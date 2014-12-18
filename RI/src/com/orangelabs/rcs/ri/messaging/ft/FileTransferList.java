@@ -208,7 +208,7 @@ public class FileTransferList extends Activity {
 		switch (state) {
 		case FileTransfer.State.INVITED:
 			return getString(R.string.label_state_invited);
-		case FileTransfer.State.INITIATED:
+		case FileTransfer.State.INITIATING:
 			return getString(R.string.label_state_initiated);
 		case FileTransfer.State.STARTED:
 			return getString(R.string.label_state_started);

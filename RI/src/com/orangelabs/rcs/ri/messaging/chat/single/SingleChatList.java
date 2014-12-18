@@ -40,7 +40,7 @@ import android.widget.TextView;
 
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.orangelabs.rcs.ri.ApiConnectionManager;

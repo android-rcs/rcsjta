@@ -229,7 +229,7 @@ public class GroupChatIntentService extends IntentService {
 		try {
 			GroupChat gc = ApiConnectionManager.getInstance(this).getChatApi().getGroupChat(chatId);
 			if (gc != null) {
-				ContactId contact = gc.getRemoteContact();
+				ContactId contact = null; // TODO gc.getRemoteContact();
 				return RcsDisplayName.getInstance(this).getDisplayName(contact);
 			}
 		} catch (Exception e) {

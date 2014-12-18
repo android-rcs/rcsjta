@@ -52,8 +52,7 @@ import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.ChatServiceConfiguration;
-import com.gsma.services.rcs.chat.Geoloc;
-import com.gsma.services.rcs.chat.GeolocMessage;
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
@@ -325,7 +324,7 @@ public abstract class ChatView extends FragmentActivity implements LoaderManager
 			return;
 		}
 		// Send text message
-		ChatMessage message = sendTextMessage(text);
+		ChatMessage message = sendMessage(text);
 		if (message != null) {
 			// Warn the composing manager that the message was sent
 			composingManager.messageWasSent();
@@ -346,7 +345,7 @@ public abstract class ChatView extends FragmentActivity implements LoaderManager
 			return;
 		}
 		// Send text message
-		GeolocMessage message = sendGeolocMessage(geoloc);
+		ChatMessage message = sendMessage(geoloc);
 		if (message == null) {
 			Utils.showMessage(ChatView.this, getString(R.string.label_send_im_failed));
 		}

@@ -33,7 +33,7 @@ import android.widget.EditText;
 
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.chat.ChatServiceConfiguration;
-import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.Geoloc;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;

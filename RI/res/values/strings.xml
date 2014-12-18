@@ -332,7 +332,7 @@
 
 <string-array name="file_transfer_states">
     <item>INVITED</item>
-    <item>INITIATED</item>
+    <item>INITIATING</item>
     <item>STARTED</item>
     <item>TRANSFERRED</item>
     <item>ABORTED</item>

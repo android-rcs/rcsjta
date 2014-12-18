@@ -43,7 +43,7 @@ import android.widget.Toast;
 
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.gsh.GeolocSharing;

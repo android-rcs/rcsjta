@@ -43,12 +43,11 @@ import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.RcsCommon.ReadStatus;
 import com.gsma.services.rcs.chat.ChatMessage;
-import com.gsma.services.rcs.chat.GeolocMessage;
 import com.gsma.services.rcs.chat.OneToOneChat;
 import com.gsma.services.rcs.chat.OneToOneChatListener;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatService;
-import com.gsma.services.rcs.chat.Geoloc;
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.chat.ChatView;
@@ -160,8 +159,9 @@ public class SingleChatView extends ChatView {
 				// Save contact
 				mContact = newContact;
 				// Open chat
-				mChat = chatService.openSingleChat(mContact);
+				mChat = chatService.getOneToOneChat(mContact);
 				if (firstLoad) {
+					mChat.openChat();
 					// Initialize the Loader with id '1' and callbacks 'mCallbacks'.
 					getSupportLoaderManager().initLoader(LOADER_ID, null, this);
 				} else {
@@ -294,7 +294,7 @@ public class SingleChatView extends ChatView {
 	}
 
 	@Override
-	public ChatMessage sendTextMessage(String message) {
+	public ChatMessage sendMessage(String message) {
 		// Send text message
 		try {
 			if (LogUtils.isActive) {
@@ -311,17 +311,17 @@ public class SingleChatView extends ChatView {
 	}
 
 	@Override
-	public GeolocMessage sendGeolocMessage(Geoloc geoloc) {
+	public ChatMessage sendMessage(Geoloc geoloc) {
 		// Send geoloc message
 		try {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "sendGeolocMessage geoloc=" + geoloc);
+				Log.d(LOGTAG, "sendMessage geoloc=" + geoloc);
 			}
 			// Send the text to remote
 			return mChat.sendMessage(geoloc);
 		} catch (Exception e) {
 			if (LogUtils.isActive) {
-				Log.e(LOGTAG, "sendGeolocMessage failed", e);
+				Log.e(LOGTAG, "sendMessage failed", e);
 			}
 			return null;
 		}

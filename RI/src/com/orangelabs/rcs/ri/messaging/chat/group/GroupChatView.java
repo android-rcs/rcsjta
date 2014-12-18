@@ -53,8 +53,7 @@ import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.ChatService;
-import com.gsma.services.rcs.chat.Geoloc;
-import com.gsma.services.rcs.chat.GeolocMessage;
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.gsma.services.rcs.chat.GroupChatListener;
@@ -378,7 +377,7 @@ public class GroupChatView extends ChatView {
 					getSupportLoaderManager().initLoader(LOADER_ID, null, this);
 					chatIdOnForeground = mChatId;
 					// Get remote contact
-					ContactId contact = mGroupChat.getRemoteContact();
+					ContactId contact = null; //mGroupChat.getRemoteContact();
 					// Get subject
 					mSubject = mGroupChat.getSubject();
 					updateGroupChatViewTitle(mSubject);
@@ -446,7 +445,7 @@ public class GroupChatView extends ChatView {
 			public void onClick(DialogInterface dialog, int which) {
 				try {
 					// Accept the invitation
-					mGroupChat.acceptInvitation();
+					mGroupChat.openChat();
 				} catch (Exception e) {
 					e.printStackTrace();
 					Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_invitation_failed), exitOnce);
@@ -455,12 +454,7 @@ public class GroupChatView extends ChatView {
 		});
 		builder.setNegativeButton(getString(R.string.label_decline), new android.content.DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
-				try {
-					// Reject the invitation
-					mGroupChat.rejectInvitation();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				// Let session die by timeout
 				// Exit activity
 				finish();
 			}
@@ -844,7 +838,7 @@ public class GroupChatView extends ChatView {
 	}
 
 	@Override
-	public ChatMessage sendTextMessage(String message) {
+	public ChatMessage sendMessage(String message) {
 		// Send text message
 		try {
 			if (LogUtils.isActive) {
@@ -861,17 +855,17 @@ public class GroupChatView extends ChatView {
 	}
 
 	@Override
-	public GeolocMessage sendGeolocMessage(Geoloc geoloc) {
+	public ChatMessage sendMessage(Geoloc geoloc) {
 		// Send geoloc message
 		try {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "sendGeolocMessage geoloc=" + geoloc);
+				Log.d(LOGTAG, "sendMessage geoloc=" + geoloc);
 			}
 			// Send the text to remote
 			return mGroupChat.sendMessage(geoloc);
 		} catch (Exception e) {
 			if (LogUtils.isActive) {
-				Log.e(LOGTAG, "sendGeolocMessage failed", e);
+				Log.e(LOGTAG, "sendMessage failed", e);
 			}
 			return null;
 		}
