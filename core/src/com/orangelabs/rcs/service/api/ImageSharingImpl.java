@@ -243,7 +243,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 			}
 			return ImageSharing.State.INVITED;
 		}
-		return ImageSharing.State.INITIATED;
+		return ImageSharing.State.INITIATING;
 	}
 
 	/**

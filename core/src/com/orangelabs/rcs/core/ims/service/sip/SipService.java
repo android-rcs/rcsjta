@@ -182,7 +182,8 @@ public class SipService extends ImsService {
 	public void addSession(GenericSipMsrpSession session) {
 		final String sessionId = session.getSessionID();
 		if (logger.isActivated()) {
-			logger.debug("Add GenericSipMsrpSession with sessionId '" + sessionId + "'");
+			logger.debug(new StringBuilder("Add GenericSipMsrpSession with sessionId '")
+					.append(sessionId).append("'").toString());
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
 			mGenericSipMsrpSessionCache.put(sessionId, session);
@@ -193,7 +194,8 @@ public class SipService extends ImsService {
 	public void removeSession(final GenericSipMsrpSession session) {
 		final String sessionId = session.getSessionID();
 		if (logger.isActivated()) {
-			logger.debug("Remove GenericSipMsrpSession with sessionId '" + sessionId + "'");
+			logger.debug(new StringBuilder("Remove GenericSipMsrpSession with sessionId '")
+					.append(sessionId).append("'").toString());
 		}
 		/*
 		 * Performing remove session operation on a new thread so that ongoing
@@ -213,7 +215,8 @@ public class SipService extends ImsService {
 
 	public GenericSipMsrpSession getGenericSipMsrpSession(String sessionId) {
 		if (logger.isActivated()) {
-			logger.debug("Get GenericSipMsrpSession with sessionId '" + sessionId + "'");
+			logger.debug(new StringBuilder("Get GenericSipMsrpSession with sessionId '")
+					.append(sessionId).append("'").toString());
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
 			return mGenericSipMsrpSessionCache.get(sessionId);
@@ -223,7 +226,8 @@ public class SipService extends ImsService {
 	public void addSession(GenericSipRtpSession session) {
 		final String sessionId = session.getSessionID();
 		if (logger.isActivated()) {
-			logger.debug("Add GenericSipRtpSession with sessionId '" + sessionId + "'");
+			logger.debug(new StringBuilder("Add GenericSipRtpSession with sessionId '")
+					.append(sessionId).append("'").toString());
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
 			mGenericSipRtpSessionCache.put(sessionId, session);
@@ -234,7 +238,8 @@ public class SipService extends ImsService {
 	public void removeSession(final GenericSipRtpSession session) {
 		final String sessionId = session.getSessionID();
 		if (logger.isActivated()) {
-			logger.debug("Remove GenericSipRtpSession with sessionId '" + sessionId + "'");
+			logger.debug(new StringBuilder("Remove GenericSipRtpSession with sessionId '")
+					.append(sessionId).append("'").toString());
 		}
 		/*
 		 * Performing remove session operation on a new thread so that ongoing
@@ -254,7 +259,8 @@ public class SipService extends ImsService {
 
 	public GenericSipRtpSession getGenericSipRtpSession(String sessionId) {
 		if (logger.isActivated()) {
-			logger.debug("Get GenericSipRtpSession with sessionId '" + sessionId + "'");
+			logger.debug(new StringBuilder("Get GenericSipRtpSession with sessionId '")
+					.append(sessionId).append("'").toString());
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
 			return mGenericSipRtpSessionCache.get(sessionId);

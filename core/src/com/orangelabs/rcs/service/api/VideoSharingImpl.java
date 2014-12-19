@@ -41,7 +41,6 @@ import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSessionListener;
 import com.orangelabs.rcs.provider.sharing.RichCallHistory;
 import com.orangelabs.rcs.provider.sharing.VideoSharingStateAndReasonCode;
-import com.orangelabs.rcs.provider.sharing.RichCallHistory;
 import com.orangelabs.rcs.service.broadcaster.IVideoSharingEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -221,7 +220,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 			}
 			return VideoSharing.State.INVITED;
 		}
-		return VideoSharing.State.INITIATED;
+		return VideoSharing.State.INITIATING;
 	}
 
 	/**

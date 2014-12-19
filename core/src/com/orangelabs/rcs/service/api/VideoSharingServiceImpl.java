@@ -23,7 +23,6 @@
 package com.orangelabs.rcs.service.api;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -284,9 +283,9 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 			String sharingId = session.getSessionID();
 			mRichCallLog.addVideoSharing(sharingId, contact,
 					Direction.OUTGOING, (VideoContent)session.getContent(),
-					VideoSharing.State.INITIATED, ReasonCode.UNSPECIFIED);
+					VideoSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
 			mBroadcaster.broadcastStateChanged(contact, sharingId,
-					VideoSharing.State.INITIATED, ReasonCode.UNSPECIFIED);
+					VideoSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
 
 			VideoSharingPersistedStorageAccessor storageAccessor = new VideoSharingPersistedStorageAccessor(
 					sharingId, mRichCallLog);

@@ -24,18 +24,15 @@ package com.orangelabs.rcs.provider.ipcall;
 import java.util.Calendar;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
 
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IPCallLog;
-import com.gsma.services.rcs.ish.ImageSharingLog;
 import com.orangelabs.rcs.core.content.AudioContent;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.provider.LocalContentResolver;
-import com.orangelabs.rcs.provider.sharing.ImageSharingData;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -219,7 +216,7 @@ public class IPCallHistory {
 	 */
 	public ContactId getRemoteContact(String callId) {
 		if (logger.isActivated()) {
-			logger.debug("Get IP call contact for callId '" + callId + "'");
+			logger.debug("Get IP call remote contact for callId ".concat(callId));
 		}
 		return ContactUtils.createContactId(getDataAsString(getIPCallData(
 				IPCallData.KEY_CONTACT, callId)));
@@ -233,7 +230,7 @@ public class IPCallHistory {
 	 */
 	public int getState(String callId) {
 		if (logger.isActivated()) {
-			logger.debug("Get IP call state for callId '" + callId + "'");
+			logger.debug("Get IP call state for callId ".concat(callId));
 		}
 		return getDataAsInt(getIPCallData(IPCallData.KEY_STATE, callId));
 	}
@@ -246,7 +243,7 @@ public class IPCallHistory {
 	 */
 	public int getReasonCode(String callId) {
 		if (logger.isActivated()) {
-			logger.debug("Get IP call state reason code for callId '" + callId + "'");
+			logger.debug("Get IP call reason code for callId ".concat(callId));
 		}
 		return getDataAsInt(getIPCallData(IPCallData.KEY_REASON_CODE, callId));
 	}
@@ -259,7 +256,7 @@ public class IPCallHistory {
 	 */
 	public int getDirection(String callId) {
 		if (logger.isActivated()) {
-			logger.debug("Get IP call direction for callId '" + callId + "'");
+			logger.debug("Get IP call direction for callId ".concat(callId));
 		}
 		return getDataAsInt(getIPCallData(IPCallData.KEY_DIRECTION, callId));
 	}

@@ -64,11 +64,6 @@ public class IPCallService extends ImsService {
 	private final RcsSettings mRcsSettings;
 
 	/**
-	 * Max sessions
-	 */
-	private int maxSessions;
-
-	/**
      * The logger
      */
     private static final Logger logger = Logger.getLogger(IPCallService.class.getSimpleName());
@@ -88,7 +83,6 @@ public class IPCallService extends ImsService {
     public IPCallService(ImsModule parent, RcsSettings rcsSettings) throws CoreException {
 		super(parent, true);
 		mRcsSettings = rcsSettings;
-		this.maxSessions = mRcsSettings.getMaxIPCallSessions();
     }
 
 	private void handleIPCallInvitationRejected(SipRequest invite, int reasonCode) {
@@ -133,7 +127,8 @@ public class IPCallService extends ImsService {
 	public void addSession(IPCallSession session) {
 		String callId = session.getSessionID();
 		if (logger.isActivated()) {
-			logger.debug("Add IPCallSession with call ID '" + callId + "'");
+			logger.debug(new StringBuilder("Add IPCallSession with call ID '").append(callId)
+					.append("'").toString());
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
 			mIPCallSessionCache.put(callId, session);
@@ -144,7 +139,8 @@ public class IPCallService extends ImsService {
 	public void removeSession(final IPCallSession session) {
 		final String callId = session.getSessionID();
 		if (logger.isActivated()) {
-			logger.debug("Remove IPCallSession with call ID '" + callId + "'");
+			logger.debug(new StringBuilder("Remove IPCallSession with call ID '").append(callId)
+					.append("'").toString());
 		}
 		/*
 		 * Performing remove session operation on a new thread so that ongoing
@@ -163,6 +159,10 @@ public class IPCallService extends ImsService {
 	}
 
 	public IPCallSession getIPCallSession(String sessionId) {
+		if (logger.isActivated()) {
+			logger.debug(new StringBuilder("Get IPCallSession with call ID '").append(sessionId)
+					.append("'").toString());
+		}
 		synchronized (getImsServiceSessionOperationLock()) {
 			return mIPCallSessionCache.get(sessionId);
 		}
@@ -170,6 +170,7 @@ public class IPCallService extends ImsService {
 
 	protected void assertAvailableIpCallSession(String errorMessage) throws CoreException {
 		synchronized (getImsServiceSessionOperationLock()) {
+			int maxSessions = mRcsSettings.getMaxIPCallSessions();
 			if (maxSessions != 0 && mIPCallSessionCache.size() >= maxSessions) {
 				/*
 				 * TODO : Exceptions will be handled better in CR037

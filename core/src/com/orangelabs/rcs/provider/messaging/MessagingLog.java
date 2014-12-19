@@ -530,6 +530,11 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	}
 
 	@Override
+	public ContactId getGroupChatRemoteContact(String chatId) {
+		return groupChatLog.getGroupChatRemoteContact(chatId);
+	}
+
+	@Override
 	public boolean isGroupFileTransfer(String fileTransferId) {
 		return fileTransferLog.isGroupFileTransfer(fileTransferId);
 	}
@@ -600,7 +605,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	}
 
 	@Override
-	public List<String> getChatIdsOfActiveGroupChatsForAutoRejoin() {
+	public Set<String> getChatIdsOfActiveGroupChatsForAutoRejoin() {
 		return groupChatLog.getChatIdsOfActiveGroupChatsForAutoRejoin();
 	}
 }

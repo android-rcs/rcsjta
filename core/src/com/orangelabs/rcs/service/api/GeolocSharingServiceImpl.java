@@ -236,7 +236,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 			final GeolocTransferSession session = mRichcallService.initiateGeolocSharingSession(contact, content, geolocPush);
 			String sharingId = session.getSessionID();
 			mBroadcaster.broadcastGeolocSharingStateChanged(contact,
-					sharingId, GeolocSharing.State.INITIATED, ReasonCode.UNSPECIFIED);
+					sharingId, GeolocSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
 
 			// Add session listener
 			GeolocSharingImpl geolocSharing = new GeolocSharingImpl(sharingId, mBroadcaster, mRichcallService, this);

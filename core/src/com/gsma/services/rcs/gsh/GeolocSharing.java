@@ -44,7 +44,7 @@ public class GeolocSharing {
     	/**
     	 * Sharing invitation sent
     	 */
-    	public final static int INITIATED = 1;
+    	public final static int INITIATING = 1;
     	
     	/**
     	 * Sharing is started
@@ -170,7 +170,7 @@ public class GeolocSharing {
      * 
      * @param sharingInf Geoloc sharing interface
      */
-    GeolocSharing(IGeolocSharing sharingInf) {
+    /* package private */GeolocSharing(IGeolocSharing sharingInf) {
     	mSharingInf = sharingInf;
     }
     	

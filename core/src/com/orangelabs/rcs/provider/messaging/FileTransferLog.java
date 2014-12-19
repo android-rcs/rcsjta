@@ -539,7 +539,7 @@ public class FileTransferLog implements IFileTransferLog {
 	 */
 	public String getFileTransferChatId(String fileTransferId) {
 		if (logger.isActivated()) {
-			logger.debug("Get file transfer chatId for " + fileTransferId);
+			logger.debug("Get file transfer chat ID for ".concat(fileTransferId));
 		}
 		return getDataAsString(getFileTransferData(FileTransferData.KEY_CHAT_ID, fileTransferId));
 	}
@@ -551,18 +551,18 @@ public class FileTransferLog implements IFileTransferLog {
 	 */
 	public ContactId getFileTransferRemoteContact(String fileTransferId) {
 		if (logger.isActivated()) {
-			logger.debug("Get file transfer contact for " + fileTransferId);
+			logger.debug("Get file transfer remote contact for ".concat(fileTransferId));
 		}
-		String number = getDataAsString(getFileTransferData(FileTransferData.KEY_CONTACT,
+		String contact = getDataAsString(getFileTransferData(FileTransferData.KEY_CONTACT,
 				fileTransferId));
 		/*
 		 * null is legal value here only when this is a outgoing group file
 		 * transfer
 		 */
-		if (number == null) {
+		if (contact == null) {
 			return null;
 		}
-		return ContactUtils.createContactId(number);
+		return ContactUtils.createContactId(contact);
 	}
 
 	/*
@@ -572,7 +572,7 @@ public class FileTransferLog implements IFileTransferLog {
 	 */
 	public Uri getFile(String fileTransferId) {
 		if (logger.isActivated()) {
-			logger.debug("Get file for " + fileTransferId);
+			logger.debug("Get file for ".concat(fileTransferId));
 		}
 		return Uri.parse(getDataAsString(getFileTransferData(FileTransferData.KEY_FILE,
 				fileTransferId)));
@@ -585,7 +585,7 @@ public class FileTransferLog implements IFileTransferLog {
 	 */
 	public String getFileName(String fileTransferId) {
 		if (logger.isActivated()) {
-			logger.debug("Get file name for " + fileTransferId);
+			logger.debug("Get file name for ".concat(fileTransferId));
 		}
 		return getDataAsString(getFileTransferData(FileTransferData.KEY_FILENAME, fileTransferId));
 	}
@@ -597,7 +597,7 @@ public class FileTransferLog implements IFileTransferLog {
 	 */
 	public String getFileMimeType(String fileTransferId) {
 		if (logger.isActivated()) {
-			logger.debug("Get file type for " + fileTransferId);
+			logger.debug("Get file mime type for ".concat(fileTransferId));
 		}
 		return getDataAsString(getFileTransferData(FileTransferData.KEY_MIME_TYPE, fileTransferId));
 	}
@@ -609,7 +609,7 @@ public class FileTransferLog implements IFileTransferLog {
 	 */
 	public Uri getFileIcon(String fileTransferId) {
 		if (logger.isActivated()) {
-			logger.debug("Get file icon for " + fileTransferId);
+			logger.debug("Get file icon for ".concat(fileTransferId));
 		}
 		String fileIcon = getDataAsString(getFileTransferData(FileTransferData.KEY_FILEICON,
 				fileTransferId));
@@ -630,7 +630,7 @@ public class FileTransferLog implements IFileTransferLog {
 	 */
 	public int getFileTransferDirection(String fileTransferId) {
 		if (logger.isActivated()) {
-			logger.debug("Get file transfer direction for " + fileTransferId);
+			logger.debug("Get file transfer direction for ".concat(fileTransferId));
 		}
 		return getDataAsInt(getFileTransferData(FileTransferData.KEY_DIRECTION, fileTransferId));
 	}
@@ -643,7 +643,7 @@ public class FileTransferLog implements IFileTransferLog {
 	 */
 	public int getFileTransferState(String fileTransferId) {
 		if (logger.isActivated()) {
-			logger.debug("Get file transfer state for " + fileTransferId);
+			logger.debug("Get file transfer state for ".concat(fileTransferId));
 		}
 		return getDataAsInt(getFileTransferData(FileTransferData.KEY_STATE, fileTransferId));
 	}
@@ -655,7 +655,7 @@ public class FileTransferLog implements IFileTransferLog {
 	 */
 	public int getFileTransferStateReasonCode(String fileTransferId) {
 		if (logger.isActivated()) {
-			logger.debug("Get file transfer reason code for " + fileTransferId);
+			logger.debug("Get file transfer reason code for ".concat(fileTransferId));
 		}
 		return getDataAsInt(getFileTransferData(FileTransferData.KEY_REASON_CODE, fileTransferId));
 	}
@@ -667,7 +667,7 @@ public class FileTransferLog implements IFileTransferLog {
 	 */
 	public long getFileSize(String fileTransferId) {
 		if (logger.isActivated()) {
-			logger.debug("Get file size for " + fileTransferId);
+			logger.debug("Get file size for ".concat(fileTransferId));
 		}
 		return getDataAsLong(getFileTransferData(FileTransferData.KEY_FILESIZE, fileTransferId));
 	}

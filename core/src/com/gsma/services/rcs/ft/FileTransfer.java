@@ -240,7 +240,7 @@ public class FileTransfer {
      * @param transferIntf File transfer interface
      * @hide
      */
-    public FileTransfer(IFileTransfer transferIntf) {
+    /* package private */FileTransfer(IFileTransfer transferIntf) {
     	mTransferInf = transferIntf;
     }
 

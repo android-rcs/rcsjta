@@ -43,7 +43,7 @@ public class OneToOneChat {
 	 * 
 	 * @param chatIntf Chat interface
 	 */
-	public OneToOneChat(IOneToOneChat chatIntf) {
+	/* package private */ OneToOneChat(IOneToOneChat chatIntf) {
 		mOneToOneChatInf = chatIntf;
 	}
 

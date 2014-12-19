@@ -21,6 +21,8 @@ interface IGroupChat {
 
 	int getReasonCode();
 
+	ContactId getRemoteContact();
+
 	String getSubject();	
 
 	List<ParticipantInfo> getParticipants();

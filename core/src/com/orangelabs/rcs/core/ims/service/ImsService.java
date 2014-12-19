@@ -30,7 +30,6 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.logger.Logger;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -106,8 +105,6 @@ public abstract class ImsService {
 
 		public static final int BIDIRECTIONAL = 2;
 	}
-
-	protected static final int UNIDIRECTIONAL_SESSION_POSITION = 0;
 
     /**
      * Constructor

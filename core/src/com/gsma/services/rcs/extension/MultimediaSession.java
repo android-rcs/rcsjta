@@ -44,7 +44,7 @@ public abstract class MultimediaSession {
     	/**
     	 * Session invitation sent
     	 */
-    	public final static int INITIATED = 1;
+    	public final static int INITIATING = 1;
     	
     	/**
     	 * Session is started

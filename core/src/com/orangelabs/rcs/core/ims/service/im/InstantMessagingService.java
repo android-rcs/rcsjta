@@ -32,8 +32,6 @@ import javax2.sip.header.ContactHeader;
 import javax2.sip.message.Response;
 
 import com.gsma.services.rcs.RcsContactFormatException;
-import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
@@ -85,12 +83,9 @@ import com.orangelabs.rcs.core.ims.service.upload.FileUploadSession;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.provider.settings.RcsSettingsData;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.IdGenerator;
-import com.orangelabs.rcs.utils.MimeManager;
-import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -145,33 +140,18 @@ public class InstantMessagingService extends ImsService {
     public final static String[] FT_FEATURE_TAGS = { FeatureTags.FEATURE_OMA_IM };
 
 	/**
-	 * Max chat sessions
-	 */
-	private int maxChatSessions;
-
-	/**
-	 * Max file transfer sessions
-	 */
-	private int maxFtSessions;
-	
-	/**
-	 * Max file transfer size
-	 */
-	private int maxFtSize;
-
-	/**
 	 * IMDN manager
 	 */
-	private ImdnManager imdnMgr;	
+	private ImdnManager mImdnMgr;
 	
-	private FtHttpResumeManager resumeManager;
+	private FtHttpResumeManager mResumeManager;
 
 	private GroupChatAutoRejoinTask mGroupChatAutoRejoinTask;
 
 	/**
 	 * Store & Forward manager
 	 */
-	private StoreAndForwardManager storeAndFwdMgr = new StoreAndForwardManager(this);
+	private final StoreAndForwardManager mStoreAndFwdMgr = new StoreAndForwardManager(this);
 
 	/**
      * The logger
@@ -196,9 +176,6 @@ public class InstantMessagingService extends ImsService {
         mRcsSettings = rcsSettings;
         mContactsManager = contactsManager;
         mMessagingLog = messagingLog;
-		maxChatSessions = mRcsSettings.getMaxChatSessions();
-        maxFtSessions = mRcsSettings.getMaxFileTransferSessions();
-        maxFtSize = FileSharingSession.getMaxFileSharingSize();
 	}
 
 	private void handleFileTransferInvitationRejected(SipRequest invite, int reasonCode) {
@@ -229,8 +206,8 @@ public class InstantMessagingService extends ImsService {
 		setServiceStarted(true);
 		
 		// Start IMDN manager
-        imdnMgr = new ImdnManager(this);
-		imdnMgr.start();
+        mImdnMgr = new ImdnManager(this);
+		mImdnMgr.start();
 
 		/*
 		 * Send delayed displayed notifications for read messages if they were
@@ -240,7 +217,7 @@ public class InstantMessagingService extends ImsService {
 		 */
 		new DelayedDisplayNotificationTask(this);
 		// Start resuming FT HTTP
-		resumeManager = new FtHttpResumeManager(this);
+		mResumeManager = new FtHttpResumeManager(this);
 		/* Auto-rejoin group chats that are still marked as active. */
 		mGroupChatAutoRejoinTask = new GroupChatAutoRejoinTask(MessagingLog.getInstance(), mCore);
 		mGroupChatAutoRejoinTask.start();
@@ -257,10 +234,11 @@ public class InstantMessagingService extends ImsService {
 		setServiceStarted(false);
 		
 		// Stop IMDN manager
-		imdnMgr.terminate();
-        imdnMgr.interrupt();
-        if (resumeManager != null)
-        	resumeManager.terminate();
+		mImdnMgr.terminate();
+        mImdnMgr.interrupt();
+        if (mResumeManager != null) {
+        	mResumeManager.terminate();
+        }
         if (mGroupChatAutoRejoinTask.isAlive()) {
         	mGroupChatAutoRejoinTask.interrupt();
         }
@@ -278,20 +256,21 @@ public class InstantMessagingService extends ImsService {
 	 * @return IMDN manager
 	 */
 	public ImdnManager getImdnManager() {
-		return imdnMgr;
+		return mImdnMgr;
 	}	
 
 	/**
 	 * Get Store & Forward manager
 	 */
 	public StoreAndForwardManager getStoreAndForwardManager() {
-		return storeAndFwdMgr;
+		return mStoreAndFwdMgr;
 	}
 
 	public void addSession(OneToOneChatSession session) {
 		ContactId contact = session.getRemoteContact();
 		if (logger.isActivated()) {
-			logger.debug("Add OneToOneChatSession with contact '" + contact + "'");
+			logger.debug(new StringBuilder("Add OneToOneChatSession with contact '")
+					.append(contact).append("'").toString());
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
 			mOneToOneChatSessionCache.put(contact, session);
@@ -302,7 +281,8 @@ public class InstantMessagingService extends ImsService {
 	public void removeSession(final OneToOneChatSession session) {
 		final ContactId contact = session.getRemoteContact();
 		if (logger.isActivated()) {
-			logger.debug("Remove OneToOneChatSession with contact '" + contact + "'");
+			logger.debug(new StringBuilder("Remove OneToOneChatSession with contact '")
+					.append(contact).append("'").toString());
 		}
 		/*
 		 * Performing remove session operation on a new thread so that ongoing
@@ -322,7 +302,8 @@ public class InstantMessagingService extends ImsService {
 
 	public OneToOneChatSession getOneToOneChatSession(ContactId contact) {
 		if (logger.isActivated()) {
-			logger.debug("Get OneToOneChatSession with contact '" + contact + "'");
+			logger.debug(new StringBuilder("Get OneToOneChatSession with contact '")
+					.append(contact).append("'").toString());
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
 			return mOneToOneChatSessionCache.get(contact);
@@ -332,7 +313,8 @@ public class InstantMessagingService extends ImsService {
 	public void addSession(GroupChatSession session) {
 		String chatId = session.getContributionID();
 		if (logger.isActivated()) {
-			logger.debug("Add GroupChatSession with chatId '" + chatId + "'");
+			logger.debug(new StringBuilder("Add GroupChatSession with chatId '").append(chatId)
+					.append("'").toString());
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
 			mGroupChatSessionCache.put(chatId, session);
@@ -343,7 +325,8 @@ public class InstantMessagingService extends ImsService {
 	public void removeSession(final GroupChatSession session) {
 		final String chatId = session.getContributionID();
 		if (logger.isActivated()) {
-			logger.debug("Remove GroupChatSession with chatId '" + chatId + "'");
+			logger.debug(new StringBuilder("Remove GroupChatSession with chatId '").append(chatId)
+					.append("'").toString());
 		}
 		/*
 		 * Performing remove session operation on a new thread so that ongoing
@@ -369,7 +352,8 @@ public class InstantMessagingService extends ImsService {
 
 	public GroupChatSession getGroupChatSession(String chatId) {
 		if (logger.isActivated()) {
-			logger.debug("Get GroupChatSession with chatId '" + chatId + "'");
+			logger.debug(new StringBuilder("Get GroupChatSession with chatId '").append(chatId)
+					.append("'").toString());
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
 			return mGroupChatSessionCache.get(chatId);
@@ -378,7 +362,8 @@ public class InstantMessagingService extends ImsService {
 
 	public void addGroupChatConferenceSubscriber(String callId, GroupChatSession session) {
 		if (logger.isActivated()) {
-			logger.debug("Add GroupChatConferenceSubscriber with callId '" + callId + "'");
+			logger.debug(new StringBuilder("Add GroupChatConferenceSubscriber with callId '")
+					.append(callId).append("'").toString());
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
 			mGroupChatConferenceSubscriberCache.put(callId, session);
@@ -387,7 +372,8 @@ public class InstantMessagingService extends ImsService {
 
 	public void removeGroupChatConferenceSubscriber(final String callId) {
 		if (logger.isActivated()) {
-			logger.debug("Remove GroupChatConferenceSubscriber with callId '" + callId + "'");
+			logger.debug(new StringBuilder("Remove GroupChatConferenceSubscriber with callId '")
+					.append(callId).append("'").toString());
 		}
 		/*
 		 * Performing remove session operation on a new thread so that ongoing
@@ -406,8 +392,8 @@ public class InstantMessagingService extends ImsService {
 
 	public GroupChatSession getGroupChatSessionOfConferenceSubscriber(String callId) {
 		if (logger.isActivated()) {
-			logger.debug("Get chatId of GroupChatSession with ConferenceSunscriber '" + callId
-					+ "'");
+			logger.debug(new StringBuilder("Get GroupChatSession with ConferenceSunscriber '")
+					.append(callId).append("'").toString());
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
 			return mGroupChatConferenceSubscriberCache.get(callId);
@@ -420,6 +406,7 @@ public class InstantMessagingService extends ImsService {
 			 * maxChatSessions == 0 means that the allowed number of chat
 			 * sessions in use is disabled
 			 */
+			int maxChatSessions = mRcsSettings.getMaxChatSessions();
 			if (maxChatSessions == 0) {
 				return true;
 			}
@@ -444,7 +431,8 @@ public class InstantMessagingService extends ImsService {
 	public void addSession(FileSharingSession session) {
 		String fileTransferId = session.getFileTransferId();
 		if (logger.isActivated()) {
-			logger.debug("Add FileSharingSession with fileTransfer ID '" + fileTransferId + "'");
+			logger.debug(new StringBuilder("Add FileSharingSession with fileTransfer ID '")
+					.append(fileTransferId).append("'").toString());
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
 			mFileTransferSessionCache.put(fileTransferId, session);
@@ -462,7 +450,8 @@ public class InstantMessagingService extends ImsService {
 	public void removeSession(final FileSharingSession session) {
 		final String fileTransferId = session.getFileTransferId();
 		if (logger.isActivated()) {
-			logger.debug("Remove FileSharingSession with fileTransfer ID '" + fileTransferId + "'");
+			logger.debug(new StringBuilder("Remove FileSharingSession with fileTransfer ID '")
+					.append(fileTransferId).append("'").toString());
 		}
 		/*
 		 * Performing remove session operation on a new thread so that ongoing
@@ -489,7 +478,8 @@ public class InstantMessagingService extends ImsService {
 
 	public FileSharingSession getFileSharingSession(String fileTransferId) {
 		if (logger.isActivated()) {
-			logger.debug("Get FileSharingSession with fileTransfer ID '" + fileTransferId + "'");
+			logger.debug(new StringBuilder("Get FileSharingSession with fileTransfer ID '")
+					.append(fileTransferId).append("'").toString());
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
 			return mFileTransferSessionCache.get(fileTransferId);
@@ -499,7 +489,8 @@ public class InstantMessagingService extends ImsService {
 	public void addSession(FileUploadSession session) {
 		String uploadId = session.getUploadID();
 		if (logger.isActivated()) {
-			logger.debug("Add FileUploadSession with upload ID '" + uploadId + "'");
+			logger.debug(new StringBuilder("Add FileUploadSession with upload ID '")
+					.append(uploadId).append("'").toString());
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
 			mFileUploadSessionCache.put(uploadId, session);
@@ -509,7 +500,8 @@ public class InstantMessagingService extends ImsService {
 	public void removeSession(final FileUploadSession session) {
 		final String uploadId = session.getUploadID();
 		if (logger.isActivated()) {
-			logger.debug("Remove FileUploadSession with upload ID '" + uploadId + "'");
+			logger.debug(new StringBuilder("Remove FileUploadSession with upload ID '")
+					.append(uploadId).append("'").toString());
 		}
 		/*
 		 * Performing remove session operation on a new thread so that ongoing
@@ -528,7 +520,8 @@ public class InstantMessagingService extends ImsService {
 
 	public FileUploadSession getFileUploadSession(String uploadId) {
 		if (logger.isActivated()) {
-			logger.debug("Get FileUploadSession with upload ID '" + uploadId + "'");
+			logger.debug(new StringBuilder("Get FileUploadSession with upload ID '")
+					.append(uploadId).append("'").toString());
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
 			return mFileUploadSessionCache.get(uploadId);
@@ -538,14 +531,15 @@ public class InstantMessagingService extends ImsService {
 	public boolean isFileTransferSessionAvailable() {
 		synchronized (getImsServiceSessionOperationLock()) {
 			/*
-			 * maxFtSessions == 0 means that the allowed number of file transfer
-			 * sessions in use is disabled
+			 * maxFtSessions == 0 means that the checking of allowed number of
+			 * file transfer sessions in use is disabled
 			 */
-			if (maxFtSessions == 0) {
+			int maxFileTransferSessions = mRcsSettings.getMaxFileTransferSessions();
+			if (maxFileTransferSessions == 0) {
 				return true;
 			}
 
-			return mFileTransferSessionCache.size() + mFileUploadSessionCache.size() < maxFtSessions;
+			return mFileTransferSessionCache.size() + mFileUploadSessionCache.size() < maxFileTransferSessions;
 		}
 	}
 
@@ -564,10 +558,11 @@ public class InstantMessagingService extends ImsService {
 
 	public void assertFileSizeNotExceedingMaxLimit(long size, String errorMessage) throws CoreException {
 		/*
-		 * maxFtSize == 0 means that the allowed number of file transfer size in
-		 * use is disabled
+		 * maxFtSize == 0 means that the checking of allowed number of file
+		 * transfer size in use is disabled
 		 */
-		if (maxFtSize > 0 && size > maxFtSize) {
+		int maxFileTransferSize = mRcsSettings.getMaxFileTransferSize();
+		if (maxFileTransferSize > 0 && size > maxFileTransferSize) {
 			if (logger.isActivated()) {
 				logger.error(errorMessage);
 			}
@@ -593,14 +588,21 @@ public class InstantMessagingService extends ImsService {
 					nrOfConcurrentOutgoingFileTransferSessions++;
 				}
 			}
-			int maxConcurrentOutgoingFilrTransferSessions = mRcsSettings
+			/*
+			 * maxConcurrentOutgoingFilrTransferSessions == 0 means that the
+			 * checking of allowed concurrent number of outgoing file transfers
+			 * in use is disabled
+			 */
+			int maxConcurrentOutgoingFileTransferSessions = mRcsSettings
 					.getMaxConcurrentOutgoingFileTransferSessions();
-			if (nrOfConcurrentOutgoingFileTransferSessions >= maxConcurrentOutgoingFilrTransferSessions) {
+			if (maxConcurrentOutgoingFileTransferSessions == 0) {
+				return false;
+			}
+			if (nrOfConcurrentOutgoingFileTransferSessions >= maxConcurrentOutgoingFileTransferSessions) {
 				return true;
 			}
-			nrOfConcurrentOutgoingFileTransferSessions = nrOfConcurrentOutgoingFileTransferSessions
-					+ mFileUploadSessionCache.size();
-			return nrOfConcurrentOutgoingFileTransferSessions >= maxConcurrentOutgoingFilrTransferSessions;
+			nrOfConcurrentOutgoingFileTransferSessions += mFileUploadSessionCache.size();
+			return nrOfConcurrentOutgoingFileTransferSessions >= maxConcurrentOutgoingFileTransferSessions;
 		}
 	}
 
@@ -616,17 +618,12 @@ public class InstantMessagingService extends ImsService {
 	 *            Content of fileicon
 	 * 
 	 * @return File transfer session
-	 * @throws CoreException
 	 */
 	public FileSharingSession initiateFileTransferSession(String fileTransferId, ContactId contact,
-			MmContent content, MmContent fileIcon) throws CoreException {
+			MmContent content, MmContent fileIcon) {
 		if (logger.isActivated()) {
 			logger.info("Initiate a file transfer session with contact " + contact + ", file " + content.toString());
 		}
-
-		assertAvailableFileTransferSession("Max file transfer sessions achieved.");
-
-		assertFileSizeNotExceedingMaxLimit(content.getSize(), "File exceeds max size.");
 
 		boolean isFToHttpSupportedByRemote = false;
 		Capabilities remoteCapability = mContactsManager.getContactCapabilities(contact);

@@ -172,7 +172,7 @@ public class IPCall {
      * 
      * @param callInf IP call interface
      */
-    IPCall(IIPCall callInf) {
+    /* package private */IPCall(IIPCall callInf) {
     	this.callInf = callInf;
     }
     	

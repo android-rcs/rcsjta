@@ -76,7 +76,7 @@ public class FileUpload {
      * 
      * @param uploadInf Upload interface
      */
-    FileUpload(IFileUpload uploadInf) {
+    /* package private */FileUpload(IFileUpload uploadInf) {
     	this.uploadInf = uploadInf;
     }
     	

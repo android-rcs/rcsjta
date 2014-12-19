@@ -45,7 +45,7 @@ public class ImageSharing {
     	/**
     	 * Sharing invitation sent
     	 */
-    	public final static int INITIATED = 1;
+    	public final static int INITIATING = 1;
     	
     	/**
     	 * Sharing is started
@@ -195,7 +195,7 @@ public class ImageSharing {
      * 
      * @param sharingInf Image sharing interface
      */
-    ImageSharing(IImageSharing sharingInf) {
+    /* package private */ImageSharing(IImageSharing sharingInf) {
     	mSharingInf = sharingInf;
     }
     	

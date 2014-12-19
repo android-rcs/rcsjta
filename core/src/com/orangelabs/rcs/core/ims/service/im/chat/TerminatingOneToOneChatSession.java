@@ -113,8 +113,9 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 	 * Background processing
 	 */
 	public void run() {
+		final boolean logActivated = logger.isActivated();
 		try {
-			if (logger.isActivated()) {
+			if (logActivated) {
 				logger.info("Initiate a new 1-1 chat session as terminating");
 			}
 
@@ -132,7 +133,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 								ImdnDocument.DELIVERY_STATUS_DELIVERED,
 								SipUtils.getRemoteInstanceID(getDialogPath().getInvite()));
 					} catch (RcsContactFormatException e) {
-						if (logger.isActivated()) {
+						if (logActivated) {
 							logger.warn("Cannot parse contact " + getDialogPath().getRemoteParty());
 						}
 					}
@@ -142,7 +143,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 			Collection<ImsSessionListener> listeners = getListeners();
 			/* Check if session should be auto-accepted once */
 			if (isSessionAccepted()) {
-				if (logger.isActivated()) {
+				if (logActivated) {
 					logger.debug("Received one-to-one chat invitation marked for auto-accept");
 				}
 
@@ -150,7 +151,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 					((ChatSessionListener)listener).handleSessionAutoAccepted();
 				}
 			} else {
-				if (logger.isActivated()) {
+				if (logActivated) {
 					logger.debug("Received one-to-one chat invitation marked for manual accept");
 				}
 
@@ -163,7 +164,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 				int answer = waitInvitationAnswer();
 				switch (answer) {
 					case ImsServiceSession.INVITATION_REJECTED:
-						if (logger.isActivated()) {
+						if (logActivated) {
 							logger.debug("Session has been rejected by user");
 						}
 
@@ -175,7 +176,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 						return;
 
 					case ImsServiceSession.INVITATION_NOT_ANSWERED:
-						if (logger.isActivated()) {
+						if (logActivated) {
 							logger.debug("Session has been rejected on timeout");
 						}
 
@@ -190,7 +191,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 						return;
 
 					case ImsServiceSession.INVITATION_CANCELED:
-						if (logger.isActivated()) {
+						if (logActivated) {
 							logger.debug("Session has been rejected by remote");
 						}
 
@@ -210,7 +211,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 						break;
 
 					default:
-						if (logger.isActivated()) {
+						if (logActivated) {
 							logger.debug("Unknown invitation answer in run; answer=".concat(String
 									.valueOf(answer)));
 						}
@@ -237,13 +238,13 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 			if (attr2 != null) {
 				remoteSetup = attr2.getValue();
 			}
-			if (logger.isActivated()) {
+			if (logActivated) {
 				logger.debug("Remote setup attribute is " + remoteSetup);
 			}
 
 			// Set setup mode
 			String localSetup = createSetupAnswer(remoteSetup);
-			if (logger.isActivated()) {
+			if (logActivated) {
 				logger.debug("Local setup attribute is " + localSetup);
 			}
 
@@ -268,7 +269,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 
 			// Test if the session should be interrupted
 			if (isInterrupted()) {
-				if (logger.isActivated()) {
+				if (logActivated) {
 					logger.debug("Session has been interrupted: end of processing");
 				}
 				return;
@@ -294,7 +295,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 							// MSRP connection.
 							sendEmptyDataChunk();
 						} catch (IOException e) {
-							if (logger.isActivated()) {
+							if (logActivated) {
 								logger.error("Can't create the MSRP server session", e);
 							}
 						}
@@ -304,7 +305,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 			}
 
 			// Create a 200 OK response
-			if (logger.isActivated()) {
+			if (logActivated) {
 				logger.info("Send 200 OK");
 			}
 			SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
@@ -320,7 +321,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 			// Analyze the received response
 			if (ctx.isSipAck()) {
 				// ACK received
-				if (logger.isActivated()) {
+				if (logActivated) {
 					logger.info("ACK request received");
 				}
 
@@ -356,7 +357,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 				getActivityManager().start();
 
 			} else {
-				if (logger.isActivated()) {
+				if (logActivated) {
 					logger.debug("No ACK received for INVITE");
 				}
 
@@ -364,7 +365,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 				handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED));
 			}
 		} catch (Exception e) {
-			if (logger.isActivated()) {
+			if (logActivated) {
 				logger.error("Session initiation has failed", e);
 			}
 
@@ -386,8 +387,9 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 
 	@Override
 	public void startSession() {
+		final boolean logActivated = logger.isActivated();
 		ContactId contact = getRemoteContact();
-		if (logger.isActivated()) {
+		if (logActivated) {
 			logger.debug("Start OneToOneChatSession with '" + contact + "'");
 		}
 		InstantMessagingService imService = getImsService().getImsModule()
@@ -403,7 +405,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 				 * OneToOneChatSession that was locally originated with the same
 				 * contact.
 				 */
-				if (logger.isActivated()) {
+				if (logActivated) {
 					logger.warn("Rejecting OneToOneChatSession (session id '" + getSessionID()
 							+ "') with '" + contact + "'");
 				}
@@ -416,18 +418,29 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 			 * originating we should leave (reject or abort) the CURRENT rcs
 			 * chat session if there is one and replace it with the new one.
 			 */
-			if (logger.isActivated()) {
+			if (logActivated) {
 				logger.warn("Rejecting/Aborting existing OneToOneChatSession (session id '"
 						+ getSessionID() + "') with '" + contact + "'");
 			}
 			if (currentSessionInitiatedByRemote) {
 				if (currentSessionEstablished) {
-					currentSession.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+					currentSession.abortSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
 				} else {
 					currentSession.rejectSession();
 				}
 			} else {
-				currentSession.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+				currentSession.abortSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+			}
+			/*
+			 * Since the current session was already established and we are now
+			 * replacing that session with a new session then we make sure to
+			 * auto-accept that new replacement session also so to leave the
+			 * client in the same situation for the replacement session as for
+			 * the original "current" session regardless if the the provisioning
+			 * setting for chat is set to non-auto-accept or not.
+			 */
+			if (currentSessionEstablished) {
+				setSessionAccepted();
 			}
 		}
 		imService.addSession(this);

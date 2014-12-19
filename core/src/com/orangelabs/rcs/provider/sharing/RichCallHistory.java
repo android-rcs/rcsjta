@@ -374,7 +374,7 @@ public class RichCallHistory {
 	 */
 	public ContactId getImageSharingRemoteContact(String sharingId) {
 		if (logger.isActivated()) {
-			logger.debug("Get image transfer contact for sharingId '" + sharingId + "'");
+			logger.debug("Get image transfer remote contact for sharingId ".concat(sharingId));
 		}
 		Cursor cursor = getImageTransferData(ImageSharingData.KEY_CONTACT, sharingId);
 		return ContactUtils.createContactId(getDataAsString(cursor));
@@ -388,7 +388,7 @@ public class RichCallHistory {
 	 */
 	public Uri getImage(String sharingId) {
 		if (logger.isActivated()) {
-			logger.debug("Get image uri for sharingId '" + sharingId + "'");
+			logger.debug("Get image for sharingId ".concat(sharingId));
 		}
 		return Uri
 				.parse(getDataAsString(getImageTransferData(ImageSharingData.KEY_FILE, sharingId)));
@@ -402,7 +402,7 @@ public class RichCallHistory {
 	 */
 	public String getImageSharingName(String sharingId) {
 		if (logger.isActivated()) {
-			logger.debug("Get image sharing name for sharingId '" + sharingId + "'");
+			logger.debug("Get image name for sharingId ".concat(sharingId));
 		}
 		return getDataAsString(getImageTransferData(ImageSharingData.KEY_FILENAME, sharingId));
 	}
@@ -428,7 +428,7 @@ public class RichCallHistory {
 	 */
 	public String getImageSharingMimeType(String sharingId) {
 		if (logger.isActivated()) {
-			logger.debug("Get image type for sharingId '" + sharingId + "'");
+			logger.debug("Get image transfer mime type for sharingId ".concat(sharingId));
 		}
 		return getDataAsString(getImageTransferData(ImageSharingData.KEY_MIME_TYPE, sharingId));
 	}
@@ -441,7 +441,7 @@ public class RichCallHistory {
 	 */
 	public int getImageSharingState(String sharingId) {
 		if (logger.isActivated()) {
-			logger.debug("Get image transfer state for sharingId '" + sharingId + "'");
+			logger.debug("Get image transfer state for sharingId ".concat(sharingId));
 		}
 		return getDataAsInt(getImageTransferData(ImageSharingData.KEY_STATE, sharingId));
 	}
@@ -454,7 +454,7 @@ public class RichCallHistory {
 	 */
 	public int getImageSharingReasonCode(String sharingId) {
 		if (logger.isActivated()) {
-			logger.debug("Get image transfer state readon code for sharingId '" + sharingId + "'");
+			logger.debug("Get image transfer reason code for sharingId ".concat(sharingId));
 		}
 		return getDataAsInt(getImageTransferData(ImageSharingData.KEY_REASON_CODE, sharingId));
 	}
@@ -467,7 +467,7 @@ public class RichCallHistory {
 	 */
 	public int getImageSharingDirection(String sharingId) {
 		if (logger.isActivated()) {
-			logger.debug("Get image transfer direction for sharingId '" + sharingId + "'");
+			logger.debug("Get image transfer direction for sharingId ".concat(sharingId));
 		}
 		return getDataAsInt(getImageTransferData(ImageSharingData.KEY_DIRECTION, sharingId));
 	}
@@ -480,7 +480,7 @@ public class RichCallHistory {
 	 */
 	public ContactId getVideoSharingRemoteContact(String sharingId) {
 		if (logger.isActivated()) {
-			logger.debug("Get video share contact for sharingId '" + sharingId + "'");
+			logger.debug("Get video share remote contact for sharingId ".concat(sharingId));
 		}
 		return ContactUtils.createContactId(getDataAsString(getVideoSharingData(
 				VideoSharingData.KEY_CONTACT, sharingId)));
@@ -494,7 +494,7 @@ public class RichCallHistory {
 	 */
 	public int getVideoSharingState(String sharingId) {
 		if (logger.isActivated()) {
-			logger.debug("Get video share state for sharingId '" + sharingId + "'");
+			logger.debug("Get video share state for sharingId ".concat(sharingId));
 		}
 		return getDataAsInt(getVideoSharingData(VideoSharingData.KEY_STATE, sharingId));
 	}
@@ -507,7 +507,7 @@ public class RichCallHistory {
 	 */
 	public int getVideoSharingReasonCode(String sharingId) {
 		if (logger.isActivated()) {
-			logger.debug("Get video share state reason code for sharingId '" + sharingId + "'");
+			logger.debug("Get video share reason code for sharingId ".concat(sharingId));
 		}
 		return getDataAsInt(getVideoSharingData(VideoSharingData.KEY_REASON_CODE, sharingId));
 	}
@@ -520,7 +520,7 @@ public class RichCallHistory {
 	 */
 	public int getVideoSharingDirection(String sharingId) {
 		if (logger.isActivated()) {
-			logger.debug("Get video share direction for sharingId '" + sharingId + "'");
+			logger.debug("Get video share direction for sharingId ".concat(sharingId));
 		}
 		return getDataAsInt(getVideoSharingData(VideoSharingData.KEY_DIRECTION, sharingId));
 	}

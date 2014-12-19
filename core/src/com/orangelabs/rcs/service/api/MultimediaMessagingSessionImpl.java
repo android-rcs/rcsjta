@@ -150,7 +150,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 			}
 			return MultimediaSession.State.INVITED;
 		}
-		return MultimediaSession.State.INITIATED;
+		return MultimediaSession.State.INITIATING;
 	}
 
 	/**

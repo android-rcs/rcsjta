@@ -95,20 +95,21 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 		String chatId = ChatUtils.getContributionId(invite);
 		setContributionID(chatId);
 
+		boolean logActivated = logger.isActivated();
 		// Detect if it's a rejoin
 		if (sessionParticipants.size() == 0) {
-			if (logger.isActivated()) {
+			if (logActivated) {
 				logger.info("Invite to join a group chat");
 			}
 		} else {
-			if (logger.isActivated()) {
+			if (logActivated) {
 				logger.info("Set of invited participants: " + getListOfParticipants(sessionParticipants));
 			}
 			// Detect if it's a restart: retrieve set of initial participants
 			Set<ParticipantInfo> initialParticipants = MessagingLog.getInstance().getGroupChatConnectedParticipants(
 					getContributionID());
 			if (initialParticipants != null && initialParticipants.size() > 0) {
-				if (logger.isActivated()) {
+				if (logActivated) {
 					logger.info("Set of initial participants: " + getListOfParticipants(initialParticipants));
 				}
 				missingParticipants = new HashSet<ContactId>();
@@ -122,7 +123,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 					}
 				}
 				if (missingParticipants.size() != 0) {
-					if (logger.isActivated()) {
+					if (logActivated) {
 						StringBuilder sb = new StringBuilder("Invite to restart with missing participants: ");
 						for (ContactId missing : missingParticipants) {
 							sb.append(missing.toString()).append(" ");
@@ -131,7 +132,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 					}
 				}
 			} else {
-				if (logger.isActivated()) {
+				if (logActivated) {
 					logger.info("No initial Group Chat");
 				}
 			}
@@ -164,15 +165,16 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 	 * Background processing
 	 */
 	public void run() {
+		final boolean logActivated = logger.isActivated();
 		try {
-	    	if (logger.isActivated()) {
+	    	if (logActivated) {
 	    		logger.info("Initiate a new ad-hoc group chat session as terminating");
 	    	}
 
 			Collection<ImsSessionListener> listeners = getListeners();
 			/* Check if session should be auto-accepted once */
 			if (isSessionAccepted()) {
-				if (logger.isActivated()) {
+				if (logActivated) {
 					logger.debug("Received group chat invitation marked for auto-accept");
 				}
 
@@ -180,7 +182,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 					((ChatSessionListener)listener).handleSessionAutoAccepted();
 				}
 			} else {
-				if (logger.isActivated()) {
+				if (logActivated) {
 					logger.debug("Received group chat invitation marked for manual accept");
 				}
 
@@ -193,7 +195,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 				int answer = waitInvitationAnswer();
 				switch (answer) {
 					case ImsServiceSession.INVITATION_REJECTED:
-						if (logger.isActivated()) {
+						if (logActivated) {
 							logger.debug("Session has been rejected by user");
 						}
 
@@ -205,7 +207,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 						return;
 
 					case ImsServiceSession.INVITATION_NOT_ANSWERED:
-						if (logger.isActivated()) {
+						if (logActivated) {
 							logger.debug("Session has been rejected on timeout");
 						}
 
@@ -220,7 +222,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 						return;
 
 					case ImsServiceSession.INVITATION_CANCELED:
-						if (logger.isActivated()) {
+						if (logActivated) {
 							logger.debug("Session has been rejected by remote");
 						}
 
@@ -240,7 +242,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 						break;
 
 					default:
-						if (logger.isActivated()) {
+						if (logActivated) {
 							logger.debug("Unknown invitation answer in run; answer="
 									.concat(String.valueOf(answer)));
 						}
@@ -267,13 +269,13 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 			if (attr2 != null) {
 				remoteSetup = attr2.getValue();
 			}
-            if (logger.isActivated()){
+			if (logActivated) {
 				logger.debug("Remote setup attribute is " + remoteSetup);
 			}
             
     		// Set setup mode
             String localSetup = createSetupAnswer(remoteSetup);
-            if (logger.isActivated()){
+			if (logActivated) {
 				logger.debug("Local setup attribute is " + localSetup);
 			}
 
@@ -296,7 +298,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 
 	        // Test if the session should be interrupted
             if (isInterrupted()) {
-				if (logger.isActivated()) {
+				if (logActivated) {
 					logger.debug("Session has been interrupted: end of processing");
 				}
 				return;
@@ -320,7 +322,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 							// and so enable the active endpoint to initiate a MSRP connection.
     		            	sendEmptyDataChunk();    						
 						} catch (IOException e) {
-							if (logger.isActivated()) {
+							if (logActivated) {
 				        		logger.error("Can't create the MSRP server session", e);
 				        	}
 						}		
@@ -329,7 +331,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
             }
             
             // Create a 200 OK response
-        	if (logger.isActivated()) {
+        	if (logActivated) {
         		logger.info("Send 200 OK");
         	}
             SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
@@ -344,7 +346,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
             // Analyze the received response 
             if (ctx.isSipAck()) {
     	        // ACK received
-    			if (logger.isActivated()) {
+    			if (logActivated) {
     				logger.info("ACK request received");
     			}
 
@@ -383,7 +385,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
             		getSessionTimerManager().start(SessionTimerManager.UAS_ROLE, getDialogPath().getSessionExpireTime());
             	}
             } else {
-        		if (logger.isActivated()) {
+        		if (logActivated) {
             		logger.debug("No ACK received for INVITE");
             	}
 
@@ -391,7 +393,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
             	handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED));
             }
 		} catch(Exception e) {
-        	if (logger.isActivated()) {
+        	if (logActivated) {
         		logger.error("Session initiation has failed", e);
         	}
 
@@ -407,7 +409,8 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 	 *            Set of missing participant identifiers
 	 */
 	private void inviteMissingParticipants(final Set<ContactId> participants) {
-		if (logger.isActivated()) {
+		final boolean logActivated = logger.isActivated();
+		if (logActivated) {
 			logger.info("Invite missing participants: " + Arrays.toString(missingParticipants.toArray()));
 		}
 		new Thread() {
@@ -415,7 +418,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 				try {
 					addParticipants(participants);
 				} catch (Exception e) {
-					if (logger.isActivated()) {
+					if (logActivated) {
 						logger.error("Session initiation has failed", e);
 					}
 				}
@@ -445,8 +448,9 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 
 	@Override
 	public void startSession() {
+		final boolean logActivated = logger.isActivated();
 		String chatId = getContributionID();
-		if (logger.isActivated()) {
+		if (logActivated) {
 			logger.debug("Start GroupChatSession with chatID '" + chatId + "'");
 		}
 		InstantMessagingService imService = getImsService().getImsModule()
@@ -459,11 +463,22 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 			 * with this groupchat session and mark the old groupchat session
 			 * pending for removal which will timeout eventually
 			 */
-			if (logger.isActivated()) {
+			if (logActivated) {
 				logger.debug("Ongoing GrooupChat session detected for chatId '" + chatId
 						+ "' marking that session pending for removal");
 			}
 			currentSession.markForPendingRemoval();
+			/*
+			 * Since the current session was already established and we are now
+			 * replacing that session with a new session then we make sure to
+			 * auto-accept that new replacement session also so to leave the
+			 * client in the same situation for the replacement session as for
+			 * the original "current" session regardless if the the provisioning
+			 * setting for chat is set to non-auto-accept or not.
+			 */
+			if (currentSession.getDialogPath().isSessionEstablished()) {
+				setSessionAccepted();
+			}
 		}
 		imService.addSession(this);
 		start();

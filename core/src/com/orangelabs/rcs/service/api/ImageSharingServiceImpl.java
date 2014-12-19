@@ -39,7 +39,6 @@ import com.gsma.services.rcs.ish.IImageSharingService;
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.ish.ImageSharing.ReasonCode;
 import com.gsma.services.rcs.ish.ImageSharingServiceConfiguration;
-import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.SessionIdGenerator;
@@ -258,9 +257,9 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 			String sharingId = session.getSessionID();
 			mRichCallLog.addImageSharing(session.getSessionID(), contact,
 					Direction.OUTGOING, session.getContent(),
-					ImageSharing.State.INITIATED, ReasonCode.UNSPECIFIED);
+					ImageSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
 			mBroadcaster.broadcastStateChanged(contact, sharingId,
-					ImageSharing.State.INITIATED, ReasonCode.UNSPECIFIED);
+					ImageSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
 
 			ImageSharingPersistedStorageAccessor storageAccessor = new ImageSharingPersistedStorageAccessor(
 					sharingId, mRichCallLog);

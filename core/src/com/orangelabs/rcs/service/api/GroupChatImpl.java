@@ -247,7 +247,20 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	public String getChatId() {
 		return mChatId;
 	}
-
+	
+	/**
+	 * Get remote contact identifier
+	 * 
+	 * @return ContactId
+	 */
+	public ContactId getRemoteContact() {
+		GroupChatSession session = mImService.getGroupChatSession(mChatId);
+		if (session == null) {
+			return mPersistentStorage.getRemoteContact();
+		}
+		return session.getRemoteContact();
+	}
+	
 	/**
 	 * Returns the direction of the group chat (incoming or outgoing)
 	 * 
@@ -284,7 +297,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			}
 			return GroupChat.State.INVITED;
 		}
-		return GroupChat.State.INITIATED;
+		return GroupChat.State.INITIATING;
 	}
 
 	/**
@@ -498,6 +511,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 				return;
 			}
 		}
+
 		SipDialogPath chatSessionDialogPath = groupChatSession.getDialogPath();
 		if (chatSessionDialogPath.isSessionEstablished()) {
 			addOutgoingGroupChatMessage(msg, Message.Status.Content.SENDING);
@@ -508,6 +522,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			}
 			return;
 		}
+
 		addOutgoingGroupChatMessage(msg, Message.Status.Content.QUEUED);
 		if (!groupChatSession.isInitiatedByRemote()) {
 			return;
@@ -576,6 +591,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 * a message, else it is set to false.
 	 * 
 	 * @param status Is-composing status
+	 * @see RcsSettingsData.ImSessionStartMode
 	 */
 	public void sendIsComposingEvent(final boolean status) {
 		final GroupChatSession session = mImService.getGroupChatSession(mChatId);
@@ -678,6 +694,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 * open the chat conversation. Note: if it’s an incoming pending chat
 	 * session and the parameter IM SESSION START is 0 then the session is
 	 * accepted now.
+	 * 
+	 * @see RcsSettingsData.ImSessionStartMode
 	 */
 	public void openChat() {
 		if (logger.isActivated()) {
@@ -881,12 +899,13 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 			 * is of course not the intention here
 			 */
 			if (logger.isActivated()) {
-				logger.info("Session marked pending for removal - Error " + chatErrorCode);
+				logger.info(new StringBuilder("Session marked pending for removal - Error ")
+						.append(chatErrorCode).toString());
 			}
 			return;
 		}
 		if (logger.isActivated()) {
-			logger.info("IM error " + chatErrorCode);
+			logger.info(new StringBuilder("IM error ").append(chatErrorCode).toString());
 		}
 		setRejoinedAsPartOfSendOperation(false);
 		synchronized (lock) {
@@ -917,8 +936,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 
 	@Override
 	public void handleIsComposingEvent(ContactId contact, boolean status) {
-     	if (logger.isActivated()) {
-			logger.info(contact + " is composing status set to " + status);
+		if (logger.isActivated()) {
+			logger.info(new StringBuilder().append(contact).append(" is composing status set to ")
+					.append(status).toString());
 		}
     	synchronized(lock) {
 			// Notify event listeners

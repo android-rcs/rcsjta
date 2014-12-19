@@ -23,7 +23,6 @@
 package com.gsma.services.rcs.chat;
 
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
@@ -41,7 +40,7 @@ public class ChatMessage {
 	 * 
 	 * @param chatMessageInf IChatMessage
 	 */
-	public ChatMessage(IChatMessage chatMessageInf) {
+	/* package private */ChatMessage(IChatMessage chatMessageInf) {
 		mChatMessageInf = chatMessageInf;
 	}
 

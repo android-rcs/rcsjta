@@ -42,7 +42,6 @@ import com.gsma.services.rcs.extension.MultimediaSession;
 import com.gsma.services.rcs.extension.MultimediaSession.ReasonCode;
 import com.gsma.services.rcs.extension.MultimediaSessionServiceConfiguration;
 import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
-import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
 import com.orangelabs.rcs.core.ims.service.sip.SipService;
 import com.orangelabs.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
@@ -311,7 +310,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 					mSipService, this);
 			session.addListener(multiMediaMessaging);
 			mMultimediaMessagingSessionEventBroadcaster.broadcastStateChanged(
-					contact, session.getSessionID(), MultimediaSession.State.INITIATED,
+					contact, session.getSessionID(), MultimediaSession.State.INITIATING,
 					ReasonCode.UNSPECIFIED);
 
 			addMultimediaMessaging(multiMediaMessaging);
@@ -417,7 +416,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 					mSipService, this);
 			session.addListener(multimediaStreaming);
 			mMultimediaStreamingSessionEventBroadcaster.broadcastStateChanged(
-					contact, session.getSessionID(), MultimediaSession.State.INITIATED,
+					contact, session.getSessionID(), MultimediaSession.State.INITIATING,
 					ReasonCode.UNSPECIFIED);
 
 			addMultimediaStreaming(multimediaStreaming);

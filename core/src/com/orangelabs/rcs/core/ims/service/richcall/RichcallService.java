@@ -163,7 +163,7 @@ public class RichcallService extends ImsService {
 			logger.debug("Get Unidirection ImageTransferSession ");
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
-			return mImageTransferSessionCache.get(UNIDIRECTIONAL_SESSION_POSITION);
+			return mImageTransferSessionCache.values().iterator().next();
 		}
 	}
 
@@ -199,7 +199,7 @@ public class RichcallService extends ImsService {
 			logger.debug("Get Unidirection VideoStreamingSession ");
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
-			return mVideoStremaingSessionCache.get(UNIDIRECTIONAL_SESSION_POSITION);
+			return mVideoStremaingSessionCache.values().iterator().next();
 		}
 	}
 
@@ -220,7 +220,7 @@ public class RichcallService extends ImsService {
 			logger.debug("Get Unidirection GeolocTransferSession ");
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
-			return mGeolocTransferSessionCache.get(UNIDIRECTIONAL_SESSION_POSITION);
+			return mGeolocTransferSessionCache.values().iterator().next();
 		}
 	}
 
@@ -239,7 +239,8 @@ public class RichcallService extends ImsService {
 	public void addSession(ImageTransferSession session) {
 		String sessionId = session.getSessionID();
 		if (logger.isActivated()) {
-			logger.debug("Add ImageTransferSession with sessionId '" + sessionId + "'");
+			logger.debug(new StringBuilder("Add ImageTransferSession with sessionId '")
+					.append(sessionId).append("'").toString());
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
 			mImageTransferSessionCache.put(sessionId, session);
@@ -250,7 +251,8 @@ public class RichcallService extends ImsService {
 	public void removeSession(final ImageTransferSession session) {
 		final String sessionId = session.getSessionID();
 		if (logger.isActivated()) {
-			logger.debug("Remove ImageTransferSession with sessionId '" + sessionId + "'");
+			logger.debug(new StringBuilder("Remove ImageTransferSession with sessionId '")
+					.append(sessionId).append("'").toString());
 		}
 		/*
 		 * Performing remove session operation on a new thread so that ongoing
@@ -270,7 +272,8 @@ public class RichcallService extends ImsService {
 
 	public ImageTransferSession getImageTransferSession(String sessionId) {
 		if (logger.isActivated()) {
-			logger.debug("Get ImageTransferSession with sessionId '" + sessionId + "'");
+			logger.debug(new StringBuilder("Get ImageTransferSession with sessionId '")
+					.append(sessionId).append("'").toString());
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
 			return mImageTransferSessionCache.get(sessionId);
@@ -280,7 +283,8 @@ public class RichcallService extends ImsService {
 	public void addSession(VideoStreamingSession session) {
 		String sessionId = session.getSessionID();
 		if (logger.isActivated()) {
-			logger.debug("Add VideoStreamingSession with sessionId '" + sessionId + "'");
+			logger.debug(new StringBuilder("Add VideoStreamingSession with sessionId '")
+					.append(sessionId).append("'").toString());
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
 			mVideoStremaingSessionCache.put(sessionId, session);
@@ -291,7 +295,8 @@ public class RichcallService extends ImsService {
 	public void removeSession(final VideoStreamingSession session) {
 		final String sessionId = session.getSessionID();
 		if (logger.isActivated()) {
-			logger.debug("Remove VideoStreamingSession with sessionId '" + sessionId + "'");
+			logger.debug(new StringBuilder("Remove VideoStreamingSession with sessionId '")
+					.append(sessionId).append("'").toString());
 		}
 		/*
 		 * Performing remove session operation on a new thread so that ongoing
@@ -311,7 +316,8 @@ public class RichcallService extends ImsService {
 
 	public VideoStreamingSession getVideoSharingSession(String sessionId) {
 		if (logger.isActivated()) {
-			logger.debug("Get VideoStreamingSession with sessionId '" + sessionId + "'");
+			logger.debug(new StringBuilder("Get VideoStreamingSession with sessionId '")
+					.append(sessionId).append("'").toString());
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
 			return mVideoStremaingSessionCache.get(sessionId);
@@ -321,7 +327,8 @@ public class RichcallService extends ImsService {
 	public void addSession(GeolocTransferSession session) {
 		String sessionId = session.getSessionID();
 		if (logger.isActivated()) {
-			logger.debug("Add GeolocTransferSession with sessionId '" + sessionId + "'");
+			logger.debug(new StringBuilder("Add GeolocTransferSession with sessionId '")
+					.append(sessionId).append("'").toString());
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
 			mGeolocTransferSessionCache.put(sessionId, session);
@@ -332,7 +339,8 @@ public class RichcallService extends ImsService {
 	public void removeSession(final GeolocTransferSession session) {
 		final String sessionId = session.getSessionID();
 		if (logger.isActivated()) {
-			logger.debug("Remove GeolocTransferSession with sessionId '" + sessionId + "'");
+			logger.debug(new StringBuilder("Remove GeolocTransferSession with sessionId '")
+					.append(sessionId).append("'").toString());
 		}
 		/*
 		 * Performing remove session operation on a new thread so that ongoing
@@ -352,7 +360,8 @@ public class RichcallService extends ImsService {
 
 	public GeolocTransferSession getGeolocTransferSession(String sessionId) {
 		if (logger.isActivated()) {
-			logger.debug("Get GeolocTransferSession with sessionId '" + sessionId + "'");
+			logger.debug(new StringBuilder("Get GeolocTransferSession with sessionId '")
+					.append(sessionId).append("'").toString());
 		}
 		synchronized (getImsServiceSessionOperationLock()) {
 			return mGeolocTransferSessionCache.get(sessionId);

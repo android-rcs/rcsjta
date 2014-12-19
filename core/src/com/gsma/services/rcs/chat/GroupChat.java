@@ -47,7 +47,7 @@ public class GroupChat {
     	/**
     	 * Chat invitation sent
     	 */
-    	public final static int INITIATED = 1;
+    	public final static int INITIATING = 1;
     	
     	/**
     	 * Chat is started
@@ -173,7 +173,7 @@ public class GroupChat {
      * 
      * @param chatIntf Group chat interface
      */
-    public GroupChat(IGroupChat chatIntf) {
+    /* package private */GroupChat(IGroupChat chatIntf) {
     	mGroupChatInf = chatIntf;
     }
 
@@ -231,6 +231,21 @@ public class GroupChat {
 	public int getReasonCode() throws RcsServiceException {
 		try {
 			return mGroupChatInf.getReasonCode();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	
+	/**
+	 * Returns the remote contact
+	 * 
+	 * @return Contact
+	 * @throws RcsServiceException
+	 */
+	public ContactId getRemoteContact() throws RcsServiceException {
+		try {
+			return mGroupChatInf.getRemoteContact();
 		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}

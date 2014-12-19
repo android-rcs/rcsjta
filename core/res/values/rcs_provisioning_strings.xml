@@ -71,6 +71,7 @@
     <string name="Max_duration_of_a_video_share_seconds">Max duration of a video share (seconds):</string>
     <string name="Max_number_of_simultaneous_chat_sessions">Max number of simultaneous chat sessions:</string>
     <string name="Max_number_of_simultaneous_file_transfer_sessions">Max number of simultaneous file transfer sessions:</string>
+    <string name="Max_number_of_concurrent_outgoing_file_transfer_sessions">Max number of concurrent outgoing file transfer sessions:</string>
     <string name="Max_number_of_simultaneous_IP_call_sessions">Max number of simultaneous IP call sessions:</string>
     <string name="IM_session_start_mode">IM session start mode:</string>
     <string name="Max_entries_per_contact_for_chat_history">Max entries per contact for chat history:</string>

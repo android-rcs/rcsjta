@@ -433,7 +433,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 			session.addListener(groupChat);
 
 			mMessagingLog.addGroupChat(session.getContributionID(), session.getRemoteContact(),
-					session.getSubject(), session.getParticipants(), GroupChat.State.INITIATED,
+					session.getSubject(), session.getParticipants(), GroupChat.State.INITIATING,
 					GroupChat.ReasonCode.UNSPECIFIED, Direction.OUTGOING);
 
 			addGroupChat(groupChat);

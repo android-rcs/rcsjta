@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.provisioning.local;
@@ -94,6 +98,8 @@ public class ServiceProvisioning extends Activity {
 		setEditTextParameter(this, R.id.MaxVideoShareDuration, RcsSettingsData.MAX_VIDEO_SHARE_DURATION, bundle);
 		setEditTextParameter(this, R.id.MaxChatSessions, RcsSettingsData.MAX_CHAT_SESSIONS, bundle);
 		setEditTextParameter(this, R.id.MaxFileTransferSessions, RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS, bundle);
+		setEditTextParameter(this, R.id.MaxConcurrentOutgoingFileTransferSessions,
+				RcsSettingsData.MAX_CONCURRENT_OUTGOING_FILE_TRANSFERS, bundle);
 		setEditTextParameter(this, R.id.MaxIpCallSessions, RcsSettingsData.MAX_IP_CALL_SESSIONS, bundle);
 		setEditTextParameter(this, R.id.MaxChatLogEntries, RcsSettingsData.MAX_CHAT_LOG_ENTRIES, bundle);
 		setEditTextParameter(this, R.id.MaxRichcallLogEntries, RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES, bundle);
@@ -139,6 +145,8 @@ public class ServiceProvisioning extends Activity {
 		saveEditTextParameter(this, R.id.MaxVideoShareDuration, RcsSettingsData.MAX_VIDEO_SHARE_DURATION, bundle);
 		saveEditTextParameter(this, R.id.MaxChatSessions, RcsSettingsData.MAX_CHAT_SESSIONS, bundle);
 		saveEditTextParameter(this, R.id.MaxFileTransferSessions, RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS, bundle);
+		saveEditTextParameter(this, R.id.MaxConcurrentOutgoingFileTransferSessions,
+				RcsSettingsData.MAX_CONCURRENT_OUTGOING_FILE_TRANSFERS, bundle);
 		saveEditTextParameter(this, R.id.MaxIpCallSessions, RcsSettingsData.MAX_IP_CALL_SESSIONS, bundle);
 		saveEditTextParameter(this, R.id.MaxChatLogEntries, RcsSettingsData.MAX_CHAT_LOG_ENTRIES, bundle);
 		saveEditTextParameter(this, R.id.MaxRichcallLogEntries, RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES, bundle);

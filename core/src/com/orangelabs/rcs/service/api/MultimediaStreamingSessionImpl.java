@@ -149,7 +149,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 			}
 			return MultimediaSession.State.INVITED;
 		}
-		return MultimediaSession.State.INITIATED;
+		return MultimediaSession.State.INITIATING;
 	}
 
 	/**

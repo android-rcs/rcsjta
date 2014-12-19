@@ -84,11 +84,6 @@ public class TermsConditionsService extends ImsService {
 	private final RcsSettings mRcsSettings;
 
 	/**
-	 * Remote server
-	 */
-	private String remoteServer;
-	
-	/**
      * The logger
      */
     private Logger logger = Logger.getLogger(this.getClass().getName());
@@ -103,8 +98,6 @@ public class TermsConditionsService extends ImsService {
 	public TermsConditionsService(ImsModule parent, RcsSettings rcsSettings) throws CoreException {
         super(parent, true);
         mRcsSettings = rcsSettings;
-        // Get remote server URI
-		remoteServer = mRcsSettings.getEndUserConfirmationRequestUri();
 	}
 
 	/**
@@ -232,7 +225,8 @@ public class TermsConditionsService extends ImsService {
 		}
 		
 		// Send SIP MESSAGE
-		return sendSipMessage(remoteServer, id, ACCEPT_RESPONSE, pin);
+		return sendSipMessage(mRcsSettings.getEndUserConfirmationRequestUri(), id, ACCEPT_RESPONSE,
+				pin);
 	}
 
 	/**
@@ -248,7 +242,8 @@ public class TermsConditionsService extends ImsService {
 		}
 
 		// Send SIP MESSAGE
-		return sendSipMessage(remoteServer, id, DECLINE_RESPONSE, pin);
+		return sendSipMessage(mRcsSettings.getEndUserConfirmationRequestUri(), id,
+				DECLINE_RESPONSE, pin);
 	}
 
 	/**

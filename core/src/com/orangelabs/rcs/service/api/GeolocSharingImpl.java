@@ -160,7 +160,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 			}
 			return GeolocSharing.State.INVITED;
 		}
-		return GeolocSharing.State.INITIATED;
+		return GeolocSharing.State.INITIATING;
 	}
 
 	/**

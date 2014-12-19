@@ -295,6 +295,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	 * message, else it is set to false.
 	 * 
 	 * @param status Is-composing status
+	 * @see RcsSettingsData.ImSessionStartMode
 	 */
 	public void sendIsComposingEvent(final boolean status) {
 		final OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
@@ -331,6 +332,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	 * open the chat conversation. Note: if it’s an incoming pending chat
 	 * session and the parameter IM SESSION START is 0 then the session is
 	 * accepted now.
+	 * 
+	 * @see RcsSettingsData.ImSessionStartMode
 	 */
 	public void openChat() {
 		if (logger.isActivated()) {
@@ -342,7 +345,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 				/*
 				 * If there is no session ongoing right now then we do not need
 				 * to open anything right now so we just return here. A sending
-				 * of a new message on this one-to-ont chat will anyway result
+				 * of a new message on this one-to-one chat will anyway result
 				 * in creating a new session so we do not need to do anything
 				 * more here for now.
 				 */

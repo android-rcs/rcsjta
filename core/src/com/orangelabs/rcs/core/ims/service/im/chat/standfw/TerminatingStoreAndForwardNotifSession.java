@@ -97,8 +97,9 @@ public class TerminatingStoreAndForwardNotifSession extends OneToOneChatSession 
 	 * Background processing
 	 */
 	public void run() {
+		final boolean logActivated = logger.isActivated();
 		try {
-	    	if (logger.isActivated()) {
+	    	if (logActivated) {
 	    		logger.info("Initiate a new store & forward session for notifications");
 	    	}
 	    	
@@ -120,13 +121,13 @@ public class TerminatingStoreAndForwardNotifSession extends OneToOneChatSession 
 			if (attr2 != null) {
 				remoteSetup = attr2.getValue();
 			}
-            if (logger.isActivated()){
+			if (logActivated) {
 				logger.debug("Remote setup attribute is " + remoteSetup);
 			}
             
     		// Set setup mode
             String localSetup = createSetupAnswer(remoteSetup);
-            if (logger.isActivated()){
+			if (logActivated) {
 				logger.debug("Local setup attribute is " + localSetup);
 			}
 			
@@ -148,7 +149,7 @@ public class TerminatingStoreAndForwardNotifSession extends OneToOneChatSession 
 
 	        // Test if the session should be interrupted
             if (isInterrupted()) {
-            	if (logger.isActivated()) {
+            	if (logActivated) {
             		logger.debug("Session has been interrupted: end of processing");
             	}
             	return;
@@ -171,7 +172,7 @@ public class TerminatingStoreAndForwardNotifSession extends OneToOneChatSession 
 			    	        // Send an empty packet
 			            	sendEmptyDataChunk();							
 						} catch (IOException e) {
-							if (logger.isActivated()) {
+							if (logActivated) {
 				        		logger.error("Can't create the MSRP server session", e);
 				        	}
 						}		
@@ -181,7 +182,7 @@ public class TerminatingStoreAndForwardNotifSession extends OneToOneChatSession 
             }
             
             // Create a 200 OK response
-        	if (logger.isActivated()) {
+        	if (logActivated) {
         		logger.info("Send 200 OK");
         	}
             SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
@@ -196,7 +197,7 @@ public class TerminatingStoreAndForwardNotifSession extends OneToOneChatSession 
             // Analyze the received response 
             if (ctx.isSipAck()) {
     	        // ACK received
-    			if (logger.isActivated()) {
+    			if (logActivated) {
     				logger.info("ACK request received");
     			}
 
@@ -221,7 +222,7 @@ public class TerminatingStoreAndForwardNotifSession extends OneToOneChatSession 
     			getActivityManager().start();
                 
             } else {
-        		if (logger.isActivated()) {
+        		if (logActivated) {
             		logger.debug("No ACK received for INVITE");
             	}
 
@@ -229,7 +230,7 @@ public class TerminatingStoreAndForwardNotifSession extends OneToOneChatSession 
             	handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED));
             }
 		} catch(Exception e) {
-        	if (logger.isActivated()) {
+        	if (logActivated) {
         		logger.error("Session initiation has failed", e);
         	}
 
@@ -295,7 +296,8 @@ public class TerminatingStoreAndForwardNotifSession extends OneToOneChatSession 
 	 * @param mimeType Data mime-type 
 	 */
 	public void msrpDataReceived(String msgId, byte[] data, String mimeType) {
-    	if (logger.isActivated()) {
+		final boolean logActivated = logger.isActivated();
+    	if (logActivated) {
     		logger.info("Data received (type " + mimeType + ")");
     	}
     	
@@ -304,7 +306,7 @@ public class TerminatingStoreAndForwardNotifSession extends OneToOneChatSession 
     	
     	if ((data == null) || (data.length == 0)) {
     		// By-pass empty data
-        	if (logger.isActivated()) {
+        	if (logActivated) {
         		logger.debug("By-pass received empty data");
         	}
     		return;
@@ -331,13 +333,13 @@ public class TerminatingStoreAndForwardNotifSession extends OneToOneChatSession 
 					}
 				}
 	    	} catch(Exception e) {
-		   		if (logger.isActivated()) {
+		   		if (logActivated) {
 		   			logger.error("Can't parse the CPIM message", e);
 		   		}
 		   	}
 		} else {
 			// Not supported content
-        	if (logger.isActivated()) {
+        	if (logActivated) {
         		logger.debug("Not supported content " + mimeType + " in chat session");
         	}
 		}
@@ -429,8 +431,9 @@ public class TerminatingStoreAndForwardNotifSession extends OneToOneChatSession 
 
 	@Override
 	public void startSession() {
+		final boolean logActivated = logger.isActivated();
 		ContactId contact = getRemoteContact();
-		if (logger.isActivated()) {
+		if (logActivated) {
 			logger.debug("Start OneToOneChatSession with '" + contact + "'");
 		}
 		InstantMessagingService imService = getImsService().getImsModule()
@@ -446,7 +449,7 @@ public class TerminatingStoreAndForwardNotifSession extends OneToOneChatSession 
 				 * OneToOneChatSession that was locally originated with the same
 				 * contact.
 				 */
-				if (logger.isActivated()) {
+				if (logActivated) {
 					logger.warn("Rejecting OneToOneChatSession (session id '" + getSessionID()
 							+ "') with '" + contact + "'");
 				}
@@ -459,18 +462,29 @@ public class TerminatingStoreAndForwardNotifSession extends OneToOneChatSession 
 			 * originating we should leave (reject or abort) the CURRENT rcs
 			 * chat session if there is one and replace it with the new one.
 			 */
-			if (logger.isActivated()) {
+			if (logActivated) {
 				logger.warn("Rejecting/Aborting existing OneToOneChatSession (session id '"
 						+ getSessionID() + "') with '" + contact + "'");
 			}
 			if (currentSessionInitiatedByRemote) {
 				if (currentSessionEstablished) {
-					currentSession.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+					currentSession.abortSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
 				} else {
 					currentSession.rejectSession();
 				}
 			} else {
-				currentSession.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+				currentSession.abortSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+			}
+			/*
+			 * Since the current session was already established and we are now
+			 * replacing that session with a new session then we make sure to
+			 * auto-accept that new replacement session also so to leave the
+			 * client in the same situation for the replacement session as for
+			 * the original "current" session regardless if the the provisioning
+			 * setting for chat is set to non-auto-accept or not.
+			 */
+			if (currentSessionEstablished) {
+				setSessionAccepted();
 			}
 		}
 		imService.addSession(this);

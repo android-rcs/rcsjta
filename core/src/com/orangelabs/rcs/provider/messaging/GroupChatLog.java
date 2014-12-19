@@ -41,6 +41,7 @@ import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.orangelabs.rcs.provider.LocalContentResolver;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -49,15 +50,13 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class GroupChatLog implements IGroupChatLog {
 
-	private final static int DEPARTED_BY_USER = 1;
-
 	private final static String ORDER_BY_TIMESTAMP_DESC = ChatData.KEY_TIMESTAMP.concat(" DESC");
 
 	private final Context mCtx;
 
 	private final LocalContentResolver mLocalContentResolver;
-	
-	private final static String SELECT_CHAT_ID = new StringBuilder(ChatData.KEY_CHAT_ID).append("=?").toString();
+
+	private final static String SELECT_CHAT_ID = ChatData.KEY_CHAT_ID.concat("=?");
 
 	private final static String SELECT_CHAT_ID_STATUS_REJECTED = new StringBuilder(
 			ChatData.KEY_CHAT_ID).append("=? AND ").append(ChatData.KEY_STATE).append("=")
@@ -351,7 +350,7 @@ public class GroupChatLog implements IGroupChatLog {
 	 */
 	private Cursor getGroupChatData(String columnName, String chatId) {
 		if (logger.isActivated()) {
-			logger.debug("Get group chat info for " + chatId);
+			logger.debug("Get group chat info for ".concat(chatId));
 		}
 		String[] projection = new String[] {
 			columnName
@@ -421,7 +420,7 @@ public class GroupChatLog implements IGroupChatLog {
 	 */
 	public int getGroupChatDirection(String chatId) {
 		if (logger.isActivated()) {
-			logger.debug("Get group chat direction for " + chatId);
+			logger.debug("Get group chat direction for ".concat(chatId));
 		}
 		return getDataAsInt(getGroupChatData(ChatData.KEY_DIRECTION, chatId));
 	}
@@ -434,7 +433,7 @@ public class GroupChatLog implements IGroupChatLog {
 	 */
 	public int getGroupChatState(String chatId) {
 		if (logger.isActivated()) {
-			logger.debug("Get group chat state for " + chatId);
+			logger.debug("Get group chat state for ".concat(chatId));
 		}
 		return getDataAsInt(getGroupChatData(ChatData.KEY_STATE, chatId));
 	}
@@ -447,7 +446,7 @@ public class GroupChatLog implements IGroupChatLog {
 	 */
 	public int getGroupChatReasonCode(String chatId) {
 		if (logger.isActivated()) {
-			logger.debug("Get group chat reason code for " + chatId);
+			logger.debug("Get group chat reason code for ".concat(chatId));
 		}
 		return getDataAsInt(getGroupChatData(ChatData.KEY_REASON_CODE, chatId));
 	}
@@ -460,7 +459,7 @@ public class GroupChatLog implements IGroupChatLog {
 	 */
 	public String getSubject(String chatId) {
 		if (logger.isActivated()) {
-			logger.debug("Get group chat subject for " + chatId);
+			logger.debug("Get group chat subject for ".concat(chatId));
 		}
 		return getDataAsString(getGroupChatData(ChatData.KEY_SUBJECT, chatId));
 	}
@@ -473,9 +472,27 @@ public class GroupChatLog implements IGroupChatLog {
 	 */
 	public Set<ParticipantInfo> getGroupChatParticipants(String chatId) {
 		if (logger.isActivated()) {
-			logger.debug("Get group chat participants for " + chatId);
+			logger.debug("Get group chat participants for ".concat(chatId));
 		}
 		return getParticipants(getDataAsString(getGroupChatData(ChatData.KEY_PARTICIPANTS, chatId)));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see
+	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#getGroupChatRemoteContact
+	 * (java.lang.String)
+	 */
+	public ContactId getGroupChatRemoteContact(String chatId) {
+		if (logger.isActivated()) {
+			logger.debug("Get group chat remote contact for ".concat(chatId));
+		}
+		String contact = getDataAsString(getGroupChatData(ChatData.KEY_CONTACT, chatId));
+		/* null is legal value here only when this is a outgoing group chat */
+		if (contact == null) {
+			return null;
+		}
+		return ContactUtils.createContactId(contact);
 	}
 
 	/*
@@ -499,7 +516,7 @@ public class GroupChatLog implements IGroupChatLog {
 	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#
 	 * retrieveChatIdsOfActiveGroupChatsForAutoRejoin
 	 */
-	public List<String> getChatIdsOfActiveGroupChatsForAutoRejoin() {
+	public Set<String> getChatIdsOfActiveGroupChatsForAutoRejoin() {
 		String[] projection = new String[] {
 			ChatData.KEY_CHAT_ID
 		};
@@ -507,7 +524,7 @@ public class GroupChatLog implements IGroupChatLog {
 		try {
 			cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection,
 					SELECT_ACTIVE_GROUP_CHATS, null, null);
-			List<String> activeGroupChats = new ArrayList<String>();
+			Set<String> activeGroupChats = new HashSet<String>();
 			while (cursor.moveToNext()) {
 				String chatId = cursor.getString(FIRST_COLUMN_IDX);
 				activeGroupChats.add(chatId);

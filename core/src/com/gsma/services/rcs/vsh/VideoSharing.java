@@ -43,7 +43,7 @@ public class VideoSharing {
     	/**
     	 * Sharing invitation sent
     	 */
-    	public final static int INITIATED = 1;
+    	public final static int INITIATING = 1;
     	
     	/**
     	 * Sharing is started
@@ -179,7 +179,7 @@ public class VideoSharing {
      * 
      * @param sharingInf Video sharing interface
      */
-    VideoSharing(IVideoSharing sharingInf) {
+    /* package private */VideoSharing(IVideoSharing sharingInf) {
     	mSharingInf = sharingInf;
     }
     	
