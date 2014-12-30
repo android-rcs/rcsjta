@@ -480,7 +480,7 @@ public final class ContactsManager {
 
 		// Save the capabilities extensions
 		values.put(RichAddressBookData.KEY_CAPABILITY_EXTENSIONS,
-				ServiceExtensionManager.getInstance().getExtensions(newCapabilities.getSupportedExtensions()));
+				ServiceExtensionManager.getExtensions(newCapabilities.getSupportedExtensions()));
 
 		// Save capabilities timestamp
 		values.put(RichAddressBookData.KEY_CAPABILITY_TIME_LAST_RQST, newCapabilities.getTimestampOfLastRequest());
@@ -777,7 +777,7 @@ public final class ContactsManager {
 					capabilities.setSipAutomata(isCapabilitySupported(cursor, RichAddressBookData.KEY_AUTOMATA));
 					
 					// Set RCS extensions capability
-					capabilities.setSupportedExtensions(ServiceExtensionManager.getInstance().getExtensions(
+					capabilities.setSupportedExtensions(ServiceExtensionManager.getExtensions(
 							cursor.getString(cursor.getColumnIndexOrThrow(RichAddressBookData.KEY_CAPABILITY_EXTENSIONS))));
 
 					// Set time of last request
@@ -938,7 +938,7 @@ public final class ContactsManager {
 	 * Add or modify a contact number to the rich address book provider
 	 * 
 	 * @param contact Contact ID
-	 * @param RCS status
+	 * @param rcsStatus
 	 */
 	public void modifyRcsContactInProvider(ContactId contact, RcsStatus rcsStatus) {
 		ContentValues values = new ContentValues();
@@ -1372,7 +1372,7 @@ public final class ContactsManager {
 				.newUpdate(Data.CONTENT_URI)
 				.withSelection(SELECTION_RAW_CONTACT_MIMETYPE_DATA1,
 						new String[] { String.valueOf(rawContactId), MIMETYPE_CAPABILITY_EXTENSIONS, contact.toString() })
-				.withValue(Data.DATA2, ServiceExtensionManager.getInstance().getExtensions(newExtensions)).build());
+				.withValue(Data.DATA2, ServiceExtensionManager.getExtensions(newExtensions)).build());
 		return ops;
 	}
 	
@@ -1751,7 +1751,7 @@ public final class ContactsManager {
 		caps.setGroupChatStoreForwardSupport(supported);
 		values.put(RichAddressBookData.KEY_CAPABILITY_GROUP_CHAT_SF, supported);
 		
-		String extensions = ServiceExtensionManager.getInstance().getExtensions(caps.getSupportedExtensions());
+		String extensions = ServiceExtensionManager.getExtensions(caps.getSupportedExtensions());
 		// Save the capabilities extensions
 		values.put(RichAddressBookData.KEY_CAPABILITY_EXTENSIONS, extensions);
 		
@@ -1873,7 +1873,7 @@ public final class ContactsManager {
 			caps.setSipAutomata(isCapabilitySupported(cursor, RichAddressBookData.KEY_AUTOMATA));
 
 			// Set RCS extensions capability
-			caps.setSupportedExtensions(ServiceExtensionManager.getInstance().getExtensions(
+			caps.setSupportedExtensions(ServiceExtensionManager.getExtensions(
 					cursor.getString(cursor.getColumnIndexOrThrow(RichAddressBookData.KEY_CAPABILITY_EXTENSIONS))));
 
 			// Set time of last request
@@ -1928,8 +1928,8 @@ public final class ContactsManager {
     /**
      * Utility method to create new "RCS" raw contact, that aggregates with other raw contact
      *
-     * @param contact info for the RCS raw contact
-     * @param id of the raw contact we want to aggregate the RCS infos to
+     * @param info for the RCS raw contact
+     * @param rawContactId of the raw contact we want to aggregate the RCS infos to
      * @return the RCS rawContactId concerning this newly created contact
      */
     public long createRcsContact(final ContactInfo info, final long rawContactId) {
@@ -1998,7 +1998,7 @@ public final class ContactsManager {
 				.withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
 				.withValue(Data.MIMETYPE, MIMETYPE_CAPABILITY_EXTENSIONS)
 				.withValue(Data.DATA1, info.getContact().toString())
-				.withValue(Data.DATA2, ServiceExtensionManager.getInstance().getExtensions(info.getCapabilities().getSupportedExtensions()))
+				.withValue(Data.DATA2, ServiceExtensionManager.getExtensions(info.getCapabilities().getSupportedExtensions()))
 				.withValue(Data.DATA3, info.getContact().toString())
 				.build());
 
@@ -2091,7 +2091,6 @@ public final class ContactsManager {
     /**
      * Utility method to create the "Me" raw contact.
      *
-     * @param context The application context.
      * @return the rawContactId of the newly created contact
      */
     public long createMyContact() {
@@ -2335,7 +2334,7 @@ public final class ContactsManager {
      * Utility method to check if a raw contact id is a SIM account
      * 
      * @param rawContactId
-     * @return
+     * @return True if raw contact id is a SIM account
      */
 	public boolean isSimAccount(final long rawContactId) {
 		Cursor cursor = null;
@@ -2597,7 +2596,7 @@ public final class ContactsManager {
 					// Set RCS extensions capability
 					int columnIndex = cursor.getColumnIndex(Data.DATA2);
 					if (columnIndex != -1) {
-						capabilities.setSupportedExtensions(ServiceExtensionManager.getInstance().getExtensions(
+						capabilities.setSupportedExtensions(ServiceExtensionManager.getExtensions(
 								cursor.getString(columnIndex)));
 					}
 				}
@@ -2906,7 +2905,7 @@ public final class ContactsManager {
 	 * Set the display name into the rich address book provider
 	 * 
 	 * @param contact Contact ID
-	 * @param RCS display name
+	 * @param displayName
 	 */
 	public void setContactDisplayName(ContactId contact, String displayName) {
 		if (contact == null) {

@@ -26,24 +26,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax2.sip.message.Response;
-
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.GroupDeliveryInfoLog;
 import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message;
-import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
-import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.IChatMessage;
 import com.gsma.services.rcs.chat.IGroupChat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.chat.ParticipantInfo.Status;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.ft.FileTransfer;
-import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
@@ -51,7 +44,6 @@ import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
-import com.orangelabs.rcs.core.ims.service.im.chat.FileTransferMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatPersistedStorageAccessor;
@@ -60,13 +52,11 @@ import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.event.User;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
-import com.orangelabs.rcs.provider.messaging.GroupChatLog.UserAbortion;
 import com.orangelabs.rcs.provider.messaging.GroupChatStateAndReasonCode;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.provider.settings.RcsSettings.ImSessionStartMode;
+import com.orangelabs.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
 import com.orangelabs.rcs.service.broadcaster.IGroupChatEventBroadcaster;
-import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -745,6 +735,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		}
 	}
 
+	/**
+	 * @param enable
+	 */
 	public void setRejoinedAsPartOfSendOperation(boolean enable) {
 		mGroupChatRejoinedAsPartOfSendOperation = enable;
 	}

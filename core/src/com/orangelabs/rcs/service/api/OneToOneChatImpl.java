@@ -24,22 +24,17 @@ package com.orangelabs.rcs.service.api;
 
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
-import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.IChatMessage;
 import com.gsma.services.rcs.chat.IOneToOneChat;
-import com.gsma.services.rcs.chat.IOneToOneChatListener;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.ft.FileTransfer;
-import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
-import com.orangelabs.rcs.core.ims.service.im.chat.FileTransferMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
@@ -47,12 +42,9 @@ import com.orangelabs.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.provider.settings.RcsSettings.ImSessionStartMode;
+import com.orangelabs.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
 import com.orangelabs.rcs.service.broadcaster.IOneToOneChatEventBroadcaster;
-import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.logger.Logger;
-
-import android.text.GetChars;
 
 /**
  * One-to-One Chat implementation
@@ -91,7 +83,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	 * @param imService InstantMessagingService
 	 * @param messagingLog MessagingLog
 	 * @param rcsSettings RcsSettings
-	 * @param mChatService ChatServiceImpl
+	 * @param chatService ChatServiceImpl
 	 */
 	public OneToOneChatImpl(ContactId contact, IOneToOneChatEventBroadcaster broadcaster,
 			InstantMessagingService imService, MessagingLog messagingLog,
@@ -122,7 +114,6 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	 * Returns the remote contact identifier
 	 * 
 	 * @return ContactId
-	 * @throws Exception
 	 */
 	public ContactId getRemoteContact() {
 		return mContact;

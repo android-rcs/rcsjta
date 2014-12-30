@@ -199,42 +199,53 @@ public class ServiceExtensionManager {
 	
 	/**
 	 * Extract set of extensions from String
-	 * 
+	 *
 	 * @param extensions
 	 *            String where extensions are concatenated with a ";" separator
 	 * @return the set of extensions
 	 */
-	public Set<String> getExtensions(String extensions) {
+	public static Set<String> getExtensions(String extensions) {
 		Set<String> result = new HashSet<String>();
-		if (!TextUtils.isEmpty(extensions)) {
-			String[] extensionList = extensions.split(";");
-			for (String extension : extensionList) {
-				if (!TextUtils.isEmpty(extension) && extension.trim().length() > 0) {
-					result.add(extension);
-				}
+		if (TextUtils.isEmpty(extensions)) {
+			return result;
+
+		}
+		String[] extensionList = extensions.split(ServiceExtensionManager.EXTENSION_SEPARATOR);
+		for (String extension : extensionList) {
+			if (!TextUtils.isEmpty(extension) && extension.trim().length() > 0) {
+				result.add(extension);
 			}
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Concatenate set of extensions into a string
-	 * 
+	 *
 	 * @param extensions
 	 *            set of extensions
 	 * @return String where extensions are concatenated with a ";" separator
 	 */
-	public String getExtensions(Set<String> extensions) {
-		if (extensions != null && !extensions.isEmpty()) {
-			StringBuilder result = new StringBuilder();
-			for (String extension : extensions) {
-				if (extension.trim().length() > 0) {
-					result.append(EXTENSION_SEPARATOR).append(extension);
-				}
-			}
-			return result.substring(EXTENSION_SEPARATOR.length());
+	public static String getExtensions(Set<String> extensions) {
+		if (extensions == null || extensions.isEmpty()) {
+			return "";
+
 		}
-		return "";
+		StringBuilder result = new StringBuilder();
+		int size = extensions.size();
+		for (String extension : extensions) {
+			if (extension.trim().length() == 0) {
+				--size;
+				continue;
+
+			}
+			result.append(extension);
+			if (--size != 0) {
+				// Not last item : add separator
+				result.append(EXTENSION_SEPARATOR);
+			}
+		}
+		return result.toString();
 	}
 
 }

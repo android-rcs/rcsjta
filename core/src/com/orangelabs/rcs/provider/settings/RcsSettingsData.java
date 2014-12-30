@@ -23,7 +23,6 @@
 package com.orangelabs.rcs.provider.settings;
 
 import javax2.sip.ListeningPoint;
-
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Environment;
@@ -40,7 +39,9 @@ import com.orangelabs.rcs.utils.logger.Logger;
  *
  */
 public class RcsSettingsData {
-
+    /**
+     * Content provider URI
+     */
 	public static final Uri CONTENT_URI = Uri
 			.parse("content://com.orangelabs.rcs.setting/setting");
 
@@ -72,9 +73,69 @@ public class RcsSettingsData {
      * The authentication procedure enumerated type.
      */
 	public enum AuthenticationProcedure {
-		GIBA, DIGEST
+		/**
+		 * GIBA authentication
+		 */
+		GIBA,
+		/**
+		 * Digest authentication
+		 */
+		DIGEST
 	};
     
+	/**
+	 * Option for what ux-operation to react on when handling manual acceptance
+	 * of one2one and group chat invitations.
+	 */
+	public static enum ImSessionStartMode {
+
+		/**
+		 * Group chat session is accepted when opening conversation
+		 */
+		ON_OPENING(0), 
+		/**
+		 * Group chat session is accepted when composing first message
+		 */
+		ON_COMPOSING(1), 
+		/**
+		 * Group chat session is accepted when sending first message
+		 */
+		ON_SENDING(2);
+
+		private final int mValue;
+
+		private static SparseArray<ImSessionStartMode> mValueToEnum = new SparseArray<ImSessionStartMode>();
+		static {
+			for (ImSessionStartMode entry : ImSessionStartMode.values()) {
+				mValueToEnum.put(entry.toInt(), entry);
+			}
+		}
+
+		private ImSessionStartMode(int value) {
+			mValue = value;
+		}
+
+		/**
+		 * @return value
+		 */
+		public final int toInt() {
+			return mValue;
+		}
+
+		/**
+		 * @param value
+		 * @return ImSessionStartMode
+		 */
+		public final static ImSessionStartMode valueOf(int value) {
+			ImSessionStartMode entry = mValueToEnum.get(value);
+			if (entry != null) {
+				return entry;
+			}
+			throw new IllegalArgumentException("No enum const class "
+					+ ImSessionStartMode.class.getName() + "." + value);
+		}
+
+	}
 	// TODO replace by API definition CR031
 	public enum MessagingMode {
 		INTEGRATED(0), CONVERGED(1), SEAMLESS(2), NONE(3);
@@ -177,8 +238,23 @@ public class RcsSettingsData {
 		
 	};
     
+    /**
+     * Network access type
+     *
+     */
     public enum NetworkAccessType {
-    	MOBILE(ConnectivityManager.TYPE_MOBILE), WIFI(ConnectivityManager.TYPE_WIFI), ANY(-1);
+		/**
+		 * Mobile access type
+		 */
+		MOBILE(ConnectivityManager.TYPE_MOBILE), 
+		/**
+    	 * Wifi access type
+    	 */
+		WIFI(ConnectivityManager.TYPE_WIFI), 
+		/**
+    	 * All access types
+    	 */
+		ANY(-1);
 		
     	private int mValue;
 
@@ -193,10 +269,17 @@ public class RcsSettingsData {
 			mValue = value;
 		}
 
+		/**
+		 * @return value
+		 */
 		public final int toInt() {
 			return mValue;
 		}
 
+		/**
+		 * @param value
+		 * @return NetworkAccessType
+		 */
 		public static NetworkAccessType valueOf(int value) {
 			NetworkAccessType entry = mValueToEnum.get(value);
 			if (entry != null) {
@@ -213,7 +296,14 @@ public class RcsSettingsData {
 	 * The configuration mode enumerated type.
 	 */
 	public enum ConfigurationMode {
-		MANUAL(0), AUTO(1);
+		/**
+		 * Manual configuration
+		 */
+		MANUAL(0), 
+		/**
+		 * Automatic configuration
+		 */
+		AUTO(1);
 		
 		private int mValue;
 
@@ -228,10 +318,17 @@ public class RcsSettingsData {
 			mValue = value;
 		}
 
+		/**
+		 * @return value
+		 */
 		public final int toInt() {
 			return mValue;
 		}
 
+		/**
+		 * @param value
+		 * @return ConfigurationMode
+		 */
 		public static ConfigurationMode valueOf(int value) {
 			ConfigurationMode entry = mValueToEnum.get(value);
 			if (entry != null) {
@@ -247,14 +344,32 @@ public class RcsSettingsData {
      * The File Transfer protocol enumerated type.
      */
 	public enum FileTransferProtocol {
-		MSRP, HTTP
+		/**
+		 * MSRP protocol
+		 */
+		MSRP, 
+		/**
+		 * HTTP protocol
+		 */
+		HTTP
 	};
     
     /**
      * The GSMA release enumerated type.
      */
 	public enum GsmaRelease {
-		ALBATROS(0), BLACKBIRD(1), CRANE(2);
+		/**
+		 * Albatros release
+		 */
+		ALBATROS(0), 
+		/**
+		 * Blackbird release
+		 */
+		BLACKBIRD(1), 
+		/**
+		 * Crane release
+		 */
+		CRANE(2);
 		
 		private int mValue;
 
@@ -269,10 +384,17 @@ public class RcsSettingsData {
 			mValue = value;
 		}
 
+		/**
+		 * @return value
+		 */
 		public final int toInt() {
 			return mValue;
 		}
 
+		/**
+		 * @param value
+		 * @return GsmaRelease
+		 */
 		public static GsmaRelease valueOf(int value) {
 			GsmaRelease entry = mValueToEnum.get(value);
 			if (entry != null) {
