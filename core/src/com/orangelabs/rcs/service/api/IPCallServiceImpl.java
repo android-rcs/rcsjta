@@ -254,8 +254,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 			mBroadcaster.broadcastIPCallStateChanged(contact, callId,
 					IPCall.State.INITIATED, ReasonCode.UNSPECIFIED);
 
-			IPCallPersistedStorageAccessor storageAccessor = new IPCallPersistedStorageAccessor(callId,
-					mIPCallLog);
+			IPCallPersistedStorageAccessor storageAccessor = new IPCallPersistedStorageAccessor(
+					callId, contact, Direction.OUTGOING, mIPCallLog);
 			IPCallImpl ipCall = new IPCallImpl(callId, mBroadcaster, mIPCallService,
 					storageAccessor, this);
 
@@ -315,8 +315,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 			mBroadcaster.broadcastIPCallStateChanged(contact, callId,
 					IPCall.State.INITIATED, ReasonCode.UNSPECIFIED);
 
-			IPCallPersistedStorageAccessor storageAccessor = new IPCallPersistedStorageAccessor(callId,
-					mIPCallLog);
+			IPCallPersistedStorageAccessor storageAccessor = new IPCallPersistedStorageAccessor(
+					callId, contact, Direction.OUTGOING, mIPCallLog);
 			IPCallImpl ipCall = new IPCallImpl(callId, mBroadcaster, mIPCallService,
 					storageAccessor, this);
 

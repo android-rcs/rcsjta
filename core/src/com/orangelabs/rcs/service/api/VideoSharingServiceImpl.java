@@ -288,7 +288,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 					VideoSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
 
 			VideoSharingPersistedStorageAccessor storageAccessor = new VideoSharingPersistedStorageAccessor(
-					sharingId, mRichCallLog);
+					sharingId, contact, Direction.OUTGOING, mRichCallLog);
 			VideoSharingImpl videoSharing = new VideoSharingImpl(sharingId, mRichcallService,
 					mBroadcaster, storageAccessor, this);
 

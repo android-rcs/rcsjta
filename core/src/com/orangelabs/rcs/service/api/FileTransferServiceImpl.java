@@ -340,7 +340,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	private IFileTransfer sendOneToOneFile(ContactId contact, MmContent file, MmContent fileIcon,
 			String fileTransferId) throws ServerApiException {
 		try {
+			long fileSize = file.getSize();
 			mImService.assertFileSizeNotExceedingMaxLimit(file.getSize(), "File exceeds max size");
+
+			FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
+					fileTransferId, contact, Direction.OUTGOING, contact.toString(), file.getUri(),
+					fileIcon != null ? fileIcon.getUri() : null, file.getName(),
+					file.getEncoding(), fileSize, mMessagingLog);
 
 			if (!mImService.isFileTransferSessionAvailable()
 					|| mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
@@ -350,9 +356,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 				addOutgoingFileTransfer(fileTransferId, contact, file, fileIcon,
 						FileTransfer.State.QUEUED);
 				return new OneToOneFileTransferImpl(fileTransferId,
-						mOneToOneFileTransferBroadcaster, mImService,
-						new FileTransferPersistedStorageAccessor(fileTransferId, mMessagingLog),
-						this);
+						mOneToOneFileTransferBroadcaster, mImService, storageAccessor, this);
 			}
 			addOutgoingFileTransfer(fileTransferId, contact, file, fileIcon,
 					FileTransfer.State.INITIATING);
@@ -360,8 +364,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 					fileTransferId, contact, file, fileIcon);
 
 			OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
-					fileTransferId, mOneToOneFileTransferBroadcaster, mImService,
-					new FileTransferPersistedStorageAccessor(fileTransferId, mMessagingLog), this);
+					fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
+					this);
 			session.addListener(oneToOneFileTransfer);
 			addFileTransfer(oneToOneFileTransfer);
 
@@ -422,9 +426,12 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			/* If the IMS is NOT connected at this time then queue this one to one file. */
 			addOutgoingFileTransfer(fileTransferId, contact, content, fileIconContent,
 					FileTransfer.State.QUEUED);
+			FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
+					fileTransferId, contact, Direction.OUTGOING, contact.toString(), file,
+					fileIconContent != null ? fileIconContent.getUri() : null, content.getName(),
+					content.getEncoding(), content.getSize(), mMessagingLog);
 			return new OneToOneFileTransferImpl(fileTransferId, mOneToOneFileTransferBroadcaster,
-					mImService, new FileTransferPersistedStorageAccessor(fileTransferId,
-							mMessagingLog), this);
+					mImService, storageAccessor, this);
 
 		} catch (Exception e) {
 			/*
@@ -451,8 +458,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	private IFileTransfer sendGroupFile(Set<ParticipantInfo> participants, MmContent content,
 			MmContent fileIcon, String chatId, String fileTransferId) throws ServerApiException {
 		try {
-			mImService.assertFileSizeNotExceedingMaxLimit(content.getSize(),
-					"File exceeds max size.");
+			long fileSize = content.getSize();
+			mImService.assertFileSizeNotExceedingMaxLimit(fileSize, "File exceeds max size.");
+
+			FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
+					fileTransferId, null, Direction.OUTGOING, chatId, content.getUri(),
+					fileIcon != null ? fileIcon.getUri() : null, content.getName(),
+					content.getEncoding(), fileSize, mMessagingLog);
 
 			if (!mImService.isFileTransferSessionAvailable()
 					|| mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
@@ -462,9 +474,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 				addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileIcon,
 						State.QUEUED);
 				return new GroupFileTransferImpl(fileTransferId, chatId,
-						mGroupFileTransferBroadcaster, mImService,
-						new FileTransferPersistedStorageAccessor(fileTransferId, mMessagingLog),
-						this);
+						mGroupFileTransferBroadcaster, mImService, storageAccessor, this);
 			}
 			final GroupChatSession groupChatSession = mImService.getGroupChatSession(chatId);
 			String chatSessionId = groupChatSession != null ? groupChatSession.getSessionID()
@@ -478,8 +488,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
 				GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(
 						session.getFileTransferId(), chatId, mGroupFileTransferBroadcaster,
-						mImService, new FileTransferPersistedStorageAccessor(fileTransferId,
-								mMessagingLog), this);
+						mImService, storageAccessor, this);
 				session.addListener(groupFileTransfer);
 				addFileTransfer(groupFileTransfer);
 
@@ -519,8 +528,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 				}
 			}
 			return new GroupFileTransferImpl(fileTransferId, chatId, mGroupFileTransferBroadcaster,
-					mImService, new FileTransferPersistedStorageAccessor(fileTransferId,
-							mMessagingLog), this);
+					mImService, storageAccessor, this);
 
 		} catch (Exception e) {
 			/*
@@ -570,9 +578,12 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			/* If the IMS is NOT connected at this time then queue this group file. */
 			addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileIconContent,
 					State.QUEUED);
+			FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
+					fileTransferId, null, Direction.OUTGOING, chatId, file,
+					fileIconContent != null ? fileIconContent.getUri() : null, content.getName(),
+					content.getEncoding(), content.getSize(), mMessagingLog);
 			return new GroupFileTransferImpl(fileTransferId, chatId, mGroupFileTransferBroadcaster,
-					mImService, new FileTransferPersistedStorageAccessor(fileTransferId,
-							mMessagingLog), this);
+					mImService, storageAccessor, this);
 
 		} catch (Exception e) {
 			/*

@@ -46,6 +46,14 @@ public class VideoSharingPersistedStorageAccessor {
 		mRichCallLog = richCallLog;
 	}
 
+	public VideoSharingPersistedStorageAccessor(String sharingId, ContactId contact, int direction,
+			RichCallHistory richCallLog) {
+		mSharingId = sharingId;
+		mContact = contact;
+		mDirection = direction;
+		mRichCallLog = richCallLog;
+	}
+
 	public ContactId getRemoteContact() {
 		/*
 		 * Utilizing cache here as contact can't be changed in persistent

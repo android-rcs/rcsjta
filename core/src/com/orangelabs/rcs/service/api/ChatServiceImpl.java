@@ -427,7 +427,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
 			String chatId = session.getContributionID();
 			GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
-					chatId, mMessagingLog);
+					chatId, subject, Direction.OUTGOING, mMessagingLog);
 			GroupChatImpl groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster,
 					mImService, storageAccessor, mRcsSettings, mContactsManager, this, mMessagingLog);
 			session.addListener(groupChat);

@@ -262,7 +262,8 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 					ImageSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
 
 			ImageSharingPersistedStorageAccessor storageAccessor = new ImageSharingPersistedStorageAccessor(
-					sharingId, mRichCallLog);
+					sharingId, contact, Direction.OUTGOING, file, content.getName(),
+					content.getEncoding(), content.getSize(), mRichCallLog);
 			ImageSharingImpl imageSharing = new ImageSharingImpl(sharingId, mRichcallService,
 					mBroadcaster, storageAccessor, this);
 

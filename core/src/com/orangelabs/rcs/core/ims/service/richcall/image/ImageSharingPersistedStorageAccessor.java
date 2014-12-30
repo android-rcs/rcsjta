@@ -54,6 +54,18 @@ public class ImageSharingPersistedStorageAccessor {
 		mRichCallLog = richCallLog;
 	}
 
+	public ImageSharingPersistedStorageAccessor(String sharingId, ContactId contact, int direction,
+			Uri file, String fileName, String mimeType, long fileSize, RichCallHistory richCallLog) {
+		mSharingId = sharingId;
+		mContact = contact;
+		mDirection = direction;
+		mFile = file;
+		mFileName = fileName;
+		mFileSize = fileSize;
+		mMimeType = mimeType;
+		mRichCallLog = richCallLog;
+	}
+
 	public ContactId getRemoteContact() {
 		/*
 		 * Utilizing cache here as contact can't be changed in persistent

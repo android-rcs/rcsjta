@@ -58,6 +58,21 @@ public class FileTransferPersistedStorageAccessor {
 		mMessagingLog = messagingLog;
 	}
 
+	public FileTransferPersistedStorageAccessor(String fileTransferId, ContactId contact,
+			int direction, String chatId, Uri file, Uri fileIcon, String fileName, String mimeType,
+			long fileSize, MessagingLog messagingLog) {
+		mFileTransferId = fileTransferId;
+		mContact = contact;
+		mDirection = direction;
+		mChatId = chatId;
+		mFile = file;
+		mFileIcon = fileIcon;
+		mFileName = fileName;
+		mMimeType = mimeType;
+		mFileSize = fileSize;
+		mMessagingLog = messagingLog;
+	}
+
 	public String getChatId() {
 		/*
 		 * Utilizing cache here as chatId can't be changed in persistent storage

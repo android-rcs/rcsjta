@@ -47,6 +47,14 @@ public class IPCallPersistedStorageAccessor {
 		mIPCallLog = ipCallLog;
 	}
 
+	public IPCallPersistedStorageAccessor(String callId, ContactId contact, int direction,
+			IPCallHistory ipCallLog) {
+		mCallId = callId;
+		mContact = contact;
+		mDirection = direction;
+		mIPCallLog = ipCallLog;
+	}
+
 	public ContactId getRemoteContact() {
 		/*
 		 * Utilizing cache here as contact can't be changed in persistent

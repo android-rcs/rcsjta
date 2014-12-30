@@ -50,6 +50,14 @@ public class GroupChatPersistedStorageAccessor {
 		mMessagingLog = messagingLog;
 	}
 
+	public GroupChatPersistedStorageAccessor(String chatId, String subject, int direction,
+			MessagingLog messagingLog) {
+		mChatId = chatId;
+		mSubject = subject;
+		mDirection = direction;
+		mMessagingLog = messagingLog;
+	}
+
 	public int getDirection() {
 		/*
 		 * Utilizing cache here as direction can't be changed in persistent
