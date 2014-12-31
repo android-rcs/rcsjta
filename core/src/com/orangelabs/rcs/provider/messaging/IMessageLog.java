@@ -24,6 +24,8 @@ package com.orangelabs.rcs.provider.messaging;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 
+import android.database.Cursor;
+
 /**
  * Interface for the message table
  * 
@@ -136,14 +138,6 @@ public interface IMessageLog {
 	public boolean isMessageRead(String msgId);
 
 	/**
-	 * Returns the timestamp of a message
-	 * 
-	 * @param msgId
-	 * @return timestamp
-	 */
-	public long getMessageTimestamp(String msgId);
-
-	/**
 	 * Returns the timestamp_sent of a message
 	 * 
 	 * @param msgId
@@ -168,46 +162,6 @@ public interface IMessageLog {
 	public long getMessageDisplayedTimestamp(String msgId);
 
 	/**
-	 * Get message chatId from its unique ID
-	 * 
-	 * @param msgId
-	 * @return chatId
-	 */
-	public String getMessageChatId(String msgId);
-
-	/**
-	 * Get message remote contact from its unique ID
-	 * 
-	 * @param msgId
-	 * @return contact
-	 */
-	public ContactId getMessageRemoteContact(String msgId);
-
-	/**
-	 * Get message direction from its unique ID
-	 * 
-	 * @param msgId
-	 * @return Mime type
-	 */
-	public String getMessageMimeType(String msgId);
-
-	/**
-	 * Get message content from its unique ID
-	 * 
-	 * @param msgId
-	 * @return Content
-	 */
-	public String getMessageContent(String msgId);
-
-	/**
-	 * Get message direction from its unique ID
-	 * 
-	 * @param msgId
-	 * @return Direction
-	 */
-	public int getMessageDirection(String msgId);
-
-	/**
 	 * Get message state from its unique ID
 	 * 
 	 * @param msgId
@@ -222,4 +176,12 @@ public interface IMessageLog {
 	 * @return reason code of the state
 	 */
 	public int getMessageReasonCode(String msgId);
+
+	/**
+	 * Get cacheable message data from its unique ID
+	 * 
+	 * @param msgId
+	 * @return Cursor
+	 */
+	public Cursor getCacheableChatMessageData(String msgId);
 }

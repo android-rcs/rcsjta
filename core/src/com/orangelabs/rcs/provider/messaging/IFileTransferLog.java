@@ -27,6 +27,7 @@ import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResume;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
 
+import android.database.Cursor;
 import android.net.Uri;
 
 import java.util.List;
@@ -180,62 +181,6 @@ public interface IFileTransferLog {
 	public FtHttpResumeUpload retrieveFtHttpResumeUpload(String tId);
 
 	/**
-	 * Get file transfer chatId from its unique ID
-	 * 
-	 * @param fileTransferId Unique ID of file transfer
-	 * @return chatId
-	 */
-	public String getFileTransferChatId(String fileTransferId);
-
-	/**
-	 * Get file transfer remote contact from its unique ID
-	 * 
-	 * @param fileTransferId Unique ID of file transfer
-	 * @return contact
-	 */
-	public ContactId getFileTransferRemoteContact(String fileTransferId);
-
-	/**
-	 * Get file from its unique ID
-	 * 
-	 * @param fileTransferId Unique ID of file transfer
-	 * @return file
-	 */
-	public Uri getFile(String fileTransferId);
-
-	/**
-	 * Get file name from its unique ID
-	 * 
-	 * @param fileTransferId Unique ID of file transfer
-	 * @return name
-	 */
-	public String getFileName(String fileTransferId);
-
-	/**
-	 * Get file transfer direction from its unique ID
-	 * 
-	 * @param fileTransferId Unique ID of file transfer
-	 * @return Direction
-	 */
-	public String getFileMimeType(String fileTransferId);
-
-	/**
-	 * Get file icon from its unique ID
-	 * 
-	 * @param fileTransferId Unique ID of file transfer
-	 * @return fileicon
-	 */
-	public Uri getFileIcon(String fileTransferId);
-
-	/**
-	 * Get file transfer direction from its unique ID
-	 * 
-	 * @param fileTransferId Unique ID of file transfer
-	 * @return Direction
-	 */
-	public int getFileTransferDirection(String fileTransferId);
-
-	/**
 	 * Get file transfer state from its unique ID
 	 * 
 	 * @param fileTransferId Unique ID of file transfer
@@ -252,12 +197,12 @@ public interface IFileTransferLog {
 	public int getFileTransferStateReasonCode(String fileTransferId);
 
 	/**
-	 * Get file size from its unique ID
+	 * Get cacheable file transfer data from its unique ID
 	 * 
-	 * @param fileTransferId Unique ID of file transfer
-	 * @return size of the file
+	 * @param fileTransferId
+	 * @return Cursor
 	 */
-	public long getFileSize(String fileTransferId);
+	public Cursor getCacheableFileTransferData(String fileTransferId);
 
 	/**
 	 * Is group file transfer

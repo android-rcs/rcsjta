@@ -36,6 +36,7 @@ import com.orangelabs.rcs.provider.fthttp.FtHttpResume;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
 
 /**
@@ -455,11 +456,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	}
 
 	@Override
-	public int getGroupChatDirection(String chatId) {
-		return groupChatLog.getGroupChatDirection(chatId);
-	}
-
-	@Override
 	public int getGroupChatState(String chatId) {
 		return groupChatLog.getGroupChatState(chatId);
 	}
@@ -467,11 +463,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	@Override
 	public int getGroupChatReasonCode(String chatId) {
 		return groupChatLog.getGroupChatReasonCode(chatId);
-	}
-
-	@Override
-	public int getFileTransferDirection(String fileTransferId) {
-		return fileTransferLog.getFileTransferDirection(fileTransferId);
 	}
 
 	@Override
@@ -485,53 +476,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	}
 
 	@Override
-	public long getFileSize(String fileTransferId) {
-		return fileTransferLog.getFileSize(fileTransferId);
-	}
-
-	@Override
-	public String getFileTransferChatId(String fileTransferId) {
-		return fileTransferLog.getFileTransferChatId(fileTransferId);
-	}
-
-	@Override
-	public ContactId getFileTransferRemoteContact(String fileTransferId) {
-		return fileTransferLog.getFileTransferRemoteContact(fileTransferId);
-	}
-
-	@Override
-	public Uri getFile(String fileTransferId) {
-		return fileTransferLog.getFile(fileTransferId);
-	}
-
-	@Override
-	public String getFileName(String fileTransferId) {
-		return fileTransferLog.getFileName(fileTransferId);
-	}
-
-	@Override
-	public String getFileMimeType(String fileTransferId) {
-		return fileTransferLog.getFileMimeType(fileTransferId);
-	}
-
-	@Override
-	public Uri getFileIcon(String fileTransferId) {
-		return fileTransferLog.getFileIcon(fileTransferId);
-	}
-
-	@Override
-	public String getSubject(String chatId) {
-		return groupChatLog.getSubject(chatId);
-	}
-
-	@Override
 	public Set<ParticipantInfo> getGroupChatParticipants(String chatId) {
 		return groupChatLog.getGroupChatParticipants(chatId);
-	}
-
-	@Override
-	public ContactId getGroupChatRemoteContact(String chatId) {
-		return groupChatLog.getGroupChatRemoteContact(chatId);
 	}
 
 	@Override
@@ -555,11 +501,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	}
 
 	@Override
-	public long getMessageTimestamp(String msgId) {
-		return messageLog.getMessageTimestamp(msgId);
-	}
-
-	@Override
 	public long getMessageDeliveredTimestamp(String msgId) {
 		return messageLog.getMessageDeliveredTimestamp(msgId);
 	}
@@ -567,31 +508,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	@Override
 	public long getMessageDisplayedTimestamp(String msgId) {
 		return messageLog.getMessageDisplayedTimestamp(msgId);
-	}
-
-	@Override
-	public String getMessageChatId(String msgId) {
-		return messageLog.getMessageChatId(msgId);
-	}
-
-	@Override
-	public ContactId getMessageRemoteContact(String msgId) {
-		return messageLog.getMessageRemoteContact(msgId);
-	}
-
-	@Override
-	public String getMessageMimeType(String msgId) {
-		return messageLog.getMessageMimeType(msgId);
-	}
-
-	@Override
-	public String getMessageContent(String msgId) {
-		return messageLog.getMessageContent(msgId);
-	}
-
-	@Override
-	public int getMessageDirection(String msgId) {
-		return messageLog.getMessageDirection(msgId);
 	}
 
 	@Override
@@ -607,5 +523,20 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	@Override
 	public Set<String> getChatIdsOfActiveGroupChatsForAutoRejoin() {
 		return groupChatLog.getChatIdsOfActiveGroupChatsForAutoRejoin();
+	}
+
+	@Override
+	public Cursor getCacheableFileTransferData(String fileTransferId) {
+		return fileTransferLog.getCacheableFileTransferData(fileTransferId);
+	}
+
+	@Override
+	public Cursor getCacheableGroupChatData(String chatId) {
+		return groupChatLog.getCacheableGroupChatData(chatId);
+	}
+
+	@Override
+	public Cursor getCacheableChatMessageData(String msgId) {
+		return messageLog.getCacheableChatMessageData(msgId);
 	}
 }

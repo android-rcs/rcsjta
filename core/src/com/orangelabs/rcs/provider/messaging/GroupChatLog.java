@@ -370,9 +370,6 @@ public class GroupChatLog implements IGroupChatLog {
 					"No row returned while querying for group chat data with chatId : " + chatId);
 
 		} catch (RuntimeException e) {
-			if (logger.isActivated()) {
-				logger.error("Error in retrieving group chat info with chatId : " + chatId);
-			}
 			if (cursor != null) {
 				cursor.close();
 			}
@@ -415,19 +412,6 @@ public class GroupChatLog implements IGroupChatLog {
 	/*
 	 * (non-Javadoc)
 	 * @see
-	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#getGroupChatDirection
-	 * (java.lang.String)
-	 */
-	public int getGroupChatDirection(String chatId) {
-		if (logger.isActivated()) {
-			logger.debug("Get group chat direction for ".concat(chatId));
-		}
-		return getDataAsInt(getGroupChatData(ChatData.KEY_DIRECTION, chatId));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see
 	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#getGroupChatState
 	 * (java.lang.String)
 	 */
@@ -454,19 +438,6 @@ public class GroupChatLog implements IGroupChatLog {
 	/*
 	 * (non-Javadoc)
 	 * @see
-	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#getSubject(java.lang
-	 * .String)
-	 */
-	public String getSubject(String chatId) {
-		if (logger.isActivated()) {
-			logger.debug("Get group chat subject for ".concat(chatId));
-		}
-		return getDataAsString(getGroupChatData(ChatData.KEY_SUBJECT, chatId));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see
 	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#getGroupChatParticipants
 	 * (java.lang.String)
 	 */
@@ -475,24 +446,6 @@ public class GroupChatLog implements IGroupChatLog {
 			logger.debug("Get group chat participants for ".concat(chatId));
 		}
 		return getParticipants(getDataAsString(getGroupChatData(ChatData.KEY_PARTICIPANTS, chatId)));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see
-	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#getGroupChatRemoteContact
-	 * (java.lang.String)
-	 */
-	public ContactId getGroupChatRemoteContact(String chatId) {
-		if (logger.isActivated()) {
-			logger.debug("Get group chat remote contact for ".concat(chatId));
-		}
-		String contact = getDataAsString(getGroupChatData(ChatData.KEY_CONTACT, chatId));
-		/* null is legal value here only when this is a outgoing group chat */
-		if (contact == null) {
-			return null;
-		}
-		return ContactUtils.createContactId(contact);
 	}
 
 	/*
@@ -535,6 +488,38 @@ public class GroupChatLog implements IGroupChatLog {
 			if (cursor != null) {
 				cursor.close();
 			}
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see
+	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#getCacheableGroupChatData
+	 * ( java.lang.String)
+	 */
+	public Cursor getCacheableGroupChatData(String chatId) {
+		if (logger.isActivated()) {
+			logger.debug("Get group chat info for ".concat(chatId));
+		}
+		String[] selArgs = new String[] {
+			chatId
+		};
+		Cursor cursor = null;
+		try {
+			cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, null, SELECT_CHAT_ID,
+					selArgs, ORDER_BY_TIMESTAMP_DESC);
+			if (cursor.moveToFirst()) {
+				return cursor;
+			}
+
+			throw new SQLException(
+					"No row returned while querying for group chat data with chatId : " + chatId);
+
+		} catch (RuntimeException e) {
+			if (cursor != null) {
+				cursor.close();
+			}
+			throw e;
 		}
 	}
 }

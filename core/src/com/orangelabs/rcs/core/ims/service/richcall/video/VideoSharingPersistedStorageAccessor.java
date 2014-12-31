@@ -17,9 +17,12 @@
 package com.orangelabs.rcs.core.ims.service.richcall.video;
 
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.vsh.VideoSharingLog;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.provider.sharing.RichCallHistory;
+import com.orangelabs.rcs.utils.ContactUtils;
 
+import android.database.Cursor;
 import android.net.Uri;
 
 /**
@@ -54,6 +57,23 @@ public class VideoSharingPersistedStorageAccessor {
 		mRichCallLog = richCallLog;
 	}
 
+	private void cacheData() {
+		Cursor cursor = null;
+		try {
+			cursor = mRichCallLog.getCacheableVideoSharingData(mSharingId);
+			String contact = cursor.getString(cursor
+					.getColumnIndexOrThrow(VideoSharingLog.CONTACT));
+			if (contact != null) {
+				mContact = ContactUtils.createContactId(contact);
+			}
+			mDirection = cursor.getInt(cursor.getColumnIndexOrThrow(VideoSharingLog.DIRECTION));
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
 	public ContactId getRemoteContact() {
 		/*
 		 * Utilizing cache here as contact can't be changed in persistent
@@ -61,7 +81,7 @@ public class VideoSharingPersistedStorageAccessor {
 		 * multiple times.
 		 */
 		if (mContact == null) {
-			mContact = mRichCallLog.getVideoSharingRemoteContact(mSharingId);
+			cacheData();
 		}
 		return mContact;
 	}
@@ -81,7 +101,7 @@ public class VideoSharingPersistedStorageAccessor {
 		 * multiple times.
 		 */
 		if (mDirection == null) {
-			mDirection = mRichCallLog.getVideoSharingDirection(mSharingId);
+			cacheData();
 		}
 		return mDirection;
 	}

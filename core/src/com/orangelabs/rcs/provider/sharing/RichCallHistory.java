@@ -36,7 +36,6 @@ import com.gsma.services.rcs.vsh.VideoSharingLog;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.provider.LocalContentResolver;
-import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -84,10 +83,6 @@ public class RichCallHistory {
 							+ sharingId);
 
 		} catch (RuntimeException e) {
-			if (logger.isActivated()) {
-				logger.error("Exception occured while retrieving image share info of sharingId = '"
-						+ sharingId + "' ! ", e);
-			}
 			if (cursor != null) {
 				cursor.close();
 			}
@@ -120,10 +115,6 @@ public class RichCallHistory {
 							+ sharingId);
 
 		} catch (RuntimeException e) {
-			if (logger.isActivated()) {
-				logger.error("Exception occured while retrieving video share info of sharingId = '"
-						+ sharingId + "' ! ", e);
-			}
 			if (cursor != null) {
 				cursor.close();
 			}
@@ -131,31 +122,9 @@ public class RichCallHistory {
 		}
 	}
 
-	private String getDataAsString(Cursor cursor) {
-		try {
-			return cursor.getString(FIRST_COLUMN_IDX);
-
-		} finally {
-			if (cursor != null) {
-				cursor.close();
-			}
-		}
-	}
-
 	private int getDataAsInt(Cursor cursor) {
 		try {
 			return cursor.getInt(FIRST_COLUMN_IDX);
-
-		} finally {
-			if (cursor != null) {
-				cursor.close();
-			}
-		}
-	}
-
-	private long getDataAsLong(Cursor cursor) {
-		try {
-			return cursor.getLong(FIRST_COLUMN_IDX);
 
 		} finally {
 			if (cursor != null) {
@@ -367,73 +336,6 @@ public class RichCallHistory {
 	}	
 
 	/**
-	 * Get remote contact from unique Id
-	 * 
-	 * @param sharingId
-	 * @return ContactId
-	 */
-	public ContactId getImageSharingRemoteContact(String sharingId) {
-		if (logger.isActivated()) {
-			logger.debug("Get image transfer remote contact for sharingId ".concat(sharingId));
-		}
-		Cursor cursor = getImageTransferData(ImageSharingData.KEY_CONTACT, sharingId);
-		return ContactUtils.createContactId(getDataAsString(cursor));
-	}
-
-	/**
-	 * Get Image Uri from unique Id
-	 * 
-	 * @param sharingId
-	 * @return Uri of image
-	 */
-	public Uri getImage(String sharingId) {
-		if (logger.isActivated()) {
-			logger.debug("Get image for sharingId ".concat(sharingId));
-		}
-		return Uri
-				.parse(getDataAsString(getImageTransferData(ImageSharingData.KEY_FILE, sharingId)));
-	}
-
-	/**
-	 * Get Image sharing name from unique Id
-	 * 
-	 * @param sharingId
-	 * @return name
-	 */
-	public String getImageSharingName(String sharingId) {
-		if (logger.isActivated()) {
-			logger.debug("Get image name for sharingId ".concat(sharingId));
-		}
-		return getDataAsString(getImageTransferData(ImageSharingData.KEY_FILENAME, sharingId));
-	}
-
-	/**
-	 * Get Image sharing size from unique Id
-	 * 
-	 * @param sharingId
-	 * @return Size
-	 */
-	public long getImageSharingSize(String sharingId) {
-		if (logger.isActivated()) {
-			logger.debug("Get image sharing size for sharingId '" + sharingId + "'");
-		}
-		return getDataAsLong(getImageTransferData(ImageSharingData.KEY_FILESIZE, sharingId));
-	}
-
-	/**
-	 * Get Image sharing mime type from unique Id
-	 * 
-	 * @param sharingId
-	 * @return Mimetype
-	 */
-	public String getImageSharingMimeType(String sharingId) {
-		if (logger.isActivated()) {
-			logger.debug("Get image transfer mime type for sharingId ".concat(sharingId));
-		}
-		return getDataAsString(getImageTransferData(ImageSharingData.KEY_MIME_TYPE, sharingId));
-	}
-
-	/**
 	 * Get Image sharing state from unique Id
 	 * 
 	 * @param sharingId
@@ -457,33 +359,6 @@ public class RichCallHistory {
 			logger.debug("Get image transfer reason code for sharingId ".concat(sharingId));
 		}
 		return getDataAsInt(getImageTransferData(ImageSharingData.KEY_REASON_CODE, sharingId));
-	}
-
-	/**
-	 * Get Image sharing direction from unique Id
-	 * 
-	 * @param sharingId
-	 * @return Direction
-	 */
-	public int getImageSharingDirection(String sharingId) {
-		if (logger.isActivated()) {
-			logger.debug("Get image transfer direction for sharingId ".concat(sharingId));
-		}
-		return getDataAsInt(getImageTransferData(ImageSharingData.KEY_DIRECTION, sharingId));
-	}
-
-	/**
-	 * Get Video sharing remote contact from unique Id
-	 * 
-	 * @param sharingId
-	 * @return ContactId
-	 */
-	public ContactId getVideoSharingRemoteContact(String sharingId) {
-		if (logger.isActivated()) {
-			logger.debug("Get video share remote contact for sharingId ".concat(sharingId));
-		}
-		return ContactUtils.createContactId(getDataAsString(getVideoSharingData(
-				VideoSharingData.KEY_CONTACT, sharingId)));
 	}
 
 	/**
@@ -513,15 +388,58 @@ public class RichCallHistory {
 	}
 
 	/**
-	 * Get Video sharing direction from unique Id
+	 * Get cacheable image transfer info from its unique Id
 	 * 
 	 * @param sharingId
-	 * @return Direction
+	 * @return Cursor the caller of this method has to close the cursor if a
+	 *         cursor is returned
 	 */
-	public int getVideoSharingDirection(String sharingId) {
-		if (logger.isActivated()) {
-			logger.debug("Get video share direction for sharingId ".concat(sharingId));
+	public Cursor getCacheableImageTransferData(String sharingId) {
+		Cursor cursor = null;
+		try {
+			cursor = mLocalContentResolver.query(
+					Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId), null, null, null,
+					null);
+			if (cursor.moveToFirst()) {
+				return cursor;
+			}
+			throw new SQLException(
+					"No row returned while querying for image transfer data with sharingId : "
+							+ sharingId);
+
+		} catch (RuntimeException e) {
+			if (cursor != null) {
+				cursor.close();
+			}
+			throw e;
 		}
-		return getDataAsInt(getVideoSharingData(VideoSharingData.KEY_DIRECTION, sharingId));
+	}
+
+	/**
+	 * Get cacheable video sharing info from its unique Id
+	 * 
+	 * @param sharingId
+	 * @return Cursor the caller of this method has to close the cursor if a
+	 *         cursor is returned
+	 */
+	public Cursor getCacheableVideoSharingData(String sharingId) {
+		Cursor cursor = null;
+		try {
+			cursor = mLocalContentResolver.query(
+					Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, sharingId), null, null, null,
+					null);
+			if (cursor.moveToFirst()) {
+				return cursor;
+			}
+			throw new SQLException(
+					"No row returned while querying for video sharing data with sharingId : "
+							+ sharingId);
+
+		} catch (RuntimeException e) {
+			if (cursor != null) {
+				cursor.close();
+			}
+			throw e;
+		}
 	}
 }

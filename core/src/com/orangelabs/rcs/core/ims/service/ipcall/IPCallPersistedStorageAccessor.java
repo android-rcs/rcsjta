@@ -17,10 +17,13 @@
 package com.orangelabs.rcs.core.ims.service.ipcall;
 
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.ipcall.IPCallLog;
 import com.orangelabs.rcs.core.content.AudioContent;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.provider.ipcall.IPCallHistory;
+import com.orangelabs.rcs.utils.ContactUtils;
 
+import android.database.Cursor;
 import android.net.Uri;
 
 /**
@@ -55,6 +58,24 @@ public class IPCallPersistedStorageAccessor {
 		mIPCallLog = ipCallLog;
 	}
 
+
+	private void cacheData() {
+		Cursor cursor = null;
+		try {
+			cursor = mIPCallLog.getCacheableIPCallData(mCallId);
+			String contact = cursor.getString(cursor
+					.getColumnIndexOrThrow(IPCallLog.CONTACT));
+			if (contact != null) {
+				mContact = ContactUtils.createContactId(contact);
+			}
+			mDirection = cursor.getInt(cursor.getColumnIndexOrThrow(IPCallLog.DIRECTION));
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
 	public ContactId getRemoteContact() {
 		/*
 		 * Utilizing cache here as contact can't be changed in persistent
@@ -62,7 +83,7 @@ public class IPCallPersistedStorageAccessor {
 		 * multiple times.
 		 */
 		if (mContact == null) {
-			mContact = mIPCallLog.getRemoteContact(mCallId);
+			cacheData();
 		}
 		return mContact;
 	}
@@ -82,7 +103,7 @@ public class IPCallPersistedStorageAccessor {
 		 * multiple times.
 		 */
 		if (mDirection == null) {
-			mDirection = mIPCallLog.getDirection(mCallId);
+			cacheData();
 		}
 		return mDirection;
 	}

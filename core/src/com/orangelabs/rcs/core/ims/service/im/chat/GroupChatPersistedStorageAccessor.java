@@ -17,10 +17,14 @@
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.utils.ContactUtils;
+
+import android.database.Cursor;
 
 import java.util.Set;
 
@@ -58,6 +62,24 @@ public class GroupChatPersistedStorageAccessor {
 		mMessagingLog = messagingLog;
 	}
 
+	private void cacheData() {
+		Cursor cursor = null;
+		try {
+			cursor = mMessagingLog.getCacheableGroupChatData(mChatId);
+			mSubject = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.SUBJECT));
+			mDirection = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.DIRECTION));
+			String contact = cursor.getString(cursor
+					.getColumnIndexOrThrow(ChatLog.GroupChat.CONTACT));
+			if (contact != null) {
+				mContact = ContactUtils.createContactId(contact);
+			}
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
 	public int getDirection() {
 		/*
 		 * Utilizing cache here as direction can't be changed in persistent
@@ -65,7 +87,7 @@ public class GroupChatPersistedStorageAccessor {
 		 * multiple times.
 		 */
 		if (mDirection == null) {
-			mDirection = mMessagingLog.getGroupChatDirection(mChatId);
+			cacheData();
 		}
 		return mDirection;
 	}
@@ -85,7 +107,7 @@ public class GroupChatPersistedStorageAccessor {
 		 * multiple times.
 		 */
 		if (mSubject == null) {
-			mSubject = mMessagingLog.getSubject(mChatId);
+			cacheData();
 		}
 		return mSubject;
 	}
@@ -101,7 +123,7 @@ public class GroupChatPersistedStorageAccessor {
 		 * multiple times.
 		 */
 		if (mContact == null) {
-			mContact = mMessagingLog.getGroupChatRemoteContact(mChatId);
+			cacheData();
 		}
 		return mContact;
 	}
