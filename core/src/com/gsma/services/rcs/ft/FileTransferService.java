@@ -304,12 +304,14 @@ public class FileTransferService extends RcsService {
 		}
     }    
 
-    /**
-     * Returns a current file transfer from its unique ID
-     * 
-     * @return File transfer or null if not found
-     * @throws RcsServiceException
-     */
+	/**
+	 * Returns a current file transfer from its unique ID
+	 * 
+	 * @param transferId
+	 * 
+	 * @return File transfer or null if not found
+	 * @throws RcsServiceException
+	 */
     public FileTransfer getFileTransfer(String transferId) throws RcsServiceException {
 		if (api != null) {
 			try {
@@ -444,10 +446,11 @@ public class FileTransferService extends RcsService {
 	}
     
 	/**
-	 * set the image resize option for file transfer. 
+	 * set the image resize option for file transfer.
 	 * 
 	 * @param option
 	 *            the image resize option (0: ALWAYS_PERFORM, 1: ONLY_ABOVE_MAX_SIZE, 2: ASK)
+	 * @throws RcsServiceException
 	 */
     public void setImageResizeOption(int option) throws RcsServiceException {
 		if (api != null) {

@@ -39,7 +39,7 @@
 <string name="label_state_accepting">accepting</string>
 <string name="label_state_ringing">ringing</string>
 <string name="label_state_failed">failed</string>
-<string name="label_state_initiated">initiated</string>
+<string name="label_state_initiating">initiating</string>
 <string name="label_state_invited">invited</string>
 <string name="label_state_started">started</string>
 <string name="label_state_transferred">transferred</string>

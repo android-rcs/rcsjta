@@ -38,6 +38,11 @@ public class RcsContactFormatException extends RuntimeException {
 		super("rcs contact format not supported");
 	}
 	
+	/**
+	 * Constructor
+	 * 
+	 * @param message
+	 */
 	public RcsContactFormatException(String message) {
 		super(message);
 	}

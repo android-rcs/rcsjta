@@ -22,14 +22,11 @@
 package com.gsma.services.rcs.chat;
 
 import java.util.HashSet;
-import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import android.content.Context;
 import android.net.Uri;
 
-import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.contacts.ContactUtils;
 
 /**
@@ -104,12 +101,13 @@ public class ChatLog {
         public static final String CONTACT = "contact";
 
 		/**
-         * Utility method to get the set of ParticipantInfo objects from its string representation in the ChatLog provider.
-         *
-         * @param participants
-         *            the SET of participant information from the ChatLog provider
-         * @return the SET of participant information
-         */
+		 * Utility method to get the set of ParticipantInfo objects from its string representation in the ChatLog provider.
+		 * 
+		 * @param context
+		 * @param participants
+		 *            the SET of participant information from the ChatLog provider
+		 * @return the SET of participant information
+		 */
 		public static Set<ParticipantInfo> getParticipantInfo(Context context, String participants) {
 			if (participants == null) {
 				return null;
@@ -227,22 +225,22 @@ public class ChatLog {
          */
         public static final String MIME_TYPE = "mime_type";
 
-        /*
+        /**
          * Message MIME-types
          */
         public static class MimeType {
 
-           /*
+           /**
             * MIME-type of text messages
             */
             public static final String TEXT_MESSAGE = "text/plain";
 
-            /*
+            /**
              * MIME-type of geoloc messages
              */
             public static final String GEOLOC_MESSAGE = "application/geoloc";
 
-            /*
+            /**
              * MIME-type of group chat events
              */
             public static final String GROUPCHAT_EVENT = "rcs/groupchat-event";

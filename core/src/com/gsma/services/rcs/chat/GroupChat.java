@@ -370,9 +370,10 @@ public class GroupChat {
 	}
 
 	/**
-	 * open the chat conversation. Note: if it’s an incoming pending chat
-	 * session and the parameter IM SESSION START is 0 then the session is
-	 * accepted now.
+	 * open the chat conversation.<br>
+	 * Note: if it is an incoming pending chat session and the parameter IM SESSION START is 0 then the session is accepted now.
+	 * 
+	 * @throws RcsServiceException
 	 */
 	public void openChat() throws RcsServiceException {
 		try {

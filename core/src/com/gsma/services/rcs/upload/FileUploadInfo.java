@@ -78,6 +78,15 @@ public class FileUploadInfo implements Parcelable {
 
     /**
      * Constructor for outgoing message
+     * @param file 
+     * @param validity 
+     * @param filename 
+     * @param size 
+     * @param type 
+     * @param fileIcon 
+     * @param fileIconValidity 
+     * @param fileIconSize 
+     * @param fileIconType 
      * 
      * @hide
 	 */

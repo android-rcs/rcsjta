@@ -204,8 +204,8 @@ public class ImageSharingList extends Activity {
 		switch (state) {
 		case ImageSharing.State.INVITED:
 			return getString(R.string.label_state_invited);
-		case ImageSharing.State.INITIATED:
-			return getString(R.string.label_state_initiated);
+		case ImageSharing.State.INITIATING:
+			return getString(R.string.label_state_initiating);
 		case ImageSharing.State.STARTED:
 			return getString(R.string.label_state_started);
 		case ImageSharing.State.ABORTED:

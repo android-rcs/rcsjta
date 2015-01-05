@@ -23,7 +23,6 @@ import android.content.Context;
 import android.test.AndroidTestCase;
 
 import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
@@ -59,45 +58,6 @@ public class ChatLogTest extends AndroidTestCase {
 		ContactId participant2 = mContactUtils.formatContact("+330124");
 		ParticipantInfo info2 = new ParticipantInfo(participant2, ParticipantInfo.Status.DEPARTED);
 		assertTrue(participantInfos.contains(info2));
-	}
-
-	public void testgetGeolocNull() {
-		try {
-			ChatLog.getGeoloc(null);
-			fail("Exception is expected");
-		} catch (Exception e) {
-			assertTrue(e instanceof RuntimeException);
-		}
-	}
-
-	public void testgetGeolocInvalidData() {
-		Geoloc geoloc = ChatLog.getGeoloc("abcd,2,3,4.0");
-		assertTrue(geoloc == null);
-	}
-
-	public void testgetGeolocMissingData() {
-		Geoloc geoloc = ChatLog.getGeoloc("label,1,2,3");
-		assertTrue(geoloc == null);
-	}
-
-	public void testgetGeoloc() {
-		Geoloc geoloc = ChatLog.getGeoloc("label,1,2,3,4.0");
-		assertNotNull(geoloc);
-		assertEquals("label", geoloc.getLabel());
-		assertEquals(1.0d, geoloc.getLatitude());
-		assertEquals(2.0d, geoloc.getLongitude());
-		assertEquals(3L, geoloc.getExpiration());
-		assertEquals(4.0f, geoloc.getAccuracy());
-	}
-
-	public void testgetGeolocNoLabel() {
-		Geoloc geoloc = ChatLog.getGeoloc("1,2,3,4.0");
-		assertNotNull(geoloc);
-		assertEquals(null, geoloc.getLabel());
-		assertEquals(1.0d, geoloc.getLatitude());
-		assertEquals(2.0d, geoloc.getLongitude());
-		assertEquals(3L, geoloc.getExpiration());
-		assertEquals(4.0f, geoloc.getAccuracy());
 	}
 
 }

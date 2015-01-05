@@ -182,12 +182,14 @@ public class MultimediaSessionService extends RcsService {
 		}
     }    
 
-    /**
-     * Returns a current messaging session from its unique session ID
-     * 
-     * @return Multimedia messaging session or null if not found
-     * @throws RcsServiceException
-     */
+	/**
+	 * Returns a current messaging session from its unique session ID
+	 * 
+	 * @param sessionId
+	 * 
+	 * @return Multimedia messaging session or null if not found
+	 * @throws RcsServiceException
+	 */
     public MultimediaMessagingSession getMessagingSession(String sessionId) throws RcsServiceException {
 		if (api != null) {
 			try {
@@ -234,13 +236,14 @@ public class MultimediaSessionService extends RcsService {
 		}
     }    
     
-    /**
-     * Returns the list of streaming sessions associated to a given service ID
-     * 
-     * @param serviceId Service ID
-     * @return List of streaming sessions
-     * @throws RcsServiceException
-     */
+	/**
+	 * Returns the list of streaming sessions associated to a given service ID
+	 * 
+	 * @param serviceId
+	 *            Service ID
+	 * @return List of streaming sessions
+	 * @throws RcsServiceException
+	 */
     public Set<MultimediaStreamingSession> getStreamingSessions(String serviceId) throws RcsServiceException {
 		if (api != null) {
 			try {
@@ -259,12 +262,14 @@ public class MultimediaSessionService extends RcsService {
 		}
     }    
 
-    /**
-     * Returns a current streaming session from its unique session ID
-     * 
-     * @return Multimedia streaming session or null if not found
-     * @throws RcsServiceException
-     */
+	/**
+	 * Returns a current streaming session from its unique session ID
+	 * 
+	 * @param sessionId
+	 * 
+	 * @return Multimedia streaming session or null if not found
+	 * @throws RcsServiceException
+	 */
     public MultimediaStreamingSession getStreamingSession(String sessionId) throws RcsServiceException {
 		if (api != null) {
 			try {

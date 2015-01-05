@@ -209,7 +209,7 @@ public class FileTransferList extends Activity {
 		case FileTransfer.State.INVITED:
 			return getString(R.string.label_state_invited);
 		case FileTransfer.State.INITIATING:
-			return getString(R.string.label_state_initiated);
+			return getString(R.string.label_state_initiating);
 		case FileTransfer.State.STARTED:
 			return getString(R.string.label_state_started);
 		case FileTransfer.State.TRANSFERRED:

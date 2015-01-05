@@ -194,8 +194,8 @@ public class VideoSharingList extends Activity {
 		switch (state) {
 		case VideoSharing.State.INVITED:
 			return getString(R.string.label_state_invited);
-		case VideoSharing.State.INITIATED:
-			return getString(R.string.label_state_initiated);
+		case VideoSharing.State.INITIATING:
+			return getString(R.string.label_state_initiating);
 		case VideoSharing.State.STARTED:
 			return getString(R.string.label_state_started);
 		case VideoSharing.State.ABORTED:

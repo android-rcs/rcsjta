@@ -135,7 +135,7 @@ public class ShowUsInMap extends MapActivity {
 					QUERY_SORT_ORDER);
 			if (cursor.moveToFirst()) {
 				String content = cursor.getString(cursor.getColumnIndex(ChatLog.Message.CONTENT));
-				return ChatLog.getGeoloc(content);
+				return new Geoloc(content);
 			}
 		} catch (Exception e) {
 		} finally {
@@ -159,7 +159,7 @@ public class ShowUsInMap extends MapActivity {
 					QUERY_WHERE_CLAUSE, null, QUERY_SORT_ORDER);
 			if (cursor.moveToFirst()) {
 				String content = cursor.getString(cursor.getColumnIndex(ChatLog.Message.CONTENT));
-				return ChatLog.getGeoloc(content);
+				return new Geoloc(content);
 			}
 		} catch (Exception e) {
 		} finally {

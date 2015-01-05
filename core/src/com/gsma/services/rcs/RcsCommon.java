@@ -15,6 +15,10 @@
  */
 package com.gsma.services.rcs;
 
+/**
+ * @author yplo6403
+ *
+ */
 public class RcsCommon {
 
 	/**

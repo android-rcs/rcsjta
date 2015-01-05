@@ -171,7 +171,7 @@ public class IPCallList extends Activity {
 		case IPCall.State.INVITED:
 			return getString(R.string.label_state_invited);
 		case IPCall.State.INITIATED:
-			return getString(R.string.label_state_initiated);
+			return getString(R.string.label_state_initiating);
 		case IPCall.State.STARTED:
 			return getString(R.string.label_state_started);
 		case IPCall.State.ABORTED:

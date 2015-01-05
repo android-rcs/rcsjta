@@ -30,6 +30,10 @@ import com.gsma.services.rcs.contacts.ContactId;
  * 
  * @author Jean-Marc AUFFRET
  */
+/**
+ * @author yplo6403
+ *
+ */
 public class GeolocSharing {
 
     /**
@@ -85,6 +89,10 @@ public class GeolocSharing {
         }    	
     }
 
+    /**
+     * Reason code
+     *
+     */
     public static class ReasonCode {
     	/**
     	 * No specific reason code specified.

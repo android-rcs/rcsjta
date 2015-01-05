@@ -124,7 +124,7 @@ public class ChatMessageTest extends AndroidTestCase {
     		String contact = cursor.getString(cursor.getColumnIndex(ChatLog.Message.CONTACT));
     		String content = cursor.getString(cursor.getColumnIndex(ChatLog.Message.CONTENT));
     		assertNotNull(content);
-			Geoloc readGeoloc = ChatLog.getGeoloc(content);
+			Geoloc readGeoloc = new Geoloc(content);
     		assertNotNull(readGeoloc);
 			
     		String contentType = cursor.getString(cursor.getColumnIndex(ChatLog.Message.MIME_TYPE));

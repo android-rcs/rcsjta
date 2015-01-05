@@ -12,20 +12,22 @@ import android.database.Cursor;
 import android.support.v4.widget.CursorAdapter;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsDisplayName;
 import com.orangelabs.rcs.ri.utils.SmileyParser;
 import com.orangelabs.rcs.ri.utils.Smileys;
@@ -56,6 +58,11 @@ public class ChatCursorAdapter extends CursorAdapter {
 	 */
 	private Smileys mSmileyResources;
 
+    /**
+	 * The log tag for this class
+	 */
+	private static final String LOGTAG = LogUtils.getTag(ChatCursorAdapter.class.getSimpleName());
+	
 	/**
 	 * Constructor
 	 * 
@@ -176,15 +183,20 @@ public class ChatCursorAdapter extends CursorAdapter {
 			return formatMessageWithSmiley(data);
 		}
 		if (ChatLog.Message.MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
-			Geoloc geoloc = ChatLog.getGeoloc(data);
-			if (geoloc == null) {
-				return null;
+			try {
+				Geoloc geoloc = new Geoloc(data);
+				return new StringBuilder(context.getString(R.string.label_geolocation_msg)).append("\n")
+						.append(context.getString(R.string.label_location)).append(" ").append(geoloc.getLabel()).append("\n")
+						.append(context.getString(R.string.label_latitude)).append(" ").append(geoloc.getLatitude()).append("\n")
+						.append(context.getString(R.string.label_longitude)).append(" ").append(geoloc.getLongitude()).append("\n")
+						.append(context.getString(R.string.label_accuracy)).append(" ").append(geoloc.getAccuracy()).toString();
+			} catch (Exception e) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG,"Invalid geoloc message:".concat(data));
+				}
+				return data;
 			}
-			return new StringBuilder(context.getString(R.string.label_geolocation_msg)).append("\n")
-					.append(context.getString(R.string.label_location)).append(" ").append(geoloc.getLabel()).append("\n")
-					.append(context.getString(R.string.label_latitude)).append(" ").append(geoloc.getLatitude()).append("\n")
-					.append(context.getString(R.string.label_longitude)).append(" ").append(geoloc.getLongitude()).append("\n")
-					.append(context.getString(R.string.label_accuracy)).append(" ").append(geoloc.getAccuracy()).toString();
+			
 		}
 		return null;
 	}

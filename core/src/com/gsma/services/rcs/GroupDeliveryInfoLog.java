@@ -23,21 +23,52 @@ import android.net.Uri;
  */
 public class GroupDeliveryInfoLog {
 
+	/**
+	 * Content provider URI for Group Delivery Info
+	 */
 	public static final Uri CONTENT_URI = Uri
 			.parse("content://com.gsma.services.rcs.provider.groupdeliveryinfo/groupdeliveryinfo");
 
+	/**
+     * The name of the column containing the status of a group delivery info.
+     * <P>Type: INTEGER</P>
+     */
 	public static final String STATUS = "status";
 
+	/**
+     * The name of the column containing the reason code of a group delivery info.
+     * <P>Type: INTEGER</P>
+     */
 	public static final String REASON_CODE = "reason_code";
 
+	/**
+     * The name of the column containing the unique ID of the chat message (“msg_id”) or file transfer (“ft_id”).
+     * <P>Type: TEXT</P>
+     */
 	public static final String ID = "id";
 
+	/**
+     * The name of the column containing the unique ID of the group chat.
+     * <P>Type: TEXT</P>
+     */
 	public static final String CHAT_ID = "chat_id";
 
+	  /**
+     * ContactId formatted number of the inviter of the group chat or the group file transfer.
+     * <P>Type: TEXT</P>
+     */
 	public static final String CONTACT = "contact";
 
+	/**
+     * The name of the column containing the time when message or file transfer notification is displayed.
+     * <P>Type: LONG</P>
+     */
 	public static final String TIMESTAMP_DELIVERED = "timestamp_delivered";
 
+	/**
+     * The name of the column containing the time when message is displayed or file transfer is done
+     * <P>Type: LONG</P>
+     */
 	public static final String TIMESTAMP_DISPLAYED = "timestamp_displayed";
 
 	/**

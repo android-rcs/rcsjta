@@ -22,8 +22,6 @@
 package com.gsma.services.rcs.chat;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import android.content.ComponentName;
@@ -132,14 +130,16 @@ public class ChatService extends RcsService {
 		}
 	}    
   
-    /**
-     * Initiates a group chat with a group of contact and returns a GroupChat
-     * instance. The subject is optional and may be null.
-     * 
-     * @param contacts Set of contact identifiers
-     * @param subject Subject
-     * @throws RcsServiceException
-     */
+	/**
+	 * Initiates a group chat with a group of contact and returns a GroupChat instance. The subject is optional and may be null.
+	 * 
+	 * @param contacts
+	 *            Set of contact identifiers
+	 * @param subject
+	 *            The subject is optional and may be null
+	 * @return a GroupChat instance
+	 * @throws RcsServiceException
+	 */
     public GroupChat initiateGroupChat(Set<ContactId> contacts, String subject) throws RcsServiceException {
     	if (api != null) {
 			try {
