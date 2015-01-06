@@ -995,6 +995,10 @@ public abstract class ImsServiceSession extends Thread {
                 // 603 Invitation declined
                 handle603Declined(ctx.getSipResponse());
                 break;
+			case Response.FORBIDDEN:
+				// 403 Forbidden
+				handle403Forbidden(ctx.getSipResponse());
+				break;
 			default:
 				// Other error response
                 handleDefaultError(ctx.getSipResponse());

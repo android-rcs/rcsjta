@@ -194,11 +194,7 @@ public class RestartGroupChatSession extends GroupChatSession {
         return createInviteRequest(getDialogPath().getLocalContent());
     }
 
-    /**
-     * Handle 403 Forbidden
-     *
-     * @param resp 403 response
-     */
+    @Override
     public void handle403Forbidden(SipResponse resp) {
         WarningHeader warn = (WarningHeader)resp.getHeader(WarningHeader.NAME);
         if ((warn != null) && (warn.getText() != null) &&

@@ -177,69 +177,82 @@ public class SipManager {
 	 */
 	public SipTransactionContext sendSipMessageAndWait(SipMessage message, int timeout, SipTransactionContext.INotifySipProvisionalResponse callback)
 			throws SipException {
-        if (sipstack != null) {
-            SipTransactionContext ctx = sipstack.sendSipMessageAndWait(message, callback);
+        if (sipstack == null) {
+			throw new SipException("Stack not initialized");
+        }
+		SipTransactionContext ctx = sipstack.sendSipMessageAndWait(message, callback);
 
-            // wait the response
-            ctx.waitResponse(timeout);
+		// wait the response
+		ctx.waitResponse(timeout);
 
-            // Analyze the received response
-            if (message instanceof SipRequest
-                && !((SipRequest)message).getMethod().equals(Request.REGISTER)
-                    && ctx.isSipResponse()) {
-                // Check if not registered and warning header
-                WarningHeader warn = (WarningHeader)ctx.getSipResponse().getHeader(WarningHeader.NAME);
-                if ((ctx.getStatusCode() == Response.FORBIDDEN) && (warn == null)) {
-                    // Launch new registration
-                    networkInterface.getRegistrationManager().restart();
+		if (!(message instanceof SipRequest) || !ctx.isSipResponse()) {
+			// Return the transaction context
+			return ctx;
+			
+		}
+		String method = ((SipRequest) message).getMethod();
+		SipResponse response = ctx.getSipResponse();
+		if (method == null || response == null) {
+			return ctx;
+			
+		}
+		// Analyze the received response
+		if (!method.equals(Request.REGISTER)) {
+			// Check if not registered and warning header
+			WarningHeader warn = (WarningHeader) response.getHeader(WarningHeader.NAME);
+			if ((ctx.getStatusCode() == Response.FORBIDDEN) && (warn == null)) {
+				// Launch new registration
+				networkInterface.getRegistrationManager().restart();
 
-                    // Throw not registered exception 
-                    throw new SipException("Not registered");
-                }
-            }
-            
-			KeepAliveManager keepAliveManager = networkInterface.getSipManager().getSipStack().getKeepAliveManager();
-			if (message instanceof SipRequest && ctx.isSipResponse()) {
-				String method = ((SipRequest) message).getMethod();
-				if (method != null && keepAliveManager != null) {
-					if (method.equals(Request.INVITE) || method.equals(Request.REGISTER)) {
-						// Message is a response to INVITE or REGISTER: analyze "keep" flag of "Via" header
-						int viaKeep = -1;
-						ListIterator<ViaHeader> iterator = ctx.getSipResponse().getViaHeaders();
-						if (iterator != null) {
-							ViaHeader respViaHeader = iterator.next();
-							// Retrieve "keep" value
-							String keepStr = respViaHeader.getParameter("keep");
-							if (keepStr != null) {
-								// Convert "keep" value to integer
-								try {
-									viaKeep = Integer.parseInt(keepStr);
-									if (viaKeep > 0) {
-										// If "keep" value is valid, set keep alive period
-										keepAliveManager.setPeriod(viaKeep);
-									} else {
-										if (logger.isActivated())
-											logger.warn("Non positive keep value \"" + keepStr + "\"");
-									}
-								} catch (NumberFormatException e) {
-									if (logger.isActivated())
-										logger.warn("Non-numeric keep value \"" + keepStr + "\"");
-								}
-							}
-						}
-						// If "keep" value is invalid or not present, set keep alive period to default value
-						if (viaKeep <= 0) {
-							keepAliveManager.setPeriod(RcsSettings.getInstance().getSipKeepAlivePeriod());
-						}
-					}
+				if (callback == null) {
+					// Throw not registered exception
+					throw new SipException("Not registered");
+					
 				}
 			}
-			
-            // Return the transaction context 
-            return ctx;
-		} else {
-			throw new SipException("Stack not initialized");
 		}
+		if (!method.equals(Request.INVITE) && !method.equals(Request.REGISTER)) {
+			return ctx;
+			
+		}
+		
+		KeepAliveManager keepAliveManager = networkInterface.getSipManager().getSipStack().getKeepAliveManager();
+		if (keepAliveManager == null) {
+			return ctx;
+			
+		}
+		
+		// Message is a response to INVITE or REGISTER: analyze "keep" flag of "Via" header
+		int viaKeep = -1;
+		ListIterator<ViaHeader> iterator = response.getViaHeaders();
+		if (iterator != null) {
+			ViaHeader respViaHeader = iterator.next();
+			// Retrieve "keep" value
+			String keepStr = respViaHeader.getParameter("keep");
+			if (keepStr != null) {
+				// Convert "keep" value to integer
+				try {
+					viaKeep = Integer.parseInt(keepStr);
+					if (viaKeep > 0) {
+						// If "keep" value is valid, set keep alive period
+						keepAliveManager.setPeriod(viaKeep);
+					} else {
+						if (logger.isActivated())
+							logger.warn("Non positive keep value \"" + keepStr + "\"");
+					}
+				} catch (NumberFormatException e) {
+					if (logger.isActivated())
+						logger.warn("Non-numeric keep value \"" + keepStr + "\"");
+				}
+			}
+		}
+		// If "keep" value is invalid or not present, set keep alive period to default value
+		if (viaKeep <= 0) {
+			keepAliveManager.setPeriod(RcsSettings.getInstance().getSipKeepAlivePeriod());
+		}
+
+		// Return the transaction context
+		return ctx;
     }
     
     /**
