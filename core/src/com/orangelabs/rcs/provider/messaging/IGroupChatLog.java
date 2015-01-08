@@ -27,6 +27,8 @@ import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
 
+import android.database.Cursor;
+
 
 /**
  * Interface for the chat table
@@ -141,14 +143,6 @@ public interface IGroupChatLog {
 	public Set<ParticipantInfo> getParticipants(String participants);
 
 	/**
-	 * Get group chat direction from its chat ID
-	 * 
-	 * @param chatId Chat ID of the group chat
-	 * @return Direction
-	 */
-	public int getGroupChatDirection(String chatId);
-
-	/**
 	 * Get group chat state from its chat ID
 	 * 
 	 * @param chatId Chat ID of the group chat
@@ -165,14 +159,6 @@ public interface IGroupChatLog {
 	public int getGroupChatReasonCode(String chatId);
 
 	/**
-	 * Get group chat subject from its chat ID
-	 * 
-	 * @param chatId Chat ID of the group chat
-	 * @return subject
-	 */
-	public String getSubject(String chatId);
-
-	/**
 	 * Get group chat participants from its chat ID
 	 * 
 	 * @param chatId Chat ID of the group chat
@@ -181,12 +167,12 @@ public interface IGroupChatLog {
 	public Set<ParticipantInfo> getGroupChatParticipants(String chatId);
 
 	/**
-	 * Get group chat remote contact from its chat ID
+	 * Get cacheable group chat data from its chat ID
 	 * 
-	 * @param chatId Chat ID of the group chat
-	 * @return contact
+	 * @param chatId
+	 * @return Cursor
 	 */
-	public ContactId getGroupChatRemoteContact(String chatId);
+	public Cursor getCacheableGroupChatData(String chatId);
 
 	/**
 	 * Retrieve all active group chats for auto-rejoin

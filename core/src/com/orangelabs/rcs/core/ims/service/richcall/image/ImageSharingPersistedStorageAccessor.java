@@ -17,9 +17,12 @@
 package com.orangelabs.rcs.core.ims.service.richcall.image;
 
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.ish.ImageSharingLog;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.provider.sharing.RichCallHistory;
+import com.orangelabs.rcs.utils.ContactUtils;
 
+import android.database.Cursor;
 import android.net.Uri;
 
 /**
@@ -66,6 +69,27 @@ public class ImageSharingPersistedStorageAccessor {
 		mRichCallLog = richCallLog;
 	}
 
+	private void cacheData() {
+		Cursor cursor = null;
+		try {
+			cursor = mRichCallLog.getCacheableImageTransferData(mSharingId);
+			String contact = cursor.getString(cursor
+					.getColumnIndexOrThrow(ImageSharingLog.CONTACT));
+			if (contact != null) {
+				mContact = ContactUtils.createContactId(contact);
+			}
+			mDirection = cursor.getInt(cursor.getColumnIndexOrThrow(ImageSharingLog.DIRECTION));
+			mFileName = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILENAME));
+			mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.MIME_TYPE));
+			mFileSize = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.FILESIZE));
+			mFile = Uri.parse(cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILE)));
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
 	public ContactId getRemoteContact() {
 		/*
 		 * Utilizing cache here as contact can't be changed in persistent
@@ -73,7 +97,7 @@ public class ImageSharingPersistedStorageAccessor {
 		 * multiple times.
 		 */
 		if (mContact == null) {
-			mContact = mRichCallLog.getImageSharingRemoteContact(mSharingId);
+			cacheData();
 		}
 		return mContact;
 	}
@@ -85,7 +109,7 @@ public class ImageSharingPersistedStorageAccessor {
 		 * times.
 		 */
 		if (mFile == null) {
-			mFile = mRichCallLog.getImage(mSharingId);
+			cacheData();
 		}
 		return mFile;
 	}
@@ -97,7 +121,7 @@ public class ImageSharingPersistedStorageAccessor {
 		 * multiple times.
 		 */
 		if (mFileName == null) {
-			mFileName = mRichCallLog.getImageSharingName(mSharingId);
+			cacheData();
 		}
 		return mFileName;
 	}
@@ -109,7 +133,7 @@ public class ImageSharingPersistedStorageAccessor {
 		 * multiple times.
 		 */
 		if (mFileSize == null) {
-			mFileSize = mRichCallLog.getImageSharingSize(mSharingId);
+			cacheData();
 		}
 		return mFileSize;
 	}
@@ -121,7 +145,7 @@ public class ImageSharingPersistedStorageAccessor {
 		 * multiple times.
 		 */
 		if (mMimeType == null) {
-			mMimeType = mRichCallLog.getImageSharingMimeType(mSharingId);
+			cacheData();
 		}
 		return mMimeType;
 	}
@@ -141,7 +165,7 @@ public class ImageSharingPersistedStorageAccessor {
 		 * multiple times.
 		 */
 		if (mDirection == null) {
-			mDirection = mRichCallLog.getImageSharingDirection(mSharingId);
+			cacheData();
 		}
 		return mDirection;
 	}

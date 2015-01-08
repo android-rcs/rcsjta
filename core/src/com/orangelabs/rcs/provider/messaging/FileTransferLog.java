@@ -466,11 +466,10 @@ public class FileTransferLog implements IFileTransferLog {
 	/*
 	 * (non-Javadoc)
 	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
-	 * getFileTransferData(java.lang.String)
+	 * getFileTransferData(java.lang.String, java.lang.String)
 	 */
-	private Cursor getFileTransferData(String columnName, String fileTransferId)
-			throws SQLException {
-		String[] projection = new String[] {
+	private Cursor getFileTransferData(String columnName, String fileTransferId) throws SQLException {
+		String[] projection = {
 			columnName
 		};
 		Cursor cursor = null;
@@ -487,26 +486,10 @@ public class FileTransferLog implements IFileTransferLog {
 							+ fileTransferId);
 
 		} catch (RuntimeException e) {
-			if (logger.isActivated()) {
-				logger.error("Exception occured while retrieving file info of fileTransferId = '"
-						+ fileTransferId + "' ! ", e);
-			}
 			if (cursor != null) {
 				cursor.close();
 			}
 			throw e;
-		}
-	}
-
-
-	private String getDataAsString(Cursor cursor) {
-		try {
-			return cursor.getString(FIRST_COLUMN_IDX);
-
-		} finally {
-			if (cursor != null) {
-				cursor.close();
-			}
 		}
 	}
 
@@ -519,120 +502,6 @@ public class FileTransferLog implements IFileTransferLog {
 				cursor.close();
 			}
 		}
-	}
-
-	private long getDataAsLong(Cursor cursor) {
-		try {
-			return cursor.getLong(FIRST_COLUMN_IDX);
-
-		} finally {
-			if (cursor != null) {
-				cursor.close();
-			}
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
-	 * getChatId(java.lang.String)
-	 */
-	public String getFileTransferChatId(String fileTransferId) {
-		if (logger.isActivated()) {
-			logger.debug("Get file transfer chat ID for ".concat(fileTransferId));
-		}
-		return getDataAsString(getFileTransferData(FileTransferData.KEY_CHAT_ID, fileTransferId));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
-	 * getContact(java.lang.String)
-	 */
-	public ContactId getFileTransferRemoteContact(String fileTransferId) {
-		if (logger.isActivated()) {
-			logger.debug("Get file transfer remote contact for ".concat(fileTransferId));
-		}
-		String contact = getDataAsString(getFileTransferData(FileTransferData.KEY_CONTACT,
-				fileTransferId));
-		/*
-		 * null is legal value here only when this is a outgoing group file
-		 * transfer
-		 */
-		if (contact == null) {
-			return null;
-		}
-		return ContactUtils.createContactId(contact);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
-	 * getFile(java.lang.String)
-	 */
-	public Uri getFile(String fileTransferId) {
-		if (logger.isActivated()) {
-			logger.debug("Get file for ".concat(fileTransferId));
-		}
-		return Uri.parse(getDataAsString(getFileTransferData(FileTransferData.KEY_FILE,
-				fileTransferId)));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
-	 * getFileName(java.lang.String)
-	 */
-	public String getFileName(String fileTransferId) {
-		if (logger.isActivated()) {
-			logger.debug("Get file name for ".concat(fileTransferId));
-		}
-		return getDataAsString(getFileTransferData(FileTransferData.KEY_FILENAME, fileTransferId));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
-	 * getFileType(java.lang.String)
-	 */
-	public String getFileMimeType(String fileTransferId) {
-		if (logger.isActivated()) {
-			logger.debug("Get file mime type for ".concat(fileTransferId));
-		}
-		return getDataAsString(getFileTransferData(FileTransferData.KEY_MIME_TYPE, fileTransferId));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
-	 * getFileicon(java.lang.String)
-	 */
-	public Uri getFileIcon(String fileTransferId) {
-		if (logger.isActivated()) {
-			logger.debug("Get file icon for ".concat(fileTransferId));
-		}
-		String fileIcon = getDataAsString(getFileTransferData(FileTransferData.KEY_FILEICON,
-				fileTransferId));
-		/*
-		 * null is legal value here only when this is a outgoing group file
-		 * transfer
-		 */
-		if (fileIcon == null) {
-			return null;
-		}
-		return Uri.parse(fileIcon);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
-	 * getFileTransferDirection(java.lang.String)
-	 */
-	public int getFileTransferDirection(String fileTransferId) {
-		if (logger.isActivated()) {
-			logger.debug("Get file transfer direction for ".concat(fileTransferId));
-		}
-		return getDataAsInt(getFileTransferData(FileTransferData.KEY_DIRECTION, fileTransferId));
 	}
 
 	/*
@@ -663,18 +532,6 @@ public class FileTransferLog implements IFileTransferLog {
 	/*
 	 * (non-Javadoc)
 	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
-	 * getFileTransferSize(java.lang.String)
-	 */
-	public long getFileSize(String fileTransferId) {
-		if (logger.isActivated()) {
-			logger.debug("Get file size for ".concat(fileTransferId));
-		}
-		return getDataAsLong(getFileTransferData(FileTransferData.KEY_FILESIZE, fileTransferId));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
 	 * isGroupFileTransfer(java.lang.String)
 	 */
 	public boolean isGroupFileTransfer(String fileTransferId) {
@@ -698,6 +555,33 @@ public class FileTransferLog implements IFileTransferLog {
 			if (cursor != null) {
 				cursor.close();
 			}
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
+	 * getCacheableFileTransferData(java.lang.String)
+	 */
+	public Cursor getCacheableFileTransferData(String fileTransferId) throws SQLException {
+		Cursor cursor = null;
+		try {
+			cursor = mLocalContentResolver.query(
+					Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), null,
+					null, null, null);
+			if (cursor.moveToFirst()) {
+				return cursor;
+			}
+
+			throw new SQLException(
+					"No row returned while querying for file transfer data with fileTransferId : "
+							+ fileTransferId);
+
+		} catch (RuntimeException e) {
+			if (cursor != null) {
+				cursor.close();
+			}
+			throw e;
 		}
 	}
 }

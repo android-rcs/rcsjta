@@ -16,8 +16,12 @@
 
 package com.orangelabs.rcs.service.api;
 
+import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
+import com.orangelabs.rcs.utils.ContactUtils;
+
+import android.database.Cursor;
 
 /**
  * ChatMessagePersistedStorageAccessor helps in retrieving persisted data
@@ -79,41 +83,62 @@ public class ChatMessagePersistedStorageAccessor {
 		mDirection = direction;
 	}
 
+	private void cacheData() {
+		Cursor cursor = null;
+		try {
+			cursor = mMessagingLog.getCacheableChatMessageData(mId);
+			String contact = cursor.getString(cursor
+					.getColumnIndexOrThrow(ChatLog.Message.CONTACT));
+			if (contact != null) {
+				mRemoteContact = ContactUtils.createContactId(contact);
+			}
+			mDirection = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.Message.DIRECTION));
+			mContent = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTENT));
+			mChatId = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CHAT_ID));
+			mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.MIME_TYPE));
+			mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(ChatLog.Message.TIMESTAMP));
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
 	public String getId() {
 		return mId;
 	}
 
 	public ContactId getRemoteContact() {
 		if (mRemoteContact == null) {
-			mRemoteContact = mMessagingLog.getFileTransferRemoteContact(mId);
+			cacheData();
 		}
 		return mRemoteContact;
 	}
 
 	public String getContent() {
 		if (mContent == null) {
-			mContent = mMessagingLog.getMessageContent(mId);
+			cacheData();
 		}
 		return mContent;
 	}
 
 	public String getMimeType() {
 		if (mMimeType == null) {
-			mMimeType = mMessagingLog.getMessageMimeType(mId);
+			cacheData();
 		}
 		return mMimeType;
 	}
 
 	public int getDirection() {
 		if (mDirection == null) {
-			mDirection = mMessagingLog.getMessageDirection(mId);
+			cacheData();
 		}
 		return mDirection;
 	}
 
 	public long getTimestamp() {
 		if (mDirection == null) {
-			mTimestamp = mMessagingLog.getMessageTimestamp(mId);
+			cacheData();
 		}
 		return mTimestamp;
 	}
@@ -140,7 +165,7 @@ public class ChatMessagePersistedStorageAccessor {
 
 	public String getChatId() {
 		if (mChatId == null) {
-			mChatId = mMessagingLog.getMessageChatId(mId);
+			cacheData();
 		}
 		return mChatId;
 	}

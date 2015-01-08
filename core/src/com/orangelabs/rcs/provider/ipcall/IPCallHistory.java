@@ -33,7 +33,6 @@ import com.gsma.services.rcs.ipcall.IPCallLog;
 import com.orangelabs.rcs.core.content.AudioContent;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.provider.LocalContentResolver;
-import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -80,25 +79,10 @@ public class IPCallHistory {
 					+ callId);
 
 		} catch (RuntimeException e) {
-			if (logger.isActivated()) {
-				logger.error("Exception occured while retrieving IP call info of callId = '"
-						+ callId + "' ! ", e);
-			}
 			if (cursor != null) {
 				cursor.close();
 			}
 			throw e;
-		}
-	}
-
-	private String getDataAsString(Cursor cursor) {
-		try {
-			return cursor.getString(FIRST_COLUMN_IDX);
-
-		} finally {
-			if (cursor != null) {
-				cursor.close();
-			}
 		}
 	}
 
@@ -209,20 +193,6 @@ public class IPCallHistory {
 	}
 
 	/**
-	 * Get IPCall session remote contact from unique Id
-	 * 
-	 * @param callId
-	 * @return ContactId
-	 */
-	public ContactId getRemoteContact(String callId) {
-		if (logger.isActivated()) {
-			logger.debug("Get IP call remote contact for callId ".concat(callId));
-		}
-		return ContactUtils.createContactId(getDataAsString(getIPCallData(
-				IPCallData.KEY_CONTACT, callId)));
-	}
-
-	/**
 	 * Get IPCall session state from unique Id
 	 * 
 	 * @param callId
@@ -249,15 +219,28 @@ public class IPCallHistory {
 	}
 
 	/**
-	 * Get IPCall session direction from unique Id
+	 * Get IPCall session info from its unique Id
 	 * 
 	 * @param callId
-	 * @return Direction
+	 * @return Cursor the caller of this method has to close the cursor if a
+	 *         cursor is returned
 	 */
-	public int getDirection(String callId) {
-		if (logger.isActivated()) {
-			logger.debug("Get IP call direction for callId ".concat(callId));
+	public Cursor getCacheableIPCallData(String callId) {
+		Cursor cursor = null;
+		try {
+			cursor = mLocalContentResolver.query(
+					Uri.withAppendedPath(IPCallLog.CONTENT_URI, callId), null, null, null, null);
+			if (cursor.moveToFirst()) {
+				return cursor;
+			}
+			throw new SQLException("No row returned while querying for IP call data with callId : "
+					+ callId);
+
+		} catch (RuntimeException e) {
+			if (cursor != null) {
+				cursor.close();
+			}
+			throw e;
 		}
-		return getDataAsInt(getIPCallData(IPCallData.KEY_DIRECTION, callId));
 	}
 }
