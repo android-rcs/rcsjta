@@ -192,26 +192,25 @@ public class SipManager {
 		}
 		String method = ((SipRequest) message).getMethod();
 		SipResponse response = ctx.getSipResponse();
-		if (method == null || response == null) {
+		if (response == null) {
 			return ctx;
 			
 		}
 		// Analyze the received response
-		if (!method.equals(Request.REGISTER)) {
+		if (!Request.REGISTER.equals(method)) {
 			// Check if not registered and warning header
 			WarningHeader warn = (WarningHeader) response.getHeader(WarningHeader.NAME);
-			if ((ctx.getStatusCode() == Response.FORBIDDEN) && (warn == null)) {
+			if (Response.FORBIDDEN == ctx.getStatusCode() && warn == null) {
 				// Launch new registration
 				networkInterface.getRegistrationManager().restart();
 
 				if (callback == null) {
-					// Throw not registered exception
 					throw new SipException("Not registered");
 					
 				}
 			}
 		}
-		if (!method.equals(Request.INVITE) && !method.equals(Request.REGISTER)) {
+		if (!Request.INVITE.equals(method) && !Request.REGISTER.equals(method)) {
 			return ctx;
 			
 		}
@@ -224,31 +223,36 @@ public class SipManager {
 		
 		// Message is a response to INVITE or REGISTER: analyze "keep" flag of "Via" header
 		int viaKeep = -1;
+		RcsSettings rcsSettings = RcsSettings.getInstance();
 		ListIterator<ViaHeader> iterator = response.getViaHeaders();
-		if (iterator != null) {
-			ViaHeader respViaHeader = iterator.next();
-			// Retrieve "keep" value
-			String keepStr = respViaHeader.getParameter("keep");
-			if (keepStr != null) {
-				// Convert "keep" value to integer
-				try {
-					viaKeep = Integer.parseInt(keepStr);
-					if (viaKeep > 0) {
-						// If "keep" value is valid, set keep alive period
-						keepAliveManager.setPeriod(viaKeep);
-					} else {
-						if (logger.isActivated())
-							logger.warn("Non positive keep value \"" + keepStr + "\"");
-					}
-				} catch (NumberFormatException e) {
-					if (logger.isActivated())
-						logger.warn("Non-numeric keep value \"" + keepStr + "\"");
-				}
+		if (!iterator.hasNext()) {
+			keepAliveManager.setPeriod(rcsSettings.getSipKeepAlivePeriod());
+			return ctx;
+			
+		}
+		ViaHeader respViaHeader = iterator.next();
+		String keepStr = respViaHeader.getParameter("keep");
+		if (keepStr == null) {
+			keepAliveManager.setPeriod(rcsSettings.getSipKeepAlivePeriod());
+			return ctx;
+			
+		}
+		try {
+			viaKeep = Integer.parseInt(keepStr);
+			if (viaKeep > 0) {
+				// If "keep" value is valid, set keep alive period
+				keepAliveManager.setPeriod(viaKeep);
+			} else {
+				if (logger.isActivated())
+					logger.warn("Non positive keep value \"" + keepStr + "\"");
 			}
+		} catch (NumberFormatException e) {
+			if (logger.isActivated())
+				logger.warn("Non-numeric keep value \"" + keepStr + "\"");
 		}
 		// If "keep" value is invalid or not present, set keep alive period to default value
 		if (viaKeep <= 0) {
-			keepAliveManager.setPeriod(RcsSettings.getInstance().getSipKeepAlivePeriod());
+			keepAliveManager.setPeriod(rcsSettings.getSipKeepAlivePeriod());
 		}
 
 		// Return the transaction context
