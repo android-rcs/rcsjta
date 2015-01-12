@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:paddingTop="10dip"
+        android:stretchColumns="1" >
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_ImAlwaysOn" />
+
+            <CheckBox
+                android:id="@+id/ImAlwaysOn"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:clickable="false"
+                android:enabled="false"
+                android:paddingTop="10dip" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_WarnSF" />
+
+            <CheckBox
+                android:id="@+id/WarnSF"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:clickable="false"
+                android:enabled="false"
+                android:paddingTop="10dip" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_IsComposingTimeout" />
+
+            <TextView
+                android:id="@+id/IsComposingTimeout"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_ChatTimeout" />
+
+            <TextView
+                android:id="@+id/ChatTimeout"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip" />
+        </TableRow>
+        
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_GroupChatSupported" />
+
+            <CheckBox
+                android:id="@+id/GroupChatSupported"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:clickable="false"
+                android:enabled="false"
+                android:paddingTop="10dip" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_MinGroupChatParticipants" />
+
+            <TextView
+                android:id="@+id/MinGroupChatParticipants"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_MaxGroupChatParticipants" />
+
+            <TextView
+                android:id="@+id/MaxGroupChatParticipants"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_MaxMsgLengthGroupChat" />
+
+            <TextView
+                android:id="@+id/MaxMsgLengthGroupChat"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_GroupChatSubjectMaxLength" />
+
+            <TextView
+                android:id="@+id/GroupChatSubjectMaxLength"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_MaxMsgLengthOneToOneChat" />
+
+            <TextView
+                android:id="@+id/MaxMsgLengthOneToOneChat"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_SmsFallback" />
+
+            <CheckBox
+                android:id="@+id/SmsFallback"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:clickable="false"
+                android:enabled="false"
+                android:paddingTop="10dip" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_RespondToDisplayReports" />
+
+            <CheckBox
+                android:id="@+id/RespondToDisplayReports"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip" />
+
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_MaxGeolocLabelLength" />
+
+            <TextView
+                android:id="@+id/MaxGeolocLabelLength"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_GeolocExpireTime" />
+
+            <TextView
+                android:id="@+id/GeolocExpireTime"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip" />
+        </TableRow>
+    </TableLayout>
+
+</ScrollView>

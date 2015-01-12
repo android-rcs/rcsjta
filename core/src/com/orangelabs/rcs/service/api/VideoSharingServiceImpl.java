@@ -29,14 +29,17 @@ import java.util.Map;
 
 import android.os.IBinder;
 
+import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.vsh.IVideoPlayer;
 import com.gsma.services.rcs.vsh.IVideoSharing;
 import com.gsma.services.rcs.vsh.IVideoSharingListener;
 import com.gsma.services.rcs.vsh.IVideoSharingService;
+import com.gsma.services.rcs.vsh.IVideoSharingServiceConfiguration;
 import com.gsma.services.rcs.vsh.VideoSharing;
 import com.gsma.services.rcs.vsh.VideoSharing.ReasonCode;
 import com.gsma.services.rcs.vsh.VideoSharingServiceConfiguration;
@@ -248,8 +251,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * 
      * @return Configuration
      */
-    public VideoSharingServiceConfiguration getConfiguration() {
-		return new VideoSharingServiceConfiguration(mRcsSettings.getMaxVideoShareDuration());
+    public IVideoSharingServiceConfiguration getConfiguration() {
+		return new IVideoSharingServiceConfigurationImpl(mRcsSettings);
 	}
 
     /**
@@ -313,13 +316,14 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
     /**
      * Returns a current video sharing from its unique ID
+     * @param sharingId 
      * 
      * @return Video sharing
      * @throws ServerApiException
      */
 	public IVideoSharing getVideoSharing(String sharingId) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Get video sharing " + sharingId);
+			logger.info("Get video sharing ".concat(sharingId));
 		}
 
 		IVideoSharing videoSharing = mVideoSharingCache.get(sharingId);
@@ -405,10 +409,19 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	 * Returns service version
 	 * 
 	 * @return Version
-	 * @see RcsService.Build.VERSION_CODES
+	 * @see VERSION_CODES
 	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {
 		return RcsService.Build.API_VERSION;
+	}
+	
+	/**
+	 * Returns the common service configuration
+	 * 
+	 * @return the common service configuration
+	 */
+	public ICommonServiceConfiguration getCommonConfiguration() {
+		return new CommonServiceConfigurationImpl();
 	}
 }

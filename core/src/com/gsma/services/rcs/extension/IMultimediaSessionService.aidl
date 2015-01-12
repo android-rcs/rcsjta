@@ -5,8 +5,10 @@ import com.gsma.services.rcs.extension.IMultimediaMessagingSession;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSessionListener;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSession;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSessionListener;
-import com.gsma.services.rcs.extension.MultimediaSessionServiceConfiguration;
+import com.gsma.services.rcs.extension.IMultimediaSessionServiceConfiguration;
+
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.ICommonServiceConfiguration;
 
 /**
  * Multimedia session service API for extended services
@@ -19,7 +21,7 @@ interface IMultimediaSessionService {
 
 	void removeEventListener(IRcsServiceRegistrationListener listener);
 
-	MultimediaSessionServiceConfiguration getConfiguration();
+	IMultimediaSessionServiceConfiguration getConfiguration();
 
 	List<IBinder> getMessagingSessions(in String serviceId);
 	
@@ -42,6 +44,8 @@ interface IMultimediaSessionService {
 	void addEventListener3(in IMultimediaStreamingSessionListener listener);
 
 	void removeEventListener3(in IMultimediaStreamingSessionListener listener);
+
+	ICommonServiceConfiguration getCommonConfiguration();
 }
 
 

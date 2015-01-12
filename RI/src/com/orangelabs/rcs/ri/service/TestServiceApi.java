@@ -46,7 +46,8 @@ public class TestServiceApi extends ListActivity {
         String[] items = {
     		getString(R.string.menu_service_status),
     		getString(R.string.menu_registration_status),
-    		getString(R.string.menu_others)
+    		getString(R.string.menu_others),
+    		getString(R.string.menu_service_configuration)
         };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
@@ -64,6 +65,10 @@ public class TestServiceApi extends ListActivity {
 
 	        case 2:
             	startActivity(new Intent(this, OtherServices.class));
+                break;
+                
+	        case 3:
+	        	startActivity(new Intent(this, CommonServiceConfigurationActivity.class));
                 break;
         }
     }

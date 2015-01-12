@@ -29,6 +29,7 @@ import android.os.Parcelable;
 import android.provider.BaseColumns;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.text.InputFilter;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -38,16 +39,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsCommon;
+import com.gsma.services.rcs.RcsCommon.ReadStatus;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.RcsCommon.ReadStatus;
+import com.gsma.services.rcs.chat.ChatLog.Message;
+import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.chat.ChatMessage;
+import com.gsma.services.rcs.chat.ChatService;
+import com.gsma.services.rcs.chat.ChatServiceConfiguration;
 import com.gsma.services.rcs.chat.OneToOneChat;
 import com.gsma.services.rcs.chat.OneToOneChatListener;
-import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.ChatService;
-import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.chat.ChatView;
@@ -94,15 +97,22 @@ public class SingleChatView extends ChatView {
 	 */
 	private static final String LOGTAG = LogUtils.getTag(SingleChatView.class.getSimpleName());
 
-	private static final String WHERE_CLAUSE = new StringBuilder(ChatLog.Message.CONTACT).append("=? AND (")
-			.append(ChatLog.Message.MIME_TYPE).append("='").append(ChatLog.Message.MimeType.GEOLOC_MESSAGE).append("' OR ")
-			.append(ChatLog.Message.MIME_TYPE).append("='").append(ChatLog.Message.MimeType.TEXT_MESSAGE).append("')").toString();
+	private static final String WHERE_CLAUSE = new StringBuilder(
+			Message.CONTACT).append("=? AND (").append(Message.MIME_TYPE)
+			.append("='").append(Message.MimeType.GEOLOC_MESSAGE)
+			.append("' OR ").append(Message.MIME_TYPE).append("='")
+			.append(Message.MimeType.TEXT_MESSAGE).append("')").toString();
 
-	private final static String UNREADS_WHERE_CLAUSE = new StringBuilder(ChatLog.Message.CONTACT).append("=? AND ").append(ChatLog.Message.READ_STATUS)
-			.append("=").append(ReadStatus.UNREAD).append(" AND (").append(ChatLog.Message.MIME_TYPE).append("='")
-			.append(ChatLog.Message.MimeType.GEOLOC_MESSAGE).append("' OR ").append(ChatLog.Message.MIME_TYPE).append("='")
-			.append(ChatLog.Message.MimeType.TEXT_MESSAGE).append("')").toString();
+	private final static String UNREADS_WHERE_CLAUSE = new StringBuilder(
+			Message.CONTACT).append("=? AND ").append(Message.READ_STATUS)
+			.append("=").append(ReadStatus.UNREAD).append(" AND (")
+			.append(Message.MIME_TYPE).append("='")
+			.append(Message.MimeType.GEOLOC_MESSAGE).append("' OR ")
+			.append(Message.MIME_TYPE).append("='")
+			.append(Message.MimeType.TEXT_MESSAGE).append("')").toString();
 
+	private final static String[] PROJECTION_MSG_ID = new String[] { Message.MESSAGE_ID };
+	
 	/**
 	 * Single Chat listener
 	 */
@@ -110,12 +120,16 @@ public class SingleChatView extends ChatView {
 		// Callback called when an Is-composing event has been received
 		@Override
 		public void onComposingEvent(ContactId contact, boolean status) {
-			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onComposingEvent contact=" + contact + " status=" + status);
-			}
 			// Discard event if not for current contact
-			if (mContact == null || !mContact.equals(contact)) {
+			if (!mContact.equals(contact)) {
 				return;
+				
+			}
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG,
+						new StringBuilder("onComposingEvent contact=")
+								.append(contact.toString()).append(" status=")
+								.append(status).toString());
 			}
 			displayComposingEvent(contact, status);
 		}
@@ -123,12 +137,43 @@ public class SingleChatView extends ChatView {
 		@Override
 		public void onMessageStatusChanged(ContactId contact, String msgId, int status, int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onMessageStatusChanged contact=" + contact + " msgId=" + msgId + " status=" + status);
+				Log.d(LOGTAG,
+						new StringBuilder("onMessageStatusChanged contact=")
+								.append(contact.toString()).append(" msgId=")
+								.append(msgId).append(" status=")
+								.append(status).toString());
 			}
 		}
 
 	};
 
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		ChatService chatService = mCnxManager.getChatApi();
+		try {
+			addChatEventListener(chatService);
+			ChatServiceConfiguration configuration = chatService.getConfiguration();
+			// Set max label length
+			int maxMsgLength = configuration.getOneToOneChatMessageMaxLength();
+			if (maxMsgLength > 0) {
+				// Set the message composer max length
+				InputFilter[] filterArray = new InputFilter[1];
+				filterArray[0] = new InputFilter.LengthFilter(maxMsgLength);
+				composeText.setFilters(filterArray);
+			}
+			// Instantiate the composing manager
+			composingManager = new IsComposingManager(configuration.getIsComposingTimeout() * 1000, getNotifyComposing());
+		} catch (RcsServiceNotAvailableException e) {
+			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
+		} catch (RcsServiceException e) {
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+		}
+		if (LogUtils.isActive) {
+			Log.d(LOGTAG, "onCreate");
+		}
+	}
+	
 	@Override
 	public void onDestroy() {
 		if (LogUtils.isActive) {
@@ -143,7 +188,7 @@ public class SingleChatView extends ChatView {
 		if (LogUtils.isActive) {
 			Log.d(LOGTAG, "processIntent");
 		}
-		ChatService chatService = connectionManager.getChatApi();
+		ChatService chatService = mCnxManager.getChatApi();
 		// Open chat
 		ContactId newContact = (ContactId) getIntent().getParcelableExtra(EXTRA_CONTACT);
 		if (newContact == null) {
@@ -151,6 +196,7 @@ public class SingleChatView extends ChatView {
 				Log.w(LOGTAG, "Cannot process intent: contact is null");
 			}
 			return false;
+			
 		}
 		try {
 			if (!newContact.equals(mContact) || mChat == null) {
@@ -181,6 +227,7 @@ public class SingleChatView extends ChatView {
 				chatService.markMessageAsRead(msgId);
 			}
 			return true;
+			
 		} catch (RcsServiceNotAvailableException e) {
 			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
 		} catch (RcsServiceException e) {
@@ -191,14 +238,11 @@ public class SingleChatView extends ChatView {
 
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-		if (LogUtils.isActive) {
-			Log.d(LOGTAG, "onCreateLoader " + id);
-		}
 		// Create a new CursorLoader with the following query parameters.
-		Uri uri = ChatLog.Message.CONTENT_URI;
-		CursorLoader loader = new CursorLoader(this, uri, PROJECTION, WHERE_CLAUSE, new String[] { mContact.toString() },
+		Uri uri = Message.CONTENT_URI;
+		return new CursorLoader(this, uri, PROJECTION,
+				WHERE_CLAUSE, new String[] { mContact.toString() },
 				QUERY_SORT_ORDER);
-		return loader;
 	}
 
 	@Override
@@ -209,23 +253,28 @@ public class SingleChatView extends ChatView {
 		Cursor cursor = (Cursor) mAdapter.getItem(info.position);
 		// Adapt the contextual menu according to the selected item
 		menu.add(0, CHAT_MENU_ITEM_DELETE, CHAT_MENU_ITEM_DELETE, R.string.menu_delete_message);
-		int direction = cursor.getInt(cursor.getColumnIndex(ChatLog.Message.DIRECTION));
-		if (direction == RcsCommon.Direction.OUTGOING) {
-			int status = cursor.getInt(cursor.getColumnIndex(ChatLog.Message.STATUS));
-			switch (status) {
-			case ChatLog.Message.Status.Content.FAILED:
-				menu.add(0, CHAT_MENU_ITEM_RESEND, CHAT_MENU_ITEM_RESEND, R.string.menu_resend_message);
-				break;
-			case ChatLog.Message.Status.Content.DISPLAY_REPORT_REQUESTED:
-			case ChatLog.Message.Status.Content.DELIVERED:
-			case ChatLog.Message.Status.Content.SENT:
-			case ChatLog.Message.Status.Content.SENDING:
-			case ChatLog.Message.Status.Content.QUEUED:
-				menu.add(0, CHAT_MENU_ITEM_REVOKE, CHAT_MENU_ITEM_REVOKE, R.string.menu_revoke_message);
-				break;
-			default:
-				break;
-			}
+		int direction = cursor.getInt(cursor.getColumnIndex(Message.DIRECTION));
+		if (RcsCommon.Direction.OUTGOING != direction) {
+			return;
+		
+		}
+		int status = cursor.getInt(cursor
+				.getColumnIndex(Message.STATUS));
+		switch (status) {
+		case Status.Content.FAILED:
+			menu.add(0, CHAT_MENU_ITEM_RESEND, CHAT_MENU_ITEM_RESEND,
+					R.string.menu_resend_message);
+			break;
+		case Status.Content.DISPLAY_REPORT_REQUESTED:
+		case Status.Content.DELIVERED:
+		case Status.Content.SENT:
+		case Status.Content.SENDING:
+		case Status.Content.QUEUED:
+			menu.add(0, CHAT_MENU_ITEM_REVOKE, CHAT_MENU_ITEM_REVOKE,
+					R.string.menu_revoke_message);
+			break;
+		default:
+			break;
 		}
 	}
 
@@ -235,7 +284,7 @@ public class SingleChatView extends ChatView {
 		Cursor cursor = (Cursor) (mAdapter.getItem(info.position));
 		String messageId = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
 		if (LogUtils.isActive) {
-			Log.d(LOGTAG, "onContextItemSelected msgId=" + messageId);
+			Log.d(LOGTAG, "onContextItemSelected msgId=".concat(messageId));
 		}
 		switch (item.getItemId()) {
 		case CHAT_MENU_ITEM_RESEND:
@@ -268,22 +317,27 @@ public class SingleChatView extends ChatView {
 
 	/**
 	 * Get unread messages for contact
+	 * 
 	 * @param contact
 	 * @return set of unread message IDs
 	 */
 	private Set<String> getUnreadMessageIds(ContactId contact) {
 		Set<String> unReadMessageIDs = new HashSet<String>();
 		String[] where_args = new String[] { contact.toString() };
-		String[] projection = new String[] { ChatLog.Message.MESSAGE_ID };
+
 		Cursor cursor = null;
 		try {
-			cursor = getContentResolver().query(ChatLog.Message.CONTENT_URI, projection, UNREADS_WHERE_CLAUSE, where_args, QUERY_SORT_ORDER);
+			cursor = getContentResolver().query(Message.CONTENT_URI,
+					PROJECTION_MSG_ID, UNREADS_WHERE_CLAUSE, where_args,
+					QUERY_SORT_ORDER);
+			int columIndex = cursor
+					.getColumnIndexOrThrow(Message.MESSAGE_ID);
 			while (cursor.moveToNext()) {
-				unReadMessageIDs.add(cursor.getString(cursor.getColumnIndex(ChatLog.Message.MESSAGE_ID)));
+				unReadMessageIDs.add(cursor.getString(columIndex));
 			}
 		} catch (Exception e) {
 			if (LogUtils.isActive) {
-				Log.e(LOGTAG, "Exception getUnreads", e);
+				Log.e(LOGTAG, "Exception occurred", e);
 			}
 		} finally {
 			if (cursor != null) {
@@ -295,11 +349,11 @@ public class SingleChatView extends ChatView {
 
 	@Override
 	public ChatMessage sendMessage(String message) {
+		if (LogUtils.isActive) {
+			Log.d(LOGTAG, "sendTextMessage: ".concat(message));
+		}
 		// Send text message
 		try {
-			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "sendTextMessage msg=" + message);
-			}
 			// Send the text to remote
 			return mChat.sendMessage(message);
 		} catch (Exception e) {
@@ -312,11 +366,11 @@ public class SingleChatView extends ChatView {
 
 	@Override
 	public ChatMessage sendMessage(Geoloc geoloc) {
+		if (LogUtils.isActive) {
+			Log.d(LOGTAG, "sendGeolocMessage: ".concat(geoloc.toString()));
+		}
 		// Send geoloc message
 		try {
-			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "sendMessage geoloc=" + geoloc);
-			}
 			// Send the text to remote
 			return mChat.sendMessage(geoloc);
 		} catch (Exception e) {
@@ -329,12 +383,12 @@ public class SingleChatView extends ChatView {
 
 	@Override
 	public void addChatEventListener(ChatService chatService) throws RcsServiceException {
-		connectionManager.getChatApi().addEventListener(mListener);
+		mCnxManager.getChatApi().addEventListener(mListener);
 	}
 
 	@Override
 	public void removeChatEventListener(ChatService chatService) throws RcsServiceException {
-		connectionManager.getChatApi().removeEventListener(mListener);
+		mCnxManager.getChatApi().removeEventListener(mListener);
 	}
 
 	@Override
@@ -342,11 +396,14 @@ public class SingleChatView extends ChatView {
 		INotifyComposing notifyComposing = new IsComposingManager.INotifyComposing() {
 			public void setTypingStatus(boolean isTyping) {
 				try {
-					if (mChat != null) {
-						mChat.sendIsComposingEvent(isTyping);
-						if (LogUtils.isActive) {
-							Log.d(LOGTAG, "sendIsComposingEvent " + isTyping);
-						}
+					if (mChat == null) {
+						return;
+						
+					}
+					mChat.sendIsComposingEvent(isTyping);
+					if (LogUtils.isActive) {
+						Boolean _isTyping = Boolean.valueOf(isTyping);
+						Log.d(LOGTAG, "sendIsComposingEvent ".concat(_isTyping.toString()));
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -360,7 +417,6 @@ public class SingleChatView extends ChatView {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = new MenuInflater(getApplicationContext());
 		inflater.inflate(R.menu.menu_chat, menu);
-
 		return true;
 	}
 

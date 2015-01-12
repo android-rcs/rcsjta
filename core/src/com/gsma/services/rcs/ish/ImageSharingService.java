@@ -81,7 +81,7 @@ public class ImageSharingService extends RcsService {
      * Connects to the API
      */
     public void connect() {
-    	ctx.bindService(new Intent(IImageSharingService.class.getName()), apiConnection, 0);
+    	mCtx.bindService(new Intent(IImageSharingService.class.getName()), apiConnection, 0);
     }
     
     /**
@@ -89,7 +89,7 @@ public class ImageSharingService extends RcsService {
      */
     public void disconnect() {
     	try {
-    		ctx.unbindService(apiConnection);
+    		mCtx.unbindService(apiConnection);
         } catch(IllegalArgumentException e) {
         	// Nothing to do
         }
@@ -112,15 +112,15 @@ public class ImageSharingService extends RcsService {
 	private ServiceConnection apiConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
         	setApi(IImageSharingService.Stub.asInterface(service));
-        	if (serviceListener != null) {
-        		serviceListener.onServiceConnected();
+        	if (mListener != null) {
+        		mListener.onServiceConnected();
         	}
         }
 
         public void onServiceDisconnected(ComponentName className) {
         	setApi(null);
-        	if (serviceListener != null) {
-        		serviceListener.onServiceDisconnected(RcsService.Error.CONNECTION_LOST);
+        	if (mListener != null) {
+        		mListener.onServiceDisconnected(RcsService.Error.CONNECTION_LOST);
         	}
         }
     };
@@ -134,7 +134,7 @@ public class ImageSharingService extends RcsService {
     public ImageSharingServiceConfiguration getConfiguration() throws RcsServiceException {
 		if (api != null) {
 			try {
-				return api.getConfiguration();
+				return new ImageSharingServiceConfiguration(api.getConfiguration());
 			} catch(Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}
@@ -145,10 +145,10 @@ public class ImageSharingService extends RcsService {
 
 	private void grantUriPermissionToStackServices(Uri file) {
 		Intent imageSharingServiceIntent = new Intent(IImageSharingService.class.getName());
-		List<ResolveInfo> stackServices = ctx.getPackageManager().queryIntentServices(
+		List<ResolveInfo> stackServices = mCtx.getPackageManager().queryIntentServices(
 				imageSharingServiceIntent, 0);
 		for (ResolveInfo stackService : stackServices) {
-			ctx.grantUriPermission(stackService.serviceInfo.packageName, file,
+			mCtx.grantUriPermission(stackService.serviceInfo.packageName, file,
 					Intent.FLAG_GRANT_READ_URI_PERMISSION);
 		}
 	}
@@ -162,7 +162,7 @@ public class ImageSharingService extends RcsService {
 	 */
 	private void takePersistableUriPermission(Uri file) throws RcsServiceException {
 		try {
-			ContentResolver contentResolver = ctx.getContentResolver();
+			ContentResolver contentResolver = mCtx.getContentResolver();
 			Method takePersistableUriPermissionMethod = contentResolver.getClass().getMethod(
 					TAKE_PERSISTABLE_URI_PERMISSION_METHOD_NAME,
 					TAKE_PERSISTABLE_URI_PERMISSION_PARAM_TYPES);

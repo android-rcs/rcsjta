@@ -5,6 +5,7 @@ import com.gsma.services.rcs.gsh.IGeolocSharing;
 import com.gsma.services.rcs.gsh.IGeolocSharingListener;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.ICommonServiceConfiguration;
 
 /**
  * Geoloc sharing service API
@@ -28,4 +29,6 @@ interface IGeolocSharingService {
 	void removeEventListener2(in IGeolocSharingListener listener);
 
 	int getServiceVersion();
+	
+	ICommonServiceConfiguration getCommonConfiguration();
 }

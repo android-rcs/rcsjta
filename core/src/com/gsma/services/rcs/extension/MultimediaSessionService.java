@@ -66,7 +66,7 @@ public class MultimediaSessionService extends RcsService {
      * Connects to the API
      */
     public void connect() {
-    	ctx.bindService(new Intent(IMultimediaSessionService.class.getName()), apiConnection, 0);
+    	mCtx.bindService(new Intent(IMultimediaSessionService.class.getName()), apiConnection, 0);
     }
     
     /**
@@ -74,7 +74,7 @@ public class MultimediaSessionService extends RcsService {
      */
     public void disconnect() {
     	try {
-    		ctx.unbindService(apiConnection);
+    		mCtx.unbindService(apiConnection);
         } catch(IllegalArgumentException e) {
         	// Nothing to do
         }
@@ -97,15 +97,15 @@ public class MultimediaSessionService extends RcsService {
 	private ServiceConnection apiConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
         	setApi(IMultimediaSessionService.Stub.asInterface(service));
-        	if (serviceListener != null) {
-        		serviceListener.onServiceConnected();
+        	if (mListener != null) {
+        		mListener.onServiceConnected();
         	}
         }
 
         public void onServiceDisconnected(ComponentName className) {
         	setApi(null);
-        	if (serviceListener != null) {
-        		serviceListener.onServiceDisconnected(RcsService.Error.CONNECTION_LOST);
+        	if (mListener != null) {
+        		mListener.onServiceDisconnected(RcsService.Error.CONNECTION_LOST);
         	}
         }
     };
@@ -119,7 +119,7 @@ public class MultimediaSessionService extends RcsService {
     public MultimediaSessionServiceConfiguration getConfiguration() throws RcsServiceException {
 		if (api != null) {
 			try {
-				return api.getConfiguration();
+				return new MultimediaSessionServiceConfiguration(api.getConfiguration());
 			} catch(Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}

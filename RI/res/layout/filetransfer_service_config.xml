@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:paddingTop="10dip"
+        android:stretchColumns="1" >
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_ft_WarnSize" />
+
+            <TextView
+                android:id="@+id/ft_WarnSize"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_ft_MaxSize" />
+
+            <TextView
+                android:id="@+id/ft_MaxSize"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_ft_isAutoAccept" />
+
+            <CheckBox
+                android:id="@+id/ft_isAutoAccept"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_ft_isAutoAcceptModeChangeable" />
+
+            <CheckBox
+                android:id="@+id/ft_isAutoAcceptModeChangeable"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:clickable="false"
+                android:enabled="false"
+                android:gravity="left"
+                android:paddingTop="10dip" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_ft_isAutoAcceptInRoaming" />
+
+            <CheckBox
+                android:id="@+id/ft_isAutoAcceptInRoaming"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_MaxFileTransfers" />
+
+            <TextView
+                android:id="@+id/MaxFileTransfers"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_ft_ImageResizeOption" />
+
+            <Spinner
+                android:id="@+id/ft_ImageResizeOption"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="5dip" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_GroupFileTransferSupported" />
+
+            <CheckBox
+                android:id="@+id/GroupFileTransferSupported"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:clickable="false"
+                android:enabled="false"
+                android:gravity="left"
+                android:paddingTop="10dip" />
+        </TableRow>
+    </TableLayout>
+
+</ScrollView>

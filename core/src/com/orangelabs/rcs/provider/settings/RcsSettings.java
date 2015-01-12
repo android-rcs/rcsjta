@@ -33,16 +33,16 @@ import android.database.Cursor;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
+import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
+import com.gsma.services.rcs.ft.FileTransferServiceConfiguration.ImageResizeOption;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
 import com.orangelabs.rcs.core.ims.service.extension.ServiceExtensionManager;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.ConfigurationMode;
-import com.orangelabs.rcs.provider.settings.RcsSettingsData.DefaultMessagingMethod;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.GsmaRelease;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
-import com.orangelabs.rcs.provider.settings.RcsSettingsData.ImageResizeOption;
-import com.orangelabs.rcs.provider.settings.RcsSettingsData.MessagingMode;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.NetworkAccessType;
 
 /**
@@ -176,25 +176,8 @@ public class RcsSettings {
 	 * @return the value field
 	 */
 	private int readInteger(String key, int defaultValue) {
-		return readInteger(key, defaultValue, true);
-	}
-	
-	/**
-	 * Read int parameter
-	 * <p>
-	 * If parsing of the value fails, method return default value.
-	 * 
-	 * @param key
-	 *            the key field
-	 * @param defaultValue
-	 *            the default value
-	 * @param tryReadFromCache
-	 *            try to read from cache
-	 * @return the value field
-	 */
-	private int readInteger(String key, int defaultValue, boolean tryReadFromCache) {
 		try {
-			String result = readParameter(key, tryReadFromCache);
+			String result = readParameter(key);
 			// Purposely put in comments. Remove comment strongly impact performance.
 			// if (logger.isActivated()) {
 			// logger.debug("readInteger "+key+"="+result);
@@ -216,24 +199,8 @@ public class RcsSettings {
 	 * @return the value field or defaultValue (if read fails)
 	 */
 	private String readString(String key, String defaultValue) {
-		return readString(key, defaultValue, true);
-	}
-	
-	/**
-	 * Read String parameter
-	 * 
-	 * @param key
-	 *            the key field
-	 * @param defaultValue
-	 *            the default value
-	 * @param tryReadFromCache
-	 *            Try to read from the cache
-	 * 
-	 * @return the value field or defaultValue (if read fails)
-	 */
-	private String readString(String key, String defaultValue, boolean tryReadFromCache) {
 		try {
-			return readParameter(key, tryReadFromCache);
+			return readParameter(key);
 		} catch (Exception e) {
 			return defaultValue;
 		}
@@ -248,25 +215,11 @@ public class RcsSettings {
 	 *            the integer value
 	 */
 	public void writeInteger(String key, Integer value) {
-		writeInteger(key, value, true);
-	}
-	
-	/**
-	 * Write integer parameter
-	 * 
-	 * @param key
-	 *            the key field
-	 * @param value
-	 *            the integer value
-	 * @param updateCache
-	 *            update the cache
-	 */
-	public void writeInteger(String key, Integer value, boolean updateCache) {
 		// Purposely put in comments. Remove comment strongly impact performance.
 		// if (logger.isActivated()) {
 		// logger.debug("writeInteger "+key+"="+value);
 		// }
-		writeParameter(key, value.toString(), updateCache);
+		writeParameter(key, value.toString());
 	}
 
 	/**
@@ -277,45 +230,32 @@ public class RcsSettings {
 	 * @return Value
 	 */
 	public String readParameter(String key) {
-		return readParameter(key, true);
-	}
-	
-	/**
-	 * Read a parameter
-	 *
-	 * @param key
-	 *            Key
-	 * @param tryReadFromCache
-	 *            Try to read parameter from cache
-	 * @return Value
-	 */
-	public String readParameter(String key, boolean tryReadFromCache) {
 		if (instance == null) {
 			throw new IllegalStateException("RcsInstance not created");
 		}
 		String value = null;
-		if (tryReadFromCache) {
-			// First read value from cache
-			value = mCache.get(key);
-			if (value != null) {
-				return value;
-			}
+		// First read value from cache
+		value = mCache.get(key);
+		if (value != null) {
+			return value;
+			
 		}
 		// If value is null then query database
 		Cursor c = null;
 		try {
 			String[] whereArg = new String[] { key };
 			c = mContentResolver.query(RcsSettingsData.CONTENT_URI, null, WHERE_CLAUSE, whereArg, null);
-			if (c.moveToFirst()) {
-				value = c.getString(c.getColumnIndexOrThrow(RcsSettingsData.KEY_VALUE));
-				// Update cache
-				mCache.put(key, value);
-				return value;
-			} else {
+			if (!c.moveToFirst()) {
 				return null;
 			}
+			value = c.getString(c.getColumnIndexOrThrow(RcsSettingsData.KEY_VALUE));
+			// Update cache
+			mCache.put(key, value);
+			return value;
+			
 		} catch (Exception e) {
 			return null;
+			
 		} finally {
 			if (c != null) {
 				c.close();
@@ -325,25 +265,12 @@ public class RcsSettings {
 
 	/**
 	 * Write a string setting parameter
+	 * 
 	 * @param key
 	 * @param value
 	 * @return the number of rows updated
 	 */
 	public int writeParameter(String key, String value) {
-		return writeParameter(key,value,true);
-	}
-	
-	/**
-	 * Write a parameter
-	 *
-	 * @param key
-	 *            Key
-	 * @param value
-	 *            Value
-	 * @param updateCache
-	 * @return the number of rows updated
-	 */
-	public int writeParameter(String key, String value, boolean updateCache) {
 		if (instance == null || value == null) {
 			return 0;
 		}
@@ -351,7 +278,7 @@ public class RcsSettings {
 		values.put(RcsSettingsData.KEY_VALUE, value);
 		String[] whereArgs = new String[] { key };
 		int count = mContentResolver.update(RcsSettingsData.CONTENT_URI, values, WHERE_CLAUSE, whereArgs);
-		if (count != 0 && updateCache) {
+		if (count != 0) {
 			// Put in cache
 			mCache.put(key, value);
 		}
@@ -722,7 +649,7 @@ public class RcsSettings {
 	 * @return String
 	 */
 	public String getUserProfileImsDisplayName() {
-		return readString(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, RcsSettingsData.DEFAULT_USERPROFILE_IMS_DISPLAY_NAME, false);
+		return readString(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, RcsSettingsData.DEFAULT_USERPROFILE_IMS_DISPLAY_NAME);
 	}
 
 	/**
@@ -732,7 +659,7 @@ public class RcsSettings {
 	 *            Value
 	 */
 	public void setUserProfileImsDisplayName(String value) {
-		writeParameter(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, value, false);
+		writeParameter(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, value);
 	}
 
 	/**
@@ -2453,12 +2380,12 @@ public class RcsSettings {
 	 * 
 	 * @return the default messaging method (0: AUTOMATIC, 1: RCS, 2: NON_RCS)
 	 */
-	public DefaultMessagingMethod getDefaultMessagingMethod() {
-		int method = readInteger(RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD, RcsSettingsData.DEFAULT_KEY_DEFAULT_MESSAGING_METHOD, false);
+	public MessagingMethod getDefaultMessagingMethod() {
+		int method = readInteger(RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD, RcsSettingsData.DEFAULT_KEY_DEFAULT_MESSAGING_METHOD);
 		try {
-			return DefaultMessagingMethod.valueOf(method);
+			return MessagingMethod.valueOf(method);
 		} catch (Exception e) {
-			return DefaultMessagingMethod.valueOf(RcsSettingsData.DEFAULT_KEY_DEFAULT_MESSAGING_METHOD);
+			return MessagingMethod.valueOf(RcsSettingsData.DEFAULT_KEY_DEFAULT_MESSAGING_METHOD);
 		}
 	}
 
@@ -2468,8 +2395,8 @@ public class RcsSettings {
 	 * @param method
 	 *            the default messaging method (0: AUTOMATIC, 1: RCS, 2: NON_RCS)
 	 */
-	public void setDefaultMessagingMethod(DefaultMessagingMethod method) {
-		writeInteger(RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD, method.toInt(), false);
+	public void setDefaultMessagingMethod(MessagingMethod method) {
+		writeInteger(RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD, method.toInt());
 	}
 
 	/**

@@ -29,8 +29,10 @@ import java.util.Map;
 import android.os.IBinder;
 
 import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.gsh.GeolocSharing;
 import com.gsma.services.rcs.gsh.IGeolocSharing;
@@ -290,6 +292,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 
     /**
      * Returns a current geoloc sharing from its unique ID
+     * @param sharingId 
      * 
      * @return Geoloc sharing
      * @throws ServerApiException
@@ -339,17 +342,33 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 	 * Returns service version
 	 * 
 	 * @return Version
-	 * @see RcsService.Build.VERSION_CODES
+	 * @see VERSION_CODES
 	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {
 		return RcsService.Build.API_VERSION;
 	}
 
+	/**
+	 * Adds and broadcasts Geoloc sharing invitation rejection
+	 * 
+	 * @param contact
+	 * @param content
+	 * @param reasonCode
+	 */
 	public void addAndbroadcastGeolocSharingInvitationRejected(ContactId contact, GeolocContent content,
 			int reasonCode) {
 		String sharingId = SessionIdGenerator.getNewId();
 		/* TODO: Persist in geoloc content provider */
 		mBroadcaster.broadcastInvitation(sharingId);
+	}
+	
+	/**
+	 * Returns the common service configuration
+	 * 
+	 * @return the common service configuration
+	 */
+	public ICommonServiceConfiguration getCommonConfiguration() {
+		return new CommonServiceConfigurationImpl();
 	}
 }

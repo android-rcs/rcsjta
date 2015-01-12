@@ -68,7 +68,7 @@ public class ChatService extends RcsService {
      * Connects to the API
      */
     public void connect() {
-    	ctx.bindService(new Intent(IChatService.class.getName()), apiConnection, 0);
+    	mCtx.bindService(new Intent(IChatService.class.getName()), apiConnection, 0);
     }
     
     /**
@@ -76,7 +76,7 @@ public class ChatService extends RcsService {
      */
     public void disconnect() {
     	try {
-    		ctx.unbindService(apiConnection);
+    		mCtx.unbindService(apiConnection);
         } catch(IllegalArgumentException e) {
         	// Nothing to do
         }
@@ -99,15 +99,15 @@ public class ChatService extends RcsService {
 	private ServiceConnection apiConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
         	setApi(IChatService.Stub.asInterface(service));
-        	if (serviceListener != null) {
-        		serviceListener.onServiceConnected();
+        	if (mListener != null) {
+        		mListener.onServiceConnected();
         	}
         }
 
         public void onServiceDisconnected(ComponentName className) {
         	setApi(null);
-        	if (serviceListener != null) {
-        		serviceListener.onServiceDisconnected(Error.CONNECTION_LOST);
+        	if (mListener != null) {
+        		mListener.onServiceDisconnected(Error.CONNECTION_LOST);
         	}
         }
     };
@@ -121,7 +121,7 @@ public class ChatService extends RcsService {
     public ChatServiceConfiguration getConfiguration() throws RcsServiceException {
 		if (api != null) {
 			try {
-				return api.getConfiguration();
+				return new ChatServiceConfiguration(api.getConfiguration());
 			} catch(Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}

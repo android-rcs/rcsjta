@@ -24,9 +24,9 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 
+import com.gsma.services.rcs.ft.FileTransferServiceConfiguration.ImageResizeOption;
 import com.orangelabs.rcs.R;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.provider.settings.RcsSettingsData.ImageResizeOption;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

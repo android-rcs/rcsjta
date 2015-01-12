@@ -561,7 +561,7 @@ public class InstantMessagingService extends ImsService {
 		 * maxFtSize == 0 means that the checking of allowed number of file
 		 * transfer size in use is disabled
 		 */
-		int maxFileTransferSize = mRcsSettings.getMaxFileTransferSize();
+		int maxFileTransferSize = mRcsSettings.getMaxFileTransferSize()*1000;
 		if (maxFileTransferSize > 0 && size > maxFileTransferSize) {
 			if (logger.isActivated()) {
 				logger.error(errorMessage);

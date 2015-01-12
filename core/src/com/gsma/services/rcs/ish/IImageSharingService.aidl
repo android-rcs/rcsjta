@@ -5,8 +5,9 @@ import android.net.Uri;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.ish.IImageSharing;
 import com.gsma.services.rcs.ish.IImageSharingListener;
-import com.gsma.services.rcs.ish.ImageSharingServiceConfiguration;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.ICommonServiceConfiguration;
+import com.gsma.services.rcs.ish.IImageSharingServiceConfiguration;
 
 /**
  * Image sharing service API
@@ -19,7 +20,7 @@ interface IImageSharingService {
 
 	void removeEventListener(IRcsServiceRegistrationListener listener);
 
-	ImageSharingServiceConfiguration getConfiguration();
+	IImageSharingServiceConfiguration getConfiguration();
     
 	List<IBinder> getImageSharings();
 	
@@ -32,4 +33,6 @@ interface IImageSharingService {
 	void removeEventListener2(in IImageSharingListener listener);
 
 	int getServiceVersion();
+	
+	ICommonServiceConfiguration getCommonConfiguration();
 }

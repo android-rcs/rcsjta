@@ -28,13 +28,13 @@ import javax2.sip.ListeningPoint;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
+import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
-import com.orangelabs.rcs.provider.settings.RcsSettingsData.DefaultMessagingMethod;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.GsmaRelease;
-import com.orangelabs.rcs.provider.settings.RcsSettingsData.MessagingMode;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -821,9 +821,9 @@ public class ProvisioningParser {
 						// set default IM messaging method if first provisioning
 						if (first) {
 							if (_imCapAlwaysOn) {
-								rcsSettings.setDefaultMessagingMethod(DefaultMessagingMethod.RCS);
+								rcsSettings.setDefaultMessagingMethod(MessagingMethod.RCS);
 							} else {
-								rcsSettings.setDefaultMessagingMethod(DefaultMessagingMethod.AUTOMATIC);
+								rcsSettings.setDefaultMessagingMethod(MessagingMethod.AUTOMATIC);
 							}
 						}
 						continue;

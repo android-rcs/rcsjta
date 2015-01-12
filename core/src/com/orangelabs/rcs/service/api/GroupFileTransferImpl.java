@@ -34,7 +34,6 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSessionLis
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferPersistedStorageAccessor;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpTransferState;
-import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.messaging.FileTransferStateAndReasonCode;
 import com.orangelabs.rcs.service.broadcaster.IGroupFileTransferBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;

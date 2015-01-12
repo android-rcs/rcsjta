@@ -238,10 +238,10 @@ public class ReceiveFileTransfer extends Activity {
 		}
 	}
 	
-    public void initiateFileTransfer() {
+    private void initiateFileTransfer() {
 		try {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "initiateFileTransfer "+ftDao);
+				Log.d(LOGTAG, "initiateFileTransfer ".concat(ftDao.toString()));
 			}
 			FileTransferService ftApi = connectionManager.getFileTransferApi();
 			// Get the file transfer session
@@ -253,6 +253,7 @@ public class ReceiveFileTransfer extends Activity {
 					if (ftDao.getState() == FileTransfer.State.TRANSFERRED) {
 						displayTransferredFile();
 						return;
+						
 					} else {
 						String reasonCode = RiApplication.FT_REASON_CODES[ftDao.getReasonCode()];
 						if (LogUtils.isActive) {
@@ -261,6 +262,7 @@ public class ReceiveFileTransfer extends Activity {
 						// Transfer failed
 						Utils.showMessageAndExit(this, getString(R.string.label_transfer_failed, reasonCode), exitOnce);
 						return;
+						
 					}
 				} catch (Exception e) {
 					if (LogUtils.isActive) {
@@ -270,6 +272,7 @@ public class ReceiveFileTransfer extends Activity {
 					// Session not found or expired
 					Utils.showMessageAndExit(this, getString(R.string.label_session_not_found), exitOnce);
 					return;
+					
 				}
 			}
 			// Add service event listener
@@ -390,8 +393,9 @@ public class ReceiveFileTransfer extends Activity {
 	 * Check if file transfer invitation is auto-accepted
 	 * @param config the file transfer service configuration
 	 * @return True if already auto accepted by the stack
+	 * @throws RcsServiceException 
 	 */
-	private boolean isFileTransferInvitationAutoAccepted(FileTransferServiceConfiguration config) {
+	private boolean isFileTransferInvitationAutoAccepted(FileTransferServiceConfiguration config) throws RcsServiceException {
 		TelephonyManager telephony = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 		if (telephony.isNetworkRoaming()) {
 			return config.isAutoAcceptInRoamingEnabled();

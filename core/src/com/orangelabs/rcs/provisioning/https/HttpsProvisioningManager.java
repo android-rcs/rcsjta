@@ -69,11 +69,11 @@ import android.os.Environment;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
+import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
 import com.gsma.services.rcs.RcsService;
 import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.GsmaRelease;
-import com.orangelabs.rcs.provider.settings.RcsSettingsData.MessagingMode;
 import com.orangelabs.rcs.provisioning.ProvisioningFailureReasons;
 import com.orangelabs.rcs.provisioning.ProvisioningInfo;
 import com.orangelabs.rcs.provisioning.ProvisioningInfo.Version;
@@ -150,6 +150,7 @@ public class HttpsProvisioningManager {
 	 * Constructor
 	 * 
 	 * @param applicationContext
+	 * @param localContentResolver 
 	 * @param retryIntent
 	 *            pending intent to update periodically the configuration
 	 * @param first

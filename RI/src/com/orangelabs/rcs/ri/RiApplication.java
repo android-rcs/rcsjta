@@ -18,7 +18,6 @@
 package com.orangelabs.rcs.ri;
 
 import android.app.Application;
-import android.content.Context;
 
 /**
  * This subclass of Application allows to get a resource content from a static context
@@ -127,12 +126,9 @@ public class RiApplication extends Application {
 	 */
 	public static String[] GROUP_CHAT_EVENTS;
 	
-	private static Context mContext;
-
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		mContext = this;
 		PARTICIPANT_STATUSES = getResources().getStringArray(R.array.participant_statuses);
 		DELIVERY_STATUSES = getResources().getStringArray(R.array.delivery_statuses);
 		DELIVERY_REASON_CODES = getResources().getStringArray(R.array.delivery_reason_codes);
@@ -155,10 +151,6 @@ public class RiApplication extends Application {
 		GROUP_CHAT_EVENTS = getResources().getStringArray(R.array.group_chat_event);
 		
 		ApiConnectionManager.getInstance(getApplicationContext()).connectApis();
-	}
-
-	public static Context getContext() {
-		return mContext;
 	}
 
 }

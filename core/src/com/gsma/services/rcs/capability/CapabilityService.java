@@ -49,8 +49,6 @@ import com.gsma.services.rcs.contacts.ContactId;
 public class CapabilityService extends RcsService {
     /**
      * Intent broadcasted to discover extensions
-     * 
-     * @see CapabilityService.EXTENSION_MIME_TYPE
      */
     public final static String INTENT_EXTENSIONS = "com.gsma.services.rcs.capability.EXTENSION";
     
@@ -78,7 +76,7 @@ public class CapabilityService extends RcsService {
      * Connects to the API
      */
     public void connect() {
-    	ctx.bindService(new Intent(ICapabilityService.class.getName()), apiConnection, 0);
+    	mCtx.bindService(new Intent(ICapabilityService.class.getName()), apiConnection, 0);
     }
     
     /**
@@ -86,7 +84,7 @@ public class CapabilityService extends RcsService {
      */
     public void disconnect() {
     	try {
-    		ctx.unbindService(apiConnection);
+    		mCtx.unbindService(apiConnection);
         } catch(IllegalArgumentException e) {
         	// Nothing to do
         }
@@ -109,15 +107,15 @@ public class CapabilityService extends RcsService {
 	private ServiceConnection apiConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
         	setApi(ICapabilityService.Stub.asInterface(service));
-        	if (serviceListener != null) {
-        		serviceListener.onServiceConnected();
+        	if (mListener != null) {
+        		mListener.onServiceConnected();
         	}
         }
 
         public void onServiceDisconnected(ComponentName className) {
         	setApi(null);
-        	if (serviceListener != null) {
-        		serviceListener.onServiceDisconnected(Error.CONNECTION_LOST);
+        	if (mListener != null) {
+        		mListener.onServiceDisconnected(Error.CONNECTION_LOST);
         	}
         }
     };

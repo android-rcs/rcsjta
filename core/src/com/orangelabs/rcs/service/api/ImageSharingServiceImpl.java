@@ -29,13 +29,16 @@ import java.util.Map;
 import android.net.Uri;
 import android.os.IBinder;
 
+import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ish.IImageSharing;
 import com.gsma.services.rcs.ish.IImageSharingListener;
 import com.gsma.services.rcs.ish.IImageSharingService;
+import com.gsma.services.rcs.ish.IImageSharingServiceConfiguration;
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.ish.ImageSharing.ReasonCode;
 import com.gsma.services.rcs.ish.ImageSharingServiceConfiguration;
@@ -224,8 +227,8 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * 
      * @return Configuration
      */
-	public ImageSharingServiceConfiguration getConfiguration() {
-		return new ImageSharingServiceConfiguration(mRcsSettings.getMaxImageSharingSize());
+	public IImageSharingServiceConfiguration getConfiguration() {
+		return new IImageSharingServiceConfigurationImpl(mRcsSettings);
 	}    
     
     /**
@@ -314,6 +317,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 
     /**
      * Returns a current image sharing from its unique ID
+     * @param sharingId 
      * 
      * @return Image sharing
      * @throws ServerApiException
@@ -380,10 +384,19 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	 * Returns service version
 	 * 
 	 * @return Version
-	 * @see RcsService.Build.VERSION_CODES
+	 * @see VERSION_CODES
 	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {
 		return RcsService.Build.API_VERSION;
+	}
+	
+	/**
+	 * Returns the common service configuration
+	 * 
+	 * @return the common service configuration
+	 */
+	public ICommonServiceConfiguration getCommonConfiguration() {
+		return new CommonServiceConfigurationImpl();
 	}
 }

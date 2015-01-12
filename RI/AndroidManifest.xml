@@ -83,6 +83,10 @@
             android:name=".service.OtherServices"
 			android:label="@string/menu_others" />
 		
+        <activity
+            android:name=".service.CommonServiceConfigurationActivity"
+			android:label="@string/menu_service_configuration" />
+		
    		<!-- Contacts API -->
         
         <activity android:name=".contacts.TestContactsApi"/>
@@ -173,6 +177,11 @@
             android:name=".messaging.ft.FileTransferList"
             android:label="@string/menu_file_transfer_log" />
         
+        <activity 
+            android:icon="@drawable/ri_quick_ft_icon"
+            android:label="@string/menu_ft_config"
+            android:name="com.orangelabs.rcs.ri.messaging.ft.FileTransferServiceConfigActivity"/>
+        
         <!-- Chat API -->
         
         <activity 
@@ -221,6 +230,11 @@
             android:icon="@drawable/ri_quick_chat_icon"
             android:label="@string/menu_chat_log"
             android:name="com.orangelabs.rcs.ri.messaging.chat.single.SingleChatList"/>
+       
+         <activity 
+            android:icon="@drawable/ri_quick_chat_icon"
+            android:label="@string/menu_chat_config"
+            android:name="com.orangelabs.rcs.ri.messaging.chat.ChatServiceConfigActivity"/>
         
         <activity 
             android:icon="@drawable/ri_quick_chat_icon" 

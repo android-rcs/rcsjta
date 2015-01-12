@@ -62,6 +62,7 @@ public class ApiConnectionManager {
 	 * Enumerated type for RCS service name
 	 *
 	 */
+	@SuppressWarnings("javadoc")
 	public enum RcsServiceName {
 		CAPABILITY, CONTACTS, CHAT, FILE_TRANSFER, IMAGE_SHARING, VIDEO_SHARING, GEOLOC_SHARING, FILE_UPLOAD, IP_CALL, MULTIMEDIA;
 	};

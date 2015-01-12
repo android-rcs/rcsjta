@@ -68,7 +68,7 @@ public class IPCallService extends RcsService {
      * Connects to the API
      */
     public void connect() {
-    	ctx.bindService(new Intent(IIPCallService.class.getName()), apiConnection, 0);
+    	mCtx.bindService(new Intent(IIPCallService.class.getName()), apiConnection, 0);
     }
     
     /**
@@ -76,7 +76,7 @@ public class IPCallService extends RcsService {
      */
     public void disconnect() {
     	try {
-    		ctx.unbindService(apiConnection);
+    		mCtx.unbindService(apiConnection);
         } catch(IllegalArgumentException e) {
         	// Nothing to do
         }
@@ -99,15 +99,15 @@ public class IPCallService extends RcsService {
 	private ServiceConnection apiConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
         	setApi(IIPCallService.Stub.asInterface(service));
-        	if (serviceListener != null) {
-        		serviceListener.onServiceConnected();
+        	if (mListener != null) {
+        		mListener.onServiceConnected();
         	}
         }
 
         public void onServiceDisconnected(ComponentName className) {
         	setApi(null);
-        	if (serviceListener != null) {
-        		serviceListener.onServiceDisconnected(RcsService.Error.CONNECTION_LOST);
+        	if (mListener != null) {
+        		mListener.onServiceDisconnected(RcsService.Error.CONNECTION_LOST);
         	}
         }
     };
@@ -121,7 +121,7 @@ public class IPCallService extends RcsService {
     public IPCallServiceConfiguration getConfiguration() throws RcsServiceException {
 		if (api != null) {
 			try {
-				return api.getConfiguration();
+				return new IPCallServiceConfiguration(api.getConfiguration());
 			} catch(Exception e) {
 				throw new RcsServiceException(e.getMessage());
 			}

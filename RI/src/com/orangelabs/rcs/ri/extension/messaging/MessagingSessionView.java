@@ -43,6 +43,7 @@ import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionListener;
 import com.gsma.services.rcs.extension.MultimediaSession;
 import com.gsma.services.rcs.extension.MultimediaSessionService;
+import com.gsma.services.rcs.extension.MultimediaSessionServiceConfiguration;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
@@ -230,6 +231,7 @@ public class MessagingSessionView extends Activity {
 		try {
 			// Add service listener
 			connectionManager.getMultimediaSessionApi().addEventListener(serviceListener);
+			
 			initialiseMessagingSession();
 		} catch (RcsServiceException e) {
 			if (LogUtils.isActive) {
@@ -283,9 +285,13 @@ public class MessagingSessionView extends Activity {
     	}
 	}	
     
-    public void initialiseMessagingSession() {
+    private void initialiseMessagingSession() {
     	MultimediaSessionService sessionApi = connectionManager.getMultimediaSessionApi();
 		try {
+			MultimediaSessionServiceConfiguration config = sessionApi.getConfiguration();
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG,"MessageMaxLength: ".concat(	Integer.valueOf(config.getMessageMaxLength()).toString()));
+			}
 	        int mode = getIntent().getIntExtra(MessagingSessionView.EXTRA_MODE, -1);
 			if (mode == MessagingSessionView.MODE_OUTGOING) {
 				// Outgoing session
