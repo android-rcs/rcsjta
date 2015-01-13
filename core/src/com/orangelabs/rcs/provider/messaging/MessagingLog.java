@@ -62,12 +62,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	private GroupDeliveryInfoLog groupChatDeliveryInfoLog;
 
 	/**
-	 * Empty constructor : prevent caller from creating multiple instances
-	 */
-	private MessagingLog() {
-	}
-
-	/**
 	 * Create instance
 	 * 
 	 * @param context

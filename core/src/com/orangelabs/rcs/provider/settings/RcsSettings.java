@@ -88,14 +88,6 @@ public class RcsSettings {
 	final private Map<String,String> mCache;
 
 	/**
-	 * Empty constructor : prevent caller from creating multiple instances
-	 */
-	private RcsSettings() {
-		mContentResolver = null;
-		mCache = null;
-	}
-
-	/**
 	 * Create instance
 	 *
 	 * @param ctx

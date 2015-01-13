@@ -358,16 +358,6 @@ public final class ContactsManager {
 		return sInstance;
 	}
 	
-	/**
-	 * Empty constructor : prevent caller from creating multiple instances
-	 */
-	private ContactsManager() {
-		mContext = null;
-		mContentResolver = null;
-		mLocalContentResolver = null;
-		mCapabilitiesCache = null;
-	}
-	
     /**
      * Constructor
      *      
