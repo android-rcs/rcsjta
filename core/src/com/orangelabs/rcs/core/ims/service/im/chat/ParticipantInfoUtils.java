@@ -34,6 +34,7 @@ import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.service.im.chat.resourcelist.ResourceListDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.resourcelist.ResourceListParser;
 import com.orangelabs.rcs.utils.ContactUtils;
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -77,7 +78,8 @@ public class ParticipantInfoUtils {
 	public static Set<ParticipantInfo> parseResourceList(String xml) {
 		Set<ParticipantInfo> result = new HashSet<ParticipantInfo>();
 		try {
-			InputSource pidfInput = new InputSource(new ByteArrayInputStream(xml.getBytes()));
+			InputSource pidfInput = new InputSource(new ByteArrayInputStream(
+					xml.getBytes(UTF8)));
 			ResourceListParser listParser = new ResourceListParser(pidfInput);
 			ResourceListDocument resList = listParser.getResourceList();
 			if (resList != null) {

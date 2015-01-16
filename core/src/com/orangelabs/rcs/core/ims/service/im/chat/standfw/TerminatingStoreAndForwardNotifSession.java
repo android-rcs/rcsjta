@@ -53,6 +53,7 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.PhoneUtils;
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -75,11 +76,13 @@ public class TerminatingStoreAndForwardNotifSession extends OneToOneChatSession 
      * Constructor
      * 
 	 * @param parent IMS service
-	 * @param invite Initial INVITE request
-	 * @param contact the remote ContactId
+     * @param invite Initial INVITE request
+     * @param contact the remote ContactId
+     * @param rcsSettings RCS settings
 	 */
-	public TerminatingStoreAndForwardNotifSession(ImsService parent, SipRequest invite, ContactId contact) {
-		super(parent, contact, PhoneUtils.formatContactIdToUri(contact));
+	public TerminatingStoreAndForwardNotifSession(ImsService parent, SipRequest invite,
+			ContactId contact, RcsSettings rcsSettings) {
+		super(parent, contact, PhoneUtils.formatContactIdToUri(contact), null, rcsSettings);
 
 		// Create the MSRP manager
 		int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort();
@@ -104,7 +107,7 @@ public class TerminatingStoreAndForwardNotifSession extends OneToOneChatSession 
 	    	}
 	    	
         	// Parse the remote SDP part
-        	SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes());
+        	SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
     		Vector<MediaDescription> media = parser.getMediaDescriptions();
 			MediaDescription mediaDesc = media.elementAt(0);
 			MediaAttribute attr1 = mediaDesc.getMediaAttribute("path");

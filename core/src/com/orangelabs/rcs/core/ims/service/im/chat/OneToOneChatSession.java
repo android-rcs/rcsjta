@@ -27,14 +27,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax2.sip.header.SubjectHeader;
-
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
+import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
@@ -49,12 +48,11 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttp
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.IdGenerator;
-import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Abstract 1-1 chat session
- * 
+ *
  * @author Jean-Marc AUFFRET
  */
 public abstract class OneToOneChatSession extends ChatSession {
@@ -62,6 +60,8 @@ public abstract class OneToOneChatSession extends ChatSession {
 	 * Boundary tag
 	 */
 	private final static String BOUNDARY_TAG = "boundary1";
+
+	private final ChatMessage mFirstMsg;
 
 	/**
 	 * The logger
@@ -71,13 +71,17 @@ public abstract class OneToOneChatSession extends ChatSession {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param parent IMS service
 	 * @param contact Remote contact identifier
 	 * @param remoteUri Remote URI
+	 * @param firstMsg First chat message
+	 * @param rcsSettings RCS settings
 	 */
-	public OneToOneChatSession(ImsService parent, ContactId contact, String remoteUri) {
-		super(parent, contact, remoteUri, OneToOneChatSession.generateOneOneParticipants(contact));
+	public OneToOneChatSession(ImsService parent, ContactId contact, String remoteUri,
+			ChatMessage firstMsg, RcsSettings rcsSettings) {
+		super(parent, contact, remoteUri, OneToOneChatSession.generateOneOneParticipants(contact),
+				rcsSettings);
 
 		// Set feature tags
 		List<String> featureTags = ChatUtils.getSupportedFeatureTagsForChat();
@@ -86,24 +90,26 @@ public abstract class OneToOneChatSession extends ChatSession {
 		// Set Accept-Contact header
 		setAcceptContactTags(featureTags);
 
-		// Set accept-types
-		String acceptTypes = CpimMessage.MIME_TYPE + " " + IsComposingInfo.MIME_TYPE;
+		String acceptTypes = new StringBuilder(CpimMessage.MIME_TYPE).append(" ")
+				.append(IsComposingInfo.MIME_TYPE).toString();
 		setAcceptTypes(acceptTypes);
 
-		// Set accept-wrapped-types
-		String wrappedTypes = InstantMessage.MIME_TYPE + " " + ImdnDocument.MIME_TYPE;
-		if (RcsSettings.getInstance().isGeoLocationPushSupported()) {
-			wrappedTypes += " " + GeolocInfoDocument.MIME_TYPE;
+		StringBuilder wrappedTypes = new StringBuilder(MimeType.TEXT_MESSAGE).append(" ")
+				.append(ImdnDocument.MIME_TYPE);
+		if (mRcsSettings.isGeoLocationPushSupported()) {
+			wrappedTypes.append(" ").append(GeolocInfoDocument.MIME_TYPE);
 		}
-		if (RcsSettings.getInstance().isFileTransferHttpSupported()) {
-			wrappedTypes += " " + FileTransferHttpInfoDocument.MIME_TYPE;
+		if (mRcsSettings.isFileTransferHttpSupported()) {
+			wrappedTypes.append(" ").append(FileTransferHttpInfoDocument.MIME_TYPE);
 		}
-		setWrappedTypes(wrappedTypes);
+		setWrappedTypes(wrappedTypes.toString());
+
+		mFirstMsg = firstMsg;
 	}
 
 	/**
 	 * Is group chat
-	 * 
+	 *
 	 * @return Boolean
 	 */
 	public boolean isGroupChat() {
@@ -112,7 +118,7 @@ public abstract class OneToOneChatSession extends ChatSession {
 
 	/**
 	 * Generate the set of participants for a 1-1 chat
-	 * 
+	 *
 	 * @param contact ContactId
 	 * @return Set of participants
 	 */
@@ -124,7 +130,7 @@ public abstract class OneToOneChatSession extends ChatSession {
 
 	/**
 	 * Returns the set of participants currently connected to the session
-	 * 
+	 *
 	 * @return Set of participants
 	 */
 	public Set<ParticipantInfo> getConnectedParticipants() {
@@ -144,23 +150,24 @@ public abstract class OneToOneChatSession extends ChatSession {
 
 	/**
 	 * Send a text message
-	 * 
-	 * @param msg InstantMessage
+	 * @param msg Chat message
 	 */
-	public void sendTextMessage(InstantMessage msg) {
-		String msgId = msg.getMessageId();
-		boolean useImdn = getImdnManager().isImdnActivated();
+	@Override
+	public void sendChatMessage(ChatMessage msg) {
 		String from = ChatUtils.ANOMYNOUS_URI;
 		String to = ChatUtils.ANOMYNOUS_URI;
-		String textMessage = msg.getTextMessage();
+		String msgId = msg.getMessageId();
 		String networkContent;
+		boolean useImdn = getImdnManager().isImdnActivated()
+				&& !mRcsSettings.isAlbatrosRelease();
+		String mimeType = msg.getMimeType();
 		if (useImdn) {
 			networkContent = ChatUtils.buildCpimMessageWithImdn(from, to, msgId,
-					StringUtils.encodeUTF8(textMessage), InstantMessage.MIME_TYPE);
+					msg.getContent(), mimeType);
 
 		} else {
 			networkContent = ChatUtils.buildCpimMessage(from, to,
-					StringUtils.encodeUTF8(textMessage), InstantMessage.MIME_TYPE);
+					msg.getContent(), mimeType);
 		}
 
 		Collection<ImsSessionListener> listeners = getListeners();
@@ -168,67 +175,31 @@ public abstract class OneToOneChatSession extends ChatSession {
 			((ChatSessionListener)listener).handleMessageSending(msg);
 		}
 
-		boolean result = sendDataChunks(IdGenerator.generateMessageID(), networkContent,
-				CpimMessage.MIME_TYPE, MsrpSession.TypeMsrpChunk.TextMessage);
-
-		/* TODO:This will be redone with CR037 */
-		if (result) {
-			for (ImsSessionListener listener : listeners) {
-				((ChatSessionListener)listener).handleMessageSent(msgId);
-			}
-
+		boolean sendOperationSucceeded = false;
+		if (ChatUtils.isGeolocType(mimeType)) {
+			sendOperationSucceeded = sendDataChunks(IdGenerator.generateMessageID(), networkContent,
+					CpimMessage.MIME_TYPE, TypeMsrpChunk.GeoLocation);
 		} else {
-			for (ImsSessionListener listener : listeners) {
-				((ChatSessionListener)listener).handleMessageFailedSend(msgId);
-			}
-		}
-	}
-
-	/**
-	 * Send a geoloc message
-	 * 
-	 * @param geolocMsg GeolocMessage
-	 */
-	public void sendGeolocMessage(GeolocMessage geolocMsg) {
-		boolean useImdn = getImdnManager().isImdnActivated();
-		String msgId = geolocMsg.getMessageId();
-		String from = ChatUtils.ANOMYNOUS_URI;
-		String to = ChatUtils.ANOMYNOUS_URI;
-		String geoDoc = ChatUtils.buildGeolocDocument(geolocMsg.getGeoloc(),
-				ImsModule.IMS_USER_PROFILE.getPublicUri(), msgId);
-		String networkContent;
-		if (useImdn) {
-			networkContent = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, geoDoc,
-					GeolocInfoDocument.MIME_TYPE);
-		} else {
-			networkContent = ChatUtils.buildCpimMessage(from, to, geoDoc,
-					GeolocInfoDocument.MIME_TYPE);
+			sendOperationSucceeded = sendDataChunks(IdGenerator.generateMessageID(), networkContent,
+					CpimMessage.MIME_TYPE, TypeMsrpChunk.TextMessage);
 		}
 
-		Collection<ImsSessionListener> listeners = getListeners();
-		for (ImsSessionListener listener : listeners) {
-			((ChatSessionListener)listener).handleMessageSending(geolocMsg);
-		}
-
-		boolean result = sendDataChunks(IdGenerator.generateMessageID(), networkContent,
-				CpimMessage.MIME_TYPE, MsrpSession.TypeMsrpChunk.GeoLocation);
-
-		/* TODO:This will be redone with CR037 */
-		if (result) {
-			for (ImsSessionListener listener : listeners) {
-				((ChatSessionListener)listener).handleMessageSent(msgId);
+		if (sendOperationSucceeded) {
+			for (ImsSessionListener listener : getListeners()) {
+				((ChatSessionListener)listener).handleMessageSent(msgId,
+				        ChatUtils.networkMimeTypeToApiMimeType(mimeType));
 			}
-
 		} else {
-			for (ImsSessionListener listener : listeners) {
-				((ChatSessionListener)listener).handleMessageFailedSend(msgId);
+			for (ImsSessionListener listener : getListeners()) {
+				((ChatSessionListener)listener).handleMessageFailedSend(msgId,
+				        ChatUtils.networkMimeTypeToApiMimeType(mimeType));
 			}
 		}
 	}
 
 	/**
 	 * Send is composing status
-	 * 
+	 *
 	 * @param status Status
 	 */
 	public void sendIsComposingStatus(boolean status) {
@@ -247,20 +218,15 @@ public abstract class OneToOneChatSession extends ChatSession {
 
 	/**
 	 * Create INVITE request
-	 * 
+	 *
 	 * @param content Content part
 	 * @return Request
 	 * @throws SipException
 	 */
-	private SipRequest createMultipartInviteRequest(String content) throws SipException {
+	private SipRequest createMultipartInviteRequest(String content)
+			throws SipException {
 		SipRequest invite = SipMessageFactory.createMultipartInvite(getDialogPath(),
 				getFeatureTags(), content, BOUNDARY_TAG);
-
-		// Test if there is a text message
-		InstantMessage firstMessage = getFirstMessage();
-		String text = firstMessage.getTextMessage();
-		// Add a subject header
-		invite.addHeader(SubjectHeader.NAME, StringUtils.encodeUTF8(text));
 
 		// Add a contribution ID header
 		invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
@@ -270,7 +236,7 @@ public abstract class OneToOneChatSession extends ChatSession {
 
 	/**
 	 * Create INVITE request
-	 * 
+	 *
 	 * @param content Content part
 	 * @return Request
 	 * @throws SipException
@@ -287,7 +253,7 @@ public abstract class OneToOneChatSession extends ChatSession {
 
 	/**
 	 * Create an INVITE request
-	 * 
+	 *
 	 * @return the INVITE request
 	 * @throws SipException
 	 */
@@ -303,7 +269,7 @@ public abstract class OneToOneChatSession extends ChatSession {
 
 	/**
 	 * Handle 200 0K response
-	 * 
+	 *
 	 * @param resp 200 OK response
 	 */
 	public void handle200OK(SipResponse resp) {
@@ -315,13 +281,22 @@ public abstract class OneToOneChatSession extends ChatSession {
 
 	/**
 	 * Get SDP direction
-	 * 
+	 *
 	 * @return Direction
 	 * @see com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils#DIRECTION_RECVONLY
 	 * @see com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils#DIRECTION_SENDONLY
 	 * @see com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils#DIRECTION_SENDRECV
 	 */
 	public abstract String getSdpDirection();
+
+	/**
+	 * Get first message.
+	 *
+	 * @param ChatMessage First chat message
+	 */
+	public ChatMessage getFirstMessage() {
+		return mFirstMsg;
+	}
 
 	/*
 	 * (non-Javadoc)

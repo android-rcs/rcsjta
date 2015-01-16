@@ -31,18 +31,18 @@ public class DataChunks {
      * Current transfered size in bytes
      */
     private int currentSize = 0;
-    
+
     /**
 	 * Cache used to save data chunks
 	 */
-	private ByteArrayOutputStream cache = new ByteArrayOutputStream();	
+	private ByteArrayOutputStream cache = new ByteArrayOutputStream();
 
 	/**
 	 * Constructor
 	 */
 	public DataChunks() {
 	}
-	
+
 	/**
 	 * Add a new chunk
 	 *

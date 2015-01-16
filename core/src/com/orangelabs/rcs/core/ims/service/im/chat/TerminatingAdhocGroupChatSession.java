@@ -50,6 +50,7 @@ import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -69,17 +70,20 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
      */
     private static final Logger logger = Logger.getLogger(TerminatingAdhocGroupChatSession.class.getSimpleName());
     
-    /**
-     * Constructor
-     * 
+	/**
+	 * Constructor
+	 * 
 	 * @param parent IMS service
 	 * @param invite Initial INVITE request
 	 * @param contact remote contact
 	 * @param remoteUri the remote Uri
 	 * @param participants set of participants
+	 * @param rcsSettings RCS settings
 	 */
-	public TerminatingAdhocGroupChatSession(ImsService parent, SipRequest invite, ContactId contact, String remoteUri, Set<ParticipantInfo> participants) {
-		super(parent, contact, remoteUri, participants);
+	public TerminatingAdhocGroupChatSession(ImsService parent, SipRequest invite,
+			ContactId contact, String remoteUri, Set<ParticipantInfo> participants,
+			RcsSettings rcsSettings) {
+		super(parent, contact, remoteUri, participants, rcsSettings);
 
 		Set<ParticipantInfo> sessionParticipants = getParticipants();
 		// Set subject
@@ -252,7 +256,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 
         	// Parse the remote SDP part
 			String remoteSdp = getDialogPath().getInvite().getSdpContent();
-        	SdpParser parser = new SdpParser(remoteSdp.getBytes());
+        	SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));
     		Vector<MediaDescription> media = parser.getMediaDescriptions();
 			MediaDescription mediaDesc = media.elementAt(0);
 			MediaAttribute attr1 = mediaDesc.getMediaAttribute("path");

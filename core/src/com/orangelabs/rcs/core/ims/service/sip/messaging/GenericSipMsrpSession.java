@@ -43,6 +43,7 @@ import com.orangelabs.rcs.core.ims.service.sip.SipSessionListener;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -141,7 +142,8 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
      */
     public void prepareMediaSession() throws Exception {
         // Parse the remote SDP part
-        SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes());
+        SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(
+                UTF8));
         Vector<MediaDescription> media = parser.getMediaDescriptions();
         MediaDescription mediaDesc = media.elementAt(0);
         MediaAttribute attr = mediaDesc.getMediaAttribute("path");

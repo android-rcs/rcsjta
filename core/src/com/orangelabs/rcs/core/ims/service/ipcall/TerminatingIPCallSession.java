@@ -43,6 +43,7 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -176,9 +177,9 @@ public class TerminatingIPCallSession extends IPCallSession {
 			// Set the local SDP in the dialog path
 			getDialogPath().setLocalContent(sdp);
 
-			// Prepare media session			
+			// Prepare media session
 			prepareMediaSession();
-			
+
 			// Create a 200 OK response
 			if (logger.isActivated()) {
 				logger.info("Send 200 OK");
@@ -216,7 +217,7 @@ public class TerminatingIPCallSession extends IPCallSession {
 				startMediaSession();
 
             	// Start session timer
-            	if (getSessionTimerManager().isSessionTimerActivated(resp)) {        	
+            	if (getSessionTimerManager().isSessionTimerActivated(resp)) {
             		getSessionTimerManager().start(SessionTimerManager.UAS_ROLE, getDialogPath().getSessionExpireTime());
             	}
 
@@ -262,7 +263,7 @@ public class TerminatingIPCallSession extends IPCallSession {
 
         // Remove the current session
         removeSession();
-        
+
         // Notify listener
         for(int i=0; i < getListeners().size(); i++) {
             ((IPCallStreamingSessionListener)getListeners().get(i)).handleCallError(error);
@@ -272,21 +273,22 @@ public class TerminatingIPCallSession extends IPCallSession {
 
 	/**
 	 * Build sdp response for addVideo
-	 * 
+	 *
 	 * @param reInvite  reInvite Request received
 	 */
 	private String buildSdpAnswer() {
 		// Parse the remote SDP part
-        SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes());
-               
+        SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(
+                UTF8));
+
         // Extract the audio codecs from SDP
         Vector<MediaDescription> audio = parser.getMediaDescriptions("audio");
         Vector<AudioCodec> proposedAudioCodecs = AudioCodecManager.extractAudioCodecsFromSdp(audio);
 
-        // Extract video codecs from SDP            
+        // Extract video codecs from SDP
         Vector<MediaDescription> video = parser.getMediaDescriptions("video");
         Vector<VideoCodec> proposedVideoCodecs = VideoCodecManager.extractVideoCodecsFromSdp(video);
-        
+
         // Audio codec negotiation
 		AudioCodec selectedAudioCodec;
 		try {
@@ -303,7 +305,7 @@ public class TerminatingIPCallSession extends IPCallSession {
 				handleError(new IPCallError(IPCallError.UNSUPPORTED_AUDIO_TYPE));
 				return null;
 			}
-			
+
 	        // Video codec negotiation
 			VideoCodec selectedVideoCodec = null;
 			if ((proposedVideoCodecs != null) && (proposedVideoCodecs.size() > 0)) {
@@ -326,7 +328,7 @@ public class TerminatingIPCallSession extends IPCallSession {
                 MediaDescription mediaVideo = parser.getMediaDescription("video");
             	videoSdp = VideoSdpBuilder.buildSdpAnswer(selectedVideoCodec,
             			getRenderer().getLocalVideoRtpPort(), mediaVideo);
-            }	
+            }
 	        String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
 
@@ -340,16 +342,16 @@ public class TerminatingIPCallSession extends IPCallSession {
 	            audioSdp +
 	            videoSdp +
 	            "a=sendrcv" + SipUtils.CRLF;
-	        
+
 			return sdp;
-	        
+
 		} catch (RemoteException e) {
 			if (logger.isActivated()) {
                 logger.error("Session initiation has failed", e);
             }
-            
+
             // Unexpected error
-            handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));            
+            handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
             return null;
 		}
 	}

@@ -31,6 +31,7 @@ import com.gsma.services.rcs.GroupDeliveryInfoLog;
 import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message;
+import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.IChatMessage;
@@ -41,14 +42,12 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
+import com.orangelabs.rcs.core.ims.service.im.chat.ChatMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
-import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
-import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatPersistedStorageAccessor;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession;
-import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.event.User;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
@@ -121,7 +120,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	}
 
 	private GroupChatStateAndReasonCode toStateAndReasonCode(ChatError error) {
-		switch (error.getErrorCode()) {
+		int chatError = error.getErrorCode();
+		switch (chatError) {
 			case ChatError.SESSION_INITIATION_CANCELLED:
 			case ChatError.SESSION_INITIATION_DECLINED:
 				return new GroupChatStateAndReasonCode(GroupChat.State.REJECTED, GroupChat.ReasonCode.REJECTED_BY_REMOTE);
@@ -136,9 +136,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 				return new GroupChatStateAndReasonCode(GroupChat.State.ABORTED,
 						GroupChat.ReasonCode.ABORTED_BY_SYSTEM);
 			default:
-				throw new IllegalArgumentException(
-						"Unknown reason in GroupChatImpl.toStateAndReasonCode; error="
-								+ error + "!");
+				throw new IllegalArgumentException(new StringBuilder(
+						"Unknown reason in GroupChatImpl.toStateAndReasonCode; chatError=")
+						.append(chatError).append("!").toString());
 		}
 	}
 
@@ -182,18 +182,19 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	}
 
     private void handleMessageDeliveryStatusDelivered(ContactId contact, String msgId) {
+        String mimeType = mMessagingLog.getMessageMimeType(msgId);
         synchronized (lock) {
             mPersistentStorage.setDeliveryInfoStatusAndReasonCode(msgId, contact,
                     GroupDeliveryInfoLog.Status.DELIVERED,
                     GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
             mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId, contact,
-                    msgId, GroupDeliveryInfoLog.Status.DELIVERED,
+                    mimeType, msgId, GroupDeliveryInfoLog.Status.DELIVERED,
                     GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
             if (mPersistentStorage.isDeliveredToAllRecipients(msgId)) {
                 mPersistentStorage.setMessageStatusAndReasonCode(msgId,
                         ChatLog.Message.Status.Content.DELIVERED,
                         ChatLog.Message.ReasonCode.UNSPECIFIED);
-                mBroadcaster.broadcastMessageStatusChanged(mChatId, msgId,
+                mBroadcaster.broadcastMessageStatusChanged(mChatId, msgId, mimeType,
                         ChatLog.Message.Status.Content.DELIVERED,
                         ChatLog.Message.ReasonCode.UNSPECIFIED);
             }
@@ -201,18 +202,19 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
     }
 
     private void handleMessageDeliveryStatusDisplayed(ContactId contact, String msgId) {
+        String mimeType = mMessagingLog.getMessageMimeType(msgId);
         synchronized (lock) {
             mPersistentStorage.setDeliveryInfoStatusAndReasonCode(msgId, contact,
                     GroupDeliveryInfoLog.Status.DISPLAYED,
                     GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
             mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId, contact,
-                    msgId, GroupDeliveryInfoLog.Status.DISPLAYED,
+                    mimeType, msgId, GroupDeliveryInfoLog.Status.DISPLAYED,
                     GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
             if (mPersistentStorage.isDisplayedByAllRecipients(msgId)) {
                 mPersistentStorage.setMessageStatusAndReasonCode(msgId,
                         ChatLog.Message.Status.Content.DISPLAYED,
                         ChatLog.Message.ReasonCode.UNSPECIFIED);
-                mBroadcaster.broadcastMessageStatusChanged(mChatId, msgId,
+                mBroadcaster.broadcastMessageStatusChanged(mChatId, msgId, mimeType,
                         ChatLog.Message.Status.Content.DISPLAYED,
                         ChatLog.Message.ReasonCode.UNSPECIFIED);
             }
@@ -220,20 +222,21 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
     }
 
     private void handleMessageDeliveryStatusFailed(ContactId contact, String msgId, int reasonCode) {
+        String mimeType = mMessagingLog.getMessageMimeType(msgId);
         synchronized (lock) {
             if (ChatLog.Message.ReasonCode.FAILED_DELIVERY == reasonCode) {
                 mPersistentStorage.setDeliveryInfoStatusAndReasonCode(msgId, contact,
                         GroupDeliveryInfoLog.Status.FAILED,
                         GroupDeliveryInfoLog.ReasonCode.FAILED_DELIVERY);
-                mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId,
-                        contact, msgId, GroupDeliveryInfoLog.Status.FAILED,
+                mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId, contact,
+                        mimeType, msgId, GroupDeliveryInfoLog.Status.FAILED,
                         GroupDeliveryInfoLog.ReasonCode.FAILED_DELIVERY);
             } else {
                 mPersistentStorage.setDeliveryInfoStatusAndReasonCode(msgId, contact,
                         GroupDeliveryInfoLog.Status.FAILED,
                         GroupDeliveryInfoLog.ReasonCode.FAILED_DISPLAY);
-                mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId,
-                        contact, msgId, GroupDeliveryInfoLog.Status.FAILED,
+                mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId, contact,
+                        mimeType, msgId, GroupDeliveryInfoLog.Status.FAILED,
                         GroupDeliveryInfoLog.ReasonCode.FAILED_DISPLAY);
             }
         }
@@ -469,23 +472,22 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 
 	/**
 	 * Add group chat message to Db
-	 *
 	 * @param msg InstantMessage
-	 * @param state state of message
+	 * @param state state of messaget
 	 */
-	private void addOutgoingGroupChatMessage(InstantMessage msg, int state) {
+	private void addOutgoingGroupChatMessage(ChatMessage msg, int state) {
 		mPersistentStorage.addGroupChatMessage(msg, Direction.OUTGOING, state,
 				ReasonCode.UNSPECIFIED);
-		mBroadcaster.broadcastMessageStatusChanged(mChatId, msg.getMessageId(), state,
-				ReasonCode.UNSPECIFIED);
+		String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
+		mBroadcaster.broadcastMessageStatusChanged(mChatId, apiMimeType, msg.getMessageId(),
+				state, ReasonCode.UNSPECIFIED);
 	}
 
 	/**
 	 * Actual send operation of message performed
-	 *
-	 * @param msg InstantMessage
+	 * @param msg Chat message
 	 */
-	private void sendChatMessage(final InstantMessage msg) {
+	private void sendChatMessage(final ChatMessage msg) {
 		final GroupChatSession groupChatSession = mImService.getGroupChatSession(mChatId);
 		if (groupChatSession == null) {
 			/*
@@ -511,18 +513,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 				return;
 			}
 		}
-
 		SipDialogPath chatSessionDialogPath = groupChatSession.getDialogPath();
 		if (chatSessionDialogPath.isSessionEstablished()) {
 			addOutgoingGroupChatMessage(msg, Message.Status.Content.SENDING);
-			if (msg instanceof GeolocMessage) {
-				groupChatSession.sendGeolocMessage((GeolocMessage)msg);
-			} else {
-				groupChatSession.sendTextMessage(msg);
-			}
+			groupChatSession.sendChatMessage(msg);
 			return;
 		}
-
 		addOutgoingGroupChatMessage(msg, Message.Status.Content.QUEUED);
 		if (!groupChatSession.isInitiatedByRemote()) {
 			return;
@@ -544,11 +540,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 * @return Chat message
 	 */
 	public IChatMessage sendMessage(final String text) {
-		InstantMessage msg = ChatUtils.createTextMessage(null, text, mImService.getImdnManager()
-				.isImdnActivated());
+		ChatMessage msg = ChatUtils.createTextMessage(null, text);
 		ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
-				mMessagingLog, msg.getMessageId(), msg.getRemote(), msg.getTextMessage(),
-				InstantMessage.MIME_TYPE, mChatId, msg.getDate().getTime(), Direction.OUTGOING);
+				mMessagingLog, msg.getMessageId(), msg.getRemoteContact(), text,
+				MimeType.TEXT_MESSAGE, mChatId, msg.getDate().getTime(), Direction.OUTGOING);
 
 		/* If the IMS is connected at this time then send this message. */
 		if (ServerApiUtils.isImsConnected()) {
@@ -567,13 +562,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 * @return ChatMessage
 	 */
 	public IChatMessage sendMessage2(Geoloc geoloc) {
-		final GeolocPush geolocPush = new GeolocPush(geoloc.getLabel(), geoloc.getLatitude(),
-				geoloc.getLongitude(), geoloc.getExpiration(), geoloc.getAccuracy());
-		GeolocMessage geolocMsg = ChatUtils.createGeolocMessage(null, geolocPush, mImService
-				.getImdnManager().isImdnActivated());
+		ChatMessage geolocMsg = ChatUtils.createGeolocMessage(null, geoloc);
 		ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
-				mMessagingLog, geolocMsg.getMessageId(), geolocMsg.getRemote(),
-				geolocMsg.toString(), GeolocMessage.MIME_TYPE, mChatId, geolocMsg.getDate()
+				mMessagingLog, geolocMsg.getMessageId(), geolocMsg.getRemoteContact(),
+				geolocMsg.toString(), MimeType.GEOLOC_MESSAGE, mChatId, geolocMsg.getDate()
 						.getTime(), Direction.OUTGOING);
 
 		/* If the IMS is connected at this time then send this message. */
@@ -587,11 +579,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	}
 
     /**
-	 * Sends a is-composing event. The status is set to true when typing
+	 * Sends an is-composing event. The status is set to true when typing
 	 * a message, else it is set to false.
+	 * @see RcsSettingsData.ImSessionStartMode
 	 * 
 	 * @param status Is-composing status
-	 * @see RcsSettingsData.ImSessionStartMode
 	 */
 	public void sendIsComposingEvent(final boolean status) {
 		final GroupChatSession session = mImService.getGroupChatSession(mChatId);
@@ -861,23 +853,27 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		}
 	}
     
-    /* (non-Javadoc)
-     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleReceiveMessage(com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage)
-     */
-	public void handleReceiveMessage(InstantMessage message) {
-		String msgId = message.getMessageId();
+    /*
+	 * (non-Javadoc)
+	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#
+	 * handleReceiveMessage
+	 * (com.orangelabs.rcs.core.ims.service.im.chat.ChatMessage, boolean)
+	 */
+	public void handleReceiveMessage(ChatMessage msg, boolean imdnDisplayedRequested) {
+		String msgId = msg.getMessageId();
 		if (logger.isActivated()) {
 			logger.info(new StringBuilder("New IM with messageId '").append(msgId)
-					.append("' received").toString());
+					.append("' received.").toString());
 		}
 		synchronized (lock) {
-			mPersistentStorage
-					.addGroupChatMessage(message, Direction.INCOMING,
-							ChatLog.Message.Status.Content.RECEIVED,
-							ChatLog.Message.ReasonCode.UNSPECIFIED);
-			mContactsManager.setContactDisplayName(message.getRemote(), message.getDisplayName());
+			mPersistentStorage.addGroupChatMessage(msg, Direction.INCOMING,
+					ChatLog.Message.Status.Content.RECEIVED, ChatLog.Message.ReasonCode.UNSPECIFIED);
+			mContactsManager.setContactDisplayName(msg.getRemoteContact(),
+					msg.getDisplayName());
 
-			mBroadcaster.broadcastMessageReceived(msgId);
+			String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg
+					.getMimeType());
+			mBroadcaster.broadcastMessageReceived(apiMimeType, msgId);
 		}
 	}
 
@@ -949,20 +945,23 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	/*
 	 * (non-Javadoc)
 	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#
-	 * handleMessageSending(
-	 * com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage)
+	 * handleMessageSending
+	 * (com.orangelabs.rcs.core.ims.service.im.chat.ChatMessage)
 	 */
 	@Override
-	public void handleMessageSending(InstantMessage msg) {
+	public void handleMessageSending(ChatMessage msg) {
 		String msgId = msg.getMessageId();
+		String networkMimeType = msg.getMimeType();
 		if (logger.isActivated()) {
-			logger.info(new StringBuilder("Handle message status ")
-					.append(Message.Status.Content.SENDING).append(" id=").append(msgId).toString());
+			logger.info(new StringBuilder("Message is being sent; msgId=").append(msgId)
+					.append("networkMimeType=").append(networkMimeType).append(".").append(".").toString());
 		}
+		String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(networkMimeType);
 		synchronized (lock) {
 			mPersistentStorage.setMessageStatusAndReasonCode(msgId,
 					ChatLog.Message.Status.Content.SENDING, ChatLog.Message.ReasonCode.UNSPECIFIED);
-			mBroadcaster.broadcastMessageStatusChanged(mChatId, msgId,
+
+			mBroadcaster.broadcastMessageStatusChanged(mChatId, apiMimeType, msgId,
 					ChatLog.Message.Status.Content.SENDING, ReasonCode.UNSPECIFIED);
 		}
 	}
@@ -970,19 +969,21 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	/*
 	 * (non-Javadoc)
 	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#
-	 * handleMessageFailedSend(java.lang.String)
+	 * handleMessageFailedSend
+	 * (com.orangelabs.rcs.core.ims.service.im.chat.ChatMessage)
 	 */
 	@Override
-	public void handleMessageFailedSend(String msgId) {
+	public void handleMessageFailedSend(String msgId, String mimeType) {
 		if (logger.isActivated()) {
-			logger.info(new StringBuilder("Handle message send status ")
-					.append(ChatLog.Message.Status.Content.FAILED).append(" msgId=").append(msgId).toString());
+			logger.info(new StringBuilder("Message sending failed; msgId=").append(msgId)
+					.append("mimeType=").append(mimeType).append(".").toString());
 		}
+
 		synchronized (lock) {
 			mPersistentStorage.setMessageStatusAndReasonCode(msgId,
 					ChatLog.Message.Status.Content.FAILED, ChatLog.Message.ReasonCode.FAILED_SEND);
 
-			mBroadcaster.broadcastMessageStatusChanged(getChatId(), msgId,
+			mBroadcaster.broadcastMessageStatusChanged(getChatId(), mimeType, msgId,
 					ChatLog.Message.Status.Content.FAILED, ChatLog.Message.ReasonCode.FAILED_SEND);
 		}
 	}
@@ -990,20 +991,20 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	/*
 	 * (non-Javadoc)
 	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#
-	 * handleMessageSent(java.lang.String)
+	 * handleMessageSent(com.orangelabs.rcs.core.ims.service.im.chat.ChatMessage)
 	 */
 	@Override
-	public void handleMessageSent(String msgId) {
+	public void handleMessageSent(String msgId, String mimeType) {
 		if (logger.isActivated()) {
-			logger.info(new StringBuilder("Handle message status ")
-					.append(ChatLog.Message.Status.Content.SENT).append(" msgId=").append(msgId)
-					.toString());
+			logger.info(new StringBuilder("Text message sent; msgId=").append(msgId)
+					.append("mimeType=").append(mimeType).append(".").toString());
 		}
+
 		synchronized (lock) {
 			mPersistentStorage.setMessageStatusAndReasonCode(msgId,
 					ChatLog.Message.Status.Content.SENT, ChatLog.Message.ReasonCode.UNSPECIFIED);
 
-			mBroadcaster.broadcastMessageStatusChanged(getChatId(), msgId,
+			mBroadcaster.broadcastMessageStatusChanged(getChatId(), mimeType, msgId,
 					ChatLog.Message.Status.Content.SENT, ChatLog.Message.ReasonCode.UNSPECIFIED);
 		}
 	}
@@ -1087,27 +1088,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 					new ParticipantInfo(contact, ParticipantInfo.Status.FAILED));
 		}
 	}
-
-    /**
-     * New geoloc message received
-     * 
-     * @param geoloc Geoloc message
-     */
-    public void handleReceiveGeoloc(GeolocMessage geoloc) {
-		if (logger.isActivated()) {
-			logger.info("New geoloc received");
-		}
-    	synchronized(lock) {
-			mPersistentStorage
-					.addGroupChatMessage(geoloc, Direction.INCOMING,
-							ChatLog.Message.Status.Content.RECEIVED,
-							ChatLog.Message.ReasonCode.UNSPECIFIED);
-
-			mContactsManager.setContactDisplayName(geoloc.getRemote(), geoloc.getDisplayName());
-
-			 mBroadcaster.broadcastMessageReceived(geoloc.getMessageId());
-	    }
-    }
 
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleParticipantStatusChanged(com.gsma.services.rcs.chat.ParticipantInfo)

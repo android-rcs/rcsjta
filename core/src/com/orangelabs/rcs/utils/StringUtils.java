@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +15,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.utils;
 
+import java.nio.charset.Charset;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.Iterator;
@@ -27,14 +32,13 @@ import java.util.Iterator;
  */
 public class StringUtils {
 
-	/**
-	 * UTF-8 charset
-	 */
-	private final static String CHARSET_UTF8 = "UTF-8"; 
-		
+	public static final String UTF8_STR = "utf-8";
+
+    public static final Charset UTF8 = Charset.forName(UTF8_STR);
+
     /**
      * Truncate a string to a max length
-     * 
+     *
      * @param text String to truncate
      * @param truncatedLength Max length
      * @return Truncated string
@@ -42,88 +46,24 @@ public class StringUtils {
     public static String truncate(String text, int truncatedLength) {
         if (text == null) {
             return null;
-        }        
-        
+        }
+
         if ((truncatedLength < 0) || (truncatedLength > text.length())) {
             return text;
-        }        
+        }
         return text.substring(0, truncatedLength);
     }
-	
-	/**
-	 * Encode string into UTF-8 string
-	 * 
-	 * @param str Input string
-	 * @return Encoded string
-	 */
-	public static String encodeUTF8(String str) {
-		if (str == null) {
-			return null;
-		}
-		try {
-			return new String(str.getBytes(), CHARSET_UTF8);
-		} catch (Exception e){
-		    return null;
-		}
-	}
-	
-	/**
-	 * Encode UTF-8 bytes to a string
-	 * 
-	 * @param b Input bytes
-	 * @return Decoded string
-	 */
-	public static String encodeUTF8(byte[] b) {
-		if (b == null) {
-			return null;
-		}
-		try {
-			return new String(b, CHARSET_UTF8);
-		} catch (Exception e){
-			return null;
-		}
-	}	
-	
-	/**
-	 * Decode UTF-8 bytes to string
-	 * 
-	 * @param b Input bytes
-	 * @return Decoded string
-	 */
-	public static String decodeUTF8(byte[] b) {
-		if (b == null) {
-			return null;
-		}
-		try {
-			return new String(b, CHARSET_UTF8);
-		} catch(Exception e) {
-			return null;
-		}
-	}	
 
 	/**
-	 * Decode UTF-8 string to a string
-	 * 
-	 * @param str Input string
-	 * @return Decoded string
-	 */
-	public static String decodeUTF8(String str) {
-		if (str == null) {
-			return null;
-		}
-		return decodeUTF8(str.getBytes());
-	}
-	
-	/**
 	 * Escape characters for text appearing as XML data, between tags.
-	 * 
+	 *
 	 * The following characters are replaced :
 	 * <br> <
 	 * <br> >
 	 * <br> &
 	 * <br> "
 	 * <br> '
-	 * 
+	 *
 	 * @param text Input text
 	 * @return Encoded string
 	 */
@@ -131,7 +71,7 @@ public class StringUtils {
 		if (text == null) {
 			return null;
 		}
-		
+
 	    final StringBuilder result = new StringBuilder();
 	    final StringCharacterIterator iterator = new StringCharacterIterator(text);
 	    char character =  iterator.current();
@@ -160,10 +100,10 @@ public class StringUtils {
 	    }
 	    return result.toString();
 	}
-	
+
 	/**
 	 * Decode XML string
-	 * 
+	 *
 	 * @param text Input text
 	 * @return Decoded string
 	 */
@@ -171,19 +111,19 @@ public class StringUtils {
 		if (text == null) {
 			return null;
 		}
-		
+
 	    text = text.replaceAll("&lt;", "<");
 	    text = text.replaceAll("&gt;", ">");
 	    text = text.replaceAll("&quot;", "\"");
 	    text = text.replaceAll("&#039;", "\'");
 	    text = text.replaceAll("&amp;", "&");
-		
+
 	    return text;
 	}
 
 	/**
 	 * Remove quotes delimiters
-	 * 
+	 *
 	 * @param input Input
 	 * @return String without quotes
 	 */
@@ -193,20 +133,20 @@ public class StringUtils {
 		}
 		return input;
 	}
-	
+
 	/**
 	 * Is empty string
-	 * 
+	 *
 	 * @param str String
 	 * @return Boolean
 	 */
 	public static boolean isEmpty(String str) {
 		return (str == null) || (str.trim().length() == 0);
 	}
-	
+
 	/**
 	 * Build a string of delimited items
-	 * 
+	 *
 	 * @param s
 	 *            an iterator over a CharSequence
 	 * @param delimiter
@@ -222,7 +162,7 @@ public class StringUtils {
 			buffer.append(delimiter).append(iter.next());
 		return buffer.toString();
 	}
-	
+
 	/**
 	 * compares two strings null-safe
 	 * @param str1

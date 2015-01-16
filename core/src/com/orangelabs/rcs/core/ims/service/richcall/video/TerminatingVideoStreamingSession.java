@@ -44,6 +44,7 @@ import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.core.ims.service.richcall.RichcallService;
 import com.orangelabs.rcs.utils.ContactUtils;
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -83,7 +84,8 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
             // Parse the remote SDP part
-            SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes());
+            SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(
+                    UTF8));
             MediaDescription mediaVideo = parser.getMediaDescription("video");
             String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaVideo);
             int remotePort = mediaVideo.port;

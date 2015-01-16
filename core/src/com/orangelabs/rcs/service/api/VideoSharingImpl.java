@@ -39,7 +39,6 @@ import com.orangelabs.rcs.core.ims.service.richcall.RichcallService;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoSharingPersistedStorageAccessor;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSessionListener;
-import com.orangelabs.rcs.provider.sharing.RichCallHistory;
 import com.orangelabs.rcs.provider.sharing.VideoSharingStateAndReasonCode;
 import com.orangelabs.rcs.service.broadcaster.IVideoSharingEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -96,7 +95,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	}
 
 	private VideoSharingStateAndReasonCode toStateAndReasonCode(ContentSharingError error) {
-		switch (error.getErrorCode()) {
+		int contentSharingError = error.getErrorCode();
+		switch (contentSharingError) {
 			case ContentSharingError.SESSION_INITIATION_FAILED:
 				return new VideoSharingStateAndReasonCode(VideoSharing.State.FAILED,
 						ReasonCode.FAILED_INITIATION);
@@ -112,8 +112,9 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 						ReasonCode.FAILED_SHARING);
 			default:
 				throw new IllegalArgumentException(
-						"Unknown reason in VideoSharingImpl.toStateAndReasonCode; error="
-								+ error + "!");
+						new StringBuilder(
+								"Unknown reason in VideoSharingImpl.toStateAndReasonCode; contentSharingError=")
+								.append(contentSharingError).append("!").toString());
 		}
 	}
 

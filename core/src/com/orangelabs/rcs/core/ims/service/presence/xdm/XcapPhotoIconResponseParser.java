@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service.presence.xdm;
@@ -25,22 +29,23 @@ import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * XCAP photo-icon response parser
- * 
+ *
  * @author jexa7410
  */
 public class XcapPhotoIconResponseParser extends DefaultHandler {
 
 	private StringBuffer accumulator;
-	
+
 	private byte[] data = null;
 	private String mime = null;
 	private String encoding = null;
 	private String desc = null;
-	
+
 	/**
      * The logger
      */
@@ -48,7 +53,7 @@ public class XcapPhotoIconResponseParser extends DefaultHandler {
 
     /**
      * Constructor
-     * 
+     *
      * @param inputSource Input source
      * @throws Exception
      */
@@ -75,7 +80,7 @@ public class XcapPhotoIconResponseParser extends DefaultHandler {
 
 	public void endElement(String namespaceURL, String localName, String qname) {
 		if (localName.equals("data")) {
-			data = accumulator.toString().getBytes();
+			data = accumulator.toString().getBytes(UTF8);
 		} else
 		if (localName.equals("mime-type")) {
 			mime = accumulator.toString();

@@ -84,6 +84,7 @@ import com.orangelabs.rcs.utils.HttpUtils;
 import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.NetworkUtils;
 import com.orangelabs.rcs.utils.StringUtils;
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -342,7 +343,8 @@ public class HttpsProvisioningManager {
             }
 
             result.code = response.getStatusLine().getStatusCode();
-            result.content = new String(EntityUtils.toByteArray(response.getEntity()), "UTF-8");
+            result.content = new String(EntityUtils.toByteArray(response.getEntity()),
+                    UTF8);
             if (result.code != 200) {
                 if (result.code == 403) {
                     if (logger.isActivated()) {
@@ -554,7 +556,8 @@ public class HttpsProvisioningManager {
             }
 
             result.code = response.getStatusLine().getStatusCode(); 
-			result.content = new String(EntityUtils.toByteArray(response.getEntity()), "UTF-8");
+            result.content = new String(EntityUtils.toByteArray(response.getEntity()),
+                    UTF8);
             if (result.code == 511) {
                 // Blackbird guidelines ID_2_6 Configuration mechanism over PS without Header Enrichment
                 // Use SMS provisioning on PS data network if server reply 511 NETWORK AUTHENTICATION REQUIRED 
@@ -585,7 +588,8 @@ public class HttpsProvisioningManager {
                 }
 				return result;
 			}
-			result.content = new String(EntityUtils.toByteArray(response.getEntity()), "UTF-8");
+			result.content = new String(EntityUtils.toByteArray(response.getEntity()),
+					UTF8);
 			return result;
 		} catch(UnknownHostException e) {
 			if (logger.isActivated()) {
@@ -654,7 +658,8 @@ public class HttpsProvisioningManager {
                 }
                 return result;
             }
-            result.content = new String(EntityUtils.toByteArray(response.getEntity()), "UTF-8");
+            result.content = new String(EntityUtils.toByteArray(response.getEntity()),
+                    UTF8);
 
             return result;
         } catch (Exception e) {

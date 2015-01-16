@@ -41,7 +41,6 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferPersisted
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpTransferState;
 import com.orangelabs.rcs.provider.messaging.FileTransferStateAndReasonCode;
-import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.service.broadcaster.IOneToOneFileTransferBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -454,7 +453,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 	}
 
 	private FileTransferStateAndReasonCode toStateAndReasonCode(FileSharingError error) {
-		switch (error.getErrorCode()) {
+		int fileSharingError = error.getErrorCode();
+		switch (fileSharingError) {
 			case FileSharingError.SESSION_INITIATION_DECLINED:
 			case FileSharingError.SESSION_INITIATION_CANCELLED:
 				return new FileTransferStateAndReasonCode(FileTransfer.State.REJECTED,
@@ -479,8 +479,9 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 						ReasonCode.REJECTED_LOW_SPACE);
 			default:
 				throw new IllegalArgumentException(
-						"Unknown reason in OneToOneFileTransferImpl.toStateAndReasonCode; error="
-								+ error + "!");
+						new StringBuilder(
+								"Unknown reason in OneToOneFileTransferImpl.toStateAndReasonCode; fileSharingError=")
+								.append(fileSharingError).append("!").toString());
 		}
 	}
 

@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +15,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.utils;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 /**
  * Provides Base64 encoding and decoding as defined by RFC 2045.
- * 
- * <p>This class implements section <cite>6.8. Base64 Content-Transfer-Encoding</cite> 
- * from RFC 2045 <cite>Multipurpose Internet Mail Extensions (MIME) Part One: 
- * Format of Internet Message Bodies</cite> by Freed and Borenstein.</p> 
+ *
+ * <p>This class implements section <cite>6.8. Base64 Content-Transfer-Encoding</cite>
+ * from RFC 2045 <cite>Multipurpose Internet Mail Extensions (MIME) Part One:
+ * Format of Internet Message Bodies</cite> by Freed and Borenstein.</p>
  *
  * @see <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a>
  * @author Apache Software Foundation
@@ -34,20 +40,20 @@ public class Base64 {
 
     /**
      * Chunk size per RFC 2045 section 6.8.
-     * 
-     * <p>The {@value} character limit does not count the trailing CRLF, but counts 
+     *
+     * <p>The {@value} character limit does not count the trailing CRLF, but counts
      * all other characters, including any equal signs.</p>
-     * 
+     *
      * @see <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045 section 6.8</a>
      */
     static final int CHUNK_SIZE = 76;
 
     /**
      * Chunk separator per RFC 2045 section 2.1.
-     * 
+     *
      * @see <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045 section 2.1</a>
      */
-    static final byte[] CHUNK_SEPARATOR = "\r\n".getBytes();
+    static final byte[] CHUNK_SEPARATOR = "\r\n".getBytes(UTF8);
 
     /**
      * The base length.
@@ -83,13 +89,13 @@ public class Base64 {
      * Used to test the sign of a byte.
      */
     static final int SIGN = -128;
-    
+
     /**
      * Byte used to pad output.
      */
     static final byte PAD = (byte) '=';
 
-    // Create arrays to hold the base64 characters and a 
+    // Create arrays to hold the base64 characters and a
     // lookup for base64 chars
     private static byte[] base64Alphabet = new byte[BASELENGTH];
     private static byte[] lookUpBase64Alphabet = new byte[LOOKUPLENGTH];
@@ -174,8 +180,8 @@ public class Base64 {
             encodedDataLength = numberTriplets * 4;
         }
 
-        // If the output is to be "chunked" into 76 character sections, 
-        // for compliance with RFC 2045 MIME, then it is important to 
+        // If the output is to be "chunked" into 76 character sections,
+        // for compliance with RFC 2045 MIME, then it is important to
         // allow for extra length to account for the separator(s)
         if (isChunked) {
 
@@ -237,7 +243,7 @@ public class Base64 {
                         CHUNK_SEPARATOR.length);
                     chunksSoFar++;
                     nextSeparatorIndex =
-                        (CHUNK_SIZE * (chunksSoFar + 1)) + 
+                        (CHUNK_SIZE * (chunksSoFar + 1)) +
                         (chunksSoFar * CHUNK_SEPARATOR.length);
                     encodedIndex += CHUNK_SEPARATOR.length;
                 }
@@ -326,20 +332,20 @@ public class Base64 {
             }
             decodedData = new byte[lastData - numberQuadruple];
         }
-        
+
         for (int i = 0; i < numberQuadruple; i++) {
             dataIndex = i * 4;
             marker0 = base64Data[dataIndex + 2];
             marker1 = base64Data[dataIndex + 3];
-            
+
             b1 = base64Alphabet[base64Data[dataIndex]];
             b2 = base64Alphabet[base64Data[dataIndex + 1]];
-            
+
             if (marker0 != PAD && marker1 != PAD) {
                 //No PAD e.g 3cQl
                 b3 = base64Alphabet[marker0];
                 b4 = base64Alphabet[marker1];
-                
+
                 decodedData[encodedIndex] = (byte) (b1 << 2 | b2 >> 4);
                 decodedData[encodedIndex + 1] =
                     (byte) (((b2 & 0xf) << 4) | ((b3 >> 2) & 0xf));
@@ -350,7 +356,7 @@ public class Base64 {
             } else if (marker1 == PAD) {
                 //One PAD e.g. 3cQ[Pad]
                 b3 = base64Alphabet[marker0];
-                
+
                 decodedData[encodedIndex] = (byte) (b1 << 2 | b2 >> 4);
                 decodedData[encodedIndex + 1] =
                     (byte) (((b2 & 0xf) << 4) | ((b3 >> 2) & 0xf));
@@ -398,5 +404,5 @@ public class Base64 {
 			encodedBuff.append((char)encoded[i]);
 		}
 		return encodedBuff.toString();
-	}	
+	}
 }

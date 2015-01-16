@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +15,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.utils;
 
 import java.util.UUID;
@@ -24,10 +29,11 @@ import android.os.Build;
 import android.telephony.TelephonyManager;
 
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 
 /***
  * Device utility functions
- * 
+ *
  * @author jexa7410
  */
 public class DeviceUtils {
@@ -38,8 +44,8 @@ public class DeviceUtils {
 
 	/**
 	 * Returns unique UUID of the device
-	 * 
-	 * @param context Context 
+	 *
+	 * @param context Context
 	 * @return UUID
 	 */
     public static UUID getDeviceUUID(Context context) {
@@ -54,7 +60,7 @@ public class DeviceUtils {
                 imei = getSerial();
             }
             if (imei != null) {
-                uuid = UUID.nameUUIDFromBytes(imei.getBytes());
+                uuid = UUID.nameUUIDFromBytes(imei.getBytes(UTF8));
             }
 		}
 
@@ -63,7 +69,7 @@ public class DeviceUtils {
 
 	/**
 	 * Returns the serial number of the device. Only works from OS version Gingerbread.
-	 * 
+	 *
 	 * @return Serial number
 	 */
 	private static String getSerial() {
@@ -88,7 +94,7 @@ public class DeviceUtils {
         String instanceId = null;
         if (RcsSettings.getInstance().isImeiUsedAsDeviceId()) {
             String imei = getImei(context);
-            if (imei != null) { 
+            if (imei != null) {
                 instanceId = "\"<urn:gsma:imei:" + imei + ">\"";
             }
         } else {

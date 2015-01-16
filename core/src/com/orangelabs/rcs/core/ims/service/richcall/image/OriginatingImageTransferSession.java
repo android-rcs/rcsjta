@@ -53,6 +53,7 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.Base64;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -144,22 +145,24 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 	    		// Encode the thumbnail file
 	    	    String imageEncoded = Base64.encodeBase64ToString(getThumbnail().getData());
 
-	    		// Build multipart
-	    		String multipart = 
-	    				Multipart.BOUNDARY_DELIMITER + BOUNDARY_TAG + SipUtils.CRLF +
-	    				ContentTypeHeader.NAME + ": application/sdp" + SipUtils.CRLF +
-	    				ContentLengthHeader.NAME + ": " + sdp.getBytes().length + SipUtils.CRLF +
-	    				SipUtils.CRLF +
-	    				sdp + SipUtils.CRLF + 
-	    				Multipart.BOUNDARY_DELIMITER + BOUNDARY_TAG + SipUtils.CRLF +
-	    				ContentTypeHeader.NAME + ": " + getContent().getEncoding() + SipUtils.CRLF +
-	    				SipUtils.HEADER_CONTENT_TRANSFER_ENCODING + ": base64" + SipUtils.CRLF +
-	    				SipUtils.HEADER_CONTENT_ID + ": <image@joyn.com>" + SipUtils.CRLF +
-	    				ContentLengthHeader.NAME + ": "+ imageEncoded.length() + SipUtils.CRLF +
-	    				ContentDispositionHeader.NAME + ": icon" + SipUtils.CRLF +
-	    				SipUtils.CRLF +
-	    				imageEncoded + SipUtils.CRLF +
-	    				Multipart.BOUNDARY_DELIMITER + BOUNDARY_TAG + Multipart.BOUNDARY_DELIMITER;
+				String multipart = new StringBuilder(Multipart.BOUNDARY_DELIMITER)
+						.append(BOUNDARY_TAG).append(SipUtils.CRLF).append(ContentTypeHeader.NAME)
+						.append(": application/sdp").append(SipUtils.CRLF)
+						.append(ContentLengthHeader.NAME).append(": ")
+						.append(sdp.getBytes(UTF8).length)
+						.append(SipUtils.CRLF).append(SipUtils.CRLF).append(sdp)
+						.append(SipUtils.CRLF).append(Multipart.BOUNDARY_DELIMITER)
+						.append(BOUNDARY_TAG).append(SipUtils.CRLF).append(ContentTypeHeader.NAME)
+						.append(": ").append(getContent().getEncoding()).append(SipUtils.CRLF)
+						.append(SipUtils.HEADER_CONTENT_TRANSFER_ENCODING).append(": base64")
+						.append(SipUtils.CRLF).append(SipUtils.HEADER_CONTENT_ID)
+						.append(": <image@joyn.com>").append(SipUtils.CRLF)
+						.append(ContentLengthHeader.NAME).append(": ")
+						.append(imageEncoded.length()).append(SipUtils.CRLF)
+						.append(ContentDispositionHeader.NAME).append(": icon")
+						.append(SipUtils.CRLF).append(SipUtils.CRLF).append(imageEncoded)
+						.append(SipUtils.CRLF).append(Multipart.BOUNDARY_DELIMITER)
+						.append(BOUNDARY_TAG).append(Multipart.BOUNDARY_DELIMITER).toString();
 
 	    		// Set the local SDP part in the dialog path
 	    		getDialogPath().setLocalContent(multipart);	    		
@@ -205,7 +208,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
     public void prepareMediaSession() throws Exception {
         // Changed by Deutsche Telekom
         // Get the remote SDP part
-        byte[] sdp = getDialogPath().getRemoteContent().getBytes();
+        byte[] sdp = getDialogPath().getRemoteContent().getBytes(UTF8);
 
         // Changed by Deutsche Telekom
         // Create the MSRP session

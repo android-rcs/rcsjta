@@ -10,6 +10,7 @@
 	<string name="rcs_core_permission_read_videoshare">Rcs videoShare read</string>
 	<string name="rcs_core_permission_read_capability">Rcs capability read</string>
 	<string name="rcs_core_permission_read_ipcall">Rcs ipcall read</string>
+	<string name="rcs_core_permission_read_geolocshare">Rcs geoloc read</string>
 	<string name="rcs_core_permission_desc">rcs</string>
 	<string name="rcs_core_permission_ext_desc">rcs extensions</string>
 	<string name="rcs_core_permission_read_chat_desc">Grants permission to read rcs chat history</string>
@@ -18,6 +19,7 @@
 	<string name="rcs_core_permission_read_videoshare_desc">Grants permission to read rcs videoshare history</string>
 	<string name="rcs_core_permission_read_capability_desc">Grants permission to read rcs capability information</string>
 	<string name="rcs_core_permission_read_ipcall_desc">Grants permission to read ipcall history</string>
+	<string name="rcs_core_permission_read_geolocshare_desc">Grants permission to read rcs geoloc history</string>
 
 	<string name="rcs_core_loaded">rcs service is loaded</string>
 	<string name="rcs_core_failed">rcs service has failed</string>

@@ -49,6 +49,7 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.PhoneUtils;
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -70,13 +71,12 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 	 * @param parent IMS service
 	 * @param invite Initial INVITE request
 	 * @param contact the remote contactId
+	 * @param rcsSettings RCS settings
 	 */
-	public TerminatingOneToOneChatSession(ImsService parent, SipRequest invite, ContactId contact) {
-		super(parent, contact, PhoneUtils.formatContactIdToUri(contact));
-
-		// Set first message
-		InstantMessage firstMsg = ChatUtils.getFirstMessage(invite);
-		setFirstMesssage(firstMsg);
+	public TerminatingOneToOneChatSession(ImsService parent, SipRequest invite, ContactId contact,
+			RcsSettings rcsSettings) {
+		super(parent, contact, PhoneUtils.formatContactIdToUri(contact), ChatUtils
+				.getFirstMessage(invite), rcsSettings);
 
 		// Create dialog path
 		createTerminatingDialogPath(invite);
@@ -221,7 +221,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 
 			// Parse the remote SDP part
 			String remoteSdp = getDialogPath().getInvite().getSdpContent();
-			SdpParser parser = new SdpParser(remoteSdp.getBytes());
+			SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));
 			Vector<MediaDescription> media = parser.getMediaDescriptions();
 			MediaDescription mediaDesc = media.elementAt(0);
 			MediaAttribute attr1 = mediaDesc.getMediaAttribute("path");

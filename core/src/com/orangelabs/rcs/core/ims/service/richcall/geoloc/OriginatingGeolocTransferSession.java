@@ -27,6 +27,7 @@ import java.io.InputStream;
 
 import android.net.Uri;
 
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
@@ -42,9 +43,9 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
-import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.utils.ContactUtils;
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -71,7 +72,7 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
 	 * @param contact Remote contact Id
      * @param geoloc Geoloc info
 	 */
-	public OriginatingGeolocTransferSession(ImsService parent, MmContent content, ContactId contact, GeolocPush geoloc) {
+	public OriginatingGeolocTransferSession(ImsService parent, MmContent content, ContactId contact, Geoloc geoloc) {
 		super(parent, content, contact);
 
 		// Create dialog path
@@ -172,7 +173,7 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
     public void prepareMediaSession() throws Exception {
         // Changed by Deutsche Telekom
         // Get the remote SDP part
-        byte[] sdp = getDialogPath().getRemoteContent().getBytes();
+        byte[] sdp = getDialogPath().getRemoteContent().getBytes(UTF8);
 
         // Changed by Deutsche Telekom
         // Create the MSRP session

@@ -40,6 +40,11 @@
         android:description="@string/rcs_core_permission_ext_desc"
         android:protectionLevel="normal" />
 
+	<permission android:name="com.gsma.services.rcs.RCS_READ_GEOLOCSHARE"
+        android:label="@string/rcs_core_permission_read_geolocshare"
+        android:description="@string/rcs_core_permission_read_geolocshare_desc"
+        android:protectionLevel="normal" />
+
 	<permission
         android:name="com.gsma.services.rcs.RCS_READ_CHATS"
         android:description="@string/rcs_core_permission_read_chat_desc"
@@ -218,6 +223,13 @@
             android:name="com.orangelabs.rcs.provider.settings.RcsSettingsProvider"
             android:authorities="com.orangelabs.rcs.setting;com.gsma.services.rcs.provider.setting"
             android:exported="true" />
+
+        <provider
+            android:name="com.orangelabs.rcs.provider.sharing.GeolocSharingProvider"
+            android:authorities="com.gsma.services.rcs.provider.geolocshare"
+            android:exported="true"
+            android:readPermission="com.gsma.services.rcs.RCS_READ_GEOLOCSHARE"
+            android:writePermission="com.orangelabs.rcs.permission.RCS_INTERNAL_ACCESS_ONLY"/>
 
 		<!-- Device events receiver -->	
 

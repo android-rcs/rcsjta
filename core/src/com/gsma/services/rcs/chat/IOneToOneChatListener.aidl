@@ -7,7 +7,8 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 interface IOneToOneChatListener {
 
-	void onMessageStatusChanged(in ContactId contact, in String msgId, in int status, in int reasonCode);
+	void onMessageStatusChanged(in ContactId contact, in String mimeType, in String msgId,
+			in int status, in int reasonCode);
 
 	void onComposingEvent(in ContactId contact, in boolean status);
 }

@@ -37,6 +37,7 @@ import com.orangelabs.rcs.core.ims.service.sip.GenericSipSession;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionListener;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -162,7 +163,8 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
      */
     public void prepareMediaSession() throws Exception {
         // Parse the remote SDP part
-        SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes());
+        SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(
+                UTF8));
         MediaDescription mediaApp = parser.getMediaDescription("application");
         String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaApp);
         int remotePort = mediaApp.port;

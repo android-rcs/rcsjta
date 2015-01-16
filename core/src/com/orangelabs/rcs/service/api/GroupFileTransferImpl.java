@@ -34,7 +34,6 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSessionLis
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferPersistedStorageAccessor;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpTransferState;
-import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.messaging.FileTransferStateAndReasonCode;
 import com.orangelabs.rcs.service.broadcaster.IGroupFileTransferBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -449,7 +448,8 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 	}
 
 	private FileTransferStateAndReasonCode toStateAndReasonCode(FileSharingError error) {
-		switch (error.getErrorCode()) {
+		int fileSharingError = error.getErrorCode();
+		switch (fileSharingError) {
 			case FileSharingError.SESSION_INITIATION_DECLINED:
 			case FileSharingError.SESSION_INITIATION_CANCELLED:
 				return new FileTransferStateAndReasonCode(FileTransfer.State.REJECTED,
@@ -474,8 +474,9 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 						ReasonCode.REJECTED_LOW_SPACE);
 			default:
 				throw new IllegalArgumentException(
-						"Unknown reason in GroupFileTransferImpl.toStateAndReasonCode; error="
-								+ error + "!");
+						new StringBuilder(
+								"Unknown reason in GroupFileTransferImpl.toStateAndReasonCode; fileSharingError=")
+								.append(fileSharingError).append("!").toString());
 		}
 	}
 

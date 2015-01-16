@@ -262,7 +262,7 @@ public class RcsCoreService extends Service implements CoreListener {
             ftApi = new FileTransferServiceImpl(imService, messgaingLog, rcsSettings, contactsManager, core);
             vshApi = new VideoSharingServiceImpl(richCallService, richcallLog, rcsSettings, contactsManager, core);
             ishApi = new ImageSharingServiceImpl(richCallService, richcallLog, rcsSettings, contactsManager);
-            gshApi = new GeolocSharingServiceImpl(richCallService, contactsManager);
+            gshApi = new GeolocSharingServiceImpl(richCallService, contactsManager, richcallLog);
             ipcallApi = new IPCallServiceImpl(ipCallService, IPCallHistory.getInstance(), contactsManager, rcsSettings);
         	sessionApi = new MultimediaSessionServiceImpl(sipService, rcsSettings, contactsManager);
             uploadApi = new FileUploadServiceImpl(imService);
@@ -862,7 +862,7 @@ public class RcsCoreService extends Service implements CoreListener {
 	@Override
 	public void handleGeolocSharingInvitationRejected(ContactId contact, GeolocContent content,
 			int reasonCode) {
-		gshApi.addAndbroadcastGeolocSharingInvitationRejected(contact, content, reasonCode);
+		gshApi.addAndBroadcastGeolocSharingInvitationRejected(contact, content, reasonCode);
 	}
 
 	@Override
