@@ -21,6 +21,9 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+import static com.orangelabs.rcs.utils.StringUtils.UTF8_STR;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -67,8 +70,6 @@ import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.DateUtils;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8_STR;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -636,9 +637,7 @@ public class ChatUtils {
 	 *
 	 * @param xml XML document
 	 * @return Geolocation
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
+	 * @throws IllegalArgumentException
 	 */
 	public static Geoloc parseGeolocDocument(String xml) {
 		try {

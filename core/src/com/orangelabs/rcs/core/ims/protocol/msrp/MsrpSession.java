@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.protocol.msrp;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,7 +36,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.orangelabs.rcs.utils.CloseableUtils;
 import com.orangelabs.rcs.utils.IdGenerator;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

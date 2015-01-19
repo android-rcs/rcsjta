@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.ipcall;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.util.Collection;
 import java.util.Vector;
 
@@ -43,7 +45,6 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
@@ -53,11 +55,11 @@ import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -93,10 +95,11 @@ public abstract class GroupChatSession extends ChatSession {
      * @param conferenceId Conference id
      * @param participants Set of invited participants
      * @param rcsSettings RCS settings
+     * @param messagingLog Messaging log
 	 */
 	public GroupChatSession(ImsService parent, ContactId contact, String conferenceId,
-			Set<ParticipantInfo> participants, RcsSettings rcsSettings) {
-		super(parent, contact, conferenceId, participants, rcsSettings);
+			Set<ParticipantInfo> participants, RcsSettings rcsSettings, MessagingLog messagingLog) {
+		super(parent, contact, conferenceId, participants, rcsSettings, messagingLog);
 
 		conferenceSubscriber = new ConferenceEventSubscribeManager(this);
 

@@ -54,6 +54,7 @@ public class ChatMessage {
      * @param msgId Message ID
      * @param remote Remote contact
      * @param content Text message
+     * @param mimeType MIME type
      * @param serverReceiptAt Receipt date of the message on the server
      * @param displayName the name to display
      */

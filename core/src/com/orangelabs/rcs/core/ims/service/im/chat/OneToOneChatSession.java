@@ -45,6 +45,7 @@ import com.orangelabs.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.IdGenerator;
@@ -77,11 +78,12 @@ public abstract class OneToOneChatSession extends ChatSession {
 	 * @param remoteUri Remote URI
 	 * @param firstMsg First chat message
 	 * @param rcsSettings RCS settings
+	 * @param messagingLog Messaging log
 	 */
 	public OneToOneChatSession(ImsService parent, ContactId contact, String remoteUri,
-			ChatMessage firstMsg, RcsSettings rcsSettings) {
+			ChatMessage firstMsg, RcsSettings rcsSettings, MessagingLog messagingLog) {
 		super(parent, contact, remoteUri, OneToOneChatSession.generateOneOneParticipants(contact),
-				rcsSettings);
+				rcsSettings, messagingLog);
 
 		// Set feature tags
 		List<String> featureTags = ChatUtils.getSupportedFeatureTagsForChat();

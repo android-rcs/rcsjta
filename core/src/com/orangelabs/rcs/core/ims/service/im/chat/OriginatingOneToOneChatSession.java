@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.network.sip.Multipart;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -29,9 +31,9 @@ import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -57,10 +59,11 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
 	 * @param contact Remote contact identifier
 	 * @param msg First message of the session
 	 * @param rcsSettings RCS settings
+	 * @param messagingLog Messaging log
 	 */
 	public OriginatingOneToOneChatSession(ImsService parent, ContactId contact, ChatMessage msg,
-			RcsSettings rcsSettings) {
-		super(parent, contact, PhoneUtils.formatContactIdToUri(contact), msg, rcsSettings);
+			RcsSettings rcsSettings, MessagingLog messagingLog) {
+		super(parent, contact, PhoneUtils.formatContactIdToUri(contact), msg, rcsSettings, messagingLog);
 		// Create dialog path
 		createOriginatingDialogPath();
 		// Set contribution ID

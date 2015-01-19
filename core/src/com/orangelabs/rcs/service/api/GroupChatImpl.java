@@ -194,7 +194,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
                 mPersistentStorage.setMessageStatusAndReasonCode(msgId,
                         ChatLog.Message.Status.Content.DELIVERED,
                         ChatLog.Message.ReasonCode.UNSPECIFIED);
-                mBroadcaster.broadcastMessageStatusChanged(mChatId, msgId, mimeType,
+                mBroadcaster.broadcastMessageStatusChanged(mChatId, mimeType, msgId,
                         ChatLog.Message.Status.Content.DELIVERED,
                         ChatLog.Message.ReasonCode.UNSPECIFIED);
             }
@@ -214,7 +214,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
                 mPersistentStorage.setMessageStatusAndReasonCode(msgId,
                         ChatLog.Message.Status.Content.DISPLAYED,
                         ChatLog.Message.ReasonCode.UNSPECIFIED);
-                mBroadcaster.broadcastMessageStatusChanged(mChatId, msgId, mimeType,
+                mBroadcaster.broadcastMessageStatusChanged(mChatId, mimeType, msgId,
                         ChatLog.Message.Status.Content.DISPLAYED,
                         ChatLog.Message.ReasonCode.UNSPECIFIED);
             }

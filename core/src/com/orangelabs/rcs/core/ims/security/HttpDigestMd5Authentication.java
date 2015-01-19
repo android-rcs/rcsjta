@@ -23,6 +23,7 @@
 package com.orangelabs.rcs.core.ims.security;
 
 import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

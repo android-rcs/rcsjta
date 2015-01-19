@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.provisioning;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.io.ByteArrayInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -39,7 +41,6 @@ import com.orangelabs.rcs.provider.settings.RcsSettingsData.DefaultMessagingMeth
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.GsmaRelease;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.MessagingMode;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

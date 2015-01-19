@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.richcall.video;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.util.Collection;
 import java.util.Vector;
 
@@ -44,7 +46,6 @@ import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.core.ims.service.richcall.RichcallService;
 import com.orangelabs.rcs.utils.ContactUtils;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

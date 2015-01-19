@@ -21,6 +21,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -49,7 +51,6 @@ import com.orangelabs.rcs.utils.Base64;
 import com.orangelabs.rcs.utils.CloseableUtils;
 import com.orangelabs.rcs.utils.FileUtils;
 import com.orangelabs.rcs.utils.MimeManager;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

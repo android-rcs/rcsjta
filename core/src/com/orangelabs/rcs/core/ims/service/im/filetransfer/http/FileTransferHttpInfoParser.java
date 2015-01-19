@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8_STR;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
@@ -36,7 +38,6 @@ import android.net.Uri;
 import android.util.TimeFormatException;
 
 import com.orangelabs.rcs.utils.DateUtils;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8_STR;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

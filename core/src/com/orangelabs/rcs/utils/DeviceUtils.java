@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.utils;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.util.UUID;
 
 import android.content.Context;
@@ -29,7 +31,6 @@ import android.os.Build;
 import android.telephony.TelephonyManager;
 
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 
 /***
  * Device utility functions

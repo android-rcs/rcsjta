@@ -32,6 +32,7 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.service.ImsService;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -52,12 +53,13 @@ public class RejoinGroupChatSession extends GroupChatSession {
 	 * @param parent IMS service
      * @param groupChatInfo Group Chat information
      * @param rcsSettings Rcs settings
+     * @param messagingLog Messaging log
 	 */
 	public RejoinGroupChatSession(ImsService parent, GroupChatInfo groupChatInfo,
-			RcsSettings rcsSettings) {
+			RcsSettings rcsSettings, MessagingLog messagingLog) {
 		super(parent, null, groupChatInfo.getRejoinId(), groupChatInfo.getParticipants(),
-				rcsSettings);
-		
+				rcsSettings, messagingLog);
+
 		// Set subject
 		if (!TextUtils.isEmpty(groupChatInfo.getSubject())) {
 			setSubject(groupChatInfo.getSubject());		

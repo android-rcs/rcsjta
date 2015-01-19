@@ -22,10 +22,10 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat.cpim;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.util.Hashtable;
 import java.util.StringTokenizer;
-
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 
 /**
  * CPIM parser (see RFC3862)

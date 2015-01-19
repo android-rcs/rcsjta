@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat.standfw;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.io.IOException;
 import java.util.Vector;
 
@@ -53,7 +55,6 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.PhoneUtils;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -79,10 +80,11 @@ public class TerminatingStoreAndForwardNotifSession extends OneToOneChatSession 
      * @param invite Initial INVITE request
      * @param contact the remote ContactId
      * @param rcsSettings RCS settings
+     * @param messagingLog Messaging log
 	 */
 	public TerminatingStoreAndForwardNotifSession(ImsService parent, SipRequest invite,
-			ContactId contact, RcsSettings rcsSettings) {
-		super(parent, contact, PhoneUtils.formatContactIdToUri(contact), null, rcsSettings);
+			ContactId contact, RcsSettings rcsSettings, MessagingLog messagingLog) {
+		super(parent, contact, PhoneUtils.formatContactIdToUri(contact), null, rcsSettings, messagingLog);
 
 		// Create the MSRP manager
 		int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort();

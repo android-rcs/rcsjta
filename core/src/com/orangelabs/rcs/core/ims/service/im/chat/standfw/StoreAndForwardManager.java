@@ -26,6 +26,7 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -62,15 +63,17 @@ public class StoreAndForwardManager {
      * @param invite Received invite
      * @param contact Contact identifier
      * @param rcsSettings RCS settings
+     * @param messagingLog Messaging log
      * @throws RcsContactFormatException
      */
-    public void receiveStoredMessages(SipRequest invite, ContactId contact, RcsSettings rcsSettings) {
+    public void receiveStoredMessages(SipRequest invite, ContactId contact, RcsSettings rcsSettings,
+            MessagingLog messagingLog) {
     	if (logger.isActivated()) {
 			logger.debug("Receive stored messages");
 		}    	
     	
 		TerminatingStoreAndForwardMsgSession session = new TerminatingStoreAndForwardMsgSession(
-				imsService, invite, contact, rcsSettings);
+				imsService, invite, contact, rcsSettings, messagingLog);
 
 		imsService.getImsModule().getCore().getListener().handleStoreAndForwardMsgSessionInvitation(session);
 
@@ -83,16 +86,18 @@ public class StoreAndForwardManager {
      * @param invite Received invite
      * @param contact Contact identifier
      * @param rcsSettings RCS settings
+     * @param messagingLog Messaging log
      * @throws RcsContactFormatException
      */
-    public void receiveStoredNotifications(SipRequest invite, ContactId contact, RcsSettings rcsSettings) {
+    public void receiveStoredNotifications(SipRequest invite, ContactId contact,
+            RcsSettings rcsSettings, MessagingLog messagingLog) {
     	if (logger.isActivated()) {
 			logger.debug("Receive stored notifications");
 		}    	
     	
 		TerminatingStoreAndForwardNotifSession session = new TerminatingStoreAndForwardNotifSession(
-				imsService, invite, contact, rcsSettings);
-		
+				imsService, invite, contact, rcsSettings, messagingLog);
+
 		// Start the session
 		session.startSession();
     }    

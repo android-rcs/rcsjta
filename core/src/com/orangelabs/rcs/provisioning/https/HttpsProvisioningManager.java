@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.provisioning.https;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
@@ -84,7 +86,6 @@ import com.orangelabs.rcs.utils.HttpUtils;
 import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.NetworkUtils;
 import com.orangelabs.rcs.utils.StringUtils;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

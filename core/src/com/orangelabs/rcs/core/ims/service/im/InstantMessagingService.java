@@ -752,7 +752,7 @@ public class InstantMessagingService extends ImsService {
 		assertAvailableChatSession("Max chat sessions achieved");
 
 		OriginatingOneToOneChatSession session = new OriginatingOneToOneChatSession(this, contact,
-				firstMsg, mRcsSettings);
+				firstMsg, mRcsSettings, mMessagingLog);
 		return session;
 	}
 
@@ -826,8 +826,8 @@ public class InstantMessagingService extends ImsService {
 			}
 
 			// Create a new session
-			TerminatingOneToOneChatSession session = new TerminatingOneToOneChatSession(this,
-					invite, remote, mRcsSettings);
+            TerminatingOneToOneChatSession session = new TerminatingOneToOneChatSession(this,
+					invite, remote, mRcsSettings, mMessagingLog);
 
 			getImsModule().getCore().getListener().handleOneOneChatSessionInvitation(session);
 
@@ -861,8 +861,8 @@ public class InstantMessagingService extends ImsService {
 				.getParticipantInfos(contacts);
 
 		// Create a new session
-		OriginatingAdhocGroupChatSession session = new OriginatingAdhocGroupChatSession(this,
-				ImsModule.IMS_USER_PROFILE.getImConferenceUri(), subject, participants, mRcsSettings);
+        OriginatingAdhocGroupChatSession session = new OriginatingAdhocGroupChatSession(this,
+				ImsModule.IMS_USER_PROFILE.getImConferenceUri(), subject, participants, mRcsSettings, mMessagingLog);
 
 		return session;
 	}
@@ -916,8 +916,8 @@ public class InstantMessagingService extends ImsService {
 		}
 
 		// Create a new session
-		TerminatingAdhocGroupChatSession session = new TerminatingAdhocGroupChatSession(this,
-				invite, contact, remoteUri, participants, mRcsSettings);
+        TerminatingAdhocGroupChatSession session = new TerminatingAdhocGroupChatSession(this,
+				invite, contact, remoteUri, participants, mRcsSettings, mMessagingLog);
 
 		/*--
 		 * 6.3.3.1 Leaving a Group Chat that is idle
@@ -985,7 +985,7 @@ public class InstantMessagingService extends ImsService {
 			logger.debug("Rejoin group chat: " + groupChat.toString());
 		}
 
-		return new RejoinGroupChatSession(this, groupChat, mRcsSettings);
+		return new RejoinGroupChatSession(this, groupChat, mRcsSettings, mMessagingLog);
     }
 
     /**
@@ -1029,7 +1029,7 @@ public class InstantMessagingService extends ImsService {
 		}
 
 		return new RestartGroupChatSession(this, ImsModule.IMS_USER_PROFILE.getImConferenceUri(), groupChat.getSubject(),
-				participants, chatId, mRcsSettings);
+				participants, chatId, mRcsSettings, mMessagingLog);
     }
 
     /**
@@ -1169,7 +1169,7 @@ public class InstantMessagingService extends ImsService {
 		}
 
 		// Create a new session
-    	getStoreAndForwardManager().receiveStoredMessages(invite, remote, mRcsSettings);
+        getStoreAndForwardManager().receiveStoredMessages(invite, remote, mRcsSettings, mMessagingLog);
     }
 
     /**
@@ -1202,7 +1202,7 @@ public class InstantMessagingService extends ImsService {
 	    }
 
 		// Create a new session
-    	getStoreAndForwardManager().receiveStoredNotifications(invite,remote, null);
+        getStoreAndForwardManager().receiveStoredNotifications(invite,remote, mRcsSettings, mMessagingLog);
     }
 
     /**
@@ -1267,7 +1267,7 @@ public class InstantMessagingService extends ImsService {
 
 			// Create and start a chat session
 			TerminatingOneToOneChatSession oneToOneChatSession = new TerminatingOneToOneChatSession(
-					this, invite, remote, mRcsSettings);
+					this, invite, remote, mRcsSettings, mMessagingLog);
 			oneToOneChatSession.startSession();
 
 			// Create and start a new HTTP file transfer session
@@ -1308,7 +1308,7 @@ public class InstantMessagingService extends ImsService {
 
         // Create and start a chat session
         TerminatingStoreAndForwardMsgSession one2oneChatSession = new TerminatingStoreAndForwardMsgSession(
-                this, invite, remote, mRcsSettings);
+                this, invite, remote, mRcsSettings, mMessagingLog);
         one2oneChatSession.startSession();
 
         // Auto reject if file too big

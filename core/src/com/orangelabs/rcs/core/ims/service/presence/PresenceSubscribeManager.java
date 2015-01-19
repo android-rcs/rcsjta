@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.presence;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.io.ByteArrayInputStream;
 import java.util.Vector;
 
@@ -45,7 +47,6 @@ import com.orangelabs.rcs.core.ims.service.presence.rlmi.ResourceInstance;
 import com.orangelabs.rcs.core.ims.service.presence.rlmi.RlmiDocument;
 import com.orangelabs.rcs.core.ims.service.presence.rlmi.RlmiParser;
 import com.orangelabs.rcs.utils.ContactUtils;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

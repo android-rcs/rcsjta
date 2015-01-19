@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.network.sip;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import gov2.nist.core.NameValue;
 import gov2.nist.javax2.sip.Utils;
 import gov2.nist.javax2.sip.header.Subject;
@@ -66,7 +68,6 @@ import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.logger.Logger;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 /**
  * SIP message factory
  *

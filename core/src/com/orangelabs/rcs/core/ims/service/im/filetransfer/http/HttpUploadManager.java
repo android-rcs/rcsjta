@@ -21,6 +21,9 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+import static com.orangelabs.rcs.utils.StringUtils.UTF8_STR;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -57,8 +60,6 @@ import com.orangelabs.rcs.core.ims.protocol.http.HttpAuthenticationAgent;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.utils.CloseableUtils;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8_STR;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

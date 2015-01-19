@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -63,7 +65,6 @@ import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -144,6 +145,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 
     protected final RcsSettings mRcsSettings;
 
+    private final MessagingLog mMessagingLog;
+
 	/**
 	 * Receive chat message
 	 *
@@ -151,7 +154,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	 * @param imdnDisplayedRequested Indicates whether display report was requested
 	 */
 	protected void receive(ChatMessage msg, boolean imdnDisplayedRequested) {
-		if (MessagingLog.getInstance().isMessagePersisted(msg.getMessageId())) {
+		if (mMessagingLog.isMessagePersisted(msg.getMessageId())) {
 			// Message already received
 			return;
 		}
@@ -172,11 +175,13 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param remoteUri Remote URI
      * @param participants List of participants
      * @param rcsSettings RCS settings
+     * @param messagingLog Messaging log
 	 */
-	public ChatSession(ImsService parent, ContactId contact, String remoteUri, Set<ParticipantInfo> participants, RcsSettings rcsSettings) {
+	public ChatSession(ImsService parent, ContactId contact, String remoteUri, Set<ParticipantInfo> participants, RcsSettings rcsSettings, MessagingLog messagingLog) {
 		super(parent, contact, remoteUri);
 
 		mRcsSettings = rcsSettings;
+		mMessagingLog = messagingLog;
 		// Set the session participants
 		this.participants = participants;
 
@@ -887,10 +892,10 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		// Send data
 		boolean result = sendDataChunks(IdGenerator.generateMessageID(), content, CpimMessage.MIME_TYPE, typeMsrpChunk);
 		if (result && ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
-			if (MessagingLog.getInstance().isFileTransfer(msgId)) {
-				//TODO update file transfer status
+			if (mMessagingLog.isFileTransfer(msgId)) {
+			    //TODO update file transfer status
 			} else {
-				MessagingLog.getInstance().markIncomingChatMessageAsReceived(msgId);
+				mMessagingLog.markIncomingChatMessageAsReceived(msgId);
 			}
 		}
 	}
@@ -921,7 +926,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                 return;
             }
 
-            boolean isFileTransfer = MessagingLog.getInstance().isFileTransfer(imdn.getMsgId());
+            boolean isFileTransfer = mMessagingLog.isFileTransfer(imdn.getMsgId());
             if (isFileTransfer) {
                 if (isGroupChat()) {
                     ((InstantMessagingService)getImsService()).receiveGroupFileDeliveryStatus(

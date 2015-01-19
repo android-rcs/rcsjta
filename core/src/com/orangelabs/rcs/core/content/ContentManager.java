@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.content;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
@@ -31,7 +33,6 @@ import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.MimeManager;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;

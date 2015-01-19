@@ -22,10 +22,11 @@
 
 package com.orangelabs.rcs.core.ims.protocol.http;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.ims.security.HttpDigestMd5Authentication;
 import com.orangelabs.rcs.utils.Base64;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

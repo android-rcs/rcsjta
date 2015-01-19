@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.presence;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8_STR;
+
 import java.util.Set;
 
 import com.gsma.services.rcs.RcsContactFormatException;
@@ -43,7 +45,6 @@ import com.orangelabs.rcs.service.StartService;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.DateUtils;
 import com.orangelabs.rcs.utils.StringUtils;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8_STR;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

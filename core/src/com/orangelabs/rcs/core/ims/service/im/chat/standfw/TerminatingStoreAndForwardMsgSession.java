@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat.standfw;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Vector;
@@ -49,9 +51,9 @@ import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -72,11 +74,12 @@ public class TerminatingStoreAndForwardMsgSession extends OneToOneChatSession im
      * @param invite Initial INVITE request
      * @param contact the remote ContactId
      * @param rcsSettings RCS settings
+     * @param messagingLog Messaging log
 	 */
 	public TerminatingStoreAndForwardMsgSession(ImsService parent, SipRequest invite,
-			ContactId contact, RcsSettings rcsSettings) {
+			ContactId contact, RcsSettings rcsSettings, MessagingLog messagingLog) {
 		super(parent, contact, PhoneUtils.formatContactIdToUri(contact), ChatUtils
-				.getFirstMessage(invite), rcsSettings);
+				.getFirstMessage(invite), rcsSettings, messagingLog);
 
 		// Set feature tags
 		setFeatureTags(ChatUtils.getSupportedFeatureTagsForChat());

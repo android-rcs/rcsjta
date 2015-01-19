@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -50,7 +52,6 @@ import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -79,11 +80,12 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 	 * @param remoteUri the remote Uri
 	 * @param participants set of participants
 	 * @param rcsSettings RCS settings
+	 * @param messagingLog Messaging log
 	 */
 	public TerminatingAdhocGroupChatSession(ImsService parent, SipRequest invite,
 			ContactId contact, String remoteUri, Set<ParticipantInfo> participants,
-			RcsSettings rcsSettings) {
-		super(parent, contact, remoteUri, participants, rcsSettings);
+			RcsSettings rcsSettings, MessagingLog messagingLog) {
+		super(parent, contact, remoteUri, participants, rcsSettings, messagingLog);
 
 		Set<ParticipantInfo> sessionParticipants = getParticipants();
 		// Set subject

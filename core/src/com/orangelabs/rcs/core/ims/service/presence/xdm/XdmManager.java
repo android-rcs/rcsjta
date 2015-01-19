@@ -22,6 +22,9 @@
 
 package com.orangelabs.rcs.core.ims.service.presence.xdm;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+import static com.orangelabs.rcs.utils.StringUtils.UTF8_STR;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,8 +60,6 @@ import com.orangelabs.rcs.utils.Base64;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.HttpUtils;
 import com.orangelabs.rcs.utils.PhoneUtils;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8_STR;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

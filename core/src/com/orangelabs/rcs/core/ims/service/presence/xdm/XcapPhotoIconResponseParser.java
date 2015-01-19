@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.presence.xdm;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -29,7 +31,6 @@ import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
 
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

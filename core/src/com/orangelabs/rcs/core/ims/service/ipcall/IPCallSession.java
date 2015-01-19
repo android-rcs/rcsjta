@@ -21,6 +21,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.ipcall;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.util.Vector;
 
 import android.os.RemoteException;
@@ -51,7 +53,6 @@ import com.orangelabs.rcs.core.ims.service.ImsSessionBasedServiceError;
 import com.orangelabs.rcs.core.ims.service.richcall.video.SdpOrientationExtension;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.PhoneUtils;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**

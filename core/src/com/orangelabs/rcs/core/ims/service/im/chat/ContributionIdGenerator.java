@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.util.UUID;
 
 import javax.crypto.Mac;
@@ -29,7 +31,6 @@ import javax.crypto.spec.SecretKeySpec;
 
 import com.orangelabs.rcs.platform.AndroidFactory;
 import com.orangelabs.rcs.utils.DeviceUtils;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 
 /**
  * Contribution ID generator based on RFC draft-kaplan-dispatch-session-id-03

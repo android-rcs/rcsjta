@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.util.Set;
 
 import javax2.sip.header.RequireHeader;
@@ -35,8 +37,8 @@ import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -63,10 +65,11 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
      * @param subject Subject associated to the session
      * @param participants List of invited participants
      * @param rcsSettings RCS settings
+     * @param messagingLog Messaging log
 	 */
 	public OriginatingAdhocGroupChatSession(ImsService parent, String conferenceId, String subject,
-			Set<ParticipantInfo> participants, RcsSettings rcsSettings) {
-		super(parent, null, conferenceId, participants, rcsSettings);
+			Set<ParticipantInfo> participants, RcsSettings rcsSettings, MessagingLog messagingLog) {
+		super(parent, null, conferenceId, participants, rcsSettings, messagingLog);
 
 		// Set subject
 		if ((subject != null) && (subject.length() > 0)) {

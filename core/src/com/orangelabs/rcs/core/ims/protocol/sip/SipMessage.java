@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.protocol.sip;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import gov2.nist.javax2.sip.header.extensions.SessionExpiresHeader;
 
 import java.text.ParseException;
@@ -48,7 +50,6 @@ import com.orangelabs.rcs.core.ims.network.sip.Multipart;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
 import com.orangelabs.rcs.utils.StringUtils;
-import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 
 /**
  * SIP message

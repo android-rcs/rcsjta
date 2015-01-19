@@ -22,10 +22,10 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat.iscomposing;
 
-import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
-import com.orangelabs.rcs.utils.DateUtils;
 import static com.orangelabs.rcs.utils.StringUtils.UTF8_STR;
 
+import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
+import com.orangelabs.rcs.utils.DateUtils;
 
 /**
  * Is composing info document (see RFC3994)
