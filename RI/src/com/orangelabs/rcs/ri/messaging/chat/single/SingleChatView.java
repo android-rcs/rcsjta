@@ -111,7 +111,9 @@ public class SingleChatView extends ChatView {
 		@Override
 		public void onComposingEvent(ContactId contact, boolean status) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onComposingEvent contact=" + contact + " status=" + status);
+				Log.d(LOGTAG,
+						new StringBuilder("onComposingEvent contact=").append(contact.toString())
+								.append(" status=").append(status).toString());
 			}
 			// Discard event if not for current contact
 			if (mContact == null || !mContact.equals(contact)) {
@@ -121,9 +123,14 @@ public class SingleChatView extends ChatView {
 		}
 
 		@Override
-		public void onMessageStatusChanged(ContactId contact, String msgId, int status, int reasonCode) {
+		public void onMessageStatusChanged(ContactId contact, String mimeType, String msgId,
+				int status, int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onMessageStatusChanged contact=" + contact + " msgId=" + msgId + " status=" + status);
+				Log.d(LOGTAG,
+						new StringBuilder("onMessageStatusChanged contact=")
+								.append(contact.toString()).append(" mime-type=").append(mimeType)
+								.append(" msgId=").append(msgId).append(" status=").append(status)
+								.toString());
 			}
 		}
 
@@ -191,9 +198,6 @@ public class SingleChatView extends ChatView {
 
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-		if (LogUtils.isActive) {
-			Log.d(LOGTAG, "onCreateLoader " + id);
-		}
 		// Create a new CursorLoader with the following query parameters.
 		Uri uri = ChatLog.Message.CONTENT_URI;
 		CursorLoader loader = new CursorLoader(this, uri, PROJECTION, WHERE_CLAUSE, new String[] { mContact.toString() },
@@ -210,7 +214,7 @@ public class SingleChatView extends ChatView {
 		// Adapt the contextual menu according to the selected item
 		menu.add(0, CHAT_MENU_ITEM_DELETE, CHAT_MENU_ITEM_DELETE, R.string.menu_delete_message);
 		int direction = cursor.getInt(cursor.getColumnIndex(ChatLog.Message.DIRECTION));
-		if (direction == RcsCommon.Direction.OUTGOING) {
+		if (RcsCommon.Direction.OUTGOING == direction) {
 			int status = cursor.getInt(cursor.getColumnIndex(ChatLog.Message.STATUS));
 			switch (status) {
 			case ChatLog.Message.Status.Content.FAILED:
@@ -235,7 +239,7 @@ public class SingleChatView extends ChatView {
 		Cursor cursor = (Cursor) (mAdapter.getItem(info.position));
 		String messageId = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
 		if (LogUtils.isActive) {
-			Log.d(LOGTAG, "onContextItemSelected msgId=" + messageId);
+			Log.d(LOGTAG, "onContextItemSelected msgId=".concat(messageId));
 		}
 		switch (item.getItemId()) {
 		case CHAT_MENU_ITEM_RESEND:
@@ -298,7 +302,7 @@ public class SingleChatView extends ChatView {
 		// Send text message
 		try {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "sendTextMessage msg=" + message);
+				Log.d(LOGTAG, "sendTextMessage msg=".concat(message));
 			}
 			// Send the text to remote
 			return mChat.sendMessage(message);
@@ -315,7 +319,7 @@ public class SingleChatView extends ChatView {
 		// Send geoloc message
 		try {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "sendMessage geoloc=" + geoloc);
+				Log.d(LOGTAG, "sendMessage geoloc=".concat(geoloc.toString()));
 			}
 			// Send the text to remote
 			return mChat.sendMessage(geoloc);
@@ -345,7 +349,7 @@ public class SingleChatView extends ChatView {
 					if (mChat != null) {
 						mChat.sendIsComposingEvent(isTyping);
 						if (LogUtils.isActive) {
-							Log.d(LOGTAG, "sendIsComposingEvent " + isTyping);
+							Log.d(LOGTAG, "sendIsComposingEvent ".concat(String.valueOf(isTyping)));
 						}
 					}
 				} catch (Exception e) {

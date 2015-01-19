@@ -51,10 +51,17 @@ public class SingleChatIntentService extends IntentService {
 	 */
 	private static final String LOGTAG = LogUtils.getTag(SingleChatIntentService.class.getSimpleName());
 
+	/**
+	 * Creates an IntentService.
+	 * @param name of the thread
+	 */
 	public SingleChatIntentService(String name) {
 		super(name);
 	}
 
+	/**
+	 * Creates an IntentService.
+	 */
 	public SingleChatIntentService() {
 		super("SingleChatIntentService");
 	}
@@ -69,11 +76,15 @@ public class SingleChatIntentService extends IntentService {
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		if (intent != null && SingleChatInvitationReceiver.ACTION_NEW_121_CHAT_MSG.equals(intent.getAction())) {
+		if (intent == null || intent.getAction() == null) {
+			return;
+		}
+		String action = intent.getAction();
+		if (SingleChatInvitationReceiver.ACTION_NEW_121_CHAT_MSG.equals(action)) {
 			handleNewOneToOneChatMessage(intent);
 		} else {
 			if (LogUtils.isActive) {
-				Log.e(LOGTAG, "Unknown action " + intent.getAction());
+				Log.e(LOGTAG, "Unknown action ".concat(action));
 			}
 		}
 	}
@@ -87,22 +98,29 @@ public class SingleChatIntentService extends IntentService {
 	private void handleNewOneToOneChatMessage(Intent messageIntent) {
 		// Gets data from the incoming Intent
 		String msgId = messageIntent.getStringExtra(OneToOneChatIntent.EXTRA_MESSAGE_ID);
-		if (msgId != null) {
-			try {
-				// Read message from provider
-				ChatMessageDAO messageDAO = new ChatMessageDAO(this, msgId);
-				if (LogUtils.isActive) {
-					Log.d(LOGTAG, "One to one chat message " + messageDAO);
-				}
-				forwardSingleChatMessage2UI(this, messageDAO);
-			} catch (Exception e) {
-				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "Cannot read chat message from provider", e);
-				}
-			}
-		} else {
+		if (msgId == null) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "Cannot read message ID");
+			}
+			return;
+		}
+		String mimeType = messageIntent.getStringExtra(OneToOneChatIntent.EXTRA_MIME_TYPE);
+		if (mimeType == null) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "Cannot read message mime-type");
+			}
+			return;
+		}
+		try {
+			// Read message from provider
+			ChatMessageDAO messageDAO = new ChatMessageDAO(this, msgId);
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "One to one chat message ".concat(messageDAO.toString()));
+			}
+			forwardSingleChatMessage2UI(this, messageDAO);
+		} catch (Exception e) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "Cannot read chat message from provider", e);
 			}
 		}
 	}
@@ -116,34 +134,37 @@ public class SingleChatIntentService extends IntentService {
 	 *            the chat message DAO
 	 */
 	private void forwardSingleChatMessage2UI(Context context, ChatMessageDAO message) {
-		if (message.getContact() == null) {
+		ContactId contact = message.getContact();
+		if (contact == null) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "Contact is null");
 			}
 			return;
 		}
-		Intent intent = SingleChatView.forgeIntentToStart(context, message.getContact());
+		String mimeType = message.getMimeType();
+		String content = message.getContent();
+		Intent intent = SingleChatView.forgeIntentToStart(context, contact);
 		// Do not display notification if activity is on foreground for this contact
-		if (SingleChatView.isDisplayed() && message.getContact().equals(SingleChatView.contactOnForeground)) {
+		if (SingleChatView.isDisplayed() && contact.equals(SingleChatView.contactOnForeground)) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "New message '" + message.getContent() + "' for contact " + message.getContact());
+				Log.d(LOGTAG, new StringBuilder("New message '").append(content)
+						.append("' for contact ").append(contact.toString()).toString());
 			}
 			context.startActivity(intent);
 		} else {
 			// Create notification
 			PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-			ContactId contact = message.getContact();
 			String displayName = RcsDisplayName.getInstance(this).getDisplayName(contact);
 			String title = context.getString(R.string.title_recv_chat, displayName);
 			String msg;
-			if (ChatLog.Message.MimeType.GEOLOC_MESSAGE.equals(message.getMimeType())) {
+			if (ChatLog.Message.MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
 				msg = context.getString(R.string.label_geoloc_msg);
 			} else {
-				if (ChatLog.Message.MimeType.TEXT_MESSAGE.equals(message.getMimeType())) {
-					msg = message.getContent();
+				if (ChatLog.Message.MimeType.TEXT_MESSAGE.equals(mimeType)) {
+					msg = content;
 				} else {
 					if (LogUtils.isActive) {
-						Log.e(LOGTAG, "Unknown message type '" + message.getMimeType());
+						Log.e(LOGTAG, "Unknown message type '".concat(mimeType));
 					}
 					return;
 				}
@@ -153,7 +174,7 @@ public class SingleChatIntentService extends IntentService {
 
 			// Send notification
 			NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-			notificationManager.notify(message.getContact().toString(), Utils.NOTIF_ID_SINGLE_CHAT, notif);
+			notificationManager.notify(contact.toString(), Utils.NOTIF_ID_SINGLE_CHAT, notif);
 		}
 	}
 

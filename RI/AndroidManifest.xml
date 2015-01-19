@@ -445,6 +445,8 @@
 	 
 	 	<service android:name=".messaging.ft.FileTransferIntentService" android:exported="false" />
 	 	
+	 	<service android:name=".sharing.geoloc.GeolocSharingIntentService" android:exported="false" />
+	 	
 	 	<service android:name=".sharing.image.ImageSharingIntentService" android:exported="false" />
 	 	
 	 	<service android:name=".sharing.video.VideoSharingIntentService" android:exported="false" />

@@ -17,21 +17,26 @@
  ******************************************************************************/
 package com.gsma.service.rcs.database;
 
+import java.util.Date;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.test.AndroidTestCase;
+import android.util.Log;
 
-import com.gsma.services.rcs.RcsContactFormatException;
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsCommon;
+import com.gsma.services.rcs.RcsContactFormatException;
+import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
-import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.Geoloc;
-import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
-import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
-import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
+import com.orangelabs.rcs.core.ims.ImsModule;
+import com.orangelabs.rcs.core.ims.service.im.chat.ChatMessage;
+import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
+import com.orangelabs.rcs.core.ims.userprofile.UserProfile;
 import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 
@@ -39,7 +44,7 @@ public class ChatMessageTest extends AndroidTestCase {
 	private ContactId mContact;
 	private Context mContext;
 	private ContentResolver mContentResolver;
-	
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		mContext = getContext();
@@ -50,95 +55,92 @@ public class ChatMessageTest extends AndroidTestCase {
 		try {
 			mContact = contactUtils.formatContact("+339000000");
 		} catch (RcsContactFormatException e) {
-			fail( "Cannot create contactID");
+			fail("Cannot create contactID");
 		}
+		ImsModule.IMS_USER_PROFILE = new UserProfile(mContact, "homeDomain", "privateID",
+				"password", "realm", "xdmServerAddr", "xdmServerLogin", "xdmServerPassword",
+				"imConferenceUri");
 	}
 
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}
-	
+
 	public void testTextMessage() {
 		String msgId = "" + System.currentTimeMillis();
 		String txt = "Hello";
-		InstantMessage msg = new InstantMessage(msgId, mContact, txt, true, "display");
-		
+		Date now = new Date();
+		ChatMessage msg = new ChatMessage(msgId, mContact, txt, MimeType.TEXT_MESSAGE, now,
+				"display");
+
 		// Add entry
-		MessagingLog.getInstance().addOutgoingOneToOneChatMessage(msg, ChatLog.Message.Status.Content.SENT, ChatLog.Message.ReasonCode.UNSPECIFIED);
-		
+		MessagingLog.getInstance().addOutgoingOneToOneChatMessage(msg,
+				ChatLog.Message.Status.Content.SENT, ChatLog.Message.ReasonCode.UNSPECIFIED);
+
 		// Read entry
-		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId);		
-    	Cursor cursor = mContentResolver.query(uri, 
-    			new String[] {
-    				ChatLog.Message.DIRECTION,
-    				ChatLog.Message.CONTACT,
-    				ChatLog.Message.CONTENT,
-    				ChatLog.Message.MIME_TYPE,
-    				ChatLog.Message.MESSAGE_ID
-    				},
-    				"(" + ChatLog.Message.MESSAGE_ID + "='" + msgId + "')", 
-    			null, 
-    			ChatLog.Message.TIMESTAMP + " ASC");
-    	assertEquals(cursor.getCount(), 1);
-    	while(cursor.moveToNext()) {
-    		int direction = cursor.getInt(cursor.getColumnIndex(ChatLog.Message.DIRECTION));
-    		String contact = cursor.getString(cursor.getColumnIndex(ChatLog.Message.CONTACT));
-    		String content = cursor.getString(cursor.getColumnIndex(ChatLog.Message.CONTENT));
-    		assertNotNull(content);
-    		String readTxt = new String(content);
-    		String mimeType = cursor.getString(cursor.getColumnIndex(ChatLog.Message.MIME_TYPE));
-    		String id = cursor.getString(cursor.getColumnIndex(ChatLog.Message.MESSAGE_ID));
-    		
-    		assertEquals(direction, RcsCommon.Direction.OUTGOING);
-    		assertEquals(contact, mContact.toString());
-    		assertEquals(readTxt, txt);
-    		assertEquals(mimeType, com.gsma.services.rcs.chat.ChatLog.Message.MimeType.TEXT_MESSAGE);
-    		assertEquals(id, msgId);
-    	}
+		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId);
+		Cursor cursor = mContentResolver.query(uri, new String[] { ChatLog.Message.DIRECTION,
+				ChatLog.Message.CONTACT, ChatLog.Message.CONTENT, ChatLog.Message.MIME_TYPE,
+				ChatLog.Message.MESSAGE_ID, ChatLog.Message.TIMESTAMP }, "("
+				+ ChatLog.Message.MESSAGE_ID + "='" + msgId + "')", null, ChatLog.Message.TIMESTAMP
+				+ " ASC");
+		assertEquals(cursor.getCount(), 1);
+		while (cursor.moveToNext()) {
+			int direction = cursor.getInt(cursor.getColumnIndex(ChatLog.Message.DIRECTION));
+			String contact = cursor.getString(cursor.getColumnIndex(ChatLog.Message.CONTACT));
+			String content = cursor.getString(cursor.getColumnIndex(ChatLog.Message.CONTENT));
+			assertNotNull(content);
+			String readTxt = new String(content);
+			String mimeType = cursor.getString(cursor.getColumnIndex(ChatLog.Message.MIME_TYPE));
+			String id = cursor.getString(cursor.getColumnIndex(ChatLog.Message.MESSAGE_ID));
+			long readDate = cursor.getLong(cursor.getColumnIndex(ChatLog.Message.TIMESTAMP));
+			assertEquals(now.getTime(), readDate);
+			assertEquals(direction, RcsCommon.Direction.OUTGOING);
+			assertEquals(contact, mContact.toString());
+			assertEquals(readTxt, txt);
+			assertEquals(mimeType, com.gsma.services.rcs.chat.ChatLog.Message.MimeType.TEXT_MESSAGE);
+			assertEquals(id, msgId);
+		}
 	}
 
 	public void testGeolocMessage() {
-		String msgId = "" + System.currentTimeMillis();
-		GeolocPush geoloc = new GeolocPush("test", 10.0, 11.0, 2000);
-		GeolocMessage geolocMsg = new GeolocMessage(msgId, mContact, geoloc, true,"display");
 		
+		Geoloc geoloc = new Geoloc("test", 10.0, 11.0, 2000, 2);
+		ChatMessage chatMsg = ChatUtils.createGeolocMessage(mContact, geoloc);
+		String msgId = chatMsg.getMessageId();
 		// Add entry
-		MessagingLog.getInstance().addOutgoingOneToOneChatMessage(geolocMsg, ChatLog.Message.Status.Content.SENT, ChatLog.Message.ReasonCode.UNSPECIFIED);
-		
+		MessagingLog.getInstance().addOutgoingOneToOneChatMessage(chatMsg,
+				ChatLog.Message.Status.Content.SENT, ChatLog.Message.ReasonCode.UNSPECIFIED);
+
 		// Read entry
-		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId);		
-    	Cursor cursor = mContentResolver.query(uri, 
-    			new String[] {
-    				ChatLog.Message.DIRECTION,
-    				ChatLog.Message.CONTACT,
-    				ChatLog.Message.CONTENT,
-    				ChatLog.Message.MIME_TYPE,
-    				ChatLog.Message.MESSAGE_ID
-    				},
-    				"(" + ChatLog.Message.MESSAGE_ID + "='" + msgId + "')", 
-    			null, 
-    			ChatLog.Message.TIMESTAMP + " ASC");
-    	assertEquals(cursor.getCount(), 1);
-    	while(cursor.moveToNext()) {
-    		int direction = cursor.getInt(cursor.getColumnIndex(ChatLog.Message.DIRECTION));
-    		String contact = cursor.getString(cursor.getColumnIndex(ChatLog.Message.CONTACT));
-    		String content = cursor.getString(cursor.getColumnIndex(ChatLog.Message.CONTENT));
-    		assertNotNull(content);
+		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId);
+		Cursor cursor = mContentResolver.query(uri, new String[] { ChatLog.Message.DIRECTION,
+				ChatLog.Message.CONTACT, ChatLog.Message.CONTENT, ChatLog.Message.MIME_TYPE,
+				ChatLog.Message.MESSAGE_ID }, "(" + ChatLog.Message.MESSAGE_ID + "='" + msgId
+				+ "')", null, ChatLog.Message.TIMESTAMP + " ASC");
+		assertEquals(cursor.getCount(), 1);
+		while (cursor.moveToNext()) {
+			int direction = cursor.getInt(cursor.getColumnIndex(ChatLog.Message.DIRECTION));
+			String contact = cursor.getString(cursor.getColumnIndex(ChatLog.Message.CONTACT));
+			String content = cursor.getString(cursor.getColumnIndex(ChatLog.Message.CONTENT));
+			assertNotNull(content);
+			Log.w("[TEST]",content);
 			Geoloc readGeoloc = new Geoloc(content);
-    		assertNotNull(readGeoloc);
-			
-    		String contentType = cursor.getString(cursor.getColumnIndex(ChatLog.Message.MIME_TYPE));
-    		String id = cursor.getString(cursor.getColumnIndex(ChatLog.Message.MESSAGE_ID));
-    		
-    		assertEquals(direction, RcsCommon.Direction.OUTGOING);
-    		assertEquals(contact, mContact.toString());
-    		assertEquals(readGeoloc.getLabel(), geoloc.getLabel());
-    		assertEquals(readGeoloc.getLatitude(), geoloc.getLatitude());
-    		assertEquals(readGeoloc.getLongitude(), geoloc.getLongitude());
-    		assertEquals(readGeoloc.getExpiration(), geoloc.getExpiration());
-    		assertEquals(readGeoloc.getAccuracy(), geoloc.getAccuracy());
-    		assertEquals(contentType, com.gsma.services.rcs.chat.ChatLog.Message.MimeType.GEOLOC_MESSAGE);
-    		assertEquals(id, msgId);
-    	}
+			assertNotNull(readGeoloc);
+
+			String contentType = cursor.getString(cursor.getColumnIndex(ChatLog.Message.MIME_TYPE));
+			String id = cursor.getString(cursor.getColumnIndex(ChatLog.Message.MESSAGE_ID));
+
+			assertEquals(direction, RcsCommon.Direction.OUTGOING);
+			assertEquals(contact, mContact.toString());
+			assertEquals(readGeoloc.getLabel(), geoloc.getLabel());
+			assertEquals(readGeoloc.getLatitude(), geoloc.getLatitude());
+			assertEquals(readGeoloc.getLongitude(), geoloc.getLongitude());
+			assertEquals(readGeoloc.getExpiration(), geoloc.getExpiration());
+			assertEquals(readGeoloc.getAccuracy(), geoloc.getAccuracy());
+			assertEquals(contentType,
+					com.gsma.services.rcs.chat.ChatLog.Message.MimeType.GEOLOC_MESSAGE);
+			assertEquals(id, msgId);
+		}
 	}
 }

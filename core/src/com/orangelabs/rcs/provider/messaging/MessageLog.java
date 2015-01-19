@@ -96,8 +96,7 @@ public class MessageLog implements IMessageLog {
 		values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD);
 		String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
 		values.put(MessageData.KEY_MIME_TYPE, apiMimeType);
-		values.put(MessageData.KEY_CONTENT, ChatUtils.networkContentToPersistedContent(apiMimeType,
-				msg.getContent()));
+		values.put(MessageData.KEY_CONTENT, ChatUtils.networkContentToPersistedContent(msg));
 
 		values.put(MessageData.KEY_TIMESTAMP, msg.getDate().getTime());
 		values.put(MessageData.KEY_TIMESTAMP_SENT, 0);
@@ -136,7 +135,7 @@ public class MessageLog implements IMessageLog {
 		String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
 		values.put(MessageData.KEY_MIME_TYPE, apiMimeType);
 		values.put(MessageData.KEY_CONTENT,
-				ChatUtils.networkContentToPersistedContent(apiMimeType, msg.getContent()));
+				ChatUtils.networkContentToPersistedContent(msg));
 
 		values.put(MessageData.KEY_TIMESTAMP, msg.getDate().getTime());
 		values.put(MessageData.KEY_TIMESTAMP_SENT, msg.getDate().getTime());
@@ -204,7 +203,7 @@ public class MessageLog implements IMessageLog {
 		String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
 		values.put(MessageData.KEY_MIME_TYPE, apiMimeType);
 		values.put(MessageData.KEY_CONTENT,
-				ChatUtils.networkContentToPersistedContent(apiMimeType, msg.getContent()));
+				ChatUtils.networkContentToPersistedContent(msg));
 
 		if (direction == Direction.INCOMING) {
 			// Receive message

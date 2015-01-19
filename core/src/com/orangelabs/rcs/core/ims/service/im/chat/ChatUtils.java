@@ -897,20 +897,19 @@ public class ChatUtils {
 
     /**
      * Generate persisted content from network pay-load
+     * @param msg 
      *
-     * @param API MIME-type
-     * @param Network pay-load content
      * @return Persisted content
      */
-    public static String networkContentToPersistedContent(String apiMimeType, String networkContent) {
+    public static String networkContentToPersistedContent(ChatMessage msg) {
         /*
          * Geolocation chat messages does not have the same mimetype in the
          * payload as in the TAPI. Text chat messages do.
          */
-        if (ChatUtils.isGeolocType(apiMimeType)) {
-            Geoloc geoloc = parseGeolocDocument(networkContent);
+        if (ChatUtils.isGeolocType(msg.getMimeType())) {
+            Geoloc geoloc = parseGeolocDocument(msg.getContent());
             return geoloc.toString();
         }
-        return networkContent;
+        return msg.getContent();
     }
 }

@@ -144,8 +144,18 @@ public class GroupChatView extends ChatView {
 	 */
 	private GroupChatListener mListener = new GroupChatListener() {
 
+		@Override
+		public void onMessageStatusChanged(String chatId, String mimeType, String msgId, int status, int reasonCode) {
+			if (LogUtils.isActive) {
+				Log.w(LOGTAG, new StringBuilder("onMessageStatusChanged chatId=").append(chatId)
+						.append(" mime-type=").append(mimeType).append(" msgId=").append(msgId)
+						.append(" status=").append(status).append(" reason=").append(reasonCode)
+						.toString());
+			}
+		}
+
 		// Callback called when an Is-composing event has been received
-		public void onComposingEvent(final String chatId, final ContactId contact, final boolean status) {
+		public void onComposingEvent( String chatId, ContactId contact, boolean status) {
 			// Discard event if not for current chatId
 			if (GroupChatView.this.mChatId == null || !GroupChatView.this.mChatId.equals(chatId)) {
 				return;
@@ -154,41 +164,51 @@ public class GroupChatView extends ChatView {
 		}
 
 		@Override
-		public void onParticipantInfoChanged(String chatId, final ParticipantInfo participant) {
+		public void onParticipantInfoChanged(String chatId, ParticipantInfo participant) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onParticipantInfoChanged chatId=" + chatId + " contact=" + participant.getContact() + " status="
-						+ participant.getStatus());
+				Log.d(LOGTAG,
+						new StringBuilder("onParticipantInfoChanged chatId=").append(chatId)
+								.append(" contact=").append(participant.getContact().toString())
+								.append(" status=").append(participant.getStatus()).toString());
 			}
 		}
 
 		@Override
-		public void onMessageGroupDeliveryInfoChanged(String chatId, ContactId contact, final String msgId, int status, int reasonCode) {
+		public void onMessageGroupDeliveryInfoChanged(String chatId, ContactId contact,
+				String mimeType, String msgId, int status, int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onGroupDeliveryInfoChanged chatId=" + chatId + " contact=" + contact + " msgId=" + msgId
-						+ " status=" + status + " reason=" + reasonCode);
+				Log.d(LOGTAG,
+						new StringBuilder("onGroupDeliveryInfoChanged chatId=").append(chatId)
+								.append(" contact=").append(contact.toString())
+								.append(" mime-type=").append(mimeType).append(" msgId=")
+								.append(msgId).append(" status=").append(status).append(" reason=")
+								.append(reasonCode).toString());
 			}
 		}
 
+		/* (non-Javadoc)
+		 * @see com.gsma.services.rcs.chat.GroupChatListener#onStateChanged(java.lang.String, int, int)
+		 */
 		@Override
 		public void onStateChanged(String chatId, final int state, final int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onGroupChatStateChanged chatId=" + chatId + " state=" + state + " reason=" + reasonCode);
+				Log.d(LOGTAG, new StringBuilder("onStateChanged chatId=").append(chatId).append(" state=").append(state).append( " reason=").append(reasonCode).toString());
 			}
 			// TODO CR031 enumerated types
 			if (state > RiApplication.GC_STATES.length) {
 				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "onGroupChatStateChanged unhandled status=" + state);
+					Log.e(LOGTAG, "onStateChanged unhandled status=".concat(String.valueOf(state)));
 				}
 				return;
 			}
 			if (reasonCode > RiApplication.GC_REASON_CODES.length) {
 				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "onGroupChatStateChanged unhandled reason=" + reasonCode);
+					Log.e(LOGTAG, "onStateChanged unhandled reason=".concat(String.valueOf(reasonCode)));
 				}
 				return;
 			}
 			// Discard event if not for current chatId
-			if (GroupChatView.this.mChatId == null || !GroupChatView.this.mChatId.equals(chatId)) {
+			if (mChatId == null || !mChatId.equals(chatId)) {
 				return;
 			}
 			final String _reasonCode = RiApplication.GC_REASON_CODES[reasonCode];
@@ -224,13 +244,6 @@ public class GroupChatView extends ChatView {
 			});
 		};
 
-		@Override
-		public void onMessageStatusChanged(String chatId, final String msgId, int status, int reasonCode) {
-			if (LogUtils.isActive) {
-				Log.w(LOGTAG, "onMessageStatusChanged chatId=" + chatId + " msgId=" + msgId + " status=" + status + " reason="
-						+ reasonCode);
-			}
-		}
 	};
 
 	@Override
@@ -241,7 +254,7 @@ public class GroupChatView extends ChatView {
 		Cursor cursor = (Cursor) mAdapter.getItem(info.position);
 		menu.add(0, GROUPCHAT_MENU_ITEM_DELETE, 0, R.string.menu_delete_message);
 		int direction = cursor.getInt(cursor.getColumnIndex(ChatLog.Message.DIRECTION));
-		if (direction == RcsCommon.Direction.OUTGOING) {
+		if (RcsCommon.Direction.OUTGOING == direction) {
 			menu.add(0, GROUPCHAT_MENU_ITEM_VIEW_GC_INFO, 1, R.string.menu_view_groupdelivery);
 		}
 	}
@@ -252,7 +265,7 @@ public class GroupChatView extends ChatView {
 		Cursor cursor = (Cursor) (mAdapter.getItem(info.position));
 		String messageId = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
 		if (LogUtils.isActive) {
-			Log.d(LOGTAG, "onContextItemSelected msgId=" + messageId);
+			Log.d(LOGTAG, "onContextItemSelected msgId=".concat(messageId));
 		}
 		switch (item.getItemId()) {
 		case GROUPCHAT_MENU_ITEM_VIEW_GC_INFO:
@@ -303,7 +316,7 @@ public class GroupChatView extends ChatView {
 							mParticipants.add(contactUtils.formatContact(contact));
 						} catch (RcsContactFormatException e) {
 							if (LogUtils.isActive) {
-								Log.e(LOGTAG, "processIntent invalid participant " + contact);
+								Log.e(LOGTAG, "processIntent invalid participant ".concat(contact));
 							}
 						}
 					}
@@ -327,7 +340,7 @@ public class GroupChatView extends ChatView {
 				mGroupChat = connectionManager.getChatApi().getGroupChat(mChatId);
 				if (mGroupChat == null) {
 					if (LogUtils.isActive) {
-						Log.e(LOGTAG, "processIntent session not found for chatId=" + mChatId);
+						Log.e(LOGTAG, "processIntent session not found for chatId=".concat(mChatId));
 					}
 					Utils.showMessageAndExit(this, getString(R.string.label_session_not_found), exitOnce);
 					return false;
@@ -344,7 +357,8 @@ public class GroupChatView extends ChatView {
 				mParticipants = getListOfParticipants(mGroupChat.getParticipants());
 				if (LogUtils.isActive) {
 					if (mParticipants == null) {
-						Log.e(LOGTAG, "processIntent chatId=" + mChatId + " subject='" + mSubject + "'");
+						Log.e(LOGTAG, new StringBuilder("processIntent chatId=").append(mChatId)
+								.append(" subject='").append(mSubject).append("'").toString());
 					}
 				}
 				return true;
@@ -361,8 +375,9 @@ public class GroupChatView extends ChatView {
 						// Ignore message if it does not belong to current GC
 						if (LogUtils.isActive) {
 							Log.d(LOGTAG,
-									"processIntent discard chat message " + message.getMsgId() + " for chatId "
-											+ message.getChatId());
+									new StringBuilder("processIntent discard chat message ")
+											.append(message.getMsgId()).append(" for chatId ")
+											.append(message.getChatId()).toString());
 						}
 						return true;
 					}
@@ -410,15 +425,13 @@ public class GroupChatView extends ChatView {
 	private void updateGroupChatViewTitle(String subject) {
 		// Set title
 		if (!TextUtils.isEmpty(subject)) {
-			setTitle(new StringBuilder(getString(R.string.title_group_chat)).append(" '").append(mSubject).append("'").toString());
+			setTitle(new StringBuilder(getString(R.string.title_group_chat)).append(" '")
+					.append(mSubject).append("'").toString());
 		}
 	}
 
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle arg) {
-		if (LogUtils.isActive) {
-			Log.d(LOGTAG, "onCreateLoader " + id);
-		}
 		// Create a new CursorLoader with the following query parameters.
 		CursorLoader loader = new CursorLoader(this, ChatLog.Message.CONTENT_URI, PROJECTION, WHERE_CLAUSE,
 				new String[] { mChatId }, QUERY_SORT_ORDER);
@@ -842,7 +855,7 @@ public class GroupChatView extends ChatView {
 		// Send text message
 		try {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "sendTextMessage msg=" + message);
+				Log.d(LOGTAG, "sendTextMessage msg=".concat(message));
 			}
 			// Send the text to Group Chat
 			return mGroupChat.sendMessage(message);
@@ -859,7 +872,7 @@ public class GroupChatView extends ChatView {
 		// Send geoloc message
 		try {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "sendMessage geoloc=" + geoloc);
+				Log.d(LOGTAG, "sendMessage geoloc=".concat(geoloc.toString()));
 			}
 			// Send the text to remote
 			return mGroupChat.sendMessage(geoloc);
@@ -889,7 +902,7 @@ public class GroupChatView extends ChatView {
 					if (mGroupChat != null) {
 						mGroupChat.sendIsComposingEvent(isTyping);
 						if (LogUtils.isActive) {
-							Log.d(LOGTAG, "sendIsComposingEvent " + isTyping);
+							Log.d(LOGTAG, "sendIsComposingEvent ".concat(String.valueOf(isTyping)));
 						}
 					}
 				} catch (Exception e) {
