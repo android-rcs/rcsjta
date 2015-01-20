@@ -100,6 +100,10 @@ public class RcsSettingsProvider extends ContentProvider {
 		private void addParameter(SQLiteDatabase db, String key, int value) {
 			addParameter(db, key, Integer.toString(value));
 		}
+		
+		private void addParameter(SQLiteDatabase db, String key, long value) {
+			addParameter(db, key, Long.toString(value));
+		}
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -266,6 +270,7 @@ public class RcsSettingsProvider extends ContentProvider {
 			addParameter(db, RcsSettingsData.AUTO_ACCEPT_FT_CHANGEABLE, RcsSettingsData.DEFAULT_AUTO_ACCEPT_FT_CHANGEABLE);
 			addParameter(db, RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD, RcsSettingsData.DEFAULT_KEY_DEFAULT_MESSAGING_METHOD);
 			addParameter(db, RcsSettingsData.KEY_IMAGE_RESIZE_OPTION, RcsSettingsData.DEFAULT_KEY_IMAGE_RESIZE_OPTION);
+			addParameter(db, RcsSettingsData.ENABLE_RCS_SWITCH, RcsSettingsData.DEFAULT_ENABLE_RCS_SWITCH);
         }
 
         @Override

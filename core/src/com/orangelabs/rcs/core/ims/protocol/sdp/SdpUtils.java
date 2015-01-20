@@ -248,7 +248,7 @@ public class SdpUtils {
      */
 	public static String buildFileSDP(String ipAddress, int localPort,
 			String protocol, String acceptTypes, String transferId, String selector, String disposition,
-			String setup, String path, String direction, int maxSize) {
+			String setup, String path, String direction, long maxSize) {
         return buildSDP(ipAddress, localPort, protocol, acceptTypes, null, transferId, selector,
                 disposition, setup, path, direction, null, maxSize);
 	}
@@ -274,10 +274,10 @@ public class SdpUtils {
 	 * @param selector file-selector
 	 * @param media media description (used for video share)
 	 * @param maxSize maximum file size
-	 * @return
+	 * @return SDP
 	 */
     public static String buildCapabilitySDP(String ipAddress, String protocol, String acceptTypes,
-            String selector, String media, int maxSize) {
+            String selector, String media, long maxSize) {
         return buildSDP(ipAddress, 0, protocol, acceptTypes, null, null, selector, null, null, null,
                 null, media, maxSize);
 	}
@@ -303,7 +303,7 @@ public class SdpUtils {
     private static String buildSDP(String ipAddress, int localPort, String protocol,
             String acceptTypes, String wrapperTypes, String transferId, String selector,
             String disposition, String setup, String path, String direction, String media,
-            int maxSize) {
+            long maxSize) {
 		String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 
 		StringBuffer sdp = new StringBuffer("v=0" + SipUtils.CRLF + 

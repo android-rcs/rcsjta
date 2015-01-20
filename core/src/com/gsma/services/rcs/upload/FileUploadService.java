@@ -61,7 +61,9 @@ public class FileUploadService extends RcsService {
 	/**
 	 * API
 	 */
-	private IFileUploadService api;
+	private IFileUploadService mApi;
+	
+	private static final String ERROR_CNX = "FileUpload service not connected";
 	
     /**
      * Constructor
@@ -98,8 +100,7 @@ public class FileUploadService extends RcsService {
 	 */
     protected void setApi(IInterface api) {
     	super.setApi(api);
-    	
-        this.api = (IFileUploadService)api;
+        mApi = (IFileUploadService)api;
     }
     
     /**
@@ -150,7 +151,7 @@ public class FileUploadService extends RcsService {
 			};
 			takePersistableUriPermissionMethod.invoke(contentResolver, methodArgs);
 		} catch (Exception e) {
-			throw new RcsServiceException(e.getMessage());
+			throw new RcsServiceException(e);
 		}
 	}    
     
@@ -180,14 +181,14 @@ public class FileUploadService extends RcsService {
      * @throws RcsServiceException
      */
     public boolean canUploadFile() throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				return api.canUploadFile();
+				return mApi.canUploadFile();
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }
     
@@ -198,14 +199,14 @@ public class FileUploadService extends RcsService {
      * @throws RcsServiceException
      */
     public FileUploadServiceConfiguration getConfiguration() throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				return new FileUploadServiceConfiguration(api.getConfiguration());
+				return new FileUploadServiceConfiguration(mApi.getConfiguration());
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
     
@@ -220,21 +221,21 @@ public class FileUploadService extends RcsService {
 	 * @throws RcsServiceException
 	 */
     public FileUpload uploadFile(Uri file, boolean attachFileIcon) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
 				tryToGrantAndPersistUriPermission(file);
 				
-				IFileUpload uploadIntf = api.uploadFile(file, attachFileIcon);
+				IFileUpload uploadIntf = mApi.uploadFile(file, attachFileIcon);
 				if (uploadIntf != null) {
 					return new FileUpload(uploadIntf);
 				} else {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }    
     
@@ -245,20 +246,20 @@ public class FileUploadService extends RcsService {
      * @throws RcsServiceException
      */
     public Set<FileUpload> getFileUploads() throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
 	    		Set<FileUpload> result = new HashSet<FileUpload>();
-				List<IBinder> ishList = api.getFileUploads();
+				List<IBinder> ishList = mApi.getFileUploads();
 				for (IBinder binder : ishList) {
 					FileUpload upload = new FileUpload(IFileUpload.Stub.asInterface(binder));
 					result.add(upload);
 				}
 				return result;
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }    
 
@@ -270,19 +271,19 @@ public class FileUploadService extends RcsService {
      * @throws RcsServiceException
      */
     public FileUpload getFileUpload(String uploadId) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				IFileUpload uploadIntf = api.getFileUpload(uploadId);
+				IFileUpload uploadIntf = mApi.getFileUpload(uploadId);
 				if (uploadIntf != null) {
 					return new FileUpload(uploadIntf);
 				} else {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }    
  
@@ -293,14 +294,14 @@ public class FileUploadService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public void addEventListener(FileUploadListener listener) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.addEventListener(listener);
+				mApi.addEventListener(listener);
 			} catch (Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -311,14 +312,14 @@ public class FileUploadService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public void removeEventListener(FileUploadListener listener) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.removeEventListener(listener);
+				mApi.removeEventListener(listener);
 			} catch (Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 }

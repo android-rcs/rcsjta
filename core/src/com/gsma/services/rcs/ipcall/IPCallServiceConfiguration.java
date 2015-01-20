@@ -52,7 +52,7 @@ public class IPCallServiceConfiguration {
 		try {
 			return mIConfig.isVoiceCallBreakout();
 		} catch (Exception e) {
-			throw new RcsServiceException(e.getMessage());
+			throw new RcsServiceException(e);
 		}
 	}
 }

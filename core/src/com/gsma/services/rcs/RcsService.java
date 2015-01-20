@@ -38,6 +38,8 @@ public abstract class RcsService {
 	 * Action to broadcast when RCS service is provisioned.
 	 */
 	public static final String ACTION_SERVICE_PROVISIONED = "com.gsma.services.rcs.action.SERVICE_PROVISIONED";
+	
+	private static final String ERROR_CNX = "Service not connected";
 
 	/**
 	 * Information about the current build
@@ -158,7 +160,7 @@ public abstract class RcsService {
                 return m.invoke(mApi);
             }
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsServiceException(e);
         }
 	}
 
@@ -223,7 +225,7 @@ public abstract class RcsService {
 		if (mApi != null) {
 			return (Boolean)callApiMethod("isServiceRegistered", null, null);
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -237,7 +239,7 @@ public abstract class RcsService {
 		if (mApi != null) {
 			callApiMethod("addEventListener", listener, IRcsServiceRegistrationListener.class);
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -251,7 +253,7 @@ public abstract class RcsService {
 		if (mApi != null) {
 			callApiMethod("removeEventListener", listener, IRcsServiceRegistrationListener.class);
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 	
@@ -266,7 +268,7 @@ public abstract class RcsService {
 			ICommonServiceConfiguration configuration = (ICommonServiceConfiguration)callApiMethod("getCommonConfiguration", null, null);
 			return new CommonServiceConfiguration(configuration);
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 }

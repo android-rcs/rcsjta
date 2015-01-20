@@ -143,7 +143,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
 			// Build SDP part
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
 	    	String encoding = getContent().getEncoding();
-	    	int maxSize = FileSharingSession.getMaxFileSharingSize();
+	    	long maxSize = FileSharingSession.getMaxFileSharingSize();
 	    	// Set File-selector attribute
 	    	String selector = getFileSelectorAttribute();
 	    	String sdp = SdpUtils.buildFileSDP(ipAddress, localMsrpPort,
@@ -346,6 +346,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * @param currentSize Current transfered size in bytes
      * @param totalSize Total size in bytes
      * @param data received data chunk
+     * @return always false TODO
      */
     public boolean msrpTransferProgress(long currentSize, long totalSize, byte[] data) {
         // Not used in originating side

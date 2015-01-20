@@ -170,7 +170,7 @@ public class CommonServiceConfiguration {
 		try {
 			return mIConfig.isConfigValid();
 		} catch (Exception e) {
-			throw new RcsServiceException(e.getMessage());
+			throw new RcsServiceException(e);
 		}
 	}
 
@@ -185,7 +185,7 @@ public class CommonServiceConfiguration {
 		try {
 			return mIConfig.getMyDisplayName();
 		} catch (Exception e) {
-			throw new RcsServiceException(e.getMessage());
+			throw new RcsServiceException(e);
 		}
 	}
 
@@ -200,7 +200,7 @@ public class CommonServiceConfiguration {
 		try {
 			mIConfig.setMyDisplayName(name);
 		} catch (Exception e) {
-			throw new RcsServiceException(e.getMessage());
+			throw new RcsServiceException(e);
 		}
 	}
 
@@ -214,7 +214,7 @@ public class CommonServiceConfiguration {
 		try {
 			return mIConfig.getMyContactId();
 		} catch (Exception e) {
-			throw new RcsServiceException(e.getMessage());
+			throw new RcsServiceException(e);
 		}
 	}
 
@@ -229,7 +229,7 @@ public class CommonServiceConfiguration {
 			int messagingMode = mIConfig.getMessagingUX();
 			return MessagingMode.valueOf(messagingMode);
 		} catch (Exception e) {
-			throw new RcsServiceException(e.getMessage());
+			throw new RcsServiceException(e);
 		}
 	}
 
@@ -244,7 +244,7 @@ public class CommonServiceConfiguration {
 			int defaultMessagingMethod = mIConfig.getDefaultMessagingMethod();
 			return MessagingMethod.valueOf(defaultMessagingMethod);
 		} catch (Exception e) {
-			throw new RcsServiceException(e.getMessage());
+			throw new RcsServiceException(e);
 		}
 	}
 
@@ -259,7 +259,7 @@ public class CommonServiceConfiguration {
 		try {
 			mIConfig.setDefaultMessagingMethod(method.toInt());
 		} catch (Exception e) {
-			throw new RcsServiceException(e.getMessage());
+			throw new RcsServiceException(e);
 		}
 	}
 

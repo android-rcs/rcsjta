@@ -97,8 +97,7 @@ public class ChatServiceConfigurationImpl extends IChatServiceConfiguration.Stub
 
 	@Override
 	public boolean isGroupChatSupported() throws RemoteException {
-		// TODO CR017 Usecase capabilities
-		return true;
+		return mRcsSettings.isGroupChatActivated();
 	}
 
 	@Override

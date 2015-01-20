@@ -28,6 +28,7 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.gsma.services.rcs.contacts.ContactUtils;
+import com.gsma.services.rcs.chat.GroupChat.State;
 
 /**
  * Content provider for chat history
@@ -55,7 +56,7 @@ public class ChatLog {
         /**
          * The name of the column containing the state of the group chat.
          * <P>Type: INTEGER</P>
-         * @see GroupChat.State
+         * @see State
          */
         public static final String STATE = "state";
 

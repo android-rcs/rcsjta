@@ -375,8 +375,8 @@ public class ProfileProvisioning extends Activity {
 		 * @return true if loading the provisioning is successful
 		 */
 		private boolean createProvisioning(String mXMLFileContent, String userPhoneNumber) {
-			ProvisioningParser parser = new ProvisioningParser(mXMLFileContent);
 			RcsSettings rcsSettings = RcsSettings.getInstance();
+			ProvisioningParser parser = new ProvisioningParser(mXMLFileContent, rcsSettings);
 			// Save GSMA release set into the provider
 			GsmaRelease release = rcsSettings.getGsmaRelease();
 			// Save client Messaging Mode set into the provider

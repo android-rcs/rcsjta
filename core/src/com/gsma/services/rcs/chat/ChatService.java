@@ -52,7 +52,9 @@ public class ChatService extends RcsService {
 	/**
 	 * API
 	 */
-	private IChatService api;
+	private IChatService mApi;
+	
+	private static final String ERROR_CNX = "Chat service not connected";
 
 	/**
      * Constructor
@@ -89,8 +91,7 @@ public class ChatService extends RcsService {
 	 */
     protected void setApi(IInterface api) {
     	super.setApi(api);
-    	
-        this.api = (IChatService)api;
+        mApi = (IChatService)api;
     }
 
     /**
@@ -119,14 +120,14 @@ public class ChatService extends RcsService {
      * @throws RcsServiceException
      */
     public ChatServiceConfiguration getConfiguration() throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				return new ChatServiceConfiguration(api.getConfiguration());
+				return new ChatServiceConfiguration(mApi.getConfiguration());
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}    
   
@@ -141,19 +142,19 @@ public class ChatService extends RcsService {
 	 * @throws RcsServiceException
 	 */
     public GroupChat initiateGroupChat(Set<ContactId> contacts, String subject) throws RcsServiceException {
-    	if (api != null) {
+    	if (mApi != null) {
 			try {
-				IGroupChat chatIntf = api.initiateGroupChat(new ArrayList<ContactId>(contacts), subject);
+				IGroupChat chatIntf = mApi.initiateGroupChat(new ArrayList<ContactId>(contacts), subject);
 				if (chatIntf != null) {
 					return new GroupChat(chatIntf);
 				} else {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }
 
@@ -165,14 +166,14 @@ public class ChatService extends RcsService {
      * @throws RcsServiceException
      */
 	public OneToOneChat getOneToOneChat(ContactId contact) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				return new OneToOneChat(api.getOneToOneChat(contact));
+				return new OneToOneChat(mApi.getOneToOneChat(contact));
 			} catch (Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -185,14 +186,14 @@ public class ChatService extends RcsService {
 	 * @throws RcsServiceException
 	 */
     public GroupChat getGroupChat(String chatId) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				return new GroupChat(api.getGroupChat(chatId));
+				return new GroupChat(mApi.getGroupChat(chatId));
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }
     
@@ -203,14 +204,14 @@ public class ChatService extends RcsService {
      * @throws RcsServiceException
      */
     public void markMessageAsRead(String msgId) throws RcsServiceException {
-        if (api != null) {
+        if (mApi != null) {
             try {
-                api.markMessageAsRead(msgId);
+                mApi.markMessageAsRead(msgId);
             } catch(Exception e) {
-                throw new RcsServiceException(e.getMessage());
+                throw new RcsServiceException(e);
             }
         } else {
-            throw new RcsServiceNotAvailableException();
+            throw new RcsServiceNotAvailableException(ERROR_CNX);
         }
     }
 
@@ -224,14 +225,14 @@ public class ChatService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public void setRespondToDisplayReports(boolean enable) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.setRespondToDisplayReports(enable);
+				mApi.setRespondToDisplayReports(enable);
 			} catch (Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -242,14 +243,14 @@ public class ChatService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public void addEventListener(GroupChatListener listener) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.addEventListener3(listener);
+				mApi.addEventListener3(listener);
 			} catch (Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -261,14 +262,14 @@ public class ChatService extends RcsService {
 	 */
 	public void removeEventListener(GroupChatListener listener)
 			throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.removeEventListener3(listener);
+				mApi.removeEventListener3(listener);
 			} catch (Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -279,14 +280,14 @@ public class ChatService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public void addEventListener(OneToOneChatListener listener) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.addEventListener2(listener);
+				mApi.addEventListener2(listener);
 			} catch (Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -297,14 +298,14 @@ public class ChatService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public void removeEventListener(OneToOneChatListener listener) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.removeEventListener2(listener);
+				mApi.removeEventListener2(listener);
 			} catch (Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -316,14 +317,14 @@ public class ChatService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public ChatMessage getChatMessage(String msgId) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				return new ChatMessage(api.getChatMessage(msgId));
+				return new ChatMessage(mApi.getChatMessage(msgId));
 			} catch (Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 }

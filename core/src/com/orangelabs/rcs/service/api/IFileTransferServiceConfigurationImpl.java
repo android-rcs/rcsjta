@@ -55,8 +55,7 @@ public class IFileTransferServiceConfigurationImpl extends IFileTransferServiceC
 
 	@Override
 	public boolean isGroupFileTransferSupported() throws RemoteException {
-		// TODO CR017 Usecase capabilities
-		return false;
+		return mRcsSettings.getMyCapabilities().isFileTransferHttpSupported() && mRcsSettings.isGroupChatActivated();
 	}
 
 	@Override
@@ -86,7 +85,7 @@ public class IFileTransferServiceConfigurationImpl extends IFileTransferServiceC
 
 	@Override
 	public int getMaxFileTransfers() throws RemoteException {
-		return mRcsSettings.getMaxFileTransferSize();
+		return mRcsSettings.getMaxFileTransferSessions();
 	}
 
 	@Override

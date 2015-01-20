@@ -51,7 +51,7 @@ public class ImageSharingServiceConfiguration {
 		try {
 			return mConfiguration.getMaxSize();
 		} catch (Exception e) {
-			throw new RcsServiceException(e.getMessage());
+			throw new RcsServiceException(e);
 		}
 	}
 }

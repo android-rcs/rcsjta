@@ -33,4 +33,13 @@ public class RcsServiceException extends java.lang.Exception {
 	public RcsServiceException(String error) {
 		super(error);
 	}
+
+	/**
+	 * Constructs a new Exception with the current stack trace and the specified cause.
+	 * 
+	 * @param e
+	 */
+	public RcsServiceException(Exception e) {
+		super(e);
+	}
 }

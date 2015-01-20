@@ -39,10 +39,10 @@ import com.gsma.services.rcs.upload.IFileUploadServiceConfiguration;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.upload.FileUploadSession;
 import com.orangelabs.rcs.platform.file.FileDescription;
 import com.orangelabs.rcs.platform.file.FileFactory;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.broadcaster.FileUploadEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -69,16 +69,20 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 	 */
 	private Object lock = new Object();
 
+	private final RcsSettings mRcsSettings;
+
 	/**
 	 * Constructor
 	 * 
 	 * @param imService InstantMessagingService
+	 * @param rcsSettings 
 	 */
-	public FileUploadServiceImpl(InstantMessagingService imService) {
+	public FileUploadServiceImpl(InstantMessagingService imService, RcsSettings rcsSettings) {
 		if (logger.isActivated()) {
 			logger.info("File upload service API is loaded");
 		}
 		mImService = imService;
+		mRcsSettings = rcsSettings;
 	}
 
 	/**
@@ -124,7 +128,7 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      * @return Configuration
      */
     public IFileUploadServiceConfiguration getConfiguration() {
-    	return new IFileUploadServiceConfigurationImpl();
+    	return new IFileUploadServiceConfigurationImpl(mRcsSettings);
     }    	
 	
     /**

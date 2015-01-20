@@ -676,7 +676,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
     	PhotoIcon currentPhoto = presenceInfo.getPhotoIcon();
     	if ((photoIcon != null) && (photoIcon.getEtag() == null)) {
     		// Test photo icon size
-    		int maxSize = mRcsSettings.getMaxPhotoIconSize()*1024;
+    		long maxSize = mRcsSettings.getMaxPhotoIconSize();
         	if ((maxSize != 0) && (photoIcon.getSize() > maxSize)) {
     			if (logger.isActivated()) {
     				logger.debug("Max photo size achieved");
@@ -708,7 +708,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * Publish presence info
      * 
      * @param info Presence info
-     * @returns Returns true if the presence info has been publish with success,
+     * @return true if the presence info has been publish with success,
      *          else returns false
      */
     public boolean publishPresenceInfo(PresenceInfo info) {
@@ -758,7 +758,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * Upload photo icon
      * 
      * @param photo Photo icon
-     * @returns Boolean result
+     * @return Boolean result
      */
 	public boolean uploadPhotoIcon(PhotoIcon photo) {
 		// Upload the photo to the XDM server
@@ -784,8 +784,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
     /**
      * Delete photo icon
-     * 
-     * @returns Boolean result
+     * @return Boolean result
      */
 	public boolean deletePhotoIcon(){
 		// Delete the photo from the XDM server
@@ -801,7 +800,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * Invite a contact to share its presence
      * 
      * @param contact Contact
-     * @returns Returns true if XDM request was successful, else false
+     * @return Returns true if XDM request was successful, else false
      */
     public boolean inviteContactToSharePresence(ContactId contact) {
 		// Remove contact from the blocked contacts list
@@ -823,7 +822,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * Revoke a shared contact
      * 
      * @param contact Contact
-     * @returns Returns true if XDM request was successful, else false
+     * @return Returns true if XDM request was successful, else false
      */
     public boolean revokeSharedContact(ContactId contact){
 		// Add contact in the revoked contacts list
@@ -846,7 +845,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * Remove a revoked contact
      * 
      * @param contact Contact
-     * @returns Returns true if XDM request was successful, else false
+     * @return Returns true if XDM request was successful, else false
      */
 	public boolean removeRevokedContact(ContactId contact) {
 		// Remove contact from the revoked contacts list
@@ -863,7 +862,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * Remove a blocked contact
      * 
      * @param contact Contact
-     * @returns Returns true if XDM request was successful, else false
+     * @return Returns true if XDM request was successful, else false
      */
 	public boolean removeBlockedContact(ContactId contact) {
 		// Remove contact from the blocked contacts list

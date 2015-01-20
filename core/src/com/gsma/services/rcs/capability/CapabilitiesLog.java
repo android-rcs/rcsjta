@@ -52,7 +52,6 @@ public class CapabilitiesLog {
 
     /**
      * The name of the column containing the image share capability.
-     * @see CapabilitiesLog.Support
      * <P>Type: INTEGER</P>
      */
     public static final String CAPABILITY_IMAGE_SHARE = "capability_image_share";

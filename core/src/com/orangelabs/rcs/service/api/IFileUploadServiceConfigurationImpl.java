@@ -13,13 +13,14 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
  */
 public class IFileUploadServiceConfigurationImpl extends IFileUploadServiceConfiguration.Stub {
 
-	private RcsSettings mRcsSettings;
+	private final RcsSettings mRcsSettings;
 
 	/**
 	 * Constructor
+	 * @param rcsSettings 
 	 */
-	public IFileUploadServiceConfigurationImpl() {
-		mRcsSettings = RcsSettings.getInstance();
+	public IFileUploadServiceConfigurationImpl(RcsSettings rcsSettings) {
+		mRcsSettings = rcsSettings;
 	}
 
 	@Override

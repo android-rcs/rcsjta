@@ -56,7 +56,9 @@ public class ContactsService extends RcsService {
 	/**
 	 * API
 	 */
-	private IContactsService api = null;
+	private IContactsService mApi;
+	
+	private static final String ERROR_CNX = "Contacts service not connected";
 	
     /**
      * Constructor
@@ -93,8 +95,7 @@ public class ContactsService extends RcsService {
 	 */
     protected void setApi(IInterface api) {
     	super.setApi(api);
-    	
-        this.api = (IContactsService)api;
+        mApi = (IContactsService)api;
     }
     
     /**
@@ -125,14 +126,14 @@ public class ContactsService extends RcsService {
      * @see RcsContact
      */
 	public RcsContact getRcsContact(ContactId contact) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				return api.getRcsContact(contact);
+				return mApi.getRcsContact(contact);
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }
     
@@ -144,20 +145,20 @@ public class ContactsService extends RcsService {
      * @see RcsContact
      */
     public Set<RcsContact> getRcsContacts() throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
 	    		Set<RcsContact> result = new HashSet<RcsContact>();
-	    		List<RcsContact> contacts = api.getRcsContacts();
+	    		List<RcsContact> contacts = mApi.getRcsContacts();
 	    		for(int i=0; i < contacts.size(); i++) {
 	    			RcsContact contact = contacts.get(i);
 	    			result.add(contact);
 	    		}
 				return result;
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }
 
@@ -169,16 +170,16 @@ public class ContactsService extends RcsService {
      * @see RcsContact
      */
     public Set<RcsContact> getRcsContactsOnline() throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
 	    		Set<RcsContact> result = new HashSet<RcsContact>();
-	    		result.addAll(api.getRcsContactsOnline());
+	    		result.addAll(mApi.getRcsContactsOnline());
 				return result;
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }
 
@@ -191,16 +192,16 @@ public class ContactsService extends RcsService {
      * @see RcsContact
      */
     public Set<RcsContact> getRcsContactsSupporting(String serviceId) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
 	    		Set<RcsContact> result = new HashSet<RcsContact>();
-	    		result.addAll(api.getRcsContactsSupporting(serviceId));
+	    		result.addAll(mApi.getRcsContactsSupporting(serviceId));
 				return result;
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }
     
@@ -241,7 +242,7 @@ public class ContactsService extends RcsService {
     			mFileOutputStream.write(Vcard.toString().getBytes());
     			mFileOutputStream.close();
     		} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
     		}
     	}
     	cursor.close();

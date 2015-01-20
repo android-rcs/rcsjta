@@ -609,6 +609,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param currentSize Current transfered size in bytes
      * @param totalSize Total size in bytes
      * @param data received data chunk
+     * @return always false TODO
      */
     public boolean msrpTransferProgress(long currentSize, long totalSize, byte[] data) {
         // Not used by chat
@@ -804,7 +805,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		}
 
 		// Auto reject if file too big
-		int maxSize = FileSharingSession.getMaxFileSharingSize();
+		long maxSize = FileSharingSession.getMaxFileSharingSize();
 		if (maxSize > 0 && fileTransferInfo.getFileSize() > maxSize) {
 			if (logger.isActivated()) {
 				logger.debug("File is too big, reject the HTTP File transfer");

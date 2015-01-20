@@ -29,6 +29,15 @@ public class RcsServiceNotAvailableException extends RcsServiceException {
 	 * Constructor
 	 */
 	public RcsServiceNotAvailableException() {
-		super("rcs service not available");
+		this("RCS service not available");
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param error
+	 */
+	public RcsServiceNotAvailableException(String error) {
+		super(error);
 	}
 }

@@ -51,7 +51,7 @@ public class VideoSharingServiceConfiguration {
 		try {
 			return mConfiguration.getMaxTime();
 		} catch (Exception e) {
-			throw new RcsServiceException(e.getMessage());
+			throw new RcsServiceException(e);
 		}
 	}
 }

@@ -16,7 +16,7 @@
 	    android:layout_width="fill_parent"
 	    android:layout_height="fill_parent">
     
-       	<TextView android:text="@string/Max_photo_icon_size_kB"
+       	<TextView android:text="@string/Max_photo_icon_size"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -25,7 +25,6 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="4"
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
@@ -94,7 +93,7 @@
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="@string/Max_size_of_a_file_transfer_kB"
+       	<TextView android:text="@string/Max_size_of_a_file_transfer"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -103,11 +102,10 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="5"
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="@string/Threshold_warning_on_file_transfer_size_kB"
+       	<TextView android:text="@string/Threshold_warning_on_file_transfer_size"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -116,11 +114,10 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="5"
 	 	android:inputType="number"
 	 	android:lines="1"/>
 
-       	<TextView android:text="@string/Max_size_of_an_image_share_kB"
+       	<TextView android:text="@string/Max_size_of_an_image_share"
 	    android:paddingTop="5dip"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"/>
@@ -129,7 +126,6 @@
 	    android:layout_height="wrap_content"
 	 	android:layout_marginLeft="5dip"
 	 	android:layout_marginRight="5dip"
-	 	android:maxLength="5"
 	 	android:inputType="number"
 	 	android:lines="1"/>
 

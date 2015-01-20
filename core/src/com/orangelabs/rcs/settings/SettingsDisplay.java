@@ -97,6 +97,7 @@ public class SettingsDisplay extends PreferenceActivity implements Preference.On
 
         // Instantiate the settings provider
         RcsSettings.createInstance(getApplicationContext());
+        RcsSettings rcsSettings = RcsSettings.getInstance();
         
         // Save user profile preference the first time
 		presencePref = (Preference)getPreferenceScreen().findPreference("presence_settings");
@@ -105,13 +106,13 @@ public class SettingsDisplay extends PreferenceActivity implements Preference.On
         batteryLevel = (ListPreference) findPreference("min_battery_level");
         batteryLevel.setPersistent(false);
         batteryLevel.setOnPreferenceChangeListener(this);
-        batteryLevel.setValue("" + RcsSettings.getInstance().getMinBatteryLevel());
+        batteryLevel.setValue("" + rcsSettings.getMinBatteryLevel());
 
         // Minimum storage
         minStorage = (ListPreference) findPreference("min_storage");
         minStorage.setPersistent(false);
         minStorage.setOnPreferenceChangeListener(this);
-        minStorage.setValue("" + RcsSettings.getInstance().getMinStorageCapacity());
+		minStorage.setValue("" + rcsSettings.getMinStorageCapacity() / 1024L);
 
     	// Modify the intents so the activities can be launched even if not defined in this application (i.e. RCS apps)
     	int totalNumberOfPreferences = getPreferenceScreen().getPreferenceCount();

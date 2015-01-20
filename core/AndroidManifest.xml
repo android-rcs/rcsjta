@@ -216,8 +216,7 @@
 
         <provider
             android:name="com.orangelabs.rcs.provider.settings.RcsSettingsProvider"
-            android:authorities="com.orangelabs.rcs.setting;com.gsma.services.rcs.provider.setting"
-            android:exported="true" />
+            android:authorities="com.orangelabs.rcs.setting;com.gsma.services.rcs.provider.setting" />
 
 		<!-- Device events receiver -->	
 

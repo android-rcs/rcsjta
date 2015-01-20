@@ -44,6 +44,7 @@ import com.orangelabs.rcs.R;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.ConfigurationMode;
+import com.orangelabs.rcs.provider.settings.RcsSettingsData.EnableRcseSwitch;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.NetworkAccessType;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 
@@ -67,6 +68,12 @@ public class StackProvisioning extends Activity {
 	 * SIP protocol
 	 */
 	private static final String[] SIP_PROTOCOL = { "UDP", "TCP", "TLS" };
+	
+	/**
+	 * Enable RCS switch
+	 */
+	private static final String[] ENABLE_RCS_SWITCH = { EnableRcseSwitch.ALWAYS_SHOW.name(),
+			EnableRcseSwitch.ONLY_SHOW_IN_ROAMING.name(), EnableRcseSwitch.NEVER_SHOW.name() };
 
 	/**
 	 * Network accesses
@@ -122,20 +129,21 @@ public class StackProvisioning extends Activity {
 	 * Save parameters either in bundle or in RCS settings
 	 */
 	private void saveInstanceState(Bundle bundle) {
+		RcsSettings rcsSettings = RcsSettings.getInstance();
 		Spinner spinner = (Spinner) findViewById(R.id.Autoconfig);
 		switch (spinner.getSelectedItemPosition()) {
 		case 0:
 			if (bundle != null) {
 				bundle.putInt(RcsSettingsData.CONFIG_MODE, ConfigurationMode.MANUAL.toInt());
 			} else {
-				RcsSettings.getInstance().setConfigurationMode(ConfigurationMode.MANUAL);
+				rcsSettings.setConfigurationMode(ConfigurationMode.MANUAL);
 			}
 			break;
 		case 1:
 			if (bundle != null) {
 				bundle.putInt(RcsSettingsData.CONFIG_MODE, ConfigurationMode.AUTO.toInt());
 			} else {
-				RcsSettings.getInstance().setConfigurationMode(ConfigurationMode.AUTO);
+				rcsSettings.setConfigurationMode(ConfigurationMode.AUTO);
 			}
 			break;
 		}
@@ -144,15 +152,42 @@ public class StackProvisioning extends Activity {
 		if (bundle != null) {
 			bundle.putString(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE, (String) spinner.getSelectedItem());
 		} else {
-			RcsSettings.getInstance().writeParameter(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE,
+			rcsSettings.writeParameter(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE,
 					(String) spinner.getSelectedItem());
+		}
+		
+		spinner = (Spinner) findViewById(R.id.EnableRcsSwitch);
+		switch (spinner.getSelectedItemPosition()) {
+		case 0:
+			if (bundle != null) {
+				bundle.putInt(RcsSettingsData.ENABLE_RCS_SWITCH,
+						EnableRcseSwitch.ALWAYS_SHOW.toInt());
+			} else {
+				rcsSettings.setEnableRcseSwitch(EnableRcseSwitch.ALWAYS_SHOW);
+			}
+			break;
+		case 1:
+			if (bundle != null) {
+				bundle.putInt(RcsSettingsData.ENABLE_RCS_SWITCH,
+						EnableRcseSwitch.ONLY_SHOW_IN_ROAMING.toInt());
+			} else {
+				rcsSettings.setEnableRcseSwitch(EnableRcseSwitch.ALWAYS_SHOW);
+			}
+			break;
+		default:
+			if (bundle != null) {
+				bundle.putInt(RcsSettingsData.ENABLE_RCS_SWITCH,
+						EnableRcseSwitch.NEVER_SHOW.toInt());
+			} else {
+				rcsSettings.setEnableRcseSwitch(EnableRcseSwitch.NEVER_SHOW);
+			}
 		}
 
 		spinner = (Spinner) findViewById(R.id.SipDefaultProtocolForWifi);
 		if (bundle != null) {
 			bundle.putString(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI, (String) spinner.getSelectedItem());
 		} else {
-			RcsSettings.getInstance().writeParameter(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI,
+			rcsSettings.writeParameter(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI,
 					(String) spinner.getSelectedItem());
 		}
 
@@ -163,14 +198,14 @@ public class StackProvisioning extends Activity {
 			if (bundle != null) {
 				bundle.putString(RcsSettingsData.TLS_CERTIFICATE_ROOT, "");
 			} else {
-				RcsSettings.getInstance().writeParameter(RcsSettingsData.TLS_CERTIFICATE_ROOT, "");
+				rcsSettings.writeParameter(RcsSettingsData.TLS_CERTIFICATE_ROOT, "");
 			}
 		} else {
 			String path = CERTIFICATE_FOLDER_PATH + File.separator + (String) spinner.getSelectedItem();
 			if (bundle != null) {
 				bundle.putString(RcsSettingsData.TLS_CERTIFICATE_ROOT, path);
 			} else {
-				RcsSettings.getInstance().writeParameter(RcsSettingsData.TLS_CERTIFICATE_ROOT, path);
+				rcsSettings.writeParameter(RcsSettingsData.TLS_CERTIFICATE_ROOT, path);
 			}
 		}
 
@@ -179,14 +214,14 @@ public class StackProvisioning extends Activity {
 			if (bundle != null) {
 				bundle.putString(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, "");
 			} else {
-				RcsSettings.getInstance().writeParameter(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, "");
+				rcsSettings.writeParameter(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, "");
 			}
 		} else {
 			String path = CERTIFICATE_FOLDER_PATH + File.separator + (String) spinner.getSelectedItem();
 			if (bundle != null) {
 				bundle.putString(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, path);
 			} else {
-				RcsSettings.getInstance().writeParameter(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, path);
+				rcsSettings.writeParameter(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, path);
 			}
 		}
 
@@ -196,21 +231,21 @@ public class StackProvisioning extends Activity {
 			if (bundle != null) {
 				bundle.putInt(RcsSettingsData.NETWORK_ACCESS, NetworkAccessType.MOBILE.toInt());
 			} else {
-				RcsSettings.getInstance().setNetworkAccess(NetworkAccessType.MOBILE);
+				rcsSettings.setNetworkAccess(NetworkAccessType.MOBILE);
 			}
 			break;
 		case 2:
 			if (bundle != null) {
 				bundle.putInt(RcsSettingsData.NETWORK_ACCESS, NetworkAccessType.WIFI.toInt());
 			} else {
-				RcsSettings.getInstance().setNetworkAccess(NetworkAccessType.WIFI);
+				rcsSettings.setNetworkAccess(NetworkAccessType.WIFI);
 			}
 			break;
 		default:
 			if (bundle != null) {
 				bundle.putInt(RcsSettingsData.NETWORK_ACCESS, NetworkAccessType.ANY.toInt());
 			} else {
-				RcsSettings.getInstance().setNetworkAccess(NetworkAccessType.ANY);
+				rcsSettings.setNetworkAccess(NetworkAccessType.ANY);
 			}
 		}
 
@@ -219,12 +254,12 @@ public class StackProvisioning extends Activity {
 			bundle.putString(RcsSettingsData.FT_PROTOCOL, (String) spinner.getSelectedItem());
 		} else {
 			FileTransferProtocol protocol = FileTransferProtocol.valueOf((String) spinner.getSelectedItem());
-			RcsSettings.getInstance().setFtProtocol(protocol);
+			rcsSettings.setFtProtocol(protocol);
 		}
 
         spinner = (Spinner)findViewById(R.id.client_vendor);
         String value = (String)spinner.getSelectedItem();
-        RcsSettings.getInstance().writeParameter(RcsSettingsData.VENDOR_NAME, value);
+        rcsSettings.writeParameter(RcsSettingsData.VENDOR_NAME, value);
 
 		saveEditTextParameter(this, R.id.SecondaryProvisioningAddress, RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS, bundle);
 		saveCheckBoxParameter(this, R.id.SecondaryProvisioningAddressOnly, RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY,
@@ -273,6 +308,7 @@ public class StackProvisioning extends Activity {
 	 * @param bundle
 	 */
 	private void updateView(Bundle bundle) {
+		RcsSettings rcsSettings = RcsSettings.getInstance();
 		// Display stack parameters
 		Spinner spinner = (Spinner) findViewById(R.id.Autoconfig);
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, mConfigModes);
@@ -282,7 +318,7 @@ public class StackProvisioning extends Activity {
 		if (bundle != null && bundle.containsKey(RcsSettingsData.CONFIG_MODE)) {
 			mode = ConfigurationMode.valueOf(bundle.getInt(RcsSettingsData.CONFIG_MODE));
 		} else {
-			mode = RcsSettings.getInstance().getConfigurationMode();
+			mode = rcsSettings.getConfigurationMode();
 		}
 		spinner.setSelection(ConfigurationMode.AUTO.equals(mode) ? 1 : 0);
 
@@ -291,9 +327,9 @@ public class StackProvisioning extends Activity {
                 R.array.vendors, android.R.layout.simple_spinner_item);
         adapterVendor.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapterVendor);
-
+        
         String[] vendorArray = getResources().getStringArray(R.array.vendors);
-        String vendorInDB = RcsSettings.getInstance().getVendor();
+        String vendorInDB = rcsSettings.getVendor();
 
         if (vendorInDB != null && vendorInDB.length() > 0) {
             if (vendorInDB.equals(vendorArray[0])) {
@@ -304,6 +340,26 @@ public class StackProvisioning extends Activity {
         } else {
             spinner.setSelection(0);
         }
+        
+		spinner = (Spinner) findViewById(R.id.EnableRcsSwitch);
+		adapter = new ArrayAdapter<String>(this,
+				android.R.layout.simple_spinner_item, ENABLE_RCS_SWITCH);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spinner.setAdapter(adapter);
+		EnableRcseSwitch rcsSwitch;
+		if (bundle != null && bundle.containsKey(RcsSettingsData.ENABLE_RCS_SWITCH)) {
+			rcsSwitch = EnableRcseSwitch.valueOf(bundle.getInt(RcsSettingsData.ENABLE_RCS_SWITCH));
+		} else {
+			rcsSwitch = rcsSettings.getEnableRcseSwitch();
+		}
+		switch (rcsSwitch) {
+		case ALWAYS_SHOW:
+		case ONLY_SHOW_IN_ROAMING:
+			spinner.setSelection(rcsSwitch.toInt());
+			break;
+		default:
+			spinner.setSelection(2);
+		}
 
 		setEditTextParameter(this, R.id.SecondaryProvisioningAddress, RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS, bundle);
 		setCheckBoxParameter(this, R.id.SecondaryProvisioningAddressOnly, RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY,
@@ -317,7 +373,7 @@ public class StackProvisioning extends Activity {
 		if (bundle != null && bundle.containsKey(RcsSettingsData.NETWORK_ACCESS)) {
 			access = NetworkAccessType.valueOf(bundle.getInt(RcsSettingsData.NETWORK_ACCESS));
 		} else {
-			access = RcsSettings.getInstance().getNetworkAccess();
+			access = rcsSettings.getNetworkAccess();
 		}
 		switch (access) {
 		case MOBILE:
@@ -338,7 +394,7 @@ public class StackProvisioning extends Activity {
 		if (bundle != null && bundle.containsKey(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE)) {
 			sipMobile = bundle.getString(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE);
 		} else {
-			sipMobile = RcsSettings.getInstance().getSipDefaultProtocolForMobile();
+			sipMobile = rcsSettings.getSipDefaultProtocolForMobile();
 		}
 		if (sipMobile.equalsIgnoreCase(SIP_PROTOCOL[0])) {
 			spinner.setSelection(0);
@@ -356,7 +412,7 @@ public class StackProvisioning extends Activity {
 		if (bundle != null && bundle.containsKey(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI)) {
 			sipWifi = bundle.getString(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI);
 		} else {
-			sipWifi = RcsSettings.getInstance().getSipDefaultProtocolForWifi();
+			sipWifi = rcsSettings.getSipDefaultProtocolForWifi();
 		}
 		if (sipWifi.equalsIgnoreCase(SIP_PROTOCOL[0])) {
 			spinner.setSelection(0);
@@ -376,7 +432,7 @@ public class StackProvisioning extends Activity {
 		if (bundle != null && bundle.containsKey(RcsSettingsData.TLS_CERTIFICATE_ROOT)) {
 			certRoot = bundle.getString(RcsSettingsData.TLS_CERTIFICATE_ROOT);
 		} else {
-			certRoot = RcsSettings.getInstance().getTlsCertificateRoot();
+			certRoot = rcsSettings.getTlsCertificateRoot();
 		}
 		for (int i = 0; i < certificates.length; i++) {
 			if (certRoot.contains(certificates[i])) {
@@ -386,7 +442,7 @@ public class StackProvisioning extends Activity {
 		}
 		if (!found) {
 			spinner.setSelection(0);
-			RcsSettings.getInstance().writeParameter(RcsSettingsData.TLS_CERTIFICATE_ROOT, "");
+			rcsSettings.writeParameter(RcsSettingsData.TLS_CERTIFICATE_ROOT, "");
 		}
 
 		spinner = (Spinner) findViewById(R.id.TlsCertificateIntermediate);
@@ -399,7 +455,7 @@ public class StackProvisioning extends Activity {
 		if (bundle != null && bundle.containsKey(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE)) {
 			certInt = bundle.getString(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE);
 		} else {
-			certInt = RcsSettings.getInstance().getTlsCertificateIntermediate();
+			certInt = rcsSettings.getTlsCertificateIntermediate();
 		}
 		for (int i = 0; i < certificates.length; i++) {
 			if (certInt.contains(certificates[i])) {
@@ -409,7 +465,7 @@ public class StackProvisioning extends Activity {
 		}
 		if (!found) {
 			spinner.setSelection(0);
-			RcsSettings.getInstance().writeParameter(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, "");
+			rcsSettings.writeParameter(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, "");
 		}
 
 		spinner = (Spinner) findViewById(R.id.FtProtocol);
@@ -420,7 +476,7 @@ public class StackProvisioning extends Activity {
 		if (bundle != null && bundle.containsKey(RcsSettingsData.FT_PROTOCOL)) {
 			ftProtocol = FileTransferProtocol.valueOf(bundle.getString(RcsSettingsData.FT_PROTOCOL));
 		} else {
-			ftProtocol = RcsSettings.getInstance().getFtProtocol();
+			ftProtocol = rcsSettings.getFtProtocol();
 		}
 		if (FileTransferProtocol.HTTP.equals(ftProtocol)) {
 			spinner.setSelection(0);
