@@ -5,8 +5,9 @@ import com.gsma.services.rcs.ipcall.IIPCall;
 import com.gsma.services.rcs.ipcall.IIPCallListener;
 import com.gsma.services.rcs.ipcall.IIPCallPlayer;
 import com.gsma.services.rcs.ipcall.IIPCallRenderer;
-import com.gsma.services.rcs.ipcall.IPCallServiceConfiguration;
+import com.gsma.services.rcs.ipcall.IIPCallServiceConfiguration;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.ICommonServiceConfiguration;
 
 /**
  * IP call service API
@@ -19,7 +20,7 @@ interface IIPCallService {
 
 	void removeEventListener(IRcsServiceRegistrationListener listener);
 
-	IPCallServiceConfiguration getConfiguration();
+	IIPCallServiceConfiguration getConfiguration();
 
 	List<IBinder> getIPCalls();
 	
@@ -34,4 +35,6 @@ interface IIPCallService {
 	void removeEventListener2(in IIPCallListener listener);
 	
 	int getServiceVersion();
+	
+	ICommonServiceConfiguration getCommonConfiguration();
 }

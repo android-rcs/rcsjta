@@ -91,7 +91,7 @@ public abstract class ImageTransferSession extends ContentSharingSession {
 	/**
 	 * Is image transfered
 	 * 
-	 * @retrurn Boolean
+	 * @return Boolean
 	 */
 	public boolean isImageTransfered() {
 		return imageTransfered; 
@@ -102,8 +102,8 @@ public abstract class ImageTransferSession extends ContentSharingSession {
 	 * 
 	 * @return Size in bytes
 	 */
-	public static int getMaxImageSharingSize() {
-		return RcsSettings.getInstance().getMaxImageSharingSize()*1024;
+	public static long getMaxImageSharingSize() {
+		return RcsSettings.getInstance().getMaxImageSharingSize();
 	}
 
     /**

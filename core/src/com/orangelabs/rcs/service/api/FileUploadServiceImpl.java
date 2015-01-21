@@ -29,19 +29,20 @@ import java.util.Map;
 import android.net.Uri;
 import android.os.IBinder;
 
+import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.RcsService;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.upload.FileUploadServiceConfiguration;
+import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.upload.IFileUpload;
 import com.gsma.services.rcs.upload.IFileUploadListener;
 import com.gsma.services.rcs.upload.IFileUploadService;
+import com.gsma.services.rcs.upload.IFileUploadServiceConfiguration;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.upload.FileUploadSession;
 import com.orangelabs.rcs.platform.file.FileDescription;
 import com.orangelabs.rcs.platform.file.FileFactory;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.service.broadcaster.FileUploadEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -59,11 +60,6 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 	private final Map<String, IFileUpload> mFileUploadCache = new HashMap<String, IFileUpload>();
 
 	/**
-	 * Max file upload size
-	 */
-	private int maxUploadSize;	
-	
-	/**
 	 * The logger
 	 */
 	private static final Logger logger = Logger.getLogger(FileUploadServiceImpl.class.getSimpleName());
@@ -73,19 +69,20 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 	 */
 	private Object lock = new Object();
 
+	private final RcsSettings mRcsSettings;
+
 	/**
 	 * Constructor
 	 * 
 	 * @param imService InstantMessagingService
+	 * @param rcsSettings 
 	 */
-	public FileUploadServiceImpl(InstantMessagingService imService) {
+	public FileUploadServiceImpl(InstantMessagingService imService, RcsSettings rcsSettings) {
 		if (logger.isActivated()) {
 			logger.info("File upload service API is loaded");
 		}
-
-		// Get configuration
-		maxUploadSize = FileSharingSession.getMaxFileSharingSize();
 		mImService = imService;
+		mRcsSettings = rcsSettings;
 	}
 
 	/**
@@ -130,9 +127,8 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      * 
      * @return Configuration
      */
-    public FileUploadServiceConfiguration getConfiguration() {
-    	return new FileUploadServiceConfiguration(
-    			maxUploadSize);
+    public IFileUploadServiceConfiguration getConfiguration() {
+    	return new IFileUploadServiceConfigurationImpl(mRcsSettings);
     }    	
 	
     /**
@@ -184,7 +180,7 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      * Can a file be uploaded now
      * 
      * @return Returns true if a file can be uploaded, else returns false
-     * @throws RcsServiceException
+     * @throws ServerApiException 
      */
     public boolean canUploadFile() throws ServerApiException {
 		if (logger.isActivated()) {
@@ -225,6 +221,7 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 
     /**
      * Returns a current file upload from its unique ID
+     * @param uploadId 
      * 
      * @return File upload
      * @throws ServerApiException
@@ -273,10 +270,19 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 	 * Returns service version
 	 * 
 	 * @return Version
-	 * @see RcsService.Build.VERSION_CODES
+	 * @see VERSION_CODES
 	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {
 		return RcsService.Build.API_VERSION;
+	}
+	
+	/**
+	 * Returns the common service configuration
+	 * 
+	 * @return the common service configuration
+	 */
+	public ICommonServiceConfiguration getCommonConfiguration() {
+		return new CommonServiceConfigurationImpl();
 	}
 }

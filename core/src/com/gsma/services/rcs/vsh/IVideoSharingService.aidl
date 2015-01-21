@@ -4,8 +4,9 @@ import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.vsh.IVideoSharing;
 import com.gsma.services.rcs.vsh.IVideoSharingListener;
 import com.gsma.services.rcs.vsh.IVideoPlayer;
-import com.gsma.services.rcs.vsh.VideoSharingServiceConfiguration;
+import com.gsma.services.rcs.vsh.IVideoSharingServiceConfiguration;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.ICommonServiceConfiguration;
 
 /**
  * Video sharing service API
@@ -18,7 +19,7 @@ interface IVideoSharingService {
 
 	void removeEventListener(IRcsServiceRegistrationListener listener);
 
-	VideoSharingServiceConfiguration getConfiguration();
+	IVideoSharingServiceConfiguration getConfiguration();
 
 	List<IBinder> getVideoSharings();
 	
@@ -31,4 +32,6 @@ interface IVideoSharingService {
 	void removeEventListener2(in IVideoSharingListener listener);
 
 	int getServiceVersion();
+	
+	ICommonServiceConfiguration getCommonConfiguration();
 }

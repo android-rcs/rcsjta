@@ -102,7 +102,7 @@ public class ChatCursorAdapter extends CursorAdapter {
 		String data = cursor.getString(holder.columnContent);
 		// Set display name
 		String displayName = null;
-		if (!mIsSingleChat && direction != RcsCommon.Direction.OUTGOING) {
+		if (!mIsSingleChat && RcsCommon.Direction.OUTGOING != direction) {
 			String number = cursor.getString(holder.columnContact);
 			if (number != null) {
 				try {
@@ -181,6 +181,7 @@ public class ChatCursorAdapter extends CursorAdapter {
 	private CharSequence formatDataToText(Context context, String mimeType, String data) {
 		if (ChatLog.Message.MimeType.TEXT_MESSAGE.equals(mimeType)) {
 			return formatMessageWithSmiley(data);
+			
 		}
 		if (ChatLog.Message.MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
 			try {
@@ -190,13 +191,14 @@ public class ChatCursorAdapter extends CursorAdapter {
 						.append(context.getString(R.string.label_latitude)).append(" ").append(geoloc.getLatitude()).append("\n")
 						.append(context.getString(R.string.label_longitude)).append(" ").append(geoloc.getLongitude()).append("\n")
 						.append(context.getString(R.string.label_accuracy)).append(" ").append(geoloc.getAccuracy()).toString();
+				
 			} catch (Exception e) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG,"Invalid geoloc message:".concat(data));
 				}
 				return data;
+				
 			}
-			
 		}
 		return null;
 	}
@@ -225,12 +227,12 @@ public class ChatCursorAdapter extends CursorAdapter {
 		 */
 		ViewHolder(View base, Cursor cursor) {
 			// Save column indexes
-			columnDirection = cursor.getColumnIndex(ChatLog.Message.DIRECTION);
-			columnTimestamp = cursor.getColumnIndex(ChatLog.Message.TIMESTAMP);
-			columnContent = cursor.getColumnIndex(ChatLog.Message.CONTENT);
-			columnMessageStatus = cursor.getColumnIndex(ChatLog.Message.STATUS);
-			columnContact = cursor.getColumnIndex(ChatLog.Message.CONTACT);
-			columnMimetype = cursor.getColumnIndex(ChatLog.Message.MIME_TYPE);
+			columnDirection = cursor.getColumnIndexOrThrow(ChatLog.Message.DIRECTION);
+			columnTimestamp = cursor.getColumnIndexOrThrow(ChatLog.Message.TIMESTAMP);
+			columnContent = cursor.getColumnIndexOrThrow(ChatLog.Message.CONTENT);
+			columnMessageStatus = cursor.getColumnIndexOrThrow(ChatLog.Message.STATUS);
+			columnContact = cursor.getColumnIndexOrThrow(ChatLog.Message.CONTACT);
+			columnMimetype = cursor.getColumnIndexOrThrow(ChatLog.Message.MIME_TYPE);
 			// Save children views
 			chatItemLayout = (RelativeLayout) base.findViewById(R.id.msg_item);
 			chatText = (TextView) base.findViewById(R.id.chat_text);

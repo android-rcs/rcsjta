@@ -58,7 +58,9 @@ public class TestChatApi extends ListActivity {
     		getString(R.string.menu_chat_log),
     		getString(R.string.menu_initiate_group_chat),
     		getString(R.string.menu_group_chat_log),
+    		getString(R.string.menu_chat_service_config),
     		getString(R.string.menu_showus_map),
+
     	};
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
@@ -83,6 +85,10 @@ public class TestChatApi extends ListActivity {
 			break;
 
 		case 4:
+			startActivity(new Intent(this, ChatServiceConfigActivity.class));
+			break;
+			
+		case 5:
 			ArrayList<String> list = new ArrayList<String>();
 			Cursor cursor = null;
 			try {

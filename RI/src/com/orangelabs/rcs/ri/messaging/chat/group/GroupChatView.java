@@ -34,6 +34,7 @@ import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.text.InputFilter;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -46,14 +47,15 @@ import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Toast;
 
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.ChatService;
-import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.chat.ChatServiceConfiguration;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.gsma.services.rcs.chat.GroupChatListener;
@@ -99,10 +101,13 @@ public class GroupChatView extends ChatView {
 	private final static int GROUPCHAT_MENU_ITEM_DELETE = 0;
 	private final static int GROUPCHAT_MENU_ITEM_VIEW_GC_INFO = 1;
 
-	private static final String WHERE_CLAUSE = new StringBuilder(ChatLog.Message.CHAT_ID).append("=? AND (")
-			.append(ChatLog.Message.MIME_TYPE).append("='").append(ChatLog.Message.MimeType.GEOLOC_MESSAGE).append("' OR ")
-			.append(ChatLog.Message.MIME_TYPE).append("='").append(ChatLog.Message.MimeType.TEXT_MESSAGE).append("' OR ")
-			.append(ChatLog.Message.MIME_TYPE).append("='").append(ChatLog.Message.MimeType.GROUPCHAT_EVENT).append("')").toString();
+	private static final String WHERE_CLAUSE = new StringBuilder(
+			Message.CHAT_ID).append("=? AND (").append(Message.MIME_TYPE)
+			.append("='").append(Message.MimeType.GEOLOC_MESSAGE)
+			.append("' OR ").append(Message.MIME_TYPE).append("='")
+			.append(Message.MimeType.TEXT_MESSAGE).append("' OR ")
+			.append(Message.MIME_TYPE).append("='")
+			.append(Message.MimeType.GROUPCHAT_EVENT).append("')").toString();
 
 	/**
 	 * Subject
@@ -157,8 +162,9 @@ public class GroupChatView extends ChatView {
 		// Callback called when an Is-composing event has been received
 		public void onComposingEvent( String chatId, ContactId contact, boolean status) {
 			// Discard event if not for current chatId
-			if (GroupChatView.this.mChatId == null || !GroupChatView.this.mChatId.equals(chatId)) {
+			if (!mChatId.equals(chatId)) {
 				return;
+				
 			}
 			displayComposingEvent(contact, status);
 		}
@@ -167,9 +173,11 @@ public class GroupChatView extends ChatView {
 		public void onParticipantInfoChanged(String chatId, ParticipantInfo participant) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG,
-						new StringBuilder("onParticipantInfoChanged chatId=").append(chatId)
-								.append(" contact=").append(participant.getContact().toString())
-								.append(" status=").append(participant.getStatus()).toString());
+						new StringBuilder("onParticipantInfoChanged chatId=")
+								.append(chatId).append(" contact=")
+								.append(participant.getContact().toString())
+								.append(" status=")
+								.append(participant.getStatus()).toString());
 			}
 		}
 
@@ -178,10 +186,12 @@ public class GroupChatView extends ChatView {
 				String mimeType, String msgId, int status, int reasonCode) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG,
-						new StringBuilder("onGroupDeliveryInfoChanged chatId=").append(chatId)
-								.append(" contact=").append(contact.toString())
-								.append(" mime-type=").append(mimeType).append(" msgId=")
-								.append(msgId).append(" status=").append(status).append(" reason=")
+						new StringBuilder(
+								"onMessageGroupDeliveryInfoChanged chatId=")
+								.append(chatId).append(" contact=")
+								.append(contact).append(" msgId=")
+								.append(msgId).append(" status=")
+								.append(status).append(" reason=")
 								.append(reasonCode).toString());
 			}
 		}
@@ -192,7 +202,11 @@ public class GroupChatView extends ChatView {
 		@Override
 		public void onStateChanged(String chatId, final int state, final int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, new StringBuilder("onStateChanged chatId=").append(chatId).append(" state=").append(state).append( " reason=").append(reasonCode).toString());
+				Log.d(LOGTAG,
+						new StringBuilder("onStateChanged chatId=")
+								.append(chatId).append(" state=").append(state)
+								.append(" reason=").append(reasonCode)
+								.toString());
 			}
 			// TODO CR031 enumerated types
 			if (state > RiApplication.GC_STATES.length) {
@@ -200,16 +214,19 @@ public class GroupChatView extends ChatView {
 					Log.e(LOGTAG, "onStateChanged unhandled status=".concat(String.valueOf(state)));
 				}
 				return;
+				
 			}
 			if (reasonCode > RiApplication.GC_REASON_CODES.length) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "onStateChanged unhandled reason=".concat(String.valueOf(reasonCode)));
 				}
 				return;
+				
 			}
 			// Discard event if not for current chatId
 			if (mChatId == null || !mChatId.equals(chatId)) {
 				return;
+				
 			}
 			final String _reasonCode = RiApplication.GC_REASON_CODES[reasonCode];
 			handler.post(new Runnable() {
@@ -253,7 +270,7 @@ public class GroupChatView extends ChatView {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
 		Cursor cursor = (Cursor) mAdapter.getItem(info.position);
 		menu.add(0, GROUPCHAT_MENU_ITEM_DELETE, 0, R.string.menu_delete_message);
-		int direction = cursor.getInt(cursor.getColumnIndex(ChatLog.Message.DIRECTION));
+		int direction = cursor.getInt(cursor.getColumnIndex(Message.DIRECTION));
 		if (RcsCommon.Direction.OUTGOING == direction) {
 			menu.add(0, GROUPCHAT_MENU_ITEM_VIEW_GC_INFO, 1, R.string.menu_view_groupdelivery);
 		}
@@ -271,11 +288,40 @@ public class GroupChatView extends ChatView {
 		case GROUPCHAT_MENU_ITEM_VIEW_GC_INFO:
 			GroupDeliveryInfoList.startActivity(GroupChatView.this, messageId);
 			return true;
+			
 		case GROUPCHAT_MENU_ITEM_DELETE:
 			// TODO CR005 delete methods
 			return true;
+			
 		default:
 			return super.onContextItemSelected(item);
+		}
+	}
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		ChatService chatService = mCnxManager.getChatApi();
+		try {
+			addChatEventListener(chatService);
+			ChatServiceConfiguration configuration = chatService.getConfiguration();
+			// Set max label length
+			int maxMsgLength = configuration.getGroupChatMessageMaxLength();
+			if (maxMsgLength > 0) {
+				// Set the message composer max length
+				InputFilter[] filterArray = new InputFilter[1];
+				filterArray[0] = new InputFilter.LengthFilter(maxMsgLength);
+				composeText.setFilters(filterArray);
+			}
+			// Instantiate the composing manager
+			composingManager = new IsComposingManager(configuration.getIsComposingTimeout() * 1000, getNotifyComposing());
+		} catch (RcsServiceNotAvailableException e) {
+			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
+		} catch (RcsServiceException e) {
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+		}
+		if (LogUtils.isActive) {
+			Log.d(LOGTAG, "onCreate");
 		}
 	}
 
@@ -297,10 +343,11 @@ public class GroupChatView extends ChatView {
 			switch ((GroupChatMode) getIntent().getSerializableExtra(EXTRA_MODE)) {
 			case OUTGOING:
 				// Initiate a Group Chat: check if the service is available
-				boolean registered = connectionManager.getChatApi().isServiceRegistered();
+				boolean registered = mCnxManager.getChatApi().isServiceRegistered();
 				if (!registered) {
 					Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 					return false;
+					
 				}
 
 				// Get subject
@@ -310,23 +357,27 @@ public class GroupChatView extends ChatView {
 				// Get participants
 				ContactUtils contactUtils = ContactUtils.getInstance(this);
 				List<String> contacts = getIntent().getStringArrayListExtra(GroupChatView.EXTRA_PARTICIPANTS);
-				if (contacts != null && !contacts.isEmpty()) {
-					for (String contact : contacts) {
-						try {
-							mParticipants.add(contactUtils.formatContact(contact));
-						} catch (RcsContactFormatException e) {
-							if (LogUtils.isActive) {
-								Log.e(LOGTAG, "processIntent invalid participant ".concat(contact));
-							}
-						}
-					}
-					if (mParticipants.isEmpty()) {
-						Utils.showMessageAndExit(this, getString(R.string.label_invalid_contacts), exitOnce);
-						return false;
-					}
-				} else {
+				if (contacts == null || contacts.isEmpty()) {
 					Utils.showMessageAndExit(this, getString(R.string.label_invalid_contacts), exitOnce);
 					return false;
+					
+				}
+				
+				for (String contact : contacts) {
+					try {
+						mParticipants.add(contactUtils.formatContact(contact));
+					} catch (RcsContactFormatException e) {
+						if (LogUtils.isActive) {
+							Log.e(LOGTAG, "processIntent invalid participant ".concat(contact));
+						}
+					}
+				}
+				if (mParticipants.isEmpty()) {
+					Utils.showMessageAndExit(this,
+							getString(R.string.label_invalid_contacts),
+							exitOnce);
+					return false;
+					
 				}
 
 				// Initiate group chat
@@ -337,13 +388,14 @@ public class GroupChatView extends ChatView {
 				mChatId = getIntent().getStringExtra(GroupChatView.EXTRA_CHAT_ID);
 
 				// Get chat session
-				mGroupChat = connectionManager.getChatApi().getGroupChat(mChatId);
+				mGroupChat = mCnxManager.getChatApi().getGroupChat(mChatId);
 				if (mGroupChat == null) {
 					if (LogUtils.isActive) {
 						Log.e(LOGTAG, "processIntent session not found for chatId=".concat(mChatId));
 					}
 					Utils.showMessageAndExit(this, getString(R.string.label_session_not_found), exitOnce);
 					return false;
+					
 				}
 				getSupportLoaderManager().initLoader(LOADER_ID, null, this);
 
@@ -357,8 +409,11 @@ public class GroupChatView extends ChatView {
 				mParticipants = getListOfParticipants(mGroupChat.getParticipants());
 				if (LogUtils.isActive) {
 					if (mParticipants == null) {
-						Log.e(LOGTAG, new StringBuilder("processIntent chatId=").append(mChatId)
-								.append(" subject='").append(mSubject).append("'").toString());
+						Log.e(LOGTAG,
+								new StringBuilder("processIntent chatId=")
+										.append(mChatId).append(" subject='")
+										.append(mSubject).append("'")
+										.toString());
 					}
 				}
 				return true;
@@ -369,25 +424,31 @@ public class GroupChatView extends ChatView {
 					// It is a new message: check if for the displayed conversation
 					if (message.getChatId().equals(mChatId)) {
 						// Mark the message as read
-						connectionManager.getChatApi().markMessageAsRead(message.getMsgId());
+						mCnxManager.getChatApi().markMessageAsRead(message.getMsgId());
 						return true;
+						
 					} else {
 						// Ignore message if it does not belong to current GC
 						if (LogUtils.isActive) {
 							Log.d(LOGTAG,
-									new StringBuilder("processIntent discard chat message ")
-											.append(message.getMsgId()).append(" for chatId ")
-											.append(message.getChatId()).toString());
+									new StringBuilder(
+											"processIntent discard chat message ")
+											.append(message.getMsgId())
+											.append(" for chatId ")
+											.append(message.getChatId())
+											.toString());
 						}
 						return true;
+						
 					}
 				} else {
 					// New GC invitation
 					mChatId = getIntent().getStringExtra(GroupChatIntent.EXTRA_CHAT_ID);
-					mGroupChat = connectionManager.getChatApi().getGroupChat(mChatId);
+					mGroupChat = mCnxManager.getChatApi().getGroupChat(mChatId);
 					if (mGroupChat == null) {
 						Utils.showMessageAndExit(this, getString(R.string.label_session_not_found), exitOnce);
 						return false;
+						
 					}
 					getSupportLoaderManager().initLoader(LOADER_ID, null, this);
 					chatIdOnForeground = mChatId;
@@ -400,11 +461,12 @@ public class GroupChatView extends ChatView {
 					mParticipants = getListOfParticipants(mGroupChat.getParticipants());
 					// Display accept/reject dialog
 					// TODO manage new state ACCEPTING and REJECTED
-					if (mGroupChat.getState() == GroupChat.State.INVITED) {
+					if (GroupChat.State.INVITED == mGroupChat.getState()) {
 						displayAcceptRejectDialog(contact);
 					}
 				}
 				return true;
+				
 			}
 		} catch (RcsServiceNotAvailableException e) {
 			e.printStackTrace();
@@ -433,7 +495,7 @@ public class GroupChatView extends ChatView {
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle arg) {
 		// Create a new CursorLoader with the following query parameters.
-		CursorLoader loader = new CursorLoader(this, ChatLog.Message.CONTENT_URI, PROJECTION, WHERE_CLAUSE,
+		CursorLoader loader = new CursorLoader(this, Message.CONTENT_URI, PROJECTION, WHERE_CLAUSE,
 				new String[] { mChatId }, QUERY_SORT_ORDER);
 		return loader;
 	}
@@ -519,7 +581,7 @@ public class GroupChatView extends ChatView {
 	private boolean startGroupChat() {
 		// Initiate the chat session in background
 		try {
-			mGroupChat = connectionManager.getChatApi().initiateGroupChat(new HashSet<ContactId>(mParticipants), mSubject);
+			mGroupChat = mCnxManager.getChatApi().initiateGroupChat(new HashSet<ContactId>(mParticipants), mSubject);
 			mChatId = mGroupChat.getChatId();
 			getSupportLoaderManager().initLoader(LOADER_ID, null, this);
 			chatIdOnForeground = mChatId;
@@ -566,7 +628,7 @@ public class GroupChatView extends ChatView {
 		Set<ContactId> availableParticipants = new HashSet<ContactId>();
 		try {
 			Set<ParticipantInfo> currentContacts = mGroupChat.getParticipants();
-			Set<RcsContact> contacts = connectionManager.getContactsApi().getRcsContacts();
+			Set<RcsContact> contacts = mCnxManager.getContactsApi().getRcsContacts();
 			for (RcsContact c1 : contacts) {
 				ContactId contact = c1.getContactId();
 				boolean found = false;
@@ -584,12 +646,14 @@ public class GroupChatView extends ChatView {
 			e.printStackTrace();
 			Utils.showMessage(GroupChatView.this, getString(R.string.label_api_failed));
 			return;
+			
 		}
 
 		// Check if some participants are available
 		if (availableParticipants.size() == 0) {
 			Utils.showMessage(GroupChatView.this, getString(R.string.label_no_participant_found));
 			return;
+			
 		}
 
 		// Display contacts
@@ -732,7 +796,7 @@ public class GroupChatView extends ChatView {
 	 * @return true if connected
 	 */
 	private static boolean isConnected(int status) {
-		return ((status == Status.CONNECTED) || (status == Status.PENDING) || (status == Status.BOOTED));
+		return ((Status.CONNECTED == status) || (Status.PENDING == status) || (Status.BOOTED == status));
 	}
 
 	/**
@@ -749,30 +813,33 @@ public class GroupChatView extends ChatView {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		switch (keyCode) {
 		case KeyEvent.KEYCODE_BACK:
-			if (mChatId != null) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				builder.setTitle(getString(R.string.title_chat_exit));
-				builder.setPositiveButton(getString(R.string.label_ok), new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
-						// Quit the session
-						quitSession();
-						if (LogUtils.isActive) {
-							Log.d(LOGTAG, "Quit the session");
-						}
-					}
-				});
-				builder.setNegativeButton(getString(R.string.label_cancel), new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
-						// Exit activity without aborting the session
-						finish();
-					}
-				});
-				builder.setCancelable(true);
-				builder.show();
-			} else {
+			if (mChatId == null) {
 				// Exit activity
 				finish();
+				return true;
+				
 			}
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle(getString(R.string.title_chat_exit));
+			builder.setPositiveButton(getString(R.string.label_ok),
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							// Quit the session
+							quitSession();
+							if (LogUtils.isActive) {
+								Log.d(LOGTAG, "Quit the session");
+							}
+						}
+					});
+			builder.setNegativeButton(getString(R.string.label_cancel),
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							// Exit activity without aborting the session
+							finish();
+						}
+					});
+			builder.setCancelable(true);
+			builder.show();
 			return true;
 		}
 		return super.onKeyDown(keyCode, event);
@@ -852,11 +919,10 @@ public class GroupChatView extends ChatView {
 
 	@Override
 	public ChatMessage sendMessage(String message) {
-		// Send text message
+		if (LogUtils.isActive) {
+			Log.d(LOGTAG, "sendTextMessage: ".concat(message));
+		}
 		try {
-			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "sendTextMessage msg=".concat(message));
-			}
 			// Send the text to Group Chat
 			return mGroupChat.sendMessage(message);
 		} catch (Exception e) {
@@ -869,12 +935,11 @@ public class GroupChatView extends ChatView {
 
 	@Override
 	public ChatMessage sendMessage(Geoloc geoloc) {
-		// Send geoloc message
+		if (LogUtils.isActive) {
+			Log.d(LOGTAG, "sendGeolocMessage: ".concat(geoloc.toString()));
+		}
 		try {
-			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "sendMessage geoloc=".concat(geoloc.toString()));
-			}
-			// Send the text to remote
+			// Send the geoloc to Group Chat
 			return mGroupChat.sendMessage(geoloc);
 		} catch (Exception e) {
 			if (LogUtils.isActive) {
@@ -886,18 +951,22 @@ public class GroupChatView extends ChatView {
 
 	@Override
 	public void addChatEventListener(ChatService chatService) throws RcsServiceException {
-		connectionManager.getChatApi().addEventListener(mListener);
+		mCnxManager.getChatApi().addEventListener(mListener);
 	}
 
 	@Override
 	public void removeChatEventListener(ChatService chatService) throws RcsServiceException {
-		connectionManager.getChatApi().removeEventListener(mListener);
+		mCnxManager.getChatApi().removeEventListener(mListener);
 	}
 
 	@Override
 	public INotifyComposing getNotifyComposing() {
 		INotifyComposing notifyComposing = new IsComposingManager.INotifyComposing() {
 			public void setTypingStatus(boolean isTyping) {
+				if (mGroupChat != null) {
+					return;
+					
+				}
 				try {
 					if (mGroupChat != null) {
 						mGroupChat.sendIsComposingEvent(isTyping);

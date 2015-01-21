@@ -17,86 +17,41 @@
  ******************************************************************************/
 package com.gsma.services.rcs.ish;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import com.gsma.services.rcs.RcsServiceException;
 
 /**
  * Image sharing service configuration
  * 
  * @author Jean-Marc AUFFRET
+ * @author yplo6403
+ *
  */
-public class ImageSharingServiceConfiguration implements Parcelable {
-		
-	/**
-	 * Image size limit
-	 */
-	private long maxSize;
-	
+public class ImageSharingServiceConfiguration {
+
+	IImageSharingServiceConfiguration mConfiguration;
+
 	/**
 	 * Constructor
 	 * 
-	 * @param maxSize Image size limit
-     * @hide
+	 * @param configuration
+	 * @hide
 	 */
-	public ImageSharingServiceConfiguration(long maxSize) {
-		this.maxSize = maxSize;
-    }	
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param source Parcelable source
-     * @hide
-	 */
-	public ImageSharingServiceConfiguration(Parcel source) {
-		this.maxSize = source.readLong();
-    }
+	public ImageSharingServiceConfiguration(IImageSharingServiceConfiguration configuration) {
+		mConfiguration = configuration;
+	}
 
 	/**
-	 * Describe the kinds of special objects contained in this Parcelable's
-	 * marshalled representation
-	 * 
-	 * @return Integer
-     * @hide
-	 */
-	public int describeContents() {
-        return 0;
-    }
-
-	/**
-	 * Write parcelable object
-	 * 
-	 * @param dest The Parcel in which the object should be written
-	 * @param flags Additional flags about how the object should be written
-     * @hide
-	 */
-    public void writeToParcel(Parcel dest, int flags) {
-    	dest.writeLong(maxSize);
-    }
-
-    /**
-     * Parcelable creator
-     * 
-     * @hide
-     */
-    public static final Parcelable.Creator<ImageSharingServiceConfiguration> CREATOR
-            = new Parcelable.Creator<ImageSharingServiceConfiguration>() {
-        public ImageSharingServiceConfiguration createFromParcel(Parcel source) {
-            return new ImageSharingServiceConfiguration(source);
-        }
-
-        public ImageSharingServiceConfiguration[] newArray(int size) {
-            return new ImageSharingServiceConfiguration[size];
-        }
-    };	
-		
-	/**
-	 * Returns the maximum authorized size of the image that can be sent. It
-	 * returns 0 if there is no limitation.
+	 * Returns the maximum authorized size of the image that can be sent. It returns 0 if there is
+	 * no limitation.
 	 * 
 	 * @return Size in kilobytes
+	 * @throws RcsServiceException
 	 */
-	public long getMaxSize() {
-		return maxSize;
+	public long getMaxSize() throws RcsServiceException {
+		try {
+			return mConfiguration.getMaxSize();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
 	}
 }

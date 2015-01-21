@@ -8,7 +8,6 @@
 
 <!-- Commons -->
 <string name="label_service_not_available">The service is not available. Please retry later.</string>
-<string name="label_not_implemented">Not yet implemented</string>
 <string name="label_confirm_close">Do you want to close the session on quit?</string>
 <string name="menu_close_session">Quit</string>
 <string name="menu_clear_log">Clear log</string>
@@ -139,11 +138,23 @@
 <string name="label_transfer_session_has_expired">Session has expired (timeout or any other error)</string>
 <string name="label_ft_state_changed">%1$s (%2$s)</string>
 <string name="label_ft_from_size">From: %1$s\nSize: %2$s Kb</string>
+<string name="menu_ft_config">File transfer configuration</string>
+
+<string name="label_ft_WarnSize">File size warning:</string>
+<string name="label_ft_MaxSize">Max file size:</string>
+<string name="label_ft_isAutoAccept">AA enabled:</string>
+<string name="label_ft_isAutoAcceptModeChangeable">AA changeable:</string>
+<string name="label_ft_isAutoAcceptInRoaming">AA enabled in roaming:</string>
+<string name="label_MaxFileTransfers">Max file transfers:</string>
+<string name="label_GroupFileTransferSupported">Group supported:</string>
+<string name="menu_file_transfer_config">File transfer service configuration</string>
+<string name="label_ft_ImageResizeOption">Image resize option:</string>
 
 <!-- Chat menu -->
 <string name="menu_initiate_chat">Initiate single chat</string>
 <string name="menu_initiate_group_chat">Initiate group chat</string>
 <string name="menu_chat_log">Chat log</string>
+<string name="menu_chat_config">Chat service configuration</string>
 <string name="menu_group_chat_log">Group chat log</string>
 <string name="label_invite">Invite</string>
 <string name="title_recv_chat">Chat with %s</string>
@@ -182,7 +193,21 @@
 <string name="label_gc_from_subject">From: %1$s\nSubject: %2$s</string>
 <string name="label_chat_send">Send</string>
 <string name="label_groupchat_event">Contact has %1$s</string>
-
+<string name="menu_chat_service_config">Chat service configuration</string>
+<string name="label_ImAlwaysOn">IM always on:</string>
+<string name="label_WarnSF">Warning SF:</string>
+<string name="label_IsComposingTimeout">Composing timeout:</string>
+<string name="label_MinGroupChatParticipants">Min GC participants:</string>
+<string name="label_MaxGroupChatParticipants">MaX GC participants:</string>
+<string name="label_MaxMsgLengthGroupChat">Max GC msg length:</string>
+<string name="label_GroupChatSubjectMaxLength">Max GC subject length:</string>
+<string name="label_MaxMsgLengthOneToOneChat">Max 1to1 msg length:</string>
+<string name="label_SmsFallback">SMS Fallback:</string>
+<string name="label_RespondToDisplayReports">Reply to display reports:</string>
+<string name="label_MaxGeolocLabelLength">Max Geoloc label length:</string>
+<string name="label_GeolocExpireTime">Geoloc Expire Timeout:</string>
+<string name="label_GroupChatSupported">GC supported:</string>
+<string name="label_ChatTimeout">Chat timeout</string>
 
 <!-- Sharing menu -->
 <string name="menu_sharing">Sharing</string>
@@ -308,6 +333,13 @@
 <string name="label_service_status">Service enabled:</string>
 <string name="label_registration_status">Service registered:</string>
 <string name="menu_others">Other services</string>
+<string name="menu_service_configuration">Service common configuration</string>
+<string name="label_service_configuration_valid">Configuration valid:</string>
+<string name="label_default_messaging_method">Messaging method:</string>
+<string name="label_messaging_mode">Messaging mode:</string>
+<string name="label_my_display_name">My display name:</string>
+<string name="label_my_contact_id">My contact identifier:</string>
+<string name="label_configuration_refresh">update</string>
 
 <!-- File upload menu -->
 <string name="menu_upload">File upload</string>

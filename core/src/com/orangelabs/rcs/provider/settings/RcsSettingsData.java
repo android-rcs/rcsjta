@@ -28,7 +28,9 @@ import android.net.Uri;
 import android.os.Environment;
 import android.util.SparseArray;
 
-import com.gsma.services.rcs.RcsServiceConfiguration;
+import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
+import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
+import com.gsma.services.rcs.ft.FileTransferServiceConfiguration.ImageResizeOption;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -48,12 +50,12 @@ public class RcsSettingsData {
 	/**
 	 * Key of the Rcs configuration parameter
 	 */
-	static final String KEY_KEY = RcsServiceConfiguration.Settings.KEY;
+	static final String KEY_KEY = "key";
 
 	/**
 	 * Value of the Rcs configuration parameter
 	 */
-	static final String KEY_VALUE = RcsServiceConfiguration.Settings.VALUE;
+	static final String KEY_VALUE = "value";
 
 	/**
 	 * Default group chat conference URI
@@ -136,107 +138,6 @@ public class RcsSettingsData {
 		}
 
 	}
-	// TODO replace by API definition CR031
-	public enum MessagingMode {
-		INTEGRATED(0), CONVERGED(1), SEAMLESS(2), NONE(3);
-
-		private int mValue;
-
-		private static SparseArray<MessagingMode> mValueToEnum = new SparseArray<MessagingMode>();
-		static {
-			for (MessagingMode entry : MessagingMode.values()) {
-				mValueToEnum.put(entry.toInt(), entry);
-			}
-		}
-
-		private MessagingMode(int value) {
-			mValue = value;
-		}
-
-		public final int toInt() {
-			return mValue;
-		}
-
-		public static MessagingMode valueOf(int value) {
-			MessagingMode entry = mValueToEnum.get(value);
-			if (entry != null) {
-				return entry;
-			}
-			throw new IllegalArgumentException("No enum const class "
-					+ MessagingMode.class.getName() + "." + value);
-
-		}
-
-	};
-	
-	// TODO replace by API definition CR031
-	public enum DefaultMessagingMethod {
-		AUTOMATIC(0), RCS(1), NON_RCS(2);
-		
-		private int mValue;
-
-		private static SparseArray<DefaultMessagingMethod> mValueToEnum = new SparseArray<DefaultMessagingMethod>();
-		static {
-			for (DefaultMessagingMethod entry : DefaultMessagingMethod.values()) {
-				mValueToEnum.put(entry.toInt(), entry);
-			}
-		}
-
-		private DefaultMessagingMethod(int value) {
-			mValue = value;
-		}
-
-		public final int toInt() {
-			return mValue;
-		}
-
-		public static DefaultMessagingMethod valueOf(int value) {
-			DefaultMessagingMethod entry = mValueToEnum.get(value);
-			if (entry != null) {
-				return entry;
-			}
-			throw new IllegalArgumentException("No enum const class "
-					+ DefaultMessagingMethod.class.getName() + "." + value);
-
-		}
-		
-	};
-    
-	// TODO replace by API definition CR031
-	/**
-	 * Enumerated for the Image Resize Option
-	 */
-	public enum ImageResizeOption {
-		ALWAYS_PERFORM(0), ONLY_ABOVE_MAX_SIZE(1), ASK(2);
-		
-		private int mValue;
-
-		private static SparseArray<ImageResizeOption> mValueToEnum = new SparseArray<ImageResizeOption>();
-		static {
-			for (ImageResizeOption entry : ImageResizeOption.values()) {
-				mValueToEnum.put(entry.toInt(), entry);
-			}
-		}
-
-		private ImageResizeOption(int value) {
-			mValue = value;
-		}
-
-		public final int toInt() {
-			return mValue;
-		}
-
-		public static ImageResizeOption valueOf(int value) {
-			ImageResizeOption entry = mValueToEnum.get(value);
-			if (entry != null) {
-				return entry;
-			}
-			throw new IllegalArgumentException("No enum const class "
-					+ ImageResizeOption.class.getName() + "." + value);
-
-		}
-		
-	};
     
     /**
      * Network access type
@@ -290,6 +191,60 @@ public class RcsSettingsData {
 
 		}
 		
+	};
+	
+	/**
+	 * EnableRcseSwitch describes whether or not to show the RCS enabled/disabled switch permanently
+	 *
+	 */
+	public enum EnableRcseSwitch {
+		/**
+		 * the switch is shown permanently
+		 */
+		ALWAYS_SHOW(0),
+		/**
+		 * the switch is only shown during roaming
+		 */
+		ONLY_SHOW_IN_ROAMING(1),
+		/**
+		 * the switch is never shown
+		 */
+		NEVER_SHOW(-1);
+
+		private int mValue;
+
+		private static SparseArray<EnableRcseSwitch> mValueToEnum = new SparseArray<EnableRcseSwitch>();
+		static {
+			for (EnableRcseSwitch entry : EnableRcseSwitch.values()) {
+				mValueToEnum.put(entry.toInt(), entry);
+			}
+		}
+
+		private EnableRcseSwitch(int value) {
+			mValue = value;
+		}
+
+		/**
+		 * @return value
+		 */
+		public final int toInt() {
+			return mValue;
+		}
+
+		/**
+		 * @param value
+		 * @return NetworkAccessType
+		 */
+		public static EnableRcseSwitch valueOf(int value) {
+			EnableRcseSwitch entry = mValueToEnum.get(value);
+			if (entry != null) {
+				return entry;
+			}
+			throw new IllegalArgumentException("No enum const class "
+					+ EnableRcseSwitch.class.getName() + "." + value);
+
+		}
+
 	};
 
 	/**
@@ -511,13 +466,13 @@ public class RcsSettingsData {
 	 * Max file-icon size
 	 */
 	public static final String MAX_FILE_ICON_SIZE = "FileIconSize";
-	/* package private */static final Integer DEFAULT_MAX_FILE_ICON_SIZE = 50;
+	/* package private */static final Long DEFAULT_MAX_FILE_ICON_SIZE = 50L * 1024L;
 
 	/**
 	 * Max photo-icon size
 	 */
 	public static final String MAX_PHOTO_ICON_SIZE = "MaxPhotoIconSize";
-	/* package private */static final Integer DEFAULT_MAX_PHOTO_ICON_SIZE = 100;
+	/* package private */static final Long DEFAULT_MAX_PHOTO_ICON_SIZE = 100L * 1024L;
 
 	/**
 	 * Max length of the freetext
@@ -553,19 +508,19 @@ public class RcsSettingsData {
 	 * Max size of a file transfer
 	 */
 	public static final String MAX_FILE_TRANSFER_SIZE = "MaxFileTransferSize";
-	/* package private */static final Integer DEFAULT_MAX_FT_SIZE = 3072;
+	/* package private */static final Long DEFAULT_MAX_FT_SIZE = 3072L * 1024L;
 
 	/**
 	 * Warning threshold for file transfer size
 	 */
 	public static final String WARN_FILE_TRANSFER_SIZE = "WarnFileTransferSize";
-	/* package private */static final Integer DEFAULT_WARN_FT_SIZE = 2048;
+	/* package private */static final Long DEFAULT_WARN_FT_SIZE = 2048L * 1024L;
 
 	/**
 	 * Max size of an image share
 	 */
 	public static final String MAX_IMAGE_SHARE_SIZE = "MaxImageShareSize";
-	/* package private */static final Integer DEFAULT_MAX_ISH_SIZE = 3072;
+	/* package private */static final Long DEFAULT_MAX_ISH_SIZE = 3072L * 1024L;
 
 	/**
 	 * Max duration of a video share
@@ -667,19 +622,19 @@ public class RcsSettingsData {
 	 * Minimum storage capacity
 	 */
 	public static final String MIN_STORAGE_CAPACITY = "MinStorageCapacity";
-	/* package private */static final Integer DEFAULT_MIN_STORAGE_CAPACITY = 10240;
+	/* package private */static final Long DEFAULT_MIN_STORAGE_CAPACITY = 10240L * 1024L;
     
 	/**
 	 * Convergent messaging UX option
 	 */
-	public static final String KEY_MESSAGING_MODE = RcsServiceConfiguration.Settings.MESSAGING_MODE;
+	public static final String KEY_MESSAGING_MODE = "MessagingMode";
 	/* package private */static final Integer DEFAULT_KEY_MESSAGING_MODE = MessagingMode.NONE.toInt();
 	
 	/**
 	 * Default messaging method
 	 */
-	public static final String KEY_DEFAULT_MESSAGING_METHOD = RcsServiceConfiguration.Settings.DEFAULT_MESSAGING_METHOD;
-	/* package private */static final Integer DEFAULT_KEY_DEFAULT_MESSAGING_METHOD = DefaultMessagingMethod.AUTOMATIC.toInt();
+	public static final String KEY_DEFAULT_MESSAGING_METHOD = "DefaultMessagingMethod";
+	/* package private */static final Integer DEFAULT_KEY_DEFAULT_MESSAGING_METHOD = MessagingMethod.AUTOMATIC.toInt();
 
 	
     // ---------------------------------------------------------------------------
@@ -689,13 +644,13 @@ public class RcsSettingsData {
 	/**
 	 * IMS username or username part of the IMPU (for HTTP Digest only)
 	 */
-	public static final String USERPROFILE_IMS_USERNAME = RcsServiceConfiguration.Settings.MY_CONTACT_ID;
+	public static final String USERPROFILE_IMS_USERNAME = "MyContactId";
 	/* package private */static final String DEFAULT_USERPROFILE_IMS_USERNAME = "";
 
 	/**
 	 * IMS display name
 	 */
-	public static final String USERPROFILE_IMS_DISPLAY_NAME = RcsServiceConfiguration.Settings.MY_DISPLAY_NAME;
+	public static final String USERPROFILE_IMS_DISPLAY_NAME = "MyDisplayName";
 	/* package private */static final String DEFAULT_USERPROFILE_IMS_DISPLAY_NAME = "";
 
 	/**
@@ -1006,31 +961,31 @@ public class RcsSettingsData {
 	 * Image sharing capability
 	 */
 	public static final String CAPABILITY_IMAGE_SHARING = "CapabilityImageShare";
-	/* package private */static final Boolean DEFAULT_CAPABILITY_ISH = true;
+	/* package private */static final Boolean DEFAULT_CAPABILITY_ISH = false;
 
 	/**
 	 * Video sharing capability
 	 */
 	public static final String CAPABILITY_VIDEO_SHARING = "CapabilityVideoShare";
-	/* package private */static final Boolean DEFAULT_CAPABILITY_VSH = true;
+	/* package private */static final Boolean DEFAULT_CAPABILITY_VSH = false;
 
 	/**
 	 * IP voice call capability
 	 */
 	public static final String CAPABILITY_IP_VOICE_CALL = "CapabilityIPVoiceCall";
-	/* package private */static final Boolean DEFAULT_CAPABILITY_IP_VOICE_CALL = true;
+	/* package private */static final Boolean DEFAULT_CAPABILITY_IP_VOICE_CALL = false;
 
 	/**
 	 * IP video call capability
 	 */
 	public static final String CAPABILITY_IP_VIDEO_CALL = "CapabilityIPVideoCall";
-	/* package private */static final Boolean DEFAULT_CAPABILITY_IP_VIDEO_CALL = true;
+	/* package private */static final Boolean DEFAULT_CAPABILITY_IP_VIDEO_CALL = false;
 
 	/**
 	 * Instant Messaging session capability
 	 */
 	public static final String CAPABILITY_IM_SESSION = "CapabilityImSession";
-	/* package private */static final Boolean DEFAULT_CAPABILITY_IM_SESSION = true;
+	/* package private */static final Boolean DEFAULT_CAPABILITY_IM_SESSION = false;
 
 	/**
 	 * Group Instant Messaging session capability
@@ -1042,13 +997,13 @@ public class RcsSettingsData {
 	 * File transfer capability
 	 */
 	public static final String CAPABILITY_FILE_TRANSFER = "CapabilityFileTransfer";
-	/* package private */static final Boolean DEFAULT_CAPABILITY_FT = true;
+	/* package private */static final Boolean DEFAULT_CAPABILITY_FT = false;
 
 	/**
 	 * File transfer via HTTP capability
 	 */
 	public static final String CAPABILITY_FILE_TRANSFER_HTTP = "CapabilityFileTransferHttp";
-	/* package private */static final Boolean DEFAULT_CAPABILITY_FT_HTTP = true;
+	/* package private */static final Boolean DEFAULT_CAPABILITY_FT_HTTP = false;
 
 	/**
 	 * Presence discovery capability
@@ -1066,7 +1021,7 @@ public class RcsSettingsData {
 	 * Geolocation push capability
 	 */
 	public static final String CAPABILITY_GEOLOCATION_PUSH = "CapabilityGeoLocationPush";
-	/* package private */static final Boolean DEFAULT_CAPABILITY_GEOLOCATION_PUSH = true;
+	/* package private */static final Boolean DEFAULT_CAPABILITY_GEOLOCATION_PUSH = false;
 
 	/**
 	 * File transfer thumbnail capability
@@ -1321,7 +1276,7 @@ public class RcsSettingsData {
 	/**
 	 * Validity of the RCS configuration.
 	 */
-	public static final String CONFIGURATION_VALID = RcsServiceConfiguration.Settings.CONFIGURATION_VALIDITY;
+	public static final String CONFIGURATION_VALID = "ConfigurationValidity";
 	/* package private */static final Boolean DEFAULT_CONFIGURATION_VALID = false;
 
 	/**
@@ -1341,5 +1296,11 @@ public class RcsSettingsData {
 	 */
 	public static final String KEY_IMAGE_RESIZE_OPTION = "ImageResizeOption";
 	/* package private */static final Integer DEFAULT_KEY_IMAGE_RESIZE_OPTION = ImageResizeOption.ONLY_ABOVE_MAX_SIZE.toInt();
+
+	/**
+	 * RCS stack can be activated/deactivated by client applications
+	 */
+	public static final String ENABLE_RCS_SWITCH = "enableRcseSwitch";
+	/* package private */static final int DEFAULT_ENABLE_RCS_SWITCH = EnableRcseSwitch.ALWAYS_SHOW.toInt();
 	
 }

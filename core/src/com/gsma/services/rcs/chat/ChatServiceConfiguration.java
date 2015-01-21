@@ -21,310 +21,253 @@
  ******************************************************************************/
 package com.gsma.services.rcs.chat;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import com.gsma.services.rcs.RcsServiceException;
 
 /**
  * Chat service configuration
  * 
  * @author Jean-Marc AUFFRET
+ * @author yplo6403
+ *
  */
 public class ChatServiceConfiguration {
-	/**
-	 * IM always-on thanks to the Store & Forward
-	 */
-	private boolean mImAlwaysOn;
-	
-	/**
-	 * Store and Forward warning
-	 */
-	private boolean mWarnSF;
-	
-	/**
-	 * Chat timeout
-	 */
-	private int mChatTimeout;
-	
-	/**
-	 * Is-composing timeout
-	 */
-	private int mIsComposingTimeout;
 
-	/**
-	 * Max participants in a group chat
-	 */
-	private int mMaxGroupChatParticipants;
-	
-	/**
-	 * Max length of a message in a one-to-one chat
-	 */
-	private int mMaxMsgLengthOneToOneChat;
+	private final IChatServiceConfiguration mIConfig;
 
-	/**
-	 * Max length of a message in a group chat
-	 */
-	private int mMaxMsgLengthGroupChat;
-	
-	/**
-	 * SMS fallback
-	 */
-	private boolean mSmsFallback;
-
-	/**
-	 * Respond to displayed delivery report
-	 */
-	private boolean mRespondToDisplayReports;
-	
-	/**
-	 * Max geoloc label length
-	 */
-	private int mMaxGeolocLabelLength;
-
-	/**
-	 * Geoloc expiration time
-	 */
-	private int mGeolocExpireTime;
-
-	private int mMinGroupChatParticipants;
-
-	/**
-	 * The maximum length a group chat subject can have.
-	 * <p>The length is the number of bytes of the message encoded in UTF-8.
-	 */
-	private int mGroupChatSubjectMaxLength;
-	
 	/**
 	 * Constructor
 	 * 
-	 * @param imAlwaysOn IM always-on thanks to the Store & Forward
-	 * @param warnSF Store and Forward warning
-	 * @param chatTimeout Chat timeout
-	 * @param isComposingTimeout Is-composing timeout
-	 * @param maxGroupChatParticipants Max participants in a group chat
-	 * @param minGroupChatParticipants Min participants in a group chat
-	 * @param maxMsgLengthOneToOneChat Max length of a message in a one-to-one chat
-	 * @param maxMsgLengthGroupChat Max length of a message in a group chat
-	 * @param groupChatSubjectMaxLength Max length of subject in a group chat
-	 * @param smsFallback SMS fallback
-	 * @param respondToDisplayReports Respond to displayed delivery report
-	 * @param maxGeolocLabelLength Max geoloc label length
-	 * @param geolocExpireTime Geoloc expiration time
-     * @hide
+	 * @param iConfig
+	 *            IChatServiceConfiguration instance
+	 * @hide
 	 */
-	public ChatServiceConfiguration(boolean imAlwaysOn, boolean warnSF, int chatTimeout, int isComposingTimeout,
-			int maxGroupChatParticipants, int minGroupChatParticipants, int maxMsgLengthOneToOneChat, int maxMsgLengthGroupChat,
-			int groupChatSubjectMaxLength, boolean smsFallback, boolean respondToDisplayReports, int maxGeolocLabelLength,
-			int geolocExpireTime) {
-		mImAlwaysOn = imAlwaysOn;
-		mWarnSF = warnSF;
-		mChatTimeout = chatTimeout;
-		mIsComposingTimeout = isComposingTimeout;
-		mMaxGroupChatParticipants = maxGroupChatParticipants;
-		mMinGroupChatParticipants = minGroupChatParticipants;
-		mMaxMsgLengthOneToOneChat = maxMsgLengthOneToOneChat;
-		mMaxMsgLengthGroupChat = maxMsgLengthGroupChat;
-		mGroupChatSubjectMaxLength = groupChatSubjectMaxLength;
-		mSmsFallback = smsFallback;
-		mRespondToDisplayReports = respondToDisplayReports;
-		mMaxGeolocLabelLength = maxGeolocLabelLength;
-		mGeolocExpireTime = geolocExpireTime;
-    }	
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param source Parcelable source
-     * @hide
-	 */
-	public ChatServiceConfiguration(Parcel source) {
-		mImAlwaysOn = source.readInt() != 0;
-		mWarnSF = source.readInt() != 0;
-		mChatTimeout = source.readInt();
-		mIsComposingTimeout = source.readInt();
-		mMaxGroupChatParticipants = source.readInt();
-		mMinGroupChatParticipants = source.readInt();
-		mMaxMsgLengthOneToOneChat = source.readInt();
-		mMaxMsgLengthGroupChat = source.readInt();
-		mGroupChatSubjectMaxLength = source.readInt();
-		mSmsFallback = source.readInt() != 0;
-		mRespondToDisplayReports = source.readInt() != 0;
-		mMaxGeolocLabelLength = source.readInt();
-		mGeolocExpireTime = source.readInt();
-    }
+	/* package private */ChatServiceConfiguration(IChatServiceConfiguration iConfig) {
+		mIConfig = iConfig;
+	}
 
-	/**
-	 * Describe the kinds of special objects contained in this Parcelable's
-	 * marshalled representation
-	 * 
-	 * @return Integer
-     * @hide
-	 */
-	public int describeContents() {
-        return 0;
-    }
-
-	/**
-	 * Write parcelable object
-	 * 
-	 * @param dest The Parcel in which the object should be written
-	 * @param flags Additional flags about how the object should be written
-     * @hide
-	 */
-    public void writeToParcel(Parcel dest, int flags) {
-    	dest.writeInt(mImAlwaysOn ? 1 : 0);
-    	dest.writeInt(mWarnSF ? 1 : 0);
-    	dest.writeInt(mChatTimeout);
-    	dest.writeInt(mIsComposingTimeout);
-    	dest.writeInt(mMaxGroupChatParticipants);
-    	dest.writeInt(mMinGroupChatParticipants);
-    	dest.writeInt(mMaxMsgLengthOneToOneChat);
-    	dest.writeInt(mMaxMsgLengthGroupChat);
-    	dest.writeInt(mGroupChatSubjectMaxLength);
-    	dest.writeInt(mSmsFallback ? 1 : 0);
-    	dest.writeInt(mRespondToDisplayReports ? 1 : 0);
-    	dest.writeInt(mMaxGeolocLabelLength);
-    	dest.writeInt(mGeolocExpireTime);
-    }
-
-    /**
-     * Parcelable creator
-     * 
-     * @hide
-     */
-    public static final Parcelable.Creator<ChatServiceConfiguration> CREATOR
-            = new Parcelable.Creator<ChatServiceConfiguration>() {
-        public ChatServiceConfiguration createFromParcel(Parcel source) {
-            return new ChatServiceConfiguration(source);
-        }
-
-        public ChatServiceConfiguration[] newArray(int size) {
-            return new ChatServiceConfiguration[size];
-        }
-    };	
-	
 	/**
 	 * Is the Store and Forward capability is supported.
 	 * 
-	 * @return True if Store and Forward capability is supported, False if no Store & Forward capability
+	 * @return True if Store and Forward capability is supported, False if no Store & Forward
+	 *         capability
+	 * @throws RcsServiceException
 	 */
-	public boolean isChatSf() {
-		return mImAlwaysOn;
+	public boolean isChatSf() throws RcsServiceException {
+		try {
+			return mIConfig.isChatSf();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
 	}
 
 	/**
-	 * Does the UX should alert the user that messages are handled differently when
-	 * the Store and Forward functionality is involved. It returns True if user should
-	 * be informed when sending message to offline user.
-	 * <p>This should be used with isChatSf.
+	 * Does the UX should alert the user that messages are handled differently when the Store and
+	 * Forward functionality is involved. It returns True if user should be informed when sending
+	 * message to offline user.
+	 * <p>
+	 * This should be used with isChatSf.
 	 * 
 	 * @return Boolean
+	 * @throws RcsServiceException
 	 */
-	public boolean isChatWarnSF() {
-		return mWarnSF;
+	public boolean isChatWarnSF() throws RcsServiceException {
+		try {
+			return mIConfig.isChatWarnSF();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
 	}
-	
+
 	/**
 	 * Returns the time after inactive chat could be closed
 	 * 
 	 * @return Timeout in seconds
+	 * @throws RcsServiceException
 	 */
-	public int getChatTimeout() {
-		return mChatTimeout;
+	public int getChatTimeout() throws RcsServiceException {
+		try {
+			return mIConfig.getChatTimeout();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
 	}
-	
+
 	/**
 	 * Returns the time after an inactive chat could be closed
 	 * 
 	 * @return Timeout in seconds
+	 * @throws RcsServiceException
 	 */
-	public int getIsComposingTimeout() {
-		return mIsComposingTimeout;
-	}	
-	
+	public int getIsComposingTimeout() throws RcsServiceException {
+		try {
+			return mIConfig.getIsComposingTimeout();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
+	}
+
 	/**
 	 * Returns the maximum number of participants in a group chat
 	 * 
 	 * @return Number
+	 * @throws RcsServiceException
 	 */
-	public int getGroupChatMaxParticipants() {
-		return mMaxGroupChatParticipants;
+	public int getGroupChatMaxParticipants() throws RcsServiceException {
+		try {
+			return mIConfig.getGroupChatMaxParticipants();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
 	}
-	
+
 	/**
 	 * Returns the minimum number of participants in a group chat
+	 * 
 	 * @return number
+	 * @throws RcsServiceException
 	 */
-	public int getGroupChatMinParticipants() {
-	  return mMinGroupChatParticipants;	
+	public int getGroupChatMinParticipants() throws RcsServiceException {
+		try {
+			return mIConfig.getGroupChatMinParticipants();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
 	}
-	
+
 	/**
-	 * Returns the maximum one-to-one chat message’s length can have.
+	 * Returns the maximum one-to-one chat message s length can have.
 	 * <p>
 	 * The length is the number of bytes of the message encoded in UTF-8.
 	 * 
 	 * @return Number of bytes
+	 * @throws RcsServiceException
 	 */
-	public int getOneToOneChatMessageMaxLength() {
-		return mMaxMsgLengthOneToOneChat;
+	public int getOneToOneChatMessageMaxLength() throws RcsServiceException {
+		try {
+			return mIConfig.getOneToOneChatMessageMaxLength();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
 	}
-	
+
 	/**
 	 * Return maximum length of a group chat message.
 	 * <p>
 	 * The length is the number of bytes of the message encoded in UTF-8.
 	 * 
 	 * @return Number of bytes
+	 * @throws RcsServiceException
 	 */
-	public int getGroupChatMessageMaxLength() {
-		return mMaxMsgLengthGroupChat;
-	}
-	
-	/**
-	 * The maximum group chat subject's length can have.
-	 * <p>The length is the number of bytes of the message encoded in UTF-8.
-	 * @return The maximum group chat subject's length can have.
-	 */
-	public int getGroupChatSubjectMaxLength() {
-		return mGroupChatSubjectMaxLength;
+	public int getGroupChatMessageMaxLength() throws RcsServiceException {
+		try {
+			return mIConfig.getGroupChatMessageMaxLength();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
 	}
 
 	/**
-	 * Does the UX proposes automatically a SMS fallback in case of chat failure. It
-	 * returns True if SMS fallback procedure is activated, else returns False.
+	 * The maximum group chat subject's length can have.
+	 * <p>
+	 * The length is the number of bytes of the message encoded in UTF-8.
+	 * 
+	 * @return The maximum group chat subject's length can have.
+	 * @throws RcsServiceException
+	 */
+	public int getGroupChatSubjectMaxLength() throws RcsServiceException {
+		try {
+			return mIConfig.getGroupChatSubjectMaxLength();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
+	}
+
+	/**
+	 * Returns True if group chat is supported, else returns False.
+	 * 
+	 * @return True if group chat is supported, else returns False.
+	 * @throws RcsServiceException
+	 */
+	public boolean isGroupChatSupported() throws RcsServiceException {
+		try {
+			return mIConfig.isGroupChatSupported();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
+	}
+
+	/**
+	 * Does the UX proposes automatically a SMS fallback in case of chat failure. It returns True if
+	 * SMS fallback procedure is activated, else returns False.
 	 * 
 	 * @return Boolean
+	 * @throws RcsServiceException
 	 */
-	public boolean isSmsFallback() {
-		return mSmsFallback;
+	public boolean isSmsFallback() throws RcsServiceException {
+		try {
+			return mIConfig.isSmsFallback();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
 	}
-	
+
 	/**
 	 * Does displayed delivery report activated on received chat messages.
 	 * <p>
 	 * Only applicable to one to one chat message.
 	 * 
 	 * @return Boolean
+	 * @throws RcsServiceException
 	 */
-	public boolean isRespondToDisplayReportsEnabled() {
-		return mRespondToDisplayReports;
+	public boolean isRespondToDisplayReportsEnabled() throws RcsServiceException {
+		try {
+			return mIConfig.isRespondToDisplayReportsEnabled();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
 	}
 
 	/**
 	 * Return maximum length of a geoloc label
 	 * 
 	 * @return Number of bytes
+	 * @throws RcsServiceException
 	 */
-	public int getGeolocLabelMaxLength() {
-		return mMaxGeolocLabelLength;
+	public int getGeolocLabelMaxLength() throws RcsServiceException {
+		try {
+			return mIConfig.getGeolocLabelMaxLength();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
 	}
 
-    /**
-     * Get geoloc expiration time
-     *
-     * @return Time in seconds
-     */
-	public int getGeolocExpirationTime() {
-		return mGeolocExpireTime;
+	/**
+	 * Get geoloc expiration time
+	 *
+	 * @return Time in seconds
+	 * @throws RcsServiceException
+	 */
+	public int getGeolocExpirationTime() throws RcsServiceException {
+		try {
+			return mIConfig.getGeolocExpirationTime();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
+	}
+
+	/**
+	 * Sets the parameter that controls whether to respond or not to display reports when requested
+	 * by the remote.<br>
+	 * Applicable to one to one chat messages.
+	 * 
+	 * @param enable
+	 * @throws RcsServiceException
+	 */
+	public void setRespondToDisplayReports(boolean enable) throws RcsServiceException {
+		try {
+			mIConfig.setRespondToDisplayReports(enable);
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
 	}
 }

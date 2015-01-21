@@ -24,20 +24,22 @@ import android.content.Context;
 import android.os.IInterface;
 
 /**
- * Abstract rcs service
+ * Abstract RCS service
  * 
  * @author Jean-Marc AUFFRET
  */
 public abstract class RcsService {
 	/**
-	 * Action to broadcast when rcs service is up.
+	 * Action to broadcast when RCS service is up.
 	 */
 	public static final String ACTION_SERVICE_UP = "com.gsma.services.rcs.action.SERVICE_UP";
 
 	/**
-	 * Action to broadcast when rcs service is provisioned.
+	 * Action to broadcast when RCS service is provisioned.
 	 */
 	public static final String ACTION_SERVICE_PROVISIONED = "com.gsma.services.rcs.action.SERVICE_PROVISIONED";
+	
+	private static final String ERROR_CNX = "Service not connected";
 
 	/**
 	 * Information about the current build
@@ -48,12 +50,12 @@ public abstract class RcsService {
 		 */
 		public static class VERSION_CODES {
 			/**
-			 * The original first version of rcs API
+			 * The original first version of RCS API
 			 */
 			public final static int BASE = 1;
 
 			/**
-			 * Blackbird version of rcs API
+			 * Blackbird version of RCS API
 			 */
 			public final static int BLACKBIRD = 2;
 		}
@@ -66,7 +68,7 @@ public abstract class RcsService {
 		/**
 		 * API version number
 		 * 
-		 * @see Build.VERSION_CODES
+		 * @see VERSION_CODES
 		 */
 		public static final int API_VERSION = VERSION_CODES.BLACKBIRD;
 
@@ -106,23 +108,23 @@ public abstract class RcsService {
 	/**
 	 * Application context
 	 */
-	protected Context ctx;
+	protected Context mCtx;
 
 	/**
 	 * Service listener
 	 */
-	protected RcsServiceListener serviceListener;
+	protected RcsServiceListener mListener;
 
 	/**
 	 * API interface
 	 */
-	private IInterface api = null;
+	private IInterface mApi;
 
 	/**
 	 * Service version
 	 */
-	private Integer version = null;
-
+	private Integer version;
+	
 	/**
 	 * Constructor
 	 * 
@@ -130,8 +132,8 @@ public abstract class RcsService {
 	 * @param listener Service listener
 	 */
 	public RcsService(Context ctx, RcsServiceListener listener) {
-		this.ctx = ctx;
-		this.serviceListener = listener;
+		mCtx = ctx;
+		mListener = listener;
 	}
 
 	/**
@@ -143,24 +145,23 @@ public abstract class RcsService {
 	 * @return Object
 	 * @throws RcsServiceException
 	 */
-	private Object callApiMethod(String method, Object param, Class paramClass)
+	private Object callApiMethod(String method, Object param, Class<IRcsServiceRegistrationListener> paramClass)
 			throws RcsServiceException {
-		if (api != null) {
-			Class c = api.getClass();
-			try {
-				if (param != null) {
-					Method m = c.getDeclaredMethod(method, paramClass);
-					return m.invoke(api, param);
-				} else {
-					Method m = c.getDeclaredMethod(method, null);
-					return m.invoke(api);
-				}
-			} catch (Exception e) {
-				throw new RcsServiceException(e.getMessage());
-			}
-		} else {
+		if (mApi == null) {
 			throw new RcsServiceNotAvailableException();
 		}
+		Class<? extends IInterface> c = mApi.getClass();
+        try {
+            if (param != null) {
+                Method m = c.getDeclaredMethod(method, paramClass);
+                return m.invoke(mApi, param);
+            } else {
+                Method m = c.getDeclaredMethod(method, (Class[])null);
+                return m.invoke(mApi);
+            }
+        } catch (Exception e) {
+            throw new RcsServiceException(e);
+        }
 	}
 
 	/**
@@ -169,7 +170,7 @@ public abstract class RcsService {
 	 * @param api API interface
 	 */
 	protected void setApi(IInterface api) {
-		this.api = api;
+		mApi = api;
 	}
 
 	/**
@@ -188,18 +189,18 @@ public abstract class RcsService {
 	 * @return Returns true if connected else returns false
 	 */
 	public boolean isServiceConnected() {
-		return (api != null);
+		return (mApi != null);
 	}
 
 	/**
 	 * Returns service version
 	 * 
 	 * @return Version
-	 * @see RcsService.Build.VERSION_CODES
+	 * @see Build.VERSION_CODES
 	 * @throws RcsServiceException
 	 */
 	public int getServiceVersion() throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			if (version == null) {
 				try {
 					version = (Integer)callApiMethod("getServiceVersion", null, null);
@@ -221,10 +222,10 @@ public abstract class RcsService {
 	 * @throws RcsServiceException
 	 */
 	public boolean isServiceRegistered() throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			return (Boolean)callApiMethod("isServiceRegistered", null, null);
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -235,10 +236,10 @@ public abstract class RcsService {
 	 * @throws RcsServiceException
 	 */
 	public void addEventListener(RcsServiceRegistrationListener listener) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			callApiMethod("addEventListener", listener, IRcsServiceRegistrationListener.class);
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -249,10 +250,25 @@ public abstract class RcsService {
      * @throws RcsServiceException
 	 */
 	public void removeEventListener(RcsServiceRegistrationListener listener) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			callApiMethod("removeEventListener", listener, IRcsServiceRegistrationListener.class);
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+	
+	/**
+	 * Returns the configuration that is common for all the service APIs
+	 * 
+	 * @return the CommonServiceConfiguration instance
+	 * @throws RcsServiceException
+	 */
+	public CommonServiceConfiguration getCommonConfiguration() throws RcsServiceException {
+		if (mApi != null) {
+			ICommonServiceConfiguration configuration = (ICommonServiceConfiguration)callApiMethod("getCommonConfiguration", null, null);
+			return new CommonServiceConfiguration(configuration);
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 }

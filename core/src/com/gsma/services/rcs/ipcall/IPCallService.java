@@ -52,7 +52,9 @@ public class IPCallService extends RcsService {
 	/**
 	 * API
 	 */
-	private IIPCallService api;
+	private IIPCallService mApi;
+	
+	private static final String ERROR_CNX = "IPCall service not connected";
 	
     /**
      * Constructor
@@ -68,7 +70,7 @@ public class IPCallService extends RcsService {
      * Connects to the API
      */
     public void connect() {
-    	ctx.bindService(new Intent(IIPCallService.class.getName()), apiConnection, 0);
+    	mCtx.bindService(new Intent(IIPCallService.class.getName()), apiConnection, 0);
     }
     
     /**
@@ -76,7 +78,7 @@ public class IPCallService extends RcsService {
      */
     public void disconnect() {
     	try {
-    		ctx.unbindService(apiConnection);
+    		mCtx.unbindService(apiConnection);
         } catch(IllegalArgumentException e) {
         	// Nothing to do
         }
@@ -89,8 +91,7 @@ public class IPCallService extends RcsService {
 	 */
     protected void setApi(IInterface api) {
     	super.setApi(api);
-    	
-        this.api = (IIPCallService)api;
+        mApi = (IIPCallService)api;
     }
 
     /**
@@ -99,15 +100,15 @@ public class IPCallService extends RcsService {
 	private ServiceConnection apiConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
         	setApi(IIPCallService.Stub.asInterface(service));
-        	if (serviceListener != null) {
-        		serviceListener.onServiceConnected();
+        	if (mListener != null) {
+        		mListener.onServiceConnected();
         	}
         }
 
         public void onServiceDisconnected(ComponentName className) {
         	setApi(null);
-        	if (serviceListener != null) {
-        		serviceListener.onServiceDisconnected(RcsService.Error.CONNECTION_LOST);
+        	if (mListener != null) {
+        		mListener.onServiceDisconnected(RcsService.Error.CONNECTION_LOST);
         	}
         }
     };
@@ -119,14 +120,14 @@ public class IPCallService extends RcsService {
      * @throws RcsServiceException
      */
     public IPCallServiceConfiguration getConfiguration() throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				return api.getConfiguration();
+				return new IPCallServiceConfiguration(mApi.getConfiguration());
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -142,19 +143,19 @@ public class IPCallService extends RcsService {
      * @throws RcsServiceException
      */
     public IPCall initiateCall(ContactId contact, IPCallPlayer player, IPCallRenderer renderer) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				IIPCall callIntf = api.initiateCall(contact, player, renderer);
+				IIPCall callIntf = mApi.initiateCall(contact, player, renderer);
 				if (callIntf != null) {
 					return new IPCall(callIntf);
 				} else {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }    
     
@@ -170,19 +171,19 @@ public class IPCallService extends RcsService {
      * @throws RcsServiceException
      */
     public IPCall initiateVisioCall(ContactId contact, IPCallPlayer player, IPCallRenderer renderer) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				IIPCall callIntf = api.initiateVisioCall(contact, player, renderer);
+				IIPCall callIntf = mApi.initiateVisioCall(contact, player, renderer);
 				if (callIntf != null) {
 					return new IPCall(callIntf);
 				} else {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }    
     
@@ -193,20 +194,20 @@ public class IPCallService extends RcsService {
      * @throws RcsServiceException
      */
     public Set<IPCall> getIPCalls() throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
 	    		Set<IPCall> result = new HashSet<IPCall>();
-				List<IBinder> vshList = api.getIPCalls();
+				List<IBinder> vshList = mApi.getIPCalls();
 				for (IBinder binder : vshList) {
 					IPCall call = new IPCall(IIPCall.Stub.asInterface(binder));
 					result.add(call);
 				}
 				return result;
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }    
 
@@ -218,14 +219,14 @@ public class IPCallService extends RcsService {
      * @throws RcsServiceException
      */
     public IPCall getIPCall(String callId) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				return new IPCall(api.getIPCall(callId));
+				return new IPCall(mApi.getIPCall(callId));
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }    
     
@@ -236,14 +237,14 @@ public class IPCallService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public void addEventListener(IPCallListener listener) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.addEventListener2(listener);
+				mApi.addEventListener2(listener);
 			} catch (Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -254,14 +255,14 @@ public class IPCallService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public void removeEventListener(IPCallListener listener) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.removeEventListener2(listener);
+				mApi.removeEventListener2(listener);
 			} catch (Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 }

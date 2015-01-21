@@ -170,6 +170,9 @@ public class InitiateFileUpload extends Activity {
             	long maxSize = 0;
             	try {
             		maxSize = connectionManager.getFileUploadApi().getConfiguration().getMaxSize();
+            		if (LogUtils.isActive) {
+    					Log.d(LOGTAG, "FileUpload max size=".concat(Long.valueOf(maxSize).toString()));
+    				}
             	} catch(Exception e) {
             		e.printStackTrace();
             	}
@@ -177,8 +180,8 @@ public class InitiateFileUpload extends Activity {
     				// Display an error
                 	Utils.showMessage(InitiateFileUpload.this, getString(R.string.label_upload_max_size, maxSize));
                 	return;
+                	
                 }
-
 
                 // Get thumbnail option
         		CheckBox ftThumb = (CheckBox) findViewById(R.id.file_thumb);

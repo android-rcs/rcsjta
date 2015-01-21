@@ -49,8 +49,6 @@ import com.gsma.services.rcs.contacts.ContactId;
 public class CapabilityService extends RcsService {
     /**
      * Intent broadcasted to discover extensions
-     * 
-     * @see CapabilityService.EXTENSION_MIME_TYPE
      */
     public final static String INTENT_EXTENSIONS = "com.gsma.services.rcs.capability.EXTENSION";
     
@@ -58,11 +56,13 @@ public class CapabilityService extends RcsService {
 	 * Extension MIME type
 	 */
 	public final static String EXTENSION_MIME_TYPE = "com.gsma.services.rcs";
+	
+	private static final String ERROR_CNX = "Capability service not connected";
 
 	/**
 	 * API
 	 */
-	private ICapabilityService api = null;
+	private ICapabilityService mApi;
 	
     /**
      * Constructor
@@ -78,7 +78,7 @@ public class CapabilityService extends RcsService {
      * Connects to the API
      */
     public void connect() {
-    	ctx.bindService(new Intent(ICapabilityService.class.getName()), apiConnection, 0);
+    	mCtx.bindService(new Intent(ICapabilityService.class.getName()), apiConnection, 0);
     }
     
     /**
@@ -86,7 +86,7 @@ public class CapabilityService extends RcsService {
      */
     public void disconnect() {
     	try {
-    		ctx.unbindService(apiConnection);
+    		mCtx.unbindService(apiConnection);
         } catch(IllegalArgumentException e) {
         	// Nothing to do
         }
@@ -99,8 +99,7 @@ public class CapabilityService extends RcsService {
 	 */
     protected void setApi(IInterface api) {
     	super.setApi(api);
-    	
-        this.api = (ICapabilityService)api;
+        mApi = (ICapabilityService)api;
     }
     
     /**
@@ -109,15 +108,15 @@ public class CapabilityService extends RcsService {
 	private ServiceConnection apiConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
         	setApi(ICapabilityService.Stub.asInterface(service));
-        	if (serviceListener != null) {
-        		serviceListener.onServiceConnected();
+        	if (mListener != null) {
+        		mListener.onServiceConnected();
         	}
         }
 
         public void onServiceDisconnected(ComponentName className) {
         	setApi(null);
-        	if (serviceListener != null) {
-        		serviceListener.onServiceDisconnected(Error.CONNECTION_LOST);
+        	if (mListener != null) {
+        		mListener.onServiceDisconnected(Error.CONNECTION_LOST);
         	}
         }
     };
@@ -130,14 +129,14 @@ public class CapabilityService extends RcsService {
      * @throws RcsServiceException
      */
     public Capabilities getMyCapabilities() throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				return api.getMyCapabilities();
+				return mApi.getMyCapabilities();
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }
     
@@ -153,14 +152,14 @@ public class CapabilityService extends RcsService {
      * @throws RcsServiceException
      */
     public Capabilities getContactCapabilities(ContactId contact) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				return api.getContactCapabilities(contact);
+				return mApi.getContactCapabilities(contact);
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }    
 
@@ -180,14 +179,14 @@ public class CapabilityService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public void requestContactCapabilities(ContactId contact) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.requestContactCapabilities(contact);
+				mApi.requestContactCapabilities(contact);
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -226,14 +225,14 @@ public class CapabilityService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public void requestAllContactsCapabilities() throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.requestAllContactsCapabilities();
+				mApi.requestAllContactsCapabilities();
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -244,14 +243,14 @@ public class CapabilityService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public void addCapabilitiesListener(CapabilitiesListener listener) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.addCapabilitiesListener(listener);
+				mApi.addCapabilitiesListener(listener);
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -262,14 +261,14 @@ public class CapabilityService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public void removeCapabilitiesListener(CapabilitiesListener listener) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.removeCapabilitiesListener(listener);
+				mApi.removeCapabilitiesListener(listener);
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -281,18 +280,18 @@ public class CapabilityService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public void addCapabilitiesListener(Set<ContactId> contacts, CapabilitiesListener listener) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
 				Iterator<ContactId> list = contacts.iterator();
 				while(list.hasNext()) { 
 					ContactId contact = list.next();
-					api.addCapabilitiesListener2(contact, listener);
+					mApi.addCapabilitiesListener2(contact, listener);
 				}
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -304,18 +303,18 @@ public class CapabilityService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public void removeCapabilitiesListener(Set<ContactId> contacts, CapabilitiesListener listener) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
 				Iterator<ContactId> list = contacts.iterator();
 				while(list.hasNext()) { 
 					ContactId contact = list.next();
-					api.removeCapabilitiesListener2(contact, listener);
+					mApi.removeCapabilitiesListener2(contact, listener);
 				}
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 }

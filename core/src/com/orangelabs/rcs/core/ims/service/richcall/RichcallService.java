@@ -183,7 +183,7 @@ public class RichcallService extends ImsService {
 
 	private void assertMaximumImageTransferSize(long size, String errorMessage)
 			throws CoreException {
-		int maxSize = ImageTransferSession.getMaxImageSharingSize();
+		long maxSize = ImageTransferSession.getMaxImageSharingSize();
 		if (maxSize > 0 && size > maxSize) {
 			if (logger.isActivated()) {
 				logger.error(errorMessage);

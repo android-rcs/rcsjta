@@ -33,7 +33,6 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.text.Editable;
-import android.text.InputFilter;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -46,13 +45,10 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.ChatMessage;
-import com.gsma.services.rcs.chat.ChatService;
-import com.gsma.services.rcs.chat.ChatServiceConfiguration;
 import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.chat.ChatLog.Message;
+import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
@@ -101,19 +97,17 @@ public abstract class ChatView extends FragmentActivity implements LoaderManager
 	/**
 	 * Activity displayed status
 	 */
-	private static boolean activityDisplayed = false;
+	private static boolean sActivityDisplayed = false;
 
 	/**
 	 * API connection manager
 	 */
-	protected ApiConnectionManager connectionManager;
+	protected ApiConnectionManager mCnxManager;
 
 	/**
 	 * UI handler
 	 */
 	protected Handler handler = new Handler();
-
-	protected ListView listView;
 
 	/**
 	 * The log tag for this class
@@ -123,14 +117,14 @@ public abstract class ChatView extends FragmentActivity implements LoaderManager
 	/** 
 	 * MESSAGE_ID is the ID since it is unique
 	 */
-	private static final String MESSAGE_ID_AS_ID = new StringBuilder(ChatLog.Message.MESSAGE_ID).append(" AS ").append(BaseColumns._ID)
+	private static final String MESSAGE_ID_AS_ID = new StringBuilder(Message.MESSAGE_ID).append(" AS ").append(BaseColumns._ID)
 			.toString();
 
-	protected static final String[] PROJECTION = new String[] { MESSAGE_ID_AS_ID, ChatLog.Message.MIME_TYPE,
-			ChatLog.Message.CONTENT, ChatLog.Message.TIMESTAMP, ChatLog.Message.STATUS, ChatLog.Message.DIRECTION,
-			ChatLog.Message.CONTACT };
+	protected static final String[] PROJECTION = new String[] { MESSAGE_ID_AS_ID, Message.MIME_TYPE,
+			Message.CONTENT, Message.TIMESTAMP, Message.STATUS, Message.DIRECTION,
+			Message.CONTACT };
 
-	protected final static String QUERY_SORT_ORDER = new StringBuilder(ChatLog.Message.TIMESTAMP).append(" ASC").toString();
+	protected final static String QUERY_SORT_ORDER = new StringBuilder(Message.TIMESTAMP).append(" ASC").toString();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -145,13 +139,15 @@ public abstract class ChatView extends FragmentActivity implements LoaderManager
 
 			@Override
 			public boolean onKey(View v, int keyCode, KeyEvent event) {
-				if (event.getAction() == KeyEvent.ACTION_DOWN) {
-					switch (keyCode) {
-					case KeyEvent.KEYCODE_DPAD_CENTER:
-					case KeyEvent.KEYCODE_ENTER:
-						sendText();
-						return true;
-					}
+				if (KeyEvent.ACTION_DOWN != event.getAction()) {
+					return false;
+					
+				}
+				switch (keyCode) {
+				case KeyEvent.KEYCODE_DPAD_CENTER:
+				case KeyEvent.KEYCODE_ENTER:
+					sendText();
+					return true;
 				}
 				return false;
 			}
@@ -194,55 +190,33 @@ public abstract class ChatView extends FragmentActivity implements LoaderManager
 		mAdapter = new ChatCursorAdapter(this, null, 0, isSingleChat());
 
 		// Associate the list adapter with the ListView.
-		listView = (ListView) findViewById(android.R.id.list);
+		ListView listView = (ListView) findViewById(android.R.id.list);
 		listView.setAdapter(mAdapter);
 		registerForContextMenu(listView);
 
 		// Register to API connection manager
-		connectionManager = ApiConnectionManager.getInstance(this);
+		mCnxManager = ApiConnectionManager.getInstance(this);
 
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACTS)) {
+		if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACTS)) {
 			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
 			return;
+			
 		}
-		connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.CHAT, RcsServiceName.CONTACTS);
-		if (!processIntent()) {
-			return;
-		}
-		ChatService chatService = connectionManager.getChatApi();
-		try {
-			addChatEventListener(chatService);
-			ChatServiceConfiguration configuration = chatService.getConfiguration();
-			// Set max label length
-			int maxMsgLength = configuration.getOneToOneChatMessageMaxLength();
-			if (maxMsgLength > 0) {
-				// Set the message composer max length
-				InputFilter[] filterArray = new InputFilter[1];
-				filterArray[0] = new InputFilter.LengthFilter(maxMsgLength);
-				composeText.setFilters(filterArray);
-			}
-			// Instantiate the composing manager
-			composingManager = new IsComposingManager(configuration.getIsComposingTimeout() * 1000, getNotifyComposing());
-		} catch (RcsServiceNotAvailableException e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
-		} catch (RcsServiceException e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
-		}
-		if (LogUtils.isActive) {
-			Log.d(LOGTAG, "onCreate");
-		}
+		mCnxManager.startMonitorServices(this, exitOnce, RcsServiceName.CHAT, RcsServiceName.CONTACTS);
+		processIntent();
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		if (connectionManager == null) {
+		if (mCnxManager == null) {
 			return;
+			
 		}
-		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsServiceName.CHAT)) {
+		mCnxManager.stopMonitorServices(this);
+		if (mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
 			try {
-				removeChatEventListener(connectionManager.getChatApi());
+				removeChatEventListener(mCnxManager.getChatApi());
 			} catch (RcsServiceException e) {
 				e.printStackTrace();
 			}
@@ -252,13 +226,13 @@ public abstract class ChatView extends FragmentActivity implements LoaderManager
 	@Override
 	protected void onResume() {
 		super.onResume();
-		activityDisplayed = true;
+		sActivityDisplayed = true;
 	}
 
 	@Override
 	protected void onPause() {
 		super.onStart();
-		activityDisplayed = false;
+		sActivityDisplayed = false;
 	}
 
 	/**
@@ -267,7 +241,7 @@ public abstract class ChatView extends FragmentActivity implements LoaderManager
 	 * @return Boolean
 	 */
 	public static boolean isDisplayed() {
-		return activityDisplayed;
+		return sActivityDisplayed;
 	}
 
 	@Override
@@ -279,16 +253,13 @@ public abstract class ChatView extends FragmentActivity implements LoaderManager
 		// Replace the value of intent
 		setIntent(intent);
 
-		if (connectionManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACTS)) {
+		if (mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACTS)) {
 			processIntent();
 		}
 	}
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-		if (LogUtils.isActive) {
-			Log.d(LOGTAG, "onLoadFinished " + loader.getId());
-		}
 		// A switch-case is useful when dealing with multiple Loaders/IDs
 		switch (loader.getId()) {
 		case LOADER_ID:
@@ -303,9 +274,6 @@ public abstract class ChatView extends FragmentActivity implements LoaderManager
 
 	@Override
 	public void onLoaderReset(Loader<Cursor> loader) {
-		if (LogUtils.isActive) {
-			Log.d(LOGTAG, "onLoaderReset " + loader.getId());
-		}
 		// For whatever reason, the Loader's data is now unavailable.
 		// Remove any references to the old data by replacing it with a null Cursor.
 		mAdapter.swapCursor(null);
@@ -318,20 +286,23 @@ public abstract class ChatView extends FragmentActivity implements LoaderManager
 		String text = composeText.getText().toString();
 		if (TextUtils.isEmpty(text)) {
 			return;
+			
 		}
 		// Check if the service is available
 		if (!isServiceRegistered()) {
 			return;
+			
 		}
 		// Send text message
 		ChatMessage message = sendMessage(text);
-		if (message != null) {
-			// Warn the composing manager that the message was sent
-			composingManager.messageWasSent();
-			composeText.setText(null);
-		} else {
+		if (message == null) {
 			Utils.showMessage(ChatView.this, getString(R.string.label_send_im_failed));
+			return;
+			
 		}
+		// Warn the composing manager that the message was sent
+		composingManager.messageWasSent();
+		composeText.setText(null);
 	}
 
 	/**
@@ -343,6 +314,7 @@ public abstract class ChatView extends FragmentActivity implements LoaderManager
 		// Check if the service is available
 		if (!isServiceRegistered()) {
 			return;
+			
 		}
 		// Send text message
 		ChatMessage message = sendMessage(geoloc);
@@ -406,6 +378,7 @@ public abstract class ChatView extends FragmentActivity implements LoaderManager
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode != RESULT_OK) {
 			return;
+			
 		}
 		switch (requestCode) {
 		case SELECT_GEOLOCATION:

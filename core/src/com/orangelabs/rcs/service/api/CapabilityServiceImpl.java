@@ -22,8 +22,10 @@
 
 package com.orangelabs.rcs.service.api;
 
+import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.capability.ICapabilitiesListener;
 import com.gsma.services.rcs.capability.ICapabilityService;
@@ -355,10 +357,20 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	 * Returns service version
 	 * 
 	 * @return Version
-	 * @see RcsService.Build.VERSION_CODES
+	 * @see VERSION_CODES
 	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {
 		return RcsService.Build.API_VERSION;
 	}
+	
+	/**
+	 * Returns the common service configuration
+	 * 
+	 * @return the common service configuration
+	 */
+	public ICommonServiceConfiguration getCommonConfiguration() {
+		return new CommonServiceConfigurationImpl();
+	}
+	
 }

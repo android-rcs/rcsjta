@@ -88,6 +88,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	 * @param contact Remote contactId
 	 * @param remoteUri the remote URI
 	 * @param fileIcon File icon
+     * @param filetransferId 
 	 */
 	public FileSharingSession(ImsService parent, MmContent content, ContactId contact, String remoteUri, MmContent fileIcon, String filetransferId) {
 		super(parent, contact, remoteUri);
@@ -196,8 +197,8 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	 * 
 	 * @return Size in bytes
 	 */
-	public static int getMaxFileSharingSize() {
-		return RcsSettings.getInstance().getMaxFileTransferSize()*1024;
+	public static long getMaxFileSharingSize() {
+		return RcsSettings.getInstance().getMaxFileTransferSize();
 	}
 
     /**

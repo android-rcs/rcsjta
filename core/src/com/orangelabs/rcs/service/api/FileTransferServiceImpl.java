@@ -32,17 +32,20 @@ import android.os.IBinder;
 import android.os.RemoteException;
 
 import com.gsma.services.rcs.GroupDeliveryInfoLog;
+import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
-import com.gsma.services.rcs.ft.FileTransfer.State;
 import com.gsma.services.rcs.ft.FileTransfer.ReasonCode;
-import com.gsma.services.rcs.ft.FileTransferServiceConfiguration;
+import com.gsma.services.rcs.ft.FileTransfer.State;
+import com.gsma.services.rcs.ft.FileTransferServiceConfiguration.ImageResizeOption;
 import com.gsma.services.rcs.ft.IFileTransfer;
 import com.gsma.services.rcs.ft.IFileTransferService;
+import com.gsma.services.rcs.ft.IFileTransferServiceConfiguration;
 import com.gsma.services.rcs.ft.IGroupFileTransferListener;
 import com.gsma.services.rcs.ft.IOneToOneFileTransferListener;
 import com.orangelabs.rcs.core.Core;
@@ -59,7 +62,6 @@ import com.orangelabs.rcs.platform.file.FileFactory;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.provider.settings.RcsSettingsData.ImageResizeOption;
 import com.orangelabs.rcs.service.broadcaster.GroupFileTransferBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.OneToOneFileTransferBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
@@ -272,19 +274,12 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     }
 
     /**
-     * Returns the configuration of the file transfer service
+     * Returns the interface to the configuration of the file transfer service
      * 
-     * @return Configuration
+     * @return IFileTransferServiceConfiguration instance
      */
-    public FileTransferServiceConfiguration getConfiguration() {
-    	return new FileTransferServiceConfiguration(
-    			mRcsSettings.getWarningMaxFileTransferSize(),
-    			mRcsSettings.getMaxFileTransferSize(),
-    			mRcsSettings.isFtAutoAcceptedModeChangeable(),
-    			mRcsSettings.isFileTransferAutoAccepted(),
-    			mRcsSettings.isFileTransferAutoAcceptedInRoaming(),
-    			mRcsSettings.getMaxFileTransferSessions()	,
-    			mRcsSettings.getImageResizeOption().toInt());
+    public IFileTransferServiceConfiguration getConfiguration() {
+    	return new IFileTransferServiceConfigurationImpl(mRcsSettings);
     }    
 
 	/**
@@ -618,13 +613,14 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Returns a current file transfer from its unique ID
+     * @param transferId 
      * 
      * @return File transfer
      * @throws ServerApiException
      */
 	public IFileTransfer getFileTransfer(String transferId) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Get file transfer session " + transferId);
+			logger.info("Get file transfer session ".concat(transferId));
 		}
 
 		IFileTransfer fileTransfer = mFileTransferCache.get(transferId);
@@ -820,7 +816,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	 * Returns service version
 	 * 
 	 * @return Version
-	 * @see RcsService.Build.VERSION_CODES
+	 * @see VERSION_CODES
 	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {
@@ -891,7 +887,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	/**
      * Mark a received file transfer as read (i.e. the invitation or the file has been displayed in the UI).
      *
-     * @param transferID File transfer ID
+     * @param transferId File transfer ID
      */
 	@Override
 	public void markFileTransferAsRead(String transferId) throws RemoteException {
@@ -963,4 +959,15 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
 		mOneToOneFileTransferBroadcaster.broadcastInvitation(fileTransferId);
 	}
+
+	
+	/**
+	 * Returns the common service configuration
+	 * 
+	 * @return the common service configuration
+	 */
+	public ICommonServiceConfiguration getCommonConfiguration() {
+		return new CommonServiceConfigurationImpl();
+	}
+	
 }

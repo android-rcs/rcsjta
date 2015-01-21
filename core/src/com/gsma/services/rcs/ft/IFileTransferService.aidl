@@ -6,7 +6,7 @@ import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.ft.IFileTransfer;
 import com.gsma.services.rcs.ft.IOneToOneFileTransferListener;
 import com.gsma.services.rcs.ft.IGroupFileTransferListener;
-import com.gsma.services.rcs.ft.FileTransferServiceConfiguration;
+import com.gsma.services.rcs.ft.IFileTransferServiceConfiguration;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
@@ -20,7 +20,7 @@ interface IFileTransferService {
 
 	void removeEventListener(IRcsServiceRegistrationListener listener);
 
-	FileTransferServiceConfiguration getConfiguration();
+	IFileTransferServiceConfiguration getConfiguration();
 
 	List<IBinder> getFileTransfers();
 	

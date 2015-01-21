@@ -96,6 +96,7 @@ public class GroupChatList extends Activity {
 				if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.CHAT)) {
 					Utils.showMessage(GroupChatList.this, getString(R.string.label_continue_chat_failed));
 					return;
+					
 				}
 				Cursor cursor = (Cursor) (parent.getAdapter()).getItem(pos);
 				String chatId = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
@@ -135,6 +136,7 @@ public class GroupChatList extends Activity {
 		if (cursor == null) {
 			Utils.showMessageAndExit(this, getString(R.string.label_load_log_failed));
 			return null;
+			
 		}
 		return new GroupChatListAdapter(this, cursor);
 	}
@@ -198,8 +200,9 @@ public class GroupChatList extends Activity {
 		int columnDate;
 
 		GroupChatListItemViewHolder(View base, Cursor cursor) {
-			columnSubject = cursor.getColumnIndex(ChatLog.GroupChat.SUBJECT);
-			columnDate = cursor.getColumnIndex(ChatLog.GroupChat.TIMESTAMP);
+			columnSubject = cursor.getColumnIndexOrThrow(ChatLog.GroupChat.SUBJECT);
+			columnDate = cursor.getColumnIndexOrThrow(ChatLog.GroupChat.TIMESTAMP);
+			
 			titleText = (TextView) base.findViewById(R.id.line1);
 			subjectText = (TextView) base.findViewById(R.id.line2);
 			dateText = (TextView) base.findViewById(R.id.date);
@@ -211,7 +214,6 @@ public class GroupChatList extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = new MenuInflater(getApplicationContext());
 		inflater.inflate(R.menu.menu_log, menu);
-
 		return true;
 	}
 
@@ -221,7 +223,6 @@ public class GroupChatList extends Activity {
 		case R.id.menu_clear_log:
 			// Delete all: TODO CR005 delete methods
 			getContentResolver().delete(ChatLog.GroupChat.CONTENT_URI, null, null);
-
 			// Refresh view
 			listView.setAdapter(createListAdapter());
 			break;

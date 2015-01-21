@@ -21,168 +21,146 @@
  ******************************************************************************/
 package com.gsma.services.rcs.ft;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.util.SparseArray;
 
+import com.gsma.services.rcs.RcsServiceException;
 
 /**
  * File transfer service configuration
  * 
- * @author Jean-Marc AUFFRET
+ * @author LEMORDANT Philippe
+ *
  */
-public class FileTransferServiceConfiguration implements Parcelable {
-	/**
-	 * File transfer size threshold
-	 */
-	private long warnSize;
-		
-	/**
-	 * File transfer size limit
-	 */
-	private long maxSize;
+public class FileTransferServiceConfiguration {
 	
-	/**
-	 * File transfer auto accept mode
-	 */
-	private boolean autoAcceptMode;
-	
-	/**
-	 * File transfer auto accept mode in roaming
-	 */
-	private boolean autoAcceptModeInRoaming;
+	private IFileTransferServiceConfiguration mIFtServiceConfig;
 
 	/**
-	 * File transfer default auto accept mode changeable
+	 * Enumerated for the Image Resize Option
 	 */
-	private boolean autoAcceptModeChangeable;
-	
-	/**
-	 * 
-	 */
-	private int maxFileTransfers;
+	public enum ImageResizeOption {
+		/**
+		 * Always ask to resize or not
+		 */
+		ALWAYS_PERFORM(0),
+		/**
+		 * Only ask if above maximum size
+		 */
+		ONLY_ABOVE_MAX_SIZE(1),
+		/**
+		 * Ask
+		 */
+		ASK(2);
 
-	/**
-	 * the image resize option for file transfer in the range: ALWAYS_PERFORM, ONLY_ABOVE_MAX_SIZE, ASK
-	 */
-	private int imageResizeOption;
-	
+		private int mValue;
+
+		private static SparseArray<ImageResizeOption> mValueToEnum = new SparseArray<ImageResizeOption>();
+		static {
+			for (ImageResizeOption entry : ImageResizeOption.values()) {
+				mValueToEnum.put(entry.toInt(), entry);
+			}
+		}
+
+		private ImageResizeOption(int value) {
+			mValue = value;
+		}
+
+		/**
+		 * Returns the value of this ImageResizeOption as an int.
+		 * 
+		 * @return int value
+		 */
+		public final int toInt() {
+			return mValue;
+			/**
+			 * @param value
+			 * @return
+			 */
+		}
+
+		/**
+		 * Returns a ImageResizeOption instance representing the specified int value.
+		 * 
+		 * @param value
+		 * @return ImageResizeOption instance
+		 */
+		public static ImageResizeOption valueOf(int value) {
+			ImageResizeOption entry = mValueToEnum.get(value);
+			if (entry != null) {
+				return entry;
+			}
+			throw new IllegalArgumentException("No enum const class " + ImageResizeOption.class.getName() + "." + value);
+
+		}
+
+	};
+
 	/**
 	 * Constructor
 	 * 
-	 * @param warnSize
-	 *            File transfer size threshold
-	 * @param maxSize
-	 *            File transfer size limit
-	 * @param autoAcceptModeChangeable
-	 *            File transfer default auto accept mode changeable
-	 * @param autoAcceptMode
-	 *            File transfer auto accept mode
-	 * @param autoAcceptModeInRoaming
-	 *            File transfer auto accept mode in roaming
-	 * @param maxFileTransfers
-	 * 			the maximum number of simultaneous file transfers
-	 * @param imageResizeOption
-	 * 			the image resize option for file transfer in the range: ALWAYS_PERFORM, ONLY_ABOVE_MAX_SIZE, ASK
+	 * @param iFtServiceConfig
 	 * @hide
 	 */
-	public FileTransferServiceConfiguration(long warnSize, long maxSize, boolean autoAcceptModeChangeable, boolean autoAcceptMode,
-			boolean autoAcceptModeInRoaming, int maxFileTransfers, int imageResizeOption) {
-		this.warnSize = warnSize;
-		this.maxSize = maxSize;
-		this.autoAcceptModeChangeable = autoAcceptModeChangeable;
-		this.autoAcceptMode = autoAcceptMode;
-		this.autoAcceptModeInRoaming = autoAcceptModeInRoaming;
-		this.maxFileTransfers = maxFileTransfers;
-		this.imageResizeOption = imageResizeOption;
-	}
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param source Parcelable source
-     * @hide
-	 */
-	public FileTransferServiceConfiguration(Parcel source) {
-		this.warnSize = source.readLong();
-		this.maxSize = source.readLong();
-		this.autoAcceptMode = source.readInt() != 0;
-		this.autoAcceptModeInRoaming = source.readInt() != 0;
-		this.autoAcceptModeChangeable = source.readInt() != 0;
-		this.maxFileTransfers = source.readInt();
-		this.imageResizeOption = source.readInt();
-    }
-
-	/**
-	 * Describe the kinds of special objects contained in this Parcelable's
-	 * marshalled representation
-	 * 
-	 * @return Integer
-     * @hide
-	 */
-	public int describeContents() {
-        return 0;
-    }
-
-	/**
-	 * Write parcelable object
-	 * 
-	 * @param dest The Parcel in which the object should be written
-	 * @param flags Additional flags about how the object should be written
-     * @hide
-	 */
-	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeLong(warnSize);
-		dest.writeLong(maxSize);
-		dest.writeInt(autoAcceptMode ? 1 : 0);
-		dest.writeInt(autoAcceptModeInRoaming ? 1 : 0);
-		dest.writeInt(autoAcceptModeChangeable ? 1 : 0);
-		dest.writeInt(maxFileTransfers);
-		dest.writeInt(imageResizeOption);
+	/* package private */ FileTransferServiceConfiguration(IFileTransferServiceConfiguration iFtServiceConfig) {
+		mIFtServiceConfig = iFtServiceConfig;
 	}
 
-    /**
-     * Parcelable creator
-     * 
-     * @hide
-     */
-    public static final Parcelable.Creator<FileTransferServiceConfiguration> CREATOR
-            = new Parcelable.Creator<FileTransferServiceConfiguration>() {
-        public FileTransferServiceConfiguration createFromParcel(Parcel source) {
-            return new FileTransferServiceConfiguration(source);
-        }
-
-        public FileTransferServiceConfiguration[] newArray(int size) {
-            return new FileTransferServiceConfiguration[size];
-        }
-    };	
-	
 	/**
-	 * Returns the file transfer size threshold when the user should be warned about
-	 * the potential charges associated to the transfer of a large file. It returns
-	 * 0 if there no need to warn.
+	 * Returns the file transfer size threshold when the user should be warned about the potential charges associated to the
+	 * transfer of a large file. It returns 0 if there no need to warn.
 	 * 
-	 * @return Size in kilobytes 
+	 * @return Size in kilobytes
+	 * @throws RcsServiceException 
 	 */
-	public long getWarnSize() {
-		return warnSize;
+	public long getWarnSize() throws RcsServiceException {
+		try {
+			return mIFtServiceConfig.getWarnSize();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
 	}
-			
+
 	/**
 	 * Returns the file transfer size limit. It returns 0 if there is no limitation.
 	 * 
 	 * @return Size in kilobytes
+	 * @throws RcsServiceException 
 	 */
-	public long getMaxSize() {
-		return maxSize;
+	public long getMaxSize() throws RcsServiceException {
+		try {
+			return mIFtServiceConfig.getMaxSize();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
 	}
-	
+
 	/**
-	 * Is file transfer invitation automatically accepted 
+	 * Is file transfer invitation automatically accepted
 	 * 
 	 * @return Returns true if File Transfer is automatically accepted else returns false
+	 * @throws RcsServiceException 
 	 */
-	public boolean isAutoAcceptEnabled() {
-		return autoAcceptMode;
+	public boolean isAutoAcceptEnabled() throws RcsServiceException {
+		try {
+			return mIFtServiceConfig.isAutoAcceptEnabled();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
+	}
+
+	/**
+	 * Sets the Auto Accept Mode of a File Transfer configuration.<br>
+	 * The Auto Accept Mode can only be modified by client application if isAutoAcceptChangeable is true.
+	 * 
+	 * @param enable
+	 * @throws RcsServiceException 
+	 */
+	public void setAutoAccept(boolean enable) throws RcsServiceException {
+		try {
+			mIFtServiceConfig.setAutoAccept(enable) ;
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
 	}
 
 	/**
@@ -191,31 +169,100 @@ public class FileTransferServiceConfiguration implements Parcelable {
 	 * This parameter is only applicable if auto accept is active for File Transfer in normal conditions (see isAutoAcceptEnabled).
 	 * 
 	 * @return Returns true if File Transfer is automatically accepted while in roaming else returns false
+	 * @throws RcsServiceException 
 	 */
-	public boolean isAutoAcceptInRoamingEnabled() {
-		return autoAcceptModeInRoaming;
+	public boolean isAutoAcceptInRoamingEnabled() throws RcsServiceException {
+		try {
+			return mIFtServiceConfig.isAutoAcceptInRoamingEnabled();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
 	}
-	
+
+	/**
+	 * Sets the Auto Accept Mode of a File Transfer configuration while roaming.<br>
+	 * The AutoAcceptInRoaming can only be modified by client application if isAutoAcceptModeChangeable is true and if the
+	 * AutoAccept Mode in normal conditions is true.
+	 * 
+	 * @param enable
+	 * @throws RcsServiceException 
+	 */
+	public void setAutoAcceptInRoaming(boolean enable) throws RcsServiceException {
+		try {
+			mIFtServiceConfig.setAutoAcceptInRoaming(enable) ;
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
+	}
+
 	/**
 	 * is default Auto Accept mode (both in normal or roaming modes) changeable
 	 * 
 	 * @return True if client is allowed to change the default Auto Accept mode (both in normal or roaming modes)
+	 * @throws RcsServiceException 
 	 */
-	public boolean isAutoAcceptModeChangeable() {
-		return autoAcceptModeChangeable;
+	public boolean isAutoAcceptModeChangeable() throws RcsServiceException {
+		try {
+			return mIFtServiceConfig.isAutoAcceptModeChangeable();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
 	}
 
 	/**
-	 * @return returns the max number of simultaneous file transfers
+	 * Returns the max number of simultaneous file transfers
+	 * 
+	 * @return the max number of simultaneous file transfers
+	 * @throws RcsServiceException 
 	 */
-	public int getMaxFileTransfers() {
-		return maxFileTransfers;
+	public int getMaxFileTransfers() throws RcsServiceException {
+		try {
+			return mIFtServiceConfig.getMaxFileTransfers();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
 	}
-	
+
 	/**
-	 * @return the image resize option for file transfer in the range: ALWAYS_PERFORM, ONLY_ABOVE_MAX_SIZE, ASK
+	 * Returns the image resize option for file transfer in the range: ALWAYS_PERFORM, ONLY_ABOVE_MAX_SIZE, ASK
+	 * 
+	 * @return ImageResizeOption instance
+	 * @throws RcsServiceException 
 	 */
-	public int getImageResizeOption() {
-		return imageResizeOption;
+	public ImageResizeOption getImageResizeOption() throws RcsServiceException {
+		try {
+			int option = mIFtServiceConfig.getImageResizeOption();
+			return ImageResizeOption.valueOf(option);
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
+	}
+
+	/**
+	 * Sets the image resize option for file transfer.
+	 * 
+	 * @param option
+	 * @throws RcsServiceException 
+	 */
+	public void setImageResizeOption(ImageResizeOption option) throws RcsServiceException {
+		try {
+			mIFtServiceConfig.setImageResizeOption(option.toInt()) ;
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
+	}
+
+	/**
+	 * Returns True if group file transfer is supported, else returns False.
+	 * 
+	 * @return True if group file transfer is supported, else returns False.
+	 * @throws RcsServiceException 
+	 */
+	public boolean isGroupFileTransferSupported() throws RcsServiceException {
+		try {
+			return mIFtServiceConfig.isGroupFileTransferSupported();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
 	}
 }

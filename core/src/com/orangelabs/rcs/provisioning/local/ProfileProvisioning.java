@@ -46,13 +46,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
 import com.orangelabs.rcs.R;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.ConfigurationMode;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.GsmaRelease;
-import com.orangelabs.rcs.provider.settings.RcsSettingsData.MessagingMode;
 import com.orangelabs.rcs.provisioning.ProvisioningParser;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -139,7 +139,7 @@ public class ProfileProvisioning extends Activity {
 		spinner.setSelection(0);
 
 		setEditTextParameter(this, R.id.ImsUsername, RcsSettingsData.USERPROFILE_IMS_USERNAME, bundle);
-		setEditTextParameter(this, R.id.ImsDisplayName, RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, bundle, false);
+		setEditTextParameter(this, R.id.ImsDisplayName, RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, bundle);
 		setEditTextParameter(this, R.id.ImsHomeDomain, RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN, bundle);
 		setEditTextParameter(this, R.id.ImsPrivateId, RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID, bundle);
 		setEditTextParameter(this, R.id.ImsPassword, RcsSettingsData.USERPROFILE_IMS_PASSWORD, bundle);
@@ -216,7 +216,7 @@ public class ProfileProvisioning extends Activity {
 		}
 
 		saveEditTextParameter(this, R.id.ImsUsername, RcsSettingsData.USERPROFILE_IMS_USERNAME, bundle);
-		saveEditTextParameter(this, R.id.ImsDisplayName, RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, bundle, false);
+		saveEditTextParameter(this, R.id.ImsDisplayName, RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, bundle);
 		saveEditTextParameter(this, R.id.ImsHomeDomain, RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN, bundle);
 		saveEditTextParameter(this, R.id.ImsPrivateId, RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID, bundle);
 		saveEditTextParameter(this, R.id.ImsPassword, RcsSettingsData.USERPROFILE_IMS_PASSWORD, bundle);
@@ -375,8 +375,8 @@ public class ProfileProvisioning extends Activity {
 		 * @return true if loading the provisioning is successful
 		 */
 		private boolean createProvisioning(String mXMLFileContent, String userPhoneNumber) {
-			ProvisioningParser parser = new ProvisioningParser(mXMLFileContent);
 			RcsSettings rcsSettings = RcsSettings.getInstance();
+			ProvisioningParser parser = new ProvisioningParser(mXMLFileContent, rcsSettings);
 			// Save GSMA release set into the provider
 			GsmaRelease release = rcsSettings.getGsmaRelease();
 			// Save client Messaging Mode set into the provider
@@ -390,7 +390,7 @@ public class ProfileProvisioning extends Activity {
 			if (parser.parse(release,true)) {
 				// Customize provisioning data with user phone number
 				rcsSettings.writeParameter(RcsSettingsData.USERPROFILE_IMS_USERNAME, userPhoneNumber);
-				rcsSettings.writeParameter(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, userPhoneNumber, false);
+				rcsSettings.writeParameter(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, userPhoneNumber);
 				String homeDomain = rcsSettings.readParameter(RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN);
 				String sipUri = userPhoneNumber + "@" + homeDomain;
 				rcsSettings.writeParameter(RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID, sipUri);

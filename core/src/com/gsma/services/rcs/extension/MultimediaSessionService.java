@@ -50,7 +50,9 @@ public class MultimediaSessionService extends RcsService {
 	/**
 	 * API
 	 */
-	private IMultimediaSessionService api;
+	private IMultimediaSessionService mApi;
+	
+	private static final String ERROR_CNX = "MultimediaSession service not connected";
 	
     /**
      * Constructor
@@ -66,7 +68,7 @@ public class MultimediaSessionService extends RcsService {
      * Connects to the API
      */
     public void connect() {
-    	ctx.bindService(new Intent(IMultimediaSessionService.class.getName()), apiConnection, 0);
+    	mCtx.bindService(new Intent(IMultimediaSessionService.class.getName()), apiConnection, 0);
     }
     
     /**
@@ -74,7 +76,7 @@ public class MultimediaSessionService extends RcsService {
      */
     public void disconnect() {
     	try {
-    		ctx.unbindService(apiConnection);
+    		mCtx.unbindService(apiConnection);
         } catch(IllegalArgumentException e) {
         	// Nothing to do
         }
@@ -87,8 +89,7 @@ public class MultimediaSessionService extends RcsService {
 	 */
     protected void setApi(IInterface api) {
     	super.setApi(api);
-    	
-        this.api = (IMultimediaSessionService)api;
+        mApi = (IMultimediaSessionService)api;
     }
     
     /**
@@ -97,15 +98,15 @@ public class MultimediaSessionService extends RcsService {
 	private ServiceConnection apiConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
         	setApi(IMultimediaSessionService.Stub.asInterface(service));
-        	if (serviceListener != null) {
-        		serviceListener.onServiceConnected();
+        	if (mListener != null) {
+        		mListener.onServiceConnected();
         	}
         }
 
         public void onServiceDisconnected(ComponentName className) {
         	setApi(null);
-        	if (serviceListener != null) {
-        		serviceListener.onServiceDisconnected(RcsService.Error.CONNECTION_LOST);
+        	if (mListener != null) {
+        		mListener.onServiceDisconnected(RcsService.Error.CONNECTION_LOST);
         	}
         }
     };
@@ -117,14 +118,14 @@ public class MultimediaSessionService extends RcsService {
      * @throws RcsServiceException
      */
     public MultimediaSessionServiceConfiguration getConfiguration() throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				return api.getConfiguration();
+				return new MultimediaSessionServiceConfiguration(mApi.getConfiguration());
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}     
     
@@ -141,19 +142,19 @@ public class MultimediaSessionService extends RcsService {
      * @throws RcsServiceException
      */
     public MultimediaMessagingSession initiateMessagingSession(String serviceId, ContactId contact) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				IMultimediaMessagingSession sessionIntf = api.initiateMessagingSession(serviceId, contact);
+				IMultimediaMessagingSession sessionIntf = mApi.initiateMessagingSession(serviceId, contact);
 				if (sessionIntf != null) {
 					return new MultimediaMessagingSession(sessionIntf);
 				} else {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }    
     
@@ -165,20 +166,20 @@ public class MultimediaSessionService extends RcsService {
      * @throws RcsServiceException
      */
     public Set<MultimediaMessagingSession> getMessagingSessions(String serviceId) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
 	    		Set<MultimediaMessagingSession> result = new HashSet<MultimediaMessagingSession>();
-				List<IBinder> mmsList = api.getMessagingSessions(serviceId);
+				List<IBinder> mmsList = mApi.getMessagingSessions(serviceId);
 				for (IBinder binder : mmsList) {
 					MultimediaMessagingSession session = new MultimediaMessagingSession(IMultimediaMessagingSession.Stub.asInterface(binder));
 					result.add(session);
 				}
 				return result;
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }    
 
@@ -191,19 +192,19 @@ public class MultimediaSessionService extends RcsService {
 	 * @throws RcsServiceException
 	 */
     public MultimediaMessagingSession getMessagingSession(String sessionId) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				IMultimediaMessagingSession sessionIntf = api.getMessagingSession(sessionId);
+				IMultimediaMessagingSession sessionIntf = mApi.getMessagingSession(sessionId);
 				if (sessionIntf != null) {
 					return new MultimediaMessagingSession(sessionIntf);
 				} else {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }    
     
@@ -220,19 +221,19 @@ public class MultimediaSessionService extends RcsService {
      * @throws RcsServiceException
      */
     public MultimediaStreamingSession initiateStreamingSession(String serviceId, ContactId contact) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				IMultimediaStreamingSession sessionIntf = api.initiateStreamingSession(serviceId, contact);
+				IMultimediaStreamingSession sessionIntf = mApi.initiateStreamingSession(serviceId, contact);
 				if (sessionIntf != null) {
 					return new MultimediaStreamingSession(sessionIntf);
 				} else {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }    
     
@@ -245,20 +246,20 @@ public class MultimediaSessionService extends RcsService {
 	 * @throws RcsServiceException
 	 */
     public Set<MultimediaStreamingSession> getStreamingSessions(String serviceId) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
 	    		Set<MultimediaStreamingSession> result = new HashSet<MultimediaStreamingSession>();
-				List<IBinder> mmsList = api.getStreamingSessions(serviceId);
+				List<IBinder> mmsList = mApi.getStreamingSessions(serviceId);
 				for (IBinder binder : mmsList) {
 					MultimediaStreamingSession session = new MultimediaStreamingSession(IMultimediaStreamingSession.Stub.asInterface(binder));
 					result.add(session);
 				}
 				return result;
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }    
 
@@ -271,19 +272,19 @@ public class MultimediaSessionService extends RcsService {
 	 * @throws RcsServiceException
 	 */
     public MultimediaStreamingSession getStreamingSession(String sessionId) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				IMultimediaStreamingSession sessionIntf = api.getStreamingSession(sessionId);
+				IMultimediaStreamingSession sessionIntf = mApi.getStreamingSession(sessionId);
 				if (sessionIntf != null) {
 					return new MultimediaStreamingSession(sessionIntf);
 				} else {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }    
     
@@ -295,14 +296,14 @@ public class MultimediaSessionService extends RcsService {
 	 */
 	public void addEventListener(MultimediaMessagingSessionListener listener)
 			throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.addEventListener2(listener);
+				mApi.addEventListener2(listener);
 			} catch (Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -314,14 +315,14 @@ public class MultimediaSessionService extends RcsService {
 	 */
 	public void removeEventListener(MultimediaMessagingSessionListener listener)
 			throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.removeEventListener2(listener);
+				mApi.removeEventListener2(listener);
 			} catch (Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -333,14 +334,14 @@ public class MultimediaSessionService extends RcsService {
 	 */
 	public void addEventListener(MultimediaStreamingSessionListener listener)
 			throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.addEventListener3(listener);
+				mApi.addEventListener3(listener);
 			} catch (Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -352,14 +353,14 @@ public class MultimediaSessionService extends RcsService {
 	 */
 	public void removeEventListener(MultimediaStreamingSessionListener listener)
 			throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.removeEventListener3(listener);
+				mApi.removeEventListener3(listener);
 			} catch (Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 }

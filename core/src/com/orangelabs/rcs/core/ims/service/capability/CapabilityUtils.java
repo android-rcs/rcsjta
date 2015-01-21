@@ -320,7 +320,7 @@ public class CapabilityUtils {
 	        	String mimeTypes = null;
 	        	String protocol = null;
 	        	String selector = null;
-	        	int maxSize = 0;
+	        	long maxSize = 0;
 	        	String media = null;
 	        	
 		    	// Add video config

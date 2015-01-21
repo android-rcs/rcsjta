@@ -59,15 +59,15 @@
     <string name="Group_chat_Store_Forward">Group chat Store &amp; Forward</string>
     <string name="SIP_automata">SIP automata</string>
     <!-- rcs_provisioning_service.xml -->
-    <string name="Max_photo_icon_size_kB">Max photo-icon size (kB):</string>
+    <string name="Max_photo_icon_size">Max photo-icon size:</string>
     <string name="Max_length_of_the_freetext">Max length of the freetext:</string>
     <string name="Max_number_of_participants_in_a_group_chat">Max number of participants in a group chat:</string>
     <string name="Max_length_of_a_chat_message">Max length of a chat message:</string>
     <string name="Max_length_of_a_group_chat_message">Max length of a group chat message:</string>
     <string name="Idle_duration_of_a_chat_session_seconds">Idle duration of a chat session (seconds):</string>
-    <string name="Max_size_of_a_file_transfer_kB">Max size of a file transfer (kB):</string>
-    <string name="Threshold_warning_on_file_transfer_size_kB">Threshold warning on file transfer size (kB):</string>
-    <string name="Max_size_of_an_image_share_kB">Max size of an image share (kB):</string>
+    <string name="Max_size_of_a_file_transfer">Max size of a file transfer:</string>
+    <string name="Threshold_warning_on_file_transfer_size">Threshold warning on file transfer size:</string>
+    <string name="Max_size_of_an_image_share">Max size of an image share:</string>
     <string name="Max_duration_of_a_video_share_seconds">Max duration of a video share (seconds):</string>
     <string name="Max_number_of_simultaneous_chat_sessions">Max number of simultaneous chat sessions:</string>
     <string name="Max_number_of_simultaneous_file_transfer_sessions">Max number of simultaneous file transfer sessions:</string>
@@ -90,6 +90,7 @@
     <!-- rcs_provisioning_stack.xml -->
     <string name="config_mode">Configuration mode:</string>
     <string name="Vendor">Vendor:</string>
+    <string name="enable_rcs_switch">Enable RCS switch:</string>
     <string name="Secondary_provisioning_server">Secondary provisioning server:</string>
     <string name="Use_only_the_secondary_provisioning_server">Use only the secondary provisioning server</string>
     <string name="Network_access">Network access:</string>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:paddingTop="10dip"
+        android:stretchColumns="1" >
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_service_configuration_valid" />
+
+            <CheckBox
+                android:id="@+id/label_service_configuration_valid"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:clickable="false"
+                android:enabled="false"
+                android:gravity="left"
+                android:paddingTop="10dip" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:id="@+id/label_default_messaging_method"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:paddingTop="10dip"
+                android:text="@string/label_default_messaging_method" />
+
+            <Spinner
+                android:id="@+id/spinner_default_messaging_method"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@id/label_default_messaging_method"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip" />
+
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_messaging_mode" />
+
+            <TextView
+                android:id="@+id/label_messaging_mode"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:id="@+id/label_my_display_name"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_my_display_name" />
+
+            <EditText
+                android:id="@+id/text_my_display_name"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@id/label_my_display_name"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:paddingTop="10dip" />
+
+            <Button
+                android:id="@+id/button_display_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@id/text_my_display_name"
+                android:text="@string/label_configuration_refresh" />
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip"
+                android:text="@string/label_my_contact_id" />
+
+            <TextView
+                android:id="@+id/label_my_contact_id"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="left"
+                android:paddingTop="10dip" />
+        </TableRow>
+    </TableLayout>
+
+</ScrollView>

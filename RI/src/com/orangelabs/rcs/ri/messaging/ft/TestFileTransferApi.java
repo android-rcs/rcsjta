@@ -43,7 +43,8 @@ public class TestFileTransferApi extends ListActivity {
         // Set items
         String[] items = {
     		getString(R.string.menu_transfer_file),
-    		getString(R.string.menu_file_transfer_log)
+    		getString(R.string.menu_file_transfer_log),
+    		getString(R.string.menu_file_transfer_config)
     	};
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
@@ -57,6 +58,10 @@ public class TestFileTransferApi extends ListActivity {
 	            
 	        case 1:
             	startActivity(new Intent(this, FileTransferList.class));
+	            break;
+	            
+	        case 2:
+            	startActivity(new Intent(this, FileTransferServiceConfigActivity.class));
 	            break;
         }
     }

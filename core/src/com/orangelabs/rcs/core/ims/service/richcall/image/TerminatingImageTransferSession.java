@@ -240,7 +240,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 
 			// Build SDP part
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
-	    	int maxSize = ImageTransferSession.getMaxImageSharingSize();
+	    	long maxSize = ImageTransferSession.getMaxImageSharingSize();
 	    	String sdp = SdpUtils.buildFileSDP(ipAddress, localMsrpPort,
                     msrpMgr.getLocalSocketProtocol(), getContent().getEncoding(), fileTransferId,
                     fileSelector, null, localSetup, msrpMgr.getLocalMsrpPath(),
@@ -444,6 +444,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
      * @param currentSize Current transfered size in bytes
      * @param totalSize Total size in bytes
      * @param data received data chunk
+     * @return always true TODO
      */
     public boolean msrpTransferProgress(long currentSize, long totalSize, byte[] data) {
         try {

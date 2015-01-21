@@ -22,7 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.IContactsService;
@@ -63,7 +65,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 	}
     
     /**
-     * Returns the rcs contact infos from its contact ID (i.e. MSISDN)
+     * Returns the RCS contact infos from its contact ID (i.e. MSISDN)
      * 
      * @param contact Contact ID
      * @return Contact
@@ -71,7 +73,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
      */
 	public RcsContact getRcsContact(ContactId contact) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Get rcs contact " + contact);
+			logger.info("Get RCS contact " + contact);
 		}
 		// Read capabilities in the local database
 		return getRcsContact(ContactsManager.getInstance().getContactInfo(contact));
@@ -221,10 +223,22 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 	 * Returns service version
 	 * 
 	 * @return Version
-	 * @see RcsService.Build.VERSION_CODES
+	 * @see VERSION_CODES
 	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {
 		return RcsService.Build.API_VERSION;
+	}
+	
+	/**
+	 * Returns the common service configuration
+	 * 
+	 * @return the common service configuration
+	 */
+	public ICommonServiceConfiguration getCommonConfiguration() {
+		if (logger.isActivated()) {
+			logger.debug("getCommonConfiguration");
+		}
+		return new CommonServiceConfigurationImpl();
 	}
 }

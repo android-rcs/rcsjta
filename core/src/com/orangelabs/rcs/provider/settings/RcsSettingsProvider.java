@@ -34,7 +34,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import com.gsma.services.rcs.RcsServiceConfiguration;
 import com.orangelabs.rcs.R;
 import com.orangelabs.rcs.utils.DatabaseUtils;
 
@@ -56,52 +55,17 @@ public class RcsSettingsProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     static {
         sUriMatcher.addURI(RcsSettingsData.CONTENT_URI.getAuthority(),
-                RcsSettingsData.CONTENT_URI.getPath().substring(1), UriType.InternalSettings.INTERNAL_SETTINGS);
+                RcsSettingsData.CONTENT_URI.getPath().substring(1), UriType.SETTINGS);
         sUriMatcher.addURI(RcsSettingsData.CONTENT_URI.getAuthority(), RcsSettingsData.CONTENT_URI
-                .getPath().substring(1).concat("/*"), UriType.InternalSettings.INTERNAL_SETTINGS_WITH_KEY);
-        sUriMatcher.addURI(RcsServiceConfiguration.Settings.CONTENT_URI.getAuthority(),
-                RcsServiceConfiguration.Settings.CONTENT_URI.getPath().substring(1), UriType.Settings.SETTINGS);
-        sUriMatcher.addURI(RcsServiceConfiguration.Settings.CONTENT_URI.getAuthority(),
-                RcsServiceConfiguration.Settings.CONTENT_URI.getPath().substring(1).concat("/*"),
-                UriType.Settings.SETTINGS_WITH_KEY);
+                .getPath().substring(1).concat("/*"), UriType.SETTINGS_WITH_KEY);
     }
 
-    /**
-     * String to restrict query for exposed Uri to a set of columns
-     */
-    private static final String RESTRICTED_SELECTION_QUERY_FOR_EXTERNALLY_DEFINED_COLUMNS = new StringBuilder(
-            RcsSettingsData.KEY_KEY).append(" IN ('").append(RcsSettingsData.KEY_MESSAGING_MODE)
-            .append("','").append(RcsSettingsData.USERPROFILE_IMS_USERNAME).append("','")
-            .append(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME).append("','")
-            .append(RcsSettingsData.CONFIGURATION_VALID).append("','")
-            .append(RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD).append("')").toString();
+	private static final class UriType {
 
-    /**
-     * String to restrict update from exposed Uri to a set of columns
-     */
+		private static final int SETTINGS = 1;
 
-    private static final String RESTRICTED_SELECTION_UPDATE_FOR_EXTERNALLY_DEFINED_COLUMNS = new StringBuilder(
-            RcsSettingsData.KEY_KEY).append(" IN ('")
-            .append(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME).append("','")
-            .append(RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD).append("')").toString();
-
-    private static final class UriType {
-
-        private static final class Settings {
-
-            private static final int SETTINGS = 1;
-
-            private static final int SETTINGS_WITH_KEY = 2;
-        }
-
-        private static final class InternalSettings {
-
-            private static final int INTERNAL_SETTINGS = 3;
-
-            private static final int INTERNAL_SETTINGS_WITH_KEY = 4;
-
-        }
-    }
+		private static final int SETTINGS_WITH_KEY = 2;
+	}
 
     private static final class CursorType {
 
@@ -111,7 +75,7 @@ public class RcsSettingsProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 106;
+        private static final int DATABASE_VERSION = 107;
 
         private Context mContext;
 
@@ -135,6 +99,10 @@ public class RcsSettingsProvider extends ContentProvider {
 
 		private void addParameter(SQLiteDatabase db, String key, int value) {
 			addParameter(db, key, Integer.toString(value));
+		}
+		
+		private void addParameter(SQLiteDatabase db, String key, long value) {
+			addParameter(db, key, Long.toString(value));
 		}
 
         public DatabaseHelper(Context ctx) {
@@ -302,6 +270,7 @@ public class RcsSettingsProvider extends ContentProvider {
 			addParameter(db, RcsSettingsData.AUTO_ACCEPT_FT_CHANGEABLE, RcsSettingsData.DEFAULT_AUTO_ACCEPT_FT_CHANGEABLE);
 			addParameter(db, RcsSettingsData.KEY_DEFAULT_MESSAGING_METHOD, RcsSettingsData.DEFAULT_KEY_DEFAULT_MESSAGING_METHOD);
 			addParameter(db, RcsSettingsData.KEY_IMAGE_RESIZE_OPTION, RcsSettingsData.DEFAULT_KEY_IMAGE_RESIZE_OPTION);
+			addParameter(db, RcsSettingsData.ENABLE_RCS_SWITCH, RcsSettingsData.DEFAULT_ENABLE_RCS_SWITCH);
         }
 
         @Override
@@ -368,14 +337,6 @@ public class RcsSettingsProvider extends ContentProvider {
         return DatabaseUtils.appendSelectionArgs(keySelectionArg, selectionArgs);
     }
 
-    private StringBuilder restrictSelectionToColumns(String selection, String restrictedSetOfColumns) {
-        if (TextUtils.isEmpty(selection)) {
-            return new StringBuilder(restrictedSetOfColumns);
-        }
-        return new StringBuilder("(").append(selection).append(") AND (")
-                .append(restrictedSetOfColumns).append(")");
-    }
-
     @Override
     public boolean onCreate() {
         mOpenHelper = new DatabaseHelper(getContext());
@@ -385,14 +346,10 @@ public class RcsSettingsProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
         switch (sUriMatcher.match(uri)) {
-            case UriType.InternalSettings.INTERNAL_SETTINGS:
-                /* Intentional fall through */
-            case UriType.Settings.SETTINGS:
+            case UriType.SETTINGS:
                 return CursorType.TYPE_DIRECTORY;
 
-            case UriType.InternalSettings.INTERNAL_SETTINGS_WITH_KEY:
-                /* Intentional fall through */
-            case UriType.Settings.SETTINGS_WITH_KEY:
+            case UriType.SETTINGS_WITH_KEY:
                 return CursorType.TYPE_ITEM;
 
             default:
@@ -405,34 +362,20 @@ public class RcsSettingsProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
             String sort) {
         Cursor cursor = null;
-        Uri notificationUri = RcsServiceConfiguration.Settings.CONTENT_URI;
+        Uri notificationUri = RcsSettingsData.CONTENT_URI;
         try {
             switch (sUriMatcher.match(uri)) {
-                case UriType.InternalSettings.INTERNAL_SETTINGS_WITH_KEY:
+                case UriType.SETTINGS_WITH_KEY:
                     String key = uri.getLastPathSegment();
                     selection = getSelectionWithKey(selection);
                     selectionArgs = getSelectionArgsWithKey(selectionArgs, key);
                     notificationUri = Uri.withAppendedPath(notificationUri, key);
                     /* Intentional fall through */
-                case UriType.InternalSettings.INTERNAL_SETTINGS:
+                case UriType.SETTINGS:
                     SQLiteDatabase database = mOpenHelper.getReadableDatabase();
                     cursor = database.query(TABLE, projection, selection, selectionArgs, null,
                             null, sort);
                     cursor.setNotificationUri(getContext().getContentResolver(), notificationUri);
-                    return cursor;
-
-                case UriType.Settings.SETTINGS_WITH_KEY:
-                    key = uri.getLastPathSegment();
-                    selection = getSelectionWithKey(selection);
-                    selectionArgs = getSelectionArgsWithKey(selectionArgs, key);
-                    /* Intentional fall through */
-                case UriType.Settings.SETTINGS:
-                    database = mOpenHelper.getReadableDatabase();
-                    selection = restrictSelectionToColumns(selection,
-                            RESTRICTED_SELECTION_QUERY_FOR_EXTERNALLY_DEFINED_COLUMNS).toString();
-                    cursor = database.query(TABLE, projection, selection, selectionArgs, null,
-                            null, sort);
-                    cursor.setNotificationUri(getContext().getContentResolver(), uri);
                     return cursor;
 
                 default:
@@ -449,34 +392,19 @@ public class RcsSettingsProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        Uri notificationUri = RcsServiceConfiguration.Settings.CONTENT_URI;
+        Uri notificationUri = RcsSettingsData.CONTENT_URI;
         switch (sUriMatcher.match(uri)) {
-            case UriType.InternalSettings.INTERNAL_SETTINGS_WITH_KEY:
+            case UriType.SETTINGS_WITH_KEY:
                 String key = uri.getLastPathSegment();
                 selection = getSelectionWithKey(selection);
                 selectionArgs = getSelectionArgsWithKey(selectionArgs, key);
                 notificationUri = Uri.withAppendedPath(notificationUri, key);
                 /* Intentional fall through */
-            case UriType.InternalSettings.INTERNAL_SETTINGS:
+            case UriType.SETTINGS:
                 SQLiteDatabase database = mOpenHelper.getWritableDatabase();
                 int count = database.update(TABLE, values, selection, selectionArgs);
                 if (count > 0) {
                     getContext().getContentResolver().notifyChange(notificationUri, null);
-                }
-                return count;
-
-            case UriType.Settings.SETTINGS_WITH_KEY:
-                key = uri.getLastPathSegment();
-                selection = getSelectionWithKey(selection);
-                selectionArgs = getSelectionArgsWithKey(selectionArgs, key);
-                /* Intentional fall through */
-            case UriType.Settings.SETTINGS:
-                database = mOpenHelper.getReadableDatabase();
-                selection = restrictSelectionToColumns(selection,
-                        RESTRICTED_SELECTION_UPDATE_FOR_EXTERNALLY_DEFINED_COLUMNS).toString();
-                count = database.update(TABLE, values, selection, selectionArgs);
-                if (count > 0) {
-                    getContext().getContentResolver().notifyChange(uri, null);
                 }
                 return count;
 

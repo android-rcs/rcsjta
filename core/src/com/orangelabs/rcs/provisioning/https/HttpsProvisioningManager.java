@@ -71,11 +71,11 @@ import android.os.Environment;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
+import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
 import com.gsma.services.rcs.RcsService;
 import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.provider.settings.RcsSettingsData.GsmaRelease;
-import com.orangelabs.rcs.provider.settings.RcsSettingsData.MessagingMode;
 import com.orangelabs.rcs.provisioning.ProvisioningFailureReasons;
 import com.orangelabs.rcs.provisioning.ProvisioningInfo;
 import com.orangelabs.rcs.provisioning.ProvisioningInfo.Version;
@@ -152,6 +152,7 @@ public class HttpsProvisioningManager {
 	 * Constructor
 	 * 
 	 * @param applicationContext
+	 * @param localContentResolver 
 	 * @param retryIntent
 	 *            pending intent to update periodically the configuration
 	 * @param first
@@ -695,6 +696,7 @@ public class HttpsProvisioningManager {
      */
 	private void processProvisioningResult(HttpsProvisioningResult result) {
 		if (result != null) {
+			RcsSettings rcsSettings = RcsSettings.getInstance();
 			if (result.code == 200) {
 				// Reset after 511 counter
 				retryAfter511ErrorCount = 0;
@@ -711,17 +713,17 @@ public class HttpsProvisioningManager {
 				}
 
 				// Parse the received content
-				ProvisioningParser parser = new ProvisioningParser(result.content);
+				ProvisioningParser parser = new ProvisioningParser(result.content, rcsSettings);
 				
 				// Save GSMA release set into the provider
-				GsmaRelease gsmaRelease = RcsSettings.getInstance().getGsmaRelease();
+				GsmaRelease gsmaRelease = rcsSettings.getGsmaRelease();
 				// Save client Messaging Mode set into the provider
-				MessagingMode messagingMode = RcsSettings.getInstance().getMessagingMode();
+				MessagingMode messagingMode = rcsSettings.getMessagingMode();
 				
 				// Before parsing the provisioning, the GSMA release is set to Albatros
-				RcsSettings.getInstance().setGsmaRelease(GsmaRelease.ALBATROS);
+				rcsSettings.setGsmaRelease(GsmaRelease.ALBATROS);
 				// Before parsing the provisioning, the client Messaging mode is set to NONE 
-				RcsSettings.getInstance().setMessagingMode(MessagingMode.NONE);
+				rcsSettings.setMessagingMode(MessagingMode.NONE);
 				
 				if (parser.parse(gsmaRelease, first)) {
 					// Successfully provisioned, 1st time reg finalized
@@ -740,7 +742,7 @@ public class HttpsProvisioningManager {
 					
 					// Save the validity of the configuration
 					LauncherUtils.saveProvisioningValidity(mCtx, validity);
-					RcsSettings.getInstance().setProvisioningVersion(version);
+					rcsSettings.setProvisioningVersion(version);
 
 					// Save token
 					String token = info.getToken();
@@ -748,7 +750,7 @@ public class HttpsProvisioningManager {
 					if (logger.isActivated()) {
 						logger.debug("Provisioning Token=" + token + ", validity=" + tokenValidity);
 					}
-					RcsSettings.getInstance().setProvisioningToken(token);
+					rcsSettings.setProvisioningToken(token);
 					
 					// Reset retry alarm counter
 			        retryCount = 0;
@@ -762,7 +764,7 @@ public class HttpsProvisioningManager {
 							HttpsProvisioningService.startRetryAlarm(mCtx, retryIntent, validity * 1000);
 						}
 						// We parsed successfully the configuration
-						RcsSettings.getInstance().setConfigurationValid(true);
+						rcsSettings.setConfigurationValid(true);
 						// Stop the RCS core service. Provisioning is still running.
 						LauncherUtils.stopRcsCoreService(mCtx);
 					} else {
@@ -772,9 +774,9 @@ public class HttpsProvisioningManager {
 								logger.debug("Provisioning: disable RCS client");
 							}
 							// We parsed successfully the configuration
-							RcsSettings.getInstance().setConfigurationValid(true);
+							rcsSettings.setConfigurationValid(true);
 							// Disable and stop RCS service
-							RcsSettings.getInstance().setServiceActivationState(false);
+							rcsSettings.setServiceActivationState(false);
 							LauncherUtils.stopRcsService(mCtx);
 						} else {
 							if (ProvisioningInfo.Version.RESETED_NOQUERY.equals(version)) {
@@ -785,9 +787,9 @@ public class HttpsProvisioningManager {
 								// Reset config
 								LauncherUtils.resetRcsConfig(mCtx, mLocalContentResolver);
 								// Force version to "-1" (resetRcs set version to "0")
-								RcsSettings.getInstance().setProvisioningVersion(version);
+								rcsSettings.setProvisioningVersion(version);
 								// Disable the RCS service
-								RcsSettings.getInstance().setServiceActivationState(false);
+								rcsSettings.setServiceActivationState(false);
 							} else {
 								if (ProvisioningInfo.Version.RESETED.equals(version)) {
 									if (logger.isActivated()) {
@@ -801,11 +803,11 @@ public class HttpsProvisioningManager {
 										HttpsProvisioningService.startRetryAlarm(mCtx, retryIntent, validity * 1000);
 									}
 									// Terms request
-									if (info.getMessage() != null && !RcsSettings.getInstance().isProvisioningTermsAccepted()) {
+									if (info.getMessage() != null && !rcsSettings.isProvisioningTermsAccepted()) {
 										showTermsAndConditions(info);
 									}
 									// We parsed successfully the configuration
-									RcsSettings.getInstance().setConfigurationValid(true);
+									rcsSettings.setConfigurationValid(true);
 									// Start the RCS core service
 									LauncherUtils.launchRcsCoreService(mCtx);
 								}
@@ -822,10 +824,10 @@ public class HttpsProvisioningManager {
 						logger.debug("Can't parse provisioning document");
 					}
 					// Restore GSMA release saved before parsing of the provisioning
-					RcsSettings.getInstance().setGsmaRelease(gsmaRelease);
+					rcsSettings.setGsmaRelease(gsmaRelease);
 					
 					// Restore the client messaging mode saved before parsing of the provisioning
-					RcsSettings.getInstance().setMessagingMode(messagingMode);
+					rcsSettings.setMessagingMode(messagingMode);
 					
 					if (first) {
 						if (logger.isActivated()) {
@@ -861,7 +863,7 @@ public class HttpsProvisioningManager {
 					logger.debug("Provisioning forbidden: reset account");
 				}
 				// Reset version to "0"
-				RcsSettings.getInstance().setProvisioningVersion(Version.RESETED.toString());
+				rcsSettings.setProvisioningVersion(Version.RESETED.toString());
 				// Reset config
 				LauncherUtils.resetRcsConfig(mCtx, mLocalContentResolver);
 				// Reason: Provisioning forbidden
@@ -872,7 +874,7 @@ public class HttpsProvisioningManager {
 					logger.debug("Provisioning authentication required");
 				}
 				// Reset provisioning token
-				RcsSettings.getInstance().setProvisioningToken("");
+				rcsSettings.setProvisioningToken("");
 				// Retry after reseting provisioning token
 				if (!retryAfter511Error()) {
 					// Reason: Provisioning authentication required

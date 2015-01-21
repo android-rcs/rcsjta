@@ -21,84 +21,41 @@
  ******************************************************************************/
 package com.gsma.services.rcs.extension;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import com.gsma.services.rcs.RcsServiceException;
 
 /**
  * Multimedia session configuration
  * 
  * @author Jean-Marc AUFFRET
+ * @author yplo6403
+ *
  */
-public class MultimediaSessionServiceConfiguration implements Parcelable {
-	/**
-	 * Max length of a message
-	 */
-	private int maxMsgLength;
-	
+public class MultimediaSessionServiceConfiguration {
+
+	private final IMultimediaSessionServiceConfiguration mIConfig;
+
 	/**
 	 * Constructor
 	 * 
-	 * @param maxMsgLength Max length of a message
-     * @hide
+	 * @param iConfig
+	 *            IMultimediaSessionServiceConfiguration instance
+	 * @hide
 	 */
-	public MultimediaSessionServiceConfiguration(int maxMsgLength) {
-		this.maxMsgLength = maxMsgLength;
-    }	
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param source Parcelable source
-     * @hide
-	 */
-	public MultimediaSessionServiceConfiguration(Parcel source) {
-		this.maxMsgLength = source.readInt();
-    }
+	public MultimediaSessionServiceConfiguration(IMultimediaSessionServiceConfiguration iConfig) {
+		mIConfig = iConfig;
+	}
 
-	/**
-	 * Describe the kinds of special objects contained in this Parcelable's
-	 * marshalled representation
-	 * 
-	 * @return Integer
-     * @hide
-	 */
-	public int describeContents() {
-        return 0;
-    }
-
-	/**
-	 * Write parcelable object
-	 * 
-	 * @param dest The Parcel in which the object should be written
-	 * @param flags Additional flags about how the object should be written
-     * @hide
-	 */
-    public void writeToParcel(Parcel dest, int flags) {
-    	dest.writeInt(maxMsgLength);
-    }
-
-    /**
-     * Parcelable creator
-     * 
-     * @hide
-     */
-    public static final Parcelable.Creator<MultimediaSessionServiceConfiguration> CREATOR
-            = new Parcelable.Creator<MultimediaSessionServiceConfiguration>() {
-        public MultimediaSessionServiceConfiguration createFromParcel(Parcel source) {
-            return new MultimediaSessionServiceConfiguration(source);
-        }
-
-        public MultimediaSessionServiceConfiguration[] newArray(int size) {
-            return new MultimediaSessionServiceConfiguration[size];
-        }
-    };	
-	
 	/**
 	 * Return maximum length of a multimedia message
 	 * 
 	 * @return Number of bytes
+	 * @throws RcsServiceException
 	 */
-	public int getMessageMaxLength() {
-		return maxMsgLength;
+	public int getMessageMaxLength() throws RcsServiceException {
+		try {
+			return mIConfig.getMessageMaxLength();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
 	}
 }

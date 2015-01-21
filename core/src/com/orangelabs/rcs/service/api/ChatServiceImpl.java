@@ -30,17 +30,18 @@ import java.util.concurrent.Executors;
 
 import android.os.RemoteException;
 
+import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
-import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
-import com.gsma.services.rcs.chat.ChatServiceConfiguration;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.IChatMessage;
 import com.gsma.services.rcs.chat.IChatService;
+import com.gsma.services.rcs.chat.IChatServiceConfiguration;
 import com.gsma.services.rcs.chat.IGroupChat;
 import com.gsma.services.rcs.chat.IGroupChatListener;
 import com.gsma.services.rcs.chat.IOneToOneChat;
@@ -425,10 +426,11 @@ public class ChatServiceImpl extends IChatService.Stub {
 	/**
 	 * Initiates a group chat with a group of contact and returns a GroupChat instance. The subject is optional and may be null.
 	 *
-	 * @param contact
+	 * @param contacts
 	 *            List of contact IDs
 	 * @param subject
 	 *            Subject
+	 * @return instance of IGroupChat
 	 * @throws ServerApiException
 	 *             Note: List is used instead of Set because AIDL does only support List
 	 */
@@ -511,6 +513,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 * Adds a listener on one-to-one chat events
 	 *
 	 * @param listener One-to-One chat event listener
+	 * @throws RemoteException 
 	 */
 	public void addEventListener2(IOneToOneChatListener listener) throws RemoteException {
 		if (logger.isActivated()) {
@@ -525,6 +528,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 * Removes a listener on one-to-one chat events
 	 *
 	 * @param listener One-to-One chat event listener
+	 * @throws RemoteException 
 	 */
 	public void removeEventListener2(IOneToOneChatListener listener) throws RemoteException {
 		if (logger.isActivated()) {
@@ -570,21 +574,8 @@ public class ChatServiceImpl extends IChatService.Stub {
      *
      * @return Configuration
      */
-    public ChatServiceConfiguration getConfiguration() {
-    	return new ChatServiceConfiguration(
-    			mRcsSettings.isImAlwaysOn(),
-    			mRcsSettings.isStoreForwardWarningActivated(),
-    			mRcsSettings.getChatIdleDuration(),
-    			mRcsSettings.getIsComposingTimeout(),
-    			mRcsSettings.getMaxChatParticipants(),
-    			mRcsSettings.getMinGroupChatParticipants(),
-    			mRcsSettings.getMaxChatMessageLength(),
-    			mRcsSettings.getMaxGroupChatMessageLength(),
-    			mRcsSettings.getGroupChatSubjectMaxLength(),
-    			mRcsSettings.isSmsFallbackServiceActivated(),
-    			mRcsSettings.isRespondToDisplayReports(),
-    			mRcsSettings.getMaxGeolocLabelLength(),
-    			mRcsSettings.getGeolocExpirationTime());
+    public IChatServiceConfiguration getConfiguration() {
+    	return new ChatServiceConfigurationImpl();
 	}
 
 	/**
@@ -598,7 +589,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 		mMessagingLog.markMessageAsRead(msgId);
 		if (mRcsSettings.isImReportsActivated() && mRcsSettings.isRespondToDisplayReports()) {
 			if (logger.isActivated()) {
-				logger.debug("tryToDispatchAllPendingDisplayNotifications for msgID "+msgId);
+				logger.debug("tryToDispatchAllPendingDisplayNotifications for msgID ".concat(msgId));
 			}
 			tryToDispatchAllPendingDisplayNotifications();
 		}
@@ -608,7 +599,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 * Returns service version
 	 *
 	 * @return Version
-	 * @see RcsService.Build.VERSION_CODES
+	 * @see VERSION_CODES
 	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {
@@ -662,7 +653,6 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 *
 	 * @param msgId
 	 * @return IChatMessage
-	 * @throws RcsServiceException
 	 */
 	public IChatMessage getChatMessage(String msgId) {
 		ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
@@ -693,4 +683,14 @@ public class ChatServiceImpl extends IChatService.Stub {
 		groupChat.rejoinGroupChat();
 		addGroupChat(groupChat);
 	}
+	
+	/**
+	 * Returns the common service configuration
+	 * 
+	 * @return the common service configuration
+	 */
+	public ICommonServiceConfiguration getCommonConfiguration() {
+		return new CommonServiceConfigurationImpl();
+	}
+	
 }

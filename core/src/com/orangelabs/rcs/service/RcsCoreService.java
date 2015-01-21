@@ -265,7 +265,7 @@ public class RcsCoreService extends Service implements CoreListener {
             gshApi = new GeolocSharingServiceImpl(richCallService, contactsManager, richcallLog);
             ipcallApi = new IPCallServiceImpl(ipCallService, IPCallHistory.getInstance(), contactsManager, rcsSettings);
         	sessionApi = new MultimediaSessionServiceImpl(sipService, rcsSettings, contactsManager);
-            uploadApi = new FileUploadServiceImpl(imService);
+            uploadApi = new FileUploadServiceImpl(imService, rcsSettings);
             
             // Set the logger properties
     		Logger.activationFlag = RcsSettings.getInstance().isTraceActivated();

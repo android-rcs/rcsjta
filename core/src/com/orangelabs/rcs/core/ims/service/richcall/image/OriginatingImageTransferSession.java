@@ -126,7 +126,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 			// Build SDP part
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
 	    	String encoding = getContent().getEncoding();
-	    	int maxSize = ImageTransferSession.getMaxImageSharingSize();
+	    	long maxSize = ImageTransferSession.getMaxImageSharingSize();
 	    	// Set File-selector attribute
 	    	String selector = getFileSelectorAttribute();
 	    	String sdp = SdpUtils.buildFileSDP(ipAddress, localMsrpPort,
@@ -329,6 +329,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
      * @param currentSize Current transfered size in bytes
      * @param totalSize Total size in bytes
      * @param data received data chunk
+     * @return always false TODO
      */
     public boolean msrpTransferProgress(long currentSize, long totalSize, byte[] data) {
         // Not used in originating side

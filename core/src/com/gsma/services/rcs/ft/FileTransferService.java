@@ -65,7 +65,9 @@ public class FileTransferService extends RcsService {
 	/**
 	 * API
 	 */
-	private IFileTransferService api;
+	private IFileTransferService mApi;
+	
+	private static final String ERROR_CNX = "FileTransfer service not connected";
 	
     /**
      * Constructor
@@ -81,7 +83,7 @@ public class FileTransferService extends RcsService {
      * Connects to the API
      */
     public void connect() {
-    	ctx.bindService(new Intent(IFileTransferService.class.getName()), apiConnection, 0);
+    	mCtx.bindService(new Intent(IFileTransferService.class.getName()), apiConnection, 0);
     }
     
     /**
@@ -89,7 +91,7 @@ public class FileTransferService extends RcsService {
      */
     public void disconnect() {
     	try {
-    		ctx.unbindService(apiConnection);
+    		mCtx.unbindService(apiConnection);
         } catch(IllegalArgumentException e) {
         	// Nothing to do
         }
@@ -102,8 +104,7 @@ public class FileTransferService extends RcsService {
 	 */
     protected void setApi(IInterface api) {
     	super.setApi(api);
-    	
-        this.api = (IFileTransferService)api;
+        mApi = (IFileTransferService)api;
     }
     
     /**
@@ -112,15 +113,15 @@ public class FileTransferService extends RcsService {
 	private ServiceConnection apiConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
         	setApi(IFileTransferService.Stub.asInterface(service));
-        	if (serviceListener != null) {
-        		serviceListener.onServiceConnected();
+        	if (mListener != null) {
+        		mListener.onServiceConnected();
         	}
         }
 
         public void onServiceDisconnected(ComponentName className) {
         	setApi(null);
-        	if (serviceListener != null) {
-        		serviceListener.onServiceDisconnected(RcsService.Error.CONNECTION_LOST);
+        	if (mListener != null) {
+        		mListener.onServiceDisconnected(RcsService.Error.CONNECTION_LOST);
         	}
         }
     };
@@ -132,23 +133,23 @@ public class FileTransferService extends RcsService {
      * @throws RcsServiceException
      */
     public FileTransferServiceConfiguration getConfiguration() throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				return api.getConfiguration();
+				return new FileTransferServiceConfiguration(mApi.getConfiguration());
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
 	private void grantUriPermissionToStackServices(Uri file) {
 		Intent fileTransferServiceIntent = new Intent(IFileTransferService.class.getName());
-		List<ResolveInfo> stackServices = ctx.getPackageManager().queryIntentServices(
+		List<ResolveInfo> stackServices = mCtx.getPackageManager().queryIntentServices(
 				fileTransferServiceIntent, 0);
 		for (ResolveInfo stackService : stackServices) {
-			ctx.grantUriPermission(stackService.serviceInfo.packageName, file,
+			mCtx.grantUriPermission(stackService.serviceInfo.packageName, file,
 					Intent.FLAG_GRANT_READ_URI_PERMISSION);
 		}
 	}
@@ -162,7 +163,7 @@ public class FileTransferService extends RcsService {
 	 */
 	private void takePersistableUriPermission(Uri file) throws RcsServiceException {
 		try {
-			ContentResolver contentResolver = ctx.getContentResolver();
+			ContentResolver contentResolver = mCtx.getContentResolver();
 			Method takePersistableUriPermissionMethod = contentResolver.getClass().getMethod(
 					TAKE_PERSISTABLE_URI_PERMISSION_METHOD_NAME,
 					TAKE_PERSISTABLE_URI_PERMISSION_PARAM_TYPES);
@@ -172,7 +173,7 @@ public class FileTransferService extends RcsService {
 			};
 			takePersistableUriPermissionMethod.invoke(contentResolver, methodArgs);
 		} catch (Exception e) {
-			throw new RcsServiceException(e.getMessage());
+			throw new RcsServiceException(e);
 		}
 	}
 
@@ -212,21 +213,21 @@ public class FileTransferService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public FileTransfer transferFile(ContactId contact, Uri file, boolean attachFileIcon) throws RcsServiceException {
-    	if (api != null) {
+    	if (mApi != null) {
 			try {
 				tryToGrantAndPersistUriPermission(file);
 
-				IFileTransfer ftIntf = api.transferFile(contact, file, attachFileIcon);
+				IFileTransfer ftIntf = mApi.transferFile(contact, file, attachFileIcon);
 				if (ftIntf != null) {
 					return new FileTransfer(ftIntf);
 				} else {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -244,21 +245,21 @@ public class FileTransferService extends RcsService {
 	 */
 	public FileTransfer transferFileToGroupChat(String chatId, Uri file, boolean attachFileIcon)
 			throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
 				tryToGrantAndPersistUriPermission(file);
 				
-				IFileTransfer ftIntf = api.transferFileToGroupChat(chatId, file, attachFileIcon);
+				IFileTransfer ftIntf = mApi.transferFileToGroupChat(chatId, file, attachFileIcon);
 				if (ftIntf != null) {
 					return new FileTransfer(ftIntf);
 				} else {
 					return null;
 				}
 			} catch (Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -269,14 +270,14 @@ public class FileTransferService extends RcsService {
      * @throws RcsServiceException
      */
     public void markFileTransferAsRead(String transferId) throws RcsServiceException {
-        if (api != null) {
+        if (mApi != null) {
             try {
-                api.markFileTransferAsRead(transferId);
+                mApi.markFileTransferAsRead(transferId);
             } catch(Exception e) {
-                throw new RcsServiceException(e.getMessage());
+                throw new RcsServiceException(e);
             }
         } else {
-            throw new RcsServiceNotAvailableException();
+            throw new RcsServiceNotAvailableException(ERROR_CNX);
         }
     }
     
@@ -287,20 +288,20 @@ public class FileTransferService extends RcsService {
      * @throws RcsServiceException
      */
     public Set<FileTransfer> getFileTransfers() throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
 	    		Set<FileTransfer> result = new HashSet<FileTransfer>();
-				List<IBinder> ftList = api.getFileTransfers();
+				List<IBinder> ftList = mApi.getFileTransfers();
 				for (IBinder binder : ftList) {
 					FileTransfer ft = new FileTransfer(IFileTransfer.Stub.asInterface(binder));
 					result.add(ft);
 				}
 				return result;
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }    
 
@@ -313,19 +314,19 @@ public class FileTransferService extends RcsService {
 	 * @throws RcsServiceException
 	 */
     public FileTransfer getFileTransfer(String transferId) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				IFileTransfer ftIntf = api.getFileTransfer(transferId);
+				IFileTransfer ftIntf = mApi.getFileTransfer(transferId);
 				if (ftIntf != null) {
 					return new FileTransfer(ftIntf);
 				} else {
 					return null;
 				}
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }    
     
@@ -336,14 +337,14 @@ public class FileTransferService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public void addEventListener(OneToOneFileTransferListener listener) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.addEventListener2(listener);
+				mApi.addEventListener2(listener);
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -354,14 +355,14 @@ public class FileTransferService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public void removeEventListener(OneToOneFileTransferListener listener) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.removeEventListener2(listener);
+				mApi.removeEventListener2(listener);
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -372,14 +373,14 @@ public class FileTransferService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public void addEventListener(GroupFileTransferListener listener) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.addEventListener3(listener);
+				mApi.addEventListener3(listener);
 			} catch (Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -390,14 +391,14 @@ public class FileTransferService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public void removeEventListener(GroupFileTransferListener listener) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.removeEventListener3(listener);
+				mApi.removeEventListener3(listener);
 			} catch (Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 
@@ -412,14 +413,14 @@ public class FileTransferService extends RcsService {
 	 * @throws RcsServiceException
 	 */
     public void setAutoAccept(boolean enable) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.setAutoAccept(enable);
+				mApi.setAutoAccept(enable);
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 	
@@ -434,14 +435,14 @@ public class FileTransferService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public void setAutoAcceptInRoaming(boolean enable) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.setAutoAcceptInRoaming(enable);
+				mApi.setAutoAcceptInRoaming(enable);
 			} catch (Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
     
@@ -453,14 +454,14 @@ public class FileTransferService extends RcsService {
 	 * @throws RcsServiceException
 	 */
     public void setImageResizeOption(int option) throws RcsServiceException {
-		if (api != null) {
+		if (mApi != null) {
 			try {
-				api.setImageResizeOption(option);
+				mApi.setImageResizeOption(option);
 			} catch(Exception e) {
-				throw new RcsServiceException(e.getMessage());
+				throw new RcsServiceException(e);
 			}
 		} else {
-			throw new RcsServiceNotAvailableException();
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
 }
