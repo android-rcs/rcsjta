@@ -89,7 +89,7 @@ public class FileTransferPersistedStorageAccessor {
 			mChatId = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.CHAT_ID));
 			mFileName = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FILENAME));
 			mMimeType = cursor.getString(cursor
-					.getColumnIndexOrThrow(FileTransferLog.FILEICON_MIME_TYPE));
+					.getColumnIndexOrThrow(FileTransferLog.MIME_TYPE));
 			mFile = Uri.parse(cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FILE)));
 			String fileIcon = cursor.getString(cursor
 					.getColumnIndexOrThrow(FileTransferLog.FILEICON));
