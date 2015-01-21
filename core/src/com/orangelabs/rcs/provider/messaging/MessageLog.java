@@ -464,4 +464,9 @@ public class MessageLog implements IMessageLog {
 			throw e;
 		}
 	}
+
+	@Override
+	public String getChatMessageContent(String msgId) {
+		return getDataAsString(getMessageData(MessageData.KEY_CONTENT, msgId));
+	}
 }

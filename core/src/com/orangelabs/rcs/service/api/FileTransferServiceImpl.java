@@ -299,6 +299,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 				state, ReasonCode.UNSPECIFIED);
 	}
 
+	private void setFileTransferState(String fileTransferId, ContactId contact, int state) {
+		mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, state,
+				ReasonCode.UNSPECIFIED);
+		mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId, state,
+				ReasonCode.UNSPECIFIED);
+	}
+
 	/**
 	 * Add outgoing group file transfer to DB
 	 * 
@@ -364,6 +371,67 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 				}
 			}.start();
 			return oneToOneFileTransfer;
+
+		} catch (Exception e) {
+			/*
+			 * TODO: This is not correct implementation. It will be fixed
+			 * properly in CR037
+			 */
+			if (logger.isActivated()) {
+				logger.error("Unexpected error", e);
+			}
+			throw new ServerApiException(e);
+		}
+	}
+
+	/**
+	 * 1-1 file re-send operation initiated
+	 * 
+	 * @param contact
+	 * @param file
+	 * @param fileIcon
+	 * @param fileTransferId
+	 * @throws ServerApiException
+	 */
+	/* package private */void resendOneToOneFile(ContactId contact, MmContent file,
+			MmContent fileIcon, String fileTransferId) throws ServerApiException {
+		try {
+			if (!ServerApiUtils.isImsConnected()) {
+				/*
+				 * If the IMS is NOT connected at this time then re-queue
+				 * transfer.
+				 */
+				setFileTransferState(fileTransferId, contact, FileTransfer.State.QUEUED);
+				return;
+			}
+			if (!mImService.isFileTransferSessionAvailable()
+					|| mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
+				if (logger.isActivated()) {
+					logger.debug("The max number of file transfer sessions is achieved: re-queue the file transfer with fileTransferId "
+							.concat(fileTransferId));
+				}
+				setFileTransferState(fileTransferId, contact, FileTransfer.State.QUEUED);
+				return;
+			}
+			setFileTransferState(fileTransferId, contact, FileTransfer.State.INITIATING);
+			final FileSharingSession session = mImService.initiateFileTransferSession(
+					fileTransferId, contact, file, fileIcon);
+
+			FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
+					fileTransferId, contact, Direction.OUTGOING, contact.toString(), file.getUri(),
+					fileIcon != null ? fileIcon.getUri() : null, file.getName(),
+					file.getEncoding(), file.getSize(), mMessagingLog);
+			OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
+					fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
+					this);
+			session.addListener(oneToOneFileTransfer);
+			addFileTransfer(oneToOneFileTransfer);
+
+			new Thread() {
+				public void run() {
+					session.startSession();
+				}
+			}.start();
 
 		} catch (Exception e) {
 			/*

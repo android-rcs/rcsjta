@@ -465,4 +465,33 @@ public class FileTransfer {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
+
+	/**
+	 * Returns whether you can resend the transfer.
+	 * 
+	 * @return boolean
+	 * @throws RcsServiceException
+	 */
+	public boolean canResendTransfer() throws RcsServiceException {
+		try {
+			return mTransferInf.canResendTransfer();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Resend a file transfer which was previously failed. This only for 1-1
+	 * file transfer, an exception is thrown in case of a file transfer to
+	 * group.
+	 * 
+	 * @throws RcsServiceException
+	 */
+	public void resendTransfer() throws RcsServiceException {
+		try {
+			mTransferInf.resendTransfer();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
 }

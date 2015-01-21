@@ -28,6 +28,7 @@ import android.net.Uri;
 import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
+import com.gsma.services.rcs.ft.FileTransfer.State;
 import com.gsma.services.rcs.ft.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.ft.IFileTransfer;
 import com.orangelabs.rcs.core.content.MmContent;
@@ -38,6 +39,7 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferPersistedStorageAccessor;
+import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpTransferState;
 import com.orangelabs.rcs.provider.messaging.FileTransferStateAndReasonCode;
@@ -434,6 +436,68 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 		}
 
 		((HttpFileTransferSession)session).resumeFileTransfer();
+	}
+
+	/**
+	 * Returns whether you can resend the transfer.
+	 * 
+	 * @return boolean
+	 * @throws RcsServiceException
+	 */
+	public boolean canResendTransfer() {
+		int state = getState();
+		int reasonCode = getReasonCode();
+		/*
+		 * According to Blackbird PDD v3.0, "When a File Transfer is interrupted
+		 * by sender interaction (or fails), then ‘resend button’ shall be
+		 * offered to allow the user to re-send the file without selecting a new
+		 * receiver or selecting the file again."
+		 */
+		switch (state) {
+			case State.FAILED:
+				return true;
+			case State.ABORTED:
+				if (ReasonCode.ABORTED_BY_SYSTEM == reasonCode
+						|| ReasonCode.ABORTED_BY_USER == reasonCode) {
+					return true;
+				}
+				if (logger.isActivated()) {
+					logger.debug("Cannot resend transfer as it has been ABORTED_BY_REMOTE, fileTransferId "
+							.concat(mFileTransferId));
+				}
+				return false;
+			default:
+				if (logger.isActivated()) {
+					logger.debug(new StringBuilder("Cannot resend transfer with fileTransferId ")
+							.append(mFileTransferId).append(" as state=").append(state)
+							.append(" reasonCode=").append(reasonCode).toString());
+				}
+				return false;
+		}
+	}
+
+	/**
+	 * Resend a file transfer which was previously failed. This only for 1-1
+	 * file transfer, an exception is thrown in case of a file transfer to
+	 * group.
+	 */
+	public void resendTransfer() {
+		if (!canResendTransfer()) {
+			return;
+		}
+		try {
+			MmContent file = FileTransferUtils.createMmContent(getFile());
+			Uri fileIcon = getFileIcon();
+			MmContent fileIconContent = fileIcon != null ? FileTransferUtils
+					.createMmContent(fileIcon) : null;
+			mFileTransferService.resendOneToOneFile(getRemoteContact(), file, fileIconContent,
+					mFileTransferId);
+		} catch (ServerApiException e) {
+			if (logger.isActivated()) {
+				logger.error(new StringBuilder("Unable to resend file with fileTransferId ")
+						.append(mFileTransferId).append("due to ").append(e).toString());
+			}
+		}
 	}
 
 	/*------------------------------- SESSION EVENTS ----------------------------------*/

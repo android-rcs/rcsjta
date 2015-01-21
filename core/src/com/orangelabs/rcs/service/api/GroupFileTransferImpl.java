@@ -415,6 +415,31 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 		((HttpFileTransferSession)session).resumeFileTransfer();
 	}
 
+	/**
+	 * Returns whether you can resend the transfer.
+	 * 
+	 * @return boolean
+	 * @throws RcsServiceException
+	 */
+	public boolean canResendTransfer() {
+		/* Resend file transfer is supported only for one-to-one transfers */
+		return false;
+	}
+
+	/**
+	 * Resend a file transfer which was previously failed. This only for 1-1
+	 * file transfer, an exception is thrown in case of a file transfer to
+	 * group.
+	 */
+	public void resendTransfer() {
+		/*
+		 * TODO: Throw correct exception as part of CR037 implementation
+		 */
+		throw new IllegalStateException(
+				"Resend operation not supported for group file transfer with file transfer ID "
+						.concat(mFileTransferId));
+	}
+
 	/*------------------------------- SESSION EVENTS ----------------------------------*/
 
 	/**

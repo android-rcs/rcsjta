@@ -539,4 +539,9 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	public Cursor getCacheableChatMessageData(String msgId) {
 		return messageLog.getCacheableChatMessageData(msgId);
 	}
+
+	@Override
+	public String getChatMessageContent(String msgId) {
+		return messageLog.getChatMessageContent(msgId);
+	}
 }

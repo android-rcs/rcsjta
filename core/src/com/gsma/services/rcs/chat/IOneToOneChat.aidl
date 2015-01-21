@@ -18,4 +18,6 @@ interface IOneToOneChat {
 	IChatMessage sendMessage2(in Geoloc geoloc);
 
 	void openChat();
+
+	void resendMessage(in String msgId);
 }

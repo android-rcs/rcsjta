@@ -195,4 +195,12 @@ public interface IMessageLog {
 	 * @return Cursor
 	 */
 	public Cursor getCacheableChatMessageData(String msgId);
+
+	/**
+	 * Get chat message content
+	 * 
+	 * @param msgId
+	 * @return Content of chat message
+	 */
+	public String getChatMessageContent(String msgId);
 }

@@ -119,4 +119,18 @@ public class OneToOneChat {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
+
+	/**
+	 * Resend a message which previously failed.
+	 * 
+	 * @param msgId
+	 * @throws RcsServiceException
+	 */
+	public void resendMessage(String msgId) throws RcsServiceException {
+		try {
+			mOneToOneChatInf.resendMessage(msgId);
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
 }
