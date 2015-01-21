@@ -1,5 +1,6 @@
 package com.gsma.services.rcs.chat;
 
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.chat.IGroupChatListener;
 import com.gsma.services.rcs.chat.IChatMessage;
 import com.gsma.services.rcs.Geoloc;

@@ -71,7 +71,7 @@ public class ProvisioningParser {
     private String mContent;
 
     private RcsSettings mRcsSettings;
-    
+
     private boolean mFirst = false;
 
     /**

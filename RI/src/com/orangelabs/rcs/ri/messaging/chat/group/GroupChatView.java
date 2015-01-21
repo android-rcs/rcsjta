@@ -211,14 +211,14 @@ public class GroupChatView extends ChatView {
 			// TODO CR031 enumerated types
 			if (state > RiApplication.GC_STATES.length) {
 				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "onStateChanged unhandled status=" + state);
+					Log.e(LOGTAG, "onStateChanged unhandled status=".concat(String.valueOf(state)));
 				}
 				return;
 				
 			}
 			if (reasonCode > RiApplication.GC_REASON_CODES.length) {
 				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "onStateChanged unhandled reason=" + reasonCode);
+					Log.e(LOGTAG, "onStateChanged unhandled reason=".concat(String.valueOf(reasonCode)));
 				}
 				return;
 				
