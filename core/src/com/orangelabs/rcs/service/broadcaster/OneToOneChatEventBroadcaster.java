@@ -47,16 +47,16 @@ public class OneToOneChatEventBroadcaster implements IOneToOneChatEventBroadcast
 		mOneToOneChatListeners.unregister(listener);
 	}
 
-	public void broadcastMessageStatusChanged(ContactId contact, String msgId, int status,
-			int reasonCode) {
+	public void broadcastMessageStatusChanged(ContactId contact, String mimeType, String msgId,
+			int status, int reasonCode) {
 		final int N = mOneToOneChatListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mOneToOneChatListeners.getBroadcastItem(i).onMessageStatusChanged(contact, msgId,
-						status, reasonCode);
+				mOneToOneChatListeners.getBroadcastItem(i).onMessageStatusChanged(contact,
+						mimeType, msgId, status, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
-					logger.error("Can't notify listener", e);
+					logger.error("Can't notify listener.", e);
 				}
 			}
 		}
@@ -77,10 +77,11 @@ public class OneToOneChatEventBroadcaster implements IOneToOneChatEventBroadcast
 		mOneToOneChatListeners.finishBroadcast();
 	}
 
-	public void broadcastMessageReceived(String msgId) {
+	public void broadcastMessageReceived(String mimeType, String msgId) {
 		Intent newOneToOneMessage = new Intent(OneToOneChatIntent.ACTION_NEW_ONE_TO_ONE_CHAT_MESSAGE);
 		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newOneToOneMessage);
 		IntentUtils.tryToSetReceiverForegroundFlag(newOneToOneMessage);
+		newOneToOneMessage.putExtra(OneToOneChatIntent.EXTRA_MIME_TYPE, mimeType);
 		newOneToOneMessage.putExtra(OneToOneChatIntent.EXTRA_MESSAGE_ID, msgId);
 		AndroidFactory.getApplicationContext().sendBroadcast(newOneToOneMessage);
 	}

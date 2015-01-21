@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat.standfw;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Vector;
@@ -46,10 +48,10 @@ import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatError;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
-import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -69,18 +71,18 @@ public class TerminatingStoreAndForwardMsgSession extends OneToOneChatSession im
      * Constructor
      * 
 	 * @param parent IMS service
-	 * @param invite Initial INVITE request
-	 * @param contact the remote ContactId
+     * @param invite Initial INVITE request
+     * @param contact the remote ContactId
+     * @param rcsSettings RCS settings
+     * @param messagingLog Messaging log
 	 */
-	public TerminatingStoreAndForwardMsgSession(ImsService parent, SipRequest invite, ContactId contact) {
-		super(parent, contact, PhoneUtils.formatContactIdToUri(contact));
+	public TerminatingStoreAndForwardMsgSession(ImsService parent, SipRequest invite,
+			ContactId contact, RcsSettings rcsSettings, MessagingLog messagingLog) {
+		super(parent, contact, PhoneUtils.formatContactIdToUri(contact), ChatUtils
+				.getFirstMessage(invite), rcsSettings, messagingLog);
 
 		// Set feature tags
 		setFeatureTags(ChatUtils.getSupportedFeatureTagsForChat());
-
-		// Set first message
-    	InstantMessage firstMsg = ChatUtils.getFirstMessage(invite);
-		setFirstMesssage(firstMsg);
 		
 		// Create dialog path
 		createTerminatingDialogPath(invite);
@@ -215,7 +217,7 @@ public class TerminatingStoreAndForwardMsgSession extends OneToOneChatSession im
 
         	// Parse the remote SDP part
 			String remoteSdp = getDialogPath().getInvite().getSdpContent();
-        	SdpParser parser = new SdpParser(remoteSdp.getBytes());
+        	SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));
     		Vector<MediaDescription> media = parser.getMediaDescriptions();
 			MediaDescription mediaDesc = media.elementAt(0);
 			MediaAttribute attr1 = mediaDesc.getMediaAttribute("path");

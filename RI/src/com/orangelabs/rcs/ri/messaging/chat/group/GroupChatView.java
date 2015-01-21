@@ -149,8 +149,18 @@ public class GroupChatView extends ChatView {
 	 */
 	private GroupChatListener mListener = new GroupChatListener() {
 
+		@Override
+		public void onMessageStatusChanged(String chatId, String mimeType, String msgId, int status, int reasonCode) {
+			if (LogUtils.isActive) {
+				Log.w(LOGTAG, new StringBuilder("onMessageStatusChanged chatId=").append(chatId)
+						.append(" mime-type=").append(mimeType).append(" msgId=").append(msgId)
+						.append(" status=").append(status).append(" reason=").append(reasonCode)
+						.toString());
+			}
+		}
+
 		// Callback called when an Is-composing event has been received
-		public void onComposingEvent(final String chatId, final ContactId contact, final boolean status) {
+		public void onComposingEvent( String chatId, ContactId contact, boolean status) {
 			// Discard event if not for current chatId
 			if (!mChatId.equals(chatId)) {
 				return;
@@ -160,7 +170,7 @@ public class GroupChatView extends ChatView {
 		}
 
 		@Override
-		public void onParticipantInfoChanged(String chatId, final ParticipantInfo participant) {
+		public void onParticipantInfoChanged(String chatId, ParticipantInfo participant) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG,
 						new StringBuilder("onParticipantInfoChanged chatId=")
@@ -172,7 +182,8 @@ public class GroupChatView extends ChatView {
 		}
 
 		@Override
-		public void onMessageGroupDeliveryInfoChanged(String chatId, ContactId contact, final String msgId, int status, int reasonCode) {
+		public void onMessageGroupDeliveryInfoChanged(String chatId, ContactId contact,
+				String mimeType, String msgId, int status, int reasonCode) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG,
 						new StringBuilder(
@@ -185,6 +196,9 @@ public class GroupChatView extends ChatView {
 			}
 		}
 
+		/* (non-Javadoc)
+		 * @see com.gsma.services.rcs.chat.GroupChatListener#onStateChanged(java.lang.String, int, int)
+		 */
 		@Override
 		public void onStateChanged(String chatId, final int state, final int reasonCode) {
 			if (LogUtils.isActive) {
@@ -247,16 +261,6 @@ public class GroupChatView extends ChatView {
 			});
 		};
 
-		@Override
-		public void onMessageStatusChanged(String chatId, final String msgId, int status, int reasonCode) {
-			if (LogUtils.isActive) {
-				Log.w(LOGTAG, new StringBuilder(
-						"onMessageStatusChanged chatId=").append(chatId)
-						.append(" msgId=").append(msgId).append(" status=")
-						.append(status).append(" reason=").append(reasonCode)
-						.toString());
-			}
-		}
 	};
 
 	@Override
@@ -387,7 +391,7 @@ public class GroupChatView extends ChatView {
 				mGroupChat = mCnxManager.getChatApi().getGroupChat(mChatId);
 				if (mGroupChat == null) {
 					if (LogUtils.isActive) {
-						Log.e(LOGTAG, "processIntent session not found for chatId=" + mChatId);
+						Log.e(LOGTAG, "processIntent session not found for chatId=".concat(mChatId));
 					}
 					Utils.showMessageAndExit(this, getString(R.string.label_session_not_found), exitOnce);
 					return false;

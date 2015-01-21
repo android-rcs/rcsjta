@@ -172,7 +172,7 @@ public class GroupChatPersistedStorageAccessor {
 		mMessagingLog.addGroupChatEvent(mChatId,  contact,  status);
 	}
 
-	public void addGroupChatMessage(InstantMessage msg, int direction, int status, int reasonCode) {
+	public void addGroupChatMessage(ChatMessage msg, int direction, int status, int reasonCode) {
 		mMessagingLog.addGroupChatMessage(mChatId, msg, direction, status, reasonCode);
 	}
 

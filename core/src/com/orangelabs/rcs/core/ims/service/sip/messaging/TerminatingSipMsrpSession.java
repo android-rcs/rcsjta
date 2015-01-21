@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.sip.messaging;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Vector;
@@ -150,7 +152,7 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
 			
         	// Parse the remote SDP part
 			String remoteSdp = getDialogPath().getInvite().getSdpContent();
-        	SdpParser parser = new SdpParser(remoteSdp.getBytes());
+			SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));
     		Vector<MediaDescription> media = parser.getMediaDescriptions();
 			MediaDescription mediaDesc = media.elementAt(0);
 			MediaAttribute attr1 = mediaDesc.getMediaAttribute("path");

@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +15,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service.presence;
+
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 
 import java.io.ByteArrayInputStream;
 import java.util.Vector;
@@ -45,7 +51,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Subscribe manager for presence event
- * 
+ *
  * @author jexa7410
  */
 public class PresenceSubscribeManager extends SubscribeManager {
@@ -56,7 +62,7 @@ public class PresenceSubscribeManager extends SubscribeManager {
 
     /**
      * Constructor
-     * 
+     *
      * @param parent IMS module
      */
     public PresenceSubscribeManager(ImsModule parent) {
@@ -65,16 +71,16 @@ public class PresenceSubscribeManager extends SubscribeManager {
 
     /**
      * Returns the presentity
-     * 
+     *
      * @return Presentity
      */
     public String getPresentity() {
     	return ImsModule.IMS_USER_PROFILE.getPublicUri()+";pres-list=rcs";
-    }    
-    
+    }
+
     /**
      * Create a SUBSCRIBE request
-     * 
+     *
 	 * @param dialog SIP dialog path
 	 * @param expirePeriod Expiration period
 	 * @return SIP request
@@ -98,18 +104,18 @@ public class PresenceSubscribeManager extends SubscribeManager {
 
     /**
      * Receive a notification
-     * 
+     *
      * @param notify Received notify
      */
     public void receiveNotification(SipRequest notify) {
     	// Check notification
     	if (!isNotifyForThisSubscriber(notify)) {
     		return;
-    	}    	
-    	
+    	}
+
 		if (logger.isActivated()) {
 			logger.debug("New presence notification received");
-		}    	
+		}
 
 		// Parse XML part
 	    String content = notify.getContent();
@@ -123,7 +129,8 @@ public class PresenceSubscribeManager extends SubscribeManager {
 			    	if (rlmiPart != null) {
     					try {
 	    	    			// Parse RLMI part
-	    					InputSource rlmiInput = new InputSource(new ByteArrayInputStream(rlmiPart.getBytes()));
+	    					InputSource rlmiInput = new InputSource(new ByteArrayInputStream(
+	    							rlmiPart.getBytes(UTF8)));
 	    					RlmiParser rlmiParser = new RlmiParser(rlmiInput);
 	    					RlmiDocument rlmiInfo = rlmiParser.getResourceInfo();
 	    					Vector<ResourceInstance> list = rlmiInfo.getResourceList();
@@ -132,14 +139,14 @@ public class PresenceSubscribeManager extends SubscribeManager {
 	    						ContactId contact = ContactUtils.createContactId(res.getUri());
 	    						String state = res.getState();
 	    						String reason = res.getReason();
-	    						
+
 	    						if ((state != null) && (reason != null)) {
 	    							if (state.equalsIgnoreCase("terminated") && reason.equalsIgnoreCase("rejected")) {
 	    								// It's a "terminated" event with status "rejected" the contact
 	    								// should be removed from the "rcs" list
 	    								getImsModule().getPresenceService().getXdmManager().removeContactFromGrantedList(contact);
-	    							}				
-	    							
+	    							}
+
 	    							// Notify listener
 	    					    	getImsModule().getCore().getListener().handlePresenceSharingNotification(
 	    					    			contact, state, reason);
@@ -152,11 +159,12 @@ public class PresenceSubscribeManager extends SubscribeManager {
     			    	}
 			    	}
 
-			    	// PIDF 
+			    	// PIDF
 			    	String pidfPart = multi.getPart("application/pidf+xml");
 					try {
     	    			// Parse PIDF part
-						InputSource pidfInput = new InputSource(new ByteArrayInputStream(pidfPart.getBytes()));
+						InputSource pidfInput = new InputSource(new ByteArrayInputStream(
+								pidfPart.getBytes(UTF8)));
     					PidfParser pidfParser = new PidfParser(pidfInput);
     					PidfDocument presenceInfo = pidfParser.getPresence();
 
@@ -174,7 +182,7 @@ public class PresenceSubscribeManager extends SubscribeManager {
 	    			logger.error("Can't parse presence notification", e);
 	    		}
 	    	}
-	    	
+
 			// Check subscription state
 	    	SubscriptionStateHeader stateHeader = (SubscriptionStateHeader)notify.getHeader(SubscriptionStateHeader.NAME);
 	    	if ((stateHeader != null) && stateHeader.getState().equalsIgnoreCase("terminated")) {
@@ -184,5 +192,5 @@ public class PresenceSubscribeManager extends SubscribeManager {
 				terminatedByServer();
 			}
 		}
-    }   
+    }
 }

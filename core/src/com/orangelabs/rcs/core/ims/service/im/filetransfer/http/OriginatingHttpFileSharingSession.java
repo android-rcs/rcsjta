@@ -21,6 +21,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.CoreException;
@@ -28,9 +30,8 @@ import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
-import com.orangelabs.rcs.core.ims.service.im.chat.ChatSession;
+import com.orangelabs.rcs.core.ims.service.im.chat.ChatMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
-import com.orangelabs.rcs.core.ims.service.im.chat.FileTransferMessage;
 import com.orangelabs.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
@@ -38,9 +39,7 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
-import com.orangelabs.rcs.service.api.ServerApiException;
 import com.orangelabs.rcs.utils.IdGenerator;
-import com.orangelabs.rcs.utils.MimeManager;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -67,7 +66,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param fileTransferId
 	 *            File transfer Id
 	 * @param parent
@@ -105,7 +104,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	    	if (logger.isActivated()) {
 	    		logger.info("Initiate a new HTTP file transfer session as originating");
 	    	}
-	    	// Upload the file to the HTTP server 
+	    	// Upload the file to the HTTP server
             byte[] result = uploadManager.uploadFile();
             sendResultToContact(result);
         } catch(Exception e) {
@@ -123,10 +122,11 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
         	return;
         }
 
-        if ((result != null) && (FileTransferUtils.parseFileTransferHttpDocument(result) != null)) {
-        	String fileInfo = new String(result);
+        if (result != null && FileTransferUtils.parseFileTransferHttpDocument(result) != null) {
+        	String fileInfo = new String(result, UTF8);
             if (logger.isActivated()) {
-                logger.debug("Upload done with success: " + fileInfo);
+                logger.debug(new StringBuilder("Upload done with success: ").append(fileInfo)
+                        .append(".").toString());
             }
 
             OneToOneChatSession chatSession = mCore.getImService()
@@ -135,7 +135,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
             String msgId = getFileTransferId();
             if (chatSession != null) {
                 if (logger.isActivated()) {
-                    logger.debug("Send file transfer info via an existing chat session");
+                    logger.debug("Send file transfer info via an existing chat session.");
                 }
                 if (chatSession.isMediaEstablished()) {
                     setChatSessionID(chatSession.getSessionID());
@@ -147,11 +147,12 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 				String content = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE);
 				chatSession.sendDataChunks(IdGenerator.generateMessageID(), content, mime, MsrpSession.TypeMsrpChunk.HttpFileSharing);
 			} else {
-                if (logger.isActivated()) {
-                    logger.debug("Send file transfer info via a new chat session");
-                }
-                FileTransferMessage firstMsg = ChatUtils.createFileTransferMessage(getRemoteContact(), fileInfo, false, msgId);
-                try {
+				if (logger.isActivated()) {
+					logger.debug("Send file transfer info via a new chat session.");
+				}
+				ChatMessage firstMsg = ChatUtils.createFileTransferMessage(getRemoteContact(),
+						fileInfo, false, msgId);
+				try {
 					chatSession = mCore.getImService().initiateOneToOneChatSession(getRemoteContact(), firstMsg);
 				} catch (CoreException e) {
 					if (logger.isActivated()) {
@@ -188,12 +189,12 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 	public void handleError(ImsServiceError error) {
 		super.handleError(error);
 	}
-	
+
 	@Override
 	public void handleFileTransfered() {
 		super.handleFileTransfered();
 	}
-	
+
 	/**
      * Posts an interrupt request to this Thread
      */

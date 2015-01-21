@@ -47,7 +47,7 @@ public class GeolocSharingEventBroadcaster implements IGeolocSharingEventBroadca
 		mGeolocSharingListeners.unregister(listener);
 	}
 
-	public void broadcastGeolocSharingStateChanged(ContactId contact, String sharingId, int state, int reasonCode) {
+	public void broadcastStateChanged(ContactId contact, String sharingId, int state, int reasonCode) {
 		final int N = mGeolocSharingListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {

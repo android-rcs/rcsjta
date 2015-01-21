@@ -22,6 +22,9 @@
 
 package com.orangelabs.rcs.core.ims.service.richcall;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.gsh.GeolocSharing;
@@ -39,7 +42,6 @@ import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
-import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.OriginatingGeolocTransferSession;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.TerminatingGeolocTransferSession;
@@ -118,7 +120,7 @@ public class RichcallService extends ImsService {
 	private void handleVideoSharingInvitationRejected(SipRequest invite, int reasonCode) {
 		ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
 		VideoContent content = ContentManager.createLiveVideoContentFromSdp(invite.getSdpContent()
-				.getBytes());
+				.getBytes(UTF8));
 		getImsModule().getCore().getListener()
 				.handleVideoSharingInvitationRejected(contact, content, reasonCode);
 	}
@@ -370,20 +372,20 @@ public class RichcallService extends ImsService {
 
 	/**
      * Is call connected with a given contact
-     * 
+     *
      * @param contact Contact Id
      * @return Boolean
      */
 	public boolean isCallConnectedWith(ContactId contact) {
 		boolean csCall = (getImsModule() != null) &&
 				(getImsModule().getCallManager() != null) &&
-					getImsModule().getCallManager().isCallConnectedWith(contact); 
+					getImsModule().getCallManager().isCallConnectedWith(contact);
 		boolean ipCall = (getImsModule() != null) &&
-				(getImsModule().getIPCallService() != null) && 
+				(getImsModule().getIPCallService() != null) &&
 					getImsModule().getIPCallService().isCallConnectedWith(contact);
 		return (csCall || ipCall);
-	}	    
-    
+	}
+
     /**
      * Initiate an image sharing session
      *
@@ -677,20 +679,19 @@ public class RichcallService extends ImsService {
      *
      * @param contact Remote contact
      * @param content Content to be shared
-     * @param geoloc Geoloc info
-     * @return CSh session
+     * @param geoloc Geolocation
+     * @return GeolocTransferSession
      * @throws CoreException
      */
-	public GeolocTransferSession initiateGeolocSharingSession(ContactId contact, MmContent content, GeolocPush geoloc)
+	public GeolocTransferSession initiateGeolocSharingSession(ContactId contact, MmContent content, Geoloc geoloc)
 			throws CoreException {
 		if (logger.isActivated()) {
-			logger.info("Initiate geoloc sharing session with contact " + contact);
+			logger.info(new StringBuilder("Initiate geoloc sharing session with contact ")
+					.append(contact).append(".").toString());
 		}
-
-		// Test if call is established
 		if (!isCallConnectedWith(contact)) {
 			if (logger.isActivated()) {
-				logger.debug("Rich call not established: cancel the initiation");
+				logger.debug("Rich call not established: cancel the initiation.");
 			}
 			/*
 			 * TODO : Proper exception handling will be added here as part of
@@ -707,7 +708,7 @@ public class RichcallService extends ImsService {
 
 	/**
 	 * Receive a geoloc sharing invitation
-	 * 
+	 *
 	 * @param invite Initial invite
 	 */
 	public void receiveGeolocSharingInvitation(SipRequest invite) {
@@ -788,26 +789,26 @@ public class RichcallService extends ImsService {
 		}
 		abortAllSessions(ImsServiceSession.TERMINATION_BY_SYSTEM);
     }
-	
+
 	/**
 	 * Is the current session an originating one
-	 * 
+	 *
 	 * @param session
 	 * @return true if session is an originating content sharing session (image or video)
 	 */
 	private boolean isSessionOriginating(ContentSharingSession session){
-		return (session instanceof OriginatingImageTransferSession 
+		return (session instanceof OriginatingImageTransferSession
 				|| session instanceof OriginatingVideoStreamingSession);
 	}
-	
+
 	/**
 	 * Is the current session a terminating one
-	 * 
+	 *
 	 * @param session
 	 * @return true if session is an terminating content sharing session (image or video)
 	 */
 	private boolean isSessionTerminating(ContentSharingSession session){
-		return (session instanceof TerminatingImageTransferSession 
+		return (session instanceof TerminatingImageTransferSession
 				|| session instanceof TerminatingVideoStreamingSession);
 	}
 }

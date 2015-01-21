@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +15,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service.im.chat.cpim;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 
-import com.orangelabs.rcs.utils.StringUtils;
-
 /**
  * CPIM parser (see RFC3862)
- * 
+ *
  * @author jexa7410
  */
 public class CpimParser {
@@ -43,20 +47,20 @@ public class CpimParser {
 	 * CPIM message
 	 */
 	private CpimMessage cpim = null;
-	
+
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param data Input data
 	 * @throws Exception
 	 */
     public CpimParser(byte data[]) throws Exception {
-        parse(new String(data));
+        parse(new String(data, UTF8));
 	}
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param data Input data
 	 * @throws Exception
 	 */
@@ -66,16 +70,16 @@ public class CpimParser {
 
     /***
      * Returns the CPIM message
-     * 
+     *
      * @return CPIM message
      */
     public CpimMessage getCpimMessage() {
     	return cpim;
     }
-    
+
     /**
      * Parse message/CPIM document
-     * 
+     *
      * @param data Input data
      * @throws Exception
      */
@@ -85,10 +89,10 @@ public class CpimParser {
 	    To: Depressed Donkey <im:eeyore@100akerwood.com>
 	    DateTime: 2000-12-13T13:40:00-08:00
 	    Subject: the weather will be fine today
-	    
+
 	    Content-type: text/plain
 	    Content-ID: <1234567890@foo.com>
-	    
+
 	    Here is the text of my message.
 	    */
 		try {
@@ -96,19 +100,19 @@ public class CpimParser {
 			int begin = 0;
 			int end = data.indexOf(DOUBLE_CRLF, begin);
 			String block2 = data.substring(begin, end);
-			StringTokenizer lines = new StringTokenizer(block2, CRLF); 
+			StringTokenizer lines = new StringTokenizer(block2, CRLF);
 			Hashtable<String, String> headers = new Hashtable<String, String>();
 			while(lines.hasMoreTokens()) {
 				String token = lines.nextToken();
 				CpimHeader hd = CpimHeader.parseHeader(token);
 				headers.put(hd.getName(), hd.getValue());
 			}
-			
+
 			// Read the MIME-encapsulated content header
 			begin = end+4;
 			end = data.indexOf(DOUBLE_CRLF, begin);
 			String block3 = data.substring(begin, end);
-			lines = new StringTokenizer(block3, CRLF); 
+			lines = new StringTokenizer(block3, CRLF);
 			Hashtable<String, String> contentHeaders = new Hashtable<String, String>();
 			while(lines.hasMoreTokens()) {
 				String token = lines.nextToken();
@@ -119,9 +123,9 @@ public class CpimParser {
 			// Read the message content
 			begin = end+4;
 			String content = data.substring(begin);
-			
+
 			// Create the CPIM message
-			cpim = new CpimMessage(headers, contentHeaders, StringUtils.decodeUTF8(content));
+			cpim = new CpimMessage(headers, contentHeaders, content);
 		} catch(Exception e) {
 			throw new Exception("Bad CPIM message format");
 		}

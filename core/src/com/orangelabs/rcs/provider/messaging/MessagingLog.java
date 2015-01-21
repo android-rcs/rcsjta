@@ -30,7 +30,7 @@ import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
-import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
+import com.orangelabs.rcs.core.ims.service.im.chat.ChatMessage;
 import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResume;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
@@ -60,12 +60,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	private FileTransferLog fileTransferLog;
 
 	private GroupDeliveryInfoLog groupChatDeliveryInfoLog;
-
-	/**
-	 * Empty constructor : prevent caller from creating multiple instances
-	 */
-	private MessagingLog() {
-	}
 
 	/**
 	 * Create instance
@@ -182,46 +176,47 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 
 	/*
 	 * (non-Javadoc)
-	 * 
 	 * @see
-	 * com.orangelabs.rcs.provider.messaging.IMessageLog#addSpamMessage(com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage)
+	 * com.orangelabs.rcs.provider.messaging.IMessageLog#addOneToOneSpamMessage(
+	 * orangelabs.rcs.core.ims.service.im.chat.ChatMessage))
 	 */
 	@Override
-	public void addSpamMessage(InstantMessage msg) {
-		messageLog.addSpamMessage(msg);
+	public void addOneToOneSpamMessage(ChatMessage msg) {
+		messageLog.addOneToOneSpamMessage(msg);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.orangelabs.rcs.provider.messaging.IMessageLog#addIncomingOneToOneChatMessage(com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage))
+	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#
+	 * addIncomingOneToOneChatMessage
+	 * (com.orangelabs.rcs.core.ims.service.im.chat.ChatMessage, boolean)
 	 */
 	@Override
-	public void addIncomingOneToOneChatMessage(InstantMessage msg) {
-		messageLog.addIncomingOneToOneChatMessage(msg);
+	public void addIncomingOneToOneChatMessage(ChatMessage msg, boolean imdnDisplayedRequested) {
+		messageLog.addIncomingOneToOneChatMessage(msg, imdnDisplayedRequested);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.orangelabs.rcs.provider.messaging.IMessageLog#addOutgoingOneToOneChatMessage(com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage,
-	 * int,int)
+	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#
+	 * addOutgoingOneToOneChatMessage (com.orangelabs
+	 * .rcs.core.ims.service.im.chat.ChatMessage, int, int)
 	 */
 	@Override
-	public void addOutgoingOneToOneChatMessage(InstantMessage msg, int status, int reasonCode) {
+	public void addOutgoingOneToOneChatMessage(ChatMessage msg, int status, int reasonCode) {
 		messageLog.addOutgoingOneToOneChatMessage(msg, status, reasonCode);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IMessageLog#addGroupChatMessage(java.lang.String,
-	 * com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage, int, int, int)
+	 * @see
+	 * com.orangelabs.rcs.provider.messaging.IMessageLog#addGroupChatMessage
+	 * (java.lang.String,
+	 * com.orangelabs.rcs.core.ims.service.im.chat.ChatMessage, int, int, int)
 	 */
 	@Override
-	public void addGroupChatMessage(String chatId, InstantMessage msg, int direction, int status, int reasonCode) {
+	public void addGroupChatMessage(String chatId, ChatMessage msg,
+			int direction, int status, int reasonCode) {
 		messageLog.addGroupChatMessage(chatId, msg, direction, status, reasonCode);
 	}
 
@@ -518,6 +513,11 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	@Override
 	public int getMessageReasonCode(String msgId) {
 		return messageLog.getMessageReasonCode(msgId);
+	}
+
+	@Override
+	public String getMessageMimeType(String msgId) {
+		return messageLog.getMessageMimeType(msgId);
 	}
 
 	@Override

@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +15,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.protocol.msrp;
+
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,7 +33,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Chunks receiver
- * 
+ *
  * @author jexa7410
  */
 public class ChunkReceiver extends Thread {
@@ -35,12 +41,12 @@ public class ChunkReceiver extends Thread {
 	 * MSRP connection
 	 */
 	private MsrpConnection connection;
-	
+
 	/**
 	 * MSRP input stream
 	 */
 	private InputStream stream;
-	
+
 	/**
 	 * Termination flag
 	 */
@@ -58,7 +64,7 @@ public class ChunkReceiver extends Thread {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param connection MSRP connection
 	 * @param stream TCP input stream
 	 */
@@ -66,16 +72,16 @@ public class ChunkReceiver extends Thread {
 		this.connection = connection;
 		this.stream = stream;
 	}
-	
+
 	/**
 	 * Returns the MSRP connection
-	 * 
+	 *
 	 * @return MSRP connection
 	 */
 	public MsrpConnection getConnection() {
 		return connection;
 	}
-	
+
 	/**
 	 * Terminate the receiver
 	 */
@@ -88,7 +94,7 @@ public class ChunkReceiver extends Thread {
 			logger.debug("Receiver is terminated");
 		}
 	}
-	
+
 	/**
 	 * Background processing
 	 */
@@ -203,7 +209,7 @@ public class ChunkReceiver extends Thread {
 							}
 
 							if (MsrpConnection.MSRP_TRACE_ENABLED) {
-								trace.append(new String(data));
+								trace.append(new String(data, UTF8));
 								trace.append(MsrpConstants.NEW_LINE);
 							}
 						} else {
@@ -226,11 +232,11 @@ public class ChunkReceiver extends Thread {
 									buffer.append(dataline);
 								}
 							}
-							data = buffer.toString().getBytes();
+							data = buffer.toString().getBytes(UTF8);
 							totalSize = data.length;
 
 							if (MsrpConnection.MSRP_TRACE_ENABLED) {
-								trace.append(new String(data));
+								trace.append(new String(data, UTF8));
 								trace.append(MsrpConstants.NEW_LINE);
 								trace.append(end);
 								trace.append(continuationFlag);
@@ -320,7 +326,7 @@ public class ChunkReceiver extends Thread {
 
 	/**
 	 * Read line
-	 * 
+	 *
 	 * @return String
 	 * @throws IOException
 	 */
@@ -329,15 +335,15 @@ public class ChunkReceiver extends Thread {
 		int previous = -1;
 		int current = -1;
 		while((current = stream.read()) != -1) {
-			line.append((char)current);			
+			line.append((char)current);
 			if ((previous == MsrpConstants.CHAR_LF) && (current == MsrpConstants.CHAR_CR)) {
 				return line.delete(line.length()-2, line.length());
 			}
 			previous = current;
 		}
-		return line;			
+		return line;
 	}
-		
+
 	/**
 	 * Read chunked data
 	 *

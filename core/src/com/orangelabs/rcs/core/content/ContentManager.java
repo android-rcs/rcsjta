@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.content;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
@@ -305,7 +307,7 @@ public class ContentManager{
 	public static MmContent createMmContentFromSdp(SipRequest invite) {
 		try {
 			String remoteSdp = invite.getSdpContent();
-	    	SdpParser parser = new SdpParser(remoteSdp.getBytes());
+	    	SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));
 			Vector<MediaDescription> media = parser.getMediaDescriptions();
 			MediaDescription desc = media.elementAt(0);
 			MediaAttribute attr1 = desc.getMediaAttribute("file-selector");

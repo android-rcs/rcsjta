@@ -21,6 +21,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.chat.imdn;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.FeatureTags;
@@ -192,10 +194,10 @@ public class ImdnManager extends Thread {
 
 	        // Create MESSAGE request
         	if (logger.isActivated()) {
-        		logger.info("Send first MESSAGE");
+        		logger.info("Send first MESSAGE.");
         	}
 	        SipRequest msg = SipMessageFactory.createMessage(dialogPath,
-	        		FeatureTags.FEATURE_OMA_IM, CpimMessage.MIME_TYPE, cpim.getBytes());
+	        		FeatureTags.FEATURE_OMA_IM, CpimMessage.MIME_TYPE, cpim.getBytes(UTF8));
 	        
 	        // Send MESSAGE request
 	        SipTransactionContext ctx = imsService.getImsModule().getSipManager().sendSipMessageAndWait(msg);
@@ -215,10 +217,10 @@ public class ImdnManager extends Thread {
 
                 // Create a second MESSAGE request with the right token
                 if (logger.isActivated()) {
-                	logger.info("Send second MESSAGE");
+                	logger.info("Send second MESSAGE.");
                 }
     	        msg = SipMessageFactory.createMessage(dialogPath,
-    	        		FeatureTags.FEATURE_OMA_IM, CpimMessage.MIME_TYPE, cpim.getBytes());
+    	        		FeatureTags.FEATURE_OMA_IM, CpimMessage.MIME_TYPE, cpim.getBytes(UTF8));
     	        
     	        // Set the Authorization header
     	        authenticationAgent.setProxyAuthorizationHeader(msg);

@@ -18,8 +18,9 @@
 
 package com.orangelabs.rcs.core.ims.service.richcall.geoloc;
 
+import com.gsma.services.rcs.Geoloc;
+
 import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
-import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 
 /**
@@ -38,9 +39,9 @@ public interface GeolocTransferSessionListener extends ImsSessionListener  {
     /**
      * Content has been transfered
      * 
-     * @param geoloc Geoloc info
+     * @param geoloc Geolocation
      */
-    public void handleContentTransfered(GeolocPush geoloc);
+    public void handleContentTransfered(Geoloc geoloc);
     
     /**
      * Destination user agent received INVITE, and is alerting user of call

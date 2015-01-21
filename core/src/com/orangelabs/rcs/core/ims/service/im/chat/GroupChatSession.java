@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
@@ -29,16 +31,13 @@ import java.util.Set;
 import javax2.sip.header.ExtensionHeader;
 
 import com.gsma.services.rcs.RcsContactFormatException;
-import com.gsma.services.rcs.RcsCommon.Direction;
-import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
-import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
-import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
@@ -56,16 +55,16 @@ import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnUtils;
 import com.orangelabs.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.PhoneUtils;
-import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Abstract Group chat session
- * 
+ *
  * @author Jean-Marc AUFFRET
  * @author YPLO6403
  *
@@ -90,51 +89,53 @@ public abstract class GroupChatSession extends ChatSession {
 
     /**
 	 * Constructor for originating side
-	 * 
+	 *
 	 * @param parent IMS service
-	 * @param contact remote contact identifier
-	 * @param conferenceId Conference id
-	 * @param participants Set of invited participants
+     * @param contact remote contact identifier
+     * @param conferenceId Conference id
+     * @param participants Set of invited participants
+     * @param rcsSettings RCS settings
+     * @param messagingLog Messaging log
 	 */
-    public GroupChatSession(ImsService parent, ContactId contact, String conferenceId, Set<ParticipantInfo> participants) {
-		super(parent, contact, conferenceId, participants);
-		
-		conferenceSubscriber = new ConferenceEventSubscribeManager(this); 
-		
+	public GroupChatSession(ImsService parent, ContactId contact, String conferenceId,
+			Set<ParticipantInfo> participants, RcsSettings rcsSettings, MessagingLog messagingLog) {
+		super(parent, contact, conferenceId, participants, rcsSettings, messagingLog);
+
+		conferenceSubscriber = new ConferenceEventSubscribeManager(this);
+
 		// Set feature tags
         setFeatureTags(ChatUtils.getSupportedFeatureTagsForGroupChat());
-		
+
         // Set Accept-Contact header
         setAcceptContactTags(ChatUtils.getAcceptContactTagsForGroupChat());
 
-		// Set accept-types
-		String acceptTypes = CpimMessage.MIME_TYPE;	
+		String acceptTypes = CpimMessage.MIME_TYPE;
         setAcceptTypes(acceptTypes);
-				
-		// Set accept-wrapped-types
-		String wrappedTypes = InstantMessage.MIME_TYPE + " " + IsComposingInfo.MIME_TYPE;
-		if (RcsSettings.getInstance().isGeoLocationPushSupported()) {
-        	wrappedTypes += " " + GeolocInfoDocument.MIME_TYPE;
+
+		StringBuilder wrappedTypes = new StringBuilder(MimeType.TEXT_MESSAGE).append(" ")
+				.append(IsComposingInfo.MIME_TYPE);
+		if (rcsSettings.isGeoLocationPushSupported()) {
+        	wrappedTypes.append(" ").append(GeolocInfoDocument.MIME_TYPE);
         }
-        if (RcsSettings.getInstance().isFileTransferHttpSupported()) {
-        	wrappedTypes += " " + FileTransferHttpInfoDocument.MIME_TYPE;
-        }		
-        setWrappedTypes(wrappedTypes);
+        if (rcsSettings.isFileTransferHttpSupported()) {
+        	wrappedTypes.append(" ").append(FileTransferHttpInfoDocument.MIME_TYPE);
+        }
+        setWrappedTypes(wrappedTypes.toString());
 	}
 
     @Override
 	public boolean isGroupChat() {
 		return true;
 	}
-	
+
     @Override
     public Set<ParticipantInfo> getConnectedParticipants() {
 		return conferenceSubscriber.getParticipants();
 	}
-    
+
     /**
 	 * Get replaced session ID
-	 * 
+	 *
 	 * @return Session ID
 	 */
 	public String getReplacedSessionId() {
@@ -154,15 +155,15 @@ public abstract class GroupChatSession extends ChatSession {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Returns the conference event subscriber
-	 * 
+	 *
 	 * @return Subscribe manager
 	 */
 	public ConferenceEventSubscribeManager getConferenceEventSubscriber() {
 		return conferenceSubscriber;
-	}	
+	}
 
     /**
      * Close media session
@@ -174,17 +175,17 @@ public abstract class GroupChatSession extends ChatSession {
 
     /**
 	 * Terminate session
-	 *  
+	 *
 	 * @param reason Reason
 	 */
 	public void terminateSession(int reason) {
 		// Stop conference subscription
 		conferenceSubscriber.terminate();
-		
+
 		// Terminate session
 		super.terminateSession(reason);
-	}	
-	
+	}
+
 	/**
 	 * Request capabilities to contact
 	 * @param contact
@@ -202,51 +203,56 @@ public abstract class GroupChatSession extends ChatSession {
 	}
 
     /**
-     * Receive BYE request 
-     * 
+     * Receive BYE request
+     *
      * @param bye BYE request
      */
     public void receiveBye(SipRequest bye) {
         // Stop conference subscription
         conferenceSubscriber.terminate();
-        
+
         // Receive BYE request
         super.receiveBye(bye);
-        
+
         // Request capabilities if remote contact is valid
         requestContactCapabilities(getDialogPath().getRemoteParty());
     }
-    
+
     /**
-     * Receive CANCEL request 
-     * 
+     * Receive CANCEL request
+     *
      * @param cancel CANCEL request
      */
     public void receiveCancel(SipRequest cancel) {
         // Stop conference subscription
         conferenceSubscriber.terminate();
-        
+
         super.receiveCancel(cancel);
-        
-        // Request capabilities if remote contact is valid 
+
+        // Request capabilities if remote contact is valid
         requestContactCapabilities(getDialogPath().getRemoteParty());
 	}
 
+	/**
+	 * Send a text message
+	 * @param msg Chat message
+	 */
 	@Override
-	public void sendTextMessage(InstantMessage msg) {
-		boolean useImdn = getImdnManager().isImdnActivated()
-				&& !RcsSettings.getInstance().isAlbatrosRelease();
+	public void sendChatMessage(ChatMessage msg) {
 		String from = ImsModule.IMS_USER_PROFILE.getPublicAddress();
 		String to = ChatUtils.ANOMYNOUS_URI;
 		String msgId = msg.getMessageId();
-		String textMessage = msg.getTextMessage();
 		String networkContent;
+		String mimeType = msg.getMimeType();
+		boolean useImdn = getImdnManager().isImdnActivated()
+				&& !mRcsSettings.isAlbatrosRelease();
 		if (useImdn) {
 			networkContent = ChatUtils.buildCpimMessageWithDeliveredImdn(from, to, msgId,
-					StringUtils.encodeUTF8(textMessage), InstantMessage.MIME_TYPE);
+					msg.getContent(), mimeType);
+
 		} else {
 			networkContent = ChatUtils.buildCpimMessage(from, to,
-					StringUtils.encodeUTF8(textMessage), InstantMessage.MIME_TYPE);
+					msg.getContent(), mimeType);
 		}
 
 		Collection<ImsSessionListener> listeners = getListeners();
@@ -254,56 +260,25 @@ public abstract class GroupChatSession extends ChatSession {
 			((ChatSessionListener)listener).handleMessageSending(msg);
 		}
 
-		boolean result = sendDataChunks(IdGenerator.generateMessageID(), networkContent,
-				CpimMessage.MIME_TYPE, TypeMsrpChunk.TextMessage);
+		boolean sendOperationSucceeded = false;
+		if (ChatUtils.isGeolocType(mimeType)) {
+			sendOperationSucceeded = sendDataChunks(IdGenerator.generateMessageID(), networkContent,
+					CpimMessage.MIME_TYPE, TypeMsrpChunk.GeoLocation);
+		} else {
+			sendOperationSucceeded = sendDataChunks(IdGenerator.generateMessageID(), networkContent,
+					CpimMessage.MIME_TYPE, TypeMsrpChunk.TextMessage);
+		}
 
 		/* TODO:This will be redone with CR037 */
-		if (result) {
-			for (ImsSessionListener listener : listeners) {
-				((ChatSessionListener)listener).handleMessageSent(msgId);
+		if (sendOperationSucceeded) {
+			for (ImsSessionListener listener : getListeners()) {
+				((ChatSessionListener)listener).handleMessageSent(msgId,
+				        ChatUtils.networkMimeTypeToApiMimeType(mimeType));
 			}
-
 		} else {
-			for (ImsSessionListener listener : listeners) {
-				((ChatSessionListener)listener).handleMessageFailedSend(msgId);
-			}
-		}
-	}
-
-	@Override
-	public void sendGeolocMessage(GeolocMessage geolocMsg) {
-		String msgId = geolocMsg.getMessageId();
-		boolean useImdn = getImdnManager().isImdnActivated();
-		String from = ImsModule.IMS_USER_PROFILE.getPublicAddress();
-		String to = ChatUtils.ANOMYNOUS_URI;
-		String geoDoc = ChatUtils.buildGeolocDocument(geolocMsg.getGeoloc(),
-				ImsModule.IMS_USER_PROFILE.getPublicUri(), msgId);
-		String networkContent;
-		if (useImdn) {
-			networkContent = ChatUtils.buildCpimMessageWithDeliveredImdn(from, to, msgId, geoDoc,
-					GeolocInfoDocument.MIME_TYPE);
-		} else {
-			networkContent = ChatUtils.buildCpimMessage(from, to, geoDoc,
-					GeolocInfoDocument.MIME_TYPE);
-		}
-
-		Collection<ImsSessionListener> listeners = getListeners();
-		for (ImsSessionListener listener : listeners) {
-			((ChatSessionListener)listener).handleMessageSending(geolocMsg);
-		}
-
-		boolean result = sendDataChunks(IdGenerator.generateMessageID(), networkContent, CpimMessage.MIME_TYPE,
-				TypeMsrpChunk.GeoLocation);
-
-		/* TODO:This will be redone with CR037 */
-		if (result) {
-			for (ImsSessionListener listener : listeners) {
-				((ChatSessionListener)listener).handleMessageSent(msgId);
-			}
-
-		} else {
-			for (ImsSessionListener listener : listeners) {
-				((ChatSessionListener)listener).handleMessageFailedSend(msgId);
+			for (ImsSessionListener listener : getListeners()) {
+				((ChatSessionListener)listener).handleMessageFailedSend(msgId,
+				        ChatUtils.networkMimeTypeToApiMimeType(mimeType));
 			}
 		}
 	}
@@ -314,7 +289,7 @@ public abstract class GroupChatSession extends ChatSession {
 		String to = ChatUtils.ANOMYNOUS_URI;
 		String msgId = IdGenerator.generateMessageID();
 		String content = ChatUtils.buildCpimMessage(from, to, IsComposingInfo.buildIsComposingInfo(status), IsComposingInfo.MIME_TYPE);
-		sendDataChunks(msgId, content, CpimMessage.MIME_TYPE, TypeMsrpChunk.IsComposing);	
+		sendDataChunks(msgId, content, CpimMessage.MIME_TYPE, TypeMsrpChunk.IsComposing);
 	}
 
     @Override
@@ -323,7 +298,7 @@ public abstract class GroupChatSession extends ChatSession {
 		String to = (remote != null) ? remote.toString() : ChatUtils.ANOMYNOUS_URI;
 		sendMsrpMessageDeliveryStatus(null, to, msgId, status);
     }
-    
+
     @Override
     public void sendMsrpMessageDeliveryStatus(String fromUri, String toUri, String msgId, String status) {
 		// Do not perform Message Delivery Status in Albatros for group chat
@@ -344,7 +319,7 @@ public abstract class GroupChatSession extends ChatSession {
 
 	/**
 	 * Add a participant to the session
-	 * 
+	 *
 	 * @param participant Participant
 	 */
 	public void addParticipant(ContactId participant) {
@@ -352,12 +327,12 @@ public abstract class GroupChatSession extends ChatSession {
         	if (logger.isActivated()) {
         		logger.debug("Add one participant (" + participant + ") to the session");
         	}
-    		
+
     		// Re-use INVITE dialog path
     		SessionAuthenticationAgent authenticationAgent = getAuthenticationAgent();
-    		
-    		// Increment the Cseq number of the dialog path   
-            getDialogPath().incrementCseq();   
+
+    		// Increment the Cseq number of the dialog path
+            getDialogPath().incrementCseq();
 
             // Send REFER request
     		if (logger.isActivated()) {
@@ -366,7 +341,7 @@ public abstract class GroupChatSession extends ChatSession {
     		String contactUri = PhoneUtils.formatContactIdToUri(participant);
 	        SipRequest refer = SipMessageFactory.createRefer(getDialogPath(), contactUri, getSubject(), getContributionID());
     		SipTransactionContext ctx = getImsService().getImsModule().getSipManager().sendSubsequentRequest(getDialogPath(), refer);
-	
+
 	        // Analyze received message
             if (ctx.getStatusCode() == 407) {
                 // 407 response received
@@ -385,10 +360,10 @@ public abstract class GroupChatSession extends ChatSession {
                 	logger.info("Send second REFER");
                 }
     	        refer = SipMessageFactory.createRefer(getDialogPath(), contactUri, getSubject(), getContributionID());
-                
+
     	        // Set the Authorization header
     	        authenticationAgent.setProxyAuthorizationHeader(refer);
-                
+
                 // Send REFER request
         		ctx = getImsService().getImsModule().getSipManager().sendSubsequentRequest(getDialogPath(), refer);
 
@@ -398,7 +373,7 @@ public abstract class GroupChatSession extends ChatSession {
                 	if (logger.isActivated()) {
                 		logger.debug("200 OK response received");
                 	}
-                	
+
         			// Notify listeners
         	    	for(int i=0; i < getListeners().size(); i++) {
         	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantSuccessful(participant);
@@ -408,7 +383,7 @@ public abstract class GroupChatSession extends ChatSession {
                     if (logger.isActivated()) {
                     	logger.debug("REFER has failed (" + ctx.getStatusCode() + ")");
                     }
-                    
+
         			// Notify listeners
         	    	for(int i=0; i < getListeners().size(); i++) {
         	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantFailed(participant, ctx.getReasonPhrase());
@@ -420,7 +395,7 @@ public abstract class GroupChatSession extends ChatSession {
             	if (logger.isActivated()) {
             		logger.debug("200 OK response received");
             	}
-            	
+
     			// Notify listeners
     	    	for(int i=0; i < getListeners().size(); i++) {
     	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantSuccessful(participant);
@@ -430,7 +405,7 @@ public abstract class GroupChatSession extends ChatSession {
             	if (logger.isActivated()) {
             		logger.debug("No response received");
             	}
-            	
+
     			// Notify listeners
     	    	for(int i=0; i < getListeners().size(); i++) {
     	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantFailed(participant, ctx.getReasonPhrase());
@@ -440,17 +415,17 @@ public abstract class GroupChatSession extends ChatSession {
         	if (logger.isActivated()) {
         		logger.error("REFER request has failed", e);
         	}
-        	
+
 			// Notify listeners
 	    	for(int i=0; i < getListeners().size(); i++) {
 	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantFailed(participant, e.getMessage());
 	        }
         }
 	}
-	
+
 	/**
 	 * Add a set of participants to the session
-	 * 
+	 *
 	 * @param participants set of participants
 	 */
 	public void addParticipants(Set<ContactId> participants) {
@@ -459,24 +434,24 @@ public abstract class GroupChatSession extends ChatSession {
 				addParticipant(participants.iterator().next());
 				return;
 			}
-			
+
         	if (logger.isActivated()) {
         		logger.debug("Add " + participants.size()+ " participants to the session");
         	}
-    		
+
     		// Re-use INVITE dialog path
     		SessionAuthenticationAgent authenticationAgent = getAuthenticationAgent();
-    		
+
             // Increment the Cseq number of the dialog path
     		getDialogPath().incrementCseq();
-            
+
 	        // Send REFER request
     		if (logger.isActivated()) {
         		logger.debug("Send REFER");
         	}
 	        SipRequest refer = SipMessageFactory.createRefer(getDialogPath(), participants, getSubject(), getContributionID());
 	        SipTransactionContext ctx = getImsService().getImsModule().getSipManager().sendSubsequentRequest(getDialogPath(), refer);
-	
+
 	        // Analyze received message
             if (ctx.getStatusCode() == 407) {
                 // 407 response received
@@ -495,10 +470,10 @@ public abstract class GroupChatSession extends ChatSession {
                 	logger.info("Send second REFER");
                 }
     	        refer = SipMessageFactory.createRefer(getDialogPath(), participants, getSubject(), getContributionID());
-                
+
     	        // Set the Authorization header
     	        authenticationAgent.setProxyAuthorizationHeader(refer);
-                
+
                 // Send REFER request
     	        ctx = getImsService().getImsModule().getSipManager().sendSubsequentRequest(getDialogPath(), refer);
 
@@ -508,7 +483,7 @@ public abstract class GroupChatSession extends ChatSession {
                 	if (logger.isActivated()) {
                 		logger.debug("20x OK response received");
                 	}
-                	
+
                     // Notify listeners
                     for (ContactId participant : participants) {
                         for (int i = 0; i < getListeners().size(); i++) {
@@ -521,7 +496,7 @@ public abstract class GroupChatSession extends ChatSession {
                     if (logger.isActivated()) {
                     	logger.debug("REFER has failed (" + ctx.getStatusCode() + ")");
                     }
-                    
+
                     // Notify listeners
                     for (ContactId participant : participants) {
                         for (int i = 0; i < getListeners().size(); i++) {
@@ -536,7 +511,7 @@ public abstract class GroupChatSession extends ChatSession {
             	if (logger.isActivated()) {
             		logger.debug("20x OK response received");
             	}
-            	
+
                 // Notify listeners
                 for (ContactId participant : participants) {
                     for (int i = 0; i < getListeners().size(); i++) {
@@ -549,7 +524,7 @@ public abstract class GroupChatSession extends ChatSession {
             	if (logger.isActivated()) {
             		logger.debug("No response received");
             	}
-            	
+
                 // Notify listeners
                 for (ContactId participant : participants) {
                     for (int i = 0; i < getListeners().size(); i++) {
@@ -562,7 +537,7 @@ public abstract class GroupChatSession extends ChatSession {
         	if (logger.isActivated()) {
         		logger.error("REFER request has failed", e);
         	}
-        	
+
             // Notify listeners
             for (ContactId participant : participants) {
                 for (int i = 0; i < getListeners().size(); i++) {
@@ -572,7 +547,7 @@ public abstract class GroupChatSession extends ChatSession {
             }
         }
 	}
-	
+
 	/**
 	 * Reject the session invitation
 	 */
@@ -584,7 +559,7 @@ public abstract class GroupChatSession extends ChatSession {
      * Create an INVITE request
      *
      * @return the INVITE request
-     * @throws SipException 
+     * @throws SipException
      */
     public SipRequest createInvite() throws SipException {
         // Nothing to do in terminating side
@@ -592,7 +567,7 @@ public abstract class GroupChatSession extends ChatSession {
     }
 
     /**
-     * Handle 200 0K response 
+     * Handle 200 0K response
      *
      * @param resp 200 OK response
      */
@@ -602,7 +577,7 @@ public abstract class GroupChatSession extends ChatSession {
         // Subscribe to event package
         getConferenceEventSubscriber().subscribe();
     }
-    
+
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSession#msrpDataReceived(java.lang.String, byte[], java.lang.String)
      */
@@ -627,20 +602,23 @@ public abstract class GroupChatSession extends ChatSession {
 			// Is composing event
 			receiveIsComposing(getRemoteContact(), data);
 			return;
-		}
-		if (ChatUtils.isTextPlainType(mimeType)) {
-			// Text message
-			receiveText(getRemoteContact(), StringUtils.decodeUTF8(data), null, false, new Date(), null);
+
+		} else if (ChatUtils.isTextPlainType(mimeType)) {
+			ChatMessage msg = new ChatMessage(msgId, getRemoteContact(), new String(data,
+					UTF8), MimeType.TEXT_MESSAGE, new Date(),
+					null);
+			boolean imdnDisplayedRequested = false;
+			receive(msg, imdnDisplayedRequested);
 			return;
-		}
-		if (!ChatUtils.isMessageCpimType(mimeType)) {
+
+		} else if (!ChatUtils.isMessageCpimType(mimeType)) {
 			// Not supported content
 			if (logger.isActivated()) {
 				logger.debug("Not supported content " + mimeType + " in chat session");
 			}
 			return;
 		}
-			
+
 		// Receive a CPIM message
 		CpimParser cpimParser = null;
 		try {
@@ -699,8 +677,9 @@ public abstract class GroupChatSession extends ChatSession {
 		if (isFToHTTP) {
 			// File transfer over HTTP message
 			// Parse HTTP document
-			FileTransferHttpInfoDocument fileInfo = FileTransferUtils.parseFileTransferHttpDocument(cpimMsg.getMessageContent()
-					.getBytes());
+            FileTransferHttpInfoDocument fileInfo = FileTransferUtils
+                    .parseFileTransferHttpDocument(cpimMsg.getMessageContent().getBytes(
+                            UTF8));
 			if (fileInfo != null) {
 				receiveHttpFileTransfer(remoteId, pseudo, fileInfo, cpimMsgId);
 			} else {
@@ -710,12 +689,15 @@ public abstract class GroupChatSession extends ChatSession {
 			sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId, ImdnDocument.DELIVERY_STATUS_DELIVERED);
 		} else {
 			if (ChatUtils.isTextPlainType(contentType)) {
-				// Text message
-				receiveText(remoteId, StringUtils.decodeUTF8(cpimMsg.getMessageContent()), cpimMsgId, false, date, pseudo);
+				ChatMessage msg = new ChatMessage(cpimMsgId, remoteId, cpimMsg.getMessageContent(),
+						MimeType.TEXT_MESSAGE, date, pseudo);
+				boolean imdnDisplayedRequested = false;
+				receive(msg, imdnDisplayedRequested);
 			} else {
 				if (ChatUtils.isApplicationIsComposingType(contentType)) {
 					// Is composing event
-					receiveIsComposing(remoteId, cpimMsg.getMessageContent().getBytes());
+                    receiveIsComposing(remoteId,
+                            cpimMsg.getMessageContent().getBytes(UTF8));
 				} else {
 					if (ChatUtils.isMessageImdnType(contentType)) {
 						// Delivery report
@@ -734,9 +716,11 @@ public abstract class GroupChatSession extends ChatSession {
 						}
 					} else {
 						if (ChatUtils.isGeolocType(contentType)) {
-							// Geoloc message
-							receiveGeoloc(remoteId, StringUtils.decodeUTF8(cpimMsg.getMessageContent()), cpimMsgId, false, date,
-									pseudo);
+							ChatMessage msg = new ChatMessage(cpimMsgId, remoteId,
+									cpimMsg.getMessageContent(), GeolocInfoDocument.MIME_TYPE,
+									date, pseudo);
+							boolean imdnDisplayedRequested = false;
+							receive(msg, imdnDisplayedRequested);
 						}
 					}
 				}

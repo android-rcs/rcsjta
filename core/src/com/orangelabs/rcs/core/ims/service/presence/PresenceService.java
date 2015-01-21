@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.presence;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8_STR;
+
 import java.util.Set;
 
 import com.gsma.services.rcs.RcsContactFormatException;
@@ -47,7 +49,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Presence service
- * 
+ *
  * @author Jean-Marc AUFFRET
  */
 public class PresenceService extends ImsService implements AddressBookEventListener{
@@ -93,7 +95,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
     /**
      * Constructor
-     * 
+     *
      * @param parent IMS module
      * @param rcsSettings RcsSettings
      * @param contactsManager ContactsManager
@@ -153,7 +155,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 			}
 			xdm.addContactToGrantedList(me);
 		}
-		
+
 		// It may be necessary to initiate the address book first launch or account check procedure
         if (StartService.getNewUserAccount(AndroidFactory.getApplicationContext())) {
 			Set<ContactId> blockedContacts = xdm.getBlockedContacts();
@@ -209,7 +211,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * the application or when the user account changed <br>
      * We create a new contact with the adequate state for each RCS number in
      * the XDM lists that is not already existing on the phone
-     * 
+     *
      * @param list of granted contacts
      * @param list of blocked contacts
      */
@@ -363,7 +365,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
 	/**
      * Is permanent state procedure
-     * 
+     *
      * @return Boolean
      */
 	public boolean isPermanentState() {
@@ -372,7 +374,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
 	/**
      * Set the presence info
-     * 
+     *
      * @param info Presence info
      */
 	public void setPresenceInfo(PresenceInfo info) {
@@ -381,7 +383,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
 	/**
      * Returns the presence info
-     * 
+     *
      * @return Presence info
      */
 	public PresenceInfo getPresenceInfo() {
@@ -390,7 +392,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
 	/**
      * Returns the publish manager
-     * 
+     *
      * @return Publish manager
      */
     public PublishManager getPublishManager() {
@@ -399,7 +401,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
 	/**
      * Returns the watcher-info subscribe manager
-     * 
+     *
      * @return Subscribe manager
      */
 	public SubscribeManager getWatcherInfoSubscriber() {
@@ -408,7 +410,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
     /**
      * Returns the presence subscribe manager
-     * 
+     *
      * @return Subscribe manager
      */
 	public SubscribeManager getPresenceSubscriber() {
@@ -417,7 +419,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
     /**
      * Returns the XDM manager
-     * 
+     *
      * @return XDM manager
      */
     public XdmManager getXdmManager() {
@@ -426,7 +428,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
 	/**
      * Build boolean status value
-     * 
+     *
      * @param state Boolean state
      * @return String
      */
@@ -440,7 +442,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
     /**
      * Build capabilities document
-     * 
+     *
      * @param timestamp Timestamp
      * @param capabilities Capabilities
      * @return Document
@@ -496,7 +498,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
     /**
      * Build geoloc document
-     * 
+     *
      * @param timestamp Timestamp
      * @param geolocInfo Geoloc info
      * @return Document
@@ -523,58 +525,64 @@ public class PresenceService extends ImsService implements AddressBookEventListe
     	return document;
     }
 
-    /**
-     * Build person info document
-     *
-     * @param info Presence info
-     * @return Document
-     */
-    private String buildPersonInfo(PresenceInfo info) {
-        String document = "  <op:overriding-willingness>" + SipUtils.CRLF +
-			    "    <op:basic>" + info.getPresenceStatus() + "</op:basic>" + SipUtils.CRLF +
-			    "  </op:overriding-willingness>" + SipUtils.CRLF;
+	/**
+	 * Build person info document
+	 *
+	 * @param info Presence info
+	 * @return Document
+	 */
+	private String buildPersonInfo(PresenceInfo info) {
+		StringBuilder document = new StringBuilder("  <op:overriding-willingness>")
+				.append(SipUtils.CRLF).append("    <op:basic>").append(info.getPresenceStatus())
+				.append("</op:basic>").append(SipUtils.CRLF)
+				.append("  </op:overriding-willingness>").append(SipUtils.CRLF);
 
-    	FavoriteLink favoriteLink = info.getFavoriteLink();
-    	if ((favoriteLink != null) && (favoriteLink.getLink() != null)) {
-    		document += "  <ci:homepage>" + StringUtils.encodeUTF8(StringUtils.encodeXML(favoriteLink.getLink())) + "</ci:homepage>" + SipUtils.CRLF;
-    	}
+		FavoriteLink favoriteLink = info.getFavoriteLink();
+		if ((favoriteLink != null) && (favoriteLink.getLink() != null)) {
+			document.append("  <ci:homepage>")
+					.append(StringUtils.encodeXML(favoriteLink.getLink())).append("</ci:homepage>")
+					.append(SipUtils.CRLF);
+		}
 
-    	PhotoIcon photoIcon = info.getPhotoIcon();
-    	if ((photoIcon != null) && (photoIcon.getEtag() != null)) {
-    		document +=
-    			"  <rpid:status-icon opd:etag=\"" + photoIcon.getEtag() +
-    			"\" opd:fsize=\"" + photoIcon.getSize() +
-    			"\" opd:contenttype=\"" + photoIcon.getType() +
-    			"\" opd:resolution=\"" + photoIcon.getResolution() + "\">" + xdm.getEndUserPhotoIconUrl() +
-    			"</rpid:status-icon>" + SipUtils.CRLF;
-    	}
+		PhotoIcon photoIcon = info.getPhotoIcon();
+		String eTag = photoIcon.getEtag();
+		if ((photoIcon != null) && (eTag != null)) {
+			document.append("  <rpid:status-icon opd:etag=\"").append(eTag)
+					.append("\" opd:fsize=\"").append(photoIcon.getSize())
+					.append("\" opd:contenttype=\"").append(photoIcon.getType())
+					.append("\" opd:resolution=\"").append(photoIcon.getResolution()).append("\">")
+					.append(xdm.getEndUserPhotoIconUrl()).append("</rpid:status-icon>")
+					.append(SipUtils.CRLF);
+		}
 
-        String freetext = info.getFreetext();
-    	if (freetext != null){
-    		document += "  <pdm:note>" + StringUtils.encodeUTF8(StringUtils.encodeXML(freetext)) + "</pdm:note>" + SipUtils.CRLF;
-    	}
+		String freetext = info.getFreetext();
+		if (freetext != null) {
+			document.append("  <pdm:note>").append(StringUtils.encodeXML(freetext))
+					.append("</pdm:note>").append(SipUtils.CRLF);
+		}
 
-    	return document;
-    }
+		return document.toString();
+	}
 
-    /**
-     * Build presence info document (RCS 1.0)
-     * 
-     * @param info Presence info
-     * @return Document
-     */
-    private String buildPresenceInfoDocument(PresenceInfo info) {
-    	String document= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + SipUtils.CRLF +
-    		"<presence xmlns=\"urn:ietf:params:xml:ns:pidf\"" +
-    		" xmlns:op=\"urn:oma:xml:prs:pidf:oma-pres\"" +
-    		" xmlns:opd=\"urn:oma:xml:pde:pidf:ext\"" +
-    		" xmlns:pdm=\"urn:ietf:params:xml:ns:pidf:data-model\"" +
- " xmlns:ci=\"urn:ietf:params:xml:ns:pidf:cipid\""
-                + " xmlns:rpid=\"urn:ietf:params:xml:ns:pidf:rpid\""
-                + " xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\""
-                + " xmlns:gml=\"urn:opengis:specification:gml:schema-xsd:feature:v3.0\""
-                +
-    		" entity=\""+ ImsModule.IMS_USER_PROFILE.getPublicUri() + "\">" + SipUtils.CRLF;
+	/**
+	 * Build presence info document (RCS 1.0)
+	 *
+	 * @param info Presence info
+	 * @return Document
+	 */
+	private String buildPresenceInfoDocument(PresenceInfo info) {
+		String document = new StringBuilder("<?xml version=\"1.0\" encoding=\"")
+				.append(UTF8_STR).append("\"?>").append(SipUtils.CRLF)
+				.append("<presence xmlns=\"urn:ietf:params:xml:ns:pidf\"")
+				.append(" xmlns:op=\"urn:oma:xml:prs:pidf:oma-pres\"")
+				.append(" xmlns:opd=\"urn:oma:xml:pde:pidf:ext\"")
+				.append(" xmlns:pdm=\"urn:ietf:params:xml:ns:pidf:data-model\"")
+				.append(" xmlns:ci=\"urn:ietf:params:xml:ns:pidf:cipid\"")
+				.append(" xmlns:rpid=\"urn:ietf:params:xml:ns:pidf:rpid\"")
+				.append(" xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\"")
+				.append(" xmlns:gml=\"urn:opengis:specification:gml:schema-xsd:feature:v3.0\"")
+				.append(" entity=\"").append(ImsModule.IMS_USER_PROFILE.getPublicUri())
+				.append("\">").append(SipUtils.CRLF).toString();
 
     	// Encode timestamp
     	String timestamp = DateUtils.encodeDate(info.getTimestamp());
@@ -597,25 +605,26 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         return document;
     }
 
-    /**
-     * Build partial presence info document (all presence info except permanent
-     * state info)
-     * 
-     * @param info Presence info
-     * @return Document
-     */
-    private String buildPartialPresenceInfoDocument(PresenceInfo info) {
-    	String document= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + SipUtils.CRLF +
-    		"<presence xmlns=\"urn:ietf:params:xml:ns:pidf\"" +
-    		" xmlns:op=\"urn:oma:xml:prs:pidf:oma-pres\"" +
-    		" xmlns:opd=\"urn:oma:xml:pde:pidf:ext\"" +
-    		" xmlns:pdm=\"urn:ietf:params:xml:ns:pidf:data-model\"" +
- " xmlns:ci=\"urn:ietf:params:xml:ns:pidf:cipid\""
-                + " xmlns:rpid=\"urn:ietf:params:xml:ns:pidf:rpid\""
-                + " xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\""
-                + " xmlns:gml=\"urn:opengis:specification:gml:schema-xsd:feature:v3.0\""
-                +
-    		" entity=\""+ ImsModule.IMS_USER_PROFILE.getPublicUri() + "\">" + SipUtils.CRLF;
+	/**
+	 * Build partial presence info document (all presence info except permanent
+	 * state info)
+	 *
+	 * @param info Presence info
+	 * @return Document
+	 */
+	private String buildPartialPresenceInfoDocument(PresenceInfo info) {
+		String document = new StringBuilder("<?xml version=\"1.0\" encoding=\"")
+				.append(UTF8_STR).append("\"?>").append(SipUtils.CRLF)
+				.append("<presence xmlns=\"urn:ietf:params:xml:ns:pidf\"")
+				.append(" xmlns:op=\"urn:oma:xml:prs:pidf:oma-pres\"")
+				.append(" xmlns:opd=\"urn:oma:xml:pde:pidf:ext\"")
+				.append(" xmlns:pdm=\"urn:ietf:params:xml:ns:pidf:data-model\"")
+				.append(" xmlns:ci=\"urn:ietf:params:xml:ns:pidf:cipid\"")
+				.append(" xmlns:rpid=\"urn:ietf:params:xml:ns:pidf:rpid\"")
+				.append(" xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\"")
+				.append(" xmlns:gml=\"urn:opengis:specification:gml:schema-xsd:feature:v3.0\"")
+				.append(" entity=\"").append(ImsModule.IMS_USER_PROFILE.getPublicUri())
+				.append("\">").append(SipUtils.CRLF).toString();
 
     	// Encode timestamp
     	String timestamp = DateUtils.encodeDate(info.getTimestamp());
@@ -632,21 +641,23 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         return document;
     }
 
-    /**
-     * Build permanent presence info document (RCS R2.0)
-     * 
-     * @param info Presence info
-     * @return Document
-     */
-    private String buildPermanentPresenceInfoDocument(PresenceInfo info) {
-    	String document= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + SipUtils.CRLF +
-    		"<presence xmlns=\"urn:ietf:params:xml:ns:pidf\"" +
-    		" xmlns:op=\"urn:oma:xml:prs:pidf:oma-pres\"" +
-    		" xmlns:opd=\"urn:oma:xml:pde:pidf:ext\"" +
-			" xmlns:pdm=\"urn:ietf:params:xml:ns:pidf:data-model\"" +
-			" xmlns:ci=\"urn:ietf:params:xml:ns:pidf:cipid\"" +
-			" xmlns:rpid=\"urn:ietf:params:xml:ns:pidf:rpid\"" +
-    		" entity=\""+ ImsModule.IMS_USER_PROFILE.getPublicUri() + "\">" + SipUtils.CRLF;
+	/**
+	 * Build permanent presence info document (RCS R2.0)
+	 *
+	 * @param info Presence info
+	 * @return Document
+	 */
+	private String buildPermanentPresenceInfoDocument(PresenceInfo info) {
+		String document = new StringBuilder("<?xml version=\"1.0\" encoding=\"")
+				.append(UTF8_STR).append("\"?>").append(SipUtils.CRLF)
+				.append("<presence xmlns=\"urn:ietf:params:xml:ns:pidf\"")
+				.append(" xmlns:op=\"urn:oma:xml:prs:pidf:oma-pres\"")
+				.append(" xmlns:opd=\"urn:oma:xml:pde:pidf:ext\"")
+				.append(" xmlns:pdm=\"urn:ietf:params:xml:ns:pidf:data-model\"")
+				.append(" xmlns:ci=\"urn:ietf:params:xml:ns:pidf:cipid\"")
+				.append(" xmlns:rpid=\"urn:ietf:params:xml:ns:pidf:rpid\"").append(" entity=\"")
+				.append(ImsModule.IMS_USER_PROFILE.getPublicUri()).append("\">")
+				.append(SipUtils.CRLF).toString();
 
     	// Encode timestamp
     	String timestamp = DateUtils.encodeDate(info.getTimestamp());
@@ -665,7 +676,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
     /**
      * Update photo-icon
-     * 
+     *
      * @param photoIcon Photo-icon
      * @return Boolean result
      */
@@ -706,7 +717,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
     /**
      * Publish presence info
-     * 
+     *
      * @param info Presence info
      * @return true if the presence info has been publish with success,
      *          else returns false
@@ -756,7 +767,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
     /**
      * Upload photo icon
-     * 
+     *
      * @param photo Photo icon
      * @return Boolean result
      */
@@ -798,7 +809,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
 	/**
      * Invite a contact to share its presence
-     * 
+     *
      * @param contact Contact
      * @return Returns true if XDM request was successful, else false
      */
@@ -820,7 +831,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
     /**
      * Revoke a shared contact
-     * 
+     *
      * @param contact Contact
      * @return Returns true if XDM request was successful, else false
      */
@@ -843,7 +854,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
     /**
      * Remove a revoked contact
-     * 
+     *
      * @param contact Contact
      * @return Returns true if XDM request was successful, else false
      */
@@ -860,7 +871,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
     /**
      * Remove a blocked contact
-     * 
+     *
      * @param contact Contact
      * @return Returns true if XDM request was successful, else false
      */

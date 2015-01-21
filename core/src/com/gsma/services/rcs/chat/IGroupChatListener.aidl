@@ -12,9 +12,11 @@ interface IGroupChatListener {
 
 	void onComposingEvent(String chatId, in ContactId contact, in boolean status);
 
-	void onMessageStatusChanged(in String chatId, in String msgId, in int status, in int reasonCode);
+	void onMessageStatusChanged(in String chatId, in String mimeType, in String msgId, in int status,
+			 in int reasonCode);
 
-	void onMessageGroupDeliveryInfoChanged(in String chatId, in ContactId contact, in String msgId, in int status, in int reasonCode);
+	void onMessageGroupDeliveryInfoChanged(in String chatId, in ContactId contact, in String mimeType,
+			in String msgId, in int status, in int reasonCode);
 
 	void onParticipantInfoChanged(in String chatId, in ParticipantInfo info);
 }

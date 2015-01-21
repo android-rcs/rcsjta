@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +15,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.core.ims.service.im.chat;
+
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 
 import java.util.UUID;
 
@@ -27,7 +34,7 @@ import com.orangelabs.rcs.utils.DeviceUtils;
 
 /**
  * Contribution ID generator based on RFC draft-kaplan-dispatch-session-id-03
- * 
+ *
  * @author jexa7410
  */
 public class ContributionIdGenerator {
@@ -44,10 +51,9 @@ public class ContributionIdGenerator {
     	UUID uuid = DeviceUtils.getDeviceUUID(AndroidFactory.getApplicationContext());
     	byte[] key;
     	if (uuid != null) {
-            key = uuid.toString().getBytes();
+            key = uuid.toString().getBytes(UTF8);
     	} else {
-    		String t = "" + System.currentTimeMillis(); 
-            key = t.getBytes();
+            key = String.valueOf(System.currentTimeMillis()).getBytes(UTF8);
     	}
 
         // Keep only 128 bits
@@ -74,7 +80,7 @@ public class ContributionIdGenerator {
             SecretKeySpec sks = new SecretKeySpec(secretKey, "HmacSHA1");
             Mac mac = Mac.getInstance("HmacSHA1");
             mac.init(sks);
-            byte[] contributionId = mac.doFinal(callId.getBytes());
+            byte[] contributionId = mac.doFinal(callId.getBytes(UTF8));
 
             // Convert to Hexa and keep only 128 bits
             StringBuilder hexString = new StringBuilder(32);
@@ -85,7 +91,7 @@ public class ContributionIdGenerator {
                 }
                 hexString.append(hex);
             }
-            
+
             String id = hexString.toString();
             return id;
         } catch(Exception e) {

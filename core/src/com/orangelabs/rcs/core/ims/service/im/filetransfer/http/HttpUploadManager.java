@@ -21,6 +21,9 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+import static com.orangelabs.rcs.utils.StringUtils.UTF8_STR;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -61,7 +64,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * HTTP upload manager
- * 
+ *
  * @author jexa7410
  * @author hhff3235
  * @author YPLO6403
@@ -144,7 +147,7 @@ public class HttpUploadManager extends HttpTransferManager {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param content
 	 *            File content to upload
 	 * @param fileIcon
@@ -164,7 +167,7 @@ public class HttpUploadManager extends HttpTransferManager {
 
 	/**
 	 * Upload a file
-	 * 
+	 *
 	 * @return XML result or null if fails
 	 */
 	public byte[] uploadFile() {
@@ -235,7 +238,7 @@ public class HttpUploadManager extends HttpTransferManager {
 
 	/**
 	 * Generate First POST
-	 * 
+	 *
 	 * @return POST request
 	 * @throws MalformedURLException
 	 * @throws URISyntaxException
@@ -262,7 +265,7 @@ public class HttpUploadManager extends HttpTransferManager {
 
 	/**
 	 * Create and Send the second POST
-	 * 
+	 *
 	 * @param resp
 	 *            response of the first request
 	 * @return Content of the response
@@ -291,7 +294,7 @@ public class HttpUploadManager extends HttpTransferManager {
 		connection.setDoOutput(true);
 		connection.setReadTimeout(5000);
 		connection.setChunkedStreamingMode(CHUNK_MAX_SIZE);
-		
+
 		// POST construction
 		connection.setRequestMethod("POST");
 		connection.setRequestProperty("Connection", "Keep-Alive");
@@ -349,7 +352,7 @@ public class HttpUploadManager extends HttpTransferManager {
 			if (!isCancelled()) {
 				// if the upload is cancelled, we don't send the last boundary to get bad request
 				outputStream.writeBytes(twoHyphens + BOUNDARY_TAG + twoHyphens);
-				
+
 				// Check response status code
 				int responseCode = connection.getResponseCode();
 				if (logger.isActivated()) {
@@ -459,7 +462,7 @@ public class HttpUploadManager extends HttpTransferManager {
 
 	/**
 	 * Write the thumbnail multipart
-	 * 
+	 *
 	 * @param outputStream
 	 *            DataOutputStream to write to
 	 */
@@ -506,7 +509,7 @@ public class HttpUploadManager extends HttpTransferManager {
 
 	/**
 	 * Generate the TID multipart
-	 * 
+	 *
 	 * @return tid TID header
 	 */
 	private String generateTidMultipart() {
@@ -520,7 +523,7 @@ public class HttpUploadManager extends HttpTransferManager {
 
 	/**
 	 * Write the file multipart
-	 * 
+	 *
 	 * @param outputStream
 	 *            DataOutputStream to write to
 	 * @param file
@@ -534,13 +537,13 @@ public class HttpUploadManager extends HttpTransferManager {
 		long fileSize = content.getSize();
 
 		// Build and write headers
-		String filePartHeader = twoHyphens + BOUNDARY_TAG + lineEnd;
-		filePartHeader += "Content-Disposition: form-data; name=\"File\"; filename=\"" + URLEncoder.encode(filename, "UTF-8")
-				+ "\"" + lineEnd;
-		filePartHeader += "Content-Type: " + content.getEncoding() + lineEnd;
-		filePartHeader += "Content-Length: " + fileSize + lineEnd + lineEnd;
-
-		outputStream.writeBytes(filePartHeader);
+        StringBuilder filePartHeader = new StringBuilder(twoHyphens).append(BOUNDARY_TAG)
+                .append(lineEnd)
+                .append("Content-Disposition: form-data; name=\"File\"; filename=\"")
+                .append(URLEncoder.encode(filename, UTF8_STR)).append("\"").append(lineEnd)
+                .append("Content-Type: ").append(content.getEncoding()).append(lineEnd)
+                .append("Content-Length: ").append(fileSize).append(lineEnd).append(lineEnd);
+        outputStream.writeBytes(filePartHeader.toString());
 
 		// Write file content
 		InputStream fileInputStream = null;
@@ -580,7 +583,7 @@ public class HttpUploadManager extends HttpTransferManager {
 
 	/**
 	 * Stream conversion
-	 * 
+	 *
 	 * @param is
 	 *            Input stream
 	 * @return Byte array
@@ -599,7 +602,7 @@ public class HttpUploadManager extends HttpTransferManager {
 		} finally {
 			CloseableUtils.close(is);
 		}
-		return sb.toString().getBytes();
+		return sb.toString().getBytes(UTF8);
 	}
 
 	/**
@@ -608,7 +611,7 @@ public class HttpUploadManager extends HttpTransferManager {
 	private class NullHostNameVerifier implements HostnameVerifier {
 		/**
 		 * Verifies that the specified hostname is allowed within the specified SSL session.
-		 * 
+		 *
 		 * @param hostname
 		 *            Hostname to check
 		 * @param session
@@ -622,7 +625,7 @@ public class HttpUploadManager extends HttpTransferManager {
 
 	/**
 	 * Resume the upload
-	 * 
+	 *
 	 * @return byte[] contains the info to send to terminating side
 	 * @throws ParseException
 	 *             , IOException
@@ -646,7 +649,7 @@ public class HttpUploadManager extends HttpTransferManager {
 			return uploadFile();
 		} else {
 			String content = EntityUtils.toString(resp.getEntity());
-			byte[] bytes = content.getBytes("UTF8");
+			byte[] bytes = content.getBytes(UTF8);
 			if (HTTP_TRACE_ENABLED) {
 				String trace = "Get Upload Info response:";
 				trace += "\n " + content;
@@ -682,7 +685,7 @@ public class HttpUploadManager extends HttpTransferManager {
 
 	/**
 	 * Write a part of the file in a PUT request for resuming upload
-	 * 
+	 *
 	 * @param resumeInfo
 	 *            info on already uploaded content
 	 * @return byte[] containing the server's response
@@ -829,7 +832,7 @@ public class HttpUploadManager extends HttpTransferManager {
 
 	/**
 	 * write remaining file data
-	 * 
+	 *
 	 * @param outputStream
 	 *            the output stream
 	 * @param file
@@ -852,7 +855,7 @@ public class HttpUploadManager extends HttpTransferManager {
 		if (logger.isActivated()) {
 			logger.debug("Send "+bytesAvailable+" remaining bytes starting from " + progress);
 		}
-		// Send remaining bytes 
+		// Send remaining bytes
 		while (bytesRead > 0 && !isCancelled()) {
 			progress += bytesRead;
 			outputStream.write(buffer, 0, bytesRead);
@@ -861,14 +864,14 @@ public class HttpUploadManager extends HttpTransferManager {
 			bufferSize = Math.min(bytesAvailable, CHUNK_MAX_SIZE);
 			buffer = new byte[bufferSize];
 			bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-			
+
 		}
 		fileInputStream.close();
 	}
 
 	/**
 	 * Send a get for info on the upload
-	 * 
+	 *
 	 * @param suffix
 	 *            String that specifies if it is for upload or download info
 	 * @param authRequired
@@ -888,7 +891,7 @@ public class HttpUploadManager extends HttpTransferManager {
 		if (authRequired && auth != null) {
 			get.addHeader("Authorization", auth.generateAuthorizationHeaderValue(get.getMethod(), get.getURI().toString(), ""));
 		}
-		
+
 		// Trace
 		if (HTTP_TRACE_ENABLED) {
 			String trace = ">>> Send HTTP request:";
@@ -941,7 +944,7 @@ public class HttpUploadManager extends HttpTransferManager {
 
 	/**
 	 * Send a request to get the download info and bring the response
-	 * 
+	 *
 	 * @return byte[] contains the response of the server to the upload
 	 */
 	private byte[] getDownloadInfo() {
@@ -971,7 +974,7 @@ public class HttpUploadManager extends HttpTransferManager {
 
 	/**
 	 * Send a request to get info on the upload for download purpose on terminating
-	 * 
+	 *
 	 * @return HttpResponse The last response of the server (401 are hidden)
 	 */
 	private HttpResponse sendGetDownloadInfo() throws Exception {
@@ -980,7 +983,7 @@ public class HttpUploadManager extends HttpTransferManager {
 
 	/**
 	 * Send a get for info on the upload
-	 * 
+	 *
 	 * @return HttpResponse The last response of the server (401 are hidden)
 	 */
 	private HttpResponse sendGetUploadInfo() throws Exception {

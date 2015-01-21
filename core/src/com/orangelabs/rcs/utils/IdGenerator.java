@@ -86,22 +86,22 @@ public class IdGenerator {
 	 * @result The converted String containing (7 + N_COUNTERS_CHARS) characters
 	 */
 	private static String encode64(long time, int counter) {
-		char[] result = new char[MAX_DIGIT];
+		char[] encodedData = new char[MAX_DIGIT];
 		int i, idx;
 
 		for (i = 0; i < 7; i++) {
 			idx = (int) time & 63;
 			time >>= 6;
-			result[i] = CODE_TABLE[idx];
+			encodedData[i] = CODE_TABLE[idx];
 		}
 
 		for (; i < MAX_DIGIT; i++) {
 			idx = counter & 63;
 			counter >>= 6;
-			result[i] = CODE_TABLE[idx];
+			encodedData[i] = CODE_TABLE[idx];
 		}
 
-		return new String(result);
+		return new String(encodedData);
 	}
 
 	/**

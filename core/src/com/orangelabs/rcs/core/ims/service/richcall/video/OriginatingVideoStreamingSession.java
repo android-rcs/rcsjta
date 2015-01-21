@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.richcall.video;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.util.Vector;
 
 import com.gsma.services.rcs.RcsContactFormatException;
@@ -124,7 +126,8 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
      */
     public void prepareMediaSession() throws Exception {
         // Parse the remote SDP part
-        SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes());
+        SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(
+                UTF8));
         MediaDescription mediaVideo = parser.getMediaDescription("video");
         String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaVideo);
         int remotePort = mediaVideo.port;

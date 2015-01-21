@@ -32,7 +32,8 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.service.ImsService;
-import com.orangelabs.rcs.utils.StringUtils;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -50,11 +51,15 @@ public class RejoinGroupChatSession extends GroupChatSession {
 	 * Constructor
 	 * 
 	 * @param parent IMS service
-	 * @param groupChatInfo Group Chat information
+     * @param groupChatInfo Group Chat information
+     * @param rcsSettings Rcs settings
+     * @param messagingLog Messaging log
 	 */
-	public RejoinGroupChatSession(ImsService parent, GroupChatInfo groupChatInfo) {
-		super(parent, null, groupChatInfo.getRejoinId(), groupChatInfo.getParticipants());
-		
+	public RejoinGroupChatSession(ImsService parent, GroupChatInfo groupChatInfo,
+			RcsSettings rcsSettings, MessagingLog messagingLog) {
+		super(parent, null, groupChatInfo.getRejoinId(), groupChatInfo.getParticipants(),
+				rcsSettings, messagingLog);
+
 		// Set subject
 		if (!TextUtils.isEmpty(groupChatInfo.getSubject())) {
 			setSubject(groupChatInfo.getSubject());		
@@ -140,7 +145,7 @@ public class RejoinGroupChatSession extends GroupChatSession {
         // Test if there is a subject
         if (getSubject() != null) {
             // Add a subject header
-            invite.addHeader(SubjectHeader.NAME, StringUtils.encodeUTF8(getSubject()));
+            invite.addHeader(SubjectHeader.NAME, getSubject());
         }
 
         // Add a contribution ID header

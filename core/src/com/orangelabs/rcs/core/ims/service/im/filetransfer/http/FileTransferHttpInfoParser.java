@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8_STR;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
@@ -101,7 +103,7 @@ public class FileTransferHttpInfoParser extends DefaultHandler {
 	public FileTransferHttpInfoDocument getFtInfo() {
 		return ftInfo;
 	}
-	
+
 	/**
 	 * Receive notification of the beginning of the document.
 	 */
@@ -124,27 +126,27 @@ public class FileTransferHttpInfoParser extends DefaultHandler {
 	 */
 	public void startElement(String namespaceURL, String localName,	String qname, Attributes attr) {
 		accumulator.setLength(0);
-		
-		if (localName.equalsIgnoreCase("file")) {		
+
+		if (localName.equalsIgnoreCase("file")) {
 			ftInfo = new FileTransferHttpInfoDocument();
 		} else
-		if (localName.equalsIgnoreCase("file-info")) {	
+		if (localName.equalsIgnoreCase("file-info")) {
 			if (ftInfo != null) {
-				String type = attr.getValue("type").trim();	
-				if (type.equalsIgnoreCase("thumbnail")) { 
+				String type = attr.getValue("type").trim();
+				if (type.equalsIgnoreCase("thumbnail")) {
 					thumbnailInfo = new FileTransferHttpThumbnail();
 				}
 			}
-		} else		
-		if (localName.equalsIgnoreCase("data")) {	
+		} else
+		if (localName.equalsIgnoreCase("data")) {
 			if (ftInfo != null) {
 				String url = attr.getValue("url").trim();
 				String validity = attr.getValue("until").trim();
-				
-				if (ftInfo.getFileThumbnail() != null || thumbnailInfo == null){ 
+
+				if (ftInfo.getFileThumbnail() != null || thumbnailInfo == null){
 					ftInfo.setFileUri(Uri.parse(url));
 					ftInfo.setTransferValidity(parseValidityDate(validity));
-					
+
 				} else
 				if (thumbnailInfo != null) {
 					thumbnailInfo.setThumbnailUri(Uri.parse(url));
@@ -154,7 +156,7 @@ public class FileTransferHttpInfoParser extends DefaultHandler {
 			}
 		}
 	}
-	
+
 	private long parseValidityDate(String validity) {
 		try
 		{
@@ -164,7 +166,7 @@ public class FileTransferHttpInfoParser extends DefaultHandler {
 		{
 			try
 			{
-				return Long.decode(validity); // validity may be already the long value 
+				return Long.decode(validity); // validity may be already the long value
 			}
 			catch(NumberFormatException nfe)
 			{
@@ -183,32 +185,26 @@ public class FileTransferHttpInfoParser extends DefaultHandler {
 		if (localName.equalsIgnoreCase("file-size")) {
 			if ((ftInfo != null && ftInfo.getFileThumbnail() != null) || (ftInfo != null && thumbnailInfo == null)) {
 				ftInfo.setFileSize(Integer.parseInt(accumulator.toString().trim()));
-			} else
-			if (thumbnailInfo != null) {
+			} else if (thumbnailInfo != null) {
 				thumbnailInfo.setThumbnailSize(Integer.parseInt(accumulator.toString().trim()));
 			}
-		} else
-		if (localName.equalsIgnoreCase("file-name")) {
+		} else if (localName.equalsIgnoreCase("file-name")) {
 			if (ftInfo != null) {
-				String s;
 				try {
-					s = URLDecoder.decode(accumulator.toString().trim(), "UTF-8");
-					ftInfo.setFilename(s);
+					ftInfo.setFilename(URLDecoder.decode(accumulator.toString().trim(), UTF8_STR));
 				} catch (UnsupportedEncodingException e) {
 					if (logger.isActivated()) {
-						logger.debug("Coulnd not decode filename");
+						logger.debug(new StringBuilder("Could not decode filename '").append(accumulator).append("'").toString());
 					}
 				}
 			}
-		} else
-		if (localName.equalsIgnoreCase("content-type")) {			                  
-			if (ftInfo != null && (ftInfo.getFileThumbnail() != null  || thumbnailInfo == null )) {
+		} else if (localName.equalsIgnoreCase("content-type")) {
+			if (ftInfo != null && (ftInfo.getFileThumbnail() != null  || thumbnailInfo == null)) {
 				ftInfo.setFileType(accumulator.toString().trim());
-			} else
-			if (thumbnailInfo != null) {
+			} else if (thumbnailInfo != null) {
 				thumbnailInfo.setThumbnailType(accumulator.toString().trim());
 			}
-		} 
+		}
 	}
 
 	/**

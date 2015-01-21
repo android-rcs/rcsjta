@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +15,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.service.presence.xdm;
+
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+import static com.orangelabs.rcs.utils.StringUtils.UTF8_STR;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -80,7 +87,7 @@ public class XdmManager {
 	 * Managed documents
 	 */
 	private Hashtable<String, Folder> documents = new Hashtable<String, Folder>();
-	
+
 	/**
 	 * The logger
 	 */
@@ -88,7 +95,7 @@ public class XdmManager {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param parent IMS module
 	 */
 	public XdmManager(ImsModule parent) {
@@ -96,10 +103,10 @@ public class XdmManager {
 		xdmServerLogin = ImsModule.IMS_USER_PROFILE.getXdmServerLogin();
 		xdmServerPwd = ImsModule.IMS_USER_PROFILE.getXdmServerPassword();
 	}
-	
+
 	/**
 	 * Send HTTP PUT request
-	 * 
+	 *
 	 * @param request HTTP request
 	 * @return HTTP response
 	 * @throws CoreException
@@ -107,10 +114,10 @@ public class XdmManager {
 	private HttpResponse sendRequestToXDMS(HttpRequest request) throws CoreException {
 		return sendRequestToXDMS(request, new HttpAuthenticationAgent(xdmServerLogin, xdmServerPwd));
 	}
-	
+
 	/**
 	 * Send HTTP PUT request with authentication
-	 * 
+	 *
 	 * @param request HTTP request
 	 * @param authenticationAgent Authentication agent
 	 * @return HTTP response
@@ -120,23 +127,23 @@ public class XdmManager {
 		try {
 			// Send first request
 			HttpResponse response = sendHttpRequest(request, authenticationAgent);
-			
+
 			// Analyze the response
 			if (response.getResponseCode() == 401) {
 				// 401 response received
 				if (logger.isActivated()) {
 					logger.debug("401 Unauthorized response received");
 				}
-	
+
 				if (authenticationAgent != null) {
 					// Update the authentication agent
 					authenticationAgent.readWwwAuthenticateHeader(response.getHeader("www-authenticate"));
 				}
-	
+
 				// Set the cookie from the received response
 				String cookie = response.getHeader("set-cookie");
 				request.setCookie(cookie);
-				
+
 				// Send second request with authentification header
 				response = sendRequestToXDMS(request, authenticationAgent);
 			} else
@@ -145,13 +152,13 @@ public class XdmManager {
 				if (logger.isActivated()) {
 					logger.debug("412 Precondition failed");
 				}
-	
+
 				// Reset the etag
 				documents.remove(request.getAUID());
-				
+
 				// Send second request with authentification header
 				response = sendRequestToXDMS(request);
-			} else {		
+			} else {
 				// Other response received
 				if (logger.isActivated()) {
 					logger.debug(response.getResponseCode() + " response received");
@@ -167,7 +174,7 @@ public class XdmManager {
 
 	/**
 	 * Send HTTP PUT request
-	 * 
+	 *
 	 * @param request HTTP request
 	 * @param authenticationAgent Authentication agent
 	 * @return HTTP response
@@ -177,13 +184,13 @@ public class XdmManager {
 	private HttpResponse sendHttpRequest(HttpRequest request, HttpAuthenticationAgent authenticationAgent) throws IOException, CoreException {
 		// Extract host & port
 		String[] parts = xdmServerAddr.substring(7).split(":|/");
-		String host = parts[0];		
+		String host = parts[0];
 		int port = Integer.parseInt(parts[1]);
 		String serviceRoot = "";
 		if (parts.length > 2) {
 			serviceRoot = "/" + parts[2];
 		}
-		
+
 		// Open connection with the XCAP server
 		SocketConnection conn = NetworkFactory.getFactory().createSocketClientConnection();
 		conn.open(host, port);
@@ -195,14 +202,14 @@ public class XdmManager {
 		String httpRequest = request.getMethod() + " " + requestUri + " HTTP/1.1" + HttpUtils.CRLF +
 				"Host: " + host + ":" + port + HttpUtils.CRLF +
 				"User-Agent: " + TerminalInfo.getProductName() + " " + TerminalInfo.getProductVersion() + HttpUtils.CRLF;
-		
+
 		if (authenticationAgent != null) {
 			// Set the Authorization header
 			String authorizationHeader = authenticationAgent.generateAuthorizationHeader(
 					request.getMethod(), requestUri, request.getContent());
 			httpRequest += authorizationHeader + HttpUtils.CRLF;
 		}
-		
+
 		String cookie = request.getCookie();
 		if (cookie != null){
 			// Set the cookie header
@@ -216,7 +223,7 @@ public class XdmManager {
 		if ((folder != null) && (folder.getEntry() != null) && (folder.getEntry().getEtag() != null)) {
 			httpRequest += "If-match: \"" + folder.getEntry().getEtag() + "\"" + HttpUtils.CRLF;
 		}
-		
+
 		if (request.getContent() != null) {
 			// Set the content type
 			httpRequest += "Content-type: " + request.getContentType() + HttpUtils.CRLF;
@@ -224,14 +231,14 @@ public class XdmManager {
 		} else {
 			httpRequest += "Content-Length: 0" + HttpUtils.CRLF + HttpUtils.CRLF;
 		}
-		
+
 		// Write HTTP request headers
-		os.write(httpRequest.getBytes());
+		os.write(httpRequest.getBytes(UTF8));
 		os.flush();
 
 		// Write HTTP content
 		if (request.getContent() != null) {
-			os.write(request.getContent().getBytes("UTF-8"));
+			os.write(request.getContent().getBytes(UTF8));
 			os.flush();
 		}
 
@@ -250,7 +257,7 @@ public class XdmManager {
 		String line = "";
 		while((ch = is.read()) != -1) {
 			line += (char)ch;
-			
+
 			if (line.endsWith(HttpUtils.CRLF)) {
 				if (line.equals(HttpUtils.CRLF)) {
 					// All headers has been read
@@ -263,7 +270,7 @@ public class XdmManager {
 
 				// Remove CRLF
 				line = line.substring(0, line.length()-2);
-				
+
 				if (line.startsWith("HTTP/")) {
 					// Status line
 					response.setStatusLine(line);
@@ -274,11 +281,11 @@ public class XdmManager {
 					String value = line.substring(index+1).trim();
 					response.addHeader(name, value);
 				}
-				
+
 				line = "";
 			}
 		}
-		
+
 		// Extract content length
 		int length = -1;
 		try {
@@ -287,7 +294,7 @@ public class XdmManager {
 		} catch(Exception e) {
 			length = -1;
 		}
-		
+
 		// Read HTTP content response
 		if (length > 0) {
 			byte[] content = new byte[length];
@@ -297,14 +304,14 @@ public class XdmManager {
 			while((nb = is.read(buffer)) != -1) {
 				System.arraycopy(buffer, 0, content, pos, nb);
 				pos += nb;
-				
+
 				if (pos >= length) {
 					// End of content
 					break;
 				}
 			}
 			if (logger.isActivated()) {
-				respTrace.append(HttpUtils.CRLF + new String(content));
+				respTrace.append(HttpUtils.CRLF).append(new String(content, UTF8));
 			}
 			response.setContent(content);
 		}
@@ -323,10 +330,10 @@ public class XdmManager {
 		if ((etag != null) && (folder != null) && (folder.getEntry() != null)) {
 			folder.getEntry().setEtag(etag);
 		}
-		
+
 		return response;
-	}	
-	
+	}
+
 	/**
 	 * Initialize the XDM interface
 	 */
@@ -363,13 +370,13 @@ public class XdmManager {
 					}
 
 					// Set resource list document
-			    	setResourcesList(); 
+			    	setResourcesList();
 				} else {
 					if (logger.isActivated()){
 						logger.debug("The resource-lists document already exists");
 					}
 				}
-			
+
 				// Check presence rules document
 				folder = (Folder)documents.get("org.openmobilealliance.pres-rules");
 				if ((folder == null) || (folder.getEntry() == null)) {
@@ -388,13 +395,13 @@ public class XdmManager {
 		} catch(Exception e) {
         	if (logger.isActivated()) {
         		logger.error("Can't parse the XCAP directory document", e);
-        	}	    				
+        	}
 		}
 	}
 
 	/**
 	 * Get XCAP managed documents
-	 * 
+	 *
 	 * @return Response
 	 */
 	public HttpResponse getXcapDocuments() {
@@ -402,11 +409,11 @@ public class XdmManager {
 			if (logger.isActivated()){
 				logger.info("Get XCAP documents");
 			}
-	
+
 			// URL
 			String url = "/org.openmobilealliance.xcap-directory/users/" +
 				HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + "/directory.xml";
-		
+
 			// Create the request
 			HttpGetRequest request = new HttpGetRequest(url);
 
@@ -432,7 +439,7 @@ public class XdmManager {
 
 	/**
 	 * Get RCS list
-	 * 
+	 *
 	 * @return Response
 	 */
 	public HttpResponse getRcsList() {
@@ -440,11 +447,11 @@ public class XdmManager {
 			if (logger.isActivated()){
 				logger.info("Get RCS list");
 			}
-	
+
 			// URL
 			String url = "/rls-services/users/" +
 				HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + "/index";
-		
+
 			// Create the request
 			HttpGetRequest request = new HttpGetRequest(url);
 
@@ -470,7 +477,7 @@ public class XdmManager {
 
 	/**
 	 * Set RCS list
-	 * 
+	 *
 	 * @return Response
 	 */
 	public HttpResponse setRcsList() {
@@ -478,26 +485,27 @@ public class XdmManager {
 			if (logger.isActivated()){
 				logger.info("Set RCS list");
 			}
-	
+
 			// URL
-			String url = "/rls-services/users/" + 
+			String url = "/rls-services/users/" +
 				HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + "/index";
-		
+
 			// Content
 			String user = ImsModule.IMS_USER_PROFILE.getPublicUri();
 			String resList = xdmServerAddr + "/resource-lists/users/" + HttpUtils.encodeURL(user) + "/index/~~/resource-lists/list%5B@name=%22rcs%22%5D";
-			String content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + HttpUtils.CRLF +
-				"<rls-services xmlns=\"urn:ietf:params:xml:ns:rls-services\" xmlns:rl=\"urn:ietf:params:xml:ns:resource-lists\">" + HttpUtils.CRLF +
-				"<service uri=\"" + user + ";pres-list=rcs\">" + HttpUtils.CRLF +
-				
-				"<resource-list>" + resList + "</resource-list>" + HttpUtils.CRLF +
-				
-				"<packages>" + HttpUtils.CRLF +
-				" <package>presence</package>" + HttpUtils.CRLF +
-				"</packages>" + HttpUtils.CRLF +
-				
-				"</service></rls-services>";
-	
+			String content = new StringBuilder("<?xml version=\"1.0\" encoding=\"")
+					.append(UTF8_STR)
+					.append("\"?>")
+					.append(HttpUtils.CRLF)
+					.append("<rls-services xmlns=\"urn:ietf:params:xml:ns:rls-services\" xmlns:rl=\"urn:ietf:params:xml:ns:resource-lists\">")
+					.append(HttpUtils.CRLF).append("<service uri=\"").append(user)
+					.append(";pres-list=rcs\">").append(HttpUtils.CRLF).append("<resource-list>")
+					.append(resList).append("</resource-list>").append(HttpUtils.CRLF)
+					.append("<packages>").append(HttpUtils.CRLF)
+					.append(" <package>presence</package>").append(HttpUtils.CRLF)
+					.append("</packages>").append(HttpUtils.CRLF)
+					.append("</service></rls-services>").toString();
+
 			// Create the request
 			HttpPutRequest request = new HttpPutRequest(url, content, "application/rls-services+xml");
 
@@ -520,10 +528,10 @@ public class XdmManager {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Get resources list
-	 * 
+	 *
 	 * @return Response
 	 */
 	public HttpResponse getResourcesList() {
@@ -531,11 +539,11 @@ public class XdmManager {
 			if (logger.isActivated()){
 				logger.info("Get resources list");
 			}
-	
+
 			// URL
 			String url = "/resource-lists/users/" +
 				HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + "/index";
-		
+
 			// Create the request
 			HttpGetRequest request = new HttpGetRequest(url);
 
@@ -561,7 +569,7 @@ public class XdmManager {
 
 	/**
 	 * Set resources list
-	 * 
+	 *
 	 * @return Response
 	 */
 	public HttpResponse setResourcesList() {
@@ -569,44 +577,40 @@ public class XdmManager {
 			if (logger.isActivated()){
 				logger.info("Set resources list");
 			}
-	
+
 			// URL
 			String url = "/resource-lists/users/" +
 				HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + "/index";
-		
+
 			// Content
 			String user = ImsModule.IMS_USER_PROFILE.getPublicUri();
 			String resList = xdmServerAddr + "/resource-lists/users/" + HttpUtils.encodeURL(user) + "/index/~~/resource-lists/list%5B";
-			String content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + HttpUtils.CRLF +
-				"<resource-lists xmlns=\"urn:ietf:params:xml:ns:resource-lists\">" + HttpUtils.CRLF +
-				
-				"<list name=\"oma_buddylist\">" + HttpUtils.CRLF +
-				" <external anchor=\"" + resList + "@name=%22rcs%22%5D\"/>" + HttpUtils.CRLF +
-				"</list>" + HttpUtils.CRLF +
-				
-				"<list name=\"oma_grantedcontacts\">" + HttpUtils.CRLF +
-				" <external anchor=\"" + resList + "@name=%22rcs%22%5D\"/>" + HttpUtils.CRLF +
-				"</list>" + HttpUtils.CRLF +
-				
-				"<list name=\"oma_blockedcontacts\">" + HttpUtils.CRLF +
-				" <external anchor=\"" + resList + "@name=%22rcs_blockedcontacts%22%5D\"/>" + HttpUtils.CRLF +
-				" <external anchor=\"" + resList + "@name=%22rcs_revokedcontacts%22%5D\"/>" + HttpUtils.CRLF +
-				"</list>" + HttpUtils.CRLF +
-				
-				"<list name=\"rcs\">" + HttpUtils.CRLF +
-				" <display-name>My presence buddies</display-name>" + HttpUtils.CRLF +
-				"</list>" + HttpUtils.CRLF +
-				
-				"<list name=\"rcs_blockedcontacts\">" + HttpUtils.CRLF +
-				" <display-name>My blocked contacts</display-name>" + HttpUtils.CRLF +
-				"</list>" + HttpUtils.CRLF +
-				
-				"<list name=\"rcs_revokedcontacts\">" + HttpUtils.CRLF +
-				" <display-name>My revoked contacts</display-name>" + HttpUtils.CRLF +
-				"</list>" + HttpUtils.CRLF +
-				
-				"</resource-lists>";
-			
+			String content = new StringBuilder("<?xml version=\"1.0\" encoding=\"")
+					.append(UTF8_STR).append("\"?>").append(HttpUtils.CRLF)
+					.append("<resource-lists xmlns=\"urn:ietf:params:xml:ns:resource-lists\">")
+					.append(HttpUtils.CRLF).append("<list name=\"oma_buddylist\">")
+					.append(HttpUtils.CRLF).append(" <external anchor=\"").append(resList)
+					.append("@name=%22rcs%22%5D\"/>").append(HttpUtils.CRLF).append("</list>")
+					.append(HttpUtils.CRLF).append("<list name=\"oma_grantedcontacts\">")
+					.append(HttpUtils.CRLF).append(" <external anchor=\"").append(resList)
+					.append("@name=%22rcs%22%5D\"/>").append(HttpUtils.CRLF).append("</list>")
+					.append(HttpUtils.CRLF).append("<list name=\"oma_blockedcontacts\">")
+					.append(HttpUtils.CRLF).append(" <external anchor=\"").append(resList)
+					.append("@name=%22rcs_blockedcontacts%22%5D\"/>").append(HttpUtils.CRLF)
+					.append(" <external anchor=\"").append(resList)
+					.append("@name=%22rcs_revokedcontacts%22%5D\"/>").append(HttpUtils.CRLF)
+					.append("</list>").append(HttpUtils.CRLF).append("<list name=\"rcs\">")
+					.append(HttpUtils.CRLF)
+					.append(" <display-name>My presence buddies</display-name>")
+					.append(HttpUtils.CRLF).append("</list>").append(HttpUtils.CRLF)
+					.append("<list name=\"rcs_blockedcontacts\">").append(HttpUtils.CRLF)
+					.append(" <display-name>My blocked contacts</display-name>")
+					.append(HttpUtils.CRLF).append("</list>").append(HttpUtils.CRLF)
+					.append("<list name=\"rcs_revokedcontacts\">").append(HttpUtils.CRLF)
+					.append(" <display-name>My revoked contacts</display-name>")
+					.append(HttpUtils.CRLF).append("</list>").append(HttpUtils.CRLF)
+					.append("</resource-lists>").toString();
+
 			// Create the request
 			HttpPutRequest request = new HttpPutRequest(url, content, "application/resource-lists+xml");
 
@@ -629,10 +633,10 @@ public class XdmManager {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Get presence rules
-	 * 
+	 *
 	 * @return Response
 	 */
 	public HttpResponse getPresenceRules() {
@@ -640,11 +644,11 @@ public class XdmManager {
 			if (logger.isActivated()){
 				logger.info("Get presence rules");
 			}
-	
+
 			// URL
 			String url = "/org.openmobilealliance.pres-rules/users/" +
 				HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + "/pres-rules";
-		
+
 			// Create the request
 			HttpGetRequest request = new HttpGetRequest(url);
 
@@ -670,7 +674,7 @@ public class XdmManager {
 
 	/**
 	 * Set presence rules
-	 * 
+	 *
 	 * @return Response
 	 */
 	public HttpResponse setPresenceRules() {
@@ -678,70 +682,75 @@ public class XdmManager {
 			if (logger.isActivated()){
 				logger.info("Set presence rules");
 			}
-	
+
 			// URL
 			String url = "/org.openmobilealliance.pres-rules/users/" +
 				HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + "/pres-rules";
-		
+
 			// Content
 			String user = ImsModule.IMS_USER_PROFILE.getPublicUri();
 			String blockedList = xdmServerAddr + "/resource-lists/users/" + user + "/index/~~/resource-lists/list%5B@name=%22oma_blockedcontacts%22%5D";
 			String grantedList = xdmServerAddr + "/resource-lists/users/" + user + "/index/~~/resource-lists/list%5B@name=%22oma_grantedcontacts%22%5D";
-			String content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + HttpUtils.CRLF +
-				"<cr:ruleset xmlns:ocp=\"urn:oma:xml:xdm:common-policy\" xmlns:pr=\"urn:ietf:params:xml:ns:pres-rules\" xmlns:cr=\"urn:ietf:params:xml:ns:common-policy\">" + HttpUtils.CRLF +
-				
-				"<cr:rule id=\"wp_prs_allow_own\">" + HttpUtils.CRLF +
-				" <cr:conditions>" + HttpUtils.CRLF +
-				"  <cr:identity><cr:one id=\"" + ImsModule.IMS_USER_PROFILE.getPublicUri() + "\"/></cr:identity>" + HttpUtils.CRLF +
-				" </cr:conditions>" + HttpUtils.CRLF +
-				" <cr:actions><pr:sub-handling>allow</pr:sub-handling></cr:actions>" + HttpUtils.CRLF +
-				" <cr:transformations>" + HttpUtils.CRLF +
-				"  <pr:provide-services><pr:all-services/></pr:provide-services>" + HttpUtils.CRLF +
-				"  <pr:provide-persons><pr:all-persons/></pr:provide-persons>" + HttpUtils.CRLF +
-				"  <pr:provide-devices><pr:all-devices/></pr:provide-devices>" + HttpUtils.CRLF +
-				"  <pr:provide-all-attributes/>" + HttpUtils.CRLF +
-				" </cr:transformations>" + HttpUtils.CRLF +
-				"</cr:rule>" + HttpUtils.CRLF +
-				
-				"<cr:rule id=\"rcs_allow_services_anonymous\">" + HttpUtils.CRLF +
-				" <cr:conditions><ocp:anonymous-request/></cr:conditions>" + HttpUtils.CRLF +
-				" <cr:actions><pr:sub-handling>allow</pr:sub-handling></cr:actions>" + HttpUtils.CRLF +
-				" <cr:transformations>" + HttpUtils.CRLF +
-				"  <pr:provide-services><pr:all-services/></pr:provide-services>" + HttpUtils.CRLF +
-				"  <pr:provide-all-attributes/>" + HttpUtils.CRLF +
-				" </cr:transformations>" + HttpUtils.CRLF +
-				"</cr:rule>" + HttpUtils.CRLF +
-				
-				"<cr:rule id=\"wp_prs_unlisted\">" + HttpUtils.CRLF +
-				" <cr:conditions><ocp:other-identity/></cr:conditions>" + HttpUtils.CRLF +
-				" <cr:actions><pr:sub-handling>confirm</pr:sub-handling></cr:actions>" + HttpUtils.CRLF +
-				"</cr:rule>" + HttpUtils.CRLF +
-				
-				"<cr:rule id=\"wp_prs_grantedcontacts\">" + HttpUtils.CRLF +
-				" <cr:conditions>" + HttpUtils.CRLF +
-				" <ocp:external-list>" + HttpUtils.CRLF +
-				"  <ocp:entry anc=\"" + grantedList + "\"/>" + HttpUtils.CRLF +
-				" </ocp:external-list>" + HttpUtils.CRLF +
-				" </cr:conditions>" + HttpUtils.CRLF +
-				" <cr:actions><pr:sub-handling>allow</pr:sub-handling></cr:actions>" + HttpUtils.CRLF +
-				" <cr:transformations>" + HttpUtils.CRLF +
-				"   <pr:provide-services><pr:all-services/></pr:provide-services>" + HttpUtils.CRLF +
-				"   <pr:provide-persons><pr:all-persons/></pr:provide-persons>" + HttpUtils.CRLF +
-				"   <pr:provide-devices><pr:all-devices/></pr:provide-devices>" + HttpUtils.CRLF +
-				"   <pr:provide-all-attributes/>" + HttpUtils.CRLF +
-				" </cr:transformations>" + HttpUtils.CRLF +
-				"</cr:rule>" + HttpUtils.CRLF +
-				
-				"<cr:rule id=\"wp_prs_blockedcontacts\">" + HttpUtils.CRLF +
-				" <cr:conditions>" + HttpUtils.CRLF +
-				"  <ocp:external-list>" + HttpUtils.CRLF + 
-				"  <ocp:entry anc=\"" + blockedList + "\"/>" + HttpUtils.CRLF +
-				" </ocp:external-list>" + HttpUtils.CRLF +
-				" </cr:conditions>" + HttpUtils.CRLF +
-				" <cr:actions><pr:sub-handling>block</pr:sub-handling></cr:actions>" + HttpUtils.CRLF +
-				"</cr:rule>" + HttpUtils.CRLF +
-				"</cr:ruleset>";
-			
+			String content = new StringBuilder("<?xml version=\"1.0\" encoding=\"")
+					.append(UTF8_STR)
+					.append("\"?>")
+					.append(HttpUtils.CRLF)
+					.append("<cr:ruleset xmlns:ocp=\"urn:oma:xml:xdm:common-policy\" xmlns:pr=\"urn:ietf:params:xml:ns:pres-rules\" xmlns:cr=\"urn:ietf:params:xml:ns:common-policy\">")
+					.append(HttpUtils.CRLF).append("<cr:rule id=\"wp_prs_allow_own\">")
+					.append(HttpUtils.CRLF).append(" <cr:conditions>").append(HttpUtils.CRLF)
+					.append("  <cr:identity><cr:one id=\"")
+					.append(ImsModule.IMS_USER_PROFILE.getPublicUri()).append("\"/></cr:identity>")
+					.append(HttpUtils.CRLF).append(" </cr:conditions>").append(HttpUtils.CRLF)
+					.append(" <cr:actions><pr:sub-handling>allow</pr:sub-handling></cr:actions>")
+					.append(HttpUtils.CRLF).append(" <cr:transformations>").append(HttpUtils.CRLF)
+					.append("  <pr:provide-services><pr:all-services/></pr:provide-services>")
+					.append(HttpUtils.CRLF)
+					.append("  <pr:provide-persons><pr:all-persons/></pr:provide-persons>")
+					.append(HttpUtils.CRLF)
+					.append("  <pr:provide-devices><pr:all-devices/></pr:provide-devices>")
+					.append(HttpUtils.CRLF).append("  <pr:provide-all-attributes/>")
+					.append(HttpUtils.CRLF).append(" </cr:transformations>").append(HttpUtils.CRLF)
+					.append("</cr:rule>").append(HttpUtils.CRLF)
+					.append("<cr:rule id=\"rcs_allow_services_anonymous\">").append(HttpUtils.CRLF)
+					.append(" <cr:conditions><ocp:anonymous-request/></cr:conditions>")
+					.append(HttpUtils.CRLF)
+					.append(" <cr:actions><pr:sub-handling>allow</pr:sub-handling></cr:actions>")
+					.append(HttpUtils.CRLF).append(" <cr:transformations>").append(HttpUtils.CRLF)
+					.append("  <pr:provide-services><pr:all-services/></pr:provide-services>")
+					.append(HttpUtils.CRLF).append("  <pr:provide-all-attributes/>")
+					.append(HttpUtils.CRLF).append(" </cr:transformations>").append(HttpUtils.CRLF)
+					.append("</cr:rule>").append(HttpUtils.CRLF)
+					.append("<cr:rule id=\"wp_prs_unlisted\">").append(HttpUtils.CRLF)
+					.append(" <cr:conditions><ocp:other-identity/></cr:conditions>")
+					.append(HttpUtils.CRLF)
+					.append(" <cr:actions><pr:sub-handling>confirm</pr:sub-handling></cr:actions>")
+					.append(HttpUtils.CRLF).append("</cr:rule>").append(HttpUtils.CRLF)
+					.append("<cr:rule id=\"wp_prs_grantedcontacts\">").append(HttpUtils.CRLF)
+					.append(" <cr:conditions>").append(HttpUtils.CRLF)
+					.append(" <ocp:external-list>").append(HttpUtils.CRLF)
+					.append("  <ocp:entry anc=\"").append(grantedList).append("\"/>")
+					.append(HttpUtils.CRLF).append(" </ocp:external-list>").append(HttpUtils.CRLF)
+					.append(" </cr:conditions>").append(HttpUtils.CRLF)
+					.append(" <cr:actions><pr:sub-handling>allow</pr:sub-handling></cr:actions>")
+					.append(HttpUtils.CRLF).append(" <cr:transformations>").append(HttpUtils.CRLF)
+					.append("   <pr:provide-services><pr:all-services/></pr:provide-services>")
+					.append(HttpUtils.CRLF)
+					.append("   <pr:provide-persons><pr:all-persons/></pr:provide-persons>")
+					.append(HttpUtils.CRLF)
+					.append("   <pr:provide-devices><pr:all-devices/></pr:provide-devices>")
+					.append(HttpUtils.CRLF).append("   <pr:provide-all-attributes/>")
+					.append(HttpUtils.CRLF).append(" </cr:transformations>").append(HttpUtils.CRLF)
+					.append("</cr:rule>").append(HttpUtils.CRLF)
+					.append("<cr:rule id=\"wp_prs_blockedcontacts\">").append(HttpUtils.CRLF)
+					.append(" <cr:conditions>").append(HttpUtils.CRLF)
+					.append("  <ocp:external-list>").append(HttpUtils.CRLF)
+					.append("  <ocp:entry anc=\"").append(blockedList).append("\"/>")
+					.append(HttpUtils.CRLF).append(" </ocp:external-list>").append(HttpUtils.CRLF)
+					.append(" </cr:conditions>").append(HttpUtils.CRLF)
+					.append(" <cr:actions><pr:sub-handling>block</pr:sub-handling></cr:actions>")
+					.append(HttpUtils.CRLF).append("</cr:rule>").append(HttpUtils.CRLF)
+					.append("</cr:ruleset>").toString();
+
 			// Create the request
 			HttpPutRequest request = new HttpPutRequest(url, content, "application/auth-policy+xml");
 
@@ -764,10 +773,10 @@ public class XdmManager {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Add a contact to the granted contacts list
-	 * 
+	 *
 	 * @param contact Contact
 	 * @return Response
 	 */
@@ -776,16 +785,16 @@ public class XdmManager {
 			if (logger.isActivated()){
 				logger.info("Add " + contact + " to granted list");
 			}
-	
+
 			// URL
 			String url = "/resource-lists/users/" +
-					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + 
+					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) +
 					"/index/~~/resource-lists/list%5B@name=%22rcs%22%5D/entry%5B@uri=%22" +
 					HttpUtils.encodeURL(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
-			
+
 			// Content
 			String content = "<entry uri='" + contact + "'></entry>";
-			
+
 			// Create the request
 			HttpPutRequest request = new HttpPutRequest(url, content, "application/xcap-el+xml");
 
@@ -811,7 +820,7 @@ public class XdmManager {
 
 	/**
 	 * Remove a contact from the granted contacts list
-	 * 
+	 *
 	 * @param contact Contact
 	 * @return Response
 	 */
@@ -820,13 +829,13 @@ public class XdmManager {
 			if (logger.isActivated()){
 				logger.info("Remove " + contact + " from granted list");
 			}
-	
+
 			// URL
 			String url = "/resource-lists/users/" +
-					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + 
+					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) +
 					"/index/~~/resource-lists/list%5B@name=%22rcs%22%5D/entry%5B@uri=%22" +
 					HttpUtils.encodeURL(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
-			
+
 			// Create the request
 			HttpDeleteRequest request = new HttpDeleteRequest(url);
 
@@ -849,7 +858,7 @@ public class XdmManager {
 			return null;
 		}
 	}
-	
+
 	private Set<ContactId> convertListOfUrisToSetOfContactId(List<String> uris) {
 		Set<ContactId> result = new HashSet<ContactId>();
 		if (uris != null) {
@@ -868,7 +877,7 @@ public class XdmManager {
 
 	/**
 	 * Returns the list of granted contacts
-	 * 
+	 *
 	 * @return List
 	 */
 	public Set<ContactId> getGrantedContacts() {
@@ -876,15 +885,15 @@ public class XdmManager {
 			if (logger.isActivated()){
 				logger.info("Get granted contacts list");
 			}
-	
+
 			// URL
 			String url = "/resource-lists/users/" +
-					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + 
+					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) +
 					"/index/~~/resource-lists/list%5B@name=%22rcs%22%5D";
-			
+
 			// Create the request
 			HttpGetRequest request = new HttpGetRequest(url);
-			
+
 			// Send the request
 			HttpResponse response = sendRequestToXDMS(request);
 			if (response.isSuccessfullResponse()) {
@@ -911,7 +920,7 @@ public class XdmManager {
 
 	/**
 	 * Add a contact to the blocked contacts list
-	 * 
+	 *
 	 * @param contact Contact
 	 * @return Response
 	 */
@@ -920,16 +929,16 @@ public class XdmManager {
 			if (logger.isActivated()){
 				logger.info("Add " + contact + " to blocked list");
 			}
-	
+
 			// URL
 			String url = "/resource-lists/users/" +
-					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + 
+					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) +
 					"/index/~~/resource-lists/list%5B@name=%22rcs_blockedcontacts%22%5D/entry%5B@uri=%22" +
 					HttpUtils.encodeURL(contact) + "%22%5D";
-			
+
 			// Content
 			String content = "<entry uri='" + contact + "'></entry>";
-			
+
 			// Create the request
 			HttpPutRequest request = new HttpPutRequest(url, content, "application/xcap-el+xml");
 
@@ -955,7 +964,7 @@ public class XdmManager {
 
 	/**
 	 * Remove a contact from the blocked contacts list
-	 * 
+	 *
 	 * @param contact Contact
 	 * @return Response
 	 */
@@ -964,13 +973,13 @@ public class XdmManager {
 			if (logger.isActivated()){
 				logger.info("Remove " + contact + " from blocked list");
 			}
-	
+
 			// URL
 			String url = "/resource-lists/users/" +
-					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + 
+					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) +
 					"/index/~~/resource-lists/list%5B@name=%22rcs_blockedcontacts%22%5D/entry%5B@uri=%22" +
 					HttpUtils.encodeURL(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
-			
+
 			// Create the request
 			HttpDeleteRequest request = new HttpDeleteRequest(url);
 
@@ -996,7 +1005,7 @@ public class XdmManager {
 
 	/**
 	 * Returns the list of blocked contacts
-	 * 
+	 *
 	 * @return List
 	 */
 	public Set<ContactId> getBlockedContacts() {
@@ -1004,12 +1013,12 @@ public class XdmManager {
 			if (logger.isActivated()){
 				logger.info("Get blocked contacts list");
 			}
-	
+
 			// URL
 			String url = "/resource-lists/users/" +
-					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + 
+					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) +
 					"/index/~~/resource-lists/list%5B@name=%22rcs_blockedcontacts%22%5D";
-			
+
 			// Create the request
 			HttpGetRequest request = new HttpGetRequest(url);
 
@@ -1019,7 +1028,7 @@ public class XdmManager {
 				if (logger.isActivated()){
 					logger.info("Blocked contacts list has been read with success");
 				}
-				
+
 				// Parse response
 				InputSource input = new InputSource(new ByteArrayInputStream(response.getContent()));
 				XcapResponseParser parser = new XcapResponseParser(input);
@@ -1039,7 +1048,7 @@ public class XdmManager {
 
 	/**
 	 * Add a contact to the revoked contacts list
-	 * 
+	 *
 	 * @param contact Contact
 	 * @return Response
 	 */
@@ -1048,16 +1057,16 @@ public class XdmManager {
 			if (logger.isActivated()){
 				logger.info("Add " + contact + " to revoked list");
 			}
-	
+
 			// URL
 			String url = "/resource-lists/users/" +
-					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + 
+					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) +
 					"/index/~~/resource-lists/list%5B@name=%22rcs_revokedcontacts%22%5D/entry%5B@uri=%22" +
 					HttpUtils.encodeURL(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
-			
+
 			// Content
 			String content = "<entry uri='" + contact + "'></entry>";
-			
+
 			// Create the request
 			HttpPutRequest request = new HttpPutRequest(url, content, "application/xcap-el+xml");
 
@@ -1083,7 +1092,7 @@ public class XdmManager {
 
 	/**
 	 * Remove a contact from the revoked contacts list
-	 * 
+	 *
 	 * @param contact Contact
 	 * @return Response
 	 */
@@ -1092,13 +1101,13 @@ public class XdmManager {
 			if (logger.isActivated()){
 				logger.info("Remove " + contact + " from revoked list");
 			}
-	
+
 			// URL
 			String url = "/resource-lists/users/" +
-					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + 
+					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) +
 					"/index/~~/resource-lists/list%5B@name=%22rcs_revokedcontacts%22%5D/entry%5B@uri=%22" +
 					HttpUtils.encodeURL(PhoneUtils.formatContactIdToUri(contact)) + "%22%5D";
-			
+
 			// Create the request
 			HttpDeleteRequest request = new HttpDeleteRequest(url);
 
@@ -1124,7 +1133,7 @@ public class XdmManager {
 
 	/**
 	 * Returns the list of revoked contacts
-	 * 
+	 *
 	 * @return List
 	 */
 	public List<String> getRevokedContacts() {
@@ -1133,12 +1142,12 @@ public class XdmManager {
 			if (logger.isActivated()){
 				logger.info("Get revoked contacts list");
 			}
-	
+
 			// URL
 			String url = "/resource-lists/users/" +
-					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + 
+					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) +
 					"/index/~~/resource-lists/list%5B@name=%22rcs_revokedcontacts%22%5D";
-			
+
 			// Create the request
 			HttpGetRequest request = new HttpGetRequest(url);
 
@@ -1153,7 +1162,7 @@ public class XdmManager {
 				InputSource input = new InputSource(
 						new ByteArrayInputStream(response.getContent()));
 				XcapResponseParser parser = new XcapResponseParser(input);
-				result = parser.getUris(); 
+				result = parser.getUris();
 			} else {
 				if (logger.isActivated()){
 					logger.info("Can't get revoked contacts list: " + response.getResponseCode() + " error");
@@ -1169,18 +1178,18 @@ public class XdmManager {
 
 	/**
 	 * Returns the photo icon URL
-	 * 
+	 *
 	 * @return URL
 	 */
 	public String getEndUserPhotoIconUrl() {
 		return xdmServerAddr + "/org.openmobilealliance.pres-content/users/" +
-			HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + 
+			HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) +
 			"/oma_status-icon/rcs_status_icon";
 	}
-	
+
 	/**
 	 * Upload the end user photo
-	 * 
+	 *
 	 * @param photo Photo icon
 	 * @return Response
 	 */
@@ -1189,19 +1198,21 @@ public class XdmManager {
 			if (logger.isActivated()){
 				logger.info("Upload the end user photo");
 			}
-	
+
 			// Content
 			String data = Base64.encodeBase64ToString(photo.getContent());
-			String content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + HttpUtils.CRLF +
-				"<content xmlns=\"urn:oma:xml:prs:pres-content\">" + HttpUtils.CRLF +
-				"<mime-type>" + photo.getType() + "</mime-type>" + HttpUtils.CRLF + 
-				"<encoding>base64</encoding>" + HttpUtils.CRLF +
-				"<data>" + data + "</data>" + HttpUtils.CRLF +
-				"</content>";
-			
+			String content = new StringBuilder("<?xml version=\"1.0\" encoding=\"")
+					.append(UTF8_STR).append("\"?>").append(HttpUtils.CRLF)
+					.append("<content xmlns=\"urn:oma:xml:prs:pres-content\">")
+					.append(HttpUtils.CRLF).append("<mime-type>").append(photo.getType())
+					.append("</mime-type>").append(HttpUtils.CRLF)
+					.append("<encoding>base64</encoding>").append(HttpUtils.CRLF).append("<data>")
+					.append(data).append("</data>").append(HttpUtils.CRLF).append("</content>")
+					.toString();
+
 			// URL
 			String url = "/org.openmobilealliance.pres-content/users/" +
-				HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + 
+				HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) +
 				"/oma_status-icon/rcs_status_icon";
 
 			// Create the request
@@ -1224,12 +1235,12 @@ public class XdmManager {
 				logger.error("Can't upload the photo: unexpected exception", e);
 			}
 			return null;
-		}		
+		}
 	}
 
 	/**
 	 * Delete the end user photo
-	 * 
+	 *
 	 * @param photo Photo icon
 	 * @return Response
 	 */
@@ -1238,10 +1249,10 @@ public class XdmManager {
 			if (logger.isActivated()){
 				logger.info("Delete the end user photo");
 			}
-	
+
 			// URL
 			String url = "/org.openmobilealliance.pres-content/users/" +
-				HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) + 
+				HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) +
 				"/oma_status-icon/rcs_status_icon";
 
 			// Create the request
@@ -1264,9 +1275,9 @@ public class XdmManager {
 				logger.error("Can't delete the photo: unexpected exception", e);
 			}
 			return null;
-		}		
+		}
 	}
-	
+
 	/**
 	 * Download photo of a remote contact
 	 *
@@ -1279,10 +1290,10 @@ public class XdmManager {
 			if (logger.isActivated()){
 				logger.info("Download the photo at " + url);
 			}
-			
+
 			// Remove the beginning of the URL
-			url = url.substring(url.indexOf("/org.openmobilealliance.pres-content"));						
-			
+			url = url.substring(url.indexOf("/org.openmobilealliance.pres-content"));
+
 			// Create the request
 			HttpGetRequest request = new HttpGetRequest(url);
 
@@ -1297,22 +1308,22 @@ public class XdmManager {
 				InputSource input = new InputSource(
 						new ByteArrayInputStream(response.getContent()));
 				XcapPhotoIconResponseParser parser = new XcapPhotoIconResponseParser(input);
-				
+
 				// Return data
-				byte[] data = parser.getData(); 
+				byte[] data = parser.getData();
 				if (data != null) {
 					if (logger.isActivated()){
 						logger.debug("Received photo: encoding=" + parser.getEncoding() + ", mime=" + parser.getMime() + ", encoded size=" + data.length);
 					}
 					byte[] dataArray = Base64.decodeBase64(data);
-					
+
 	    			// Create a bitmap from the received photo data
 	    			Bitmap bitmap = BitmapFactory.decodeByteArray(dataArray, 0, dataArray.length);
-	    			if (bitmap != null) {	
+	    			if (bitmap != null) {
 	    				if (logger.isActivated()){
 	    					logger.debug("Photo width="+bitmap.getWidth() + " height="+bitmap.getHeight());
 	    				}
-	    				
+
 						return new PhotoIcon(dataArray, bitmap.getWidth(), bitmap.getHeight(), etag);
 	    			}else{
 	    				return null;
@@ -1339,7 +1350,7 @@ public class XdmManager {
 
 	/**
 	 * Set presence info
-	 * 
+	 *
 	 * @param info Presence info
 	 * @return Response
 	 */
@@ -1348,12 +1359,12 @@ public class XdmManager {
 			if (logger.isActivated()){
 				logger.info("Update presence info");
 			}
-	
+
 			// URL
 			String url = "/pidf-manipulation/users/" +
 					HttpUtils.encodeURL(ImsModule.IMS_USER_PROFILE.getPublicUri()) +
 					"/perm-presence";
-			
+
 			// Create the request
 			HttpPutRequest request = new HttpPutRequest(url, info, "application/pidf+xml");
 

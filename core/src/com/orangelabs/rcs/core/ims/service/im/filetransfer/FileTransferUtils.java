@@ -21,6 +21,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -39,8 +41,7 @@ import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.network.sip.Multipart;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
-import com.orangelabs.rcs.core.ims.service.im.chat.FileTransferMessage;
-import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
+import com.orangelabs.rcs.core.ims.service.im.chat.ChatMessage;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoParser;
 import com.orangelabs.rcs.platform.AndroidFactory;
@@ -54,9 +55,9 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Utility class to manage File Transfer
- * 
+ *
  * @author YPLO6403
- * 
+ *
  */
 public class FileTransferUtils {
 
@@ -67,22 +68,19 @@ public class FileTransferUtils {
 
 	/**
 	 * Is a file transfer HTTP event type
-	 * 
+	 *
 	 * @param mime
 	 *            MIME type
 	 * @return Boolean
 	 */
 	public static boolean isFileTransferHttpType(String mime) {
-		if ((mime != null) && mime.toLowerCase().startsWith(FileTransferHttpInfoDocument.MIME_TYPE)) {
-			return true;
-		} else {
-			return false;
-		}
+		return mime != null
+				&& mime.toLowerCase().startsWith(FileTransferHttpInfoDocument.MIME_TYPE);
 	}
 
 	/**
 	 * Create a content of fileIcon from a file
-	 * 
+	 *
 	 * @param file
 	 *            Uri of the image
 	 * @param fileIconId
@@ -153,7 +151,7 @@ public class FileTransferUtils {
 
 	/**
 	 * Generate a filename for the file icon
-	 * 
+	 *
 	 * @param msgId
 	 *            the message ID of the File Transfer
 	 * @param mimeType
@@ -174,7 +172,7 @@ public class FileTransferUtils {
 
 	/**
 	 * Extract file icon from incoming INVITE request
-	 * 
+	 *
 	 * @param request
 	 *            Request
 	 * @return fileIcon the file icon content persisted on disk
@@ -200,7 +198,8 @@ public class FileTransferUtils {
 					// Generate URL
 					Uri fileIconUri = ContentManager.generateUriForReceivedContent(iconName, mimeType);
 					// Get binary data
-					byte[] fileIconData = Base64.decodeBase64(mimeType.getBytes());
+					byte[] fileIconData = Base64.decodeBase64(mimeType
+							.getBytes(UTF8));
 					// Generate fileIcon content
 					MmContent result = ContentManager.createMmContent(fileIconUri, fileIconData.length, iconName);
 					result.setData(fileIconData);
@@ -220,7 +219,7 @@ public class FileTransferUtils {
 
 	/**
 	 * Parse a file transfer over HTTP document
-	 * 
+	 *
 	 * @param xml
 	 *            XML document
 	 * @return File transfer document
@@ -237,25 +236,23 @@ public class FileTransferUtils {
 
 	/**
 	 * Get the HTTP file transfer info document
-	 * 
+	 *
 	 * @param request
 	 *            Request
 	 * @return FT HTTP info
 	 */
 	public static FileTransferHttpInfoDocument getHttpFTInfo(SipRequest request) {
-		InstantMessage message = ChatUtils.getFirstMessage(request);
-		if ((message != null) && (message instanceof FileTransferMessage)) {
-			FileTransferMessage ftMsg = (FileTransferMessage) message;
-			byte[] xml = ftMsg.getFileInfo().getBytes();
-			return parseFileTransferHttpDocument(xml);
-		} else {
+		ChatMessage message = ChatUtils.getFirstMessage(request);
+		if (message == null || !FileTransferUtils.isFileTransferHttpType(message.getMimeType())) {
 			return null;
 		}
+		byte[] xml = message.getContent().getBytes(UTF8);
+		return parseFileTransferHttpDocument(xml);
 	}
 
 	/**
 	 * Create a content object from URI
-	 * 
+	 *
 	 * @param uri Uri of file
 	 * @return Content instance
 	 */

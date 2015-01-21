@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.provisioning.https;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
@@ -343,7 +345,8 @@ public class HttpsProvisioningManager {
             }
 
             result.code = response.getStatusLine().getStatusCode();
-            result.content = new String(EntityUtils.toByteArray(response.getEntity()), "UTF-8");
+            result.content = new String(EntityUtils.toByteArray(response.getEntity()),
+                    UTF8);
             if (result.code != 200) {
                 if (result.code == 403) {
                     if (logger.isActivated()) {
@@ -555,7 +558,8 @@ public class HttpsProvisioningManager {
             }
 
             result.code = response.getStatusLine().getStatusCode(); 
-			result.content = new String(EntityUtils.toByteArray(response.getEntity()), "UTF-8");
+            result.content = new String(EntityUtils.toByteArray(response.getEntity()),
+                    UTF8);
             if (result.code == 511) {
                 // Blackbird guidelines ID_2_6 Configuration mechanism over PS without Header Enrichment
                 // Use SMS provisioning on PS data network if server reply 511 NETWORK AUTHENTICATION REQUIRED 
@@ -586,7 +590,8 @@ public class HttpsProvisioningManager {
                 }
 				return result;
 			}
-			result.content = new String(EntityUtils.toByteArray(response.getEntity()), "UTF-8");
+			result.content = new String(EntityUtils.toByteArray(response.getEntity()),
+					UTF8);
 			return result;
 		} catch(UnknownHostException e) {
 			if (logger.isActivated()) {
@@ -655,7 +660,8 @@ public class HttpsProvisioningManager {
                 }
                 return result;
             }
-            result.content = new String(EntityUtils.toByteArray(response.getEntity()), "UTF-8");
+            result.content = new String(EntityUtils.toByteArray(response.getEntity()),
+                    UTF8);
 
             return result;
         } catch (Exception e) {

@@ -36,9 +36,10 @@ public interface ChatSessionListener extends ImsSessionListener {
 	/**
 	 * New message received
 	 * 
-	 * @param message Message
+	 * @param msg Chat message
+	 * @param imdnDisplayedRequested Indicates whether display notification is requested
 	 */
-    public void handleReceiveMessage(InstantMessage message);
+    public void handleReceiveMessage(ChatMessage msg, boolean imdnDisplayedRequested);
     
     /**
      * IM error
@@ -66,22 +67,25 @@ public interface ChatSessionListener extends ImsSessionListener {
 
     /**
      * Notifying sending of a message
-     *
-     * @param msg Instant message
+     * 
+     * @param msg Chat message
      */
-    public void handleMessageSending(InstantMessage msg);
+    public void handleMessageSending(ChatMessage msg);
     /**
      * Notifying that a message has been sent
      *
      * @param msgId Message ID
+     * @param mimeType MIME type
      */
-    public void handleMessageSent(String msgId);
+    public void handleMessageSent(String msgId, String mimeType);
+
     /**
      * Notifying failure of sending message
      *
      * @param msgId Message ID
+     * @param mimeType MIME type
      */
-    public void handleMessageFailedSend(String msgId);
+    public void handleMessageFailedSend(String msgId, String mimeType);
 
     /**
      * New message delivery status that are received as part of imdn notification
@@ -104,14 +108,7 @@ public interface ChatSessionListener extends ImsSessionListener {
      * @param reason Error reason
      */
     public void handleAddParticipantFailed(ContactId contact, String reason);
-    
-    /**
-     * New geoloc message received
-     * 
-     * @param geoloc Geoloc message
-     */
-    public void handleReceiveGeoloc(GeolocMessage geoloc);
-    
+
 	/**
 	 * Participant status changed
 	 * 

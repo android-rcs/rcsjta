@@ -51,25 +51,29 @@ public abstract class GroupChatListener extends IGroupChatListener.Stub {
 
 	/**
 	 * Callback called when a message status/reasonCode is changed.
-	 *
+	 * 
 	 * @param chatId chat id
+	 * @param mimeType MIME-type
 	 * @param msgId message id
 	 * @param status message status
 	 * @param reasonCode reason code
 	 */
-	public abstract void onMessageStatusChanged(String chatId, String msgId, int status,
-			int reasonCode);
+	public abstract void onMessageStatusChanged(String chatId, String mimeType, String msgId,
+			int status, int reasonCode);
 
 	/**
-	 * Callback called when a group delivery info status/reasonCode was changed for a single recipient to a group message.
-	 *
+	 * Callback called when a group delivery info status/reasonCode was changed
+	 * for a single recipient to a group message.
+	 * 
 	 * @param chatId chat id
 	 * @param contact contact
+	 * @param mimeType MIME-type
 	 * @param msgId message id
 	 * @param status message status
 	 * @param reasonCode status reason code
 	 */
-	public abstract void onMessageGroupDeliveryInfoChanged(String chatId, ContactId contact, String msgId, int status, int reasonCode);
+	public abstract void onMessageGroupDeliveryInfoChanged(String chatId, ContactId contact,
+			String mimeType, String msgId, int status, int reasonCode);
 
 	/**
 	 * Callback called when a participant status has been changed in a group chat.

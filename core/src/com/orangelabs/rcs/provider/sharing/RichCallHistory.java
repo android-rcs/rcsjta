@@ -29,7 +29,12 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
 
+import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.gsh.GeolocSharing;
+import com.gsma.services.rcs.gsh.GeolocSharingLog;
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.ish.ImageSharingLog;
 import com.gsma.services.rcs.vsh.VideoSharingLog;
@@ -162,6 +167,44 @@ public class RichCallHistory {
 		super();
 		mLocalContentResolver = localContentResolver;
 	}
+
+    /**
+     * Get geoloc sharing data
+     * 
+     * @param columnName Column name
+     * @param sharingId Sharing ID
+     */
+    private Cursor getGeolocSharingData(String columnName, String sharingId)
+            throws SQLException {
+        String[] projection = new String[] {
+            columnName
+        };
+        Cursor cursor = null;
+        try {
+            cursor = mLocalContentResolver.query(
+                    Uri.withAppendedPath(GeolocSharingData.CONTENT_URI, sharingId), projection,
+                    null, null, null);
+            if (cursor.moveToFirst()) {
+                return cursor;
+            }
+
+            throw new SQLException(
+                    "No row returned while querying for geoloc sharing data with sharingId : "
+                            + sharingId);
+
+        } catch (RuntimeException e) {
+            if (logger.isActivated()) {
+                logger.error(
+                        "Exception occured while retrieving geoloc sharing data of sharingId = '"
+                                + sharingId + "' ! ", e);
+            }
+            if (cursor != null) {
+                cursor.close();
+            }
+            throw e;
+        }
+    }
+
 	
 	/*--------------------- Video sharing methods ----------------------*/
 	
@@ -326,6 +369,145 @@ public class RichCallHistory {
 		mLocalContentResolver.update(
 				Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId), values, null, null);
 	}
+	   /*--------------------- Geoloc sharing methods ----------------------*/
+
+    /**
+     * Add an incoming geoloc sharing
+     * 
+     * @param contact Remote contact ID
+     * @param sharingId Sharing ID
+     * @param state Geoloc sharing state
+     * @param reasonCode Reason code of the state
+     */
+    public Uri addIncomingGeolocSharing(ContactId contact, String sharingId, int state,
+            int reasonCode) {
+        ContentValues values = new ContentValues();
+        values.put(GeolocSharingData.KEY_SHARING_ID, sharingId);
+        values.put(GeolocSharingData.KEY_CONTACT, contact.toString());
+        values.put(GeolocSharingData.KEY_MIME_TYPE, MimeType.GEOLOC_MESSAGE);
+        values.put(GeolocSharingData.KEY_DIRECTION, Direction.INCOMING);
+        values.put(GeolocSharingData.KEY_STATE, state);
+        values.put(GeolocSharingData.KEY_REASON_CODE, reasonCode);
+        values.put(GeolocSharingData.KEY_TIMESTAMP, System.currentTimeMillis());
+        return mLocalContentResolver.insert(GeolocSharingData.CONTENT_URI, values);
+    }
+
+    /**
+     * Add an outgoing geoloc sharing
+     * 
+     * @param contact Remote contact ID
+     * @param sharingId Sharing ID
+     * @param geoloc Geolocation
+     * @param state Geoloc sharing state
+     * @param reasonCode Reason code of the state
+     */
+    public Uri addOutgoingGeolocSharing(ContactId contact, String sharingId, Geoloc geoloc,
+            int state, int reasonCode) {
+        ContentValues values = new ContentValues();
+        values.put(GeolocSharingData.KEY_SHARING_ID, sharingId);
+        values.put(GeolocSharingData.KEY_CONTACT, contact.toString());
+        values.put(GeolocSharingData.KEY_MIME_TYPE, MimeType.GEOLOC_MESSAGE);
+        values.put(GeolocSharingData.KEY_CONTENT, geoloc.toString());
+        values.put(GeolocSharingData.KEY_DIRECTION, Direction.OUTGOING);
+        values.put(GeolocSharingData.KEY_STATE, state);
+        values.put(GeolocSharingData.KEY_REASON_CODE, reasonCode);
+        values.put(GeolocSharingData.KEY_TIMESTAMP, System.currentTimeMillis());
+        return mLocalContentResolver.insert(GeolocSharingData.CONTENT_URI, values);
+    }
+
+    /**
+     * Sets the data of a geoloc sharing and updates state to transferred
+     * 
+     * @param sharingId Sharing ID
+     * @param geoloc Geolococation
+     */
+    public void setGeolocSharingTransferred(String sharingId, Geoloc geoloc) {
+        ContentValues values = new ContentValues();
+        values.put(GeolocSharingData.KEY_CONTENT, geoloc.toString());
+        values.put(GeolocSharingData.KEY_STATE, GeolocSharing.State.TRANSFERRED);
+        values.put(GeolocSharingData.KEY_REASON_CODE, GeolocSharing.ReasonCode.UNSPECIFIED);
+        if (mLocalContentResolver.update(Uri.withAppendedPath(GeolocSharingData.CONTENT_URI, sharingId), values, null, null) < 1) {
+            /* TODO: Exception throwing should be implemented here in CR037 */
+            if (logger.isActivated()) {
+                logger.warn(new StringBuilder("There was no geoloc sharing for sharingId '")
+                        .append(sharingId).append("' to update!").toString());
+            }
+        }
+    }
+
+    /**
+     * Update the geoloc sharing state and reason code
+     * 
+     * @param sharingId Sharing ID
+     * @param state Geoloc sharing state
+     * @param reasonCode Reason code of the state
+     */
+    public void setGeolocSharingStateAndReasonCode(String sharingId, int state, int reasonCode) {
+        ContentValues values = new ContentValues();
+        values.put(GeolocSharingData.KEY_STATE, state);
+        values.put(GeolocSharingData.KEY_REASON_CODE, reasonCode);
+        if (mLocalContentResolver.update(Uri.withAppendedPath(GeolocSharingData.CONTENT_URI, sharingId), values, null, null) < 1) {
+            /* TODO: Exception throwing should be implemented here in CR037 */
+            if (logger.isActivated()) {
+                logger.warn(new StringBuilder("There was no geoloc sharing for sharingId '")
+                        .append(sharingId).append("' to update!").toString());
+            }
+        }
+    }
+
+    /**
+     * Get the geoloc sharing state
+     * 
+     * @param sharingId Sharing ID
+     */
+    public int getGeolocSharingState(String sharingId) {
+        if (logger.isActivated()) {
+            logger.debug(new StringBuilder("Get geoloc sharing state for ").append(sharingId)
+                    .append(".").toString());
+        }
+        return getDataAsInt(getGeolocSharingData(GeolocSharingData.KEY_STATE, sharingId));
+    }
+
+    /**
+     * Get the geoloc sharing state reason code
+     * 
+     * @param sharingId Sharing ID
+     */
+    public int getGeolocSharingStateReasonCode(String sharingId) {
+        if (logger.isActivated()) {
+            logger.debug(new StringBuilder("Get geoloc sharing state reason code for ")
+                    .append(sharingId).append(".").toString());
+        }
+        return getDataAsInt(getGeolocSharingData(GeolocSharingData.KEY_REASON_CODE, sharingId));
+    }
+
+    /**
+     * Get cache-able geolocation sharing info from its unique Id
+     * 
+     * @param sharingId
+     * @return Cursor the caller of this method has to close the cursor if a
+     *         cursor is returned
+     */
+    public Cursor getCacheableGeolocSharingData(String sharingId) {
+        Cursor cursor = null;
+        try {
+            cursor = mLocalContentResolver.query(
+                    Uri.withAppendedPath(GeolocSharingLog.CONTENT_URI, sharingId), null, null,
+                    null, null);
+            if (cursor.moveToFirst()) {
+                return cursor;
+            }
+            throw new SQLException(
+                    "No row returned while querying for geoloc sharing data with sharingId : "
+                            + sharingId);
+
+        } catch (RuntimeException e) {
+            if (cursor != null) {
+                cursor.close();
+            }
+            throw e;
+        }
+    }
 
 	/**
 	 * Delete all entries in Rich Call history
@@ -333,6 +515,7 @@ public class RichCallHistory {
 	public void deleteAllEntries() {
 		mLocalContentResolver.delete(ImageSharingLog.CONTENT_URI, null, null);
 		mLocalContentResolver.delete(VideoSharingLog.CONTENT_URI, null, null);
+		mLocalContentResolver.delete(GeolocSharingData.CONTENT_URI, null, null);
 	}	
 
 	/**

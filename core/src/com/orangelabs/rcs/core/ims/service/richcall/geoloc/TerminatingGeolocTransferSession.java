@@ -22,10 +22,13 @@
 
 package com.orangelabs.rcs.core.ims.service.richcall.geoloc;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Vector;
 
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.ContentManager;
@@ -46,7 +49,6 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
-import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.core.ims.service.richcall.RichcallService;
 import com.orangelabs.rcs.utils.ContactUtils;
@@ -171,7 +173,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 
 	    	// Parse the remote SDP part
 			String remoteSdp = getDialogPath().getInvite().getSdpContent();
-        	SdpParser parser = new SdpParser(remoteSdp.getBytes());
+        	SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));
     		Vector<MediaDescription> media = parser.getMediaDescriptions();
 			MediaDescription mediaDesc = media.elementAt(0);
 			MediaAttribute attr1 = mediaDesc.getMediaAttribute("file-selector");
@@ -366,8 +368,8 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
     	
 	   	try {
             // Parse received geoloc info
-			String geolocDoc = new String(data);
-            GeolocPush geoloc = ChatUtils.parseGeolocDocument(geolocDoc);
+			String geolocDoc = new String(data, UTF8);
+            Geoloc geoloc = ChatUtils.parseGeolocDocument(geolocDoc);
         	
         	// Set geoloc
         	setGeoloc(geoloc);

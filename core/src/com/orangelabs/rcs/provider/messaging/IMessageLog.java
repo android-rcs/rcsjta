@@ -22,7 +22,7 @@
 package com.orangelabs.rcs.provider.messaging;
 
 import com.gsma.services.rcs.contacts.ContactId;
-import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
+import com.orangelabs.rcs.core.ims.service.im.chat.ChatMessage;
 
 import android.database.Cursor;
 
@@ -40,15 +40,16 @@ public interface IMessageLog {
 	 * @param msg
 	 *            Chat message
 	 */
-	public void addSpamMessage(InstantMessage msg);
+	public void addOneToOneSpamMessage(ChatMessage msg);
 
 	/**
 	 * Add a chat message
 	 * 
 	 * @param msg
 	 *            Chat message
+	 * @param imdnDisplayedRequested IMDN display report requested
 	 */
-	public void addIncomingOneToOneChatMessage(InstantMessage msg);
+	public void addIncomingOneToOneChatMessage(ChatMessage msg, boolean imdnDisplayedRequested);
 
 	/**
 	 * Add a chat message
@@ -60,7 +61,8 @@ public interface IMessageLog {
 	 * @param reasonCode
 	 *            Status reason code
 	 */
-	public void addOutgoingOneToOneChatMessage(InstantMessage msg, int status, int reasonCode);
+	public void addOutgoingOneToOneChatMessage(ChatMessage msg, int status,
+			int reasonCode);
 
 	/**
 	 * Add a group chat message
@@ -76,7 +78,8 @@ public interface IMessageLog {
 	 * @param reasonCode
 	 *            Status reason code
 	 */
-	public void addGroupChatMessage(String chatId, InstantMessage msg, int direction, int status, int reasonCode);
+	public void addGroupChatMessage(String chatId, ChatMessage msg,
+			int direction, int status, int reasonCode);
 
 	/**
 	 * Add group chat system message
@@ -176,6 +179,14 @@ public interface IMessageLog {
 	 * @return reason code of the state
 	 */
 	public int getMessageReasonCode(String msgId);
+
+	/**
+	 * Get message MIME-type from its unique ID
+	 * 
+	 * @param msgId
+	 * @return MIME-type
+	 */
+	public String getMessageMimeType(String msgId);
 
 	/**
 	 * Get cacheable message data from its unique ID

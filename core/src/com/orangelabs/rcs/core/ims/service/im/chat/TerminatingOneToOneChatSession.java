@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Vector;
@@ -46,6 +48,7 @@ import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.PhoneUtils;
@@ -66,17 +69,17 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param parent IMS service
 	 * @param invite Initial INVITE request
 	 * @param contact the remote contactId
+	 * @param rcsSettings RCS settings
+	 * @param messagingLog Messaging log
 	 */
-	public TerminatingOneToOneChatSession(ImsService parent, SipRequest invite, ContactId contact) {
-		super(parent, contact, PhoneUtils.formatContactIdToUri(contact));
-
-		// Set first message
-		InstantMessage firstMsg = ChatUtils.getFirstMessage(invite);
-		setFirstMesssage(firstMsg);
+	public TerminatingOneToOneChatSession(ImsService parent, SipRequest invite, ContactId contact,
+			RcsSettings rcsSettings, MessagingLog messagingLog) {
+		super(parent, contact, PhoneUtils.formatContactIdToUri(contact), ChatUtils
+				.getFirstMessage(invite), rcsSettings, messagingLog);
 
 		// Create dialog path
 		createTerminatingDialogPath(invite);
@@ -221,7 +224,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 
 			// Parse the remote SDP part
 			String remoteSdp = getDialogPath().getInvite().getSdpContent();
-			SdpParser parser = new SdpParser(remoteSdp.getBytes());
+			SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));
 			Vector<MediaDescription> media = parser.getMediaDescriptions();
 			MediaDescription mediaDesc = media.elementAt(0);
 			MediaAttribute attr1 = mediaDesc.getMediaAttribute("path");

@@ -40,6 +40,11 @@ public class OneToOneChatIntent {
 	public final static String ACTION_NEW_ONE_TO_ONE_CHAT_MESSAGE = "com.gsma.services.rcs.chat.action.NEW_ONE_TO_ONE_CHAT_MESSAGE";
 
 	/**
+	 * MIME-type of received message
+	 */
+	public final static String EXTRA_MIME_TYPE = "mimeType";
+
+	/**
 	 * Message ID of received message
 	 */
 	public final static String EXTRA_MESSAGE_ID = "messageId";

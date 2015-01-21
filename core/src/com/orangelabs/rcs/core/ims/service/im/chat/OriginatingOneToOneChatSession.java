@@ -22,18 +22,18 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import com.gsma.services.rcs.contacts.ContactId;
-import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.Multipart;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.im.chat.cpim.CpimMessage;
-import com.orangelabs.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.PhoneUtils;
-import com.orangelabs.rcs.utils.StringUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -58,11 +58,12 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
 	 * @param parent IMS service
 	 * @param contact Remote contact identifier
 	 * @param msg First message of the session
+	 * @param rcsSettings RCS settings
+	 * @param messagingLog Messaging log
 	 */
-	public OriginatingOneToOneChatSession(ImsService parent, ContactId contact, InstantMessage msg) {
-		super(parent, contact, PhoneUtils.formatContactIdToUri(contact));
-		// Set first message
-		setFirstMesssage(msg);
+	public OriginatingOneToOneChatSession(ImsService parent, ContactId contact, ChatMessage msg,
+			RcsSettings rcsSettings, MessagingLog messagingLog) {
+		super(parent, contact, PhoneUtils.formatContactIdToUri(contact), msg, rcsSettings, messagingLog);
 		// Create dialog path
 		createOriginatingDialogPath();
 		// Set contribution ID
@@ -103,51 +104,35 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
 
 			// If there is a first message then builds a multipart content else
 			// builds a SDP content
-			InstantMessage firstMessage = getFirstMessage();
-			if (firstMessage != null) {
+			ChatMessage chatMessage = getFirstMessage();
+			if (chatMessage != null) {
 				// Build CPIM part
 				String from = ChatUtils.ANOMYNOUS_URI;
 				String to = ChatUtils.ANOMYNOUS_URI;
 
 				boolean useImdn = getImdnManager().isImdnActivated();
-				String formattedMsg;
-				String mime;
-				if (firstMessage instanceof GeolocMessage) {
-					GeolocMessage geolocMsg = (GeolocMessage)firstMessage;
-					formattedMsg = ChatUtils.buildGeolocDocument(geolocMsg.getGeoloc(),
-							ImsModule.IMS_USER_PROFILE.getPublicUri(), firstMessage
-									.getMessageId());
-					mime = GeolocInfoDocument.MIME_TYPE;
-				} else if (firstMessage instanceof FileTransferMessage) {
-					FileTransferMessage fileMsg = (FileTransferMessage)firstMessage;
-					formattedMsg = fileMsg.getFileInfo();
-					mime = FileTransferHttpInfoDocument.MIME_TYPE;
-				} else {
-					formattedMsg = firstMessage.getTextMessage();
-					mime = InstantMessage.MIME_TYPE;
-				}
-
 				String cpim;
 				if (useImdn) {
 					// Send message in CPIM + IMDN
-					cpim = ChatUtils.buildCpimMessageWithImdn(from, to, firstMessage
-							.getMessageId(), StringUtils.encodeUTF8(formattedMsg), mime);
+					cpim = ChatUtils.buildCpimMessageWithImdn(from, to, chatMessage.getMessageId(),
+							chatMessage.getContent(), chatMessage.getMimeType());
 				} else {
 					// Send message in CPIM
-					cpim = ChatUtils.buildCpimMessage(from, to,
-							StringUtils.encodeUTF8(formattedMsg), mime);
+					cpim = ChatUtils.buildCpimMessage(from, to, chatMessage.getContent(),
+							chatMessage.getMimeType());
 				}
 
-				// Build multipart
 				String multipart = new StringBuilder(Multipart.BOUNDARY_DELIMITER)
 						.append(BOUNDARY_TAG).append(SipUtils.CRLF)
 						.append("Content-Type: application/sdp").append(SipUtils.CRLF)
-						.append("Content-Length: ").append(sdp.getBytes().length)
+						.append("Content-Length: ")
+						.append(sdp.getBytes(UTF8).length)
 						.append(SipUtils.CRLF).append(SipUtils.CRLF).append(sdp)
 						.append(SipUtils.CRLF).append(Multipart.BOUNDARY_DELIMITER)
 						.append(BOUNDARY_TAG).append(SipUtils.CRLF).append("Content-Type: ")
 						.append(CpimMessage.MIME_TYPE).append(SipUtils.CRLF)
-						.append("Content-Length: ").append(cpim.getBytes().length)
+						.append("Content-Length: ")
+						.append(cpim.getBytes(UTF8).length)
 						.append(SipUtils.CRLF).append(SipUtils.CRLF).append(cpim)
 						.append(SipUtils.CRLF).append(Multipart.BOUNDARY_DELIMITER)
 						.append(BOUNDARY_TAG).append(Multipart.BOUNDARY_DELIMITER).toString();

@@ -30,25 +30,22 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
 
-import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.RcsCommon.ReadStatus;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.orangelabs.rcs.core.ims.service.im.chat.GeolocMessage;
-import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
-import com.orangelabs.rcs.core.ims.service.im.chat.InstantMessage;
+import com.orangelabs.rcs.core.ims.service.im.chat.ChatMessage;
+import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
 import com.orangelabs.rcs.provider.LocalContentResolver;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
-import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Class to interface the message table
- * 
+ *
  */
 public class MessageLog implements IMessageLog {
 
@@ -61,14 +58,14 @@ public class MessageLog implements IMessageLog {
 	 * The logger
 	 */
 	private static final Logger logger = Logger.getLogger(MessageLog.class.getSimpleName());
-	
+
 	private static final String[] PROJECTION_MESSAGE_ID = new String[] { MessageData.KEY_MESSAGE_ID };
 
 	private static final int FIRST_COLUMN_IDX = 0;
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param localContentResolver
 	 *            Local content resolver
 	 * @param groupChatLog
@@ -80,37 +77,15 @@ public class MessageLog implements IMessageLog {
 		this.groupChatDeliveryInfoLog = groupChatDeliveryInfoLog;
 	}
 
-	/**
-	 * Format geoloc object to string
-	 * 
-	 * @param geoloc
-	 *            Geoloc object
-	 * @return String
-	 */
-	private static String geolocToString(Geoloc geoloc) {
-		String label = geoloc.getLabel();
-		if (label == null) {
-			label = "";
-		}
-		return label + "," + geoloc.getLatitude() + "," + geoloc.getLongitude() + "," + geoloc.getExpiration() + ","
-				+ geoloc.getAccuracy();
-	}
-
-	/**
-	 * Add incoming one-to-one chat message
-	 * 
-	 * @param msg Chat message
-	 * @param status Status
-	 * @param reasonCode Reason code
-	 */
-	private void addIncomingOneToOneMessage(InstantMessage msg, int status, int reasonCode) {
-		ContactId contact = msg.getRemote();
+	private void addIncomingOneToOneMessage(ChatMessage msg, int status,
+			int reasonCode) {
+		ContactId contact = msg.getRemoteContact();
 		String msgId = msg.getMessageId();
 		if (logger.isActivated()) {
 			logger.debug(new StringBuilder("Add incoming chat message: contact=")
-			.append(contact).append(", msg=").append(msgId)
-			.append(", status=").append(status).append(", reasonCode=").append(reasonCode)
-			.toString());
+					.append(contact).append(", msg=").append(msgId).append(", status=")
+					.append(status).append(", reasonCode=").append(reasonCode).append(".")
+					.toString());
 		}
 
 		ContentValues values = new ContentValues();
@@ -119,17 +94,9 @@ public class MessageLog implements IMessageLog {
 		values.put(MessageData.KEY_CONTACT, contact.toString());
 		values.put(MessageData.KEY_DIRECTION, Direction.INCOMING);
 		values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD);
-
-		if (msg instanceof GeolocMessage) {
-			values.put(MessageData.KEY_MIME_TYPE, MimeType.GEOLOC_MESSAGE);
-			GeolocPush geoloc = ((GeolocMessage)msg).getGeoloc();
-			Geoloc geolocData = new Geoloc(geoloc.getLabel(), geoloc.getLatitude(),
-					geoloc.getLongitude(), geoloc.getExpiration(), geoloc.getAccuracy());
-			values.put(MessageData.KEY_CONTENT, geolocToString(geolocData));
-		} else {
-			values.put(MessageData.KEY_MIME_TYPE, MimeType.TEXT_MESSAGE);
-			values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
-		}
+		String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
+		values.put(MessageData.KEY_MIME_TYPE, apiMimeType);
+		values.put(MessageData.KEY_CONTENT, ChatUtils.networkContentToPersistedContent(msg));
 
 		values.put(MessageData.KEY_TIMESTAMP, msg.getDate().getTime());
 		values.put(MessageData.KEY_TIMESTAMP_SENT, 0);
@@ -149,13 +116,15 @@ public class MessageLog implements IMessageLog {
 	 * @param reasonCode Reason code
 	 */
 	@Override
-	public void addOutgoingOneToOneChatMessage(InstantMessage msg, int status, int reasonCode) {
-		ContactId contact = msg.getRemote();
+	public void addOutgoingOneToOneChatMessage(ChatMessage msg, int status,
+			int reasonCode) {
+		ContactId contact = msg.getRemoteContact();
 		String msgId = msg.getMessageId();
 		if (logger.isActivated()) {
-			logger.debug(new StringBuilder("Add outgoing chat message: contact=").append(contact)
-					.append(", msg=").append(msgId).append(", status=").append(status)
-					.append(", reasonCode=").append(reasonCode).toString());
+			logger.debug(new StringBuilder("Add outgoing chat message: contact=")
+					.append(contact).append(", msg=").append(msgId).append(", status=")
+					.append(status).append(", reasonCode=").append(reasonCode).append(".")
+					.toString());
 		}
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_CHAT_ID, contact.toString());
@@ -163,17 +132,10 @@ public class MessageLog implements IMessageLog {
 		values.put(MessageData.KEY_CONTACT, contact.toString());
 		values.put(MessageData.KEY_DIRECTION, Direction.OUTGOING);
 		values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD);
-
-		if (msg instanceof GeolocMessage) {
-			values.put(MessageData.KEY_MIME_TYPE, MimeType.GEOLOC_MESSAGE);
-			GeolocPush geoloc = ((GeolocMessage)msg).getGeoloc();
-			Geoloc geolocData = new Geoloc(geoloc.getLabel(), geoloc.getLatitude(),
-					geoloc.getLongitude(), geoloc.getExpiration(), geoloc.getAccuracy());
-			values.put(MessageData.KEY_CONTENT, geolocToString(geolocData));
-		} else {
-			values.put(MessageData.KEY_MIME_TYPE, MimeType.TEXT_MESSAGE);
-			values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
-		}
+		String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
+		values.put(MessageData.KEY_MIME_TYPE, apiMimeType);
+		values.put(MessageData.KEY_CONTENT,
+				ChatUtils.networkContentToPersistedContent(msg));
 
 		values.put(MessageData.KEY_TIMESTAMP, msg.getDate().getTime());
 		values.put(MessageData.KEY_TIMESTAMP_SENT, msg.getDate().getTime());
@@ -186,55 +148,62 @@ public class MessageLog implements IMessageLog {
 	}
 
 	@Override
-	public void addSpamMessage(InstantMessage msg) {
+	public void addOneToOneSpamMessage(ChatMessage msg) {
 		addIncomingOneToOneMessage(msg, ChatLog.Message.Status.Content.REJECTED,
 				ChatLog.Message.ReasonCode.REJECTED_SPAM);
 	}
 
+	/**
+	 * Add incoming one-to-one chat message
+	 *
+	 * @param msg Chat message
+	 * @param imdnDisplayedRequested Indicates whether IMDN display was requested
+	 */
 	@Override
-	public void addIncomingOneToOneChatMessage(InstantMessage msg) {
-			if (msg.isImdnDisplayedRequested()) {
-				addIncomingOneToOneMessage(msg,
-						ChatLog.Message.Status.Content.DISPLAY_REPORT_REQUESTED,
-						ChatLog.Message.ReasonCode.UNSPECIFIED);
+	public void addIncomingOneToOneChatMessage(ChatMessage msg, boolean imdnDisplayedRequested) {
+		if (imdnDisplayedRequested) {
+			addIncomingOneToOneMessage(msg,
+					ChatLog.Message.Status.Content.DISPLAY_REPORT_REQUESTED,
+					ChatLog.Message.ReasonCode.UNSPECIFIED);
 
-			} else {
-				addIncomingOneToOneMessage(msg, ChatLog.Message.Status.Content.RECEIVED,
-						ChatLog.Message.ReasonCode.UNSPECIFIED);
-			}
-
+		} else {
+			addIncomingOneToOneMessage(msg, ChatLog.Message.Status.Content.RECEIVED,
+					ChatLog.Message.ReasonCode.UNSPECIFIED);
+		}
 	}
 
+	/**
+	 * Add group chat message
+	 *
+	 * @param chatId Chat ID
+	 * @param msg Chat message
+	 * @param msg direction Direction
+	 * @param status Status
+	 * @param reasonCode Reason code
+	 */
 	@Override
-	public void addGroupChatMessage(String chatId, InstantMessage msg, int direction, int status, int reasonCode) {
+	public void addGroupChatMessage(String chatId, ChatMessage msg, int direction, int status, int reasonCode) {
 		String msgId = msg.getMessageId();
+		ContactId contact = msg.getRemoteContact() ;
 		if (logger.isActivated()) {
-			logger.debug("Add group chat message: chatID=" + chatId + ", msg=" + msgId + ", dir="
-					+ direction + ", contact=" + msg.getRemote());
+			logger.debug(new StringBuilder("Add group chat message; chatId=").append(chatId)
+					.append(", msg=").append(msgId).append(", dir=").append(direction)
+					.append(", contact=").append(contact).append(".").toString());
 		}
-
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_CHAT_ID, chatId);
 		values.put(MessageData.KEY_MESSAGE_ID, msgId);
-		if (msg.getRemote() != null) {
-			values.put(MessageData.KEY_CONTACT, msg.getRemote().toString());
+		if (contact != null) {
+			values.put(MessageData.KEY_CONTACT, contact.toString());
 		}
 		values.put(MessageData.KEY_DIRECTION, direction);
 		values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD);
 		values.put(MessageData.KEY_STATUS, status);
 		values.put(MessageData.KEY_REASON_CODE, reasonCode);
-
-		//file transfer are not handled here but in FileTransferLog; therefore FileTransferMessages are not to be processed here
-		if (msg instanceof GeolocMessage) {
-			values.put(MessageData.KEY_MIME_TYPE, MimeType.GEOLOC_MESSAGE);
-			GeolocPush geoloc = ((GeolocMessage) msg).getGeoloc();
-			Geoloc geolocData = new Geoloc(geoloc.getLabel(), geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getExpiration(),
-					geoloc.getAccuracy());
-			values.put(MessageData.KEY_CONTENT, geolocToString(geolocData));
-		} else {
-			values.put(MessageData.KEY_MIME_TYPE, MimeType.TEXT_MESSAGE);
-			values.put(MessageData.KEY_CONTENT, msg.getTextMessage());
-		}
+		String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
+		values.put(MessageData.KEY_MIME_TYPE, apiMimeType);
+		values.put(MessageData.KEY_CONTENT,
+				ChatUtils.networkContentToPersistedContent(msg));
 
 		if (direction == Direction.INCOMING) {
 			// Receive message
@@ -404,6 +373,17 @@ public class MessageLog implements IMessageLog {
 		}
 	}
 
+	private String getDataAsString(Cursor cursor) {
+		try {
+			return cursor.getString(FIRST_COLUMN_IDX);
+
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
 	@Override
 	public boolean isMessageRead(String msgId) {
 		if (logger.isActivated()) {
@@ -453,6 +433,14 @@ public class MessageLog implements IMessageLog {
 			logger.debug(new StringBuilder("Get message reason code for ").append(msgId).toString());
 		}
 		return getDataAsInt(getMessageData(MessageData.KEY_REASON_CODE, msgId));
+	}
+
+	@Override
+	public String getMessageMimeType(String msgId) {
+		if (logger.isActivated()) {
+			logger.debug(new StringBuilder("Get message MIME-type for ").append(msgId).toString());
+		}
+		return getDataAsString(getMessageData(MessageData.KEY_MIME_TYPE, msgId));
 	}
 
 	@Override

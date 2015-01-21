@@ -21,6 +21,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.ipcall;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.util.Vector;
 
 import android.os.RemoteException;
@@ -55,7 +57,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * IP call session
- * 
+ *
  * @author opob7414
  */
 public abstract class IPCallSession extends ImsServiceSession {
@@ -73,7 +75,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 	 */
 	public static final int TYPE_INCOMING_IPCALL = 16;
 	public static final int TYPE_OUTGOING_IPCALL = 17;
-	
+
 	/**
 	 * Live audio content to be streamed
 	 */
@@ -93,7 +95,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 	 * IP call player
 	 */
 	private IIPCallPlayer player;
-	
+
 	/**
 	 * Call hold manager
 	 */
@@ -103,10 +105,10 @@ public abstract class IPCallSession extends ImsServiceSession {
 	 * The logger
 	 */
 	private final static Logger logger = Logger.getLogger(IPCallSession.class.getSimpleName());
-	
+
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param parent IMS service
 	 * @param contact Remote contactId
 	 * @param audioContent Audio content
@@ -117,12 +119,12 @@ public abstract class IPCallSession extends ImsServiceSession {
 
 		this.audioContent = audioContent;
 		this.videoContent = videoContent;
-		
+
 	}
-	
+
 	/**
 	 * Is video activated
-	 * 
+	 *
 	 * @return Boolean
 	 */
 	public boolean isVideoActivated() {
@@ -131,7 +133,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 
 	/**
 	 * Returns the video content
-	 * 
+	 *
 	 * @return Video content
 	 */
 	public VideoContent getVideoContent() {
@@ -140,7 +142,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 
 	/**
 	 * Set the video content
-	 * 
+	 *
 	 * @param videoContent Video content
 	 */
 	public void setVideoContent(VideoContent videoContent) {
@@ -149,7 +151,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 
 	/**
 	 * Returns the audio content
-	 * 
+	 *
 	 * @return Audio content
 	 */
 	public AudioContent getAudioContent() {
@@ -158,7 +160,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 
 	/**
 	 * Set the audio content
-	 * 
+	 *
 	 * @param audioContent Audio content
 	 */
 	public void setAudioContent(AudioContent audioContent) {
@@ -167,7 +169,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 
 	/**
 	 * Get the IP call renderer
-	 * 
+	 *
 	 * @return Renderer
 	 */
 	public IIPCallRenderer getRenderer() {
@@ -176,7 +178,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 
 	/**
 	 * Set the IP call renderer
-	 * 
+	 *
 	 * @param renderer Renderer
 	 */
 	public void setRenderer(IIPCallRenderer renderer) {
@@ -185,7 +187,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 
 	/**
 	 * Get the IP call player
-	 * 
+	 *
 	 * @return Player
 	 */
 	public IIPCallPlayer getPlayer() {
@@ -194,21 +196,22 @@ public abstract class IPCallSession extends ImsServiceSession {
 
 	/**
 	 * Set the IP call player
-	 * 
+	 *
 	 * @param player Player
 	 */
 	public void setPlayer(IIPCallPlayer player) {
 		this.player = player;
 	}
-	
+
     /**
      * Prepare media session
      *
-     * @throws Exception 
+     * @throws Exception
      */
 	public void prepareMediaSession() throws Exception {
 		// Parse the remote SDP part
-		SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes());
+		SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(
+				UTF8));
 
 		// Extract the remote host (same between audio and video)
 		String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription.connectionInfo);
@@ -265,7 +268,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 				return;
 			}
 		}
-		
+
 		// Set the OrientationHeaderID
 		if (mediaVideo!= null) {
 			SdpOrientationExtension extensionHeader = SdpOrientationExtension.create(mediaVideo);
@@ -283,8 +286,8 @@ public abstract class IPCallSession extends ImsServiceSession {
 				logger.debug("Open renderer on " + remoteHost + ":" + audioRemotePort + ":" + videoRemotePort);
 			}
 		}
-		
-		// Open the player 
+
+		// Open the player
 		if (getPlayer() != null) {
 			getPlayer().addEventListener(new PlayerEventListener(this));
 			getPlayer().open(selectedAudioCodec, selectedVideoCodec, remoteHost, audioRemotePort, videoRemotePort);
@@ -292,7 +295,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 				logger.debug("Open player on " + remoteHost + ":" + audioRemotePort + ":" + videoRemotePort);
 			}
 		}
-		
+
 		// Open the video player/renderer
 		if ((getRenderer()!= null)&&(getPlayer()!= null)&&(selectedVideoCodec!= null)) {
 			getRenderer().open(selectedAudioCodec, selectedVideoCodec, remoteHost, audioRemotePort, videoRemotePort);
@@ -306,7 +309,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 
 	/**
      * Start media session
-     * 
+     *
      * @throws RemoteException
      */
 	public void startMediaSession() throws RemoteException {
@@ -316,30 +319,30 @@ public abstract class IPCallSession extends ImsServiceSession {
               }
 			getPlayer().start();
 		}
-		
+
 		if (getRenderer()!= null) {
 			if (logger.isActivated()) {
-              	logger.debug("Start renderer");	
+              	logger.debug("Start renderer");
 			}
 			getRenderer().start();
 		}
 	}
-	
+
 	/**
 	 * Receive BYE request
-	 * 
+	 *
 	 * @param bye BYE request
 	 */
 	public void receiveBye(SipRequest bye) {
 		super.receiveBye(bye);
-		
+
 		// Request capabilities to the remote
 	    getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getRemoteContact());
 	}
 
 	/**
 	 * Create an INVITE request
-	 * 
+	 *
 	 * @return the INVITE request
 	 * @throws SipException
 	 */
@@ -347,29 +350,29 @@ public abstract class IPCallSession extends ImsServiceSession {
 		return SipMessageFactory.createInvite(getDialogPath(), null,
 				getDialogPath().getLocalContent());
 	}
-	
+
 	/**
 	 * Receive re-INVITE request
-	 * 
+	 *
 	 * @param reInvite re-INVITE received request
 	 */
 	public void receiveReInvite(SipRequest reInvite) {
 		if (logger.isActivated()) {
 			logger.info("receiveReInvite");
 		}
-		
-		if (reInvite.getSdpContent() == null) { 
-			// "Keep Alive" ReInvite	
+
+		if (reInvite.getSdpContent() == null) {
+			// "Keep Alive" ReInvite
 			getSessionTimerManager().receiveReInvite(reInvite);
-		} else { 
+		} else {
 			// ReInvite for Update of Session
 			 String content = reInvite.getSdpContent();
-			
+
 			 // set received sdp proposal as remote sdp content in dialogPath
 			getDialogPath().setRemoteContent(content);
-			
+
 			int requestType = -1;
-			// Analyze sdp to dispatch according to sdp content		
+			// Analyze sdp to dispatch according to sdp content
 			if (isTagPresent(content, "a=sendonly")){
 				requestType = 3;// Set On Hold Sendonly
 			}
@@ -392,18 +395,18 @@ public abstract class IPCallSession extends ImsServiceSession {
 			}
 
 			switch (requestType) {
-			case (0): { // Case Add Video			
+			case (0): { // Case Add Video
 				// create Video Content and set it on session
 				VideoContent videocontent = ContentManager.createLiveVideoContentFromSdp(reInvite.getContentBytes());
 				setVideoContent(videoContent);
-				
+
 				// processes user Answer and SIP response
 				getUpdateSessionManager().waitUserAckAndSendReInviteResp(
 						reInvite,
-						IPCallService.FEATURE_TAGS_IP_VIDEO_CALL,  
+						IPCallService.FEATURE_TAGS_IP_VIDEO_CALL,
 						IPCallSession.ADD_VIDEO);
 
-				
+
 				// get video Encoding , video Width and video Height
 				String videoEncoding = (videocontent == null) ? ""
 						: videocontent.getEncoding();
@@ -411,7 +414,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 						.getWidth();
 				int videoHeight = (videocontent == null) ? 0 : videocontent
 						.getHeight();
-				
+
 				// Notify listeners
 				for (int i = 0; i < getListeners().size(); i++) {
 					((IPCallStreamingSessionListener) getListeners().get(i))
@@ -422,13 +425,13 @@ public abstract class IPCallSession extends ImsServiceSession {
 			case (1): { // Case Remove Video
 				// build sdp response
 				String sdp = buildRemoveVideoSdpResponse();
-				
+
 				// set sdp response as local content
 				getDialogPath().setLocalContent(sdp);
-				
+
 				// process user Answer and SIP response
 				getUpdateSessionManager().send200OkReInviteResp(reInvite,
-						IPCallService.FEATURE_TAGS_IP_VOICE_CALL, sdp, 
+						IPCallService.FEATURE_TAGS_IP_VOICE_CALL, sdp,
 						IPCallSession.REMOVE_VIDEO);
 
 				// Notify listeners
@@ -440,10 +443,10 @@ public abstract class IPCallSession extends ImsServiceSession {
 			case (2): { // Case Set On Hold Inactive
 				// instanciate Hold Manager
 				holdMgr = new IPCall_RemoteHoldInactive(this);
-				
+
 				// launhc callHold
 				holdMgr.setCallHold(true, reInvite);
-				
+
 				// Notify listeners
 				for (int i = 0; i < getListeners().size(); i++) {
 					((IPCallStreamingSessionListener) getListeners().get(i))
@@ -451,14 +454,14 @@ public abstract class IPCallSession extends ImsServiceSession {
 				}
 			}
 				break;
-				
+
 			case (5): { // Case Set On Resume
 				// instanciate Hold Manager
 				holdMgr = new IPCall_RemoteHoldInactive(this);
-				
+
 				// launhc callHold
 				holdMgr.setCallHold(false, reInvite);
-				
+
 				// Notify listeners
 				for (int i = 0; i < getListeners().size(); i++) {
 					((IPCallStreamingSessionListener) getListeners().get(i))
@@ -466,11 +469,11 @@ public abstract class IPCallSession extends ImsServiceSession {
 				}
 			}
 				break;
-			}			
+			}
 		}
 	}
 
-	
+
 	/**
 	 * Add video in the current call
 	 */
@@ -481,7 +484,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 
 		// Add video on IP call player and renderer
 		// TODO
-		
+
 		// Build SDP
 		String sdp = buildAudioVideoSdpProposal();
 
@@ -504,7 +507,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 		if (logger.isActivated()) {
 			logger.info("Remove video");
 		}
-		
+
 		// Build SDP
 		String sdp = buildRemoveVideoSdpProposal();
 
@@ -523,14 +526,14 @@ public abstract class IPCallSession extends ImsServiceSession {
 	public void setOnHold(boolean callHoldAction){
 		// instanciate Hold Manager
 		holdMgr = new IPCall_HoldInactive(this);
-		
+
 		// launhc callHold
-		holdMgr.setCallHold(callHoldAction);		
+		holdMgr.setCallHold(callHoldAction);
 	}
-	
+
 	/**
-	 * Handle Sip Response to ReInvite / originating side 
-	 * 
+	 * Handle Sip Response to ReInvite / originating side
+	 *
 	 * @param int code response code
 	 * @param response
 	 *            Sip response to sent ReInvite
@@ -545,16 +548,16 @@ public abstract class IPCallSession extends ImsServiceSession {
 
 		// case Add video
 		if (requestType == IPCallSession.ADD_VIDEO) {
-			if (code == 200) {	// 200 OK response			
+			if (code == 200) {	// 200 OK response
 				//prepare Video media session
 				// TODO prepareVideoSession();
-				
+
 				// Notify listeners
 				for (int i = 0; i < getListeners().size(); i++) {
 					((IPCallStreamingSessionListener) getListeners().get(i))
 							.handleAddVideoAccepted();
 				}
-				
+
 				try {
 					// TODO startVideoSession(true) ;
 				} catch (Exception e) {
@@ -576,12 +579,12 @@ public abstract class IPCallSession extends ImsServiceSession {
 			// case Remove Video
 		} else if (requestType == IPCallSession.REMOVE_VIDEO) {
 			if (code == 200) { // 200 OK response
-				// close video media session 
+				// close video media session
 				// TODO closeVideoSession();
-				
+
 				// Remove video on IP call player & renderer
 				// TODO
-				
+
 				// Notify listeners
 				for (int i = 0; i < getListeners().size(); i++) {
 					((IPCallStreamingSessionListener) getListeners().get(i))
@@ -598,7 +601,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 		else if (requestType == IPCallSession.SET_ON_HOLD) {
 			if (code == 200) { // 200 OK response
 				holdMgr.prepareSession();
-				
+
 				// Notify listeners
 				for (int i = 0; i < getListeners().size(); i++) {
 					((IPCallStreamingSessionListener) getListeners().get(i))
@@ -618,7 +621,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 		else if (requestType == IPCallSession.SET_ON_RESUME) {
 			if (code == 200) { // 200 OK response
 				holdMgr.prepareSession();
-				
+
 				// Notify listeners
 				for (int i = 0; i < getListeners().size(); i++) {
 					((IPCallStreamingSessionListener) getListeners().get(i))
@@ -635,11 +638,11 @@ public abstract class IPCallSession extends ImsServiceSession {
 			}
 		}
 	}
-	
+
 
 	/**
 	 * Handle Sip Response to ReInvite/ terminating side
-	 * 
+	 *
 	 * @param int code response code
 	 * @param requestType
 	 *            Type type of request (addVideo/RemoveVideo/Set on Hold/Set on
@@ -663,14 +666,14 @@ public abstract class IPCallSession extends ImsServiceSession {
 					((IPCallStreamingSessionListener) getListeners().get(i))
 							.handleAddVideoAborted(code);
 				}
-			}		
-		} 		
+			}
+		}
 	}
-	
-	
+
+
 	/**
 	 * Handle Sip Response to ReInvite/ terminating side
-	 * 
+	 *
 	 * @param int code response code
 	 * @param requestType
 	 *            Type type of request (addVideo/RemoveVideo/Set on Hold/Set on
@@ -693,13 +696,13 @@ public abstract class IPCallSession extends ImsServiceSession {
 						ImsSessionBasedServiceError.UNEXPECTED_EXCEPTION,
 						e.getMessage()));
 			}
-			
+
 			// Notify listeners
 			for (int i = 0; i < getListeners().size(); i++) {
 				((IPCallStreamingSessionListener) getListeners().get(i))
 						.handleAddVideoAccepted();
 			}
-		} else if ((requestType == IPCallSession.REMOVE_VIDEO)&& (code == 200)) {// case Remove Video						
+		} else if ((requestType == IPCallSession.REMOVE_VIDEO)&& (code == 200)) {// case Remove Video
 			// close video media session
 			// TODO closeVideoSession();
 
@@ -711,7 +714,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 				((IPCallStreamingSessionListener) getListeners().get(i))
 						.handleRemoveVideoAccepted();
 			}
-		} else if ((requestType == IPCallSession.SET_ON_HOLD)&& (code == 200)) {// case On Hold						
+		} else if ((requestType == IPCallSession.SET_ON_HOLD)&& (code == 200)) {// case On Hold
 			holdMgr.prepareSession();
 
 			// Notify listeners
@@ -721,7 +724,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 			}
 			// release hold manager
 			holdMgr = null;
-		} else if ((requestType == IPCallSession.SET_ON_RESUME)&& (code == 200)) {// case On Resume					
+		} else if ((requestType == IPCallSession.SET_ON_RESUME)&& (code == 200)) {// case On Resume
 			holdMgr.prepareSession();
 
 			// Notify listeners
@@ -733,12 +736,12 @@ public abstract class IPCallSession extends ImsServiceSession {
 			holdMgr = null;
 		}
 	}
-	
+
 	/**
 	 * Handle 486 Busy
-	 * 
+	 *
 	 * @param resp SipResponse
-	 *            
+	 *
 	 */
 	public void handle486Busy(SipResponse resp) {
 		if (logger.isActivated()) {
@@ -750,7 +753,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 
 		// Remove the current session
 		removeSession();
-		
+
 		try {
 			ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
 			// Request capabilities to the remote
@@ -770,10 +773,10 @@ public abstract class IPCallSession extends ImsServiceSession {
 
 	/**
 	 * Handle 407 Proxy authent error
-	 * 
+	 *
 	 * @param resp SipResponse
 	 * @param requestType type of request (addVideo/RemoveVideo/Set on Hold/Set on
-	 *            Resume)            
+	 *            Resume)
 	 */
 	public void handleReInvite407ProxyAuthent(SipResponse response, int requestType) {
 
@@ -805,10 +808,10 @@ public abstract class IPCallSession extends ImsServiceSession {
 
 	}
 
-	
+
 	/**
 	 * Handle error
-	 * 
+	 *
 	 * @param error Error
 	 */
 	public void handleError(ImsServiceError error) {
@@ -836,17 +839,17 @@ public abstract class IPCallSession extends ImsServiceSession {
 				logger.warn("Cannot parse contact "+getDialogPath().getRemoteParty());
 			}
 		}
-		
+
 		// Notify listeners
 		for (int i = 0; i < getListeners().size(); i++) {
 			((IPCallStreamingSessionListener) getListeners().get(i))
 					.handleCallError(new IPCallError(error));
 		}
 	}
-	
+
 	/**
 	 * Is tag present in SDP
-	 * 
+	 *
 	 * @param sdp SDP
 	 * @param tag Tag to be searched
 	 * @return Boolean
@@ -861,7 +864,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 
 	/**
 	 * Build SDP proposal for audio+ video session (call init or addVideo)
-	 * 
+	 *
 	 * @return SDP content or null in case of error
 	 */
 	protected String buildAudioVideoSdpProposal() {
@@ -873,17 +876,17 @@ public abstract class IPCallSession extends ImsServiceSession {
 			// Build SDP part
 			String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 			String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
-			
-			String audioSdp = AudioSdpBuilder.buildSdpOffer(getPlayer().getSupportedAudioCodecs(), 
+
+			String audioSdp = AudioSdpBuilder.buildSdpOffer(getPlayer().getSupportedAudioCodecs(),
 					getPlayer().getLocalAudioRtpPort());
-			
+
 			String videoSdp = "";
-	        if ((getVideoContent()!= null)&&(getPlayer()!= null)&&(getRenderer()!= null)) {	        	
+	        if ((getVideoContent()!= null)&&(getPlayer()!= null)&&(getRenderer()!= null)) {
 					videoSdp = VideoSdpBuilder.buildSdpOfferWithOrientation(
 							getPlayer().getSupportedVideoCodecs(),
-							getRenderer().getLocalVideoRtpPort());		
+							getRenderer().getLocalVideoRtpPort());
 	        }
-			
+
 	        String sdp =
 	            	"v=0" + SipUtils.CRLF +
 	            	"o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
@@ -909,7 +912,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 
 	/**
 	 * Build SDP proposal to remove video stream from the session
-	 * 
+	 *
 	 * @return SDP content or null in case of error
 	 */
 	private String buildRemoveVideoSdpProposal() {
@@ -922,7 +925,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 			String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 			String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
 			String audioSdp = AudioSdpBuilder.buildSdpOffer(getPlayer().getSupportedAudioCodecs(), getPlayer().getLocalAudioRtpPort());
-			
+
 			return "v=0" + SipUtils.CRLF +
 					"o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
 					"s=-" + SipUtils.CRLF +
@@ -942,7 +945,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 
 	/**
 	 * select sdp builder method (to build sdp response) according to serviceContext - build and return sdp
-	 * 
+	 *
 	 * @param reInvite
 	 *            reInvite received request
 	 * @param serviceContext
@@ -957,16 +960,16 @@ public abstract class IPCallSession extends ImsServiceSession {
 				break;
 			}
 			case (IPCallSession.REMOVE_VIDEO): {
-				localSdp = buildRemoveVideoSdpResponse(); // for remove Video: same sdp used for response as the one used for proposal 
+				localSdp = buildRemoveVideoSdpResponse(); // for remove Video: same sdp used for response as the one used for proposal
 				break;
 			}
 		}
 		return localSdp;
 	}
-	
+
 	/**
 	 * Build sdp response for addVideo
-	 * 
+	 *
 	 * @param reInvite  reInvite Request received
 	 */
 	private String buildAddVideoSdpResponse(SipRequest reInvite) {
@@ -974,10 +977,10 @@ public abstract class IPCallSession extends ImsServiceSession {
 			logger.info("buildAddVideoSdpResponse()");
 		}
 
-		String sdp = "";
+		StringBuilder sdp = new StringBuilder();
 
 		// Parse the remote SDP part
-		SdpParser parser = new SdpParser(reInvite.getSdpContent().getBytes());
+		SdpParser parser = new SdpParser(reInvite.getSdpContent().getBytes(UTF8));
 		MediaDescription mediaVideo = parser.getMediaDescription("video");
 
 		// Extract video codecs from SDP
@@ -1019,15 +1022,14 @@ public abstract class IPCallSession extends ImsServiceSession {
 					String audioSdp = AudioSdpBuilder.buildSdpAnswer(
 							getPlayer().getAudioCodec(),
 							getRenderer().getLocalAudioRtpPort());
-					sdp = "v=0" + SipUtils.CRLF +
-							"o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-							"s=-" + SipUtils.CRLF +
-							"c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-							"t=0 0" + SipUtils.CRLF
-							+ audioSdp +
-							"a=sendrcv" + SipUtils.CRLF +
-							videoSdp +
-							"a=sendrcv" + SipUtils.CRLF;
+                    sdp.append("v=0").append(SipUtils.CRLF).append("o=- ").append(ntpTime)
+                            .append(" ").append(ntpTime).append(" ")
+                            .append(SdpUtils.formatAddressType(ipAddress)).append(SipUtils.CRLF)
+                            .append("s=-").append(SipUtils.CRLF)
+                            .append("c=" + SdpUtils.formatAddressType(ipAddress))
+                            .append(SipUtils.CRLF).append("t=0 0").append(SipUtils.CRLF)
+                            .append(audioSdp).append("a=sendrcv").append(SipUtils.CRLF)
+                            .append(videoSdp).append("a=sendrcv").append(SipUtils.CRLF);
 				}
 			}
 		} catch (RemoteException e) {
@@ -1040,7 +1042,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 					e.getMessage()));
 		}
 
-		return sdp;
+		return sdp.toString();
 	}
 
 	/**
@@ -1057,10 +1059,10 @@ public abstract class IPCallSession extends ImsServiceSession {
 		String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
 		String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
 
-		
+
 		try {
 			String audioSdp = AudioSdpBuilder.buildSdpAnswer(getPlayer()
-					.getAudioCodec(), getPlayer().getLocalAudioRtpPort());			
+					.getAudioCodec(), getPlayer().getLocalAudioRtpPort());
 			sdp = "v=0" + SipUtils.CRLF + "o=- " + ntpTime + " " + ntpTime
 					+ " " + SdpUtils.formatAddressType(ipAddress)
 					+ SipUtils.CRLF + "s=-" + SipUtils.CRLF + "c="
@@ -1078,8 +1080,8 @@ public abstract class IPCallSession extends ImsServiceSession {
 		}
 		return sdp;
 	}
-	
-	
+
+
 	//******************************************************************************
 	//******************************************************************************
 	//******************      Media Session Management Methods      ****************
@@ -1093,7 +1095,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 		if (logger.isActivated()) {
 			logger.info("Close media session");
 		}
-		
+
 		if (renderer != null) {
 			// Close the video renderer
 			try {
@@ -1125,13 +1127,13 @@ public abstract class IPCallSession extends ImsServiceSession {
 		setPlayer(null);
 		setRenderer(null);
 	}
-	
+
 	//******************************************************************************
 	//******************************************************************************
 	//*************************       Media Listeners       ************************
 	//******************************************************************************
 	//******************************************************************************
-	
+
 	/**
 	 * Player event listener
 	 */
@@ -1143,7 +1145,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 
 		/**
 		 * Constructor
-		 * 
+		 *
 		 * @param session
 		 *            Streaming session
 		 */
@@ -1189,7 +1191,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 
 		/**
 		 * Callback called when the player has failed
-		 * 
+		 *
 		 * @param error Error
 		 */
 		public void onPlayerError(int error) {
@@ -1227,7 +1229,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 			}
 		}
 	}
-	
+
     /**
      * Renderer event listener
      */
@@ -1302,7 +1304,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 
     	/**
     	 * Callback called when the renderer has failed
-    	 * 
+    	 *
     	 * @param error Error
     	 */
     	public void onRendererError(int error) {
@@ -1339,11 +1341,11 @@ public abstract class IPCallSession extends ImsServiceSession {
     		}
         }
     }
-    
+
     @Override
-    public void receiveCancel(SipRequest cancel) {      
+    public void receiveCancel(SipRequest cancel) {
     	super.receiveCancel(cancel);
-        
+
 		// Request capabilities to the remote
 	    getImsService().getImsModule().getCapabilityService().requestContactCapabilities(getRemoteContact());
 	}

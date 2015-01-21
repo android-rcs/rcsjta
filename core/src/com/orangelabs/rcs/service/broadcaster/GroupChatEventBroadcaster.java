@@ -49,31 +49,32 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
 		mGroupChatListeners.unregister(listener);
 	}
 
-	public void broadcastMessageStatusChanged(String chatId, String msgId, int status, int reasonCode) {
+	public void broadcastMessageStatusChanged(String chatId, String mimeType,
+			String msgId, int status, int reasonCode) {
 		final int N = mGroupChatListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mGroupChatListeners.getBroadcastItem(i).onMessageStatusChanged(chatId, msgId,
-						status, reasonCode);
+				mGroupChatListeners.getBroadcastItem(i).onMessageStatusChanged(chatId,
+						mimeType, msgId, status, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
-					logger.error("Can't notify listener", e);
+					logger.error("Can't notify listener.", e);
 				}
 			}
 		}
 		mGroupChatListeners.finishBroadcast();
 	}
 
-	public void broadcastMessageGroupDeliveryInfoChanged(String chatId, ContactId contact, String msgId,
-			int status, int reasonCode) {
+	public void broadcastMessageGroupDeliveryInfoChanged(String chatId, ContactId contact,
+			String apiMimeType, String msgId, int status, int reasonCode) {
 		final int N = mGroupChatListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
 				mGroupChatListeners.getBroadcastItem(i).onMessageGroupDeliveryInfoChanged(chatId,
-						contact, msgId, status, reasonCode);
+						contact, apiMimeType, msgId, status, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
-					logger.error("Can't notify listener", e);
+					logger.error("Can't notify listener.", e);
 				}
 			}
 		}
@@ -131,10 +132,11 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
 		AndroidFactory.getApplicationContext().sendBroadcast(invitation);
 	}
 
-	public void broadcastMessageReceived(String msgId) {
+	public void broadcastMessageReceived(String apiMimeType, String msgId) {
 		Intent newGroupChatMessage = new Intent(GroupChatIntent.ACTION_NEW_GROUP_CHAT_MESSAGE);
 		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newGroupChatMessage);
 		IntentUtils.tryToSetReceiverForegroundFlag(newGroupChatMessage);
+		newGroupChatMessage.putExtra(GroupChatIntent.EXTRA_MIME_TYPE, apiMimeType);
 		newGroupChatMessage.putExtra(GroupChatIntent.EXTRA_MESSAGE_ID, msgId);
 		AndroidFactory.getApplicationContext().sendBroadcast(newGroupChatMessage);
 	}

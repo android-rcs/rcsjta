@@ -54,10 +54,17 @@ public class GroupChatIntentService extends IntentService {
 	 */
 	private static final String LOGTAG = LogUtils.getTag(GroupChatIntentService.class.getSimpleName());
 
+	/**
+	 * Creates an IntentService.
+	 * @param name of the thread
+	 */
 	public GroupChatIntentService(String name) {
 		super(name);
 	}
 
+	/**
+	 * Creates an IntentService.
+	 */
 	public GroupChatIntentService() {
 		super("GroupChatIntentService");
 	}
@@ -72,17 +79,29 @@ public class GroupChatIntentService extends IntentService {
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		if (intent == null) {
+		if (intent == null || intent.getAction() == null) {
 			return;
 		}
-		if (GroupChatMessageReceiver.ACTION_NEW_GC_MSG.equals(intent.getAction())) {
+		String action = intent.getAction();
+		if (GroupChatMessageReceiver.ACTION_NEW_GC_MSG.equals(action)) {
 			// Gets message ID from the incoming Intent
 			String messageId = intent.getStringExtra(GroupChatIntent.EXTRA_MESSAGE_ID);
-			if (messageId != null) {
-				handleNewGroupChatMessage(messageId);
+			if (messageId == null) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "Cannot read message ID");
+				}
+				return;
 			}
+			String mimeType = intent.getStringExtra(GroupChatIntent.EXTRA_MIME_TYPE);
+			if (mimeType == null) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "Cannot read message mime-type");
+				}
+				return;
+			}
+			handleNewGroupChatMessage(messageId);
 		} else {
-			if (GroupChatInvitationReceiver.ACTION_NEW_GC.equals(intent.getAction())) {
+			if (GroupChatInvitationReceiver.ACTION_NEW_GC.equals(action)) {
 				// Gets chat ID from the incoming Intent
 				String chatId = intent.getStringExtra(GroupChatIntent.EXTRA_CHAT_ID);
 				if (chatId != null) {
@@ -90,7 +109,7 @@ public class GroupChatIntentService extends IntentService {
 				}
 			} else {
 				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "Unknown action " + intent.getAction());
+					Log.e(LOGTAG, "Unknown action ".concat(action));
 				}
 			}
 		}
@@ -106,7 +125,7 @@ public class GroupChatIntentService extends IntentService {
 			// Get Chat from provider
 			GroupChatDAO groupChatDAO = new GroupChatDAO(this, chatId);
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "Group chat invitation =" + groupChatDAO);
+				Log.d(LOGTAG, "Group chat invitation =".concat(groupChatDAO.toString()));
 			}
 			forwardGCInvitation2UI(chatId, groupChatDAO);
 		} catch (Exception e) {
@@ -127,7 +146,7 @@ public class GroupChatIntentService extends IntentService {
 			// Get ChatMessage from provider
 			ChatMessageDAO messageDAO = new ChatMessageDAO(this, messageId);
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "Group chat message =" + messageDAO);
+				Log.d(LOGTAG, "Group chat message =".concat(messageDAO.toString()));
 			}
 			forwardGCMessage2UI(messageDAO);
 		} catch (Exception e) {
@@ -146,11 +165,14 @@ public class GroupChatIntentService extends IntentService {
 	private void forwardGCMessage2UI(ChatMessageDAO message) {
 		// Create intent
 		Intent intent = GroupChatView.forgeIntentNewMessage(this, message);
-
+		String chatId = message.getChatId();
+		String content = message.getContent();
+		String mimeType = message.getMimeType();
 		// Do not display notification if activity is on foreground for this ChatID
-		if (GroupChatView.isDisplayed() && message.getChatId().equals(GroupChatView.chatIdOnForeground)) {
+		if (GroupChatView.isDisplayed() && chatId.equals(GroupChatView.chatIdOnForeground)) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "New message '" + message.getContent() + "' for chatId " + message.getChatId());
+				Log.d(LOGTAG, new StringBuilder("New message '").append(content)
+						.append("' for chatId ").append(chatId).toString());
 			}
 			startActivity(intent);
 		} else {
@@ -161,15 +183,18 @@ public class GroupChatIntentService extends IntentService {
 			String title = getString(R.string.title_recv_chat, displayName);
 
 			String msg;
-			if (ChatLog.Message.MimeType.GEOLOC_MESSAGE.equals(message.getMimeType())) {
+			if (ChatLog.Message.MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
 				msg = getString(R.string.label_geoloc_msg);
 			} else {
-				if (ChatLog.Message.MimeType.TEXT_MESSAGE.equals(message.getMimeType())) {
-					msg = message.getContent();
+				if (ChatLog.Message.MimeType.TEXT_MESSAGE.equals(mimeType)) {
+					msg = content;
 				} else {
 					// If the GC message does not convey user content then discards.
 					if (LogUtils.isActive) {
-						Log.w(LOGTAG, "Discard message of type '" + message.getMimeType() + "' for chatId " + message.getChatId());
+						Log.w(LOGTAG,
+								new StringBuilder("Discard message of type '")
+										.append(mimeType).append("' for chatId ")
+										.append(chatId).toString());
 					}
 					return;
 				}
@@ -180,7 +205,7 @@ public class GroupChatIntentService extends IntentService {
 
 			// Send notification
 			NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-			notificationManager.notify(message.getChatId(), Utils.NOTIF_ID_GROUP_CHAT, notif);
+			notificationManager.notify(chatId, Utils.NOTIF_ID_GROUP_CHAT, notif);
 		}
 	}
 
@@ -196,7 +221,8 @@ public class GroupChatIntentService extends IntentService {
 		// Get subject
 		String subject = groupChat.getSubject();
 		if (TextUtils.isEmpty(subject)) {
-			subject = "<" + getString(R.string.label_no_subject) + ">";
+			subject = new StringBuilder("<").append(getString(R.string.label_no_subject))
+					.append(">").toString();
 		}
 		// Create intent
 		Intent intent = GroupChatView.forgeIntentInvitation(this, chatId, groupChat);
@@ -229,7 +255,7 @@ public class GroupChatIntentService extends IntentService {
 		try {
 			GroupChat gc = ApiConnectionManager.getInstance(this).getChatApi().getGroupChat(chatId);
 			if (gc != null) {
-				ContactId contact = null; // TODO gc.getRemoteContact();
+				ContactId contact = gc.getRemoteContact();
 				return RcsDisplayName.getInstance(this).getDisplayName(contact);
 			}
 		} catch (Exception e) {

@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +15,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.security;
+
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * HTTP Digest MD5 authentication (see RFC2617)
- * 
+ *
  * @author jexa7410
  */
 public class HttpDigestMd5Authentication {
@@ -50,7 +56,7 @@ public class HttpDigestMd5Authentication {
 	 * Domain name
 	 */
 	private String realm = null;
- 
+
 	/**
 	 * Opaque parameter
 	 */
@@ -75,7 +81,7 @@ public class HttpDigestMd5Authentication {
 	 * Cnonce
 	 */
 	private String cnonce = "" + System.currentTimeMillis();
-	
+
 	/**
 	 * Cnonce counter
 	 */
@@ -99,7 +105,7 @@ public class HttpDigestMd5Authentication {
 
 	/**
 	 * Returns realm parameter
-	 * 
+	 *
 	 * @return Realm
 	 */
 	public String getRealm() {
@@ -108,7 +114,7 @@ public class HttpDigestMd5Authentication {
 
 	/**
 	 * Set the realm parameter
-	 * 
+	 *
 	 * @param realm Realm
 	 */
 	public void setRealm(String realm) {
@@ -117,7 +123,7 @@ public class HttpDigestMd5Authentication {
 
 	/**
 	 * Returns opaque parameter
-	 * 
+	 *
 	 * @return Opaque
 	 */
 	public String getOpaque() {
@@ -126,7 +132,7 @@ public class HttpDigestMd5Authentication {
 
 	/**
 	 * Set the opaque parameter
-	 * 
+	 *
 	 * @param opaque Opaque
 	 */
 	public void setOpaque(String opaque) {
@@ -135,7 +141,7 @@ public class HttpDigestMd5Authentication {
 
 	/**
 	 * Get the client nonce parameter
-	 * 
+	 *
 	 * @return Client nonce
 	 */
 	public String getCnonce() {
@@ -144,7 +150,7 @@ public class HttpDigestMd5Authentication {
 
 	/**
 	 * Get the nonce parameter
-	 * 
+	 *
 	 * @return Nonce
 	 */
 	public String getNonce() {
@@ -153,7 +159,7 @@ public class HttpDigestMd5Authentication {
 
 	/**
 	 * Set the nonce parameter
-	 * 
+	 *
 	 * @param nonce Nonce
 	 */
 	public void setNonce(String nonce) {
@@ -162,7 +168,7 @@ public class HttpDigestMd5Authentication {
 
 	/**
 	 * Returns the next nonce parameter
-	 *  
+	 *
 	 * @return Next nonce
 	 */
 	public String getNextnonce() {
@@ -171,7 +177,7 @@ public class HttpDigestMd5Authentication {
 
 	/**
 	 * Set the next nonce parameter
-	 * 
+	 *
 	 * @param nextnonce Next nonce
 	 */
 	public void setNextnonce(String nextnonce) {
@@ -180,7 +186,7 @@ public class HttpDigestMd5Authentication {
 
 	/**
 	 * Returns the Qop parameter
-	 * 
+	 *
 	 * @return Qop
 	 */
 	public String getQop() {
@@ -189,11 +195,11 @@ public class HttpDigestMd5Authentication {
 
 	/**
 	 * Set the Qop parameter
-	 * 
+	 *
 	 * @param qop Qop parameter
 	 */
 	public void setQop(String qop) {
-   		if (qop != null) { 
+   		if (qop != null) {
    			qop = qop.split(",")[0];
    		}
 		this.qop = qop;
@@ -211,9 +217,9 @@ public class HttpDigestMd5Authentication {
 	   		// Next nonce != nonce
 			nc = 1;
 			nonce = nextnonce;
-	   	}		
+	   	}
 	}
-	
+
 	/**
 	 * Build the cnonce counter
 	 *
@@ -226,10 +232,10 @@ public class HttpDigestMd5Authentication {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Convert to hexa string
-	 * 
+	 *
 	 * @param value Value to convert
 	 * @return String
 	 */
@@ -241,11 +247,11 @@ public class HttpDigestMd5Authentication {
 			c[pos++] = HEX[value[i] & 0xf];
 		}
 		return new String(c);
-	}	
-		
+	}
+
 	/**
 	 * Calculate HTTP Digest nonce response
-	 * 
+	 *
 	 * @param user User
 	 * @param password Password
 	 * @param method Method
@@ -258,7 +264,7 @@ public class HttpDigestMd5Authentication {
 		if (user == null || realm == null || uri == null || nonce == null) {
 			throw new Exception("Invalid Authorization header" +
 					user + "/" + realm + "/" + uri + "/" + nonce);
-		}	
+		}
 
 		String a1 = user + ":" + realm + ":" + password;
 		String a2 = method + ":" + uri;
@@ -267,7 +273,7 @@ public class HttpDigestMd5Authentication {
 			if (!qop.startsWith("auth")) {
 				throw new Exception("Invalid qop: " + qop);
 			}
-			
+
 			if (nc == null || cnonce == null) {
 				throw new Exception("Invalid Authorization header: " + nc + "/" + cnonce);
 			}
@@ -275,16 +281,16 @@ public class HttpDigestMd5Authentication {
 			if (qop.equals("auth-int")) {
 				a2 = a2 + ":" + H(body);
 			}
-			
+
 			return H(H(a1) + ":" + nonce + ":" + nc + ":" + cnonce + ":" + qop + ":" + H(a2));
 		} else {
 			return H(H(a1) + ":" + nonce + ":" + H(a2));
 		}
 	}
-	
+
 	/**
 	 * HTTP Digest algo
-	 * 
+	 *
 	 *  @param data Input data
 	 *  @return Hash key
 	 */
@@ -292,10 +298,11 @@ public class HttpDigestMd5Authentication {
 		try {
 			if (data == null) {
 				data = "";
-			}			
-			md5Digest.update(data.getBytes(), 0, data.getBytes().length);
+			}
+			byte[] bytes = data.getBytes(UTF8);
+			md5Digest.update(bytes, 0, bytes.length);
 			byte returnValue[] = new byte[md5Digest.getDigestSize()];
-			md5Digest.doFinal(returnValue, 0);			
+			md5Digest.doFinal(returnValue, 0);
 			return toHexString(returnValue);
 		} catch (Exception e) {
 			if (logger.isActivated()) {

@@ -21,6 +21,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.service.api;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +33,7 @@ import android.os.IBinder;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
+import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.contacts.ContactId;
@@ -44,10 +47,11 @@ import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.service.SessionIdGenerator;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
-import com.orangelabs.rcs.core.ims.service.im.chat.GeolocPush;
 import com.orangelabs.rcs.core.ims.service.richcall.RichcallService;
+import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocSharingPersistedStorageAccessor;
 import com.orangelabs.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
+import com.orangelabs.rcs.provider.sharing.RichCallHistory;
 import com.orangelabs.rcs.service.broadcaster.GeolocSharingEventBroadcaster;
 import com.orangelabs.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
 import com.orangelabs.rcs.utils.IdGenerator;
@@ -68,6 +72,8 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 
 	private final ContactsManager mContactsManager;
 
+	private final RichCallHistory mRichcallLog;
+
 	private final Map<String, IGeolocSharing> mGeolocSharingCache = new HashMap<String, IGeolocSharing>();
 
 	/**
@@ -86,12 +92,13 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 	 * @param richcallService RichcallService
 	 * @param contactsManager ContactsManager
 	 */
-	public GeolocSharingServiceImpl(RichcallService richcallService, ContactsManager contactsManager) {
+	public GeolocSharingServiceImpl(RichcallService richcallService, ContactsManager contactsManager, RichCallHistory richCallHistory) {
 		if (logger.isActivated()) {
-			logger.info("Geoloc sharing service API is loaded");
+			logger.info("Geoloc sharing service API is loaded.");
 		}
 		mRichcallService = richcallService;
 		mContactsManager = contactsManager;
+		mRichcallLog = richCallHistory;
 	}
 
 	/**
@@ -192,16 +199,22 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      */
     public void receiveGeolocSharingInvitation(GeolocTransferSession session) {
 		if (logger.isActivated()) {
-			logger.info("Receive geoloc sharing invitation from " + session.getRemoteContact()+" displayName="+session.getRemoteDisplayName());
+			logger.info(new StringBuilder("Receive geoloc sharing invitation from ")
+					.append(session.getRemoteContact()).append("; displayName=")
+					.append(session.getRemoteDisplayName()).append(".").toString());
 		}
 		// TODO : Add entry into GeolocSharing provider (to be implemented as part of CR025)
-		
-		// Update displayName of remote contact
-		mContactsManager.setContactDisplayName(session.getRemoteContact(), session.getRemoteDisplayName());
 
-		// Add session in the list
-		GeolocSharingImpl geolocSharing = new GeolocSharingImpl(session.getSessionID(),
-				mBroadcaster, mRichcallService, this);
+		ContactId contact = session.getRemoteContact();
+		String remoteDisplayName = session.getRemoteDisplayName();
+		// Update displayName of remote contact
+		mContactsManager.setContactDisplayName(contact, remoteDisplayName);
+
+		String sharingId = session.getSessionID();
+		GeolocSharingPersistedStorageAccessor persistedStorage = new GeolocSharingPersistedStorageAccessor(
+				sharingId, contact, session.getGeoloc(), Direction.OUTGOING, mRichcallLog);
+		GeolocSharingImpl geolocSharing = new GeolocSharingImpl(sharingId, mBroadcaster,
+				mRichcallService, this, persistedStorage);
 		addGeolocSharing(geolocSharing);
 		session.addListener(geolocSharing);
     }
@@ -228,20 +241,20 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 		try {
 			// Create a geoloc content
 			String msgId = IdGenerator.generateMessageID();
-			GeolocPush geolocPush = new GeolocPush(geoloc.getLabel(),
-					geoloc.getLatitude(), geoloc.getLongitude(),
-					geoloc.getExpiration(), geoloc.getAccuracy());
-			String geolocDoc = ChatUtils.buildGeolocDocument(geolocPush, ImsModule.IMS_USER_PROFILE.getPublicUri(), msgId);
-			MmContent content = new GeolocContent("geoloc.xml", geolocDoc.getBytes().length, geolocDoc.getBytes());
+			String geolocDoc = ChatUtils.buildGeolocDocument(geoloc, ImsModule.IMS_USER_PROFILE.getPublicUri(), msgId);
+			byte[] data = geolocDoc.getBytes(UTF8);
+			MmContent content = new GeolocContent("geoloc.xml", data.length, data);
 
 			// Initiate a sharing session
-			final GeolocTransferSession session = mRichcallService.initiateGeolocSharingSession(contact, content, geolocPush);
+			final GeolocTransferSession session = mRichcallService.initiateGeolocSharingSession(contact, content, geoloc);
 			String sharingId = session.getSessionID();
-			mBroadcaster.broadcastGeolocSharingStateChanged(contact,
+			mBroadcaster.broadcastStateChanged(contact,
 					sharingId, GeolocSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
 
-			// Add session listener
-			GeolocSharingImpl geolocSharing = new GeolocSharingImpl(sharingId, mBroadcaster, mRichcallService, this);
+			GeolocSharingPersistedStorageAccessor persistedStorage = new GeolocSharingPersistedStorageAccessor(
+					sharingId, contact, geoloc, Direction.OUTGOING, mRichcallLog);
+			GeolocSharingImpl geolocSharing = new GeolocSharingImpl(sharingId, mBroadcaster,
+					mRichcallService, this, persistedStorage);
 
 			// Start the session
 	        new Thread() {
@@ -306,8 +319,10 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 		if (geolocSharing != null) {
 			return geolocSharing;
 		}
-		return new GeolocSharingImpl(sharingId,
-				mBroadcaster, mRichcallService, this);
+		GeolocSharingPersistedStorageAccessor persistedStorage = new GeolocSharingPersistedStorageAccessor(
+				sharingId, mRichcallLog);
+		return new GeolocSharingImpl(sharingId, mBroadcaster, mRichcallService, this,
+				persistedStorage);
 	}
 
 	/**
@@ -349,19 +364,21 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 		return RcsService.Build.API_VERSION;
 	}
 
-	/**
-	 * Adds and broadcasts Geoloc sharing invitation rejection
-	 * 
-	 * @param contact
-	 * @param content
-	 * @param reasonCode
-	 */
-	public void addAndbroadcastGeolocSharingInvitationRejected(ContactId contact, GeolocContent content,
-			int reasonCode) {
-		String sharingId = SessionIdGenerator.getNewId();
-		/* TODO: Persist in geoloc content provider */
-		mBroadcaster.broadcastInvitation(sharingId);
-	}
+
+    /**
+     * Adds and broadcast that a geoloc sharing invitation was rejected
+     * 
+     * @param contact Contact ID
+     * @param content Geolocation content
+     * @param reasonCode Reason code
+     */
+    public void addAndBroadcastGeolocSharingInvitationRejected(ContactId contact,
+            GeolocContent content, int reasonCode) {
+        String sharingId = SessionIdGenerator.getNewId();
+        RichCallHistory.getInstance().addIncomingGeolocSharing(contact, sharingId,
+                GeolocSharing.State.REJECTED, reasonCode);
+        mBroadcaster.broadcastInvitation(sharingId);
+    }
 	
 	/**
 	 * Returns the common service configuration

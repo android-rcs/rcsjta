@@ -329,14 +329,6 @@ public class ContactUtils {
 	// @formatter:on
 
 	/**
-	 * Empty constructor : prevent caller from creating multiple instances
-	 */
-	private ContactUtils() {
-		mCountryCode = null;
-		mCountryAreaCode = null;
-	}
-
-	/**
 	 * Constructor
 	 * @param context
 	 * @param countryCode

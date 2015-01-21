@@ -21,6 +21,8 @@
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.ipcall;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IIPCallPlayer;
@@ -50,13 +52,13 @@ import java.util.Map;
  */
 public class IPCallService extends ImsService {
     /**
-     * IP voice call features tags 
+     * IP voice call features tags
      */
     public final static String[] FEATURE_TAGS_IP_VOICE_CALL = { FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_3GPP_IP_VOICE_CALL + "\"",
     		FeatureTags.FEATURE_RCSE_IP_VOICE_CALL};
-    
+
     /**
-     * IP video call features tags 
+     * IP video call features tags
      */
     public final static String[] FEATURE_TAGS_IP_VIDEO_CALL = { FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_3GPP_IP_VOICE_CALL + "\"",
     		FeatureTags.FEATURE_RCSE_IP_VOICE_CALL , FeatureTags.FEATURE_RCSE_IP_VIDEO_CALL};
@@ -87,7 +89,7 @@ public class IPCallService extends ImsService {
 
 	private void handleIPCallInvitationRejected(SipRequest invite, int reasonCode) {
 		ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
-		byte[] sessionDescriptionProtocol = invite.getSdpContent().getBytes();
+		byte[] sessionDescriptionProtocol = invite.getSdpContent().getBytes(UTF8);
 		AudioContent audioContent = ContentManager
 				.createLiveAudioContentFromSdp(sessionDescriptionProtocol);
 		VideoContent videoContent = ContentManager
@@ -201,20 +203,20 @@ public class IPCallService extends ImsService {
 		if (logger.isActivated()) {
 			logger.info("Initiate an IP call session");
 		}
-		
+
 		// Test number of sessions
 		assertAvailableIpCallSession("Max sessions achieved");
 
 		// Create content
         AudioContent audioContent = ContentManager.createGenericLiveAudioContent();
         VideoContent videoContent = null;
-	    if (video) { 
+	    if (video) {
 	    	videoContent = ContentManager.createGenericLiveVideoContent();
 	    }
 
 		// Create a new session
 		OriginatingIPCallSession session = new OriginatingIPCallSession(this, contact, audioContent, videoContent, player, renderer);
-		
+
 		return session;
 	}
 
@@ -233,7 +235,7 @@ public class IPCallService extends ImsService {
             handleIPCallInvitationRejected(invite, IPCall.ReasonCode.REJECTED_MAX_SESSIONS);
             sendErrorResponse(invite, 486);
             return;
-        } 
+        }
         ContactId contact = null;
         try {
 			contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
@@ -245,14 +247,14 @@ public class IPCallService extends ImsService {
             sendErrorResponse(invite, 486);
             return;
 		}
-		// Create a new session    
+		// Create a new session
         IPCallSession session = new TerminatingIPCallSession(this, invite, contact);
 
 		getImsModule().getCore().getListener().handleIPCallInvitation(session);
 
 		session.startSession();
 	}
-	
+
 	/**
 	 * Abort all pending sessions
 	 */
@@ -262,10 +264,10 @@ public class IPCallService extends ImsService {
 		}
 		abortAllSessions(ImsServiceSession.TERMINATION_BY_SYSTEM);
 	}
-	
+
 	/**
      * Is call connected
-     * 
+     *
      * @return Boolean
      */
 	public boolean isCallConnected() {
@@ -276,7 +278,7 @@ public class IPCallService extends ImsService {
 
 	/**
      * Is call connected with a given contact
-     * 
+     *
      * @param contact Contact Id
      * @return Boolean
      */

@@ -35,12 +35,13 @@ public abstract class OneToOneChatListener extends IOneToOneChatListener.Stub {
 	 * Callback called when a message status/reasonCode is changed.
 	 * 
 	 * @param contact Contact ID
+	 * @param mimeType MIME-type of message
 	 * @param msgId Message Id
 	 * @param status Status
 	 * @param reasonCode Reason code
 	 */
-	public abstract void onMessageStatusChanged(ContactId contact, String msgId, int status,
-			int reasonCode);
+	public abstract void onMessageStatusChanged(ContactId contact, String mimeType, String msgId,
+			int status, int reasonCode);
 
 	/**
 	 * Callback called when an Is-composing event has been received. If the

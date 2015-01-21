@@ -52,6 +52,12 @@ public class GroupChatIntent {
 	public final static String EXTRA_CHAT_ID = "chatId";
 
 	/**
+	 * MIME-type of received message
+	 *
+	 */
+	public final static String EXTRA_MIME_TYPE = "mimeType";
+
+	/**
 	 * Message ID of received message
 	 *
 	 */

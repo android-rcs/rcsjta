@@ -22,6 +22,8 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
+
 import java.util.Set;
 
 import javax2.sip.header.RequireHeader;
@@ -35,7 +37,8 @@ import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
-import com.orangelabs.rcs.utils.StringUtils;
+import com.orangelabs.rcs.provider.messaging.MessagingLog;
+import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -58,12 +61,15 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
 	 * Constructor
 	 * 
 	 * @param parent IMS service
-	 * @param conferenceId Conference ID
-	 * @param subject Subject associated to the session
-	 * @param participants List of invited participants
+     * @param conferenceId Conference ID
+     * @param subject Subject associated to the session
+     * @param participants List of invited participants
+     * @param rcsSettings RCS settings
+     * @param messagingLog Messaging log
 	 */
-	public OriginatingAdhocGroupChatSession(ImsService parent, String conferenceId, String subject, Set<ParticipantInfo> participants) {
-		super(parent, null, conferenceId, participants);
+	public OriginatingAdhocGroupChatSession(ImsService parent, String conferenceId, String subject,
+			Set<ParticipantInfo> participants, RcsSettings rcsSettings, MessagingLog messagingLog) {
+		super(parent, null, conferenceId, participants, rcsSettings, messagingLog);
 
 		// Set subject
 		if ((subject != null) && (subject.length() > 0)) {
@@ -111,19 +117,19 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
 	        String resourceList = ChatUtils.generateChatResourceList(ParticipantInfoUtils.getContacts(getParticipants()));
 	    	
 	    	// Build multipart
-	    	String multipart =
-	    		Multipart.BOUNDARY_DELIMITER + BOUNDARY_TAG + SipUtils.CRLF +
-	    		"Content-Type: application/sdp" + SipUtils.CRLF +
-    			"Content-Length: " + sdp.getBytes().length + SipUtils.CRLF +
-	    		SipUtils.CRLF +
-	    		sdp + SipUtils.CRLF +
-	    		Multipart.BOUNDARY_DELIMITER + BOUNDARY_TAG + SipUtils.CRLF +
-	    		"Content-Type: application/resource-lists+xml" + SipUtils.CRLF +
-    			"Content-Length: " + resourceList.getBytes().length + SipUtils.CRLF +
-	    		"Content-Disposition: recipient-list" + SipUtils.CRLF +
-	    		SipUtils.CRLF +
-	    		resourceList + SipUtils.CRLF +
-	    		Multipart.BOUNDARY_DELIMITER + BOUNDARY_TAG + Multipart.BOUNDARY_DELIMITER;
+	        String multipart = new StringBuilder(Multipart.BOUNDARY_DELIMITER).append(BOUNDARY_TAG)
+	    			.append(SipUtils.CRLF).append("Content-Type: application/sdp")
+	    			.append(SipUtils.CRLF).append("Content-Length: ")
+	    			.append(sdp.getBytes(UTF8).length).append(SipUtils.CRLF)
+	    			.append(SipUtils.CRLF).append(sdp).append(SipUtils.CRLF)
+	    			.append(Multipart.BOUNDARY_DELIMITER).append(BOUNDARY_TAG)
+	    			.append(SipUtils.CRLF).append("Content-Type: application/resource-lists+xml")
+	    			.append(SipUtils.CRLF).append("Content-Length: ")
+	    			.append(resourceList.getBytes(UTF8).length)
+	    			.append(SipUtils.CRLF).append("Content-Disposition: recipient-list")
+	    			.append(SipUtils.CRLF).append(SipUtils.CRLF).append(resourceList)
+	    			.append(SipUtils.CRLF).append(Multipart.BOUNDARY_DELIMITER)
+	    			.append(BOUNDARY_TAG).append(Multipart.BOUNDARY_DELIMITER).toString();
 
 			// Set the local SDP part in the dialog path
 	    	getDialogPath().setLocalContent(multipart);
@@ -170,7 +176,7 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
     	// Test if there is a subject
     	if (getSubject() != null) {
 	        // Add a subject header
-    		invite.addHeader(SubjectHeader.NAME, StringUtils.encodeUTF8(getSubject()));
+    		invite.addHeader(SubjectHeader.NAME, getSubject());
     	}
 
         // Add a require header

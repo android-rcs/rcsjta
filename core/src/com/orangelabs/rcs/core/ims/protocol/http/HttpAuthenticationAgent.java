@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +15,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.orangelabs.rcs.core.ims.protocol.http;
+
+import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.ims.security.HttpDigestMd5Authentication;
@@ -25,7 +31,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * HTTP Digest MD5 authentication agent
- * 
+ *
  * @author JM. Auffret
  * @author Deutsche Telekom
  */
@@ -34,7 +40,7 @@ public class HttpAuthenticationAgent {
 	 * Login
 	 */
 	private String serverLogin;
-	
+
 	/**
 	 * Password
 	 */
@@ -57,7 +63,7 @@ public class HttpAuthenticationAgent {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param login Server login
 	 * @param pwd Server pwd
 	 */
@@ -68,7 +74,7 @@ public class HttpAuthenticationAgent {
 
 	/**
 	 * Generate the authorization header
-	 * 
+	 *
 	 * @param method Method used
 	 * @param requestUri Request Uri
 	 * @param body Entity body
@@ -76,14 +82,12 @@ public class HttpAuthenticationAgent {
 	 * @throws CoreException
 	 */
 	public String generateAuthorizationHeader(String method, String requestUri, String body) throws CoreException {
-   		// Build the Authorization header
-		String auth = "Authorization: "+generateAuthorizationHeaderValue(method, requestUri, body);
-		return auth;
+		return "Authorization: ".concat(generateAuthorizationHeaderValue(method, requestUri, body));
     }
-	
+
 	/**
 	 * Generate the authorization header value
-	 * 
+	 *
 	 * @param method Method used
 	 * @param requestUri Request Uri
 	 * @param body Entity body
@@ -96,49 +100,42 @@ public class HttpAuthenticationAgent {
             // the authentication should be performed using basic authentication or HTTP digest as per [RFC2617]
 		    if (!isDigestAuthentication) {
 	            // Build the Basic Authorization header
-		        return "Basic " + Base64.encodeBase64ToString((serverLogin + ":" + serverPwd).getBytes()); 
+                return "Basic ".concat(Base64.encodeBase64ToString((new StringBuilder(serverLogin)
+                        .append(':').append(serverPwd).toString())
+                        .getBytes(UTF8)));
 		    }
 
-			digest.updateNonceParameters();	
-			
-			
-	   		// Build the Authorization header
-	   		String authValue = "Digest username=\"" + serverLogin + "\"" +
-					",realm=\"" + digest.getRealm() + "\"" +
-					",nonce=\"" + digest.getNonce() + "\"" +
-					",uri=\"" + requestUri + "\""+
-					",nc=" + digest.buildNonceCounter() +
-					",cnonce=\"" + digest.getCnonce() + "\"";
-	   		
-			String opaque = digest.getOpaque();
-			if (opaque != null) {
-				authValue += ",opaque=\"" + opaque + "\"";
-			}
-			
-			String response = "";
-			
-			String qop = digest.getQop();
-			if ((qop != null) && qop.startsWith("auth")) {	
-				authValue += ",qop=\"" + qop + "\"";
+			digest.updateNonceParameters();
 
-				// Calculate response
-		   		response = digest.calculateResponse(serverLogin, serverPwd,
-		   				method,
-		   				requestUri,
-						digest.buildNonceCounter(),
-						body);	
-			} else {
-				// Calculate response
-		   		response = digest.calculateResponse(serverLogin, serverPwd,
-		   				method,
-		   				requestUri,
-						digest.buildNonceCounter(),
-						"");	
-			}
-			authValue += ",response=\"" + response + "\"";
-			
-			return authValue;
-			
+            // Build the Authorization header
+            StringBuilder authValue = new StringBuilder("Digest username=\"").append(serverLogin)
+                    .append("\"").append(",realm=\"").append(digest.getRealm()).append("\"")
+                    .append(",nonce=\"").append(digest.getNonce()).append("\"").append(",uri=\"")
+                    .append(requestUri).append("\"").append(",nc=")
+                    .append(digest.buildNonceCounter()).append(",cnonce=\"")
+                    .append(digest.getCnonce()).append("\"");
+
+            String opaque = digest.getOpaque();
+            if (opaque != null) {
+                authValue.append(",opaque=\"").append(opaque).append("\"");
+            }
+
+            String qop = digest.getQop();
+            if (qop != null && qop.startsWith("auth")) {
+                authValue.append(",qop=\"").append(qop).append("\"")
+                         .append(",response=\"")
+                         .append(digest.calculateResponse(serverLogin, serverPwd, method, requestUri,
+                                 digest.buildNonceCounter(), body)).append("\"");
+
+            } else {
+                authValue
+                .append(",response=\"")
+                .append(digest.calculateResponse(serverLogin, serverPwd, method, requestUri,
+                        digest.buildNonceCounter(), "")).append("\"");
+            }
+
+            return authValue.toString();
+
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Can't create the authorization value", e);
@@ -149,7 +146,7 @@ public class HttpAuthenticationAgent {
 
 	/**
 	 * Read the WWW-Authenticate header
-	 * 
+	 *
 	 * @param header WWW-Authenticate header
 	 */
 	public void readWwwAuthenticateHeader(String header) {

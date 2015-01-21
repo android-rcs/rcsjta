@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.orangelabs.rcs.ri.sharing.image;
+package com.orangelabs.rcs.ri.sharing.geoloc;
 
 import java.util.Calendar;
 
@@ -31,40 +31,44 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.ish.ImageSharingIntent;
+import com.gsma.services.rcs.gsh.GeolocSharing;
+import com.gsma.services.rcs.gsh.GeolocSharingIntent;
+import com.gsma.services.rcs.gsh.GeolocSharingService;
+import com.orangelabs.rcs.ri.ApiConnectionManager;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsDisplayName;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
- * Image sharing intent service
+ * Geoloc sharing intent service
  * 
  * @author YPLO6403
  * 
  */
-public class ImageSharingIntentService extends IntentService {
+public class GeolocSharingIntentService extends IntentService {
 
 	/**
 	 * The log tag for this class
 	 */
-	private static final String LOGTAG = LogUtils.getTag(ImageSharingIntentService.class.getSimpleName());
+	private static final String LOGTAG = LogUtils.getTag(GeolocSharingIntentService.class.getSimpleName());
 
-	static final String BUNDLE_ISHDAO_ID = "ishdao";
+	static final String BUNDLE_GSH_ID = "bundle_gsh";
 
 	/**
 	 * Creates an IntentService.
 	 * @param name of the thread
 	 */
-	public ImageSharingIntentService(String name) {
+	public GeolocSharingIntentService(String name) {
 		super(name);
 	}
 
 	/**
 	 * Creates an IntentService.
 	 */
-	public ImageSharingIntentService() {
-		super("ImageSharingIntentService");
+	public GeolocSharingIntentService() {
+		super("GeolocSharingIntentService");
 	}
 
 	@Override
@@ -82,65 +86,80 @@ public class ImageSharingIntentService extends IntentService {
 		}
 		String action = intent.getAction();
 		// Check action from incoming intent
-		if (!ImageSharingIntent.ACTION_NEW_INVITATION.equals(action)) {
+		if (!GeolocSharingIntent.ACTION_NEW_INVITATION.equals(action)) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "Unknown action ".concat(action));
 			}
 			return;
 		}
 		// Gets data from the incoming Intent
-		String sharingId = intent.getStringExtra(ImageSharingIntent.EXTRA_SHARING_ID);
+		String sharingId = intent.getStringExtra(GeolocSharingIntent.EXTRA_SHARING_ID);
 		if (sharingId == null) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "Cannot read sharing ID");
 			}
 			return;
 		}
+		
 		try {
-			// Get Image sharing from provider
-			ImageSharingDAO ishDao = new ImageSharingDAO(this, sharingId);
-			// Save ImageSharingDAO into intent
-			Bundle bundle = new Bundle();
-			bundle.putParcelable(BUNDLE_ISHDAO_ID, ishDao);
-			intent.putExtras(bundle);
-			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "ISH invitation ".concat(ishDao.toString()));
+			ApiConnectionManager connectionManager = ApiConnectionManager.getInstance(this);
+			if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.GEOLOC_SHARING)) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "Cannot bind to GSH service");
+				}
+				return;
 			}
-			// TODO check ISH state to know if rejected
-			// TODO check validity of direction, etc ...
+			GeolocSharingService api = connectionManager.getGeolocSharingApi();
+			if (api == null) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "Cannot connect to GSH service");
+				}
+				return;
+			}
+			GeolocSharing gshSharing = api.getGeolocSharing(sharingId);
+			if (gshSharing == null) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "Cannot get geoloc sharing for ".concat(sharingId));
+				}
+				return;
+			}
+			ContactId contact = gshSharing.getRemoteContact();
+			if (contact == null) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "Cannot get contact sharing for ".concat(sharingId));
+				}
+				return;
+			}
+			// Save contact into intent
+			Bundle bundle = new Bundle();
+			bundle.putParcelable(BUNDLE_GSH_ID, contact);
+			intent.putExtras(bundle);
 			// Display invitation notification
-			addImageSharingInvitationNotification(intent, ishDao);
+			addGeolocSharingInvitationNotification(intent, sharingId, contact);
 		} catch (Exception e) {
 			if (LogUtils.isActive) {
-				Log.e(LOGTAG, "Cannot read ISH data from provider", e);
+				Log.e(LOGTAG, "Cannot read GSH data from provider", e);
 			}
 		}
 	}
 
 	/**
-	 * Add image share notification
+	 * Add geoloc share notification
 	 * 
 	 * @param intent
 	 *            Intent invitation
-	 * @param ishDao
-	 *            the image sharing data object
+	 * @param gshSharing
+	 *            the geoloc sharing
 	 */
-	private void addImageSharingInvitationNotification(Intent invitation, ImageSharingDAO ishDao) {
-		ContactId contact = ishDao.getContact();
-		if (contact == null) {
-			if (LogUtils.isActive) {
-				Log.e(LOGTAG, "addImageSharingInvitationNotification failed: cannot parse contact");
-			}
-			return;
-		}
+	private void addGeolocSharingInvitationNotification(Intent invitation, String sharingId, ContactId contact) {
 		// Create notification
 		Intent intent = new Intent(invitation);
-		intent.setClass(this, ReceiveImageSharing.class);
+		intent.setClass(this, ReceiveGeolocSharing.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		
 		String displayName = RcsDisplayName.getInstance(this).getDisplayName(contact);
-		String title = getString(R.string.title_recv_image_sharing, displayName);
+		String title = getString(R.string.title_recv_geoloc_sharing, displayName);
 
 		// Create notification
 		NotificationCompat.Builder notif = new NotificationCompat.Builder(this);
@@ -156,6 +175,6 @@ public class ImageSharingIntentService extends IntentService {
 				
 		// Send notification
 		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		notificationManager.notify(ishDao.getSharingId(), Utils.NOTIF_ID_IMAGE_SHARE, notif.build());
+		notificationManager.notify(sharingId, Utils.NOTIF_ID_GEOLOC_SHARE, notif.build());
 	}
 }

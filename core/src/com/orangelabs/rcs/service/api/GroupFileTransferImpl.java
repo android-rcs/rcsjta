@@ -448,7 +448,8 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 	}
 
 	private FileTransferStateAndReasonCode toStateAndReasonCode(FileSharingError error) {
-		switch (error.getErrorCode()) {
+		int fileSharingError = error.getErrorCode();
+		switch (fileSharingError) {
 			case FileSharingError.SESSION_INITIATION_DECLINED:
 			case FileSharingError.SESSION_INITIATION_CANCELLED:
 				return new FileTransferStateAndReasonCode(FileTransfer.State.REJECTED,
@@ -473,8 +474,9 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 						ReasonCode.REJECTED_LOW_SPACE);
 			default:
 				throw new IllegalArgumentException(
-						"Unknown reason in GroupFileTransferImpl.toStateAndReasonCode; error="
-								+ error + "!");
+						new StringBuilder(
+								"Unknown reason in GroupFileTransferImpl.toStateAndReasonCode; fileSharingError=")
+								.append(fileSharingError).append("!").toString());
 		}
 	}
 

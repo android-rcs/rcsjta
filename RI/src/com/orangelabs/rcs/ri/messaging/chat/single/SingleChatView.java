@@ -135,7 +135,8 @@ public class SingleChatView extends ChatView {
 		}
 
 		@Override
-		public void onMessageStatusChanged(ContactId contact, String msgId, int status, int reasonCode) {
+		public void onMessageStatusChanged(ContactId contact, String mimeType, String msgId,
+				int status, int reasonCode) {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG,
 						new StringBuilder("onMessageStatusChanged contact=")
