@@ -25,4 +25,6 @@ interface IGeolocSharing {
 	void rejectInvitation();
 
 	void abortSharing();
+
+	long getTimestamp();
 }

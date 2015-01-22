@@ -285,6 +285,22 @@ public class ImageSharing {
     }
 
 	/**
+	 * Returns the local timestamp of when the image sharing was initiated for
+	 * outgoing image sharing or the local timestamp of when the image sharing
+	 * invitation was received for incoming image sharings.
+	 * 
+	 * @return long
+	 * @throws RcsServiceException
+	 */
+	public long getTimestamp() throws RcsServiceException {
+		try {
+			return mSharingInf.getTimestamp();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
 	 * Returns the state of the sharing
 	 * 
 	 * @return State

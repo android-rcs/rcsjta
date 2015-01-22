@@ -336,13 +336,11 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	private IFileTransfer sendOneToOneFile(ContactId contact, MmContent file, MmContent fileIcon,
 			String fileTransferId) throws ServerApiException {
 		try {
-			long fileSize = file.getSize();
 			mImService.assertFileSizeNotExceedingMaxLimit(file.getSize(), "File exceeds max size");
 
 			FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
-					fileTransferId, contact, Direction.OUTGOING, contact.toString(), file.getUri(),
-					fileIcon != null ? fileIcon.getUri() : null, file.getName(),
-					file.getEncoding(), fileSize, mMessagingLog);
+					fileTransferId, contact, Direction.OUTGOING, contact.toString(), file,
+					fileIcon, mMessagingLog);
 
 			if (!mImService.isFileTransferSessionAvailable()
 					|| mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
@@ -417,9 +415,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 					fileTransferId, contact, file, fileIcon);
 
 			FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
-					fileTransferId, contact, Direction.OUTGOING, contact.toString(), file.getUri(),
-					fileIcon != null ? fileIcon.getUri() : null, file.getName(),
-					file.getEncoding(), file.getSize(), mMessagingLog);
+					fileTransferId, contact, Direction.OUTGOING, contact.toString(), file,
+					fileIcon, mMessagingLog);
 			OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
 					fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
 					this);
@@ -491,9 +488,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			addOutgoingFileTransfer(fileTransferId, contact, content, fileIconContent,
 					FileTransfer.State.QUEUED);
 			FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
-					fileTransferId, contact, Direction.OUTGOING, contact.toString(), file,
-					fileIconContent != null ? fileIconContent.getUri() : null, content.getName(),
-					content.getEncoding(), content.getSize(), mMessagingLog);
+					fileTransferId, contact, Direction.OUTGOING, contact.toString(), content,
+					fileIconContent, mMessagingLog);
 			return new OneToOneFileTransferImpl(fileTransferId, mOneToOneFileTransferBroadcaster,
 					mImService, storageAccessor, this);
 
@@ -537,9 +533,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			mImService.assertFileSizeNotExceedingMaxLimit(fileSize, "File exceeds max size.");
 
 			FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
-					fileTransferId, null, Direction.OUTGOING, chatId, content.getUri(),
-					fileIcon != null ? fileIcon.getUri() : null, content.getName(),
-					content.getEncoding(), fileSize, mMessagingLog);
+					fileTransferId, null, Direction.OUTGOING, chatId, content, fileIcon,
+					mMessagingLog);
 
 			if (!mImService.isFileTransferSessionAvailable()
 					|| mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
@@ -654,9 +649,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileIconContent,
 					State.QUEUED);
 			FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
-					fileTransferId, null, Direction.OUTGOING, chatId, file,
-					fileIconContent != null ? fileIconContent.getUri() : null, content.getName(),
-					content.getEncoding(), content.getSize(), mMessagingLog);
+					fileTransferId, null, Direction.OUTGOING, chatId, content, fileIconContent,
+					mMessagingLog);
 			return new GroupFileTransferImpl(fileTransferId, chatId, mGroupFileTransferBroadcaster,
 					mImService, storageAccessor, this);
 

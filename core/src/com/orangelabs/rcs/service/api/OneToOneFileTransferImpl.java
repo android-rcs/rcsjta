@@ -191,6 +191,19 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 	}
 
 	/**
+	 * Returns the Mime type of file icon
+	 *
+	 * @return Mime type
+	 */
+	public String getFileIconMimeType() {
+		FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+		if (session == null) {
+			return mPersistentStorage.getFileIconMimeType();
+		}
+		MmContent fileIconMimeType = session.getContent();
+		return fileIconMimeType != null ? fileIconMimeType.getEncoding() : null;
+	}
+	/**
 	 * Returns the state of the file transfer
 	 * 
 	 * @return State
@@ -260,6 +273,22 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 			return Direction.INCOMING.toInt();
 		}
 		return Direction.OUTGOING.toInt();
+	}
+
+	public long getTimestamp() {
+		return mPersistentStorage.getTimestamp();
+	}
+
+	public long getTimestampSent() {
+		return mPersistentStorage.getTimestampSent();
+	}
+
+	public long getTimestampDelivered() {
+		return mPersistentStorage.getTimestampDelivered();
+	}
+
+	public long getTimestampDisplayed() {
+		return mPersistentStorage.getTimestampDisplayed();
 	}
 
 	/**

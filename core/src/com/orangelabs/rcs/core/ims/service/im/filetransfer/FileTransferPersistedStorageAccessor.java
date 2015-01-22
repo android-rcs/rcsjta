@@ -57,23 +57,30 @@ public class FileTransferPersistedStorageAccessor {
 
 	private Uri mFileIcon;
 
+	private String mFileIconMimeType;
+
+	private long mTimestampDelivered;
+
+	private long mTimestampDisplayed;
+
 	public FileTransferPersistedStorageAccessor(String fileTransferId, MessagingLog messagingLog) {
 		mFileTransferId = fileTransferId;
 		mMessagingLog = messagingLog;
 	}
 
 	public FileTransferPersistedStorageAccessor(String fileTransferId, ContactId contact,
-			Direction direction, String chatId, Uri file, Uri fileIcon, String fileName, String mimeType,
-			long fileSize, MessagingLog messagingLog) {
+			Direction direction, String chatId, MmContent file, MmContent fileIcon,
+			MessagingLog messagingLog) {
 		mFileTransferId = fileTransferId;
 		mContact = contact;
 		mDirection = direction;
 		mChatId = chatId;
-		mFile = file;
-		mFileIcon = fileIcon;
-		mFileName = fileName;
-		mMimeType = mimeType;
-		mFileSize = fileSize;
+		mFile = file.getUri();
+		mFileIcon = fileIcon != null ? fileIcon.getUri() : null;
+		mFileIconMimeType = fileIcon != null ? fileIcon.getEncoding() : null;
+		mFileName = file.getName();
+		mMimeType = file.getEncoding();
+		mFileSize = file.getSize();
 		mMessagingLog = messagingLog;
 	}
 
@@ -102,6 +109,16 @@ public class FileTransferPersistedStorageAccessor {
 					.getColumnIndexOrThrow(FileTransferLog.READ_STATUS));
 			}
 			mFileSize = cursor.getLong(cursor.getColumnIndexOrThrow(FileTransferLog.FILESIZE));
+			mFileIconMimeType = cursor.getString(cursor
+					.getColumnIndexOrThrow(FileTransferLog.FILEICON_MIME_TYPE));
+			if (mTimestampDelivered <= 0) {
+				mTimestampDelivered = cursor.getLong(cursor
+						.getColumnIndexOrThrow(FileTransferLog.TIMESTAMP_DELIVERED));
+			}
+			if (mTimestampDisplayed <= 0) {
+				mTimestampDisplayed = cursor.getLong(cursor
+						.getColumnIndexOrThrow(FileTransferLog.TIMESTAMP_DISPLAYED));
+			}
 		} finally {
 			if (cursor != null) {
 				cursor.close();
@@ -191,6 +208,50 @@ public class FileTransferPersistedStorageAccessor {
 			cacheData();
 		}
 		return mFileIcon;
+	}
+
+	public String getFileIconMimeType() {
+		/*
+		 * Utilizing cache here as file icon mime type can't be changed in
+		 * persistent storage after entry insertion anyway so no need to query
+		 * for it multiple times.
+		 */
+		if (mFileIconMimeType == null) {
+			cacheData();
+		}
+		return mFileIconMimeType;
+	}
+
+	public long getTimestamp() {
+		return mMessagingLog.getFileTransferTimestamp(mFileTransferId);
+	}
+
+	public long getTimestampSent() {
+		return mMessagingLog.getFileTransferSentTimestamp(mFileTransferId);
+	}
+
+	public long getTimestampDelivered() {
+		/*
+		 * Utilizing cache here as Timestamp delivered can't be changed in
+		 * persistent storage after it has been set to some value bigger than
+		 * zero, so no need to query for it multiple times.
+		 */
+		if (mTimestampDelivered == 0) {
+			cacheData();
+		}
+		return mTimestampDelivered;
+	}
+
+	public long getTimestampDisplayed() {
+		/*
+		 * Utilizing cache here as Timestamp displayed can't be changed in
+		 * persistent storage after it has been set to some value bigger than
+		 * zero, so no need to query for it multiple times.
+		 */
+		if (mTimestampDisplayed == 0) {
+			cacheData();
+		}
+		return mTimestampDisplayed;
 	}
 
 	public int getState() {

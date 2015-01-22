@@ -175,6 +175,10 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 		return Direction.OUTGOING.toInt();
 	}
 
+	public long getTimestamp() {
+		return mPersistentStorage.getTimestamp();
+	}
+
 	/**
 	 * Accepts geoloc sharing invitation
 	 */

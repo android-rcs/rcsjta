@@ -212,4 +212,20 @@ public interface IFileTransferLog {
 	 * @return true if it is group file transfer
 	 */
 	public boolean isGroupFileTransfer(String fileTransferId);
+
+	/**
+	 * Get file transfer time stamp from file transfer Id
+	 * 
+	 * @param fileTransferId
+	 * @return time stamp
+	 */
+	public long getFileTransferTimestamp(String fileTransferId);
+
+	/**
+	 * Get file transfer sent time stamp from file transfer Id
+	 *
+	 * @param fileTransferId
+	 * @return sent time stamp
+	 */
+	public long getFileTransferSentTimestamp(String fileTransferId);
 }

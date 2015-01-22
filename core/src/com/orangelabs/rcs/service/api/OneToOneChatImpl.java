@@ -289,8 +289,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 		ChatMessage msg = ChatUtils.createTextMessage(mContact, message);
 		ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
 				mMessagingLog, msg.getMessageId(), msg.getRemoteContact(), message,
-				MimeType.TEXT_MESSAGE, mContact.toString(), msg.getDate().getTime(),
-				Direction.OUTGOING);
+				MimeType.TEXT_MESSAGE, mContact.toString(), Direction.OUTGOING);
 
 		/* If the IMS is connected at this time then send this message. */
 		if (ServerApiUtils.isImsConnected()) {
@@ -315,8 +314,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 		ChatMessage msg = ChatUtils.createGeolocMessage(mContact, geoloc);
 		ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
 				mMessagingLog, msg.getMessageId(), msg.getRemoteContact(), msg.toString(),
-				MimeType.GEOLOC_MESSAGE, mContact.toString(), msg.getDate().getTime(),
-				Direction.OUTGOING);
+				MimeType.GEOLOC_MESSAGE, mContact.toString(), Direction.OUTGOING);
 
 		/* If the IMS is connected at this time then send this message. */
 		if (ServerApiUtils.isImsConnected()) {

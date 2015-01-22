@@ -187,7 +187,15 @@ public abstract class MultimediaSession {
 	 * @throws RcsServiceException
 	 */
 	public abstract Direction getDirection() throws RcsServiceException;
-	
+
+	/**
+	 * Returns the reason code of the session.
+	 * 
+	 * @return int
+	 * @throws RcsServiceException
+	 */
+	public abstract int getReasonCode() throws RcsServiceException;
+
 	/**
 	 * Accepts session invitation.
 	 * 

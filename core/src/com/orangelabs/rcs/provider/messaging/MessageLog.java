@@ -403,21 +403,11 @@ public class MessageLog implements IMessageLog {
 	}
 
 	@Override
-	public long getMessageDeliveredTimestamp(String msgId) {
+	public long getMessageTimestamp(String msgId) {
 		if (logger.isActivated()) {
-			logger.debug(new StringBuilder("Get message delivered timestamp for ").append(msgId)
-					.toString());
+			logger.debug("Get message timestamp for ".concat(msgId));
 		}
 		return getDataAsLong(getMessageData(MessageData.KEY_TIMESTAMP_DELIVERED, msgId));
-	}
-
-	@Override
-	public long getMessageDisplayedTimestamp(String msgId) {
-		if (logger.isActivated()) {
-			logger.debug(new StringBuilder("Get message displayed timestamp for ").append(msgId)
-					.toString());
-		}
-		return getDataAsLong(getMessageData(MessageData.KEY_TIMESTAMP_DISPLAYED, msgId));
 	}
 
 	@Override
