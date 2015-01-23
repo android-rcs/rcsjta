@@ -24,7 +24,7 @@ package com.orangelabs.rcs.service.api;
 
 import javax2.sip.message.Response;
 
-import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.vsh.IVideoRenderer;
 import com.gsma.services.rcs.vsh.IVideoSharing;
@@ -45,7 +45,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Video sharing session
- * 
+ *
  * @author Jean-Marc AUFFRET
  */
 public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreamingSessionListener {
@@ -69,7 +69,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	 * Started at
 	 */
 	private long startedAt;
-	
+
 	/**
 	 * The logger
 	 */
@@ -77,7 +77,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param sharingId Unique Id of video sharing
 	 * @param richcallService RichcallService
 	 * @param broadcaster IVideoSharingEventBroadcaster
@@ -149,16 +149,16 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 
     /**
 	 * Returns the sharing ID of the video sharing
-	 * 
+	 *
 	 * @return Sharing ID
 	 */
 	public String getSharingId() {
 		return mSharingId;
 	}
-	
+
 	/**
 	 * Returns the remote contact ID
-	 * 
+	 *
 	 * @return ContactId
 	 */
 	public ContactId getRemoteContact() {
@@ -168,10 +168,10 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 		}
 		return session.getRemoteContact();
 	}
-	
+
 	/**
 	 * Returns the video codec
-	 * 
+	 *
 	 * @return Video codec
 	 * @see VideoCodec
 	 */
@@ -200,10 +200,10 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Returns the state of the sharing
-	 * 
+	 *
 	 * @return State
 	 * @see VideoSharing.State
 	 */
@@ -236,27 +236,27 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 		}
 		return ReasonCode.UNSPECIFIED;
 	}
-	
+
 	/**
 	 * Returns the direction of the sharing (incoming or outgoing)
-	 * 
+	 *
 	 * @return Direction
 	 * @see Direction
 	 */
 	public int getDirection() {
 		VideoStreamingSession session = mRichcallService.getVideoSharingSession(mSharingId);
 		if (session == null) {
-			return mPersistentStorage.getDirection();
+			return mPersistentStorage.getDirection().toInt();
 		}
 		if (session.isInitiatedByRemote()) {
-			return Direction.INCOMING;
+			return Direction.INCOMING.toInt();
 		}
-		return Direction.OUTGOING;
+		return Direction.OUTGOING.toInt();
 	}
-	
+
 	/**
 	 * Accepts video sharing invitation
-	 * 
+	 *
 	 * @param renderer Video renderer
 	 */
 	public void acceptInvitation(IVideoRenderer renderer) {
@@ -273,7 +273,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 		}
 		// Set the video renderer
 		session.setVideoRenderer(renderer);
-		
+
 		// Accept invitation
         new Thread() {
     		public void run() {
@@ -281,7 +281,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
     		}
     	}.start();
 	}
-	
+
 	/**
 	 * Rejects video sharing invitation
 	 */
@@ -325,7 +325,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
     		public void run() {
     			session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
     		}
-    	}.start();	
+    	}.start();
 	}
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
@@ -432,7 +432,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 					mSharingId, VideoSharing.State.ACCEPTING, ReasonCode.UNSPECIFIED);
 		}
 	}
-    
+
     /**
      * Video stream has been resized
      *

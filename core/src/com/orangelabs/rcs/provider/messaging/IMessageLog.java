@@ -21,6 +21,7 @@
  ******************************************************************************/
 package com.orangelabs.rcs.provider.messaging;
 
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.service.im.chat.ChatMessage;
 
@@ -79,7 +80,7 @@ public interface IMessageLog {
 	 *            Status reason code
 	 */
 	public void addGroupChatMessage(String chatId, ChatMessage msg,
-			int direction, int status, int reasonCode);
+			Direction direction, int status, int reasonCode);
 
 	/**
 	 * Add group chat system message

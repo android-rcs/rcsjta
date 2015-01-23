@@ -32,7 +32,7 @@ import android.os.RemoteException;
 
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
-import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.chat.ChatLog.Message;
@@ -513,7 +513,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 * Adds a listener on one-to-one chat events
 	 *
 	 * @param listener One-to-One chat event listener
-	 * @throws RemoteException 
+	 * @throws RemoteException
 	 */
 	public void addEventListener2(IOneToOneChatListener listener) throws RemoteException {
 		if (logger.isActivated()) {
@@ -528,7 +528,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 * Removes a listener on one-to-one chat events
 	 *
 	 * @param listener One-to-One chat event listener
-	 * @throws RemoteException 
+	 * @throws RemoteException
 	 */
 	public void removeEventListener2(IOneToOneChatListener listener) throws RemoteException {
 		if (logger.isActivated()) {
@@ -683,14 +683,14 @@ public class ChatServiceImpl extends IChatService.Stub {
 		groupChat.rejoinGroupChat();
 		addGroupChat(groupChat);
 	}
-	
+
 	/**
 	 * Returns the common service configuration
-	 * 
+	 *
 	 * @return the common service configuration
 	 */
 	public ICommonServiceConfiguration getCommonConfiguration() {
 		return new CommonServiceConfigurationImpl();
 	}
-	
+
 }

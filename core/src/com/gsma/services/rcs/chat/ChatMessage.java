@@ -22,6 +22,7 @@
 
 package com.gsma.services.rcs.chat;
 
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 
@@ -107,9 +108,9 @@ public class ChatMessage {
 	 * @see com.gsma.services.rcs.RcsCommon.Direction
 	 * @throws RcsServiceException
 	 */
-	public int getDirection() throws RcsServiceException {
+	public Direction getDirection() throws RcsServiceException {
 		try {
-			return mChatMessageInf.getDirection();
+			return Direction.valueOf(mChatMessageInf.getDirection());
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}

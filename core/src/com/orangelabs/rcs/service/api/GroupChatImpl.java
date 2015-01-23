@@ -28,7 +28,7 @@ import java.util.Set;
 
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.GroupDeliveryInfoLog;
-import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
@@ -272,12 +272,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	public int getDirection() {
 		GroupChatSession session = mImService.getGroupChatSession(mChatId);
 		if (session == null) {
-			return mPersistentStorage.getDirection();
+			return mPersistentStorage.getDirection().toInt();
 		}
 		if (session.isInitiatedByRemote()) {
-			return Direction.INCOMING;
+			return Direction.INCOMING.toInt();
 		}
-		return Direction.OUTGOING;
+		return Direction.OUTGOING.toInt();
 	}
 
 	/**
@@ -473,7 +473,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	/**
 	 * Add group chat message to Db
 	 * @param msg InstantMessage
-	 * @param state state of messaget
+	 * @param state state of message
 	 */
 	private void addOutgoingGroupChatMessage(ChatMessage msg, int state) {
 		mPersistentStorage.addGroupChatMessage(msg, Direction.OUTGOING, state,

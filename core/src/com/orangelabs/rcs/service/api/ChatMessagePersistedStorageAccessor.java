@@ -16,8 +16,11 @@
 
 package com.orangelabs.rcs.service.api;
 
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.ft.FileTransferLog;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.utils.ContactUtils;
 
@@ -45,11 +48,13 @@ public class ChatMessagePersistedStorageAccessor {
 
 	private Long mTimestamp;
 
-	private Integer mDirection;
+	private boolean mRead;
+
+	private Direction mDirection;
 
 	/**
 	 * Constructor for outgoing message
-	 * 
+	 *
 	 * @param messagingLog MessagingLog
 	 * @param id Message Id
 	 */
@@ -60,7 +65,7 @@ public class ChatMessagePersistedStorageAccessor {
 
 	/**
 	 * Constructor for outgoing message
-	 * 
+	 *
 	 * @param messagingLog MessagingLog
 	 * @param id Message Id
 	 * @param remoteContact Contact Id
@@ -72,7 +77,7 @@ public class ChatMessagePersistedStorageAccessor {
 	 */
 	public ChatMessagePersistedStorageAccessor(MessagingLog messagingLog, String id,
 			ContactId remoteContact, String content, String mimeType, String chatId,
-			long timestamp, int direction) {
+			long timestamp, Direction direction) {
 		mMessagingLog = messagingLog;
 		mId = id;
 		mRemoteContact = remoteContact;
@@ -92,11 +97,15 @@ public class ChatMessagePersistedStorageAccessor {
 			if (contact != null) {
 				mRemoteContact = ContactUtils.createContactId(contact);
 			}
-			mDirection = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.Message.DIRECTION));
+			mDirection = Direction.valueOf(cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.Message.DIRECTION)));
 			mContent = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTENT));
 			mChatId = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CHAT_ID));
 			mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.MIME_TYPE));
 			mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(ChatLog.Message.TIMESTAMP));
+			if (!mRead) {
+			    mRead = ReadStatus.READ.toInt() == cursor.getInt(cursor
+			            .getColumnIndexOrThrow(FileTransferLog.READ_STATUS));
+			}
 		} finally {
 			if (cursor != null) {
 				cursor.close();
@@ -129,7 +138,7 @@ public class ChatMessagePersistedStorageAccessor {
 		return mMimeType;
 	}
 
-	public int getDirection() {
+	public Direction getDirection() {
 		if (mDirection == null) {
 			cacheData();
 		}
@@ -171,6 +180,13 @@ public class ChatMessagePersistedStorageAccessor {
 	}
 
 	public boolean isRead() {
-		return mMessagingLog.isMessageRead(mId);
+		/*
+		 * No need to read from provider unless incoming and not already marked
+		 * as read.
+		 */
+		if (Direction.INCOMING == mDirection && !mRead) {
+			cacheData();
+		}
+		return mRead;
 	}
 }

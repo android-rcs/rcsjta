@@ -16,6 +16,8 @@
 
 package com.orangelabs.rcs.core.ims.service.im.filetransfer;
 
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransferLog;
 import com.orangelabs.rcs.core.content.MmContent;
@@ -39,10 +41,9 @@ public class FileTransferPersistedStorageAccessor {
 
 	private ContactId mContact;
 
-	/**
-	 * TODO: Change type to enum in CR031 implementation
-	 */
-	private Integer mDirection;
+	private boolean mRead;
+
+	private Direction mDirection;
 
 	private String mChatId;
 
@@ -62,7 +63,7 @@ public class FileTransferPersistedStorageAccessor {
 	}
 
 	public FileTransferPersistedStorageAccessor(String fileTransferId, ContactId contact,
-			int direction, String chatId, Uri file, Uri fileIcon, String fileName, String mimeType,
+			Direction direction, String chatId, Uri file, Uri fileIcon, String fileName, String mimeType,
 			long fileSize, MessagingLog messagingLog) {
 		mFileTransferId = fileTransferId;
 		mContact = contact;
@@ -85,16 +86,20 @@ public class FileTransferPersistedStorageAccessor {
 			if (contact != null) {
 				mContact = ContactUtils.createContactId(contact);
 			}
-			mDirection = cursor.getInt(cursor.getColumnIndexOrThrow(FileTransferLog.DIRECTION));
+			mDirection = Direction.valueOf(cursor.getInt(cursor.getColumnIndexOrThrow(FileTransferLog.DIRECTION)));
 			mChatId = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.CHAT_ID));
 			mFileName = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FILENAME));
 			mMimeType = cursor.getString(cursor
-					.getColumnIndexOrThrow(FileTransferLog.MIME_TYPE));
+					.getColumnIndexOrThrow(FileTransferLog.FILEICON_MIME_TYPE));
 			mFile = Uri.parse(cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FILE)));
 			String fileIcon = cursor.getString(cursor
 					.getColumnIndexOrThrow(FileTransferLog.FILEICON));
 			if (fileIcon != null) {
 				mFileIcon = Uri.parse(fileIcon);
+			}
+			if (!mRead) {
+				mRead = ReadStatus.READ.toInt() == cursor.getInt(cursor
+					.getColumnIndexOrThrow(FileTransferLog.READ_STATUS));
 			}
 			mFileSize = cursor.getLong(cursor.getColumnIndexOrThrow(FileTransferLog.FILESIZE));
 		} finally {
@@ -196,16 +201,27 @@ public class FileTransferPersistedStorageAccessor {
 		return mMessagingLog.getFileTransferStateReasonCode(mFileTransferId);
 	}
 
-	public int getDirection() {
+    public Direction getDirection() {
+        /*
+         * Utilizing cache here as direction can't be changed in persistent
+         * storage after entry insertion anyway so no need to query for it
+         * multiple times.
+         */
+        if (mDirection == null) {
+            cacheData();
+        }
+        return mDirection;
+    }
+
+	public boolean isRead() {
 		/*
-		 * Utilizing cache here as direction can't be changed in persistent
-		 * storage after entry insertion anyway so no need to query for it
-		 * multiple times.
+		 * No need to read from provider unless incoming and not already marked
+		 * as read.
 		 */
-		if (mDirection == null) {
+		if (Direction.INCOMING == mDirection && !mRead) {
 			cacheData();
 		}
-		return mDirection;
+		return mRead;
 	}
 
 	public void setStateAndReasonCode(int state, int reasonCode) {
@@ -220,7 +236,7 @@ public class FileTransferPersistedStorageAccessor {
 		mMessagingLog.setFileTransferred(mFileTransferId, content);
 	}
 
-	public void addFileTransfer(ContactId contact, int direction, MmContent content,
+	public void addFileTransfer(ContactId contact, Direction direction, MmContent content,
 			MmContent fileIcon, int status, int reasonCode) {
 		mMessagingLog.addFileTransfer(mFileTransferId, contact, direction, content, fileIcon,
 				status, reasonCode);

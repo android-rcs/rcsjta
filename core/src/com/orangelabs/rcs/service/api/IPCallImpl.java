@@ -25,7 +25,7 @@ import javax2.sip.message.Response;
 
 import android.os.RemoteException;
 
-import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.AudioCodec;
 import com.gsma.services.rcs.ipcall.IIPCall;
@@ -210,12 +210,12 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	public int getDirection() {
 		IPCallSession session = mIPCallService.getIPCallSession(mCallId);
 		if (session == null) {
-			return mPersistentStorage.getDirection();
+			return mPersistentStorage.getDirection().toInt();
 		}
 		if (session.isInitiatedByRemote()) {
-			return Direction.INCOMING;
+			return Direction.INCOMING.toInt();
 		}
-		return Direction.OUTGOING;
+		return Direction.OUTGOING.toInt();
 	}
 
 	/**

@@ -21,6 +21,7 @@ package com.gsma.services.rcs.contacts;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 
 import android.content.ComponentName;
@@ -57,7 +58,7 @@ public class ContactsService extends RcsService {
 	 * API
 	 */
 	private IContactsService mApi;
-	
+
 	private static final String ERROR_CNX = "Contacts service not connected";
 	
     /**
@@ -117,7 +118,7 @@ public class ContactsService extends RcsService {
         public void onServiceDisconnected(ComponentName className) {
         	setApi(null);
         	if (mListener != null) {
-        		mListener.onServiceDisconnected(Error.CONNECTION_LOST);
+        		mListener.onServiceDisconnected(ReasonCode.CONNECTION_LOST);
         	}
         }
     };

@@ -25,7 +25,7 @@ public class ChatMessageImpl extends IChatMessage.Stub {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param persistentStorage ChatMessagePersistedStorageAccessor
 	 */
 	public ChatMessageImpl(ChatMessagePersistedStorageAccessor persistentStorage) {
@@ -49,7 +49,7 @@ public class ChatMessageImpl extends IChatMessage.Stub {
 	}
 
 	public int getDirection() {
-		return mPersistentStorage.getDirection();
+		return mPersistentStorage.getDirection().toInt();
 	}
 
 	public long getTimestamp() {

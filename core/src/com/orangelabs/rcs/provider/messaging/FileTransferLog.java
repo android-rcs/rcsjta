@@ -32,8 +32,8 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
 
-import com.gsma.services.rcs.RcsCommon.Direction;
-import com.gsma.services.rcs.RcsCommon.ReadStatus;
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
@@ -95,7 +95,7 @@ public class FileTransferLog implements IFileTransferLog {
 	}
 
 	@Override
-	public void addFileTransfer(String fileTransferId, ContactId contact, int direction,
+	public void addFileTransfer(String fileTransferId, ContactId contact, Direction direction,
 			MmContent content, MmContent fileIcon, int state, int reasonCode) {
 		if (logger.isActivated()) {
 			logger.debug(new StringBuilder("Add file transfer entry: fileTransferId=")
@@ -111,7 +111,7 @@ public class FileTransferLog implements IFileTransferLog {
 		values.put(FileTransferData.KEY_FILE, content.getUri().toString());
 		values.put(FileTransferData.KEY_FILENAME, content.getName());
 		values.put(FileTransferData.KEY_MIME_TYPE, content.getEncoding());
-		values.put(FileTransferData.KEY_DIRECTION, direction);
+		values.put(FileTransferData.KEY_DIRECTION, direction.toInt());
 		values.put(FileTransferData.KEY_TRANSFERRED, 0);
 		values.put(FileTransferData.KEY_FILESIZE, content.getSize());
 		if (fileIcon != null) {
@@ -119,7 +119,7 @@ public class FileTransferLog implements IFileTransferLog {
 		}
 
 		long date = Calendar.getInstance().getTimeInMillis();
-		values.put(FileTransferData.KEY_READ_STATUS, ReadStatus.UNREAD);
+		values.put(FileTransferData.KEY_READ_STATUS, ReadStatus.UNREAD.toInt());
 		values.put(FileTransferData.KEY_STATE, state);
 		values.put(FileTransferData.KEY_REASON_CODE, reasonCode);
 		if (direction == Direction.INCOMING) {
@@ -151,11 +151,11 @@ public class FileTransferLog implements IFileTransferLog {
 		values.put(FileTransferData.KEY_FILE, content.getUri().toString());
 		values.put(FileTransferData.KEY_FILENAME, content.getName());
 		values.put(FileTransferData.KEY_MIME_TYPE, content.getEncoding());
-		values.put(FileTransferData.KEY_DIRECTION, Direction.OUTGOING);
+		values.put(FileTransferData.KEY_DIRECTION, Direction.OUTGOING.toInt());
 		values.put(FileTransferData.KEY_TRANSFERRED, 0);
 		values.put(FileTransferData.KEY_FILESIZE, content.getSize());
 		long date = Calendar.getInstance().getTimeInMillis();
-		values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD);
+		values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD.toInt());
 		// Send file
 		values.put(FileTransferData.KEY_TIMESTAMP, date);
 		values.put(FileTransferData.KEY_TIMESTAMP_SENT, date);
@@ -204,10 +204,10 @@ public class FileTransferLog implements IFileTransferLog {
 		values.put(FileTransferData.KEY_CONTACT, contact.toString());
 		values.put(FileTransferData.KEY_FILENAME, content.getName());
 		values.put(FileTransferData.KEY_MIME_TYPE, content.getEncoding());
-		values.put(FileTransferData.KEY_DIRECTION, Direction.INCOMING);
+		values.put(FileTransferData.KEY_DIRECTION, Direction.INCOMING.toInt());
 		values.put(FileTransferData.KEY_TRANSFERRED, 0);
 		values.put(FileTransferData.KEY_FILESIZE, content.getSize());
-		values.put(FileTransferData.KEY_READ_STATUS, ReadStatus.UNREAD);
+		values.put(FileTransferData.KEY_READ_STATUS, ReadStatus.UNREAD.toInt());
 		values.put(FileTransferData.KEY_STATE, state);
 		values.put(FileTransferData.KEY_REASON_CODE, reasonCode);
 
@@ -253,7 +253,7 @@ public class FileTransferLog implements IFileTransferLog {
 					.toString());
 		}
 		ContentValues values = new ContentValues();
-		values.put(FileTransferData.KEY_READ_STATUS, ReadStatus.READ);
+		values.put(FileTransferData.KEY_READ_STATUS, ReadStatus.READ.toInt());
 		if (mLocalContentResolver.update(Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values,
 				null, null) < 1) {
 			/* TODO: Throw exception */
@@ -372,7 +372,7 @@ public class FileTransferLog implements IFileTransferLog {
 				String chatId = cursor.getString(chatIdColumnIdx);
 				String file = cursor.getString(fileColumnIdx);
 				String fileName = cursor.getString(fileNameColumnIdx);
-				int direction = cursor.getInt(directionColumnIdx);
+				Direction direction = Direction.valueOf(cursor.getInt(directionColumnIdx));
 				String fileIcon = cursor.getString(fileIconColumnIdx);
 				boolean isGroup = !contact.toString().equals(chatId);
 				if (direction == Direction.INCOMING) {

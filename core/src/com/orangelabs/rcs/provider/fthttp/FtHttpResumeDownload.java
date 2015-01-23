@@ -21,7 +21,7 @@
  ******************************************************************************/
 package com.orangelabs.rcs.provider.fthttp;
 
-import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
@@ -30,20 +30,20 @@ import android.net.Uri;
 
 /**
  * @author YPLO6403
- * 
+ *
  *         Class to handle FtHttpResumeDownload data objects
- * 
+ *
  */
 public final class FtHttpResumeDownload extends FtHttpResume {
 
 	/**
 	 * The URI to download file from
 	 */
-	final private Uri downloadServerAddress;
+	final private Uri mDownloadServerAddress;
 
 	/**
 	 * Creates a FT HTTP resume download data object (immutable)
-	 * 
+	 *
 	 * @param session
 	 *            the {@code session} instance.
 	 * @param downloadServerAddress
@@ -65,7 +65,7 @@ public final class FtHttpResumeDownload extends FtHttpResume {
 
 	/**
 	 * Creates a FT HTTP resume download data object
-	 * 
+	 *
 	 * @param downloadServerAddress
 	 *            the {@code downloadServerAddress} instance.
 	 * @param file
@@ -86,20 +86,20 @@ public final class FtHttpResumeDownload extends FtHttpResume {
 	public FtHttpResumeDownload(Uri downloadServerAddress, Uri file, Uri fileIcon, MmContent content, ContactId contact,
 			String chatId, String filetransferId, boolean isGroup) {
 		super(Direction.INCOMING, file, content.getName(), content.getEncoding(), content.getSize(), fileIcon, contact, chatId, filetransferId, isGroup);
-		this.downloadServerAddress = downloadServerAddress;
+		mDownloadServerAddress = downloadServerAddress;
 		if (downloadServerAddress == null || filetransferId == null)
 			throw new IllegalArgumentException("Invalid argument");
 	}
 
 	public Uri getDownloadServerAddress() {
-		return downloadServerAddress;
+		return mDownloadServerAddress;
 	}
 
 	@Override
 	public String toString() {
-		return "FtHttpResumeDownload [downloadServerAddress=" + downloadServerAddress + ", file=" + getFile() + ",getFileName()=" + getFileName()
+		return "FtHttpResumeDownload [downloadServerAddress=" + mDownloadServerAddress + ", file=" + getFile() + ",getFileName()=" + getFileName()
 				+ ", getSize()=" + getSize() + ", getFileicon()=" + getFileicon() + ", getContact()=" + getContact()
-				+ ", getChatId()=" + getChatId() + ", getFileTransferId()=" + getFileTransferId() + ", isGroup()=" + isGroup() + "]";
+				+ ", getChatId()=" + getChatId() + ", getFileTransferId()=" + getFileTransferId() + ", isGroup()=" + isGroupTransfer() + "]";
 	}
 
 }

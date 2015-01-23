@@ -32,6 +32,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.util.SparseArray;
 
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
@@ -138,7 +139,7 @@ public class GroupChatLog implements IGroupChatLog {
 	 * int, int)
 	 */
 	public void addGroupChat(String chatId, ContactId contact, String subject, Set<ParticipantInfo> participants,
-			int state, int reasonCode, int direction) {
+			int state, int reasonCode, Direction direction) {
 		if (logger.isActivated()) {
 			logger.debug(new StringBuilder("addGroupChat; chatID=").append(chatId)
 					.append(",subject=").append(subject).append(",state").append(state)
@@ -154,7 +155,7 @@ public class GroupChatLog implements IGroupChatLog {
 		values.put(ChatData.KEY_REASON_CODE, reasonCode);
 		values.put(ChatData.KEY_SUBJECT, subject);
 		values.put(ChatData.KEY_PARTICIPANTS, writeParticipantInfo(participants));
-		values.put(ChatData.KEY_DIRECTION, direction);
+		values.put(ChatData.KEY_DIRECTION, direction.toInt());
 		values.put(ChatData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
 		values.put(ChatData.KEY_USER_ABORTION, UserAbortion.SERVER_NOTIFIED.toInt());
 		mLocalContentResolver.insert(ChatData.CONTENT_URI, values);

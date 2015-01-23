@@ -30,7 +30,7 @@ import android.database.SQLException;
 import android.net.Uri;
 
 import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.gsh.GeolocSharing;
@@ -217,7 +217,7 @@ public class RichCallHistory {
 	 * @param state Call state
 	 * @param reasonCode Reason Code
 	 */
-	public Uri addVideoSharing(String sharingId, ContactId contact, int direction, VideoContent content,
+	public Uri addVideoSharing(String sharingId, ContactId contact, Direction direction, VideoContent content,
 			int state, int reasonCode) {
 		if(logger.isActivated()){
 			logger.debug(new StringBuilder("Add new video sharing for contact ").append(contact)
@@ -228,7 +228,7 @@ public class RichCallHistory {
 		ContentValues values = new ContentValues();
 		values.put(VideoSharingData.KEY_SHARING_ID, sharingId);
 		values.put(VideoSharingData.KEY_CONTACT, contact.toString());
-		values.put(VideoSharingData.KEY_DIRECTION, direction);
+		values.put(VideoSharingData.KEY_DIRECTION, direction.toInt());
 		values.put(VideoSharingData.KEY_STATE, state);
 		values.put(VideoSharingData.KEY_REASON_CODE, reasonCode);
 		values.put(VideoSharingData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
@@ -286,7 +286,7 @@ public class RichCallHistory {
 	 * @param status Call status
 	 * @param reasonCode Reason Code
 	 */
-	public Uri addImageSharing(String sharingId, ContactId contact, int direction, MmContent content,
+	public Uri addImageSharing(String sharingId, ContactId contact, Direction direction, MmContent content,
 			int status, int reasonCode) {
 		if(logger.isActivated()){
 			logger.debug("Add new image sharing for contact " + contact + ": sharing =" + sharingId + ", status=" + status);
@@ -295,7 +295,7 @@ public class RichCallHistory {
 		ContentValues values = new ContentValues();
 		values.put(ImageSharingData.KEY_SHARING_ID, sharingId);
 		values.put(ImageSharingData.KEY_CONTACT, contact.toString());
-		values.put(ImageSharingData.KEY_DIRECTION, direction);
+		values.put(ImageSharingData.KEY_DIRECTION, direction.toInt());
 		values.put(ImageSharingData.KEY_FILE, content.getUri().toString());
 		values.put(ImageSharingData.KEY_FILENAME, content.getName());
 		values.put(ImageSharingData.KEY_MIME_TYPE, content.getEncoding());
@@ -385,7 +385,7 @@ public class RichCallHistory {
         values.put(GeolocSharingData.KEY_SHARING_ID, sharingId);
         values.put(GeolocSharingData.KEY_CONTACT, contact.toString());
         values.put(GeolocSharingData.KEY_MIME_TYPE, MimeType.GEOLOC_MESSAGE);
-        values.put(GeolocSharingData.KEY_DIRECTION, Direction.INCOMING);
+        values.put(GeolocSharingData.KEY_DIRECTION, Direction.INCOMING.toInt());
         values.put(GeolocSharingData.KEY_STATE, state);
         values.put(GeolocSharingData.KEY_REASON_CODE, reasonCode);
         values.put(GeolocSharingData.KEY_TIMESTAMP, System.currentTimeMillis());
@@ -408,7 +408,7 @@ public class RichCallHistory {
         values.put(GeolocSharingData.KEY_CONTACT, contact.toString());
         values.put(GeolocSharingData.KEY_MIME_TYPE, MimeType.GEOLOC_MESSAGE);
         values.put(GeolocSharingData.KEY_CONTENT, geoloc.toString());
-        values.put(GeolocSharingData.KEY_DIRECTION, Direction.OUTGOING);
+        values.put(GeolocSharingData.KEY_DIRECTION, Direction.OUTGOING.toInt());
         values.put(GeolocSharingData.KEY_STATE, state);
         values.put(GeolocSharingData.KEY_REASON_CODE, reasonCode);
         values.put(GeolocSharingData.KEY_TIMESTAMP, System.currentTimeMillis());

@@ -22,7 +22,7 @@
 package com.gsma.services.rcs.gsh;
 
 import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 
@@ -263,9 +263,9 @@ public class GeolocSharing {
 	 * @see Direction
 	 * @throws RcsServiceException
 	 */
-	public int getDirection() throws RcsServiceException {
+	public Direction getDirection() throws RcsServiceException {
 		try {
-			return mSharingInf.getDirection();
+			return Direction.valueOf(mSharingInf.getDirection());
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}

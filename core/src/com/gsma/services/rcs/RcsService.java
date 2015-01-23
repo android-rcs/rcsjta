@@ -18,10 +18,13 @@
 
 package com.gsma.services.rcs;
 
+import com.gsma.services.rcs.RcsService.ReadStatus;
+
 import java.lang.reflect.Method;
 
 import android.content.Context;
 import android.os.IInterface;
+import android.util.SparseArray;
 
 /**
  * Abstract RCS service
@@ -82,30 +85,97 @@ public abstract class RcsService {
 		}
 	}
 
+    /**
+     * Direction of the communication for Chat message, Geolocation,
+     * Filetransfer, Imageshare, Videoshare etc.
+     */
+    public enum Direction {
+
+        /**
+         * Incoming communication
+         */
+        INCOMING(0),
+
+        /**
+         * Outgoing communication
+         */
+        OUTGOING(1),
+
+        /**
+         * Irrelevant or not applicable (e.g. for group chat event message)
+         */
+        IRRELEVANT(2);
+
+        private final int mValue;
+
+        private static SparseArray<Direction> mValueToEnum = new SparseArray<Direction>();
+        static {
+            for (Direction entry : Direction.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
+
+        private Direction(int value) {
+            mValue = value;
+        }
+
+        public final int toInt() {
+            return mValue;
+        }
+
+        public final static Direction valueOf(int value) {
+            Direction entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(Direction.class.getName()).append(".").append(value).append("!")
+                    .toString());
+        }
+    }
+
 	/**
-	 * Service error
-	 */
-	public static class Error {
-		/**
-		 * Internal error
-		 */
-		public final static int INTERNAL_ERROR = 0;
+     * Read status of the message
+     */
+    public enum ReadStatus {
+        /**
+         * The message has not yet been displayed in the UI.
+         */
+        UNREAD(0),
+        /**
+         * The message has been displayed in the UI.
+         */
+        READ(1);
+    
+        private final int mValue;
+    
+        private static SparseArray<ReadStatus> mValueToEnum = new SparseArray<ReadStatus>();
+        static {
+            for (ReadStatus entry : ReadStatus.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
+    
+        private ReadStatus(int value) {
+            mValue = value;
+        }
+    
+        public final int toInt() {
+            return mValue;
+        }
+    
+        public final static ReadStatus valueOf(int value) {
+            ReadStatus entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(ReadStatus.class.getName()).append(".").append(value).append("!")
+                    .toString());
+        }
+    }
 
-		/**
-		 * Service has been disabled
-		 */
-		public final static int SERVICE_DISABLED = 1;
-
-		/**
-		 * Service connection has been lost
-		 */
-		public final static int CONNECTION_LOST = 2;
-
-		private Error() {
-		}
-	}
-
-	/**
+    /**
 	 * Application context
 	 */
 	protected Context mCtx;

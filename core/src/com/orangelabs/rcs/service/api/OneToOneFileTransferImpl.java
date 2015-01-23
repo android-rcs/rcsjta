@@ -25,7 +25,7 @@ import javax2.sip.message.Response;
 
 import android.net.Uri;
 
-import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransfer.State;
@@ -254,12 +254,12 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 	public int getDirection() {
 		FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
 		if (session == null) {
-			return mPersistentStorage.getDirection();
+			return mPersistentStorage.getDirection().toInt();
 		}
 		if (session.isInitiatedByRemote()) {
-			return Direction.INCOMING;
+			return Direction.INCOMING.toInt();
 		}
-		return Direction.OUTGOING;
+		return Direction.OUTGOING.toInt();
 	}
 
 	/**
@@ -495,6 +495,14 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 					mFileTransferId);
 	}
 
+	/**
+	 * Returns true if file transfer has been marked as read
+	 *
+	 * @return boolean
+	 */
+	public boolean isRead() {
+	    return mPersistentStorage.isRead();
+	}
 	/*------------------------------- SESSION EVENTS ----------------------------------*/
 
 	private int sessionAbortedReasonToReasonCode(int sessionAbortedReason) {

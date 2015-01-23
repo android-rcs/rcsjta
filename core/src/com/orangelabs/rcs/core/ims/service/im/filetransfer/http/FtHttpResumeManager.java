@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.gsma.services.rcs.ft.FileTransfer;
-import com.gsma.services.rcs.RcsCommon.Direction;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
@@ -119,7 +118,7 @@ public class FtHttpResumeManager {
 			logger.debug("Resume FT HTTP " + ftHttpResume);
 		}
 		switch (ftHttpResume.getDirection()) {
-		case Direction.INCOMING:
+		case INCOMING:
 			FtHttpResumeDownload downloadInfo = (FtHttpResumeDownload) ftHttpResume;
 			MmContent downloadContent = ContentManager.createMmContent(ftHttpResume.getFile(),downloadInfo.getSize(),downloadInfo.getFileName());
 			// Creates the Resume Download session object
@@ -140,10 +139,10 @@ public class FtHttpResumeManager {
 					.handleIncomingFileTransferResuming(resumeDownload, resumeDownload.isGroupFileTransfer(), resumeDownload.getChatSessionID(),
 							resumeDownload.getContributionID());
 			break;
-		case Direction.OUTGOING:
+		case OUTGOING:
 		    // TODO : only managed for 1-1 FToHTTP
             FtHttpResumeUpload uploadInfo = (FtHttpResumeUpload) ftHttpResume;
-            if (!ftHttpResume.isGroup()) {
+            if (!ftHttpResume.isGroupTransfer()) {
                 // Get upload content
                     MmContent uploadContent = ContentManager.createMmContentFromMime(
                             uploadInfo.getFile(), uploadInfo.getMimetype(),

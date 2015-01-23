@@ -16,6 +16,7 @@
 
 package com.orangelabs.rcs.core.ims.service.richcall.image;
 
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ish.ImageSharingLog;
 import com.orangelabs.rcs.core.content.MmContent;
@@ -39,10 +40,7 @@ public class ImageSharingPersistedStorageAccessor {
 
 	private ContactId mContact;
 
-	/**
-	 * TODO: Change type to enum in CR031 implementation
-	 */
-	private Integer mDirection;
+	private Direction mDirection;
 
 	private String mFileName;
 
@@ -57,7 +55,7 @@ public class ImageSharingPersistedStorageAccessor {
 		mRichCallLog = richCallLog;
 	}
 
-	public ImageSharingPersistedStorageAccessor(String sharingId, ContactId contact, int direction,
+	public ImageSharingPersistedStorageAccessor(String sharingId, ContactId contact, Direction direction,
 			Uri file, String fileName, String mimeType, long fileSize, RichCallHistory richCallLog) {
 		mSharingId = sharingId;
 		mContact = contact;
@@ -78,7 +76,7 @@ public class ImageSharingPersistedStorageAccessor {
 			if (contact != null) {
 				mContact = ContactUtils.createContactId(contact);
 			}
-			mDirection = cursor.getInt(cursor.getColumnIndexOrThrow(ImageSharingLog.DIRECTION));
+			mDirection = Direction.valueOf(cursor.getInt(cursor.getColumnIndexOrThrow(ImageSharingLog.DIRECTION)));
 			mFileName = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILENAME));
 			mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.MIME_TYPE));
 			mFileSize = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.FILESIZE));
@@ -158,7 +156,7 @@ public class ImageSharingPersistedStorageAccessor {
 		return mRichCallLog.getImageSharingReasonCode(mSharingId);
 	}
 
-	public int getDirection() {
+	public Direction getDirection() {
 		/*
 		 * Utilizing cache here as direction can't be changed in persistent
 		 * storage after entry insertion anyway so no need to query for it
@@ -178,7 +176,7 @@ public class ImageSharingPersistedStorageAccessor {
 		mRichCallLog.setImageSharingProgress(mSharingId, currentSize);
 	}
 
-	public Uri addImageSharing(ContactId contact, int direction, MmContent content, int status,
+	public Uri addImageSharing(ContactId contact, Direction direction, MmContent content, int status,
 			int reasonCode) {
 		return mRichCallLog.addImageSharing(mSharingId, contact, direction, content, status, reasonCode);
 	}

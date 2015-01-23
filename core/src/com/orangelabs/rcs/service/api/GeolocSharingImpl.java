@@ -24,7 +24,7 @@ package com.orangelabs.rcs.service.api;
 import javax2.sip.message.Response;
 
 import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.gsh.GeolocSharing;
 import com.gsma.services.rcs.gsh.GeolocSharing.ReasonCode;
@@ -167,12 +167,12 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 	public int getDirection() {
 		GeolocTransferSession session = mRichcallService.getGeolocTransferSession(mSharingId);
 		if (session == null) {
-			return mPersistentStorage.getDirection();
+			return mPersistentStorage.getDirection().toInt();
 		}
 		if (session.isInitiatedByRemote()) {
-			return Direction.INCOMING;
+			return Direction.INCOMING.toInt();
 		}
-		return Direction.OUTGOING;
+		return Direction.OUTGOING.toInt();
 	}
 
 	/**

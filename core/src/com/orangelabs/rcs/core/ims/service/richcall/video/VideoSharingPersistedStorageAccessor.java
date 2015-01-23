@@ -16,6 +16,7 @@
 
 package com.orangelabs.rcs.core.ims.service.richcall.video;
 
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.vsh.VideoSharingLog;
 import com.orangelabs.rcs.core.content.VideoContent;
@@ -39,17 +40,14 @@ public class VideoSharingPersistedStorageAccessor {
 
 	private ContactId mContact;
 
-	/**
-	 * TODO: Change type to enum in CR031 implementation
-	 */
-	private Integer mDirection;
+	private Direction mDirection;
 
 	public VideoSharingPersistedStorageAccessor(String sharingId, RichCallHistory richCallLog) {
 		mSharingId = sharingId;
 		mRichCallLog = richCallLog;
 	}
 
-	public VideoSharingPersistedStorageAccessor(String sharingId, ContactId contact, int direction,
+	public VideoSharingPersistedStorageAccessor(String sharingId, ContactId contact, Direction direction,
 			RichCallHistory richCallLog) {
 		mSharingId = sharingId;
 		mContact = contact;
@@ -66,7 +64,7 @@ public class VideoSharingPersistedStorageAccessor {
 			if (contact != null) {
 				mContact = ContactUtils.createContactId(contact);
 			}
-			mDirection = cursor.getInt(cursor.getColumnIndexOrThrow(VideoSharingLog.DIRECTION));
+			mDirection = Direction.valueOf(cursor.getInt(cursor.getColumnIndexOrThrow(VideoSharingLog.DIRECTION)));
 		} finally {
 			if (cursor != null) {
 				cursor.close();
@@ -94,7 +92,7 @@ public class VideoSharingPersistedStorageAccessor {
 		return mRichCallLog.getVideoSharingReasonCode(mSharingId);
 	}
 
-	public int getDirection() {
+	public Direction getDirection() {
 		/*
 		 * Utilizing cache here as direction can't be changed in persistent
 		 * storage after entry insertion anyway so no need to query for it
@@ -114,7 +112,7 @@ public class VideoSharingPersistedStorageAccessor {
 		mRichCallLog.setVideoSharingDuration(mSharingId, duration);
 	}
 
-	public Uri addVideoSharing(ContactId contact, int direction, VideoContent content, int state,
+	public Uri addVideoSharing(ContactId contact, Direction direction, VideoContent content, int state,
 			int reasonCode) {
 		return mRichCallLog.addVideoSharing(mSharingId, contact, direction, content, state,
 				reasonCode);

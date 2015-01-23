@@ -25,7 +25,7 @@ import javax2.sip.message.Response;
 
 import android.net.Uri;
 
-import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ish.IImageSharing;
 import com.gsma.services.rcs.ish.ImageSharing;
@@ -43,7 +43,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Image sharing implementation
- * 
+ *
  * @author Jean-Marc AUFFRET
  */
 public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransferSessionListener {
@@ -70,7 +70,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param sharingId Unique Id of Image Sharing
 	 * @param richcallService RichcallService
 	 * @param broadcaster IImageSharingEventBroadcaster
@@ -153,16 +153,16 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
 	/**
 	 * Returns the sharing ID of the image sharing
-	 * 
+	 *
 	 * @return Sharing ID
 	 */
 	public String getSharingId() {
 		return mSharingId;
 	}
-	
+
 	/**
 	 * Returns the remote contact identifier
-	 * 
+	 *
 	 * @return ContactId
 	 */
 	public ContactId getRemoteContact() {
@@ -172,7 +172,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 		}
 		return session.getRemoteContact();
 	}
-	
+
 	/**
      * Returns the complete filename including the path of the file to be transferred
      *
@@ -210,11 +210,11 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 			return mPersistentStorage.getFileSize();
 		}
 		return session.getContent().getSize();
-	}	
+	}
 
     /**
      * Returns the MIME type of the file to be transferred
-     * 
+     *
      * @return Type
      */
 	public String getMimeType() {
@@ -227,7 +227,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
 	/**
 	 * Returns the state of the image sharing
-	 * 
+	 *
 	 * @return State
 	 */
 	public int getState() {
@@ -259,24 +259,24 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 		}
 		return ReasonCode.UNSPECIFIED;
 	}
-	
+
 	/**
 	 * Returns the direction of the sharing (incoming or outgoing)
-	 * 
+	 *
 	 * @return Direction
 	 * @see Direction
 	 */
 	public int getDirection() {
 		ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
 		if (session == null) {
-			return mPersistentStorage.getDirection();
+			return mPersistentStorage.getDirection().toInt();
 		}
 		if (session.isInitiatedByRemote()) {
-			return Direction.INCOMING;
+			return Direction.INCOMING.toInt();
 		}
-		return Direction.OUTGOING;
-	}		
-		
+		return Direction.OUTGOING.toInt();
+	}
+
 	/**
 	 * Accepts image sharing invitation
 	 */
@@ -299,7 +299,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     		}
     	}.start();
 	}
-	
+
 	/**
 	 * Rejects image sharing invitation
 	 */
@@ -347,7 +347,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     		public void run() {
     			session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
     		}
-    	}.start();		
+    	}.start();
 	}
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
@@ -367,7 +367,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 					getSharingId(), ImageSharing.State.STARTED, ReasonCode.UNSPECIFIED);
 		}
     }
-    
+
 	/**
 	 * * Session has been aborted
 	 *
@@ -409,10 +409,10 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 			}
 		}
 	}
-    
+
 	/**
 	 * Content sharing error
-	 * 
+	 *
 	 * @param error Error
 	 */
 	public void handleSharingError(ContentSharingError error) {
@@ -431,7 +431,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 					mSharingId, state, reasonCode);
 		}
 	}
-    
+
     /**
      * Content sharing progress
      *
@@ -446,7 +446,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 					getSharingId(), currentSize, totalSize);
 	     }
     }
-    
+
     /**
      * Content has been transferred
      *

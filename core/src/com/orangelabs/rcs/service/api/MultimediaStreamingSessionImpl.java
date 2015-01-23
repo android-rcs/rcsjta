@@ -24,7 +24,7 @@ package com.orangelabs.rcs.service.api;
 
 import javax2.sip.message.Response;
 
-import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSession;
 import com.gsma.services.rcs.extension.MultimediaSession;
@@ -179,9 +179,9 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 							+ "' not available.");
 		}
 		if (session.isInitiatedByRemote()) {
-			return Direction.INCOMING;
+			return Direction.INCOMING.toInt();
 		}
-		return Direction.OUTGOING;
+		return Direction.OUTGOING.toInt();
 	}
 	
 	/**

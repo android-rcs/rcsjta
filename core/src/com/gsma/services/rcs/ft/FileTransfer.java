@@ -23,6 +23,7 @@ package com.gsma.services.rcs.ft;
 
 import android.net.Uri;
 
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 
@@ -393,11 +394,11 @@ public class FileTransfer {
 	 * @see com.gsma.services.rcs.RcsCommon.Direction
 	 * @throws RcsServiceException
 	 */
-	public int getDirection() throws RcsServiceException {
+	public Direction getDirection() throws RcsServiceException {
 		try {
-			return mTransferInf.getDirection();
+			return Direction.valueOf(mTransferInf.getDirection());
 		} catch(Exception e) {
-			throw new RcsServiceException(e.getMessage());
+			throw new RcsServiceException(e);
 		}
 	}
 	
@@ -494,4 +495,18 @@ public class FileTransfer {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
+
+    /**
+     * Returns true if file transfer has been marked as read
+     * 
+     * @return boolean
+     * @throws RcsServiceException
+     */
+    public boolean isRead() throws RcsServiceException {
+        try {
+            return mTransferInf.isRead();
+        } catch (Exception e) {
+            throw new RcsServiceException(e);
+        }
+    }
 }

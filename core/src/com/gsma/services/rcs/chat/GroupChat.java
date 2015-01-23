@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 
@@ -198,9 +199,9 @@ public class GroupChat {
 	 * @see com.gsma.services.rcs.RcsCommon.Direction
 	 * @throws RcsServiceException
 	 */
-	public int getDirection() throws RcsServiceException {
+	public Direction getDirection() throws RcsServiceException {
 		try {
-			return mGroupChatInf.getDirection();
+			return Direction.valueOf(mGroupChatInf.getDirection());
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}

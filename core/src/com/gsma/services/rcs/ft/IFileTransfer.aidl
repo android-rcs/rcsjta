@@ -41,6 +41,8 @@ interface IFileTransfer {
 	
 	void resumeTransfer();
 
+	boolean isRead();
+
 	boolean canResendTransfer();
 
 	void resendTransfer();

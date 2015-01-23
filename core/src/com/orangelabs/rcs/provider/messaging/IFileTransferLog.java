@@ -22,6 +22,7 @@
 
 package com.orangelabs.rcs.provider.messaging;
 
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResume;
@@ -57,7 +58,7 @@ public interface IFileTransferLog {
 	 * @param reasonCode
 	 *            Reason code
 	 */
-	public void addFileTransfer(String fileTransferId, ContactId contact, int direction,
+	public void addFileTransfer(String fileTransferId, ContactId contact, Direction direction,
 			MmContent content, MmContent fileIcon, int state, int reasonCode);
 
 	/**
