@@ -191,11 +191,6 @@ public class RichAddressBookData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_CAPABILITY_COMMON_EXTENSION = "capability_common_extension";
-	
-	/**
-	 * Column name
-	 */
 	static final String KEY_CAPABILITY_IP_VOICE_CALL = CapabilitiesLog.CAPABILITY_IP_VOICE_CALL;
 	
 	/**

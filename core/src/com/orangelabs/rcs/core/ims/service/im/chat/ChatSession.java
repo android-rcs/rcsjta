@@ -750,7 +750,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		}
 
 		// Auto reject if file too big
-		long maxSize = FileSharingSession.getMaxFileSharingSize();
+		long maxSize = mRcsSettings.getMaxFileTransferSize();
 		if (maxSize > 0 && fileTransferInfo.getFileSize() > maxSize) {
 			if (logger.isActivated()) {
 				logger.debug("File is too big, reject the HTTP File transfer");

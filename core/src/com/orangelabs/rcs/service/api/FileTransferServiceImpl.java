@@ -357,7 +357,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			addOutgoingFileTransfer(fileTransferId, contact, file, fileIcon,
 					FileTransfer.State.INITIATING);
 			final FileSharingSession session = mImService.initiateFileTransferSession(
-					fileTransferId, contact, file, fileIcon);
+					fileTransferId, contact, file, fileIcon, mRcsSettings);
 
 			OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
 					fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
@@ -391,10 +391,9 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	 * @param file
 	 * @param fileIcon
 	 * @param fileTransferId
-	 * @throws ServerApiException
 	 */
 	/* package private */void resendOneToOneFile(ContactId contact, MmContent file,
-			MmContent fileIcon, String fileTransferId) throws ServerApiException {
+			MmContent fileIcon, String fileTransferId) {
 		try {
 			if (!ServerApiUtils.isImsConnected()) {
 				/*
@@ -415,7 +414,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			}
 			setFileTransferState(fileTransferId, contact, FileTransfer.State.INITIATING);
 			final FileSharingSession session = mImService.initiateFileTransferSession(
-					fileTransferId, contact, file, fileIcon);
+					fileTransferId, contact, file, fileIcon, mRcsSettings);
 
 			FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
 					fileTransferId, contact, Direction.OUTGOING, contact.toString(), file.getUri(),
@@ -438,10 +437,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			 * TODO: This is not correct implementation. It will be fixed
 			 * properly in CR037
 			 */
-			if (logger.isActivated()) {
-				logger.error("Unexpected error", e);
-			}
-			throw new ServerApiException(e);
+			throw new IllegalStateException(e);
 		}
 	}
 

@@ -343,7 +343,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
      * Is HTTP transfer
      *
      * @return Boolean
-     * @throws ServerApiException 
      */
 	public boolean isHttpTransfer() {
 		FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
@@ -387,7 +386,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 	}
 
 	/**
-	 * Pause the session (only for HTTP transfer)
+	 * Checks if transfer is paused (only for HTTP transfer)
+	 * @return True if transfer is paused
 	 */
 	public boolean isSessionPaused() {
 		FileSharingSession session = mImService
@@ -442,7 +442,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 	 * Returns whether you can resend the transfer.
 	 * 
 	 * @return boolean
-	 * @throws RcsServiceException
 	 */
 	public boolean canResendTransfer() {
 		int state = getState();
@@ -483,21 +482,17 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 	 */
 	public void resendTransfer() {
 		if (!canResendTransfer()) {
-			return;
+			// TODO Temporarily illegal access exception
+			throw new IllegalStateException( new StringBuilder("Unable to resend file with fileTransferId ")
+						.append(mFileTransferId).toString());
 		}
-		try {
 			MmContent file = FileTransferUtils.createMmContent(getFile());
 			Uri fileIcon = getFileIcon();
 			MmContent fileIconContent = fileIcon != null ? FileTransferUtils
 					.createMmContent(fileIcon) : null;
+					
 			mFileTransferService.resendOneToOneFile(getRemoteContact(), file, fileIconContent,
 					mFileTransferId);
-		} catch (ServerApiException e) {
-			if (logger.isActivated()) {
-				logger.error(new StringBuilder("Unable to resend file with fileTransferId ")
-						.append(mFileTransferId).append("due to ").append(e).toString());
-			}
-		}
 	}
 
 	/*------------------------------- SESSION EVENTS ----------------------------------*/

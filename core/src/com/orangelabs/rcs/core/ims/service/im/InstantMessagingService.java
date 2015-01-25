@@ -616,11 +616,12 @@ public class InstantMessagingService extends ImsService {
 	 *            Content of file to sent
 	 * @param fileIcon
 	 *            Content of fileicon
+	 * @param rcsSettings RCS settings
 	 *
 	 * @return File transfer session
 	 */
 	public FileSharingSession initiateFileTransferSession(String fileTransferId, ContactId contact,
-			MmContent content, MmContent fileIcon) {
+			MmContent content, MmContent fileIcon, RcsSettings rcsSettings) {
 		if (logger.isActivated()) {
 			logger.info("Initiate a file transfer session with contact " + contact + ", file " + content.toString());
 		}
@@ -643,7 +644,7 @@ public class InstantMessagingService extends ImsService {
 			fileIcon = null;
 		}
 		return new OriginatingMsrpFileSharingSession(fileTransferId, this, content, contact,
-				fileIcon);
+				fileIcon, rcsSettings);
 	}
 
 	/**
@@ -686,8 +687,9 @@ public class InstantMessagingService extends ImsService {
      * Receive a file transfer invitation
      *
      * @param invite Initial invite
+	 * @param rcsSettings RCS settings
      */
-	public void receiveFileTransferInvitation(SipRequest invite) {
+	public void receiveFileTransferInvitation(SipRequest invite, RcsSettings rcsSettings) {
 		if (logger.isActivated()) {
     		logger.info("Receive a file transfer session invitation");
     	}
@@ -722,7 +724,7 @@ public class InstantMessagingService extends ImsService {
 			}
 
 			// Create a new session
-			FileSharingSession session = new TerminatingMsrpFileSharingSession(this, invite);
+			FileSharingSession session = new TerminatingMsrpFileSharingSession(this, invite, rcsSettings);
 
 			getImsModule().getCore().getListener().handleFileTransferInvitation(session, false, remote, session.getRemoteDisplayName());
 
@@ -1344,7 +1346,7 @@ public class InstantMessagingService extends ImsService {
      */
     private boolean isFileSizeExceeded(long size) {
         // Auto reject if file too big
-        long maxSize = FileSharingSession.getMaxFileSharingSize();
+        long maxSize = mRcsSettings.getMaxFileTransferSize();
         if (maxSize > 0 && size > maxSize) {
             return true;
         }

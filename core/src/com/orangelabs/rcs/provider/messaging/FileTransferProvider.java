@@ -90,7 +90,7 @@ public class FileTransferProvider extends ContentProvider {
     }
 
     /**
-     * String to restrict projection for exposed URI to a set of columns
+     * Strings to restrict projection for exposed URI to a set of columns
      */
     private static final String[] RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS = new String[] {
             FileTransferLog.FT_ID, FileTransferLog.CHAT_ID, FileTransferLog.CONTACT,
@@ -102,9 +102,16 @@ public class FileTransferProvider extends ContentProvider {
             FileTransferLog.STATE, FileTransferLog.REASON_CODE, FileTransferLog.READ_STATUS
     };
 
-    private static final Set<String> RESTRICTED_PROJECTION_SET = new HashSet<String>(
-            Arrays.asList(RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS));
+    /**
+     * Columns that are not exposed through external URI
+     */
+    private static final String[] COLUMNS_HIDDEN_FOR_EXTERNAL_ACCESS = new String[] {
+    	FileTransferData.KEY_UPLOAD_TID, FileTransferData.KEY_DOWNLOAD_URI
+    };
 
+    private static final Set<String> COLUMN_SET_HIDDEN_FOR_EXTERNAL_ACCESS = new HashSet<String>(
+            Arrays.asList(COLUMNS_HIDDEN_FOR_EXTERNAL_ACCESS));
+    
     private static class DatabaseHelper extends SQLiteOpenHelper {
         private static final int DATABASE_VERSION = 13;
 
@@ -180,7 +187,7 @@ public class FileTransferProvider extends ContentProvider {
             return RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS;
         }
         for (String projectedColumn : projection) {
-            if (!RESTRICTED_PROJECTION_SET.contains(projectedColumn)) {
+            if (COLUMN_SET_HIDDEN_FOR_EXTERNAL_ACCESS.contains(projectedColumn)) {
                 throw new UnsupportedOperationException(new StringBuilder(
                         "No visibility to the accessed column ").append(projectedColumn)
                         .append("!").toString());

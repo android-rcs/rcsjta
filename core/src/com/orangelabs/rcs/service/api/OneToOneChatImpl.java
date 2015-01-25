@@ -194,9 +194,19 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 			}
 			final OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
 			if (session == null) {
+				if (!mImService.isChatSessionAvailable()) {
+					if (logger.isActivated()) {
+						logger.debug("Session does not exist. Cannot start new session since to limit of sessions is reached. MessageId="
+								.concat(msgId));
+					}
+					setChatMessageStatus(msgId, mimeType, Message.Status.Content.QUEUED);
+					return;
+				}
+				
 				if (logger.isActivated()) {
 					logger.debug("Core session is not yet established: initiate a new session to send the message");
 				}
+			
 				setChatMessageStatus(msgId, mimeType, Message.Status.Content.SENDING);
 				sendChatMessageInNewSession(msg);
 				return;
@@ -352,7 +362,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	 * message, else it is set to false.
 	 * 
 	 * @param status Is-composing status
-	 * @see RcsSettingsData.ImSessionStartMode
+	 * @see ImSessionStartMode
 	 */
 	public void sendIsComposingEvent(final boolean status) {
 		final OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
@@ -390,7 +400,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	 * session and the parameter IM SESSION START is 0 then the session is
 	 * accepted now.
 	 * 
-	 * @see RcsSettingsData.ImSessionStartMode
+	 * @see ImSessionStartMode
 	 */
 	public void openChat() {
 		if (logger.isActivated()) {

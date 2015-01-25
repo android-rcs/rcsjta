@@ -92,8 +92,8 @@ public class GroupChatList extends Activity {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v, int pos, long id) {
-				ApiConnectionManager connectionManager = ApiConnectionManager.getInstance(GroupChatList.this);
-				if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.CHAT)) {
+				ApiConnectionManager cnxManager = ApiConnectionManager.getInstance(GroupChatList.this);
+				if (cnxManager == null || !cnxManager.isServiceConnected(RcsServiceName.CHAT)) {
 					Utils.showMessage(GroupChatList.this, getString(R.string.label_continue_chat_failed));
 					return;
 					
@@ -102,7 +102,7 @@ public class GroupChatList extends Activity {
 				String chatId = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
 				try {
 					// Get group chat
-					GroupChat groupChat = connectionManager.getChatApi().getGroupChat(chatId);
+					GroupChat groupChat = cnxManager.getChatApi().getGroupChat(chatId);
 					if (groupChat != null) {
 						// Session already active on the device: just reload it in the UI
 						GroupChatView.openGroupChat(GroupChatList.this, groupChat.getChatId());

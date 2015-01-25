@@ -26,20 +26,30 @@ import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.BaseColumns;
+import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.CursorAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.gsma.services.rcs.RcsCommon;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferLog;
+import com.orangelabs.rcs.ri.ApiConnectionManager;
+import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsDisplayName;
 import com.orangelabs.rcs.ri.utils.Utils;
 
@@ -72,10 +82,21 @@ public class FileTransferList extends Activity {
 
 	private static final String SORT_ORDER = new StringBuilder(FileTransferLog.TIMESTAMP).append(" DESC").toString();
 
+	private ListView mListView;
+	
+	private ListAdapter mAdapter;
+	
+	private ApiConnectionManager mCnxManager;
+	
+	LockAccess exitOnce = new LockAccess();
+	
+	private static final String LOGTAG = LogUtils.getTag(FileTransferList.class.getSimpleName());
+	
 	/**
-	 * List view
+	 * List of items for contextual menu
 	 */
-	private ListView listView;
+	private final static int MENU_ITEM_DELETE = 0;
+	private final static int MENU_ITEM_RESEND = 1;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -86,17 +107,26 @@ public class FileTransferList extends Activity {
 		setContentView(R.layout.filetransfer_list);
 
 		// Set list adapter
-		listView = (ListView) findViewById(android.R.id.list);
+		mListView = (ListView) findViewById(android.R.id.list);
 		TextView emptyView = (TextView) findViewById(android.R.id.empty);
-		listView.setEmptyView(emptyView);
+		mListView.setEmptyView(emptyView);
+		registerForContextMenu(mListView);
+		
+		mCnxManager = ApiConnectionManager.getInstance(FileTransferList.this);
+		if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
+			Utils.showMessage(FileTransferList.this, getString(R.string.label_api_disabled));
+			return;
+			
+		}
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
 
+		mAdapter = createListAdapter();
 		// Refresh view
-		listView.setAdapter(createListAdapter());
+		mListView.setAdapter(mAdapter);
 	}
 
 	/**
@@ -277,9 +307,61 @@ public class FileTransferList extends Activity {
 			getContentResolver().delete(FileTransferLog.CONTENT_URI, null, null);
 
 			// Refresh view
-			listView.setAdapter(createListAdapter());
+			mListView.setAdapter(createListAdapter());
 			break;
 		}
 		return true;
+	}
+	
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		// Get the list item position
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
+		Cursor cursor = (Cursor) mAdapter.getItem(info.position);
+		menu.add(0, MENU_ITEM_DELETE, 0, R.string.menu_delete_message);
+		String transferId = cursor.getString(cursor.getColumnIndexOrThrow(BaseColumns._ID));
+		if (LogUtils.isActive) {
+			Log.d(LOGTAG, "onCreateContextMenu ftId=".concat(transferId));
+		}
+		
+		// Check if resend is allowed
+		try {
+			FileTransfer transfer = mCnxManager.getFileTransferApi().getFileTransfer(transferId);
+			if (transfer.canResendTransfer()) {
+				menu.add(0, MENU_ITEM_RESEND, 1, R.string.menu_resend_message);
+			}
+		} catch (RcsServiceException e) {
+			Utils.showMessageAndExit(FileTransferList.this, getString(R.string.label_api_disabled),
+					exitOnce, e);
+		}
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		Cursor cursor = (Cursor) (mAdapter.getItem(info.position));
+		String transferId = cursor.getString(cursor.getColumnIndexOrThrow(BaseColumns._ID));
+		switch (item.getItemId()) {
+		case MENU_ITEM_RESEND:
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "onContextItemSelected resend ftId=".concat(transferId));
+			}
+			try {
+				FileTransfer transfer = mCnxManager.getFileTransferApi().getFileTransfer(transferId);
+				transfer.resendTransfer();
+			} catch (RcsServiceException e) {
+				Utils.showMessageAndExit(FileTransferList.this, getString(R.string.label_resend_failed),
+						exitOnce, e);
+			}
+			return true;
+			
+		case MENU_ITEM_DELETE:
+			// TODO CR005 delete methods
+			return true;
+			
+		default:
+			return super.onContextItemSelected(item);
+		}
 	}
 }

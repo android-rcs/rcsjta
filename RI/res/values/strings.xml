@@ -139,7 +139,6 @@
 <string name="label_ft_state_changed">%1$s (%2$s)</string>
 <string name="label_ft_from_size">From: %1$s\nSize: %2$s Kb</string>
 <string name="menu_ft_config">File transfer configuration</string>
-
 <string name="label_ft_WarnSize">File size warning:</string>
 <string name="label_ft_MaxSize">Max file size:</string>
 <string name="label_ft_isAutoAccept">AA enabled:</string>
@@ -149,6 +148,8 @@
 <string name="label_GroupFileTransferSupported">Group supported:</string>
 <string name="menu_file_transfer_config">File transfer service configuration</string>
 <string name="label_ft_ImageResizeOption">Image resize option:</string>
+<string name="label_resend_failed">Transfer resend failed</string>
+
 
 <!-- Chat menu -->
 <string name="menu_initiate_chat">Initiate single chat</string>

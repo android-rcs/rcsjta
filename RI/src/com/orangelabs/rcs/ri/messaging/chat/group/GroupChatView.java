@@ -280,13 +280,13 @@ public class GroupChatView extends ChatView {
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 		Cursor cursor = (Cursor) (mAdapter.getItem(info.position));
-		String messageId = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
+		String messageId = cursor.getString(cursor.getColumnIndexOrThrow(BaseColumns._ID));
 		if (LogUtils.isActive) {
 			Log.d(LOGTAG, "onContextItemSelected msgId=".concat(messageId));
 		}
 		switch (item.getItemId()) {
 		case GROUPCHAT_MENU_ITEM_VIEW_GC_INFO:
-			GroupDeliveryInfoList.startActivity(GroupChatView.this, messageId);
+			GroupDeliveryInfoList.startActivity(this, messageId);
 			return true;
 			
 		case GROUPCHAT_MENU_ITEM_DELETE:

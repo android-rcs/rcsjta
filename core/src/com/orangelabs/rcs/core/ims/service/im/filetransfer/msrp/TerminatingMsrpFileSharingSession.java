@@ -69,7 +69,9 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 	/**
 	 * MSRP manager
 	 */
-	private MsrpManager msrpMgr = null;
+	private MsrpManager msrpMgr;
+
+	private RcsSettings mRcsSettings;
 
 	/**
      * The logger
@@ -81,9 +83,10 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * 
 	 * @param parent IMS service
 	 * @param invite Initial INVITE request
+     * @param rcsSettings RCS settings
 	 * @throws RcsContactFormatException
 	 */
-	public TerminatingMsrpFileSharingSession(ImsService parent, SipRequest invite) throws RcsContactFormatException {
+	public TerminatingMsrpFileSharingSession(ImsService parent, SipRequest invite, RcsSettings rcsSettings) throws RcsContactFormatException {
 		super(parent, ContentManager.createMmContentFromSdp(invite), ContactUtils.createContactId(SipUtils
 				.getAssertedIdentity(invite)), FileTransferUtils.extractFileIcon(invite), IdGenerator.generateMessageID());
 
@@ -97,6 +100,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 		if (shouldBeAutoAccepted()) {
 			setSessionAccepted();
 		}
+		mRcsSettings = rcsSettings;
 	}
 
 	/**
@@ -272,7 +276,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 
 			// Build SDP part
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
-	    	long maxSize = ImsFileSharingSession.getMaxFileSharingSize();
+	    	long maxSize = mRcsSettings.getMaxFileTransferSize();
 	    	String sdp = SdpUtils.buildFileSDP(ipAddress, localMsrpPort,
                     msrpMgr.getLocalSocketProtocol(), getContent().getEncoding(), fileTransferId,
                     fileSelector, null, localSetup, msrpMgr.getLocalMsrpPath(),

@@ -102,8 +102,42 @@ public class RichAddressBookProvider extends ContentProvider {
             RichAddressBookData.KEY_CAPABILITY_TIME_LAST_REFRESH
             };
 
-    private static final Set<String> RESTRICTED_PROJECTION_SET = new HashSet<String>(
-            Arrays.asList(RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS));
+    /**
+     * Columns that are not exposed through external URI
+     */
+    private static final String[] COLUMNS_HIDDEN_FOR_EXTERNAL_ACCESS = new String[] {
+    	RichAddressBookData.KEY_DISPLAY_NAME,
+    	RichAddressBookData.KEY_PRESENCE_SHARING_STATUS,
+    	RichAddressBookData.KEY_TIMESTAMP,
+    	RichAddressBookData.KEY_RCS_STATUS,
+    	RichAddressBookData.KEY_REGISTRATION_STATE,
+    	RichAddressBookData.KEY_RCS_STATUS_TIMESTAMP,
+    	RichAddressBookData.KEY_PRESENCE_FREE_TEXT,
+    	RichAddressBookData.KEY_PRESENCE_WEBLINK_NAME,
+    	RichAddressBookData.KEY_PRESENCE_WEBLINK_URL,
+    	RichAddressBookData.KEY_PRESENCE_PHOTO_EXIST_FLAG,
+    	RichAddressBookData.KEY_PRESENCE_PHOTO_ETAG,
+    	RichAddressBookData.KEY_PRESENCE_PHOTO_DATA,
+    	RichAddressBookData.KEY_PRESENCE_GEOLOC_EXIST_FLAG,
+    	RichAddressBookData.KEY_PRESENCE_GEOLOC_LATITUDE,
+    	RichAddressBookData.KEY_PRESENCE_GEOLOC_LONGITUDE,
+    	RichAddressBookData.KEY_PRESENCE_GEOLOC_ALTITUDE,
+    	RichAddressBookData.KEY_PRESENCE_TIMESTAMP,
+    	RichAddressBookData.KEY_CAPABILITY_TIME_LAST_RQST,
+    	RichAddressBookData.KEY_CAPABILITY_CS_VIDEO,
+    	RichAddressBookData.KEY_CAPABILITY_PRESENCE_DISCOVERY,
+    	RichAddressBookData.KEY_CAPABILITY_SOCIAL_PRESENCE,
+    	RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_HTTP,
+    	RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL,
+    	RichAddressBookData.KEY_CAPABILITY_GROUP_CHAT_SF,
+    	RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_SF,
+    	RichAddressBookData.KEY_CAPABILITY_IM_BLOCKED_TIMESTAMP, 
+    	RichAddressBookData.KEY_IM_BLOCKED,
+    	RichAddressBookData.KEY_FT_BLOCKED
+    };
+
+    private static final Set<String> COLUMN_SET_HIDDEN_FOR_EXTERNAL_ACCESS = new HashSet<String>(
+            Arrays.asList(COLUMNS_HIDDEN_FOR_EXTERNAL_ACCESS));
 
     private static final String RESTRICTED_SELECTION_QUERY_FOR_EXTERNALLY_DEFINED_COLUMNS = new StringBuilder(
             "(" + RichAddressBookData.KEY_RCS_STATUS).append("!=").append(RcsStatus.NO_INFO.toInt())
@@ -278,7 +312,7 @@ public class RichAddressBookProvider extends ContentProvider {
             return RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS;
         }
         for (String projectedColumn : projection) {
-            if (!RESTRICTED_PROJECTION_SET.contains(projectedColumn)) {
+            if (COLUMN_SET_HIDDEN_FOR_EXTERNAL_ACCESS.contains(projectedColumn)) {
                 throw new UnsupportedOperationException(new StringBuilder(
                         "No visibility to the accessed column ").append(projectedColumn)
                         .append("!").toString());

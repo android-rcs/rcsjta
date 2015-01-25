@@ -82,9 +82,16 @@ public class ChatProvider extends ContentProvider {
             ChatLog.GroupChat.REASON_CODE, ChatLog.GroupChat.PARTICIPANTS
     };
 
-    private static final Set<String> RESTRICTED_PROJECTION_SET = new HashSet<String>(
-            Arrays.asList(RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS));
+    /**
+     * Columns that are not exposed through external URI
+     */
+    private static final String[] COLUMNS_HIDDEN_FOR_EXTERNAL_ACCESS = new String[] {
+    	ChatData.KEY_REJOIN_ID, ChatData.KEY_USER_ABORTION
+    };
 
+    private static final Set<String> COLUMN_SET_HIDDEN_FOR_EXTERNAL_ACCESS = new HashSet<String>(
+            Arrays.asList(COLUMNS_HIDDEN_FOR_EXTERNAL_ACCESS));
+    
     private static final class UriType {
 
         private static final class Chat {
@@ -228,7 +235,7 @@ public class ChatProvider extends ContentProvider {
             return RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS;
         }
         for (String projectedColumn : projection) {
-            if (!RESTRICTED_PROJECTION_SET.contains(projectedColumn)) {
+            if (COLUMN_SET_HIDDEN_FOR_EXTERNAL_ACCESS.contains(projectedColumn)) {
                 throw new UnsupportedOperationException(new StringBuilder(
                         "No visibility to the accessed column ").append(projectedColumn)
                         .append("!").toString());

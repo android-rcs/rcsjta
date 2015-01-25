@@ -132,9 +132,20 @@ public class Utils {
 	 * @param msg Message to be displayed
 	 */
 	public static void showMessageAndExit(final Activity activity, String msg) {
-		showMessageAndExit(activity, msg, null);
+		showMessageAndExit(activity, msg, null, null);
 	}
     
+	/**
+	 * Show a message and exit activity
+	 * 
+	 * @param activity
+	 * @param msg
+	 * @param locker
+	 */
+	public static void showMessageAndExit(final Activity activity, String msg, LockAccess locker) {
+		showMessageAndExit(activity, msg, locker, null);
+	}
+	
 	/**
 	 * Show a message and exit activity
 	 * 
@@ -144,8 +155,9 @@ public class Utils {
 	 *            Message to be displayed
 	 * @param locker
 	 *            a locker to only execute once
+	 * @param e 
 	 */
-	public static void showMessageAndExit(final Activity activity, String msg, LockAccess locker) {
+	public static void showMessageAndExit(final Activity activity, String msg, LockAccess locker, Exception e) {
 		// Do not execute if activity is Fishing 
 		if (activity.isFinishing()) {
 			return;
@@ -155,8 +167,12 @@ public class Utils {
 			return;
 		}
 
+		if (e != null)  {
+			e.printStackTrace();
+		}
 		if (LogUtils.isActive) {
-			Log.w(LOGTAG, "Exit activity " + activity.getLocalClassName()+ " "+msg);
+			Log.w(LOGTAG, new StringBuilder("Exit activity ").append(activity.getLocalClassName())
+					.append(" <").append(msg).append(">").toString());
 		}
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
