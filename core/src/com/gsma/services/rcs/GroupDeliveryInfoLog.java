@@ -42,7 +42,7 @@ public class GroupDeliveryInfoLog {
 	public static final String REASON_CODE = "reason_code";
 
 	/**
-     * The name of the column containing the unique ID of the chat message (“msg_id”) or file transfer (“ft_id”).
+     * The name of the column containing the unique ID of the chat message ("msg_id") or file transfer ("ft_id").
      * <P>Type: TEXT</P>
      */
 	public static final String ID = "id";
