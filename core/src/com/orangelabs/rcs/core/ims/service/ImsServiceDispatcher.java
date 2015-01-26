@@ -75,15 +75,19 @@ public class ImsServiceDispatcher extends Thread {
      */
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
+	private RcsSettings mRcsSettings;
+
     /**
 	 * Constructor
 	 * 
 	 * @param imsModule IMS module
+     * @param rcsSettings 
 	 */
-	public ImsServiceDispatcher(ImsModule imsModule) {
+	public ImsServiceDispatcher(ImsModule imsModule, RcsSettings rcsSettings) {
 		super("SipDispatcher");
 		
         mImsModule = imsModule;
+        mRcsSettings = rcsSettings;
 	}
 	
     /**
@@ -140,7 +144,6 @@ public class ImsServiceDispatcher extends Thread {
 		if (logger.isActivated()) {
 			logger.debug("Receive " + request.getMethod() + " request");
 		}
-		RcsSettings rcsSettings = RcsSettings.getInstance();
 		// Check the IP address of the request-URI
 		String localIpAddress = mImsModule.getCurrentNetworkInterface().getNetworkAccess().getIpAddress();
 		ImsNetworkInterface imsNetIntf = mImsModule.getCurrentNetworkInterface();
@@ -253,7 +256,7 @@ public class ImsServiceDispatcher extends Thread {
 	    				(SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_IMAGE_SHARE) ||
 	    						SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_IMAGE_SHARE_RCS2))) {
 	    		// Image sharing
-	    		if (rcsSettings.isImageSharingSupported()) {
+	    		if (mRcsSettings.isImageSharingSupported()) {
 		    		if (logger.isActivated()) {
 		    			logger.debug("Image content sharing transfer invitation");
 		    		}
@@ -270,11 +273,11 @@ public class ImsServiceDispatcher extends Thread {
 	    			SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_OMA_IM) &&
 	    				isTagPresent(sdp, "file-selector")) {
 		        // File transfer
-	    		if (rcsSettings.isFileTransferSupported()) {
+	    		if (mRcsSettings.isFileTransferSupported()) {
 		    		if (logger.isActivated()) {
 		    			logger.debug("File transfer invitation");
 		    		}
-	    			mImsModule.getInstantMessagingService().receiveFileTransferInvitation(request, rcsSettings);
+	    			mImsModule.getInstantMessagingService().receiveFileTransferInvitation(request);
 	    		} else {
 					// Service not supported: reject the invitation with a 603 Decline
 					if (logger.isActivated()) {
@@ -286,7 +289,7 @@ public class ImsServiceDispatcher extends Thread {
 	    	if (isTagPresent(sdp, "msrp") &&
 	    			SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_OMA_IM)) {
 	    		// IM service
-	    		if (!rcsSettings.isImSessionSupported()) {
+	    		if (!mRcsSettings.isImSessionSupported()) {
 					// Service not supported: reject the invitation with a 603 Decline
 					if (logger.isActivated()) {
 						logger.debug("IM service not supported: automatically reject");
@@ -352,7 +355,7 @@ public class ImsServiceDispatcher extends Thread {
 	    	if (isTagPresent(sdp, "rtp") &&
 	    			SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_VIDEO_SHARE)) {
 	    		// Video streaming
-	    		if (rcsSettings.isVideoSharingSupported()) {
+	    		if (mRcsSettings.isVideoSharingSupported()) {
 		    		if (logger.isActivated()) {
 		    			logger.debug("Video content sharing streaming invitation");
 		    		}
@@ -369,7 +372,7 @@ public class ImsServiceDispatcher extends Thread {
 		    		SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_VIDEO_SHARE) &&
 		    			SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH )) {
 	    		// Geoloc sharing
-	    		if (rcsSettings.isGeoLocationPushSupported()) {
+	    		if (mRcsSettings.isGeoLocationPushSupported()) {
 		    		if (logger.isActivated()) {
 		    			logger.debug("Geoloc content sharing transfer invitation");
 		    		}
@@ -385,7 +388,7 @@ public class ImsServiceDispatcher extends Thread {
 			if (SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_RCSE_IP_VOICE_CALL) &&
 	    			SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_IP_VOICE_CALL))	{
 	    		// IP voice call
-	    		if (rcsSettings.isIPVoiceCallSupported()) {
+	    		if (mRcsSettings.isIPVoiceCallSupported()) {
 		    		if (logger.isActivated()) {
 		    			logger.debug("IP Voice call invitation");
 		    		}
@@ -402,7 +405,7 @@ public class ImsServiceDispatcher extends Thread {
 	    			SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_IP_VOICE_CALL) &&
 	    				SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_RCSE_IP_VIDEO_CALL))	{
 		    		// IP video call
-		    		if (rcsSettings.isIPVideoCallSupported()) {
+		    		if (mRcsSettings.isIPVideoCallSupported()) {
 			    		if (logger.isActivated()) {
 			    			logger.debug("IP video call invitation");
 			    		}
@@ -563,7 +566,7 @@ public class ImsServiceDispatcher extends Thread {
 	    // Dispatch the notification to the corresponding service
 	    if (eventHeader.getEventType().equalsIgnoreCase("presence.winfo")) {
 	    	// Presence service
-	    	if (RcsSettings.getInstance().isSocialPresenceSupported() && mImsModule.getPresenceService().isServiceStarted()) {
+	    	if (mRcsSettings.isSocialPresenceSupported() && mImsModule.getPresenceService().isServiceStarted()) {
 	    		mImsModule.getPresenceService().getWatcherInfoSubscriber().receiveNotification(notify);
 	    	}
 	    } else

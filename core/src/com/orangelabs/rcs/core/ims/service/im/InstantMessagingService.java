@@ -616,12 +616,11 @@ public class InstantMessagingService extends ImsService {
 	 *            Content of file to sent
 	 * @param fileIcon
 	 *            Content of fileicon
-	 * @param rcsSettings RCS settings
 	 *
 	 * @return File transfer session
 	 */
 	public FileSharingSession initiateFileTransferSession(String fileTransferId, ContactId contact,
-			MmContent content, MmContent fileIcon, RcsSettings rcsSettings) {
+			MmContent content, MmContent fileIcon) {
 		if (logger.isActivated()) {
 			logger.info("Initiate a file transfer session with contact " + contact + ", file " + content.toString());
 		}
@@ -644,14 +643,14 @@ public class InstantMessagingService extends ImsService {
 			fileIcon = null;
 		}
 		return new OriginatingMsrpFileSharingSession(fileTransferId, this, content, contact,
-				fileIcon, rcsSettings);
+				fileIcon, mRcsSettings);
 	}
 
 	/**
 	 * Initiate a group file transfer session
 	 * @param fileTransferId
 	 *            File transfer Id
-	 * @param contacts
+	 * @param participants
 	 *            Set of remote contacts
 	 * @param content
 	 *            The file content to be sent
@@ -687,9 +686,8 @@ public class InstantMessagingService extends ImsService {
      * Receive a file transfer invitation
      *
      * @param invite Initial invite
-	 * @param rcsSettings RCS settings
      */
-	public void receiveFileTransferInvitation(SipRequest invite, RcsSettings rcsSettings) {
+	public void receiveFileTransferInvitation(SipRequest invite) {
 		if (logger.isActivated()) {
     		logger.info("Receive a file transfer session invitation");
     	}
@@ -724,7 +722,7 @@ public class InstantMessagingService extends ImsService {
 			}
 
 			// Create a new session
-			FileSharingSession session = new TerminatingMsrpFileSharingSession(this, invite, rcsSettings);
+			FileSharingSession session = new TerminatingMsrpFileSharingSession(this, invite, mRcsSettings);
 
 			getImsModule().getCore().getListener().handleFileTransferInvitation(session, false, remote, session.getRemoteDisplayName());
 

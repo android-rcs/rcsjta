@@ -173,7 +173,7 @@ public class ImsModule implements SipEventListener {
         services[ImsService.SIP_SERVICE] = new SipService(this);
 
         // Create the service dispatcher
-        serviceDispatcher = new ImsServiceDispatcher(this);
+        serviceDispatcher = new ImsServiceDispatcher(this, rcsSettings);
 
         // Create the call manager
     	callManager = new CallManager(this);

@@ -357,7 +357,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			addOutgoingFileTransfer(fileTransferId, contact, file, fileIcon,
 					FileTransfer.State.INITIATING);
 			final FileSharingSession session = mImService.initiateFileTransferSession(
-					fileTransferId, contact, file, fileIcon, mRcsSettings);
+					fileTransferId, contact, file, fileIcon);
 
 			OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
 					fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
@@ -414,7 +414,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			}
 			setFileTransferState(fileTransferId, contact, FileTransfer.State.INITIATING);
 			final FileSharingSession session = mImService.initiateFileTransferSession(
-					fileTransferId, contact, file, fileIcon, mRcsSettings);
+					fileTransferId, contact, file, fileIcon);
 
 			FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
 					fileTransferId, contact, Direction.OUTGOING, contact.toString(), file.getUri(),

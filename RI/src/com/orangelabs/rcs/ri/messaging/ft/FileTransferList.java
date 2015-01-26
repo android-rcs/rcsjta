@@ -88,7 +88,7 @@ public class FileTransferList extends Activity {
 	
 	private ApiConnectionManager mCnxManager;
 	
-	LockAccess exitOnce = new LockAccess();
+	private LockAccess mExitOnce = new LockAccess();
 	
 	private static final String LOGTAG = LogUtils.getTag(FileTransferList.class.getSimpleName());
 	
@@ -333,7 +333,7 @@ public class FileTransferList extends Activity {
 			}
 		} catch (RcsServiceException e) {
 			Utils.showMessageAndExit(FileTransferList.this, getString(R.string.label_api_disabled),
-					exitOnce, e);
+					mExitOnce, e);
 		}
 	}
 
@@ -352,7 +352,7 @@ public class FileTransferList extends Activity {
 				transfer.resendTransfer();
 			} catch (RcsServiceException e) {
 				Utils.showMessageAndExit(FileTransferList.this, getString(R.string.label_resend_failed),
-						exitOnce, e);
+						mExitOnce, e);
 			}
 			return true;
 			
