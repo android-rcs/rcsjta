@@ -60,11 +60,6 @@ public class ContactsService extends RcsService {
 	private IContactsService mApi;
 
 	private static final String ERROR_CNX = "Contacts service not connected";
-	
-    /**
-     * API
-     */
-    private IContactsService api = null;
 
     /**
      * Constructor
@@ -267,5 +262,42 @@ public class ContactsService extends RcsService {
                 cursor.close();
             }
         }
+    }
+    
+    /**
+     * Block a contact. Any communication from the given contact will be
+     * blocked and redirected to the corresponding spambox.
+     * 
+     * @param contact Contact ID
+     * @throws RcsServiceException
+     */
+    public void blockContact(ContactId contact) throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.blockContact(contact);
+			} catch(Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}    	
+    }
+
+    /**
+     * Unblock a contact
+     * 
+     * @param contact Contact ID
+     * @throws RcsServiceException
+     */
+    public void unblockContact(ContactId contact) throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.unblockContact(contact);
+			} catch(Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}     	
     }
 }

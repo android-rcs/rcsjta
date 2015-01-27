@@ -241,4 +241,27 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 		}
 		return new CommonServiceConfigurationImpl();
 	}
+	
+    /**
+     * Block a contact. Any communication from the given contact will be
+     * blocked and redirected to the corresponding spambox.
+     * 
+     * @param contact Contact ID
+     * @throws ServerApiException
+     */
+    public void blockContact(ContactId contact) throws ServerApiException {
+    	// TODO
+    	throw new ServerApiException("Not yet implemented");
+    }
+
+    /**
+     * Unblock a contact
+     * 
+     * @param contact Contact ID
+     * @throws ServerApiException
+     */
+    public void unblockContact(ContactId contact) throws ServerApiException {
+    	// TODO
+    	throw new ServerApiException("Not yet implemented");
+    }
 }

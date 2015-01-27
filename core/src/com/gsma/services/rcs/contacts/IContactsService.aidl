@@ -20,4 +20,8 @@ interface IContactsService {
 	int getServiceVersion();
 	
 	ICommonServiceConfiguration getCommonConfiguration();
+	
+	void blockContact(in ContactId contact);
+
+	void unblockContact(in ContactId contact);
 }
