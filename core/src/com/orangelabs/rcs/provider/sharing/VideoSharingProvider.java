@@ -45,6 +45,9 @@ public class VideoSharingProvider extends ContentProvider {
     private static final String SELECTION_WITH_SHARING_ID_ONLY = VideoSharingData.KEY_SHARING_ID
             .concat("=?");
 
+    /**
+     * Database name
+     */
     public static final String DATABASE_NAME = "videoshare.db";
 
     private static final UriMatcher sUriMatcher;
@@ -74,7 +77,7 @@ public class VideoSharingProvider extends ContentProvider {
      * Helper class for opening, creating and managing db version control
      */
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 5;
+        private static final int DATABASE_VERSION = 6;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -92,8 +95,7 @@ public class VideoSharingProvider extends ContentProvider {
                     .append(VideoSharingData.KEY_DURATION).append(" INTEGER NOT NULL,")
                     .append(VideoSharingData.KEY_VIDEO_ENCODING).append(" TEXT,")
                     .append(VideoSharingData.KEY_WIDTH).append(" INTEGER NOT NULL,")
-                    .append(VideoSharingData.KEY_HEIGHT).append(" INTEGER NOT NULL,")
-                    .append(VideoSharingData.KEY_ORIENTATION).append(" INTEGER);").toString());
+                    .append(VideoSharingData.KEY_HEIGHT).append(" INTEGER NOT NULL)").toString());
             db.execSQL(new StringBuilder("CREATE INDEX ").append(VideoSharingData.KEY_CONTACT)
                     .append("_idx").append(" ON ").append(TABLE).append("(")
                     .append(VideoSharingData.KEY_CONTACT).append(")").toString());
@@ -167,7 +169,7 @@ public class VideoSharingProvider extends ContentProvider {
                             null, sort);
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
                     return cursor;
-
+        
                 default:
                     throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
                             .append(uri).append("!").toString());

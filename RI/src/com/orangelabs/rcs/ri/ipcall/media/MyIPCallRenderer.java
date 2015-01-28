@@ -26,8 +26,8 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.JavaPacketizer;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.profiles.H264Profile1b;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.H264VideoFormat;
-import com.orangelabs.rcs.ri.sharing.video.media.NetworkRessourceManager;
 import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.NetworkRessourceManager;
 
 /**
  * IP call renderer 

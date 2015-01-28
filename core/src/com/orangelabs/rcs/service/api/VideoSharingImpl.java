@@ -26,11 +26,13 @@ import javax2.sip.message.Response;
 
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.vsh.IVideoRenderer;
+import com.gsma.services.rcs.vsh.IVideoPlayer;
 import com.gsma.services.rcs.vsh.IVideoSharing;
 import com.gsma.services.rcs.vsh.VideoCodec;
+import com.gsma.services.rcs.vsh.VideoDescriptor;
 import com.gsma.services.rcs.vsh.VideoSharing;
 import com.gsma.services.rcs.vsh.VideoSharing.ReasonCode;
+import com.gsma.services.rcs.vsh.VideoSharing.State;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
@@ -63,13 +65,12 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	/**
 	 * Lock used for synchronization
 	 */
-	private final Object lock = new Object();
+	private final Object mLock = new Object();
 
-	/**
-	 * Started at
-	 */
-	private long startedAt;
+	private long mStartedAt = 0L;
 
+	private long mStoppedAt = 0L;
+	
 	/**
 	 * The logger
 	 */
@@ -95,8 +96,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	}
 
 	private VideoSharingStateAndReasonCode toStateAndReasonCode(ContentSharingError error) {
-		int contentSharingError = error.getErrorCode();
-		switch (contentSharingError) {
+		int code = error.getErrorCode();
+		switch (code) {
 			case ContentSharingError.SESSION_INITIATION_FAILED:
 				return new VideoSharingStateAndReasonCode(VideoSharing.State.FAILED,
 						ReasonCode.FAILED_INITIATION);
@@ -107,19 +108,19 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 			case ContentSharingError.MEDIA_TRANSFER_FAILED:
 			case ContentSharingError.MEDIA_STREAMING_FAILED:
 			case ContentSharingError.UNSUPPORTED_MEDIA_TYPE:
-			case ContentSharingError.MEDIA_RENDERER_NOT_INITIALIZED:
+			case ContentSharingError.MEDIA_PLAYER_NOT_INITIALIZED:
 				return new VideoSharingStateAndReasonCode(VideoSharing.State.FAILED,
 						ReasonCode.FAILED_SHARING);
 			default:
 				throw new IllegalArgumentException(
 						new StringBuilder(
 								"Unknown reason in VideoSharingImpl.toStateAndReasonCode; contentSharingError=")
-								.append(contentSharingError).append("!").toString());
+								.append(code).append("!").toString());
 		}
 	}
 
-	private int imsServiceSessionErrorToReasonCode(int imsServiceSessionErrorCodeAsReasonCode) {
-		switch (imsServiceSessionErrorCodeAsReasonCode) {
+	private int imsServiceSessionErrorToReasonCode(int imsServiceSessionError) {
+		switch (imsServiceSessionError) {
 			case ImsServiceSession.TERMINATION_BY_SYSTEM:
 			case ImsServiceSession.TERMINATION_BY_TIMEOUT:
 				return ReasonCode.ABORTED_BY_SYSTEM;
@@ -127,19 +128,18 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 				return ReasonCode.ABORTED_BY_USER;
 			default:
 				throw new IllegalArgumentException(
-						"Unknown reason in ImageSharingImpl.imsServiceSessionErrorToReasonCode; imsServiceSessionErrorCodeAsReasonCode="
-								+ imsServiceSessionErrorCodeAsReasonCode + "!");
+						"Unknown imsServiceSessionError=".concat(String.valueOf(imsServiceSessionError).toString()));
 		}
 	}
 
 	private void handleSessionRejected(int reasonCode) {
 		if (logger.isActivated()) {
-			logger.info("Session rejected; reasonCode=" + reasonCode + ".");
+			logger.info("Session rejected; reasonCode=".concat(String.valueOf(reasonCode).toString()));
 		}
-		synchronized (lock) {
+		synchronized (mLock) {
 			mVideoSharingService.removeVideoSharing(mSharingId);
 
-			mPersistentStorage.setStateAndReasonCode(VideoSharing.State.ABORTED,
+			mPersistentStorage.setStateAndReasonCode(VideoSharing.State.REJECTED,
 					reasonCode);
 
 			mBroadcaster.broadcastStateChanged(getRemoteContact(),
@@ -170,42 +170,10 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	}
 
 	/**
-	 * Returns the video codec
-	 *
-	 * @return Video codec
-	 * @see VideoCodec
-	 */
-	public VideoCodec getVideoCodec() {
-		VideoStreamingSession session = mRichcallService.getVideoSharingSession(mSharingId);
-		if (session == null) {
-			/*
-			 * Throw correct exception as part of CR037 implementation
-			 */
-			throw new IllegalStateException(
-					"Unable to get VideoCodec since session with sharing ID '" + mSharingId
-							+ "' not available.");
-		}
-		try {
-			if (session.getVideoPlayer() != null) {
-				return session.getVideoPlayer().getCodec();
-			} else if (session.getVideoRenderer() != null) {
-				return session.getVideoRenderer().getCodec();
-			}
-			return null;
-
-		} catch (Exception e) {
-			/**
-			 * Handle exceptions in CR037
-			 */
-			return null;
-		}
-	}
-
-	/**
 	 * Returns the state of the sharing
 	 *
 	 * @return State
-	 * @see VideoSharing.State
+	 * @see State
 	 */
 	public int getState() {
 		VideoStreamingSession session = mRichcallService.getVideoSharingSession(mSharingId);
@@ -215,6 +183,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 		SipDialogPath dialogPath = session.getDialogPath();
 		if (dialogPath != null && dialogPath.isSessionEstablished()) {
 			return VideoSharing.State.STARTED;
+			
 		} else if (session.isInitiatedByRemote()) {
 			if (session.isSessionAccepted()) {
 				return VideoSharing.State.ACCEPTING;
@@ -228,6 +197,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	 * Returns the reason code of the state of the video sharing
 	 *
 	 * @return ReasonCode
+	 * @see ReasonCode
 	 */
 	public int getReasonCode() {
 		VideoStreamingSession session = mRichcallService.getVideoSharingSession(mSharingId);
@@ -257,9 +227,9 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	/**
 	 * Accepts video sharing invitation
 	 *
-	 * @param renderer Video renderer
+	 * @param player Video player
 	 */
-	public void acceptInvitation(IVideoRenderer renderer) {
+	public void acceptInvitation(IVideoPlayer player) {
 		if (logger.isActivated()) {
 			logger.info("Accept session invitation");
 		}
@@ -268,11 +238,10 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 			/*
 			 * TODO: Throw correct exception as part of CR037 implementation
 			 */
-			throw new IllegalStateException("Session with sharing ID '" + mSharingId
-					+ "' not available.");
+			throw new IllegalStateException("No session with sharing ID:".concat(mSharingId));
 		}
-		// Set the video renderer
-		session.setVideoRenderer(renderer);
+		// Set the video player
+		session.setVideoPlayer(player);
 
 		// Accept invitation
         new Thread() {
@@ -294,8 +263,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 			/*
 			 * TODO: Throw correct exception as part of CR037 implementation
 			 */
-			throw new IllegalStateException("Session with sharing ID '" + mSharingId
-					+ "' not available.");
+			throw new IllegalStateException("No session with sharing ID:".concat(mSharingId));
 		}
 		// Reject invitation
         new Thread() {
@@ -317,8 +285,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 			/*
 			 * TODO: Throw correct exception as part of CR037 implementation
 			 */
-			throw new IllegalStateException("Session with sharing ID '" + mSharingId
-					+ "' not available.");
+			throw new IllegalStateException("No session with sharing ID:".concat(mSharingId));
 		}
 		// Abort the session
         new Thread() {
@@ -327,7 +294,93 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
     		}
     	}.start();
 	}
+	
+	/**
+	 * Return the video encoding (eg. H.264)
+	 * 
+	 * @return Encoding
+	 */
+	public String getVideoEncoding() {
+		final VideoStreamingSession session = mRichcallService.getVideoSharingSession(mSharingId);
+		if (session == null) {
+			return mPersistentStorage.getVideoEncoding();
+		}
+		try {
+			if (session.getVideoPlayer() != null && session.getVideoPlayer().getCodec() != null) {
+				return session.getVideoPlayer().getCodec().getEncoding();
+			}
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Exception occurred", e);
+			}
+			// TODO Should we not rethrow exception ? 
+		}
+		if (logger.isActivated()) {
+			logger.warn("Cannot get video encoding");
+		}
+		return null;
+	}
 
+	/**
+	 * Returns the local timestamp of when the video sharing was initiated for outgoing
+	 * video sharing or the local timestamp of when the video sharing invitation was received
+	 * for incoming video sharings.
+	 *  
+	 * @return Timestamp in milliseconds
+	 */
+	public long getTimeStamp() {
+		return mStartedAt;
+	}
+
+	/**
+	 * Returns the duration of the video sharing
+	 * 
+	 * @return Duration in seconds
+	 */
+	public long getDuration() {
+		long duration = 0L;
+		if (mStartedAt > 0L) {
+			if (mStoppedAt > 0L) {
+				// Ended
+				duration = (mStoppedAt - mStartedAt) / 1000;
+			} else {
+				// In progress
+				duration = (System.currentTimeMillis() - mStartedAt) / 1000;
+			}
+		}
+		return duration;
+	}	
+
+	/** 		
+	 * Returns the video descriptor 		
+	 * 		
+	 * @return Video descriptor 		
+	 * @see VideoDescriptor 		
+	 */ 		
+	public VideoDescriptor getVideoDescriptor() {
+		final VideoStreamingSession session = mRichcallService.getVideoSharingSession(mSharingId);
+		if (session == null) {
+			return mPersistentStorage.getVideoDescriptor();
+		}
+		try {
+			IVideoPlayer player = session.getVideoPlayer();
+			if (player != null) {
+				VideoCodec codec = player.getCodec();
+				return new VideoDescriptor(codec.getWidth(), codec.getHeight());
+				
+			} else {
+				VideoContent content = (VideoContent) session.getContent();
+				return new VideoDescriptor(content.getWidth(), content.getHeight());
+			}
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Exception occurred", e);
+			}
+			// TODO should we not rethrow exception here ?
+			return null;
+		}
+	}
+	
     /*------------------------------- SESSION EVENTS ----------------------------------*/
 
 	/**
@@ -337,10 +390,9 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 		if (logger.isActivated()) {
 			logger.info("Session started");
 		}
-		synchronized (lock) {
+		synchronized (mLock) {
 			mPersistentStorage.setStateAndReasonCode(VideoSharing.State.STARTED,
 					ReasonCode.UNSPECIFIED);
-			startedAt = System.currentTimeMillis();
 
 			mBroadcaster.broadcastStateChanged(getRemoteContact(),
 					mSharingId, VideoSharing.State.STARTED, ReasonCode.UNSPECIFIED);
@@ -354,9 +406,10 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	 */
 	public void handleSessionAborted(int reason) {
 		if (logger.isActivated()) {
-			logger.info("Session aborted (reason " + reason + ")");
+			logger.info("Session aborted, reason=".concat(String.valueOf(reason).toString()));
 		}
-		synchronized (lock) {
+		mStoppedAt = System.currentTimeMillis();
+		synchronized (mLock) {
 			mVideoSharingService.removeVideoSharing(mSharingId);
 			VideoStreamingSession session = mRichcallService
 					.getVideoSharingSession(mSharingId);
@@ -372,8 +425,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 
 				mBroadcaster.broadcastStateChanged(getRemoteContact(),
 						mSharingId, VideoSharing.State.ABORTED, reasonCode);
-				mPersistentStorage
-						.setDuration((System.currentTimeMillis() - startedAt) / 100);
+				mPersistentStorage.setDuration(getDuration());
 			}
 		}
 	}
@@ -385,13 +437,13 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 		if (logger.isActivated()) {
 			logger.info("Session terminated by remote");
 		}
-		synchronized (lock) {
+		mStoppedAt = System.currentTimeMillis();
+		synchronized (mLock) {
 			mVideoSharingService.removeVideoSharing(mSharingId);
 
 			mPersistentStorage.setStateAndReasonCode(VideoSharing.State.ABORTED,
 					ReasonCode.ABORTED_BY_REMOTE);
-			mPersistentStorage
-					.setDuration((System.currentTimeMillis() - startedAt) / 100);
+			mPersistentStorage.setDuration(getDuration());
 
 			mBroadcaster.broadcastStateChanged(getRemoteContact(),
 					getSharingId(), VideoSharing.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
@@ -405,16 +457,18 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 	 */
 	public void handleSharingError(ContentSharingError error) {
 		if (logger.isActivated()) {
-			logger.info("Sharing error " + error.getErrorCode());
+			logger.info("Sharing error ".concat(String.valueOf(error.getErrorCode()).toString()));
 		}
 		VideoSharingStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
 		int state = stateAndReasonCode.getState();
 		int reasonCode = stateAndReasonCode.getReasonCode();
-		synchronized (lock) {
+		mStoppedAt = System.currentTimeMillis();
+		synchronized (mLock) {
 			mVideoSharingService.removeVideoSharing(mSharingId);
 
 			mPersistentStorage.setStateAndReasonCode(state, reasonCode);
 
+			mPersistentStorage.setDuration(getDuration());
 			mBroadcaster.broadcastStateChanged(getRemoteContact(),
 					mSharingId, state, reasonCode);
 		}
@@ -425,7 +479,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 		if (logger.isActivated()) {
 			logger.info("Accepting sharing");
 		}
-		synchronized (lock) {
+		synchronized (mLock) {
 			mPersistentStorage.setStateAndReasonCode(VideoSharing.State.ACCEPTING,
 					ReasonCode.UNSPECIFIED);
 			mBroadcaster.broadcastStateChanged(getRemoteContact(),
@@ -440,7 +494,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
      * @param height Video height
      */
 	public void handleVideoResized(int width, int height) {
-		// TODO : Check if new callback needed
+		// Not used
 	}
 
 	@Override
@@ -466,7 +520,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 		VideoStreamingSession session = mRichcallService
 				.getVideoSharingSession(mSharingId);
 		VideoContent content = (VideoContent)session.getContent();
-		synchronized (lock) {
+		synchronized (mLock) {
 			mPersistentStorage.addVideoSharing(getRemoteContact(), Direction.INCOMING, content,
 					VideoSharing.State.INVITED, ReasonCode.UNSPECIFIED);
 		}
@@ -475,7 +529,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
 
 	@Override
 	public void handle180Ringing() {
-		synchronized (lock) {
+		synchronized (mLock) {
 			mPersistentStorage.setStateAndReasonCode(VideoSharing.State.RINGING,
 					ReasonCode.UNSPECIFIED);
 			mBroadcaster.broadcastStateChanged(getRemoteContact(), mSharingId,

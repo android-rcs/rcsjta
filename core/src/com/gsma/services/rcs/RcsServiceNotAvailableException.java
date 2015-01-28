@@ -18,7 +18,7 @@
 package com.gsma.services.rcs;
 
 /**
- * Rcs service not available exception
+ * RCS service not available exception
  *  
  * @author Jean-Marc AUFFRET
  */

@@ -85,5 +85,4 @@ public class VideoSharingData {
 	 */
 	static final String KEY_HEIGHT = VideoSharingLog.HEIGHT;
 
-	static final String KEY_ORIENTATION = VideoSharingLog.ORIENTATION;
 }

@@ -1,8 +1,8 @@
 package com.gsma.services.rcs.vsh;
 
-import com.gsma.services.rcs.vsh.IVideoRenderer;
-import com.gsma.services.rcs.vsh.VideoCodec;
+import com.gsma.services.rcs.vsh.IVideoPlayer;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.vsh.VideoDescriptor;
 
 /**
  * Video sharing interface
@@ -13,17 +13,23 @@ interface IVideoSharing {
 
 	ContactId getRemoteContact();
 
-	VideoCodec getVideoCodec();
-
 	int getState();
 
 	int getReasonCode();
 
 	int getDirection();
 	
-	void acceptInvitation(IVideoRenderer renderer);
+	void acceptInvitation(IVideoPlayer player);
 
 	void rejectInvitation();
 
 	void abortSharing();
+	
+	String getVideoEncoding();
+
+	long getTimeStamp();
+
+	long getDuration();
+	
+	VideoDescriptor getVideoDescriptor();
 }

@@ -34,6 +34,7 @@ import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
+import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.vsh.IVideoPlayer;
 import com.gsma.services.rcs.vsh.IVideoSharing;
@@ -82,7 +83,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	/**
 	 * Lock used for synchronization
 	 */
-	private final Object lock = new Object();
+	private final Object mLock = new Object();
 
 	/**
 	 * The logger
@@ -128,7 +129,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      */
 	private void addVideoSharing(VideoSharingImpl videoSharing) {
 		if (logger.isActivated()) {
-			logger.debug("Add a video sharing in the list (size=" + mVideoSharingCache.size() + ")");
+			logger.debug("Add a video sharing");
 		}
 		
 		mVideoSharingCache.put(videoSharing.getSharingId(), videoSharing);
@@ -141,7 +142,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      */
 	/* package private */ void removeVideoSharing(String sharingId) {
 		if (logger.isActivated()) {
-			logger.debug("Remove a video sharing from the list (size=" + mVideoSharingCache.size() + ")");
+			logger.debug("Remove a video sharing");
 		}
 		
 		mVideoSharingCache.remove(sharingId);
@@ -165,7 +166,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Add a service listener");
 		}
-		synchronized (lock) {
+		synchronized (mLock) {
 			mRcsServiceRegistrationEventBroadcaster.addEventListener(listener);
 		}
 	}
@@ -179,7 +180,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Remove a service listener");
 		}
-		synchronized (lock) {
+		synchronized (mLock) {
 			mRcsServiceRegistrationEventBroadcaster.removeEventListener(listener);
 		}
 	}
@@ -191,7 +192,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	 */
 	public void notifyRegistrationEvent(boolean state) {
 		// Notify listeners
-		synchronized (lock) {
+		synchronized (mLock) {
 			if (state) {
 				mRcsServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
 			} else {
@@ -217,10 +218,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 		try {
 			return mCore.getImsModule().getCallManager().getContact();
 		} catch(Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Unexpected error", e);
-			}
-			throw new ServerApiException(e.getMessage());
+			throw new ServerApiException(e);
 		}
 	}
 
@@ -232,7 +230,9 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
     public void receiveVideoSharingInvitation(VideoStreamingSession session) {
 		ContactId contact = session.getRemoteContact();
 		if (logger.isActivated()) {
-			logger.info("Receive video sharing invitation from " + contact + " displayName=" + session.getRemoteDisplayName());
+			logger.info(new StringBuilder("Receive video sharing invitation from ")
+					.append(contact.toString()).append(" displayName=")
+					.append(session.getRemoteDisplayName()).toString());
 		}
 
 		// Update displayName of remote contact
@@ -269,7 +269,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      */
     public IVideoSharing shareVideo(ContactId contact, IVideoPlayer player) throws ServerApiException {
 		if (logger.isActivated()) {
-			logger.info("Initiate a live video session with " + contact);
+			logger.info("Initiate a live video session with ".concat(contact.toString()));
 		}
 
 		// Test IMS connection
@@ -284,33 +284,29 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
             final VideoStreamingSession session = mRichcallService.initiateLiveVideoSharingSession(contact, player);
 
 			String sharingId = session.getSessionID();
+			VideoContent content = (VideoContent)session.getContent();
 			mRichCallLog.addVideoSharing(sharingId, contact,
-					Direction.OUTGOING, (VideoContent)session.getContent(),
+					Direction.OUTGOING, content,
 					VideoSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
 			mBroadcaster.broadcastStateChanged(contact, sharingId,
 					VideoSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
 
-			VideoSharingPersistedStorageAccessor storageAccessor = new VideoSharingPersistedStorageAccessor(
-					sharingId, contact, Direction.OUTGOING, mRichCallLog);
+			VideoSharingPersistedStorageAccessor storageAccessor = new VideoSharingPersistedStorageAccessor(sharingId, contact,
+					Direction.OUTGOING, mRichCallLog, content.getEncoding(), content.getHeight(), content.getWidth());
 			VideoSharingImpl videoSharing = new VideoSharingImpl(sharingId, mRichcallService,
 					mBroadcaster, storageAccessor, this);
-
 			addVideoSharing(videoSharing);
 			session.addListener(videoSharing);
 
-	        Thread t = new Thread() {
+	        new Thread() {
 	    		public void run() {
 	    			session.startSession();
 	    		}
-	    	};
-	    	t.start();	
+	    	}.start();	
 			return videoSharing;
 
 		} catch(Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Unexpected error", e);
-			}
-			throw new ServerApiException(e.getMessage());
+			throw new ServerApiException(e);
 		}
 	}
 
@@ -355,10 +351,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 			return videoSharings;
 
 		} catch(Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Unexpected error", e);
-			}
-			throw new ServerApiException(e.getMessage());
+			throw new ServerApiException(e);
 		}		
 	}
 
@@ -386,7 +379,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Add a video sharing event listener");
 		}
-		synchronized (lock) {
+		synchronized (mLock) {
 			mBroadcaster.addEventListener(listener);
 		}
 	}
@@ -400,7 +393,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 		if (logger.isActivated()) {
 			logger.info("Remove a video sharing event listener");
 		}
-		synchronized (lock) {
+		synchronized (mLock) {
 			mBroadcaster.removeEventListener(listener);
 		}
 	}
@@ -409,8 +402,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	 * Returns service version
 	 * 
 	 * @return Version
+	 * @throws ServerApiException 
 	 * @see VERSION_CODES
-	 * @throws ServerApiException
 	 */
 	public int getServiceVersion() throws ServerApiException {
 		return RcsService.Build.API_VERSION;

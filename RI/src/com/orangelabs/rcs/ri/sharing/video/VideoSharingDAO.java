@@ -39,12 +39,12 @@ public class VideoSharingDAO implements Parcelable {
 	private String mSharingId;
 	private ContactId mContact;
 	private int mState;
+	private int mReasonCode;
 	private Direction mDirection;
 	private long mTimestamp;
 	private long mDuration;
 	private int mHeight;
 	private int mWidth;
-	// TODO private int orientation;
 	private String mVideoEncoding;
 
 	private static final String WHERE_CLAUSE = new StringBuilder(VideoSharingLog.SHARING_ID).append("=?").toString();
@@ -73,14 +73,34 @@ public class VideoSharingDAO implements Parcelable {
 
 	}
 	
+	/**
+	 * Gets state
+	 * @return state
+	 */
 	public int getState() {
 		return mState;
 	}
 
+	/**
+	 * Gets reason code
+	 * @return reason code
+	 */
+	public int getmReasonCode() {
+		return mReasonCode;
+	}
+
+	/**
+	 * Gets sharing ID
+	 * @return sharingId
+	 */
 	public String getSharingId() {
 		return mSharingId;
 	}
 
+	/**
+	 * Gets remote contact
+	 * @return contact
+	 */
 	public ContactId getContact() {
 		return mContact;
 	}
@@ -89,22 +109,42 @@ public class VideoSharingDAO implements Parcelable {
 		return mDirection;
 	}
 
+	/**
+	 * Gets date of the sharing
+	 * @return time stamp
+	 */
 	public long getTimestamp() {
 		return mTimestamp;
 	}
 
+	/**
+	 * Gets duration
+	 * @return duration
+	 */
 	public long getDuration() {
 		return mDuration;
 	}
 
+	/**
+	 * Gets height
+	 * @return height
+	 */
 	public int getHeight() {
 		return mHeight;
 	}
 
+	/**
+	 * Gets width
+	 * @return width
+	 */
 	public int getWidth() {
 		return mWidth;
 	}
 
+	/**
+	 * Gets video encoding name (e.g. H264).
+	 * @return video encoding
+	 */
 	public String getVideoEncoding() {
 		return mVideoEncoding;
 	}
@@ -182,6 +222,9 @@ public class VideoSharingDAO implements Parcelable {
 		dest.writeString(mVideoEncoding);
 	};
 
+	/**
+	 * public CREATOR field that generates instances of Parcelable class from a VideoSharingDAO.
+	 */
 	public static final Parcelable.Creator<VideoSharingDAO> CREATOR = new Parcelable.Creator<VideoSharingDAO>() {
 		@Override
 		public VideoSharingDAO createFromParcel(Parcel in) {

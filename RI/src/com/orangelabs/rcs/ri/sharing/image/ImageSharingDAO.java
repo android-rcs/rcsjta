@@ -105,30 +105,58 @@ public class ImageSharingDAO implements Parcelable {
 		dest.writeInt(mReasonCode);
 	};
 
+	/**
+	 * Gets state
+	 * @return state
+	 */
 	public int getState() {
 		return mState;
 	}
 
+	/**
+	 * Gets transferred size
+	 * @return size
+	 */
 	public long getSizeTransferred() {
 		return mSizeTransferred;
 	}
 
+	/**
+	 * Gets sharing ID
+	 * @return sharingId
+	 */
 	public String getSharingId() {
 		return mSharingId;
 	}
 
+	/**
+	 * Gets remote contact
+	 * @return contact
+	 */
 	public ContactId getContact() {
 		return mContact;
 	}
 
+	/**
+	 * Gets file URI
+	 * @return file URI
+	 */
 	public Uri getFile() {
 		return mFile;
 	}
 
+	/**
+	 * Gets file name
+	 * @return file name
+	 */
 	public String getFilename() {
 		return mFilename;
 	}
 
+	/**
+	 * Gets mime type
+	 * @return mime type
+	 */
 	public String getMimeType() {
 		return mMimeType;
 	}
@@ -137,14 +165,26 @@ public class ImageSharingDAO implements Parcelable {
 		return mDirection;
 	}
 
+	/**
+	 * Gets date of the sharing
+	 * @return time stamp
+	 */
 	public long getTimestamp() {
 		return mTimestamp;
 	}
 
+	/**
+	 * Gets size
+	 * @return size
+	 */
 	public long getSize() {
 		return mSize;
 	}
 
+	/**
+	 * Gets reason code
+	 * @return reason code
+	 */
 	public int getReasonCode() {
 		return mReasonCode;
 	}
@@ -167,6 +207,7 @@ public class ImageSharingDAO implements Parcelable {
 			cursor = context.getContentResolver().query(uri, null, WHERE_CLAUSE, whereArgs, null);
 			if (!cursor.moveToFirst()) {
 				throw new IllegalArgumentException("Sharing ID not found");
+				
 			}
 			mSharingId = sharingId;
 			String _contact = cursor.getString(cursor
@@ -206,6 +247,9 @@ public class ImageSharingDAO implements Parcelable {
 		return 0;
 	}
 
+	/**
+	 * public CREATOR field that generates instances of Parcelable class from a VideoSharingDAO.
+	 */
 	public static final Parcelable.Creator<ImageSharingDAO> CREATOR = new Parcelable.Creator<ImageSharingDAO>() {
 		@Override
 		public ImageSharingDAO createFromParcel(Parcel in) {

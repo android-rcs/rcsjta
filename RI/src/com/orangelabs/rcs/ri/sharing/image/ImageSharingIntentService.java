@@ -79,6 +79,7 @@ public class ImageSharingIntentService extends IntentService {
 	protected void onHandleIntent(Intent intent) {
 		if (intent == null || intent.getAction() == null) {
 			return;
+			
 		}
 		String action = intent.getAction();
 		// Check action from incoming intent
@@ -87,6 +88,7 @@ public class ImageSharingIntentService extends IntentService {
 				Log.e(LOGTAG, "Unknown action ".concat(action));
 			}
 			return;
+			
 		}
 		// Gets data from the incoming Intent
 		String sharingId = intent.getStringExtra(ImageSharingIntent.EXTRA_SHARING_ID);
@@ -95,6 +97,7 @@ public class ImageSharingIntentService extends IntentService {
 				Log.e(LOGTAG, "Cannot read sharing ID");
 			}
 			return;
+			
 		}
 		try {
 			// Get Image sharing from provider

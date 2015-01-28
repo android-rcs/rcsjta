@@ -23,6 +23,7 @@
 <string name="label_decline">Decline</string>
 <string name="label_refresh">Refresh</string>
 <string name="label_from_args">From: %s</string>
+<string name="label_with_args">With: %s</string>
 <string name="label_invitation_failed">Invitation has failed</string>
 <string name="label_yes">Yes</string>
 <string name="label_no">No</string>
@@ -238,9 +239,10 @@
 <string name="title_recv_video_sharing">Video sharing from %s</string>
 <string name="title_video_sharing">Video sharing</string> 
 <string name="label_video_duration">Duration: %s s</string>
-<string name="label_note_sharing_codec">Note: the video codec is an H264 codec from the Google Android open source and is a contribution from PacketVideo (Apache 2 license).</string>
 <string name="label_vsh_state_changed">VSH state %1$s (%2$s)</string>
+<string name="label_switch_camera">Switch camera</string>
 <string name="label_vsh_uninitialized_duration">duration</string>
+<string name="label_video_format">Format: %s</string>
 
 <!-- Geoloc sharing menu -->
 <string name="title_recv_geoloc_sharing">Geoloc sharing from (%1$s)</string>

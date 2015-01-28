@@ -77,32 +77,32 @@ public class InitiateImageSharing extends Activity {
 	/**
 	 * Selected filename
 	 */
-	private String filename;
+	private String mFilename;
 	
 	/**
 	 * Selected fileUri
 	 */
-	private Uri file;
+	private Uri mFile;
 	
 	/**
 	 * Selected filesize (kB)
 	 */
-	private long filesize = -1;	
+	private long mFilesize = -1;	
 	   
 	/**
      * Image sharing
      */
-    private ImageSharing imageSharing;
+    private ImageSharing mImageSharing;
     
     /**
      * Image sharing Id
      */
-    private String sharingId;
+    private String mSharingId;
     
 	/**
      * Progress dialog
      */
-    private Dialog progressDialog;
+    private Dialog mProgressDialog;
     
     /**
    	 * A locker to exit only once
@@ -132,8 +132,9 @@ public class InitiateImageSharing extends Activity {
 		@Override
 		public void onProgressUpdate(ContactId contact, String sharingId, final long currentSize, final long totalSize) {
 			// Discard event if not for current sharingId
-			if (InitiateImageSharing.this.sharingId == null || !InitiateImageSharing.this.sharingId.equals(sharingId)) {
+			if (mSharingId == null || !mSharingId.equals(sharingId)) {
 				return;
+				
 			}
 			handler.post(new Runnable() {
 				public void run() {
@@ -154,16 +155,19 @@ public class InitiateImageSharing extends Activity {
 					Log.e(LOGTAG, "onStateChanged unhandled state=" + state);
 				}
 				return;
+				
 			}
 			if (reasonCode > RiApplication.ISH_REASON_CODES.length) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "onStateChanged unhandled reason=" + reasonCode);
 				}
 				return;
+				
 			}
 			// Discard event if not for current sharingId
-			if (InitiateImageSharing.this.sharingId == null || !InitiateImageSharing.this.sharingId.equals(sharingId)) {
+			if (mSharingId == null || !mSharingId.equals(sharingId)) {
 				return;
+				
 			}
 			final String _reasonCode = RiApplication.ISH_REASON_CODES[reasonCode];
 			final String _state = RiApplication.ISH_STATES[state];
@@ -269,16 +273,19 @@ public class InitiateImageSharing extends Activity {
     	super.onDestroy();
     	if (mCnxManager == null) {
     		return;
+    		
     	}
 		mCnxManager.stopMonitorServices(this);
-		if (mCnxManager.isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
-			// Remove image sharing listener
-			try {
-				mCnxManager.getImageSharingApi().removeEventListener(ishListener);
-			} catch (Exception e) {
-				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "Failed to remove listener", e);
-				}
+		if (!mCnxManager.isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
+			return;
+			
+		}
+		// Remove image sharing listener
+		try {
+			mCnxManager.getImageSharingApi().removeEventListener(ishListener);
+		} catch (Exception e) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "Failed to remove listener", e);
 			}
 		}
     }
@@ -294,7 +301,7 @@ public class InitiateImageSharing extends Activity {
 
             // Initiate a GSM call before to be able to share content
             Intent intent = new Intent(Intent.ACTION_CALL);
-        	intent.setData(Uri.parse("tel:"+phoneNumber));
+        	intent.setData(Uri.parse("tel:".concat(phoneNumber)));
             startActivity(intent);
         }
     };
@@ -330,16 +337,16 @@ public class InitiateImageSharing extends Activity {
 			}
 
             if (LogUtils.isActive) {
-				Log.d(LOGTAG, "shareImage image="+filename+" size="+filesize);
+				Log.d(LOGTAG, "shareImage image="+mFilename+" size="+mFilesize);
 			}    		
 			try {
 				// Initiate sharing
-				imageSharing = mCnxManager.getImageSharingApi().shareImage(remote, file);
-				sharingId = imageSharing.getSharingId();
+				mImageSharing = mCnxManager.getImageSharingApi().shareImage(remote, mFile);
+				mSharingId = mImageSharing.getSharingId();
 				
 				// Display a progress dialog
-				progressDialog = Utils.showProgressDialog(InitiateImageSharing.this, getString(R.string.label_command_in_progress));
-				progressDialog.setOnCancelListener(new OnCancelListener() {
+				mProgressDialog = Utils.showProgressDialog(InitiateImageSharing.this, getString(R.string.label_command_in_progress));
+				mProgressDialog.setOnCancelListener(new OnCancelListener() {
 					public void onCancel(DialogInterface dialog) {
 						Toast.makeText(InitiateImageSharing.this, getString(R.string.label_sharing_cancelled), Toast.LENGTH_SHORT)
 								.show();
@@ -383,21 +390,22 @@ public class InitiateImageSharing extends Activity {
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode != RESULT_OK) {
 			return;
+			
 		}
 
 		switch (requestCode) {
 		case SELECT_IMAGE:
 			if ((data != null) && (data.getData() != null)) {
 				// Get selected photo URI
-				file = data.getData();
+				mFile = data.getData();
 				// Display the selected filename attribute
 				TextView uriEdit = (TextView) findViewById(R.id.uri);
 				try {
-					filename = FileUtils.getFileName(this, file);
-					filesize = FileUtils.getFileSize(this, file) / 1024;
-					uriEdit.setText(filesize + " KB");
+					mFilename = FileUtils.getFileName(this, mFile);
+					mFilesize = FileUtils.getFileSize(this, mFile) / 1024;
+					uriEdit.setText(mFilesize + " KB");
 				} catch (Exception e) {
-					filesize = -1;
+					mFilesize = -1;
 					uriEdit.setText("Unknown");
 				}
 				// Enable invite button
@@ -412,10 +420,13 @@ public class InitiateImageSharing extends Activity {
 	 * Hide progress dialog
 	 */
     public void hideProgressDialog() {
-		if (progressDialog != null && progressDialog.isShowing()) {
-			progressDialog.dismiss();
-			progressDialog = null;
+    	if (mProgressDialog == null) {
+    		return;
+    	}
+		if (mProgressDialog.isShowing()) {
+			mProgressDialog.dismiss();
 		}
+		mProgressDialog = null;
     }       
     
     /**
@@ -449,13 +460,13 @@ public class InitiateImageSharing extends Activity {
     private void quitSession() {
 		// Stop session
     	try {
-            if (imageSharing != null) {
-            	imageSharing.abortSharing();
+            if (mImageSharing != null) {
+            	mImageSharing.abortSharing();
             }
     	} catch(Exception e) {
     		e.printStackTrace();
     	}
-    	imageSharing = null;
+    	mImageSharing = null;
 		
 	    // Exit activity
 		finish();

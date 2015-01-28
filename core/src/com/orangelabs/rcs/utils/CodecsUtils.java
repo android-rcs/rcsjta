@@ -18,9 +18,9 @@
 
 package com.orangelabs.rcs.utils;
 
+import java.util.HashSet;
 import java.util.List;
-import java.util.Vector;
-
+import java.util.Set;
 
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
@@ -40,16 +40,23 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.H264VideoFormat;
  * @author hlxn7157
  */
 public class CodecsUtils {
-
-    /**
-     * Get list of supported video codecs according to current network
-     *
-     * @return Codecs list
-     */
-    public static VideoCodec[] getRendererCodecList() {
-        return getSupportedCodecList(true, true);
-    }
-
+	
+    // Codec parameters
+	private final static String PARAM_1_3 = new StringBuilder(H264Config.CODEC_PARAM_PROFILEID).append("=")
+			.append(H264Profile1_3.BASELINE_PROFILE_ID).append(";")
+			.append(H264Config.CODEC_PARAM_PACKETIZATIONMODE).append("=")
+			.append(JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE).toString();
+	
+	private final static String PARAM_1_2 = new StringBuilder(H264Config.CODEC_PARAM_PROFILEID).append("=")
+			.append(H264Profile1_2.BASELINE_PROFILE_ID).append(";")
+			.append(H264Config.CODEC_PARAM_PACKETIZATIONMODE).append("=")
+			.append(JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE).toString();
+	
+	private final static String PARAM_1_b = new StringBuilder(H264Config.CODEC_PARAM_PROFILEID).append("=")
+			.append(H264Profile1b.BASELINE_PROFILE_ID).append(";")
+			.append(H264Config.CODEC_PARAM_PACKETIZATIONMODE).append("=")
+			.append(JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE).toString();
+	
     /**
      * Get list of supported video codecs according to current network
      *
@@ -98,22 +105,14 @@ public class CodecsUtils {
      * @return boolean
      */
     private static boolean sizeContains(List<Camera.Size> list, int width, int height) {
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).width == width && list.get(i).height == height) {
-                return true;
-            }
-        }
+    	for (Camera.Size size : list) {
+    		 if (size.width == width && size.height == height) {
+                 return true;
+             }
+		}
         return false;
     }
 
-    // Codec parameters
-	static String param_1_3 = H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1_3.BASELINE_PROFILE_ID + ";" +
-		H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=" + JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE;
-	static String param_1_2 = H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1_2.BASELINE_PROFILE_ID + ";" +
-		H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=" + JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE;
-	static String param_1_b = H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1b.BASELINE_PROFILE_ID + ";" +
-		H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=" + JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE;
-    
     /**
      * Get list of supported video codecs according to current network
      *
@@ -124,7 +123,7 @@ public class CodecsUtils {
     private static VideoCodec[] getSupportedCodecList(boolean cif, boolean qvga) {
         int networkLevel = NetworkUtils.getNetworkAccessType();
         int payload_count = H264VideoFormat.PAYLOAD - 1;
-        Vector<VideoCodec> list = new Vector<VideoCodec>();
+        Set<VideoCodec> videoCodes = new HashSet<VideoCodec>();
 
         // Add codecs settings (ordered list)
         /*
@@ -134,47 +133,42 @@ public class CodecsUtils {
          * WIFI   -> level 1.2: profile-level-id=42800c, frame_rate=15, frame_size=CIF, bit_rate=384k
          * WIFI   -> level 1.3: profile-level-id=42800d, frame_rate=15, frame_size=CIF, bit_rate=384k
          */
-
-    	if (networkLevel == NetworkUtils.NETWORK_ACCESS_WIFI || networkLevel == NetworkUtils.NETWORK_ACCESS_4G) {
+    	if (NetworkUtils.NETWORK_ACCESS_WIFI == networkLevel || NetworkUtils.NETWORK_ACCESS_4G == networkLevel) {
             if (cif) {
-                list.add(new VideoCodec(H264Config.CODEC_NAME,
+            	videoCodes.add(new VideoCodec(H264Config.CODEC_NAME,
                         ++payload_count,
                         H264Config.CLOCK_RATE,
                         15,
                         256000,
-                        H264Config.CIF_WIDTH, 
-                        H264Config.CIF_HEIGHT,
-                        param_1_3));
+                        H264Config.CIF_WIDTH, H264Config.CIF_HEIGHT,
+                        PARAM_1_3));
                 
-                list.add(new VideoCodec(H264Config.CODEC_NAME,
+            	videoCodes.add(new VideoCodec(H264Config.CODEC_NAME,
                         ++payload_count,
                         H264Config.CLOCK_RATE,
                         15,
                         176000,
-                        H264Config.CIF_WIDTH, 
-                        H264Config.CIF_HEIGHT,
-                        param_1_2));
+                        H264Config.CIF_WIDTH, H264Config.CIF_HEIGHT,
+                        PARAM_1_2));
             }
             if (qvga) {
-                list.add(new VideoCodec(H264Config.CODEC_NAME,
+            	videoCodes.add(new VideoCodec(H264Config.CODEC_NAME,
                         ++payload_count,
                         H264Config.CLOCK_RATE,
                         15,
                         176000,
-                        H264Config.QVGA_WIDTH, 
-                        H264Config.QVGA_HEIGHT,
-                        param_1_2));
+                        H264Config.QVGA_WIDTH, H264Config.QVGA_HEIGHT,                        
+                        PARAM_1_2));
             }
         }
-        list.add(new VideoCodec(H264Config.CODEC_NAME,
+    	videoCodes.add(new VideoCodec(H264Config.CODEC_NAME,
                 ++payload_count,
                 H264Config.CLOCK_RATE,
                 15,
                 96000,
-                H264Config.QCIF_WIDTH, 
-                H264Config.QCIF_HEIGHT,
-                param_1_b));
+                H264Config.QCIF_WIDTH, H264Config.QCIF_HEIGHT,                        
+                PARAM_1_b));
 
-        return (VideoCodec[]) list.toArray(new VideoCodec[list.size()]);
+        return (VideoCodec[]) videoCodes.toArray(new VideoCodec[videoCodes.size()]);
     }
 }

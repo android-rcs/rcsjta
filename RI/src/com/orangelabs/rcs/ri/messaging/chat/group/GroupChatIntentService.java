@@ -63,7 +63,7 @@ public class GroupChatIntentService extends IntentService {
 	}
 
 	/**
-	 * Creates an IntentService.
+	 * Constructor
 	 */
 	public GroupChatIntentService() {
 		super("GroupChatIntentService");

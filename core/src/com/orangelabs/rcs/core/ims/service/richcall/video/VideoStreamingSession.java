@@ -25,13 +25,13 @@ package com.orangelabs.rcs.core.ims.service.richcall.video;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.vsh.IVideoPlayer;
-import com.gsma.services.rcs.vsh.IVideoRenderer;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipException;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
+import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingSession;
 import com.orangelabs.rcs.core.ims.service.richcall.RichcallService;
@@ -45,24 +45,24 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public abstract class VideoStreamingSession extends ContentSharingSession {
 	/**
+	 * Video orientation ID
+	 */
+	private int mVideoOrientationId;
+	
+	/**
 	 * Video width
 	 */
-	private int videoWidth = -1;
+	private int mVideoWidth = -1;
 	
 	/**
 	 * Video height
 	 */
-	private int videoHeight = -1;
-
-	/**
-	 * Video renderer
-	 */
-	private IVideoRenderer renderer;
+	private int mVideoHeight = -1;
 
     /**
-     * Video renderer
+     * Video player
      */
-    private IVideoPlayer player;
+    private IVideoPlayer mPlayer;
 
     /**
      * The logger
@@ -81,12 +81,30 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
 	}
 
 	/**
+	 * Get the video orientation ID
+	 * 
+	 * @return Orientation
+	 */
+	public int getVideoOrientationId() {
+		return mVideoOrientationId;
+	}
+
+	/**
+	 * Set the video orientation ID
+	 * 
+	 * @param orientationId Orientation
+	 */
+	public void setVideoOrientationId(int orientationId) {
+		this.mVideoOrientationId = orientationId;
+	}
+	
+	/**
 	 * Get the video width
 	 * 
 	 * @return Width
 	 */
 	public int getVideoWidth() {
-		return videoWidth;
+		return mVideoWidth;
 	}
 
 	/**
@@ -95,25 +113,7 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
 	 * @return Height
 	 */
 	public int getVideoHeight() {
-		return videoHeight;
-	}
-
-	/**
-	 * Get the video renderer
-	 * 
-	 * @return Renderer
-	 */
-	public IVideoRenderer getVideoRenderer() {
-		return renderer;
-	}
-	
-	/**
-	 * Set the video renderer
-	 * 
-	 * @param renderer Renderer
-	 */
-	public void setVideoRenderer(IVideoRenderer renderer) {
-		this.renderer = renderer;
+		return mVideoHeight;
 	}
 
     /**
@@ -122,16 +122,16 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
      * @return Player
      */
     public IVideoPlayer getVideoPlayer() {
-        return player;
+        return mPlayer;
     }
 
     /**
      * Set the video player
      *
-     * @param Player
+     * @param player
      */
     public void setVideoPlayer(IVideoPlayer player) {
-        this.player = player;
+        mPlayer = player;
     }
 
     /**
@@ -155,10 +155,11 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
             return;
         }
 
+        boolean logIsActivated = logger.isActivated();
         // Error
-        if (logger.isActivated()) {
-            logger.info("Session error: " + error.getErrorCode() + ", reason="
-                    + error.getMessage());
+        if (logIsActivated) {
+			logger.info(new StringBuilder("Session error: ").append(error.getErrorCode())
+					.append(", reason=").append(error.getMessage()).toString());
         }
 
         // Close media session
@@ -172,16 +173,17 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
 			// Request capabilities to the remote
 	        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
 		} catch (RcsContactFormatException e) {
-			if (logger.isActivated()) {
-				logger.warn("Cannot parse contact "+getDialogPath().getRemoteParty());
+			if (logIsActivated) {
+				logger.warn(new StringBuilder("Cannot parse contact ").append(
+						getDialogPath().getRemoteParty()).toString());
 			}
 		}
 
         // Notify listeners
-        for (int i = 0; i < getListeners().size(); i++) {
-            ((VideoStreamingSessionListener) getListeners().get(i))
-                    .handleSharingError(new ContentSharingError(error));
-        }
+        for (ImsSessionListener imsSessionListener : getListeners()) {
+        	 ((VideoStreamingSessionListener) imsSessionListener)
+             .handleSharingError(new ContentSharingError(error));
+		}
     }
 
 	@Override

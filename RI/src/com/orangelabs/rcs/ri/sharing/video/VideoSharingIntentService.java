@@ -51,10 +51,17 @@ public class VideoSharingIntentService extends IntentService {
 
 	static final String BUNDLE_VSHDAO_ID = "vshdao";
 
+	/**
+	 * Constructor
+	 * @param name
+	 */
 	public VideoSharingIntentService(String name) {
 		super(name);
 	}
 
+	/**
+	 * Constructor
+	 */
 	public VideoSharingIntentService() {
 		super("VideoSharingIntentService");
 	}
@@ -75,34 +82,40 @@ public class VideoSharingIntentService extends IntentService {
 		// Check action from incoming intent
 		if (!intent.getAction().equalsIgnoreCase(VideoSharingIntent.ACTION_NEW_INVITATION)) {
 			if (LogUtils.isActive) {
-				Log.e(LOGTAG, "Unknown action " + intent.getAction());
+				Log.e(LOGTAG, "Unknown action ".concat(intent.getAction()));
 			}
 			return;
+			
 		}
 		// Gets data from the incoming Intent
 		String sharingId = intent.getStringExtra(VideoSharingIntent.EXTRA_SHARING_ID);
-		if (sharingId != null) {
+		if (sharingId == null) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onHandleIntent video sharing with ID " + sharingId);
+				Log.e(LOGTAG, "Cannot read sharing ID");
 			}
-			try {
-				// Get Video Sharing from provider
-				VideoSharingDAO vshDao = new VideoSharingDAO(this, sharingId);
-				// Save VideoSharingDAO into intent
-				Bundle bundle = new Bundle();
-				bundle.putParcelable(BUNDLE_VSHDAO_ID, vshDao);
-				intent.putExtras(bundle);
-				if (LogUtils.isActive) {
-					Log.d(LOGTAG, "Video sharing invitation " + vshDao);
-				}
-				// TODO check VSH state to know if rejected
-				// TODO check validity of direction, etc ...
-				// Display invitation notification
-				addVideoSharingInvitationNotification(intent, vshDao);
-			} catch (Exception e) {
-				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "Cannot read VSH data from provider", e);
-				}
+			return;
+			
+		}
+		if (LogUtils.isActive) {
+			Log.d(LOGTAG, "onHandleIntent video sharing with ID ".concat(sharingId));
+		}
+		try {
+			// Get Video Sharing from provider
+			VideoSharingDAO vshDao = new VideoSharingDAO(this, sharingId);
+			// Save VideoSharingDAO into intent
+			Bundle bundle = new Bundle();
+			bundle.putParcelable(BUNDLE_VSHDAO_ID, vshDao);
+			intent.putExtras(bundle);
+			if (LogUtils.isActive) {
+				Log.d(LOGTAG, "Video sharing invitation ".concat(vshDao.toString()));
+			}
+			// TODO check VSH state to know if rejected
+			// TODO check validity of direction, etc ...
+			// Display invitation notification
+			addVideoSharingInvitationNotification(intent, vshDao);
+		} catch (Exception e) {
+			if (LogUtils.isActive) {
+				Log.e(LOGTAG, "Cannot read VSH data from provider", e);
 			}
 		}
 	}
@@ -124,7 +137,7 @@ public class VideoSharingIntentService extends IntentService {
 		}
 		// Create notification
 		Intent intent = new Intent(invitation);
-		intent.setClass(this, ReceiveVideoSharing.class);
+		intent.setClass(this, IncomingVideoSharing.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		
