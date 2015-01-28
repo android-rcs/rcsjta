@@ -114,21 +114,21 @@ public class SendSingleFile extends SendFile {
 						// Transfer is aborted: hide progress dialog then exit
 						hideProgressDialog();
 						Utils.showMessageAndExit(SendSingleFile.this, getString(R.string.label_transfer_aborted, _reasonCode),
-								exitOnce);
+								mExitOnce);
 						break;
 
 					case FileTransfer.State.REJECTED:
 						// Transfer is rejected: hide progress dialog then exit
 						hideProgressDialog();
 						Utils.showMessageAndExit(SendSingleFile.this, getString(R.string.label_transfer_rejected, _reasonCode),
-								exitOnce);
+								mExitOnce);
 						break;
 
 					case FileTransfer.State.FAILED:
 						// Transfer failed: hide progress dialog then exit
 						hideProgressDialog();
 						Utils.showMessageAndExit(SendSingleFile.this, getString(R.string.label_transfer_failed, _reasonCode),
-								exitOnce);
+								mExitOnce);
 						break;
 
 					default:
@@ -166,12 +166,12 @@ public class SendSingleFile extends SendFile {
 				Log.d(LOGTAG, "initiateTransfer filename=" + filename + " size=" + filesize);
 			}
 			// Initiate transfer
-			fileTransfer = connectionManager.getFileTransferApi().transferFile(mContact, file, fileicon);
+			fileTransfer = mCnxManager.getFileTransferApi().transferFile(mContact, file, fileicon);
 			mTransferId = fileTransfer.getTransferId();
 			return true;
 		} catch (Exception e) {
 			hideProgressDialog();
-			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce, e);
 			return false;
 		}
 	}

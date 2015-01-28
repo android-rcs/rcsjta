@@ -17,7 +17,13 @@
  ******************************************************************************/
 package com.orangelabs.rcs.ri;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import android.app.Application;
+import android.content.res.Resources;
+
+import com.gsma.services.rcs.RcsService.Direction;
 
 /**
  * This subclass of Application allows to get a resource content from a static context
@@ -126,29 +132,47 @@ public class RiApplication extends Application {
 	 */
 	public static String[] GROUP_CHAT_EVENTS;
 	
+	private static Map<Direction, String> sDirectionToString;
+	
+	/**
+	 * Gets direction
+	 * 
+	 * @param direction Direction
+	 * @return String
+	 */
+	public static String getDirection(Direction direction) {
+		return sDirectionToString.get(direction);
+	}
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		PARTICIPANT_STATUSES = getResources().getStringArray(R.array.participant_statuses);
-		DELIVERY_STATUSES = getResources().getStringArray(R.array.delivery_statuses);
-		DELIVERY_REASON_CODES = getResources().getStringArray(R.array.delivery_reason_codes);
-		GC_STATES = getResources().getStringArray(R.array.group_chat_states);
-		GC_REASON_CODES = getResources().getStringArray(R.array.group_chat_reason_codes);
-		MESSAGE_REASON_CODES = getResources().getStringArray(R.array.message_reason_codes);
-		MESSAGE_STATUSES = getResources().getStringArray(R.array.message_statuses);
-		FT_STATES = getResources().getStringArray(R.array.file_transfer_states);
-		FT_REASON_CODES = getResources().getStringArray(R.array.file_transfer_reason_codes);
-		ISH_STATES = getResources().getStringArray(R.array.ish_states);
-		ISH_REASON_CODES = getResources().getStringArray(R.array.ish_reason_codes);
-		VSH_STATES = getResources().getStringArray(R.array.vsh_states);
-		VSH_REASON_CODES = getResources().getStringArray(R.array.vsh_reason_codes);
-		GSH_STATES = getResources().getStringArray(R.array.gsh_states);
-		GSH_REASON_CODES = getResources().getStringArray(R.array.gsh_reason_codes);
-		IPCALL_STATES = getResources().getStringArray(R.array.ipcall_states);
-		IPCALL_REASON_CODES = getResources().getStringArray(R.array.ipcall_reason_codes);
-		MMS_STATES = getResources().getStringArray(R.array.mms_states);
-		MMS_REASON_CODES = getResources().getStringArray(R.array.mms_reason_codes);
-		GROUP_CHAT_EVENTS = getResources().getStringArray(R.array.group_chat_event);
+		Resources resources =  getResources();
+		PARTICIPANT_STATUSES = resources.getStringArray(R.array.participant_statuses);
+		DELIVERY_STATUSES = resources.getStringArray(R.array.delivery_statuses);
+		DELIVERY_REASON_CODES = resources.getStringArray(R.array.delivery_reason_codes);
+		GC_STATES = resources.getStringArray(R.array.group_chat_states);
+		GC_REASON_CODES = resources.getStringArray(R.array.group_chat_reason_codes);
+		MESSAGE_REASON_CODES = resources.getStringArray(R.array.message_reason_codes);
+		MESSAGE_STATUSES = resources.getStringArray(R.array.message_statuses);
+		FT_STATES = resources.getStringArray(R.array.file_transfer_states);
+		FT_REASON_CODES = resources.getStringArray(R.array.file_transfer_reason_codes);
+		ISH_STATES = resources.getStringArray(R.array.ish_states);
+		ISH_REASON_CODES = resources.getStringArray(R.array.ish_reason_codes);
+		VSH_STATES = resources.getStringArray(R.array.vsh_states);
+		VSH_REASON_CODES = resources.getStringArray(R.array.vsh_reason_codes);
+		GSH_STATES = resources.getStringArray(R.array.gsh_states);
+		GSH_REASON_CODES = resources.getStringArray(R.array.gsh_reason_codes);
+		IPCALL_STATES = resources.getStringArray(R.array.ipcall_states);
+		IPCALL_REASON_CODES = resources.getStringArray(R.array.ipcall_reason_codes);
+		MMS_STATES = resources.getStringArray(R.array.mms_states);
+		MMS_REASON_CODES = resources.getStringArray(R.array.mms_reason_codes);
+		GROUP_CHAT_EVENTS = resources.getStringArray(R.array.group_chat_event);
+		
+		sDirectionToString = new HashMap<Direction, String>();
+		sDirectionToString.put(Direction.INCOMING, resources.getString(R.string.label_incoming));
+		sDirectionToString.put(Direction.OUTGOING, resources.getString(R.string.label_outgoing));
+		sDirectionToString.put(Direction.IRRELEVANT, resources.getString(R.string.label_direction_unknown));
 		
 		ApiConnectionManager.getInstance(getApplicationContext()).connectApis();
 	}

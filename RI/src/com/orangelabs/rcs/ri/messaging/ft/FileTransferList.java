@@ -41,11 +41,12 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.RcsCommon;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferLog;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
+import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LockAccess;
@@ -183,8 +184,8 @@ public class FileTransferList extends Activity {
 			int state = cursor.getInt(holder.columnState);
 			holder.stateText.setText(getString(R.string.label_session_state, decodeState(state)));
 
-			int direction = cursor.getInt(holder.columnDirection);
-			holder.directionText.setText(getString(R.string.label_direction, decodeDirection(direction)));
+			Direction direction = Direction.valueOf(cursor.getInt(holder.columnDirection));
+			holder.directionText.setText(getString(R.string.label_direction, RiApplication.getDirection(direction)));
 
 			Long timestamp = cursor.getLong(holder.columnTimestamp);
 			holder.timestamptext.setText(getString(R.string.label_session_date, decodeDate(timestamp)));
@@ -262,21 +263,6 @@ public class FileTransferList extends Activity {
 			return getString(R.string.label_state_queued);
 		default:
 			return getString(R.string.label_state_unknown);
-		}
-	}
-
-	/**
-	 * Decode direction
-	 * 
-	 * @param direction
-	 *            Direction
-	 * @return String
-	 */
-	private String decodeDirection(int direction) {
-		if (direction == RcsCommon.Direction.INCOMING) {
-			return getString(R.string.label_incoming);
-		} else {
-			return getString(R.string.label_outgoing);
 		}
 	}
 

@@ -35,7 +35,7 @@ public class DelayedDisplayNotificationDispatcher implements Runnable {
 			ChatLog.Message.CHAT_ID).append("=").append(ChatLog.Message.CONTACT).append(" AND ")
 			.append(ChatLog.Message.MIME_TYPE).append(" IN('").append(MimeType.TEXT_MESSAGE)
 			.append("','").append(MimeType.GEOLOC_MESSAGE).append("') AND ")
-			.append(ChatLog.Message.READ_STATUS).append("=").append(ReadStatus.READ)
+			.append(ChatLog.Message.READ_STATUS).append("=").append(ReadStatus.READ.toInt())
 			.append(" AND ").append(ChatLog.Message.STATUS).append("=")
 			.append(ChatLog.Message.Status.Content.DISPLAY_REPORT_REQUESTED).toString();
 

@@ -267,8 +267,7 @@ public class StreamingSessionView extends Activity {
     		// Accept the invitation
 			session.acceptInvitation();
     	} catch(Exception e) {
-    		e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), exitOnce, e);
     	}
 	}
 	
@@ -376,8 +375,7 @@ public class StreamingSessionView extends Activity {
 			session = connectionManager.getMultimediaSessionApi().initiateStreamingSession(serviceId, contact);
 			sessionId = session.getSessionId();
     	} catch(Exception e) {
-    		e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), exitOnce, e);
 			return;
     	}
 

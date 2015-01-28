@@ -30,7 +30,7 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.gsma.services.rcs.RcsCommon;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransferIntent;
 import com.orangelabs.rcs.ri.R;
@@ -122,7 +122,7 @@ public class FileTransferIntentService extends IntentService {
 					Log.d(LOGTAG, "onHandleIntent file transfer resume with ID " + transferId);
 				}
 				Intent intentLocal = new Intent(intent);
-				if (ftDao.getDirection() == RcsCommon.Direction.INCOMING) {
+				if (Direction.INCOMING == ftDao.getDirection()) {
 					intentLocal.setClass(this, ReceiveFileTransfer.class);
 				} else {
 					intentLocal.setClass(this, InitiateFileTransfer.class);

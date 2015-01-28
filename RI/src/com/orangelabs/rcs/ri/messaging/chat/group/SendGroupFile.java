@@ -125,21 +125,21 @@ public class SendGroupFile extends SendFile {
 						// Transfer is aborted: hide progress dialog then exit
 						hideProgressDialog();
 						Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_transfer_aborted, _reasonCode),
-								exitOnce);
+								mExitOnce);
 						break;
 
 					case FileTransfer.State.REJECTED:
 						// Transfer is rejected: hide progress dialog then exit
 						hideProgressDialog();
 						Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_transfer_rejected, _reasonCode),
-								exitOnce);
+								mExitOnce);
 						break;
 
 					case FileTransfer.State.FAILED:
 						// Transfer failed: hide progress dialog then exit
 						hideProgressDialog();
 						Utils.showMessageAndExit(SendGroupFile.this, getString(R.string.label_transfer_failed, _reasonCode),
-								exitOnce);
+								mExitOnce);
 						break;
 
 					default:
@@ -177,12 +177,12 @@ public class SendGroupFile extends SendFile {
 				Log.d(LOGTAG, "initiateTransfer filename=" + filename + " size=" + filesize+" chatId="+mChatId);
 			}
 			// Initiate transfer
-			fileTransfer = connectionManager.getFileTransferApi().transferFileToGroupChat(mChatId, file, fileicon);
+			fileTransfer = mCnxManager.getFileTransferApi().transferFileToGroupChat(mChatId, file, fileicon);
 			mTransferId = fileTransfer.getTransferId();
 			return true;
 		} catch (Exception e) {
 			hideProgressDialog();
-			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce, e);
 			return false;
 		}
 	}

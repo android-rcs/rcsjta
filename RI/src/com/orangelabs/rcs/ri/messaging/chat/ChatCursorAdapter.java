@@ -20,8 +20,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.RcsContactFormatException;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
@@ -93,7 +93,7 @@ public class ChatCursorAdapter extends CursorAdapter {
 		final ViewHolder holder = (ViewHolder) view.getTag();
 
 		// Set the type of message
-		int direction = cursor.getInt(holder.columnDirection);
+		Direction direction = Direction.valueOf(cursor.getInt(holder.columnDirection));
 		// Set the date/time field
 		long date = cursor.getLong(holder.columnTimestamp);
 		// Set the status text
@@ -102,7 +102,7 @@ public class ChatCursorAdapter extends CursorAdapter {
 		String data = cursor.getString(holder.columnContent);
 		// Set display name
 		String displayName = null;
-		if (!mIsSingleChat && RcsCommon.Direction.OUTGOING != direction) {
+		if (!mIsSingleChat && Direction.OUTGOING != direction) {
 			String number = cursor.getString(holder.columnContact);
 			if (number != null) {
 				try {
@@ -129,7 +129,7 @@ public class ChatCursorAdapter extends CursorAdapter {
 				RelativeLayout.LayoutParams.WRAP_CONTENT);
 		// Retrieve layout elements
 		switch (direction) {
-		case RcsCommon.Direction.OUTGOING:
+		case OUTGOING:
 			lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
 			// Set background
 			holder.chatItemLayout.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.msg_item_left));
@@ -137,7 +137,7 @@ public class ChatCursorAdapter extends CursorAdapter {
 			holder.contactText.setVisibility(View.GONE);
 			holder.statusText.setVisibility(View.VISIBLE);
 			break;
-		case RcsCommon.Direction.INCOMING:
+		case INCOMING:
 			lp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 			// Set background
 			holder.chatItemLayout.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.msg_item_right));
@@ -150,7 +150,7 @@ public class ChatCursorAdapter extends CursorAdapter {
 			}
 			holder.statusText.setVisibility(View.VISIBLE);
 			break;
-		case RcsCommon.Direction.IRRELEVANT:
+		case IRRELEVANT:
 			if (ChatLog.Message.MimeType.GROUPCHAT_EVENT.equals(mimeType)) {
 				lp.addRule(RelativeLayout.CENTER_IN_PARENT);
 				holder.chatItemLayout.setBackgroundDrawable(null);

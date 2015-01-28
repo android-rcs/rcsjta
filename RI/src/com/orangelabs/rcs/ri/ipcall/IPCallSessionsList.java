@@ -122,7 +122,7 @@ public class IPCallSessionsList extends ListActivity {
 			intent.putExtra(IPCallView.EXTRA_CALL_ID, callId);
 			startActivity(intent);
 		} catch(RcsServiceException e) {
-			Utils.showMessageAndExit(IPCallSessionsList.this, getString(R.string.label_api_failed), exitOnce);
+			Utils.showMessageAndExit(IPCallSessionsList.this, getString(R.string.label_api_failed), exitOnce, e);
 		}
 	}
 
@@ -147,7 +147,7 @@ public class IPCallSessionsList extends ListActivity {
 				setListAdapter(null);
 			}
 		} catch (Exception e) {
-			Utils.showMessageAndExit(IPCallSessionsList.this, getString(R.string.label_api_failed), exitOnce);
+			Utils.showMessageAndExit(IPCallSessionsList.this, getString(R.string.label_api_failed), exitOnce, e);
 		}
 	}
 }

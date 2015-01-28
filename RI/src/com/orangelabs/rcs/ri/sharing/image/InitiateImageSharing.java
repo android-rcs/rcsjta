@@ -50,6 +50,7 @@ import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.sharing.geoloc.InitiateGeolocSharing;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
 import com.orangelabs.rcs.ri.utils.FileUtils;
 import com.orangelabs.rcs.ri.utils.LockAccess;
@@ -106,12 +107,12 @@ public class InitiateImageSharing extends Activity {
     /**
    	 * A locker to exit only once
    	 */
-   	private LockAccess exitOnce = new LockAccess();
+   	private LockAccess mExitOnce = new LockAccess();
    	
   	/**
 	 * API connection manager
 	 */
-	private ApiConnectionManager connectionManager;
+	private ApiConnectionManager mCnxManager;
     
     /**
      * Spinner for contact selection
@@ -145,18 +146,18 @@ public class InitiateImageSharing extends Activity {
 		@Override
 		public void onStateChanged(ContactId contact, String sharingId, final int state, int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onImageSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state
+				Log.d(LOGTAG, "onStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state
 						+ " reason=" + reasonCode);
 			}
 			if (state > RiApplication.ISH_STATES.length) {
 				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "onImageSharingStateChanged unhandled state=" + state);
+					Log.e(LOGTAG, "onStateChanged unhandled state=" + state);
 				}
 				return;
 			}
 			if (reasonCode > RiApplication.ISH_REASON_CODES.length) {
 				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "onImageSharingStateChanged unhandled reason=" + reasonCode);
+					Log.e(LOGTAG, "onStateChanged unhandled reason=" + reasonCode);
 				}
 				return;
 			}
@@ -180,20 +181,20 @@ public class InitiateImageSharing extends Activity {
 					case ImageSharing.State.ABORTED:
 						// Session is aborted: hide progress dialog then exit
 						hideProgressDialog();
-						Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_sharing_aborted, _reasonCode), exitOnce);
+						Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_sharing_aborted, _reasonCode), mExitOnce);
 						break;
 
 					case ImageSharing.State.REJECTED:
 						//  Session is rejected: hide progress dialog then exit
 						hideProgressDialog();
 						Utils.showMessageAndExit(InitiateImageSharing.this,
-								getString(R.string.label_sharing_rejected, _reasonCode), exitOnce);
+								getString(R.string.label_sharing_rejected, _reasonCode), mExitOnce);
 						break;
 
 					case ImageSharing.State.FAILED:
 						//  Session failed: hide progress dialog then exit
 						hideProgressDialog();
-						Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_sharing_failed, _reasonCode), exitOnce);
+						Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_sharing_failed, _reasonCode), mExitOnce);
 						break;
 
 					case ImageSharing.State.TRANSFERRED:
@@ -208,7 +209,7 @@ public class InitiateImageSharing extends Activity {
 						statusView.setText(_state);
 						if (LogUtils.isActive) {
 							Log.d(LOGTAG,
-									"onImageSharingStateChanged "
+									"onStateChanged "
 											+ getString(R.string.label_ish_state_changed, _state, _reasonCode));
 						}
 					}
@@ -246,34 +247,34 @@ public class InitiateImageSharing extends Activity {
         }
         
         // Register to API connection manager
-		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
+		mCnxManager = ApiConnectionManager.getInstance(this);
+		if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), mExitOnce);
 			return;
 		}
-		connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.IMAGE_SHARING);
+		mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.IMAGE_SHARING);
 		try {
 			// Add service listener
-			connectionManager.getImageSharingApi().addEventListener(ishListener);
+			mCnxManager.getImageSharingApi().addEventListener(ishListener);
 		} catch (RcsServiceException e) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "Failed to add listener", e);
 			}
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce);
 		}
     }
     
     @Override
     public void onDestroy() {
     	super.onDestroy();
-    	if (connectionManager == null) {
+    	if (mCnxManager == null) {
     		return;
     	}
-		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
+		mCnxManager.stopMonitorServices(this);
+		if (mCnxManager.isServiceConnected(RcsServiceName.IMAGE_SHARING)) {
 			// Remove image sharing listener
 			try {
-				connectionManager.getImageSharingApi().removeEventListener(ishListener);
+				mCnxManager.getImageSharingApi().removeEventListener(ishListener);
 			} catch (Exception e) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "Failed to remove listener", e);
@@ -306,9 +307,10 @@ public class InitiateImageSharing extends Activity {
             // Check if the service is available
         	boolean registered = false;
         	try {
-        		registered = connectionManager.getImageSharingApi().isServiceRegistered();
+        		registered = mCnxManager.getImageSharingApi().isServiceRegistered();
         	} catch(Exception e) {
-        		e.printStackTrace();
+        		Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_api_failed), mExitOnce, e);
+        		return;
         	}
             if (!registered) {
     	    	Utils.showMessage(InitiateImageSharing.this, getString(R.string.label_service_not_available));
@@ -332,7 +334,7 @@ public class InitiateImageSharing extends Activity {
 			}    		
 			try {
 				// Initiate sharing
-				imageSharing = connectionManager.getImageSharingApi().shareImage(remote, file);
+				imageSharing = mCnxManager.getImageSharingApi().shareImage(remote, file);
 				sharingId = imageSharing.getSharingId();
 				
 				// Display a progress dialog
@@ -356,11 +358,8 @@ public class InitiateImageSharing extends Activity {
 				Button dialBtn = (Button) findViewById(R.id.dial_btn);
 				dialBtn.setVisibility(View.INVISIBLE);
 			} catch (Exception e) {
-				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "Failed to share image", e);
-				}
 				hideProgressDialog();
-				Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_invitation_failed), exitOnce);
+				Utils.showMessageAndExit(InitiateImageSharing.this, getString(R.string.label_invitation_failed), mExitOnce, e);
 			}
         }
     };

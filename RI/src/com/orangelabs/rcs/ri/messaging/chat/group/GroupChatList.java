@@ -45,6 +45,7 @@ import com.gsma.services.rcs.chat.GroupChat;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -71,10 +72,12 @@ public class GroupChatList extends Activity {
 
 	private static final String SORT_ORDER = new StringBuilder(ChatLog.GroupChat.TIMESTAMP).append(" DESC").toString();
 
-	/**
-	 * List view
+	private ListView mListView;
+	
+    /**
+	 * A locker to exit only once
 	 */
-	private ListView listView;
+	private LockAccess mExitOnce = new LockAccess();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -85,10 +88,10 @@ public class GroupChatList extends Activity {
 		setContentView(R.layout.chat_list);
 
 		// Set list adapter
-		listView = (ListView) findViewById(android.R.id.list);
+		mListView = (ListView) findViewById(android.R.id.list);
 		TextView emptyView = (TextView) findViewById(android.R.id.empty);
-		listView.setEmptyView(emptyView);
-		listView.setOnItemClickListener(new OnItemClickListener() {
+		mListView.setEmptyView(emptyView);
+		mListView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v, int pos, long id) {
@@ -111,11 +114,9 @@ public class GroupChatList extends Activity {
 						// TODO CR018
 					}
 				} catch (RcsServiceNotAvailableException e) {
-					e.printStackTrace();
-					Utils.showMessageAndExit(GroupChatList.this, getString(R.string.label_api_disabled));
+					Utils.showMessageAndExit(GroupChatList.this, getString(R.string.label_api_disabled), mExitOnce, e);
 				} catch (RcsServiceException e) {
-					e.printStackTrace();
-					Utils.showMessageAndExit(GroupChatList.this, getString(R.string.label_api_failed));
+					Utils.showMessageAndExit(GroupChatList.this, getString(R.string.label_api_failed), mExitOnce, e);
 				}
 			}
 		});
@@ -125,7 +126,7 @@ public class GroupChatList extends Activity {
 	protected void onResume() {
 		super.onResume();
 		// Refresh view
-		listView.setAdapter(createListAdapter());
+		mListView.setAdapter(createListAdapter());
 	}
 
 	/**
@@ -224,7 +225,7 @@ public class GroupChatList extends Activity {
 			// Delete all: TODO CR005 delete methods
 			getContentResolver().delete(ChatLog.GroupChat.CONTENT_URI, null, null);
 			// Refresh view
-			listView.setAdapter(createListAdapter());
+			mListView.setAdapter(createListAdapter());
 			break;
 		}
 		return true;

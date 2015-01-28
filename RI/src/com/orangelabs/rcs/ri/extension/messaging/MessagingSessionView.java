@@ -106,12 +106,12 @@ public class MessagingSessionView extends Activity {
     /**
 	 * A locker to exit only once
 	 */
-	private LockAccess exitOnce = new LockAccess();
+	private LockAccess mExitOnce = new LockAccess();
 	
   	/**
 	 * API connection manager
 	 */
-	private ApiConnectionManager connectionManager;
+	private ApiConnectionManager mCnxManager;
 
 	/**
    	 * The log tag for this class
@@ -126,18 +126,18 @@ public class MessagingSessionView extends Activity {
 		@Override
 		public void onStateChanged(ContactId contact, String sessionId, final int state, int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onMultimediaMessagingStateChanged contact=" + contact + " sessionId=" + sessionId + " state="
+				Log.d(LOGTAG, "onStateChanged contact=" + contact + " sessionId=" + sessionId + " state="
 						+ state + " reason=" + reasonCode);
 			}
 			if (state > RiApplication.MMS_STATES.length) {
 				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "onMultimediaMessagingStateChanged unhandled state=" + state);
+					Log.e(LOGTAG, "onStateChanged unhandled state=" + state);
 				}
 				return;
 			}
 			if (reasonCode > RiApplication.MMS_REASON_CODES.length) {
 				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "onMultimediaMessagingStateChanged unhandled reason=" + reasonCode);
+					Log.e(LOGTAG, "onStateChanged unhandled reason=" + reasonCode);
 				}
 				return;
 			}
@@ -160,25 +160,25 @@ public class MessagingSessionView extends Activity {
 					case MultimediaSession.State.ABORTED:
 						// Session is aborted: hide progress dialog then exit
 						hideProgressDialog();
-						Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_session_aborted, _reasonCode), exitOnce);
+						Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_session_aborted, _reasonCode), mExitOnce);
 						break;
 
 					case MultimediaSession.State.REJECTED:
 						// Session is rejected: hide progress dialog then exit
 						hideProgressDialog();
-						Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_session_rejected, _reasonCode), exitOnce);
+						Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_session_rejected, _reasonCode), mExitOnce);
 						break;
 
 					case MultimediaSession.State.FAILED:
 						// Session is failed: hide progress dialog then exit
 						hideProgressDialog();
-						Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_session_failed, _reasonCode), exitOnce);
+						Utils.showMessageAndExit(MessagingSessionView.this, getString(R.string.label_session_failed, _reasonCode), mExitOnce);
 						break;
 
 					default:
 						if (LogUtils.isActive) {
 							Log.d(LOGTAG,
-									"onMultimediaMessagingStateChanged "
+									"onStateChanged "
 											+ getString(R.string.label_mms_state_changed, RiApplication.MMS_STATES[state],
 													_reasonCode));
 						}
@@ -190,7 +190,7 @@ public class MessagingSessionView extends Activity {
 		@Override
 		public void onMessageReceived(ContactId contact, String sessionId, byte[] content) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onNewMessage contact=" + contact + " sessionId=" + sessionId);
+				Log.d(LOGTAG, "onMessageReceived contact=" + contact + " sessionId=" + sessionId);
 			}
 			// Discard event if not for current sessionId
 			if (MessagingSessionView.this.sessionId == null || !MessagingSessionView.this.sessionId.equals(sessionId)) {
@@ -222,36 +222,36 @@ public class MessagingSessionView extends Activity {
 		sendBtn.setEnabled(false);
 
         // Register to API connection manager
-		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.MULTIMEDIA,RcsServiceName.CONTACTS)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
+		mCnxManager = ApiConnectionManager.getInstance(this);
+		if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.MULTIMEDIA,RcsServiceName.CONTACTS)) {
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), mExitOnce);
 			return;
 		}
-		connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.MULTIMEDIA, RcsServiceName.CONTACTS);
+		mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.MULTIMEDIA, RcsServiceName.CONTACTS);
 		try {
 			// Add service listener
-			connectionManager.getMultimediaSessionApi().addEventListener(serviceListener);
+			mCnxManager.getMultimediaSessionApi().addEventListener(serviceListener);
 			
 			initialiseMessagingSession();
 		} catch (RcsServiceException e) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "Failed to add listener", e);
 			}
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce);
 		}
     }
     
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		if (connectionManager == null) {
+		if (mCnxManager == null) {
     		return;
     	}
-		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
+		mCnxManager.stopMonitorServices(this);
+		if (mCnxManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
 			// Remove listener
 			try {
-				connectionManager.getMultimediaSessionApi().removeEventListener(serviceListener);
+				mCnxManager.getMultimediaSessionApi().removeEventListener(serviceListener);
 			} catch (Exception e) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "Failed to remove listener", e);
@@ -268,8 +268,7 @@ public class MessagingSessionView extends Activity {
     		// Accept the invitation
 			session.acceptInvitation();
     	} catch(Exception e) {
-    		e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce, e);
     	}
 	}
 	
@@ -286,7 +285,7 @@ public class MessagingSessionView extends Activity {
 	}	
     
     private void initialiseMessagingSession() {
-    	MultimediaSessionService sessionApi = connectionManager.getMultimediaSessionApi();
+    	MultimediaSessionService sessionApi = mCnxManager.getMultimediaSessionApi();
 		try {
 			MultimediaSessionServiceConfiguration config = sessionApi.getConfiguration();
 			if (LogUtils.isActive) {
@@ -298,7 +297,7 @@ public class MessagingSessionView extends Activity {
 
 	            // Check if the service is available
 	            if (!sessionApi.isServiceRegistered()) {
-	    	    	Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
+	    	    	Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), mExitOnce);
 	    	    	return;
 	            } 
 	            
@@ -318,7 +317,7 @@ public class MessagingSessionView extends Activity {
 					session = sessionApi.getMessagingSession(sessionId);
 					if (session == null) {
 						// Session not found or expired
-						Utils.showMessageAndExit(this, getString(R.string.label_session_has_expired), exitOnce);
+						Utils.showMessageAndExit(this, getString(R.string.label_session_has_expired), mExitOnce);
 						return;
 					}
 
@@ -332,7 +331,7 @@ public class MessagingSessionView extends Activity {
 					session = sessionApi.getMessagingSession(sessionId);
 					if (session == null) {
 						// Session not found or expired
-						Utils.showMessageAndExit(this, getString(R.string.label_session_has_expired), exitOnce);
+						Utils.showMessageAndExit(this, getString(R.string.label_session_has_expired), mExitOnce);
 						return;
 					}
 
@@ -365,8 +364,7 @@ public class MessagingSessionView extends Activity {
 			}
 
 		} catch(RcsServiceException e) {
-			e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
 		}
     }
     
@@ -377,11 +375,10 @@ public class MessagingSessionView extends Activity {
 		// Initiate the chat session in background
     	try {
 			// Initiate session
-			session = connectionManager.getMultimediaSessionApi().initiateMessagingSession(serviceId, contact);
+			session = mCnxManager.getMultimediaSessionApi().initiateMessagingSession(serviceId, contact);
 			sessionId = session.getSessionId();
     	} catch(Exception e) {
-    		e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce, e);
 			return;
     	}
 

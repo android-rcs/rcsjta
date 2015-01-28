@@ -39,12 +39,12 @@ public abstract class MultimediaSessionList extends ListActivity {
    	/**
 	 * API connection manager
 	 */
-	protected ApiConnectionManager connectionManager;
+	protected ApiConnectionManager mCnxManager;
 	
     /**
 	 * A locker to exit only once
 	 */
-	protected LockAccess exitOnce = new LockAccess();
+	protected LockAccess mExitOnce = new LockAccess();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -55,12 +55,12 @@ public abstract class MultimediaSessionList extends ListActivity {
 		setContentView(R.layout.extension_session_list);
 
 		// Register to API connection manager
-		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
-			Utils.showMessageAndExit(MultimediaSessionList.this, getString(R.string.label_service_not_available), exitOnce);
+		mCnxManager = ApiConnectionManager.getInstance(this);
+		if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
+			Utils.showMessageAndExit(MultimediaSessionList.this, getString(R.string.label_service_not_available), mExitOnce);
 			return;
 		}
-		connectionManager.startMonitorServices(this, null, RcsServiceName.MULTIMEDIA);
+		mCnxManager.startMonitorServices(this, null, RcsServiceName.MULTIMEDIA);
 	}
 	
 	@Override
@@ -74,8 +74,8 @@ public abstract class MultimediaSessionList extends ListActivity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		if (connectionManager != null) {
-			connectionManager.stopMonitorServices(this);
+		if (mCnxManager != null) {
+			mCnxManager.stopMonitorServices(this);
     	}
 	}	
 	

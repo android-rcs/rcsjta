@@ -23,6 +23,7 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.ish.ImageSharingLog;
@@ -35,17 +36,17 @@ import com.gsma.services.rcs.ish.ImageSharingLog;
  */
 public class ImageSharingDAO implements Parcelable {
 
-	private String sharingId;
-	private ContactId contact;
-	private Uri file;
-	private String filename;
-	private String mimeType;
-	private int state;
-	private int direction;
-	private long timestamp;
-	private long sizeTransferred;
-	private long size;
-	private int reasonCode;
+	private String mSharingId;
+	private ContactId mContact;
+	private Uri mFile;
+	private String mFilename;
+	private String mMimeType;
+	private int mState;
+	private Direction mDirection;
+	private long mTimestamp;
+	private long mSizeTransferred;
+	private long mSize;
+	private int mReasonCode;
 
 	private static final String WHERE_CLAUSE = new StringBuilder(ImageSharingLog.SHARING_ID).append("=?").toString();
 
@@ -56,96 +57,96 @@ public class ImageSharingDAO implements Parcelable {
 	 *            Parcelable source
 	 */
 	public ImageSharingDAO(Parcel source) {
-		sharingId = source.readString();
+		mSharingId = source.readString();
 		boolean containsContactId = source.readInt() != 0;
 		if (containsContactId) {
-			contact = ContactId.CREATOR.createFromParcel(source);
+			mContact = ContactId.CREATOR.createFromParcel(source);
 		} else {
-			contact = null;
+			mContact = null;
 		}
 		boolean containsFile = source.readInt() != 0;
 		if (containsFile) {
-			file = Uri.parse(source.readString());
+			mFile = Uri.parse(source.readString());
 		} else {
-			file = null;
+			mFile = null;
 		}
-		filename = source.readString();
-		mimeType = source.readString();
-		state = source.readInt();
-		direction = source.readInt();
-		timestamp = source.readLong();
-		sizeTransferred = source.readLong();
-		size = source.readLong();
-		reasonCode = source.readInt();
+		mFilename = source.readString();
+		mMimeType = source.readString();
+		mState = source.readInt();
+		mDirection = Direction.valueOf(source.readInt());
+		mTimestamp = source.readLong();
+		mSizeTransferred = source.readLong();
+		mSize = source.readLong();
+		mReasonCode = source.readInt();
 	}
 
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeString(sharingId);
-		if (contact != null) {
+		dest.writeString(mSharingId);
+		if (mContact != null) {
 			dest.writeInt(1);
-			contact.writeToParcel(dest, flags);
+			mContact.writeToParcel(dest, flags);
 		} else {
 			dest.writeInt(0);
 		}
-		if (file != null) {
+		if (mFile != null) {
 			dest.writeInt(1);
-			dest.writeString(file.toString());
+			dest.writeString(mFile.toString());
 		} else {
 			dest.writeInt(0);
 		}
-		dest.writeString(filename);
-		dest.writeString(mimeType);
-		dest.writeInt(state);
-		dest.writeInt(direction);
-		dest.writeLong(timestamp);
-		dest.writeLong(sizeTransferred);
-		dest.writeLong(size);
-		dest.writeInt(reasonCode);
+		dest.writeString(mFilename);
+		dest.writeString(mMimeType);
+		dest.writeInt(mState);
+		dest.writeInt(mDirection.toInt());
+		dest.writeLong(mTimestamp);
+		dest.writeLong(mSizeTransferred);
+		dest.writeLong(mSize);
+		dest.writeInt(mReasonCode);
 	};
 
 	public int getState() {
-		return state;
+		return mState;
 	}
 
 	public long getSizeTransferred() {
-		return sizeTransferred;
+		return mSizeTransferred;
 	}
 
 	public String getSharingId() {
-		return sharingId;
+		return mSharingId;
 	}
 
 	public ContactId getContact() {
-		return contact;
+		return mContact;
 	}
 
 	public Uri getFile() {
-		return file;
+		return mFile;
 	}
 
 	public String getFilename() {
-		return filename;
+		return mFilename;
 	}
 
 	public String getMimeType() {
-		return mimeType;
+		return mMimeType;
 	}
 
-	public int getDirection() {
-		return direction;
+	public Direction getDirection() {
+		return mDirection;
 	}
 
 	public long getTimestamp() {
-		return timestamp;
+		return mTimestamp;
 	}
 
 	public long getSize() {
-		return size;
+		return mSize;
 	}
 
 	public int getReasonCode() {
-		return reasonCode;
+		return mReasonCode;
 	}
 
 	/**
@@ -164,25 +165,27 @@ public class ImageSharingDAO implements Parcelable {
 		Cursor cursor = null;
 		try {
 			cursor = context.getContentResolver().query(uri, null, WHERE_CLAUSE, whereArgs, null);
-			if (cursor.moveToFirst()) {
-				this.sharingId = sharingId;
-				String _contact = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.CONTACT));
-				if (_contact != null) {
-					ContactUtils contactUtils = ContactUtils.getInstance(context);
-					contact = contactUtils.formatContact(_contact);
-				}
-				file = Uri.parse(cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILE)));
-				filename = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILENAME));
-				mimeType = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.MIME_TYPE));
-				state = cursor.getInt(cursor.getColumnIndexOrThrow(ImageSharingLog.STATE));
-				direction = cursor.getInt(cursor.getColumnIndexOrThrow(ImageSharingLog.DIRECTION));
-				timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.TIMESTAMP));
-				sizeTransferred = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.TRANSFERRED));
-				size = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.FILESIZE));
-				reasonCode = cursor.getInt(cursor.getColumnIndexOrThrow(ImageSharingLog.REASON_CODE));
-			} else {
+			if (!cursor.moveToFirst()) {
 				throw new IllegalArgumentException("Sharing ID not found");
 			}
+			mSharingId = sharingId;
+			String _contact = cursor.getString(cursor
+					.getColumnIndexOrThrow(ImageSharingLog.CONTACT));
+			if (_contact != null) {
+				ContactUtils contactUtils = ContactUtils.getInstance(context);
+				mContact = contactUtils.formatContact(_contact);
+			}
+			mFile = Uri.parse(cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILE)));
+			mFilename = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILENAME));
+			mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.MIME_TYPE));
+			mState = cursor.getInt(cursor.getColumnIndexOrThrow(ImageSharingLog.STATE));
+			mDirection = Direction.valueOf(cursor.getInt(cursor
+					.getColumnIndexOrThrow(ImageSharingLog.DIRECTION)));
+			mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.TIMESTAMP));
+			mSizeTransferred = cursor.getLong(cursor
+					.getColumnIndexOrThrow(ImageSharingLog.TRANSFERRED));
+			mSize = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.FILESIZE));
+			mReasonCode = cursor.getInt(cursor.getColumnIndexOrThrow(ImageSharingLog.REASON_CODE));
 		} catch (Exception e) {
 			throw e;
 		} finally {
@@ -194,8 +197,8 @@ public class ImageSharingDAO implements Parcelable {
 
 	@Override
 	public String toString() {
-		return "ImageSharingDAO [sharingId=" + sharingId + ", contact=" + contact + ", file=" + file + ", filename=" + filename
-				+ ", mimeType=" + mimeType + ", state=" + state + ", size=" + size + "]";
+		return "ImageSharingDAO [sharingId=" + mSharingId + ", contact=" + mContact + ", file=" + mFile + ", filename=" + mFilename
+				+ ", mimeType=" + mMimeType + ", state=" + mState + ", size=" + mSize + "]";
 	}
 
 	@Override

@@ -258,15 +258,9 @@ public class ReceiveImageSharing extends Activity {
 			builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
 			builder.show();
 	    } catch(RcsServiceNotAvailableException e) {
-	    	if (LogUtils.isActive) {
-				Log.e(LOGTAG, e.getMessage(), e);
-			}
-	    	Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), mExitOnce);
+	    	Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), mExitOnce, e);
 	    } catch(RcsServiceException e) {
-	    	if (LogUtils.isActive) {
-				Log.e(LOGTAG, e.getMessage(), e);
-			}
-	    	Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce);
+	    	Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
 		}
     }
     
@@ -278,8 +272,7 @@ public class ReceiveImageSharing extends Activity {
     		// Accept the invitation
     		mImageSharing.acceptInvitation();
     	} catch(Exception e) {
-    		e.printStackTrace();
-    		Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce);
+    		Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce, e);
     	}
 	}
 	

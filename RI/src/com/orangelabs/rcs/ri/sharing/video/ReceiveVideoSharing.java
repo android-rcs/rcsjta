@@ -276,11 +276,9 @@ public class ReceiveVideoSharing extends Activity {
 			builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
 			builder.show();
 	    } catch(RcsServiceNotAvailableException e) {
-	    	e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce, e);
 	    } catch(RcsServiceException e) {
-	    	e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce, e);
 		}
     }
     
@@ -295,8 +293,7 @@ public class ReceiveVideoSharing extends Activity {
     		// Accept the invitation
     		videoSharing.acceptInvitation(videoRenderer);
     	} catch(Exception e) {
-    		e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), exitOnce, e);
     	}
 	}
 	

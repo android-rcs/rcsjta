@@ -136,11 +136,8 @@ public class CommonServiceConfigurationActivity extends Activity {
 						}
 					}
 				} catch (RcsServiceException e) {
-					if (LogUtils.isActive) {
-						Log.e(LOGTAG, "Exception occurred", e);
-					}
 					Utils.showMessageAndExit(CommonServiceConfigurationActivity.this,
-							getString(R.string.label_api_failed), mExitOnce);
+							getString(R.string.label_api_failed), mExitOnce, e);
 				}
 
 			}
@@ -181,10 +178,7 @@ public class CommonServiceConfigurationActivity extends Activity {
 			mTextEditDisplayName.setText(mConfiguration.getMyDisplayName());
 			mTextEditContactId.setText(mConfiguration.getMyContactId().toString());
 		} catch (RcsServiceException e) {
-			if (LogUtils.isActive) {
-				Log.e(LOGTAG, "Exception occurred", e);
-			}
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
 		}
 	}
 

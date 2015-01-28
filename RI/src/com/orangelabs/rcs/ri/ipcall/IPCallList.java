@@ -37,10 +37,11 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.RcsCommon;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.ipcall.IPCall;
 import com.gsma.services.rcs.ipcall.IPCallLog;
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -129,7 +130,7 @@ public class IPCallList extends Activity {
             CallItemCache cache = new CallItemCache();
     		cache.number = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
     		cache.state = cursor.getInt(cursor.getColumnIndex(IPCallLog.STATE));
-    		cache.direction = cursor.getInt(cursor.getColumnIndex(IPCallLog.DIRECTION));
+    		cache.direction = Direction.valueOf(cursor.getInt(cursor.getColumnIndex(IPCallLog.DIRECTION)));
     		cache.date = cursor.getLong(cursor.getColumnIndex(IPCallLog.TIMESTAMP));
             view.setTag(cache);
             
@@ -144,7 +145,7 @@ public class IPCallList extends Activity {
     		TextView stateView = (TextView)view.findViewById(R.id.state);
     		stateView.setText(getString(R.string.label_session_state, decodeState(cache.state)));
     		TextView directionView = (TextView)view.findViewById(R.id.direction);
-    		directionView.setText(getString(R.string.label_direction, decodeDirection(cache.direction)));
+    		directionView.setText(getString(R.string.label_direction, RiApplication.getDirection(cache.direction)));
     		TextView dateView = (TextView)view.findViewById(R.id.date);
     		dateView.setText(getString(R.string.label_session_date, decodeDate(cache.date)));
     	}
@@ -155,7 +156,7 @@ public class IPCallList extends Activity {
      */
 	private class CallItemCache {
 		public String number;
-		public int direction;
+		public Direction direction;
 		public int state;
 		public long date;
 	}
@@ -188,20 +189,6 @@ public class IPCallList extends Activity {
 			return getString(R.string.label_state_ringing);
 		default:
 			return getString(R.string.label_state_unknown);
-		}
-	}
-
-	/**
-	 * Decode direction
-	 * 
-	 * @param direction Direction
-	 * @return String
-	 */
-	private String decodeDirection(int direction) {
-		if (direction == RcsCommon.Direction.INCOMING) {
-			return getString(R.string.label_incoming);
-		} else {
-			return getString(R.string.label_outgoing);
 		}
 	}
 

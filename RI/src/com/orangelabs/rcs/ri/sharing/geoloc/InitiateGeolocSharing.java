@@ -108,12 +108,12 @@ public class InitiateGeolocSharing extends Activity {
     /**
 	 * A locker to exit only once
 	 */
-	private LockAccess exitOnce = new LockAccess();
+	private LockAccess mExitOnce = new LockAccess();
 	
   	/**
 	 * API connection manager
 	 */
-	private ApiConnectionManager connectionManager;
+	private ApiConnectionManager mCnxManager;
    	
 	
 	/**
@@ -143,7 +143,7 @@ public class InitiateGeolocSharing extends Activity {
 		@Override
 		public void onStateChanged(final ContactId contact, String sharingId, final int state, int reasonCode) {
 			if (LogUtils.isActive) {
-				Log.d(LOGTAG, "onGeolocSharingStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state
+				Log.d(LOGTAG, "onStateChanged contact=" + contact + " sharingId=" + sharingId + " state=" + state
 						+ " reason=" + reasonCode);
 			}
 			// Discard event if not for current sharingId
@@ -152,13 +152,13 @@ public class InitiateGeolocSharing extends Activity {
 			}
 			if (state > RiApplication.GSH_STATES.length) {
 				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "onGeolocSharingStateChanged unhandled state=" + state);
+					Log.e(LOGTAG, "onStateChanged unhandled state=" + state);
 				}
 				return;
 			}
 			if (reasonCode > RiApplication.GSH_REASON_CODES.length) {
 				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "onGeolocSharingStateChanged unhandled reason=" + reasonCode);
+					Log.e(LOGTAG, "onStateChanged unhandled reason=" + reasonCode);
 				}
 				return;
 			}
@@ -180,19 +180,19 @@ public class InitiateGeolocSharing extends Activity {
 						// sharing aborted: hide progress dialog then exit
 						hideProgressDialog();
 						// Display session status
-						Utils.showMessageAndExit(InitiateGeolocSharing.this, getString(R.string.label_sharing_aborted, _reasonCode), exitOnce);
+						Utils.showMessageAndExit(InitiateGeolocSharing.this, getString(R.string.label_sharing_aborted, _reasonCode), mExitOnce);
 						break;
 
 					case GeolocSharing.State.REJECTED:
 						// sharing rejected: hide progress dialog then exit
 						hideProgressDialog();
-						Utils.showMessageAndExit(InitiateGeolocSharing.this, getString(R.string.label_sharing_rejected, _reasonCode), exitOnce);
+						Utils.showMessageAndExit(InitiateGeolocSharing.this, getString(R.string.label_sharing_rejected, _reasonCode), mExitOnce);
 						break;
 
 					case GeolocSharing.State.FAILED:
 						// sharing failed: hide progress dialog then exit
 						hideProgressDialog();
-						Utils.showMessageAndExit(InitiateGeolocSharing.this, getString(R.string.label_sharing_failed, _reasonCode), exitOnce);
+						Utils.showMessageAndExit(InitiateGeolocSharing.this, getString(R.string.label_sharing_failed, _reasonCode), mExitOnce);
 						break;
 
 					case GeolocSharing.State.TRANSFERRED:
@@ -249,34 +249,31 @@ public class InitiateGeolocSharing extends Activity {
         }
         
         // Register to API connection manager
-		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.GEOLOC_SHARING)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
+		mCnxManager = ApiConnectionManager.getInstance(this);
+		if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.GEOLOC_SHARING)) {
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), mExitOnce);
 			return;
 		}
-		connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.GEOLOC_SHARING);
+		mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.GEOLOC_SHARING);
 		try {
 			// Add service listener
-			connectionManager.getGeolocSharingApi().addEventListener(gshListener);
+			mCnxManager.getGeolocSharingApi().addEventListener(gshListener);
 		} catch (RcsServiceException e) {
-			if (LogUtils.isActive) {
-				Log.e(LOGTAG, "Failed to add listener", e);
-			}
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
 		}
     }
     
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		if (connectionManager == null) {
+		if (mCnxManager == null) {
     		return;
     	}
-		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsServiceName.GEOLOC_SHARING)) {
+		mCnxManager.stopMonitorServices(this);
+		if (mCnxManager.isServiceConnected(RcsServiceName.GEOLOC_SHARING)) {
 			// Remove geoloc sharing listener
 			try {
-				connectionManager.getGeolocSharingApi().removeEventListener(gshListener);
+				mCnxManager.getGeolocSharingApi().removeEventListener(gshListener);
 			} catch (Exception e) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "Failed to remove listener", e);
@@ -296,7 +293,7 @@ public class InitiateGeolocSharing extends Activity {
 
             // Initiate a GSM call before to be able to share content
             Intent intent = new Intent(Intent.ACTION_CALL);
-        	intent.setData(Uri.parse("tel:"+phoneNumber));
+        	intent.setData(Uri.parse("tel:".concat(phoneNumber)));
             startActivity(intent);
         }
     };
@@ -309,9 +306,10 @@ public class InitiateGeolocSharing extends Activity {
             // Check if the service is available
         	boolean registered = false;
         	try {
-        		registered = connectionManager.getGeolocSharingApi().isServiceRegistered();
+        		registered = mCnxManager.getGeolocSharingApi().isServiceRegistered();
         	} catch(Exception e) {
-        		e.printStackTrace();
+        		Utils.showMessageAndExit(InitiateGeolocSharing.this, getString(R.string.label_api_failed), mExitOnce, e);
+        		return;
         	}
             if (!registered) {
     	    	Utils.showMessage(InitiateGeolocSharing.this, getString(R.string.label_service_not_available));
@@ -332,12 +330,11 @@ public class InitiateGeolocSharing extends Activity {
 
         	try {
                 // Initiate location share
-        		geolocSharing = connectionManager.getGeolocSharingApi().shareGeoloc(contact, geoloc);
+        		geolocSharing = mCnxManager.getGeolocSharingApi().shareGeoloc(contact, geoloc);
         		sharingId = geolocSharing.getSharingId();
         	} catch(Exception e) {
-        		e.printStackTrace();
 				hideProgressDialog();
-				Utils.showMessageAndExit(InitiateGeolocSharing.this, getString(R.string.label_invitation_failed), exitOnce);
+				Utils.showMessageAndExit(InitiateGeolocSharing.this, getString(R.string.label_invitation_failed), mExitOnce, e);
         	}
 
             // Display a progress dialog

@@ -23,6 +23,8 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.ft.FileTransferLog;
@@ -35,88 +37,88 @@ import com.gsma.services.rcs.ft.FileTransferLog;
  */
 public class FileTransferDAO implements Parcelable {
 	
-	private String transferId;
-	private ContactId contact;
-	private Uri file;
-	private String filename;
-	private String chatId;
-	private String mimeType;
-	private int state;
-	private int readStatus;
-	private int direction;
-	private long timestamp;
-	private long timestampSent;
-	private long timestampDelivered;
-	private long timestampDisplayed;
-	private long sizeTransferred;
-	private long size;
-	private Uri thumbnail;
-	private int reasonCode;
+	private String mTransferId;
+	private ContactId mContact;
+	private Uri mFile;
+	private String mFilename;
+	private String mChatId;
+	private String mMimeType;
+	private int mState;
+	private ReadStatus mReadStatus;
+	private Direction mDirection;
+	private long mTimestamp;
+	private long mTimestampSent;
+	private long mTimestampDelivered;
+	private long mTimestampDisplayed;
+	private long mSizeTransferred;
+	private long mSize;
+	private Uri mThumbnail;
+	private int mReasonCode;
 
 	private static final String WHERE_CLAUSE = new StringBuilder(FileTransferLog.FT_ID).append("=?").toString();
 
 	public int getState() {
-		return state;
+		return mState;
 	}
 
-	public int getReadStatus() {
-		return readStatus;
+	public ReadStatus getReadStatus() {
+		return mReadStatus;
 	}
 
 	public long getTimestampSent() {
-		return timestampSent;
+		return mTimestampSent;
 	}
 
 	public long getTimestampDelivered() {
-		return timestampDelivered;
+		return mTimestampDelivered;
 	}
 
 	public long getTimestampDisplayed() {
-		return timestampDisplayed;
+		return mTimestampDisplayed;
 	}
 
 	public long getSizeTransferred() {
-		return sizeTransferred;
+		return mSizeTransferred;
 	}
 
 	public String getTransferId() {
-		return transferId;
+		return mTransferId;
 	}
 
 	public ContactId getContact() {
-		return contact;
+		return mContact;
 	}
 
 	public Uri getFile() {
-		return file;
+		return mFile;
 	}
 
 	public String getFilename() {
-		return filename;
+		return mFilename;
 	}
 
 	public String getChatId() {
-		return chatId;
+		return mChatId;
 	}
 
 	public String getMimeType() {
-		return mimeType;
+		return mMimeType;
 	}
 
-	public int getDirection() {
-		return direction;
+	public Direction getDirection() {
+		return mDirection;
 	}
 
 	public long getTimestamp() {
-		return timestamp;
+		return mTimestamp;
 	}
 
 	public long getSize() {
-		return size;
+		return mSize;
 	}
 
 	public Uri getThumbnail() {
-		return thumbnail;
+		return mThumbnail;
 	}
 
 	/**
@@ -126,38 +128,38 @@ public class FileTransferDAO implements Parcelable {
 	 *            Parcelable source
 	 */
 	public FileTransferDAO(Parcel source) {
-		transferId = source.readString();
+		mTransferId = source.readString();
 		boolean containsContactId = source.readInt() != 0;
 		if (containsContactId) {
-			contact = ContactId.CREATOR.createFromParcel(source);
+			mContact = ContactId.CREATOR.createFromParcel(source);
 		} else {
-			contact = null;
+			mContact = null;
 		}
 		boolean containsFile = source.readInt() != 0;
 		if (containsFile) {
-			file = Uri.parse(source.readString());
+			mFile = Uri.parse(source.readString());
 		} else {
-			file = null;
+			mFile = null;
 		}
-		filename = source.readString();
-		chatId = source.readString();
-		mimeType = source.readString();
-		state = source.readInt();
-		readStatus = source.readInt();
-		direction = source.readInt();
-		timestamp = source.readLong();
-		timestampSent = source.readLong();
-		timestampDelivered = source.readLong();
-		timestampDisplayed = source.readLong();
-		sizeTransferred = source.readLong();
-		size = source.readLong();
+		mFilename = source.readString();
+		mChatId = source.readString();
+		mMimeType = source.readString();
+		mState = source.readInt();
+		mReadStatus = ReadStatus.valueOf(source.readInt());
+		mDirection = Direction.valueOf(source.readInt());
+		mTimestamp = source.readLong();
+		mTimestampSent = source.readLong();
+		mTimestampDelivered = source.readLong();
+		mTimestampDisplayed = source.readLong();
+		mSizeTransferred = source.readLong();
+		mSize = source.readLong();
 		boolean containsThumbnail = source.readInt() != 0;
 		if (containsThumbnail) {
-			thumbnail = Uri.parse(source.readString());
+			mThumbnail = Uri.parse(source.readString());
 		} else {
-			thumbnail = null;
+			mThumbnail = null;
 		}
-		reasonCode = source.readInt();
+		mReasonCode = source.readInt();
 	}
 	
 	/**
@@ -176,34 +178,40 @@ public class FileTransferDAO implements Parcelable {
 		Cursor cursor = null;
 		try {
 			cursor = context.getContentResolver().query(uri, null, WHERE_CLAUSE, whereArgs, null);
-			if (cursor.moveToFirst()) {
-				transferId = fileTransferId;
-				chatId = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.CHAT_ID));
-				String _contact = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.CONTACT));
-				if (_contact != null) {
-					ContactUtils contactUtils = ContactUtils.getInstance(context);
-					contact = contactUtils.formatContact(_contact);
-				}
-				file = Uri.parse(cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FILE)));
-				filename = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FILENAME));
-				mimeType = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.MIME_TYPE));
-				state = cursor.getInt(cursor.getColumnIndexOrThrow(FileTransferLog.STATE));
-				readStatus = cursor.getInt(cursor.getColumnIndexOrThrow(FileTransferLog.READ_STATUS));
-				direction = cursor.getInt(cursor.getColumnIndexOrThrow(FileTransferLog.DIRECTION));
-				timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(FileTransferLog.TIMESTAMP));
-				timestampSent = cursor.getLong(cursor.getColumnIndexOrThrow(FileTransferLog.TIMESTAMP_SENT));
-				timestampDelivered = cursor.getLong(cursor.getColumnIndexOrThrow(FileTransferLog.TIMESTAMP_DELIVERED));
-				timestampDisplayed = cursor.getLong(cursor.getColumnIndexOrThrow(FileTransferLog.TIMESTAMP_DISPLAYED));
-				sizeTransferred = cursor.getLong(cursor.getColumnIndexOrThrow(FileTransferLog.TRANSFERRED));
-				size = cursor.getLong(cursor.getColumnIndexOrThrow(FileTransferLog.FILESIZE));
-				String fileicon = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FILEICON));
-				if (fileicon != null) {
-					thumbnail = Uri.parse(fileicon);
-				}
-				reasonCode = cursor.getInt(cursor.getColumnIndexOrThrow(FileTransferLog.REASON_CODE));
-			} else {
+			if (!cursor.moveToFirst()) {
 				throw new IllegalArgumentException("Filetransfer ID not found"); 
 			}
+			mTransferId = fileTransferId;
+			mChatId = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.CHAT_ID));
+			String _contact = cursor.getString(cursor
+					.getColumnIndexOrThrow(FileTransferLog.CONTACT));
+			if (_contact != null) {
+				ContactUtils contactUtils = ContactUtils.getInstance(context);
+				mContact = contactUtils.formatContact(_contact);
+			}
+			mFile = Uri.parse(cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FILE)));
+			mFilename = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FILENAME));
+			mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.MIME_TYPE));
+			mState = cursor.getInt(cursor.getColumnIndexOrThrow(FileTransferLog.STATE));
+			mReadStatus = ReadStatus.valueOf(cursor.getInt(cursor.getColumnIndexOrThrow(FileTransferLog.READ_STATUS)));
+			mDirection = Direction.valueOf(cursor.getInt(cursor
+					.getColumnIndexOrThrow(FileTransferLog.DIRECTION)));
+			mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(FileTransferLog.TIMESTAMP));
+			mTimestampSent = cursor.getLong(cursor
+					.getColumnIndexOrThrow(FileTransferLog.TIMESTAMP_SENT));
+			mTimestampDelivered = cursor.getLong(cursor
+					.getColumnIndexOrThrow(FileTransferLog.TIMESTAMP_DELIVERED));
+			mTimestampDisplayed = cursor.getLong(cursor
+					.getColumnIndexOrThrow(FileTransferLog.TIMESTAMP_DISPLAYED));
+			mSizeTransferred = cursor.getLong(cursor
+					.getColumnIndexOrThrow(FileTransferLog.TRANSFERRED));
+			mSize = cursor.getLong(cursor.getColumnIndexOrThrow(FileTransferLog.FILESIZE));
+			String fileicon = cursor.getString(cursor
+					.getColumnIndexOrThrow(FileTransferLog.FILEICON));
+			if (fileicon != null) {
+				mThumbnail = Uri.parse(fileicon);
+			}
+			mReasonCode = cursor.getInt(cursor.getColumnIndexOrThrow(FileTransferLog.REASON_CODE));
 		} catch (Exception e) {
 			throw e;
 		} finally {
@@ -215,8 +223,8 @@ public class FileTransferDAO implements Parcelable {
 
 	@Override
 	public String toString() {
-		return "FileTransferDAO [ftId=" + transferId + ", contact=" + contact + ", filename=" + filename + ", chatId=" + chatId
-				+ ", mimeType=" + mimeType + ", state=" + state + ", size=" + size + "]";
+		return "FileTransferDAO [ftId=" + mTransferId + ", contact=" + mContact + ", filename=" + mFilename + ", chatId=" + mChatId
+				+ ", mimeType=" + mMimeType + ", state=" + mState + ", size=" + mSize + "]";
 	}
 
 	@Override
@@ -226,38 +234,38 @@ public class FileTransferDAO implements Parcelable {
 
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeString(transferId);
-		if (contact != null) {
+		dest.writeString(mTransferId);
+		if (mContact != null) {
 			dest.writeInt(1);
-			contact.writeToParcel(dest, flags);
+			mContact.writeToParcel(dest, flags);
 		} else {
 			dest.writeInt(0);
 		}
-		if (file != null) {
+		if (mFile != null) {
 			dest.writeInt(1);
-			dest.writeString(file.toString());
+			dest.writeString(mFile.toString());
 		} else {
 			dest.writeInt(0);
 		}
-		dest.writeString(filename);
-		dest.writeString(chatId);
-		dest.writeString(mimeType);
-		dest.writeInt(state);
-		dest.writeInt(readStatus);
-		dest.writeInt(direction);
-		dest.writeLong(timestamp);
-		dest.writeLong(timestampSent);
-		dest.writeLong(timestampDelivered);
-		dest.writeLong(timestampDisplayed);
-		dest.writeLong(sizeTransferred);
-		dest.writeLong(size);
-		if (thumbnail != null) {
+		dest.writeString(mFilename);
+		dest.writeString(mChatId);
+		dest.writeString(mMimeType);
+		dest.writeInt(mState);
+		dest.writeInt(mReadStatus.toInt());
+		dest.writeInt(mDirection.toInt());
+		dest.writeLong(mTimestamp);
+		dest.writeLong(mTimestampSent);
+		dest.writeLong(mTimestampDelivered);
+		dest.writeLong(mTimestampDisplayed);
+		dest.writeLong(mSizeTransferred);
+		dest.writeLong(mSize);
+		if (mThumbnail != null) {
 			dest.writeInt(1);
-			dest.writeString(thumbnail.toString());
+			dest.writeString(mThumbnail.toString());
 		} else {
 			dest.writeInt(0);
 		}
-		dest.writeInt(reasonCode);
+		dest.writeInt(mReasonCode);
 	};
 
 	public static final Parcelable.Creator<FileTransferDAO> CREATOR = new Parcelable.Creator<FileTransferDAO>() {
@@ -273,6 +281,6 @@ public class FileTransferDAO implements Parcelable {
 	};
 
 	public int getReasonCode() {
-		return reasonCode;
+		return mReasonCode;
 	}
 }

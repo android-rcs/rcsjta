@@ -23,6 +23,7 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.vsh.VideoSharingLog;
@@ -35,16 +36,16 @@ import com.gsma.services.rcs.vsh.VideoSharingLog;
  */
 public class VideoSharingDAO implements Parcelable {
 
-	private String sharingId;
-	private ContactId contact;
-	private int state;
-	private int direction;
-	private long timestamp;
-	private long duration;
-	private int height;
-	private int width;
+	private String mSharingId;
+	private ContactId mContact;
+	private int mState;
+	private Direction mDirection;
+	private long mTimestamp;
+	private long mDuration;
+	private int mHeight;
+	private int mWidth;
 	// TODO private int orientation;
-	private String videoEncoding;
+	private String mVideoEncoding;
 
 	private static final String WHERE_CLAUSE = new StringBuilder(VideoSharingLog.SHARING_ID).append("=?").toString();
 
@@ -55,57 +56,57 @@ public class VideoSharingDAO implements Parcelable {
 	 *            Parcelable source
 	 */
 	public VideoSharingDAO(Parcel source) {
-		sharingId = source.readString();
+		mSharingId = source.readString();
 		boolean containsContactId = source.readInt() != 0;
 		if (containsContactId) {
-			contact = ContactId.CREATOR.createFromParcel(source);
+			mContact = ContactId.CREATOR.createFromParcel(source);
 		} else {
-			contact = null;
+			mContact = null;
 		}
-		state = source.readInt();
-		direction = source.readInt();
-		timestamp = source.readLong();
-		duration = source.readLong();
-		height = source.readInt();
-		width = source.readInt();
-		videoEncoding = source.readString();
+		mState = source.readInt();
+		mDirection = Direction.valueOf(source.readInt());
+		mTimestamp = source.readLong();
+		mDuration = source.readLong();
+		mHeight = source.readInt();
+		mWidth = source.readInt();
+		mVideoEncoding = source.readString();
 
 	}
 	
 	public int getState() {
-		return state;
+		return mState;
 	}
 
 	public String getSharingId() {
-		return sharingId;
+		return mSharingId;
 	}
 
 	public ContactId getContact() {
-		return contact;
+		return mContact;
 	}
 
-	public int getDirection() {
-		return direction;
+	public Direction getDirection() {
+		return mDirection;
 	}
 
 	public long getTimestamp() {
-		return timestamp;
+		return mTimestamp;
 	}
 
 	public long getDuration() {
-		return duration;
+		return mDuration;
 	}
 
 	public int getHeight() {
-		return height;
+		return mHeight;
 	}
 
 	public int getWidth() {
-		return width;
+		return mWidth;
 	}
 
 	public String getVideoEncoding() {
-		return videoEncoding;
+		return mVideoEncoding;
 	}
 
 	/**
@@ -124,23 +125,25 @@ public class VideoSharingDAO implements Parcelable {
 		Cursor cursor = null;
 		try {
 			cursor = context.getContentResolver().query(uri, null, WHERE_CLAUSE, whereArgs, null);
-			if (cursor.moveToFirst()) {
-				this.sharingId = sharingId;
-				String _contact = cursor.getString(cursor.getColumnIndexOrThrow(VideoSharingLog.CONTACT));
-				if (_contact != null) {
-					ContactUtils contactUtils = ContactUtils.getInstance(context);
-					contact = contactUtils.formatContact(_contact);
-				}
-				state = cursor.getInt(cursor.getColumnIndexOrThrow(VideoSharingLog.STATE));
-				direction = cursor.getInt(cursor.getColumnIndexOrThrow(VideoSharingLog.DIRECTION));
-				timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(VideoSharingLog.TIMESTAMP));
-				duration = cursor.getLong(cursor.getColumnIndexOrThrow(VideoSharingLog.DURATION));
-				height = cursor.getInt(cursor.getColumnIndexOrThrow(VideoSharingLog.HEIGHT));
-				width = cursor.getInt(cursor.getColumnIndexOrThrow(VideoSharingLog.WIDTH));
-				videoEncoding = cursor.getString(cursor.getColumnIndexOrThrow(VideoSharingLog.VIDEO_ENCODING));
-			} else {
+			if (!cursor.moveToFirst()) {
 				throw new Exception("Sharing ID not found" );
 			}
+			mSharingId = sharingId;
+			String _contact = cursor.getString(cursor
+					.getColumnIndexOrThrow(VideoSharingLog.CONTACT));
+			if (_contact != null) {
+				ContactUtils contactUtils = ContactUtils.getInstance(context);
+				mContact = contactUtils.formatContact(_contact);
+			}
+			mState = cursor.getInt(cursor.getColumnIndexOrThrow(VideoSharingLog.STATE));
+			mDirection = Direction.valueOf(cursor.getInt(cursor
+					.getColumnIndexOrThrow(VideoSharingLog.DIRECTION)));
+			mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(VideoSharingLog.TIMESTAMP));
+			mDuration = cursor.getLong(cursor.getColumnIndexOrThrow(VideoSharingLog.DURATION));
+			mHeight = cursor.getInt(cursor.getColumnIndexOrThrow(VideoSharingLog.HEIGHT));
+			mWidth = cursor.getInt(cursor.getColumnIndexOrThrow(VideoSharingLog.WIDTH));
+			mVideoEncoding = cursor.getString(cursor
+					.getColumnIndexOrThrow(VideoSharingLog.VIDEO_ENCODING));
 		} catch (Exception e) {
 			throw e;
 		} finally {
@@ -152,7 +155,7 @@ public class VideoSharingDAO implements Parcelable {
 
 	@Override
 	public String toString() {
-		return "VideoSharingDAO [sharingId=" + sharingId + ", contact=" + contact + ", state=" + state + ", duration=" + duration
+		return "VideoSharingDAO [sharingId=" + mSharingId + ", contact=" + mContact + ", state=" + mState + ", duration=" + mDuration
 				+ "]";
 	}
 
@@ -163,20 +166,20 @@ public class VideoSharingDAO implements Parcelable {
 
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeString(sharingId);
-		if (contact != null) {
+		dest.writeString(mSharingId);
+		if (mContact != null) {
 			dest.writeInt(1);
-			contact.writeToParcel(dest, flags);
+			mContact.writeToParcel(dest, flags);
 		} else {
 			dest.writeInt(0);
 		}
-		dest.writeInt(state);
-		dest.writeInt(direction);
-		dest.writeLong(timestamp);
-		dest.writeLong(duration);
-		dest.writeInt(height);
-		dest.writeInt(width);
-		dest.writeString(videoEncoding);
+		dest.writeInt(mState);
+		dest.writeInt(mDirection.toInt());
+		dest.writeLong(mTimestamp);
+		dest.writeLong(mDuration);
+		dest.writeInt(mHeight);
+		dest.writeInt(mWidth);
+		dest.writeString(mVideoEncoding);
 	};
 
 	public static final Parcelable.Creator<VideoSharingDAO> CREATOR = new Parcelable.Creator<VideoSharingDAO>() {

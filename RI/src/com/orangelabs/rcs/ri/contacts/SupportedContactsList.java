@@ -132,8 +132,7 @@ public class SupportedContactsList extends Activity {
 				listView.setAdapter(null);
 			}
 		} catch(Exception e) {
-			e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce, e);
 		}
     }
     

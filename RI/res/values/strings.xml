@@ -31,6 +31,7 @@
 <string name="label_log_empty">No entry</string>
 <string name="label_incoming">incoming</string>
 <string name="label_outgoing">outgoing</string>
+<string name="label_direction_unknown">unknown direction</string>
 <string name="label_state_unknown">unknown</string>
 <string name="label_state_aborted">aborted</string>
 <string name="label_state_rejected">rejected</string>

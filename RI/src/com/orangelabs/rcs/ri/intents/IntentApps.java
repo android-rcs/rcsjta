@@ -26,6 +26,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -34,6 +35,12 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public class IntentApps extends Activity {
+	
+    /**
+	 * A locker to exit only once
+	 */
+	private LockAccess mExitOnce = new LockAccess();
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,8 +83,7 @@ public class IntentApps extends Activity {
 	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.Chat.ACTION_VIEW_ONE_TO_ONE_CHAT);
 	        		startActivity(intent);
 	    		} catch(Exception e) {
-			    	e.printStackTrace();
-					Utils.showMessageAndExit(IntentApps.this, getString(R.string.label_intent_failed));
+					Utils.showMessageAndExit(IntentApps.this, getString(R.string.label_intent_failed), mExitOnce, e);
 	    		}
         	} else
         	if (v.getId() == R.id.initiate_chat) {
@@ -85,8 +91,7 @@ public class IntentApps extends Activity {
 	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.Chat.ACTION_SEND_ONE_TO_ONE_CHAT_MESSAGE);
 	        		startActivity(intent);
 	    		} catch(Exception e) {
-			    	e.printStackTrace();
-					Utils.showMessageAndExit(IntentApps.this, getString(R.string.label_intent_failed));
+					Utils.showMessageAndExit(IntentApps.this, getString(R.string.label_intent_failed), mExitOnce, e);
 	    		}
         	} else
         	if (v.getId() == R.id.load_group_chat) {
@@ -94,8 +99,7 @@ public class IntentApps extends Activity {
 	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.Chat.ACTION_VIEW_GROUP_CHAT);
 	        		startActivity(intent);
 	    		} catch(Exception e) {
-			    	e.printStackTrace();
-					Utils.showMessageAndExit(IntentApps.this, getString(R.string.label_intent_failed));
+					Utils.showMessageAndExit(IntentApps.this, getString(R.string.label_intent_failed), mExitOnce, e);
 	    		}
         	} else
         	if (v.getId() == R.id.initiate_group_chat) {
@@ -103,8 +107,7 @@ public class IntentApps extends Activity {
 	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.Chat.ACTION_INITIATE_GROUP_CHAT);
 	        		startActivity(intent);
 	    		} catch(Exception e) {
-			    	e.printStackTrace();
-					Utils.showMessageAndExit(IntentApps.this, getString(R.string.label_intent_failed));
+					Utils.showMessageAndExit(IntentApps.this, getString(R.string.label_intent_failed), mExitOnce, e);
 	    		}
         	} else
         	if (v.getId() == R.id.load_ft) {
@@ -112,8 +115,7 @@ public class IntentApps extends Activity {
 	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.FileTransfer.ACTION_VIEW_FILE_TRANSFER);
 	        		startActivity(intent);
 	    		} catch(Exception e) {
-			    	e.printStackTrace();
-					Utils.showMessageAndExit(IntentApps.this, getString(R.string.label_intent_failed));
+					Utils.showMessageAndExit(IntentApps.this, getString(R.string.label_intent_failed), mExitOnce, e);
 	    		}
         	} else
         	if (v.getId() == R.id.initiate_ft) {
@@ -121,8 +123,7 @@ public class IntentApps extends Activity {
 	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.FileTransfer.ACTION_INITIATE_ONE_TO_ONE_FILE_TRANSFER);
 	        		startActivity(intent);
 	    		} catch(Exception e) {
-			    	e.printStackTrace();
-					Utils.showMessageAndExit(IntentApps.this, getString(R.string.label_intent_failed));
+					Utils.showMessageAndExit(IntentApps.this, getString(R.string.label_intent_failed), mExitOnce, e);
 	    		}
         	} else
 	    	if (v.getId() == R.id.load_ipcall) {
@@ -130,8 +131,7 @@ public class IntentApps extends Activity {
 	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.IPCall.ACTION_VIEW_IPCALL);
 	        		startActivity(intent);
 	    		} catch(Exception e) {
-			    	e.printStackTrace();
-					Utils.showMessageAndExit(IntentApps.this, getString(R.string.label_intent_failed));
+					Utils.showMessageAndExit(IntentApps.this, getString(R.string.label_intent_failed), mExitOnce, e);
 	    		}
 	    	} else
         	if (v.getId() == R.id.initiate_ipcall) {
@@ -139,8 +139,7 @@ public class IntentApps extends Activity {
 	        		Intent intent = new Intent(com.gsma.services.rcs.Intents.IPCall.ACTION_INITIATE_IPCALL);
 	        		startActivity(intent);
 	    		} catch(Exception e) {
-			    	e.printStackTrace();
-					Utils.showMessageAndExit(IntentApps.this, getString(R.string.label_intent_failed));
+					Utils.showMessageAndExit(IntentApps.this, getString(R.string.label_intent_failed), mExitOnce, e);
 	    		}
 	    	}
         }
