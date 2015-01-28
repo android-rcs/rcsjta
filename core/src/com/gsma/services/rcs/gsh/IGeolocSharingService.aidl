@@ -31,4 +31,10 @@ interface IGeolocSharingService {
 	int getServiceVersion();
 	
 	ICommonServiceConfiguration getCommonConfiguration();
+
+	void deleteGeolocSharings();
+
+	void deleteGeolocSharings2(in ContactId contact);
+
+	void deleteGeolocSharing(in String sharingId);
 }

@@ -32,7 +32,7 @@ interface IGroupChat {
 
 	void sendIsComposingEvent(in boolean status);
 
-	void addParticipants(in List<ContactId> participants);
+	void inviteParticipants(in List<ContactId> participants);
 	
 	int getMaxParticipants();
 	
@@ -41,4 +41,12 @@ interface IGroupChat {
 	IChatMessage sendMessage2(in Geoloc geoloc);
 
 	void openChat();
+
+	boolean canSendMessage();
+
+	boolean canInviteParticipants();
+
+	boolean canInviteParticipant(in ContactId participant);
+
+	boolean canLeave();
 }

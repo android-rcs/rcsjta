@@ -20,4 +20,6 @@ interface IOneToOneChat {
 	void openChat();
 
 	void resendMessage(in String msgId);
+
+	boolean canSendMessage();
 }

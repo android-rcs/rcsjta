@@ -418,4 +418,32 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	public ICommonServiceConfiguration getCommonConfiguration() {
 		return new CommonServiceConfigurationImpl();
 	}
+
+	/**
+	 * Deletes all video sharing from history and abort/reject any associated
+	 * ongoing session if such exists.
+	 */
+	public void deleteVideoSharings() {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Delete video sharing associated with a given contact from history and
+	 * abort/reject any associated ongoing session if such exists.
+	 * 
+	 * @param contact
+	 */
+	public void deleteVideoSharings2(ContactId contact) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Deletes a video sharing by its sharing ID from history and abort/reject
+	 * any associated ongoing session if such exists.
+	 * 
+	 * @param sharingId
+	 */
+	public void deleteVideoSharing(String sharingId) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
 }

@@ -347,6 +347,15 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	}
 
 	/**
+	 * Returns true if it is possible to leave this group chat.
+	 * 
+	 * @return boolean
+	 */
+	public boolean canLeave() {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
 	 * Quits a group chat conversation. The conversation will continue between
 	 * other participants if there are enough participants.
 	 */
@@ -426,13 +435,34 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		}
 		return result;
 	}
-	
+
 	/**
-	 * Adds participants to a group chat
+	 * Returns true if it is possible to invite additional participants to the
+	 * group chat right now, else returns false.
+	 * 
+	 * @return boolean
+	 */
+	public boolean canInviteParticipants() {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Returns true if it is possible to invite the specified participants to
+	 * the group chat right now, else returns false.
+	 * 
+	 * @param ContactId participant
+	 * @return boolean
+	 */
+	public boolean canInviteParticipant(ContactId participant) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Invite additional participants to this group chat.
 	 * 
 	 * @param participants Set of participants
 	 */
-	public void addParticipants(final List<ContactId> participants) {
+	public void inviteParticipants(final List<ContactId> participants) {
 		final GroupChatSession session = mImService.getGroupChatSession(mChatId);
 		if (session == null) {
 			/* TODO: Throw proper exception as part of CR037 implementation */
@@ -531,6 +561,16 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 				groupChatSession.acceptSession();
 			}
 		}.start();
+	}
+
+	/**
+	 * Returns true if it is possible to send messages in the group chat right
+	 * now, else returns false.
+	 * 
+	 * @return boolean
+	 */
+	public boolean canSendMessage() {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
 	}
 
 	/**

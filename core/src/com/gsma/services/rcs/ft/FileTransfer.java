@@ -440,7 +440,24 @@ public class FileTransfer {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-	
+
+	/**
+	 * Returns true if it is possible to pause this file transfer right now,
+	 * else returns false. If this filetransfer corresponds to a file transfer
+	 * that is no longer present in the persistent storage false will be
+	 * returned (this is no error)
+	 * 
+	 * @return boolean
+	 * @throws RcsServiceException
+	 */
+	public boolean canPauseTransfer() throws RcsServiceException {
+		try {
+			return mTransferInf.canPauseTransfer();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
 	/**
 	 * Pauses the file transfer
 	 * 
@@ -453,7 +470,24 @@ public class FileTransfer {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-	
+
+	/**
+	 * Returns true if it is possible to resume this file transfer right now,
+	 * else return false. If this filetransfer corresponds to a file transfer
+	 * that is no longer present in the persistent storage false will be
+	 * returned.
+	 * 
+	 * @return boolean
+	 * @throws RcsServiceException
+	 */
+	public boolean canResumeTransfer() throws RcsServiceException {
+		try {
+			return mTransferInf.canResumeTransfer();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
 	/**
 	 * Resumes the file transfer
 	 * 

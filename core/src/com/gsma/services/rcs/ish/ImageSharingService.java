@@ -306,4 +306,60 @@ public class ImageSharingService extends RcsService {
 			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
+
+	/**
+	 * Deletes all image sharing from history and abort/reject any associated
+	 * ongoing session if such exists.
+	 * 
+	 * @throws RcsServiceException
+	 */
+	public void deleteImageSharings() throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.deleteImageSharings();
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * Deletes image sharing with a given contact from history and abort/reject
+	 * any associated ongoing session if such exists
+	 * 
+	 * @param ContactId contact
+	 * @throws RcsServiceException
+	 */
+	public void deleteImageSharings(ContactId contact) throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.deleteImageSharings2(contact);
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * deletes an image sharing by its sharing id from history and abort/reject
+	 * any associated ongoing session if such exists.
+	 * 
+	 * @param sharingId
+	 * @throws RcsServiceException
+	 */
+	public void deleteImageSharing(String sharingId) throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.deleteImageSharing(sharingId);
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
 }

@@ -62,6 +62,21 @@ public class OneToOneChat {
 	}
 
 	/**
+	 * Returns true if it is possible to send messages in this one to one chat
+	 * right now, else return false.
+	 * 
+	 * @return boolean
+	 * @throws RcsServiceException
+	 */
+	public boolean canSendMessage() throws RcsServiceException {
+		try {
+			return mOneToOneChatInf.canSendMessage();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
 	 * Sends a chat message
 	 * 
 	 * @param message Message

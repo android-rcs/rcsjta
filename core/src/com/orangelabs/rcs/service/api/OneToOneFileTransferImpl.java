@@ -357,7 +357,19 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 
 		return (session instanceof HttpFileTransferSession);
 	}
-    
+
+	/**
+	 * Returns true if it is possible to pause this file transfer right now,
+	 * else returns false. If this filetransfer corresponds to a file transfer
+	 * that is no longer present in the persistent storage false will be
+	 * returned (this is no error)
+	 * 
+	 * @return boolean
+	 */
+	public boolean canPauseTransfer() {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
 	/**
 	 * Pauses the file transfer (only for HTTP transfer)
 	 */
@@ -407,6 +419,18 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements File
 			return false;
 		}
 		return ((HttpFileTransferSession)session).isFileTransferPaused();
+	}
+
+	/**
+	 * Returns true if it is possible to resume this file transfer right now,
+	 * else return false. If this filetransfer corresponds to a file transfer
+	 * that is no longer present in the persistent storage false will be
+	 * returned.
+	 * 
+	 * @return boolean
+	 */
+	public boolean canResumeTransfer() {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
 	}
 
 	/**

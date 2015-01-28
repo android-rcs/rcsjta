@@ -34,4 +34,10 @@ interface IVideoSharingService {
 	int getServiceVersion();
 	
 	ICommonServiceConfiguration getCommonConfiguration();
+
+	void deleteVideoSharings();
+
+	void deleteVideoSharings2(in ContactId contact);
+
+	void deleteVideoSharing(in String sharingId);
 }

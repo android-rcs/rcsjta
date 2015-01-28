@@ -282,6 +282,21 @@ public class GroupChat {
 	}
 
 	/**
+	 * Returns true if it is possible to send messages in the group chat right
+	 * now, else returns false.
+	 * 
+	 * @return boolean
+	 * @throws RcsServiceException
+	 */
+	public boolean canSendMessage() throws RcsServiceException {
+		try {
+			return mGroupChatInf.canSendMessage();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
 	 * Sends a text message to the group
 	 * 
 	 * @param text Message
@@ -325,21 +340,52 @@ public class GroupChat {
 			throw new RcsServiceException(e.getMessage());
 		}		
 	}
-	
+
 	/**
-	 * Adds participants to a group chat
+	 * Returns true if it is possible to invite additional participants to the
+	 * group chat right now, else returns false.
+	 * 
+	 * @return boolean
+	 * @throws RcsServiceException
+	 */
+	public boolean canInviteParticipants() throws RcsServiceException {
+		try {
+			return mGroupChatInf.canInviteParticipants();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Returns true if it is possible to invite the specified participant to
+	 * the group chat right now, else returns false.
+	 * 
+	 * @param ContactId participant
+	 * @return boolean
+	 * @throws RcsServiceException
+	 */
+	public boolean canInviteParticipant(ContactId participant) throws RcsServiceException {
+		try {
+			return mGroupChatInf.canInviteParticipant(participant);
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Invite additional participants to this group chat.
 	 * 
 	 * @param participants List of participants
 	 * @throws RcsServiceException
 	 */
-	public void addParticipants(Set<ContactId> participants) throws RcsServiceException {
+	public void inviteParticipants(Set<ContactId> participants) throws RcsServiceException {
 		try {
-			mGroupChatInf.addParticipants(new ArrayList<ContactId>(participants));
-		} catch(Exception e) {
+			mGroupChatInf.inviteParticipants(new ArrayList<ContactId>(participants));
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
-		}		
+		}
 	}
-	
+
 	/**
 	 * Returns the max number of participants in the group chat. This limit is
 	 * read during the conference event subscription and overrides the provisioning
@@ -355,7 +401,21 @@ public class GroupChat {
 			throw new RcsServiceException(e.getMessage());
 		}		
 	}
-	
+
+	/**
+	 * Returns true if it is possible to leave this group chat.
+	 * 
+	 * @return boolean
+	 * @throws RcsServiceException
+	 */
+	public boolean canLeave() throws RcsServiceException {
+		try {
+			return mGroupChatInf.canLeave();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
 	/**
 	 * Leaves a group chat willingly and permanently. The group chat will
 	 * continue between other participants if there are enough participants.

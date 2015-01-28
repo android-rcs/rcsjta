@@ -240,6 +240,16 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	}
 
 	/**
+	 * Returns true if it is possible to send messages in this one to one chat
+	 * right now, else return false.
+	 * 
+	 * @return boolean
+	 */
+	public boolean canSendMessage() {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
 	 * Add chat message to Db
 	 * 
 	 * @param msg InstantMessage

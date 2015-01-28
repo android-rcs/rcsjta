@@ -442,6 +442,17 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	}
 
 	/**
+	 * Returns true if it is possible to initiate file transfer to the contact
+	 * specified by the contact parameter, else returns false.
+	 * 
+	 * @param contact
+	 * @return boolean
+	 */
+	public boolean canTransferFile(ContactId contact) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
      * Transfers a file to a contact. The parameter file contains the URI of the
      * file to be transferred (for a local or a remote file). The parameter
      * contact supports the following formats: MSISDN in national or
@@ -496,6 +507,17 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			}
 			throw new ServerApiException(e);
 		}
+	}
+
+	/**
+	 * Returns true if it is possible to initiate file transfer to the group
+	 * chat specified by the chatId parameter, else returns false.
+	 * 
+	 * @param chatId
+	 * @return boolean
+	 */
+	public boolean canTransferFileToGroupChat(String chatId) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
 	}
 
 	/**
@@ -1007,6 +1029,63 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		}
 	}
 
+	/**
+	 * Deletes all one to one file transfer history and abort/reject any
+	 * associated ongoing session if such exists.
+	 */
+	public void deleteOneToOneFileTransfers() {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Deletes all group file transfer from history and abort/reject any
+	 * associated ongoing session if such exists.
+	 */
+	public void deleteGroupFileTransfers() {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Deletes file transfer corresponding to a given one to one chat specified
+	 * by contact from history and abort/reject any associated ongoing session
+	 * if such exists.
+	 * 
+	 * @param contact
+	 */
+	public void deleteOneToOneFileTransfers2(ContactId contact) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Deletes file transfer corresponding to a given group chat specified by
+	 * chat id from history and abort/reject any associated ongoing session if
+	 * such exists.
+	 * 
+	 * @param chatId
+	 */
+	public void deleteGroupFileTransfers2(String chatId) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Deletes a file transfer by its unique id from history and abort/reject
+	 * any associated ongoing session if such exists.
+	 * 
+	 * @param transferId
+	 */
+	public void deleteFileTransfer(String transferId) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Marks undelivered file transfers to indicate that transfers have been
+	 * processed.
+	 * 
+	 * @param transferIds
+	 */
+	public void markUndeliveredFileTransfersAsProcessed(List<String> transferIds) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
 	/**
 	 * Add and broadcast file transfer invitation rejections
 	 *

@@ -189,6 +189,62 @@ public class GeolocSharingService extends RcsService {
     }    
 
 	/**
+	 * Deletes all geoloc sharing from history and abort/reject any associated
+	 * ongoing session if such exists.
+	 * 
+	 * @throws RcsServiceException
+	 */
+	public void deleteGeolocSharings() throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.deleteGeolocSharings();
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * Deletes geoloc sharing with a given contact from history and abort/reject
+	 * any associated ongoing session if such exists.
+	 * 
+	 * @param ContactId contact
+	 * @throws RcsServiceException
+	 */
+	public void deleteGeolocSharings(ContactId contact) throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.deleteGeolocSharings2(contact);
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * Deletes a geoloc sharing by its sharing id from history and abort/reject
+	 * any associated ongoing session if such exists.
+	 * 
+	 * @param String sharingId
+	 * @throws RcsServiceException
+	 */
+	public void deleteGeolocSharing(String sharingId) throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.deleteGeolocSharing(sharingId);
+			} catch (Exception e) {
+				throw new RcsServiceException(e.getMessage());
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
 	 * Adds a listener on geoloc sharing events
 	 *
 	 * @param listener Listener

@@ -381,6 +381,34 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	}
 
 	/**
+	 * Deletes all image sharing from history and abort/reject any associated
+	 * ongoing session if such exists.
+	 */
+	public void deleteImageSharings() {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Deletes image sharing with a given contact from history and abort/reject
+	 * any associated ongoing session if such exists
+	 * 
+	 * @param contact
+	 */
+	public void deleteImageSharings2(ContactId contact) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * deletes an image sharing by its sharing id from history and abort/reject
+	 * any associated ongoing session if such exists.
+	 * 
+	 * @param sharingId
+	 */
+	public void deleteImageSharing(String sharingId) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
 	 * Returns service version
 	 * 
 	 * @return Version

@@ -388,4 +388,28 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 	public ICommonServiceConfiguration getCommonConfiguration() {
 		return new CommonServiceConfigurationImpl();
 	}
+
+	/**
+	 * Deletes all geoloc sharing from history and abort/reject any associated
+	 * ongoing session if such exists.
+	 */
+	public void deleteGeolocSharings() {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Deletes geoloc sharing with a given contact from history and abort/reject
+	 * any associated ongoing session if such exists.
+	 */
+	public void deleteGeolocSharings2(ContactId contact) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Deletes a geoloc sharing by its sharing id from history and abort/reject
+	 * any associated ongoing session if such exists.
+	 */
+	public void deleteGeolocSharing(String sharingId) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
 }

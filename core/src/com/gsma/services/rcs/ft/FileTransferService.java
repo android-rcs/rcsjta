@@ -22,6 +22,7 @@
 package com.gsma.services.rcs.ft;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -196,7 +197,27 @@ public class FileTransferService extends RcsService {
 			}
 		}
 	}
-    
+
+	/**
+	 * Returns true if it is possible to initiate file transfer to the contact
+	 * specified by the contact parameter, else returns false.
+	 * 
+	 * @param ContactId contact
+	 * @return boolean
+	 * @throws RcsServiceException
+	 */
+	public boolean canTransferFile(ContactId contact) throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				return mApi.canTransferFile(contact);
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
 	/**
      * Transfers a file to a contact. The parameter file contains the URI of the
      * file to be transferred (for a local or a remote file). The parameter
@@ -225,6 +246,26 @@ public class FileTransferService extends RcsService {
 					return null;
 				}
 			} catch(Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * Returns true if it is possible to initiate file transfer to the group
+	 * chat specified by the chatId parameter, else returns false.
+	 * 
+	 * @param chatId
+	 * @return boolean
+	 * @throws RcsServiceException
+	 */
+	public boolean canTransferFileToGroupChat(String chatId) throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				return mApi.canTransferFileToGroupChat(chatId);
+			} catch (Exception e) {
 				throw new RcsServiceException(e);
 			}
 		} else {
@@ -459,6 +500,121 @@ public class FileTransferService extends RcsService {
 			try {
 				mApi.setImageResizeOption(option);
 			} catch(Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * Deletes all one to one file transfer from history and abort/reject any
+	 * associated ongoing session if such exists.
+	 * 
+	 * @throws RcsServiceException
+	 */
+	public void deleteOneToOneFileTransfers() throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.deleteOneToOneFileTransfers();
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * Deletes all group file transfer from history and abort/reject any
+	 * associated ongoing session if such exists.
+	 * 
+	 * @throws RcsServiceException
+	 */
+	public void deleteGroupFileTransfers() throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.deleteGroupFileTransfers();
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * Deletes file transfer corresponding to a given one to one chat specified
+	 * by contact from history and abort/reject any associated ongoing session
+	 * if such exists.
+	 * 
+	 * @param contact
+	 * @throws RcsServiceException
+	 */
+	public void deleteOneToOneFileTransfers(ContactId contact) throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.deleteOneToOneFileTransfers2(contact);
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * Deletes file transfer corresponding to a given group chat specified by
+	 * chat id from history and abort/reject any associated ongoing session if
+	 * such exists.
+	 * 
+	 * @param chatId
+	 * @throws RcsServiceException
+	 */
+	public void deleteGroupFileTransfers(String chatId) throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.deleteGroupFileTransfers2(chatId);
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * Deletes a file transfer by its unique id from history and abort/reject
+	 * any associated ongoing session if such exists.
+	 * 
+	 * @param transferId
+	 * @throws RcsServiceException
+	 */
+	public void deleteFileTransfer(String transferId) throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.deleteFileTransfer(transferId);
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * Marks undelivered file transfers to indicate the specified file transfers
+	 * have been processed.
+	 * 
+	 * @param transferIds
+	 * @throws RcsServiceException
+	 */
+	public void markUndeliveredFileTransfersAsProcessed(Set<String> transferIds)
+			throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.markUndeliveredFileTransfersAsProcessed(new ArrayList<String>(transferIds));
+			} catch (Exception e) {
 				throw new RcsServiceException(e);
 			}
 		} else {

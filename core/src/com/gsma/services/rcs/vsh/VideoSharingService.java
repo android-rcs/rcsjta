@@ -241,4 +241,57 @@ public class VideoSharingService extends RcsService {
 			throw new RcsServiceException(e);
 		}
 	}
+
+	/**
+	 * Deletes all video sharing from history and abort/reject any associated
+	 * ongoing session if such exists.
+	 * 
+	 * @throws RcsServiceException
+	 */
+	public void deleteVideoSharings() throws RcsServiceException {
+		if (mApi == null) {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+		try {
+			mApi.deleteVideoSharings();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
+	}
+
+	/**
+	 * Delete video sharing associated with a given contact from history and
+	 * abort/reject any associated ongoing session if such exists.
+	 * 
+	 * @param contact
+	 * @throws RcsServiceException
+	 */
+	public void deleteVideoSharings(ContactId contact) throws RcsServiceException {
+		if (mApi == null) {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+		try {
+			mApi.deleteVideoSharings2(contact);
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
+	}
+
+	/**
+	 * Deletes a video sharing by its sharing ID from history and abort/reject
+	 * any associated ongoing session if such exists.
+	 * 
+	 * @param sharingId
+	 * @throws RcsServiceException
+	 */
+	public void deleteVideoSharing(String sharingId) throws RcsServiceException {
+		if (mApi == null) {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+		try {
+			mApi.deleteVideoSharing(sharingId);
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
+	}
 }
