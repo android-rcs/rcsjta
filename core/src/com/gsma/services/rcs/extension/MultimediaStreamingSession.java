@@ -121,10 +121,10 @@ public class MultimediaStreamingSession extends MultimediaSession {
 	}
 	
 	/**
-	 * Returns the direction of the session (incoming, outgoing or irrelevant)
-	 * 
+	 * Returns the direction of the session
+	 *
 	 * @return Direction
-	 * @see MultimediaSession.Direction
+	 * @see Direction
 	 * @throws RcsServiceException
 	 */
 	public Direction getDirection() throws RcsServiceException {

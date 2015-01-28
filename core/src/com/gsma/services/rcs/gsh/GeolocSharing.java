@@ -257,8 +257,8 @@ public class GeolocSharing {
 	}
 
 	/**
-	 * Returns the direction of the sharing (incoming or outgoing)
-	 * 
+	 * Returns the direction of the sharing
+	 *
 	 * @return Direction
 	 * @see Direction
 	 * @throws RcsServiceException

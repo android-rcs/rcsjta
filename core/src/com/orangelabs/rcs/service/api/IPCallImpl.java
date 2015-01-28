@@ -205,7 +205,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	 * Returns the direction of the call (incoming or outgoing)
 	 *
 	 * @return Direction
-	 * @see IpCall.Direction
+	 * @see Direction
 	 */
 	public int getDirection() {
 		IPCallSession session = mIPCallService.getIPCallSession(mCallId);

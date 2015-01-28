@@ -17,7 +17,7 @@
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatLog.GroupChat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
@@ -63,10 +63,10 @@ public class GroupChatPersistedStorageAccessor {
 		Cursor cursor = null;
 		try {
 			cursor = mMessagingLog.getCacheableGroupChatData(mChatId);
-			mSubject = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.SUBJECT));
-			mDirection = Direction.valueOf(cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.DIRECTION)));
+			mSubject = cursor.getString(cursor.getColumnIndexOrThrow(GroupChat.SUBJECT));
+			mDirection = Direction.valueOf(cursor.getInt(cursor.getColumnIndexOrThrow(GroupChat.DIRECTION)));
 			String contact = cursor.getString(cursor
-					.getColumnIndexOrThrow(ChatLog.GroupChat.CONTACT));
+					.getColumnIndexOrThrow(GroupChat.CONTACT));
 			if (contact != null) {
 				mContact = ContactUtils.createContactId(contact);
 			}

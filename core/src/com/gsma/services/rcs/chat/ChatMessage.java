@@ -102,10 +102,10 @@ public class ChatMessage {
 	}
 
 	/**
-	 * Returns the direction of message (incoming or outgoing)
-	 * 
+	 * Returns the direction of message
+	 *
 	 * @return Direction
-	 * @see com.gsma.services.rcs.RcsCommon.Direction
+	 * @see Direction
 	 * @throws RcsServiceException
 	 */
 	public Direction getDirection() throws RcsServiceException {

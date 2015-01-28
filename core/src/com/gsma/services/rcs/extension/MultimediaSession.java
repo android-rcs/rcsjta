@@ -180,10 +180,10 @@ public abstract class MultimediaSession {
 	public abstract int getState() throws RcsServiceException;
 	
 	/**
-	 * Returns the direction of the session (incoming or outgoing)
-	 * 
+	 * Returns the direction of the session
+	 *
 	 * @return Direction
-	 * @see MultimediaSession.Direction
+	 * @see Direction
 	 * @throws RcsServiceException
 	 */
 	public abstract Direction getDirection() throws RcsServiceException;

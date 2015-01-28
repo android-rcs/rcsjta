@@ -225,10 +225,10 @@ public class VideoSharing {
 	}
 
 	/**
-	 * Returns the direction of the sharing (incoming or outgoing)
-	 * 
+	 * Returns the direction of the sharing
+	 *
 	 * @return Direction
-	 * @see com.gsma.services.rcs.RcsCommon.Direction
+	 * @see Direction
 	 * @throws RcsServiceException
 	 */
 	public Direction getDirection() throws RcsServiceException {

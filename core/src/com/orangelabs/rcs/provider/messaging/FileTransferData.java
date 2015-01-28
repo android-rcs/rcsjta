@@ -86,7 +86,7 @@ public class FileTransferData {
 	static final String KEY_REASON_CODE = FileTransferLog.REASON_CODE;
 	
 	/**
-	 * @see com.gsma.services.rcs.RcsCommon.ReadStatus for the list of status.
+	 * @see ReadStatus 
 	 */
 	static final String KEY_READ_STATUS = FileTransferLog.READ_STATUS;
 
@@ -118,7 +118,7 @@ public class FileTransferData {
 	/**
 	 * Incoming transfer or outgoing transfer
 	 *
-	 * @see com.gsma.services.rcs.RcsCommon.Direction for the list of directions
+	 * @see Direction
 	 */
 	static final String KEY_DIRECTION = FileTransferLog.DIRECTION;
 

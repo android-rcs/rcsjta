@@ -86,7 +86,7 @@ public class ImageSharingData {
 	/**
 	 * Incoming sharing or outgoing sharing.
 	 *
-	 * @see com.gsma.services.rcs.RcsCommon.Direction for the list of directions
+	 * @see Direction
 	 */
 	static final String KEY_DIRECTION = ImageSharingLog.DIRECTION;	
 }

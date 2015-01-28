@@ -83,8 +83,8 @@ public interface RcsServiceListener {
      * Callback called when service has been disconnected. This method is called when
      * the service is disconnected from the RCS service (e.g. service deactivated).
      * 
-     * @param error Error
-     * @see RcsService.Error
+     * @param ReasonCode reasonCode
+     * @see ReasonCode
      */
     public void onServiceDisconnected(ReasonCode reasonCode);
 }

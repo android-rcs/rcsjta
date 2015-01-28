@@ -193,10 +193,10 @@ public class GroupChat {
 	}
 
 	/**
-	 * Returns the direction of the group chat (incoming or outgoing)
-	 * 
+	 * Returns the direction of the group chat
+	 *
 	 * @return Direction
-	 * @see com.gsma.services.rcs.RcsCommon.Direction
+	 * @see Direction
 	 * @throws RcsServiceException
 	 */
 	public Direction getDirection() throws RcsServiceException {

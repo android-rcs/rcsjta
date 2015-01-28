@@ -60,7 +60,7 @@ public class MessageData {
 	/**
 	 * Status direction of message.
 	 *
-	 * @see com.gsma.services.rcs.RcsCommon.Direction for the list of directions
+	 * @see Direction
 	 */
 	static final String KEY_DIRECTION = ChatLog.Message.DIRECTION;	
 

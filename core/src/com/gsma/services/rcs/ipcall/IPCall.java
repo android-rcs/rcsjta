@@ -236,10 +236,10 @@ public class IPCall {
 	}
 
 	/**
-	 * Returns the direction of the call (incoming or outgoing)
-	 * 
+	 * Returns the direction of the call
+	 *
 	 * @return Direction
-	 * @see com.gsma.services.rcs.RcsCommon.Direction
+	 * @see Direction
 	 * @throws RcsServiceException
 	 */
 	public Direction getDirection() throws RcsServiceException {
