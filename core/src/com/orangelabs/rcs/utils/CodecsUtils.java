@@ -99,13 +99,13 @@ public class CodecsUtils {
      * Test if size is in list.
      * Can't use List.contains because it doesn't work with some devices.
      *
-     * @param list
+     * @param cameraSizes
      * @param width
      * @param height
      * @return boolean
      */
-    private static boolean sizeContains(List<Camera.Size> list, int width, int height) {
-    	for (Camera.Size size : list) {
+    private static boolean sizeContains(List<Camera.Size> cameraSizes, int width, int height) {
+    	for (Camera.Size size : cameraSizes) {
     		 if (size.width == width && size.height == height) {
                  return true;
              }

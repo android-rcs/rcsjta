@@ -28,12 +28,14 @@ import java.util.Collection;
 import java.util.Vector;
 
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.vsh.IVideoPlayer;
 import com.gsma.services.rcs.vsh.VideoCodec;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpParser;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
+import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -78,9 +80,9 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             if (logger.isActivated()) {
                 logger.info("Initiate a new live video sharing session as terminating");
             }
-
+            SipDialogPath dialogPath = getDialogPath();
             // Send a 180 Ringing response
-            send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+            send180Ringing(dialogPath.getInvite(), dialogPath.getLocalTag());
 
             // Parse the remote SDP part
             SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(
@@ -120,7 +122,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                     }
 
                     // Ringing period timeout
-                    send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+                    send486Busy(dialogPath.getInvite(), dialogPath.getLocalTag());
 
                     removeSession();
 
@@ -157,8 +159,9 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                     return;
             }
 
+            IVideoPlayer player = getPlayer();
             // Check that a video player has been set
-            if (getVideoPlayer() == null) {
+            if (player == null) {
                 handleError(new ContentSharingError(
                         ContentSharingError.MEDIA_PLAYER_NOT_INITIALIZED));
                 return;
@@ -166,14 +169,14 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
 
             // Codec negotiation
             VideoCodec selectedVideoCodec = VideoCodecManager.negociateVideoCodec(
-            		getVideoPlayer().getSupportedCodecs(), proposedCodecs);
+            		player.getSupportedCodecs(), proposedCodecs);
             if (selectedVideoCodec == null) {
                 if (logger.isActivated()){
                     logger.debug("Proposed codecs are not supported");
                 }
                 
                 // Send a 415 Unsupported media type response
-                send415Error(getDialogPath().getInvite());
+                send415Error(dialogPath.getInvite());
                 
                 // Unsupported media type
                 handleError(new ContentSharingError(ContentSharingError.UNSUPPORTED_MEDIA_TYPE));
@@ -184,19 +187,19 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             SdpOrientationExtension extensionHeader = SdpOrientationExtension.create(mediaVideo);
             if (extensionHeader != null) {
             	// Update the orientation ID
-            	setVideoOrientationId(extensionHeader.getExtensionId());
+            	setOrientation(extensionHeader.getExtensionId());
             }
 
             // Build SDP part
             // Note ID_6_5 Extmap: it is recommended not to change the extmap's local
             // identifier in the SDP answer from the one in the SDP offer because there
             // are no reasons to do that since there should only be one extension in use.
-	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
-            String videoSdp = VideoSdpBuilder.buildSdpAnswer(selectedVideoCodec, getVideoPlayer().getLocalRtpPort(), mediaVideo); 
+	    	String ipAddress = dialogPath.getSipStack().getLocalIpAddress();
+            String videoSdp = VideoSdpBuilder.buildSdpAnswer(selectedVideoCodec, player.getLocalRtpPort(), mediaVideo); 
             String sdp = SdpUtils.buildVideoSDP(ipAddress, videoSdp, SdpUtils.DIRECTION_RECVONLY);
 
             // Set the local SDP part in the dialog path
-            getDialogPath().setLocalContent(sdp);
+            dialogPath.setLocalContent(sdp);
 
 	        // Test if the session should be interrupted
             if (isInterrupted()) {
@@ -210,11 +213,11 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             if (logger.isActivated()) {
                 logger.info("Send 200 OK");
             }
-            SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
+            SipResponse resp = SipMessageFactory.create200OkInviteResponse(dialogPath,
                     RichcallService.FEATURE_TAGS_VIDEO_SHARE, sdp);
 
             // The signalisation is established
-            getDialogPath().sigEstablished();
+            dialogPath.sigEstablished();
 
             // Send response
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager().sendSipMessageAndWait(resp);
@@ -227,20 +230,19 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                 }
 
                 // The session is established
-                getDialogPath().sessionEstablished();
+                dialogPath.sessionEstablished();
 
                 // Start session timer
                 if (getSessionTimerManager().isSessionTimerActivated(resp)) {
-                    getSessionTimerManager().start(SessionTimerManager.UAS_ROLE, getDialogPath().getSessionExpireTime());
+                    getSessionTimerManager().start(SessionTimerManager.UAS_ROLE, dialogPath.getSessionExpireTime());
                 }
 
                 // Set the video player remote info
-                getVideoPlayer().setRemoteInfo(selectedVideoCodec, remoteHost, remotePort, getVideoOrientationId());
+                player.setRemoteInfo(selectedVideoCodec, remoteHost, remotePort, getOrientation());
 
-                // Notify listeners
-                for(int i=0; i < getListeners().size(); i++) {
-                    getListeners().get(i).handleSessionStarted();
-                }
+                for (ImsSessionListener listener : listeners) {
+                	listener.handleSessionStarted();
+				}
             } else {
                 if (logger.isActivated()) {
                     logger.debug("No ACK received for INVITE");
@@ -272,7 +274,9 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
 
         // Error
         if (logger.isActivated()) {
-            logger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
+			logger.info(new StringBuilder("Session error: ")
+					.append(String.valueOf(error.getErrorCode())).append(", reason=")
+					.append(error.getMessage()).toString());
         }
 
         // Close media session
@@ -281,10 +285,9 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
         // Remove the current session
         removeSession();
 
-        // Notify listener
-        for(int i=0; i < getListeners().size(); i++) {
-            ((VideoStreamingSessionListener)getListeners().get(i)).handleSharingError(error);
-        }
+        for (ImsSessionListener listener : getListeners()) {
+        	((VideoStreamingSessionListener)listener).handleSharingError(error);
+		}
     }
 
     /**

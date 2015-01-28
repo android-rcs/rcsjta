@@ -34,6 +34,7 @@ import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpParser;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
+import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.service.ImsService;
@@ -70,7 +71,7 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
         createOriginatingDialogPath();
 
         // Set the video player
-        setVideoPlayer(player);
+        setPlayer(player);
     }
 
     /**
@@ -82,27 +83,29 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
                 logger.info("Initiate a new live video sharing session as originating");
             }
 
+            SipDialogPath dialogPath = getDialogPath();
             // Build SDP part
-	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
-            String videoSdp = VideoSdpBuilder.buildSdpOfferWithOrientation(getVideoPlayer().getSupportedCodecs(),
-            		getVideoPlayer().getLocalRtpPort());
+	    	String ipAddress = dialogPath.getSipStack().getLocalIpAddress();
+	    	IVideoPlayer player = getPlayer();
+            String videoSdp = VideoSdpBuilder.buildSdpOfferWithOrientation(player.getSupportedCodecs(),
+            		player.getLocalRtpPort());
             String sdp = SdpUtils.buildVideoSDP(ipAddress, videoSdp, SdpUtils.DIRECTION_SENDONLY);
 
             // Set the local SDP part in the dialog path
-            getDialogPath().setLocalContent(sdp);
+            dialogPath.setLocalContent(sdp);
 
             // Create an INVITE request
             if (logger.isActivated()) {
                 logger.info("Send INVITE");
             }
-            SipRequest invite = SipMessageFactory.createInvite(getDialogPath(),
+            SipRequest invite = SipMessageFactory.createInvite(dialogPath,
                     RichcallService.FEATURE_TAGS_VIDEO_SHARE, sdp);
 
 	        // Set the Authorization header
 	        getAuthenticationAgent().setAuthorizationHeader(invite);
 
 	        // Set initial request in the dialog path
-            getDialogPath().setInvite(invite);
+	        dialogPath.setInvite(invite);
 
             // Send INVITE request
             sendInvite(invite);
@@ -134,9 +137,11 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
         Vector<MediaDescription> medias = parser.getMediaDescriptions("video");
         Vector<VideoCodec> proposedCodecs = VideoCodecManager.extractVideoCodecsFromSdp(medias);
 
+        IVideoPlayer player = getPlayer();
+        
         // Codec negotiation
         VideoCodec selectedVideoCodec = VideoCodecManager.negociateVideoCodec(
-                getVideoPlayer().getSupportedCodecs(), proposedCodecs);
+        		player.getSupportedCodecs(), proposedCodecs);
         if (selectedVideoCodec == null) {
             if (logger.isActivated()) {
                 logger.debug("Proposed codecs are not supported");
@@ -155,11 +160,11 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
         SdpOrientationExtension extensionHeader = SdpOrientationExtension.create(mediaVideo);
         if (extensionHeader != null) {
         	// Update the orientation ID
-        	setVideoOrientationId(extensionHeader.getExtensionId());
+        	setOrientation(extensionHeader.getExtensionId());
         }
         
         // Set the video player remote info
-        getVideoPlayer().setRemoteInfo(selectedVideoCodec, remoteHost, remotePort, getVideoOrientationId());
+        player.setRemoteInfo(selectedVideoCodec, remoteHost, remotePort, getOrientation());
     }
 
     /**

@@ -291,8 +291,9 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 			mBroadcaster.broadcastStateChanged(contact, sharingId,
 					VideoSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
 
-			VideoSharingPersistedStorageAccessor storageAccessor = new VideoSharingPersistedStorageAccessor(sharingId, contact,
-					Direction.OUTGOING, mRichCallLog, content.getEncoding(), content.getHeight(), content.getWidth());
+			VideoSharingPersistedStorageAccessor storageAccessor = new VideoSharingPersistedStorageAccessor(
+					sharingId, contact, Direction.OUTGOING, mRichCallLog, content.getEncoding(),
+					content.getHeight(), content.getWidth(), session.getTimestamp());
 			VideoSharingImpl videoSharing = new VideoSharingImpl(sharingId, mRichcallService,
 					mBroadcaster, storageAccessor, this);
 			addVideoSharing(videoSharing);

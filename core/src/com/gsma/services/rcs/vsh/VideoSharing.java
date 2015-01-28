@@ -301,9 +301,9 @@ public class VideoSharing {
 	 * @return Timestamp in milliseconds
 	 * @throws RcsServiceException
 	 */
-	public long getTimeStamp() throws RcsServiceException {
+	public long getTimestamp() throws RcsServiceException {
 		try {
-			return mSharingInf.getTimeStamp();
+			return mSharingInf.getTimestamp();
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}		
@@ -312,7 +312,7 @@ public class VideoSharing {
 	/**
 	 * Returns the duration of the video sharing
 	 * 
-	 * @return Duration in seconds
+	 * @return Duration in milliseconds
 	 * @throws RcsServiceException
 	 */
 	public long getDuration() throws RcsServiceException {

@@ -205,7 +205,7 @@ public class VideoCodecManager {
     		if (codec != null) {
     			codecs.add(codec);
     		}
-    	}
+		}
     	return codecs;
     }
 }

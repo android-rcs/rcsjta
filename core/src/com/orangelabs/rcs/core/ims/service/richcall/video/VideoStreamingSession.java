@@ -44,29 +44,17 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author Jean-Marc AUFFRET
  */
 public abstract class VideoStreamingSession extends ContentSharingSession {
-	/**
-	 * Video orientation ID
-	 */
-	private int mVideoOrientationId;
-	
-	/**
-	 * Video width
-	 */
-	private int mVideoWidth = -1;
-	
-	/**
-	 * Video height
-	 */
-	private int mVideoHeight = -1;
 
-    /**
-     * Video player
-     */
+	private int mOrientation;
+	
+	private int mWidth;
+	
+	private int mHeight;
+
     private IVideoPlayer mPlayer;
-
-    /**
-     * The logger
-     */
+    
+    private final long mTimestamp;
+    
     private final static Logger logger = Logger.getLogger(VideoStreamingSession.class.getSimpleName());
 
 	/**
@@ -78,6 +66,7 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
 	 */
 	public VideoStreamingSession(ImsService parent, MmContent content, ContactId contact) {
 		super(parent, content, contact);
+		mTimestamp = System.currentTimeMillis();
 	}
 
 	/**
@@ -85,17 +74,17 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
 	 * 
 	 * @return Orientation
 	 */
-	public int getVideoOrientationId() {
-		return mVideoOrientationId;
+	public int getOrientation() {
+		return mOrientation;
 	}
 
 	/**
 	 * Set the video orientation ID
 	 * 
-	 * @param orientationId Orientation
+	 * @param orientation
 	 */
-	public void setVideoOrientationId(int orientationId) {
-		this.mVideoOrientationId = orientationId;
+	public void setOrientation(int orientation) {
+		mOrientation = orientation;
 	}
 	
 	/**
@@ -103,8 +92,8 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
 	 * 
 	 * @return Width
 	 */
-	public int getVideoWidth() {
-		return mVideoWidth;
+	public int getWidth() {
+		return mWidth;
 	}
 
 	/**
@@ -112,8 +101,8 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
 	 * 
 	 * @return Height
 	 */
-	public int getVideoHeight() {
-		return mVideoHeight;
+	public int getHeight() {
+		return mHeight;
 	}
 
     /**
@@ -121,7 +110,7 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
      * 
      * @return Player
      */
-    public IVideoPlayer getVideoPlayer() {
+    public IVideoPlayer getPlayer() {
         return mPlayer;
     }
 
@@ -130,7 +119,7 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
      *
      * @param player
      */
-    public void setVideoPlayer(IVideoPlayer player) {
+    public void setPlayer(IVideoPlayer player) {
         mPlayer = player;
     }
 
@@ -155,9 +144,9 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
             return;
         }
 
-        boolean logIsActivated = logger.isActivated();
+        boolean logActivated = logger.isActivated();
         // Error
-        if (logIsActivated) {
+        if (logActivated) {
 			logger.info(new StringBuilder("Session error: ").append(error.getErrorCode())
 					.append(", reason=").append(error.getMessage()).toString());
         }
@@ -173,7 +162,7 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
 			// Request capabilities to the remote
 	        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
 		} catch (RcsContactFormatException e) {
-			if (logIsActivated) {
+			if (logActivated) {
 				logger.warn(new StringBuilder("Cannot parse contact ").append(
 						getDialogPath().getRemoteParty()).toString());
 			}
@@ -195,5 +184,16 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
 	@Override
 	public void removeSession() {
 		getImsService().getImsModule().getRichcallService().removeSession(this);
+	}
+
+	/**
+	 * Returns the local timestamp of when the video sharing was initiated for outgoing video
+	 * sharing or the local timestamp of when the video sharing invitation was received for incoming
+	 * video sharings.
+	 * 
+	 * @return timestamp
+	 */
+	public long getTimestamp() {
+		return mTimestamp;
 	}
 }

@@ -16,6 +16,9 @@
 
 package com.orangelabs.rcs.core.ims.service.richcall.video;
 
+import android.database.Cursor;
+import android.net.Uri;
+
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.vsh.VideoDescriptor;
@@ -23,9 +26,6 @@ import com.gsma.services.rcs.vsh.VideoSharingLog;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.provider.sharing.RichCallHistory;
 import com.orangelabs.rcs.utils.ContactUtils;
-
-import android.database.Cursor;
-import android.net.Uri;
 
 /**
  * VideoSharingPersistedStorageAccessor helps in retrieving persisted data
@@ -46,6 +46,8 @@ public class VideoSharingPersistedStorageAccessor {
 	private String mVideoEncoding;
 	
 	private VideoDescriptor mVideoDescriptor;
+	
+	private Long mTimestamp;
 
 	/**
 	 * Constructor
@@ -66,15 +68,17 @@ public class VideoSharingPersistedStorageAccessor {
 	 * @param videoEncoding 
 	 * @param height 
 	 * @param width 
+	 * @param timestamp 
 	 */
 	public VideoSharingPersistedStorageAccessor(String sharingId, ContactId contact, Direction direction,
-			RichCallHistory richCallLog, String videoEncoding, int height, int width) {
+			RichCallHistory richCallLog, String videoEncoding, int height, int width, long timestamp) {
 		mSharingId = sharingId;
 		mContact = contact;
 		mDirection = direction;
 		mRichCallLog = richCallLog;
 		mVideoEncoding = videoEncoding;
 		mVideoDescriptor = new VideoDescriptor(width, height);
+		mTimestamp = timestamp;
 	}
 
 	private void cacheData() {
@@ -91,6 +95,7 @@ public class VideoSharingPersistedStorageAccessor {
 			int width = cursor.getInt(cursor.getColumnIndexOrThrow(VideoSharingLog.WIDTH));
 			int height = cursor.getInt(cursor.getColumnIndexOrThrow(VideoSharingLog.HEIGHT));
 			mVideoDescriptor = new VideoDescriptor(width, height);
+			mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(VideoSharingLog.TIMESTAMP));
 		} finally {
 			if (cursor != null) {
 				cursor.close();
@@ -147,20 +152,13 @@ public class VideoSharingPersistedStorageAccessor {
 	}
 
 	/**
-	 * Sets state and reason code
+	 * Sets state, reason code and duration
 	 * @param state
 	 * @param reasonCode
+	 * @param duration 
 	 */
-	public void setStateAndReasonCode(int state, int reasonCode) {
-		mRichCallLog.setVideoSharingStateAndReasonCode(mSharingId, state, reasonCode);
-	}
-
-	/**
-	 * Sets duration
-	 * @param duration
-	 */
-	public void setDuration(long duration) {
-		mRichCallLog.setVideoSharingDuration(mSharingId, duration);
+	public void setStateReasonCodeAndDuration(int state, int reasonCode, long duration) {
+		mRichCallLog.setVideoSharingStateReasonCodeAndDuration(mSharingId, state, reasonCode, duration);
 	}
 
 	/**
@@ -208,5 +206,31 @@ public class VideoSharingPersistedStorageAccessor {
 			cacheData();
 		}
 		return mVideoDescriptor;
+	}
+	
+	/**
+	 * Returns the local timestamp of when the video sharing was initiated for outgoing
+	 * video sharing or the local timestamp of when the video sharing invitation was received
+	 * for incoming video sharings.
+	 * @return timestamp
+	 */
+	public long getTimestamp() {
+		/*
+		 * Utilizing cache here as direction can't be changed in persistent
+		 * storage after entry insertion anyway so no need to query for it
+		 * multiple times.
+		 */
+		if (mTimestamp == null) {
+			cacheData();
+		}
+		return mTimestamp;
+	}
+	
+	/**
+	 * Returns the duration of the video sharing
+	 * @return duration
+	 */
+	public long getDuration() {
+		return mRichCallLog.getVideoSharingDuration(mSharingId);
 	}
 }

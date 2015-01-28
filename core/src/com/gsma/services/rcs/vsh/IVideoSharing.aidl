@@ -27,7 +27,7 @@ interface IVideoSharing {
 	
 	String getVideoEncoding();
 
-	long getTimeStamp();
+	long getTimestamp();
 
 	long getDuration();
 	
