@@ -691,7 +691,7 @@ public class GroupChatView extends ChatView {
 						contacts.add(contactUtils.formatContact(participant));
 					}
 					// Add participants
-					mGroupChat.addParticipants(contacts);
+					mGroupChat.inviteParticipants(contacts);
 
 					// Hide progress dialog
 					if (mProgressDialog != null && mProgressDialog.isShowing()) {
