@@ -30,6 +30,7 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.IContactsService;
 import com.gsma.services.rcs.contacts.RcsContact;
 import com.orangelabs.rcs.core.ims.service.ContactInfo;
+import com.orangelabs.rcs.core.ims.service.ContactInfo.BlockingState;
 import com.orangelabs.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.utils.logger.Logger;
@@ -111,7 +112,9 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 		}
 		Capabilities capaApi = getCapabilities(contactInfo.getCapabilities());
 		boolean registered = RegistrationState.ONLINE.equals(contactInfo.getRegistrationState());
-		return new RcsContact(contactInfo.getContact(), registered, capaApi, contactInfo.getDisplayName());
+		boolean blocked = BlockingState.BLOCKED.equals(contactInfo.getBlockingState());
+		return new RcsContact(contactInfo.getContact(), registered, capaApi, contactInfo.getDisplayName(),
+				blocked, contactInfo.getBlockingTimestamp());
 	}
 	
 	
@@ -247,21 +250,23 @@ public class ContactsServiceImpl extends IContactsService.Stub {
      * blocked and redirected to the corresponding spambox.
      * 
      * @param contact Contact ID
-     * @throws ServerApiException
      */
-    public void blockContact(ContactId contact) throws ServerApiException {
-    	// TODO
-    	throw new ServerApiException("Not yet implemented");
+    public void blockContact(ContactId contact) {
+		if (logger.isActivated()) {
+			logger.info("Block contact " + contact);
+		}
+		ContactsManager.getInstance().setBlockingState(contact, BlockingState.BLOCKED);
     }
 
     /**
      * Unblock a contact
      * 
      * @param contact Contact ID
-     * @throws ServerApiException
      */
-    public void unblockContact(ContactId contact) throws ServerApiException {
-    	// TODO
-    	throw new ServerApiException("Not yet implemented");
+    public void unblockContact(ContactId contact) {
+		if (logger.isActivated()) {
+			logger.info("Unblock contact " + contact);
+		}
+		ContactsManager.getInstance().setBlockingState(contact, BlockingState.NONE);
     }
 }

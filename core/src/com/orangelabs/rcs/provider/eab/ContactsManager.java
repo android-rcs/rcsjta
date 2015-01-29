@@ -65,6 +65,7 @@ import com.gsma.services.rcs.contacts.ContactsProvider;
 import com.orangelabs.rcs.R;
 import com.orangelabs.rcs.addressbook.AuthenticationService;
 import com.orangelabs.rcs.core.ims.service.ContactInfo;
+import com.orangelabs.rcs.core.ims.service.ContactInfo.BlockingState;
 import com.orangelabs.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.orangelabs.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.orangelabs.rcs.core.ims.service.capability.Capabilities;
@@ -261,10 +262,7 @@ public final class ContactsManager {
      */
 	private static final String[] PROJECTION_RABP = new String[] { RichAddressBookData.KEY_CONTACT };
 
-	private static final String SELECTION_RAPB_IM_BLOCKED = new StringBuilder(RichAddressBookData.KEY_IM_BLOCKED).append("=")
-			.append(RichAddressBookData.BLOCKED_VALUE_SET).toString();
-
-	private static final String SELECTION_RABP_FT_BLOCKED = new StringBuilder(RichAddressBookData.KEY_FT_BLOCKED).append("=")
+	private static final String SELECTION_RAPB_BLOCKED = new StringBuilder(RichAddressBookData.KEY_BLOCKED).append("=")
 			.append(RichAddressBookData.BLOCKED_VALUE_SET).toString();
 
 	private static final String SELECTION_RAW_CONTACT_FROM_NUMBER = new StringBuilder(Data.MIMETYPE)
@@ -691,6 +689,9 @@ public final class ContactsManager {
 		
 		infos.setRegistrationState(RegistrationState.UNKNOWN);
 
+		infos.setBlockingState(BlockingState.NONE);
+		infos.setBlockingTimestamp(-1L);
+		
 		Cursor cursor = null;
 		try {
 			Uri uri = Uri.withAppendedPath(RichAddressBookData.CONTENT_URI, contact.toString());
@@ -708,6 +709,9 @@ public final class ContactsManager {
 				int registrationState = cursor.getInt(cursor.getColumnIndexOrThrow(RichAddressBookData.KEY_REGISTRATION_STATE));
 				infos.setRegistrationState(RegistrationState.valueOf(registrationState));
 
+				int blockingState = cursor.getInt(cursor.getColumnIndexOrThrow(RichAddressBookData.KEY_BLOCKED));
+				infos.setBlockingState(BlockingState.valueOf(blockingState));
+				
 				// Get Presence info
 				presenceInfo.setPresenceStatus(cursor.getString(cursor.getColumnIndexOrThrow(RichAddressBookData.KEY_PRESENCE_SHARING_STATUS)));
 
@@ -2485,16 +2489,16 @@ public final class ContactsManager {
 	}
     
     /**
-     * Get whether the "IM" feature is enabled or not for the contact
+     * Get whether the contact is blocked or not
      * 
      * @param contact
      * @return flag indicating if IM sessions with the contact are enabled or not
      */
-    public boolean isImBlockedForContact(ContactId contact){
+    public boolean isBlockedForContact(ContactId contact){
 		Cursor cursor = null;
 		try {
 			Uri uri = Uri.withAppendedPath(RichAddressBookData.CONTENT_URI, contact.toString());
-			cursor = mLocalContentResolver.query(uri, PROJECTION_RABP, SELECTION_RAPB_IM_BLOCKED, null, null);
+			cursor = mLocalContentResolver.query(uri, PROJECTION_RABP, SELECTION_RAPB_BLOCKED, null, null);
 			return cursor.moveToFirst();
 			
 		} catch (Exception e) {
@@ -2509,32 +2513,6 @@ public final class ContactsManager {
 			}
 		}
     }
-    
-    /**
-     * Get whether the "FT" feature is enabled or not for the contact
-     * 
-     * @param contact
-     * @return flag indicating if FT sessions with the contact are enabled or not
-     */
-	public boolean isFtBlockedForContact(ContactId contact) {
-		Cursor cursor = null;
-		try {
-			Uri uri = Uri.withAppendedPath(RichAddressBookData.CONTENT_URI, contact.toString());
-			cursor = mLocalContentResolver.query(uri, PROJECTION_RABP, SELECTION_RABP_FT_BLOCKED, null, null);
-			return cursor.moveToFirst();
-			
-		} catch (Exception e) {
-			if (logger.isActivated()){
-				logger.error("Exception occurred",e);
-			}
-			return false;
-			
-		} finally {
-			if (cursor != null) {
-				cursor.close();
-			}
-		}
-	}
     
     /**
      * Utility to create a ContactInfo object from a cursor containing data
@@ -2970,5 +2948,32 @@ public final class ContactsManager {
 		values.put(RichAddressBookData.KEY_CAPABILITY_TIME_LAST_REFRESH, now);
 		Uri uri = Uri.withAppendedPath(RichAddressBookData.CONTENT_URI, contact.toString());
 		mLocalContentResolver.update(uri, values, null, null);
+	}
+	
+	/**
+	 * Set the blocking stte for a given contact
+	 * 
+	 * @param contact Contact ID
+	 * @param state Blocking state
+	 */
+	public void setBlockingState(ContactId contact, BlockingState state) {
+		if (contact == null) {
+			return;
+		}
+
+		ContentValues values = new ContentValues();
+		if (BlockingState.BLOCKED == state) {
+			// Block the contact
+			values.put(RichAddressBookData.KEY_BLOCKED, RichAddressBookData.BLOCKED_VALUE_SET);
+			long now = System.currentTimeMillis();
+			values.put(RichAddressBookData.KEY_BLOCKING_TIMESTAMP, now);			
+		} else {
+			// Unblock the contact
+			values.put(RichAddressBookData.KEY_BLOCKED, RichAddressBookData.BLOCKED_VALUE_NOT_SET);
+			values.put(RichAddressBookData.KEY_BLOCKING_TIMESTAMP, -1L);			
+		}
+		Uri uri = Uri.withAppendedPath(RichAddressBookData.CONTENT_URI, contact.toString());
+		mLocalContentResolver.update(uri, values, null, null);
+		// TODO: contact not exist management
 	}
 }

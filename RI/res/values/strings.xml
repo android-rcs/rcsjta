@@ -91,6 +91,11 @@
 <string name="menu_contact_vcard">Contact visit card</string>
 <string name="label_vcard">Visit card:</string>
 <string name="label_show_vcard">Show card</string>
+<string name="menu_blocking_contact">Block contacts</string>
+<string name="label_block">Block</string>
+<string name="label_unblock">Unblock</string>
+<string name="label_contact_blocked">%s has been blocked</string>
+<string name="label_contact_unblocked">%s has been unblocked</string>
 
 <!-- Capabilities menu -->
 <string name="menu_capabilities">Capabilities</string>

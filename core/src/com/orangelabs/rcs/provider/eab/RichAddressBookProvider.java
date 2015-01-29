@@ -131,9 +131,8 @@ public class RichAddressBookProvider extends ContentProvider {
     	RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL,
     	RichAddressBookData.KEY_CAPABILITY_GROUP_CHAT_SF,
     	RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_SF,
-    	RichAddressBookData.KEY_CAPABILITY_IM_BLOCKED_TIMESTAMP, 
-    	RichAddressBookData.KEY_IM_BLOCKED,
-    	RichAddressBookData.KEY_FT_BLOCKED
+    	RichAddressBookData.KEY_BLOCKING_TIMESTAMP, 
+    	RichAddressBookData.KEY_BLOCKED
     };
 
     private static final Set<String> COLUMN_SET_HIDDEN_FOR_EXTERNAL_ACCESS = new HashSet<String>(
@@ -191,7 +190,7 @@ public class RichAddressBookProvider extends ContentProvider {
 
         private static final String DATABASE_NAME = "capability.db";
 
-        private static final int DATABASE_VERSION = 25;
+        private static final int DATABASE_VERSION = 26;
 
         private void createDb(SQLiteDatabase db) {
             db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(CAPABILITY_TABLE).append("(")
@@ -228,9 +227,8 @@ public class RichAddressBookProvider extends ContentProvider {
                     .append(RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_SF).append(" INTEGER,")
                     .append(RichAddressBookData.KEY_CAPABILITY_GROUP_CHAT_SF).append(" INTEGER,")
                     .append(RichAddressBookData.KEY_CAPABILITY_EXTENSIONS).append(" TEXT,")
-                    .append(RichAddressBookData.KEY_IM_BLOCKED).append(" INTEGER,")
-                    .append(RichAddressBookData.KEY_FT_BLOCKED).append(" INTEGER,")
-                    .append(RichAddressBookData.KEY_CAPABILITY_IM_BLOCKED_TIMESTAMP).append(" INTEGER,")
+                    .append(RichAddressBookData.KEY_BLOCKED).append(" INTEGER,")
+                    .append(RichAddressBookData.KEY_BLOCKING_TIMESTAMP).append(" INTEGER,")
                     .append(RichAddressBookData.KEY_TIMESTAMP).append(" INTEGER,")
                     .append(RichAddressBookData.KEY_AUTOMATA).append(" TEXT,")
                     .append(RichAddressBookData.KEY_CAPABILITY_TIME_LAST_REFRESH).append(" INTEGER)").toString());

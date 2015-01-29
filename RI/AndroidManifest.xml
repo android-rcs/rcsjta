@@ -107,6 +107,10 @@
             android:name=".contacts.ContactVCard"
             android:label="@string/menu_contact_vcard" />
                 
+        <activity
+            android:name=".contacts.BlockingContact"
+            android:label="@string/menu_blocking_contact" />
+        
         <!-- Capabilities API -->
 
         <activity android:name=".capabilities.TestCapabilitiesApi"/>

@@ -61,6 +61,38 @@ public class ContactInfo {
 		}
 	};
 	
+	public enum BlockingState {
+		NONE(0), BLOCKED(1);
+
+		private int mValue;
+
+		/**
+		 * A data array to keep mapping between value and BlockingState
+		 */
+		private static SparseArray<BlockingState> mValueToEnum = new SparseArray<BlockingState>();
+		static {
+			for (BlockingState entry : BlockingState.values()) {
+				mValueToEnum.put(entry.toInt(), entry);
+			}
+		}
+
+		private BlockingState(int value) {
+			mValue = value;
+		}
+
+		public final int toInt() {
+			return mValue;
+		}
+		
+		public static BlockingState valueOf(int value) {
+			BlockingState state = mValueToEnum.get(value);
+		    if (state != null) {
+		        return state;
+		    }
+		    return NONE;
+		}
+	};	
+	
 	public enum RcsStatus {
 		/**
 		 * The contact is RCS capable but there is no special presence relationship with the user
@@ -163,7 +195,17 @@ public class ContactInfo {
 	 */
 	private long rcsStatusTimestamp = 0L;
 	
-    /**
+	/**
+	 * Blocking state
+	 */
+	private BlockingState blockingState = BlockingState.NONE;
+	
+	/**
+	 * Blocking timestamp
+	 */
+	private long blockingTs = -1L;
+
+	/**
 	 * Constructor
 	 */
 	public ContactInfo() {
@@ -182,6 +224,8 @@ public class ContactInfo {
 		capabilities = info.capabilities;
 		presenceInfo = info.getPresenceInfo();
 		displayName = info.getDisplayName();
+		blockingState = info.getBlockingState();
+		blockingTs = info.getBlockingTimestamp();
 	}
 
     /**
@@ -304,6 +348,7 @@ public class ContactInfo {
 
 	/**
 	 * Returns the RCS display name
+	 * 
 	 * @return the RCS display name
 	 */
 	public String getDisplayName() {
@@ -312,12 +357,49 @@ public class ContactInfo {
 
 	/**
 	 * Sets the RCS display name
+	 * 
 	 * @param displayName
 	 */
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
+	
+    /**
+	 * Set the blocking state
+	 * 
+	 * @param state State
+	 */
+	public void setBlockingState(BlockingState state) {
+		blockingState = state;
+	}
+	
+	/**
+	 * Returns the blocking state
+	 * 
+	 * @return State
+	 */
+	public BlockingState getBlockingState(){
+		return blockingState;
+	}
+	
+	/**
+	 * Returns the blocking timestamp
+	 * 
+	 * @return Timestamp
+	 */
+	public long getBlockingTimestamp(){
+		return blockingTs;
+	}	
 
+	/**
+	 * Set the blocking timestamp
+	 * 
+	 * @param ts Timestamp
+	 */
+	public void setBlockingTimestamp(long ts){
+		this.blockingTs = ts;
+	}	
+	
 	/**
 	 * Returns a string representation of the object
 	 * 
@@ -327,7 +409,9 @@ public class ContactInfo {
 		String result =  "Contact=" + mContact +
 			", Status=" + rcsStatus +
 			", State=" + registrationState +
-			", Timestamp=" + rcsStatusTimestamp;
+			", Timestamp=" + rcsStatusTimestamp + 
+			", Blocked=" + blockingState +
+			", Blocked at=" + blockingTs;
 		if (capabilities != null) {
 			result += ", Capabilities=" + capabilities.toString();
 		}

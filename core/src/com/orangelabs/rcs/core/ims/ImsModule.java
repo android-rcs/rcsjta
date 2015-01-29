@@ -161,16 +161,16 @@ public class ImsModule implements SipEventListener {
         services[ImsService.IM_SERVICE] = new InstantMessagingService(this, core, rcsSettings, contactsManager, messagingLog);
         
         // Create IP call service (optional)
-        services[ImsService.IPCALL_SERVICE] = new IPCallService(this, rcsSettings);
+        services[ImsService.IPCALL_SERVICE] = new IPCallService(this, rcsSettings, contactsManager);
         
         // Create richcall service (optional)
-        services[ImsService.RICHCALL_SERVICE] = new RichcallService(this);
+        services[ImsService.RICHCALL_SERVICE] = new RichcallService(this, contactsManager);
 
         // Create presence service (optional)
         services[ImsService.PRESENCE_SERVICE] = new PresenceService(this, rcsSettings, contactsManager);
 
         // Create generic SIP service
-        services[ImsService.SIP_SERVICE] = new SipService(this);
+        services[ImsService.SIP_SERVICE] = new SipService(this, contactsManager);
 
         // Create the service dispatcher
         serviceDispatcher = new ImsServiceDispatcher(this, rcsSettings);

@@ -43,7 +43,6 @@ import com.gsma.services.rcs.vsh.IVideoSharingService;
 import com.gsma.services.rcs.vsh.IVideoSharingServiceConfiguration;
 import com.gsma.services.rcs.vsh.VideoSharing;
 import com.gsma.services.rcs.vsh.VideoSharing.ReasonCode;
-import com.gsma.services.rcs.vsh.VideoSharingServiceConfiguration;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.service.SessionIdGenerator;

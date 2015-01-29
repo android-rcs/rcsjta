@@ -51,11 +51,14 @@ import com.orangelabs.rcs.core.ims.service.richcall.image.TerminatingImageTransf
 import com.orangelabs.rcs.core.ims.service.richcall.video.OriginatingVideoStreamingSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.TerminatingVideoStreamingSession;
 import com.orangelabs.rcs.core.ims.service.richcall.video.VideoStreamingSession;
+import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import javax2.sip.message.Response;
 
 /**
  * Rich call service has in charge to monitor the GSM call in order to stop the
@@ -100,14 +103,22 @@ public class RichcallService extends ImsService {
 	 */
 	private Map<String, GeolocTransferSession> mGeolocTransferSessionCache = new HashMap<String, GeolocTransferSession>();
 
-    /**
+	/**
+	 * Contacts manager
+	 */
+	private final ContactsManager mContactsManager;	
+	
+	/**
      * Constructor
      *
      * @param parent IMS module
+	 * @param contactsManager ContactsManager
      * @throws CoreException
      */
-	public RichcallService(ImsModule parent) throws CoreException {
+	public RichcallService(ImsModule parent, ContactsManager contactsManager) throws CoreException {
         super(parent, true);
+        
+        mContactsManager = contactsManager;        
 	}
 
 	private void handleImageSharingInvitationRejected(SipRequest invite, int reasonCode) {
@@ -464,8 +475,8 @@ public class RichcallService extends ImsService {
 		if (logger.isActivated()) {
     		logger.info("Receive an image sharing session invitation");
     	}
-        // Reject if there are already 2 bidirectional sessions with a given contact
-		boolean rejectInvitation = false;
+
+		// Parse contact
         ContactId contact = null;
 		try {
 			contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
@@ -473,7 +484,7 @@ public class RichcallService extends ImsService {
 			if (logger.isActivated()) {
 				logger.debug("Rich call not established: cannot parse contact");
 			}
-			rejectInvitation = true;
+			return;
 		}
 
         // Test if call is established
@@ -484,7 +495,20 @@ public class RichcallService extends ImsService {
 			sendErrorResponse(invite, 606);
 			return;
 		}
+		
+		// Test if the contact is blocked
+		if (mContactsManager.isBlockedForContact(contact)) {
+			if (logger.isActivated()) {
+				logger.debug("Contact " + contact + " is blocked: automatically reject the sharing invitation");
+			}
 
+			// Send a 603 Decline response
+			sendErrorResponse(invite, Response.DECLINE);
+			return;
+		}
+
+        // Reject if there are already 2 bidirectional sessions with a given contact
+		boolean rejectInvitation = false;
         if (isCurrentlyImageSharingBiDirectional()) {
         	// Already a bidirectional session
             if (logger.isActivated()) {
@@ -609,17 +633,16 @@ public class RichcallService extends ImsService {
 		if (logger.isActivated()) {
     		logger.info("Receive a video sharing invitation");
     	}
-        // Reject if there are already 2 bidirectional sessions with a given contact
-		boolean rejectInvitation = false;
-        ContactId contact = null;
+
+		// Parse contact
+		ContactId contact = null;
 		try {
 			contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
 		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.debug("Rich call not established: cannot parse contact");
 			}
-			rejectInvitation = true;
-			/*TODO: Skip catching exception, which should be implemented in CR037.*/
+			return;
 		}
 
         // Test if call is established
@@ -630,7 +653,20 @@ public class RichcallService extends ImsService {
 			sendErrorResponse(invite, 606);
 			return;
 		}
+		
+		// Test if the contact is blocked
+		if (mContactsManager.isBlockedForContact(contact)) {
+			if (logger.isActivated()) {
+				logger.debug("Contact " + contact + " is blocked: automatically reject the sharing invitation");
+			}
 
+			// Send a 603 Decline response
+			sendErrorResponse(invite, Response.DECLINE);
+			return;
+		}		
+
+        // Reject if there are already 2 bidirectional sessions with a given contact
+		boolean rejectInvitation = false;
         if (isCurrentlyVideoSharingBiDirectional()) {
         	// Already a bidirectional session
             if (logger.isActivated()) {
@@ -716,26 +752,39 @@ public class RichcallService extends ImsService {
 			logger.info("Receive a geoloc sharing session invitation");
 		}
 
+		// Parse contact
 		ContactId contact = null;
-		boolean rejectInvitation = false;
 		try {
 			contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
-			// Test if call is established
-			if (!isCallConnectedWith(contact)) {
-				if (logger.isActivated()) {
-					logger.debug("Rich call not established: reject the invitation");
-				}
-				sendErrorResponse(invite, 606);
-				return;
-			}
 		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.debug("Rich call not established: cannot parse contact");
 			}
-			rejectInvitation = true;
 			return;
 		}
 
+		// Test if call is established
+		if (!isCallConnectedWith(contact)) {
+			if (logger.isActivated()) {
+				logger.debug("Rich call not established: reject the invitation");
+			}
+			sendErrorResponse(invite, 606);
+			return;
+		}
+
+		// Test if the contact is blocked
+		if (mContactsManager.isBlockedForContact(contact)) {
+			if (logger.isActivated()) {
+				logger.debug("Contact " + contact + " is blocked: automatically reject the sharing invitation");
+			}
+
+			// Send a 603 Decline response
+			sendErrorResponse(invite, Response.DECLINE);
+			return;
+		}
+
+        // Reject if there are already 2 bidirectional sessions with a given contact
+		boolean rejectInvitation = false;
 		if (isCurrentlyGeolocSharingBiDirectional()) {
 			// Already a bidirectional session
 			if (logger.isActivated()) {
