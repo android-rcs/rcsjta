@@ -74,6 +74,14 @@ public class BlockingContact extends Activity {
 		toggleBtn = (ToggleButton) findViewById(R.id.block_btn);
 		toggleBtn.setOnClickListener(toggleListener);
 
+		// Update refresh button
+		if (mSpinner.getAdapter().getCount() == 0) {
+			// Disable button if no contact available
+			toggleBtn.setEnabled(false);
+		} else {
+			toggleBtn.setEnabled(true);
+		}
+		
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
 		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.CONTACTS)) {
