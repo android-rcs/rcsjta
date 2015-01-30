@@ -18,8 +18,6 @@
 
 package com.gsma.services.rcs;
 
-import com.gsma.services.rcs.RcsService.ReadStatus;
-
 import java.lang.reflect.Method;
 
 import android.content.Context;

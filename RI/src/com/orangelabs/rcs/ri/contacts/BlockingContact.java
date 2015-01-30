@@ -4,10 +4,9 @@ import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.Spinner;
 import android.widget.ToggleButton;
 
@@ -62,17 +61,19 @@ public class BlockingContact extends Activity {
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		setContentView(R.layout.contacts_blocking);
 
+		// Set contact utils instance
+		mContactUtils = ContactUtils.getInstance(this);		
+
 		// Set the contact selector
 		mSpinner = (Spinner) findViewById(R.id.contact);
-		mSpinner.setAdapter(ContactListAdapter.createContactListAdapter(this));
+		ContactListAdapter adapter = ContactListAdapter.createRcsContactListAdapter(this);
+		mSpinner.setAdapter(adapter);
 		mSpinner.setOnItemSelectedListener(listenerContact);
 
 		// Set button callback
 		toggleBtn = (ToggleButton) findViewById(R.id.block_btn);
-		toggleBtn.setOnCheckedChangeListener(toggleListener);
-		
-		mContactUtils = ContactUtils.getInstance(this);		
-		
+		toggleBtn.setOnClickListener(toggleListener);
+
 		// Register to API connection manager
 		connectionManager = ApiConnectionManager.getInstance(this);
 		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.CONTACTS)) {
@@ -80,13 +81,6 @@ public class BlockingContact extends Activity {
 			return;
 		}
 		connectionManager.startMonitorServices(this, null, RcsServiceName.CONTACTS);
-	}
-	
-	@Override
-	protected void onResume() {
-		super.onResume();
-		
-		//updateToggle();		
 	}
 
 	@Override
@@ -97,10 +91,8 @@ public class BlockingContact extends Activity {
     	}
 	}
 	
-	private void updateToggle() {
+	private void updateBlockingState(ContactId contactId) {
 	   	try {
-			// Update the toggle info
-			ContactId contactId = getSelectedContact();
 			RcsContact contact = connectionManager.getContactsApi().getRcsContact(contactId);
 			toggleBtn.setChecked(contact.isBlocked());
 		} catch (RcsServiceNotAvailableException e) {
@@ -118,7 +110,8 @@ public class BlockingContact extends Activity {
 	private OnItemSelectedListener listenerContact = new OnItemSelectedListener() {
 		@Override
 		public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-			updateToggle();
+			ContactId contactId = getSelectedContact();
+			updateBlockingState(contactId);
 		}
 
 		@Override
@@ -132,6 +125,7 @@ public class BlockingContact extends Activity {
 	 * @return Contact ID
 	 */
 	private ContactId getSelectedContact() {
+		// get selected phone number
 		ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
 		return mContactUtils.formatContact(adapter.getSelectedNumber(mSpinner.getSelectedView()));
 	}
@@ -139,11 +133,11 @@ public class BlockingContact extends Activity {
 	/**
 	 * Toggle button listener
      */
-    private OnCheckedChangeListener toggleListener = new OnCheckedChangeListener() {
-        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+    private OnClickListener toggleListener = new OnClickListener() {
+    	public void onClick(View view) {
         	try {
 				ContactId contact = getSelectedContact();
-	        	if (isChecked) {
+	        	if (toggleBtn.isChecked()) {
 					// Block the contact
 	        		connectionManager.getContactsApi().blockContact(contact);
 	        		Utils.displayToast(BlockingContact.this, getString(R.string.label_contact_blocked, contact.toString()));

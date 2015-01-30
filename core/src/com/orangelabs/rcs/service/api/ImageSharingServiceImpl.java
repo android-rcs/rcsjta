@@ -41,7 +41,6 @@ import com.gsma.services.rcs.ish.IImageSharingService;
 import com.gsma.services.rcs.ish.IImageSharingServiceConfiguration;
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.ish.ImageSharing.ReasonCode;
-import com.gsma.services.rcs.ish.ImageSharingServiceConfiguration;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.SessionIdGenerator;

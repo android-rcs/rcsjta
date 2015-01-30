@@ -42,7 +42,6 @@ import com.gsma.services.rcs.ipcall.IIPCallService;
 import com.gsma.services.rcs.ipcall.IIPCallServiceConfiguration;
 import com.gsma.services.rcs.ipcall.IPCall;
 import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
-import com.gsma.services.rcs.ipcall.IPCallServiceConfiguration;
 import com.orangelabs.rcs.core.content.AudioContent;
 import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.service.SessionIdGenerator;

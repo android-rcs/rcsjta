@@ -128,6 +128,11 @@ public final class ContactsManager {
     private static final String MIMETYPE_REGISTRATION_STATE = ContactsProvider.MIME_TYPE_REGISTRATION_STATE;
     
     /** 
+     * MIME type for blocking state 
+     */
+    private static final String MIMETYPE_BLOCKING_STATE = ContactsProvider.MIME_TYPE_BLOCKING_STATE;
+
+    /** 
      * MIME type for GSMA_CS_IMAGE (image sharing) capability 
      */
     private static final String MIMETYPE_CAPABILITY_IMAGE_SHARING = ContactsProvider.MIME_TYPE_IMAGE_SHARING;
@@ -148,7 +153,7 @@ public final class ContactsManager {
     private static final String MIMETYPE_CAPABILITY_FILE_TRANSFER = ContactsProvider.MIME_TYPE_FILE_TRANSFER;
 
     /** 
-     * MIME type for social presence capability 
+     * MIME type for geoloc psuh capability 
      */
     private static final String MIMETYPE_CAPABILITY_GEOLOCATION_PUSH = ContactsProvider.MIME_TYPE_GEOLOC_PUSH;
     
@@ -517,6 +522,18 @@ public final class ContactsManager {
 				values.put(RichAddressBookData.KEY_PRESENCE_PHOTO_ETAG, photoIcon.getEtag());
 			}
 		}
+
+		// Save blocking state
+		if (newInfo.getBlockingState() == BlockingState.BLOCKED) {
+			// Block the contact
+			values.put(RichAddressBookData.KEY_BLOCKED, RichAddressBookData.BLOCKED_VALUE_SET);
+			long now = System.currentTimeMillis();
+			values.put(RichAddressBookData.KEY_BLOCKING_TIMESTAMP, now);			
+		} else {
+			// Unblock the contact
+			values.put(RichAddressBookData.KEY_BLOCKED, RichAddressBookData.BLOCKED_VALUE_NOT_SET);
+			values.put(RichAddressBookData.KEY_BLOCKING_TIMESTAMP, -1L);			
+		}
 		
 		// Save registration state
 		values.put(RichAddressBookData.KEY_REGISTRATION_STATE, newInfo.getRegistrationState().toInt());
@@ -624,6 +641,14 @@ public final class ContactsManager {
 						ops.add(extensionOperation);
 					}
 				}
+    			// Blocking state
+    			if (newInfo.getBlockingState() != oldInfo.getBlockingState()){
+    				// Modify blocking state
+    				ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
+    						.withSelection(SELECTION_RAW_CONTACT_MIMETYPE_DATA1, new String[]{Long.toString(rawContactId), MIMETYPE_BLOCKING_STATE, contact.toString()})
+    						.withValue(Data.DATA2, newInfo.getBlockingState().toInt())
+    						.build());
+    			}
     			
     			// New contact registration state
     			String newFreeText = "";
@@ -1240,7 +1265,7 @@ public final class ContactsManager {
 					.withValue(Data.DATA2, newRegistrationState)
 					.build());
 		}
-		
+
 		if (!StringUtils.equals(newFreeText, oldFreeText) || registrationChanged){
 			int availability = PRESENCE_STATUS_NOT_SET;
 			if (RegistrationState.ONLINE == newRegistrationState) {
@@ -1307,7 +1332,7 @@ public final class ContactsManager {
 		}
 
 		if (registrationChanged) {
-			// Modify registration status
+			// Modify registration state
 			ops.add(ContentProviderOperation
 					.newUpdate(Data.CONTENT_URI)
 					.withSelection(SELECTION_RAW_CONTACT_MIMETYPE_DATA1,
@@ -1987,16 +2012,20 @@ public final class ContactsManager {
         if (capabilities.isGeolocationPushSupported()) {
             ops.add(createMimeTypeForContact(rawContactRefIms, info.getContact(), MIMETYPE_CAPABILITY_GEOLOCATION_PUSH));
         }
-        // Insert extensions
-		ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
-				.withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
-				.withValue(Data.MIMETYPE, MIMETYPE_CAPABILITY_EXTENSIONS)
-				.withValue(Data.DATA1, info.getContact().toString())
-				.withValue(Data.DATA2, ServiceExtensionManager.getExtensions(info.getCapabilities().getSupportedExtensions()))
-				.withValue(Data.DATA3, info.getContact().toString())
-				.build());
 
-    	// Insert registration status
+        // Extensions
+        Set<String> exts = info.getCapabilities().getSupportedExtensions();
+        if ((exts != null) && (exts.size() > 0)) {
+			ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
+					.withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
+					.withValue(Data.MIMETYPE, MIMETYPE_CAPABILITY_EXTENSIONS)
+					.withValue(Data.DATA1, info.getContact().toString())
+					.withValue(Data.DATA2, ServiceExtensionManager.getExtensions(exts))
+					.withValue(Data.DATA3, info.getContact().toString())
+					.build());
+        }
+        
+        // Insert registration state
     	ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
     			.withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
     			.withValue(Data.MIMETYPE, MIMETYPE_REGISTRATION_STATE)
@@ -2004,7 +2033,15 @@ public final class ContactsManager {
     			.withValue(Data.DATA2, info.getRegistrationState().toInt())
     			.build());
     	
-        // Create the RCS raw contact and get its id        
+    	// Insert blocking state
+    	ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
+    			.withValueBackReference(Data.RAW_CONTACT_ID, rawContactRefIms)
+    			.withValue(Data.MIMETYPE, MIMETYPE_BLOCKING_STATE)
+    			.withValue(Data.DATA1, info.getContact().toString())
+    			.withValue(Data.DATA2, info.getBlockingState().toInt())
+    			.build());
+    	
+    	// Create the RCS raw contact and get its id        
         long rcsRawContactId = INVALID_ID;
         try {
         	ContentProviderResult[] results;
@@ -2625,7 +2662,7 @@ public final class ContactsManager {
                 Data.DATA1, 
                 Data.DATA2, 
                 Website.URL,
-                Photo.PHOTO          
+                Photo.PHOTO
         };
 
         // Filter the mime types 
@@ -2639,10 +2676,12 @@ public final class ContactsManager {
                 + Data.MIMETYPE + "=? OR "
                 + Data.MIMETYPE + "=? OR "
                 + Data.MIMETYPE + "=? OR "
+                + Data.MIMETYPE + "=? OR "
                 + Data.MIMETYPE + "=?)";
         String[] selectionArgs = {
                 Long.toString(rawContactId), 
                 MIMETYPE_REGISTRATION_STATE,
+                MIMETYPE_BLOCKING_STATE,
                 MIMETYPE_NUMBER,
                 MIMETYPE_CAPABILITY_IMAGE_SHARING,
                 MIMETYPE_CAPABILITY_VIDEO_SHARING,
@@ -2714,7 +2753,6 @@ public final class ContactsManager {
 		values.put(Data.DATA2, getMimeTypeDescription(MIMETYPE_CAPABILITY_IP_VIDEO_CALL));
 		ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
 				.withSelection(SELECTION_DATA_MIMETYPE_CAPABILITY_IP_VIDEO_CALL, null).withValues(values).build());
-
 
     	if (!ops.isEmpty()){
 			// Do the actual database modifications
@@ -2955,25 +2993,21 @@ public final class ContactsManager {
 	 * 
 	 * @param contact Contact ID
 	 * @param state Blocking state
+	 * @throws ContactsManagerException
 	 */
-	public void setBlockingState(ContactId contact, BlockingState state) {
+	public void setBlockingState(ContactId contact, BlockingState state) throws ContactsManagerException {
 		if (contact == null) {
 			return;
 		}
+		
+		// Get the current information on this contact 
+		ContactInfo oldInfo = getContactInfo(contact);
+		ContactInfo newInfo = new ContactInfo(oldInfo);
+		
+		// Update the state
+		newInfo.setBlockingState(state);		
 
-		ContentValues values = new ContentValues();
-		if (BlockingState.BLOCKED == state) {
-			// Block the contact
-			values.put(RichAddressBookData.KEY_BLOCKED, RichAddressBookData.BLOCKED_VALUE_SET);
-			long now = System.currentTimeMillis();
-			values.put(RichAddressBookData.KEY_BLOCKING_TIMESTAMP, now);			
-		} else {
-			// Unblock the contact
-			values.put(RichAddressBookData.KEY_BLOCKED, RichAddressBookData.BLOCKED_VALUE_NOT_SET);
-			values.put(RichAddressBookData.KEY_BLOCKING_TIMESTAMP, -1L);			
-		}
-		Uri uri = Uri.withAppendedPath(RichAddressBookData.CONTENT_URI, contact.toString());
-		mLocalContentResolver.update(uri, values, null, null);
-		// TODO: contact not exist management
+		// Save the modifications
+		setContactInfo(newInfo, oldInfo);
 	}
 }

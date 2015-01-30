@@ -250,23 +250,47 @@ public class ContactsServiceImpl extends IContactsService.Stub {
      * blocked and redirected to the corresponding spambox.
      * 
      * @param contact Contact ID
+     * @throws ServerApiException
      */
-    public void blockContact(ContactId contact) {
+    public void blockContact(ContactId contact) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Block contact " + contact);
 		}
-		ContactsManager.getInstance().setBlockingState(contact, BlockingState.BLOCKED);
+		try {
+			ContactsManager.getInstance().setBlockingState(contact, BlockingState.BLOCKED);
+		} catch (Exception e) {
+			/*
+			 * TODO: This is not the correct way to handle this exception, and
+			 * will be fixed in CR037
+			 */
+			if (logger.isActivated()) {
+				logger.error("Unexpected exception", e);
+			}
+			throw new ServerApiException(e);
+		}
     }
 
     /**
      * Unblock a contact
      * 
      * @param contact Contact ID
+     * @throws ServerApiException
      */
-    public void unblockContact(ContactId contact) {
-		if (logger.isActivated()) {
-			logger.info("Unblock contact " + contact);
+    public void unblockContact(ContactId contact) throws ServerApiException {
+		try {
+			if (logger.isActivated()) {
+				logger.info("Unblock contact " + contact);
+			}
+			ContactsManager.getInstance().setBlockingState(contact, BlockingState.NONE);
+		} catch (Exception e) {
+			/*
+			 * TODO: This is not the correct way to handle this exception, and
+			 * will be fixed in CR037
+			 */
+			if (logger.isActivated()) {
+				logger.error("Unexpected exception", e);
+			}
+			throw new ServerApiException(e);
 		}
-		ContactsManager.getInstance().setBlockingState(contact, BlockingState.NONE);
     }
 }

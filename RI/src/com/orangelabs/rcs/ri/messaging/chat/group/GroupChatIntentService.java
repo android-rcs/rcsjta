@@ -127,6 +127,15 @@ public class GroupChatIntentService extends IntentService {
 			if (LogUtils.isActive) {
 				Log.d(LOGTAG, "Group chat invitation =".concat(groupChatDAO.toString()));
 			}
+			
+			// Check if it's a spam
+			if (groupChatDAO.getReasonCode() == GroupChat.ReasonCode.REJECTED_SPAM) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "Do nothing on a spam");
+				}
+				return;
+			}
+			
 			forwardGCInvitation2UI(chatId, groupChatDAO);
 		} catch (Exception e) {
 			if (LogUtils.isActive) {
