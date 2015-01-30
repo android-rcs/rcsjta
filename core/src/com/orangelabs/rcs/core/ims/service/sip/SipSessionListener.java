@@ -18,7 +18,10 @@
 
 package com.orangelabs.rcs.core.ims.service.sip;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
+
+import android.content.Intent;
 
 /**
  * SIP session listener
@@ -28,20 +31,28 @@ import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 public interface SipSessionListener extends ImsSessionListener  {
     /**
      * SIP session error
-     * 
+     * @param contact Remote contact
      * @param error Error
      */
-    public void handleSessionError(SipSessionError error);
+    public void handleSessionError(ContactId contact, SipSessionError error);
     
     /**
      * Receive data
-     * 
+     * @param contact Remote contact
      * @param error Error
      */
-    public void handleReceiveData(byte[] data);
+    public void handleReceiveData(ContactId contact, byte[] data);
     
     /**
      * Destination user agent received INVITE, and is alerting user of call
+     * @param contact Remote contact
      */
-    public void handle180Ringing();
+    public void handle180Ringing(ContactId contact);
+
+	/**
+	 * A session invitation has been received
+	 * @param contact Remote contact
+	 * @param sessionInvite
+	 */
+	public void handleSessionInvited(ContactId contact, Intent sessionInvite);
 }

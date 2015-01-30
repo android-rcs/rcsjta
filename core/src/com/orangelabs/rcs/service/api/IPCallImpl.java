@@ -34,6 +34,8 @@ import com.gsma.services.rcs.ipcall.IIPCallRenderer;
 import com.gsma.services.rcs.ipcall.IPCall;
 import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
 import com.gsma.services.rcs.ipcall.VideoCodec;
+import com.orangelabs.rcs.core.content.AudioContent;
+import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.ipcall.IPCallError;
@@ -110,7 +112,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 		}
 	}
 
-	private void handleSessionRejected(int reasonCode) {
+	private void handleSessionRejected(int reasonCode, ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Call rejected; reasonCode=" + reasonCode + ".");
 		}
@@ -120,8 +122,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 
 			mPersistentStorage.setStateAndReasonCode(IPCall.State.REJECTED, reasonCode);
 
-			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), mCallId,
-					IPCall.State.REJECTED, reasonCode);
+			mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, IPCall.State.REJECTED,
+					reasonCode);
 		}
 	}
 
@@ -522,38 +524,30 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	/**
 	 * Session is started
 	 */
-	public void handleSessionStarted() {
+	public void handleSessionStarted(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Call started");
 		}
 		synchronized (lock) {
-			// Notify event listeners
-			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
-					IPCall.State.STARTED, ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, IPCall.State.STARTED,
+					ReasonCode.UNSPECIFIED);
 		}
 	}
 
 	/**
 	 * Session has been aborted
-	 *
 	 * @param reason Termination reason
 	 */
-	public void handleSessionAborted(int reason) {
+	public void handleSessionAborted(ContactId contact, int reason) {
 		if (logger.isActivated()) {
 			logger.info("Call aborted (reason " + reason + ")");
 		}
-		IPCallSession session = mIPCallService.getIPCallSession(mCallId);
 		synchronized (lock) {
-			if (session != null && session.getDialogPath().isSessionCancelled()) {
-				mPersistentStorage.setStateAndReasonCode(IPCall.State.ABORTED,
-						ReasonCode.ABORTED_BY_REMOTE);
-			} else {
-				int reasonCode = imsServiceSessionErrorToReasonCode(reason);
-				mPersistentStorage.setStateAndReasonCode(IPCall.State.ABORTED, reasonCode);
+			int reasonCode = imsServiceSessionErrorToReasonCode(reason);
+			mPersistentStorage.setStateAndReasonCode(IPCall.State.ABORTED, reasonCode);
 
-				mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(),
-						mCallId, IPCall.State.ABORTED, reasonCode);
-			}
+			mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, IPCall.State.ABORTED,
+					reasonCode);
 			mIPCallServiceImpl.removeIPCall(mCallId);
 		}
 	}
@@ -561,7 +555,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	/**
 	 * Session has been terminated by remote
 	 */
-	public void handleSessionTerminatedByRemote() {
+	public void handleSessionTerminatedByRemote(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Call terminated by remote");
 		}
@@ -571,17 +565,17 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 			mPersistentStorage.setStateAndReasonCode(IPCall.State.ABORTED,
 					ReasonCode.ABORTED_BY_REMOTE);
 
-			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), mCallId,
-					IPCall.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
+			mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, IPCall.State.ABORTED,
+					ReasonCode.ABORTED_BY_REMOTE);
 		}
 	}
 
 	/**
 	 * IP Call error
-	 *
+	 * @param contact Remote contact
 	 * @param error Error
 	 */
-	public void handleCallError(IPCallError error) {
+	public void handleCallError(ContactId contact, IPCallError error) {
 		if (logger.isActivated()) {
 			logger.info("Session error " + error.getErrorCode());
 		}
@@ -593,104 +587,101 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 
 			mPersistentStorage.setStateAndReasonCode(state, reasonCode);
 
-			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), mCallId, state,
+			mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, state,
 					reasonCode);
 		}
 	}
 
 	/**
 	 * Add video invitation
-	 *
 	 * @param videoEncoding Video encoding
-     * @param width Video width
-     * @param height Video height
+	 * @param width Video width
+	 * @param height Video height
 	 */
-	public void handleAddVideoInvitation(String videoEncoding, int videoWidth, int videoHeight) {
+	public void handleAddVideoInvitation(ContactId contact, String videoEncoding, int videoWidth, int videoHeight) {
 		if (logger.isActivated()) {
 			logger.info("Add video invitation");
 		}
 		synchronized (lock) {
 			// TODO : Verify if the state change callback listener used is the right one!
-			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
-					IPCall.State.INVITED, ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, IPCall.State.INVITED,
+					ReasonCode.UNSPECIFIED);
 		}
 	}
 
 	/**
 	 * Remove video invitation
 	 */
-	public void handleRemoveVideo() {
+	public void handleRemoveVideo(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Remove video invitation");
 		}
 		synchronized (lock) {
 			// TODO : Verify if the state change callback listener used is the right one!
-			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
-					IPCall.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
+			mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, IPCall.State.ABORTED,
+					ReasonCode.ABORTED_BY_REMOTE);
 		}
 	}
 
 	/**
 	 * Add video has been accepted by user
 	 */
-	public void handleAddVideoAccepted() {
+	public void handleAddVideoAccepted(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Add video accepted");
 		}
 		synchronized (lock) {
 			// TODO : Verify if the state change callback listener used is the
 			// right one!
-			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
-					IPCall.State.STARTED, ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, IPCall.State.STARTED,
+					ReasonCode.UNSPECIFIED);
 		}
 	}
 
 	/**
 	 * Remove video has been accepted by user
 	 */
-	public void handleRemoveVideoAccepted() {
+	public void handleRemoveVideoAccepted(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Remove video accepted");
 		}
 		synchronized (lock) {
 			// TODO : Verify if the state change callback listener used is the
 			// right one!
-			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
-					IPCall.State.ABORTED, ReasonCode.ABORTED_BY_USER);
+			mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, IPCall.State.ABORTED,
+					ReasonCode.ABORTED_BY_USER);
 		}
 	}
 
 	/**
 	 * Add video has been aborted
-	 *
 	 * @param reason Termination reason
 	 */
-	public void handleAddVideoAborted(int reason) {
+	public void handleAddVideoAborted(ContactId contact, int reason) {
 		if (logger.isActivated()) {
 			logger.info("Add video aborted (reason " + reason + ")");
 		}
 		int reasonCode = imsServiceSessionErrorToReasonCode(reason);
 		synchronized (lock) {
 			mPersistentStorage.setStateAndReasonCode(IPCall.State.ABORTED, reasonCode);
-			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
-					IPCall.State.ABORTED, reasonCode);
+			mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, IPCall.State.ABORTED,
+					reasonCode);
 		}
 	}
 
 	/**
 	 * Remove video has been aborted
-	 *
 	 * @param reason Termination reason
 	 */
-	public void handleRemoveVideoAborted(int reason) {
+	public void handleRemoveVideoAborted(ContactId contact, int reason) {
 		if (logger.isActivated()) {
 			logger.info("Remove video aborted (reason " + reason + ")");
 		}
 		int reasonCode = imsServiceSessionErrorToReasonCode(reason);
 		synchronized (lock) {
 			mPersistentStorage.setStateAndReasonCode(IPCall.State.ABORTED, reasonCode);
-			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), mCallId,
-					IPCall.State.ABORTED, reasonCode);
+			mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, IPCall.State.ABORTED,
+					reasonCode);
 		}
 	}
 
@@ -698,15 +689,15 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	 * Call Hold invitation
 	 *
 	 */
-	public void handleCallHold() {
+	public void handleCallHold(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Call hold");
 		}
 		synchronized (lock) {
 			mPersistentStorage.setStateAndReasonCode(IPCall.State.HOLD, ReasonCode.UNSPECIFIED);
 
-			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), mCallId,
-					IPCall.State.HOLD, ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, IPCall.State.HOLD,
+					ReasonCode.UNSPECIFIED);
 		}
 	}
 
@@ -714,7 +705,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	 * Call Resume invitation
 	 *
 	 */
-	public void handleCallResume() {
+	public void handleCallResume(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Call Resume invitation");
 		}
@@ -722,8 +713,8 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 			mPersistentStorage.setStateAndReasonCode(IPCall.State.STARTED,
 					ReasonCode.UNSPECIFIED);
 
-			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), mCallId,
-					IPCall.State.STARTED, ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, IPCall.State.STARTED,
+					ReasonCode.UNSPECIFIED);
 		}
 	}
 
@@ -731,30 +722,29 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	 * Call Hold has been accepted
 	 *
 	 */
-	public void handleCallHoldAccepted() {
+	public void handleCallHoldAccepted(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Call Hold accepted");
 		}
 		synchronized (lock) {
 			// TODO : Verify if the state change callback listener used is the right one!
-			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
-					IPCall.State.HOLD, ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, IPCall.State.HOLD,
+					ReasonCode.UNSPECIFIED);
 		}
 	}
 
 	/**
 	 * Call Hold has been aborted
-	 *
 	 * @param reason Termination reason
 	 */
-	public void handleCallHoldAborted(int errorCode) {
+	public void handleCallHoldAborted(ContactId contact, int errorCode) {
 		if (logger.isActivated()) {
 			logger.info("Call Hold aborted (reason " + errorCode + ")");
 		}
 		int reasonCode = imsServiceSessionErrorToReasonCode(errorCode);
 		synchronized (lock) {
-			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
-					IPCall.State.ABORTED, reasonCode);
+			mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, IPCall.State.ABORTED,
+					reasonCode);
 		}
 	}
 
@@ -762,41 +752,40 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	 * Call Resume has been accepted
 	 *
 	 */
-	public void handleCallResumeAccepted() {
+	public void handleCallResumeAccepted(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Call Resume accepted");
 		}
 		synchronized (lock) {
 			// TODO : Verify if the state change callback listener used is the right one!
-			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
-					IPCall.State.STARTED, ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, IPCall.State.STARTED,
+					ReasonCode.UNSPECIFIED);
 		}
 	}
 
 	/**
 	 * Call Resume has been aborted
-	 *
 	 * @param reason Termination reason
 	 */
-	public void handleCallResumeAborted() {
+	public void handleCallResumeAborted(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Call Resume aborted");
 		}
 		synchronized (lock) {
 			// TODO : Verify if the state change callback listener used is the right one!
-			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
-					IPCall.State.ABORTED, ReasonCode.ABORTED_BY_SYSTEM);
+			mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, IPCall.State.ABORTED,
+					ReasonCode.ABORTED_BY_SYSTEM);
 		}
 	}
 
 	/**
 	 * Called user is Busy
 	 */
-	public void handle486Busy() {
+	public void handle486Busy(ContactId contact) {
 		// Notify event listeners
 		// TODO : Verify if the state change callback listener used is the right one!
-		mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), getCallId(),
-				IPCall.State.REJECTED, ReasonCode.REJECTED_TIME_OUT);
+		mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, IPCall.State.REJECTED,
+				ReasonCode.REJECTED_TIME_OUT);
 	}
 
     /**
@@ -829,7 +818,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 	}
 
 	@Override
-	public void handleSessionAccepted() {
+	public void handleSessionAccepted(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Accepting call");
 		}
@@ -838,36 +827,34 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 			mPersistentStorage.setStateAndReasonCode(IPCall.State.ACCEPTING,
 					ReasonCode.UNSPECIFIED);
 
-			mBroadcaster.broadcastIPCallStateChanged(getRemoteContact(), mCallId,
-					IPCall.State.ACCEPTING, ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, IPCall.State.ACCEPTING,
+					ReasonCode.UNSPECIFIED);
 		}
 	}
 
 	@Override
-	public void handleSessionRejectedByUser() {
-		handleSessionRejected(ReasonCode.REJECTED_BY_USER);
+	public void handleSessionRejectedByUser(ContactId contact) {
+		handleSessionRejected(ReasonCode.REJECTED_BY_USER, contact);
 	}
 
 	@Override
-	public void handleSessionRejectedByTimeout() {
-		handleSessionRejected(ReasonCode.REJECTED_TIME_OUT);
+	public void handleSessionRejectedByTimeout(ContactId contact) {
+		handleSessionRejected(ReasonCode.REJECTED_TIME_OUT, contact);
 	}
 
 	@Override
-	public void handleSessionRejectedByRemote() {
-		handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE);
+	public void handleSessionRejectedByRemote(ContactId contact) {
+		handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE, contact);
 	}
 
 	@Override
-	public void handleSessionInvited() {
+	public void handleSessionInvited(ContactId contact, AudioContent audio, VideoContent video) {
 		if (logger.isActivated()) {
 			logger.info("Invited to ipcall session");
 		}
 		synchronized (lock) {
-			IPCallSession session = mIPCallService.getIPCallSession(mCallId);
-			mPersistentStorage.addCall(getRemoteContact(), Direction.INCOMING,
-					session.getAudioContent(), session.getVideoContent(), IPCall.State.INVITED,
-					ReasonCode.UNSPECIFIED);
+			mPersistentStorage.addCall(contact, Direction.INCOMING, audio, video,
+					IPCall.State.INVITED, ReasonCode.UNSPECIFIED);
 		}
 
 		mBroadcaster.broadcastIPCallInvitation(mCallId);

@@ -140,9 +140,9 @@ public abstract class GeolocTransferSession extends ContentSharingSession {
         // Remove the current session
         removeSession();
 
-        // Notify listeners
+        ContactId contact = getRemoteContact();
         for(int j=0; j < getListeners().size(); j++) {
-            ((GeolocTransferSessionListener)getListeners().get(j)).handleSharingError(new ContentSharingError(error));
+            ((GeolocTransferSessionListener)getListeners().get(j)).handleSharingError(contact, new ContentSharingError(error));
         }
     }
 

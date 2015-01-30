@@ -393,7 +393,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 //					requestType = 5;// Set on Resume
 //				}
 			}
-
+			ContactId contact = getRemoteContact();
 			switch (requestType) {
 			case (0): { // Case Add Video
 				// create Video Content and set it on session
@@ -418,7 +418,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 				// Notify listeners
 				for (int i = 0; i < getListeners().size(); i++) {
 					((IPCallStreamingSessionListener) getListeners().get(i))
-							.handleAddVideoInvitation(videoEncoding, videoWidth, videoHeight);
+							.handleAddVideoInvitation(contact, videoEncoding, videoWidth, videoHeight);
 					}
 			}
 				break;
@@ -436,7 +436,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 
 				// Notify listeners
 				for (int i = 0; i < getListeners().size(); i++) {
-					((IPCallStreamingSessionListener) getListeners().get(i)).handleRemoveVideo();
+					((IPCallStreamingSessionListener) getListeners().get(i)).handleRemoveVideo(contact);
 				}
 			}
 				break;
@@ -450,7 +450,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 				// Notify listeners
 				for (int i = 0; i < getListeners().size(); i++) {
 					((IPCallStreamingSessionListener) getListeners().get(i))
-							.handleCallHold();
+							.handleCallHold(contact);
 				}
 			}
 				break;
@@ -465,7 +465,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 				// Notify listeners
 				for (int i = 0; i < getListeners().size(); i++) {
 					((IPCallStreamingSessionListener) getListeners().get(i))
-							.handleCallResume();
+							.handleCallResume(contact);
 				}
 			}
 				break;
@@ -546,6 +546,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 			logger.info("handleReInviteResponse: " + code);
 		}
 
+        ContactId contact = getRemoteContact();
 		// case Add video
 		if (requestType == IPCallSession.ADD_VIDEO) {
 			if (code == 200) {	// 200 OK response
@@ -555,7 +556,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 				// Notify listeners
 				for (int i = 0; i < getListeners().size(); i++) {
 					((IPCallStreamingSessionListener) getListeners().get(i))
-							.handleAddVideoAccepted();
+							.handleAddVideoAccepted(contact);
 				}
 
 				try {
@@ -572,7 +573,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 				// Notify listeners
 				for (int i = 0; i < getListeners().size(); i++) {
 					((IPCallStreamingSessionListener) getListeners().get(i))
-							.handleAddVideoAborted(code);
+							.handleAddVideoAborted(contact, code);
 				}
 			}
 
@@ -588,13 +589,13 @@ public abstract class IPCallSession extends ImsServiceSession {
 				// Notify listeners
 				for (int i = 0; i < getListeners().size(); i++) {
 					((IPCallStreamingSessionListener) getListeners().get(i))
-							.handleRemoveVideoAccepted();
+							.handleRemoveVideoAccepted(contact);
 				}
 			} else if (code == ImsServiceSession.TERMINATION_BY_TIMEOUT) { // No answer or 408 TimeOut response
 				// Notify listeners
 				for (int i = 0; i < getListeners().size(); i++) {
 					((IPCallStreamingSessionListener) getListeners().get(i))
-							.handleRemoveVideoAborted(code);
+							.handleRemoveVideoAborted(contact, code);
 				}
 			}
 		}
@@ -605,7 +606,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 				// Notify listeners
 				for (int i = 0; i < getListeners().size(); i++) {
 					((IPCallStreamingSessionListener) getListeners().get(i))
-							.handleCallHoldAccepted();
+							.handleCallHoldAccepted(contact);
 				}
 
 				// release hold
@@ -614,7 +615,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 				// Notify listeners
 				for (int i = 0; i < getListeners().size(); i++) {
 					((IPCallStreamingSessionListener) getListeners().get(i))
-							.handleCallHoldAborted(code);
+							.handleCallHoldAborted(contact, code);
 				}
 			}
 		}
@@ -625,7 +626,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 				// Notify listeners
 				for (int i = 0; i < getListeners().size(); i++) {
 					((IPCallStreamingSessionListener) getListeners().get(i))
-							.handleCallResumeAccepted();
+							.handleCallResumeAccepted(contact);
 				}
 				// release hold
 				holdMgr = null;
@@ -633,7 +634,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 				// Notify listeners
 				for (int i = 0; i < getListeners().size(); i++) {
 					((IPCallStreamingSessionListener) getListeners().get(i))
-							.handleCallResumeAborted();
+							.handleCallResumeAborted(contact);
 				}
 			}
 		}
@@ -661,10 +662,10 @@ public abstract class IPCallSession extends ImsServiceSession {
 			// Invitation declined or not answered
 			} else if (code == ImsServiceSession.INVITATION_NOT_ANSWERED)
 					 {
-				// Notify listeners
+				ContactId contact = getRemoteContact();
 				for (int i = 0; i < getListeners().size(); i++) {
 					((IPCallStreamingSessionListener) getListeners().get(i))
-							.handleAddVideoAborted(code);
+							.handleAddVideoAborted(contact, code);
 				}
 			}
 		}
@@ -685,6 +686,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 		}
 
 		// case Add video
+		ContactId contact = getRemoteContact();
 		if ((requestType == IPCallSession.ADD_VIDEO) && (code == 200)) {
 			try {
 				// TODO startVideoSession(false);
@@ -700,7 +702,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 			// Notify listeners
 			for (int i = 0; i < getListeners().size(); i++) {
 				((IPCallStreamingSessionListener) getListeners().get(i))
-						.handleAddVideoAccepted();
+						.handleAddVideoAccepted(contact);
 			}
 		} else if ((requestType == IPCallSession.REMOVE_VIDEO)&& (code == 200)) {// case Remove Video
 			// close video media session
@@ -712,7 +714,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 			// Notify listeners
 			for (int i = 0; i < getListeners().size(); i++) {
 				((IPCallStreamingSessionListener) getListeners().get(i))
-						.handleRemoveVideoAccepted();
+						.handleRemoveVideoAccepted(contact);
 			}
 		} else if ((requestType == IPCallSession.SET_ON_HOLD)&& (code == 200)) {// case On Hold
 			holdMgr.prepareSession();
@@ -720,7 +722,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 			// Notify listeners
 			for (int i = 0; i < getListeners().size(); i++) {
 				((IPCallStreamingSessionListener) getListeners().get(i))
-						.handleCallHoldAccepted();
+						.handleCallHoldAccepted(contact);
 			}
 			// release hold manager
 			holdMgr = null;
@@ -730,7 +732,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 			// Notify listeners
 			for (int i = 0; i < getListeners().size(); i++) {
 				((IPCallStreamingSessionListener) getListeners().get(i))
-						.handleCallResumeAccepted();
+						.handleCallResumeAccepted(contact);
 			}
 			// release hold manager
 			holdMgr = null;
@@ -764,9 +766,9 @@ public abstract class IPCallSession extends ImsServiceSession {
 			}
 		}
 
-		// Notify listeners
+		ContactId contact = getRemoteContact();
 		for (int i = 0; i < getListeners().size(); i++) {
-			((IPCallStreamingSessionListener) getListeners().get(i)).handle486Busy();
+			((IPCallStreamingSessionListener) getListeners().get(i)).handle486Busy(contact);
 		}
 	}
 
@@ -840,10 +842,10 @@ public abstract class IPCallSession extends ImsServiceSession {
 			}
 		}
 
-		// Notify listeners
+		ContactId contact = getRemoteContact();
 		for (int i = 0; i < getListeners().size(); i++) {
 			((IPCallStreamingSessionListener) getListeners().get(i))
-					.handleCallError(new IPCallError(error));
+					.handleCallError(contact, new IPCallError(error));
 		}
 	}
 
@@ -1212,10 +1214,10 @@ public abstract class IPCallSession extends ImsServiceSession {
 			// Remove the current session
 			removeSession();
 
-			// Notify listeners
+			ContactId contact = getRemoteContact();
 			for (int i = 0; i < getListeners().size(); i++) {
 				((IPCallStreamingSessionListener) getListeners().get(i))
-						.handleCallError(new IPCallError(IPCallError.PLAYER_FAILED));
+						.handleCallError(contact, new IPCallError(IPCallError.PLAYER_FAILED));
 			}
 
 			try {
@@ -1325,9 +1327,9 @@ public abstract class IPCallSession extends ImsServiceSession {
             // Remove the current session
             removeSession();
 
-            // Notify listeners
+            ContactId contact = getRemoteContact();
             for(int i=0; i < getListeners().size(); i++) {
-                ((IPCallStreamingSessionListener)getListeners().get(i)).handleCallError(new IPCallError(IPCallError.RENDERER_FAILED));
+                ((IPCallStreamingSessionListener)getListeners().get(i)).handleCallError(contact, new IPCallError(IPCallError.RENDERER_FAILED));
             }
 
             try {

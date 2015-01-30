@@ -62,8 +62,6 @@ public abstract class OneToOneChatSession extends ChatSession {
 	 */
 	private final static String BOUNDARY_TAG = "boundary1";
 
-	private final ChatMessage mFirstMsg;
-
 	/**
 	 * The logger
 	 */
@@ -83,7 +81,7 @@ public abstract class OneToOneChatSession extends ChatSession {
 	public OneToOneChatSession(ImsService parent, ContactId contact, String remoteUri,
 			ChatMessage firstMsg, RcsSettings rcsSettings, MessagingLog messagingLog) {
 		super(parent, contact, remoteUri, OneToOneChatSession.generateOneOneParticipants(contact),
-				rcsSettings, messagingLog);
+				rcsSettings, messagingLog, firstMsg);
 
 		// Set feature tags
 		List<String> featureTags = ChatUtils.getSupportedFeatureTagsForChat();
@@ -105,8 +103,6 @@ public abstract class OneToOneChatSession extends ChatSession {
 			wrappedTypes.append(" ").append(FileTransferHttpInfoDocument.MIME_TYPE);
 		}
 		setWrappedTypes(wrappedTypes.toString());
-
-		mFirstMsg = firstMsg;
 	}
 
 	/**
@@ -290,15 +286,6 @@ public abstract class OneToOneChatSession extends ChatSession {
 	 * @see com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils#DIRECTION_SENDRECV
 	 */
 	public abstract String getSdpDirection();
-
-	/**
-	 * Get first message.
-	 *
-	 * @param ChatMessage First chat message
-	 */
-	public ChatMessage getFirstMessage() {
-		return mFirstMsg;
-	}
 
 	/*
 	 * (non-Javadoc)

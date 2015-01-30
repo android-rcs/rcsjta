@@ -27,6 +27,8 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 
+import java.util.Set;
+
 /**
  * Chat session listener
  * 
@@ -45,8 +47,9 @@ public interface ChatSessionListener extends ImsSessionListener {
      * IM error
      * 
      * @param error Error
+     * @param message
      */
-    public void handleImError(ChatError error);
+    public void handleImError(ChatError error, ChatMessage message);
     
     /**
      * Is composing event
@@ -117,8 +120,23 @@ public interface ChatSessionListener extends ImsSessionListener {
 	 */
     public void handleParticipantStatusChanged(ParticipantInfo participantInfo);
 
-    /**
-     * Chat is auto-accepted and the session is in the process of being started
-     */
-    public void handleSessionAutoAccepted();
+	/**
+	 * A session invitation has been received
+	 * 
+	 * @param contact Remote contact
+	 * @param subject
+	 * @param participants Participants in case of groupchat
+	 */
+	public void handleSessionInvited(ContactId contact, String subject,
+			Set<ParticipantInfo> participants);
+
+	/**
+	 * Chat is auto-accepted and the session is in the process of being started
+	 * 
+	 * @param contact Remote contact
+	 * @param subject
+	 * @param participants Participants in case of groupchat
+	 */
+	public void handleSessionAutoAccepted(ContactId contact, String subject,
+			Set<ParticipantInfo> participants);
 }

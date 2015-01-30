@@ -292,39 +292,39 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 		}
 	}
 
-	private void handleSessionRejected(int reasonCode) {
+	private void handleSessionRejected(int reasonCode, ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Session rejected; reasonCode=" + reasonCode + ".");
 		}
 		synchronized (lock) {
 			mGeolocSharingService.removeGeolocSharing(mSharingId);
 			mPersistentStorage.setStateAndReasonCode(GeolocSharing.State.REJECTED, reasonCode);
-			mBroadcaster.broadcastStateChanged(getRemoteContact(),
-					mSharingId, GeolocSharing.State.REJECTED, reasonCode);
+			mBroadcaster.broadcastStateChanged(contact, mSharingId, GeolocSharing.State.REJECTED,
+					reasonCode);
 		}
 	}
 
 	/**
 	 * Session is started
 	 */
-    public void handleSessionStarted() {
+    public void handleSessionStarted(ContactId contact) {
         if (logger.isActivated()) {
             logger.info("Session started.");
         }
         synchronized (lock) {
             mPersistentStorage.setStateAndReasonCode(GeolocSharing.State.STARTED,
                     ReasonCode.UNSPECIFIED);
-            mBroadcaster.broadcastStateChanged(getRemoteContact(),
+            mBroadcaster.broadcastStateChanged(contact,
                     mSharingId, GeolocSharing.State.STARTED, ReasonCode.UNSPECIFIED);
         }
     }
 
     /**
      * Session has been aborted
-     * 
+     * @param contact
      * @param reason Termination reason
      */
-    public void handleSessionAborted(int reason) {
+    public void handleSessionAborted(ContactId contact, int reason) {
         if (logger.isActivated()) {
             logger.info(new StringBuilder("Session aborted; reason=").append(reason).append(".")
                     .toString());
@@ -333,7 +333,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
         synchronized (lock) {
             mGeolocSharingService.removeGeolocSharing(mSharingId);
             mPersistentStorage.setStateAndReasonCode(GeolocSharing.State.ABORTED, reasonCode);
-            mBroadcaster.broadcastStateChanged(getRemoteContact(),
+            mBroadcaster.broadcastStateChanged(contact,
                     mSharingId, GeolocSharing.State.ABORTED, reasonCode);
         }
     }
@@ -341,30 +341,32 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 	/**
 	 * Session has been terminated by remote
 	 */
-	public void handleSessionTerminatedByRemote() {
+	public void handleSessionTerminatedByRemote(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Session terminated by remote");
 		}
 		synchronized (lock) {
 			mGeolocSharingService.removeGeolocSharing(mSharingId);
-			GeolocTransferSession session = mRichcallService
-					.getGeolocTransferSession(mSharingId);
-			if (!session.isGeolocTransfered()) {
+			/*
+			 * TODO : Fix sending of SIP BYE by sender once transfer is
+			 * completed and media session is closed. Then this check of state
+			 * can be removed.
+			 */
+			if (State.TRANSFERRED != getState()) {
 				mPersistentStorage.setStateAndReasonCode(GeolocSharing.State.ABORTED,
 						ReasonCode.ABORTED_BY_REMOTE);
-				mBroadcaster.broadcastStateChanged(
-						getRemoteContact(), mSharingId, GeolocSharing.State.ABORTED,
-						ReasonCode.ABORTED_BY_REMOTE);
+				mBroadcaster.broadcastStateChanged(contact, mSharingId,
+						GeolocSharing.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
 			}
 		}
 	}
 
 	/**
 	 * Content sharing error
-	 *
+	 * @param contact Remote contact
 	 * @param error Error
 	 */
-	public void handleSharingError(ContentSharingError error) {
+	public void handleSharingError(ContactId contact, ContentSharingError error) {
 		if (logger.isActivated()) {
 			logger.info(new StringBuilder("Sharing error ").append(error.getErrorCode())
 					.append(".").toString());
@@ -374,27 +376,24 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
 		int reasonCode = stateAndReasonCode.getReasonCode();
 		synchronized (lock) {
 			mGeolocSharingService.removeGeolocSharing(mSharingId);
-			RichCallHistory.getInstance().setGeolocSharingStateAndReasonCode(mSharingId, state,
-					reasonCode);
-			mBroadcaster.broadcastStateChanged(getRemoteContact(),
-					mSharingId, state, reasonCode);
+			mPersistentStorage.setStateAndReasonCode(state, reasonCode);
+			mBroadcaster.broadcastStateChanged(contact, mSharingId, state, reasonCode);
 		}
 	}
     
     /**
      * Content has been transfered
-     * 
+     * @param contact Remote contact
      * @param geoloc Geolocation
+     * @param initiatedByRemote
      */
-    public void handleContentTransfered(Geoloc geoloc) {
+    public void handleContentTransfered(ContactId contact, Geoloc geoloc, boolean initiatedByRemote) {
         if (logger.isActivated()) {
             logger.info("Geoloc transferred.");
         }
-        ContactId contact = getRemoteContact();
-        GeolocTransferSession session = mRichcallService.getGeolocTransferSession(mSharingId);
         synchronized (lock) {
             mGeolocSharingService.removeGeolocSharing(mSharingId);
-            if (session.isInitiatedByRemote()) {
+            if (initiatedByRemote) {
                 RichCallHistory.getInstance()
                         .setGeolocSharingTransferred(mSharingId, geoloc);
             } else {
@@ -407,47 +406,47 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
     }
 
     @Override
-    public void handleSessionAccepted() {
+    public void handleSessionAccepted(ContactId contact) {
         if (logger.isActivated()) {
             logger.info("Accepting sharing.");
         }
         synchronized (lock) {
             mPersistentStorage.setStateAndReasonCode(GeolocSharing.State.ACCEPTING,
                     ReasonCode.UNSPECIFIED);
-            mBroadcaster.broadcastStateChanged(getRemoteContact(),
+            mBroadcaster.broadcastStateChanged(contact,
                     mSharingId, GeolocSharing.State.ACCEPTING, ReasonCode.UNSPECIFIED);
         }
     }
 
 	@Override
-	public void handleSessionRejectedByUser() {
-		handleSessionRejected(ReasonCode.REJECTED_BY_USER);
+	public void handleSessionRejectedByUser(ContactId contact) {
+		handleSessionRejected(ReasonCode.REJECTED_BY_USER, contact);
 	}
 
 	@Override
-	public void handleSessionRejectedByTimeout() {
-		handleSessionRejected(ReasonCode.REJECTED_TIME_OUT);
+	public void handleSessionRejectedByTimeout(ContactId contact) {
+		handleSessionRejected(ReasonCode.REJECTED_TIME_OUT, contact);
 	}
 
 	@Override
-	public void handleSessionRejectedByRemote() {
-		handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE);
+	public void handleSessionRejectedByRemote(ContactId contact) {
+		handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE, contact);
 	}
 
     @Override
-    public void handleSessionInvited() {
+    public void handleSessionInvited(ContactId contact) {
         synchronized (lock) {
-            mPersistentStorage.addIncomingGeolocSharing(getRemoteContact(), State.INVITED,
+            mPersistentStorage.addIncomingGeolocSharing(contact, State.INVITED,
                     ReasonCode.UNSPECIFIED);
             mBroadcaster.broadcastInvitation(mSharingId);
         }
     }
 
     @Override
-    public void handle180Ringing() {
+    public void handle180Ringing(ContactId contact) {
         synchronized (lock) {
             mPersistentStorage.setStateAndReasonCode(State.RINGING, ReasonCode.UNSPECIFIED);
-            mBroadcaster.broadcastStateChanged(getRemoteContact(), mSharingId,
+            mBroadcaster.broadcastStateChanged(contact, mSharingId,
                     State.RINGING, ReasonCode.UNSPECIFIED);
         }
     }

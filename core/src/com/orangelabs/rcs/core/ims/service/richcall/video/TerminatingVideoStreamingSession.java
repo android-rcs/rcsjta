@@ -31,6 +31,7 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.vsh.IVideoPlayer;
 import com.gsma.services.rcs.vsh.VideoCodec;
 import com.orangelabs.rcs.core.content.ContentManager;
+import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpParser;
@@ -97,8 +98,10 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
 
             // Notify listener
             Collection<ImsSessionListener> listeners = getListeners();
+			ContactId contact = getRemoteContact();
+			MmContent content = getContent();
             for (ImsSessionListener listener : listeners) {
-                listener.handleSessionInvited();
+            	((VideoStreamingSessionListener)listener).handleSessionInvited(contact, content);
             }
 
             // Wait invitation answer
@@ -112,7 +115,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionRejectedByUser();
+                        listener.handleSessionRejectedByUser(contact);
                     }
                     return;
 
@@ -127,7 +130,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionRejectedByTimeout();
+                        listener.handleSessionRejectedByTimeout(contact);
                     }
                     return;
 
@@ -139,7 +142,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionRejectedByRemote();
+                        listener.handleSessionRejectedByRemote(contact);
                     }
                     return;
 
@@ -147,7 +150,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                     setSessionAccepted();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionAccepted();
+                        listener.handleSessionAccepted(contact);
                     }
                     break;
 
@@ -241,7 +244,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                 player.setRemoteInfo(selectedVideoCodec, remoteHost, remotePort, getOrientation());
 
                 for (ImsSessionListener listener : listeners) {
-                	listener.handleSessionStarted();
+                	listener.handleSessionStarted(contact);
 				}
             } else {
                 if (logger.isActivated()) {
@@ -285,8 +288,9 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
         // Remove the current session
         removeSession();
 
+        ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
-        	((VideoStreamingSessionListener)listener).handleSharingError(error);
+        	((VideoStreamingSessionListener)listener).handleSharingError(contact, error);
 		}
     }
 

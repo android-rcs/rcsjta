@@ -194,9 +194,9 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
 		if (logger.isActivated()) {
 			logger.debug("handle180Ringing");
 		}
-		// Notify listeners
+		ContactId contact = getRemoteContact();
 		for (ImsSessionListener listener : getListeners()) {
-			((VideoStreamingSessionListener)listener).handle180Ringing();
+			((VideoStreamingSessionListener)listener).handle180Ringing(contact);
 		}
 	}
 }

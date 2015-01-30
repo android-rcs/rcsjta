@@ -232,9 +232,9 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
     		return;
     	}
 
-        // Notify listeners
+    	ContactId contact = getRemoteContact();
     	for(int i=0; i < getListeners().size(); i++) {
-            ((SipSessionListener)getListeners().get(i)).handleReceiveData(data);
+            ((SipSessionListener)getListeners().get(i)).handleReceiveData(contact, data);
         }
 	}
     
@@ -286,9 +286,9 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
             logger.info("Data transfer error " + error);
         }
 
-        // Notify listeners
+		ContactId contact = getRemoteContact();
         for(int i=0; i < getListeners().size(); i++) {
-            ((SipSessionListener)getListeners().get(i)).handleSessionError(new SipSessionError(SipSessionError.MEDIA_FAILED, error));
+            ((SipSessionListener)getListeners().get(i)).handleSessionError(contact, new SipSessionError(SipSessionError.MEDIA_FAILED, error));
         }
     }
 

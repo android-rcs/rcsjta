@@ -268,8 +268,9 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
                         logger.error("Session initiation has failed due to that the file is not accessible!", e);
                     }
                     Collection<ImsSessionListener> listeners = getListeners();
+                    ContactId contact = getRemoteContact();
                     for (ImsSessionListener listener : listeners) {
-                        ((FileSharingSessionListener)listener).handleTransferNotAllowedToSend();
+                        ((FileSharingSessionListener)listener).handleTransferNotAllowedToSend(contact);
                     }
                 } catch(Exception e) {
                     // Unexpected error
@@ -306,12 +307,12 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
     	// Remove the current session
     	removeSession();
 
-    	// Notify listeners
+    	ContactId contact = getRemoteContact();
+    	MmContent content = getContent();
     	for(int j=0; j < getListeners().size(); j++) {
-    		((FileSharingSessionListener)getListeners().get(j)).handleFileTransfered(getContent());
+    		((FileSharingSessionListener)getListeners().get(j)).handleFileTransfered(content, contact);
         }
     	InstantMessagingService imService = ((InstantMessagingService) getImsService());
-    	ContactId contact = getRemoteContact();
     	String fileTransferId = getFileTransferId();
     	imService.receiveFileDeliveryStatus(contact, new ImdnDocument(fileTransferId, ImdnDocument.POSITIVE_DELIVERY,
     			ImdnDocument.DELIVERY_STATUS_DELIVERED));
@@ -337,9 +338,9 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
 	 * @param totalSize Total size in bytes
 	 */
 	public void msrpTransferProgress(long currentSize, long totalSize) {
-		// Notify listeners
+		ContactId contact = getRemoteContact();
     	for(int j=0; j < getListeners().size(); j++) {
-    		((FileSharingSessionListener)getListeners().get(j)).handleTransferProgress(currentSize, totalSize);
+    		((FileSharingSessionListener)getListeners().get(j)).handleTransferProgress(contact, currentSize, totalSize);
         }
 	}	
 

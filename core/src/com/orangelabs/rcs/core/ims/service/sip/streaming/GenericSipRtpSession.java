@@ -239,10 +239,10 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
         // Remove the current session
         removeSession();
 
-        // Notify listeners
+        ContactId contact = getRemoteContact();
         for (int j = 0; j < getListeners().size(); j++) {
             ((SipSessionListener) getListeners().get(j))
-                    .handleSessionError(new SipSessionError(SipSessionError.MEDIA_FAILED));
+                    .handleSessionError(contact, new SipSessionError(SipSessionError.MEDIA_FAILED));
         }
     }
     
@@ -252,9 +252,9 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
      * @param data Data
      */
     public void receiveData(byte[] data) {
-        // Notify listeners
+    	ContactId contact = getRemoteContact();
         for (int j = 0; j < getListeners().size(); j++) {
-            ((SipSessionListener) getListeners().get(j)).handleReceiveData(data);
+            ((SipSessionListener) getListeners().get(j)).handleReceiveData(contact, data);
         }
     }
 

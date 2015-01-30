@@ -32,7 +32,9 @@ import android.os.RemoteException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.AudioCodec;
 import com.gsma.services.rcs.ipcall.VideoCodec;
+import com.orangelabs.rcs.core.content.AudioContent;
 import com.orangelabs.rcs.core.content.ContentManager;
+import com.orangelabs.rcs.core.content.VideoContent;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
@@ -85,8 +87,12 @@ public class TerminatingIPCallSession extends IPCallSession {
 			send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
 			Collection<ImsSessionListener> listeners = getListeners();
+			ContactId contact = getRemoteContact();
+			AudioContent audio = getAudioContent();
+			VideoContent video = getVideoContent();
 			for (ImsSessionListener listener : listeners) {
-				listener.handleSessionInvited();
+				((IPCallStreamingSessionListener)listener).handleSessionInvited(contact, audio,
+						video);
 			}
 
 			int answer = waitInvitationAnswer();
@@ -99,7 +105,7 @@ public class TerminatingIPCallSession extends IPCallSession {
 					removeSession();
 
 					for (ImsSessionListener listener : listeners) {
-						listener.handleSessionRejectedByUser();
+						listener.handleSessionRejectedByUser(contact);
 					}
 					return;
 
@@ -114,7 +120,7 @@ public class TerminatingIPCallSession extends IPCallSession {
 					removeSession();
 
 					for (ImsSessionListener listener : listeners) {
-						listener.handleSessionRejectedByTimeout();
+						listener.handleSessionRejectedByTimeout(contact);
 					}
 					return;
 
@@ -126,7 +132,7 @@ public class TerminatingIPCallSession extends IPCallSession {
 					removeSession();
 
 					for (ImsSessionListener listener : listeners) {
-						listener.handleSessionRejectedByRemote();
+						listener.handleSessionRejectedByRemote(contact);
 					}
 					return;
 
@@ -134,7 +140,7 @@ public class TerminatingIPCallSession extends IPCallSession {
 					setSessionAccepted();
 
 					for (ImsSessionListener listener : listeners) {
-						listener.handleSessionAccepted();
+						listener.handleSessionAccepted(contact);
 					}
 					break;
 
@@ -224,7 +230,7 @@ public class TerminatingIPCallSession extends IPCallSession {
 
 				// Notify listeners
 				for (int i = 0; i < getListeners().size(); i++) {
-					getListeners().get(i).handleSessionStarted();
+					getListeners().get(i).handleSessionStarted(contact);
 				}
 			} else {
 				if (logger.isActivated()) {
@@ -265,9 +271,9 @@ public class TerminatingIPCallSession extends IPCallSession {
         // Remove the current session
         removeSession();
 
-        // Notify listener
+        ContactId contact = getRemoteContact();
         for(int i=0; i < getListeners().size(); i++) {
-            ((IPCallStreamingSessionListener)getListeners().get(i)).handleCallError(error);
+            ((IPCallStreamingSessionListener)getListeners().get(i)).handleCallError(contact, error);
         }
     }
 

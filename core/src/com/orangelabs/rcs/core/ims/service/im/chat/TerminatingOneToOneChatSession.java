@@ -26,9 +26,11 @@ import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Set;
 import java.util.Vector;
 
 import com.gsma.services.rcs.RcsContactFormatException;
+import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
@@ -144,6 +146,9 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 			}
 
 			Collection<ImsSessionListener> listeners = getListeners();
+			ContactId contact = getRemoteContact();
+			String subject = getSubject();
+			Set<ParticipantInfo> participants = getParticipants();
 			/* Check if session should be auto-accepted once */
 			if (isSessionAccepted()) {
 				if (logActivated) {
@@ -151,7 +156,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 				}
 
 				for (ImsSessionListener listener : listeners) {
-					((ChatSessionListener)listener).handleSessionAutoAccepted();
+					((ChatSessionListener)listener).handleSessionAutoAccepted(contact, subject, participants);
 				}
 			} else {
 				if (logActivated) {
@@ -159,7 +164,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 				}
 
 				for (ImsSessionListener listener : listeners) {
-					listener.handleSessionInvited();
+					((ChatSessionListener)listener).handleSessionInvited(contact, subject, participants);
 				}
 
 				send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
@@ -174,7 +179,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
-							listener.handleSessionRejectedByUser();
+							listener.handleSessionRejectedByUser(contact);
 						}
 						return;
 
@@ -189,7 +194,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
-							listener.handleSessionRejectedByTimeout();
+							listener.handleSessionRejectedByTimeout(contact);
 						}
 						return;
 
@@ -201,7 +206,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
-							listener.handleSessionRejectedByRemote();
+							listener.handleSessionRejectedByRemote(contact);
 						}
 						return;
 
@@ -209,7 +214,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 						setSessionAccepted();
 
 						for (ImsSessionListener listener : listeners) {
-							listener.handleSessionAccepted();
+							listener.handleSessionAccepted(contact);
 						}
 						break;
 
@@ -347,7 +352,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 				}
 
 				for (ImsSessionListener listener : listeners) {
-					listener.handleSessionStarted();
+					listener.handleSessionStarted(contact);
 				}
 
 				// Start session timer

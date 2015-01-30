@@ -21,6 +21,7 @@ w * Software Name : RCS IMS Stack
  ******************************************************************************/
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.Core;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.ImsService;
@@ -66,9 +67,9 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
             if (logger.isActivated()) {
                 logger.info("Resume a HTTP file transfer session as originating");
             }
-            // Notify listeners
+            ContactId contact = getRemoteContact();
             for (int j = 0; j < getListeners().size(); j++) {
-                getListeners().get(j).handleSessionStarted();
+                getListeners().get(j).handleSessionStarted(contact);
             }
 
             // Resume the file upload to the HTTP server 

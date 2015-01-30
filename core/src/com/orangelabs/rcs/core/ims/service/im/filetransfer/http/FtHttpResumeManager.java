@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
@@ -179,79 +180,79 @@ public class FtHttpResumeManager {
 			AtomicBoolean fired = new AtomicBoolean(false);
 
 			@Override
-			public void handleSessionTerminatedByRemote() {
+			public void handleSessionTerminatedByRemote(ContactId contact) {
 				if (fired.compareAndSet(false, true)) {
 					processNext();
 				}
 			}
 
 			@Override
-			public void handleSessionStarted() {
+			public void handleSessionStarted(ContactId contact) {
 			}
 
 			@Override
-			public void handleSessionAborted(int reason) {
+			public void handleSessionAborted(ContactId contact, int reason) {
 				if (fired.compareAndSet(false, true)) {
 					processNext();
 				}
 			}
 
 			@Override
-			public void handleTransferProgress(long currentSize, long totalSize) {
+			public void handleTransferProgress(ContactId contact, long currentSize, long totalSize) {
 			}
 
 			@Override
-			public void handleTransferNotAllowedToSend() {
+			public void handleTransferNotAllowedToSend(ContactId contact) {
 			}
 
 			@Override
-			public void handleTransferError(FileSharingError error) {
+			public void handleTransferError(FileSharingError error, ContactId contact) {
 				if (fired.compareAndSet(false, true)) {
 					processNext();
 				}
 			}
 
 			@Override
-			public void handleFileTransfered(MmContent content) {
+			public void handleFileTransfered(MmContent content, ContactId contact) {
 				if (fired.compareAndSet(false, true)) {
 					processNext();
 				}
 			}
 
 			@Override
-			public void handleFileTransferResumed() {
+			public void handleFileTransferResumed(ContactId contact) {
 			}
 
 			@Override
-			public void handleSessionAccepted() {
+			public void handleSessionAccepted(ContactId contact) {
 			}
 
 			@Override
-			public void handleFileTransferPausedByUser() {
+			public void handleFileTransferPausedByUser(ContactId contact) {
 			}
 
 			@Override
-			public void handleFileTransferPausedBySystem() {
+			public void handleFileTransferPausedBySystem(ContactId contact) {
 			}
 
 			@Override
-			public void handleSessionRejectedByUser() {
+			public void handleSessionRejectedByUser(ContactId contact) {
 			}
 
 			@Override
-			public void handleSessionRejectedByTimeout() {
+			public void handleSessionRejectedByTimeout(ContactId contact) {
 			}
 
 			@Override
-			public void handleSessionRejectedByRemote() {
+			public void handleSessionRejectedByRemote(ContactId contact) {
 			}
 
 			@Override
-			public void handleSessionInvited() {
+			public void handleSessionInvited(ContactId contact, MmContent file, MmContent fileIcon) {
 			}
 
 			@Override
-			public void handleSessionAutoAccepted() {
+			public void handleSessionAutoAccepted(ContactId contact, MmContent file, MmContent fileIcon) {
 			}
 		};
 	}

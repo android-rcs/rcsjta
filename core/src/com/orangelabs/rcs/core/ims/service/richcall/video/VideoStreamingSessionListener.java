@@ -18,6 +18,8 @@
 
 package com.orangelabs.rcs.core.ims.service.richcall.video;
 
+import com.gsma.services.rcs.contacts.ContactId;
+import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 
@@ -29,10 +31,10 @@ import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 public interface VideoStreamingSessionListener extends ImsSessionListener  {
     /**
      * Content sharing error
-     * 
+     * @param contact Remote contact
      * @param error Error
      */
-    public void handleSharingError(ContentSharingError error);
+    public void handleSharingError(ContactId contact, ContentSharingError error);
 
     /**
      * Video stream has been resized
@@ -44,6 +46,14 @@ public interface VideoStreamingSessionListener extends ImsSessionListener  {
     
     /**
      * Destination user agent received INVITE, and is alerting user of call
+     * @param contact Remote contact
      */
-    public void handle180Ringing();
+    public void handle180Ringing(ContactId contact);
+
+	/**
+	 * A session invitation has been received
+	 * @param contact Remote contact
+	 * @param content
+	 */
+	public void handleSessionInvited(ContactId contact, MmContent content);
 }

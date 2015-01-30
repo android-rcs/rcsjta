@@ -191,6 +191,9 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 			}
 
 			Vector<ImsSessionListener> listeners = getListeners();
+			ContactId contact = getRemoteContact();
+			MmContent content = getContent();
+			MmContent fileIcon = getFileicon();
 			/* Check if session should be auto-accepted once */
 			if (isSessionAccepted()) {
 				if (logger.isActivated()) {
@@ -198,7 +201,8 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 				}
 
 				for (ImsSessionListener listener : listeners) {
-					((FileSharingSessionListener)listener).handleSessionAutoAccepted();
+					((FileSharingSessionListener)listener).handleSessionAutoAccepted(contact, content,
+							fileIcon);
 				}
 			} else {
 				if (logger.isActivated()) {
@@ -206,7 +210,8 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 				}
 
 				for (ImsSessionListener listener : listeners) {
-					listener.handleSessionInvited();
+					((FileSharingSessionListener)listener).handleSessionInvited(contact, content,
+							fileIcon);
 				}
 
 				int answer = waitInvitationAnswer();
@@ -219,7 +224,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
-							listener.handleSessionRejectedByUser();
+							listener.handleSessionRejectedByUser(contact);
 						}
 						return;
 
@@ -231,7 +236,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
-							listener.handleSessionRejectedByTimeout();
+							listener.handleSessionRejectedByTimeout(contact);
 						}
 						return;
 
@@ -242,7 +247,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 							removeSession();
 
 							for (ImsSessionListener listener : listeners) {
-								listener.handleSessionRejectedByRemote();
+								listener.handleSessionRejectedByRemote(contact);
 							}
 						}
 						return;
@@ -251,7 +256,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 						setSessionAccepted();
 
 						for (ImsSessionListener listener : listeners) {
-							((FileSharingSessionListener)listener).handleSessionAccepted();
+							((FileSharingSessionListener)listener).handleSessionAccepted(contact);
 						}
 						break;
 
@@ -277,7 +282,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 
 			// Notify listeners
 			for (int j = 0; j < getListeners().size(); j++) {
-				getListeners().get(j).handleSessionStarted();
+				getListeners().get(j).handleSessionStarted(contact);
 			}
 			Uri file = downloadManager.getDownloadedFileUri();
 			Uri downloadServerAddress = downloadManager.getHttpServerAddr();
