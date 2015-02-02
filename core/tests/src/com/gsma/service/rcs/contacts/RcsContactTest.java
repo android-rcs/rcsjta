@@ -79,7 +79,7 @@ public class RcsContactTest extends AndroidTestCase {
 	}
 
 	public void testRcsContactContactNull() {
-		RcsContact rcsContact = new RcsContact(null, registered, capabilities, displayName);
+		RcsContact rcsContact = new RcsContact(null, registered, capabilities, displayName, false, -1L);
 		Parcel parcel = Parcel.obtain();
 		rcsContact.writeToParcel(parcel, 0);
 		// done writing, now reset parcel for reading
@@ -90,7 +90,7 @@ public class RcsContactTest extends AndroidTestCase {
 	}
 	
 	public void testRcsContactCapabilitiesNull() {
-		RcsContact rcsContact = new RcsContact(contactId, registered, null, displayName);
+		RcsContact rcsContact = new RcsContact(contactId, registered, null, displayName, false, -1L);
 		Parcel parcel = Parcel.obtain();
 		rcsContact.writeToParcel(parcel, 0);
 		// done writing, now reset parcel for reading
@@ -101,7 +101,7 @@ public class RcsContactTest extends AndroidTestCase {
 	}
 	
 	public void testRcsContactDisplayNameNull() {
-		RcsContact rcsContact = new RcsContact(contactId, registered, capabilities, null);
+		RcsContact rcsContact = new RcsContact(contactId, registered, capabilities, null, false, -1L);
 		Parcel parcel = Parcel.obtain();
 		rcsContact.writeToParcel(parcel, 0);
 		// done writing, now reset parcel for reading
@@ -112,7 +112,7 @@ public class RcsContactTest extends AndroidTestCase {
 	}
 	
 	public void testRcsContact() {
-		RcsContact rcsContact = new RcsContact(contactId, registered, capabilities, displayName);
+		RcsContact rcsContact = new RcsContact(contactId, registered, capabilities, displayName, false, -1L);
 		Parcel parcel = Parcel.obtain();
 		rcsContact.writeToParcel(parcel, 0);
 		// done writing, now reset parcel for reading
