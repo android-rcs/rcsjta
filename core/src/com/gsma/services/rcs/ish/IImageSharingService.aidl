@@ -35,4 +35,10 @@ interface IImageSharingService {
 	int getServiceVersion();
 	
 	ICommonServiceConfiguration getCommonConfiguration();
+
+	void deleteImageSharings();
+
+	void deleteImageSharings2(in ContactId contact);
+
+	void deleteImageSharing(in String sharingId);
 }

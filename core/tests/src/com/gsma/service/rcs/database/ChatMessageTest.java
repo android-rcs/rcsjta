@@ -24,12 +24,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.test.AndroidTestCase;
-import android.util.Log;
 
 import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.RcsContactFormatException;
-import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
@@ -75,30 +74,30 @@ public class ChatMessageTest extends AndroidTestCase {
 
 		// Add entry
 		MessagingLog.getInstance().addOutgoingOneToOneChatMessage(msg,
-				ChatLog.Message.Status.Content.SENT, ChatLog.Message.ReasonCode.UNSPECIFIED);
+				Message.Status.Content.SENT, Message.ReasonCode.UNSPECIFIED);
 
 		// Read entry
-		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId);
-		Cursor cursor = mContentResolver.query(uri, new String[] { ChatLog.Message.DIRECTION,
-				ChatLog.Message.CONTACT, ChatLog.Message.CONTENT, ChatLog.Message.MIME_TYPE,
-				ChatLog.Message.MESSAGE_ID, ChatLog.Message.TIMESTAMP }, "("
-				+ ChatLog.Message.MESSAGE_ID + "='" + msgId + "')", null, ChatLog.Message.TIMESTAMP
+		Uri uri = Uri.withAppendedPath(Message.CONTENT_URI, msgId);
+		Cursor cursor = mContentResolver.query(uri, new String[] { Message.DIRECTION,
+				Message.CONTACT, Message.CONTENT, Message.MIME_TYPE,
+				Message.MESSAGE_ID, Message.TIMESTAMP }, "("
+				+ Message.MESSAGE_ID + "='" + msgId + "')", null, Message.TIMESTAMP
 				+ " ASC");
 		assertEquals(cursor.getCount(), 1);
 		while (cursor.moveToNext()) {
-			int direction = cursor.getInt(cursor.getColumnIndex(ChatLog.Message.DIRECTION));
-			String contact = cursor.getString(cursor.getColumnIndex(ChatLog.Message.CONTACT));
-			String content = cursor.getString(cursor.getColumnIndex(ChatLog.Message.CONTENT));
+			Direction direction = Direction.valueOf(cursor.getInt(cursor.getColumnIndex(Message.DIRECTION)));
+			String contact = cursor.getString(cursor.getColumnIndex(Message.CONTACT));
+			String content = cursor.getString(cursor.getColumnIndex(Message.CONTENT));
 			assertNotNull(content);
 			String readTxt = new String(content);
-			String mimeType = cursor.getString(cursor.getColumnIndex(ChatLog.Message.MIME_TYPE));
-			String id = cursor.getString(cursor.getColumnIndex(ChatLog.Message.MESSAGE_ID));
-			long readDate = cursor.getLong(cursor.getColumnIndex(ChatLog.Message.TIMESTAMP));
+			String mimeType = cursor.getString(cursor.getColumnIndex(Message.MIME_TYPE));
+			String id = cursor.getString(cursor.getColumnIndex(Message.MESSAGE_ID));
+			long readDate = cursor.getLong(cursor.getColumnIndex(Message.TIMESTAMP));
 			assertEquals(now.getTime(), readDate);
-			assertEquals(direction, RcsCommon.Direction.OUTGOING);
+			assertEquals(direction, Direction.OUTGOING);
 			assertEquals(contact, mContact.toString());
 			assertEquals(readTxt, txt);
-			assertEquals(mimeType, com.gsma.services.rcs.chat.ChatLog.Message.MimeType.TEXT_MESSAGE);
+			assertEquals(mimeType, Message.MimeType.TEXT_MESSAGE);
 			assertEquals(id, msgId);
 		}
 	}
@@ -110,36 +109,34 @@ public class ChatMessageTest extends AndroidTestCase {
 		String msgId = chatMsg.getMessageId();
 		// Add entry
 		MessagingLog.getInstance().addOutgoingOneToOneChatMessage(chatMsg,
-				ChatLog.Message.Status.Content.SENT, ChatLog.Message.ReasonCode.UNSPECIFIED);
+				Message.Status.Content.SENT, Message.ReasonCode.UNSPECIFIED);
 
 		// Read entry
-		Uri uri = Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId);
-		Cursor cursor = mContentResolver.query(uri, new String[] { ChatLog.Message.DIRECTION,
-				ChatLog.Message.CONTACT, ChatLog.Message.CONTENT, ChatLog.Message.MIME_TYPE,
-				ChatLog.Message.MESSAGE_ID }, "(" + ChatLog.Message.MESSAGE_ID + "='" + msgId
-				+ "')", null, ChatLog.Message.TIMESTAMP + " ASC");
+		Uri uri = Uri.withAppendedPath(Message.CONTENT_URI, msgId);
+		Cursor cursor = mContentResolver.query(uri, new String[] { Message.DIRECTION,
+				Message.CONTACT, Message.CONTENT, Message.MIME_TYPE,
+				Message.MESSAGE_ID }, "(" + Message.MESSAGE_ID + "='" + msgId
+				+ "')", null, Message.TIMESTAMP + " ASC");
 		assertEquals(cursor.getCount(), 1);
 		while (cursor.moveToNext()) {
-			int direction = cursor.getInt(cursor.getColumnIndex(ChatLog.Message.DIRECTION));
-			String contact = cursor.getString(cursor.getColumnIndex(ChatLog.Message.CONTACT));
-			String content = cursor.getString(cursor.getColumnIndex(ChatLog.Message.CONTENT));
+			Direction direction = Direction.valueOf(cursor.getInt(cursor.getColumnIndex(Message.DIRECTION)));
+			String contact = cursor.getString(cursor.getColumnIndex(Message.CONTACT));
+			String content = cursor.getString(cursor.getColumnIndex(Message.CONTENT));
 			assertNotNull(content);
-			Log.w("[TEST]",content);
 			Geoloc readGeoloc = new Geoloc(content);
 			assertNotNull(readGeoloc);
 
-			String contentType = cursor.getString(cursor.getColumnIndex(ChatLog.Message.MIME_TYPE));
-			String id = cursor.getString(cursor.getColumnIndex(ChatLog.Message.MESSAGE_ID));
+			String contentType = cursor.getString(cursor.getColumnIndex(Message.MIME_TYPE));
+			String id = cursor.getString(cursor.getColumnIndex(Message.MESSAGE_ID));
 
-			assertEquals(direction, RcsCommon.Direction.OUTGOING);
+			assertEquals(direction, Direction.OUTGOING);
 			assertEquals(contact, mContact.toString());
 			assertEquals(readGeoloc.getLabel(), geoloc.getLabel());
 			assertEquals(readGeoloc.getLatitude(), geoloc.getLatitude());
 			assertEquals(readGeoloc.getLongitude(), geoloc.getLongitude());
 			assertEquals(readGeoloc.getExpiration(), geoloc.getExpiration());
 			assertEquals(readGeoloc.getAccuracy(), geoloc.getAccuracy());
-			assertEquals(contentType,
-					com.gsma.services.rcs.chat.ChatLog.Message.MimeType.GEOLOC_MESSAGE);
+			assertEquals(contentType, Message.MimeType.GEOLOC_MESSAGE);
 			assertEquals(id, msgId);
 		}
 	}

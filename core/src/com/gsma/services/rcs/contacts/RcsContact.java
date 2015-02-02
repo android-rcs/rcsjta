@@ -33,7 +33,7 @@ public class RcsContact implements Parcelable {
 	/**
 	 * Capabilities
 	 */
-	private Capabilities capabilities;
+	private Capabilities mCapabilities;
 
 	/**
 	 * Contact ID
@@ -43,12 +43,22 @@ public class RcsContact implements Parcelable {
 	/**
 	 * Display name
 	 */
-	private String displayName;
+	private String mDisplayName;
 
 	/**
 	 * Registration state
 	 */
-	private boolean registered;
+	private boolean mRegistered;
+
+	/**
+	 * Blocking state
+	 */
+	private boolean mBlocked;
+	
+	/**
+	 * Blocking timestamp
+	 */
+	private long mBlockingTimestamp;
 
 	/**
 	 * Constructor
@@ -56,15 +66,19 @@ public class RcsContact implements Parcelable {
 	 * @param contact Contact ID
 	 * @param registered Registration state
 	 * @param capabilities Capabilities
-	 * @param displayName display name
+	 * @param displayName Display name
+	 * @param blocked Blocking state
+	 * @param blockingTs Blocking timestamp
 	 * @hide
 	 */
 	public RcsContact(ContactId contact, boolean registered, Capabilities capabilities,
-			String displayName) {
+			String displayName, boolean blocked, long blockingTs) {
 		mContact = contact;
-		this.registered = registered;
-		this.capabilities = capabilities;
-		this.displayName = displayName;
+		this.mRegistered = registered;
+		this.mCapabilities = capabilities;
+		this.mDisplayName = displayName;
+		this.mBlocked = blocked;
+		this.mBlockingTimestamp = blockingTs;
 	}
 
 	/**
@@ -80,14 +94,16 @@ public class RcsContact implements Parcelable {
 		} else {
 			mContact = null;
 		}
-		registered = source.readInt() != 0;
+		mRegistered = source.readInt() != 0;
 		boolean containsCapabilities = source.readInt() != 0;
 		if (containsCapabilities) {
-			this.capabilities = Capabilities.CREATOR.createFromParcel(source);
+			this.mCapabilities = Capabilities.CREATOR.createFromParcel(source);
 		} else {
-			this.capabilities = null;
+			this.mCapabilities = null;
 		}
-		displayName = source.readString();
+		mDisplayName = source.readString();
+		mBlocked = source.readInt() != 0;
+		mBlockingTimestamp = source.readLong();
 	}
 
 	/**
@@ -115,14 +131,16 @@ public class RcsContact implements Parcelable {
 		} else {
 			dest.writeInt(0);
 		}
-		dest.writeInt(registered ? 1 : 0);
-		if (capabilities != null) {
+		dest.writeInt(mRegistered ? 1 : 0);
+		if (mCapabilities != null) {
 			dest.writeInt(1);
-			capabilities.writeToParcel(dest, flags);
+			mCapabilities.writeToParcel(dest, flags);
 		} else {
 			dest.writeInt(0);
 		}
-		dest.writeString(displayName);
+		dest.writeString(mDisplayName);
+		dest.writeInt(mBlocked ? 1 : 0);
+		dest.writeLong(mBlockingTimestamp);
 	}
 
 	/**
@@ -155,7 +173,7 @@ public class RcsContact implements Parcelable {
 	 * @return Returns true if registered else returns false
 	 */
 	public boolean isRegistered() {
-		return registered;
+		return mRegistered;
 	}
 
 	/**
@@ -164,7 +182,7 @@ public class RcsContact implements Parcelable {
 	 * @return Capabilities
 	 */
 	public Capabilities getCapabilities() {
-		return capabilities;
+		return mCapabilities;
 	}
 
 	/**
@@ -173,7 +191,24 @@ public class RcsContact implements Parcelable {
 	 * @return displayName
 	 */
 	public String getDisplayName() {
-		return displayName;
+		return mDisplayName;
 	}
 
+	/**
+	 * Is contact blocked
+	 * 
+	 * @return Returns true if blocked else returns false
+	 */
+	public boolean isBlocked() {
+		return mBlocked;
+	}
+
+	/**
+	 * Returns the timestamp when the blocking was activated or -1 if contact is not blocked.
+	 * 
+	 * @return Timestamp
+	 */
+	public long getBlockingTimestamp() {
+		return mBlockingTimestamp;
+	}
 }

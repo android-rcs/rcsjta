@@ -60,7 +60,7 @@ public class VideoSharingData {
 	/**
 	 * Incoming sharing or outgoing sharing.
 	 *
-	 * @see com.gsma.services.rcs.RcsCommon.Direction for the list of directions
+	 * @see Direction
 	 */
 	static final String KEY_DIRECTION = VideoSharingLog.DIRECTION;	
 
@@ -85,5 +85,4 @@ public class VideoSharingData {
 	 */
 	static final String KEY_HEIGHT = VideoSharingLog.HEIGHT;
 
-	static final String KEY_ORIENTATION = VideoSharingLog.ORIENTATION;
 }

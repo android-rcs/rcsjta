@@ -16,6 +16,7 @@
 
 package com.orangelabs.rcs.core.ims.service.ipcall;
 
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IPCallLog;
 import com.orangelabs.rcs.core.content.AudioContent;
@@ -40,17 +41,14 @@ public class IPCallPersistedStorageAccessor {
 
 	private ContactId mContact;
 
-	/**
-	 * TODO: Change type to enum in CR031 implementation
-	 */
-	private Integer mDirection;
+	private Direction mDirection;
 
 	public IPCallPersistedStorageAccessor(String callId, IPCallHistory ipCallLog) {
 		mCallId = callId;
 		mIPCallLog = ipCallLog;
 	}
 
-	public IPCallPersistedStorageAccessor(String callId, ContactId contact, int direction,
+	public IPCallPersistedStorageAccessor(String callId, ContactId contact, Direction direction,
 			IPCallHistory ipCallLog) {
 		mCallId = callId;
 		mContact = contact;
@@ -68,7 +66,7 @@ public class IPCallPersistedStorageAccessor {
 			if (contact != null) {
 				mContact = ContactUtils.createContactId(contact);
 			}
-			mDirection = cursor.getInt(cursor.getColumnIndexOrThrow(IPCallLog.DIRECTION));
+			mDirection = Direction.valueOf(cursor.getInt(cursor.getColumnIndexOrThrow(IPCallLog.DIRECTION)));
 		} finally {
 			if (cursor != null) {
 				cursor.close();
@@ -96,7 +94,7 @@ public class IPCallPersistedStorageAccessor {
 		return mIPCallLog.getReasonCode(mCallId);
 	}
 
-	public int getDirection() {
+	public Direction getDirection() {
 		/*
 		 * Utilizing cache here as direction can't be changed in persistent
 		 * storage after entry insertion anyway so no need to query for it
@@ -112,7 +110,7 @@ public class IPCallPersistedStorageAccessor {
 		mIPCallLog.setCallStateAndReasonCode(mCallId, state, reasonCode);
 	}
 
-	public Uri addCall(ContactId contact, int direction, AudioContent audiocontent,
+	public Uri addCall(ContactId contact, Direction direction, AudioContent audiocontent,
 			VideoContent videocontent, int state, int reasonCode) {
 		return mIPCallLog.addCall(mCallId, contact, direction, audiocontent, videocontent, state,
 				reasonCode);

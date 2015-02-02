@@ -40,8 +40,8 @@ import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
 import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsCommon;
-import com.gsma.services.rcs.RcsCommon.ReadStatus;
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.chat.ChatLog.Message;
@@ -97,15 +97,16 @@ public class SingleChatView extends ChatView {
 	 */
 	private static final String LOGTAG = LogUtils.getTag(SingleChatView.class.getSimpleName());
 
-	private static final String WHERE_CLAUSE = new StringBuilder(
-			Message.CONTACT).append("=? AND (").append(Message.MIME_TYPE)
+	/**
+	 * Chat_id is set to contact id for one to one chat messages.
+	 */
+	private static final String WHERE_CLAUSE = new StringBuilder(Message.CHAT_ID).append("=? AND (").append(Message.MIME_TYPE)
 			.append("='").append(Message.MimeType.GEOLOC_MESSAGE)
 			.append("' OR ").append(Message.MIME_TYPE).append("='")
 			.append(Message.MimeType.TEXT_MESSAGE).append("')").toString();
 
-	private final static String UNREADS_WHERE_CLAUSE = new StringBuilder(
-			Message.CONTACT).append("=? AND ").append(Message.READ_STATUS)
-			.append("=").append(ReadStatus.UNREAD).append(" AND (")
+	private final static String UNREADS_WHERE_CLAUSE = new StringBuilder(Message.CHAT_ID).append("=? AND ").append(Message.READ_STATUS)
+			.append("=").append(ReadStatus.UNREAD.toInt()).append(" AND (")
 			.append(Message.MIME_TYPE).append("='")
 			.append(Message.MimeType.GEOLOC_MESSAGE).append("' OR ")
 			.append(Message.MIME_TYPE).append("='")
@@ -166,9 +167,9 @@ public class SingleChatView extends ChatView {
 			// Instantiate the composing manager
 			composingManager = new IsComposingManager(configuration.getIsComposingTimeout() * 1000, getNotifyComposing());
 		} catch (RcsServiceNotAvailableException e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), mExitOnce, e);
 		} catch (RcsServiceException e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
 		}
 		if (LogUtils.isActive) {
 			Log.d(LOGTAG, "onCreate");
@@ -230,9 +231,9 @@ public class SingleChatView extends ChatView {
 			return true;
 			
 		} catch (RcsServiceNotAvailableException e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), mExitOnce, e);
 		} catch (RcsServiceException e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
 		}
 		return false;
 	}
@@ -254,8 +255,8 @@ public class SingleChatView extends ChatView {
 		Cursor cursor = (Cursor) mAdapter.getItem(info.position);
 		// Adapt the contextual menu according to the selected item
 		menu.add(0, CHAT_MENU_ITEM_DELETE, CHAT_MENU_ITEM_DELETE, R.string.menu_delete_message);
-		int direction = cursor.getInt(cursor.getColumnIndex(Message.DIRECTION));
-		if (RcsCommon.Direction.OUTGOING != direction) {
+		Direction direction = Direction.valueOf(cursor.getInt(cursor.getColumnIndex(Message.DIRECTION)));
+		if (Direction.OUTGOING != direction) {
 			return;
 		
 		}

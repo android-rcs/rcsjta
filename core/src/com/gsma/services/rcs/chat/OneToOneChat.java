@@ -62,6 +62,21 @@ public class OneToOneChat {
 	}
 
 	/**
+	 * Returns true if it is possible to send messages in this one to one chat
+	 * right now, else return false.
+	 * 
+	 * @return boolean
+	 * @throws RcsServiceException
+	 */
+	public boolean canSendMessage() throws RcsServiceException {
+		try {
+			return mOneToOneChatInf.canSendMessage();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
 	 * Sends a chat message
 	 * 
 	 * @param message Message
@@ -115,6 +130,20 @@ public class OneToOneChat {
 	public void openChat() throws RcsServiceException {
 		try {
 			mOneToOneChatInf.openChat();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Resend a message which previously failed.
+	 * 
+	 * @param msgId
+	 * @throws RcsServiceException
+	 */
+	public void resendMessage(String msgId) throws RcsServiceException {
+		try {
+			mOneToOneChatInf.resendMessage(msgId);
 		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}

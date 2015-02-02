@@ -30,7 +30,7 @@ import android.database.SQLException;
 import android.net.Uri;
 
 import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.gsh.GeolocSharing;
@@ -52,7 +52,7 @@ public class RichCallHistory {
 	/**
 	 * Current instance
 	 */
-	private static RichCallHistory instance;
+	private static RichCallHistory mInstance;
 
 	private final LocalContentResolver mLocalContentResolver;
 
@@ -84,8 +84,7 @@ public class RichCallHistory {
 				return cursor;
 			}
 			throw new SQLException(
-					"No row returned while querying for image transfer data with sharingId : "
-							+ sharingId);
+					"No row returned while querying for image transfer data with sharingId : ".concat(sharingId));
 
 		} catch (RuntimeException e) {
 			if (cursor != null) {
@@ -116,8 +115,7 @@ public class RichCallHistory {
 				return cursor;
 			}
 			throw new SQLException(
-					"No row returned while querying for video sharing data with sharingId : "
-							+ sharingId);
+					"No row returned while querying for video sharing data with sharingId : ".concat(sharingId));
 
 		} catch (RuntimeException e) {
 			if (cursor != null) {
@@ -137,6 +135,17 @@ public class RichCallHistory {
 			}
 		}
 	}
+	
+	private long getDataAsLong(Cursor cursor) {
+		try {
+			return cursor.getLong(FIRST_COLUMN_IDX);
+
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
 
 	/**
 	 * Create instance
@@ -144,8 +153,8 @@ public class RichCallHistory {
 	 * @param localContentResolver Local content resolver
 	 */
 	public static synchronized void createInstance(LocalContentResolver localContentResolver) {
-		if (instance == null) {
-			instance = new RichCallHistory(localContentResolver);
+		if (mInstance == null) {
+			mInstance = new RichCallHistory(localContentResolver);
 		}
 	}
 	
@@ -155,7 +164,7 @@ public class RichCallHistory {
 	 * @return Instance
 	 */
 	public static RichCallHistory getInstance() {
-		return instance;
+		return mInstance;
 	}
 	
 	/**
@@ -216,8 +225,9 @@ public class RichCallHistory {
 	 * @param content Shared content
 	 * @param state Call state
 	 * @param reasonCode Reason Code
+	 * @return image URI
 	 */
-	public Uri addVideoSharing(String sharingId, ContactId contact, int direction, VideoContent content,
+	public Uri addVideoSharing(String sharingId, ContactId contact, Direction direction, VideoContent content,
 			int state, int reasonCode) {
 		if(logger.isActivated()){
 			logger.debug(new StringBuilder("Add new video sharing for contact ").append(contact)
@@ -228,7 +238,7 @@ public class RichCallHistory {
 		ContentValues values = new ContentValues();
 		values.put(VideoSharingData.KEY_SHARING_ID, sharingId);
 		values.put(VideoSharingData.KEY_CONTACT, contact.toString());
-		values.put(VideoSharingData.KEY_DIRECTION, direction);
+		values.put(VideoSharingData.KEY_DIRECTION, direction.toInt());
 		values.put(VideoSharingData.KEY_STATE, state);
 		values.put(VideoSharingData.KEY_REASON_CODE, reasonCode);
 		values.put(VideoSharingData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
@@ -240,34 +250,38 @@ public class RichCallHistory {
 	}
 
 	/**
-	 * Set the video sharing state and reason code
+	 * Set the video sharing state, reason code and duration
 	 * 
-	 * @param sessionId Session ID of the entry
+	 * @param sharingId sharing ID of the entry
 	 * @param state New state
 	 * @param reasonCode Reason Code
+	 * @param duration 
 	 */
-	public void setVideoSharingStateAndReasonCode(String sharingId, int state, int reasonCode) {
+	public void setVideoSharingStateReasonCodeAndDuration(String sharingId, int state, int reasonCode, long duration) {
 		if (logger.isActivated()) {
 			logger.debug(new StringBuilder("Update video sharing state of sharing ")
 					.append(sharingId).append(" state=").append(state).append(", reasonCode=")
-					.append(reasonCode).toString());
+					.append(reasonCode).append(" duration=").append(duration).toString());
 		}
 		ContentValues values = new ContentValues();
 		values.put(VideoSharingData.KEY_STATE, state);
 		values.put(VideoSharingData.KEY_REASON_CODE, reasonCode);
+		values.put(VideoSharingData.KEY_DURATION, duration);
+		
 		mLocalContentResolver.update(
 				Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, sharingId), values, null, null);
 	}
 
 	/**
 	 * Update the video sharing duration at the end of the call
+	 * @param sharingId 
 	 * 
-	 * @param sessionId Session ID of the entry
 	 * @param duration Duration
 	 */
 	public void setVideoSharingDuration(String sharingId, long duration) {
 		if (logger.isActivated()) {
-			logger.debug("Update duration of sharing " + sharingId + " to " + duration);
+			logger.debug(new StringBuilder("Update duration of sharing ").append(sharingId)
+					.append(" to ").append(duration).toString());
 		}
 		ContentValues values = new ContentValues();
 		values.put(VideoSharingData.KEY_DURATION, duration);
@@ -285,8 +299,9 @@ public class RichCallHistory {
 	 * @param content Shared content
 	 * @param status Call status
 	 * @param reasonCode Reason Code
+	 * @return uri
 	 */
-	public Uri addImageSharing(String sharingId, ContactId contact, int direction, MmContent content,
+	public Uri addImageSharing(String sharingId, ContactId contact, Direction direction, MmContent content,
 			int status, int reasonCode) {
 		if(logger.isActivated()){
 			logger.debug("Add new image sharing for contact " + contact + ": sharing =" + sharingId + ", status=" + status);
@@ -295,7 +310,7 @@ public class RichCallHistory {
 		ContentValues values = new ContentValues();
 		values.put(ImageSharingData.KEY_SHARING_ID, sharingId);
 		values.put(ImageSharingData.KEY_CONTACT, contact.toString());
-		values.put(ImageSharingData.KEY_DIRECTION, direction);
+		values.put(ImageSharingData.KEY_DIRECTION, direction.toInt());
 		values.put(ImageSharingData.KEY_FILE, content.getUri().toString());
 		values.put(ImageSharingData.KEY_FILENAME, content.getName());
 		values.put(ImageSharingData.KEY_MIME_TYPE, content.getEncoding());
@@ -309,8 +324,8 @@ public class RichCallHistory {
 
 	/**
 	 * Set the image sharing state and reason code
+	 * @param sharingId 
 	 * 
-	 * @param sessionId Session ID of the entry
 	 * @param state New state
 	 * @param reasonCode Reason Code
 	 */
@@ -334,8 +349,8 @@ public class RichCallHistory {
 	
 	/**
      * Read the total size of transferred image
+	 * @param sharingId 
      *
-     * @param sessionId the session identifier
      * @return the total size (or 0 if failed)
      */
 	public long getImageSharingTotalSize(String sharingId ) {
@@ -385,7 +400,7 @@ public class RichCallHistory {
         values.put(GeolocSharingData.KEY_SHARING_ID, sharingId);
         values.put(GeolocSharingData.KEY_CONTACT, contact.toString());
         values.put(GeolocSharingData.KEY_MIME_TYPE, MimeType.GEOLOC_MESSAGE);
-        values.put(GeolocSharingData.KEY_DIRECTION, Direction.INCOMING);
+        values.put(GeolocSharingData.KEY_DIRECTION, Direction.INCOMING.toInt());
         values.put(GeolocSharingData.KEY_STATE, state);
         values.put(GeolocSharingData.KEY_REASON_CODE, reasonCode);
         values.put(GeolocSharingData.KEY_TIMESTAMP, System.currentTimeMillis());
@@ -408,7 +423,7 @@ public class RichCallHistory {
         values.put(GeolocSharingData.KEY_CONTACT, contact.toString());
         values.put(GeolocSharingData.KEY_MIME_TYPE, MimeType.GEOLOC_MESSAGE);
         values.put(GeolocSharingData.KEY_CONTENT, geoloc.toString());
-        values.put(GeolocSharingData.KEY_DIRECTION, Direction.OUTGOING);
+        values.put(GeolocSharingData.KEY_DIRECTION, Direction.OUTGOING.toInt());
         values.put(GeolocSharingData.KEY_STATE, state);
         values.put(GeolocSharingData.KEY_REASON_CODE, reasonCode);
         values.put(GeolocSharingData.KEY_TIMESTAMP, System.currentTimeMillis());
@@ -587,8 +602,7 @@ public class RichCallHistory {
 				return cursor;
 			}
 			throw new SQLException(
-					"No row returned while querying for image transfer data with sharingId : "
-							+ sharingId);
+					"No row returned while querying for image transfer data with sharingId : ".concat(sharingId));
 
 		} catch (RuntimeException e) {
 			if (cursor != null) {
@@ -615,8 +629,7 @@ public class RichCallHistory {
 				return cursor;
 			}
 			throw new SQLException(
-					"No row returned while querying for video sharing data with sharingId : "
-							+ sharingId);
+					"No row returned while querying for video sharing data with sharingId : ".concat(sharingId));
 
 		} catch (RuntimeException e) {
 			if (cursor != null) {
@@ -624,5 +637,14 @@ public class RichCallHistory {
 			}
 			throw e;
 		}
+	}
+
+	/**
+	 * Returns video sharing duration
+	 * @param sharingId
+	 * @return duration
+	 */
+	public long getVideoSharingDuration(String sharingId) {
+		return getDataAsLong(getVideoSharingData(VideoSharingData.KEY_DURATION, sharingId));
 	}
 }

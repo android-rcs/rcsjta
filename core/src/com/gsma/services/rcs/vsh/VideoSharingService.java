@@ -35,6 +35,7 @@ import android.os.IInterface;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contacts.ContactId;
 
@@ -110,7 +111,7 @@ public class VideoSharingService extends RcsService {
 		public void onServiceDisconnected(ComponentName className) {
         	setApi(null);
 			if (mListener != null) {
-				mListener.onServiceDisconnected(RcsService.Error.CONNECTION_LOST);
+				mListener.onServiceDisconnected(ReasonCode.CONNECTION_LOST);
 			}
 		}
 	};
@@ -121,16 +122,14 @@ public class VideoSharingService extends RcsService {
 	 * @return Configuration
 	 * @throws RcsServiceException
 	 */
-	public VideoSharingServiceConfiguration getConfiguration()
-			throws RcsServiceException {
-		if (mApi != null) {
-			try {
-				return new VideoSharingServiceConfiguration(mApi.getConfiguration());
-			} catch (Exception e) {
-				throw new RcsServiceException(e);
-			}
-		} else {
+	public VideoSharingServiceConfiguration getConfiguration() throws RcsServiceException {
+		if (mApi == null) {
 			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+		try {
+			return new VideoSharingServiceConfiguration(mApi.getConfiguration());
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
 		}
 	}
 
@@ -149,20 +148,20 @@ public class VideoSharingService extends RcsService {
 	 * @return Video sharing
 	 * @throws RcsServiceException
 	 */
-	public VideoSharing shareVideo(ContactId contact, VideoPlayer player) throws RcsServiceException {
-		if (mApi != null) {
-			try {
-				IVideoSharing sharingIntf = mApi.shareVideo(contact, player);
-				if (sharingIntf != null) {
-					return new VideoSharing(sharingIntf);
-				} else {
-					return null;
-				}
-			} catch (Exception e) {
-				throw new RcsServiceException(e);
-			}
-		} else {
+	public VideoSharing shareVideo(ContactId contact, VideoPlayer player)
+			throws RcsServiceException {
+		if (mApi == null) {
 			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+		try {
+			IVideoSharing sharingIntf = mApi.shareVideo(contact, player);
+			if (sharingIntf != null) {
+				return new VideoSharing(sharingIntf);
+			} else {
+				return null;
+			}
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
 		}
 	}
 
@@ -173,21 +172,19 @@ public class VideoSharingService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public Set<VideoSharing> getVideoSharings() throws RcsServiceException {
-		if (mApi != null) {
-			try {
-				Set<VideoSharing> result = new HashSet<VideoSharing>();
-				List<IBinder> vshList = mApi.getVideoSharings();
-				for (IBinder binder : vshList) {
-					VideoSharing sharing = new VideoSharing(
-							IVideoSharing.Stub.asInterface(binder));
-					result.add(sharing);
-				}
-				return result;
-			} catch (Exception e) {
-				throw new RcsServiceException(e);
-			}
-		} else {
+		if (mApi == null) {
 			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+		try {
+			Set<VideoSharing> result = new HashSet<VideoSharing>();
+			List<IBinder> vshList = mApi.getVideoSharings();
+			for (IBinder binder : vshList) {
+				VideoSharing sharing = new VideoSharing(IVideoSharing.Stub.asInterface(binder));
+				result.add(sharing);
+			}
+			return result;
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
 		}
 	}
 
@@ -201,14 +198,13 @@ public class VideoSharingService extends RcsService {
 	 */
 	public VideoSharing getVideoSharing(String sharingId)
 			throws RcsServiceException {
-		if (mApi != null) {
-			try {
-				return new VideoSharing(mApi.getVideoSharing(sharingId));
-			} catch (Exception e) {
-				throw new RcsServiceException(e);
-			}
-		} else {
+		if (mApi == null) {
 			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+		try {
+			return new VideoSharing(mApi.getVideoSharing(sharingId));
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
 		}
 	}
 
@@ -219,14 +215,13 @@ public class VideoSharingService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public void addEventListener(VideoSharingListener listener) throws RcsServiceException {
-		if (mApi != null) {
-			try {
-				mApi.addEventListener2(listener);
-			} catch (Exception e) {
-				throw new RcsServiceException(e);
-			}
-		} else {
+		if (mApi == null) {
 			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+		try {
+			mApi.addEventListener2(listener);
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
 		}
 	}
 
@@ -237,14 +232,66 @@ public class VideoSharingService extends RcsService {
 	 * @throws RcsServiceException
 	 */
 	public void removeEventListener(VideoSharingListener listener) throws RcsServiceException {
-		if (mApi != null) {
-			try {
-				mApi.removeEventListener2(listener);
-			} catch (Exception e) {
-				throw new RcsServiceException(e);
-			}
-		} else {
+		if (mApi == null) {
 			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+		try {
+			mApi.removeEventListener2(listener);
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
+	}
+
+	/**
+	 * Deletes all video sharing from history and abort/reject any associated
+	 * ongoing session if such exists.
+	 * 
+	 * @throws RcsServiceException
+	 */
+	public void deleteVideoSharings() throws RcsServiceException {
+		if (mApi == null) {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+		try {
+			mApi.deleteVideoSharings();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
+	}
+
+	/**
+	 * Delete video sharing associated with a given contact from history and
+	 * abort/reject any associated ongoing session if such exists.
+	 * 
+	 * @param contact
+	 * @throws RcsServiceException
+	 */
+	public void deleteVideoSharings(ContactId contact) throws RcsServiceException {
+		if (mApi == null) {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+		try {
+			mApi.deleteVideoSharings2(contact);
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
+	}
+
+	/**
+	 * Deletes a video sharing by its sharing ID from history and abort/reject
+	 * any associated ongoing session if such exists.
+	 * 
+	 * @param sharingId
+	 * @throws RcsServiceException
+	 */
+	public void deleteVideoSharing(String sharingId) throws RcsServiceException {
+		if (mApi == null) {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+		try {
+			mApi.deleteVideoSharing(sharingId);
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
 		}
 	}
 }

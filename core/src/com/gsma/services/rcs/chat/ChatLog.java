@@ -76,7 +76,7 @@ public class ChatLog {
         /**
          * The name of the column containing the direction of the group chat.
          * <P>Type: INTEGER</P>
-         * @see com.gsma.services.rcs.RcsCommon.Direction
+         * @see Direction
          */
         public static final String DIRECTION = "direction";
 
@@ -180,7 +180,7 @@ public class ChatLog {
         /**
          * The name of the column containing the message direction.
          * <P>Type: INTEGER</P>
-         * @see com.gsma.services.rcs.RcsCommon.Direction
+         * @see Direction
          */
         public static final String DIRECTION = "direction";
 

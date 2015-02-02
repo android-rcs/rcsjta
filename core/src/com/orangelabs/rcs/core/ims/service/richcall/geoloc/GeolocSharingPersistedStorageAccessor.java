@@ -17,6 +17,7 @@
 package com.orangelabs.rcs.core.ims.service.richcall.geoloc;
 
 import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.gsh.GeolocSharingLog;
@@ -41,10 +42,7 @@ public class GeolocSharingPersistedStorageAccessor {
 
     private Geoloc mGeoloc;
 
-    /**
-     * TODO: Change type to enum in CR031 implementation
-     */
-    private Integer mDirection;
+    private Direction mDirection;
 
     public GeolocSharingPersistedStorageAccessor(String sharingId, RichCallHistory richCallHistory) {
         mSharingId = sharingId;
@@ -52,7 +50,7 @@ public class GeolocSharingPersistedStorageAccessor {
     }
 
     public GeolocSharingPersistedStorageAccessor(String sharingId, ContactId contact,
-            Geoloc geoloc, int direction, RichCallHistory richCallHistory) {
+            Geoloc geoloc, Direction direction, RichCallHistory richCallHistory) {
         mSharingId = sharingId;
         mContact = contact;
         mGeoloc = geoloc;
@@ -69,7 +67,7 @@ public class GeolocSharingPersistedStorageAccessor {
             if (contact != null) {
                 mContact = ContactUtils.createContactId(contact);
             }
-            mDirection = cursor.getInt(cursor.getColumnIndexOrThrow(GeolocSharingLog.DIRECTION));
+            mDirection = Direction.valueOf(cursor.getInt(cursor.getColumnIndexOrThrow(GeolocSharingLog.DIRECTION)));
             String geoloc = cursor.getString(cursor.getColumnIndexOrThrow(GeolocSharingLog.CONTENT));
             if (geoloc != null) {
                 mGeoloc = new Geoloc(geoloc);
@@ -117,7 +115,7 @@ public class GeolocSharingPersistedStorageAccessor {
         return mRichCallLog.getGeolocSharingStateReasonCode(mSharingId);
     }
 
-    public int getDirection() {
+    public Direction getDirection() {
         /*
          * Utilizing cache here as direction can't be changed in persistent
          * storage after entry insertion anyway so no need to query for it

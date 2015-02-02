@@ -107,6 +107,10 @@
             android:name=".contacts.ContactVCard"
             android:label="@string/menu_contact_vcard" />
                 
+        <activity
+            android:name=".contacts.BlockingContact"
+            android:label="@string/menu_blocking_contact" />
+        
         <!-- Capabilities API -->
 
         <activity android:name=".capabilities.TestCapabilitiesApi"/>
@@ -359,9 +363,9 @@
             android:label="@string/title_video_sharing" />
         
         <activity
-            android:name=".sharing.video.InitiateVideoSharing"
-            android:label="@string/menu_initiate_video_sharing"
-            android:screenOrientation="landscape" />
+            android:name=".sharing.video.OutgoingVideoSharing"
+            android:label="@string/menu_video_sharing"
+        />
         
 		<receiver android:name=".sharing.video.VideoSharingInvitationReceiver">
             <intent-filter>
@@ -370,9 +374,9 @@
         </receiver>
         
         <activity
-            android:name=".sharing.video.ReceiveVideoSharing"
-            android:label="@string/menu_video_sharing"
-            android:screenOrientation="landscape" />
+            android:name=".sharing.video.IncomingVideoSharing"
+            android:label="@string/menu_video_sharing" 
+            android:exported="true" />
         
         <activity
             android:name=".sharing.video.VideoSharingList"
@@ -455,7 +459,8 @@
 	 		 	
 	 	<activity android:name=".ipcall.IPCallList"/>
 	 	
-	 	<activity android:name=".ipcall.IPCallView"/>
+	 	<activity android:name=".ipcall.IPCallView"
+	 	    />
 	 
 	 	<service android:name=".messaging.ft.FileTransferIntentService" android:exported="false" />
 	 	

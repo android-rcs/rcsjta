@@ -103,11 +103,13 @@ public class MyCapabilities extends Activity {
 	        // Set automata
 	        CheckBox automata = (CheckBox)findViewById(R.id.automata);
 	        automata.setChecked(capabilities.isAutomata());
-	    } catch(RcsServiceNotAvailableException e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
-	    } catch(RcsServiceException e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
-	    }
+		} catch (RcsServiceNotAvailableException e) {
+			Utils.showMessageAndExit(this,
+					getString(R.string.label_api_disabled), exitOnce, e);
+		} catch (RcsServiceException e) {
+			Utils.showMessageAndExit(this,
+					getString(R.string.label_api_failed), exitOnce, e);
+		}
     }
 
     

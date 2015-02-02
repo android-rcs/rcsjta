@@ -92,7 +92,7 @@ public abstract class ChatView extends FragmentActivity implements LoaderManager
 	/**
 	 * A locker to exit only once
 	 */
-	protected LockAccess exitOnce = new LockAccess();
+	protected LockAccess mExitOnce = new LockAccess();
 
 	/**
 	 * Activity displayed status
@@ -198,11 +198,11 @@ public abstract class ChatView extends FragmentActivity implements LoaderManager
 		mCnxManager = ApiConnectionManager.getInstance(this);
 
 		if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACTS)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), mExitOnce);
 			return;
 			
 		}
-		mCnxManager.startMonitorServices(this, exitOnce, RcsServiceName.CHAT, RcsServiceName.CONTACTS);
+		mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.CHAT, RcsServiceName.CONTACTS);
 		processIntent();
 	}
 

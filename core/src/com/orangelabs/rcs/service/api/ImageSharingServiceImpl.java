@@ -32,7 +32,7 @@ import android.os.IBinder;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
-import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ish.IImageSharing;
@@ -41,7 +41,6 @@ import com.gsma.services.rcs.ish.IImageSharingService;
 import com.gsma.services.rcs.ish.IImageSharingServiceConfiguration;
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.ish.ImageSharing.ReasonCode;
-import com.gsma.services.rcs.ish.ImageSharingServiceConfiguration;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.SessionIdGenerator;
@@ -378,6 +377,34 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		synchronized (lock) {
 			mBroadcaster.removeEventListener(listener);
 		}
+	}
+
+	/**
+	 * Deletes all image sharing from history and abort/reject any associated
+	 * ongoing session if such exists.
+	 */
+	public void deleteImageSharings() {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Deletes image sharing with a given contact from history and abort/reject
+	 * any associated ongoing session if such exists
+	 * 
+	 * @param contact
+	 */
+	public void deleteImageSharings2(ContactId contact) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * deletes an image sharing by its sharing id from history and abort/reject
+	 * any associated ongoing session if such exists.
+	 * 
+	 * @param sharingId
+	 */
+	public void deleteImageSharing(String sharingId) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
 	}
 
 	/**

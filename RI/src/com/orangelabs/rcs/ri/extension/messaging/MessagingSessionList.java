@@ -54,8 +54,7 @@ public class MessagingSessionList extends MultimediaSessionList {
 			intent.putExtra(MessagingSessionView.EXTRA_SESSION_ID, sessionId);
 			startActivity(intent);
 		} catch(RcsServiceException e) {
-			e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed));
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
 		}
 	}
 	
@@ -68,7 +67,7 @@ public class MessagingSessionList extends MultimediaSessionList {
 			sessions.clear();
 
 			// Get list of pending sessions
-			Set<MultimediaMessagingSession> currentSessions = connectionManager.getMultimediaSessionApi().getMessagingSessions(
+			Set<MultimediaMessagingSession> currentSessions = mCnxManager.getMultimediaSessionApi().getMessagingSessions(
 					MessagingSessionUtils.SERVICE_ID);
 			sessions = new ArrayList<MultimediaMessagingSession>(currentSessions);
 			if (sessions.size() > 0) {
@@ -81,7 +80,7 @@ public class MessagingSessionList extends MultimediaSessionList {
 				setListAdapter(null);
 			}
 		} catch (Exception e) {
-			Utils.showMessageAndExit(MessagingSessionList.this, getString(R.string.label_api_failed), exitOnce);
+			Utils.showMessageAndExit(MessagingSessionList.this, getString(R.string.label_api_failed), mExitOnce, e);
 		}
 	}
 }

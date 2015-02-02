@@ -131,7 +131,7 @@ public class VideoSdpTest extends AndroidTestCase {
 		// Create SDP
 		String createdSdp = "v=tester" + SipUtils.CRLF + VideoSdpBuilder.buildSdpOfferWithoutOrientation(codecs, RTP_PORT);
 		// TEST SDP
-		assertEquals(createdSdp, videoSdp);
+		assertEquals(videoSdp, createdSdp);
 	}
 
 	public void testParseSdp() {
@@ -153,8 +153,8 @@ public class VideoSdpTest extends AndroidTestCase {
 			assertEquals(proposedCodecs.elementAt(i).getPayloadType(), codec.getPayloadType());
 			assertEquals(proposedCodecs.elementAt(i).getParameters(), codec.getParameters());
 			assertEquals(proposedCodecs.elementAt(i).getFrameRate(), codec.getFrameRate());
-			assertEquals(proposedCodecs.elementAt(i).getVideoWidth(), codec.getVideoWidth());
-			assertEquals(proposedCodecs.elementAt(i).getVideoHeight(), codec.getVideoHeight());
+			assertEquals(proposedCodecs.elementAt(i).getWidth(), codec.getWidth());
+			assertEquals(proposedCodecs.elementAt(i).getHeight(), codec.getHeight());
 			// Bitrate and order pref not tested because not in SDP
 		}
 	}

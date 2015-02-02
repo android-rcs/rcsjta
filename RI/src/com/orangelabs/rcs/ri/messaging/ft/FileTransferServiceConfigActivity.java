@@ -166,11 +166,8 @@ public class FileTransferServiceConfigActivity extends Activity {
 								.toString()));
 					}
 				} catch (RcsServiceException e) {
-					if (LogUtils.isActive) {
-						Log.e(LOGTAG, "Exception occurred", e);
-					}
 					Utils.showMessageAndExit(FileTransferServiceConfigActivity.this,
-							getString(R.string.label_api_failed), mExitOnce);
+							getString(R.string.label_api_failed), mExitOnce, e);
 				}
 
 			}
@@ -194,8 +191,7 @@ public class FileTransferServiceConfigActivity extends Activity {
 		try {
 			displayFileTransferServiceConfig();
 		} catch (RcsServiceException e) {
-			e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
 		}
 	}
 

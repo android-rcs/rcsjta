@@ -27,15 +27,15 @@ import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 import java.util.Collection;
 import java.util.Vector;
 
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.vsh.IVideoRendererListener;
+import com.gsma.services.rcs.vsh.IVideoPlayer;
 import com.gsma.services.rcs.vsh.VideoCodec;
 import com.orangelabs.rcs.core.content.ContentManager;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpParser;
 import com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils;
+import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -45,7 +45,6 @@ import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
 import com.orangelabs.rcs.core.ims.service.richcall.RichcallService;
-import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
@@ -81,8 +80,9 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             if (logger.isActivated()) {
                 logger.info("Initiate a new live video sharing session as terminating");
             }
-
-            send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+            SipDialogPath dialogPath = getDialogPath();
+            // Send a 180 Ringing response
+            send180Ringing(dialogPath.getInvite(), dialogPath.getLocalTag());
 
             // Parse the remote SDP part
             SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(
@@ -95,11 +95,13 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             Vector<MediaDescription> medias = parser.getMediaDescriptions("video");
             Vector<VideoCodec> proposedCodecs = VideoCodecManager.extractVideoCodecsFromSdp(medias);
 
+            // Notify listener
             Collection<ImsSessionListener> listeners = getListeners();
             for (ImsSessionListener listener : listeners) {
                 listener.handleSessionInvited();
             }
 
+            // Wait invitation answer
             int answer = waitInvitationAnswer();
             switch (answer) {
                 case ImsServiceSession.INVITATION_REJECTED:
@@ -120,7 +122,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                     }
 
                     // Ringing period timeout
-                    send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+                    send486Busy(dialogPath.getInvite(), dialogPath.getLocalTag());
 
                     removeSession();
 
@@ -157,48 +159,47 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                     return;
             }
 
-            // Check that a video renderer has been set
-            if (getVideoRenderer() == null) {
+            IVideoPlayer player = getPlayer();
+            // Check that a video player has been set
+            if (player == null) {
                 handleError(new ContentSharingError(
-                        ContentSharingError.MEDIA_RENDERER_NOT_INITIALIZED));
+                        ContentSharingError.MEDIA_PLAYER_NOT_INITIALIZED));
                 return;
             }
 
             // Codec negotiation
             VideoCodec selectedVideoCodec = VideoCodecManager.negociateVideoCodec(
-            		getVideoRenderer().getSupportedCodecs(), proposedCodecs);
+            		player.getSupportedCodecs(), proposedCodecs);
             if (selectedVideoCodec == null) {
                 if (logger.isActivated()){
                     logger.debug("Proposed codecs are not supported");
                 }
                 
                 // Send a 415 Unsupported media type response
-                send415Error(getDialogPath().getInvite());
+                send415Error(dialogPath.getInvite());
                 
                 // Unsupported media type
                 handleError(new ContentSharingError(ContentSharingError.UNSUPPORTED_MEDIA_TYPE));
                 return;
             }
 
-            // Set the OrientationHeaderID
+            // Set the video player orientation
             SdpOrientationExtension extensionHeader = SdpOrientationExtension.create(mediaVideo);
             if (extensionHeader != null) {
-            	// TODO getVideoRenderer().setOrientationHeaderId(extensionHeader.getExtensionId());
+            	// Update the orientation ID
+            	setOrientation(extensionHeader.getExtensionId());
             }
 
-            // Set video renderer event listener
-            getVideoRenderer().addEventListener(new MyRendererEventListener(this));
-
-            // Open the video renderer
-            getVideoRenderer().open(selectedVideoCodec, remoteHost, remotePort);
-
             // Build SDP part
-	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
-            String videoSdp = VideoSdpBuilder.buildSdpAnswer(selectedVideoCodec, getVideoRenderer().getLocalRtpPort(), mediaVideo); 
+            // Note ID_6_5 Extmap: it is recommended not to change the extmap's local
+            // identifier in the SDP answer from the one in the SDP offer because there
+            // are no reasons to do that since there should only be one extension in use.
+	    	String ipAddress = dialogPath.getSipStack().getLocalIpAddress();
+            String videoSdp = VideoSdpBuilder.buildSdpAnswer(selectedVideoCodec, player.getLocalRtpPort(), mediaVideo); 
             String sdp = SdpUtils.buildVideoSDP(ipAddress, videoSdp, SdpUtils.DIRECTION_RECVONLY);
 
             // Set the local SDP part in the dialog path
-            getDialogPath().setLocalContent(sdp);
+            dialogPath.setLocalContent(sdp);
 
 	        // Test if the session should be interrupted
             if (isInterrupted()) {
@@ -212,11 +213,11 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             if (logger.isActivated()) {
                 logger.info("Send 200 OK");
             }
-            SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
+            SipResponse resp = SipMessageFactory.create200OkInviteResponse(dialogPath,
                     RichcallService.FEATURE_TAGS_VIDEO_SHARE, sdp);
 
             // The signalisation is established
-            getDialogPath().sigEstablished();
+            dialogPath.sigEstablished();
 
             // Send response
             SipTransactionContext ctx = getImsService().getImsModule().getSipManager().sendSipMessageAndWait(resp);
@@ -229,20 +230,19 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                 }
 
                 // The session is established
-                getDialogPath().sessionEstablished();
-
-                // Start the video renderer
-                getVideoRenderer().start();
+                dialogPath.sessionEstablished();
 
                 // Start session timer
                 if (getSessionTimerManager().isSessionTimerActivated(resp)) {
-                    getSessionTimerManager().start(SessionTimerManager.UAS_ROLE, getDialogPath().getSessionExpireTime());
+                    getSessionTimerManager().start(SessionTimerManager.UAS_ROLE, dialogPath.getSessionExpireTime());
                 }
 
-                // Notify listeners
-                for(int i=0; i < getListeners().size(); i++) {
-                    getListeners().get(i).handleSessionStarted();
-                }
+                // Set the video player remote info
+                player.setRemoteInfo(selectedVideoCodec, remoteHost, remotePort, getOrientation());
+
+                for (ImsSessionListener listener : listeners) {
+                	listener.handleSessionStarted();
+				}
             } else {
                 if (logger.isActivated()) {
                     logger.debug("No ACK received for INVITE");
@@ -274,7 +274,9 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
 
         // Error
         if (logger.isActivated()) {
-            logger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
+			logger.info(new StringBuilder("Session error: ")
+					.append(String.valueOf(error.getErrorCode())).append(", reason=")
+					.append(error.getMessage()).toString());
         }
 
         // Close media session
@@ -283,27 +285,9 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
         // Remove the current session
         removeSession();
 
-        // Notify listener
-        for(int i=0; i < getListeners().size(); i++) {
-            ((VideoStreamingSessionListener)getListeners().get(i)).handleSharingError(error);
-        }
-    }
-
-    /**
-     * Close media session
-     */
-    public void closeMediaSession() {
-        try {
-            // Close the video renderer
-            if (getVideoRenderer() != null) {
-            	getVideoRenderer().stop();
-            	getVideoRenderer().close();
-            }
-        } catch(Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Exception when closing the media renderer", e);
-            }
-        }
+        for (ImsSessionListener listener : getListeners()) {
+        	((VideoStreamingSessionListener)listener).handleSharingError(error);
+		}
     }
 
     /**
@@ -312,7 +296,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
      * @throws Exception 
      */
     public void prepareMediaSession() throws Exception {
-          // Nothing to do in terminating side
+		// Nothing to do in case of external codec
     }
 
     /**
@@ -321,114 +305,15 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
      * @throws Exception 
      */
     public void startMediaSession() throws Exception {
-        // Nothing to do in terminating side
+		// Nothing to do in case of external codec
     }
-
-    /**
-     * My renderer event listener
-     */
-    private class MyRendererEventListener extends IVideoRendererListener.Stub {
-        /**
-         * Streaming session
-         */
-        private VideoStreamingSession session;
-
-        /**
-         * Constructor
-         *
-         * @param session Streaming session
-         */
-        public MyRendererEventListener(VideoStreamingSession session) {
-            this.session = session;
-        }
-
-    	/**
-    	 * Callback called when the renderer is opened
-    	 */
-    	public void onRendererOpened() {
-            if (logger.isActivated()) {
-                logger.debug("Media renderer is opened");
-            }
-    	}
-
-    	/**
-    	 * Callback called when the renderer is started
-    	 */
-    	public void onRendererStarted() {
-            if (logger.isActivated()) {
-                logger.debug("Media renderer is started");
-            }
-    	}
-
-    	/**
-    	 * Callback called when the renderer is stopped
-    	 */
-    	public void onRendererStopped() {
-            if (logger.isActivated()) {
-                logger.debug("Media renderer is stopped");
-            }
-    	}
-
-    	/**
-    	 * Callback called when the renderer is closed
-    	 */
-    	public void onRendererClosed() {
-            if (logger.isActivated()) {
-                logger.debug("Media renderer is closed");
-            }
-    	}
-
-    	/**
-    	 * Callback called when the renderer has failed
-    	 * 
-    	 * @param error Error
-    	 */
-    	public void onRendererError(int error) {
-            if (isSessionInterrupted()) {
-                return;
-            }
-
-            if (logger.isActivated()) {
-                logger.error("Media renderer has failed: " + error);
-            }
-
-            // Close the media session
-            closeMediaSession();
-
-            // Terminate session
-            terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
-
-            // Remove the current session
-            removeSession();
-
-            // Notify listeners
-            for(int i=0; i < getListeners().size(); i++) {
-                ((VideoStreamingSessionListener)getListeners().get(i)).handleSharingError(new ContentSharingError(ContentSharingError.MEDIA_STREAMING_FAILED));
-            }
-
-            try {
-				ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
-				// Request capabilities to the remote
-		        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
-			} catch (RcsContactFormatException e) {
-				if (logger.isActivated()) {
-					logger.warn("Cannot parse contact "+getDialogPath().getRemoteParty());
-				}
-			}
-    	}
-    	
-    	/**
-    	 * Callback called when the renderer is resized
-    	 * 
-    	 * @param width Width
-    	 * @param height Height
-    	 */    	
-    	public void onRendererResized(int width, int height) {
-            if (logger.isActivated()) {
-                logger.debug("Media renderer is resized");
-            }
-    	}
-    }
+    
+	/**
+	 * Close media session
+	 */
+	public void closeMediaSession() {    
+		// Nothing to do in case of external codec
+	}    
 
 	@Override
 	public boolean isInitiatedByRemote() {

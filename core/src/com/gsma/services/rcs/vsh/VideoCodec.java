@@ -20,8 +20,6 @@ package com.gsma.services.rcs.vsh;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
-
 /**
  * Video codec
  * 
@@ -31,42 +29,42 @@ public class VideoCodec implements Parcelable {
 	/**
 	 * Video encoding
 	 */
-	private String encoding;
+	private final String mEncoding;
 	
 	/**
 	 * Payload
 	 */
-	private int payload;
+	private final int mPayload;
 	
 	/**
 	 * Clock rate
 	 */
-	private int clockRate;
+	private final int mClockRate;
 	
 	/**
 	 * Frame rate
 	 */
-	private int frameRate;
+	private final int mFrameRate;
 	
 	/**
 	 * Bit rate
 	 */
-	private int bitRate;
+	private final int mBitRate;
 
 	/**
-	 * Screen width
+	 * Video frame width
 	 */
-	private int width;
+	private final int mWidth;
+
+	/**
+	 * Video frame height
+	 */
+	private final int mHeight;
 	
-	/**
-	 * Screen height
-	 */
-	private int height;
-
 	/**
 	 * Video parameters
 	 */
-	private String parameters;
+	private final String mParameters;
 	
     /**
      * Constructor
@@ -82,14 +80,14 @@ public class VideoCodec implements Parcelable {
      * @hide
      */
     public VideoCodec(String encoding, int payload, int clockRate, int frameRate, int bitRate, int width, int height, String parameters) {
-    	this.encoding = encoding;
-    	this.payload = payload;
-    	this.clockRate = clockRate;
-    	this.frameRate = frameRate;
-    	this.bitRate = bitRate;
-    	this.width = width;
-    	this.height = height;
-    	this.parameters = parameters;
+    	mEncoding = encoding;
+    	mPayload = payload;
+    	mClockRate = clockRate;
+    	mFrameRate = frameRate;
+    	mBitRate = bitRate;
+    	mWidth = width;
+    	mHeight = height;  	
+    	mParameters = parameters;
     }
     
     /**
@@ -99,14 +97,14 @@ public class VideoCodec implements Parcelable {
      * @hide
 	 */
 	public VideoCodec(Parcel source) {
-		this.encoding = source.readString();
-    	this.payload = source.readInt();
-    	this.clockRate = source.readInt();
-    	this.frameRate = source.readInt();
-    	this.bitRate = source.readInt();
-    	this.width = source.readInt();
-    	this.height = source.readInt();
-		this.parameters = source.readString();
+		mEncoding = source.readString();
+    	mPayload = source.readInt();
+    	mClockRate = source.readInt();
+    	mFrameRate = source.readInt();
+    	mBitRate = source.readInt();
+    	mWidth = source.readInt();
+    	mHeight = source.readInt();
+		mParameters = source.readString();
 	}
 
 	/**
@@ -128,14 +126,14 @@ public class VideoCodec implements Parcelable {
      * @hide
 	 */
     public void writeToParcel(Parcel dest, int flags) {
-    	dest.writeString(encoding);
-    	dest.writeInt(payload);
-    	dest.writeInt(clockRate);
-    	dest.writeInt(frameRate);
-    	dest.writeInt(bitRate);
-    	dest.writeInt(width);
-    	dest.writeInt(height);
-    	dest.writeString(parameters);
+    	dest.writeString(mEncoding);
+    	dest.writeInt(mPayload);
+    	dest.writeInt(mClockRate);
+    	dest.writeInt(mFrameRate);
+    	dest.writeInt(mBitRate);
+    	dest.writeInt(mWidth);
+    	dest.writeInt(mHeight);
+    	dest.writeString(mParameters);
     }
     
     /**
@@ -160,7 +158,7 @@ public class VideoCodec implements Parcelable {
     * @return Encoding name
     */
     public String getEncoding() {
-    	return encoding;
+    	return mEncoding;
     }
     
     /**
@@ -169,7 +167,7 @@ public class VideoCodec implements Parcelable {
      * @return Payload type
      */
     public int getPayloadType() {
-    	return payload;
+    	return mPayload;
     }
     
     /**
@@ -178,7 +176,7 @@ public class VideoCodec implements Parcelable {
      * @return Clock rate
      */
     public int getClockRate() {
-    	return clockRate;
+    	return mClockRate;
     }
     
     /**
@@ -187,7 +185,7 @@ public class VideoCodec implements Parcelable {
      * @return Frame rate
      */
     public int getFrameRate() {
-    	return frameRate;
+    	return mFrameRate;
     }
     
     /**
@@ -196,27 +194,27 @@ public class VideoCodec implements Parcelable {
      * @return Bit rate
      */
     public int getBitRate() {
-    	return bitRate;
+    	return mBitRate;
     }
     
-    /**
-     * Returns the video width (e.g. 176)
-     * 
-     * @return Video width
-     */
-    public int getVideoWidth() {
-    	return width;
+	/**
+	 * Returns the width of video frame (e.g. 176)
+	 * 
+	 * @return Video width in pixels
+	 */
+    public int getWidth() {
+    	return mWidth;
     }
-    
-    /**
-     * Returns the video height (e.g. 144)
-     * 
-     * @return Video height
-     */
-    public int getVideoHeight() {
-    	return height;
-    }
-    
+
+	/**
+	 * Returns the height of video frame (e.g. 144)
+	 * 
+	 * @return Video height in pixels
+	 */
+	public int getHeight() {
+		return mHeight;
+	}
+    	
     /**
      * Returns the list of codec parameters (e.g. profile-level-id, packetization-mode).
      * Parameters are are semicolon separated.
@@ -224,30 +222,6 @@ public class VideoCodec implements Parcelable {
      * @return Parameters
      */
     public String getParameters() {
-    	return parameters;    	
-    }
-
-    /**
-     * Compare codec
-     *
-     * @param codec Codec to compare
-     * @return Returns True if codecs are equals, else returns False
-     */
-    public boolean compare(VideoCodec codec) {
-        boolean ret = false;
-        if (getEncoding().equalsIgnoreCase(codec.getEncoding()) 
-                && (getVideoWidth() == codec.getVideoWidth() || getVideoWidth() == 0 || codec.getVideoWidth() == 0)
-                && (getVideoHeight() == codec.getVideoHeight() || getVideoHeight() == 0 || codec.getVideoHeight() == 0)) {
-            if (getEncoding().equalsIgnoreCase(H264Config.CODEC_NAME)) {
-                if (H264Config.getCodecProfileLevelId(getParameters()).compareToIgnoreCase(H264Config.getCodecProfileLevelId(codec.getParameters())) == 0) {
-                    ret =  true;
-                }
-            } else {
-                if (getParameters().equalsIgnoreCase(codec.getParameters())) {
-                    ret = true;
-                }
-            }
-        }
-        return ret;
+    	return mParameters;    	
     }
 }

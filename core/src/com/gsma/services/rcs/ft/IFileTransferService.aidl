@@ -47,4 +47,20 @@ interface IFileTransferService {
 	void setAutoAcceptInRoaming(in boolean enable);
 	
 	void setImageResizeOption(in int option);
+
+	boolean canTransferFile(in ContactId contact);
+
+	boolean canTransferFileToGroupChat(in String chatId);
+
+	void deleteOneToOneFileTransfers();
+
+	void deleteGroupFileTransfers();
+
+	void deleteOneToOneFileTransfers2(in ContactId contact);
+
+	void deleteGroupFileTransfers2(in String chatId);
+
+	void deleteFileTransfer(in String transferId);
+
+	void markUndeliveredFileTransfersAsProcessed(in List<String> transferIds);
 }

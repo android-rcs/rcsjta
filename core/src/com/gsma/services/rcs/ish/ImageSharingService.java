@@ -39,6 +39,7 @@ import android.os.IInterface;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contacts.ContactId;
 
@@ -121,7 +122,7 @@ public class ImageSharingService extends RcsService {
         public void onServiceDisconnected(ComponentName className) {
         	setApi(null);
         	if (mListener != null) {
-        		mListener.onServiceDisconnected(RcsService.Error.CONNECTION_LOST);
+        		mListener.onServiceDisconnected(ReasonCode.CONNECTION_LOST);
         	}
         }
     };
@@ -298,6 +299,62 @@ public class ImageSharingService extends RcsService {
 		if (mApi != null) {
 			try {
 				mApi.removeEventListener2(listener);
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * Deletes all image sharing from history and abort/reject any associated
+	 * ongoing session if such exists.
+	 * 
+	 * @throws RcsServiceException
+	 */
+	public void deleteImageSharings() throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.deleteImageSharings();
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * Deletes image sharing with a given contact from history and abort/reject
+	 * any associated ongoing session if such exists
+	 * 
+	 * @param ContactId contact
+	 * @throws RcsServiceException
+	 */
+	public void deleteImageSharings(ContactId contact) throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.deleteImageSharings2(contact);
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * deletes an image sharing by its sharing id from history and abort/reject
+	 * any associated ongoing session if such exists.
+	 * 
+	 * @param sharingId
+	 * @throws RcsServiceException
+	 */
+	public void deleteImageSharing(String sharingId) throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.deleteImageSharing(sharingId);
 			} catch (Exception e) {
 				throw new RcsServiceException(e);
 			}

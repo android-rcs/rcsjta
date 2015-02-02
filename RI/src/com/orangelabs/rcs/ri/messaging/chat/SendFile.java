@@ -92,7 +92,7 @@ public abstract class SendFile extends Activity implements ISendFile {
    	/**
 	 * API connection manager
 	 */
-	protected ApiConnectionManager connectionManager;
+	protected ApiConnectionManager mCnxManager;
     
     /**
      * File transfer
@@ -112,7 +112,7 @@ public abstract class SendFile extends Activity implements ISendFile {
     /**
 	 * A locker to exit only once
 	 */
-	protected LockAccess exitOnce = new LockAccess();
+	protected LockAccess mExitOnce = new LockAccess();
 
     
     @Override
@@ -131,20 +131,17 @@ public abstract class SendFile extends Activity implements ISendFile {
         selectBtn.setOnClickListener(btnSelectListener);
                
 		// Register to API connection manager
-		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACTS)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
+		mCnxManager = ApiConnectionManager.getInstance(this);
+		if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACTS)) {
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), mExitOnce);
 		} else {
-			connectionManager
-					.startMonitorServices(this, exitOnce, RcsServiceName.CHAT, RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACTS);
-			FileTransferService ftApi = connectionManager.getFileTransferApi();
+			mCnxManager
+					.startMonitorServices(this, mExitOnce, RcsServiceName.CHAT, RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACTS);
+			FileTransferService ftApi = mCnxManager.getFileTransferApi();
 			try {
 				addFileTransferEventListener(ftApi);
 			} catch (Exception e) {
-				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "API failure", e);
-				}
-				Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+				Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
 			}
 		}
     }
@@ -152,14 +149,14 @@ public abstract class SendFile extends Activity implements ISendFile {
     @Override
     public void onDestroy() {
     	super.onDestroy();
-		if (connectionManager == null) {
+		if (mCnxManager == null) {
 			return;
 		}
-		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
+		mCnxManager.stopMonitorServices(this);
+		if (mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
 			// Remove file listener
 			try {
-				removeFileTransferEventListener(connectionManager.getFileTransferApi());
+				removeFileTransferEventListener(mCnxManager.getFileTransferApi());
 			} catch (RcsServiceException e) {
 			}
 		}
@@ -172,7 +169,7 @@ public abstract class SendFile extends Activity implements ISendFile {
         public void onClick(View v) {
         	long warnSize = 0;
         	try {
-        		warnSize = connectionManager.getFileTransferApi().getConfiguration().getWarnSize();
+        		warnSize = mCnxManager.getFileTransferApi().getConfiguration().getWarnSize();
         	} catch(Exception e) {
         		e.printStackTrace();
         	}
@@ -203,9 +200,10 @@ public abstract class SendFile extends Activity implements ISendFile {
     	// Check if the service is available
 		boolean registered = false;
 		try {
-			registered = connectionManager.getFileTransferApi().isServiceRegistered();
+			registered = mCnxManager.getFileTransferApi().isServiceRegistered();
 		} catch (Exception e) {
-			e.printStackTrace();
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+			return;
 		}
 		if (!registered) {
 			Utils.showMessage(SendFile.this, getString(R.string.label_service_not_available));

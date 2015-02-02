@@ -62,12 +62,12 @@ public class RequestCapabilities extends Activity {
 	/**
 	 * A locker to exit only once
 	 */
-	private LockAccess exitOnce = new LockAccess();
+	private LockAccess mExitOnce = new LockAccess();
 
 	/**
 	 * API connection manager
 	 */
-	private ApiConnectionManager connectionManager;
+	private ApiConnectionManager mCnxManager;
 
 	/**
 	 * Capabilities listener
@@ -116,34 +116,34 @@ public class RequestCapabilities extends Activity {
 		mContactUtils = ContactUtils.getInstance(this);
 
 		// Register to API connection manager
-		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
+		mCnxManager = ApiConnectionManager.getInstance(this);
+		if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), mExitOnce);
 			return;
 		}
-		connectionManager.startMonitorServices(this, null, RcsServiceName.CAPABILITY);
+		mCnxManager.startMonitorServices(this, null, RcsServiceName.CAPABILITY);
 		try {
 			// Add service listener
-			connectionManager.getCapabilityApi().addCapabilitiesListener(capabilitiesListener);
+			mCnxManager.getCapabilityApi().addCapabilitiesListener(capabilitiesListener);
 		} catch (RcsServiceException e) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "Failed to add listener", e);
 			}
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce);
 		}
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		if (connectionManager == null) {
+		if (mCnxManager == null) {
 			return;
 		}
-		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
+		mCnxManager.stopMonitorServices(this);
+		if (mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
 			// Remove image sharing listener
 			try {
-				connectionManager.getCapabilityApi().removeCapabilitiesListener(capabilitiesListener);
+				mCnxManager.getCapabilityApi().removeCapabilitiesListener(capabilitiesListener);
 			} catch (Exception e) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "Failed to remove listener", e);
@@ -192,7 +192,7 @@ public class RequestCapabilities extends Activity {
 	private OnItemSelectedListener listenerContact = new OnItemSelectedListener() {
 		@Override
 		public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-			CapabilityService capabilityApi = connectionManager.getCapabilityApi();
+			CapabilityService capabilityApi = mCnxManager.getCapabilityApi();
 			try {
 				// Get selected contact
 				ContactId contactId = getSelectedContact();
@@ -203,10 +203,9 @@ public class RequestCapabilities extends Activity {
 				// Display default capabilities
 				displayCapabilities(currentCapabilities);
 			} catch (RcsServiceNotAvailableException e) {
-				e.printStackTrace();
-				Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_disabled), exitOnce);
+				Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_disabled), mExitOnce, e);
 			} catch (RcsServiceException e) {
-				Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_failed), exitOnce);
+				Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_failed), mExitOnce, e);
 			}
 		}
 
@@ -234,9 +233,10 @@ public class RequestCapabilities extends Activity {
 			// Check if the service is available
 			boolean registered = false;
 			try {
-				registered = connectionManager.getCapabilityApi().isServiceRegistered();
+				registered = mCnxManager.getCapabilityApi().isServiceRegistered();
 			} catch (Exception e) {
-				e.printStackTrace();
+				Utils.showMessageAndExit(RequestCapabilities.this, getString(R.string.label_api_disabled), mExitOnce, e);
+				return;
 			}
 			if (!registered) {
 				Utils.showMessage(RequestCapabilities.this, getString(R.string.label_service_not_available));
@@ -262,13 +262,11 @@ public class RequestCapabilities extends Activity {
 		// Request capabilities
 		try {
 			// Request new capabilities
-			connectionManager.getCapabilityApi().requestContactCapabilities(contact);
+			mCnxManager.getCapabilityApi().requestContactCapabilities(contact);
 		} catch (RcsServiceNotAvailableException e) {
-			e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), mExitOnce, e);
 		} catch (RcsServiceException e) {
-			e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
 		}
 	}
 

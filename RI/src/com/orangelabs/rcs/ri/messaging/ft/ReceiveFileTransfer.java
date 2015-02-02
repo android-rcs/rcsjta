@@ -382,10 +382,7 @@ public class ReceiveFileTransfer extends Activity {
     		// Accept the invitation
 			fileTransfer.acceptInvitation();
     	} catch(Exception e) {
-			if (LogUtils.isActive) {
-				Log.e(LOGTAG, e.getMessage(), e);
-			}
-			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), exitOnce, e);
     	}
 	}
 	
@@ -533,10 +530,7 @@ public class ReceiveFileTransfer extends Activity {
 			try {
 				fileTransfer.pauseTransfer();
 			} catch (RcsServiceException e) {
-				if (LogUtils.isActive) {
-					Log.e(LOGTAG, e.getMessage(), e);
-				}
-				Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_pause_failed), exitOnce);
+				Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_pause_failed), exitOnce, e);
 			}
 		}
 	};
@@ -555,10 +549,7 @@ public class ReceiveFileTransfer extends Activity {
 			try {
 				fileTransfer.resumeTransfer();
 			} catch (RcsServiceException e) {
-				if (LogUtils.isActive) {
-					Log.e(LOGTAG, e.getMessage(), e);
-				}
-				Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_resume_failed), exitOnce);
+				Utils.showMessageAndExit(ReceiveFileTransfer.this, getString(R.string.label_resume_failed), exitOnce, e);
 			}
 		}
 	};

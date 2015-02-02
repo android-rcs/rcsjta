@@ -43,37 +43,37 @@ public abstract class FileSharingSession extends ImsServiceSession {
     /**
      * Contribution ID
      */
-    private String contributionId = null;	
+    private String mContributionId;	
     
     /**
 	 * Content to be shared
 	 */
-	private MmContent content;
+	private MmContent mContent;
 	
 	/**
 	 * File transfered
 	 */
-	private boolean fileTransfered = false;
+	private boolean mFileTransfered = false;
 
     /**
      * List of participants
      */
-    protected Set<ParticipantInfo> participants = new HashSet<ParticipantInfo>();
+    protected Set<ParticipantInfo> mParticipants = new HashSet<ParticipantInfo>();
 
     /**
 	 * Fileicon
 	 */
-	private MmContent fileIcon;
+	private MmContent mFileIcon;
 	
 	/**
 	 * File transfer paused
 	 */
-	private boolean fileTransferPaused = false;
+	private boolean mFileTransferPaused = false;
 	
 	/**
 	 * File transfer Id
 	 */
-	private String filetransferId;
+	private String mFiletransferId;
 
 	/**
      * The logger
@@ -90,12 +90,13 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	 * @param fileIcon File icon
      * @param filetransferId 
 	 */
-	public FileSharingSession(ImsService parent, MmContent content, ContactId contact, String remoteUri, MmContent fileIcon, String filetransferId) {
+	public FileSharingSession(ImsService parent, MmContent content, ContactId contact,
+			String remoteUri, MmContent fileIcon, String filetransferId) {
 		super(parent, contact, remoteUri);
 		
-		this.content = content;
-		this.fileIcon = fileIcon;
-		this.filetransferId = filetransferId;
+		mContent = content;
+		mFileIcon = fileIcon;
+		mFiletransferId = filetransferId;
 	}
 
 	/**
@@ -104,7 +105,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	 * @return Contribution ID
 	 */
 	public String getContributionID() {
-		return contributionId;
+		return mContributionId;
 	}	
 	
 	/**
@@ -113,7 +114,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	 * @param id Contribution ID
 	 */
 	public void setContributionID(String id) {
-		this.contributionId = id;
+		mContributionId = id;
 	}
 	
 	/**
@@ -122,7 +123,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	 * @return Content 
 	 */
 	public MmContent getContent() {
-		return content;
+		return mContent;
 	}
 	
 	/**
@@ -131,7 +132,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	 * @return List of participants 
 	 */
 	public Set<ParticipantInfo> getParticipants() {
-		return participants;
+		return mParticipants;
 	}
 	
 	/**
@@ -140,7 +141,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	 * @param content Content  
 	 */
 	public void setContent(MmContent content) {
-		this.content = content;
+		mContent = content;
 	}	
 	
 	/**
@@ -149,14 +150,14 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	 * @return filetransferId String
 	 */
 	public String getFileTransferId() {
-		return filetransferId;
+		return mFiletransferId;
 	}
 
 	/**
 	 * File has been transfered
 	 */
 	public void fileTransfered() {
-		this.fileTransfered = true;
+		mFileTransfered = true;
 		
 	}
 	
@@ -166,21 +167,21 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	 * @return Boolean
 	 */
 	public boolean isFileTransfered() {
-		return fileTransfered; 
+		return mFileTransfered; 
 	}
 	
 	/**
 	 * File has been paused
 	 */
 	public void fileTransferPaused() {
-		this.fileTransferPaused = true;
+		mFileTransferPaused = true;
 	}
 	
 	/**
 	 * File is resuming
 	 */
 	public void fileTransferResumed() {
-		this.fileTransferPaused = false;
+		mFileTransferPaused = false;
 	}
 	
 	/**
@@ -189,16 +190,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	 * @return fileTransferPaused
 	 */
 	public boolean isFileTransferPaused() {
-		return fileTransferPaused; 
-	}
-
-	/**
-	 * Returns max file sharing size
-	 * 
-	 * @return Size in bytes
-	 */
-	public static long getMaxFileSharingSize() {
-		return RcsSettings.getInstance().getMaxFileTransferSize();
+		return mFileTransferPaused; 
 	}
 
     /**
@@ -207,7 +199,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
      * @return Fileicon
      */
     public MmContent getFileicon() {
-    	return fileIcon;
+    	return mFileIcon;
     }
 
 	/**
@@ -216,7 +208,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	 * @param fileIcon Fileicon content
 	 */
     public void setFileicon(MmContent fileIcon) {
-        this.fileIcon = fileIcon;
+        mFileIcon = fileIcon;
     }
     
 	/**
@@ -226,7 +218,8 @@ public abstract class FileSharingSession extends ImsServiceSession {
 	 * @return Error or null if file capacity is acceptable
 	 */
 	public static FileSharingError isFileCapacityAcceptable(long fileSize) {
-		boolean fileIsToBig = (FileSharingSession.getMaxFileSharingSize() > 0) ? fileSize > FileSharingSession.getMaxFileSharingSize() : false;
+		long maxFileSharingSize = RcsSettings.getInstance().getMaxFileTransferSize();
+		boolean fileIsToBig = (maxFileSharingSize > 0) ? fileSize > maxFileSharingSize : false;
 		boolean storageIsTooSmall = (StorageUtils.getExternalStorageFreeSpace() > 0) ? fileSize > StorageUtils.getExternalStorageFreeSpace() : false;
 		if (fileIsToBig) {
 			if (logger.isActivated()) {

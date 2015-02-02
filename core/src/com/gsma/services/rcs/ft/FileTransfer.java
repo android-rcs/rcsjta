@@ -23,6 +23,7 @@ package com.gsma.services.rcs.ft;
 
 import android.net.Uri;
 
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 
@@ -387,17 +388,17 @@ public class FileTransfer {
 	}
 
 	/**
-	 * Returns the direction of the transfer (incoming or outgoing)
-	 * 
+	 * Returns the direction of the transfer
+	 *
 	 * @return Direction
-	 * @see com.gsma.services.rcs.RcsCommon.Direction
+	 * @see Direction
 	 * @throws RcsServiceException
 	 */
-	public int getDirection() throws RcsServiceException {
+	public Direction getDirection() throws RcsServiceException {
 		try {
-			return mTransferInf.getDirection();
+			return Direction.valueOf(mTransferInf.getDirection());
 		} catch(Exception e) {
-			throw new RcsServiceException(e.getMessage());
+			throw new RcsServiceException(e);
 		}
 	}
 	
@@ -439,7 +440,24 @@ public class FileTransfer {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-	
+
+	/**
+	 * Returns true if it is possible to pause this file transfer right now,
+	 * else returns false. If this filetransfer corresponds to a file transfer
+	 * that is no longer present in the persistent storage false will be
+	 * returned (this is no error)
+	 * 
+	 * @return boolean
+	 * @throws RcsServiceException
+	 */
+	public boolean canPauseTransfer() throws RcsServiceException {
+		try {
+			return mTransferInf.canPauseTransfer();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
 	/**
 	 * Pauses the file transfer
 	 * 
@@ -452,7 +470,24 @@ public class FileTransfer {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-	
+
+	/**
+	 * Returns true if it is possible to resume this file transfer right now,
+	 * else return false. If this filetransfer corresponds to a file transfer
+	 * that is no longer present in the persistent storage false will be
+	 * returned.
+	 * 
+	 * @return boolean
+	 * @throws RcsServiceException
+	 */
+	public boolean canResumeTransfer() throws RcsServiceException {
+		try {
+			return mTransferInf.canResumeTransfer();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
 	/**
 	 * Resumes the file transfer
 	 * 
@@ -465,4 +500,47 @@ public class FileTransfer {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
+
+	/**
+	 * Returns whether you can resend the transfer.
+	 * 
+	 * @return boolean
+	 * @throws RcsServiceException
+	 */
+	public boolean canResendTransfer() throws RcsServiceException {
+		try {
+			return mTransferInf.canResendTransfer();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Resend a file transfer which was previously failed. This only for 1-1
+	 * file transfer, an exception is thrown in case of a file transfer to
+	 * group.
+	 * 
+	 * @throws RcsServiceException
+	 */
+	public void resendTransfer() throws RcsServiceException {
+		try {
+			mTransferInf.resendTransfer();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+    /**
+     * Returns true if file transfer has been marked as read
+     * 
+     * @return boolean
+     * @throws RcsServiceException
+     */
+    public boolean isRead() throws RcsServiceException {
+        try {
+            return mTransferInf.isRead();
+        } catch (Exception e) {
+            throw new RcsServiceException(e);
+        }
+    }
 }

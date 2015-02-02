@@ -58,7 +58,7 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
         intentFilter.addAction(RcsService.ACTION_SERVICE_UP);
         registerReceiver(serviceUpListener, intentFilter);
     	
-    	// Instanciate API
+    	// Instantiate API
         serviceApi = new CapabilityService(getApplicationContext(), this);
                 
         // Connect API
@@ -97,7 +97,7 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
      * @param error Error
      * @see RcsService.Error
      */
-    public void onServiceDisconnected(int error) {
+    public void onServiceDisconnected(ReasonCode error) {
     	// Display service status
     	displayServiceStatus(false);
     }    

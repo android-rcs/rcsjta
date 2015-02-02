@@ -34,6 +34,11 @@ public class ContactsProvider {
 	public final static String MIME_TYPE_REGISTRATION_STATE = "vnd.android.cursor.item/com.gsma.services.rcs.registration-state";
 
 	/**
+	 * Blocking contact
+	 */
+	public final static String MIME_TYPE_BLOCKING_STATE = "vnd.android.cursor.item/com.gsma.services.rcs.blocking-state";
+
+	/**
 	 * Image sharing capability support
 	 */
 	public final static String MIME_TYPE_IMAGE_SHARING = "vnd.android.cursor.item/com.gsma.services.rcs.image-sharing";

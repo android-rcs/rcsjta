@@ -49,7 +49,7 @@ public class IPCallLog {
     /**
      * The name of the column containing the direction of the call.
      * <P>Type: INTEGER</P>
-     * @see com.gsma.services.rcs.RcsCommon.Direction
+     * @see Direction
      */
     public static final String DIRECTION = "direction";
 

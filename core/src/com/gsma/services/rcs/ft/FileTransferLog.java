@@ -73,7 +73,7 @@ public class FileTransferLog {
     /**
      * The name of the column containing the direction of the transfer.
      * <P>Type: INTEGER</P>
-     * @see com.gsma.services.rcs.RcsCommon.Direction
+     * @see Direction
      */
     public static final String DIRECTION = "direction";
 

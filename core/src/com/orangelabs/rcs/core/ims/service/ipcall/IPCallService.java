@@ -38,12 +38,15 @@ import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.service.ImsService;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
+import com.orangelabs.rcs.provider.eab.ContactsManager;
 import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import javax2.sip.message.Response;
 
 /**
  * IP call service offers one-to-on IP voice call and IP video call
@@ -75,16 +78,24 @@ public class IPCallService extends ImsService {
 	 */
 	private Map<String, IPCallSession> mIPCallSessionCache = new HashMap<String, IPCallSession>();
 
+	/**
+	 * Contacts manager
+	 */
+	private final ContactsManager mContactsManager;	
+	
     /**
      * Constructor
      *
      * @param parent IMS module
      * @param rcsSettings RcsSettings
+	 * @param contactsManager ContactsManager
      * @throws CoreException
      */
-    public IPCallService(ImsModule parent, RcsSettings rcsSettings) throws CoreException {
+    public IPCallService(ImsModule parent, RcsSettings rcsSettings, ContactsManager contactsManager) throws CoreException {
 		super(parent, true);
+		
 		mRcsSettings = rcsSettings;
+        mContactsManager = contactsManager;
     }
 
 	private void handleIPCallInvitationRejected(SipRequest invite, int reasonCode) {
@@ -226,6 +237,29 @@ public class IPCallService extends ImsService {
      * @param invite Initial invite
      */
 	public void receiveIPCallInvitation(SipRequest invite, boolean audio, boolean video) {
+		// Parse contact
+        ContactId contact = null;
+        try {
+			contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
+        } catch (RcsContactFormatException e) {
+        	if (logger.isActivated()) {
+                logger.debug("Cannot parse contact: reject the invitation");
+            }
+            sendErrorResponse(invite, 486);
+            return;
+		}
+
+        // Test if the contact is blocked
+		if (mContactsManager.isBlockedForContact(contact)) {
+			if (logger.isActivated()) {
+				logger.debug("Contact " + contact + " is blocked: automatically reject the sharing invitation");
+			}
+
+			// Send a 603 Decline response
+			sendErrorResponse(invite, Response.DECLINE);
+			return;
+		}		
+		
         // Reject if there is already a call in progress
         if (isCurrentSharingUnidirectional()) {
             // Max session
@@ -236,17 +270,7 @@ public class IPCallService extends ImsService {
             sendErrorResponse(invite, 486);
             return;
         }
-        ContactId contact = null;
-        try {
-			contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
-        } catch (RcsContactFormatException e) {
-        	// Max session
-        	if (logger.isActivated()) {
-                logger.debug("Cannot parse contact: reject the invitation");
-            }
-            sendErrorResponse(invite, 486);
-            return;
-		}
+        
 		// Create a new session
         IPCallSession session = new TerminatingIPCallSession(this, invite, contact);
 

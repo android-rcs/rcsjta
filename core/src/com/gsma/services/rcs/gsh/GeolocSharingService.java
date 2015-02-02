@@ -36,6 +36,7 @@ import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contacts.ContactId;
 
@@ -110,7 +111,7 @@ public class GeolocSharingService extends RcsService {
         public void onServiceDisconnected(ComponentName className) {
         	setApi(null);
         	if (mListener != null) {
-        		mListener.onServiceDisconnected(RcsService.Error.CONNECTION_LOST);
+        		mListener.onServiceDisconnected(ReasonCode.CONNECTION_LOST);
         	}
         }
     };
@@ -186,6 +187,62 @@ public class GeolocSharingService extends RcsService {
 			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }    
+
+	/**
+	 * Deletes all geoloc sharing from history and abort/reject any associated
+	 * ongoing session if such exists.
+	 * 
+	 * @throws RcsServiceException
+	 */
+	public void deleteGeolocSharings() throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.deleteGeolocSharings();
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * Deletes geoloc sharing with a given contact from history and abort/reject
+	 * any associated ongoing session if such exists.
+	 * 
+	 * @param ContactId contact
+	 * @throws RcsServiceException
+	 */
+	public void deleteGeolocSharings(ContactId contact) throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.deleteGeolocSharings2(contact);
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * Deletes a geoloc sharing by its sharing id from history and abort/reject
+	 * any associated ongoing session if such exists.
+	 * 
+	 * @param String sharingId
+	 * @throws RcsServiceException
+	 */
+	public void deleteGeolocSharing(String sharingId) throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.deleteGeolocSharing(sharingId);
+			} catch (Exception e) {
+				throw new RcsServiceException(e.getMessage());
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
 
 	/**
 	 * Adds a listener on geoloc sharing events

@@ -18,8 +18,8 @@ package com.orangelabs.rcs.service.api;
 import android.content.ContentResolver;
 import android.database.Cursor;
 
-import com.gsma.services.rcs.RcsCommon.ReadStatus;
 import com.gsma.services.rcs.RcsContactFormatException;
+import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.orangelabs.rcs.utils.ContactUtils;
@@ -35,7 +35,7 @@ public class DelayedDisplayNotificationDispatcher implements Runnable {
 			ChatLog.Message.CHAT_ID).append("=").append(ChatLog.Message.CONTACT).append(" AND ")
 			.append(ChatLog.Message.MIME_TYPE).append(" IN('").append(MimeType.TEXT_MESSAGE)
 			.append("','").append(MimeType.GEOLOC_MESSAGE).append("') AND ")
-			.append(ChatLog.Message.READ_STATUS).append("=").append(ReadStatus.READ)
+			.append(ChatLog.Message.READ_STATUS).append("=").append(ReadStatus.READ.toInt())
 			.append(" AND ").append(ChatLog.Message.STATUS).append("=")
 			.append(ChatLog.Message.Status.Content.DISPLAY_REPORT_REQUESTED).toString();
 

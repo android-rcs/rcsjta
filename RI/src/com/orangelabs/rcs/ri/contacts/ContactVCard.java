@@ -37,6 +37,7 @@ import android.widget.TextView;
 import com.gsma.services.rcs.contacts.ContactsService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
+import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -50,6 +51,11 @@ public class ContactVCard extends Activity {
 	 * Spinner for contact selection
 	 */
 	private Spinner mSpinner;
+	
+	/**
+	 * A locker to exit only once
+	 */
+	private LockAccess mExitOnce = new LockAccess();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -111,8 +117,7 @@ public class ContactVCard extends Activity {
 			TextView vcardView = (TextView) findViewById(R.id.vcard);
 			vcardView.setText(vcard);
 		} catch (Exception e) {
-			e.printStackTrace();
-			Utils.showMessageAndExit(ContactVCard.this, getString(R.string.label_api_failed));
+			Utils.showMessageAndExit(ContactVCard.this, getString(R.string.label_api_failed), mExitOnce, e);
 		}
 	}
 

@@ -101,7 +101,7 @@ public class InitiateFileTransfer extends Activity {
     /**
 	 * A locker to exit only once
 	 */
-	private LockAccess exitOnce = new LockAccess();
+	private LockAccess mExitOnce = new LockAccess();
     
     /**
      * Progress dialog
@@ -111,7 +111,7 @@ public class InitiateFileTransfer extends Activity {
    	/**
 	 * API connection manager
 	 */
-	private ApiConnectionManager connectionManager;
+	private ApiConnectionManager mCnxManager;
 	
     /**
    	 * The log tag for this class
@@ -189,19 +189,19 @@ public class InitiateFileTransfer extends Activity {
 					case FileTransfer.State.ABORTED:
 						// Session is aborted: hide progress dialog then exit
 						hideProgressDialog();
-						Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_transfer_aborted, _reasonCode), exitOnce);
+						Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_transfer_aborted, _reasonCode), mExitOnce);
 						break;
 
 					case FileTransfer.State.REJECTED:
 						// Session is rejected: hide progress dialog then exit
 						hideProgressDialog();
-						Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_transfer_rejected, _reasonCode), exitOnce);
+						Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_transfer_rejected, _reasonCode), mExitOnce);
 						break;
 
 					case FileTransfer.State.FAILED:
 						// Session failed: hide progress dialog then exit
 						hideProgressDialog();
-						Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_transfer_failed, _reasonCode), exitOnce);
+						Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_transfer_failed, _reasonCode), mExitOnce);
 						break;
 
 					case FileTransfer.State.TRANSFERRED:
@@ -261,15 +261,15 @@ public class InitiateFileTransfer extends Activity {
 		resumeBtn.setEnabled(false);
 		
 		// Register to API connection manager
-		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
+		mCnxManager = ApiConnectionManager.getInstance(this);
+		if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), mExitOnce);
 			return;
 		}
-		connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.FILE_TRANSFER);
+		mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.FILE_TRANSFER);
 		try {
 			// Add service listener
-			connectionManager.getFileTransferApi().addEventListener(ftListener);
+			mCnxManager.getFileTransferApi().addEventListener(ftListener);
 			if (resuming) {
 				// Get resuming info
 				FileTransferDAO ftdao = (FileTransferDAO) (getIntent().getExtras()
@@ -293,10 +293,10 @@ public class InitiateFileTransfer extends Activity {
 				sizeEdit.setText((filesize / 1024) + " KB");
 				uriEdit.setText(filename);
 				// Check if session still exists
-				if (connectionManager.getFileTransferApi().getFileTransfer(ftId) == null) {
+				if (mCnxManager.getFileTransferApi().getFileTransfer(ftId) == null) {
 					// Session not found or expired
 					Utils.showMessageAndExit(this, getString(R.string.label_transfer_session_has_expired),
-							exitOnce);
+							mExitOnce);
 					return;
 				}
 				pauseBtn.setEnabled(true);
@@ -314,11 +314,9 @@ public class InitiateFileTransfer extends Activity {
 				}
 			}
 		} catch (RcsServiceNotAvailableException e) {
-			e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), mExitOnce, e);
 		} catch (RcsServiceException e) {
-			e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
 		}
 	}
     
@@ -328,14 +326,14 @@ public class InitiateFileTransfer extends Activity {
 			Log.d(LOGTAG, "onDestroy");
 		}
 		super.onDestroy();
-		if (connectionManager == null) {
+		if (mCnxManager == null) {
 			return;
 		}
-		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
+		mCnxManager.stopMonitorServices(this);
+		if (mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
 			// Remove file transfer listener
 			try {
-				connectionManager.getFileTransferApi().removeEventListener(ftListener);
+				mCnxManager.getFileTransferApi().removeEventListener(ftListener);
 			} catch (Exception e) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "Failed to remove listener", e);
@@ -351,7 +349,7 @@ public class InitiateFileTransfer extends Activity {
         public void onClick(View v) {
         	long warnSize = 0;
         	try {
-        		warnSize = connectionManager.getFileTransferApi().getConfiguration().getWarnSize();
+        		warnSize = mCnxManager.getFileTransferApi().getConfiguration().getWarnSize();
         	} catch(Exception e) {
         		e.printStackTrace();
         	}
@@ -382,9 +380,10 @@ public class InitiateFileTransfer extends Activity {
 		// Check if the service is available
 		boolean registered = false;
 		try {
-			registered = connectionManager.getFileTransferApi().isServiceRegistered();
+			registered = mCnxManager.getFileTransferApi().isServiceRegistered();
 		} catch (Exception e) {
-			e.printStackTrace();
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+			return;
 		}
 		if (!registered) {
 			Utils.showMessage(this, getString(R.string.label_service_not_available));
@@ -413,7 +412,7 @@ public class InitiateFileTransfer extends Activity {
         		tryToSendFileicon = false;
         	}
     		// Initiate transfer
-    		fileTransfer = connectionManager.getFileTransferApi().transferFile(remote, file, tryToSendFileicon);
+    		fileTransfer = mCnxManager.getFileTransferApi().transferFile(remote, file, tryToSendFileicon);
     		ftId = fileTransfer.getTransferId();
     		
             Button pauseBtn = (Button)findViewById(R.id.pause_btn);
@@ -438,11 +437,8 @@ public class InitiateFileTransfer extends Activity {
             selectBtn.setVisibility(View.INVISIBLE);
             ftThumb.setVisibility(View.INVISIBLE);
     	} catch(Exception e) {
-    		if (LogUtils.isActive) {
-				Log.e(LOGTAG, "Failed to transfer file", e);
-			}
 			hideProgressDialog();
-			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce, e);
     	}
     }
        
@@ -621,9 +617,8 @@ public class InitiateFileTransfer extends Activity {
 			try {
 				fileTransfer.pauseTransfer();
 			} catch (RcsServiceException e) {
-				e.printStackTrace();
 				hideProgressDialog();
-				Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_pause_failed), exitOnce);
+				Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_pause_failed), mExitOnce, e);
 			}
 		}
 	};
@@ -640,9 +635,8 @@ public class InitiateFileTransfer extends Activity {
 			try {
 				fileTransfer.resumeTransfer();
 			} catch (RcsServiceException e) {
-				e.printStackTrace();
 				hideProgressDialog();
-				Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_resume_failed), exitOnce);
+				Utils.showMessageAndExit(InitiateFileTransfer.this, getString(R.string.label_resume_failed), mExitOnce, e);
 			}
 		}
 	};

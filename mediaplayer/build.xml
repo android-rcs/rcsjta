@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="RCS_Core" default="help">
+
+	<property environment="env" />
+	<condition property="sdk.dir" value="${env.ANDROID_HOME}">
+		<isset property="env.ANDROID_HOME" />
+	</condition>
+
+	<property name="android.root" 		value="${env.ANDROID_SDK}"/>
+	<property name="terminal.root" 		value="."/>
+	<property name="terminal.media" 	value="${terminal.root}/rcs_media.jar"/>
+
+	<path id="j2se.lib">
+		<fileset dir="${env.JAVA_HOME}/lib/">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+	<property name="j2se.classpath" refid="j2se.lib"/>
+
+	<path id="terminal.classpath">
+		<pathelement path="${j2se.classpath};${android.root}/android.jar;${terminal.build}/classes;${terminal.root}/build/classes"/>
+	</path>
+
+	<!-- Generate media JAR used in the RI -->
+	<target name="media">
+		<echo>Generate ${terminal.media} file</echo>
+		<delete file="${terminal.media}"/>
+		<jar destfile="${terminal.media}" basedir="${terminal.root}/bin/classes">
+		</jar>
+		<copy file="${terminal.media}" todir="${terminal.root}/../RI/libs"/>
+		<copydir src="${terminal.root}/libs/armeabi" dest="${terminal.root}/../RI/libs/armeabi"/>
+	</target>
+
+	<!-- version-tag: custom -->
+	<import file="${sdk.dir}/tools/ant/build.xml" />
+</project>

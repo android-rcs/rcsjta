@@ -20,7 +20,7 @@ import javax2.sip.message.Response;
 
 import android.net.Uri;
 
-import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransfer.ReasonCode;
@@ -69,7 +69,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param transferId Transfer ID
 	 * @param broadcaster IGroupFileTransferBroadcaster
 	 * @param imService InstantMessagingService
@@ -88,7 +88,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param transferId Transfer ID
 	 * @param chatId Chat Id
 	 * @param broadcaster IGroupFileTransferBroadcaster
@@ -192,7 +192,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
 	/**
 	 * Returns the Uri of the file icon
-	 * 
+	 *
 	 * @return Uri
 	 */
 	public Uri getFileIcon() {
@@ -206,7 +206,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
 	/**
 	 * Returns the state of the file transfer
-	 * 
+	 *
 	 * @return State
 	 */
 	public int getState() {
@@ -258,12 +258,12 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 	public int getDirection() {
 		FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
 		if (session == null) {
-			return mPersistentStorage.getDirection();
+			return mPersistentStorage.getDirection().toInt();
 		}
 		if (session.isInitiatedByRemote()) {
-			return Direction.INCOMING;
+			return Direction.INCOMING.toInt();
 		}
-		return Direction.OUTGOING;
+		return Direction.OUTGOING.toInt();
 	}
 
 	/**
@@ -351,6 +351,18 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 	}
 
 	/**
+	 * Returns true if it is possible to pause this file transfer right now,
+	 * else returns false. If this filetransfer corresponds to a file transfer
+	 * that is no longer present in the persistent storage false will be
+	 * returned (this is no error)
+	 * 
+	 * @return boolean
+	 */
+	public boolean canPauseTransfer() {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
 	 * Pauses the file transfer (only for HTTP transfer)
 	 */
 	public void pauseTransfer() {
@@ -388,6 +400,18 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 	}
 
 	/**
+	 * Returns true if it is possible to resume this file transfer right now,
+	 * else return false. If this filetransfer corresponds to a file transfer
+	 * that is no longer present in the persistent storage false will be
+	 * returned.
+	 * 
+	 * @return boolean
+	 */
+	public boolean canResumeTransfer() {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
 	 * Resume the session (only for HTTP transfer)
 	 */
 	public void resumeTransfer() {
@@ -413,6 +437,40 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 			return;
 		}
 		((HttpFileTransferSession)session).resumeFileTransfer();
+	}
+
+	/**
+	 * Returns whether you can resend the transfer.
+	 *
+	 * @return boolean
+	 * @throws RcsServiceException
+	 */
+	public boolean canResendTransfer() {
+		/* Resend file transfer is supported only for one-to-one transfers */
+		return false;
+	}
+
+	/**
+	 * Returns true if file transfer has been marked as read
+	 *
+	 * @return boolean
+	 */
+	public boolean isRead() {
+	    return mPersistentStorage.isRead();
+	}
+
+	/**
+	 * Resend a file transfer which was previously failed. This only for 1-1
+	 * file transfer, an exception is thrown in case of a file transfer to
+	 * group.
+	 */
+	public void resendTransfer() {
+		/*
+		 * TODO: Throw correct exception as part of CR037 implementation
+		 */
+		throw new IllegalStateException(
+				"Resend operation not supported for group file transfer with file transfer ID "
+						.concat(mFileTransferId));
 	}
 
 	/*------------------------------- SESSION EVENTS ----------------------------------*/
@@ -497,7 +555,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
 	/**
 	 * Session has been aborted
-	 * 
+	 *
 	 * @param reason Termination reason
 	 */
 	public void handleSessionAborted(int reason) {
@@ -531,13 +589,13 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 					ReasonCode.ABORTED_BY_REMOTE);
 				mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId,
 					FileTransfer.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
-			}	
+			}
 		}
 	}
 
 	/**
 	 * File transfer error
-	 * 
+	 *
 	 * @param error Error
 	 */
 	public void handleTransferError(FileSharingError error) {
@@ -559,7 +617,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
 	/**
 	 * File transfer progress
-	 * 
+	 *
 	 * @param currentSize Data size transferred
 	 * @param totalSize Total size to be transferred
 	 */
@@ -589,7 +647,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
 	/**
 	 * File has been transfered
-	 * 
+	 *
 	 * @param content MmContent associated to the received file
 	 */
 	public void handleFileTransfered(MmContent content) {

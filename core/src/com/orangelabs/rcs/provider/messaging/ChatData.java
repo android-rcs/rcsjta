@@ -76,7 +76,7 @@ public class ChatData {
 	/**
 	 * Status direction of group chat
 	 *
-	 * @see com.gsma.services.rcs.RcsCommon.Direction for the list of directions
+	 * @see Direction
 	 */
 	static final String KEY_DIRECTION = ChatLog.GroupChat.DIRECTION;	
 

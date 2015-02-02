@@ -142,7 +142,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 				resume.getFileicon() != null ? FileTransferUtils.createMmContent(resume
 						.getFileicon()) : null, null, resume.getChatId(),
 				resume.getFileTransferId());
-		mGroupFileTransfer = resume.isGroup();
+		mGroupFileTransfer = resume.isGroupTransfer();
 		this.resumeFT = resume;
 		// Instantiate the download manager
 		downloadManager = new HttpDownloadManager(getContent(), this, resume.getDownloadServerAddress());

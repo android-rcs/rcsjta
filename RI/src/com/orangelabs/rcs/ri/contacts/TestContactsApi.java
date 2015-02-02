@@ -50,7 +50,8 @@ public class TestContactsApi extends ListActivity {
     		getString(R.string.menu_list_rcs_contacts),
     		getString(R.string.menu_list_online_contacts),        		
     		getString(R.string.menu_list_supported_contacts),
-    		getString(R.string.menu_contact_vcard)
+    		getString(R.string.menu_contact_vcard),
+    		getString(R.string.menu_blocking_contact)
         };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
@@ -85,6 +86,10 @@ public class TestContactsApi extends ListActivity {
 
 	        case 4:
             	startActivity(new Intent(this, ContactVCard.class));
+                break;
+
+	        case 5:
+            	startActivity(new Intent(this, BlockingContact.class));
                 break;
         }
     }

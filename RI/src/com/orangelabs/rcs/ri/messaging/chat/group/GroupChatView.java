@@ -48,8 +48,8 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Toast;
 
 import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsCommon;
 import com.gsma.services.rcs.RcsContactFormatException;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.chat.ChatLog.Message;
@@ -196,9 +196,6 @@ public class GroupChatView extends ChatView {
 			}
 		}
 
-		/* (non-Javadoc)
-		 * @see com.gsma.services.rcs.chat.GroupChatListener#onStateChanged(java.lang.String, int, int)
-		 */
 		@Override
 		public void onStateChanged(String chatId, final int state, final int reasonCode) {
 			if (LogUtils.isActive) {
@@ -240,19 +237,19 @@ public class GroupChatView extends ChatView {
 					case GroupChat.State.ABORTED:
 						// Session is aborted: hide progress dialog then exit
 						hideProgressDialog();
-						Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_chat_aborted, _reasonCode), exitOnce);
+						Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_chat_aborted, _reasonCode), mExitOnce);
 						break;
 
 					case GroupChat.State.REJECTED:
 						// Session is rejected: hide progress dialog then exit
 						hideProgressDialog();
-						Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_chat_rejected, _reasonCode), exitOnce);
+						Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_chat_rejected, _reasonCode), mExitOnce);
 						break;
 
 					case GroupChat.State.FAILED:
 						// Session is failed: hide progress dialog then exit
 						hideProgressDialog();
-						Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_chat_failed, _reasonCode), exitOnce);
+						Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_chat_failed, _reasonCode), mExitOnce);
 						break;
 
 					default:
@@ -270,8 +267,8 @@ public class GroupChatView extends ChatView {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
 		Cursor cursor = (Cursor) mAdapter.getItem(info.position);
 		menu.add(0, GROUPCHAT_MENU_ITEM_DELETE, 0, R.string.menu_delete_message);
-		int direction = cursor.getInt(cursor.getColumnIndex(Message.DIRECTION));
-		if (RcsCommon.Direction.OUTGOING == direction) {
+		Direction direction = Direction.valueOf(cursor.getInt(cursor.getColumnIndex(Message.DIRECTION)));
+		if (Direction.OUTGOING == direction) {
 			menu.add(0, GROUPCHAT_MENU_ITEM_VIEW_GC_INFO, 1, R.string.menu_view_groupdelivery);
 		}
 	}
@@ -280,13 +277,13 @@ public class GroupChatView extends ChatView {
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 		Cursor cursor = (Cursor) (mAdapter.getItem(info.position));
-		String messageId = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
+		String messageId = cursor.getString(cursor.getColumnIndexOrThrow(BaseColumns._ID));
 		if (LogUtils.isActive) {
 			Log.d(LOGTAG, "onContextItemSelected msgId=".concat(messageId));
 		}
 		switch (item.getItemId()) {
 		case GROUPCHAT_MENU_ITEM_VIEW_GC_INFO:
-			GroupDeliveryInfoList.startActivity(GroupChatView.this, messageId);
+			GroupDeliveryInfoList.startActivity(this, messageId);
 			return true;
 			
 		case GROUPCHAT_MENU_ITEM_DELETE:
@@ -316,9 +313,9 @@ public class GroupChatView extends ChatView {
 			// Instantiate the composing manager
 			composingManager = new IsComposingManager(configuration.getIsComposingTimeout() * 1000, getNotifyComposing());
 		} catch (RcsServiceNotAvailableException e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), mExitOnce);
 		} catch (RcsServiceException e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
 		}
 		if (LogUtils.isActive) {
 			Log.d(LOGTAG, "onCreate");
@@ -345,7 +342,7 @@ public class GroupChatView extends ChatView {
 				// Initiate a Group Chat: check if the service is available
 				boolean registered = mCnxManager.getChatApi().isServiceRegistered();
 				if (!registered) {
-					Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
+					Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), mExitOnce);
 					return false;
 					
 				}
@@ -358,7 +355,7 @@ public class GroupChatView extends ChatView {
 				ContactUtils contactUtils = ContactUtils.getInstance(this);
 				List<String> contacts = getIntent().getStringArrayListExtra(GroupChatView.EXTRA_PARTICIPANTS);
 				if (contacts == null || contacts.isEmpty()) {
-					Utils.showMessageAndExit(this, getString(R.string.label_invalid_contacts), exitOnce);
+					Utils.showMessageAndExit(this, getString(R.string.label_invalid_contacts), mExitOnce);
 					return false;
 					
 				}
@@ -375,7 +372,7 @@ public class GroupChatView extends ChatView {
 				if (mParticipants.isEmpty()) {
 					Utils.showMessageAndExit(this,
 							getString(R.string.label_invalid_contacts),
-							exitOnce);
+							mExitOnce);
 					return false;
 					
 				}
@@ -393,7 +390,7 @@ public class GroupChatView extends ChatView {
 					if (LogUtils.isActive) {
 						Log.e(LOGTAG, "processIntent session not found for chatId=".concat(mChatId));
 					}
-					Utils.showMessageAndExit(this, getString(R.string.label_session_not_found), exitOnce);
+					Utils.showMessageAndExit(this, getString(R.string.label_session_not_found), mExitOnce);
 					return false;
 					
 				}
@@ -446,7 +443,7 @@ public class GroupChatView extends ChatView {
 					mChatId = getIntent().getStringExtra(GroupChatIntent.EXTRA_CHAT_ID);
 					mGroupChat = mCnxManager.getChatApi().getGroupChat(mChatId);
 					if (mGroupChat == null) {
-						Utils.showMessageAndExit(this, getString(R.string.label_session_not_found), exitOnce);
+						Utils.showMessageAndExit(this, getString(R.string.label_session_not_found), mExitOnce);
 						return false;
 						
 					}
@@ -469,11 +466,9 @@ public class GroupChatView extends ChatView {
 				
 			}
 		} catch (RcsServiceNotAvailableException e) {
-			e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), mExitOnce, e);
 		} catch (RcsServiceException e) {
-			e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
 		}
 		return false;
 	}
@@ -522,8 +517,7 @@ public class GroupChatView extends ChatView {
 					// Accept the invitation
 					mGroupChat.openChat();
 				} catch (Exception e) {
-					e.printStackTrace();
-					Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_invitation_failed), exitOnce);
+					Utils.showMessageAndExit(GroupChatView.this, getString(R.string.label_invitation_failed), mExitOnce, e);
 				}
 			}
 		});
@@ -586,8 +580,7 @@ public class GroupChatView extends ChatView {
 			getSupportLoaderManager().initLoader(LOADER_ID, null, this);
 			chatIdOnForeground = mChatId;
 		} catch (Exception e) {
-			e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce, e);
 			return false;
 		}
 
@@ -698,7 +691,7 @@ public class GroupChatView extends ChatView {
 						contacts.add(contactUtils.formatContact(participant));
 					}
 					// Add participants
-					mGroupChat.addParticipants(contacts);
+					mGroupChat.inviteParticipants(contacts);
 
 					// Hide progress dialog
 					if (mProgressDialog != null && mProgressDialog.isShowing()) {
@@ -736,11 +729,9 @@ public class GroupChatView extends ChatView {
 			try {
 				Utils.showList(this, getString(R.string.menu_participants), getSetOfParticipants(mGroupChat.getParticipants()));
 			} catch (RcsServiceNotAvailableException e) {
-				e.printStackTrace();
-				Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
+				Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), mExitOnce, e);
 			} catch (RcsServiceException e) {
-				e.printStackTrace();
-				Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+				Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
 			}
 			break;
 
@@ -766,8 +757,7 @@ public class GroupChatView extends ChatView {
 			try {
 				showUsInMap(getSetOfParticipants(mGroupChat.getParticipants()));
 			} catch (RcsServiceException e) {
-				e.printStackTrace();
-				Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+				Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
 			}
 			break;
 

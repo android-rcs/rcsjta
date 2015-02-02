@@ -31,6 +31,7 @@ import android.os.IInterface;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contacts.ContactId;
 
@@ -116,7 +117,7 @@ public class CapabilityService extends RcsService {
         public void onServiceDisconnected(ComponentName className) {
         	setApi(null);
         	if (mListener != null) {
-        		mListener.onServiceDisconnected(Error.CONNECTION_LOST);
+        		mListener.onServiceDisconnected(ReasonCode.CONNECTION_LOST);
         	}
         }
     };
@@ -311,10 +312,10 @@ public class CapabilityService extends RcsService {
 					mApi.removeCapabilitiesListener2(contact, listener);
 				}
 			} catch(Exception e) {
-				throw new RcsServiceException(e);
+				throw new RcsServiceException(e.getMessage());
 			}
 		} else {
-			throw new RcsServiceNotAvailableException(ERROR_CNX);
+			throw new RcsServiceNotAvailableException();
 		}
 	}
 }

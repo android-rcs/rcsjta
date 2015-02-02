@@ -30,8 +30,9 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.gsma.services.rcs.RcsCommon;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.ft.FileTransfer;
 import com.gsma.services.rcs.ft.FileTransferIntent;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.chat.group.GroupChatDAO;
@@ -106,6 +107,14 @@ public class FileTransferIntentService extends IntentService {
 				// Purposely left blank
 			}
 			
+			// Check if it's a spam
+			if (ftDao.getReasonCode() == FileTransfer.ReasonCode.REJECTED_SPAM) {
+				if (LogUtils.isActive) {
+					Log.e(LOGTAG, "Do nothing on a spam");
+				}
+				return;
+			}
+			
 			// Save FileTransferDAO into intent
 			Bundle bundle = new Bundle();
 			bundle.putParcelable(BUNDLE_FTDAO_ID, ftDao);
@@ -122,7 +131,7 @@ public class FileTransferIntentService extends IntentService {
 					Log.d(LOGTAG, "onHandleIntent file transfer resume with ID " + transferId);
 				}
 				Intent intentLocal = new Intent(intent);
-				if (ftDao.getDirection() == RcsCommon.Direction.INCOMING) {
+				if (Direction.INCOMING == ftDao.getDirection()) {
 					intentLocal.setClass(this, ReceiveFileTransfer.class);
 				} else {
 					intentLocal.setClass(this, InitiateFileTransfer.class);
@@ -155,6 +164,7 @@ public class FileTransferIntentService extends IntentService {
 			}
 			return;
 		}
+		
 		// Create notification
 		Intent intent = new Intent(invitation);
 		intent.setClass(this, ReceiveFileTransfer.class);

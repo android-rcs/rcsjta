@@ -40,12 +40,12 @@ public class RequestAllCapabilities extends Activity {
   	/**
 	 * API connection manager
 	 */
-	private ApiConnectionManager connectionManager;
+	private ApiConnectionManager mCnxManager;
 	
 	/**
    	 * A locker to exit only once
    	 */
-   	private LockAccess exitOnce = new LockAccess();
+   	private LockAccess mExitOnce = new LockAccess();
    	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -60,19 +60,19 @@ public class RequestAllCapabilities extends Activity {
         refreshBtn.setOnClickListener(btnSyncListener);        
         
 		// Register to API connection manager
-		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
+		mCnxManager = ApiConnectionManager.getInstance(this);
+		if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), mExitOnce);
 			return;
 		}
-		connectionManager.startMonitorServices(this, null, RcsServiceName.CAPABILITY);
+		mCnxManager.startMonitorServices(this, null, RcsServiceName.CAPABILITY);
     }
 
     @Override
     public void onDestroy() {
     	super.onDestroy();
-    	if (connectionManager != null) {
-			connectionManager.stopMonitorServices(this);
+    	if (mCnxManager != null) {
+			mCnxManager.stopMonitorServices(this);
     	}
     }
 
@@ -84,9 +84,10 @@ public class RequestAllCapabilities extends Activity {
             // Check if the service is available
         	boolean registered = false;
         	try {
-        		registered = connectionManager.getCapabilityApi().isServiceRegistered();
+        		registered = mCnxManager.getCapabilityApi().isServiceRegistered();
         	} catch(Exception e) {
-        		e.printStackTrace();
+        		Utils.showMessageAndExit(RequestAllCapabilities.this, getString(R.string.label_api_disabled), mExitOnce, e);
+        		return;
         	}
             if (!registered) {
     	    	Utils.showMessage(RequestAllCapabilities.this, getString(R.string.label_service_not_available));
@@ -95,12 +96,12 @@ public class RequestAllCapabilities extends Activity {
         	
         	try {
     			// Refresh all contacts
-                connectionManager.getCapabilityApi().requestAllContactsCapabilities();
+                mCnxManager.getCapabilityApi().requestAllContactsCapabilities();
                 
         		// Display message
     			Utils.displayLongToast(RequestAllCapabilities.this, getString(R.string.label_refresh_success));
         	} catch(Exception e) {
-        		Utils.showMessageAndExit(RequestAllCapabilities.this, getString(R.string.label_refresh_failed), exitOnce);
+        		Utils.showMessageAndExit(RequestAllCapabilities.this, getString(R.string.label_refresh_failed), mExitOnce, e);
         	}
         }
     };

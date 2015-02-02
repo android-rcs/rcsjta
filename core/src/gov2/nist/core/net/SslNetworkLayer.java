@@ -47,8 +47,6 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
-import com.orangelabs.rcs.core.ims.security.cert.KeyStoreManager;
-
 /**
  * extended implementation of a network layer that allows to define a private java
  * keystores/truststores
@@ -64,6 +62,10 @@ public class SslNetworkLayer implements NetworkLayer {
 
     private SSLServerSocketFactory sslServerSocketFactory;
 
+    public SslNetworkLayer() throws IOException, GeneralSecurityException {
+    	        this(null, null, null, null);
+    }
+    
 	public SslNetworkLayer(String trustStoreFile, String keyStoreFile,
 			char[] keyStorePassword, String keyStoreType)
 			throws GeneralSecurityException, FileNotFoundException, IOException {
@@ -78,7 +80,7 @@ public class SslNetworkLayer implements NetworkLayer {
 		KeyStore keyStore = null;
 		KeyStore trustStore = null;
 		KeyManager[] km = null;
-		if (KeyStoreManager.isOwnCertificateUsed()) {
+		if (keyStoreFile != null) {
 			// use specific keystore with own certificate
 			trustStore = KeyStore.getInstance(keyStoreType);
 			trustStore.load(new FileInputStream(trustStoreFile),

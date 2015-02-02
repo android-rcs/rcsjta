@@ -39,7 +39,6 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.orangelabs.rcs.provider.fthttp.FtHttpResumeUpload;
-import com.orangelabs.rcs.provider.messaging.MessagingLog;
 import com.orangelabs.rcs.utils.IdGenerator;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -94,15 +93,14 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 	 * @param tId
 	 *            TID of the upload
 	 * @param core Core
-	 * @param messagingLog MessagingLog
 	 */
 	public OriginatingHttpGroupFileSharingSession(String fileTransferId, ImsService parent,
 			MmContent content, MmContent fileIcon, String conferenceId,
-			Set<ParticipantInfo> participants, String chatSessionID, String chatContributionId,
+			Set<ParticipantInfo> participants, String chatSessionId, String chatContributionId,
 			String tId, Core core) {
-		super(parent, content, null, conferenceId, fileIcon, chatSessionID, chatContributionId, fileTransferId);
+		super(parent, content, null, conferenceId, fileIcon, chatSessionId, chatContributionId, fileTransferId);
 		mCore = core;
-		this.participants = participants;
+		mParticipants = participants;
 
 		// Instantiate the upload manager
 		uploadManager = new HttpUploadManager(getContent(), fileIcon, this, tId);

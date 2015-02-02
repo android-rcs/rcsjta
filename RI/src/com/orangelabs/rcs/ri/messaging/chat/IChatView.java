@@ -58,6 +58,7 @@ public interface IChatView {
 	 * Add chat listener
 	 * 
 	 * @param chatService
+	 * @throws RcsServiceException 
 	 */
 	void addChatEventListener(ChatService chatService) throws RcsServiceException;
 
@@ -65,6 +66,7 @@ public interface IChatView {
 	 * Remove chat listener
 	 * 
 	 * @param chatService
+	 * @throws RcsServiceException 
 	 */
 	void removeChatEventListener(ChatService chatService) throws RcsServiceException;
 

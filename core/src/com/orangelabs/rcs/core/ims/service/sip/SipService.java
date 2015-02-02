@@ -27,11 +27,14 @@ import android.content.Intent;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax2.sip.message.Response;
+
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.CoreException;
 import com.orangelabs.rcs.core.ims.ImsModule;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
+import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -43,6 +46,8 @@ import com.orangelabs.rcs.core.ims.service.sip.messaging.TerminatingSipMsrpSessi
 import com.orangelabs.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 import com.orangelabs.rcs.core.ims.service.sip.streaming.OriginatingSipRtpSession;
 import com.orangelabs.rcs.core.ims.service.sip.streaming.TerminatingSipRtpSession;
+import com.orangelabs.rcs.provider.eab.ContactsManager;
+import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.PhoneUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -73,13 +78,21 @@ public class SipService extends ImsService {
 	private Map<String, GenericSipRtpSession> mGenericSipRtpSessionCache = new HashMap<String, GenericSipRtpSession>();
 
 	/**
+	 * Contacts manager
+	 */
+	private final ContactsManager mContactsManager;	
+	
+	/**
      * Constructor
      * 
      * @param parent IMS module
+	 * @param contactsManager ContactsManager
      * @throws CoreException
      */
-	public SipService(ImsModule parent) throws CoreException {
+	public SipService(ImsModule parent, ContactsManager contactsManager) throws CoreException {
         super(parent, true);
+        
+        mContactsManager = contactsManager;
 	}
 
     /**
@@ -133,10 +146,27 @@ public class SipService extends ImsService {
      * 
      * @param sessionInvite Resolved intent
      * @param invite Initial invite
-     * @throws RcsContactFormatException
      */
-	public void receiveMsrpSessionInvitation(Intent sessionInvite, SipRequest invite) throws RcsContactFormatException {
-
+	public void receiveMsrpSessionInvitation(Intent sessionInvite, SipRequest invite) {
+		try {
+			// Test if the contact is blocked
+			ContactId remote = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
+			if (mContactsManager.isBlockedForContact(remote)) {
+				if (logger.isActivated()) {
+					logger.debug("Contact " + remote + " is blocked: automatically reject the session invitation");
+				}
+	
+				// Send a 603 Decline response
+				sendErrorResponse(invite, Response.DECLINE);
+				return;
+			}
+		} catch (RcsContactFormatException e) {
+			if (logger.isActivated()) {
+				logger.warn("Cannot parse contact from FT invitation");
+			}
+			return;
+		}
+			
 		// Create a new session
 		TerminatingSipMsrpSession session = new TerminatingSipMsrpSession(this, invite, sessionInvite);
 
@@ -168,9 +198,27 @@ public class SipService extends ImsService {
      * 
      * @param sessionInvite Resolved intent
      * @param invite Initial invite
-     * @throws RcsContactFormatException
      */
 	public void receiveRtpSessionInvitation(Intent sessionInvite, SipRequest invite) throws RcsContactFormatException {
+		try {
+			// Test if the contact is blocked
+			ContactId remote = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
+			if (mContactsManager.isBlockedForContact(remote)) {
+				if (logger.isActivated()) {
+					logger.debug("Contact " + remote + " is blocked: automatically reject the session invitation");
+				}
+	
+				// Send a 603 Decline response
+				sendErrorResponse(invite, Response.DECLINE);
+				return;
+			}
+		} catch (RcsContactFormatException e) {
+			if (logger.isActivated()) {
+				logger.warn("Cannot parse contact from FT invitation");
+			}
+			return;
+		}
+		
 		// Create a new session
 		TerminatingSipRtpSession session = new TerminatingSipRtpSession(this, invite, sessionInvite);
 

@@ -40,4 +40,14 @@ interface IFileTransfer {
 	void pauseTransfer();
 	
 	void resumeTransfer();
+
+	boolean isRead();
+
+	boolean canResendTransfer();
+
+	void resendTransfer();
+
+	boolean canPauseTransfer();
+
+	boolean canResumeTransfer();
 }

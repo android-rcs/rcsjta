@@ -23,6 +23,7 @@
 <string name="label_decline">Decline</string>
 <string name="label_refresh">Refresh</string>
 <string name="label_from_args">From: %s</string>
+<string name="label_with_args">With: %s</string>
 <string name="label_invitation_failed">Invitation has failed</string>
 <string name="label_yes">Yes</string>
 <string name="label_no">No</string>
@@ -31,6 +32,7 @@
 <string name="label_log_empty">No entry</string>
 <string name="label_incoming">incoming</string>
 <string name="label_outgoing">outgoing</string>
+<string name="label_direction_unknown">unknown direction</string>
 <string name="label_state_unknown">unknown</string>
 <string name="label_state_aborted">aborted</string>
 <string name="label_state_rejected">rejected</string>
@@ -89,6 +91,11 @@
 <string name="menu_contact_vcard">Contact visit card</string>
 <string name="label_vcard">Visit card:</string>
 <string name="label_show_vcard">Show card</string>
+<string name="menu_blocking_contact">Block contact</string>
+<string name="label_block">Block</string>
+<string name="label_unblock">Unblock</string>
+<string name="label_contact_blocked">%s has been blocked</string>
+<string name="label_contact_unblocked">%s has been unblocked</string>
 
 <!-- Capabilities menu -->
 <string name="menu_capabilities">Capabilities</string>
@@ -139,7 +146,6 @@
 <string name="label_ft_state_changed">%1$s (%2$s)</string>
 <string name="label_ft_from_size">From: %1$s\nSize: %2$s Kb</string>
 <string name="menu_ft_config">File transfer configuration</string>
-
 <string name="label_ft_WarnSize">File size warning:</string>
 <string name="label_ft_MaxSize">Max file size:</string>
 <string name="label_ft_isAutoAccept">AA enabled:</string>
@@ -149,6 +155,8 @@
 <string name="label_GroupFileTransferSupported">Group supported:</string>
 <string name="menu_file_transfer_config">File transfer service configuration</string>
 <string name="label_ft_ImageResizeOption">Image resize option:</string>
+<string name="label_resend_failed">Transfer resend failed</string>
+
 
 <!-- Chat menu -->
 <string name="menu_initiate_chat">Initiate single chat</string>
@@ -236,9 +244,10 @@
 <string name="title_recv_video_sharing">Video sharing from %s</string>
 <string name="title_video_sharing">Video sharing</string> 
 <string name="label_video_duration">Duration: %s s</string>
-<string name="label_note_sharing_codec">Note: the video codec is an H264 codec from the Google Android open source and is a contribution from PacketVideo (Apache 2 license).</string>
 <string name="label_vsh_state_changed">VSH state %1$s (%2$s)</string>
+<string name="label_switch_camera">Switch camera</string>
 <string name="label_vsh_uninitialized_duration">duration</string>
+<string name="label_video_format">Format: %s</string>
 
 <!-- Geoloc sharing menu -->
 <string name="title_recv_geoloc_sharing">Geoloc sharing from (%1$s)</string>

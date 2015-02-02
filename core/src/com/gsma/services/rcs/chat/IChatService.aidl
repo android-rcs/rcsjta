@@ -46,4 +46,20 @@ interface IChatService {
 	IChatMessage getChatMessage(in String msgId);
 	
 	ICommonServiceConfiguration getCommonConfiguration();
+
+	boolean canInitiateGroupChat();
+
+	boolean canInitiateGroupChat2(in ContactId contact);
+
+	void deleteOneToOneChats();
+
+	void deleteGroupChats();
+
+	void deleteOneToOneChat(in ContactId contact);
+
+	void deleteGroupChat(in String chatId);
+
+	void deleteMessage(in String msgId);
+
+	void markUndeliveredMessagesAsProcessed(in List<String> msgIds);
 }

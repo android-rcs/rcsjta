@@ -191,11 +191,6 @@ public class RichAddressBookData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_CAPABILITY_COMMON_EXTENSION = "capability_common_extension";
-	
-	/**
-	 * Column name
-	 */
 	static final String KEY_CAPABILITY_IP_VOICE_CALL = CapabilitiesLog.CAPABILITY_IP_VOICE_CALL;
 	
 	/**
@@ -217,22 +212,7 @@ public class RichAddressBookData {
 	 * Is an automata. Values: 1 (true), 0 (false).
 	 */
 	static final String KEY_AUTOMATA = CapabilitiesLog.AUTOMATA;
-	
-	/**
-	 * Column name
-	 */
-	static final String KEY_CAPABILITY_IM_BLOCKED_TIMESTAMP = "im_blocked_timestamp";   
-
-	/**
-	 * Column name
-	 */
-	static final String KEY_IM_BLOCKED = "im_blocked";
-	
-	/**
-	 * Column name
-	 */
-	static final String KEY_FT_BLOCKED = "ft_blocked";
-	
+		
 	/**
 	 * Timestamp of the last capability refresh
 	 */
@@ -248,7 +228,17 @@ public class RichAddressBookData {
      */
     public static final String FALSE_VALUE = Boolean.toString(false);
 
-    /**
+	/**
+	 * Column name
+	 */
+	static final String KEY_BLOCKING_TIMESTAMP = "blocking_timestamp";   
+
+	/**
+	 * Column name
+	 */
+	static final String KEY_BLOCKED = "blocked";
+
+	/**
      * BLOCKED value is not set
      */
     static final int BLOCKED_VALUE_NOT_SET = 0;
@@ -257,5 +247,4 @@ public class RichAddressBookData {
      * BLOCKED value is set
      */
     static final int BLOCKED_VALUE_SET = 1;
-
 }

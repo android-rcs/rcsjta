@@ -34,6 +34,7 @@ import android.os.IInterface;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contacts.ContactId;
 
@@ -108,7 +109,7 @@ public class ChatService extends RcsService {
         public void onServiceDisconnected(ComponentName className) {
         	setApi(null);
         	if (mListener != null) {
-        		mListener.onServiceDisconnected(Error.CONNECTION_LOST);
+        		mListener.onServiceDisconnected(ReasonCode.CONNECTION_LOST);
         	}
         }
     };
@@ -196,7 +197,157 @@ public class ChatService extends RcsService {
 			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
     }
-    
+
+	/**
+	 * Returns true if it is possible to initiate a new group chat now else
+	 * returns false.
+	 * 
+	 * @return boolean
+	 * @throws RcsServiceException
+	 */
+	public boolean canInitiateGroupChat() throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				return mApi.canInitiateGroupChat();
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * Returns true if it's possible to initiate a new group chat with the
+	 * specified contactId right now, else returns false.
+	 * 
+	 * @param ContactId contact
+	 * @return boolean
+	 * @throws RcsServiceException
+	 */
+	public boolean canInitiateGroupChat(ContactId contact) throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				return mApi.canInitiateGroupChat2(contact);
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * Deletes all one to one chat from history and abort/reject any associated
+	 * ongoing session if such exists.
+	 * 
+	 * @throws RcsServiceException
+	 */
+	public void deleteOneToOneChats() throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.deleteOneToOneChats();
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * Deletes all group chat from history and abort/reject any associated
+	 * ongoing session if such exists.
+	 * 
+	 * @throws RcsServiceException
+	 */
+	public void deleteGroupChats() throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.deleteGroupChats();
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * Deletes a one to one chat with a given contact from history and
+	 * abort/reject any associated ongoing session if such exists.
+	 * 
+	 * @param ContactId contact
+	 * @throws RcsServiceException
+	 */
+	public void deleteOneToOneChat(ContactId contact) throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.deleteOneToOneChat(contact);
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * Delete a group chat by its chat id from history and abort/reject any
+	 * associated ongoing session if such exists.
+	 * 
+	 * @param chatId
+	 * @throws RcsServiceException
+	 */
+	public void deleteGroupChat(String chatId) throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.deleteGroupChat(chatId);
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * Delete a message from its message id from history.
+	 * 
+	 * @param msgId
+	 * @throws RcsServiceException
+	 */
+	public void deleteMessage(String msgId) throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.deleteMessage(msgId);
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * Marks undelivered chat messages to indicate that messages have been
+	 * processed.
+	 * 
+	 * @param msgIds
+	 * @throws RcsServiceException
+	 */
+	public void markUndeliveredMessagesAsProcessed(Set<String> msgIds) throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.markUndeliveredMessagesAsProcessed(new ArrayList<String>(msgIds));
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
     /**
      * Mark a received message as read (ie. displayed in the UI)
      *

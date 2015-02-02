@@ -741,7 +741,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	protected void receiveHttpFileTransfer(ContactId contact, String displayName, FileTransferHttpInfoDocument fileTransferInfo,
 			String msgId) {
 		// Test if the contact is blocked
-		if (ContactsManager.getInstance().isFtBlockedForContact(contact)) {
+		if (ContactsManager.getInstance().isBlockedForContact(contact)) {
 			if (logger.isActivated()) {
 				logger.debug("Contact " + contact + " is blocked, automatically reject the HTTP File transfer");
 			}
@@ -750,7 +750,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		}
 
 		// Auto reject if file too big
-		long maxSize = FileSharingSession.getMaxFileSharingSize();
+		long maxSize = mRcsSettings.getMaxFileTransferSize();
 		if (maxSize > 0 && fileTransferInfo.getFileSize() > maxSize) {
 			if (logger.isActivated()) {
 				logger.debug("File is too big, reject the HTTP File transfer");

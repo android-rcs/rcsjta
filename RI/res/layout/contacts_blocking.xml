@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+	<TableLayout android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:stretchColumns="1"
+	    android:paddingTop="10dip">
+	
+        <Spinner android:id="@+id/contact"
+			android:layout_marginLeft="5dip"
+			android:layout_marginRight="5dip"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"/>
+	
+	    <TableRow android:padding="5dip"></TableRow>
+	    
+		<ToggleButton android:id="@+id/block_btn"
+			 android:textOff="@string/label_block"
+			 android:textOn="@string/label_unblock"
+			 android:layout_marginLeft="5dip"
+			 android:layout_marginRight="5dip"/>
+	</TableLayout>
+	
+</ScrollView>	

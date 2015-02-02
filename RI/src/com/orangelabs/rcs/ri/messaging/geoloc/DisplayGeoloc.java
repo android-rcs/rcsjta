@@ -36,6 +36,7 @@ public class DisplayGeoloc extends MapActivity {
 	 * Intent parameters
 	 */
 	public final static String EXTRA_GEOLOC = "geoloc";
+	@SuppressWarnings("javadoc")
 	public final static String EXTRA_CONTACT = "contact";
 
 	/**

@@ -25,6 +25,7 @@ package com.orangelabs.rcs.provider.messaging;
 import java.util.List;
 import java.util.Set;
 
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
@@ -109,7 +110,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 */
 	@Override
 	public void addGroupChat(String chatId, ContactId contact, String subject,
-			Set<ParticipantInfo> participants, int status, int reasonCode, int direction) {
+			Set<ParticipantInfo> participants, int status, int reasonCode, Direction direction) {
 		groupChatLog.addGroupChat(chatId, contact, subject, participants, status, reasonCode,
 				direction);
 	}
@@ -216,7 +217,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 */
 	@Override
 	public void addGroupChatMessage(String chatId, ChatMessage msg,
-			int direction, int status, int reasonCode) {
+			Direction direction, int status, int reasonCode) {
 		messageLog.addGroupChatMessage(chatId, msg, direction, status, reasonCode);
 	}
 
@@ -277,7 +278,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	 * com.orangelabs.rcs.core.content.MmContent, com.orangelabs.rcs.core.content.MmContent, int, int)
 	 */
 	@Override
-	public void addFileTransfer(String fileTransferId, ContactId contact, int direction,
+	public void addFileTransfer(String fileTransferId, ContactId contact, Direction direction,
 			MmContent content, MmContent fileIcon, int status, int reasonCode) {
 		fileTransferLog.addFileTransfer(fileTransferId, contact, direction, content, fileIcon,
 				status, reasonCode);
@@ -538,5 +539,10 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	@Override
 	public Cursor getCacheableChatMessageData(String msgId) {
 		return messageLog.getCacheableChatMessageData(msgId);
+	}
+
+	@Override
+	public String getChatMessageContent(String msgId) {
+		return messageLog.getChatMessageContent(msgId);
 	}
 }

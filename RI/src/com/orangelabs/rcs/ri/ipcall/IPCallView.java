@@ -113,12 +113,12 @@ public class IPCallView extends Activity {
     /**
 	 * A locker to exit only once
 	 */
-	private LockAccess exitOnce = new LockAccess();
+	private LockAccess mExitOnce = new LockAccess();
 	
 	/**
 	 * API connection manager
 	 */
-	private ApiConnectionManager connectionManager;
+	private ApiConnectionManager mCnxManager;
 	
 	/**
 	 * Progress dialog
@@ -178,19 +178,19 @@ public class IPCallView extends Activity {
 					case IPCall.State.ABORTED:
 						// Session is aborted: hide progress dialog then exit
 						hideProgressDialog();
-						Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_ipcall_aborted, _reasonCode), exitOnce);
+						Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_ipcall_aborted, _reasonCode), mExitOnce);
 						break;
 
 					case IPCall.State.REJECTED:
 						// Session is rejected: hide progress dialog then exit
 						hideProgressDialog();
-						Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_ipcall_rejected, _reasonCode), exitOnce);
+						Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_ipcall_rejected, _reasonCode), mExitOnce);
 						break;
 
 					case IPCall.State.FAILED:
 						// Session is failed: hide progress dialog then exit
 						hideProgressDialog();
-						Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_ipcall_failed, _reasonCode), exitOnce);
+						Utils.showMessageAndExit(IPCallView.this, getString(R.string.label_ipcall_failed, _reasonCode), mExitOnce);
 						break;
 
 					default:
@@ -223,11 +223,11 @@ public class IPCallView extends Activity {
         hangupBtn.setOnClickListener(btnHangupListener);
 
         // Register to API connection manager
-     	connectionManager = ApiConnectionManager.getInstance(this);
-     	if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.IP_CALL, RcsServiceName.CONTACTS)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
+     	mCnxManager = ApiConnectionManager.getInstance(this);
+     	if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.IP_CALL, RcsServiceName.CONTACTS)) {
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), mExitOnce);
 		} else {
-			connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.IMAGE_SHARING, RcsServiceName.CONTACTS);
+			mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.IMAGE_SHARING, RcsServiceName.CONTACTS);
 			initiateIpCall();
 		}
     }
@@ -235,14 +235,14 @@ public class IPCallView extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		if (connectionManager == null) {
+		if (mCnxManager == null) {
     		return;
     	}
-		connectionManager.stopMonitorServices(this);
-		if (connectionManager.isServiceConnected(RcsServiceName.IP_CALL)) {
+		mCnxManager.stopMonitorServices(this);
+		if (mCnxManager.isServiceConnected(RcsServiceName.IP_CALL)) {
 			// Remove service listener
 			try {
-				connectionManager.getIPCallApi().removeEventListener(callListener);
+				mCnxManager.getIPCallApi().removeEventListener(callListener);
 			} catch (Exception e) {
 				if (LogUtils.isActive) {
 					Log.e(LOGTAG, "removeEventListener failed", e);
@@ -263,8 +263,7 @@ public class IPCallView extends Activity {
     		// Accept the invitation
 			call.acceptInvitation(player, renderer);
     	} catch(Exception e) {
-    		e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce, e);
     	}
 	}
 	
@@ -281,7 +280,7 @@ public class IPCallView extends Activity {
 	}	
     
     public void initiateIpCall() {
-    	IPCallService ipcallApi = connectionManager.getIPCallApi();
+    	IPCallService ipcallApi = mCnxManager.getIPCallApi();
 		try {
 			// Add service listener
 			ipcallApi.addEventListener(callListener);
@@ -292,7 +291,7 @@ public class IPCallView extends Activity {
 	            // Check if the service is available
 	        	boolean registered = ipcallApi.isServiceRegistered();
 	            if (!registered) {
-	    	    	Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
+	    	    	Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), mExitOnce);
 	    	    	return;
 	            } 
 	            
@@ -315,7 +314,7 @@ public class IPCallView extends Activity {
 					call = ipcallApi.getIPCall(callId);
 					if (call == null) {
 						// Session not found or expired
-						Utils.showMessageAndExit(this, getString(R.string.label_ipcall_has_expired), exitOnce);
+						Utils.showMessageAndExit(this, getString(R.string.label_ipcall_has_expired), mExitOnce);
 						return;
 					}
 
@@ -332,7 +331,7 @@ public class IPCallView extends Activity {
 					call = ipcallApi.getIPCall(callId);
 					if (call == null) {
 						// Session not found or expired
-						Utils.showMessageAndExit(this, getString(R.string.label_ipcall_has_expired), exitOnce);
+						Utils.showMessageAndExit(this, getString(R.string.label_ipcall_has_expired), mExitOnce);
 						return;
 					}
 
@@ -369,8 +368,7 @@ public class IPCallView extends Activity {
 	        holdBtn.setChecked(false);
 	        holdBtn.setOnCheckedChangeListener(btnHoldListener);        
 		} catch(RcsServiceException e) {
-			e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
 		}
     }
 
@@ -387,15 +385,14 @@ public class IPCallView extends Activity {
 			// Initiate session
     		if (video) {
     			// Visio call
-    			call = connectionManager.getIPCallApi().initiateVisioCall(contact, player, renderer);
+    			call = mCnxManager.getIPCallApi().initiateVisioCall(contact, player, renderer);
     		} else {
     			// Audio call
-    			call = connectionManager.getIPCallApi().initiateCall(contact, player, renderer);
+    			call = mCnxManager.getIPCallApi().initiateCall(contact, player, renderer);
     		}
     		callId = call.getCallId();
     	} catch(Exception e) {
-    		e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), exitOnce);		
+			Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce, e);		
     	}
 
         // Display a progress dialog

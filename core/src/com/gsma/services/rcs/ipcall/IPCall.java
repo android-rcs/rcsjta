@@ -21,6 +21,7 @@
  ******************************************************************************/
 package com.gsma.services.rcs.ipcall;
 
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 
@@ -235,15 +236,15 @@ public class IPCall {
 	}
 
 	/**
-	 * Returns the direction of the call (incoming or outgoing)
-	 * 
+	 * Returns the direction of the call
+	 *
 	 * @return Direction
-	 * @see com.gsma.services.rcs.RcsCommon.Direction
+	 * @see Direction
 	 * @throws RcsServiceException
 	 */
-	public int getDirection() throws RcsServiceException {
+	public Direction getDirection() throws RcsServiceException {
 		try {
-			return callInf.getDirection();
+			return Direction.valueOf(callInf.getDirection());
 		} catch(Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}

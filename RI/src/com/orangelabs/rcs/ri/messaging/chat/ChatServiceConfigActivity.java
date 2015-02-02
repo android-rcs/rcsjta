@@ -103,7 +103,7 @@ public class ChatServiceConfigActivity extends Activity {
 					}
 				} catch (RcsServiceException e) {
 					Utils.showMessageAndExit(ChatServiceConfigActivity.this,
-							getString(R.string.label_api_failed), mExitOnce);
+							getString(R.string.label_api_failed), mExitOnce, e);
 				}
 
 			}
@@ -128,7 +128,7 @@ public class ChatServiceConfigActivity extends Activity {
 		try {
 			displayChatServiceConfig();
 		} catch (RcsServiceException e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
 		}
 	}
 

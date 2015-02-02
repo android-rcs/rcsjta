@@ -80,7 +80,7 @@ public class RegistrationStatus extends Activity {
 			// Add service listener
 			connectionManager.getCapabilityApi().addEventListener(registrationListener);
 		} catch (RcsServiceException e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce, e);
 		}
     }
     

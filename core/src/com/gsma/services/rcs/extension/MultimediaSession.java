@@ -21,6 +21,7 @@
  ******************************************************************************/
 package com.gsma.services.rcs.extension;
 
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 
@@ -179,13 +180,13 @@ public abstract class MultimediaSession {
 	public abstract int getState() throws RcsServiceException;
 	
 	/**
-	 * Returns the direction of the session (incoming or outgoing)
-	 * 
+	 * Returns the direction of the session
+	 *
 	 * @return Direction
-	 * @see MultimediaSession.Direction
+	 * @see Direction
 	 * @throws RcsServiceException
 	 */
-	public abstract int getDirection() throws RcsServiceException;
+	public abstract Direction getDirection() throws RcsServiceException;
 	
 	/**
 	 * Accepts session invitation.

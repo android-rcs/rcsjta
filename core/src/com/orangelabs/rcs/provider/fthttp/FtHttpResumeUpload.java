@@ -21,7 +21,7 @@
  ******************************************************************************/
 package com.orangelabs.rcs.provider.fthttp;
 
-import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
@@ -95,7 +95,7 @@ public class FtHttpResumeUpload extends FtHttpResume {
 	public String toString() {
 		return "FtHttpResumeUpload [tId=" + mTId + ", file=" + getFile() + ",getFileName()=" + getFileName() + ", getSize()=" + getSize()
 				+ ", getFileicon()=" + getFileicon() + ", getContact()=" + getContact() + ", getChatId()=" + getChatId()
-				+ ", getFileTransferId()=" + getFileTransferId() + ", isGroup()=" + isGroup()
+				+ ", getFileTransferId()=" + getFileTransferId() + ", isGroup()=" + isGroupTransfer()
 				+ "]";
 	}
 

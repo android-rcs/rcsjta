@@ -108,7 +108,7 @@ public class RcsContactsList extends ListActivity {
 				setListAdapter(null);
 			}
 		} catch(Exception e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed),exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed),exitOnce, e);
 		}
     }
 }

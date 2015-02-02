@@ -32,7 +32,7 @@ import android.os.RemoteException;
 
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
-import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.chat.ChatLog.Message;
@@ -510,10 +510,85 @@ public class ChatServiceImpl extends IChatService.Stub {
 	}
 
 	/**
+	 * Returns true if it is possible to initiate a group chat now, else returns
+	 * false.
+	 * 
+	 * @return boolean
+	 */
+	public boolean canInitiateGroupChat() {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Returns true if it's possible to initiate a new group chat with the
+	 * specified contactId right now, else returns false.
+	 * 
+	 * @param ContactId contact
+	 */
+	public boolean canInitiateGroupChat2(ContactId contact) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Deletes all one to one chat from history and abort/reject any associated
+	 * ongoing session if such exists.
+	 */
+	public void deleteOneToOneChats() {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Deletes all group chat from history and abort/reject any associated
+	 * ongoing session if such exists.
+	 */
+	public void deleteGroupChats() {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Deletes a one to one chat with a given contact from history and
+	 * abort/reject any associated ongoing session if such exists.
+	 * 
+	 * @param ContactId contact
+	 */
+	public void deleteOneToOneChat(ContactId contact) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Delete a group chat by its chat id from history and abort/reject any
+	 * associated ongoing session if such exists.
+	 * 
+	 * @param chatId
+	 */
+	public void deleteGroupChat(String chatId) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Delete a message from its message id from history.
+	 * 
+	 * @param msgId
+	 */
+	public void deleteMessage(String msgId) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Marks undelivered chat messages to indicate that messages have been
+	 * processed.
+	 * 
+	 * @param msgIds
+	 */
+	public void markUndeliveredMessagesAsProcessed(List<String> msgIds) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
 	 * Adds a listener on one-to-one chat events
 	 *
 	 * @param listener One-to-One chat event listener
-	 * @throws RemoteException 
+	 * @throws RemoteException
 	 */
 	public void addEventListener2(IOneToOneChatListener listener) throws RemoteException {
 		if (logger.isActivated()) {
@@ -528,7 +603,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 	 * Removes a listener on one-to-one chat events
 	 *
 	 * @param listener One-to-One chat event listener
-	 * @throws RemoteException 
+	 * @throws RemoteException
 	 */
 	public void removeEventListener2(IOneToOneChatListener listener) throws RemoteException {
 		if (logger.isActivated()) {
@@ -683,14 +758,14 @@ public class ChatServiceImpl extends IChatService.Stub {
 		groupChat.rejoinGroupChat();
 		addGroupChat(groupChat);
 	}
-	
+
 	/**
 	 * Returns the common service configuration
-	 * 
+	 *
 	 * @return the common service configuration
 	 */
 	public ICommonServiceConfiguration getCommonConfiguration() {
 		return new CommonServiceConfigurationImpl();
 	}
-	
+
 }

@@ -16,8 +16,8 @@
 
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
-import com.gsma.services.rcs.RcsCommon.Direction;
-import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.chat.ChatLog.GroupChat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
@@ -42,10 +42,7 @@ public class GroupChatPersistedStorageAccessor {
 
 	private String mSubject;
 
-	/**
-	 * TODO: Change type to enum in CR031 implementation
-	 */
-	private Integer mDirection;
+	private Direction mDirection;
 
 	private ContactId mContact;
 
@@ -54,7 +51,7 @@ public class GroupChatPersistedStorageAccessor {
 		mMessagingLog = messagingLog;
 	}
 
-	public GroupChatPersistedStorageAccessor(String chatId, String subject, int direction,
+	public GroupChatPersistedStorageAccessor(String chatId, String subject, Direction direction,
 			MessagingLog messagingLog) {
 		mChatId = chatId;
 		mSubject = subject;
@@ -66,10 +63,10 @@ public class GroupChatPersistedStorageAccessor {
 		Cursor cursor = null;
 		try {
 			cursor = mMessagingLog.getCacheableGroupChatData(mChatId);
-			mSubject = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.SUBJECT));
-			mDirection = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.DIRECTION));
+			mSubject = cursor.getString(cursor.getColumnIndexOrThrow(GroupChat.SUBJECT));
+			mDirection = Direction.valueOf(cursor.getInt(cursor.getColumnIndexOrThrow(GroupChat.DIRECTION)));
 			String contact = cursor.getString(cursor
-					.getColumnIndexOrThrow(ChatLog.GroupChat.CONTACT));
+					.getColumnIndexOrThrow(GroupChat.CONTACT));
 			if (contact != null) {
 				mContact = ContactUtils.createContactId(contact);
 			}
@@ -80,7 +77,7 @@ public class GroupChatPersistedStorageAccessor {
 		}
 	}
 
-	public int getDirection() {
+	public Direction getDirection() {
 		/*
 		 * Utilizing cache here as direction can't be changed in persistent
 		 * storage after entry insertion anyway so no need to query for it
@@ -163,7 +160,7 @@ public class GroupChatPersistedStorageAccessor {
 	}
 
 	public void addGroupChat(ContactId contact, String subject, Set<ParticipantInfo> participants,
-			int state, int reasonCode, int direction) {
+			int state, int reasonCode, Direction direction) {
 		mMessagingLog.addGroupChat(mChatId, contact, subject, participants, state, reasonCode,
 				direction);
 	}
@@ -172,7 +169,7 @@ public class GroupChatPersistedStorageAccessor {
 		mMessagingLog.addGroupChatEvent(mChatId,  contact,  status);
 	}
 
-	public void addGroupChatMessage(ChatMessage msg, int direction, int status, int reasonCode) {
+	public void addGroupChatMessage(ChatMessage msg, Direction direction, int status, int reasonCode) {
 		mMessagingLog.addGroupChatMessage(mChatId, msg, direction, status, reasonCode);
 	}
 

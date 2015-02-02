@@ -74,6 +74,9 @@ public class SingleChatList extends Activity {
 	    		};
 	// @formatter:on
 
+	/**
+	 * One to one chat are raws where chat_id equals contact.
+	 */
 	private static final String WHERE_CLAUSE_GROUPED = new StringBuilder(Message.CHAT_ID).append("=")
 			.append(Message.CONTACT).append(" GROUP BY ").append(Message.CONTACT).toString();
 

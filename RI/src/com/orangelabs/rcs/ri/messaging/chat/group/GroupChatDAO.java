@@ -23,6 +23,7 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
 
 /**
@@ -33,48 +34,48 @@ import com.gsma.services.rcs.chat.ChatLog;
  */
 public class GroupChatDAO implements Parcelable {
 
-	private String chatId;
+	private String mChatId;
 	
-	private int direction;
+	private Direction mDirection;
 	
-	private String participants;
+	private String mParticipants;
 	
-	private int state;
+	private int mState;
 	
-	private String subject;
+	private String mSubject;
 	
-	private long timestamp;
+	private long mTimestamp;
 	
-	private int reasonCode;
+	private int mReasonCode;
 
-	private static final String WHERE_CLAUSE = new StringBuilder(ChatLog.GroupChat.CHAT_ID).append("=?").toString();
+	private static final String WHERE_CLAUSE = ChatLog.GroupChat.CHAT_ID.concat("=?");
 
 	public int getState() {
-		return state;
+		return mState;
 	}
 
 	public String getChatId() {
-		return chatId;
+		return mChatId;
 	}
 
 	public String getParticipants() {
-		return participants;
+		return mParticipants;
 	}
 
 	public String getSubject() {
-		return subject;
+		return mSubject;
 	}
 
-	public int getDirection() {
-		return direction;
+	public Direction getDirection() {
+		return mDirection;
 	}
 
 	public long getTimestamp() {
-		return timestamp;
+		return mTimestamp;
 	}
 
 	public int getReasonCode() {
-		return reasonCode;
+		return mReasonCode;
 	}
 
 	/**
@@ -84,24 +85,24 @@ public class GroupChatDAO implements Parcelable {
 	 *            Parcelable source
 	 */
 	public GroupChatDAO(Parcel source) {
-		chatId = source.readString();
-		state = source.readInt();
-		direction = source.readInt();
-		timestamp = source.readLong();
-		subject = source.readString();
-		participants = source.readString();
-		reasonCode = source.readInt();
+		mChatId = source.readString();
+		mState = source.readInt();
+		mDirection = Direction.valueOf(source.readInt());
+		mTimestamp = source.readLong();
+		mSubject = source.readString();
+		mParticipants = source.readString();
+		mReasonCode = source.readInt();
 	}
 	
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeString(chatId);
-		dest.writeInt(state);
-		dest.writeInt(direction);
-		dest.writeLong(timestamp);
-		dest.writeString(subject);
-		dest.writeString(participants);
-		dest.writeInt(reasonCode);
+		dest.writeString(mChatId);
+		dest.writeInt(mState);
+		dest.writeInt(mDirection.toInt());
+		dest.writeLong(mTimestamp);
+		dest.writeString(mSubject);
+		dest.writeString(mParticipants);
+		dest.writeInt(mReasonCode);
 	};
 
 	/**
@@ -119,17 +120,17 @@ public class GroupChatDAO implements Parcelable {
 		Cursor cursor = null;
 		try {
 			cursor = context.getContentResolver().query(uri, null, WHERE_CLAUSE, whereArgs, null);
-			if (cursor.moveToFirst()) {
-				this.chatId = chatId;
-				subject = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.SUBJECT));
-				state = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.STATE));
-				direction = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.DIRECTION));
-				timestamp = cursor.getLong(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.TIMESTAMP));
-				participants = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.PARTICIPANTS));
-				reasonCode = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.REASON_CODE));
-			} else {
+			if (!cursor.moveToFirst()) {
 				throw new IllegalArgumentException("ChatId not found");
 			}
+			this.mChatId = chatId;
+			mSubject = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.SUBJECT));
+			mState = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.STATE));
+			mDirection = Direction.valueOf(cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.DIRECTION)));
+			mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.TIMESTAMP));
+			mParticipants = cursor.getString(cursor
+					.getColumnIndexOrThrow(ChatLog.GroupChat.PARTICIPANTS));
+			mReasonCode = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.REASON_CODE));
 		} catch (Exception e) {
 			throw e;
 		} finally {
@@ -158,7 +159,7 @@ public class GroupChatDAO implements Parcelable {
 
 	@Override
 	public String toString() {
-		return "GroupChatDAO [chatId=" + chatId + ", direction=" + direction + ", state=" + state + ", subject=" + subject + "]";
+		return "GroupChatDAO [chatId=" + mChatId + ", direction=" + mDirection + ", state=" + mState + ", subject=" + mSubject + "]";
 	}
 	
 	

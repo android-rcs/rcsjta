@@ -262,10 +262,14 @@ public class SipInterface implements SipListener {
             if (defaultProtocol.equals(ListeningPoint.TLS)) {
                 // Set SSL properties
                 properties.setProperty("gov2.nist.javax2.sip.TLS_CLIENT_PROTOCOLS", "SSLv3, TLSv1");
-                properties.setProperty("javax2.net.ssl.keyStoreType", KeyStoreManager.getKeystoreType());
-                properties.setProperty("javax2.net.ssl.keyStore", KeyStoreManager.getKeystorePath());
-                properties.setProperty("javax2.net.ssl.keyStorePassword", KeyStoreManager.getKeystorePassword());
-                properties.setProperty("javax2.net.ssl.trustStore", KeyStoreManager.getKeystorePath());
+                if (KeyStoreManager.isOwnCertificateUsed()) {
+                	properties.setProperty("javax2.net.ssl.keyStoreType", KeyStoreManager.getKeystoreType());
+                	properties.setProperty("javax2.net.ssl.keyStore", KeyStoreManager.getKeystorePath());
+                	properties.setProperty("javax2.net.ssl.keyStorePassword", KeyStoreManager.getKeystorePassword());
+                	properties.setProperty("javax2.net.ssl.trustStore", KeyStoreManager.getKeystorePath());
+                } else {
+                	properties.setProperty("gov2.nist.javax2.sip.NETWORK_LAYER", "gov2.nist.core.net.SslNetworkLayer");
+                }
             }
 
             // Create the SIP stack

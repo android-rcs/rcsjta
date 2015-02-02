@@ -30,9 +30,9 @@ public class ContentSharingError extends ImsSessionBasedServiceError {
 	static final long serialVersionUID = 1L;
 
 	/**
-	 * Media renderer is not initialized
+	 * Media player is not initialized
 	 */
-	public final static int MEDIA_RENDERER_NOT_INITIALIZED = RICHCALL_ERROR_CODES + 1;
+	public final static int MEDIA_PLAYER_NOT_INITIALIZED = RICHCALL_ERROR_CODES + 1;
 	
 	/**
 	 * Media transfer has failed (e.g. MSRP failure)

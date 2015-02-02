@@ -28,6 +28,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
 
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IPCallLog;
 import com.orangelabs.rcs.core.content.AudioContent;
@@ -138,7 +139,7 @@ public class IPCallHistory {
 	 * @param state Call state
 	 * @param  Reason code
 	 */
-	public Uri addCall(String callId, ContactId contact, int direction, AudioContent audiocontent,
+	public Uri addCall(String callId, ContactId contact, Direction direction, AudioContent audiocontent,
 			VideoContent videocontent, int state, int reasonCode) {
 		if(logger.isActivated()){
 			logger.debug(new StringBuilder("Add new call entry for contact ").append(contact)
@@ -149,7 +150,7 @@ public class IPCallHistory {
 		ContentValues values = new ContentValues();
 		values.put(IPCallData.KEY_CALL_ID, callId );
 		values.put(IPCallData.KEY_CONTACT, contact.toString());
-		values.put(IPCallData.KEY_DIRECTION, direction);
+		values.put(IPCallData.KEY_DIRECTION, direction.toInt());
 		values.put(IPCallData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
 		values.put(IPCallData.KEY_STATE, state);
 		values.put(IPCallData.KEY_REASON_CODE, reasonCode);

@@ -33,7 +33,7 @@ import android.os.IBinder;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
-import com.gsma.services.rcs.RcsCommon.Direction;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.contacts.ContactId;
@@ -212,7 +212,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 
 		String sharingId = session.getSessionID();
 		GeolocSharingPersistedStorageAccessor persistedStorage = new GeolocSharingPersistedStorageAccessor(
-				sharingId, contact, session.getGeoloc(), Direction.OUTGOING, mRichcallLog);
+				sharingId, contact, session.getGeoloc(), Direction.INCOMING, mRichcallLog);
 		GeolocSharingImpl geolocSharing = new GeolocSharingImpl(sharingId, mBroadcaster,
 				mRichcallService, this, persistedStorage);
 		addGeolocSharing(geolocSharing);
@@ -387,5 +387,29 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 	 */
 	public ICommonServiceConfiguration getCommonConfiguration() {
 		return new CommonServiceConfigurationImpl();
+	}
+
+	/**
+	 * Deletes all geoloc sharing from history and abort/reject any associated
+	 * ongoing session if such exists.
+	 */
+	public void deleteGeolocSharings() {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Deletes geoloc sharing with a given contact from history and abort/reject
+	 * any associated ongoing session if such exists.
+	 */
+	public void deleteGeolocSharings2(ContactId contact) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Deletes a geoloc sharing by its sharing id from history and abort/reject
+	 * any associated ongoing session if such exists.
+	 */
+	public void deleteGeolocSharing(String sharingId) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
 	}
 }

@@ -643,14 +643,14 @@ public class InstantMessagingService extends ImsService {
 			fileIcon = null;
 		}
 		return new OriginatingMsrpFileSharingSession(fileTransferId, this, content, contact,
-				fileIcon);
+				fileIcon, mRcsSettings);
 	}
 
 	/**
 	 * Initiate a group file transfer session
 	 * @param fileTransferId
 	 *            File transfer Id
-	 * @param contacts
+	 * @param participants
 	 *            Set of remote contacts
 	 * @param content
 	 *            The file content to be sent
@@ -695,7 +695,7 @@ public class InstantMessagingService extends ImsService {
 		try {
 			// Test if the contact is blocked
 			ContactId remote = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
-			if (mContactsManager.isFtBlockedForContact(remote)) {
+			if (mContactsManager.isBlockedForContact(remote)) {
 				if (logger.isActivated()) {
 					logger.debug("Contact " + remote + " is blocked: automatically reject the file transfer invitation");
 				}
@@ -722,7 +722,7 @@ public class InstantMessagingService extends ImsService {
 			}
 
 			// Create a new session
-			FileSharingSession session = new TerminatingMsrpFileSharingSession(this, invite);
+			FileSharingSession session = new TerminatingMsrpFileSharingSession(this, invite, mRcsSettings);
 
 			getImsModule().getCore().getListener().handleFileTransferInvitation(session, false, remote, session.getRemoteDisplayName());
 
@@ -770,7 +770,7 @@ public class InstantMessagingService extends ImsService {
 			ChatMessage firstMsg = ChatUtils.getFirstMessage(invite);
 
 			// Test if the contact is blocked
-			if (mContactsManager.isImBlockedForContact(remote)) {
+			if (mContactsManager.isBlockedForContact(remote)) {
 				if (logger.isActivated()) {
 					logger.debug("Contact " + remote + " is blocked: automatically reject the chat invitation");
 				}
@@ -882,7 +882,7 @@ public class InstantMessagingService extends ImsService {
 		try {
 			contact = ChatUtils.getReferredIdentityAsContactId(invite);
 			// Test if the contact is blocked
-			if (mContactsManager.isImBlockedForContact(contact)) {
+			if (mContactsManager.isBlockedForContact(contact)) {
 				if (logger.isActivated()) {
 					logger.debug("Contact " + contact + " is blocked: automatically reject the chat invitation");
 				}
@@ -1145,7 +1145,7 @@ public class InstantMessagingService extends ImsService {
 		ChatMessage firstMsg = ChatUtils.getFirstMessage(invite);
 
     	// Test if the contact is blocked
-	    if (mContactsManager.isImBlockedForContact(remote)) {
+	    if (mContactsManager.isBlockedForContact(remote)) {
 			if (logger.isActivated()) {
 				logger.debug("Contact " + remote + " is blocked: automatically reject the S&F invitation");
 			}
@@ -1191,7 +1191,7 @@ public class InstantMessagingService extends ImsService {
 			return;
 		}
     	// Test if the contact is blocked
-	    if (mContactsManager.isImBlockedForContact(remote)) {
+	    if (mContactsManager.isBlockedForContact(remote)) {
 			if (logger.isActivated()) {
 				logger.debug("Contact " + remote + " is blocked: automatically reject the S&F invitation");
 			}
@@ -1219,7 +1219,7 @@ public class InstantMessagingService extends ImsService {
 		try {
 			ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);
 			// Test if the contact is blocked
-			if (mContactsManager.isFtBlockedForContact(remote)) {
+			if (mContactsManager.isBlockedForContact(remote)) {
 				if (logger.isActivated()) {
 					logger.debug("Contact " + remote + " is blocked, automatically reject the HTTP File transfer");
 				}
@@ -1344,7 +1344,7 @@ public class InstantMessagingService extends ImsService {
      */
     private boolean isFileSizeExceeded(long size) {
         // Auto reject if file too big
-        long maxSize = FileSharingSession.getMaxFileSharingSize();
+        long maxSize = mRcsSettings.getMaxFileTransferSize();
         if (maxSize > 0 && size > maxSize) {
             return true;
         }

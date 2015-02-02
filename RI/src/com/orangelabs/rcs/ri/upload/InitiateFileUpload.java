@@ -86,12 +86,12 @@ public class InitiateFileUpload extends Activity {
     /**
 	 * A locker to exit only once
 	 */
-	private LockAccess exitOnce = new LockAccess();
+	private LockAccess mExitOnce = new LockAccess();
 	
    	/**
 	 * API connection manager
 	 */
-	private ApiConnectionManager connectionManager;
+	private ApiConnectionManager mCnxManager;
 	
     
     /**
@@ -123,35 +123,33 @@ public class InitiateFileUpload extends Activity {
         selectBtn.setOnClickListener(btnSelectListener);
 
 		// Register to API connection manager
-		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
+		mCnxManager = ApiConnectionManager.getInstance(this);
+		if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), mExitOnce);
 			return;
 		}
-		connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.FILE_UPLOAD);
+		mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.FILE_UPLOAD);
 		try {
 			// Add upload listener
-			connectionManager.getFileUploadApi().addEventListener(uploadListener);
+			mCnxManager.getFileUploadApi().addEventListener(uploadListener);
 		} catch (RcsServiceNotAvailableException e) {
-			e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), mExitOnce, e);
 		} catch (RcsServiceException e) {
-			e.printStackTrace();
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce);
+			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
 		}
     }
     
     @Override
     public void onDestroy() {
     	super.onDestroy();
-    	if (connectionManager == null) {
+    	if (mCnxManager == null) {
 			return;
 		}
-		connectionManager.stopMonitorServices(this);
+		mCnxManager.stopMonitorServices(this);
         // Remove upload listener
-        if (connectionManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
+        if (mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
         	try {
-        		connectionManager.getFileUploadApi().removeEventListener(uploadListener);
+        		mCnxManager.getFileUploadApi().removeEventListener(uploadListener);
         	} catch(Exception e) {
         		if (LogUtils.isActive) {
 					Log.e(LOGTAG, "Failed to remove listener", e);
@@ -169,7 +167,7 @@ public class InitiateFileUpload extends Activity {
         		// Check max size
             	long maxSize = 0;
             	try {
-            		maxSize = connectionManager.getFileUploadApi().getConfiguration().getMaxSize();
+            		maxSize = mCnxManager.getFileUploadApi().getConfiguration().getMaxSize();
             		if (LogUtils.isActive) {
     					Log.d(LOGTAG, "FileUpload max size=".concat(Long.valueOf(maxSize).toString()));
     				}
@@ -188,7 +186,7 @@ public class InitiateFileUpload extends Activity {
         		boolean thumbnail = ftThumb.isChecked();
         		
             	// Initiate upload
-        		upload = connectionManager.getFileUploadApi().uploadFile(file, thumbnail);
+        		upload = mCnxManager.getFileUploadApi().uploadFile(file, thumbnail);
         		uploadId = upload.getUploadId();
         		
                 // Hide buttons
@@ -197,10 +195,7 @@ public class InitiateFileUpload extends Activity {
                 Button selectBtn = (Button)findViewById(R.id.select_btn);
                 selectBtn.setVisibility(View.GONE);
         	} catch(Exception e) {
-        		if (LogUtils.isActive) {
-    				Log.e(LOGTAG, "Failed to upload file", e);
-    			}
-				Utils.showMessageAndExit(InitiateFileUpload.this, getString(R.string.label_upload_failed), exitOnce);
+				Utils.showMessageAndExit(InitiateFileUpload.this, getString(R.string.label_upload_failed), mExitOnce, e);
         	}
         }
     };

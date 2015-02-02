@@ -34,9 +34,9 @@ import android.os.RemoteException;
 import com.gsma.services.rcs.GroupDeliveryInfoLog;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
-import com.gsma.services.rcs.RcsCommon.Direction;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ft.FileTransfer;
@@ -299,6 +299,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 				state, ReasonCode.UNSPECIFIED);
 	}
 
+	private void setFileTransferState(String fileTransferId, ContactId contact, int state) {
+		mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, state,
+				ReasonCode.UNSPECIFIED);
+		mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId, state,
+				ReasonCode.UNSPECIFIED);
+	}
+
 	/**
 	 * Add outgoing group file transfer to DB
 	 * 
@@ -378,6 +385,74 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 	}
 
 	/**
+	 * 1-1 file re-send operation initiated
+	 * 
+	 * @param contact
+	 * @param file
+	 * @param fileIcon
+	 * @param fileTransferId
+	 */
+	/* package private */void resendOneToOneFile(ContactId contact, MmContent file,
+			MmContent fileIcon, String fileTransferId) {
+		try {
+			if (!ServerApiUtils.isImsConnected()) {
+				/*
+				 * If the IMS is NOT connected at this time then re-queue
+				 * transfer.
+				 */
+				setFileTransferState(fileTransferId, contact, FileTransfer.State.QUEUED);
+				return;
+			}
+			if (!mImService.isFileTransferSessionAvailable()
+					|| mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
+				if (logger.isActivated()) {
+					logger.debug("The max number of file transfer sessions is achieved: re-queue the file transfer with fileTransferId "
+							.concat(fileTransferId));
+				}
+				setFileTransferState(fileTransferId, contact, FileTransfer.State.QUEUED);
+				return;
+			}
+			setFileTransferState(fileTransferId, contact, FileTransfer.State.INITIATING);
+			final FileSharingSession session = mImService.initiateFileTransferSession(
+					fileTransferId, contact, file, fileIcon);
+
+			FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
+					fileTransferId, contact, Direction.OUTGOING, contact.toString(), file.getUri(),
+					fileIcon != null ? fileIcon.getUri() : null, file.getName(),
+					file.getEncoding(), file.getSize(), mMessagingLog);
+			OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
+					fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
+					this);
+			session.addListener(oneToOneFileTransfer);
+			addFileTransfer(oneToOneFileTransfer);
+
+			new Thread() {
+				public void run() {
+					session.startSession();
+				}
+			}.start();
+
+		} catch (Exception e) {
+			/*
+			 * TODO: This is not correct implementation. It will be fixed
+			 * properly in CR037
+			 */
+			throw new IllegalStateException(e);
+		}
+	}
+
+	/**
+	 * Returns true if it is possible to initiate file transfer to the contact
+	 * specified by the contact parameter, else returns false.
+	 * 
+	 * @param contact
+	 * @return boolean
+	 */
+	public boolean canTransferFile(ContactId contact) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
      * Transfers a file to a contact. The parameter file contains the URI of the
      * file to be transferred (for a local or a remote file). The parameter
      * contact supports the following formats: MSISDN in national or
@@ -432,6 +507,17 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 			}
 			throw new ServerApiException(e);
 		}
+	}
+
+	/**
+	 * Returns true if it is possible to initiate file transfer to the group
+	 * chat specified by the chatId parameter, else returns false.
+	 * 
+	 * @param chatId
+	 * @return boolean
+	 */
+	public boolean canTransferFileToGroupChat(String chatId) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
 	}
 
 	/**
@@ -943,6 +1029,63 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 		}
 	}
 
+	/**
+	 * Deletes all one to one file transfer history and abort/reject any
+	 * associated ongoing session if such exists.
+	 */
+	public void deleteOneToOneFileTransfers() {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Deletes all group file transfer from history and abort/reject any
+	 * associated ongoing session if such exists.
+	 */
+	public void deleteGroupFileTransfers() {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Deletes file transfer corresponding to a given one to one chat specified
+	 * by contact from history and abort/reject any associated ongoing session
+	 * if such exists.
+	 * 
+	 * @param contact
+	 */
+	public void deleteOneToOneFileTransfers2(ContactId contact) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Deletes file transfer corresponding to a given group chat specified by
+	 * chat id from history and abort/reject any associated ongoing session if
+	 * such exists.
+	 * 
+	 * @param chatId
+	 */
+	public void deleteGroupFileTransfers2(String chatId) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Deletes a file transfer by its unique id from history and abort/reject
+	 * any associated ongoing session if such exists.
+	 * 
+	 * @param transferId
+	 */
+	public void deleteFileTransfer(String transferId) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
+
+	/**
+	 * Marks undelivered file transfers to indicate that transfers have been
+	 * processed.
+	 * 
+	 * @param transferIds
+	 */
+	public void markUndeliveredFileTransfersAsProcessed(List<String> transferIds) {
+		throw new UnsupportedOperationException("This method has not been implemented yet!");
+	}
 	/**
 	 * Add and broadcast file transfer invitation rejections
 	 *

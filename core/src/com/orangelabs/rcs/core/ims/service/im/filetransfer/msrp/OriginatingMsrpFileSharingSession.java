@@ -51,7 +51,6 @@ import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
 import com.orangelabs.rcs.core.ims.service.im.chat.ContributionIdGenerator;
 import com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingError;
-import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.ImsFileSharingSession;
 import com.orangelabs.rcs.platform.AndroidFactory;
@@ -76,10 +75,9 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
 	 * MSRP manager
 	 */
 	private MsrpManager msrpMgr;
+
+	private RcsSettings mRcsSettings;
 	
-	/**
-     * The logger
-     */
     private static final Logger logger = Logger.getLogger(OriginatingMsrpFileSharingSession.class.getSimpleName());
 
 	/**
@@ -95,9 +93,10 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
 	 *            Remote contact identifier
 	 * @param fileIcon
 	 *            Content of fileicon
+	 * @param rcsSettings RCS settings
 	 */
 	public OriginatingMsrpFileSharingSession(String fileTransferId, ImsService parent,
-			MmContent content, ContactId contact, MmContent fileIcon) {
+			MmContent content, ContactId contact, MmContent fileIcon, RcsSettings rcsSettings) {
 		super(parent, content, contact, fileIcon, fileTransferId);
 		
 		if (logger.isActivated()) {
@@ -109,7 +108,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
 		// Set contribution ID
 		String id = ContributionIdGenerator.getContributionId(getDialogPath().getCallId());
 		setContributionID(id);
-
+		mRcsSettings = rcsSettings;
 	}
 
 	/**
@@ -145,7 +144,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
 			// Build SDP part
 	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
 	    	String encoding = getContent().getEncoding();
-	    	long maxSize = FileSharingSession.getMaxFileSharingSize();
+	    	long maxSize = mRcsSettings.getMaxFileTransferSize();
 	    	// Set File-selector attribute
 	    	String selector = getFileSelectorAttribute();
 	    	String sdp = SdpUtils.buildFileSDP(ipAddress, localMsrpPort,
