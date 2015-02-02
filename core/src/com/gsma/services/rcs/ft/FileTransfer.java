@@ -344,6 +344,20 @@ public class FileTransfer {
 	}
 
 	/**
+	 * Returns the MIME type of the file icon to be transfered
+	 * 
+	 * @return MIME Type
+	 * @throws RcsServiceException
+	 */
+	public String getFileIconMimeType() throws RcsServiceException {
+		try {
+			return mTransferInf.getFileIconMimeType();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
 	 * Returns the Uri of the file
 	 *
 	 * @return Uri of file
@@ -401,7 +415,71 @@ public class FileTransfer {
 			throw new RcsServiceException(e);
 		}
 	}
-	
+
+	/**
+	 * Returns the local timestamp of when the file transfer was initiated
+	 * and/or queued for outgoing file transfers or the local timestamp of when
+	 * the file transfer invitation was received for incoming file transfers
+	 * 
+	 * @return long
+	 * @throws RcsServiceException
+	 */
+	public long getTimestamp() throws RcsServiceException {
+		try {
+			return mTransferInf.getTimestamp();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Returns the local timestamp of when the file transfer was initiated and
+	 * /or queued for outgoing file transfers or the remote timestamp of when
+	 * the file transfer was initiated for incoming file transfers
+	 * 
+	 * @return long
+	 * @throws RcsServiceException
+	 */
+	public long getTimestampSent() throws RcsServiceException {
+		try {
+			return mTransferInf.getTimestampSent();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Returns the local timestamp of when the file transfer was delivered for
+	 * outgoing file transfers or 0 for incoming file transfers or it was not
+	 * yet displayed
+	 * 
+	 * @return long
+	 * @throws RcsServiceException
+	 */
+	public long getTimestampDelivered() throws RcsServiceException {
+		try {
+			return mTransferInf.getTimestampDelivered();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Returns the local timestamp of when the file transfer was displayed for
+	 * outgoing file transfers or 0 for incoming file transfers or it was not
+	 * yet displayed
+	 * 
+	 * @return long
+	 * @throws RcsServiceException
+	 */
+	public long getTimestampDisplayed() throws RcsServiceException {
+		try {
+			return mTransferInf.getTimestampDisplayed();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
 	/**
 	 * Accepts file transfer invitation
 	 * 

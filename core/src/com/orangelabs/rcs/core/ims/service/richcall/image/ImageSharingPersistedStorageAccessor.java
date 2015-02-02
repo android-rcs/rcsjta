@@ -50,6 +50,8 @@ public class ImageSharingPersistedStorageAccessor {
 
 	private Uri mFile;
 
+	private long mTimestamp;
+
 	public ImageSharingPersistedStorageAccessor(String sharingId, RichCallHistory richCallLog) {
 		mSharingId = sharingId;
 		mRichCallLog = richCallLog;
@@ -81,6 +83,7 @@ public class ImageSharingPersistedStorageAccessor {
 			mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.MIME_TYPE));
 			mFileSize = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.FILESIZE));
 			mFile = Uri.parse(cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILE)));
+			mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.TIMESTAMP));
 		} finally {
 			if (cursor != null) {
 				cursor.close();
@@ -166,6 +169,18 @@ public class ImageSharingPersistedStorageAccessor {
 			cacheData();
 		}
 		return mDirection;
+	}
+
+	public long getTimestamp() {
+		/*
+		 * Utilizing cache here as timestamp can't be changed in persistent
+		 * storage after it has been set to some value bigger than zero, so no
+		 * need to query for it multiple times.
+		 */
+		if (mTimestamp == 0) {
+			cacheData();
+		}
+		return mTimestamp;
 	}
 
 	public void setStateAndReasonCode(int state, int reasonCode) {

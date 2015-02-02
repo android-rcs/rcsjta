@@ -150,20 +150,12 @@ public interface IMessageLog {
 	public long getMessageSentTimestamp(String msgId);
 
 	/**
-	 * Returns the timestamp_delivered of a message
+	 * Returns the timestamp of a message
 	 * 
 	 * @param msgId
-	 * @return timestamp_delivered
+	 * @return timestamp
 	 */
-	public long getMessageDeliveredTimestamp(String msgId);
-
-	/**
-	 * Returns the timestamp_displayed of a message
-	 * 
-	 * @param msgId
-	 * @return timestamp_displayed
-	 */
-	public long getMessageDisplayedTimestamp(String msgId);
+	public long getMessageTimestamp(String msgId);
 
 	/**
 	 * Get message state from its unique ID

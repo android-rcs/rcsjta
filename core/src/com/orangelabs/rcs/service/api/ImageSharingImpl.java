@@ -274,6 +274,10 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 		return Direction.OUTGOING.toInt();
 	}
 
+	public long getTimestamp() {
+		return mPersistentStorage.getTimestamp();
+	}
+
 	/**
 	 * Accepts image sharing invitation
 	 */

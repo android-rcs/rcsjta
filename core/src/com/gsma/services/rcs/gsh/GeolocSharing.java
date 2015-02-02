@@ -270,7 +270,23 @@ public class GeolocSharing {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}	
-	
+
+	/**
+	 * Returns the local timestamp of when the geoloc sharing was initiated for
+	 * outgoing geoloc sharing or the local timestamp of when the geoloc sharing
+	 * invitation was received for incoming geoloc sharings.
+	 * 
+	 * @return long
+	 * @throws RcsServiceException
+	 */
+	public long getTimestamp() throws RcsServiceException {
+		try {
+			return mSharingInf.getTimestamp();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
 	/**
 	 * Accepts geoloc sharing invitation
 	 * 

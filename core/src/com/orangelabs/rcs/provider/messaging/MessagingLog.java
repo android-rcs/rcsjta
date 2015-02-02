@@ -472,6 +472,16 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	}
 
 	@Override
+	public long getFileTransferSentTimestamp(String fileTransferId) {
+		return fileTransferLog.getFileTransferSentTimestamp(fileTransferId);
+	}
+
+	@Override
+	public long getFileTransferTimestamp(String fileTransferId) {
+		return fileTransferLog.getFileTransferTimestamp(fileTransferId);
+	}
+
+	@Override
 	public Set<ParticipantInfo> getGroupChatParticipants(String chatId) {
 		return groupChatLog.getGroupChatParticipants(chatId);
 	}
@@ -497,13 +507,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 	}
 
 	@Override
-	public long getMessageDeliveredTimestamp(String msgId) {
-		return messageLog.getMessageDeliveredTimestamp(msgId);
-	}
-
-	@Override
-	public long getMessageDisplayedTimestamp(String msgId) {
-		return messageLog.getMessageDisplayedTimestamp(msgId);
+	public long getMessageTimestamp(String msgId) {
+		return messageLog.getMessageTimestamp(msgId);
 	}
 
 	@Override

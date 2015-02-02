@@ -504,6 +504,17 @@ public class FileTransferLog implements IFileTransferLog {
 		}
 	}
 
+	private long getDataAsLong(Cursor cursor) {
+		try {
+			return cursor.getLong(FIRST_COLUMN_IDX);
+
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see
@@ -527,6 +538,31 @@ public class FileTransferLog implements IFileTransferLog {
 			logger.debug("Get file transfer reason code for ".concat(fileTransferId));
 		}
 		return getDataAsInt(getFileTransferData(FileTransferData.KEY_REASON_CODE, fileTransferId));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
+	 * getfileTransferTimeStamp(java.lang.String)
+	 */
+	public long getFileTransferTimestamp(String fileTransferId) {
+		if (logger.isActivated()) {
+			logger.debug("Get file transfer timestamp for ".concat(fileTransferId));
+		}
+		return getDataAsLong(getFileTransferData(FileTransferData.KEY_TIMESTAMP, fileTransferId));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
+	 * getFileTransferSentTimeStamp(java.lang.String)
+	 */
+	public long getFileTransferSentTimestamp(String fileTransferId) {
+		if (logger.isActivated()) {
+			logger.debug("Get file transfer sent timestamp for ".concat(fileTransferId));
+		}
+		return getDataAsLong(getFileTransferData(FileTransferData.KEY_TIMESTAMP_SENT,
+				fileTransferId));
 	}
 
 	/*

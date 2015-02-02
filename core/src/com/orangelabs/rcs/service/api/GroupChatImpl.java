@@ -583,7 +583,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		ChatMessage msg = ChatUtils.createTextMessage(null, text);
 		ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
 				mMessagingLog, msg.getMessageId(), msg.getRemoteContact(), text,
-				MimeType.TEXT_MESSAGE, mChatId, msg.getDate().getTime(), Direction.OUTGOING);
+				MimeType.TEXT_MESSAGE, mChatId, Direction.OUTGOING);
 
 		/* If the IMS is connected at this time then send this message. */
 		if (ServerApiUtils.isImsConnected()) {
@@ -605,8 +605,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		ChatMessage geolocMsg = ChatUtils.createGeolocMessage(null, geoloc);
 		ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
 				mMessagingLog, geolocMsg.getMessageId(), geolocMsg.getRemoteContact(),
-				geolocMsg.toString(), MimeType.GEOLOC_MESSAGE, mChatId, geolocMsg.getDate()
-						.getTime(), Direction.OUTGOING);
+				geolocMsg.toString(), MimeType.GEOLOC_MESSAGE, mChatId, Direction.OUTGOING);
 
 		/* If the IMS is connected at this time then send this message. */
 		if (ServerApiUtils.isImsConnected()) {

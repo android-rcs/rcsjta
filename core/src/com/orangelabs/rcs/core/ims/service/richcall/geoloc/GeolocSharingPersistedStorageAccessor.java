@@ -44,6 +44,8 @@ public class GeolocSharingPersistedStorageAccessor {
 
     private Direction mDirection;
 
+    private long mTimestamp;
+
     public GeolocSharingPersistedStorageAccessor(String sharingId, RichCallHistory richCallHistory) {
         mSharingId = sharingId;
         mRichCallLog = richCallHistory;
@@ -72,6 +74,7 @@ public class GeolocSharingPersistedStorageAccessor {
             if (geoloc != null) {
                 mGeoloc = new Geoloc(geoloc);
             }
+            mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(GeolocSharingLog.TIMESTAMP));
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -125,6 +128,18 @@ public class GeolocSharingPersistedStorageAccessor {
             cacheData();
         }
         return mDirection;
+    }
+
+    public long getTimestamp() {
+        /*
+         * Utilizing cache here as timestamp can't be changed in persistent
+         * storage after it has been set to some value bigger than zero, so no
+         * need to query for it multiple times.
+         */
+        if (mTimestamp == 0) {
+            cacheData();
+        }
+        return mTimestamp;
     }
 
     public void setStateAndReasonCode(int state, int reasonCode) {

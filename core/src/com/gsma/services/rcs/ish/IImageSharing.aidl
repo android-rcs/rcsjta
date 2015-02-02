@@ -26,6 +26,8 @@ interface IImageSharing {
 	int getReasonCode();
 	
 	int getDirection();
+
+	long getTimestamp();
 		
 	void acceptInvitation();
 

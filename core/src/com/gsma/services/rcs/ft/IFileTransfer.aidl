@@ -23,6 +23,8 @@ interface IFileTransfer {
 
 	Uri getFileIcon();
 
+	String getFileIconMimeType();
+
 	Uri getFile();
 
 	int getState();
@@ -30,6 +32,14 @@ interface IFileTransfer {
 	int getReasonCode();
 	
 	int getDirection();
+
+	long getTimestamp();
+
+	long getTimestampSent();
+
+	long getTimestampDelivered();
+
+	long getTimestampDisplayed();
 		
 	void acceptInvitation();
 

@@ -45,11 +45,13 @@ public class ChatMessagePersistedStorageAccessor {
 
 	private String mChatId;
 
-	private Long mTimestamp;
-
 	private boolean mRead;
 
 	private Direction mDirection;
+
+	private long mTimestampDelivered;
+
+	private long mTimestampDisplayed;
 
 	/**
 	 * Constructor for outgoing message
@@ -71,19 +73,17 @@ public class ChatMessagePersistedStorageAccessor {
 	 * @param content Message content
 	 * @param mimeType Mime type
 	 * @param chatId Chat ID
-	 * @param timestamp Time-stamp
 	 * @param direction Direction
 	 */
 	public ChatMessagePersistedStorageAccessor(MessagingLog messagingLog, String id,
 			ContactId remoteContact, String content, String mimeType, String chatId,
-			long timestamp, Direction direction) {
+			Direction direction) {
 		mMessagingLog = messagingLog;
 		mId = id;
 		mRemoteContact = remoteContact;
 		mContent = content;
 		mChatId = chatId;
 		mMimeType = mimeType;
-		mTimestamp = timestamp;
 		mDirection = direction;
 	}
 
@@ -100,10 +100,17 @@ public class ChatMessagePersistedStorageAccessor {
 			mContent = cursor.getString(cursor.getColumnIndexOrThrow(Message.CONTENT));
 			mChatId = cursor.getString(cursor.getColumnIndexOrThrow(Message.CHAT_ID));
 			mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(Message.MIME_TYPE));
-			mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(Message.TIMESTAMP));
 			if (!mRead) {
 			    mRead = ReadStatus.READ.toInt() == cursor.getInt(cursor
 			            .getColumnIndexOrThrow(Message.READ_STATUS));
+			}
+			if (mTimestampDelivered <= 0) {
+				mTimestampDelivered = cursor.getLong(cursor
+						.getColumnIndexOrThrow(Message.TIMESTAMP_DELIVERED));
+			}
+			if (mTimestampDisplayed <= 0) {
+				mTimestampDisplayed = cursor.getLong(cursor
+						.getColumnIndexOrThrow(Message.TIMESTAMP_DISPLAYED));
 			}
 		} finally {
 			if (cursor != null) {
@@ -145,10 +152,7 @@ public class ChatMessagePersistedStorageAccessor {
 	}
 
 	public long getTimestamp() {
-		if (mDirection == null) {
-			cacheData();
-		}
-		return mTimestamp;
+		return mMessagingLog.getMessageTimestamp(mId);
 	}
 
 	public long getTimestampSent() {
@@ -156,11 +160,27 @@ public class ChatMessagePersistedStorageAccessor {
 	}
 
 	public long getTimestampDelivered() {
-		return mMessagingLog.getMessageDeliveredTimestamp(mId);
+		/*
+		 * Utilizing cache here as Timestamp delivered can't be changed in
+		 * persistent storage after it has been set to some value bigger than
+		 * zero, so no need to query for it multiple times.
+		 */
+		if (mTimestampDelivered == 0) {
+			cacheData();
+		}
+		return mTimestampDelivered;
 	}
 
 	public long getTimestampDisplayed() {
-		return mMessagingLog.getMessageDisplayedTimestamp(mId);
+		/*
+		 * Utilizing cache here as Timestamp displayed can't be changed in
+		 * persistent storage after it has been set to some value bigger than
+		 * zero, so no need to query for it multiple times.
+		 */
+		if (mTimestampDisplayed == 0) {
+			cacheData();
+		}
+		return mTimestampDisplayed;
 	}
 
 	public int getStatus() {
