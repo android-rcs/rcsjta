@@ -61,6 +61,14 @@ public class BlockingContact extends Activity {
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		setContentView(R.layout.contacts_blocking);
 
+		// Register to API connection manager
+		connectionManager = ApiConnectionManager.getInstance(this);
+		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.CONTACTS)) {
+			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
+			return;
+		}
+		connectionManager.startMonitorServices(this, null, RcsServiceName.CONTACTS);
+
 		// Set contact utils instance
 		mContactUtils = ContactUtils.getInstance(this);		
 
@@ -81,14 +89,6 @@ public class BlockingContact extends Activity {
 		} else {
 			toggleBtn.setEnabled(true);
 		}
-		
-		// Register to API connection manager
-		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.CONTACTS)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
-			return;
-		}
-		connectionManager.startMonitorServices(this, null, RcsServiceName.CONTACTS);
 	}
 
 	@Override
