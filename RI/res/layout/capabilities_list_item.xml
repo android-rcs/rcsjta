@@ -149,6 +149,7 @@
 
             <TextView
                 android:id="@+id/last_refresh"
+                android:layout_marginLeft="5dip"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
         </TableRow>
     </TableLayout>

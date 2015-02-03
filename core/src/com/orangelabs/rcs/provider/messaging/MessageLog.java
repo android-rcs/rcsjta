@@ -288,7 +288,7 @@ public class MessageLog implements IMessageLog {
 	public void setChatMessageStatusAndReasonCode(String msgId, int status, int reasonCode) {
 		if (logger.isActivated()) {
 			logger.debug(new StringBuilder("Update chat message: msgID=").append(msgId)
-					.append(", status=").append(status).append("reasonCode=").append(reasonCode)
+					.append(", status=").append(status).append(", reasonCode=").append(reasonCode)
 					.toString());
 		}
 		ContentValues values = new ContentValues();

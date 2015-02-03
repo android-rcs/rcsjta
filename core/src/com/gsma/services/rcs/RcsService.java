@@ -53,12 +53,12 @@ public abstract class RcsService {
 			/**
 			 * The original first version of RCS API
 			 */
-			public final static int BASE = 1;
+			public final static int BASE = 0;
 
 			/**
 			 * Blackbird version of RCS API
 			 */
-			public final static int BLACKBIRD = 2;
+			public final static int BLACKBIRD = 1;
 		}
 
 		/**
@@ -77,7 +77,7 @@ public abstract class RcsService {
 		 * Internal number used by the underlying source control to represent
 		 * this build
 		 */
-		public static final int API_INCREMENTAL = 0;
+		public static final int API_INCREMENTAL = 1;
 
 		private Build() {
 		}

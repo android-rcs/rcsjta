@@ -46,9 +46,8 @@ public class AboutRI extends Activity {
         TextView releaseView = (TextView)findViewById(R.id.release);
         releaseView.setText(getString(R.string.label_about_release, appRelease));
 
-        String apiRelease = getBuildNumber() + "/" + getGsmaVersion();
         TextView apiView = (TextView)findViewById(R.id.api);
-        apiView.setText(getString(R.string.label_about_api, apiRelease));
+        apiView.setText(getString(R.string.label_about_api, getBuildNumber()));
     }
 
 	/**
@@ -57,7 +56,7 @@ public class AboutRI extends Activity {
 	 * @return String
 	 */
 	private static String getBuildNumber() {
-		return Build.API_CODENAME + " " + Build.API_VERSION + "." + Build.API_INCREMENTAL;
+		return Build.API_CODENAME + " " + getGsmaVersion() + "." + Build.API_INCREMENTAL;
 	}
     
 	/**
@@ -68,9 +67,9 @@ public class AboutRI extends Activity {
 	private static String getGsmaVersion() {
 		switch(Build.API_VERSION) {
 			case Build.VERSION_CODES.BASE:
-				return "Albatros";
+				return "Albatros 2.0";
 			case Build.VERSION_CODES.BLACKBIRD:
-				return "Blackbird";
+				return "Blackbird 1.5";
 			default:
 				return "Unknown";
 		}
