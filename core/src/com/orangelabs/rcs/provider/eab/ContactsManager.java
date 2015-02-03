@@ -714,7 +714,7 @@ public final class ContactsManager {
 		
 		infos.setRegistrationState(RegistrationState.UNKNOWN);
 
-		infos.setBlockingState(BlockingState.NONE);
+		infos.setBlockingState(BlockingState.NOT_BLOCKED);
 		infos.setBlockingTimestamp(-1L);
 		
 		Cursor cursor = null;

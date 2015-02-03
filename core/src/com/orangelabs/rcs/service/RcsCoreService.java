@@ -247,8 +247,6 @@ public class RcsCoreService extends Service implements CoreListener {
 			Core.createCore(this);
 
         	// Instantiate API
-            contactsApi = new ContactsServiceImpl(); 
-            capabilityApi = new CapabilityServiceImpl();
             Core core = Core.getInstance();
             InstantMessagingService imService = core.getImService();
             RichcallService richCallService = core.getRichcallService();
@@ -258,6 +256,8 @@ public class RcsCoreService extends Service implements CoreListener {
             RichCallHistory richcallLog = RichCallHistory.getInstance();
             RcsSettings rcsSettings = RcsSettings.getInstance();
             ContactsManager contactsManager = ContactsManager.getInstance();
+            contactsApi = new ContactsServiceImpl(contactsManager); 
+            capabilityApi = new CapabilityServiceImpl(contactsManager);
             chatApi = new ChatServiceImpl(imService, messgaingLog, rcsSettings, contactsManager, core);
             ftApi = new FileTransferServiceImpl(imService, messgaingLog, rcsSettings, contactsManager, core);
             vshApi = new VideoSharingServiceImpl(richCallService, richcallLog, rcsSettings, contactsManager, core);

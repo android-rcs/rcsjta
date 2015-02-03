@@ -135,7 +135,7 @@
 <string name="label_transfer_failed">Transfer failed (%1$s)</string>
 <string name="label_transfer_aborted">Transfer aborted (%1$s)</string>
 <string name="label_transfer_cancelled">File transfer session has been cancelled</string>
-<string name="label_transfer_rejected">Transferrejected (%1$s)</string>
+<string name="label_transfer_rejected">Transfer rejected (%1$s)</string>
 <string name="label_pause_transfer">Pause</string>
 <string name="label_resume_transfer">Resume</string>
 <string name="label_pause_failed">Pause of File Transfer has failed</string>

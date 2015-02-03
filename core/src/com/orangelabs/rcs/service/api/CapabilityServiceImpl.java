@@ -62,12 +62,16 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	 */
 	private final Logger logger = Logger.getLogger(getClass().getName());
 
-	/*
+	/**
+	 * Contacts manager
+	 */
+	private final ContactsManager mContactsManager;
+
+	/**
 	 * This purpose of this handler is to make the request asynchronous with the
 	 * mechanisms provider by android by placing the request in the main thread
 	 * message queue.
 	 */
-
 	private final Handler mOptionsExchangeRequestHandler;
 
 	private class CapabilitiesRequester implements Runnable {
@@ -104,11 +108,15 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
 	/**
 	 * Constructor
+	 * 
+	 * @param contactsManager Contacts manager
 	 */
-	public CapabilityServiceImpl() {
+	public CapabilityServiceImpl(ContactsManager contactsManager) {
 		if (logger.isActivated()) {
 			logger.info("Capability service API is loaded");
 		}
+		
+		mContactsManager = contactsManager;		
 		mOptionsExchangeRequestHandler = new Handler();
 	}
 
@@ -199,7 +207,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 			logger.info("Get capabilities for contact " + contact);
 		}
 		// Read capabilities in the local database
-		return ContactsServiceImpl.getCapabilities( ContactsManager.getInstance().getContactCapabilities(contact));
+		return ContactsServiceImpl.getCapabilities(mContactsManager.getContactCapabilities(contact));
 	}
 
     /**
@@ -285,8 +293,8 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 		ServerApiUtils.testIms();
 
 		try {
-			mOptionsExchangeRequestHandler.post(new AllCapabilitiesRequester(ContactsManager.getInstance(), Core
-					.getInstance().getCapabilityService()));
+			mOptionsExchangeRequestHandler.post(new AllCapabilitiesRequester(mContactsManager,
+					Core.getInstance().getCapabilityService()));
 		} catch(Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);

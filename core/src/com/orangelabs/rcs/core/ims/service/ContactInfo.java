@@ -62,7 +62,7 @@ public class ContactInfo {
 	};
 	
 	public enum BlockingState {
-		NONE(0), BLOCKED(1);
+		NOT_BLOCKED(0), BLOCKED(1);
 
 		private int mValue;
 
@@ -89,7 +89,7 @@ public class ContactInfo {
 		    if (state != null) {
 		        return state;
 		    }
-		    return NONE;
+		    return NOT_BLOCKED;
 		}
 	};	
 	
@@ -163,12 +163,12 @@ public class ContactInfo {
 	/**
 	 * Capabilities
 	 */
-	private Capabilities capabilities;
+	private Capabilities mCapabilities;
 	
 	/**
 	 * Presence info, relevant only if social info is activated for this contact
 	 */
-	private PresenceInfo presenceInfo;
+	private PresenceInfo mPresenceInfo;
 	
 	/**
 	 * Contact identifier
@@ -178,32 +178,32 @@ public class ContactInfo {
 	/**
 	 * Display name of RCS contact
 	 */
-	private String displayName;
+	private String mDisplayName;
 	
 	/**
 	 * Registration state
 	 */
-	private RegistrationState registrationState = RegistrationState.UNKNOWN;
+	private RegistrationState mRegistrationState = RegistrationState.UNKNOWN;
 	
 	/**
 	 * RCS status
 	 */
-	private RcsStatus rcsStatus = RcsStatus.NOT_RCS;
+	private RcsStatus mRcsStatus = RcsStatus.NOT_RCS;
 	
 	/**
 	 * RCS status timestamp
 	 */
-	private long rcsStatusTimestamp = 0L;
+	private long mRcsStatusTimestamp = 0L;
 	
 	/**
 	 * Blocking state
 	 */
-	private BlockingState blockingState = BlockingState.NONE;
+	private BlockingState mBlockingState = BlockingState.NOT_BLOCKED;
 	
 	/**
 	 * Blocking timestamp
 	 */
-	private long blockingTs = -1L;
+	private long mBlockingTs;
 
 	/**
 	 * Constructor
@@ -218,14 +218,14 @@ public class ContactInfo {
 	 */
 	public ContactInfo(ContactInfo info) {
 		mContact = info.getContact();
-		registrationState = info.getRegistrationState();
-		rcsStatus = info.getRcsStatus();
-		rcsStatusTimestamp = info.getRcsStatusTimestamp();
-		capabilities = info.capabilities;
-		presenceInfo = info.getPresenceInfo();
-		displayName = info.getDisplayName();
-		blockingState = info.getBlockingState();
-		blockingTs = info.getBlockingTimestamp();
+		mRegistrationState = info.getRegistrationState();
+		mRcsStatus = info.getRcsStatus();
+		mRcsStatusTimestamp = info.getRcsStatusTimestamp();
+		mCapabilities = info.mCapabilities;
+		mPresenceInfo = info.getPresenceInfo();
+		mDisplayName = info.getDisplayName();
+		mBlockingState = info.getBlockingState();
+		mBlockingTs = info.getBlockingTimestamp();
 	}
 
     /**
@@ -234,7 +234,7 @@ public class ContactInfo {
 	 * @param capabilities Capabilities
 	 */
 	public void setCapabilities(Capabilities capabilities) {
-		this.capabilities = capabilities;
+		mCapabilities = capabilities;
 	}
 	
 	/**
@@ -243,7 +243,7 @@ public class ContactInfo {
 	 * @return Capabilities
 	 */
 	public Capabilities getCapabilities(){
-		return capabilities;
+		return mCapabilities;
 	}
 	
     /**
@@ -252,7 +252,7 @@ public class ContactInfo {
 	 * @param info Presence info
 	 */
 	public void setPresenceInfo(PresenceInfo info) {
-		presenceInfo = info;
+		mPresenceInfo = info;
 	}
 	
 	/**
@@ -261,7 +261,7 @@ public class ContactInfo {
 	 * @return PresenceInfo
 	 */
 	public PresenceInfo getPresenceInfo(){
-		return presenceInfo;
+		return mPresenceInfo;
 	}
 
     /**
@@ -288,7 +288,7 @@ public class ContactInfo {
 	 * @param rcsStatus RCS status
 	 */
 	public void setRcsStatus(RcsStatus rcsStatus) {
-		this.rcsStatus = rcsStatus;
+		mRcsStatus = rcsStatus;
 	}
 	
 	/**
@@ -297,7 +297,7 @@ public class ContactInfo {
 	 * @return rcsStatus
 	 */
 	public RcsStatus getRcsStatus(){
-		return rcsStatus;
+		return mRcsStatus;
 	}
 	
     /**
@@ -306,7 +306,7 @@ public class ContactInfo {
 	 * @param int registrationState
 	 */
 	public void setRegistrationState(RegistrationState state) {
-		registrationState = state;
+		mRegistrationState = state;
 	}
 	
 	/**
@@ -315,7 +315,7 @@ public class ContactInfo {
 	 * @return registrationState
 	 */
 	public RegistrationState getRegistrationState(){
-		return registrationState;
+		return mRegistrationState;
 	}
 	
     /**
@@ -324,7 +324,7 @@ public class ContactInfo {
 	 * @param timestamp Last RCS status date of change
 	 */
 	public void setRcsStatusTimestamp(long timestamp) {
-		this.rcsStatusTimestamp = timestamp;
+		mRcsStatusTimestamp = timestamp;
 	}
 	
 	/**
@@ -333,7 +333,7 @@ public class ContactInfo {
 	 * @return timestamp
 	 */
 	public long getRcsStatusTimestamp(){
-		return rcsStatusTimestamp;
+		return mRcsStatusTimestamp;
 	}
 
     /**
@@ -342,7 +342,7 @@ public class ContactInfo {
      * @return true if the contact is RCS
      */
     public boolean isRcsContact() {
-        return (!RcsStatus.NO_INFO.equals(rcsStatus) && !RcsStatus.NOT_RCS.equals(rcsStatus));
+        return (!RcsStatus.NO_INFO.equals(mRcsStatus) && !RcsStatus.NOT_RCS.equals(mRcsStatus));
 
     }
 
@@ -352,7 +352,7 @@ public class ContactInfo {
 	 * @return the RCS display name
 	 */
 	public String getDisplayName() {
-		return displayName;
+		return mDisplayName;
 	}
 
 	/**
@@ -361,7 +361,7 @@ public class ContactInfo {
 	 * @param displayName
 	 */
 	public void setDisplayName(String displayName) {
-		this.displayName = displayName;
+		mDisplayName = displayName;
 	}
 	
     /**
@@ -370,7 +370,7 @@ public class ContactInfo {
 	 * @param state State
 	 */
 	public void setBlockingState(BlockingState state) {
-		blockingState = state;
+		mBlockingState = state;
 	}
 	
 	/**
@@ -379,7 +379,7 @@ public class ContactInfo {
 	 * @return State
 	 */
 	public BlockingState getBlockingState(){
-		return blockingState;
+		return mBlockingState;
 	}
 	
 	/**
@@ -388,7 +388,7 @@ public class ContactInfo {
 	 * @return Timestamp
 	 */
 	public long getBlockingTimestamp(){
-		return blockingTs;
+		return mBlockingTs;
 	}	
 
 	/**
@@ -397,7 +397,7 @@ public class ContactInfo {
 	 * @param ts Timestamp
 	 */
 	public void setBlockingTimestamp(long ts){
-		this.blockingTs = ts;
+		mBlockingTs = ts;
 	}	
 	
 	/**
@@ -407,16 +407,16 @@ public class ContactInfo {
 	 */
 	public String toString() {
 		String result =  "Contact=" + mContact +
-			", Status=" + rcsStatus +
-			", State=" + registrationState +
-			", Timestamp=" + rcsStatusTimestamp + 
-			", Blocked=" + blockingState +
-			", Blocked at=" + blockingTs;
-		if (capabilities != null) {
-			result += ", Capabilities=" + capabilities.toString();
+			", Status=" + mRcsStatus +
+			", State=" + mRegistrationState +
+			", Timestamp=" + mRcsStatusTimestamp + 
+			", Blocked=" + mBlockingState +
+			", Blocked at=" + mBlockingTs;
+		if (mCapabilities != null) {
+			result += ", Capabilities=" + mCapabilities.toString();
 		}
-		if (presenceInfo != null) {
-			result += ", Presence=" + presenceInfo.toString();
+		if (mPresenceInfo != null) {
+			result += ", Presence=" + mPresenceInfo.toString();
 		}
 		return result;
 	}

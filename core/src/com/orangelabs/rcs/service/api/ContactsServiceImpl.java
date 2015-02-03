@@ -48,12 +48,21 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 	private static final Logger logger = Logger.getLogger(ContactsServiceImpl.class.getSimpleName());
 
 	/**
-	 * Constructor
+	 * Contacts manager
 	 */
-	public ContactsServiceImpl() {
+	private final ContactsManager mContactsManager;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param contactsManager Contacts manager
+	 */
+	public ContactsServiceImpl(ContactsManager contactsManager) {
 		if (logger.isActivated()) {
 			logger.info("Contacts service API is loaded");
 		}
+		
+		mContactsManager = contactsManager;
 	}
 
 	/**
@@ -77,7 +86,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 			logger.info("Get RCS contact " + contact);
 		}
 		// Read capabilities in the local database
-		return getRcsContact(ContactsManager.getInstance().getContactInfo(contact));
+		return getRcsContact(mContactsManager.getContactInfo(contact));
 	}
 	
 	/**
@@ -112,7 +121,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 		}
 		Capabilities capaApi = getCapabilities(contactInfo.getCapabilities());
 		boolean registered = RegistrationState.ONLINE.equals(contactInfo.getRegistrationState());
-		boolean blocked = BlockingState.BLOCKED.equals(contactInfo.getBlockingState());
+		boolean blocked = (contactInfo.getBlockingState() == BlockingState.BLOCKED); 
 		return new RcsContact(contactInfo.getContact(), registered, capaApi, contactInfo.getDisplayName(),
 				blocked, contactInfo.getBlockingTimestamp());
 	}
@@ -143,9 +152,9 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 	private List<RcsContact> getRcsContacts(FilterContactInfo filterContactInfo) {
 		List<RcsContact> rcsContacts = new ArrayList<RcsContact>();
 		// Read capabilities in the local database
-		Set<ContactId> contacts = ContactsManager.getInstance().getRcsContacts();
+		Set<ContactId> contacts = mContactsManager.getRcsContacts();
 		for (ContactId contact : contacts) {
-			ContactInfo contactInfo = ContactsManager.getInstance().getContactInfo(contact);
+			ContactInfo contactInfo = mContactsManager.getContactInfo(contact);
 			if (contactInfo != null) {
 				if (filterContactInfo == null || filterContactInfo.inScope(contactInfo)) {
 					RcsContact contact2add = getRcsContact(contactInfo);
@@ -257,7 +266,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 			logger.info("Block contact " + contact);
 		}
 		try {
-			ContactsManager.getInstance().setBlockingState(contact, BlockingState.BLOCKED);
+			mContactsManager.setBlockingState(contact, BlockingState.BLOCKED);
 		} catch (Exception e) {
 			/*
 			 * TODO: This is not the correct way to handle this exception, and
@@ -281,7 +290,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 			if (logger.isActivated()) {
 				logger.info("Unblock contact " + contact);
 			}
-			ContactsManager.getInstance().setBlockingState(contact, BlockingState.NONE);
+			mContactsManager.setBlockingState(contact, BlockingState.NOT_BLOCKED);
 		} catch (Exception e) {
 			/*
 			 * TODO: This is not the correct way to handle this exception, and
