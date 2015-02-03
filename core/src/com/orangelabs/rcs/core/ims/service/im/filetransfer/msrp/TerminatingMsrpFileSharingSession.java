@@ -29,7 +29,9 @@ import java.util.Collection;
 import java.util.Vector;
 
 import com.gsma.services.rcs.RcsContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.ContentManager;
+import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpConstants;
@@ -128,6 +130,9 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 			}
 
 			Collection<ImsSessionListener> listeners = getListeners();
+			ContactId contact = getRemoteContact();
+			MmContent file = getContent();
+			MmContent fileIcon = getFileicon();
 			/* Check if session should be auto-accepted once */
 			if (isSessionAccepted()) {
 				if (logger.isActivated()) {
@@ -135,7 +140,8 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 				}
 
 				for (ImsSessionListener listener : listeners) {
-					((FileSharingSessionListener)listener).handleSessionAutoAccepted();
+					((FileSharingSessionListener)listener).handleSessionAutoAccepted(contact, file,
+							fileIcon);
 				}
 
 			} else {
@@ -144,7 +150,8 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 				}
 
 				for (ImsSessionListener listener : listeners) {
-					listener.handleSessionInvited();
+					((FileSharingSessionListener)listener).handleSessionInvited(contact, file,
+							fileIcon);
 				}
 
 				send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
@@ -160,7 +167,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
-							listener.handleSessionRejectedByUser();
+							listener.handleSessionRejectedByUser(contact);
 						}
 						return;
 
@@ -174,7 +181,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
-							listener.handleSessionRejectedByTimeout();
+							listener.handleSessionRejectedByTimeout(contact);
 						}
 						return;
 
@@ -186,7 +193,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
-							listener.handleSessionRejectedByRemote();
+							listener.handleSessionRejectedByRemote(contact);
 						}
 						return;
 
@@ -194,7 +201,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 						setSessionAccepted();
 
 						for (ImsSessionListener listener : listeners) {
-							((FileSharingSessionListener)listener).handleSessionAccepted();
+							((FileSharingSessionListener)listener).handleSessionAccepted(contact);
 						}
 						break;
 
@@ -362,7 +369,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
     	        getDialogPath().sessionEstablished();
 
                 for (ImsSessionListener listener : listeners) {
-                    listener.handleSessionStarted();
+                    listener.handleSessionStarted(contact);
                 }
 
             	// Start session timer
@@ -428,7 +435,8 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
     	
     	// File has been transfered
     	fileTransfered();
-	
+    	ContactId contact = getRemoteContact();
+    	MmContent file = getContent();
     	try {
         	// Close content with received data
             getContent().writeData2File(data);
@@ -436,7 +444,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 
 	    	// Notify listeners
 	    	for(int j=0; j < getListeners().size(); j++) {
-	    		((FileSharingSessionListener)getListeners().get(j)).handleFileTransfered(getContent());
+	    		((FileSharingSessionListener)getListeners().get(j)).handleFileTransfered(file, contact);
 	        }
 	   	} catch(IOException e) {
 	   		// Delete the temp file
@@ -444,7 +452,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 
 	   		// Notify listeners
 	    	for(int j=0; j < getListeners().size(); j++) {
-	    		((FileSharingSessionListener)getListeners().get(j)).handleTransferError(new FileSharingError(FileSharingError.MEDIA_SAVING_FAILED));
+	    		((FileSharingSessionListener)getListeners().get(j)).handleTransferError(new FileSharingError(FileSharingError.MEDIA_SAVING_FAILED), contact);
 	    	}
 	   	} catch(Exception e) {
 	   		// Delete the temp file
@@ -452,7 +460,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 
             // Notify listeners
 	    	for(int j=0; j < getListeners().size(); j++) {
-	    		((FileSharingSessionListener)getListeners().get(j)).handleTransferError(new FileSharingError(FileSharingError.MEDIA_TRANSFER_FAILED));
+	    		((FileSharingSessionListener)getListeners().get(j)).handleTransferError(new FileSharingError(FileSharingError.MEDIA_TRANSFER_FAILED), contact);
 	    	}
 	   	}
 	}
@@ -479,14 +487,14 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 		if (isSessionInterrupted() || isInterrupted()) {
 			return true;
 		}
-
+		ContactId contact = getRemoteContact();
         try {
         	// Update content with received data
             getContent().writeData2File(data);
             
 			// Notify listeners
 			for (int j = 0; j < getListeners().size(); j++) {
-				((FileSharingSessionListener) getListeners().get(j)).handleTransferProgress(currentSize, totalSize);
+				((FileSharingSessionListener) getListeners().get(j)).handleTransferProgress(contact, currentSize, totalSize);
 			}
         } catch(Exception e) {
 	   		// Delete the temp file
@@ -495,7 +503,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
             // Notify listeners
             for (int j = 0; j < getListeners().size(); j++) {
                 ((FileSharingSessionListener) getListeners().get(j)).handleTransferError(new FileSharingError(
-                        FileSharingError.MEDIA_SAVING_FAILED, e.getMessage()));
+                        FileSharingError.MEDIA_SAVING_FAILED, e.getMessage()), contact);
             }
         }
         return true;

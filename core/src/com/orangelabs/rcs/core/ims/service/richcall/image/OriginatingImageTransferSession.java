@@ -292,10 +292,11 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 	   	
 		// Remove the current session
 		removeSession();
-    	
-    	// Notify listeners
+
+		ContactId contact = getRemoteContact();
+		Uri image = getContent().getUri();
     	for (ImsSessionListener listener : getListeners()) {
-    		((ImageTransferSessionListener)listener).handleContentTransfered(getContent().getUri());
+    		((ImageTransferSessionListener)listener).handleContentTransfered(contact, image);
         }
 	}
 	
@@ -317,9 +318,9 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 	 * @param totalSize Total size in bytes
 	 */
 	public void msrpTransferProgress(long currentSize, long totalSize) {
-		// Notify listeners
+		ContactId contact = getRemoteContact();
 		for (ImsSessionListener listener : getListeners()) {
-    		((ImageTransferSessionListener)listener).handleSharingProgress(currentSize, totalSize);
+    		((ImageTransferSessionListener)listener).handleSharingProgress(contact, currentSize, totalSize);
         }
 	}	
 
@@ -382,9 +383,10 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
     	
 		// Notify listeners
 		if (!isSessionInterrupted() && !isSessionTerminatedByRemote()) {
+			ContactId contact = getRemoteContact();
 			for (ImsSessionListener listener : getListeners()) {
-				((ImageTransferSessionListener) listener).handleSharingError(new ContentSharingError(
-						ContentSharingError.MEDIA_TRANSFER_FAILED, error));
+				((ImageTransferSessionListener) listener).handleSharingError(contact, new ContentSharingError(
+								ContentSharingError.MEDIA_TRANSFER_FAILED, error));
 			}
 		}
 	}
@@ -399,9 +401,9 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
 		if (logger.isActivated()) {
 			logger.debug("handle180Ringing");
 		}
-		// Notify listeners
+		ContactId contact = getRemoteContact();
 		for (ImsSessionListener listener : getListeners()) {
-			((ImageTransferSessionListener)listener).handle180Ringing();
+			((ImageTransferSessionListener)listener).handle180Ringing(contact);
 		}
 	}
 }

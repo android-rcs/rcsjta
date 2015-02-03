@@ -25,6 +25,7 @@ package com.orangelabs.rcs.core.ims.service.sip.streaming;
 import android.content.Intent;
 
 import com.gsma.services.rcs.RcsContactFormatException;
+import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.ims.network.sip.SipUtils;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipRequest;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
@@ -34,6 +35,7 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
 import com.orangelabs.rcs.core.ims.service.SessionTimerManager;
 import com.orangelabs.rcs.core.ims.service.sip.SipSessionError;
+import com.orangelabs.rcs.core.ims.service.sip.SipSessionListener;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
@@ -79,8 +81,9 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
 	    	send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
             Collection<ImsSessionListener> listeners = getListeners();
+            ContactId contact = getRemoteContact();
             for (ImsSessionListener listener : listeners) {
-                listener.handleSessionInvited();
+            	((SipSessionListener)listener).handleSessionInvited(contact, mSessionInvite);
             }
 
             int answer = waitInvitationAnswer();
@@ -93,7 +96,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionRejectedByUser();
+                        listener.handleSessionRejectedByUser(contact);
                     }
                     return;
 
@@ -108,7 +111,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionRejectedByTimeout();
+                        listener.handleSessionRejectedByTimeout(contact);
                     }
                     return;
 
@@ -120,7 +123,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                     removeSession();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionRejectedByRemote();
+                        listener.handleSessionRejectedByRemote(contact);
                     }
                     return;
 
@@ -128,7 +131,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                     setSessionAccepted();
 
                     for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionAccepted();
+                        listener.handleSessionAccepted(contact);
                     }
                     break;
 
@@ -197,7 +200,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
 
             	// Notify listeners
     	    	for(int j=0; j < getListeners().size(); j++) {
-    	    		getListeners().get(j).handleSessionStarted();
+    	    		getListeners().get(j).handleSessionStarted(contact);
     	    	}
 			} else {
 	    		if (logger.isActivated()) {

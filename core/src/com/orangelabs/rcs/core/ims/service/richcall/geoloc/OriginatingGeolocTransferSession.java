@@ -246,10 +246,13 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
 		// Remove the current session
 		removeSession();
 
-    	// Notify listeners
-    	for (ImsSessionListener listener : getListeners()) {
-    		((GeolocTransferSessionListener)listener).handleContentTransfered(getGeoloc());
-        }
+		ContactId contact = getRemoteContact();
+		Geoloc geoloc = getGeoloc();
+		boolean initiatedByRemote = isInitiatedByRemote();
+		for (ImsSessionListener listener : getListeners()) {
+			((GeolocTransferSessionListener)listener).handleContentTransfered(contact, geoloc,
+					initiatedByRemote);
+		}
 	}
 	
 	/**
@@ -329,10 +332,10 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
 		// Remove the current session
 		removeSession();
 
-		// Notify listeners
+		ContactId contact = getRemoteContact();
 		for (ImsSessionListener listener : getListeners()) {
-			((GeolocTransferSessionListener) listener).handleSharingError(new ContentSharingError(
-					ContentSharingError.MEDIA_TRANSFER_FAILED, error));
+			((GeolocTransferSessionListener) listener).handleSharingError(contact, new ContentSharingError(
+							ContentSharingError.MEDIA_TRANSFER_FAILED, error));
 		}
 	}
 
@@ -346,9 +349,9 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
 		if (logger.isActivated()) {
 			logger.debug("handle180Ringing");
 		}
-		// Notify listeners
+		ContactId contact = getRemoteContact();
 		for (ImsSessionListener listener : getListeners()) {
-			((GeolocTransferSessionListener)listener).handle180Ringing();
+			((GeolocTransferSessionListener)listener).handle180Ringing(contact);
 		}
 	}
 }

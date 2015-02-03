@@ -151,9 +151,10 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
                     removeSession();
 
                     Collection<ImsSessionListener> listeners = getListeners();
+                    ContactId contact = getRemoteContact();
                     for (ImsSessionListener listener : listeners) {
                         ((FileSharingSessionListener)listener)
-                                .handleFileTransferPausedBySystem();
+                                .handleFileTransferPausedBySystem(contact);
                     }
                     return;
                 }
@@ -183,8 +184,9 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         removeSession();
 
         Collection<ImsSessionListener> listeners = getListeners();
+        ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : listeners) {
-            ((FileSharingSessionListener)listener).handleTransferError(new FileSharingError(error));
+            ((FileSharingSessionListener)listener).handleTransferError(new FileSharingError(error), contact);
         }
     }
 	
@@ -227,8 +229,10 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         removeSession();
 
         Collection<ImsSessionListener> listeners = getListeners();
+        ContactId contact = getRemoteContact();
+        MmContent content = getContent();
         for (ImsSessionListener listener : listeners) {
-			((FileSharingSessionListener)listener).handleFileTransfered(getContent());
+			((FileSharingSessionListener)listener).handleFileTransfered(content, contact);
 		}
     }
     
@@ -241,8 +245,9 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      */
     public void httpTransferProgress(long currentSize, long totalSize) {
         Collection<ImsSessionListener> listeners = getListeners();
+        ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : listeners) {
-            ((FileSharingSessionListener)listener).handleTransferProgress(currentSize, totalSize);
+            ((FileSharingSessionListener)listener).handleTransferProgress(contact, currentSize, totalSize);
         }
     }
 
@@ -251,8 +256,9 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      */
     public void httpTransferNotAllowedToSend() {
         Collection<ImsSessionListener> listeners = getListeners();
+        ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : listeners) {
-            ((FileSharingSessionListener)listener).handleTransferNotAllowedToSend();
+            ((FileSharingSessionListener)listener).handleTransferNotAllowedToSend(contact);
         }
     }
 
@@ -262,9 +268,9 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      */
     public void httpTransferStarted() {
         this.sessionState = HttpTransferState.ESTABLISHED;
-        // Notify listeners
+        ContactId contact = getRemoteContact();
         for(int j=0; j < getListeners().size(); j++) {
-            ((FileSharingSessionListener)getListeners().get(j)).handleSessionStarted();
+            ((FileSharingSessionListener)getListeners().get(j)).handleSessionStarted(contact);
         }
     }
     
@@ -273,9 +279,10 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      */
     public void httpTransferPausedByUser() {
         Collection<ImsSessionListener> listeners = getListeners();
+        ContactId contact = getRemoteContact();
         for (ImsSessionListener listener: listeners) {
             ((FileSharingSessionListener)listener)
-                    .handleFileTransferPausedByUser();
+                    .handleFileTransferPausedByUser(contact);
         }
     }
 
@@ -284,9 +291,10 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      */
     public void httpTransferPausedBySystem() {
         Collection<ImsSessionListener> listeners = getListeners();
+        ContactId contact = getRemoteContact();
         for (ImsSessionListener listener: listeners) {
             ((FileSharingSessionListener)listener)
-                    .handleFileTransferPausedBySystem();
+                    .handleFileTransferPausedBySystem(contact);
         }
     }
     
@@ -295,9 +303,10 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      */
     public void httpTransferResumed() {
         Collection<ImsSessionListener> listeners = getListeners();
+        ContactId contact = getRemoteContact();
         for (ImsSessionListener listener: listeners) {
             ((FileSharingSessionListener) listener)
-                    .handleFileTransferResumed();
+                    .handleFileTransferResumed(contact);
         }
     }
     

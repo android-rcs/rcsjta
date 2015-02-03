@@ -108,9 +108,9 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
 		if (logger.isActivated()) {
 			logger.debug("handle180Ringing");
 		}
-		// Notify listeners
+		ContactId contact = getRemoteContact();
 		for (ImsSessionListener listener : getListeners()) {
-			((SipSessionListener)listener).handle180Ringing();
+			((SipSessionListener)listener).handle180Ringing(contact);
 		}
 	}
 }

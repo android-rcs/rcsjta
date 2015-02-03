@@ -182,10 +182,10 @@ public abstract class GenericSipSession extends ImsServiceSession {
         // Remove the current session
         removeSession();
 
-        // Notify listeners
+        ContactId contact = getRemoteContact();
         for (int j = 0; j < getListeners().size(); j++) {
             ((SipSessionListener) getListeners().get(j))
-                    .handleSessionError(new SipSessionError(error));
+                    .handleSessionError(contact, new SipSessionError(error));
         }
     }
     

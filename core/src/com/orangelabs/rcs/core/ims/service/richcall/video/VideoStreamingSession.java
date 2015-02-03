@@ -168,10 +168,10 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
 			}
 		}
 
-        // Notify listeners
+        ContactId contact = getRemoteContact();
         for (ImsSessionListener imsSessionListener : getListeners()) {
         	 ((VideoStreamingSessionListener) imsSessionListener)
-             .handleSharingError(new ContentSharingError(error));
+             .handleSharingError(contact, new ContentSharingError(error));
 		}
     }
 

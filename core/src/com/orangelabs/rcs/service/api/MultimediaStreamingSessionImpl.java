@@ -39,6 +39,8 @@ import com.orangelabs.rcs.core.ims.service.sip.streaming.TerminatingSipRtpSessio
 import com.orangelabs.rcs.service.broadcaster.IMultimediaStreamingSessionEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
 
+import android.content.Intent;
+
 /**
  * Multimedia streaming session
  *
@@ -82,7 +84,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		mMultimediaSessionService = multimediaSessionService;
 	}
 
-	private void handleSessionRejected(int reasonCode) {
+	private void handleSessionRejected(int reasonCode, ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Session rejected; reasonCode=" + reasonCode + ".");
 		}
@@ -90,8 +92,8 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		synchronized (lock) {
 			mMultimediaSessionService.removeMultimediaStreaming(sessionId);
 
-			mBroadcaster.broadcastStateChanged(
-					getRemoteContact(), sessionId, MultimediaSession.State.REJECTED, reasonCode);
+			mBroadcaster.broadcastStateChanged(contact, sessionId,
+					MultimediaSession.State.REJECTED, reasonCode);
 		}
 	}
 
@@ -322,39 +324,36 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 	/**
 	 * Session is started
 	 */
-	public void handleSessionStarted() {
+	public void handleSessionStarted(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Session started");
 		}
 		synchronized (lock) {
-			mBroadcaster.broadcastStateChanged(
-					getRemoteContact(), getSessionId(), MultimediaSession.State.STARTED,
-					ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastStateChanged(contact, mSessionId,
+					MultimediaSession.State.STARTED, ReasonCode.UNSPECIFIED);
 		}
 	}
 
 	/**
 	 * Session has been aborted
-	 *
 	 * @param reason Termination reason
 	 */
-	public void handleSessionAborted(int reason) {
+	public void handleSessionAborted(ContactId contact, int reason) {
 		if (logger.isActivated()) {
 			logger.info("Session aborted (reason " + reason + ")");
 		}
 		synchronized (lock) {
 			mMultimediaSessionService.removeMultimediaStreaming(mSessionId);
 
-			mBroadcaster.broadcastStateChanged(
-					getRemoteContact(), mSessionId, MultimediaSession.State.ABORTED,
-					ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastStateChanged(contact, mSessionId,
+					MultimediaSession.State.ABORTED, ReasonCode.UNSPECIFIED);
 		}
 	}
 
 	/**
 	 * Session has been terminated by remote
 	 */
-	public void handleSessionTerminatedByRemote() {
+	public void handleSessionTerminatedByRemote(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Session terminated by remote");
 		}
@@ -362,18 +361,17 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		synchronized (lock) {
 			mMultimediaSessionService.removeMultimediaStreaming(mSessionId);
 
-			mBroadcaster.broadcastStateChanged(
-					getRemoteContact(), mSessionId, MultimediaSession.State.ABORTED,
-					ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastStateChanged(contact, mSessionId,
+					MultimediaSession.State.ABORTED, ReasonCode.UNSPECIFIED);
 		}
 	}
     
     /**
      * Session error
-     *
+     * @param contact Remote contact
      * @param error Error
      */
-    public void handleSessionError(SipSessionError error) {
+    public void handleSessionError(ContactId contact, SipSessionError error) {
 		if (logger.isActivated()) {
 			logger.info("Session error " + error.getErrorCode());
 		}
@@ -382,82 +380,70 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 
 			switch (error.getErrorCode()) {
 				case SipSessionError.SESSION_INITIATION_DECLINED:
-					mBroadcaster
-							.broadcastStateChanged(getRemoteContact(),
-									mSessionId, MultimediaSession.State.REJECTED,
-									ReasonCode.REJECTED_BY_REMOTE);
+					mBroadcaster.broadcastStateChanged(contact, mSessionId,
+							MultimediaSession.State.REJECTED, ReasonCode.REJECTED_BY_REMOTE);
 					break;
 				case SipSessionError.MEDIA_FAILED:
-					mBroadcaster
-							.broadcastStateChanged(getRemoteContact(),
-									mSessionId, MultimediaSession.State.FAILED,
-									ReasonCode.FAILED_MEDIA);
+					mBroadcaster.broadcastStateChanged(contact, mSessionId,
+							MultimediaSession.State.FAILED, ReasonCode.FAILED_MEDIA);
 					break;
 				default:
-					mBroadcaster
-							.broadcastStateChanged(getRemoteContact(),
-									mSessionId, MultimediaSession.State.FAILED,
-									ReasonCode.FAILED_SESSION);
+					mBroadcaster.broadcastStateChanged(contact, mSessionId,
+							MultimediaSession.State.FAILED, ReasonCode.FAILED_SESSION);
 			}
 		}
 	}
     
     /**
      * Receive data
-     * 
      * @param data Data
+     * @param contact
      */
-    public void handleReceiveData(byte[] data) {
+    public void handleReceiveData(ContactId contact, byte[] data) {
 		synchronized (lock) {
-			// Notify event listeners
-			mBroadcaster.broadcastPayloadReceived(getRemoteContact(),
-					mSessionId, data);
+			mBroadcaster.broadcastPayloadReceived(contact, mSessionId, data);
 		}
     }
 
 	@Override
-	public void handleSessionAccepted() {
+	public void handleSessionAccepted(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Accepting session");
 		}
 		synchronized (lock) {
-			mBroadcaster.broadcastStateChanged(
-					getRemoteContact(), mSessionId, MultimediaSession.State.ACCEPTING,
-					ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastStateChanged(contact, mSessionId,
+					MultimediaSession.State.ACCEPTING, ReasonCode.UNSPECIFIED);
 		}
 	}
 
 	@Override
-	public void handleSessionRejectedByUser() {
-		handleSessionRejected(ReasonCode.REJECTED_BY_USER);
+	public void handleSessionRejectedByUser(ContactId contact) {
+		handleSessionRejected(ReasonCode.REJECTED_BY_USER, contact);
 	}
 
 	@Override
-	public void handleSessionRejectedByTimeout() {
-		handleSessionRejected(ReasonCode.REJECTED_TIME_OUT);
+	public void handleSessionRejectedByTimeout(ContactId contact) {
+		handleSessionRejected(ReasonCode.REJECTED_TIME_OUT, contact);
 	}
 
 	@Override
-	public void handleSessionRejectedByRemote() {
-		handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE);
+	public void handleSessionRejectedByRemote(ContactId contact) {
+		handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE, contact);
 	}
 
 	@Override
-	public void handleSessionInvited() {
+	public void handleSessionInvited(ContactId contact, Intent sessionInvite) {
 		if (logger.isActivated()) {
 			logger.info("Invited to multimedia streaming session");
 		}
-		GenericSipRtpSession session = mSipService.getGenericSipRtpSession(mSessionId);
-		mBroadcaster.broadcastInvitation(
-				mSessionId, ((TerminatingSipRtpSession)session).getSessionInvite());
+		mBroadcaster.broadcastInvitation(mSessionId, sessionInvite);
 	}
 
 	@Override
-	public void handle180Ringing() {
+	public void handle180Ringing(ContactId contact) {
 		synchronized (lock) {
-			mBroadcaster.broadcastStateChanged(
-					getRemoteContact(), getSessionId(), MultimediaSession.State.RINGING,
-					ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastStateChanged(contact, mSessionId,
+					MultimediaSession.State.RINGING, ReasonCode.UNSPECIFIED);
 		}
 	}
 }

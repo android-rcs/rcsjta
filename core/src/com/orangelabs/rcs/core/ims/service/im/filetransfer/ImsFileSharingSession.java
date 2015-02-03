@@ -155,9 +155,9 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
         // Remove the current session
         removeSession();
 
-        // Notify listeners
+        ContactId contact = getRemoteContact();
         for(int j=0; j < getListeners().size(); j++) {
-            ((FileSharingSessionListener)getListeners().get(j)).handleTransferError(new FileSharingError(error));
+            ((FileSharingSessionListener)getListeners().get(j)).handleTransferError(new FileSharingError(error), contact);
         }
     }
 
@@ -204,8 +204,9 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
 
         // Notify listeners
         if (!isSessionInterrupted() && !isSessionTerminatedByRemote()) {
+        	ContactId contact = getRemoteContact();
             for(int j=0; j < getListeners().size(); j++) {
-                ((FileSharingSessionListener)getListeners().get(j)).handleTransferError(new FileSharingError(FileSharingError.MEDIA_TRANSFER_FAILED, error));
+                ((FileSharingSessionListener)getListeners().get(j)).handleTransferError(new FileSharingError(FileSharingError.MEDIA_TRANSFER_FAILED, error), contact);
             }
         }
     }

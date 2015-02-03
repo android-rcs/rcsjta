@@ -149,9 +149,9 @@ public abstract class ImageTransferSession extends ContentSharingSession {
         // Remove the current session
         removeSession();
 
-        // Notify listeners
+        ContactId contact = getRemoteContact();
         for(int j=0; j < getListeners().size(); j++) {
-            ((ImageTransferSessionListener)getListeners().get(j)).handleSharingError(new ContentSharingError(error));
+            ((ImageTransferSessionListener)getListeners().get(j)).handleSharingError(contact, new ContentSharingError(error));
         }
     }
 

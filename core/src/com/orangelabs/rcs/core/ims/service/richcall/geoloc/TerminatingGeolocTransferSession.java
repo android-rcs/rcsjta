@@ -111,8 +111,9 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
         	}
 
 			Collection<ImsSessionListener> listeners = getListeners();
+			ContactId contact = getRemoteContact();
 			for (ImsSessionListener listener : listeners) {
-				listener.handleSessionInvited();
+				((GeolocTransferSessionListener)listener).handleSessionInvited(contact);
 			}
 
 			int answer = waitInvitationAnswer();
@@ -125,7 +126,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 					removeSession();
 
 					for (ImsSessionListener listener : listeners) {
-						listener.handleSessionRejectedByUser();
+						listener.handleSessionRejectedByUser(contact);
 					}
 					return;
 
@@ -140,7 +141,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 					removeSession();
 
 					for (ImsSessionListener listener : listeners) {
-						listener.handleSessionRejectedByTimeout();
+						listener.handleSessionRejectedByTimeout(contact);
 					}
 					return;
 
@@ -152,14 +153,14 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 					removeSession();
 
 					for (ImsSessionListener listener : listeners) {
-						listener.handleSessionRejectedByRemote();
+						listener.handleSessionRejectedByRemote(contact);
 					}
 					return;
 				case ImsServiceSession.INVITATION_ACCEPTED:
 					setSessionAccepted();
 
 					for (ImsSessionListener listener : listeners) {
-						listener.handleSessionAccepted();
+						listener.handleSessionAccepted(contact);
 					}
 					break;
 
@@ -300,9 +301,8 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 
                 // The session is established
                 getDialogPath().sessionEstablished();
-
                 for (ImsSessionListener listener : listeners) {
-                    listener.handleSessionStarted();
+                    listener.handleSessionStarted(contact);
             }
 
             	// Start session timer
@@ -365,7 +365,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
     	if (logger.isActivated()) {
     		logger.info("Data received");
     	}
-    	
+    	ContactId contact = getRemoteContact();
 	   	try {
             // Parse received geoloc info
 			String geolocDoc = new String(data, UTF8);
@@ -377,14 +377,14 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
         	// Geoloc has been transfered
         	geolocTransfered();
 
-        	// Notify listeners
+        	boolean initiatedByRemote = isInitiatedByRemote();
 	    	for(int j=0; j < getListeners().size(); j++) {
-	    		((GeolocTransferSessionListener)getListeners().get(j)).handleContentTransfered(geoloc);
+	    		((GeolocTransferSessionListener)getListeners().get(j)).handleContentTransfered(contact, geoloc, initiatedByRemote);
 	    	}
 	   	} catch(Exception e) {
 	   		// Notify listeners
 	    	for(int j=0; j < getListeners().size(); j++) {
-	    		((GeolocTransferSessionListener)getListeners().get(j)).handleSharingError(new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
+	    		((GeolocTransferSessionListener)getListeners().get(j)).handleSharingError(contact, new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
 	    	}
 	   	}
 	}
@@ -455,9 +455,9 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
     	// Remove the current session
     	removeSession();
 
-    	// Notify listeners
+    	ContactId contact = getRemoteContact();
     	for(int j=0; j < getListeners().size(); j++) {
-    		((GeolocTransferSessionListener)getListeners().get(j)).handleSharingError(new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED, error));
+    		((GeolocTransferSessionListener)getListeners().get(j)).handleSharingError(contact, new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED, error));
         }
 	}
 

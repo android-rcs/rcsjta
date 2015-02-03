@@ -178,14 +178,17 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 	    	}
 
 			Collection<ImsSessionListener> listeners = getListeners();
+			ContactId contact = getRemoteContact();
+			String subject = getSubject();
+			Set<ParticipantInfo> participants = getParticipants();
 			/* Check if session should be auto-accepted once */
 			if (isSessionAccepted()) {
 				if (logActivated) {
 					logger.debug("Received group chat invitation marked for auto-accept");
 				}
-
 				for (ImsSessionListener listener : listeners) {
-					((ChatSessionListener)listener).handleSessionAutoAccepted();
+					((ChatSessionListener)listener).handleSessionAutoAccepted(contact, subject,
+							participants);
 				}
 			} else {
 				if (logActivated) {
@@ -193,7 +196,8 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 				}
 
 				for (ImsSessionListener listener : listeners) {
-					listener.handleSessionInvited();
+					((ChatSessionListener)listener).handleSessionInvited(contact, subject,
+							participants);
 				}
 
 				send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
@@ -208,7 +212,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
-							listener.handleSessionRejectedByUser();
+							listener.handleSessionRejectedByUser(contact);
 						}
 						return;
 
@@ -223,7 +227,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
-							listener.handleSessionRejectedByTimeout();
+							listener.handleSessionRejectedByTimeout(contact);
 						}
 						return;
 
@@ -235,7 +239,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
-							listener.handleSessionRejectedByRemote();
+							listener.handleSessionRejectedByRemote(contact);
 						}
 						return;
 
@@ -243,7 +247,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 						setSessionAccepted();
 
 						for (ImsSessionListener listener : listeners) {
-							((ChatSessionListener)listener).handleSessionAccepted();
+							((ChatSessionListener)listener).handleSessionAccepted(contact);
 						}
 						break;
 
@@ -374,7 +378,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
                 }
 
                 for (ImsSessionListener listener : listeners) {
-                    listener.handleSessionStarted();
+                    listener.handleSessionStarted(contact);
                 }
 
     	    	// Check if some participants are missing

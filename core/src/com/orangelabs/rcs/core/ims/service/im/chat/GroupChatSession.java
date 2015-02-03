@@ -99,7 +99,7 @@ public abstract class GroupChatSession extends ChatSession {
 	 */
 	public GroupChatSession(ImsService parent, ContactId contact, String conferenceId,
 			Set<ParticipantInfo> participants, RcsSettings rcsSettings, MessagingLog messagingLog) {
-		super(parent, contact, conferenceId, participants, rcsSettings, messagingLog);
+		super(parent, contact, conferenceId, participants, rcsSettings, messagingLog, null);
 
 		conferenceSubscriber = new ConferenceEventSubscribeManager(this);
 

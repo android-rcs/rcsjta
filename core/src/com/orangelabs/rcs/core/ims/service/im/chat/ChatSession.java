@@ -147,6 +147,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 
     private final MessagingLog mMessagingLog;
 
+	private final ChatMessage mFirstMsg;
+
 	/**
 	 * Receive chat message
 	 *
@@ -176,8 +178,11 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param participants List of participants
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
+     * @param firstMsg First message in session
 	 */
-	public ChatSession(ImsService parent, ContactId contact, String remoteUri, Set<ParticipantInfo> participants, RcsSettings rcsSettings, MessagingLog messagingLog) {
+	public ChatSession(ImsService parent, ContactId contact, String remoteUri,
+			Set<ParticipantInfo> participants, RcsSettings rcsSettings, MessagingLog messagingLog,
+			ChatMessage firstMsg) {
 		super(parent, contact, remoteUri);
 
 		mRcsSettings = rcsSettings;
@@ -192,6 +197,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		if (parent.getImsModule().isConnectedToWifiAccess()) {
 			mMsrpMgr.setSecured(RcsSettings.getInstance().isSecureMsrpOverWifi());
 		}
+		mFirstMsg = firstMsg;
 	}
 
 	/**
@@ -395,6 +401,15 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 	}
 
 	/**
+	 * Get first message.
+	 *
+	 * @param ChatMessage First chat message
+	 */
+	public ChatMessage getFirstMessage() {
+		return mFirstMsg;
+	}
+
+	/**
 	 * Close the MSRP session
 	 */
 	public void closeMsrpSession() {
@@ -428,7 +443,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 		removeSession();
 
 		for (int i = 0; i < getListeners().size(); i++) {
-			((ChatSessionListener) getListeners().get(i)).handleImError(new ChatError(error));
+			((ChatSessionListener)getListeners().get(i)).handleImError(new ChatError(error),
+					mFirstMsg);
 		}
 	}
 
@@ -700,11 +716,10 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             errorCode = ChatError.MEDIA_SESSION_FAILED;
         }
 
-        // Notify listeners
-        for (int i = 0; i < getListeners().size(); i++) {
-            ((ChatSessionListener) getListeners().get(i)).handleImError(new ChatError(
-                    errorCode, error));
-        }
+		for (int i = 0; i < getListeners().size(); i++) {
+			((ChatSessionListener)getListeners().get(i)).handleImError(new ChatError(errorCode,
+					error), mFirstMsg);
+		}
     }
 
 	/**

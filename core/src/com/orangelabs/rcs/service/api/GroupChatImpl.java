@@ -169,7 +169,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 		}
 	}
 
-	private void handleSessionRejected(int reasonCode) {
+	private void handleSessionRejected(int reasonCode, ContactId contact) {
 		setRejoinedAsPartOfSendOperation(false);
 		synchronized (lock) {
 			mChatService.removeGroupChat(mChatId);
@@ -796,7 +796,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionStarted()
      */
-    public void handleSessionStarted() {
+    public void handleSessionStarted(ContactId contact) {
     	if (logger.isActivated()) {
 			logger.info(new StringBuilder("Session status ").append(GroupChat.State.STARTED)
 					.toString());
@@ -817,7 +817,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 * com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionAborted
 	 * (int)
 	 */
-	public void handleSessionAborted(int reason) {
+	public void handleSessionAborted(ContactId contact, int reason) {
 		GroupChatSession session = mImService.getGroupChatSession(mChatId);
 		if (session != null && session.isPendingForRemoval()) {
 			/*
@@ -859,7 +859,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
     /* (non-Javadoc)
      * @see com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionTerminatedByRemote()
      */
-	public void handleSessionTerminatedByRemote() {
+	public void handleSessionTerminatedByRemote(ContactId contact) {
 		GroupChatSession session = mImService.getGroupChatSession(mChatId);
 		if (session != null && session.isPendingForRemoval()) {
 			/*
@@ -922,7 +922,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	 * com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleImError
 	 * (com.orangelabs.rcs.core.ims.service.im.chat.ChatError)
 	 */
-	public void handleImError(ChatError error) {
+	public void handleImError(ChatError error, ChatMessage message) {
 		GroupChatSession session = mImService.getGroupChatSession(mChatId);
 		int chatErrorCode = error.getErrorCode();
 		if (session != null && session.isPendingForRemoval()) {
@@ -1142,7 +1142,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	}
 
 	@Override
-	public void handleSessionAccepted() {
+	public void handleSessionAccepted(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Accepting group chat session");
 		}
@@ -1156,37 +1156,36 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	}
 
 	@Override
-	public void handleSessionRejectedByUser() {
+	public void handleSessionRejectedByUser(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Session rejected by user");
 		}
-		handleSessionRejected(GroupChat.ReasonCode.REJECTED_BY_USER);
+		handleSessionRejected(GroupChat.ReasonCode.REJECTED_BY_USER, contact);
 	}
 
 	@Override
-	public void handleSessionRejectedByTimeout() {
+	public void handleSessionRejectedByTimeout(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Session rejected by time out");
 		}
-		handleSessionRejected(GroupChat.ReasonCode.REJECTED_TIME_OUT);
+		handleSessionRejected(GroupChat.ReasonCode.REJECTED_TIME_OUT, contact);
 	}
 
 	@Override
-	public void handleSessionRejectedByRemote() {
+	public void handleSessionRejectedByRemote(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Session rejected by time out");
 		}
-		handleSessionRejected(GroupChat.ReasonCode.REJECTED_BY_REMOTE);
+		handleSessionRejected(GroupChat.ReasonCode.REJECTED_BY_REMOTE, contact);
 	}
 
 	@Override
-	public void handleSessionInvited() {
+	public void handleSessionInvited(ContactId contact, String subject, Set<ParticipantInfo> participants) {
 		if (logger.isActivated()) {
 			logger.info("Invited to group chat session");
 		}
 		synchronized (lock) {
-			GroupChatSession session = mImService.getGroupChatSession(mChatId);
-			mPersistentStorage.addGroupChat( session.getRemoteContact(), getSubject(), session.getParticipants(),
+			mPersistentStorage.addGroupChat(contact, subject, participants,
 					GroupChat.State.INVITED, ReasonCode.UNSPECIFIED, Direction.INCOMING);
 		}
 
@@ -1194,13 +1193,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 	}
 
 	@Override
-	public void handleSessionAutoAccepted() {
+	public void handleSessionAutoAccepted(ContactId contact, String subject, Set<ParticipantInfo> participants) {
 		if (logger.isActivated()) {
 			logger.info("Session auto accepted");
 		}
 		synchronized (lock) {
-			GroupChatSession session = mImService.getGroupChatSession(mChatId);
-			mPersistentStorage.addGroupChat( session.getRemoteContact(), getSubject(), session.getParticipants(),
+			mPersistentStorage.addGroupChat(contact, subject, participants,
 					GroupChat.State.ACCEPTING, ReasonCode.UNSPECIFIED, Direction.INCOMING);
 		}
 

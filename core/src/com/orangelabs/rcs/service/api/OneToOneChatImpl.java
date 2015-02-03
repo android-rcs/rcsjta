@@ -45,6 +45,8 @@ import com.orangelabs.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
 import com.orangelabs.rcs.service.broadcaster.IOneToOneChatEventBroadcaster;
 import com.orangelabs.rcs.utils.logger.Logger;
 
+import java.util.Set;
+
 /**
  * One-to-One Chat implementation
  * 
@@ -477,7 +479,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	 * ()
 	 */
 	@Override
-	public void handleSessionStarted() {
+	public void handleSessionStarted(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Session started");
 		}
@@ -490,7 +492,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	 * (int)
 	 */
 	@Override
-	public void handleSessionAborted(int reason) {
+	public void handleSessionAborted(ContactId contact, int reason) {
 		if (logger.isActivated()) {
 			logger.info(new StringBuilder("Session aborted (reason ").append(reason).append(")")
 					.toString());
@@ -506,12 +508,12 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	 * handleSessionTerminatedByRemote()
 	 */
 	@Override
-	public void handleSessionTerminatedByRemote() {
+	public void handleSessionTerminatedByRemote(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Session terminated by remote");
 		}
 		synchronized (lock) {
-			mChatService.removeOneToOneChat(mContact);
+			mChatService.removeOneToOneChat(contact);
 		}
 	}
 
@@ -542,7 +544,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	 * (com.orangelabs.rcs.core.ims.service.im.chat.ChatError)
 	 */
 	@Override
-	public void handleImError(ChatError error) {
+	public void handleImError(ChatError error, ChatMessage message) {
 		if (logger.isActivated()) {
 			logger.info("IM error " + error.getErrorCode());
 		}
@@ -552,13 +554,15 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 			switch (error.getErrorCode()) {
 				case ChatError.SESSION_INITIATION_FAILED:
 				case ChatError.SESSION_INITIATION_CANCELLED:
-					final OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
-					String msgId = session.getFirstMessage().getMessageId();
-					String apiMimeType = mMessagingLog.getMessageMimeType(msgId);
-					mMessagingLog.setChatMessageStatusAndReasonCode(msgId,
-							Message.Status.Content.FAILED, ReasonCode.FAILED_SEND);
-					mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId,
-							Message.Status.Content.FAILED, ReasonCode.FAILED_SEND);
+					if (message != null) {
+						String msgId = message.getMessageId();
+						String mimeType = message.getMimeType();
+						String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(mimeType);
+						mMessagingLog.setChatMessageStatusAndReasonCode(msgId,
+								Message.Status.Content.FAILED, ReasonCode.FAILED_SEND);
+						mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId,
+								Message.Status.Content.FAILED, ReasonCode.FAILED_SEND);
+					}
 					break;
 				default:
 					break;
@@ -686,7 +690,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	}
 
 	@Override
-	public void handleSessionRejectedByUser() {
+	public void handleSessionRejectedByUser(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Session rejected by user.");
 		}
@@ -696,7 +700,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	}
 
 	@Override
-	public void handleSessionRejectedByTimeout() {
+	public void handleSessionRejectedByTimeout(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Session rejected by time-out.");
 		}
@@ -706,7 +710,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	}
 
 	@Override
-	public void handleSessionRejectedByRemote() {
+	public void handleSessionRejectedByRemote(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Session rejected by remote.");
 		}
@@ -753,17 +757,17 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	}
 
 	@Override
-	public void handleSessionAccepted() {
+	public void handleSessionAccepted(ContactId contact) {
 		/* Not used by one-to-one chat */
 	}
 
 	@Override
-	public void handleSessionInvited() {
+	public void handleSessionInvited(ContactId contact, String subject, Set<ParticipantInfo> participants) {
 		/* Not used by one-to-one chat */
 	}
 
 	@Override
-	public void handleSessionAutoAccepted() {
+	public void handleSessionAutoAccepted(ContactId contact, String subject, Set<ParticipantInfo> participants) {
 		/* Not used by one-to-one chat */
 	}
 }

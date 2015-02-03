@@ -31,6 +31,7 @@ import java.util.Vector;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.orangelabs.rcs.core.content.ContentManager;
+import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.network.sip.SipMessageFactory;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpConstants;
 import com.orangelabs.rcs.core.ims.protocol.msrp.MsrpEventListener;
@@ -54,6 +55,8 @@ import com.orangelabs.rcs.core.ims.service.richcall.RichcallService;
 import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
+
+import android.net.Uri;
 
 /**
  * Terminating content sharing session (transfer)
@@ -111,8 +114,10 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
         	}
 
 			Collection<ImsSessionListener> listeners = getListeners();
+			ContactId contact = getRemoteContact();
+			MmContent content = getContent();
 			for (ImsSessionListener listener : listeners) {
-				listener.handleSessionInvited();
+				((ImageTransferSessionListener)listener).handleSessionInvited(contact, content);
 			}
 
 			int answer = waitInvitationAnswer();
@@ -125,7 +130,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 					removeSession();
 
 					for (ImsSessionListener listener : listeners) {
-						listener.handleSessionRejectedByUser();
+						listener.handleSessionRejectedByUser(contact);
 					}
 					return;
 
@@ -140,7 +145,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 					removeSession();
 
 					for (ImsSessionListener listener : listeners) {
-						listener.handleSessionRejectedByTimeout();
+						listener.handleSessionRejectedByTimeout(contact);
 					}
 					return;
 
@@ -152,7 +157,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 					removeSession();
 
 					for (ImsSessionListener listener : listeners) {
-						listener.handleSessionRejectedByRemote();
+						listener.handleSessionRejectedByRemote(contact);
 					}
 					return;
 
@@ -160,7 +165,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 					setSessionAccepted();
 
 					for (ImsSessionListener listener : listeners) {
-						listener.handleSessionAccepted();
+						listener.handleSessionAccepted(contact);
 					}
 					break;
 
@@ -333,7 +338,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                 getDialogPath().sessionEstablished();
 
                 for (ImsSessionListener listener : listeners) {
-                    listener.handleSessionStarted();
+                    listener.handleSessionStarted(contact);
             }
 
             	// Start session timer
@@ -399,23 +404,23 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
     	
     	// Image has been transfered
     	imageTransfered();
-	
+
+		ContactId contact = getRemoteContact();
 	   	try {
         	// Close content with received data
             getContent().writeData2File(data);
             getContent().closeFile();
 
-	    	// Notify listeners
+            Uri image = getContent().getUri();
 	    	for(int j=0; j < getListeners().size(); j++) {
-	    		((ImageTransferSessionListener)getListeners().get(j)).handleContentTransfered(getContent().getUri());
+	    		((ImageTransferSessionListener)getListeners().get(j)).handleContentTransfered(contact, image);
 	    	}
 	   	} catch(IOException e) {
 	   		// Delete the temp file
             deleteFile();
 
-	   		// Notify listeners
 	    	for(int j=0; j < getListeners().size(); j++) {
-	    		((ImageTransferSessionListener)getListeners().get(j)).handleSharingError(new ContentSharingError(ContentSharingError.MEDIA_SAVING_FAILED));
+	    		((ImageTransferSessionListener)getListeners().get(j)).handleSharingError(contact, new ContentSharingError(ContentSharingError.MEDIA_SAVING_FAILED));
 	    	}
 	   	} catch(Exception e) {
 	   		// Delete the temp file
@@ -423,7 +428,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 
             // Notify listeners
 	    	for(int j=0; j < getListeners().size(); j++) {
-	    		((ImageTransferSessionListener)getListeners().get(j)).handleSharingError(new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
+	    		((ImageTransferSessionListener)getListeners().get(j)).handleSharingError(contact, new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
 	    	}
 	   	}
 	}
@@ -447,13 +452,14 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
      * @return always true TODO
      */
     public boolean msrpTransferProgress(long currentSize, long totalSize, byte[] data) {
+		ContactId contact = getRemoteContact();
         try {
         	// Update content with received data
             getContent().writeData2File(data);
 
             // Notify listeners
             for (int j = 0; j < getListeners().size(); j++) {
-                ((ImageTransferSessionListener)getListeners().get(j)).handleSharingProgress(currentSize, totalSize);
+                ((ImageTransferSessionListener)getListeners().get(j)).handleSharingProgress(contact, currentSize, totalSize);
             }
         } catch(Exception e) {
 	   		// Delete the temp file
@@ -461,8 +467,8 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
             
             // Notify listeners
             for (int j = 0; j < getListeners().size(); j++) {
-                ((ImageTransferSessionListener) getListeners().get(j)).handleSharingError(new ContentSharingError(
-                        ContentSharingError.MEDIA_SAVING_FAILED));
+                ((ImageTransferSessionListener) getListeners().get(j)).handleSharingError(contact, new ContentSharingError(
+						        ContentSharingError.MEDIA_SAVING_FAILED));
             }
         }
         return true;
@@ -526,8 +532,9 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 		if (!isImageTransfered()) {
 			// Notify listeners
         if (!isSessionInterrupted() && !isSessionTerminatedByRemote()) {
+        	ContactId contact = getRemoteContact();
             for(int j=0; j < getListeners().size(); j++) {
-                ((ImageTransferSessionListener)getListeners().get(j)).handleSharingError(new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED, error));
+                ((ImageTransferSessionListener)getListeners().get(j)).handleSharingError(contact, new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED, error));
             }
 			}
 		}

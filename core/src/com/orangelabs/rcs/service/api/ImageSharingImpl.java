@@ -30,6 +30,8 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ish.IImageSharing;
 import com.gsma.services.rcs.ish.ImageSharing;
 import com.gsma.services.rcs.ish.ImageSharing.ReasonCode;
+import com.gsma.services.rcs.ish.ImageSharing.State;
+import com.orangelabs.rcs.core.content.MmContent;
 import com.orangelabs.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.orangelabs.rcs.core.ims.service.ImsServiceSession;
 import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
@@ -133,7 +135,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 		}
 	}
 
-	private void handleSessionRejected(int reasonCode) {
+	private void handleSessionRejected(int reasonCode, ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Session rejected; reasonCode=" + reasonCode + ".");
 		}
@@ -143,8 +145,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 			mPersistentStorage.setStateAndReasonCode(ImageSharing.State.REJECTED,
 					reasonCode);
 
-			mBroadcaster.broadcastStateChanged(getRemoteContact(),
-					mSharingId, ImageSharing.State.REJECTED, reasonCode);
+			mBroadcaster.broadcastStateChanged(contact, mSharingId, ImageSharing.State.REJECTED,
+					reasonCode);
 		}
 	}
 
@@ -356,7 +358,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 	/**
 	 * Session is started
 	 */
-    public void handleSessionStarted() {
+    public void handleSessionStarted(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Session started");
 		}
@@ -364,17 +366,16 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 			mPersistentStorage.setStateAndReasonCode(ImageSharing.State.STARTED,
 					ReasonCode.UNSPECIFIED);
 
-			mBroadcaster.broadcastStateChanged(getRemoteContact(),
-					getSharingId(), ImageSharing.State.STARTED, ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastStateChanged(contact, mSharingId, ImageSharing.State.STARTED,
+					ReasonCode.UNSPECIFIED);
 		}
     }
 
 	/**
 	 * * Session has been aborted
-	 *
 	 * @param reason Termination reason
 	 */
-	public void handleSessionAborted(int reason) {
+	public void handleSessionAborted(ContactId contact, int reason) {
 		if (logger.isActivated()) {
 			logger.info("Session aborted (reason " + reason + ")");
 		}
@@ -385,38 +386,40 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 			mPersistentStorage.setStateAndReasonCode(ImageSharing.State.ABORTED,
 					reasonCode);
 
-			mBroadcaster.broadcastStateChanged(getRemoteContact(),
-					mSharingId, ImageSharing.State.ABORTED, reasonCode);
+			mBroadcaster.broadcastStateChanged(contact, mSharingId, ImageSharing.State.ABORTED,
+					reasonCode);
 		}
 	}
 
 	/**
 	 * Session has been terminated by remote
 	 */
-	public void handleSessionTerminatedByRemote() {
+	public void handleSessionTerminatedByRemote(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Session terminated by remote");
 		}
 
 		synchronized (lock) {
 			mImageSharingService.removeImageSharing(mSharingId);
-			ImageTransferSession session = mRichcallService
-					.getImageTransferSession(mSharingId);
-			if (session != null && !session.isImageTransfered()) {
+			/*
+			 * TODO : Fix sending of SIP BYE by sender once transfer is
+			 * completed and media session is closed. Then this check of state
+			 * can be removed.
+			 */
+			if (State.TRANSFERRED != getState()) {
 				mPersistentStorage.setStateAndReasonCode(ImageSharing.State.ABORTED,
 						ReasonCode.ABORTED_BY_REMOTE);
-				mBroadcaster.broadcastStateChanged(getRemoteContact(), mSharingId,
-						ImageSharing.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
+				mBroadcaster.broadcastStateChanged(contact, mSharingId, ImageSharing.State.ABORTED,
+						ReasonCode.ABORTED_BY_REMOTE);
 			}
 		}
 	}
 
 	/**
 	 * Content sharing error
-	 *
 	 * @param error Error
 	 */
-	public void handleSharingError(ContentSharingError error) {
+	public void handleSharingError(ContactId contact, ContentSharingError error) {
 		if (logger.isActivated()) {
 			logger.info("Sharing error " + error.getErrorCode());
 		}
@@ -428,32 +431,29 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
 			mPersistentStorage.setStateAndReasonCode(state, reasonCode);
 
-			mBroadcaster.broadcastStateChanged(getRemoteContact(),
-					mSharingId, state, reasonCode);
+			mBroadcaster.broadcastStateChanged(contact, mSharingId, state, reasonCode);
 		}
 	}
 
     /**
      * Content sharing progress
-     *
      * @param currentSize Data size transferred
      * @param totalSize Total size to be transferred
      */
-    public void handleSharingProgress(long currentSize, long totalSize) {
+    public void handleSharingProgress(ContactId contact, long currentSize, long totalSize) {
     	synchronized(lock) {
 			mPersistentStorage.setProgress(currentSize);
 
-			mBroadcaster.broadcastProgressUpdate(getRemoteContact(),
-					getSharingId(), currentSize, totalSize);
+			mBroadcaster.broadcastProgressUpdate(contact, getSharingId(), currentSize, totalSize);
 	     }
     }
 
     /**
      * Content has been transferred
-     *
+     * @param contact Remote contact
      * @param file File URI associated to the received content
      */
-    public void handleContentTransfered(Uri file) {
+    public void handleContentTransfered(ContactId contact, Uri file) {
 		if (logger.isActivated()) {
 			logger.info("Image transferred");
 		}
@@ -463,61 +463,59 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 			mPersistentStorage.setStateAndReasonCode(ImageSharing.State.TRANSFERRED,
 					ReasonCode.UNSPECIFIED);
 
-			mBroadcaster.broadcastStateChanged(getRemoteContact(),
-					mSharingId, ImageSharing.State.TRANSFERRED, ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastStateChanged(contact, mSharingId, ImageSharing.State.TRANSFERRED,
+					ReasonCode.UNSPECIFIED);
 	    }
     }
 
 	@Override
-	public void handleSessionAccepted() {
+	public void handleSessionAccepted(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Accepting sharing");
 		}
 		synchronized (lock) {
 			mPersistentStorage.setStateAndReasonCode(ImageSharing.State.ACCEPTING,
 					ReasonCode.UNSPECIFIED);
-			mBroadcaster.broadcastStateChanged(getRemoteContact(),
-					mSharingId, ImageSharing.State.ACCEPTING, ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastStateChanged(contact, mSharingId, ImageSharing.State.ACCEPTING,
+					ReasonCode.UNSPECIFIED);
 		}
 	}
 
 	@Override
-	public void handleSessionRejectedByUser() {
-		handleSessionRejected(ReasonCode.REJECTED_BY_USER);
+	public void handleSessionRejectedByUser(ContactId contact) {
+		handleSessionRejected(ReasonCode.REJECTED_BY_USER, contact);
 	}
 
 	@Override
-	public void handleSessionRejectedByTimeout() {
-		handleSessionRejected(ReasonCode.REJECTED_TIME_OUT);
+	public void handleSessionRejectedByTimeout(ContactId contact) {
+		handleSessionRejected(ReasonCode.REJECTED_TIME_OUT, contact);
 	}
 
 	@Override
-	public void handleSessionRejectedByRemote() {
-		handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE);
+	public void handleSessionRejectedByRemote(ContactId contact) {
+		handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE, contact);
 	}
 
 	@Override
-	public void handleSessionInvited() {
+	public void handleSessionInvited(ContactId contact, MmContent content) {
 		if (logger.isActivated()) {
 			logger.info("Invited to image sharing session");
 		}
-		ImageTransferSession session = mRichcallService
-				.getImageTransferSession(mSharingId);
 		synchronized (lock) {
-			mPersistentStorage.addImageSharing(getRemoteContact(), Direction.INCOMING,
-					session.getContent(), ImageSharing.State.INVITED, ReasonCode.UNSPECIFIED);
+			mPersistentStorage.addImageSharing(contact, Direction.INCOMING, content,
+					ImageSharing.State.INVITED, ReasonCode.UNSPECIFIED);
 		}
 
 		mBroadcaster.broadcastInvitation(mSharingId);
 	}
 
 	@Override
-	public void handle180Ringing() {
+	public void handle180Ringing(ContactId contact) {
 		synchronized (lock) {
 			mPersistentStorage.setStateAndReasonCode(ImageSharing.State.RINGING,
 					ReasonCode.UNSPECIFIED);
-			mBroadcaster.broadcastStateChanged(getRemoteContact(),
-					mSharingId, ImageSharing.State.RINGING, ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastStateChanged(contact, mSharingId, ImageSharing.State.RINGING,
+					ReasonCode.UNSPECIFIED);
 		}
 	}
 }

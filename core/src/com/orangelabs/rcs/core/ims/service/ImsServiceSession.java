@@ -525,13 +525,13 @@ public abstract class ImsServiceSession extends Thread {
 		if (abortedReason == ImsServiceSession.TERMINATION_BY_USER && dialogPath != null
 				&& !dialogPath.isSigEstablished()) {
 			for (ImsSessionListener listener : listeners) {
-				listener.handleSessionRejectedByUser();
+				listener.handleSessionRejectedByUser(contact);
 			}
 			return;
 		}
 
 		for (ImsSessionListener listener : listeners) {
-			listener.handleSessionAborted(abortedReason);
+			listener.handleSessionAborted(contact, abortedReason);
 		}
 	}
 	
@@ -613,7 +613,7 @@ public abstract class ImsServiceSession extends Thread {
 
     	// Notify listeners
     	for(int i=0; i < getListeners().size(); i++) {
-    		getListeners().get(i).handleSessionTerminatedByRemote();
+    		getListeners().get(i).handleSessionTerminatedByRemote(contact);
         }
 
 		try {
@@ -1061,7 +1061,7 @@ public abstract class ImsServiceSession extends Thread {
 
             // Notify listeners
             for(int i=0; i < getListeners().size(); i++) {
-                getListeners().get(i).handleSessionStarted();
+                getListeners().get(i).handleSessionStarted(contact);
             }
 
             // Start session timer
