@@ -10,13 +10,32 @@
         android:stretchColumns="1" >
 
         <TableRow android:paddingTop="5dip" >
-
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dip"
                 android:layout_marginRight="5dip"
+                android:gravity="right"
+                android:paddingTop="10dip"
+                android:text="@string/label_my_contact_id" />
+
+            <TextView
+                android:id="@+id/label_my_contact_id"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
                 android:gravity="left"
+                android:paddingTop="10dip" />
+        </TableRow>
+        
+        <TableRow android:paddingTop="5dip" >
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:gravity="right"
                 android:paddingTop="10dip"
                 android:text="@string/label_service_configuration_valid" />
 
@@ -36,6 +55,7 @@
 
             <TextView
                 android:id="@+id/label_default_messaging_method"
+                android:gravity="right"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dip"
@@ -60,7 +80,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dip"
                 android:layout_marginRight="5dip"
-                android:gravity="left"
+                android:gravity="right"
                 android:paddingTop="10dip"
                 android:text="@string/label_messaging_mode" />
 
@@ -75,14 +95,13 @@
         </TableRow>
 
         <TableRow android:paddingTop="5dip" >
-
             <TextView
                 android:id="@+id/label_my_display_name"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dip"
                 android:layout_marginRight="5dip"
-                android:gravity="left"
+                android:gravity="right"
                 android:paddingTop="10dip"
                 android:text="@string/label_my_display_name" />
 
@@ -90,37 +109,8 @@
                 android:id="@+id/text_my_display_name"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignLeft="@id/label_my_display_name"
                 android:layout_marginLeft="5dip"
                 android:layout_marginRight="5dip"
-                android:paddingTop="10dip" />
-
-            <Button
-                android:id="@+id/button_display_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignLeft="@id/text_my_display_name"
-                android:text="@string/label_configuration_refresh" />
-        </TableRow>
-
-        <TableRow android:paddingTop="5dip" >
-
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:gravity="left"
-                android:paddingTop="10dip"
-                android:text="@string/label_my_contact_id" />
-
-            <TextView
-                android:id="@+id/label_my_contact_id"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:gravity="left"
                 android:paddingTop="10dip" />
         </TableRow>
     </TableLayout>

@@ -84,7 +84,7 @@
 			android:label="@string/menu_others" />
 		
         <activity
-            android:name=".service.CommonServiceConfigurationActivity"
+            android:name=".service.ServiceConfigurationActivity"
 			android:label="@string/menu_service_configuration" />
 		
    		<!-- Contacts API -->
@@ -185,6 +185,8 @@
             android:icon="@drawable/ri_quick_ft_icon"
             android:label="@string/menu_ft_config"
             android:name="com.orangelabs.rcs.ri.messaging.ft.FileTransferServiceConfigActivity"/>
+        
+	 	<service android:name=".messaging.ft.FileTransferIntentService" android:exported="false" />
         
         <!-- Chat API -->
         
@@ -308,6 +310,10 @@
             android:label="@string/menu_transfer_file" 
             android:icon="@drawable/ri_quick_ft_icon" />
         
+	 	<service android:name=".messaging.chat.single.SingleChatIntentService" android:exported="false" />
+	 	
+	 	<service android:name=".messaging.chat.group.GroupChatIntentService" android:exported="false" />
+        
         <!-- Sharing API -->
         
         <activity android:name=".sharing.TestSharingApi"/>
@@ -336,6 +342,8 @@
             android:name=".sharing.image.ImageSharingList"
             android:label="@string/menu_image_sharing_log" />
         
+	 	<service android:name=".sharing.image.ImageSharingIntentService" android:exported="false" />
+        
         <!-- Geoloc sharing API -->
         
         <activity
@@ -355,6 +363,8 @@
         <activity
             android:name=".sharing.geoloc.ReceiveGeolocSharing"
             android:label="@string/title_geoloc_sharing" />
+        
+	 	<service android:name=".sharing.geoloc.GeolocSharingIntentService" android:exported="false" />
         
         <!-- Video sharing API -->
         
@@ -381,6 +391,8 @@
         <activity
             android:name=".sharing.video.VideoSharingList"
             android:label="@string/menu_video_sharing_log" />
+        
+	 	<service android:name=".sharing.video.VideoSharingIntentService" android:exported="false" />
             
 		<!-- MM session API -->
 
@@ -424,60 +436,9 @@
         		<category android:name="android.intent.category.DEFAULT" />
 	    	</intent-filter>
         </receiver>
-        	
-        <!-- IP call API -->
-
-        <activity android:name=".ipcall.TestIPCallApi">
-			<intent-filter>
-                <category android:name="android.intent.category.LAUNCHER"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-			    <action android:name="com.gsma.services.rcs.action.VIEW_IPCALL"/>
-            </intent-filter>
-		</activity>
-		
-	 	<activity android:name=".ipcall.InitiateIPCall">
-			<intent-filter>
-                <category android:name="android.intent.category.LAUNCHER"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-			    <action android:name="com.gsma.services.rcs.action.INITIATE_IPCALL"/>
-            </intent-filter>
-	 	    
-			<intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.ip-voice-call"/>
-            </intent-filter>
-		</activity>
-		
-		<receiver android:name=".ipcall.IPCallInvitationReceiver">
-            <intent-filter>
-		    	<action android:name="com.gsma.services.rcs.ipcall.action.NEW_CALL"/>
-            </intent-filter>
-        </receiver>
-	 	
-	 	<activity android:name=".ipcall.IPCallSessionsList"/>
-	 		 	
-	 	<activity android:name=".ipcall.IPCallList"/>
-	 	
-	 	<activity android:name=".ipcall.IPCallView"
-	 	    />
-	 
-	 	<service android:name=".messaging.ft.FileTransferIntentService" android:exported="false" />
-	 	
-	 	<service android:name=".sharing.geoloc.GeolocSharingIntentService" android:exported="false" />
-	 	
-	 	<service android:name=".sharing.image.ImageSharingIntentService" android:exported="false" />
-	 	
-	 	<service android:name=".sharing.video.VideoSharingIntentService" android:exported="false" />
-	 	
-	 	<service android:name=".ipcall.IPCallIntentService" android:exported="false" />
-	 	
-	 	<service android:name="com.orangelabs.rcs.ri.messaging.chat.group.GroupChatIntentService" android:exported="false" />*
-	 	
-	 	<service android:name=".messaging.chat.single.SingleChatIntentService" android:exported="false" />
 	 	
 	 	<service android:name=".extension.MultiMediaSessionIntentService" android:exported="false" />
-	 	
+        
         <!-- File Upload API -->
         
         <activity

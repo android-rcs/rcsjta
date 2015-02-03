@@ -68,7 +68,7 @@ public class TestServiceApi extends ListActivity {
                 break;
                 
 	        case 3:
-	        	startActivity(new Intent(this, CommonServiceConfigurationActivity.class));
+	        	startActivity(new Intent(this, ServiceConfigurationActivity.class));
                 break;
         }
     }

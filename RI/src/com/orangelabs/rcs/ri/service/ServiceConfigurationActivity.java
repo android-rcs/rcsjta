@@ -23,11 +23,9 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -43,15 +41,16 @@ import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
+ * Service configuration
+ * 
  * @author yplo6403
- *
  */
-public class CommonServiceConfigurationActivity extends Activity {
+public class ServiceConfigurationActivity extends Activity {
 
 	/**
 	 * The log tag for this class
 	 */
-	private static final String LOGTAG = LogUtils.getTag(CommonServiceConfigurationActivity.class
+	private static final String LOGTAG = LogUtils.getTag(ServiceConfigurationActivity.class
 			.getSimpleName());
 
 	private static final String[] DEF_MSG_METHOD = new String[] { MessagingMethod.AUTOMATIC.name(),
@@ -102,16 +101,7 @@ public class CommonServiceConfigurationActivity extends Activity {
 		mCheckBoxIsConfigValid = (CheckBox) findViewById(R.id.label_service_configuration_valid);
 		mTextEditMessagingUX = (TextView) findViewById(R.id.label_messaging_mode);
 		mTextEditContactId = (TextView) findViewById(R.id.label_my_contact_id);
-
 		mTextEditDisplayName = (TextView) findViewById(R.id.text_my_display_name);
-		final Button btnDisplayName = (Button) findViewById(R.id.button_display_name);
-		btnDisplayName.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				String newDisplayName = mTextEditDisplayName.getText().toString();
-				setDisplayName(newDisplayName);
-			}
-
-		});
 
 		mSpinnerDefMessaginMethod = (Spinner) findViewById(R.id.spinner_default_messaging_method);
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
@@ -136,7 +126,7 @@ public class CommonServiceConfigurationActivity extends Activity {
 						}
 					}
 				} catch (RcsServiceException e) {
-					Utils.showMessageAndExit(CommonServiceConfigurationActivity.this,
+					Utils.showMessageAndExit(ServiceConfigurationActivity.this,
 							getString(R.string.label_api_failed), mExitOnce, e);
 				}
 
@@ -157,12 +147,16 @@ public class CommonServiceConfigurationActivity extends Activity {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		
+		String newDisplayName = mTextEditDisplayName.getText().toString();
+		setDisplayName(newDisplayName);
+		
 		if (mCnxManager == null) {
 			return;
 		}
 		mCnxManager.stopMonitorServices(this);
 	}
-
+	
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -194,5 +188,4 @@ public class CommonServiceConfigurationActivity extends Activity {
 			}
 		}
 	}
-
 }
