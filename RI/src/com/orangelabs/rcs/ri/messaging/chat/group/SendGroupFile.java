@@ -109,6 +109,7 @@ public class SendGroupFile extends SendFile {
 				return;
 			}
 			final String _reasonCode = RiApplication.FT_REASON_CODES[reasonCode];
+			final String _state = RiApplication.FT_STATES[state];
 			handler.post(new Runnable() {
 				public void run() {
 					TextView statusView = (TextView) findViewById(R.id.progress_status);
@@ -118,7 +119,7 @@ public class SendGroupFile extends SendFile {
 						// hide progress dialog
 						hideProgressDialog();
 						// Display transfer state started
-						statusView.setText(RiApplication.FT_STATES[state]);
+						statusView.setText(_state);
 						break;
 
 					case FileTransfer.State.ABORTED:
@@ -143,7 +144,7 @@ public class SendGroupFile extends SendFile {
 						break;
 
 					default:
-						statusView.setText(getString(R.string.label_ft_state_changed, RiApplication.FT_STATES[state], _reasonCode));
+						statusView.setText(_state);
 					}
 				}
 			});

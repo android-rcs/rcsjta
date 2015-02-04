@@ -40,7 +40,7 @@ import com.gsma.services.rcs.upload.FileUploadListener;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.messaging.ft.InitiateFileTransfer;
+import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.FileUtils;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -102,7 +102,7 @@ public class InitiateFileUpload extends Activity {
     /**
    	 * The log tag for this class
    	 */
-   	private static final String LOGTAG = LogUtils.getTag(InitiateFileTransfer.class.getSimpleName());
+   	private static final String LOGTAG = LogUtils.getTag(InitiateFileUpload.class.getSimpleName());
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -278,14 +278,14 @@ public class InitiateFileUpload extends Activity {
 			}
 			handler.post(new Runnable() { 
 				public void run() {
+					TextView statusView = (TextView)findViewById(R.id.progress_status);
 					if (state == FileUpload.State.STARTED) {
 						// Display session status
-						TextView statusView = (TextView)findViewById(R.id.progress_status);
-						statusView.setText("started");
+						statusView.setText(getString(R.string.label_upload_started));
 					} else
 					if (state == FileUpload.State.FAILED) {
 						// Display sharing status
-	                    Utils.showMessage(InitiateFileUpload.this,
+	                    Utils.showMessageAndExit(InitiateFileUpload.this,
 							getString(R.string.label_upload_failed));
 					} else
 					if (state == FileUpload.State.ABORTED) {
@@ -295,8 +295,7 @@ public class InitiateFileUpload extends Activity {
 					} else
 					if (state == FileUpload.State.TRANSFERRED) {
 						// Display sharing status
-						TextView statusView = (TextView)findViewById(R.id.progress_status);
-						statusView.setText("transferred");
+						statusView.setText(getString(R.string.label_upload_transferred));
 						
 						// Activate show button
 				        Button showBtn = (Button)findViewById(R.id.show_btn);

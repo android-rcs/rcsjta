@@ -688,7 +688,7 @@ public class ReceiveFileTransfer extends Activity {
 					break;
 
 				default:
-					statusView.setText(getString(R.string.label_ft_state_changed, _state, _reasonCode));
+					statusView.setText(_state);
 				}
 			}
 		});

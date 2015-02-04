@@ -177,6 +177,7 @@ public class ReceiveGeolocSharing extends Activity {
 						break;
 
 					default:
+						statusView.setText(_state);
 						if (LogUtils.isActive) {
 							Log.d(LOGTAG, "onStateChanged ".concat(getString(R.string.label_gsh_state_changed, _state, _reasonCode)));
 						}

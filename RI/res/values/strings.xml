@@ -355,10 +355,12 @@
 <string name="title_initiate_upload">File upload</string>
 <string name="label_upload">Upload</string>
 <string name="label_file_thumb">Thumbnail</string>
-<string name="label_upload_failed">File upload has failed</string>
-<string name="label_upload_aborted">File upload has been aborted</string>
+<string name="label_upload_failed">File upload failed</string>
+<string name="label_upload_aborted">File upload aborted</string>
 <string name="label_show_upload">Show upload</string>
 <string name="label_upload_max_size">File is too big. The max size authorised is %s</string>
+<string name="label_upload_started">STARTED</string>
+<string name="label_upload_transferred">TRANSFERRED</string>
 
 <!-- Group delivery information menu -->
 <string name="title_group_delivery_info">Group delivery information</string>
@@ -370,6 +372,8 @@
 <string name="menu_delete_message">Delete</string>
 <string name="menu_resend_message">Resend</string>
 <string name="menu_revoke_message">Revoke</string>
+
+<!-- States -->
 
 <string-array name="file_transfer_states">
     <item>INVITED</item>
