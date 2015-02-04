@@ -158,6 +158,7 @@ public class FileTransferIntentService extends IntentService {
 	 * 				the file transfer data object
 	 */
 	private void addFileTransferInvitationNotification(Intent invitation, FileTransferDAO ftDao) {
+		ContactId contact = ftDao.getContact();
 		if (ftDao.getContact() == null) {
 			if (LogUtils.isActive) {
 				Log.e(LOGTAG, "addFileTransferInvitationNotification failed: cannot parse contact");
@@ -171,10 +172,8 @@ public class FileTransferIntentService extends IntentService {
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		
-		ContactId contact = ftDao.getContact();
 		String displayName = RcsDisplayName.getInstance(this).getDisplayName(contact);
-		
-		String title = getString(R.string.title_recv_file_transfer, displayName);
+		String title = getString(R.string.title_recv_file_transfer);
 
 		// Create notification
 		NotificationCompat.Builder notif = new NotificationCompat.Builder(this);
@@ -186,7 +185,7 @@ public class FileTransferIntentService extends IntentService {
 		notif.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
 		notif.setDefaults(Notification.DEFAULT_VIBRATE);
 		notif.setContentTitle(title);
-		notif.setContentText(ftDao.getFilename());
+		notif.setContentText(getString(R.string.label_from_args, displayName));
 				
 		// Send notification
 		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

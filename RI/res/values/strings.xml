@@ -130,7 +130,7 @@
 <!-- File transfer menu -->
 <string name="menu_transfer_file">Transfer a file</string>
 <string name="menu_file_transfer_log">File transfer log</string>
-<string name="title_recv_file_transfer">File transfer from %s</string>
+<string name="title_recv_file_transfer">File transfer invitation</string>
 <string name="title_file_transfer">File transfer</string>
 <string name="label_transfer_failed">Transfer failed (%1$s)</string>
 <string name="label_transfer_aborted">Transfer aborted (%1$s)</string>
@@ -165,8 +165,8 @@
 <string name="menu_chat_config">Chat service configuration</string>
 <string name="menu_group_chat_log">Group chat log</string>
 <string name="label_invite">Invite</string>
-<string name="title_recv_chat">Chat with %s</string>
-<string name="title_recv_group_chat">Group chat initiated by %s</string>
+<string name="title_recv_chat">Chat from %s</string>
+<string name="title_recv_group_chat">Group chat from %s</string>
 <string name="title_group_chat">Group chat</string>
 <string name="title_chat">Chat with %s</string>
 <string name="title_chat_exit">Are you sure to quit the session?</string>
@@ -233,7 +233,7 @@
 <string name="menu_image_sharing_log">Image sharing log</string>
 <string name="label_select_picture">Select picture</string>
 <string name="label_selected_img">Selected picture:</string>
-<string name="title_recv_image_sharing">Image sharing from %s</string>
+<string name="title_recv_image_sharing">Image sharing invitation</string>
 <string name="title_image_sharing">Image sharing</string>
 <string name="label_ish_state_changed">ISH state %1$s (%2$s)</string>
 
@@ -241,7 +241,7 @@
 <string name="menu_initiate_video_sharing">Initiate video sharing</string>
 <string name="menu_video_sharing_log">Video sharing log</string>
 <string name="label_initiate_sharing">Invite</string>
-<string name="title_recv_video_sharing">Video sharing from %s</string>
+<string name="title_recv_video_sharing">Video sharing invitation</string>
 <string name="title_video_sharing">Video sharing</string> 
 <string name="label_video_duration">Duration: %s s</string>
 <string name="label_vsh_state_changed">VSH state %1$s (%2$s)</string>
@@ -250,7 +250,7 @@
 <string name="label_video_format">Format: %s</string>
 
 <!-- Geoloc sharing menu -->
-<string name="title_recv_geoloc_sharing">Geoloc sharing from (%1$s)</string>
+<string name="title_recv_geoloc_sharing">Geoloc sharing invitation</string>
 <string name="label_select_location">Select location</string>
 <string name="menu_initiate_geoloc_sharing">Initiate geoloc sharing</string>
 <string name="title_geoloc_sharing">Geoloc sharing</string>
@@ -303,8 +303,8 @@
 <string name="menu_ipcall_sessions">Current IP calls</string>
 <string name="title_ipcall">IP call</string> 
 <string name="title_ipcall_video">IP video call</string> 
-<string name="title_recv_ipcall">IP call invitation from %s</string>
-<string name="title_recv_ipcall_video">IP video call invitation from %s</string>
+<string name="title_recv_ipcall">IP call invitation</string>
+<string name="title_recv_ipcall_video">IP video call invitation</string>
 <string name="label_ipcall_has_expired">Call has expired</string>
 <string name="label_ipcall_aborted">Call aborted (%1$s)</string>
 <string name="label_ipcall_rejected">Call rejected (%1$s)</string>

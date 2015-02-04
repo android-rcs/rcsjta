@@ -140,9 +140,9 @@ public class IPCallIntentService extends IntentService {
 		
 		String notifTitle;
 		if (ipCallDao.getVideoEncoding() != null) {
-			notifTitle = getString(R.string.title_recv_ipcall_video, displayName);
+			notifTitle = getString(R.string.title_recv_ipcall_video);
 		} else {
-			notifTitle = getString(R.string.title_recv_ipcall, displayName);
+			notifTitle = getString(R.string.title_recv_ipcall);
 		}
 		
 		// Create notification

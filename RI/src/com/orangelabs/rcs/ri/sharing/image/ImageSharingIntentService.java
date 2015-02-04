@@ -143,7 +143,7 @@ public class ImageSharingIntentService extends IntentService {
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		
 		String displayName = RcsDisplayName.getInstance(this).getDisplayName(contact);
-		String title = getString(R.string.title_recv_image_sharing, displayName);
+		String title = getString(R.string.title_recv_image_sharing);
 
 		// Create notification
 		NotificationCompat.Builder notif = new NotificationCompat.Builder(this);
@@ -155,7 +155,7 @@ public class ImageSharingIntentService extends IntentService {
 		notif.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
 		notif.setDefaults(Notification.DEFAULT_VIBRATE);
 		notif.setContentTitle(title);
-		notif.setContentText(getString(R.string.label_from_args, contact.toString()));
+		notif.setContentText(getString(R.string.label_from_args, displayName));
 				
 		// Send notification
 		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

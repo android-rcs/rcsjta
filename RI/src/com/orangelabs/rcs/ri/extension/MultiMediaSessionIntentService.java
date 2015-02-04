@@ -143,7 +143,7 @@ public class MultiMediaSessionIntentService extends IntentService {
 		// Get remote contact and session
 		if (contact == null) {
 			if (LogUtils.isActive) {
-				Log.e(LOGTAG, "addSessionInvitationNotification failed");
+				Log.e(LOGTAG, "addSessionInvitationNotification failed: cannot parse contact");
 			}
 			return;
 		}
@@ -163,7 +163,7 @@ public class MultiMediaSessionIntentService extends IntentService {
 
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, invitation, PendingIntent.FLAG_UPDATE_CURRENT);
 
-		String from = RcsDisplayName.getInstance(this).getDisplayName(contact);
+		String displayName = RcsDisplayName.getInstance(this).getDisplayName(contact);
 
 		// Create notification
 		NotificationCompat.Builder notif = new NotificationCompat.Builder(this);
@@ -175,7 +175,7 @@ public class MultiMediaSessionIntentService extends IntentService {
 		notif.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
 		notif.setDefaults(Notification.DEFAULT_VIBRATE);
 		notif.setContentTitle(title);
-		notif.setContentText(getString(R.string.label_from_args, from));
+		notif.setContentText(getString(R.string.label_from_args, displayName));
 
 		// Send notification
 		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
