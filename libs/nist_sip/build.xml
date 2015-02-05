@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="nist-sip" default="all" basedir=".">
+
+	<property name="build.dir" value="build"/>
+	<property name="classes.dir" value="build/classes"/>
+	<property name="libs.dir" value="libs"/>
+	<property name="src.dir" value="src"/>
+
+	<path id="android-classpath">
+		<fileset dir="${libs.dir}" includes="**/*.jar"/>
+	</path>
+
+	<target name="clean">
+		<delete dir="${classes.dir}"/>
+		<delete file="${build.dir}/nist_sip.jar"/>
+	</target>
+
+	<target name="compile">
+		<mkdir dir="${classes.dir}"/>
+		<javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="android-classpath" includeantruntime="false"/>
+	</target>
+
+	<target name="jar" depends="compile">
+		<jar destfile="${build.dir}/nist_sip.jar" filesonly="true">
+			<fileset dir="${classes.dir}"/>
+		</jar>
+	</target>
+	
+	<target name="debug" depends="compile">
+		<copy todir="${classes.dir}">
+			<fileset dir="${src.dir}" />
+		</copy>
+		<jar destfile="${build.dir}/nist_sip.jar" filesonly="true">
+			<fileset dir="${classes.dir}"/>
+		</jar>
+	</target>
+
+	<target name="all" depends="jar"/>
+
+	<target name="help">
+		<echo>Library Ant Build. Available targets:</echo>
+		<echo>   help:      Displays this help.</echo>
+		<echo>   clean:     Removes output files created by other targets.</echo>
+		<echo>   compile:   Compiles source files.</echo>
+		<echo>   jar:       Generates jar library.</echo>
+		<echo>   debug:     Generates jar library for debug (with java sources).</echo>
+		<echo>   all:       Compiles sources then creates jar library.</echo>
+	</target>
+	
+</project>

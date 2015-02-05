@@ -119,6 +119,26 @@
 				packagenames="com.gsma.services.rcs.*">
 		</javadoc>
 	</target>
+	
+	<target name="-pre-compile">
+		<echo>Generate libraries</echo>
+		<ant antfile="build.xml" target="jar" dir="${terminal.root}/../libs/dnsjava"/>
+		<copy file="${terminal.root}/../libs/dnsjava/build/dnsjava.jar" todir="${terminal.root}/libs"/>
+		<ant antfile="build.xml" target="jar" dir="${terminal.root}/../libs/nist_sip"/>
+		<copy file="${terminal.root}/../libs/nist_sip/build/nist_sip.jar" todir="${terminal.root}/libs"/>
+		<ant antfile="build.xml" target="jar" dir="${terminal.root}/../libs/bouncycastle"/>
+		<copy file="${terminal.root}/../libs/bouncycastle/build/bouncycastle.jar" todir="${terminal.root}/libs"/>
+	</target>
+	
+	<target name="libs">
+		<echo>Generate libraries</echo>
+		<ant antfile="build.xml" target="debug" dir="${terminal.root}/../libs/dnsjava"/>
+		<copy file="${terminal.root}/../libs/dnsjava/build/dnsjava.jar" todir="${terminal.root}/libs"/>
+		<ant antfile="build.xml" target="debug" dir="${terminal.root}/../libs/nist_sip"/>
+		<copy file="${terminal.root}/../libs/nist_sip/build/nist_sip.jar" todir="${terminal.root}/libs"/>
+		<ant antfile="build.xml" target="debug" dir="${terminal.root}/../libs/bouncycastle"/>
+		<copy file="${terminal.root}/../libs/bouncycastle/build/bouncycastle.jar" todir="${terminal.root}/libs"/>
+	</target>
 
 	<!-- ******************************************************* -->
 	<!-- ************************* Help ************************ -->
@@ -163,6 +183,7 @@
 		<echo>   api:       Generate Terminal API</echo>
 		<echo>   merge:     Copy rcsapi.jar in RI and sample projects</echo>
 		<echo>   docs:      Generate javadoc of client terminal API</echo>
+		<echo>   libs: 	    Generate external libraries</echo>
 	</target>
 	<!-- Import the actual build file.
 
