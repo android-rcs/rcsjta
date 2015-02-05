@@ -136,7 +136,7 @@ public class ReceiveImageSharing extends Activity {
             handler.post(new Runnable() {
                 public void run() {
 
-                    TextView statusView = (TextView)findViewById(R.id.progress_status);
+                    TextView statusView = (TextView) findViewById(R.id.progress_status);
                     switch (state) {
                         case ImageSharing.State.STARTED:
                             // Display session status
@@ -168,7 +168,7 @@ public class ReceiveImageSharing extends Activity {
                             // Display transfer progress
                             statusView.setText(_state);
                             // Make sure progress bar is at the end
-                            ProgressBar progressBar = (ProgressBar)findViewById(R.id.progress_bar);
+                            ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
                             progressBar.setProgress(progressBar.getMax());
 
                             // Show the shared image
@@ -197,7 +197,7 @@ public class ReceiveImageSharing extends Activity {
         setContentView(R.layout.image_sharing_receive);
 
         // Get invitation info
-        mIshDao = (ImageSharingDAO)(getIntent().getExtras()
+        mIshDao = (ImageSharingDAO) (getIntent().getExtras()
                 .getParcelable(ImageSharingIntentService.BUNDLE_ISHDAO_ID));
         if (mIshDao == null) {
             if (LogUtils.isActive) {
@@ -260,11 +260,11 @@ public class ReceiveImageSharing extends Activity {
 
             String from = RcsDisplayName.getInstance(this).getDisplayName(mIshDao.getContact());
             // Display sharing infos
-            TextView fromTextView = (TextView)findViewById(R.id.from);
+            TextView fromTextView = (TextView) findViewById(R.id.from);
             fromTextView.setText(getString(R.string.label_from_args, from));
 
             String size = getString(R.string.label_file_size, mIshDao.getSize() / 1024);
-            TextView sizeTxt = (TextView)findViewById(R.id.image_size);
+            TextView sizeTxt = (TextView) findViewById(R.id.image_size);
             sizeTxt.setText(size);
 
             // Display accept/reject dialog
@@ -339,8 +339,8 @@ public class ReceiveImageSharing extends Activity {
      * @param totalSize Total size to be transferred
      */
     private void updateProgressBar(long currentSize, long totalSize) {
-        TextView statusView = (TextView)findViewById(R.id.progress_status);
-        ProgressBar progressBar = (ProgressBar)findViewById(R.id.progress_bar);
+        TextView statusView = (TextView) findViewById(R.id.progress_status);
+        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
         String value = "" + (currentSize / 1024);
         if (totalSize != 0) {
@@ -350,8 +350,8 @@ public class ReceiveImageSharing extends Activity {
         statusView.setText(value);
 
         if (currentSize != 0) {
-            double position = ((double)currentSize / (double)totalSize) * 100.0;
-            progressBar.setProgress((int)position);
+            double position = ((double) currentSize / (double) totalSize) * 100.0;
+            progressBar.setProgress((int) position);
         } else {
             progressBar.setProgress(0);
         }

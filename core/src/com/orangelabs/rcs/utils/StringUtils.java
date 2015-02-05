@@ -32,146 +32,137 @@ import java.util.Iterator;
  */
 public class StringUtils {
 
-	public static final String UTF8_STR = "utf-8";
+    public static final String UTF8_STR = "utf-8";
 
-	public static final Charset UTF8 = Charset.forName(UTF8_STR);
+    public static final Charset UTF8 = Charset.forName(UTF8_STR);
 
-	/**
-	 * Truncate a string to a max length
-	 *
-	 * @param text
-	 *            String to truncate
-	 * @param truncatedLength
-	 *            Max length
-	 * @return Truncated string
-	 */
-	public static String truncate(String text, int truncatedLength) {
-		if (text == null) {
-			return null;
-		}
+    /**
+     * Truncate a string to a max length
+     * 
+     * @param text String to truncate
+     * @param truncatedLength Max length
+     * @return Truncated string
+     */
+    public static String truncate(String text, int truncatedLength) {
+        if (text == null) {
+            return null;
+        }
 
-		if ((truncatedLength < 0) || (truncatedLength > text.length())) {
-			return text;
-		}
-		return text.substring(0, truncatedLength);
-	}
+        if ((truncatedLength < 0) || (truncatedLength > text.length())) {
+            return text;
+        }
+        return text.substring(0, truncatedLength);
+    }
 
-	/**
-	 * Escape characters for text appearing as XML data, between tags.
-	 *
-	 * The following characters are replaced : <br>
-	 * < <br>
-	 * > <br>
-	 * & <br>
-	 * " <br>
-	 * '
-	 *
-	 * @param text
-	 *            Input text
-	 * @return Encoded string
-	 */
-	public static String encodeXML(String text) {
-		if (text == null) {
-			return null;
-		}
+    /**
+     * Escape characters for text appearing as XML data, between tags. The following characters are
+     * replaced : <br>
+     * < <br>
+     * > <br>
+     * & <br>
+     * " <br>
+     * '
+     * 
+     * @param text Input text
+     * @return Encoded string
+     */
+    public static String encodeXML(String text) {
+        if (text == null) {
+            return null;
+        }
 
-		final StringBuilder result = new StringBuilder();
-		final StringCharacterIterator iterator = new StringCharacterIterator(text);
-		char character = iterator.current();
-		while (character != CharacterIterator.DONE) {
-			if (character == '<') {
-				result.append("&lt;");
-			} else if (character == '>') {
-				result.append("&gt;");
-			} else if (character == '\"') {
-				result.append("&quot;");
-			} else if (character == '\'') {
-				result.append("&#039;");
-			} else if (character == '&') {
-				result.append("&amp;");
-			} else {
-				// the char is not a special one
-				// add it to the result as is
-				result.append(character);
-			}
-			character = iterator.next();
-		}
-		return result.toString();
-	}
+        final StringBuilder result = new StringBuilder();
+        final StringCharacterIterator iterator = new StringCharacterIterator(text);
+        char character = iterator.current();
+        while (character != CharacterIterator.DONE) {
+            if (character == '<') {
+                result.append("&lt;");
+            } else if (character == '>') {
+                result.append("&gt;");
+            } else if (character == '\"') {
+                result.append("&quot;");
+            } else if (character == '\'') {
+                result.append("&#039;");
+            } else if (character == '&') {
+                result.append("&amp;");
+            } else {
+                // the char is not a special one
+                // add it to the result as is
+                result.append(character);
+            }
+            character = iterator.next();
+        }
+        return result.toString();
+    }
 
-	/**
-	 * Decode XML string
-	 *
-	 * @param text
-	 *            Input text
-	 * @return Decoded string
-	 */
-	public static String decodeXML(String text) {
-		if (text == null) {
-			return null;
-		}
+    /**
+     * Decode XML string
+     * 
+     * @param text Input text
+     * @return Decoded string
+     */
+    public static String decodeXML(String text) {
+        if (text == null) {
+            return null;
+        }
 
-		text = text.replaceAll("&lt;", "<");
-		text = text.replaceAll("&gt;", ">");
-		text = text.replaceAll("&quot;", "\"");
-		text = text.replaceAll("&#039;", "\'");
-		text = text.replaceAll("&amp;", "&");
+        text = text.replaceAll("&lt;", "<");
+        text = text.replaceAll("&gt;", ">");
+        text = text.replaceAll("&quot;", "\"");
+        text = text.replaceAll("&#039;", "\'");
+        text = text.replaceAll("&amp;", "&");
 
-		return text;
-	}
+        return text;
+    }
 
-	/**
-	 * Remove quotes delimiters
-	 *
-	 * @param input
-	 *            Input
-	 * @return String without quotes
-	 */
-	public static String removeQuotes(String input) {
-		if ((input != null) && input.startsWith("\"") && input.endsWith("\"")) {
-			input = input.substring(1, input.length() - 1);
-		}
-		return input;
-	}
+    /**
+     * Remove quotes delimiters
+     * 
+     * @param input Input
+     * @return String without quotes
+     */
+    public static String removeQuotes(String input) {
+        if ((input != null) && input.startsWith("\"") && input.endsWith("\"")) {
+            input = input.substring(1, input.length() - 1);
+        }
+        return input;
+    }
 
-	/**
-	 * Is empty string
-	 *
-	 * @param str
-	 *            String
-	 * @return Boolean
-	 */
-	public static boolean isEmpty(String str) {
-		return (str == null) || (str.trim().length() == 0);
-	}
+    /**
+     * Is empty string
+     * 
+     * @param str String
+     * @return Boolean
+     */
+    public static boolean isEmpty(String str) {
+        return (str == null) || (str.trim().length() == 0);
+    }
 
-	/**
-	 * Build a string of delimited items
-	 *
-	 * @param s
-	 *            an iterator over a CharSequence
-	 * @param delimiter
-	 *            a delimiter
-	 * @return the string of delimited items
-	 */
-	public static String join(Iterable<? extends CharSequence> s, String delimiter) {
-		Iterator<? extends CharSequence> iter = s.iterator();
-		if (!iter.hasNext())
-			return "";
-		StringBuilder buffer = new StringBuilder(iter.next());
-		while (iter.hasNext())
-			buffer.append(delimiter).append(iter.next());
-		return buffer.toString();
-	}
+    /**
+     * Build a string of delimited items
+     * 
+     * @param s an iterator over a CharSequence
+     * @param delimiter a delimiter
+     * @return the string of delimited items
+     */
+    public static String join(Iterable<? extends CharSequence> s, String delimiter) {
+        Iterator<? extends CharSequence> iter = s.iterator();
+        if (!iter.hasNext())
+            return "";
+        StringBuilder buffer = new StringBuilder(iter.next());
+        while (iter.hasNext())
+            buffer.append(delimiter).append(iter.next());
+        return buffer.toString();
+    }
 
-	/**
-	 * compares two strings null-safe
-	 * 
-	 * @param str1
-	 * @param str2
-	 * @return true if equals
-	 */
-	public static boolean equals(String str1, String str2) {
-		return str1 == null ? str2 == null : str1.equals(str2);
-	}
+    /**
+     * compares two strings null-safe
+     * 
+     * @param str1
+     * @param str2
+     * @return true if equals
+     */
+    public static boolean equals(String str1, String str2) {
+        return str1 == null ? str2 == null : str1.equals(str2);
+    }
 }

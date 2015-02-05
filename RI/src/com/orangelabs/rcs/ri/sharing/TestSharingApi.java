@@ -33,7 +33,7 @@ import com.orangelabs.rcs.ri.sharing.video.TestVideoSharingApi;
 
 /**
  * Sharing API
- *
+ * 
  * @author Jean-Marc AUFFRET
  */
 public class TestSharingApi extends ListActivity {

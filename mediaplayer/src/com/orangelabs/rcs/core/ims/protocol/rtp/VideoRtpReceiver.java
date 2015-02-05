@@ -27,51 +27,51 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.stream.VideoRendererStream;
 
 /**
  * Video RTP receiver
- *
+ * 
  * @author hlxn7157
  */
-public class VideoRtpReceiver  extends MediaRtpReceiver {
+public class VideoRtpReceiver extends MediaRtpReceiver {
     /**
      * Constructor
-     *
+     * 
      * @param localPort Local port number
      */
-	public VideoRtpReceiver(int localPort) {
-		super(localPort);
-	}
+    public VideoRtpReceiver(int localPort) {
+        super(localPort);
+    }
 
     /**
      * Prepare the RTP session
-     *
-     * @param remoteAddress Remote address 
+     * 
+     * @param remoteAddress Remote address
      * @param remotePort Remote port
-     * @param orientationHeaderId RTP orientation extension header id 
+     * @param orientationHeaderId RTP orientation extension header id
      * @param renderer Renderer
      * @param format Video format
      * @param rtpStreamListener RTP Stream listener
      * @throws RtpException When an error occurs
      */
-    public void prepareSession(String remoteAddress, int remotePort, int orientationHeaderId, 
+    public void prepareSession(String remoteAddress, int remotePort, int orientationHeaderId,
             MediaOutput renderer, Format format, RtpStreamListener rtpStreamListener)
             throws RtpException {
-    	try {
-			// Create the input stream
+        try {
+            // Create the input stream
             inputStream = new RtpInputStream(remoteAddress, remotePort, localPort, format);
             inputStream.setExtensionHeaderId(orientationHeaderId);
             inputStream.addRtpStreamListener(rtpStreamListener);
-    		inputStream.open();
+            inputStream.open();
 
             // Create the output stream
-        	VideoRendererStream outputStream = new VideoRendererStream(renderer);
-    		outputStream.open();
+            VideoRendererStream outputStream = new VideoRendererStream(renderer);
+            outputStream.open();
 
-        	// Create the codec chain
-        	Codec[] codecChain = MediaRegistry.generateDecodingCodecChain(format.getCodec());
+            // Create the codec chain
+            Codec[] codecChain = MediaRegistry.generateDecodingCodecChain(format.getCodec());
 
             // Create the media processor
-    		processor = new Processor(inputStream, outputStream, codecChain);
-        } catch(Exception e) {
-        	throw new RtpException("Can't prepare resources");
+            processor = new Processor(inputStream, outputStream, codecChain);
+        } catch (Exception e) {
+            throw new RtpException("Can't prepare resources");
         }
     }
 }

@@ -184,7 +184,7 @@ public class InitiateFileTransfer extends Activity {
             final String _state = RiApplication.FT_STATES[state];
             handler.post(new Runnable() {
                 public void run() {
-                    TextView statusView = (TextView)findViewById(R.id.progress_status);
+                    TextView statusView = (TextView) findViewById(R.id.progress_status);
                     switch (state) {
                         case FileTransfer.State.STARTED:
                             // Session is well established : hide progress
@@ -226,9 +226,9 @@ public class InitiateFileTransfer extends Activity {
                             // Display transfer progress
                             statusView.setText(_state);
                             // Hide buttons Pause and Resume
-                            Button pauseBtn = (Button)findViewById(R.id.pause_btn);
+                            Button pauseBtn = (Button) findViewById(R.id.pause_btn);
                             pauseBtn.setVisibility(View.INVISIBLE);
-                            Button resumeBtn = (Button)findViewById(R.id.resume_btn);
+                            Button resumeBtn = (Button) findViewById(R.id.resume_btn);
                             resumeBtn.setVisibility(View.INVISIBLE);
                             break;
 
@@ -260,21 +260,21 @@ public class InitiateFileTransfer extends Activity {
         setContentView(R.layout.filetransfer_initiate);
 
         // Set contact selector
-        mSpinner = (Spinner)findViewById(R.id.contact);
+        mSpinner = (Spinner) findViewById(R.id.contact);
 
         // Set buttons callback
-        Button inviteBtn = (Button)findViewById(R.id.invite_btn);
+        Button inviteBtn = (Button) findViewById(R.id.invite_btn);
         inviteBtn.setOnClickListener(btnInviteListener);
         inviteBtn.setEnabled(false);
-        Button selectBtn = (Button)findViewById(R.id.select_btn);
+        Button selectBtn = (Button) findViewById(R.id.select_btn);
         selectBtn.setOnClickListener(btnSelectListener);
         selectBtn.setEnabled(false);
 
-        Button pauseBtn = (Button)findViewById(R.id.pause_btn);
+        Button pauseBtn = (Button) findViewById(R.id.pause_btn);
         pauseBtn.setOnClickListener(btnPauseListener);
         pauseBtn.setEnabled(false);
 
-        Button resumeBtn = (Button)findViewById(R.id.resume_btn);
+        Button resumeBtn = (Button) findViewById(R.id.resume_btn);
         resumeBtn.setOnClickListener(btnResumeListener);
         resumeBtn.setEnabled(false);
 
@@ -291,7 +291,7 @@ public class InitiateFileTransfer extends Activity {
             mCnxManager.getFileTransferApi().addEventListener(ftListener);
             if (resuming) {
                 // Get resuming info
-                FileTransferDAO ftdao = (FileTransferDAO)(getIntent().getExtras()
+                FileTransferDAO ftdao = (FileTransferDAO) (getIntent().getExtras()
                         .getSerializable(FileTransferIntentService.BUNDLE_FTDAO_ID));
                 if (ftdao == null) {
                     if (LogUtils.isActive) {
@@ -306,11 +306,11 @@ public class InitiateFileTransfer extends Activity {
                 filesize = ftdao.getSize();
                 ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                         android.R.layout.simple_spinner_item, new String[] {
-                            remoteContact.toString()
+                                remoteContact.toString()
                         });
                 mSpinner.setAdapter(adapter);
-                TextView uriEdit = (TextView)findViewById(R.id.uri);
-                TextView sizeEdit = (TextView)findViewById(R.id.size);
+                TextView uriEdit = (TextView) findViewById(R.id.uri);
+                TextView sizeEdit = (TextView) findViewById(R.id.size);
                 sizeEdit.setText((filesize / 1024) + " KB");
                 uriEdit.setText(filename);
                 // Check if session still exists
@@ -414,7 +414,7 @@ public class InitiateFileTransfer extends Activity {
         }
 
         // get selected phone number
-        ContactListAdapter adapter = (ContactListAdapter)mSpinner.getAdapter();
+        ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
         String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
         ContactUtils contactUtils = ContactUtils.getInstance(this);
         ContactId remote;
@@ -426,7 +426,7 @@ public class InitiateFileTransfer extends Activity {
         }
 
         // Get thumbnail option
-        CheckBox ftThumb = (CheckBox)findViewById(R.id.ft_thumb);
+        CheckBox ftThumb = (CheckBox) findViewById(R.id.ft_thumb);
 
         try {
             boolean tryToSendFileicon = ftThumb.isChecked();
@@ -440,7 +440,7 @@ public class InitiateFileTransfer extends Activity {
                     tryToSendFileicon);
             ftId = fileTransfer.getTransferId();
 
-            Button pauseBtn = (Button)findViewById(R.id.pause_btn);
+            Button pauseBtn = (Button) findViewById(R.id.pause_btn);
             pauseBtn.setEnabled(true);
 
             // Display a progress dialog
@@ -459,9 +459,9 @@ public class InitiateFileTransfer extends Activity {
             mSpinner.setEnabled(false);
 
             // Hide buttons
-            Button inviteBtn = (Button)findViewById(R.id.invite_btn);
+            Button inviteBtn = (Button) findViewById(R.id.invite_btn);
             inviteBtn.setVisibility(View.INVISIBLE);
-            Button selectBtn = (Button)findViewById(R.id.select_btn);
+            Button selectBtn = (Button) findViewById(R.id.select_btn);
             selectBtn.setVisibility(View.INVISIBLE);
             ftThumb.setVisibility(View.INVISIBLE);
         } catch (Exception e) {
@@ -514,9 +514,9 @@ public class InitiateFileTransfer extends Activity {
             return;
         }
         file = data.getData();
-        TextView uriEdit = (TextView)findViewById(R.id.uri);
-        TextView sizeEdit = (TextView)findViewById(R.id.size);
-        Button inviteBtn = (Button)findViewById(R.id.invite_btn);
+        TextView uriEdit = (TextView) findViewById(R.id.uri);
+        TextView sizeEdit = (TextView) findViewById(R.id.size);
+        Button inviteBtn = (Button) findViewById(R.id.invite_btn);
         switch (requestCode) {
             case SELECT_IMAGE:
             case SELECT_TEXT_FILE:
@@ -566,8 +566,8 @@ public class InitiateFileTransfer extends Activity {
      * @param totalSize Total size to be transferred
      */
     private void updateProgressBar(long currentSize, long totalSize) {
-        TextView statusView = (TextView)findViewById(R.id.progress_status);
-        ProgressBar progressBar = (ProgressBar)findViewById(R.id.progress_bar);
+        TextView statusView = (TextView) findViewById(R.id.progress_status);
+        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
         String value = "" + (currentSize / 1024);
         if (totalSize != 0) {
@@ -577,8 +577,8 @@ public class InitiateFileTransfer extends Activity {
         statusView.setText(value);
 
         if (currentSize != 0) {
-            double position = ((double)currentSize / (double)totalSize) * 100.0;
-            progressBar.setProgress((int)position);
+            double position = ((double) currentSize / (double) totalSize) * 100.0;
+            progressBar.setProgress((int) position);
         } else {
             progressBar.setProgress(0);
         }
@@ -640,9 +640,9 @@ public class InitiateFileTransfer extends Activity {
      */
     private OnClickListener btnPauseListener = new OnClickListener() {
         public void onClick(View v) {
-            Button resumeBtn = (Button)findViewById(R.id.resume_btn);
+            Button resumeBtn = (Button) findViewById(R.id.resume_btn);
             resumeBtn.setEnabled(true);
-            Button pauseBtn = (Button)findViewById(R.id.pause_btn);
+            Button pauseBtn = (Button) findViewById(R.id.pause_btn);
             pauseBtn.setEnabled(false);
             try {
                 fileTransfer.pauseTransfer();
@@ -659,9 +659,9 @@ public class InitiateFileTransfer extends Activity {
      */
     private OnClickListener btnResumeListener = new OnClickListener() {
         public void onClick(View v) {
-            Button resumeBtn = (Button)findViewById(R.id.resume_btn);
+            Button resumeBtn = (Button) findViewById(R.id.resume_btn);
             resumeBtn.setEnabled(false);
-            Button pauseBtn = (Button)findViewById(R.id.pause_btn);
+            Button pauseBtn = (Button) findViewById(R.id.pause_btn);
             pauseBtn.setEnabled(true);
             try {
                 fileTransfer.resumeTransfer();

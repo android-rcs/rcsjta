@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.service.api;
 
 import android.os.RemoteException;
@@ -24,24 +25,23 @@ import com.gsma.services.rcs.ipcall.IIPCallServiceConfiguration;
 
 /**
  * @author yplo6403
- *
  */
 public class IPCallServiceConfigurationImpl extends IIPCallServiceConfiguration.Stub {
 
-	private final RcsSettings mRcsSettings;
+    private final RcsSettings mRcsSettings;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param rcsSettings
-	 */
-	public IPCallServiceConfigurationImpl(RcsSettings rcsSettings) {
-		mRcsSettings = rcsSettings;
-	}
+    /**
+     * Constructor
+     * 
+     * @param rcsSettings
+     */
+    public IPCallServiceConfigurationImpl(RcsSettings rcsSettings) {
+        mRcsSettings = rcsSettings;
+    }
 
-	@Override
-	public boolean isVoiceCallBreakout() throws RemoteException {
-		return mRcsSettings.isIPVoiceCallBreakoutAA() || mRcsSettings.isIPVoiceCallBreakoutAA();
-	}
+    @Override
+    public boolean isVoiceCallBreakout() throws RemoteException {
+        return mRcsSettings.isIPVoiceCallBreakoutAA() || mRcsSettings.isIPVoiceCallBreakoutAA();
+    }
 
 }

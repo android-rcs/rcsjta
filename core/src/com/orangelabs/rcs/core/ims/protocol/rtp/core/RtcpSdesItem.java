@@ -26,18 +26,18 @@ import static com.orangelabs.rcs.utils.StringUtils.UTF8;
 
 /**
  * RCTP SDES item
- *
+ * 
  * @author jexa7410
  */
 public class RtcpSdesItem {
-	public int type;
-	public byte[] data;
+    public int type;
+    public byte[] data;
 
-	public RtcpSdesItem() {
-	}
+    public RtcpSdesItem() {
+    }
 
-	public RtcpSdesItem(int i, String string) {
-		type = i;
-		data = string.getBytes(UTF8);
-	}
+    public RtcpSdesItem(int i, String string) {
+        type = i;
+        data = string.getBytes(UTF8);
+    }
 }

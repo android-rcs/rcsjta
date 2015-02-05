@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.orangelabs.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.contacts.ContactId;
@@ -22,10 +23,10 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 public interface IOneToOneChatEventBroadcaster {
 
-	public void broadcastMessageStatusChanged(ContactId contact, String mimeType, String msgId,
-			int status, int reasonCode);
+    public void broadcastMessageStatusChanged(ContactId contact, String mimeType, String msgId,
+            int status, int reasonCode);
 
-	public void broadcastComposingEvent(ContactId contact, boolean status);
+    public void broadcastComposingEvent(ContactId contact, boolean status);
 
-	public void broadcastMessageReceived(String mimeType, String msgId);
+    public void broadcastMessageReceived(String mimeType, String msgId);
 }

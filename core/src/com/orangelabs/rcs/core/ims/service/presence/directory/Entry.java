@@ -19,31 +19,31 @@
 package com.orangelabs.rcs.core.ims.service.presence.directory;
 
 public class Entry {
-	private String uri;
-	private String etag;
-	private long lastModified = -1;
+    private String uri;
+    private String etag;
+    private long lastModified = -1;
 
-	public Entry(String uri) {
-		this.uri = uri;
-	}
+    public Entry(String uri) {
+        this.uri = uri;
+    }
 
-	public String getUri() {
-		return uri;
-	}
+    public String getUri() {
+        return uri;
+    }
 
-	public String getEtag() {
-		return etag;
-	}
+    public String getEtag() {
+        return etag;
+    }
 
-	public void setEtag(String etag) {
-		this.etag = etag;
-	}
+    public void setEtag(String etag) {
+        this.etag = etag;
+    }
 
-	public long getLastModified() {
-		return lastModified;
-	}
+    public long getLastModified() {
+        return lastModified;
+    }
 
-	public void setLastModified(long lastModified) {
-		this.lastModified = lastModified;
-	}
+    public void setLastModified(long lastModified) {
+        this.lastModified = lastModified;
+    }
 }

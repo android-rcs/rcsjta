@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.orangelabs.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.contacts.ContactId;
@@ -32,57 +33,57 @@ import android.os.RemoteCallbackList;
  */
 public class ImageSharingEventBroadcaster implements IImageSharingEventBroadcaster {
 
-	private final RemoteCallbackList<IImageSharingListener> mImageSharingListeners = new RemoteCallbackList<IImageSharingListener>();
+    private final RemoteCallbackList<IImageSharingListener> mImageSharingListeners = new RemoteCallbackList<IImageSharingListener>();
 
-	private final Logger logger = Logger.getLogger(getClass().getName());
+    private final Logger logger = Logger.getLogger(getClass().getName());
 
-	public ImageSharingEventBroadcaster() {
-	}
+    public ImageSharingEventBroadcaster() {
+    }
 
-	public void addEventListener(IImageSharingListener listener) {
-		mImageSharingListeners.register(listener);
-	}
+    public void addEventListener(IImageSharingListener listener) {
+        mImageSharingListeners.register(listener);
+    }
 
-	public void removeEventListener(IImageSharingListener listener) {
-		mImageSharingListeners.unregister(listener);
-	}
+    public void removeEventListener(IImageSharingListener listener) {
+        mImageSharingListeners.unregister(listener);
+    }
 
-	public void broadcastStateChanged(ContactId contact, String sharingId, int state, int reasonCode) {
-		final int N = mImageSharingListeners.beginBroadcast();
-		for (int i = 0; i < N; i++) {
-			try {
-				mImageSharingListeners.getBroadcastItem(i).onStateChanged(contact, sharingId,
-						state, reasonCode);
-			} catch (Exception e) {
-				if (logger.isActivated()) {
-					logger.error("Can't notify listener", e);
-				}
-			}
-		}
-		mImageSharingListeners.finishBroadcast();
-	}
+    public void broadcastStateChanged(ContactId contact, String sharingId, int state, int reasonCode) {
+        final int N = mImageSharingListeners.beginBroadcast();
+        for (int i = 0; i < N; i++) {
+            try {
+                mImageSharingListeners.getBroadcastItem(i).onStateChanged(contact, sharingId,
+                        state, reasonCode);
+            } catch (Exception e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener", e);
+                }
+            }
+        }
+        mImageSharingListeners.finishBroadcast();
+    }
 
-	public void broadcastProgressUpdate(ContactId contact, String sharingId, long currentSize,
-			long totalSize) {
-		final int N = mImageSharingListeners.beginBroadcast();
-		for (int i = 0; i < N; i++) {
-			try {
-				mImageSharingListeners.getBroadcastItem(i).onProgressUpdate(contact, sharingId,
-						currentSize, totalSize);
-			} catch (Exception e) {
-				if (logger.isActivated()) {
-					logger.error("Can't notify listener", e);
-				}
-			}
-		}
-		mImageSharingListeners.finishBroadcast();
-	}
+    public void broadcastProgressUpdate(ContactId contact, String sharingId, long currentSize,
+            long totalSize) {
+        final int N = mImageSharingListeners.beginBroadcast();
+        for (int i = 0; i < N; i++) {
+            try {
+                mImageSharingListeners.getBroadcastItem(i).onProgressUpdate(contact, sharingId,
+                        currentSize, totalSize);
+            } catch (Exception e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener", e);
+                }
+            }
+        }
+        mImageSharingListeners.finishBroadcast();
+    }
 
-	public void broadcastInvitation(String sharingId) {
-		Intent invitation = new Intent(ImageSharingIntent.ACTION_NEW_INVITATION);
-		IntentUtils.tryToSetExcludeStoppedPackagesFlag(invitation);
-		IntentUtils.tryToSetReceiverForegroundFlag(invitation);
-		invitation.putExtra(ImageSharingIntent.EXTRA_SHARING_ID, sharingId);
-		AndroidFactory.getApplicationContext().sendBroadcast(invitation);
-	}
+    public void broadcastInvitation(String sharingId) {
+        Intent invitation = new Intent(ImageSharingIntent.ACTION_NEW_INVITATION);
+        IntentUtils.tryToSetExcludeStoppedPackagesFlag(invitation);
+        IntentUtils.tryToSetReceiverForegroundFlag(invitation);
+        invitation.putExtra(ImageSharingIntent.EXTRA_SHARING_ID, sharingId);
+        AndroidFactory.getApplicationContext().sendBroadcast(invitation);
+    }
 }

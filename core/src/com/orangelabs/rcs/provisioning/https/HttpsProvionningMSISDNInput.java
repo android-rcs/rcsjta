@@ -23,83 +23,83 @@ import android.content.Intent;
 
 /**
  * HTTPS provisioning - Input of MSISDN
- *
+ * 
  * @author Orange
  */
 public final class HttpsProvionningMSISDNInput {
 
-	/**
-	 * HttpsProvionningMSISDNInput instance
-	 */
-	private static volatile HttpsProvionningMSISDNInput instance = null;
+    /**
+     * HttpsProvionningMSISDNInput instance
+     */
+    private static volatile HttpsProvionningMSISDNInput instance = null;
 
-	/**
-	 * MSISDN
-	 */
-	private String inputMSISDN;
+    /**
+     * MSISDN
+     */
+    private String inputMSISDN;
 
-	/**
-	 * Constructor
-	 */
-	private HttpsProvionningMSISDNInput() {
-		super();
-	}
+    /**
+     * Constructor
+     */
+    private HttpsProvionningMSISDNInput() {
+        super();
+    }
 
-	/**
-	 * Get the MSISDN
-	 *
-	 * @return MSISDN
-	 */
-	protected String getMsisdn() {
-		return inputMSISDN;
-	}
+    /**
+     * Get the MSISDN
+     * 
+     * @return MSISDN
+     */
+    protected String getMsisdn() {
+        return inputMSISDN;
+    }
 
-	/**
-	 * Returns the Instance of HttpsProvionningMSISDNDialog
-	 *
-	 * @return Instance of HttpsProvionningMSISDNDialog
-	 */
-	public final static HttpsProvionningMSISDNInput getInstance() {
-		if (HttpsProvionningMSISDNInput.instance == null) {
-			synchronized (HttpsProvionningMSISDNInput.class) {
-				if (HttpsProvionningMSISDNInput.instance == null) {
-					HttpsProvionningMSISDNInput.instance = new HttpsProvionningMSISDNInput();
-				}
-			}
-		}
-		return HttpsProvionningMSISDNInput.instance;
-	}
+    /**
+     * Returns the Instance of HttpsProvionningMSISDNDialog
+     * 
+     * @return Instance of HttpsProvionningMSISDNDialog
+     */
+    public final static HttpsProvionningMSISDNInput getInstance() {
+        if (HttpsProvionningMSISDNInput.instance == null) {
+            synchronized (HttpsProvionningMSISDNInput.class) {
+                if (HttpsProvionningMSISDNInput.instance == null) {
+                    HttpsProvionningMSISDNInput.instance = new HttpsProvionningMSISDNInput();
+                }
+            }
+        }
+        return HttpsProvionningMSISDNInput.instance;
+    }
 
-	/**
-	 * Display the MSISDN popup
-	 *
-	 * @param context
-	 * @return
-	 */
-	protected String displayPopupAndWaitResponse(Context context) {
-		Intent intent = new Intent(context, HttpsProvisioningAlertDialog.class);
-		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		context.startActivity(intent);
-		try {
-			synchronized (HttpsProvionningMSISDNInput.instance) {
-				super.wait();
-			}
-		} catch (InterruptedException e) {
-			// nothing to do
-		}
+    /**
+     * Display the MSISDN popup
+     * 
+     * @param context
+     * @return
+     */
+    protected String displayPopupAndWaitResponse(Context context) {
+        Intent intent = new Intent(context, HttpsProvisioningAlertDialog.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+        try {
+            synchronized (HttpsProvionningMSISDNInput.instance) {
+                super.wait();
+            }
+        } catch (InterruptedException e) {
+            // nothing to do
+        }
 
-		return inputMSISDN;
-	}
+        return inputMSISDN;
+    }
 
-	/**
-	 * Callback of the MSISDN
-	 *
-	 * @param value
-	 */
-	protected void responseReceived(String value) {
-		synchronized (HttpsProvionningMSISDNInput.instance) {
-			inputMSISDN = value;
-			super.notify();
-		}
-	}
+    /**
+     * Callback of the MSISDN
+     * 
+     * @param value
+     */
+    protected void responseReceived(String value) {
+        synchronized (HttpsProvionningMSISDNInput.instance) {
+            inputMSISDN = value;
+            super.notify();
+        }
+    }
 }

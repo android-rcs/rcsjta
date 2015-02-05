@@ -37,8 +37,8 @@ public class ImdnParserTest extends AndroidTestCase {
     /*
      * IMDN SAMPLE: <?xml version="1.0" encoding="UTF-8"?> <imdn
      * xmlns="urn:ietf:params:xml:ns:imdn"> <message-id>34jk324j</message-id>
-     * <datetime>2008-04-04T12:16:49-05:00</datetime> <display-notification>
-     * <status> <displayed/> </status> </display-notification> </imdn>
+     * <datetime>2008-04-04T12:16:49-05:00</datetime> <display-notification> <status> <displayed/>
+     * </status> </display-notification> </imdn>
      */
     // @formatter:on
 

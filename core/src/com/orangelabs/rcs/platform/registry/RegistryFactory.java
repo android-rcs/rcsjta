@@ -26,128 +26,110 @@ import com.orangelabs.rcs.platform.FactoryException;
  * @author jexa7410
  */
 public abstract class RegistryFactory {
-	/**
-	 * Current platform factory
-	 */
-	private static RegistryFactory factory = null;
+    /**
+     * Current platform factory
+     */
+    private static RegistryFactory factory = null;
 
-	/**
-	 * Load the factory
-	 * 
-	 * @param classname
-	 *            Factory classname
-	 * @throws Exception
-	 */
-	public static void loadFactory(String classname) throws FactoryException {
-		if (factory != null) {
-			return;
-		}
+    /**
+     * Load the factory
+     * 
+     * @param classname Factory classname
+     * @throws Exception
+     */
+    public static void loadFactory(String classname) throws FactoryException {
+        if (factory != null) {
+            return;
+        }
 
-		try {
-			factory = (RegistryFactory) Class.forName(classname).newInstance();
-		} catch (Exception e) {
-			throw new FactoryException("Can't load the factory " + classname);
-		}
-	}
+        try {
+            factory = (RegistryFactory) Class.forName(classname).newInstance();
+        } catch (Exception e) {
+            throw new FactoryException("Can't load the factory " + classname);
+        }
+    }
 
-	/**
-	 * Returns the current factory
-	 * 
-	 * @return Factory
-	 */
-	public static RegistryFactory getFactory() {
-		return factory;
-	}
+    /**
+     * Returns the current factory
+     * 
+     * @return Factory
+     */
+    public static RegistryFactory getFactory() {
+        return factory;
+    }
 
-	/**
-	 * Read a string value in the registry
-	 * 
-	 * @param key
-	 *            Key name to be read
-	 * @param defaultValue
-	 *            Default value
-	 * @return String
-	 */
-	public abstract String readString(String key, String defaultValue);
+    /**
+     * Read a string value in the registry
+     * 
+     * @param key Key name to be read
+     * @param defaultValue Default value
+     * @return String
+     */
+    public abstract String readString(String key, String defaultValue);
 
-	/**
-	 * Write a string value in the registry
-	 * 
-	 * @param key
-	 *            Key name to be updated
-	 * @param value
-	 *            New value
-	 */
-	public abstract void writeString(String key, String value);
+    /**
+     * Write a string value in the registry
+     * 
+     * @param key Key name to be updated
+     * @param value New value
+     */
+    public abstract void writeString(String key, String value);
 
-	/**
-	 * Read an integer value in the registry
-	 * 
-	 * @param key
-	 *            Key name to be read
-	 * @param defaultValue
-	 *            Default value
-	 * @return Integer
-	 */
-	public abstract int readInteger(String key, int defaultValue);
+    /**
+     * Read an integer value in the registry
+     * 
+     * @param key Key name to be read
+     * @param defaultValue Default value
+     * @return Integer
+     */
+    public abstract int readInteger(String key, int defaultValue);
 
-	/**
-	 * Write an integer value in the registry
-	 * 
-	 * @param key
-	 *            Key name to be updated
-	 * @param value
-	 *            New value
-	 */
-	public abstract void writeInteger(String key, int value);
+    /**
+     * Write an integer value in the registry
+     * 
+     * @param key Key name to be updated
+     * @param value New value
+     */
+    public abstract void writeInteger(String key, int value);
 
-	/**
-	 * Read a long value in the registry
-	 * 
-	 * @param key
-	 *            Key name to be read
-	 * @param defaultValue
-	 *            Default value
-	 * @return Long
-	 */
-	public abstract long readLong(String key, long defaultValue);
+    /**
+     * Read a long value in the registry
+     * 
+     * @param key Key name to be read
+     * @param defaultValue Default value
+     * @return Long
+     */
+    public abstract long readLong(String key, long defaultValue);
 
-	/**
-	 * Write a long value in the registry
-	 * 
-	 * @param key
-	 *            Key name to be updated
-	 * @param value
-	 *            New value
-	 */
-	public abstract void writeLong(String key, long value);
+    /**
+     * Write a long value in the registry
+     * 
+     * @param key Key name to be updated
+     * @param value New value
+     */
+    public abstract void writeLong(String key, long value);
 
-	/**
-	 * Read a boolean value in the registry
-	 * 
-	 * @param key
-	 *            Key name to be read
-	 * @param defaultValue
-	 *            Default value
-	 * @return Boolean
-	 */
-	public abstract boolean readBoolean(String key, boolean defaultValue);
+    /**
+     * Read a boolean value in the registry
+     * 
+     * @param key Key name to be read
+     * @param defaultValue Default value
+     * @return Boolean
+     */
+    public abstract boolean readBoolean(String key, boolean defaultValue);
 
-	/**
-	 * Write a boolean value in the registry
-	 * 
-	 * @param key
-	 *            Key name to be updated
-	 * @param value
-	 *            New value
-	 */
-	public abstract void writeBoolean(String key, boolean value);
+    /**
+     * Write a boolean value in the registry
+     * 
+     * @param key Key name to be updated
+     * @param value New value
+     */
+    public abstract void writeBoolean(String key, boolean value);
 
-	/**
-	 * Remove a parameter in the registry
-	 * 
-	 * @param key
-	 *            Key name to be removed
-	 */
-	public abstract void removeParameter(String key);
+    /**
+     * Remove a parameter in the registry
+     * 
+     * @param key Key name to be removed
+     */
+    public abstract void removeParameter(String key);
 }

@@ -84,8 +84,8 @@ public class ImageSharingList extends Activity {
         setContentView(R.layout.image_sharing_list);
 
         // Set list adapter
-        listView = (ListView)findViewById(android.R.id.list);
-        TextView emptyView = (TextView)findViewById(android.R.id.empty);
+        listView = (ListView) findViewById(android.R.id.list);
+        TextView emptyView = (TextView) findViewById(android.R.id.empty);
         listView.setEmptyView(emptyView);
     }
 
@@ -137,7 +137,7 @@ public class ImageSharingList extends Activity {
 
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
-            ImageSharingItemCache holder = (ImageSharingItemCache)view.getTag();
+            ImageSharingItemCache holder = (ImageSharingItemCache) view.getTag();
 
             String number = cursor.getString(holder.columnNumber);
 
@@ -198,12 +198,12 @@ public class ImageSharingList extends Activity {
             columnState = cursor.getColumnIndex(ImageSharingLog.STATE);
             columnDirection = cursor.getColumnIndex(ImageSharingLog.DIRECTION);
             columnTimestamp = cursor.getColumnIndex(ImageSharingLog.TIMESTAMP);
-            numberText = (TextView)view.findViewById(R.id.number);
-            filenameText = (TextView)view.findViewById(R.id.filename);
-            filesizeText = (TextView)view.findViewById(R.id.filesize);
-            stateText = (TextView)view.findViewById(R.id.state);
-            directionText = (TextView)view.findViewById(R.id.direction);
-            timestamptext = (TextView)view.findViewById(R.id.date);
+            numberText = (TextView) view.findViewById(R.id.number);
+            filenameText = (TextView) view.findViewById(R.id.filename);
+            filesizeText = (TextView) view.findViewById(R.id.filesize);
+            stateText = (TextView) view.findViewById(R.id.state);
+            directionText = (TextView) view.findViewById(R.id.direction);
+            timestamptext = (TextView) view.findViewById(R.id.date);
         }
     }
 

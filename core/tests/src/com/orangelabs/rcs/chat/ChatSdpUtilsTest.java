@@ -52,13 +52,11 @@ public class ChatSdpUtilsTest extends AndroidTestCase {
         super.setUp();
         // @formatter:off
         /*
-         * v=0 o=- 3600492772 3600492772 IN IP4 10.29.67.37 s=- c=IN IP4
-         * 10.29.67.37 t=0 0 m=message 20000 TCP/MSRP *
-         * a=path:msrp://10.29.67.37:20000/1391503972255;tcp a=setup:actpass
+         * v=0 o=- 3600492772 3600492772 IN IP4 10.29.67.37 s=- c=IN IP4 10.29.67.37 t=0 0 m=message
+         * 20000 TCP/MSRP * a=path:msrp://10.29.67.37:20000/1391503972255;tcp a=setup:actpass
          * a=accept-types:message/cpim application/im-iscomposing+xml
          * a=accept-wrapped-types:text/plain message/imdn+xml
-         * application/vnd.gsma.rcspushlocation+xml
-         * application/vnd.gsma.rcs-ft-http+xml a=sendrecv
+         * application/vnd.gsma.rcspushlocation+xml application/vnd.gsma.rcs-ft-http+xml a=sendrecv
          */
         // @formatter:on
         String ntpTime = "3600492772";

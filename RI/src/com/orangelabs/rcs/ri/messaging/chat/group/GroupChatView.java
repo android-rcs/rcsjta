@@ -270,8 +270,8 @@ public class GroupChatView extends ChatView {
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         // Get the list item position
-        AdapterContextMenuInfo info = (AdapterContextMenuInfo)menuInfo;
-        Cursor cursor = (Cursor)mAdapter.getItem(info.position);
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
+        Cursor cursor = (Cursor) mAdapter.getItem(info.position);
         menu.add(0, GROUPCHAT_MENU_ITEM_DELETE, 0, R.string.menu_delete_message);
         Direction direction = Direction.valueOf(cursor.getInt(cursor
                 .getColumnIndex(Message.DIRECTION)));
@@ -282,8 +282,8 @@ public class GroupChatView extends ChatView {
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        AdapterContextMenuInfo info = (AdapterContextMenuInfo)item.getMenuInfo();
-        Cursor cursor = (Cursor)(mAdapter.getItem(info.position));
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+        Cursor cursor = (Cursor) (mAdapter.getItem(info.position));
         String messageId = cursor.getString(cursor.getColumnIndexOrThrow(BaseColumns._ID));
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "onContextItemSelected msgId=".concat(messageId));
@@ -345,7 +345,7 @@ public class GroupChatView extends ChatView {
             Log.d(LOGTAG, "processIntent");
         }
         try {
-            switch ((GroupChatMode)getIntent().getSerializableExtra(EXTRA_MODE)) {
+            switch ((GroupChatMode) getIntent().getSerializableExtra(EXTRA_MODE)) {
                 case OUTGOING:
                     // Initiate a Group Chat: check if the service is available
                     boolean registered = mCnxManager.getChatApi().isServiceRegistered();
@@ -427,7 +427,7 @@ public class GroupChatView extends ChatView {
                     return true;
 
                 case INCOMING:
-                    ChatMessageDAO message = (ChatMessageDAO)(getIntent().getExtras()
+                    ChatMessageDAO message = (ChatMessageDAO) (getIntent().getExtras()
                             .getParcelable(BUNDLE_CHATMESSAGE_DAO_ID));
                     if (message != null) {
                         // It is a new message: check if for the displayed
@@ -503,7 +503,7 @@ public class GroupChatView extends ChatView {
         // Create a new CursorLoader with the following query parameters.
         CursorLoader loader = new CursorLoader(this, Message.CONTENT_URI, PROJECTION, WHERE_CLAUSE,
                 new String[] {
-                    mChatId
+                        mChatId
                 }, QUERY_SORT_ORDER);
         return loader;
     }
@@ -680,7 +680,7 @@ public class GroupChatView extends ChatView {
         builder.setCancelable(true);
         builder.setMultiChoiceItems(items, null, new DialogInterface.OnMultiChoiceClickListener() {
             public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                String c = (String)items[which];
+                String c = (String) items[which];
                 if (isChecked) {
                     selectedParticipants.add(c);
                 } else {

@@ -97,12 +97,12 @@ public class RequestCapabilities extends Activity {
         setContentView(R.layout.capabilities_request);
 
         // Set the contact selector
-        mSpinner = (Spinner)findViewById(R.id.contact);
+        mSpinner = (Spinner) findViewById(R.id.contact);
         mSpinner.setAdapter(ContactListAdapter.createContactListAdapter(this));
         mSpinner.setOnItemSelectedListener(listenerContact);
 
         // Set button callback
-        Button refreshBtn = (Button)findViewById(R.id.refresh_btn);
+        Button refreshBtn = (Button) findViewById(R.id.refresh_btn);
         refreshBtn.setOnClickListener(btnRefreshListener);
 
         // Update refresh button
@@ -158,8 +158,7 @@ public class RequestCapabilities extends Activity {
      */
     private class MyCapabilitiesListener extends CapabilitiesListener {
         /**
-         * Callback called when new capabilities are received for a given
-         * contact
+         * Callback called when new capabilities are received for a given contact
          * 
          * @param contact Contact
          * @param capabilities Capabilities
@@ -223,7 +222,7 @@ public class RequestCapabilities extends Activity {
      */
     private ContactId getSelectedContact() {
         // get selected phone number
-        ContactListAdapter adapter = (ContactListAdapter)mSpinner.getAdapter();
+        ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
         return mContactUtils.formatContact(adapter.getSelectedNumber(mSpinner.getSelectedView()));
     }
 
@@ -280,17 +279,17 @@ public class RequestCapabilities extends Activity {
      * @param capabilities Capabilities
      */
     private void displayCapabilities(Capabilities capabilities) {
-        CheckBox imageCSh = (CheckBox)findViewById(R.id.image_sharing);
-        CheckBox videoCSh = (CheckBox)findViewById(R.id.video_sharing);
-        CheckBox ft = (CheckBox)findViewById(R.id.file_transfer);
-        CheckBox im = (CheckBox)findViewById(R.id.im);
-        CheckBox geoloc = (CheckBox)findViewById(R.id.geoloc_push);
-        CheckBox ipVoiceCall = (CheckBox)findViewById(R.id.ip_voice_call);
-        CheckBox ipVideoCall = (CheckBox)findViewById(R.id.ip_video_call);
-        TextView extensions = (TextView)findViewById(R.id.extensions);
-        TextView timestamp = (TextView)findViewById(R.id.last_refresh);
-        CheckBox automata = (CheckBox)findViewById(R.id.automata);
-        CheckBox valid = (CheckBox)findViewById(R.id.is_valid);
+        CheckBox imageCSh = (CheckBox) findViewById(R.id.image_sharing);
+        CheckBox videoCSh = (CheckBox) findViewById(R.id.video_sharing);
+        CheckBox ft = (CheckBox) findViewById(R.id.file_transfer);
+        CheckBox im = (CheckBox) findViewById(R.id.im);
+        CheckBox geoloc = (CheckBox) findViewById(R.id.geoloc_push);
+        CheckBox ipVoiceCall = (CheckBox) findViewById(R.id.ip_voice_call);
+        CheckBox ipVideoCall = (CheckBox) findViewById(R.id.ip_video_call);
+        TextView extensions = (TextView) findViewById(R.id.extensions);
+        TextView timestamp = (TextView) findViewById(R.id.last_refresh);
+        CheckBox automata = (CheckBox) findViewById(R.id.automata);
+        CheckBox valid = (CheckBox) findViewById(R.id.is_valid);
         // Set capabilities
         imageCSh.setChecked((capabilities != null) ? capabilities.isImageSharingSupported() : false);
         videoCSh.setChecked((capabilities != null) ? capabilities.isVideoSharingSupported() : false);

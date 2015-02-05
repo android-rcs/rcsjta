@@ -36,30 +36,30 @@ import android.os.Bundle;
  */
 public class SetupRcsAccount extends android.accounts.AccountAuthenticatorActivity {
 
-	private LocalContentResolver mLocalContentResolver;
+    private LocalContentResolver mLocalContentResolver;
 
-	public void onCreate(Bundle icicle) {
-		super.onCreate(icicle);
-		Context ctx = getApplicationContext();
-		mLocalContentResolver = new LocalContentResolver(ctx.getContentResolver());
-		AuthenticationService.createRcsAccount(this, mLocalContentResolver,
-				getString(R.string.rcs_core_account_username), true);
+    public void onCreate(Bundle icicle) {
+        super.onCreate(icicle);
+        Context ctx = getApplicationContext();
+        mLocalContentResolver = new LocalContentResolver(ctx.getContentResolver());
+        AuthenticationService.createRcsAccount(this, mLocalContentResolver,
+                getString(R.string.rcs_core_account_username), true);
 
-		Bundle extras = getIntent().getExtras();
-		if (extras != null) {
-			AccountAuthenticatorResponse response = extras
-					.getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE);
-			Bundle result = new Bundle();
-			result.putString(AccountManager.KEY_ACCOUNT_NAME,
-					getString(R.string.rcs_core_account_username));
-			result.putString(AccountManager.KEY_ACCOUNT_TYPE,
-					AuthenticationService.ACCOUNT_MANAGER_TYPE);
-			response.onResult(result);
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            AccountAuthenticatorResponse response = extras
+                    .getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE);
+            Bundle result = new Bundle();
+            result.putString(AccountManager.KEY_ACCOUNT_NAME,
+                    getString(R.string.rcs_core_account_username));
+            result.putString(AccountManager.KEY_ACCOUNT_TYPE,
+                    AuthenticationService.ACCOUNT_MANAGER_TYPE);
+            response.onResult(result);
 
-			// Start the service
-			LauncherUtils.launchRcsService(ctx, false, false);
-		}
-		finish();
-	}
+            // Start the service
+            LauncherUtils.launchRcsService(ctx, false, false);
+        }
+        finish();
+    }
 
 }

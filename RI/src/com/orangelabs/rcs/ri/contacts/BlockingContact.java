@@ -76,13 +76,13 @@ public class BlockingContact extends Activity {
         mContactUtils = ContactUtils.getInstance(this);
 
         // Set the contact selector
-        mSpinner = (Spinner)findViewById(R.id.contact);
+        mSpinner = (Spinner) findViewById(R.id.contact);
         ContactListAdapter adapter = ContactListAdapter.createRcsContactListAdapter(this);
         mSpinner.setAdapter(adapter);
         mSpinner.setOnItemSelectedListener(listenerContact);
 
         // Set button callback
-        toggleBtn = (ToggleButton)findViewById(R.id.block_btn);
+        toggleBtn = (ToggleButton) findViewById(R.id.block_btn);
         toggleBtn.setOnClickListener(toggleListener);
 
         // Update refresh button
@@ -139,7 +139,7 @@ public class BlockingContact extends Activity {
      */
     private ContactId getSelectedContact() {
         // get selected phone number
-        ContactListAdapter adapter = (ContactListAdapter)mSpinner.getAdapter();
+        ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
         return mContactUtils.formatContact(adapter.getSelectedNumber(mSpinner.getSelectedView()));
     }
 

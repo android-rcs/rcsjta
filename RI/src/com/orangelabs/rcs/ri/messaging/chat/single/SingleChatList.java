@@ -58,8 +58,7 @@ import com.orangelabs.rcs.ri.utils.Utils;
 public class SingleChatList extends Activity {
 
     /**
-     * Contact is the ID since there is a single contact occurrence in the query
-     * result
+     * Contact is the ID since there is a single contact occurrence in the query result
      */
     private static final String CONTACT_AS_ID = new StringBuilder(Message.CONTACT).append(" AS ")
             .append(BaseColumns._ID).toString();
@@ -107,8 +106,8 @@ public class SingleChatList extends Activity {
         mContactUtils = ContactUtils.getInstance(this);
 
         // Set list adapter
-        mListView = (ListView)findViewById(android.R.id.list);
-        TextView emptyView = (TextView)findViewById(android.R.id.empty);
+        mListView = (ListView) findViewById(android.R.id.list);
+        TextView emptyView = (TextView) findViewById(android.R.id.empty);
         mListView.setEmptyView(emptyView);
         mListView.setOnItemClickListener(new OnItemClickListener() {
 
@@ -125,7 +124,7 @@ public class SingleChatList extends Activity {
 
                 }
                 // Get selected item
-                Cursor cursor = (Cursor)(parent.getAdapter()).getItem(pos);
+                Cursor cursor = (Cursor) (parent.getAdapter()).getItem(pos);
                 String number = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
 
                 ContactId contact;
@@ -191,7 +190,7 @@ public class SingleChatList extends Activity {
 
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
-            SingleChatListItemViewHolder holder = (SingleChatListItemViewHolder)view.getTag();
+            SingleChatListItemViewHolder holder = (SingleChatListItemViewHolder) view.getTag();
 
             // Set the date/time field by mixing relative and absolute times
             long date = cursor.getLong(holder.columnTimestamp);
@@ -230,8 +229,8 @@ public class SingleChatList extends Activity {
     }
 
     /**
-     * A ViewHolder class keeps references to children views to avoid
-     * unnecessary calls to findViewById() or getColumnIndex() on each row.
+     * A ViewHolder class keeps references to children views to avoid unnecessary calls to
+     * findViewById() or getColumnIndex() on each row.
      */
     private class SingleChatListItemViewHolder {
         int columnContact;
@@ -254,9 +253,9 @@ public class SingleChatList extends Activity {
             columnMimetype = cursor.getColumnIndexOrThrow(Message.MIME_TYPE);
             columnTimestamp = cursor.getColumnIndexOrThrow(Message.TIMESTAMP);
 
-            contactText = (TextView)base.findViewById(R.id.line1);
-            contentText = (TextView)base.findViewById(R.id.line2);
-            dateText = (TextView)base.findViewById(R.id.date);
+            contactText = (TextView) base.findViewById(R.id.line1);
+            contentText = (TextView) base.findViewById(R.id.line2);
+            dateText = (TextView) base.findViewById(R.id.date);
         }
     }
 

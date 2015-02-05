@@ -25,7 +25,7 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.stream.RtpOutputStream;
 
 /**
  * Dummy packet generator for maintaining alive the network address in NAT
- *
+ * 
  * @author jexa7410
  */
 public class DummyPacketGenerator {
@@ -52,7 +52,7 @@ public class DummyPacketGenerator {
 
     /**
      * Prepare the RTP session
-     *
+     * 
      * @param remoteAddress Remote address
      * @param remotePort Remote port
      * @param rtpStream already existing RTP input stream
@@ -60,20 +60,20 @@ public class DummyPacketGenerator {
      */
     public void prepareSession(String remoteAddress, int remotePort, RtpInputStream rtpStream)
             throws RtpException {
-    	try {
-    		// Create the input stream
+        try {
+            // Create the input stream
             inputStream = new DummyPacketSourceStream();
-    		inputStream.open();
+            inputStream.open();
 
             // Create the output stream
             outputStream = new RtpOutputStream(remoteAddress, remotePort, rtpStream);
-    		outputStream.open();
+            outputStream.open();
 
             // Create the media processor
-    		processor = new Processor(inputStream, outputStream, new Codec[0]);
+            processor = new Processor(inputStream, outputStream, new Codec[0]);
 
-        } catch(Exception e) {
-        	throw new RtpException("Can't prepare resources");
+        } catch (Exception e) {
+            throw new RtpException("Can't prepare resources");
         }
     }
 
@@ -81,20 +81,20 @@ public class DummyPacketGenerator {
      * Start the RTP session
      */
     public void startSession() {
-    	// Start the media processor
-		if (processor != null) {
-			processor.startProcessing();
-		}
+        // Start the media processor
+        if (processor != null) {
+            processor.startProcessing();
+        }
     }
 
     /**
      * Stop the RTP session
      */
     public void stopSession() {
-    	// Stop the media processor
-		if (processor != null) {
-			processor.stopProcessing();
-		}
+        // Stop the media processor
+        if (processor != null) {
+            processor.stopProcessing();
+        }
 
         if (outputStream != null)
             outputStream.close();

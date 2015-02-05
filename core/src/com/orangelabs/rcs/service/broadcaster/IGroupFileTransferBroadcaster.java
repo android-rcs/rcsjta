@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.orangelabs.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.contacts.ContactId;
@@ -22,15 +23,15 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 public interface IGroupFileTransferBroadcaster {
 
-	public void broadcastStateChanged(String chatId, String transferId, int status, int reasonCode);
+    public void broadcastStateChanged(String chatId, String transferId, int status, int reasonCode);
 
-	public void broadcastProgressUpdate(String chatId, String transferId, long currentSize,
-			long totalSize);
+    public void broadcastProgressUpdate(String chatId, String transferId, long currentSize,
+            long totalSize);
 
-	public void broadcastGroupDeliveryInfoStateChanged(String chatId, ContactId contact,
-			String transferId, int state, int reasonCode);
+    public void broadcastGroupDeliveryInfoStateChanged(String chatId, ContactId contact,
+            String transferId, int state, int reasonCode);
 
-	public void broadcastInvitation(String fileTransferId);
+    public void broadcastInvitation(String fileTransferId);
 
-	public void broadcastResumeFileTransfer(String filetransferId);
+    public void broadcastResumeFileTransfer(String filetransferId);
 }

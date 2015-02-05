@@ -40,7 +40,6 @@ import android.view.inputmethod.EditorInfo;
 import com.google.common.collect.Lists;
 import com.gsma.services.rcs.samples.contacts.R;
 
-
 public class FallbackSource extends ContactsSource {
     protected static final int FLAGS_PHONE = EditorInfo.TYPE_CLASS_PHONE;
     protected static final int FLAGS_EMAIL = EditorInfo.TYPE_CLASS_TEXT
@@ -59,8 +58,8 @@ public class FallbackSource extends ContactsSource {
             | EditorInfo.TYPE_TEXT_VARIATION_POSTAL_ADDRESS | EditorInfo.TYPE_TEXT_FLAG_CAP_WORDS
             | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE;
     protected static final int FLAGS_SIP_ADDRESS = EditorInfo.TYPE_CLASS_TEXT
-            | EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS;  // since SIP addresses have the same
-                                                             // basic format as email addresses
+            | EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS; // since SIP addresses have the same
+                                                            // basic format as email addresses
 
     public FallbackSource() {
         this.accountType = null;
@@ -263,7 +262,7 @@ public class FallbackSource extends ContactsSource {
 
         if (inflateLevel >= ContactsSource.LEVEL_CONSTRAINTS) {
             final boolean useJapaneseOrder =
-                Locale.JAPANESE.getLanguage().equals(Locale.getDefault().getLanguage());
+                    Locale.JAPANESE.getLanguage().equals(Locale.getDefault().getLanguage());
             kind.typeColumn = StructuredPostal.TYPE;
             kind.typeList = Lists.newArrayList();
             kind.typeList.add(buildPostalType(StructuredPostal.TYPE_HOME));
@@ -422,7 +421,8 @@ public class FallbackSource extends ContactsSource {
             kind.defaultValues.put(Website.TYPE, Website.TYPE_OTHER);
 
             kind.fieldList = Lists.newArrayList();
-            kind.fieldList.add(new EditField(Website.URL, R.string.websiteLabelsGroup, FLAGS_WEBSITE));
+            kind.fieldList.add(new EditField(Website.URL, R.string.websiteLabelsGroup,
+                    FLAGS_WEBSITE));
         }
 
         return kind;
@@ -465,15 +465,15 @@ public class FallbackSource extends ContactsSource {
         if (inflateLevel >= ContactsSource.LEVEL_CONSTRAINTS) {
             kind.fieldList = Lists.newArrayList();
             kind.fieldList.add(new EditField(SipAddress.SIP_ADDRESS,
-                                             R.string.label_sip_address, FLAGS_SIP_ADDRESS));
+                    R.string.label_sip_address, FLAGS_SIP_ADDRESS));
         }
 
         return kind;
     }
 
     /**
-     * Simple inflater that assumes a string resource has a "%s" that will be
-     * filled from the given column.
+     * Simple inflater that assumes a string resource has a "%s" that will be filled from the given
+     * column.
      */
     public static class SimpleInflater implements StringInflater {
         private final int mStringRes;
@@ -577,29 +577,51 @@ public class FallbackSource extends ContactsSource {
 
         @Override
         protected int getTypeLabelResource(Integer type) {
-            if (type == null) return R.string.call_other;
+            if (type == null)
+                return R.string.call_other;
             switch (type) {
-                case Phone.TYPE_HOME: return R.string.call_home;
-                case Phone.TYPE_MOBILE: return R.string.call_mobile;
-                case Phone.TYPE_WORK: return R.string.call_work;
-                case Phone.TYPE_FAX_WORK: return R.string.call_fax_work;
-                case Phone.TYPE_FAX_HOME: return R.string.call_fax_home;
-                case Phone.TYPE_PAGER: return R.string.call_pager;
-                case Phone.TYPE_OTHER: return R.string.call_other;
-                case Phone.TYPE_CALLBACK: return R.string.call_callback;
-                case Phone.TYPE_CAR: return R.string.call_car;
-                case Phone.TYPE_COMPANY_MAIN: return R.string.call_company_main;
-                case Phone.TYPE_ISDN: return R.string.call_isdn;
-                case Phone.TYPE_MAIN: return R.string.call_main;
-                case Phone.TYPE_OTHER_FAX: return R.string.call_other_fax;
-                case Phone.TYPE_RADIO: return R.string.call_radio;
-                case Phone.TYPE_TELEX: return R.string.call_telex;
-                case Phone.TYPE_TTY_TDD: return R.string.call_tty_tdd;
-                case Phone.TYPE_WORK_MOBILE: return R.string.call_work_mobile;
-                case Phone.TYPE_WORK_PAGER: return R.string.call_work_pager;
-                case Phone.TYPE_ASSISTANT: return R.string.call_assistant;
-                case Phone.TYPE_MMS: return R.string.call_mms;
-                default: return R.string.call_custom;
+                case Phone.TYPE_HOME:
+                    return R.string.call_home;
+                case Phone.TYPE_MOBILE:
+                    return R.string.call_mobile;
+                case Phone.TYPE_WORK:
+                    return R.string.call_work;
+                case Phone.TYPE_FAX_WORK:
+                    return R.string.call_fax_work;
+                case Phone.TYPE_FAX_HOME:
+                    return R.string.call_fax_home;
+                case Phone.TYPE_PAGER:
+                    return R.string.call_pager;
+                case Phone.TYPE_OTHER:
+                    return R.string.call_other;
+                case Phone.TYPE_CALLBACK:
+                    return R.string.call_callback;
+                case Phone.TYPE_CAR:
+                    return R.string.call_car;
+                case Phone.TYPE_COMPANY_MAIN:
+                    return R.string.call_company_main;
+                case Phone.TYPE_ISDN:
+                    return R.string.call_isdn;
+                case Phone.TYPE_MAIN:
+                    return R.string.call_main;
+                case Phone.TYPE_OTHER_FAX:
+                    return R.string.call_other_fax;
+                case Phone.TYPE_RADIO:
+                    return R.string.call_radio;
+                case Phone.TYPE_TELEX:
+                    return R.string.call_telex;
+                case Phone.TYPE_TTY_TDD:
+                    return R.string.call_tty_tdd;
+                case Phone.TYPE_WORK_MOBILE:
+                    return R.string.call_work_mobile;
+                case Phone.TYPE_WORK_PAGER:
+                    return R.string.call_work_pager;
+                case Phone.TYPE_ASSISTANT:
+                    return R.string.call_assistant;
+                case Phone.TYPE_MMS:
+                    return R.string.call_mms;
+                default:
+                    return R.string.call_custom;
             }
         }
     }
@@ -612,29 +634,51 @@ public class FallbackSource extends ContactsSource {
 
         @Override
         protected int getTypeLabelResource(Integer type) {
-            if (type == null) return R.string.sms_other;
+            if (type == null)
+                return R.string.sms_other;
             switch (type) {
-                case Phone.TYPE_HOME: return R.string.sms_home;
-                case Phone.TYPE_MOBILE: return R.string.sms_mobile;
-                case Phone.TYPE_WORK: return R.string.sms_work;
-                case Phone.TYPE_FAX_WORK: return R.string.sms_fax_work;
-                case Phone.TYPE_FAX_HOME: return R.string.sms_fax_home;
-                case Phone.TYPE_PAGER: return R.string.sms_pager;
-                case Phone.TYPE_OTHER: return R.string.sms_other;
-                case Phone.TYPE_CALLBACK: return R.string.sms_callback;
-                case Phone.TYPE_CAR: return R.string.sms_car;
-                case Phone.TYPE_COMPANY_MAIN: return R.string.sms_company_main;
-                case Phone.TYPE_ISDN: return R.string.sms_isdn;
-                case Phone.TYPE_MAIN: return R.string.sms_main;
-                case Phone.TYPE_OTHER_FAX: return R.string.sms_other_fax;
-                case Phone.TYPE_RADIO: return R.string.sms_radio;
-                case Phone.TYPE_TELEX: return R.string.sms_telex;
-                case Phone.TYPE_TTY_TDD: return R.string.sms_tty_tdd;
-                case Phone.TYPE_WORK_MOBILE: return R.string.sms_work_mobile;
-                case Phone.TYPE_WORK_PAGER: return R.string.sms_work_pager;
-                case Phone.TYPE_ASSISTANT: return R.string.sms_assistant;
-                case Phone.TYPE_MMS: return R.string.sms_mms;
-                default: return R.string.sms_custom;
+                case Phone.TYPE_HOME:
+                    return R.string.sms_home;
+                case Phone.TYPE_MOBILE:
+                    return R.string.sms_mobile;
+                case Phone.TYPE_WORK:
+                    return R.string.sms_work;
+                case Phone.TYPE_FAX_WORK:
+                    return R.string.sms_fax_work;
+                case Phone.TYPE_FAX_HOME:
+                    return R.string.sms_fax_home;
+                case Phone.TYPE_PAGER:
+                    return R.string.sms_pager;
+                case Phone.TYPE_OTHER:
+                    return R.string.sms_other;
+                case Phone.TYPE_CALLBACK:
+                    return R.string.sms_callback;
+                case Phone.TYPE_CAR:
+                    return R.string.sms_car;
+                case Phone.TYPE_COMPANY_MAIN:
+                    return R.string.sms_company_main;
+                case Phone.TYPE_ISDN:
+                    return R.string.sms_isdn;
+                case Phone.TYPE_MAIN:
+                    return R.string.sms_main;
+                case Phone.TYPE_OTHER_FAX:
+                    return R.string.sms_other_fax;
+                case Phone.TYPE_RADIO:
+                    return R.string.sms_radio;
+                case Phone.TYPE_TELEX:
+                    return R.string.sms_telex;
+                case Phone.TYPE_TTY_TDD:
+                    return R.string.sms_tty_tdd;
+                case Phone.TYPE_WORK_MOBILE:
+                    return R.string.sms_work_mobile;
+                case Phone.TYPE_WORK_PAGER:
+                    return R.string.sms_work_pager;
+                case Phone.TYPE_ASSISTANT:
+                    return R.string.sms_assistant;
+                case Phone.TYPE_MMS:
+                    return R.string.sms_mms;
+                default:
+                    return R.string.sms_custom;
             }
         }
     }
@@ -642,13 +686,19 @@ public class FallbackSource extends ContactsSource {
     public static class EmailActionInflater extends CommonInflater {
         @Override
         protected int getTypeLabelResource(Integer type) {
-            if (type == null) return R.string.email;
+            if (type == null)
+                return R.string.email;
             switch (type) {
-                case Email.TYPE_HOME: return R.string.email_home;
-                case Email.TYPE_WORK: return R.string.email_work;
-                case Email.TYPE_OTHER: return R.string.email_other;
-                case Email.TYPE_MOBILE: return R.string.email_mobile;
-                default: return R.string.email_custom;
+                case Email.TYPE_HOME:
+                    return R.string.email_home;
+                case Email.TYPE_WORK:
+                    return R.string.email_work;
+                case Email.TYPE_OTHER:
+                    return R.string.email_other;
+                case Email.TYPE_MOBILE:
+                    return R.string.email_mobile;
+                default:
+                    return R.string.email_custom;
             }
         }
     }
@@ -663,12 +713,17 @@ public class FallbackSource extends ContactsSource {
     public static class PostalActionInflater extends CommonInflater {
         @Override
         protected int getTypeLabelResource(Integer type) {
-            if (type == null) return R.string.map_other;
+            if (type == null)
+                return R.string.map_other;
             switch (type) {
-                case StructuredPostal.TYPE_HOME: return R.string.map_home;
-                case StructuredPostal.TYPE_WORK: return R.string.map_work;
-                case StructuredPostal.TYPE_OTHER: return R.string.map_other;
-                default: return R.string.map_custom;
+                case StructuredPostal.TYPE_HOME:
+                    return R.string.map_home;
+                case StructuredPostal.TYPE_WORK:
+                    return R.string.map_work;
+                case StructuredPostal.TYPE_OTHER:
+                    return R.string.map_other;
+                default:
+                    return R.string.map_custom;
             }
         }
     }
@@ -686,18 +741,29 @@ public class FallbackSource extends ContactsSource {
 
         @Override
         protected int getTypeLabelResource(Integer type) {
-            if (type == null) return R.string.chat;
+            if (type == null)
+                return R.string.chat;
             switch (type) {
-                case Im.PROTOCOL_AIM: return R.string.chat_aim;
-                case Im.PROTOCOL_MSN: return R.string.chat_msn;
-                case Im.PROTOCOL_YAHOO: return R.string.chat_yahoo;
-                case Im.PROTOCOL_SKYPE: return R.string.chat_skype;
-                case Im.PROTOCOL_QQ: return R.string.chat_qq;
-                case Im.PROTOCOL_GOOGLE_TALK: return R.string.chat_gtalk;
-                case Im.PROTOCOL_ICQ: return R.string.chat_icq;
-                case Im.PROTOCOL_JABBER: return R.string.chat_jabber;
-                case Im.PROTOCOL_NETMEETING: return R.string.chat;
-                default: return R.string.chat;
+                case Im.PROTOCOL_AIM:
+                    return R.string.chat_aim;
+                case Im.PROTOCOL_MSN:
+                    return R.string.chat_msn;
+                case Im.PROTOCOL_YAHOO:
+                    return R.string.chat_yahoo;
+                case Im.PROTOCOL_SKYPE:
+                    return R.string.chat_skype;
+                case Im.PROTOCOL_QQ:
+                    return R.string.chat_qq;
+                case Im.PROTOCOL_GOOGLE_TALK:
+                    return R.string.chat_gtalk;
+                case Im.PROTOCOL_ICQ:
+                    return R.string.chat_icq;
+                case Im.PROTOCOL_JABBER:
+                    return R.string.chat_jabber;
+                case Im.PROTOCOL_NETMEETING:
+                    return R.string.chat;
+                default:
+                    return R.string.chat;
             }
         }
     }

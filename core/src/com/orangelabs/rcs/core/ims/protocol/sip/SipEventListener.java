@@ -24,11 +24,10 @@ package com.orangelabs.rcs.core.ims.protocol.sip;
  * @author jexa7410
  */
 public interface SipEventListener {
-	/**
-	 * Receive SIP request
-	 * 
-	 * @param request
-	 *            SIP request
-	 */
-	void receiveSipRequest(SipRequest request);
+    /**
+     * Receive SIP request
+     * 
+     * @param request SIP request
+     */
+    void receiveSipRequest(SipRequest request);
 }

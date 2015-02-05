@@ -83,8 +83,8 @@ public class VideoSharingList extends Activity {
         setContentView(R.layout.video_sharing_list);
 
         // Set list adapter
-        listView = (ListView)findViewById(android.R.id.list);
-        TextView emptyView = (TextView)findViewById(android.R.id.empty);
+        listView = (ListView) findViewById(android.R.id.list);
+        TextView emptyView = (TextView) findViewById(android.R.id.empty);
         listView.setEmptyView(emptyView);
     }
 
@@ -134,7 +134,7 @@ public class VideoSharingList extends Activity {
 
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
-            VideoSharingItemCache holder = (VideoSharingItemCache)view.getTag();
+            VideoSharingItemCache holder = (VideoSharingItemCache) view.getTag();
 
             String number = cursor.getString(holder.columnNumber);
             String displayName = RcsDisplayName.getInstance(context).getDisplayName(number);
@@ -186,11 +186,11 @@ public class VideoSharingList extends Activity {
             columnState = cursor.getColumnIndex(VideoSharingLog.STATE);
             columnDirection = cursor.getColumnIndex(VideoSharingLog.DIRECTION);
             columnTimestamp = cursor.getColumnIndex(VideoSharingLog.TIMESTAMP);
-            numberText = (TextView)view.findViewById(R.id.number);
-            durationText = (TextView)view.findViewById(R.id.duration);
-            stateText = (TextView)view.findViewById(R.id.state);
-            directionText = (TextView)view.findViewById(R.id.direction);
-            timestamptext = (TextView)view.findViewById(R.id.date);
+            numberText = (TextView) view.findViewById(R.id.number);
+            durationText = (TextView) view.findViewById(R.id.duration);
+            stateText = (TextView) view.findViewById(R.id.state);
+            directionText = (TextView) view.findViewById(R.id.direction);
+            timestamptext = (TextView) view.findViewById(R.id.date);
         }
     }
 

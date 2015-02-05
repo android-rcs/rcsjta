@@ -161,7 +161,7 @@ public class MessagingSessionView extends Activity {
                             // Session is established: hide progress dialog
                             hideProgressDialog();
                             // Activate button
-                            Button sendBtn = (Button)findViewById(R.id.send_btn);
+                            Button sendBtn = (Button) findViewById(R.id.send_btn);
                             sendBtn.setEnabled(true);
                             break;
 
@@ -219,7 +219,8 @@ public class MessagingSessionView extends Activity {
             handler.post(new Runnable() {
                 public void run() {
                     // Display received data
-                    TextView txt = (TextView)MessagingSessionView.this.findViewById(R.id.recv_data);
+                    TextView txt = (TextView) MessagingSessionView.this
+                            .findViewById(R.id.recv_data);
                     txt.setText(data);
                 }
             });
@@ -235,7 +236,7 @@ public class MessagingSessionView extends Activity {
         setContentView(R.layout.extension_session_view);
 
         // Set buttons callback
-        Button sendBtn = (Button)findViewById(R.id.send_btn);
+        Button sendBtn = (Button) findViewById(R.id.send_btn);
         sendBtn.setOnClickListener(btnSendListener);
         sendBtn.setEnabled(false);
 
@@ -379,12 +380,12 @@ public class MessagingSessionView extends Activity {
                 }
             }
             // Display session info
-            TextView featureTagEdit = (TextView)findViewById(R.id.feature_tag);
+            TextView featureTagEdit = (TextView) findViewById(R.id.feature_tag);
             featureTagEdit.setText(serviceId);
             String from = RcsDisplayName.getInstance(this).getDisplayName(contact);
-            TextView contactEdit = (TextView)findViewById(R.id.contact);
+            TextView contactEdit = (TextView) findViewById(R.id.contact);
             contactEdit.setText(from);
-            Button sendBtn = (Button)findViewById(R.id.send_btn);
+            Button sendBtn = (Button) findViewById(R.id.send_btn);
             if (session != null) {
                 sendBtn.setEnabled(true);
             } else {

@@ -22,7 +22,7 @@ import java.io.IOException;
 
 /**
  * Network ressource manager
- *
+ * 
  * @author Jean-Marc AUFFRET
  */
 public class NetworkRessourceManager {
@@ -33,7 +33,7 @@ public class NetworkRessourceManager {
 
     /**
      * Generate a default free RTP port number
-     *
+     * 
      * @return Local RTP port
      */
     public static synchronized int generateLocalRtpPort() {
@@ -42,7 +42,7 @@ public class NetworkRessourceManager {
 
     /**
      * Generate a free UDP port number from a specific port base
-     *
+     * 
      * @param portBase UDP port base
      * @return Local UDP port
      */
@@ -62,9 +62,8 @@ public class NetworkRessourceManager {
     }
 
     /**
-     * Test if the given local UDP port is really free (not used by other
-     * applications)
-     *
+     * Test if the given local UDP port is really free (not used by other applications)
+     * 
      * @param port Port to check
      * @return Boolean
      */
@@ -92,7 +91,7 @@ public class NetworkRessourceManager {
 
     /**
      * Create a datagram connection with a specific SO timeout
-     *
+     * 
      * @param timeout SO timeout
      * @return Datagram connection
      */

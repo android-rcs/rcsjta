@@ -44,7 +44,7 @@ import com.orangelabs.rcs.ri.utils.NetworkRessourceManager;
 
 /**
  * Live video RTP renderer based on H264 QCIF format
- *
+ * 
  * @author Jean-Marc AUFFRET
  */
 public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamListener {
@@ -149,9 +149,8 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
      * @param codec Video codec
      * @param remoteHost Remote RTP host
      * @param remotePort Remote RTP port
-     * @param orientationHeaderId Orientation header extension ID. The extension
-     *            ID is a value between 1 and 15 arbitrarily chosen by the
-     *            sender, as defined in RFC5285
+     * @param orientationHeaderId Orientation header extension ID. The extension ID is a value
+     *            between 1 and 15 arbitrarily chosen by the sender, as defined in RFC5285
      */
     public void setRemoteInfo(VideoCodec codec, String remoteHost, int remotePort,
             int orientationHeaderId) {
@@ -306,7 +305,7 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
 
     /**
      * Return the video start time
-     *
+     * 
      * @return Milliseconds
      */
     public long getVideoStartTime() {
@@ -315,7 +314,7 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
 
     /**
      * Returns the local RTP port
-     *
+     * 
      * @return Port
      */
     public int getLocalRtpPort() {
@@ -324,7 +323,7 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
 
     /**
      * Reserve a port
-     *
+     * 
      * @param port Port to reserve
      */
     private void reservePort(int port) {
@@ -353,7 +352,7 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
 
     /**
      * Is player opened
-     *
+     * 
      * @return Boolean
      */
     public boolean isOpened() {
@@ -362,7 +361,7 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
 
     /**
      * Is player started
-     *
+     * 
      * @return Boolean
      */
     public boolean isStarted() {
@@ -379,8 +378,7 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
     /**
      * Set the video orientation
      * 
-     * @param orientation Video orientation value (see
-     *            urn:3gpp:video-orientation)
+     * @param orientation Video orientation value (see urn:3gpp:video-orientation)
      */
     public void setOrientation(int orientation) {
         this.orientationHeaderId = orientation;
@@ -429,14 +427,14 @@ public class TerminatingVideoPlayer extends VideoPlayer implements RtpStreamList
 
         /**
          * Write a media sample
-         *
+         * 
          * @param sample Sample
          */
         public void writeSample(MediaSample sample) {
             rtpDummySender.incomingStarted();
 
             // Init orientation
-            VideoOrientation orientation = ((VideoSample)sample).getVideoOrientation();
+            VideoOrientation orientation = ((VideoSample) sample).getVideoOrientation();
             if (orientation != null) {
                 this.videoOrientation = orientation;
             }

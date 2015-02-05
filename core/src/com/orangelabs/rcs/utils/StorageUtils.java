@@ -23,38 +23,38 @@ import android.os.StatFs;
 
 /**
  * Storage utility functions
- *
+ * 
  * @author Deutsche Telekom AG
  */
 public class StorageUtils {
 
-	/**
-	 * Verify if external storage is available (read or write) using {@link Environment} external
-	 * storage state
-	 *
-	 * @see Environment#MEDIA_MOUNTED
-	 * @see Environment#MEDIA_MOUNTED_READ_ONLY
-	 * @return <code>true</code> if available, otherwise <code>false</code>
-	 */
-	public static boolean hasExternalStorage() {
-		String state = Environment.getExternalStorageState();
-		return Environment.MEDIA_MOUNTED.equals(state)
-				|| Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
-	}
+    /**
+     * Verify if external storage is available (read or write) using {@link Environment} external
+     * storage state
+     * 
+     * @see Environment#MEDIA_MOUNTED
+     * @see Environment#MEDIA_MOUNTED_READ_ONLY
+     * @return <code>true</code> if available, otherwise <code>false</code>
+     */
+    public static boolean hasExternalStorage() {
+        String state = Environment.getExternalStorageState();
+        return Environment.MEDIA_MOUNTED.equals(state)
+                || Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
+    }
 
-	/**
-	 * Get available space in external storage, only if external storage is ready to write
-	 *
-	 * @return Available space in bytes, otherwise <code>-1</code>
-	 */
-	public static long getExternalStorageFreeSpace() {
-		long freeSpace = -1;
-		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-			StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
-			long blockSize = stat.getBlockSize();
-			long availableBlocks = stat.getAvailableBlocks();
-			freeSpace = blockSize * availableBlocks;
-		}
-		return freeSpace;
-	}
+    /**
+     * Get available space in external storage, only if external storage is ready to write
+     * 
+     * @return Available space in bytes, otherwise <code>-1</code>
+     */
+    public static long getExternalStorageFreeSpace() {
+        long freeSpace = -1;
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+            StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
+            long blockSize = stat.getBlockSize();
+            long availableBlocks = stat.getAvailableBlocks();
+            freeSpace = blockSize * availableBlocks;
+        }
+        return freeSpace;
+    }
 }

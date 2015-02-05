@@ -33,87 +33,86 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author jexa7410
  */
 public class WifiNetworkAccess extends NetworkAccess {
-	/**
-	 * Wi-Fi manager
-	 */
-	private WifiManager wifiManager;
+    /**
+     * Wi-Fi manager
+     */
+    private WifiManager wifiManager;
 
-	/**
-	 * The logger
-	 */
-	private Logger logger = Logger.getLogger(this.getClass().getName());
+    /**
+     * The logger
+     */
+    private Logger logger = Logger.getLogger(this.getClass().getName());
 
-	/**
-	 * Constructor
-	 * 
-	 * @throws CoreException
-	 */
-	public WifiNetworkAccess() throws CoreException {
-		super();
+    /**
+     * Constructor
+     * 
+     * @throws CoreException
+     */
+    public WifiNetworkAccess() throws CoreException {
+        super();
 
-		// Get Wi-Fi info
-		wifiManager = (WifiManager) AndroidFactory.getApplicationContext().getSystemService(
-				Context.WIFI_SERVICE);
+        // Get Wi-Fi info
+        wifiManager = (WifiManager) AndroidFactory.getApplicationContext().getSystemService(
+                Context.WIFI_SERVICE);
 
-		if (logger.isActivated()) {
-			logger.info("Wi-Fi access has been created (interface " + getType() + ")");
-		}
-	}
+        if (logger.isActivated()) {
+            logger.info("Wi-Fi access has been created (interface " + getType() + ")");
+        }
+    }
 
-	/**
-	 * Connect to the network access
-	 * 
-	 * @param ipAddress
-	 *            Local IP address
-	 */
-	public void connect(String ipAddress) {
-		if (logger.isActivated()) {
-			logger.info("Network access connected (" + ipAddress + ")");
-		}
-		this.ipAddress = ipAddress;
+    /**
+     * Connect to the network access
+     * 
+     * @param ipAddress Local IP address
+     */
+    public void connect(String ipAddress) {
+        if (logger.isActivated()) {
+            logger.info("Network access connected (" + ipAddress + ")");
+        }
+        this.ipAddress = ipAddress;
 
-		// Changed by Deutsche Telekom
-		KeyStoreManager.updateClientCertificate(ipAddress);
-	}
+        // Changed by Deutsche Telekom
+        KeyStoreManager.updateClientCertificate(ipAddress);
+    }
 
-	/**
-	 * Disconnect from the network access
-	 */
-	public void disconnect() {
-		if (logger.isActivated()) {
-			logger.info("Network access disconnected");
-		}
-		ipAddress = null;
-	}
+    /**
+     * Disconnect from the network access
+     */
+    public void disconnect() {
+        if (logger.isActivated()) {
+            logger.info("Network access disconnected");
+        }
+        ipAddress = null;
+    }
 
-	/**
-	 * Return the type of access
-	 * 
-	 * @return Type
-	 */
-	public String getType() {
-		WifiInfo info = wifiManager.getConnectionInfo();
-		if (info.getLinkSpeed() <= 11) {
-			return "IEEE-802.11b";
-		} else {
-			return "IEEE-802.11a";
-		}
-	}
+    /**
+     * Return the type of access
+     * 
+     * @return Type
+     */
+    public String getType() {
+        WifiInfo info = wifiManager.getConnectionInfo();
+        if (info.getLinkSpeed() <= 11) {
+            return "IEEE-802.11b";
+        } else {
+            return "IEEE-802.11a";
+        }
+    }
 
-	/**
-	 * Return the network name
-	 * 
-	 * @return Name
-	 */
-	public String getNetworkName() {
-		String name = "Wi-Fi ";
-		WifiInfo info = wifiManager.getConnectionInfo();
-		if (info.getLinkSpeed() <= 11) {
-			name += "802.11b";
-		} else {
-			name += "802.11a";
-		}
-		name += ", SSID=" + wifiManager.getConnectionInfo().getSSID();
-		return name;
-	}
+    /**
+     * Return the network name
+     * 
+     * @return Name
+     */
+    public String getNetworkName() {
+        String name = "Wi-Fi ";
+        WifiInfo info = wifiManager.getConnectionInfo();
+        if (info.getLinkSpeed() <= 11) {
+            name += "802.11b";
+        } else {
+            name += "802.11a";
+        }
+        name += ", SSID=" + wifiManager.getConnectionInfo().getSSID();
+        return name;
+    }
 }

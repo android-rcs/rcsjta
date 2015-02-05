@@ -103,7 +103,7 @@ public class FileTransferServiceConfigActivity extends Activity {
 
         mCnxManager.startMonitorServices(this, null, RcsServiceName.FILE_TRANSFER);
 
-        mSpinnerImageResizeOption = (Spinner)findViewById(R.id.ft_ImageResizeOption);
+        mSpinnerImageResizeOption = (Spinner) findViewById(R.id.ft_ImageResizeOption);
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, ImageResizeOptionTab);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -136,7 +136,7 @@ public class FileTransferServiceConfigActivity extends Activity {
             }
         });
 
-        mCheckBoxIsAutoAccept = (CheckBox)findViewById(R.id.ft_isAutoAccept);
+        mCheckBoxIsAutoAccept = (CheckBox) findViewById(R.id.ft_isAutoAccept);
         mCheckBoxIsAutoAccept.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -156,7 +156,7 @@ public class FileTransferServiceConfigActivity extends Activity {
 
         });
 
-        mCheckBoxIsAutoAcceptInRoaming = (CheckBox)findViewById(R.id.ft_isAutoAcceptInRoaming);
+        mCheckBoxIsAutoAcceptInRoaming = (CheckBox) findViewById(R.id.ft_isAutoAcceptInRoaming);
         mCheckBoxIsAutoAcceptInRoaming.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -198,23 +198,23 @@ public class FileTransferServiceConfigActivity extends Activity {
     }
 
     private void displayFileTransferServiceConfig() throws RcsServiceException {
-        TextView textView = (TextView)findViewById(R.id.ft_WarnSize);
+        TextView textView = (TextView) findViewById(R.id.ft_WarnSize);
         textView.setText(Long.valueOf(mConfig.getWarnSize()).toString());
 
-        textView = (TextView)findViewById(R.id.ft_MaxSize);
+        textView = (TextView) findViewById(R.id.ft_MaxSize);
         textView.setText(Long.valueOf(mConfig.getMaxSize()).toString());
 
         mCheckBoxIsAutoAccept.setChecked(mConfig.isAutoAcceptEnabled());
 
-        CheckBox checkBox = (CheckBox)findViewById(R.id.ft_isAutoAcceptModeChangeable);
+        CheckBox checkBox = (CheckBox) findViewById(R.id.ft_isAutoAcceptModeChangeable);
         checkBox.setChecked(mConfig.isAutoAcceptModeChangeable());
 
         mCheckBoxIsAutoAcceptInRoaming.setChecked(mConfig.isAutoAcceptInRoamingEnabled());
 
-        textView = (TextView)findViewById(R.id.MaxFileTransfers);
+        textView = (TextView) findViewById(R.id.MaxFileTransfers);
         textView.setText(Integer.valueOf(mConfig.getMaxFileTransfers()).toString());
 
-        checkBox = (CheckBox)findViewById(R.id.GroupFileTransferSupported); // TODO
+        checkBox = (CheckBox) findViewById(R.id.GroupFileTransferSupported); // TODO
         checkBox.setChecked(true);
 
         mSpinnerImageResizeOption.setSelection(mConfig.getImageResizeOption().toInt());

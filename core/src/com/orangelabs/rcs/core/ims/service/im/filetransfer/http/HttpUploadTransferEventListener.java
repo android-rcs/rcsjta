@@ -15,18 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
 /**
  * Class HTTP Upload Transfer Event Listener
  * 
  * @author YPLO6403
- * 
  */
 public interface HttpUploadTransferEventListener extends HttpTransferEventListener {
-	/**
-	 * notify the start of the HTTP Upload transfer (once the thumbnail transfer iis done) <br>
-	 * The upload resume is only possible once thumbnail is transferred
-	 */
-	public void uploadStarted();
+    /**
+     * notify the start of the HTTP Upload transfer (once the thumbnail transfer iis done) <br>
+     * The upload resume is only possible once thumbnail is transferred
+     */
+    public void uploadStarted();
 }

@@ -20,6 +20,7 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.core.ims.service.sip.streaming;
 
 import android.content.Intent;
@@ -47,192 +48,190 @@ import java.util.Collection;
  * @author jexa7410
  */
 public class TerminatingSipRtpSession extends GenericSipRtpSession {
-	/**
-	 * The logger
-	 */
-	private final static Logger logger = Logger.getLogger(TerminatingSipRtpSession.class
-			.getSimpleName());
+    /**
+     * The logger
+     */
+    private final static Logger logger = Logger.getLogger(TerminatingSipRtpSession.class
+            .getSimpleName());
 
-	private final Intent mSessionInvite;
+    private final Intent mSessionInvite;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param parent
-	 *            IMS service
-	 * @param invite
-	 *            Initial INVITE request
-	 * @throws RcsContactFormatException
-	 */
-	public TerminatingSipRtpSession(ImsService parent, SipRequest invite, Intent sessionInvite)
-			throws RcsContactFormatException {
-		super(parent, ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite)), invite
-				.getFeatureTags().get(0));
+    /**
+     * Constructor
+     * 
+     * @param parent IMS service
+     * @param invite Initial INVITE request
+     * @throws RcsContactFormatException
+     */
+    public TerminatingSipRtpSession(ImsService parent, SipRequest invite, Intent sessionInvite)
+            throws RcsContactFormatException {
+        super(parent, ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite)), invite
+                .getFeatureTags().get(0));
 
-		mSessionInvite = sessionInvite;
-		// Create dialog path
-		createTerminatingDialogPath(invite);
-	}
+        mSessionInvite = sessionInvite;
+        // Create dialog path
+        createTerminatingDialogPath(invite);
+    }
 
-	/**
-	 * Background processing
-	 */
-	public void run() {
-		try {
-			if (logger.isActivated()) {
-				logger.info("Initiate a new RTP session as terminating");
-			}
+    /**
+     * Background processing
+     */
+    public void run() {
+        try {
+            if (logger.isActivated()) {
+                logger.info("Initiate a new RTP session as terminating");
+            }
 
-			send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+            send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
-			Collection<ImsSessionListener> listeners = getListeners();
-			ContactId contact = getRemoteContact();
-			for (ImsSessionListener listener : listeners) {
-				((SipSessionListener) listener).handleSessionInvited(contact, mSessionInvite);
-			}
+            Collection<ImsSessionListener> listeners = getListeners();
+            ContactId contact = getRemoteContact();
+            for (ImsSessionListener listener : listeners) {
+                ((SipSessionListener) listener).handleSessionInvited(contact, mSessionInvite);
+            }
 
-			int answer = waitInvitationAnswer();
-			switch (answer) {
-			case ImsServiceSession.INVITATION_REJECTED:
-				if (logger.isActivated()) {
-					logger.debug("Session has been rejected by user");
-				}
+            int answer = waitInvitationAnswer();
+            switch (answer) {
+                case ImsServiceSession.INVITATION_REJECTED:
+                    if (logger.isActivated()) {
+                        logger.debug("Session has been rejected by user");
+                    }
 
-				removeSession();
+                    removeSession();
 
-				for (ImsSessionListener listener : listeners) {
-					listener.handleSessionRejectedByUser(contact);
-				}
-				return;
+                    for (ImsSessionListener listener : listeners) {
+                        listener.handleSessionRejectedByUser(contact);
+                    }
+                    return;
 
-			case ImsServiceSession.INVITATION_NOT_ANSWERED:
-				if (logger.isActivated()) {
-					logger.debug("Session has been rejected on timeout");
-				}
+                case ImsServiceSession.INVITATION_NOT_ANSWERED:
+                    if (logger.isActivated()) {
+                        logger.debug("Session has been rejected on timeout");
+                    }
 
-				// Ringing period timeout
-				send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+                    // Ringing period timeout
+                    send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
-				removeSession();
+                    removeSession();
 
-				for (ImsSessionListener listener : listeners) {
-					listener.handleSessionRejectedByTimeout(contact);
-				}
-				return;
+                    for (ImsSessionListener listener : listeners) {
+                        listener.handleSessionRejectedByTimeout(contact);
+                    }
+                    return;
 
-			case ImsServiceSession.INVITATION_CANCELED:
-				if (logger.isActivated()) {
-					logger.debug("Session has been canceled");
-				}
+                case ImsServiceSession.INVITATION_CANCELED:
+                    if (logger.isActivated()) {
+                        logger.debug("Session has been canceled");
+                    }
 
-				removeSession();
+                    removeSession();
 
-				for (ImsSessionListener listener : listeners) {
-					listener.handleSessionRejectedByRemote(contact);
-				}
-				return;
+                    for (ImsSessionListener listener : listeners) {
+                        listener.handleSessionRejectedByRemote(contact);
+                    }
+                    return;
 
-			case ImsServiceSession.INVITATION_ACCEPTED:
-				setSessionAccepted();
+                case ImsServiceSession.INVITATION_ACCEPTED:
+                    setSessionAccepted();
 
-				for (ImsSessionListener listener : listeners) {
-					listener.handleSessionAccepted(contact);
-				}
-				break;
+                    for (ImsSessionListener listener : listeners) {
+                        listener.handleSessionAccepted(contact);
+                    }
+                    break;
 
-			default:
-				if (logger.isActivated()) {
-					logger.debug("Unknown invitation answer in run; answer=".concat(String
-							.valueOf(answer)));
-				}
-				return;
-			}
+                default:
+                    if (logger.isActivated()) {
+                        logger.debug("Unknown invitation answer in run; answer=".concat(String
+                                .valueOf(answer)));
+                    }
+                    return;
+            }
 
-			// Build SDP part
-			String sdp = generateSdp();
+            // Build SDP part
+            String sdp = generateSdp();
 
-			// Set the local SDP part in the dialog path
-			getDialogPath().setLocalContent(sdp);
+            // Set the local SDP part in the dialog path
+            getDialogPath().setLocalContent(sdp);
 
-			// Test if the session should be interrupted
-			if (isInterrupted()) {
-				if (logger.isActivated()) {
-					logger.debug("Session has been interrupted: end of processing");
-				}
-				return;
-			}
+            // Test if the session should be interrupted
+            if (isInterrupted()) {
+                if (logger.isActivated()) {
+                    logger.debug("Session has been interrupted: end of processing");
+                }
+                return;
+            }
 
-			// Test if the session should be interrupted
-			if (isInterrupted()) {
-				if (logger.isActivated()) {
-					logger.debug("Session has been interrupted: end of processing");
-				}
-				return;
-			}
+            // Test if the session should be interrupted
+            if (isInterrupted()) {
+                if (logger.isActivated()) {
+                    logger.debug("Session has been interrupted: end of processing");
+                }
+                return;
+            }
 
-			// Prepare Media Session
-			prepareMediaSession();
+            // Prepare Media Session
+            prepareMediaSession();
 
-			// Create a 200 OK response
-			if (logger.isActivated()) {
-				logger.info("Send 200 OK");
-			}
-			SipResponse resp = create200OKResponse();
+            // Create a 200 OK response
+            if (logger.isActivated()) {
+                logger.info("Send 200 OK");
+            }
+            SipResponse resp = create200OKResponse();
 
-			// The signalisation is established
-			getDialogPath().sigEstablished();
+            // The signalisation is established
+            getDialogPath().sigEstablished();
 
-			// Send response
-			SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
-					.sendSipMessageAndWait(resp);
+            // Send response
+            SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
+                    .sendSipMessageAndWait(resp);
 
-			// Analyze the received response
-			if (ctx.isSipAck()) {
-				// ACK received
-				if (logger.isActivated()) {
-					logger.info("ACK request received");
-				}
+            // Analyze the received response
+            if (ctx.isSipAck()) {
+                // ACK received
+                if (logger.isActivated()) {
+                    logger.info("ACK request received");
+                }
 
-				// The session is established
-				getDialogPath().sessionEstablished();
+                // The session is established
+                getDialogPath().sessionEstablished();
 
-				// Start Media Session
-				startMediaSession();
+                // Start Media Session
+                startMediaSession();
 
-				// Start session timer
-				if (getSessionTimerManager().isSessionTimerActivated(resp)) {
-					getSessionTimerManager().start(SessionTimerManager.UAS_ROLE,
-							getDialogPath().getSessionExpireTime());
-				}
+                // Start session timer
+                if (getSessionTimerManager().isSessionTimerActivated(resp)) {
+                    getSessionTimerManager().start(SessionTimerManager.UAS_ROLE,
+                            getDialogPath().getSessionExpireTime());
+                }
 
-				// Notify listeners
-				for (int j = 0; j < getListeners().size(); j++) {
-					getListeners().get(j).handleSessionStarted(contact);
-				}
-			} else {
-				if (logger.isActivated()) {
-					logger.debug("No ACK received for INVITE");
-				}
+                // Notify listeners
+                for (int j = 0; j < getListeners().size(); j++) {
+                    getListeners().get(j).handleSessionStarted(contact);
+                }
+            } else {
+                if (logger.isActivated()) {
+                    logger.debug("No ACK received for INVITE");
+                }
 
-				// No response received: timeout
-				handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED));
-			}
-		} catch (Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Session initiation has failed", e);
-			}
+                // No response received: timeout
+                handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED));
+            }
+        } catch (Exception e) {
+            if (logger.isActivated()) {
+                logger.error("Session initiation has failed", e);
+            }
 
-			// Unexpected error
-			handleError(new SipSessionError(SipSessionError.UNEXPECTED_EXCEPTION, e.getMessage()));
-		}
-	}
+            // Unexpected error
+            handleError(new SipSessionError(SipSessionError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        }
+    }
 
-	@Override
-	public boolean isInitiatedByRemote() {
-		return true;
-	}
+    @Override
+    public boolean isInitiatedByRemote() {
+        return true;
+    }
 
-	public Intent getSessionInvite() {
-		return mSessionInvite;
-	}
+    public Intent getSessionInvite() {
+        return mSessionInvite;
+    }
 }

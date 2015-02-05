@@ -253,7 +253,8 @@ public class ContactsManagerTest extends AndroidTestCase {
                 logger.debug("RCS contact : " + rcs.toString());
             }
         }
-        if (rcscontacts.isEmpty()) contactoCreate();
+        if (rcscontacts.isEmpty())
+            contactoCreate();
 
         ContactInfo oldinfo = cm.getContactInfo(mContact);
 
@@ -299,13 +300,11 @@ public class ContactsManagerTest extends AndroidTestCase {
         assertEquals(contactChange, true);
 
         /*
-         * List<String> avails = cm.getAvailableContacts(); boolean
-         * contactChange = (contacts.contains(contacto) &&
-         * (!(rcscontacts.contains(contacto)))); if (logger.isActivated()){
-         * if(rcscontacts.isEmpty()) { logger.debug("no RCS contact "); } else {
-         * for(String rcs : rcscontacts) { logger.debug("RCS contact : " + rcs);
-         * } for(String av : avails) { logger.debug("available contact : " +
-         * av); } } }
+         * List<String> avails = cm.getAvailableContacts(); boolean contactChange =
+         * (contacts.contains(contacto) && (!(rcscontacts.contains(contacto)))); if
+         * (logger.isActivated()){ if(rcscontacts.isEmpty()) { logger.debug("no RCS contact "); }
+         * else { for(String rcs : rcscontacts) { logger.debug("RCS contact : " + rcs); } for(String
+         * av : avails) { logger.debug("available contact : " + av); } } }
          */
 
         oldinfo = cm.getContactInfo(mContact);
@@ -343,10 +342,9 @@ public class ContactsManagerTest extends AndroidTestCase {
         contacts = cm.getAllContacts();
         boolean contactToRCS = (rcscontacts.contains(mContact) && contacts.contains(mContact));
         /*
-         * if (logger.isActivated()){ if(rcscontacts.isEmpty()) {
-         * logger.debug("no RCS contact "); } else { for(String rcs :
-         * rcscontacts) { logger.debug("RCS contact : " + rcs); } } for(String
-         * av : avails) { logger.debug("available contact : " + av); } }
+         * if (logger.isActivated()){ if(rcscontacts.isEmpty()) { logger.debug("no RCS contact "); }
+         * else { for(String rcs : rcscontacts) { logger.debug("RCS contact : " + rcs); } }
+         * for(String av : avails) { logger.debug("available contact : " + av); } }
          */assertEquals(contactToRCS, true);
         cm.cleanRCSEntries();
     }

@@ -20,14 +20,14 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.util;
 
 /**
  * Hexadecimal utils
- *
+ * 
  * @author Deutsche Telekom AG
  */
 public class HexadecimalUtils {
 
     /**
      * Decode hex string to a byte array
-     *
+     * 
      * @param s hexadecimal encoded string
      * @return array of bytes
      */
@@ -54,7 +54,7 @@ public class HexadecimalUtils {
 
     /**
      * Convert byte array into Hexadecimal string
-     *
+     * 
      * @param bytes
      * @return {@link String} if valid byte array, otherwise <code>null</code>
      */
@@ -64,10 +64,12 @@ public class HexadecimalUtils {
             return null;
         }
 
-        final char[] hexArray = {'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
+        final char[] hexArray = {
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+        };
         char[] hexChars = new char[bytes.length * 2];
         int value;
-        for ( int j = 0; j < bytes.length; j++) {
+        for (int j = 0; j < bytes.length; j++) {
             value = bytes[j] & 0xFF;
             hexChars[j * 2] = hexArray[value >>> 4];
             hexChars[j * 2 + 1] = hexArray[value & 0x0F];

@@ -55,7 +55,7 @@ public class ShowUsInMap extends MapActivity {
             .toString();
 
     private final static String[] QUERY_PROJECTION = new String[] {
-        ChatLog.Message.CONTENT
+            ChatLog.Message.CONTENT
     };
 
     /**
@@ -71,7 +71,7 @@ public class ShowUsInMap extends MapActivity {
         setContentView(R.layout.geoloc_display);
 
         // Set map
-        mapView = (MapView)findViewById(R.id.mapview);
+        mapView = (MapView) findViewById(R.id.mapview);
         mapView.setBuiltInZoomControls(true);
         mapView.getController().setZoom(4);
 
@@ -120,7 +120,7 @@ public class ShowUsInMap extends MapActivity {
         // Center the map
         if (lastGeoloc != null) {
             mapView.getController().setCenter(
-                    new GeoPoint((int)(lastGeoloc.getLatitude() * 1E6), (int)(lastGeoloc
+                    new GeoPoint((int) (lastGeoloc.getLatitude() * 1E6), (int) (lastGeoloc
                             .getLongitude() * 1E6)));
         }
     }
@@ -194,7 +194,7 @@ public class ShowUsInMap extends MapActivity {
      */
     public static void startShowUsInMap(Context context, List<String> contacts) {
         Intent intent = new Intent(context, ShowUsInMap.class);
-        intent.putStringArrayListExtra(ShowUsInMap.EXTRA_CONTACTS, (ArrayList<String>)contacts);
+        intent.putStringArrayListExtra(ShowUsInMap.EXTRA_CONTACTS, (ArrayList<String>) contacts);
         context.startActivity(intent);
     }
 }

@@ -19,6 +19,7 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.gsma.services.rcs.vsh;
 
 /**
@@ -27,18 +28,18 @@ package com.gsma.services.rcs.vsh;
  * @author Jean-Marc AUFFRET
  */
 public class VideoSharingIntent {
-	/**
-	 * Broadcast action: a new video sharing invitation has been received.
-	 * <p>
-	 * Intent includes the following extras:
-	 * <ul>
-	 * <li> {@link #EXTRA_SHARING_ID} containing the unique ID of the video sharing.
-	 * </ul>
-	 */
-	public final static String ACTION_NEW_INVITATION = "com.gsma.services.rcs.vsh.action.NEW_VIDEO_SHARING";
+    /**
+     * Broadcast action: a new video sharing invitation has been received.
+     * <p>
+     * Intent includes the following extras:
+     * <ul>
+     * <li> {@link #EXTRA_SHARING_ID} containing the unique ID of the video sharing.
+     * </ul>
+     */
+    public final static String ACTION_NEW_INVITATION = "com.gsma.services.rcs.vsh.action.NEW_VIDEO_SHARING";
 
-	/**
-	 * Unique ID of the video sharing
-	 */
-	public final static String EXTRA_SHARING_ID = "sharingId";
+    /**
+     * Unique ID of the video sharing
+     */
+    public final static String EXTRA_SHARING_ID = "sharingId";
 }

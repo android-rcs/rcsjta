@@ -31,120 +31,114 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Originating IP call session
- *
+ * 
  * @author opob7414
  */
 public class OriginatingIPCallSession extends IPCallSession {
 
-	/**
-	 * The logger
-	 */
-	private static final Logger logger = Logger.getLogger(OriginatingIPCallSession.class
-			.getSimpleName());
+    /**
+     * The logger
+     */
+    private static final Logger logger = Logger.getLogger(OriginatingIPCallSession.class
+            .getSimpleName());
 
-	/**
-	 * Constructor
-	 *
-	 * @param parent
-	 *            IMS service
-	 * @param contact
-	 *            Remote contact identifier
-	 * @param audioContent
-	 *            Audio content
-	 * @param videoContent
-	 *            Video content
-	 * @param player
-	 *            IP call player
-	 * @param renderer
-	 *            IP call renderer
-	 */
-	public OriginatingIPCallSession(ImsService parent, ContactId contact,
-			AudioContent audioContent, VideoContent videoContent, IIPCallPlayer player,
-			IIPCallRenderer renderer) {
-		super(parent, contact, audioContent, videoContent);
+    /**
+     * Constructor
+     * 
+     * @param parent IMS service
+     * @param contact Remote contact identifier
+     * @param audioContent Audio content
+     * @param videoContent Video content
+     * @param player IP call player
+     * @param renderer IP call renderer
+     */
+    public OriginatingIPCallSession(ImsService parent, ContactId contact,
+            AudioContent audioContent, VideoContent videoContent, IIPCallPlayer player,
+            IIPCallRenderer renderer) {
+        super(parent, contact, audioContent, videoContent);
 
-		// Set the player
-		setPlayer(player);
+        // Set the player
+        setPlayer(player);
 
-		// Set the renderer
-		setRenderer(renderer);
+        // Set the renderer
+        setRenderer(renderer);
 
-		// Create dialog path
-		createOriginatingDialogPath();
-	}
+        // Create dialog path
+        createOriginatingDialogPath();
+    }
 
-	/**
-	 * Background processing
-	 */
-	public void run() {
-		try {
-			if (logger.isActivated()) {
-				logger.info("Initiate a new IP call session as originating");
-			}
+    /**
+     * Background processing
+     */
+    public void run() {
+        try {
+            if (logger.isActivated()) {
+                logger.info("Initiate a new IP call session as originating");
+            }
 
-			// Check audio parameters
-			if (getAudioContent() == null) {
-				handleError(new IPCallError(IPCallError.UNSUPPORTED_AUDIO_TYPE,
-						"Audio codec not supported"));
-				return;
-			}
+            // Check audio parameters
+            if (getAudioContent() == null) {
+                handleError(new IPCallError(IPCallError.UNSUPPORTED_AUDIO_TYPE,
+                        "Audio codec not supported"));
+                return;
+            }
 
-			// Build SDP proposal
-			String sdp = buildAudioVideoSdpProposal();
+            // Build SDP proposal
+            String sdp = buildAudioVideoSdpProposal();
 
-			// Set the local SDP part in the dialog path
-			getDialogPath().setLocalContent(sdp);
+            // Set the local SDP part in the dialog path
+            getDialogPath().setLocalContent(sdp);
 
-			// Create an INVITE request
-			if (logger.isActivated()) {
-				logger.info("Send INVITE");
-			}
-			SipRequest invite;
-			if (getVideoContent() == null) {
-				// Voice call
-				invite = SipMessageFactory.createInvite(getDialogPath(),
-						IPCallService.FEATURE_TAGS_IP_VOICE_CALL, sdp);
-			} else {
-				// Visio call
-				invite = SipMessageFactory.createInvite(getDialogPath(),
-						IPCallService.FEATURE_TAGS_IP_VIDEO_CALL, sdp);
-			}
+            // Create an INVITE request
+            if (logger.isActivated()) {
+                logger.info("Send INVITE");
+            }
+            SipRequest invite;
+            if (getVideoContent() == null) {
+                // Voice call
+                invite = SipMessageFactory.createInvite(getDialogPath(),
+                        IPCallService.FEATURE_TAGS_IP_VOICE_CALL, sdp);
+            } else {
+                // Visio call
+                invite = SipMessageFactory.createInvite(getDialogPath(),
+                        IPCallService.FEATURE_TAGS_IP_VIDEO_CALL, sdp);
+            }
 
-			// Set the Authorization header
-			getAuthenticationAgent().setAuthorizationHeader(invite);
+            // Set the Authorization header
+            getAuthenticationAgent().setAuthorizationHeader(invite);
 
-			// Set initial request in the dialog path
-			getDialogPath().setInvite(invite);
+            // Set initial request in the dialog path
+            getDialogPath().setInvite(invite);
 
-			// Send INVITE request
-			sendInvite(invite);
+            // Send INVITE request
+            sendInvite(invite);
 
-		} catch (Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Session initiation has failed", e);
-			}
+        } catch (Exception e) {
+            if (logger.isActivated()) {
+                logger.error("Session initiation has failed", e);
+            }
 
-			// Unexpected error
-			handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
-		}
-	}
+            // Unexpected error
+            handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        }
+    }
 
-	@Override
-	public SipRequest createInvite() throws SipException {
-		if (getVideoContent() == null) {
-			// Voice call
-			return SipMessageFactory.createInvite(getDialogPath(),
-					IPCallService.FEATURE_TAGS_IP_VOICE_CALL, getDialogPath().getLocalContent());
-		} else {
-			// Visio call
-			return SipMessageFactory.createInvite(getDialogPath(),
-					IPCallService.FEATURE_TAGS_IP_VIDEO_CALL, getDialogPath().getLocalContent());
-		}
+    @Override
+    public SipRequest createInvite() throws SipException {
+        if (getVideoContent() == null) {
+            // Voice call
+            return SipMessageFactory.createInvite(getDialogPath(),
+                    IPCallService.FEATURE_TAGS_IP_VOICE_CALL, getDialogPath().getLocalContent());
+        } else {
+            // Visio call
+            return SipMessageFactory.createInvite(getDialogPath(),
+                    IPCallService.FEATURE_TAGS_IP_VIDEO_CALL, getDialogPath().getLocalContent());
+        }
 
-	}
+    }
 
-	@Override
-	public boolean isInitiatedByRemote() {
-		return false;
-	}
+    @Override
+    public boolean isInitiatedByRemote() {
+        return false;
+    }
 }

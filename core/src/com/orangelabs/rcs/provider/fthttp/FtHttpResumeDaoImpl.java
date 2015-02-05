@@ -19,6 +19,7 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.provider.fthttp;
 
 import java.util.List;
@@ -27,51 +28,47 @@ import android.content.Context;
 import com.orangelabs.rcs.provider.messaging.MessagingLog;
 
 /**
- * @author YPLO6403
- * 
- *         Implementation of interface to get access to FT HTTP data objects
- * 
+ * @author YPLO6403 Implementation of interface to get access to FT HTTP data objects
  */
 public class FtHttpResumeDaoImpl implements FtHttpResumeDao {
 
-	/**
-	 * Current instance
-	 */
-	private static FtHttpResumeDaoImpl instance = null;
+    /**
+     * Current instance
+     */
+    private static FtHttpResumeDaoImpl instance = null;
 
-	private FtHttpResumeDaoImpl() {
-	}
+    private FtHttpResumeDaoImpl() {
+    }
 
-	/**
-	 * Creates an interface to get access to Data Object FtHttpResume
-	 * 
-	 * @param ctx
-	 *            the {@code context} value.
-	 * @return Instance of FtHttpResumeDaoImpl
-	 */
-	public static synchronized FtHttpResumeDaoImpl createInstance(Context ctx) {
-		if (instance == null) {
-			instance = new FtHttpResumeDaoImpl();
-		}
-		return instance;
-	}
+    /**
+     * Creates an interface to get access to Data Object FtHttpResume
+     * 
+     * @param ctx the {@code context} value.
+     * @return Instance of FtHttpResumeDaoImpl
+     */
+    public static synchronized FtHttpResumeDaoImpl createInstance(Context ctx) {
+        if (instance == null) {
+            instance = new FtHttpResumeDaoImpl();
+        }
+        return instance;
+    }
 
-	/**
-	 * Returns instance of DAO FtHttpResume
-	 * 
-	 * @return Instance
-	 */
-	public static FtHttpResumeDaoImpl getInstance() {
-		return instance;
-	}
+    /**
+     * Returns instance of DAO FtHttpResume
+     * 
+     * @return Instance
+     */
+    public static FtHttpResumeDaoImpl getInstance() {
+        return instance;
+    }
 
-	@Override
-	public List<FtHttpResume> queryAll() {
-		return MessagingLog.getInstance().retrieveFileTransfersPausedBySystem();
-	}
+    @Override
+    public List<FtHttpResume> queryAll() {
+        return MessagingLog.getInstance().retrieveFileTransfersPausedBySystem();
+    }
 
-	@Override
-	public FtHttpResumeUpload queryUpload(String tId) {
-		return MessagingLog.getInstance().retrieveFtHttpResumeUpload(tId);
-	}
+    @Override
+    public FtHttpResumeUpload queryUpload(String tId) {
+        return MessagingLog.getInstance().retrieveFtHttpResumeUpload(tId);
+    }
 }

@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.core.ims.protocol.rtp.util;
 
 /**
@@ -23,6 +24,6 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.util;
  * @author jexa7410
  */
 public class RtpConstants {
-	public static final String RTP_PROTOCOL = "rtp";
-	public static final String RTP_SECURED_PROTOCOL = "srtp";
+    public static final String RTP_PROTOCOL = "rtp";
+    public static final String RTP_SECURED_PROTOCOL = "srtp";
 }

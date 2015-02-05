@@ -35,52 +35,43 @@ import android.net.Uri;
  * @author jexa7410
  */
 public interface ImageTransferSessionListener extends ImsSessionListener {
-	/**
-	 * Content sharing progress
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 * @param currentSize
-	 *            Data size transfered
-	 * @param totalSize
-	 *            Total size to be transfered
-	 */
-	public void handleSharingProgress(ContactId contact, long currentSize, long totalSize);
+    /**
+     * Content sharing progress
+     * 
+     * @param contact Remote contact
+     * @param currentSize Data size transfered
+     * @param totalSize Total size to be transfered
+     */
+    public void handleSharingProgress(ContactId contact, long currentSize, long totalSize);
 
-	/**
-	 * Content sharing error
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 * @param error
-	 *            Error
-	 */
-	public void handleSharingError(ContactId contact, ContentSharingError error);
+    /**
+     * Content sharing error
+     * 
+     * @param contact Remote contact
+     * @param error Error
+     */
+    public void handleSharingError(ContactId contact, ContentSharingError error);
 
-	/**
-	 * Content has been transfered
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 * @param file
-	 *            Uri of file associated to the received content
-	 */
-	public void handleContentTransfered(ContactId contact, Uri file);
+    /**
+     * Content has been transfered
+     * 
+     * @param contact Remote contact
+     * @param file Uri of file associated to the received content
+     */
+    public void handleContentTransfered(ContactId contact, Uri file);
 
-	/**
-	 * Destination user agent received INVITE, and is alerting user of call
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 */
-	public void handle180Ringing(ContactId contact);
+    /**
+     * Destination user agent received INVITE, and is alerting user of call
+     * 
+     * @param contact Remote contact
+     */
+    public void handle180Ringing(ContactId contact);
 
-	/**
-	 * A session invitation has been received
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 * @param content
-	 */
-	public void handleSessionInvited(ContactId contact, MmContent content);
+    /**
+     * A session invitation has been received
+     * 
+     * @param contact Remote contact
+     * @param content
+     */
+    public void handleSessionInvited(ContactId contact, MmContent content);
 }

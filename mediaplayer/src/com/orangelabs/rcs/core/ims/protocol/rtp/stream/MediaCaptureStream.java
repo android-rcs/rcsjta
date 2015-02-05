@@ -29,16 +29,16 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.util.Buffer;
  * @author jexa7410
  */
 public class MediaCaptureStream implements ProcessorInputStream {
-	/**
+    /**
      * Media player
      */
-	private MediaInput player;
+    private MediaInput player;
 
-	/**
-	 * Media format
-	 */
-	private Format format;
-	
+    /**
+     * Media format
+     */
+    private Format format;
+
     /**
      * Sequence number
      */
@@ -47,38 +47,37 @@ public class MediaCaptureStream implements ProcessorInputStream {
     /**
      * Input buffer
      */
-	protected Buffer buffer = new Buffer();
+    protected Buffer buffer = new Buffer();
 
     /**
-	 * Constructor
-	 * 
-	 * @param format Input format
+     * Constructor
+     * 
+     * @param format Input format
      * @param player Media player
-	 */
+     */
     public MediaCaptureStream(Format format, MediaInput player) {
-    	this.format = format;
-		this.player = player;
-	}
-    
-    
+        this.format = format;
+        this.player = player;
+    }
+
     /**
-	 * Open the input stream
-	 * 
+     * Open the input stream
+     * 
      * @throws Exception
-	 */	
+     */
     public void open() throws Exception {
-    	try {
-	    	player.open();
-    	} catch(Exception e) {
-			throw e;
-    	}
-	}    	
-	
+        try {
+            player.open();
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
     /**
      * Close the input stream
      */
     public void close() {
-		player.close();
+        player.close();
     }
 
     /**
@@ -87,12 +86,12 @@ public class MediaCaptureStream implements ProcessorInputStream {
      * @return Format
      */
     public Format getFormat() {
-    	return format;
+        return format;
     }
 
     /**
      * returns the MediaInput
-     *
+     * 
      * @return MediaInput
      */
     public MediaInput getPlayer() {
@@ -106,21 +105,21 @@ public class MediaCaptureStream implements ProcessorInputStream {
      * @throws Exception
      */
     public Buffer read() throws Exception {
-    	// Read a new sample from the media player
-    	MediaSample sample = player.readSample();
-    	if (sample == null) {
-    		return null;
-    	}
+        // Read a new sample from the media player
+        MediaSample sample = player.readSample();
+        if (sample == null) {
+            return null;
+        }
 
-    	// Create a buffer
-	    buffer.setData(sample.getData());
-	    buffer.setLength(sample.getLength());
-    	buffer.setFormat(format);
-    	buffer.setSequenceNumber(seqNo++);
-    	if (sample.isMarker()) {
-    		buffer.setFlags(Buffer.FLAG_RTP_MARKER);
-    	}
-    	buffer.setTimeStamp(sample.getTimeStamp());
-    	return buffer;
+        // Create a buffer
+        buffer.setData(sample.getData());
+        buffer.setLength(sample.getLength());
+        buffer.setFormat(format);
+        buffer.setSequenceNumber(seqNo++);
+        if (sample.isMarker()) {
+            buffer.setFlags(Buffer.FLAG_RTP_MARKER);
+        }
+        buffer.setTimeStamp(sample.getTimeStamp());
+        return buffer;
     }
 }

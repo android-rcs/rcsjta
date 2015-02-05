@@ -157,7 +157,7 @@ public class IPCallIntentService extends IntentService {
         notif.setContentText(getString(R.string.label_from_args, displayName));
 
         // Send notification
-        NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(ipCallDao.getCallId(), Utils.NOTIF_ID_IP_CALL, notif.build());
     }
 }

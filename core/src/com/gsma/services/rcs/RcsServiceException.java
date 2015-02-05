@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.gsma.services.rcs;
 
 /**
@@ -23,24 +24,23 @@ package com.gsma.services.rcs;
  * @author Jean-Marc AUFFRET
  */
 public class RcsServiceException extends java.lang.Exception {
-	static final long serialVersionUID = 1L;
+    static final long serialVersionUID = 1L;
 
-	/**
-	 * Constructor
-	 *
-	 * @param error
-	 *            Error message
-	 */
-	public RcsServiceException(String error) {
-		super(error);
-	}
+    /**
+     * Constructor
+     * 
+     * @param error Error message
+     */
+    public RcsServiceException(String error) {
+        super(error);
+    }
 
-	/**
-	 * Constructs a new Exception with the current stack trace and the specified cause.
-	 * 
-	 * @param e
-	 */
-	public RcsServiceException(Exception e) {
-		super(e);
-	}
+    /**
+     * Constructs a new Exception with the current stack trace and the specified cause.
+     * 
+     * @param e
+     */
+    public RcsServiceException(Exception e) {
+        super(e);
+    }
 }

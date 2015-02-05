@@ -26,20 +26,15 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.util.Buffer;
 
 /**
  * Reassembles H264 RTP packets into H264 frames, as per RFC 3984
- *
+ * 
  * @author Deutsche Telekom AG
  */
 public class JavaPacketizer extends VideoCodec {
 
     /**
-     * Packetization mode
-     *
-     * 0 -> Only Single NAL
-     * 1 -> Use FU-A if necessary
-     *
-     * Warning: packetization-mode 1 normally requires the management of STAP-A.
-     * But, this is not yet implemented in the stack. Then, there can be some
-     * IOT issues if you use this mode.
+     * Packetization mode 0 -> Only Single NAL 1 -> Use FU-A if necessary Warning:
+     * packetization-mode 1 normally requires the management of STAP-A. But, this is not yet
+     * implemented in the stack. Then, there can be some IOT issues if you use this mode.
      */
     public static final int H264_ENABLED_PACKETIZATION_MODE = 1;
 
@@ -91,13 +86,13 @@ public class JavaPacketizer extends VideoCodec {
     /**
      * Previous sent orientation
      */
-    private VideoOrientation previousOrientation = new VideoOrientation(CameraOptions.BACK, Orientation.NONE); 
+    private VideoOrientation previousOrientation = new VideoOrientation(CameraOptions.BACK,
+            Orientation.NONE);
 
     /**
-     * Because packets can come out of order, it is possible that some packets
-     * for a newer frame may arrive while an older frame is still incomplete.
-     * However, in the case where we get nothing but incomplete frames, we don't
-     * want to keep all of them around forever.
+     * Because packets can come out of order, it is possible that some packets for a newer frame may
+     * arrive while an older frame is still incomplete. However, in the case where we get nothing
+     * but incomplete frames, we don't want to keep all of them around forever.
      */
     public JavaPacketizer() {
     }
@@ -111,7 +106,8 @@ public class JavaPacketizer extends VideoCodec {
         if (!input.isDiscard()) {
             byte[] bufferData = (byte[]) input.getData();
             int bufferDataLength = input.getLength();
-            if (input.getLength() < H264_MAX_PACKET_FRAME_SIZE || H264_ENABLED_PACKETIZATION_MODE == 0) {
+            if (input.getLength() < H264_MAX_PACKET_FRAME_SIZE
+                    || H264_ENABLED_PACKETIZATION_MODE == 0) {
                 if ((fullFrameData == null) || (fullFrameData.length < bufferDataLength)) {
                     fullFrameData = new byte[bufferDataLength];
                 }
@@ -138,12 +134,8 @@ public class JavaPacketizer extends VideoCodec {
             output.setFragmentsSize(0);
 
             /*
-             * First Header - The FU indicator octet has the following format:
-             * +---------------+
-             * |0|1|2|3|4|5|6|7|
-             * +-+-+-+-+-+-+-+-+
-             * |F|NRI|  Type   |
-             * +---------------+
+             * First Header - The FU indicator octet has the following format: +---------------+
+             * |0|1|2|3|4|5|6|7| +-+-+-+-+-+-+-+-+ |F|NRI| Type | +---------------+
              */
 
             // FU Indicator pos = 0
@@ -152,12 +144,8 @@ public class JavaPacketizer extends VideoCodec {
             h264FU[0] |= H264RtpHeaders.AVC_NALTYPE_FUA;
 
             /*
-             * Second Header - The FU header has the following format:
-             * +---------------+
-             * |0|1|2|3|4|5|6|7|
-             * +-+-+-+-+-+-+-+-+
-             * |S|E|R|  Type   |
-             * +---------------+
+             * Second Header - The FU header has the following format: +---------------+
+             * |0|1|2|3|4|5|6|7| +-+-+-+-+-+-+-+-+ |S|E|R| Type | +---------------+
              */
 
             // FU Header pos = 1
@@ -180,7 +168,8 @@ public class JavaPacketizer extends VideoCodec {
                 System.arraycopy(h264FU, 0, packetsData[numberOfRtpPkts], 0, h264FU.length);
 
                 // Write frame data
-                System.arraycopy(bufferData, startPosBufferData, packetsData[numberOfRtpPkts], h264FU.length, maxSize);
+                System.arraycopy(bufferData, startPosBufferData, packetsData[numberOfRtpPkts],
+                        h264FU.length, maxSize);
 
                 // Copy to buffer
                 Buffer buffer = outputs[numberOfRtpPkts];
@@ -235,7 +224,8 @@ public class JavaPacketizer extends VideoCodec {
             System.arraycopy(h264FU, 0, packetsData[numberOfRtpPkts], 0, h264FU.length);
 
             // write frame data
-            System.arraycopy(bufferData, startPosBufferData, packetsData[numberOfRtpPkts], h264FU.length, available);
+            System.arraycopy(bufferData, startPosBufferData, packetsData[numberOfRtpPkts],
+                    h264FU.length, available);
 
             // copy to buffer
             Buffer buffer = outputs[numberOfRtpPkts];
@@ -244,7 +234,8 @@ public class JavaPacketizer extends VideoCodec {
             }
             buffer.setFormat(input.getFormat());
             buffer.setData(packetsData[numberOfRtpPkts]);
-            buffer.setLength(h264FU.length + available); // H264FU header length + remaining frame chunk size
+            buffer.setLength(h264FU.length + available); // H264FU header length + remaining frame
+                                                         // chunk size
             buffer.setOffset(0);
             buffer.setTimeStamp(input.getTimeStamp());
             buffer.setFlags(Buffer.FLAG_RTP_MARKER | Buffer.FLAG_RTP_TIME);
@@ -256,10 +247,10 @@ public class JavaPacketizer extends VideoCodec {
 
             // add data buffer to outputs
             outputs[numberOfRtpPkts] = buffer;
-            
+
             // increment number of rtp pkts
             numberOfRtpPkts++;
-            
+
             // Set outputs size
             output.setFragmentsSize(numberOfRtpPkts);
             // <<<<<<<<<<<< create packet <<<<<<<<<<<<
@@ -272,10 +263,10 @@ public class JavaPacketizer extends VideoCodec {
     }
 
     /**
-     * Verifies if we need to send the orientation header. The orientation
-     * header should be sent if it's the end packet of an I-Frame or if its the
-     * end packet of B/P Frames and the orientation has changed.
-     *
+     * Verifies if we need to send the orientation header. The orientation header should be sent if
+     * it's the end packet of an I-Frame or if its the end packet of B/P Frames and the orientation
+     * has changed.
+     * 
      * @param h264Frame H264 Frame
      * @param frameOrientation Frame orientation
      * @return <code>True</code> if it's to add, <code>false</code> otherwise.
@@ -286,7 +277,7 @@ public class JavaPacketizer extends VideoCodec {
             return true;
         }
 
-        if ((frameOrientation != null && previousOrientation != null && h264Header != null 
+        if ((frameOrientation != null && previousOrientation != null && h264Header != null
                 && previousOrientation.getOrientation() != frameOrientation.getOrientation())
                 && h264Header.isNonIDRSlice()) {
             return true;

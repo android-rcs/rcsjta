@@ -191,7 +191,7 @@ public class FileTransferIntentService extends IntentService {
         notif.setContentText(getString(R.string.label_from_args, displayName));
 
         // Send notification
-        NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(ftDao.getTransferId(), Utils.NOTIF_ID_FT, notif.build());
     }
 

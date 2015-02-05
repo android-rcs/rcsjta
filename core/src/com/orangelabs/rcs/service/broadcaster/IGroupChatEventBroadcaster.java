@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.orangelabs.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.chat.ParticipantInfo;
@@ -23,19 +24,19 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 public interface IGroupChatEventBroadcaster {
 
-	public void broadcastMessageStatusChanged(String chatId, String mimeType, String msgId,
-			int status, int reasonCode);
+    public void broadcastMessageStatusChanged(String chatId, String mimeType, String msgId,
+            int status, int reasonCode);
 
-	public void broadcastMessageGroupDeliveryInfoChanged(String chatId, ContactId contact,
-			String mimeType, String msgId, int status, int reasonCode);
+    public void broadcastMessageGroupDeliveryInfoChanged(String chatId, ContactId contact,
+            String mimeType, String msgId, int status, int reasonCode);
 
-	public void broadcastParticipantInfoStatusChanged(String chatId, ParticipantInfo info);
+    public void broadcastParticipantInfoStatusChanged(String chatId, ParticipantInfo info);
 
-	public void broadcastStateChanged(String chatId, int state, int reasonCode);
+    public void broadcastStateChanged(String chatId, int state, int reasonCode);
 
-	public void broadcastComposingEvent(String chatId, ContactId contact, boolean status);
+    public void broadcastComposingEvent(String chatId, ContactId contact, boolean status);
 
-	public void broadcastInvitation(String chatId);
+    public void broadcastInvitation(String chatId);
 
-	public void broadcastMessageReceived(String mimeType, String msgId);
+    public void broadcastMessageReceived(String mimeType, String msgId);
 }

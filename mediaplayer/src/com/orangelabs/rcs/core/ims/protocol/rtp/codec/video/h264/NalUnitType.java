@@ -20,7 +20,7 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264;
 
 /**
  * H264 NAL Unit Types
- *
+ * 
  * @author Deutsche Telekom
  */
 public enum NalUnitType {
@@ -43,7 +43,7 @@ public enum NalUnitType {
 
     /**
      * Decodes the NAL Unit type
-     *
+     * 
      * @param value NAL value
      * @return NAL Unit Type
      */

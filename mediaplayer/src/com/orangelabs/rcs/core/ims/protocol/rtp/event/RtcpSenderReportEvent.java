@@ -27,12 +27,12 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.core.RtcpSenderReportPacket;
  */
 public class RtcpSenderReportEvent extends RtcpEvent {
 
-	/**
-	 * Constructor
-	 * 
-	 * @param packet RTCP SR packet
-	 */
-	public RtcpSenderReportEvent(RtcpSenderReportPacket packet) {
-		super(packet);
-	}
+    /**
+     * Constructor
+     * 
+     * @param packet RTCP SR packet
+     */
+    public RtcpSenderReportEvent(RtcpSenderReportPacket packet) {
+        super(packet);
+    }
 }

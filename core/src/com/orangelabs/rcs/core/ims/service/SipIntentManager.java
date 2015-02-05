@@ -38,96 +38,91 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author Jean-Marc AUFFRET
  */
 public class SipIntentManager {
-	/**
-	 * The logger
-	 */
-	private Logger logger = Logger.getLogger(this.getClass().getName());
+    /**
+     * The logger
+     */
+    private Logger logger = Logger.getLogger(this.getClass().getName());
 
-	/**
-	 * Constructor
-	 */
-	public SipIntentManager() {
-	}
+    /**
+     * Constructor
+     */
+    public SipIntentManager() {
+    }
 
-	/**
-	 * Is the SIP request may be resolved
-	 * 
-	 * @param request
-	 *            Incoming request
-	 * @return Resolved intent or null if not resolved
-	 */
-	public Intent isSipRequestResolved(SipRequest request) {
-		Intent result = null;
-		List<String> tags = request.getFeatureTags();
-		for (int i = 0; i < tags.size(); i++) {
-			String featureTag = tags.get(i);
-			Intent intent = generateSipIntent(request, featureTag);
-			if (intent != null) {
-				if (logger.isActivated()) {
-					logger.debug("SIP intent: " + intent.getAction() + ", " + intent.getType());
-				}
-				if (isSipIntentResolvedByBroadcastReceiver(intent)) {
-					result = intent;
-					break;
-				}
-			}
-		}
-		return result;
-	}
+    /**
+     * Is the SIP request may be resolved
+     * 
+     * @param request Incoming request
+     * @return Resolved intent or null if not resolved
+     */
+    public Intent isSipRequestResolved(SipRequest request) {
+        Intent result = null;
+        List<String> tags = request.getFeatureTags();
+        for (int i = 0; i < tags.size(); i++) {
+            String featureTag = tags.get(i);
+            Intent intent = generateSipIntent(request, featureTag);
+            if (intent != null) {
+                if (logger.isActivated()) {
+                    logger.debug("SIP intent: " + intent.getAction() + ", " + intent.getType());
+                }
+                if (isSipIntentResolvedByBroadcastReceiver(intent)) {
+                    result = intent;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
 
-	/**
-	 * Generate a SIP Intent
-	 * 
-	 * @param request
-	 *            SIP request
-	 * @param featureTag
-	 *            Feature tag
-	 */
-	private Intent generateSipIntent(SipRequest request, String featureTag) {
-		String content = request.getContent();
-		if (content == null) {
-			return null;
-		}
+    /**
+     * Generate a SIP Intent
+     * 
+     * @param request SIP request
+     * @param featureTag Feature tag
+     */
+    private Intent generateSipIntent(SipRequest request, String featureTag) {
+        String content = request.getContent();
+        if (content == null) {
+            return null;
+        }
 
-		Intent intent = null;
-		if (content.toLowerCase().contains("msrp")) {
-			intent = new Intent(MultimediaMessagingSessionIntent.ACTION_NEW_INVITATION);
-		} else if (content.toLowerCase().contains("rtp")) {
-			intent = new Intent(MultimediaStreamingSessionIntent.ACTION_NEW_INVITATION);
-		}
+        Intent intent = null;
+        if (content.toLowerCase().contains("msrp")) {
+            intent = new Intent(MultimediaMessagingSessionIntent.ACTION_NEW_INVITATION);
+        } else if (content.toLowerCase().contains("rtp")) {
+            intent = new Intent(MultimediaStreamingSessionIntent.ACTION_NEW_INVITATION);
+        }
 
-		if (intent != null) {
-			String mime = formatIntentMimeType(featureTag);
-			intent.addCategory(Intent.CATEGORY_DEFAULT);
-			intent.setType(mime.toLowerCase());
-		}
+        if (intent != null) {
+            String mime = formatIntentMimeType(featureTag);
+            intent.addCategory(Intent.CATEGORY_DEFAULT);
+            intent.setType(mime.toLowerCase());
+        }
 
-		return intent;
-	}
+        return intent;
+    }
 
-	/**
-	 * Is the SIP intent may be resolved by at least broadcast receiver
-	 * 
-	 * @param intent
-	 *            The Intent to resolve
-	 * @return Returns true if the intent has been resolved, else returns false
-	 */
-	private boolean isSipIntentResolvedByBroadcastReceiver(Intent intent) {
-		PackageManager packageManager = AndroidFactory.getApplicationContext().getPackageManager();
-		List<ResolveInfo> list = packageManager.queryBroadcastReceivers(intent,
-				PackageManager.MATCH_DEFAULT_ONLY);
-		return (list.size() > 0);
-	}
+    /**
+     * Is the SIP intent may be resolved by at least broadcast receiver
+     * 
+     * @param intent The Intent to resolve
+     * @return Returns true if the intent has been resolved, else returns false
+     */
+    private boolean isSipIntentResolvedByBroadcastReceiver(Intent intent) {
+        PackageManager packageManager = AndroidFactory.getApplicationContext().getPackageManager();
+        List<ResolveInfo> list = packageManager.queryBroadcastReceivers(intent,
+                PackageManager.MATCH_DEFAULT_ONLY);
+        return (list.size() > 0);
+    }
 
-	/**
-	 * Format intent MIME type
-	 * 
-	 * @param featureTag
-	 *            Feature tag
-	 * @return Intent MIME type
-	 */
-	private String formatIntentMimeType(String featureTag) {
-		String serviceId = CapabilityUtils.extractServiceId(featureTag);
-		return CapabilityService.EXTENSION_MIME_TYPE + "/" + serviceId;
-	}
+    /**
+     * Format intent MIME type
+     * 
+     * @param featureTag Feature tag
+     * @return Intent MIME type
+     */
+    private String formatIntentMimeType(String featureTag) {
+        String serviceId = CapabilityUtils.extractServiceId(featureTag);
+        return CapabilityService.EXTENSION_MIME_TYPE + "/" + serviceId;
+    }
 }

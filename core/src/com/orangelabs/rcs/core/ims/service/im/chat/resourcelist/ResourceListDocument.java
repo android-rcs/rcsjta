@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.core.ims.service.im.chat.resourcelist;
 
 import java.util.HashSet;
@@ -25,19 +26,18 @@ import java.util.Set;
  * 
  * @author jexa7410
  * @author YPLO6403
- *
  */
 public class ResourceListDocument {
-	private Set<String> entries = new HashSet<String>();
+    private Set<String> entries = new HashSet<String>();
 
-	public ResourceListDocument() {
-	}
+    public ResourceListDocument() {
+    }
 
-	public void addEntry(String uri) {
-		entries.add(uri);
-	}
+    public void addEntry(String uri) {
+        entries.add(uri);
+    }
 
-	public Set<String> getEntries() {
-		return entries;
-	}
+    public Set<String> getEntries() {
+        return entries;
+    }
 }

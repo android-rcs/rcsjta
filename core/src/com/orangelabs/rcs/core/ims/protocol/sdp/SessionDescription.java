@@ -26,45 +26,45 @@ import java.util.Vector;
  * @author jexa7410
  */
 public class SessionDescription {
-	public Vector<TimeDescription> timeDescriptions;
+    public Vector<TimeDescription> timeDescriptions;
 
-	public Vector<MediaAttribute> sessionAttributes;
+    public Vector<MediaAttribute> sessionAttributes;
 
-	public boolean connectionIncluded;
+    public boolean connectionIncluded;
 
-	public String version;
+    public String version;
 
-	public String origin;
+    public String origin;
 
-	public String sessionName;
+    public String sessionName;
 
-	public String sessionInfo;
+    public String sessionInfo;
 
-	public String uri;
+    public String uri;
 
-	public String email;
+    public String email;
 
-	public String phone;
+    public String phone;
 
-	public String connectionInfo;
+    public String connectionInfo;
 
-	public String bandwidthInfo;
+    public String bandwidthInfo;
 
-	public String timezoneAdjustment;
+    public String timezoneAdjustment;
 
-	public String encryptionKey;
+    public String encryptionKey;
 
-	public MediaAttribute getSessionAttribute(String name) {
-		MediaAttribute attribute = null;
-		if (sessionAttributes != null) {
-			for (int i = 0; i < sessionAttributes.size(); i++) {
-				MediaAttribute entry = (MediaAttribute) sessionAttributes.elementAt(i);
-				if (entry.getName().equals(name)) {
-					attribute = entry;
-					break;
-				}
-			}
-		}
-		return attribute;
-	}
+    public MediaAttribute getSessionAttribute(String name) {
+        MediaAttribute attribute = null;
+        if (sessionAttributes != null) {
+            for (int i = 0; i < sessionAttributes.size(); i++) {
+                MediaAttribute entry = (MediaAttribute) sessionAttributes.elementAt(i);
+                if (entry.getName().equals(name)) {
+                    attribute = entry;
+                    break;
+                }
+            }
+        }
+        return attribute;
+    }
 }

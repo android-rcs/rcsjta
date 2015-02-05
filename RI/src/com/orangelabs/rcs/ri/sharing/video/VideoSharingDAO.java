@@ -179,7 +179,7 @@ public class VideoSharingDAO implements Parcelable {
     public VideoSharingDAO(final Context context, final String sharingId) throws Exception {
         Uri uri = VideoSharingLog.CONTENT_URI;
         String[] whereArgs = new String[] {
-            sharingId
+                sharingId
         };
         Cursor cursor = null;
         try {
@@ -242,8 +242,7 @@ public class VideoSharingDAO implements Parcelable {
     };
 
     /**
-     * public CREATOR field that generates instances of Parcelable class from a
-     * VideoSharingDAO.
+     * public CREATOR field that generates instances of Parcelable class from a VideoSharingDAO.
      */
     public static final Parcelable.Creator<VideoSharingDAO> CREATOR = new Parcelable.Creator<VideoSharingDAO>() {
         @Override

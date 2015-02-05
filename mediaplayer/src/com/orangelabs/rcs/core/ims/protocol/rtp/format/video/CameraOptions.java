@@ -20,7 +20,7 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.format.video;
 
 /**
  * Represents the available camera options
- *
+ * 
  * @author Deutsche Telekom
  */
 public enum CameraOptions {
@@ -38,7 +38,7 @@ public enum CameraOptions {
 
     /**
      * Default constructor
-     *
+     * 
      * @param value Camera ID
      */
     private CameraOptions(int value) {
@@ -47,7 +47,7 @@ public enum CameraOptions {
 
     /**
      * Gets the camera int value
-     *
+     * 
      * @return value
      */
     public int getValue() {
@@ -56,7 +56,7 @@ public enum CameraOptions {
 
     /**
      * Converts the given value in to a Camera
-     *
+     * 
      * @param value value
      * @return Camera
      */
@@ -69,7 +69,7 @@ public enum CameraOptions {
 
     /**
      * Verifies if it's a front camera
-     *
+     * 
      * @return <code>True</code> if it is, <code>false</code> otherwise.
      */
     public boolean isFrontCamera() {
@@ -78,7 +78,7 @@ public enum CameraOptions {
 
     /**
      * Verifies if it's a back camera
-     *
+     * 
      * @return <code>True</code> if it is, <code>false</code> otherwise.
      */
     public boolean isBackCamera() {

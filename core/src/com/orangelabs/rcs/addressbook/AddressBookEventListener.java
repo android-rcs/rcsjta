@@ -22,8 +22,8 @@ package com.orangelabs.rcs.addressbook;
  * Address book event listener
  */
 public interface AddressBookEventListener {
-	/**
-	 * Address book content has changed
-	 */
-	public void handleAddressBookHasChanged();
+    /**
+     * Address book content has changed
+     */
+    public void handleAddressBookHasChanged();
 }

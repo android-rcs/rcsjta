@@ -76,7 +76,7 @@ import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Initiate video sharing.
- *
+ * 
  * @author Jean-Marc AUFFRET
  * @author YPLO6403
  */
@@ -227,7 +227,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
         setContentView(R.layout.video_sharing_outgoing);
 
         // Set the contact selector
-        mSpinner = (Spinner)findViewById(R.id.contact);
+        mSpinner = (Spinner) findViewById(R.id.contact);
         mSpinner.setAdapter(ContactListAdapter.createRcsContactListAdapter(this));
 
         // Saved datas
@@ -256,12 +256,12 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
         }
 
         // Set button callback
-        mInviteBtn = (Button)findViewById(R.id.invite_btn);
+        mInviteBtn = (Button) findViewById(R.id.invite_btn);
         mInviteBtn.setOnClickListener(btnInviteListener);
-        mDialBtn = (Button)findViewById(R.id.dial_btn);
+        mDialBtn = (Button) findViewById(R.id.dial_btn);
         mDialBtn.setOnClickListener(btnDialListener);
 
-        mSwitchCamBtn = (Button)findViewById(R.id.switch_cam_btn);
+        mSwitchCamBtn = (Button) findViewById(R.id.switch_cam_btn);
 
         // Disable button if no contact available
         if (mSpinner.getAdapter().getCount() == 0) {
@@ -297,7 +297,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
         }
 
         // Create the live video view
-        mVideoView = (VideoSurfaceView)findViewById(R.id.video_preview);
+        mVideoView = (VideoSurfaceView) findViewById(R.id.video_preview);
         mVideoView.setAspectRatio(mVideoWidth, mVideoHeight);
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             mVideoView.setAspectRatio(mVideoWidth, mVideoHeight);
@@ -409,7 +409,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
         public void onClick(View v) {
 
             // get selected phone number
-            ContactListAdapter adapter = (ContactListAdapter)mSpinner.getAdapter();
+            ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
 
             // Initiate a GSM call before to be able to share content
@@ -439,7 +439,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
             }
 
             // Get the remote contact
-            ContactListAdapter adapter = (ContactListAdapter)mSpinner.getAdapter();
+            ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
 
             ContactUtils contactUtils = ContactUtils.getInstance(OutgoingVideoSharing.this);
@@ -646,12 +646,10 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
     }
 
     /**
-     * Check if good camera sizes are available for encoder. Must be used only
-     * before open camera.
+     * Check if good camera sizes are available for encoder. Must be used only before open camera.
      * 
      * @param cameraId
-     * @return false if the camera don't have the good preview size for the
-     *         encoder
+     * @return false if the camera don't have the good preview size for the encoder
      */
     boolean checkCameraSize(CameraOptions cameraId) {
         boolean sizeAvailable = false;
@@ -659,8 +657,8 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
         Method method = getCameraOpenMethod();
         if (method != null) {
             try {
-                camera = (Camera)method.invoke(camera, new Object[] {
-                    cameraId.getValue()
+                camera = (Camera) method.invoke(camera, new Object[] {
+                        cameraId.getValue()
                 });
             } catch (Exception e) {
                 camera = Camera.open();
@@ -703,7 +701,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
         p.setPreviewFormat(PixelFormat.YCbCr_420_SP);
 
         // Orientation
-        Display display = ((WindowManager)getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
+        Display display = ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
         switch (display.getRotation()) {
             case Surface.ROTATION_0:
                 if (LogUtils.isActive) {
@@ -816,7 +814,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
 
     /**
      * Get Camera "open" Method
-     *
+     * 
      * @return Method
      */
     private Method getCameraOpenMethod() {
@@ -825,7 +823,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
             Class<?> cameraClass = classLoader.loadClass("android.hardware.Camera");
             try {
                 return cameraClass.getMethod("open", new Class[] {
-                    int.class
+                        int.class
                 });
             } catch (NoSuchMethodException e) {
             }
@@ -836,7 +834,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
 
     /**
      * Open the camera
-     *
+     * 
      * @param cameraId Camera ID
      */
     private void openCamera(CameraOptions cameraId) {
@@ -854,8 +852,8 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
                         }
                     }
                 }
-                mCamera = (Camera)method.invoke(mCamera, new Object[] {
-                    hCamId
+                mCamera = (Camera) method.invoke(mCamera, new Object[] {
+                        hCamId
                 });
                 mOpenedCameraId = cameraId;
             } catch (Exception e) {
@@ -876,7 +874,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
 
     /**
      * Get Camera "numberOfCameras" Method
-     *
+     * 
      * @return Method
      */
     private Method getCameraNumberOfCamerasMethod() {
@@ -884,7 +882,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
         try {
             Class<?> cameraClass = classLoader.loadClass("android.hardware.Camera");
             try {
-                return cameraClass.getMethod("getNumberOfCameras", (Class[])null);
+                return cameraClass.getMethod("getNumberOfCameras", (Class[]) null);
             } catch (NoSuchMethodException e) {
             }
         } catch (ClassNotFoundException e) {
@@ -894,14 +892,14 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
 
     /**
      * Get number of cameras
-     *
+     * 
      * @return number of cameras
      */
     private int getNumberOfCameras() {
         Method method = getCameraNumberOfCamerasMethod();
         if (method != null) {
             try {
-                Integer ret = (Integer)method.invoke(null, (Object[])null);
+                Integer ret = (Integer) method.invoke(null, (Object[]) null);
                 return ret.intValue();
             } catch (Exception e) {
                 return 1;
@@ -960,7 +958,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
                             mVideoPlayer.start();
 
                             // Update camera button
-                            Button switchCamBtn = (Button)findViewById(R.id.switch_cam_btn);
+                            Button switchCamBtn = (Button) findViewById(R.id.switch_cam_btn);
                             switchCamBtn.setEnabled(true);
 
                             // Session is established : hide progress dialog
@@ -1150,7 +1148,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
             String format = new StringBuilder(mVideoSharing.getVideoEncoding()).append(" ")
                     .append(videoDescriptor.getWidth()).append("x")
                     .append(videoDescriptor.getHeight()).toString();
-            TextView fmtView = (TextView)findViewById(R.id.video_format);
+            TextView fmtView = (TextView) findViewById(R.id.video_format);
             fmtView.setVisibility(View.VISIBLE);
             fmtView.setText(getString(R.string.label_video_format, format));
         } catch (Exception e) {
@@ -1164,7 +1162,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
      * Display remote contact
      */
     private void displayRemoteContact() {
-        TextView fromTextView = (TextView)findViewById(R.id.with);
+        TextView fromTextView = (TextView) findViewById(R.id.with);
         fromTextView.setVisibility(View.VISIBLE);
         String displayName = RcsDisplayName.getInstance(this).getDisplayName(mContact);
         fromTextView.setText(getString(R.string.label_with_args, displayName));

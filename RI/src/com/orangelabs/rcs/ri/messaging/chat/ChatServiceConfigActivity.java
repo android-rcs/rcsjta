@@ -89,7 +89,7 @@ public class ChatServiceConfigActivity extends Activity {
 
         mCnxManager.startMonitorServices(this, null, RcsServiceName.CHAT);
 
-        mRespondToDisplayReports = (CheckBox)findViewById(R.id.RespondToDisplayReports);
+        mRespondToDisplayReports = (CheckBox) findViewById(R.id.RespondToDisplayReports);
         mRespondToDisplayReports.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -131,45 +131,45 @@ public class ChatServiceConfigActivity extends Activity {
     }
 
     private void displayChatServiceConfig() throws RcsServiceException {
-        CheckBox checkBox = (CheckBox)findViewById(R.id.ImAlwaysOn);
+        CheckBox checkBox = (CheckBox) findViewById(R.id.ImAlwaysOn);
         checkBox.setChecked(mConfig.isChatSf());
 
-        checkBox = (CheckBox)findViewById(R.id.WarnSF);
+        checkBox = (CheckBox) findViewById(R.id.WarnSF);
         checkBox.setChecked(mConfig.isChatWarnSF());
 
-        TextView textView = (TextView)findViewById(R.id.IsComposingTimeout);
+        TextView textView = (TextView) findViewById(R.id.IsComposingTimeout);
         textView.setText(Integer.valueOf(mConfig.getIsComposingTimeout()).toString());
 
-        textView = (TextView)findViewById(R.id.ChatTimeout);
+        textView = (TextView) findViewById(R.id.ChatTimeout);
         textView.setText(Integer.valueOf(mConfig.getChatTimeout()).toString());
 
-        textView = (TextView)findViewById(R.id.MinGroupChatParticipants);
+        textView = (TextView) findViewById(R.id.MinGroupChatParticipants);
         textView.setText(Integer.valueOf(mConfig.getGroupChatMinParticipants()).toString());
 
-        textView = (TextView)findViewById(R.id.MaxGroupChatParticipants);
+        textView = (TextView) findViewById(R.id.MaxGroupChatParticipants);
         textView.setText(Integer.valueOf(mConfig.getGroupChatMaxParticipants()).toString());
 
-        textView = (TextView)findViewById(R.id.MaxMsgLengthGroupChat);
+        textView = (TextView) findViewById(R.id.MaxMsgLengthGroupChat);
         textView.setText(Integer.valueOf(mConfig.getGroupChatMessageMaxLength()).toString());
 
-        textView = (TextView)findViewById(R.id.GroupChatSubjectMaxLength);
+        textView = (TextView) findViewById(R.id.GroupChatSubjectMaxLength);
         textView.setText(Integer.valueOf(mConfig.getGroupChatSubjectMaxLength()).toString());
 
-        textView = (TextView)findViewById(R.id.MaxMsgLengthOneToOneChat);
+        textView = (TextView) findViewById(R.id.MaxMsgLengthOneToOneChat);
         textView.setText(Integer.valueOf(mConfig.getOneToOneChatMessageMaxLength()).toString());
 
-        checkBox = (CheckBox)findViewById(R.id.SmsFallback);
+        checkBox = (CheckBox) findViewById(R.id.SmsFallback);
         checkBox.setChecked(mConfig.isSmsFallback());
 
         mRespondToDisplayReports.setChecked(mConfig.isRespondToDisplayReportsEnabled());
 
-        textView = (TextView)findViewById(R.id.MaxGeolocLabelLength);
+        textView = (TextView) findViewById(R.id.MaxGeolocLabelLength);
         textView.setText(Integer.valueOf(mConfig.getGeolocLabelMaxLength()).toString());
 
-        textView = (TextView)findViewById(R.id.GeolocExpireTime);
+        textView = (TextView) findViewById(R.id.GeolocExpireTime);
         textView.setText(Integer.valueOf(mConfig.getGeolocExpirationTime()).toString());
 
-        checkBox = (CheckBox)findViewById(R.id.GroupChatSupported);
+        checkBox = (CheckBox) findViewById(R.id.GroupChatSupported);
         checkBox.setChecked(mConfig.isGroupChatSupported());
     }
 }

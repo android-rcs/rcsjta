@@ -19,6 +19,7 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.provider.sharing;
 
 import com.gsma.services.rcs.vsh.VideoSharingLog;
@@ -30,58 +31,58 @@ import com.gsma.services.rcs.vsh.VideoSharingLog;
  */
 public class VideoSharingData {
 
-	/**
-	 * Unique sharing identifier
-	 */
-	static final String KEY_SHARING_ID = VideoSharingLog.SHARING_ID;
+    /**
+     * Unique sharing identifier
+     */
+    static final String KEY_SHARING_ID = VideoSharingLog.SHARING_ID;
 
-	/**
-	 * ContactId formatted number of the remote contact
-	 */
-	static final String KEY_CONTACT = VideoSharingLog.CONTACT;
+    /**
+     * ContactId formatted number of the remote contact
+     */
+    static final String KEY_CONTACT = VideoSharingLog.CONTACT;
 
-	/**
-	 * Date of the sharing
-	 */
-	static final String KEY_TIMESTAMP = VideoSharingLog.TIMESTAMP;
+    /**
+     * Date of the sharing
+     */
+    static final String KEY_TIMESTAMP = VideoSharingLog.TIMESTAMP;
 
-	/**
-	 * @see VideoSharing.State for the list of states
-	 */
-	static final String KEY_STATE = VideoSharingLog.STATE;
+    /**
+     * @see VideoSharing.State for the list of states
+     */
+    static final String KEY_STATE = VideoSharingLog.STATE;
 
-	/**
-	 * Reason code associated with the video sharing state.
-	 *
-	 * @see VideoSharing.ReasonCode
-	 */
-	static final String KEY_REASON_CODE = VideoSharingLog.REASON_CODE;
+    /**
+     * Reason code associated with the video sharing state.
+     * 
+     * @see VideoSharing.ReasonCode
+     */
+    static final String KEY_REASON_CODE = VideoSharingLog.REASON_CODE;
 
-	/**
-	 * Incoming sharing or outgoing sharing.
-	 *
-	 * @see Direction
-	 */
-	static final String KEY_DIRECTION = VideoSharingLog.DIRECTION;
+    /**
+     * Incoming sharing or outgoing sharing.
+     * 
+     * @see Direction
+     */
+    static final String KEY_DIRECTION = VideoSharingLog.DIRECTION;
 
-	/**
-	 * Duration of the sharing in seconds. The value is only set at the end of the sharing.
-	 */
-	static final String KEY_DURATION = VideoSharingLog.DURATION;
+    /**
+     * Duration of the sharing in seconds. The value is only set at the end of the sharing.
+     */
+    static final String KEY_DURATION = VideoSharingLog.DURATION;
 
-	/**
-	 * Encoding of the shared video
-	 */
-	static final String KEY_VIDEO_ENCODING = VideoSharingLog.VIDEO_ENCODING;
+    /**
+     * Encoding of the shared video
+     */
+    static final String KEY_VIDEO_ENCODING = VideoSharingLog.VIDEO_ENCODING;
 
-	/**
-	 * Width of the shared video
-	 */
-	static final String KEY_WIDTH = VideoSharingLog.WIDTH;
+    /**
+     * Width of the shared video
+     */
+    static final String KEY_WIDTH = VideoSharingLog.WIDTH;
 
-	/**
-	 * Height of the shared video
-	 */
-	static final String KEY_HEIGHT = VideoSharingLog.HEIGHT;
+    /**
+     * Height of the shared video
+     */
+    static final String KEY_HEIGHT = VideoSharingLog.HEIGHT;
 
 }

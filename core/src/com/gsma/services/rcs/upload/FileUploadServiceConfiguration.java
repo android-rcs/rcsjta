@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.gsma.services.rcs.upload;
 
 import com.gsma.services.rcs.RcsServiceException;
@@ -24,33 +25,32 @@ import com.gsma.services.rcs.RcsServiceException;
  * 
  * @author Jean-Marc AUFFRET
  * @author yplo6403
- *
  */
 public class FileUploadServiceConfiguration {
 
-	IFileUploadServiceConfiguration mConfiguration;
+    IFileUploadServiceConfiguration mConfiguration;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param configuration
-	 * @hide
-	 */
-	public FileUploadServiceConfiguration(IFileUploadServiceConfiguration configuration) {
-		mConfiguration = configuration;
-	}
+    /**
+     * Constructor
+     * 
+     * @param configuration
+     * @hide
+     */
+    public FileUploadServiceConfiguration(IFileUploadServiceConfiguration configuration) {
+        mConfiguration = configuration;
+    }
 
-	/**
-	 * Returns the file upload size limit. It returns 0 if there is no limitation.
-	 * 
-	 * @return Size in kilobytes
-	 * @throws RcsServiceException
-	 */
-	public long getMaxSize() throws RcsServiceException {
-		try {
-			return mConfiguration.getMaxSize();
-		} catch (Exception e) {
-			throw new RcsServiceException(e);
-		}
-	}
+    /**
+     * Returns the file upload size limit. It returns 0 if there is no limitation.
+     * 
+     * @return Size in kilobytes
+     * @throws RcsServiceException
+     */
+    public long getMaxSize() throws RcsServiceException {
+        try {
+            return mConfiguration.getMaxSize();
+        } catch (Exception e) {
+            throw new RcsServiceException(e);
+        }
+    }
 }

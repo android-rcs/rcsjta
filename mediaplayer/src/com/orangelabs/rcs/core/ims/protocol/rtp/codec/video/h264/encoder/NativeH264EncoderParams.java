@@ -26,7 +26,7 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.profiles.H264Ty
 
 /**
  * H264 Encoder settings
- *
+ * 
  * @author Deutsche Telekom AG
  */
 public class NativeH264EncoderParams {
@@ -105,48 +105,46 @@ public class NativeH264EncoderParams {
     private float frameRate;
 
     /**
-     * Contains Frame Orientation. Used for RGB input. 1 means Bottom_UP RGB, 0
-     * means Top_Down RGB, -1 for video formats other than RGB
+     * Contains Frame Orientation. Used for RGB input. 1 means Bottom_UP RGB, 0 means Top_Down RGB,
+     * -1 for video formats other than RGB
      */
     private int frameOrientation; // TODO not implemented yet on the codec side
 
     /**
-     * Contains the format of the input video, e.g., YUV 4:2:0, UYVY, RGB24,
-     * etc.
+     * Contains the format of the input video, e.g., YUV 4:2:0, UYVY, RGB24, etc.
      */
     private int videoFormat;
 
     /**
-     * Specifies an ID that will be used to specify this encoder while returning
-     * the bitstream in asynchronous mode.
+     * Specifies an ID that will be used to specify this encoder while returning the bitstream in
+     * asynchronous mode.
      */
 
     private int encodeID;
     /**
-     * Specifies the targeted profile, and will also specifies available tools
-     * for iEncMode. If default is used, encoder will choose its own preferred
-     * profile. If autodetect is used, encoder will check other settings and
-     * choose the right profile that doesn't have any conflicts.
+     * Specifies the targeted profile, and will also specifies available tools for iEncMode. If
+     * default is used, encoder will choose its own preferred profile. If autodetect is used,
+     * encoder will check other settings and choose the right profile that doesn't have any
+     * conflicts.
      */
     private int profile;
 
     /**
-     * Specifies the targeted profile IOP, composed of the values of constraint
-     * flags
+     * Specifies the targeted profile IOP, composed of the values of constraint flags
      */
     private byte profileIOP;
 
     /**
-     * Specifies the target level When present, other settings will be checked
-     * against the range allowable by this target level. Fail will returned upon
-     * Initialize call. If not known, users must set it to autodetect. Encoder
-     * will calculate the right level that doesn't conflict with other settings.
+     * Specifies the target level When present, other settings will be checked against the range
+     * allowable by this target level. Fail will returned upon Initialize call. If not known, users
+     * must set it to autodetect. Encoder will calculate the right level that doesn't conflict with
+     * other settings.
      */
     private int level;
 
     /**
-     * Specifies whether base only (numLayer = 1) or base + enhancement layer
-     * (numLayer =2 ) is to be used.
+     * Specifies whether base only (numLayer = 1) or base + enhancement layer (numLayer =2 ) is to
+     * be used.
      */
     private int numLayer;
 
@@ -156,8 +154,8 @@ public class NativeH264EncoderParams {
     private int bitRate;
 
     /**
-     * Specifies the encoding mode. This translates to the complexity of
-     * encoding modes and error resilient tools.
+     * Specifies the encoding mode. This translates to the complexity of encoding modes and error
+     * resilient tools.
      */
     private int encMode;
 
@@ -172,78 +170,71 @@ public class NativeH264EncoderParams {
     private int outputFormat;
 
     /**
-     * Specifies the packet size in bytes which represents the desired number of
-     * bytes per NAL. If this number is set to 0, the encoder will encode the
-     * entire slice group as one NAL.
+     * Specifies the packet size in bytes which represents the desired number of bytes per NAL. If
+     * this number is set to 0, the encoder will encode the entire slice group as one NAL.
      */
     private int packetSize;
 
     /**
-     * Specifies the rate control algorithm among one of the following constant
-     * Q, CBR and VBR.
+     * Specifies the rate control algorithm among one of the following constant Q, CBR and VBR.
      */
     private int rateControlType;
 
     /**
-     * Specifies the VBV buffer size which determines the end-to-end delay
-     * between the encoder and the decoder. The size is in unit of seconds. For
-     * download application, the buffer size can be larger than the streaming
-     * application. For 2-way application, this buffer shall be kept minimal.
-     * For a special case, in VBR mode, iBufferDelay will be set to -1 to allow
-     * buffer underflow.
+     * Specifies the VBV buffer size which determines the end-to-end delay between the encoder and
+     * the decoder. The size is in unit of seconds. For download application, the buffer size can be
+     * larger than the streaming application. For 2-way application, this buffer shall be kept
+     * minimal. For a special case, in VBR mode, iBufferDelay will be set to -1 to allow buffer
+     * underflow.
      */
     private float bufferDelay;
 
     /**
-     * Specifies the initial quantization parameter for the first I-frame. If
-     * constant Q rate control is used, this QP will be used for all the
-     * I-frames. This number must be set between 1 and 31, otherwise,
-     * Initialize() will fail.
+     * Specifies the initial quantization parameter for the first I-frame. If constant Q rate
+     * control is used, this QP will be used for all the I-frames. This number must be set between 1
+     * and 31, otherwise, Initialize() will fail.
      */
     private int iquant;
 
     /**
-     * Specifies the initial quantization parameter for the first P-frame. If
-     * constant Q rate control is used, this QP will be used for all the
-     * P-frames. This number must be set between 1 and 31, otherwise,
-     * Initialize() will fail.
+     * Specifies the initial quantization parameter for the first P-frame. If constant Q rate
+     * control is used, this QP will be used for all the P-frames. This number must be set between 1
+     * and 31, otherwise, Initialize() will fail.
      */
     private int pquant;
 
     /**
-     * Specifies the initial quantization parameter for the first B-frame. If
-     * constant Q rate control is used, this QP will be used for all the
-     * B-frames. This number must be set between 1 and 31, otherwise,
-     * Initialize() will fail.
+     * Specifies the initial quantization parameter for the first B-frame. If constant Q rate
+     * control is used, this QP will be used for all the B-frames. This number must be set between 1
+     * and 31, otherwise, Initialize() will fail.
      */
     private int bquant;
 
     /**
-     * Specifies automatic scene detection where I-frame will be used the the
-     * first frame in a new scene.
+     * Specifies automatic scene detection where I-frame will be used the the first frame in a new
+     * scene.
      */
     private boolean sceneDetection;
 
     /**
-     * Specifies the maximum period in seconds between 2 INTRA frames. An INTRA
-     * mode is forced to a frame once this interval is reached. When there is
-     * only one I-frame is present at the beginning of the clip, iFrameInterval
-     * should be set to -1. For all I-frames coding this number should be set to
-     * 0.
+     * Specifies the maximum period in seconds between 2 INTRA frames. An INTRA mode is forced to a
+     * frame once this interval is reached. When there is only one I-frame is present at the
+     * beginning of the clip, iFrameInterval should be set to -1. For all I-frames coding this
+     * number should be set to 0.
      */
     private int iFrameInterval;
 
     /**
-     * According to iIFrameInterval setting, the minimum number of intra MB per
-     * frame is optimally calculated for error resiliency. However, when
-     * iIFrameInterval is set to -1, numIntraMBRefresh must be specified to
-     * guarantee the minimum number of intra macroblocks per frame.
+     * According to iIFrameInterval setting, the minimum number of intra MB per frame is optimally
+     * calculated for error resiliency. However, when iIFrameInterval is set to -1,
+     * numIntraMBRefresh must be specified to guarantee the minimum number of intra macroblocks per
+     * frame.
      */
     private int numIntraMBRefresh;
 
     /**
-     * Specifies the duration of the clip in millisecond, needed for VBR encode.
-     * Set to 0 if unknown.
+     * Specifies the duration of the clip in millisecond, needed for VBR encode. Set to 0 if
+     * unknown.
      */
     private int clipDuration;
 
@@ -257,8 +248,7 @@ public class NativeH264EncoderParams {
      */
     private int fSIBuffLength;
 
-
-// ----- Constructors -----
+    // ----- Constructors -----
 
     /**
      * Constructor for native H264Encoder parameters
@@ -304,10 +294,10 @@ public class NativeH264EncoderParams {
      * @param frameHeight Height in pixels of the input frame
      * @param bitRate Bit rate in bit per second
      * @param frameRate Frame rate in the unit of frame per second
-     * @param packetSize Packet size in bytes which represents the desired
-     *            number of bytes per NAL
+     * @param packetSize Packet size in bytes which represents the desired number of bytes per NAL
      */
-    public NativeH264EncoderParams(H264TypeProfile profileType, byte profileIOP, H264TypeLevel levelType,
+    public NativeH264EncoderParams(H264TypeProfile profileType, byte profileIOP,
+            H264TypeLevel levelType,
             int frameWidth, int frameHeight,
             int bitRate, float frameRate, int packetSize) {
         this(); // to fill the default parameters
@@ -326,7 +316,7 @@ public class NativeH264EncoderParams {
 
     /**
      * Method to set profiles and level from a given codec parameter string
-     *
+     * 
      * @param codecParams Codec parameters
      */
     public void setProfilesAndLevel(String codecParams) {
@@ -557,7 +547,7 @@ public class NativeH264EncoderParams {
 
     /**
      * Parse {@link H264TypeLevel} to map encode parameter 'Level'
-     *
+     * 
      * @param level
      * @return map value if valid type, otherwise return <code>-1</code>
      */
@@ -601,7 +591,7 @@ public class NativeH264EncoderParams {
 
     /**
      * Parse {@link H264TypeProfile} to map encode parameter 'Profile'
-     *
+     * 
      * @param profile
      * @return map value if valid type, otherwise <code>PROFILE_DEFAULT<code>
      */

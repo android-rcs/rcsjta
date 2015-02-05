@@ -19,6 +19,7 @@ w * Software Name : RCS IMS Stack
  * NOTE: This file has been modified by Sony Mobile Communications AB.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.services.rcs.contacts.ContactId;
@@ -31,71 +32,68 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 public class ResumeDownloadFileSharingSession extends TerminatingHttpFileSharingSession {
 
-	/**
-	 * The logger
-	 */
-	private final static Logger logger = Logger.getLogger(ResumeDownloadFileSharingSession.class
-			.getSimpleName());
+    /**
+     * The logger
+     */
+    private final static Logger logger = Logger.getLogger(ResumeDownloadFileSharingSession.class
+            .getSimpleName());
 
-	/**
-	 * Constructor create instance of session object to resume download
-	 * 
-	 * @param parent
-	 *            IMS service
-	 * @param content
-	 *            the content (url, mime-type and size)
-	 * @param resumeDownload
-	 *            the data object in DB
-	 */
-	public ResumeDownloadFileSharingSession(ImsService parent, MmContent content,
-			FtHttpResumeDownload resumeDownload) {
-		super(parent, content, resumeDownload);
-	}
+    /**
+     * Constructor create instance of session object to resume download
+     * 
+     * @param parent IMS service
+     * @param content the content (url, mime-type and size)
+     * @param resumeDownload the data object in DB
+     */
+    public ResumeDownloadFileSharingSession(ImsService parent, MmContent content,
+            FtHttpResumeDownload resumeDownload) {
+        super(parent, content, resumeDownload);
+    }
 
-	/**
-	 * Background processing
-	 */
-	public void run() {
-		try {
-			if (logger.isActivated()) {
-				logger.info("Resume a HTTP file transfer session as terminating");
-			}
-			ContactId contact = getRemoteContact();
-			for (int j = 0; j < getListeners().size(); j++) {
-				getListeners().get(j).handleSessionStarted(contact);
-			}
+    /**
+     * Background processing
+     */
+    public void run() {
+        try {
+            if (logger.isActivated()) {
+                logger.info("Resume a HTTP file transfer session as terminating");
+            }
+            ContactId contact = getRemoteContact();
+            for (int j = 0; j < getListeners().size(); j++) {
+                getListeners().get(j).handleSessionStarted(contact);
+            }
 
-			// Resume download file from the HTTP server
-			if (downloadManager.streamForFile != null && downloadManager.resumeDownload()) {
-				if (logger.isActivated()) {
-					logger.debug("Resume download success for " + resumeFT);
-				}
-				// Set file URL
-				getContent().setUri(downloadManager.getDownloadedFileUri());
+            // Resume download file from the HTTP server
+            if (downloadManager.streamForFile != null && downloadManager.resumeDownload()) {
+                if (logger.isActivated()) {
+                    logger.debug("Resume download success for " + resumeFT);
+                }
+                // Set file URL
+                getContent().setUri(downloadManager.getDownloadedFileUri());
 
-				// File transfered
-				handleFileTransfered();
-				// Send delivery report "displayed"
-				sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED);
-			} else {
-				// Don't call handleError in case of Pause or Cancel
-				if (downloadManager.isCancelled() || downloadManager.isPaused()) {
-					return;
-				}
+                // File transfered
+                handleFileTransfered();
+                // Send delivery report "displayed"
+                sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+            } else {
+                // Don't call handleError in case of Pause or Cancel
+                if (downloadManager.isCancelled() || downloadManager.isPaused()) {
+                    return;
+                }
 
-				// Upload error
-				if (logger.isActivated()) {
-					logger.info("Resume Download file has failed");
-				}
-				handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED));
-			}
-		} catch (Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Transfer has failed", e);
-			}
-			// Unexpected error
-			handleError(new FileSharingError(FileSharingError.UNEXPECTED_EXCEPTION, e.getMessage()));
-		}
-	}
+                // Upload error
+                if (logger.isActivated()) {
+                    logger.info("Resume Download file has failed");
+                }
+                handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED));
+            }
+        } catch (Exception e) {
+            if (logger.isActivated()) {
+                logger.error("Transfer has failed", e);
+            }
+            // Unexpected error
+            handleError(new FileSharingError(FileSharingError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        }
+    }
 
 }

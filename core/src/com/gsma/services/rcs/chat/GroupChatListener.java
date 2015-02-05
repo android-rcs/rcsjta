@@ -19,6 +19,7 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.gsma.services.rcs.chat;
 
 import com.gsma.services.rcs.contacts.ContactId;
@@ -29,74 +30,56 @@ import com.gsma.services.rcs.contacts.ContactId;
  * @author Jean-Marc AUFFRET
  */
 public abstract class GroupChatListener extends IGroupChatListener.Stub {
-	/**
-	 * Callback called when the group chat state is changed
-	 *
-	 * @param chatId
-	 *            chat id
-	 * @param state
-	 *            group chat state
-	 * @param reasonCode
-	 *            reason code
-	 */
-	public abstract void onStateChanged(String chatId, int state, int reasonCode);
+    /**
+     * Callback called when the group chat state is changed
+     * 
+     * @param chatId chat id
+     * @param state group chat state
+     * @param reasonCode reason code
+     */
+    public abstract void onStateChanged(String chatId, int state, int reasonCode);
 
-	/**
-	 * Callback called when an Is-composing event has been received. If the remote is typing a
-	 * message the status is set to true, else it is false.
-	 * 
-	 * @param chatId
-	 * @param contact
-	 *            Contact ID
-	 * @param status
-	 *            Is-composing status
-	 */
-	public abstract void onComposingEvent(String chatId, ContactId contact, boolean status);
+    /**
+     * Callback called when an Is-composing event has been received. If the remote is typing a
+     * message the status is set to true, else it is false.
+     * 
+     * @param chatId
+     * @param contact Contact ID
+     * @param status Is-composing status
+     */
+    public abstract void onComposingEvent(String chatId, ContactId contact, boolean status);
 
-	/**
-	 * Callback called when a message status/reasonCode is changed.
-	 * 
-	 * @param chatId
-	 *            chat id
-	 * @param mimeType
-	 *            MIME-type
-	 * @param msgId
-	 *            message id
-	 * @param status
-	 *            message status
-	 * @param reasonCode
-	 *            reason code
-	 */
-	public abstract void onMessageStatusChanged(String chatId, String mimeType, String msgId,
-			int status, int reasonCode);
+    /**
+     * Callback called when a message status/reasonCode is changed.
+     * 
+     * @param chatId chat id
+     * @param mimeType MIME-type
+     * @param msgId message id
+     * @param status message status
+     * @param reasonCode reason code
+     */
+    public abstract void onMessageStatusChanged(String chatId, String mimeType, String msgId,
+            int status, int reasonCode);
 
-	/**
-	 * Callback called when a group delivery info status/reasonCode was changed for a single
-	 * recipient to a group message.
-	 * 
-	 * @param chatId
-	 *            chat id
-	 * @param contact
-	 *            contact
-	 * @param mimeType
-	 *            MIME-type
-	 * @param msgId
-	 *            message id
-	 * @param status
-	 *            message status
-	 * @param reasonCode
-	 *            status reason code
-	 */
-	public abstract void onMessageGroupDeliveryInfoChanged(String chatId, ContactId contact,
-			String mimeType, String msgId, int status, int reasonCode);
+    /**
+     * Callback called when a group delivery info status/reasonCode was changed for a single
+     * recipient to a group message.
+     * 
+     * @param chatId chat id
+     * @param contact contact
+     * @param mimeType MIME-type
+     * @param msgId message id
+     * @param status message status
+     * @param reasonCode status reason code
+     */
+    public abstract void onMessageGroupDeliveryInfoChanged(String chatId, ContactId contact,
+            String mimeType, String msgId, int status, int reasonCode);
 
-	/**
-	 * Callback called when a participant status has been changed in a group chat.
-	 *
-	 * @param chatId
-	 *            chat id
-	 * @param info
-	 *            participant info
-	 */
-	public abstract void onParticipantInfoChanged(String chatId, ParticipantInfo info);
+    /**
+     * Callback called when a participant status has been changed in a group chat.
+     * 
+     * @param chatId chat id
+     * @param info participant info
+     */
+    public abstract void onParticipantInfoChanged(String chatId, ParticipantInfo info);
 }

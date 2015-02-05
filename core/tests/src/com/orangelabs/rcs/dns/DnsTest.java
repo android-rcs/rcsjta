@@ -101,7 +101,7 @@ public class DnsTest extends AndroidTestCase {
                 logger.debug("NAPTR records found: " + naptrRecords.length);
             }
             for (int i = 0; i < naptrRecords.length; i++) {
-                NAPTRRecord naptr = (NAPTRRecord)naptrRecords[i];
+                NAPTRRecord naptr = (NAPTRRecord) naptrRecords[i];
                 if (logger.isActivated()) {
                     logger.debug("NAPTR record: " + naptr.toString());
                 }
@@ -224,7 +224,7 @@ public class DnsTest extends AndroidTestCase {
     private SRVRecord getBestDnsSRV(Record[] records) {
         SRVRecord result = null;
         for (int i = 0; i < records.length; i++) {
-            SRVRecord srv = (SRVRecord)records[i];
+            SRVRecord srv = (SRVRecord) records[i];
             if (logger.isActivated()) {
                 logger.debug("SRV record: " + srv.toString());
             }

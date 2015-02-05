@@ -30,12 +30,12 @@ import android.content.Intent;
  * @author jexa7410
  */
 public class DeviceBoot extends BroadcastReceiver {
-	private static Logger logger = Logger.getLogger(DeviceBoot.class.getSimpleName());
+    private static Logger logger = Logger.getLogger(DeviceBoot.class.getSimpleName());
 
-	@Override
-	public void onReceive(Context context, Intent intent) {
-		if (logger.isActivated())
-			logger.debug("Start RCS service after boot");
-		LauncherUtils.launchRcsService(context, true, false);
-	}
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        if (logger.isActivated())
+            logger.debug("Start RCS service after boot");
+        LauncherUtils.launchRcsService(context, true, false);
+    }
 }

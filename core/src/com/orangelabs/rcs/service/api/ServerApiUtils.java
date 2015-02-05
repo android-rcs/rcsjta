@@ -26,47 +26,46 @@ import com.orangelabs.rcs.core.Core;
  * @author Jean-Marc AUFFRET
  */
 public class ServerApiUtils {
-	/**
-	 * Test core
-	 * 
-	 * @throws ServerApiException
-	 */
-	public static void testCore() throws ServerApiException {
-		if (Core.getInstance() == null) {
-			throw new ServerApiException("Core is not instanciated");
-		}
-	}
+    /**
+     * Test core
+     * 
+     * @throws ServerApiException
+     */
+    public static void testCore() throws ServerApiException {
+        if (Core.getInstance() == null) {
+            throw new ServerApiException("Core is not instanciated");
+        }
+    }
 
-	/**
-	 * Test IMS connection
-	 * 
-	 * @throws ServerApiException
-	 */
-	public static void testIms() throws ServerApiException {
-		if (!isImsConnected()) {
-			throw new ServerApiException("Core is not connected to IMS");
-		}
-	}
+    /**
+     * Test IMS connection
+     * 
+     * @throws ServerApiException
+     */
+    public static void testIms() throws ServerApiException {
+        if (!isImsConnected()) {
+            throw new ServerApiException("Core is not connected to IMS");
+        }
+    }
 
-	/**
-	 * Is connected to IMS
-	 * 
-	 * @return Boolean
-	 */
-	public static boolean isImsConnected() {
-		return ((Core.getInstance() != null)
-				&& (Core.getInstance().getImsModule().getCurrentNetworkInterface() != null) && (Core
-				.getInstance().getImsModule().getCurrentNetworkInterface().isRegistered()));
-	}
+    /**
+     * Is connected to IMS
+     * 
+     * @return Boolean
+     */
+    public static boolean isImsConnected() {
+        return ((Core.getInstance() != null)
+                && (Core.getInstance().getImsModule().getCurrentNetworkInterface() != null) && (Core
+                .getInstance().getImsModule().getCurrentNetworkInterface().isRegistered()));
+    }
 
-	/**
-	 * Test API extension permission
-	 * 
-	 * @param ext
-	 *            Extension ID
-	 * @throws ServerApiException
-	 */
-	public static void testApiExtensionPermission(String ext) throws ServerApiException {
-		// No control done in this release
-	}
+    /**
+     * Test API extension permission
+     * 
+     * @param ext Extension ID
+     * @throws ServerApiException
+     */
+    public static void testApiExtensionPermission(String ext) throws ServerApiException {
+        // No control done in this release
+    }
 }

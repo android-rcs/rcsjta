@@ -31,47 +31,47 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.util.Packet;
  * @author Deutsche Telekom
  */
 public class RtpPacket extends Packet {
-	public Packet base;
-	public int marker;
-	public int payloadType;
-	public int seqnum;
-	public long timestamp;
-	public int ssrc;
-	public int payloadoffset;
-	public int payloadlength;
+    public Packet base;
+    public int marker;
+    public int payloadType;
+    public int seqnum;
+    public long timestamp;
+    public int ssrc;
+    public int payloadoffset;
+    public int payloadlength;
     public boolean extension;
     public RtpExtensionHeader extensionHeader;
 
-	public RtpPacket() {
-		super();
-	}
+    public RtpPacket() {
+        super();
+    }
 
-	public RtpPacket(Packet packet) {
-		super(packet);
-		
-		base = packet;
-	}
+    public RtpPacket(Packet packet) {
+        super(packet);
 
-	public void assemble(int length) throws IOException {
-		this.length = length;
-		this.offset = 0;
+        base = packet;
+    }
 
-		ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream(length);
-		DataOutputStream dataoutputstream = new DataOutputStream(bytearrayoutputstream);
+    public void assemble(int length) throws IOException {
+        this.length = length;
+        this.offset = 0;
+
+        ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream(length);
+        DataOutputStream dataoutputstream = new DataOutputStream(bytearrayoutputstream);
         if (extension) {
             dataoutputstream.writeByte(144);
         } else {
             dataoutputstream.writeByte(128);
         }
 
-		int i = payloadType;
-		if (marker == 1) {
-			i = payloadType | 0x80;
-		}
-		dataoutputstream.writeByte((byte) i);
-		dataoutputstream.writeShort(seqnum);
-		dataoutputstream.writeInt((int) timestamp);
-		dataoutputstream.writeInt(ssrc);
+        int i = payloadType;
+        if (marker == 1) {
+            i = payloadType | 0x80;
+        }
+        dataoutputstream.writeByte((byte) i);
+        dataoutputstream.writeShort(seqnum);
+        dataoutputstream.writeInt((int) timestamp);
+        dataoutputstream.writeInt(ssrc);
 
         if (extension && extensionHeader != null) {
             // Write extension header id
@@ -86,10 +86,10 @@ public class RtpPacket extends Packet {
             }
         }
         dataoutputstream.write(base.data, base.offset, base.length);
-		data = bytearrayoutputstream.toByteArray();
-	}
+        data = bytearrayoutputstream.toByteArray();
+    }
 
-	public int calcLength() {
-		return payloadlength + 12;
-	}
+    public int calcLength() {
+        return payloadlength + 12;
+    }
 }

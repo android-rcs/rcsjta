@@ -24,8 +24,7 @@ import android.view.KeyEvent;
 import android.widget.EditText;
 
 /**
- * A custom text editor that helps automatically dismiss the activity along with the soft
- * keyboard.
+ * A custom text editor that helps automatically dismiss the activity along with the soft keyboard.
  */
 public class SearchEditText extends EditText {
 
@@ -38,8 +37,8 @@ public class SearchEditText extends EditText {
     }
 
     /**
-     * Conditionally shows a magnifying glass icon on the right side of the text field
-     * when the text it empty.
+     * Conditionally shows a magnifying glass icon on the right side of the text field when the text
+     * it empty.
      */
     @Override
     public boolean onPreDraw() {
@@ -61,7 +60,7 @@ public class SearchEditText extends EditText {
      */
     @Override
     public boolean onKeyPreIme(int keyCode, KeyEvent event) {
-        if (((ContactsListActivity)getContext()).onKeyPreIme(keyCode, event)) {
+        if (((ContactsListActivity) getContext()).onKeyPreIme(keyCode, event)) {
             return true;
         }
         return super.onKeyPreIme(keyCode, event);

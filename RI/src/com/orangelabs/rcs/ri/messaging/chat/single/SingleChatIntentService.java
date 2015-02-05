@@ -175,7 +175,7 @@ public class SingleChatIntentService extends IntentService {
             Notification notif = buildNotification(contentIntent, title, msg);
 
             // Send notification
-            NotificationManager notificationManager = (NotificationManager)context
+            NotificationManager notificationManager = (NotificationManager) context
                     .getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.notify(contact.toString(), Utils.NOTIF_ID_SINGLE_CHAT, notif);
         }

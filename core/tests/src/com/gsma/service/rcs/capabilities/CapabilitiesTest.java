@@ -125,7 +125,8 @@ public class CapabilitiesTest extends AndroidTestCase {
             return false;
         }
         if (cap1.getSupportedExtensions() != null) {
-            if (!cap1.getSupportedExtensions().equals(cap2.getSupportedExtensions())) return false;
+            if (!cap1.getSupportedExtensions().equals(cap2.getSupportedExtensions()))
+                return false;
         } else {
             if (cap2.getSupportedExtensions() != null) {
                 return false;

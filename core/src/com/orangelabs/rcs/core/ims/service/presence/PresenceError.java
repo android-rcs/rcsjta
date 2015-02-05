@@ -26,37 +26,34 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceError;
  * @author jexa7410
  */
 public class PresenceError extends ImsServiceError {
-	static final long serialVersionUID = 1L;
+    static final long serialVersionUID = 1L;
 
-	/**
-	 * Subscription has failed (e.g. 404 not found)
-	 */
-	public final static int SUBSCRIBE_FAILED = PRESENCE_ERROR_CODES + 1;
+    /**
+     * Subscription has failed (e.g. 404 not found)
+     */
+    public final static int SUBSCRIBE_FAILED = PRESENCE_ERROR_CODES + 1;
 
-	/**
-	 * Publish has failed (e.g. 408 timeout)
-	 */
-	public final static int PUBLISH_FAILED = PRESENCE_ERROR_CODES + 2;
+    /**
+     * Publish has failed (e.g. 408 timeout)
+     */
+    public final static int PUBLISH_FAILED = PRESENCE_ERROR_CODES + 2;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param code
-	 *            Error code
-	 */
-	public PresenceError(int code) {
-		super(code);
-	}
+    /**
+     * Constructor
+     * 
+     * @param code Error code
+     */
+    public PresenceError(int code) {
+        super(code);
+    }
 
-	/**
-	 * Constructor
-	 * 
-	 * @param code
-	 *            Error code
-	 * @param msg
-	 *            Detail message
-	 */
-	public PresenceError(int code, String msg) {
-		super(code, msg);
-	}
+    /**
+     * Constructor
+     * 
+     * @param code Error code
+     * @param msg Detail message
+     */
+    public PresenceError(int code, String msg) {
+        super(code, msg);
+    }
 }

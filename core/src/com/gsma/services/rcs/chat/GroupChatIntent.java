@@ -19,6 +19,7 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.gsma.services.rcs.chat;
 
 /**
@@ -27,40 +28,38 @@ package com.gsma.services.rcs.chat;
  * @author Jean-Marc AUFFRET
  */
 public class GroupChatIntent {
-	/**
-	 * Broadcast action: a new group chat invitation has been received.
-	 * <p>
-	 * Intent includes the following extras:
-	 * <ul>
-	 * <li> {@link #EXTRA_CHAT_ID} containing the unique ID of the chat conversation.
-	 * </ul>
-	 */
-	public final static String ACTION_NEW_INVITATION = "com.gsma.services.rcs.chat.action.NEW_GROUP_CHAT";
+    /**
+     * Broadcast action: a new group chat invitation has been received.
+     * <p>
+     * Intent includes the following extras:
+     * <ul>
+     * <li> {@link #EXTRA_CHAT_ID} containing the unique ID of the chat conversation.
+     * </ul>
+     */
+    public final static String ACTION_NEW_INVITATION = "com.gsma.services.rcs.chat.action.NEW_GROUP_CHAT";
 
-	/**
-	 * Broadcast action: a new group chat message has been received.
-	 * <p>
-	 * Intent includes the following extras:
-	 * <ul>
-	 * <li> {@link #EXTRA_MESSAGE_ID} containing the message ID of chat message.
-	 * </ul>
-	 */
-	public final static String ACTION_NEW_GROUP_CHAT_MESSAGE = "com.gsma.services.rcs.chat.action.NEW_GROUP_CHAT_MESSAGE";
+    /**
+     * Broadcast action: a new group chat message has been received.
+     * <p>
+     * Intent includes the following extras:
+     * <ul>
+     * <li> {@link #EXTRA_MESSAGE_ID} containing the message ID of chat message.
+     * </ul>
+     */
+    public final static String ACTION_NEW_GROUP_CHAT_MESSAGE = "com.gsma.services.rcs.chat.action.NEW_GROUP_CHAT_MESSAGE";
 
-	/**
-	 * Unique ID of the chat conversation
-	 */
-	public final static String EXTRA_CHAT_ID = "chatId";
+    /**
+     * Unique ID of the chat conversation
+     */
+    public final static String EXTRA_CHAT_ID = "chatId";
 
-	/**
-	 * MIME-type of received message
-	 *
-	 */
-	public final static String EXTRA_MIME_TYPE = "mimeType";
+    /**
+     * MIME-type of received message
+     */
+    public final static String EXTRA_MIME_TYPE = "mimeType";
 
-	/**
-	 * Message ID of received message
-	 *
-	 */
-	public final static String EXTRA_MESSAGE_ID = "messageId";
+    /**
+     * Message ID of received message
+     */
+    public final static String EXTRA_MESSAGE_ID = "messageId";
 }

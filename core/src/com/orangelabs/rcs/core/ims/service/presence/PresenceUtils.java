@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.core.ims.service.presence;
 
 /**
@@ -23,28 +24,28 @@ package com.orangelabs.rcs.core.ims.service.presence;
  * @author jexa7410
  */
 public class PresenceUtils {
-	/**
-	 * RCS 2.0 video share feature tag
-	 */
-	public final static String FEATURE_RCS2_VIDEO_SHARE = "org.gsma.videoshare";
+    /**
+     * RCS 2.0 video share feature tag
+     */
+    public final static String FEATURE_RCS2_VIDEO_SHARE = "org.gsma.videoshare";
 
-	/**
-	 * RCS 2.0 image share feature tag
-	 */
-	public final static String FEATURE_RCS2_IMAGE_SHARE = "org.gsma.imageshare";
+    /**
+     * RCS 2.0 image share feature tag
+     */
+    public final static String FEATURE_RCS2_IMAGE_SHARE = "org.gsma.imageshare";
 
-	/**
-	 * RCS 2.0 file transfer feature tag
-	 */
-	public final static String FEATURE_RCS2_FT = "org.openmobilealliance:File-Transfer";
+    /**
+     * RCS 2.0 file transfer feature tag
+     */
+    public final static String FEATURE_RCS2_FT = "org.openmobilealliance:File-Transfer";
 
-	/**
-	 * RCS 2.0 chat feature tag
-	 */
-	public final static String FEATURE_RCS2_CHAT = "org.openmobilealliance:IM-session";
+    /**
+     * RCS 2.0 chat feature tag
+     */
+    public final static String FEATURE_RCS2_CHAT = "org.openmobilealliance:IM-session";
 
-	/**
-	 * RCS 2.0 CS video feature tag
-	 */
-	public final static String FEATURE_RCS2_CS_VIDEO = "org.3gpp.cs-videotelephony";
+    /**
+     * RCS 2.0 CS video feature tag
+     */
+    public final static String FEATURE_RCS2_CS_VIDEO = "org.3gpp.cs-videotelephony";
 }

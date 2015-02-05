@@ -54,7 +54,7 @@ public class DisplayGeoloc extends MapActivity {
         setContentView(R.layout.geoloc_display);
 
         // Set map
-        mapView = (MapView)findViewById(R.id.mapview);
+        mapView = (MapView) findViewById(R.id.mapview);
         mapView.setBuiltInZoomControls(true);
         mapView.getController().setZoom(4);
 
@@ -84,8 +84,8 @@ public class DisplayGeoloc extends MapActivity {
         // Center the map
         mapView.getController()
                 .setCenter(
-                        new GeoPoint((int)(geoloc.getLatitude() * 1E6),
-                                (int)(geoloc.getLongitude() * 1E6)));
+                        new GeoPoint((int) (geoloc.getLatitude() * 1E6),
+                                (int) (geoloc.getLongitude() * 1E6)));
     }
 
     @Override

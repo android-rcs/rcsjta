@@ -20,7 +20,7 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.profiles;
 
 /**
  * Targeted profile to encode
- *
+ * 
  * @author Deutsche Telekom AG
  */
 public enum H264TypeProfile {
@@ -42,7 +42,7 @@ public enum H264TypeProfile {
 
     /**
      * Constructor
-     *
+     * 
      * @param decimalValue type
      */
     private H264TypeProfile(int decimalValue) {
@@ -51,7 +51,7 @@ public enum H264TypeProfile {
 
     /**
      * Get Type
-     *
+     * 
      * @return type value
      */
     public int getDecimalValue() {
@@ -60,10 +60,9 @@ public enum H264TypeProfile {
 
     /**
      * Get instance of {@link H264TypeProfile}, using decimal value
-     *
+     * 
      * @param decimalValue
-     * @return {@link H264TypeProfile} if valid decimal, otherwise
-     *         <code>null</code>
+     * @return {@link H264TypeProfile} if valid decimal, otherwise <code>null</code>
      */
     public static H264TypeProfile getH264ProfileType(int decimalValue) {
         for (H264TypeProfile h264ProfileType : H264TypeProfile.values()) {

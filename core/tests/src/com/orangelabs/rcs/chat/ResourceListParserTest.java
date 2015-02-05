@@ -44,13 +44,11 @@ public class ResourceListParserTest extends AndroidTestCase {
     public void testGetResourceListDocument() {
         // @formatter:off
         /*
-         * Resource-List SAMPLE: <?xml version="1.0" encoding="UTF-8"?>
-         * <resource-lists xmlns="urn:ietf:params:xml:ns:resource-lists"
-         * xmlns:cp="urn:ietf:params:xml:ns:copycontrol"> <list> <entry
-         * uri="sip:bill@example.com" cp:copyControl="to" /> <entry
-         * uri="sip:joe@example.org" cp:copyControl="cc" /> <entry
-         * uri="sip:ted@example.net" cp:copyControl="bcc" /> </list>
-         * </resource-lists>
+         * Resource-List SAMPLE: <?xml version="1.0" encoding="UTF-8"?> <resource-lists
+         * xmlns="urn:ietf:params:xml:ns:resource-lists"
+         * xmlns:cp="urn:ietf:params:xml:ns:copycontrol"> <list> <entry uri="sip:bill@example.com"
+         * cp:copyControl="to" /> <entry uri="sip:joe@example.org" cp:copyControl="cc" /> <entry
+         * uri="sip:ted@example.net" cp:copyControl="bcc" /> </list> </resource-lists>
          */
         // @formatter:on
         StringBuffer sb = new StringBuffer("<?xml version=\"1.08\" encoding=\"UTF-8\"?>");

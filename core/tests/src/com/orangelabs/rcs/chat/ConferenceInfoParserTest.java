@@ -43,34 +43,28 @@ public class ConferenceInfoParserTest extends AndroidTestCase {
 
     // @formatter:off
     /*
-     * Conference-Info SAMPLE: <?xml version="1.0" encoding="UTF-8"?>
-     * <conference-info xmlns="urn:ietf:params:xml:ns:conference-info"
-     * entity="sips:conf233@example.com" state="full" version="1"> <!--
-     * CONFERENCE INFO --> <conference-description> <subject>Agenda: This
-     * month's goals</subject> <service-uris><entry>
-     * <uri>http://sharepoint/salesgroup/</uri> <purpose>web-page</purpose>
-     * </entry></service-uris> <maximum-user-count>50</maximum-user-count>
-     * </conference-description> <!-- CONFERENCE STATE --> <conference-state>
-     * <user-count>33</user-count></conference-state> <!-- USERS --> <users>
-     * <!-- USER 1 --> <user entity="sip:bob@example.com" state="full">
-     * <display-text>Bob Hoskins</display-text> <!-- ENDPOINTS --> <endpoint
-     * entity="sip:bob@pc33.example.com"> <display-text>Bob's
-     * Laptop</display-text> <status>disconnected</status>
-     * <disconnection-method>departed</disconnection-method>
-     * <disconnection-info> <when>2005-03-04T20:00:00Z</when> <reason>bad voice
-     * quality</reason> <by>sip:mike@example.com</by> </disconnection-info> <!--
-     * MEDIA --> <media id="1"> <display-text>main audio</display-text>
-     * <type>audio</type> <label>34567</label> <src-id>432424</src-id>
-     * <status>sendrecv</status></media></endpoint> </user> <!-- USER 2 -->
-     * <user entity="sip:alice@example.com" state="full">
-     * <display-text>Alice</display-text> <!-- ENDPOINTS --> <endpoint
-     * entity="sip:4kfk4j392jsu@example.com;grid=433kj4j3u">
+     * Conference-Info SAMPLE: <?xml version="1.0" encoding="UTF-8"?> <conference-info
+     * xmlns="urn:ietf:params:xml:ns:conference-info" entity="sips:conf233@example.com" state="full"
+     * version="1"> <!-- CONFERENCE INFO --> <conference-description> <subject>Agenda: This month's
+     * goals</subject> <service-uris><entry> <uri>http://sharepoint/salesgroup/</uri>
+     * <purpose>web-page</purpose> </entry></service-uris>
+     * <maximum-user-count>50</maximum-user-count> </conference-description> <!-- CONFERENCE STATE
+     * --> <conference-state> <user-count>33</user-count></conference-state> <!-- USERS --> <users>
+     * <!-- USER 1 --> <user entity="sip:bob@example.com" state="full"> <display-text>Bob
+     * Hoskins</display-text> <!-- ENDPOINTS --> <endpoint entity="sip:bob@pc33.example.com">
+     * <display-text>Bob's Laptop</display-text> <status>disconnected</status>
+     * <disconnection-method>departed</disconnection-method> <disconnection-info>
+     * <when>2005-03-04T20:00:00Z</when> <reason>bad voice quality</reason>
+     * <by>sip:mike@example.com</by> </disconnection-info> <!-- MEDIA --> <media id="1">
+     * <display-text>main audio</display-text> <type>audio</type> <label>34567</label>
+     * <src-id>432424</src-id> <status>sendrecv</status></media></endpoint> </user> <!-- USER 2 -->
+     * <user entity="sip:alice@example.com" state="full"> <display-text>Alice</display-text> <!--
+     * ENDPOINTS --> <endpoint entity="sip:4kfk4j392jsu@example.com;grid=433kj4j3u">
      * <status>connected</status> <joining-method>dialed-out</joining-method>
-     * <joining-info><when>2005-03-04T20:00:00Z</when>
-     * <by>sip:mike@example.com</by></joining-info> <!-- MEDIA --> <media
-     * id="1"> <display-text>main audio</display-text> <type>audio</type>
-     * <label>34567</label> <src-id>534232</src-id> <status>sendrecv</status>
-     * </media> </endpoint> </user> </users> </conference-info>
+     * <joining-info><when>2005-03-04T20:00:00Z</when> <by>sip:mike@example.com</by></joining-info>
+     * <!-- MEDIA --> <media id="1"> <display-text>main audio</display-text> <type>audio</type>
+     * <label>34567</label> <src-id>534232</src-id> <status>sendrecv</status> </media> </endpoint>
+     * </user> </users> </conference-info>
      */
     // @formatter:on
 

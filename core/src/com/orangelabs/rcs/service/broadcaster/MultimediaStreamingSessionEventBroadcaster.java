@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.orangelabs.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.contacts.ContactId;
@@ -31,58 +32,58 @@ import android.os.RemoteCallbackList;
  * the trigger of corresponding callbacks.
  */
 public class MultimediaStreamingSessionEventBroadcaster implements
-		IMultimediaStreamingSessionEventBroadcaster {
+        IMultimediaStreamingSessionEventBroadcaster {
 
-	private final RemoteCallbackList<IMultimediaStreamingSessionListener> mMultimediaStreamingListeners = new RemoteCallbackList<IMultimediaStreamingSessionListener>();
+    private final RemoteCallbackList<IMultimediaStreamingSessionListener> mMultimediaStreamingListeners = new RemoteCallbackList<IMultimediaStreamingSessionListener>();
 
-	private final Logger logger = Logger.getLogger(getClass().getName());
+    private final Logger logger = Logger.getLogger(getClass().getName());
 
-	public MultimediaStreamingSessionEventBroadcaster() {
-	}
+    public MultimediaStreamingSessionEventBroadcaster() {
+    }
 
-	public void addMultimediaStreamingEventListener(IMultimediaStreamingSessionListener listener) {
-		mMultimediaStreamingListeners.register(listener);
-	}
+    public void addMultimediaStreamingEventListener(IMultimediaStreamingSessionListener listener) {
+        mMultimediaStreamingListeners.register(listener);
+    }
 
-	public void removeMultimediaStreamingEventListener(IMultimediaStreamingSessionListener listener) {
-		mMultimediaStreamingListeners.unregister(listener);
-	}
+    public void removeMultimediaStreamingEventListener(IMultimediaStreamingSessionListener listener) {
+        mMultimediaStreamingListeners.unregister(listener);
+    }
 
-	public void broadcastPayloadReceived(ContactId contact, String sessionId, byte[] content) {
-		final int N = mMultimediaStreamingListeners.beginBroadcast();
-		for (int i = 0; i < N; i++) {
-			try {
-				mMultimediaStreamingListeners.getBroadcastItem(i).onPayloadReceived(contact,
-						sessionId, content);
-			} catch (Exception e) {
-				if (logger.isActivated()) {
-					logger.error("Can't notify listener", e);
-				}
-			}
-		}
-		mMultimediaStreamingListeners.finishBroadcast();
-	}
+    public void broadcastPayloadReceived(ContactId contact, String sessionId, byte[] content) {
+        final int N = mMultimediaStreamingListeners.beginBroadcast();
+        for (int i = 0; i < N; i++) {
+            try {
+                mMultimediaStreamingListeners.getBroadcastItem(i).onPayloadReceived(contact,
+                        sessionId, content);
+            } catch (Exception e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener", e);
+                }
+            }
+        }
+        mMultimediaStreamingListeners.finishBroadcast();
+    }
 
-	public void broadcastStateChanged(ContactId contact, String sessionId, int state, int reasonCode) {
-		final int N = mMultimediaStreamingListeners.beginBroadcast();
-		for (int i = 0; i < N; i++) {
-			try {
-				mMultimediaStreamingListeners.getBroadcastItem(i).onStateChanged(contact,
-						sessionId, state, reasonCode);
-			} catch (Exception e) {
-				if (logger.isActivated()) {
-					logger.error("Can't notify listener", e);
-				}
-			}
-		}
-		mMultimediaStreamingListeners.finishBroadcast();
-	}
+    public void broadcastStateChanged(ContactId contact, String sessionId, int state, int reasonCode) {
+        final int N = mMultimediaStreamingListeners.beginBroadcast();
+        for (int i = 0; i < N; i++) {
+            try {
+                mMultimediaStreamingListeners.getBroadcastItem(i).onStateChanged(contact,
+                        sessionId, state, reasonCode);
+            } catch (Exception e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener", e);
+                }
+            }
+        }
+        mMultimediaStreamingListeners.finishBroadcast();
+    }
 
-	public void broadcastInvitation(String sessionId, Intent rtpSessionInvite) {
-		IntentUtils.tryToSetExcludeStoppedPackagesFlag(rtpSessionInvite);
-		IntentUtils.tryToSetReceiverForegroundFlag(rtpSessionInvite);
-		rtpSessionInvite.putExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID, sessionId);
+    public void broadcastInvitation(String sessionId, Intent rtpSessionInvite) {
+        IntentUtils.tryToSetExcludeStoppedPackagesFlag(rtpSessionInvite);
+        IntentUtils.tryToSetReceiverForegroundFlag(rtpSessionInvite);
+        rtpSessionInvite.putExtra(MultimediaMessagingSessionIntent.EXTRA_SESSION_ID, sessionId);
 
-		AndroidFactory.getApplicationContext().sendBroadcast(rtpSessionInvite);
-	}
+        AndroidFactory.getApplicationContext().sendBroadcast(rtpSessionInvite);
+    }
 }

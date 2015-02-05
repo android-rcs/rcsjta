@@ -25,21 +25,21 @@ import android.net.Uri;
  */
 public class GeolocSharingData {
 
-	protected static final Uri CONTENT_URI = GeolocSharingLog.CONTENT_URI;
+    protected static final Uri CONTENT_URI = GeolocSharingLog.CONTENT_URI;
 
-	static final String KEY_SHARING_ID = GeolocSharingLog.SHARING_ID;
+    static final String KEY_SHARING_ID = GeolocSharingLog.SHARING_ID;
 
-	static final String KEY_CONTACT = GeolocSharingLog.CONTACT;
+    static final String KEY_CONTACT = GeolocSharingLog.CONTACT;
 
-	static final String KEY_CONTENT = GeolocSharingLog.CONTENT;
+    static final String KEY_CONTENT = GeolocSharingLog.CONTENT;
 
-	static final String KEY_MIME_TYPE = GeolocSharingLog.MIME_TYPE;
+    static final String KEY_MIME_TYPE = GeolocSharingLog.MIME_TYPE;
 
-	static final String KEY_DIRECTION = GeolocSharingLog.DIRECTION;
+    static final String KEY_DIRECTION = GeolocSharingLog.DIRECTION;
 
-	static final String KEY_STATE = GeolocSharingLog.STATE;
+    static final String KEY_STATE = GeolocSharingLog.STATE;
 
-	static final String KEY_REASON_CODE = GeolocSharingLog.REASON_CODE;
+    static final String KEY_REASON_CODE = GeolocSharingLog.REASON_CODE;
 
-	static final String KEY_TIMESTAMP = GeolocSharingLog.TIMESTAMP;
+    static final String KEY_TIMESTAMP = GeolocSharingLog.TIMESTAMP;
 }

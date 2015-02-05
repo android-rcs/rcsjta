@@ -31,19 +31,18 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Represents class descriptions loaded from a jdiff xml file.  Used
- * for CTS SignatureTests.
+ * Represents class descriptions loaded from a jdiff xml file. Used for CTS SignatureTests.
  */
 public class JDiffClassDescription {
     /** Indicates that the class is an annotation. */
     private static final int CLASS_MODIFIER_ANNOTATION = 0x00002000;
     /** Indicates that the class is an enum. */
-    private static final int CLASS_MODIFIER_ENUM       = 0x00004000;
+    private static final int CLASS_MODIFIER_ENUM = 0x00004000;
 
     /** Indicates that the method is a bridge method. */
-    private static final int METHOD_MODIFIER_BRIDGE    = 0x00000040;
+    private static final int METHOD_MODIFIER_BRIDGE = 0x00000040;
     /** Indicates that the method is takes a variable number of arguments. */
-    private static final int METHOD_MODIFIER_VAR_ARGS  = 0x00000080;
+    private static final int METHOD_MODIFIER_VAR_ARGS = 0x00000080;
     /** Indicates that the method is a synthetic method. */
     private static final int METHOD_MODIFIER_SYNTHETIC = 0x00001000;
 
@@ -75,7 +74,7 @@ public class JDiffClassDescription {
 
     /**
      * Creates a new JDiffClassDescription.
-     *
+     * 
      * @param pkg the java package this class will end up in.
      * @param className the name of the class.
      */
@@ -90,9 +89,8 @@ public class JDiffClassDescription {
     }
 
     /**
-     * Creates a new JDiffClassDescription with the specified results
-     * observer.
-     *
+     * Creates a new JDiffClassDescription with the specified results observer.
+     * 
      * @param pkg the java package this class belongs in.
      * @param className the name of the class.
      * @param resultObserver the resultObserver to get results with.
@@ -107,7 +105,7 @@ public class JDiffClassDescription {
 
     /**
      * adds implemented interface name.
-     *
+     * 
      * @param iname name of interface
      */
     public void addImplInterface(String iname) {
@@ -116,7 +114,7 @@ public class JDiffClassDescription {
 
     /**
      * Adds a field.
-     *
+     * 
      * @param field the field to be added.
      */
     public void addField(JDiffField field) {
@@ -125,7 +123,7 @@ public class JDiffClassDescription {
 
     /**
      * Adds a method.
-     *
+     * 
      * @param method the method to be added.
      */
     public void addMethod(JDiffMethod method) {
@@ -134,7 +132,7 @@ public class JDiffClassDescription {
 
     /**
      * Adds a constructor.
-     *
+     * 
      * @param tc the constructor to be added.
      */
     public void addConstructor(JDiffConstructor tc) {
@@ -239,7 +237,7 @@ public class JDiffClassDescription {
     }
 
     /**
-     * Represents a  field.
+     * Represents a field.
      */
     public static final class JDiffField extends JDiffElement {
         private String mFieldType;
@@ -252,7 +250,7 @@ public class JDiffClassDescription {
 
         /**
          * Make a readable string according to the class name specified.
-         *
+         * 
          * @param className The specified class name.
          * @return A readable string to represent this field along with the class name.
          */
@@ -305,7 +303,7 @@ public class JDiffClassDescription {
 
         /**
          * Adds a parameter.
-         *
+         * 
          * @param param parameter type
          */
         public void addParam(String param) {
@@ -314,7 +312,7 @@ public class JDiffClassDescription {
 
         /**
          * Adds an exception.
-         *
+         * 
          * @param exceptionName name of exception
          */
         public void addException(String exceptionName) {
@@ -323,7 +321,7 @@ public class JDiffClassDescription {
 
         /**
          * Makes a readable string according to the class name specified.
-         *
+         * 
          * @param className The specified class name.
          * @return A readable string to represent this method along with the class name.
          */
@@ -333,7 +331,7 @@ public class JDiffClassDescription {
 
         /**
          * Converts a parameter array to a string
-         *
+         * 
          * @param params the array to convert
          * @return converted parameter string
          */
@@ -398,7 +396,7 @@ public class JDiffClassDescription {
 
         /**
          * Gets the return type.
-         *
+         * 
          * @return the return type of this method.
          */
         protected String getReturnType() {
@@ -424,7 +422,7 @@ public class JDiffClassDescription {
 
         /**
          * Gets the return type.
-         *
+         * 
          * @return the return type of this method.
          */
         @Override
@@ -435,8 +433,7 @@ public class JDiffClassDescription {
     }
 
     /**
-     * Checks test class's name, modifier, fields, constructors, and
-     * methods.
+     * Checks test class's name, modifier, fields, constructors, and methods.
      */
     public void checkSignatureCompliance() {
         checkClassCompliance();
@@ -448,18 +445,14 @@ public class JDiffClassDescription {
     }
 
     /**
-     * Checks to ensure that the modifiers value for two methods are
-     * compatible.
-     *
-     * Allowable differences are:
-     *   - synchronized is allowed to be removed from an apiMethod
-     *     that has it
-     *   - the native modified is ignored
-     *
+     * Checks to ensure that the modifiers value for two methods are compatible. Allowable
+     * differences are: - synchronized is allowed to be removed from an apiMethod that has it - the
+     * native modified is ignored
+     * 
      * @param apiMethod the method read from the api file.
      * @param reflectedMethod the method found via reflections.
      */
-    private boolean areMethodModifiedCompatibile(JDiffMethod apiMethod ,
+    private boolean areMethodModifiedCompatibile(JDiffMethod apiMethod,
             Method reflectedMethod) {
 
         // If the apiMethod isn't synchronized
@@ -470,7 +463,7 @@ public class JDiffClassDescription {
             return false;
         }
 
-        // Mask off NATIVE since it is a don't care.  Also mask off
+        // Mask off NATIVE since it is a don't care. Also mask off
         // SYNCHRONIZED since we've already handled that check.
         int mod1 = reflectedMethod.getModifiers() & ~(Modifier.NATIVE | Modifier.SYNCHRONIZED);
         int mod2 = apiMethod.mModifier & ~(Modifier.NATIVE | Modifier.SYNCHRONIZED);
@@ -485,8 +478,8 @@ public class JDiffClassDescription {
     }
 
     /**
-     * Checks that the method found through reflection matches the
-     * specification from the API xml file.
+     * Checks that the method found through reflection matches the specification from the API xml
+     * file.
      */
     private void checkMethodCompliance() {
         for (JDiffMethod method : jDiffMethods) {
@@ -498,10 +491,11 @@ public class JDiffClassDescription {
 
                 Method m = findMatchingMethod(method);
                 if (m == null) {
-                    mResultObserver.notifyFailure(SignatureTestActivity.FAILURE_TYPE.MISSING_METHOD,
+                    mResultObserver.notifyFailure(
+                            SignatureTestActivity.FAILURE_TYPE.MISSING_METHOD,
                             method.toReadableString(mAbsoluteClassName),
                             "No method with correct signature found:" +
-                            method.toSignatureString());
+                                    method.toSignatureString());
                 } else {
                     if (m.isVarArgs()) {
                         method.mModifier |= METHOD_MODIFIER_VAR_ARGS;
@@ -519,24 +513,25 @@ public class JDiffClassDescription {
                     }
 
                     if (!areMethodModifiedCompatibile(method, m)) {
-                        mResultObserver.notifyFailure(SignatureTestActivity.FAILURE_TYPE.MISMATCH_METHOD,
+                        mResultObserver.notifyFailure(
+                                SignatureTestActivity.FAILURE_TYPE.MISMATCH_METHOD,
                                 method.toReadableString(mAbsoluteClassName),
                                 "Non-compatible method found when looking for " +
-                                method.toSignatureString());
+                                        method.toSignatureString());
                     }
                 }
             } catch (Exception e) {
                 SignatureTestLog.e("Got exception when checking method compliance", e);
                 mResultObserver.notifyFailure(SignatureTestActivity.FAILURE_TYPE.CAUGHT_EXCEPTION,
                         method.toReadableString(mAbsoluteClassName),
-                "Exception!");
+                        "Exception!");
             }
         }
     }
 
     /**
      * Checks if the two types of methods are the same.
-     *
+     * 
      * @param jDiffMethod the jDiffMethod to compare
      * @param method the reflected method to compare
      * @return true, if both methods are the same
@@ -548,11 +543,11 @@ public class JDiffClassDescription {
             String reflectionReturnType = typeToString(method.getGenericReturnType());
             List<String> jdiffParamList = jDiffMethod.mParamList;
 
-            // Next, compare the return types of the two methods.  If
+            // Next, compare the return types of the two methods. If
             // they aren't equal, the methods can't match.
             if (jdiffReturnType.equals(reflectionReturnType)) {
                 Type[] params = method.getGenericParameterTypes();
-                // Next, check the method parameters.  If they have
+                // Next, check the method parameters. If they have
                 // different number of parameters, the two methods
                 // can't match.
                 if (jdiffParamList.size() == params.length) {
@@ -574,7 +569,7 @@ public class JDiffClassDescription {
 
     /**
      * Finds the reflected method specified by the method description.
-     *
+     * 
      * @param method description of the method to find
      * @return the reflected method, or null if not found.
      */
@@ -593,9 +588,8 @@ public class JDiffClassDescription {
     }
 
     /**
-     * Compares the parameter from the API and the parameter from
-     * reflection.
-     *
+     * Compares the parameter from the API and the parameter from reflection.
+     * 
      * @param jdiffParam param parsed from the API xml file.
      * @param reflectionParamType param gotten from the Java reflection.
      * @return True if the two params match, otherwise return false.
@@ -612,7 +606,7 @@ public class JDiffClassDescription {
             return true;
         }
 
-        // Check for varargs.  jdiff reports varargs as ..., while
+        // Check for varargs. jdiff reports varargs as ..., while
         // reflection reports them as []
         int jdiffParamEndOffset = jdiffParam.indexOf("...");
         int reflectionParamEndOffset = reflectionParam.indexOf("[]");
@@ -626,8 +620,7 @@ public class JDiffClassDescription {
     }
 
     /**
-     * Checks whether the constructor parsed from API xml file and
-     * Java reflection are compliant.
+     * Checks whether the constructor parsed from API xml file and Java reflection are compliant.
      */
     @SuppressWarnings("unchecked")
     private void checkConstructorCompliance() {
@@ -635,10 +628,11 @@ public class JDiffClassDescription {
             try {
                 Constructor<?> c = findMatchingConstructor(con);
                 if (c == null) {
-                    mResultObserver.notifyFailure(SignatureTestActivity.FAILURE_TYPE.MISSING_METHOD,
+                    mResultObserver.notifyFailure(
+                            SignatureTestActivity.FAILURE_TYPE.MISSING_METHOD,
                             con.toReadableString(mAbsoluteClassName),
                             "No method with correct signature found:" +
-                            con.toSignatureString());
+                                    con.toSignatureString());
                 } else {
                     if (c.isVarArgs()) {// some method's parameter are variable args
                         con.mModifier |= METHOD_MODIFIER_VAR_ARGS;
@@ -648,21 +642,21 @@ public class JDiffClassDescription {
                                 SignatureTestActivity.FAILURE_TYPE.MISMATCH_METHOD,
                                 con.toReadableString(mAbsoluteClassName),
                                 "Non-compatible method found when looking for " +
-                                con.toSignatureString());
+                                        con.toSignatureString());
                     }
                 }
             } catch (Exception e) {
                 SignatureTestLog.e("Got exception when checking constructor compliance", e);
                 mResultObserver.notifyFailure(SignatureTestActivity.FAILURE_TYPE.CAUGHT_EXCEPTION,
                         con.toReadableString(mAbsoluteClassName),
-                "Exception!");
+                        "Exception!");
             }
         }
     }
 
     /**
      * Searches available constructor.
-     *
+     * 
      * @param jdiffDes constructor description to find.
      * @return reflected constructor, or null if not found.
      */
@@ -705,8 +699,7 @@ public class JDiffClassDescription {
     }
 
     /**
-     * Checks all fields in test class for compliance with the API
-     * xml.
+     * Checks all fields in test class for compliance with the API xml.
      */
     @SuppressWarnings("unchecked")
     private void checkFieldsCompliance() {
@@ -717,26 +710,27 @@ public class JDiffClassDescription {
                     mResultObserver.notifyFailure(SignatureTestActivity.FAILURE_TYPE.MISSING_FIELD,
                             field.toReadableString(mAbsoluteClassName),
                             "No field with correct signature found:" +
-                            field.toSignatureString());
+                                    field.toSignatureString());
                 } else if (f.getModifiers() != field.mModifier) {
-                    mResultObserver.notifyFailure(SignatureTestActivity.FAILURE_TYPE.MISMATCH_FIELD,
+                    mResultObserver.notifyFailure(
+                            SignatureTestActivity.FAILURE_TYPE.MISMATCH_FIELD,
                             field.toReadableString(mAbsoluteClassName),
                             "Non-compatible field modifiers found when looking for " +
-                            field.toSignatureString());
+                                    field.toSignatureString());
                 } else if (!f.getType().getCanonicalName().equals(field.mFieldType)) {
                     // type name does not match, but this might be a generic
                     String genericTypeName = null;
                     Type type = f.getGenericType();
                     if (type != null) {
                         genericTypeName = type instanceof Class ? ((Class) type).getName() :
-                            type.toString();
+                                type.toString();
                     }
                     if (genericTypeName == null || !genericTypeName.equals(field.mFieldType)) {
                         mResultObserver.notifyFailure(
                                 SignatureTestActivity.FAILURE_TYPE.MISMATCH_FIELD,
                                 field.toReadableString(mAbsoluteClassName),
                                 "Non-compatible field type found when looking for " +
-                                field.toSignatureString());
+                                        field.toSignatureString());
                     }
                 }
 
@@ -744,18 +738,18 @@ public class JDiffClassDescription {
                 SignatureTestLog.e("Got exception when checking field compliance", e);
                 mResultObserver.notifyFailure(SignatureTestActivity.FAILURE_TYPE.CAUGHT_EXCEPTION,
                         field.toReadableString(mAbsoluteClassName),
-                "Exception!");
+                        "Exception!");
             }
         }
     }
 
     /**
      * Finds the reflected field specified by the field description.
-     *
+     * 
      * @param field the field description to find
      * @return the reflected field, or null if not found.
      */
-    private Field findMatchingField(JDiffField field){
+    private Field findMatchingField(JDiffField field) {
         Field[] fields = mClass.getDeclaredFields();
         for (Field f : fields) {
             if (f.getName().equals(field.mName)) {
@@ -767,7 +761,7 @@ public class JDiffClassDescription {
 
     /**
      * Checks if the class under test has compliant modifiers compared to the API.
-     *
+     * 
      * @return true if modifiers are compliant.
      */
     private boolean checkClassModifiersCompliance() {
@@ -797,14 +791,13 @@ public class JDiffClassDescription {
             reflectionModifier &= ~CLASS_MODIFIER_ENUM;
         }
 
-        return ((reflectionModifier == apiModifier) &&
-                (isEnumType() == mClass.isEnum()));
+        return ((reflectionModifier == apiModifier) && (isEnumType() == mClass.isEnum()));
     }
 
     /**
-     * Checks if the class under test is compliant with regards to
-     * annnotations when compared to the API.
-     *
+     * Checks if the class under test is compliant with regards to annnotations when compared to the
+     * API.
+     * 
      * @return true if the class is compliant
      */
     private boolean checkClassAnnotationCompliace() {
@@ -821,9 +814,8 @@ public class JDiffClassDescription {
     }
 
     /**
-     * Checks if the class under test extends the proper classes
-     * according to the API.
-     *
+     * Checks if the class under test extends the proper classes according to the API.
+     * 
      * @return true if the class is compliant.
      */
     private boolean checkClassExtendsCompliance() {
@@ -849,9 +841,8 @@ public class JDiffClassDescription {
     }
 
     /**
-     * Checks if the class under test implements the proper interfaces
-     * according to the API.
-     *
+     * Checks if the class under test implements the proper interfaces according to the API.
+     * 
      * @return true if the class is compliant
      */
     private boolean checkClassImplementsCompliance() {
@@ -871,8 +862,8 @@ public class JDiffClassDescription {
     }
 
     /**
-     * Checks that the class found through reflection matches the
-     * specification from the API xml file.
+     * Checks that the class found through reflection matches the specification from the API xml
+     * file.
      */
     @SuppressWarnings("unchecked")
     private void checkClassCompliance() {
@@ -883,7 +874,8 @@ public class JDiffClassDescription {
             if (mClass == null) {
                 // No class found, notify the observer according to the class type
                 if (JDiffType.INTERFACE.equals(mClassType)) {
-                    mResultObserver.notifyFailure(SignatureTestActivity.FAILURE_TYPE.MISSING_INTERFACE,
+                    mResultObserver.notifyFailure(
+                            SignatureTestActivity.FAILURE_TYPE.MISSING_INTERFACE,
                             mAbsoluteClassName,
                             "Classloader is unable to find " + mAbsoluteClassName);
                 } else {
@@ -897,13 +889,13 @@ public class JDiffClassDescription {
             if (!checkClassModifiersCompliance()) {
                 logMismatchInterfaceSignature(mAbsoluteClassName,
                         "Non-compatible class found when looking for " +
-                        toSignatureString());
+                                toSignatureString());
                 return;
             }
 
             if (!checkClassAnnotationCompliace()) {
                 logMismatchInterfaceSignature(mAbsoluteClassName,
-                "Annotation mismatch");
+                        "Annotation mismatch");
                 return;
             }
 
@@ -911,14 +903,14 @@ public class JDiffClassDescription {
                 // check father class
                 if (!checkClassExtendsCompliance()) {
                     logMismatchInterfaceSignature(mAbsoluteClassName,
-                    "Extends mismatch");
+                            "Extends mismatch");
                     return;
                 }
 
                 // check implements interface
                 if (!checkClassImplementsCompliance()) {
                     logMismatchInterfaceSignature(mAbsoluteClassName,
-                    "Implements mismatch");
+                            "Implements mismatch");
                     return;
                 }
             }
@@ -926,14 +918,13 @@ public class JDiffClassDescription {
             SignatureTestLog.e("Got exception when checking field compliance", e);
             mResultObserver.notifyFailure(SignatureTestActivity.FAILURE_TYPE.CAUGHT_EXCEPTION,
                     mAbsoluteClassName,
-            "Exception!");
+                    "Exception!");
         }
     }
 
-
     /**
      * Convert the class into a printable signature string.
-     *
+     * 
      * @return the signature string
      */
     public String toSignatureString() {
@@ -989,7 +980,7 @@ public class JDiffClassDescription {
 
     /**
      * Sees if the class under test is actually an enum.
-     *
+     * 
      * @return true if this class is enum
      */
     private boolean isEnumType() {
@@ -998,7 +989,7 @@ public class JDiffClassDescription {
 
     /**
      * Finds the reflected class for the class under test.
-     *
+     * 
      * @return the reflected class, or null if not found.
      */
     @SuppressWarnings("unchecked")
@@ -1029,7 +1020,8 @@ public class JDiffClassDescription {
                 }
             }
         } catch (ClassNotFoundException e) {
-            SignatureTestLog.e("ClassNotFoundException for " + mPackageName + "." + mShortClassName, e);
+            SignatureTestLog.e(
+                    "ClassNotFoundException for " + mPackageName + "." + mShortClassName, e);
             return null;
         }
         return null;
@@ -1037,7 +1029,7 @@ public class JDiffClassDescription {
 
     /**
      * Searches the class for the specified inner class.
-     *
+     * 
      * @param clz the class to search in.
      * @param simpleName the simpleName of the class to find
      * @returns the class being searched for, or null if it can't be found.
@@ -1053,7 +1045,7 @@ public class JDiffClassDescription {
 
     /**
      * Sees if the class under test is actually an annotation.
-     *
+     * 
      * @return true if this class is Annotation.
      */
     private boolean isAnnotation() {
@@ -1065,7 +1057,7 @@ public class JDiffClassDescription {
 
     /**
      * Gets the class name for the class under test.
-     *
+     * 
      * @return the class name.
      */
     public String getClassName() {
@@ -1074,7 +1066,7 @@ public class JDiffClassDescription {
 
     /**
      * Sets the modifier for the class under test.
-     *
+     * 
      * @param modifier the modifier
      */
     public void setModifier(int modifier) {
@@ -1083,7 +1075,7 @@ public class JDiffClassDescription {
 
     /**
      * Sets the return type for the class under test.
-     *
+     * 
      * @param type the return type
      */
     public void setType(JDiffType type) {
@@ -1092,7 +1084,7 @@ public class JDiffClassDescription {
 
     /**
      * Sets the class that is beign extended for the class under test.
-     *
+     * 
      * @param extendsClass the class being extended.
      */
     public void setExtendsClass(String extendsClass) {
@@ -1100,9 +1092,9 @@ public class JDiffClassDescription {
     }
 
     /**
-     * Registers a ResultObserver to process the output from the
-     * compliance testing done in this class.
-     *
+     * Registers a ResultObserver to process the output from the compliance testing done in this
+     * class.
+     * 
      * @param resultObserver the observer to register.
      */
     public void registerResultObserver(ResultObserver resultObserver) {
@@ -1110,9 +1102,9 @@ public class JDiffClassDescription {
     }
 
     /**
-     * Converts WildcardType array into a jdiff compatible string..
-     * This is a helper function for typeToString.
-     *
+     * Converts WildcardType array into a jdiff compatible string.. This is a helper function for
+     * typeToString.
+     * 
      * @param types array of types to format.
      * @return the jdiff formatted string.
      */
@@ -1129,10 +1121,9 @@ public class JDiffClassDescription {
     }
 
     /**
-     * Converts a Type into a jdiff compatible String.  The returned
-     * types from this function should match the same Strings that
-     * jdiff is providing to us.
-     *
+     * Converts a Type into a jdiff compatible String. The returned types from this function should
+     * match the same Strings that jdiff is providing to us.
+     * 
      * @param type the type to convert.
      * @return the jdiff formatted string.
      */
@@ -1176,8 +1167,8 @@ public class JDiffClassDescription {
                 }
             } else {
                 String name = concatWildcardTypes(wt.getUpperBounds()) +
-                " super " +
-                concatWildcardTypes(wt.getLowerBounds());
+                        " super " +
+                        concatWildcardTypes(wt.getLowerBounds());
                 // Another special case for ?
                 name = name.replace("java.lang.Object", "?");
                 return name;
@@ -1189,7 +1180,7 @@ public class JDiffClassDescription {
 
     /**
      * Cleans up jdiff parameters to canonicalize them.
-     *
+     * 
      * @param paramType the parameter from jdiff.
      * @return the scrubbed version of the parameter.
      */

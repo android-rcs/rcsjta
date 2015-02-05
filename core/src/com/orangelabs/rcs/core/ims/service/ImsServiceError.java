@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.core.ims.service;
 
 /**
@@ -23,65 +24,62 @@ package com.orangelabs.rcs.core.ims.service;
  * @author jexa7410
  */
 public class ImsServiceError extends Error {
-	static final long serialVersionUID = 1L;
+    static final long serialVersionUID = 1L;
 
-	/**
-	 * Error code base for IMS sessions
-	 */
-	protected static final int SESSION_ERROR_CODES = 100;
+    /**
+     * Error code base for IMS sessions
+     */
+    protected static final int SESSION_ERROR_CODES = 100;
 
-	/**
-	 * Error code base for capabitity service
-	 */
-	protected static final int CAPABILITY_ERROR_CODES = 200;
+    /**
+     * Error code base for capabitity service
+     */
+    protected static final int CAPABILITY_ERROR_CODES = 200;
 
-	/**
-	 * Error code base for presence service
-	 */
-	protected static final int PRESENCE_ERROR_CODES = 300;
+    /**
+     * Error code base for presence service
+     */
+    protected static final int PRESENCE_ERROR_CODES = 300;
 
-	/**
-	 * Unexpected exception occurs in the module (e.g. internal exception)
-	 */
-	public final static int UNEXPECTED_EXCEPTION = 1;
+    /**
+     * Unexpected exception occurs in the module (e.g. internal exception)
+     */
+    public final static int UNEXPECTED_EXCEPTION = 1;
 
-	/**
-	 * Error code
-	 */
-	private int code;
+    /**
+     * Error code
+     */
+    private int code;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param code
-	 *            Error code
-	 */
-	public ImsServiceError(int code) {
-		super();
+    /**
+     * Constructor
+     * 
+     * @param code Error code
+     */
+    public ImsServiceError(int code) {
+        super();
 
-		this.code = code;
-	}
+        this.code = code;
+    }
 
-	/**
-	 * Constructor
-	 * 
-	 * @param code
-	 *            Error code
-	 * @param msg
-	 *            Detail message
-	 */
-	public ImsServiceError(int code, String msg) {
-		super(msg);
+    /**
+     * Constructor
+     * 
+     * @param code Error code
+     * @param msg Detail message
+     */
+    public ImsServiceError(int code, String msg) {
+        super(msg);
 
-		this.code = code;
-	}
+        this.code = code;
+    }
 
-	/**
-	 * Returns the error code
-	 * 
-	 * @return Error code
-	 */
-	public int getErrorCode() {
-		return code;
-	}
+    /**
+     * Returns the error code
+     * 
+     * @return Error code
+     */
+    public int getErrorCode() {
+        return code;
+    }
 }

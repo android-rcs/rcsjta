@@ -22,13 +22,13 @@ import android.graphics.Bitmap;
 
 /**
  * Video Surface interface
- *
+ * 
  * @author Deutsche Telekom
  */
 public interface VideoSurface {
     /**
      * Set image from a bitmap
-     *
+     * 
      * @param bmp Bitmap
      */
     public void setImage(Bitmap bmp);

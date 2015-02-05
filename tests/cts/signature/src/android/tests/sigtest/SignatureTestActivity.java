@@ -31,8 +31,8 @@ import android.os.Bundle;
 import android.util.Log;
 
 /**
- * This class is used for Signature Test. It will started by the Instrumentation class,
- * and send back the test result via IBinder.
+ * This class is used for Signature Test. It will started by the Instrumentation class, and send
+ * back the test result via IBinder.
  */
 public class SignatureTestActivity extends Activity {
     static final String BUNDLE_EXTRA_SIG_TEST = "sigtest";
@@ -47,7 +47,6 @@ public class SignatureTestActivity extends Activity {
     static final String BUNDLE_KEY_MISMATCH_METHOD = "mismatch_method_signature";
     static final String BUNDLE_KEY_MISMATCH_FIELD = "mismatch_field_signature";
     static final String BUNDLE_KEY_CAUGHT_EXCEPTION = "caught_exception";
-
 
     static final int GET_SIG_TEST_RESULT_TRANSACTION = 101;
 
@@ -85,11 +84,11 @@ public class SignatureTestActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-		Log.w("[RCS]", "Starts verifying RCS signatures");
+        Log.w("[RCS]", "Starts verifying RCS signatures");
         mResultObserver = new DeviceResultObserver();
         start();
         mResultObserver.sendResult(getIntent());
-		Log.w("[RCS]", "Ends verifying RCS signatures");
+        Log.w("[RCS]", "Ends verifying RCS signatures");
     }
 
     /**
@@ -109,7 +108,7 @@ public class SignatureTestActivity extends Activity {
 
     /**
      * Get the excluded package set, which is defined by res/raw/excludepackages.txt.
-     *
+     * 
      * @return The excluded package set.
      */
     private HashSet<String> getExcludedSet() {
@@ -138,9 +137,8 @@ public class SignatureTestActivity extends Activity {
     Bundle mBundle;
 
     /**
-     * This class is an implementation of the ResultObserver. And it aims to
-     * record the result in the Bundle, and send back to the Instrumentation class
-     * after all results has been recorded.
+     * This class is an implementation of the ResultObserver. And it aims to record the result in
+     * the Bundle, and send back to the Instrumentation class after all results has been recorded.
      */
     final class DeviceResultObserver implements ResultObserver {
         DeviceResultObserver() {
@@ -163,9 +161,9 @@ public class SignatureTestActivity extends Activity {
         }
 
         /**
-         * This method is called when all the results has been recorded. And this method
-         * will save the results in IBinder and send back to the Instrumentation class.
-         *
+         * This method is called when all the results has been recorded. And this method will save
+         * the results in IBinder and send back to the Instrumentation class.
+         * 
          * @param i The intent to carry the result.
          */
         @SuppressWarnings("deprecation")
@@ -194,8 +192,8 @@ public class SignatureTestActivity extends Activity {
         }
 
         public void notifyFailure(FAILURE_TYPE type,
-                                  String name,
-                                  String errorMessage) {
+                String name,
+                String errorMessage) {
             SignatureTestLog.d("Failure: ");
             SignatureTestLog.d("   Type: " + type);
             SignatureTestLog.d("   Name: " + name);

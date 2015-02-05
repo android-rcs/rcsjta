@@ -28,13 +28,13 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.stream.VideoCaptureStream;
 
 /**
  * Video RTP sender
- *
+ * 
  * @author hlxn7157
  */
 public class VideoRtpSender extends MediaRtpSender {
     /**
      * Constructor
-     *
+     * 
      * @param format Media format
      */
     public VideoRtpSender(Format format, int localRtpPort) {
@@ -43,38 +43,40 @@ public class VideoRtpSender extends MediaRtpSender {
 
     /**
      * Prepare the RTP session
-     *
+     * 
      * @param player Media player
      * @param remoteAddress Remote address
      * @param remotePort Remote port
      * @param RtpStreamListener rtp stream listener
      * @throws RtpException
      */
-    public void prepareSession(MediaInput player, String remoteAddress, int remotePort, RtpStreamListener rtpStreamListener)
+    public void prepareSession(MediaInput player, String remoteAddress, int remotePort,
+            RtpStreamListener rtpStreamListener)
             throws RtpException {
-    	try {
-    		// Create the input stream
+        try {
+            // Create the input stream
             inputStream = new VideoCaptureStream(format, player);
-    		inputStream.open();
+            inputStream.open();
 
             // Create the output stream
-            outputStream = new RtpOutputStream(remoteAddress, remotePort, localRtpPort, RtpOutputStream.RTCP_SOCKET_TIMEOUT);
+            outputStream = new RtpOutputStream(remoteAddress, remotePort, localRtpPort,
+                    RtpOutputStream.RTCP_SOCKET_TIMEOUT);
             outputStream.addRtpStreamListener(rtpStreamListener);
             outputStream.open();
 
-        	// Create the codec chain
-        	Codec[] codecChain = MediaRegistry.generateEncodingCodecChain(format.getCodec());
+            // Create the codec chain
+            Codec[] codecChain = MediaRegistry.generateEncodingCodecChain(format.getCodec());
 
             // Create the media processor
-    		processor = new Processor(inputStream, outputStream, codecChain);
-        } catch(Exception e) {
-        	throw new RtpException("Can't prepare resources");
+            processor = new Processor(inputStream, outputStream, codecChain);
+        } catch (Exception e) {
+            throw new RtpException("Can't prepare resources");
         }
     }
-    
+
     /**
      * Prepare the RTP session for a sender associated to a receiver
-     *
+     * 
      * @param player Media player
      * @param remoteAddress Remote address
      * @param remotePort Remote port
@@ -82,28 +84,29 @@ public class VideoRtpSender extends MediaRtpSender {
      * @param RtpStreamListener rtp stream listener
      * @throws RtpException
      */
-    
 
-    public void prepareSession(MediaInput player, String remoteAddress, int remotePort, RtpInputStream rtpStream, RtpStreamListener rtpStreamListener)
+    public void prepareSession(MediaInput player, String remoteAddress, int remotePort,
+            RtpInputStream rtpStream, RtpStreamListener rtpStreamListener)
             throws RtpException {
-    	try {
-    		// Create the input stream
+        try {
+            // Create the input stream
             inputStream = new VideoCaptureStream(format, player);
-    		inputStream.open();
+            inputStream.open();
 
             // Create the output stream
-            //outputStream = new RtpOutputStream(remoteAddress, remotePort, localRtpPort, RtpOutputStream.RTCP_SOCKET_TIMEOUT);
+            // outputStream = new RtpOutputStream(remoteAddress, remotePort, localRtpPort,
+            // RtpOutputStream.RTCP_SOCKET_TIMEOUT);
             outputStream = new RtpOutputStream(remoteAddress, remotePort, rtpStream);
             outputStream.addRtpStreamListener(rtpStreamListener);
             outputStream.open();
 
-        	// Create the codec chain
-        	Codec[] codecChain = MediaRegistry.generateEncodingCodecChain(format.getCodec());
+            // Create the codec chain
+            Codec[] codecChain = MediaRegistry.generateEncodingCodecChain(format.getCodec());
 
             // Create the media processor
-    		processor = new Processor(inputStream, outputStream, codecChain);
-        } catch(Exception e) {
-        	throw new RtpException("Can't prepare resources");
+            processor = new Processor(inputStream, outputStream, codecChain);
+        } catch (Exception e) {
+            throw new RtpException("Can't prepare resources");
         }
     }
 }

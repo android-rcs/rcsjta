@@ -33,121 +33,121 @@ import android.database.Cursor;
  */
 public class GeolocSharingPersistedStorageAccessor {
 
-	private final String mSharingId;
+    private final String mSharingId;
 
-	private final RichCallHistory mRichCallLog;
+    private final RichCallHistory mRichCallLog;
 
-	private ContactId mContact;
+    private ContactId mContact;
 
-	private Geoloc mGeoloc;
+    private Geoloc mGeoloc;
 
-	private Direction mDirection;
+    private Direction mDirection;
 
-	private long mTimestamp;
+    private long mTimestamp;
 
-	public GeolocSharingPersistedStorageAccessor(String sharingId, RichCallHistory richCallHistory) {
-		mSharingId = sharingId;
-		mRichCallLog = richCallHistory;
-	}
+    public GeolocSharingPersistedStorageAccessor(String sharingId, RichCallHistory richCallHistory) {
+        mSharingId = sharingId;
+        mRichCallLog = richCallHistory;
+    }
 
-	public GeolocSharingPersistedStorageAccessor(String sharingId, ContactId contact,
-			Geoloc geoloc, Direction direction, RichCallHistory richCallHistory) {
-		mSharingId = sharingId;
-		mContact = contact;
-		mGeoloc = geoloc;
-		mDirection = direction;
-		mRichCallLog = richCallHistory;
-	}
+    public GeolocSharingPersistedStorageAccessor(String sharingId, ContactId contact,
+            Geoloc geoloc, Direction direction, RichCallHistory richCallHistory) {
+        mSharingId = sharingId;
+        mContact = contact;
+        mGeoloc = geoloc;
+        mDirection = direction;
+        mRichCallLog = richCallHistory;
+    }
 
-	private void cacheData() {
-		Cursor cursor = null;
-		try {
-			cursor = mRichCallLog.getCacheableGeolocSharingData(mSharingId);
-			String contact = cursor.getString(cursor
-					.getColumnIndexOrThrow(GeolocSharingLog.CONTACT));
-			if (contact != null) {
-				mContact = ContactUtils.createContactId(contact);
-			}
-			mDirection = Direction.valueOf(cursor.getInt(cursor
-					.getColumnIndexOrThrow(GeolocSharingLog.DIRECTION)));
-			String geoloc = cursor
-					.getString(cursor.getColumnIndexOrThrow(GeolocSharingLog.CONTENT));
-			if (geoloc != null) {
-				mGeoloc = new Geoloc(geoloc);
-			}
-			mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(GeolocSharingLog.TIMESTAMP));
-		} finally {
-			if (cursor != null) {
-				cursor.close();
-			}
-		}
-	}
+    private void cacheData() {
+        Cursor cursor = null;
+        try {
+            cursor = mRichCallLog.getCacheableGeolocSharingData(mSharingId);
+            String contact = cursor.getString(cursor
+                    .getColumnIndexOrThrow(GeolocSharingLog.CONTACT));
+            if (contact != null) {
+                mContact = ContactUtils.createContactId(contact);
+            }
+            mDirection = Direction.valueOf(cursor.getInt(cursor
+                    .getColumnIndexOrThrow(GeolocSharingLog.DIRECTION)));
+            String geoloc = cursor
+                    .getString(cursor.getColumnIndexOrThrow(GeolocSharingLog.CONTENT));
+            if (geoloc != null) {
+                mGeoloc = new Geoloc(geoloc);
+            }
+            mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(GeolocSharingLog.TIMESTAMP));
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
 
-	public ContactId getRemoteContact() {
-		/*
-		 * Utilizing cache here as contact can't be changed in persistent storage after entry
-		 * insertion anyway so no need to query for it multiple times.
-		 */
-		if (mContact == null) {
-			cacheData();
-		}
-		return mContact;
-	}
+    public ContactId getRemoteContact() {
+        /*
+         * Utilizing cache here as contact can't be changed in persistent storage after entry
+         * insertion anyway so no need to query for it multiple times.
+         */
+        if (mContact == null) {
+            cacheData();
+        }
+        return mContact;
+    }
 
-	public Geoloc getGeoloc() {
-		/*
-		 * Utilizing cache here as geoloc can't be changed in persistent storage after geoloc has
-		 * been set anyway so no need to query for it multiple times.
-		 */
-		if (mGeoloc == null) {
-			cacheData();
-		}
-		return mGeoloc;
-	}
+    public Geoloc getGeoloc() {
+        /*
+         * Utilizing cache here as geoloc can't be changed in persistent storage after geoloc has
+         * been set anyway so no need to query for it multiple times.
+         */
+        if (mGeoloc == null) {
+            cacheData();
+        }
+        return mGeoloc;
+    }
 
-	public String getMimeType() {
-		return MimeType.GEOLOC_MESSAGE;
-	}
+    public String getMimeType() {
+        return MimeType.GEOLOC_MESSAGE;
+    }
 
-	public int getState() {
-		return mRichCallLog.getGeolocSharingState(mSharingId);
-	}
+    public int getState() {
+        return mRichCallLog.getGeolocSharingState(mSharingId);
+    }
 
-	public int getReasonCode() {
-		return mRichCallLog.getGeolocSharingStateReasonCode(mSharingId);
-	}
+    public int getReasonCode() {
+        return mRichCallLog.getGeolocSharingStateReasonCode(mSharingId);
+    }
 
-	public Direction getDirection() {
-		/*
-		 * Utilizing cache here as direction can't be changed in persistent storage after entry
-		 * insertion anyway so no need to query for it multiple times.
-		 */
-		if (mDirection == null) {
-			cacheData();
-		}
-		return mDirection;
-	}
+    public Direction getDirection() {
+        /*
+         * Utilizing cache here as direction can't be changed in persistent storage after entry
+         * insertion anyway so no need to query for it multiple times.
+         */
+        if (mDirection == null) {
+            cacheData();
+        }
+        return mDirection;
+    }
 
-	public long getTimestamp() {
-		/*
-		 * Utilizing cache here as timestamp can't be changed in persistent storage after it has
-		 * been set to some value bigger than zero, so no need to query for it multiple times.
-		 */
-		if (mTimestamp == 0) {
-			cacheData();
-		}
-		return mTimestamp;
-	}
+    public long getTimestamp() {
+        /*
+         * Utilizing cache here as timestamp can't be changed in persistent storage after it has
+         * been set to some value bigger than zero, so no need to query for it multiple times.
+         */
+        if (mTimestamp == 0) {
+            cacheData();
+        }
+        return mTimestamp;
+    }
 
-	public void setStateAndReasonCode(int state, int reasonCode) {
-		mRichCallLog.setGeolocSharingStateAndReasonCode(mSharingId, state, reasonCode);
-	}
+    public void setStateAndReasonCode(int state, int reasonCode) {
+        mRichCallLog.setGeolocSharingStateAndReasonCode(mSharingId, state, reasonCode);
+    }
 
-	public void setTransferred(Geoloc geoloc) {
-		mRichCallLog.setGeolocSharingTransferred(mSharingId, geoloc);
-	}
+    public void setTransferred(Geoloc geoloc) {
+        mRichCallLog.setGeolocSharingTransferred(mSharingId, geoloc);
+    }
 
-	public void addIncomingGeolocSharing(ContactId contact, int state, int reasonCode) {
-		mRichCallLog.addIncomingGeolocSharing(mContact, mSharingId, state, reasonCode);
-	}
+    public void addIncomingGeolocSharing(ContactId contact, int state, int reasonCode) {
+        mRichCallLog.addIncomingGeolocSharing(mContact, mSharingId, state, reasonCode);
+    }
 }

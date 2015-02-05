@@ -38,7 +38,7 @@ public class FifoBuffer {
 
     /**
      * Add an object in the buffer
-     *
+     * 
      * @param obj Message
      */
     public synchronized void addObject(Object obj) {
@@ -48,8 +48,7 @@ public class FifoBuffer {
     }
 
     /**
-     * Read an object in the buffer. This is a blocking method until an object
-     * is read.
+     * Read an object in the buffer. This is a blocking method until an object is read.
      * 
      * @return Object
      */
@@ -72,8 +71,8 @@ public class FifoBuffer {
     }
 
     /**
-     * Read an object in the buffer. This is a blocking method until a timeout
-     * occurs or an object is read.
+     * Read an object in the buffer. This is a blocking method until a timeout occurs or an object
+     * is read.
      * 
      * @param timeout Timeout
      * @return Message
@@ -106,7 +105,7 @@ public class FifoBuffer {
 
     /**
      * Get FIFO size
-     *
+     * 
      * @return size of the FIFO
      */
     public int size() {
@@ -115,7 +114,7 @@ public class FifoBuffer {
 
     /**
      * clean FIFO
-     *
+     * 
      * @param size
      */
     public void clean(int size) {

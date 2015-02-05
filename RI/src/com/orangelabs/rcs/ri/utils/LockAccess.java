@@ -33,8 +33,7 @@ public class LockAccess {
     AtomicBoolean locker = new AtomicBoolean();
 
     /**
-     * Acquires the lock only if it is not already locked at the time of
-     * invocation
+     * Acquires the lock only if it is not already locked at the time of invocation
      * 
      * @return true is resource is unlocked
      */

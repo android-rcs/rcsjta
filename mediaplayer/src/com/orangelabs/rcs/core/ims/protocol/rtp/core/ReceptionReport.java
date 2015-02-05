@@ -20,60 +20,58 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.core;
 
 /**
  * ReceptionReport based on RFC 3550 specification
- *
+ * 
  * @author Deutsche Telekom
  */
 public class ReceptionReport {
 
     /**
-     * The SSRC identifier of the source to which the information in this
-     * reception report block pertains
+     * The SSRC identifier of the source to which the information in this reception report block
+     * pertains
      */
     private int ssrc;
 
     /**
-     * The fraction of RTP data packets from source SSRC lost since the previous
-     * SR or RR packet was sent
+     * The fraction of RTP data packets from source SSRC lost since the previous SR or RR packet was
+     * sent
      */
     private double fractionLost;
 
     /**
-     * The total number of RTP data packets from source SSRC_n that have been
-     * lost since the beginning of reception
+     * The total number of RTP data packets from source SSRC_n that have been lost since the
+     * beginning of reception
      */
     private int cumulativeNumberOfPacketsLost;
 
     /**
-     * The low 16 bits contain the highest sequence number received in an RTP
-     * data packet from source SSRC, and the most significant 16 bits extend
-     * that sequence number with the corresponding count of sequence number
-     * cycles
+     * The low 16 bits contain the highest sequence number received in an RTP data packet from
+     * source SSRC, and the most significant 16 bits extend that sequence number with the
+     * corresponding count of sequence number cycles
      */
     private long extendedHighestSequenceNumberReceived;
 
     /**
-     * An estimate of the statistical variance of the RTP data packet
-     * interarrival time, measured in timestamp units and expressed as
-     * anunsigned integer
+     * An estimate of the statistical variance of the RTP data packet interarrival time, measured in
+     * timestamp units and expressed as anunsigned integer
      */
     private long interarrivalJitter;
 
     /**
-     * The middle 32 bits out of 64 in the NTP timestamp received as part of the
-     * most recent RTCP sender report (SR) packet from source SSRC. If no SR has
-     * been received yet, the field is set to zero
+     * The middle 32 bits out of 64 in the NTP timestamp received as part of the most recent RTCP
+     * sender report (SR) packet from source SSRC. If no SR has been received yet, the field is set
+     * to zero
      */
     private long lastSenderReport;
 
     /**
-     * The delay, expressed in units of 1/65536 seconds, between receiving the
-     * last SR packet from source SSRC and sending this reception report block
+     * The delay, expressed in units of 1/65536 seconds, between receiving the last SR packet from
+     * source SSRC and sending this reception report block
      */
     private long delaySinceLastSenderReport;
 
     /**
      * Default constructor
-     *
+     * 
      * @param ssrc Source identifier
      */
     public ReceptionReport(int ssrc) {

@@ -36,253 +36,250 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * RTP input stream
- *
+ * 
  * @author jexa7410
  */
 public class RtpInputStream implements ProcessorInputStream {
-	/**
-	 * RTP Socket Timeout Used a 20s timeout value because the RTP packets can have a delay
-	 */
-	private static final int RTP_SOCKET_TIMEOUT = 20000;
+    /**
+     * RTP Socket Timeout Used a 20s timeout value because the RTP packets can have a delay
+     */
+    private static final int RTP_SOCKET_TIMEOUT = 20000;
 
-	/**
-	 * Remote address
-	 */
-	private String remoteAddress;
+    /**
+     * Remote address
+     */
+    private String remoteAddress;
 
-	/**
-	 * Remote port
-	 */
-	private int remotePort;
+    /**
+     * Remote port
+     */
+    private int remotePort;
 
-	/**
-	 * Local port
-	 */
-	private int localPort;
+    /**
+     * Local port
+     */
+    private int localPort;
 
-	/**
-	 * RTP receiver
-	 */
-	private RtpPacketReceiver rtpReceiver = null;
+    /**
+     * RTP receiver
+     */
+    private RtpPacketReceiver rtpReceiver = null;
 
-	/**
-	 * RTCP receiver
-	 */
-	private RtcpPacketReceiver rtcpReceiver = null;
+    /**
+     * RTCP receiver
+     */
+    private RtcpPacketReceiver rtcpReceiver = null;
 
-	/**
-	 * RTCP transmitter
-	 */
-	private RtcpPacketTransmitter rtcpTransmitter = null;
+    /**
+     * RTCP transmitter
+     */
+    private RtcpPacketTransmitter rtcpTransmitter = null;
 
-	/**
-	 * Input buffer
-	 */
-	private Buffer buffer = new Buffer();
+    /**
+     * Input buffer
+     */
+    private Buffer buffer = new Buffer();
 
-	/**
-	 * Input format
-	 */
-	private Format inputFormat = null;
+    /**
+     * Input format
+     */
+    private Format inputFormat = null;
 
-	/**
-	 * RTCP Session
-	 */
-	private RtcpSession rtcpSession = null;
+    /**
+     * RTCP Session
+     */
+    private RtcpSession rtcpSession = null;
 
-	/**
-	 * RTP stream listener
-	 */
-	private RtpStreamListener rtpStreamListener;
+    /**
+     * RTP stream listener
+     */
+    private RtpStreamListener rtpStreamListener;
 
-	/**
-	 * The negotiated orientation extension header id
-	 */
-	private int extensionHeaderId = RtpUtils.RTP_DEFAULT_EXTENSION_ID;
+    /**
+     * The negotiated orientation extension header id
+     */
+    private int extensionHeaderId = RtpUtils.RTP_DEFAULT_EXTENSION_ID;
 
-	/**
-	 * Indicates if the stream was closed
-	 */
-	private boolean isClosed = false;
+    /**
+     * Indicates if the stream was closed
+     */
+    private boolean isClosed = false;
 
-	/**
-	 * Sequence RTP packets buffer
-	 */
-	private PriorityQueue<RtpPacket> rtpPacketsBuffer;
+    /**
+     * Sequence RTP packets buffer
+     */
+    private PriorityQueue<RtpPacket> rtpPacketsBuffer;
 
-	/**
-	 * The logger
-	 */
-	private final Logger logger = Logger.getLogger(this.getClass().getName());
+    /**
+     * The logger
+     */
+    private final Logger logger = Logger.getLogger(this.getClass().getName());
 
-	/**
-	 * Constructor
-	 *
-	 * @param localPort
-	 *            Local port
-	 * @param inputFormat
-	 *            Input format
-	 */
-	public RtpInputStream(String remoteAddress, int remotePort, int localPort, Format inputFormat) {
-		this.remoteAddress = remoteAddress;
-		this.remotePort = remotePort;
-		this.localPort = localPort;
-		this.inputFormat = inputFormat;
+    /**
+     * Constructor
+     * 
+     * @param localPort Local port
+     * @param inputFormat Input format
+     */
+    public RtpInputStream(String remoteAddress, int remotePort, int localPort, Format inputFormat) {
+        this.remoteAddress = remoteAddress;
+        this.remotePort = remotePort;
+        this.localPort = localPort;
+        this.inputFormat = inputFormat;
 
-		rtcpSession = new RtcpSession(false, 16000);
+        rtcpSession = new RtcpSession(false, 16000);
 
-		rtpPacketsBuffer = new PriorityQueue<RtpPacket>(10, new Comparator<RtpPacket>() {
-			@Override
-			public int compare(RtpPacket object1, RtpPacket object2) {
-				if (object1.seqnum == object2.seqnum) {
-					return 0;
-				} else if (object1.seqnum < object2.seqnum) {
-					return -1;
-				}
-				return 1;
-			}
-		});
+        rtpPacketsBuffer = new PriorityQueue<RtpPacket>(10, new Comparator<RtpPacket>() {
+            @Override
+            public int compare(RtpPacket object1, RtpPacket object2) {
+                if (object1.seqnum == object2.seqnum) {
+                    return 0;
+                } else if (object1.seqnum < object2.seqnum) {
+                    return -1;
+                }
+                return 1;
+            }
+        });
 
-	}
+    }
 
-	/**
-	 * Open the input stream
-	 *
-	 * @throws Exception
-	 */
-	public void open() throws Exception {
-		// Create the RTP receiver
-		rtpReceiver = new RtpPacketReceiver(localPort, rtcpSession, RTP_SOCKET_TIMEOUT);
-		rtpReceiver.start();
+    /**
+     * Open the input stream
+     * 
+     * @throws Exception
+     */
+    public void open() throws Exception {
+        // Create the RTP receiver
+        rtpReceiver = new RtpPacketReceiver(localPort, rtcpSession, RTP_SOCKET_TIMEOUT);
+        rtpReceiver.start();
 
-		// Create the RTCP receiver
-		rtcpReceiver = new RtcpPacketReceiver(localPort + 1, rtcpSession);
-		rtcpReceiver.start();
+        // Create the RTCP receiver
+        rtcpReceiver = new RtcpPacketReceiver(localPort + 1, rtcpSession);
+        rtcpReceiver.start();
 
-		// Create the RTCP transmitter
-		rtcpTransmitter = new RtcpPacketTransmitter(remoteAddress, remotePort + 1, rtcpSession,
-				rtcpReceiver.getConnection());
-		rtcpTransmitter.start();
+        // Create the RTCP transmitter
+        rtcpTransmitter = new RtcpPacketTransmitter(remoteAddress, remotePort + 1, rtcpSession,
+                rtcpReceiver.getConnection());
+        rtcpTransmitter.start();
 
-		isClosed = false;
-	}
+        isClosed = false;
+    }
 
-	/**
-	 * Close the input stream
-	 */
-	public void close() {
-		try {
-			isClosed = true;
+    /**
+     * Close the input stream
+     */
+    public void close() {
+        try {
+            isClosed = true;
 
-			// Close the RTCP transmitter
-			if (rtcpTransmitter != null)
-				rtcpTransmitter.close();
+            // Close the RTCP transmitter
+            if (rtcpTransmitter != null)
+                rtcpTransmitter.close();
 
-			// Close the RTP receiver
-			if (rtpReceiver != null) {
-				rtpReceiver.close();
-			}
+            // Close the RTP receiver
+            if (rtpReceiver != null) {
+                rtpReceiver.close();
+            }
 
-			// Close the RTCP receiver
-			if (rtcpReceiver != null) {
-				rtcpReceiver.close();
-			}
-			rtpStreamListener = null;
-		} catch (Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Can't close correctly RTP ressources", e);
-			}
-		}
-	}
+            // Close the RTCP receiver
+            if (rtcpReceiver != null) {
+                rtcpReceiver.close();
+            }
+            rtpStreamListener = null;
+        } catch (Exception e) {
+            if (logger.isActivated()) {
+                logger.error("Can't close correctly RTP ressources", e);
+            }
+        }
+    }
 
-	/**
-	 * Returns the RTP receiver
-	 *
-	 * @return RTP receiver
-	 */
-	public RtpPacketReceiver getRtpReceiver() {
-		return rtpReceiver;
-	}
+    /**
+     * Returns the RTP receiver
+     * 
+     * @return RTP receiver
+     */
+    public RtpPacketReceiver getRtpReceiver() {
+        return rtpReceiver;
+    }
 
-	/**
-	 * Returns the RTCP receiver
-	 *
-	 * @return RTCP receiver
-	 */
-	public RtcpPacketReceiver getRtcpReceiver() {
-		return rtcpReceiver;
-	}
+    /**
+     * Returns the RTCP receiver
+     * 
+     * @return RTCP receiver
+     */
+    public RtcpPacketReceiver getRtcpReceiver() {
+        return rtcpReceiver;
+    }
 
-	/**
-	 * Read from the input stream without blocking
-	 *
-	 * @return Buffer
-	 * @throws Exception
-	 */
-	public Buffer read() throws Exception {
-		try {
-			do {
-				// Wait and read a RTP packet
-				RtpPacket rtpPacket = rtpReceiver.readRtpPacket();
-				if (rtpPacket == null) {
-					return null;
-				}
+    /**
+     * Read from the input stream without blocking
+     * 
+     * @return Buffer
+     * @throws Exception
+     */
+    public Buffer read() throws Exception {
+        try {
+            do {
+                // Wait and read a RTP packet
+                RtpPacket rtpPacket = rtpReceiver.readRtpPacket();
+                if (rtpPacket == null) {
+                    return null;
+                }
 
-				// Add the buffer in queue
-				rtpPacketsBuffer.add(rtpPacket);
-			} while (rtpPacketsBuffer.size() <= 5);
+                // Add the buffer in queue
+                rtpPacketsBuffer.add(rtpPacket);
+            } while (rtpPacketsBuffer.size() <= 5);
 
-			RtpPacket packet = rtpPacketsBuffer.poll();
+            RtpPacket packet = rtpPacketsBuffer.poll();
 
-			// Create a buffer
-			buffer.setData(packet.data);
-			buffer.setLength(packet.payloadlength);
-			buffer.setOffset(0);
-			buffer.setFormat(inputFormat);
-			buffer.setSequenceNumber(packet.seqnum);
-			buffer.setRTPMarker(packet.marker != 0);
-			buffer.setTimeStamp(packet.timestamp);
+            // Create a buffer
+            buffer.setData(packet.data);
+            buffer.setLength(packet.payloadlength);
+            buffer.setOffset(0);
+            buffer.setFormat(inputFormat);
+            buffer.setSequenceNumber(packet.seqnum);
+            buffer.setRTPMarker(packet.marker != 0);
+            buffer.setTimeStamp(packet.timestamp);
 
-			if (packet.extensionHeader != null) {
-				ExtensionElement element = packet.extensionHeader.getElementById(extensionHeaderId);
-				if (element != null) {
-					buffer.setVideoOrientation(VideoOrientation.parse(element.data[0]));
-				}
-			}
+            if (packet.extensionHeader != null) {
+                ExtensionElement element = packet.extensionHeader.getElementById(extensionHeaderId);
+                if (element != null) {
+                    buffer.setVideoOrientation(VideoOrientation.parse(element.data[0]));
+                }
+            }
 
-			// Set inputFormat back to null
-			inputFormat = null;
-			return buffer;
-		} catch (TimeoutException ex) {
-			if (!isClosed) {
-				if (logger.isActivated()) {
-					logger.error("RTP Packet receiver socket error", ex);
-				}
-				if (rtpStreamListener != null) {
-					rtpStreamListener.rtpStreamAborted();
-				}
-			}
-			return null;
-		}
-	}
+            // Set inputFormat back to null
+            inputFormat = null;
+            return buffer;
+        } catch (TimeoutException ex) {
+            if (!isClosed) {
+                if (logger.isActivated()) {
+                    logger.error("RTP Packet receiver socket error", ex);
+                }
+                if (rtpStreamListener != null) {
+                    rtpStreamListener.rtpStreamAborted();
+                }
+            }
+            return null;
+        }
+    }
 
-	/**
-	 * Adds the RTP stream listener
-	 *
-	 * @param rtpStreamListener
-	 */
-	public void addRtpStreamListener(RtpStreamListener rtpStreamListener) {
-		this.rtpStreamListener = rtpStreamListener;
-	}
+    /**
+     * Adds the RTP stream listener
+     * 
+     * @param rtpStreamListener
+     */
+    public void addRtpStreamListener(RtpStreamListener rtpStreamListener) {
+        this.rtpStreamListener = rtpStreamListener;
+    }
 
-	/**
-	 * Sets the negotiated orientation extension header id
-	 *
-	 * @param extensionHeaderId
-	 *            Header id
-	 */
-	public void setExtensionHeaderId(int extensionHeaderId) {
-		this.extensionHeaderId = extensionHeaderId;
-	}
+    /**
+     * Sets the negotiated orientation extension header id
+     * 
+     * @param extensionHeaderId Header id
+     */
+    public void setExtensionHeaderId(int extensionHeaderId) {
+        this.extensionHeaderId = extensionHeaderId;
+    }
 
 }

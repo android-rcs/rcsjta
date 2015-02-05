@@ -75,14 +75,17 @@ public class SignatureTest {
         mKeyTagSet = new HashSet<String>();
         mKeyTagSet.addAll(Arrays.asList(new String[] {
                 TAG_PACKAGE, TAG_CLASS, TAG_INTERFACE, TAG_IMPLEMENTS, TAG_CONSTRUCTOR,
-                TAG_METHOD, TAG_PARAM, TAG_EXCEPTION, TAG_FIELD }));
+                TAG_METHOD, TAG_PARAM, TAG_EXCEPTION, TAG_FIELD
+        }));
     }
 
-    public static final void beginDocument(XmlPullParser parser, String firstElementName) throws XmlPullParserException, IOException
+    public static final void beginDocument(XmlPullParser parser, String firstElementName)
+            throws XmlPullParserException, IOException
     {
         int type;
-        while ((type=parser.next()) != XmlPullParser.START_TAG
-                   && type != XmlPullParser.END_DOCUMENT) { }
+        while ((type = parser.next()) != XmlPullParser.START_TAG
+                && type != XmlPullParser.END_DOCUMENT) {
+        }
 
         if (type != XmlPullParser.START_TAG) {
             throw new XmlPullParserException("No start tag found");
@@ -106,9 +109,9 @@ public class SignatureTest {
         int type;
         while (true) {
             type = XmlPullParser.START_DOCUMENT;
-            while ((type=parser.next()) != XmlPullParser.START_TAG
-                       && type != XmlPullParser.END_DOCUMENT
-                       && type != XmlPullParser.END_TAG) {
+            while ((type = parser.next()) != XmlPullParser.START_TAG
+                    && type != XmlPullParser.END_DOCUMENT
+                    && type != XmlPullParser.END_TAG) {
 
             }
 
@@ -178,7 +181,7 @@ public class SignatureTest {
 
     /**
      * Load field information from xml to memory.
-     *
+     * 
      * @param className of the class being examined which will be shown in error messages
      * @param parser The XmlPullParser which carries the xml information.
      * @return the new field
@@ -192,7 +195,7 @@ public class SignatureTest {
 
     /**
      * Load method information from xml to memory.
-     *
+     * 
      * @param className of the class being examined which will be shown in error messages
      * @param parser The XmlPullParser which carries the xml information.
      * @return the newly loaded method.
@@ -206,13 +209,13 @@ public class SignatureTest {
 
     /**
      * Load constructor information from xml to memory.
-     *
+     * 
      * @param parser The XmlPullParser which carries the xml information.
      * @param currentClass the current class being loaded.
      * @return the new constructor
      */
     private JDiffConstructor loadConstructorInfo(XmlPullParser parser,
-                                                 JDiffClassDescription currentClass) {
+            JDiffClassDescription currentClass) {
         String name = currentClass.getClassName();
         int modifier = jdiffModifierToReflectionFormat(name, parser);
         return new JDiffConstructor(name, modifier);
@@ -220,29 +223,29 @@ public class SignatureTest {
 
     /**
      * Load class or interface information to memory.
-     *
+     * 
      * @param parser The XmlPullParser which carries the xml information.
      * @param isInterface true if the current class is an interface, otherwise is false.
      * @param pkg the name of the java package this class can be found in.
      * @return the new class description.
      */
     private JDiffClassDescription loadClassInfo(XmlPullParser parser,
-                                                boolean isInterface,
-                                                String pkg) {
+            boolean isInterface,
+            String pkg) {
         String className = parser.getAttributeValue(null, ATTRIBUTE_NAME);
         JDiffClassDescription currentClass = new JDiffClassDescription(pkg,
-                                                                       className,
-                                                                       resultObserver);
+                className,
+                resultObserver);
         currentClass.setModifier(jdiffModifierToReflectionFormat(className, parser));
         currentClass.setType(isInterface ? JDiffClassDescription.JDiffType.INTERFACE :
-                             JDiffClassDescription.JDiffType.CLASS);
+                JDiffClassDescription.JDiffType.CLASS);
         currentClass.setExtendsClass(parser.getAttributeValue(null, ATTRIBUTE_EXTENDS));
         return currentClass;
     }
 
     /**
      * Convert string modifier to int modifier.
-     *
+     * 
      * @param name of the class/method/field being examined which will be shown in error messages
      * @param key modifier name
      * @param value modifier value
@@ -283,14 +286,14 @@ public class SignatureTest {
 
     /**
      * Transfer string modifier to int one.
-     *
+     * 
      * @param name of the class/method/field being examined which will be shown in error messages
      * @param parser XML resource parser
      * @return converted modifier
      */
-    private static int jdiffModifierToReflectionFormat(String name, XmlPullParser parser){
+    private static int jdiffModifierToReflectionFormat(String name, XmlPullParser parser) {
         int modifier = 0;
-        for (int i = 0;i < parser.getAttributeCount();i++) {
+        for (int i = 0; i < parser.getAttributeCount(); i++) {
             modifier |= modifierDescriptionToReflectedType(name, parser.getAttributeName(i),
                     parser.getAttributeValue(i));
         }

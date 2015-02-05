@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.core.ims.service.im.chat.cpim;
 
 /**
@@ -23,59 +24,56 @@ package com.orangelabs.rcs.core.ims.service.im.chat.cpim;
  * @author jexa7410
  */
 public class CpimHeader {
-	/***
-	 * Header name
-	 */
-	private String name;
+    /***
+     * Header name
+     */
+    private String name;
 
-	/**
-	 * Header value
-	 */
-	private String value;
+    /**
+     * Header value
+     */
+    private String value;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param name
-	 *            Header name
-	 * @param value
-	 *            Header value
-	 */
-	public CpimHeader(String name, String value) {
-		this.name = name;
-		this.value = value;
-	}
+    /**
+     * Constructor
+     * 
+     * @param name Header name
+     * @param value Header value
+     */
+    public CpimHeader(String name, String value) {
+        this.name = name;
+        this.value = value;
+    }
 
-	/**
-	 * Returns header name
-	 * 
-	 * @return String
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * Returns header name
+     * 
+     * @return String
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * Returns header value
-	 * 
-	 * @return String
-	 */
-	public String getValue() {
-		return value;
-	}
+    /**
+     * Returns header value
+     * 
+     * @return String
+     */
+    public String getValue() {
+        return value;
+    }
 
-	/**
-	 * Parse CPIM header
-	 * 
-	 * @param data
-	 *            Input data
-	 * @return Header
-	 * @throws Exception
-	 */
-	public static CpimHeader parseHeader(String data) throws Exception {
-		int index = data.indexOf(":");
-		String key = data.substring(0, index);
-		String value = data.substring(index + 1);
-		return new CpimHeader(key.trim(), value.trim());
-	}
+    /**
+     * Parse CPIM header
+     * 
+     * @param data Input data
+     * @return Header
+     * @throws Exception
+     */
+    public static CpimHeader parseHeader(String data) throws Exception {
+        int index = data.indexOf(":");
+        String key = data.substring(0, index);
+        String value = data.substring(index + 1);
+        return new CpimHeader(key.trim(), value.trim());
+    }
 }

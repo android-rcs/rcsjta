@@ -57,7 +57,7 @@ public class RequestAllCapabilities extends Activity {
         setContentView(R.layout.capabilities_refresh);
 
         // Set buttons callback
-        Button refreshBtn = (Button)findViewById(R.id.refresh_btn);
+        Button refreshBtn = (Button) findViewById(R.id.refresh_btn);
         refreshBtn.setOnClickListener(btnSyncListener);
 
         // Register to API connection manager

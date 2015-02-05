@@ -41,7 +41,7 @@ public class InitiateStreamingSession extends InitiateMultimediaSession {
         Intent intent = new Intent(InitiateStreamingSession.this, StreamingSessionView.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra(StreamingSessionView.EXTRA_MODE, StreamingSessionView.MODE_OUTGOING);
-        intent.putExtra(StreamingSessionView.EXTRA_CONTACT, (Parcelable)contact);
+        intent.putExtra(StreamingSessionView.EXTRA_CONTACT, (Parcelable) contact);
         startActivity(intent);
     }
 }

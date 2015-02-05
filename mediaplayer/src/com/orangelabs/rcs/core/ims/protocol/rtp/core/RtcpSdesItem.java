@@ -24,14 +24,14 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.core;
  * @author jexa7410
  */
 public class RtcpSdesItem {
-	public int type;
-	public byte[] data;
+    public int type;
+    public byte[] data;
 
-	public RtcpSdesItem() {
-	}
+    public RtcpSdesItem() {
+    }
 
-	public RtcpSdesItem(int i, String string) {
-		type = i;
-		data = string.getBytes();
-	}
+    public RtcpSdesItem(int i, String string) {
+        type = i;
+        data = string.getBytes();
+    }
 }

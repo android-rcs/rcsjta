@@ -174,7 +174,7 @@ public class ContactListAdapter extends CursorAdapter {
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(context);
-        TextView view = (TextView)inflater.inflate(R.layout.utils_spinner_item, parent, false);
+        TextView view = (TextView) inflater.inflate(R.layout.utils_spinner_item, parent, false);
         view.setTag(new ViewHolder(view, cursor));
         return view;
     }
@@ -182,7 +182,7 @@ public class ContactListAdapter extends CursorAdapter {
     @Override
     public View newDropDownView(Context context, Cursor cursor, ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(context);
-        TextView view = (TextView)inflater.inflate(android.R.layout.simple_dropdown_item_1line,
+        TextView view = (TextView) inflater.inflate(android.R.layout.simple_dropdown_item_1line,
                 parent, false);
         view.setTag(new ViewHolder(view, cursor));
         return view;
@@ -190,15 +190,15 @@ public class ContactListAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        final ViewHolder holder = (ViewHolder)view.getTag();
-        ((TextView)view).setText(formatText(context, cursor, holder));
+        final ViewHolder holder = (ViewHolder) view.getTag();
+        ((TextView) view).setText(formatText(context, cursor, holder));
         // Put the number in tag so it can be retrieved easily
         holder.number = cursor.getString(holder.columnNumber);
     }
 
     /**
-     * Format the item to be displayed. The user name + label is displayed if
-     * not null, else the phone number is used
+     * Format the item to be displayed. The user name + label is displayed if not null, else the
+     * phone number is used
      * 
      * @param context Context
      * @param c Cursor
@@ -235,8 +235,8 @@ public class ContactListAdapter extends CursorAdapter {
     }
 
     /**
-     * A ViewHolder class keeps references to children views to avoid
-     * unnecessary calls to getColumnIndex() on each row.
+     * A ViewHolder class keeps references to children views to avoid unnecessary calls to
+     * getColumnIndex() on each row.
      */
     private class ViewHolder {
         int columnID;
@@ -269,7 +269,7 @@ public class ContactListAdapter extends CursorAdapter {
      * @return the phone number
      */
     public String getSelectedNumber(View view) {
-        final ViewHolder holder = (ViewHolder)view.getTag();
+        final ViewHolder holder = (ViewHolder) view.getTag();
         return holder.number;
     }
 }

@@ -31,100 +31,99 @@ import com.orangelabs.rcs.utils.DateUtils;
  * Is composing info document (see RFC3994)
  */
 public class IsComposingInfo {
-	/**
-	 * MIME type
-	 */
-	public static String MIME_TYPE = "application/im-iscomposing+xml";
+    /**
+     * MIME type
+     */
+    public static String MIME_TYPE = "application/im-iscomposing+xml";
 
-	/**
-	 * CRLF constant
-	 */
-	private static final String CRLF = "\r\n";
+    /**
+     * CRLF constant
+     */
+    private static final String CRLF = "\r\n";
 
-	/**
-	 * State
-	 */
-	private boolean state = false;
+    /**
+     * State
+     */
+    private boolean state = false;
 
-	/**
-	 * Last active state in seconds
-	 */
-	private long lastActiveDate = 0L;
+    /**
+     * Last active state in seconds
+     */
+    private long lastActiveDate = 0L;
 
-	/**
-	 * Refresh time in seconds
-	 */
-	private long refreshTime = 0L;
+    /**
+     * Refresh time in seconds
+     */
+    private long refreshTime = 0L;
 
-	/**
-	 * Content type
-	 */
-	private String contentType = "";
+    /**
+     * Content type
+     */
+    private String contentType = "";
 
-	/**
-	 * Constructor
-	 */
-	public IsComposingInfo() {
-	}
+    /**
+     * Constructor
+     */
+    public IsComposingInfo() {
+    }
 
-	public void setState(String state) {
-		if (state.equalsIgnoreCase("active")) {
-			this.state = true;
-		} else {
-			this.state = false;
-		}
-	}
+    public void setState(String state) {
+        if (state.equalsIgnoreCase("active")) {
+            this.state = true;
+        } else {
+            this.state = false;
+        }
+    }
 
-	public void setLastActiveDate(String lastActiveTimeStamp) {
-		this.lastActiveDate = DateUtils.decodeDate(lastActiveTimeStamp) / 1000;
-	}
+    public void setLastActiveDate(String lastActiveTimeStamp) {
+        this.lastActiveDate = DateUtils.decodeDate(lastActiveTimeStamp) / 1000;
+    }
 
-	public void setRefreshTime(String refreshTime) {
-		this.refreshTime = Long.parseLong(refreshTime);
-	}
+    public void setRefreshTime(String refreshTime) {
+        this.refreshTime = Long.parseLong(refreshTime);
+    }
 
-	public void setContentType(String contentType) {
-		this.contentType = contentType;
-	}
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
 
-	public boolean isStateActive() {
-		return state;
-	}
+    public boolean isStateActive() {
+        return state;
+    }
 
-	public long getLastActiveDate() {
-		return lastActiveDate;
-	}
+    public long getLastActiveDate() {
+        return lastActiveDate;
+    }
 
-	public long getRefreshTime() {
-		return refreshTime;
-	}
+    public long getRefreshTime() {
+        return refreshTime;
+    }
 
-	public String getContentType() {
-		return contentType;
-	}
+    public String getContentType() {
+        return contentType;
+    }
 
-	/**
-	 * Build is composing document
-	 *
-	 * @param status
-	 *            Status
-	 * @return XML document
-	 */
-	public static String buildIsComposingInfo(boolean status) {
-		return new StringBuilder("<?xml version=\"1.0\" encoding=\"")
-				.append(UTF8_STR)
-				.append("\"?>")
-				.append(CRLF)
-				.append("<isComposing xmlns=\"urn:ietf:params:xml:ns:im-iscomposing\"")
-				.append(CRLF)
-				.append("xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"")
-				.append(CRLF)
-				.append("xsi:schemaLocation=\"urn:ietf:params:xml:ns:im-composing iscomposing.xsd\">")
-				.append(CRLF).append("<state>").append(status ? "active" : "idle")
-				.append("</state>").append(CRLF).append("<contenttype>")
-				.append(MimeType.TEXT_MESSAGE).append("</contenttype>").append(CRLF)
-				.append("<lastactive>").append(DateUtils.encodeDate(System.currentTimeMillis()))
-				.append("</lastactive>").append(CRLF).append("<refresh>60</refresh>").append(CRLF)
-				.append("</isComposing>").toString();
-	}
+    /**
+     * Build is composing document
+     * 
+     * @param status Status
+     * @return XML document
+     */
+    public static String buildIsComposingInfo(boolean status) {
+        return new StringBuilder("<?xml version=\"1.0\" encoding=\"")
+                .append(UTF8_STR)
+                .append("\"?>")
+                .append(CRLF)
+                .append("<isComposing xmlns=\"urn:ietf:params:xml:ns:im-iscomposing\"")
+                .append(CRLF)
+                .append("xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"")
+                .append(CRLF)
+                .append("xsi:schemaLocation=\"urn:ietf:params:xml:ns:im-composing iscomposing.xsd\">")
+                .append(CRLF).append("<state>").append(status ? "active" : "idle")
+                .append("</state>").append(CRLF).append("<contenttype>")
+                .append(MimeType.TEXT_MESSAGE).append("</contenttype>").append(CRLF)
+                .append("<lastactive>").append(DateUtils.encodeDate(System.currentTimeMillis()))
+                .append("</lastactive>").append(CRLF).append("<refresh>60</refresh>").append(CRLF)
+                .append("</isComposing>").toString();
+    }
 }

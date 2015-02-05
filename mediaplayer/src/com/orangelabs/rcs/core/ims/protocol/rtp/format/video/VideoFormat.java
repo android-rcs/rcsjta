@@ -31,6 +31,6 @@ public class VideoFormat extends Format {
      * @param payload Payload type
      */
     public VideoFormat(String codec, int payload) {
-    	super(codec, payload);
+        super(codec, payload);
     }
 }

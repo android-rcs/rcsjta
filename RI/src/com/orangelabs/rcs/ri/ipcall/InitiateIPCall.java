@@ -60,11 +60,11 @@ public class InitiateIPCall extends Activity {
         setTitle(R.string.menu_initiate_ipcall);
 
         // Set contact selector
-        mSpinner = (Spinner)findViewById(R.id.contact);
+        mSpinner = (Spinner) findViewById(R.id.contact);
         mSpinner.setAdapter(ContactListAdapter.createContactListAdapter(this));
 
         // Set buttons callback
-        Button initiateBtn = (Button)findViewById(R.id.initiate_btn);
+        Button initiateBtn = (Button) findViewById(R.id.initiate_btn);
         initiateBtn.setOnClickListener(btnInitiateListener);
 
         // Disable button if no contact available
@@ -86,18 +86,18 @@ public class InitiateIPCall extends Activity {
             // Get remote contact
             ContactUtils contactUtils = ContactUtils.getInstance(InitiateIPCall.this);
             // get selected phone number
-            ContactListAdapter adapter = (ContactListAdapter)mSpinner.getAdapter();
+            ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
             try {
                 ContactId contact = contactUtils.formatContact(phoneNumber);
                 // Get video option
-                CheckBox videoCheck = (CheckBox)findViewById(R.id.video);
+                CheckBox videoCheck = (CheckBox) findViewById(R.id.video);
 
                 // Display session view
                 Intent intent = new Intent(InitiateIPCall.this, IPCallView.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra(IPCallView.EXTRA_MODE, IPCallView.MODE_OUTGOING);
-                intent.putExtra(IPCallView.EXTRA_CONTACT, (Parcelable)contact);
+                intent.putExtra(IPCallView.EXTRA_CONTACT, (Parcelable) contact);
                 intent.putExtra(IPCallView.EXTRA_VIDEO_OPTION, videoCheck.isChecked());
                 startActivity(intent);
 

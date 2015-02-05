@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.provisioning;
 
 /**
@@ -23,217 +24,217 @@ package com.orangelabs.rcs.provisioning;
  * @author jexa7410
  */
 public class ProvisioningInfo {
-	/**
-	 * Version of the provisioning document
-	 */
-	private String version = null;
+    /**
+     * Version of the provisioning document
+     */
+    private String version = null;
 
-	/**
-	 * Validity of the provisioning document
-	 */
-	private long validity = 0L;
+    /**
+     * Validity of the provisioning document
+     */
+    private long validity = 0L;
 
-	/**
-	 * Token of the provisioning document
-	 */
-	private String token = null;
+    /**
+     * Token of the provisioning document
+     */
+    private String token = null;
 
-	/**
-	 * Validity of the token of the provisioning document
-	 */
-	private long tokenValidity = 0L;
+    /**
+     * Validity of the token of the provisioning document
+     */
+    private long tokenValidity = 0L;
 
-	/**
-	 * Title for terms and conditions
-	 */
-	private String title = null;
+    /**
+     * Title for terms and conditions
+     */
+    private String title = null;
 
-	/**
-	 * Message for terms and conditions
-	 */
-	private String message = null;
+    /**
+     * Message for terms and conditions
+     */
+    private String message = null;
 
-	/**
-	 * Accept button for terms and conditions
-	 */
-	private boolean acceptBtn = false;
+    /**
+     * Accept button for terms and conditions
+     */
+    private boolean acceptBtn = false;
 
-	/**
-	 * Reject button for terms and conditions
-	 */
-	private boolean rejectBtn = false;
+    /**
+     * Reject button for terms and conditions
+     */
+    private boolean rejectBtn = false;
 
-	/**
-	 * Enumerated for the provisioning version
-	 */
-	public enum Version {
-		RESETED(0), // the configuration is reseted : RCS client is temporary disabled
-		RESETED_NOQUERY(-1), // The configuration is reseted : RCS client is forbidden
-		DISABLED_NOQUERY(-2), // The RCS client is disabled and configuration query stopped
-		DISABLED_DORMANT(-3); // The RCS client is in dormant state: RCS is disabled but
-								// provisioning is still running
+    /**
+     * Enumerated for the provisioning version
+     */
+    public enum Version {
+        RESETED(0), // the configuration is reseted : RCS client is temporary disabled
+        RESETED_NOQUERY(-1), // The configuration is reseted : RCS client is forbidden
+        DISABLED_NOQUERY(-2), // The RCS client is disabled and configuration query stopped
+        DISABLED_DORMANT(-3); // The RCS client is in dormant state: RCS is disabled but
+                              // provisioning is still running
 
-		private int vers;
+        private int vers;
 
-		private Version(int vers) {
-			this.vers = vers;
-		}
+        private Version(int vers) {
+            this.vers = vers;
+        }
 
-		public int getVersion() {
-			return this.vers;
-		}
+        public int getVersion() {
+            return this.vers;
+        }
 
-		@Override
-		public String toString() {
-			return "" + this.vers;
-		}
+        @Override
+        public String toString() {
+            return "" + this.vers;
+        }
 
-		public boolean equals(String vers) {
-			return this.toString().equals(vers);
-		}
-	}
+        public boolean equals(String vers) {
+            return this.toString().equals(vers);
+        }
+    }
 
-	/**
-	 * Set version
-	 *
-	 * @param version
-	 */
-	public void setVersion(String version) {
-		this.version = version;
-	}
+    /**
+     * Set version
+     * 
+     * @param version
+     */
+    public void setVersion(String version) {
+        this.version = version;
+    }
 
-	/**
-	 * Set validity
-	 *
-	 * @param validity
-	 */
-	public void setValidity(long validity) {
-		this.validity = validity;
-	}
+    /**
+     * Set validity
+     * 
+     * @param validity
+     */
+    public void setValidity(long validity) {
+        this.validity = validity;
+    }
 
-	/**
-	 * Set title
-	 *
-	 * @param title
-	 */
-	public void setTitle(String title) {
-		this.title = title;
-	}
+    /**
+     * Set title
+     * 
+     * @param title
+     */
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-	/**
-	 * Set message
-	 *
-	 * @param message
-	 */
-	public void setMessage(String message) {
-		this.message = message;
-	}
+    /**
+     * Set message
+     * 
+     * @param message
+     */
+    public void setMessage(String message) {
+        this.message = message;
+    }
 
-	/**
-	 * Set AcceptBtn
-	 *
-	 * @param acceptBtn
-	 */
-	public void setAcceptBtn(boolean acceptBtn) {
-		this.acceptBtn = acceptBtn;
-	}
+    /**
+     * Set AcceptBtn
+     * 
+     * @param acceptBtn
+     */
+    public void setAcceptBtn(boolean acceptBtn) {
+        this.acceptBtn = acceptBtn;
+    }
 
-	/**
-	 * Set RejectBtn
-	 *
-	 * @param rejectBtn
-	 */
-	public void setRejectBtn(boolean rejectBtn) {
-		this.rejectBtn = rejectBtn;
-	}
+    /**
+     * Set RejectBtn
+     * 
+     * @param rejectBtn
+     */
+    public void setRejectBtn(boolean rejectBtn) {
+        this.rejectBtn = rejectBtn;
+    }
 
-	/**
-	 * Get version
-	 *
-	 * @return version
-	 */
-	public String getVersion() {
-		return version;
-	}
+    /**
+     * Get version
+     * 
+     * @return version
+     */
+    public String getVersion() {
+        return version;
+    }
 
-	/**
-	 * Get validity
-	 *
-	 * @return validity
-	 */
-	public long getValidity() {
-		return validity;
-	}
+    /**
+     * Get validity
+     * 
+     * @return validity
+     */
+    public long getValidity() {
+        return validity;
+    }
 
-	/**
-	 * Get title
-	 *
-	 * @return title
-	 */
-	public String getTitle() {
-		return title;
-	}
+    /**
+     * Get title
+     * 
+     * @return title
+     */
+    public String getTitle() {
+        return title;
+    }
 
-	/**
-	 * Get message
-	 *
-	 * @return message
-	 */
-	public String getMessage() {
-		return message;
-	}
+    /**
+     * Get message
+     * 
+     * @return message
+     */
+    public String getMessage() {
+        return message;
+    }
 
-	/**
-	 * Get acceptBtn
-	 *
-	 * @return acceptBtn
-	 */
-	public boolean getAcceptBtn() {
-		return acceptBtn;
-	}
+    /**
+     * Get acceptBtn
+     * 
+     * @return acceptBtn
+     */
+    public boolean getAcceptBtn() {
+        return acceptBtn;
+    }
 
-	/**
-	 * Get rejectBtn
-	 *
-	 * @return rejectBtn
-	 */
-	public boolean getRejectBtn() {
-		return rejectBtn;
-	}
+    /**
+     * Get rejectBtn
+     * 
+     * @return rejectBtn
+     */
+    public boolean getRejectBtn() {
+        return rejectBtn;
+    }
 
-	/**
-	 * Get token
-	 *
-	 * @return token
-	 */
-	public String getToken() {
-		return token;
-	}
+    /**
+     * Get token
+     * 
+     * @return token
+     */
+    public String getToken() {
+        return token;
+    }
 
-	/**
-	 * Set token
-	 *
-	 * @param token
-	 */
-	public void setToken(String token) {
-		this.token = token;
-	}
+    /**
+     * Set token
+     * 
+     * @param token
+     */
+    public void setToken(String token) {
+        this.token = token;
+    }
 
-	/**
-	 * Get token validity
-	 *
-	 * @return token validity
-	 */
-	public long getTokenValidity() {
-		return tokenValidity;
-	}
+    /**
+     * Get token validity
+     * 
+     * @return token validity
+     */
+    public long getTokenValidity() {
+        return tokenValidity;
+    }
 
-	/**
-	 * Set token validity
-	 *
-	 * @return token validity
-	 */
-	public void setTokenValidity(long tokenValidity) {
-		this.tokenValidity = tokenValidity;
-	}
+    /**
+     * Set token validity
+     * 
+     * @return token validity
+     */
+    public void setTokenValidity(long tokenValidity) {
+        this.tokenValidity = tokenValidity;
+    }
 }

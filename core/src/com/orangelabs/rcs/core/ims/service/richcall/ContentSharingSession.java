@@ -38,94 +38,90 @@ import com.orangelabs.rcs.utils.PhoneUtils;
  * @author jexa7410
  */
 public abstract class ContentSharingSession extends ImsServiceSession {
-	/**
-	 * Content to be shared
-	 */
-	private MmContent content;
+    /**
+     * Content to be shared
+     */
+    private MmContent content;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param parent
-	 *            IMS service
-	 * @param content
-	 *            Content to be shared
-	 * @param contact
-	 *            Remote contactId
-	 */
-	public ContentSharingSession(ImsService parent, MmContent content, ContactId contact) {
-		super(parent, contact, PhoneUtils.formatContactIdToUri(contact));
+    /**
+     * Constructor
+     * 
+     * @param parent IMS service
+     * @param content Content to be shared
+     * @param contact Remote contactId
+     */
+    public ContentSharingSession(ImsService parent, MmContent content, ContactId contact) {
+        super(parent, contact, PhoneUtils.formatContactIdToUri(contact));
 
-		this.content = content;
-	}
+        this.content = content;
+    }
 
-	/**
-	 * Returns the content
-	 * 
-	 * @return Content
-	 */
-	public MmContent getContent() {
-		return content;
-	}
+    /**
+     * Returns the content
+     * 
+     * @return Content
+     */
+    public MmContent getContent() {
+        return content;
+    }
 
-	/**
-	 * Set the content
-	 * 
-	 * @param content
-	 *            Content
-	 */
-	public void setContent(MmContent content) {
-		this.content = content;
-	}
+    /**
+     * Set the content
+     * 
+     * @param content Content
+     */
+    public void setContent(MmContent content) {
+        this.content = content;
+    }
 
-	/**
-	 * Returns the "file-selector" attribute
-	 * 
-	 * @return String
-	 */
-	public String getFileSelectorAttribute() {
-		return "name:\"" + content.getName() + "\"" + " type:" + content.getEncoding() + " size:"
-				+ content.getSize();
-	}
+    /**
+     * Returns the "file-selector" attribute
+     * 
+     * @return String
+     */
+    public String getFileSelectorAttribute() {
+        return "name:\"" + content.getName() + "\"" + " type:" + content.getEncoding() + " size:"
+                + content.getSize();
+    }
 
-	/**
-	 * Returns the "file-location" attribute
-	 * 
-	 * @return Uri
-	 */
-	public Uri getFileLocationAttribute() {
-		Uri file = content.getUri();
-		if ((file != null) && file.getScheme().startsWith("http")) {
-			return file;
-		} else {
-			return null;
-		}
-	}
+    /**
+     * Returns the "file-location" attribute
+     * 
+     * @return Uri
+     */
+    public Uri getFileLocationAttribute() {
+        Uri file = content.getUri();
+        if ((file != null) && file.getScheme().startsWith("http")) {
+            return file;
+        } else {
+            return null;
+        }
+    }
 
-	/**
-	 * Returns the "file-transfer-id" attribute
-	 * 
-	 * @return String
-	 */
-	public String getFileTransferId() {
-		return "CSh" + IdGenerator.generateMessageID();
-	}
+    /**
+     * Returns the "file-transfer-id" attribute
+     * 
+     * @return String
+     */
+    public String getFileTransferId() {
+        return "CSh" + IdGenerator.generateMessageID();
+    }
 
-	@Override
-	public void receiveBye(SipRequest bye) {
-		super.receiveBye(bye);
+    @Override
+    public void receiveBye(SipRequest bye) {
+        super.receiveBye(bye);
 
-		// Request capabilities to the remote
-		getImsService().getImsModule().getCapabilityService()
-				.requestContactCapabilities(getRemoteContact());
-	}
+        // Request capabilities to the remote
+        getImsService().getImsModule().getCapabilityService()
+                .requestContactCapabilities(getRemoteContact());
+    }
 
-	@Override
-	public void receiveCancel(SipRequest cancel) {
-		super.receiveCancel(cancel);
+    @Override
+    public void receiveCancel(SipRequest cancel) {
+        super.receiveCancel(cancel);
 
-		// Request capabilities to the remote
-		getImsService().getImsModule().getCapabilityService()
-				.requestContactCapabilities(getRemoteContact());
-	}
+        // Request capabilities to the remote
+        getImsService().getImsModule().getCapabilityService()
+                .requestContactCapabilities(getRemoteContact());
+    }
 }

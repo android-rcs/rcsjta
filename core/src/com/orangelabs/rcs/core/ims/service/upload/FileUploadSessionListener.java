@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.core.ims.service.upload;
 
 import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
@@ -23,47 +24,42 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttp
  * File upload session listener
  * 
  * @author Jean-Marc AUFFRET
- *
  */
 public interface FileUploadSessionListener {
-	/**
-	 * Upload started
-	 */
-	public void handleUploadStarted();
+    /**
+     * Upload started
+     */
+    public void handleUploadStarted();
 
-	/**
-	 * Upload progress
-	 * 
-	 * @param currentSize
-	 *            Data size transfered
-	 * @param totalSize
-	 *            Total size to be transfered
-	 */
-	public void handleUploadProgress(long currentSize, long totalSize);
+    /**
+     * Upload progress
+     * 
+     * @param currentSize Data size transfered
+     * @param totalSize Total size to be transfered
+     */
+    public void handleUploadProgress(long currentSize, long totalSize);
 
-	/**
-	 * Upload terminated with success
-	 * 
-	 * @param info
-	 *            File info document
-	 */
-	public void handleUploadTerminated(FileTransferHttpInfoDocument info);
+    /**
+     * Upload terminated with success
+     * 
+     * @param info File info document
+     */
+    public void handleUploadTerminated(FileTransferHttpInfoDocument info);
 
-	/**
-	 * Upload error
-	 * 
-	 * @param error
-	 *            Error
-	 */
-	public void handleUploadError(int error);
+    /**
+     * Upload error
+     * 
+     * @param error Error
+     */
+    public void handleUploadError(int error);
 
-	/**
-	 * Upload aborted
-	 */
-	public void handleUploadAborted();
+    /**
+     * Upload aborted
+     */
+    public void handleUploadAborted();
 
-	/**
-	 * Not allowed to send
-	 */
-	public void handleUploadNotAllowedToSend();
+    /**
+     * Not allowed to send
+     */
+    public void handleUploadNotAllowedToSend();
 }

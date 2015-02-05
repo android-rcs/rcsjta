@@ -41,108 +41,110 @@ import com.orangelabs.rcs.provider.settings.RcsSettingsData;
  * @author jexa7410
  */
 public class LoggerProvisioning extends Activity {
-	/**
-	 * Trace level
-	 */
-	private static final String[] TRACE_LEVEL = { "DEBUG", "INFO", "WARN", "ERROR", "FATAL" };
-	private boolean isInFront;
+    /**
+     * Trace level
+     */
+    private static final String[] TRACE_LEVEL = {
+            "DEBUG", "INFO", "WARN", "ERROR", "FATAL"
+    };
+    private boolean isInFront;
 
-	@Override
-	public void onCreate(Bundle bundle) {
-		super.onCreate(bundle);
-		// Set layout
-		setContentView(R.layout.rcs_provisioning_logger);
-		// Set buttons callback
-		Button btn = (Button) findViewById(R.id.save_btn);
-		btn.setOnClickListener(saveBtnListener);
-		updateView(bundle);
-		isInFront = true;
-	}
+    @Override
+    public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        // Set layout
+        setContentView(R.layout.rcs_provisioning_logger);
+        // Set buttons callback
+        Button btn = (Button) findViewById(R.id.save_btn);
+        btn.setOnClickListener(saveBtnListener);
+        updateView(bundle);
+        isInFront = true;
+    }
 
-	@Override
-	public void onResume() {
-		super.onResume();
-		if (isInFront == false) {
-			isInFront = true;
-			// Update UI (from DB)
-			updateView(null);
-		}
-	}
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (isInFront == false) {
+            isInFront = true;
+            // Update UI (from DB)
+            updateView(null);
+        }
+    }
 
-	@Override
-	protected void onPause() {
-		super.onPause();
-		isInFront = false;
-	}
+    @Override
+    protected void onPause() {
+        super.onPause();
+        isInFront = false;
+    }
 
-	/**
-	 * Update view
-	 * 
-	 * @param bundle
-	 */
-	private void updateView(Bundle bundle) {
-		// Display parameters
-		setCheckBoxParameter(this, R.id.TraceActivated, RcsSettingsData.TRACE_ACTIVATED, bundle);
-		setCheckBoxParameter(this, R.id.SipTraceActivated, RcsSettingsData.SIP_TRACE_ACTIVATED,
-				bundle);
-		setCheckBoxParameter(this, R.id.MediaTraceActivated, RcsSettingsData.MEDIA_TRACE_ACTIVATED,
-				bundle);
-		setEditTextParameter(this, R.id.SipTraceFile, RcsSettingsData.SIP_TRACE_FILE, bundle);
+    /**
+     * Update view
+     * 
+     * @param bundle
+     */
+    private void updateView(Bundle bundle) {
+        // Display parameters
+        setCheckBoxParameter(this, R.id.TraceActivated, RcsSettingsData.TRACE_ACTIVATED, bundle);
+        setCheckBoxParameter(this, R.id.SipTraceActivated, RcsSettingsData.SIP_TRACE_ACTIVATED,
+                bundle);
+        setCheckBoxParameter(this, R.id.MediaTraceActivated, RcsSettingsData.MEDIA_TRACE_ACTIVATED,
+                bundle);
+        setEditTextParameter(this, R.id.SipTraceFile, RcsSettingsData.SIP_TRACE_FILE, bundle);
 
-		Spinner spinner = (Spinner) findViewById(R.id.TraceLevel);
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-				android.R.layout.simple_spinner_item, TRACE_LEVEL);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		spinner.setAdapter(adapter);
-		Integer parameter = null;
-		if (bundle != null && bundle.containsKey(RcsSettingsData.TRACE_LEVEL)) {
-			parameter = bundle.getInt(RcsSettingsData.TRACE_LEVEL);
-		} else {
-			parameter = RcsSettings.getInstance().getTraceLevel();
-		}
-		spinner.setSelection(parameter);
-	}
+        Spinner spinner = (Spinner) findViewById(R.id.TraceLevel);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, TRACE_LEVEL);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        Integer parameter = null;
+        if (bundle != null && bundle.containsKey(RcsSettingsData.TRACE_LEVEL)) {
+            parameter = bundle.getInt(RcsSettingsData.TRACE_LEVEL);
+        } else {
+            parameter = RcsSettings.getInstance().getTraceLevel();
+        }
+        spinner.setSelection(parameter);
+    }
 
-	/**
-	 * Save button listener
-	 */
-	private OnClickListener saveBtnListener = new OnClickListener() {
-		public void onClick(View v) {
-			// Save parameters
-			save();
-		}
-	};
+    /**
+     * Save button listener
+     */
+    private OnClickListener saveBtnListener = new OnClickListener() {
+        public void onClick(View v) {
+            // Save parameters
+            save();
+        }
+    };
 
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		saveInstanceState(outState);
-	}
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        saveInstanceState(outState);
+    }
 
-	/**
-	 * Save parameters either in bundle or in RCS settings
-	 */
-	private void saveInstanceState(Bundle bundle) {
-		saveCheckBoxParameter(this, R.id.TraceActivated, RcsSettingsData.TRACE_ACTIVATED, bundle);
-		saveCheckBoxParameter(this, R.id.SipTraceActivated, RcsSettingsData.SIP_TRACE_ACTIVATED,
-				bundle);
-		saveCheckBoxParameter(this, R.id.MediaTraceActivated,
-				RcsSettingsData.MEDIA_TRACE_ACTIVATED, bundle);
-		saveEditTextParameter(this, R.id.SipTraceFile, RcsSettingsData.SIP_TRACE_FILE, bundle);
-		Spinner spinner = (Spinner) findViewById(R.id.TraceLevel);
-		if (bundle != null) {
-			bundle.putInt(RcsSettingsData.TRACE_LEVEL, spinner.getSelectedItemPosition());
-		} else {
-			Integer value = spinner.getSelectedItemPosition();
-			RcsSettings.getInstance().writeInteger(RcsSettingsData.TRACE_LEVEL, value);
-		}
-	}
+    /**
+     * Save parameters either in bundle or in RCS settings
+     */
+    private void saveInstanceState(Bundle bundle) {
+        saveCheckBoxParameter(this, R.id.TraceActivated, RcsSettingsData.TRACE_ACTIVATED, bundle);
+        saveCheckBoxParameter(this, R.id.SipTraceActivated, RcsSettingsData.SIP_TRACE_ACTIVATED,
+                bundle);
+        saveCheckBoxParameter(this, R.id.MediaTraceActivated,
+                RcsSettingsData.MEDIA_TRACE_ACTIVATED, bundle);
+        saveEditTextParameter(this, R.id.SipTraceFile, RcsSettingsData.SIP_TRACE_FILE, bundle);
+        Spinner spinner = (Spinner) findViewById(R.id.TraceLevel);
+        if (bundle != null) {
+            bundle.putInt(RcsSettingsData.TRACE_LEVEL, spinner.getSelectedItemPosition());
+        } else {
+            Integer value = spinner.getSelectedItemPosition();
+            RcsSettings.getInstance().writeInteger(RcsSettingsData.TRACE_LEVEL, value);
+        }
+    }
 
-	/**
-	 * Save parameters
-	 */
-	private void save() {
-		saveInstanceState(null);
-		Toast.makeText(this, getString(R.string.label_reboot_service), Toast.LENGTH_LONG).show();
-	}
+    /**
+     * Save parameters
+     */
+    private void save() {
+        saveInstanceState(null);
+        Toast.makeText(this, getString(R.string.label_reboot_service), Toast.LENGTH_LONG).show();
+    }
 }

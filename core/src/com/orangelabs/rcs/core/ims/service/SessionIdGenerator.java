@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.core.ims.service;
 
 /**
@@ -23,18 +24,18 @@ package com.orangelabs.rcs.core.ims.service;
  * @author jexa7410
  */
 public class SessionIdGenerator {
-	/**
-	 * Counter
-	 */
-	private static long current = System.currentTimeMillis();
+    /**
+     * Counter
+     */
+    private static long current = System.currentTimeMillis();
 
-	/**
-	 * Returns a unique integer ID
-	 * 
-	 * @return ID
-	 */
-	public static synchronized String getNewId() {
-		current++;
-		return "" + current;
-	}
+    /**
+     * Returns a unique integer ID
+     * 
+     * @return ID
+     */
+    public static synchronized String getNewId() {
+        current++;
+        return "" + current;
+    }
 }

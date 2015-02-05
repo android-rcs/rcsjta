@@ -53,7 +53,7 @@ public class ParticipantInfoTest extends AndroidTestCase {
     }
 
     public void testParticipantInfoContactNull() {
-        ParticipantInfo participant = new ParticipantInfo((ContactId)null);
+        ParticipantInfo participant = new ParticipantInfo((ContactId) null);
         Parcel parcel = Parcel.obtain();
         participant.writeToParcel(parcel, 0);
         // done writing, now reset parcel for reading

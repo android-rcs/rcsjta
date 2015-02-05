@@ -43,10 +43,10 @@ public class AboutRI extends Activity {
 
         // Display release number
         String appRelease = Utils.getApplicationVersion(this);
-        TextView releaseView = (TextView)findViewById(R.id.release);
+        TextView releaseView = (TextView) findViewById(R.id.release);
         releaseView.setText(getString(R.string.label_about_release, appRelease));
 
-        TextView apiView = (TextView)findViewById(R.id.api);
+        TextView apiView = (TextView) findViewById(R.id.api);
         apiView.setText(getString(R.string.label_about_api, getBuildNumber()));
     }
 

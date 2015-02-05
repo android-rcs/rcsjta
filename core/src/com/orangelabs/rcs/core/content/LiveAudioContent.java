@@ -28,18 +28,17 @@ package com.orangelabs.rcs.core.content;
  * @author opob7414
  */
 public class LiveAudioContent extends AudioContent {
-	/**
-	 * Liveaudio URL constant
-	 */
-	public static final String URL = "capture://audio";
+    /**
+     * Liveaudio URL constant
+     */
+    public static final String URL = "capture://audio";
 
-	/**
-	 * Constructor
-	 * 
-	 * @param encoding
-	 *            Encoding
-	 */
-	public LiveAudioContent(String encoding) {
-		super(encoding);
-	}
+    /**
+     * Constructor
+     * 
+     * @param encoding Encoding
+     */
+    public LiveAudioContent(String encoding) {
+        super(encoding);
+    }
 }

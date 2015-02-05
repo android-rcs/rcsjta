@@ -134,7 +134,7 @@ public class MultiContactListAdapter extends CursorAdapter implements Filterable
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(context);
-        CheckedTextView view = (CheckedTextView)inflater.inflate(
+        CheckedTextView view = (CheckedTextView) inflater.inflate(
                 android.R.layout.simple_list_item_multiple_choice, parent, false);
         // view.setText(formatText(context, cursor));
         view.setSelected(true);
@@ -144,8 +144,8 @@ public class MultiContactListAdapter extends CursorAdapter implements Filterable
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        final ViewHolder holder = (ViewHolder)view.getTag();
-        ((CheckedTextView)view).setText(formatText(context, cursor, holder));
+        final ViewHolder holder = (ViewHolder) view.getTag();
+        ((CheckedTextView) view).setText(formatText(context, cursor, holder));
         // Put the number in tag so it can be retrieved easily
         holder.number = cursor.getString(holder.columnNumber);
     }
@@ -190,8 +190,8 @@ public class MultiContactListAdapter extends CursorAdapter implements Filterable
     }
 
     /**
-     * A ViewHolder class keeps references to children views to avoid
-     * unnecessary calls to getColumnIndex() on each row.
+     * A ViewHolder class keeps references to children views to avoid unnecessary calls to
+     * getColumnIndex() on each row.
      */
     private class ViewHolder {
         int columnID;
@@ -224,7 +224,7 @@ public class MultiContactListAdapter extends CursorAdapter implements Filterable
      * @return the phone number
      */
     public String getSelectedNumber(View view) {
-        final ViewHolder holder = (ViewHolder)view.getTag();
+        final ViewHolder holder = (ViewHolder) view.getTag();
         return holder.number;
     }
 }

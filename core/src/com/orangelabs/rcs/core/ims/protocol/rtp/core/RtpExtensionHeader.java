@@ -24,79 +24,76 @@ import java.util.List;
 
 /**
  * Represent a RTP extension header
- *
+ * 
  * @author Deutsche Telekom
  */
 public class RtpExtensionHeader implements Iterable<RtpExtensionHeader.ExtensionElement> {
-	/**
-	 * Allowed extension header id for RCS video orientation
-	 */
-	public static final int RTP_EXTENSION_HEADER_ID = ((0xbe << 8) | 0xde);
+    /**
+     * Allowed extension header id for RCS video orientation
+     */
+    public static final int RTP_EXTENSION_HEADER_ID = ((0xbe << 8) | 0xde);
 
-	/**
-	 * elements list
-	 */
-	private List<RtpExtensionHeader.ExtensionElement> elements = new ArrayList<RtpExtensionHeader.ExtensionElement>(
-			0);
+    /**
+     * elements list
+     */
+    private List<RtpExtensionHeader.ExtensionElement> elements = new ArrayList<RtpExtensionHeader.ExtensionElement>(
+            0);
 
-	/**
-	 * Default constructor
-	 */
-	public RtpExtensionHeader() {
-	}
+    /**
+     * Default constructor
+     */
+    public RtpExtensionHeader() {
+    }
 
-	/**
-	 * Add header element.
-	 *
-	 * @param id
-	 *            Element id
-	 * @param data
-	 *            Element data
-	 */
-	public void addElement(int id, byte[] data) {
-		elements.add(new ExtensionElement(id, data));
-	}
+    /**
+     * Add header element.
+     * 
+     * @param id Element id
+     * @param data Element data
+     */
+    public void addElement(int id, byte[] data) {
+        elements.add(new ExtensionElement(id, data));
+    }
 
-	/**
-	 * Get ExtensionHeader element by id.
-	 *
-	 * @param id
-	 *            ID to search for
-	 * @return Element data
-	 */
-	public ExtensionElement getElementById(int id) {
-		for (ExtensionElement element : elements) {
-			if (element.id == id) {
-				return element;
-			}
-		}
-		return null;
-	}
+    /**
+     * Get ExtensionHeader element by id.
+     * 
+     * @param id ID to search for
+     * @return Element data
+     */
+    public ExtensionElement getElementById(int id) {
+        for (ExtensionElement element : elements) {
+            if (element.id == id) {
+                return element;
+            }
+        }
+        return null;
+    }
 
-	/**
-	 * Counts the number of elements in the header
-	 *
-	 * @return Number of elements
-	 */
-	public int elementsCount() {
-		return elements.size();
-	}
+    /**
+     * Counts the number of elements in the header
+     * 
+     * @return Number of elements
+     */
+    public int elementsCount() {
+        return elements.size();
+    }
 
-	@Override
-	public Iterator<ExtensionElement> iterator() {
-		return this.elements.iterator();
-	}
+    @Override
+    public Iterator<ExtensionElement> iterator() {
+        return this.elements.iterator();
+    }
 
-	/**
-	 * Extension Header Element
-	 */
-	public static class ExtensionElement {
-		public final int id;
-		public final byte[] data;
+    /**
+     * Extension Header Element
+     */
+    public static class ExtensionElement {
+        public final int id;
+        public final byte[] data;
 
-		public ExtensionElement(int id, byte[] data) {
-			this.id = id;
-			this.data = data;
-		}
-	}
+        public ExtensionElement(int id, byte[] data) {
+            this.id = id;
+            this.data = data;
+        }
+    }
 }

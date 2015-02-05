@@ -1,3 +1,4 @@
+
 package com.orangelabs.test.stack2;
 
 import android.content.BroadcastReceiver;
@@ -15,11 +16,11 @@ import com.gsma.services.rcs.Intents;
 public class GetStatusReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-    	if (intent.getAction().endsWith(Intents.Service.ACTION_GET_STATUS)) {
-	    	Bundle results = getResultExtras(true);
-	        results.putString(Intents.Service.EXTRA_PACKAGENAME, context.getPackageName());
-	        results.putBoolean(Intents.Service.EXTRA_STATUS, false);
-	        setResultExtras(results);	  
-    	}
+        if (intent.getAction().endsWith(Intents.Service.ACTION_GET_STATUS)) {
+            Bundle results = getResultExtras(true);
+            results.putString(Intents.Service.EXTRA_PACKAGENAME, context.getPackageName());
+            results.putBoolean(Intents.Service.EXTRA_STATUS, false);
+            setResultExtras(results);
+        }
     }
 }

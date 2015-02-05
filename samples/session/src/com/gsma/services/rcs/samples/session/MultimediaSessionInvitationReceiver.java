@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.gsma.services.rcs.samples.session;
 
 import com.gsma.services.rcs.samples.utils.LogUtils;
@@ -30,21 +31,22 @@ import android.util.Log;
  * @author Jean-Marc AUFFRET
  */
 public class MultimediaSessionInvitationReceiver extends BroadcastReceiver {
-	/**
-	 * The log tag for this class
-	 */
-	private static final String LOGTAG = LogUtils.getTag(MultimediaSessionInvitationReceiver.class.getSimpleName());
+    /**
+     * The log tag for this class
+     */
+    private static final String LOGTAG = LogUtils.getTag(MultimediaSessionInvitationReceiver.class
+            .getSimpleName());
 
-	@Override
-	public void onReceive(Context context, Intent invitation) {
-		if (LogUtils.isActive) {
-			Log.d(LOGTAG, "onReceive");
-		}
-		// Start MultiMediaSessionReceive activity
-		Intent intent = new Intent(invitation);
-		intent.setClass(context, ReceiveMultiMediaSession.class);
-		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		context.startActivity(intent);
-	}
+    @Override
+    public void onReceive(Context context, Intent invitation) {
+        if (LogUtils.isActive) {
+            Log.d(LOGTAG, "onReceive");
+        }
+        // Start MultiMediaSessionReceive activity
+        Intent intent = new Intent(invitation);
+        intent.setClass(context, ReceiveMultiMediaSession.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        context.startActivity(intent);
+    }
 
 }

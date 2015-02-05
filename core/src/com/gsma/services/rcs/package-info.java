@@ -38,5 +38,6 @@
  * - SIP-URI (e.g. sip:+33xxx@domain.com).<br>
  * - Tel-URI (e.g. tel:+33xxx).<br>
  */
+
 package com.gsma.services.rcs;
 

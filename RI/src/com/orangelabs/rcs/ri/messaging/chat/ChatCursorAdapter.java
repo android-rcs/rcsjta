@@ -47,8 +47,7 @@ public class ChatCursorAdapter extends CursorAdapter {
     private ContactUtils mContactUtils;
 
     /**
-     * A map between contact and display name to minimize queries of RCS
-     * settings provider
+     * A map between contact and display name to minimize queries of RCS settings provider
      */
     private Map<ContactId, String> mContactIdDisplayNameMap = new HashMap<ContactId, String>();
 
@@ -91,7 +90,7 @@ public class ChatCursorAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        final ViewHolder holder = (ViewHolder)view.getTag();
+        final ViewHolder holder = (ViewHolder) view.getTag();
 
         // Set the type of message
         Direction direction = Direction.valueOf(cursor.getInt(holder.columnDirection));
@@ -214,8 +213,8 @@ public class ChatCursorAdapter extends CursorAdapter {
     }
 
     /**
-     * A ViewHolder class keeps references to children views to avoid
-     * unnecessary calls to findViewById() or getColumnIndex() on each row.
+     * A ViewHolder class keeps references to children views to avoid unnecessary calls to
+     * findViewById() or getColumnIndex() on each row.
      */
     private class ViewHolder {
         RelativeLayout chatItemLayout;
@@ -255,11 +254,11 @@ public class ChatCursorAdapter extends CursorAdapter {
             columnContact = cursor.getColumnIndexOrThrow(ChatLog.Message.CONTACT);
             columnMimetype = cursor.getColumnIndexOrThrow(ChatLog.Message.MIME_TYPE);
             // Save children views
-            chatItemLayout = (RelativeLayout)base.findViewById(R.id.msg_item);
-            chatText = (TextView)base.findViewById(R.id.chat_text);
-            statusText = (TextView)base.findViewById(R.id.status_text);
-            dateText = (TextView)base.findViewById(R.id.date_text);
-            contactText = (TextView)base.findViewById(R.id.contact_text);
+            chatItemLayout = (RelativeLayout) base.findViewById(R.id.msg_item);
+            chatText = (TextView) base.findViewById(R.id.chat_text);
+            statusText = (TextView) base.findViewById(R.id.status_text);
+            dateText = (TextView) base.findViewById(R.id.date_text);
+            contactText = (TextView) base.findViewById(R.id.contact_text);
         }
 
     }

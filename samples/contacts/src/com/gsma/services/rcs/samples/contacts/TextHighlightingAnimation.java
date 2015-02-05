@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.gsma.services.rcs.samples.contacts;
 
 import android.database.CharArrayBuffer;
@@ -62,7 +63,9 @@ public abstract class TextHighlightingAnimation implements Runnable {
         private String mString;
 
         public TextWithHighlighting() {
-            mSpans = new DimmingSpan[] { mDimmingSpan };
+            mSpans = new DimmingSpan[] {
+                    mDimmingSpan
+            };
         }
 
         public void setText(CharArrayBuffer baseText, CharArrayBuffer highlightedText) {
@@ -83,8 +86,8 @@ public abstract class TextHighlightingAnimation implements Runnable {
         }
 
         /**
-         * An implementation of indexOf on CharArrayBuffers that finds the first match of
-         * the start of buffer2 in buffer1.  For example, indexOf("abcd", "cdef") == 2
+         * An implementation of indexOf on CharArrayBuffers that finds the first match of the start
+         * of buffer2 in buffer1. For example, indexOf("abcd", "cdef") == 2
          */
         private int indexOf(CharArrayBuffer buffer1, CharArrayBuffer buffer2) {
             char[] string1 = buffer1.data;
@@ -105,7 +108,7 @@ public abstract class TextHighlightingAnimation implements Runnable {
                 }
                 int j;
                 for (j = 0; j < size; j++) {
-                    if (string1[i+j] != string2[j]) {
+                    if (string1[i + j] != string2[j]) {
                         break;
                     }
                 }
@@ -117,13 +120,12 @@ public abstract class TextHighlightingAnimation implements Runnable {
             return -1;
         }
 
-
         @SuppressWarnings("unchecked")
         public <T> T[] getSpans(int start, int end, Class<T> type) {
             if (mDimmingEnabled) {
-                return (T[])mSpans;
+                return (T[]) mSpans;
             } else {
-                return (T[])sEmptySpans;
+                return (T[]) sEmptySpans;
             }
         }
 
@@ -179,7 +181,6 @@ public abstract class TextHighlightingAnimation implements Runnable {
         @Override
         public void updateDrawState(TextPaint ds) {
 
-
             int color = ds.getColor();
             color = Color.argb(mAlpha, Color.red(color), Color.green(color), Color.blue(color));
             ds.setColor(color);
@@ -216,8 +217,8 @@ public abstract class TextHighlightingAnimation implements Runnable {
     }
 
     /**
-     * Starts un-highlighting animation, which will brighten the dimmed portions of text
-     * to the brightness level of the rest of text.
+     * Starts un-highlighting animation, which will brighten the dimmed portions of text to the
+     * brightness level of the rest of text.
      */
     public void stopHighlighting() {
         startAnimation(false);
@@ -244,7 +245,7 @@ public abstract class TextHighlightingAnimation implements Runnable {
                 mTargetTime = now + mDuration;
                 onAnimationStarted();
                 mHandler.post(this);
-            } else  {
+            } else {
 
                 // If we have started dimming, reverse the direction and adjust the target
                 // time accordingly.
@@ -267,13 +268,14 @@ public abstract class TextHighlightingAnimation implements Runnable {
         }
 
         // Start=1, end=0
-        float virtualTime = (float)timeLeft / mDuration;
+        float virtualTime = (float) timeLeft / mDuration;
         if (mDimming) {
             float interpolatedTime = DECELERATE_INTERPOLATOR.getInterpolation(virtualTime);
-            mDimmingSpan.setAlpha((int)(MIN_ALPHA + (MAX_ALPHA-MIN_ALPHA) * interpolatedTime));
+            mDimmingSpan.setAlpha((int) (MIN_ALPHA + (MAX_ALPHA - MIN_ALPHA) * interpolatedTime));
         } else {
             float interpolatedTime = ACCELERATE_INTERPOLATOR.getInterpolation(virtualTime);
-            mDimmingSpan.setAlpha((int)(MIN_ALPHA + (MAX_ALPHA-MIN_ALPHA) * (1-interpolatedTime)));
+            mDimmingSpan.setAlpha((int) (MIN_ALPHA + (MAX_ALPHA - MIN_ALPHA)
+                    * (1 - interpolatedTime)));
         }
 
         invalidate();

@@ -82,9 +82,9 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
     }
 
     /**
-     * Callback called when service is connected. This method is called when the
-     * service is well connected to the RCS service (binding procedure
-     * successfull): this means the methods of the API may be used.
+     * Callback called when service is connected. This method is called when the service is well
+     * connected to the RCS service (binding procedure successfull): this means the methods of the
+     * API may be used.
      */
     public void onServiceConnected() {
         // Display service status
@@ -92,9 +92,8 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
     }
 
     /**
-     * Callback called when service has been disconnected. This method is called
-     * when the service is disconnected from the RCS service (e.g. service
-     * deactivated).
+     * Callback called when service has been disconnected. This method is called when the service is
+     * disconnected from the RCS service (e.g. service deactivated).
      * 
      * @param error Error
      * @see RcsService.Error
@@ -110,7 +109,7 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
      * @param status Status
      */
     private void displayServiceStatus(boolean status) {
-        TextView statusTxt = (TextView)findViewById(R.id.service_status);
+        TextView statusTxt = (TextView) findViewById(R.id.service_status);
         statusTxt.setText("" + status);
     }
 

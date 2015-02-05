@@ -126,18 +126,19 @@ public class MyIPCallRenderer extends IPCallRenderer {
     public AudioCodec[] getSupportedAudioCodecs() {
         // TODO
         AudioCodec[] codecs = {
-            new AudioCodec("AMR", 97, 8000, "")
+                new AudioCodec("AMR", 97, 8000, "")
         };
         return codecs;
     }
 
     public VideoCodec[] getSupportedVideoCodecs() {
         VideoCodec[] codecs = {
-            new VideoCodec(H264Config.CODEC_NAME, H264VideoFormat.PAYLOAD, H264Config.CLOCK_RATE,
-                    15, 96000, H264Config.QCIF_WIDTH, H264Config.QCIF_HEIGHT,
-                    H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1b.BASELINE_PROFILE_ID
-                            + ";" + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "="
-                            + JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE)
+                new VideoCodec(H264Config.CODEC_NAME, H264VideoFormat.PAYLOAD,
+                        H264Config.CLOCK_RATE,
+                        15, 96000, H264Config.QCIF_WIDTH, H264Config.QCIF_HEIGHT,
+                        H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1b.BASELINE_PROFILE_ID
+                                + ";" + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "="
+                                + JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE)
         };
         return codecs;
     }

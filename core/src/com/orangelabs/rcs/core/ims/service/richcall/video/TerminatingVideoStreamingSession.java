@@ -50,285 +50,281 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Terminating live video content sharing session (streaming)
- *
+ * 
  * @author Jean-Marc AUFFRET
  */
 public class TerminatingVideoStreamingSession extends VideoStreamingSession {
-	/**
-	 * The logger
-	 */
-	private final static Logger logger = Logger.getLogger(TerminatingVideoStreamingSession.class
-			.getSimpleName());
+    /**
+     * The logger
+     */
+    private final static Logger logger = Logger.getLogger(TerminatingVideoStreamingSession.class
+            .getSimpleName());
 
-	/**
-	 * Constructor
-	 *
-	 * @param parent
-	 *            IMS service
-	 * @param invite
-	 *            Initial INVITE request
-	 * @param contact
-	 *            Contact Id
-	 */
-	public TerminatingVideoStreamingSession(ImsService parent, SipRequest invite, ContactId contact) {
-		super(parent, ContentManager.createLiveVideoContentFromSdp(invite.getContentBytes()),
-				contact);
+    /**
+     * Constructor
+     * 
+     * @param parent IMS service
+     * @param invite Initial INVITE request
+     * @param contact Contact Id
+     */
+    public TerminatingVideoStreamingSession(ImsService parent, SipRequest invite, ContactId contact) {
+        super(parent, ContentManager.createLiveVideoContentFromSdp(invite.getContentBytes()),
+                contact);
 
-		// Create dialog path
-		createTerminatingDialogPath(invite);
-	}
+        // Create dialog path
+        createTerminatingDialogPath(invite);
+    }
 
-	/**
-	 * Background processing
-	 */
-	public void run() {
-		try {
-			if (logger.isActivated()) {
-				logger.info("Initiate a new live video sharing session as terminating");
-			}
-			SipDialogPath dialogPath = getDialogPath();
-			// Send a 180 Ringing response
-			send180Ringing(dialogPath.getInvite(), dialogPath.getLocalTag());
+    /**
+     * Background processing
+     */
+    public void run() {
+        try {
+            if (logger.isActivated()) {
+                logger.info("Initiate a new live video sharing session as terminating");
+            }
+            SipDialogPath dialogPath = getDialogPath();
+            // Send a 180 Ringing response
+            send180Ringing(dialogPath.getInvite(), dialogPath.getLocalTag());
 
-			// Parse the remote SDP part
-			SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
-			MediaDescription mediaVideo = parser.getMediaDescription("video");
-			String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaVideo);
-			int remotePort = mediaVideo.port;
+            // Parse the remote SDP part
+            SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
+            MediaDescription mediaVideo = parser.getMediaDescription("video");
+            String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaVideo);
+            int remotePort = mediaVideo.port;
 
-			// Extract video codecs from SDP
-			Vector<MediaDescription> medias = parser.getMediaDescriptions("video");
-			Vector<VideoCodec> proposedCodecs = VideoCodecManager.extractVideoCodecsFromSdp(medias);
+            // Extract video codecs from SDP
+            Vector<MediaDescription> medias = parser.getMediaDescriptions("video");
+            Vector<VideoCodec> proposedCodecs = VideoCodecManager.extractVideoCodecsFromSdp(medias);
 
-			// Notify listener
-			Collection<ImsSessionListener> listeners = getListeners();
-			ContactId contact = getRemoteContact();
-			MmContent content = getContent();
-			for (ImsSessionListener listener : listeners) {
-				((VideoStreamingSessionListener) listener).handleSessionInvited(contact, content);
-			}
+            // Notify listener
+            Collection<ImsSessionListener> listeners = getListeners();
+            ContactId contact = getRemoteContact();
+            MmContent content = getContent();
+            for (ImsSessionListener listener : listeners) {
+                ((VideoStreamingSessionListener) listener).handleSessionInvited(contact, content);
+            }
 
-			// Wait invitation answer
-			int answer = waitInvitationAnswer();
-			switch (answer) {
-			case ImsServiceSession.INVITATION_REJECTED:
-				if (logger.isActivated()) {
-					logger.debug("Session has been rejected by user");
-				}
+            // Wait invitation answer
+            int answer = waitInvitationAnswer();
+            switch (answer) {
+                case ImsServiceSession.INVITATION_REJECTED:
+                    if (logger.isActivated()) {
+                        logger.debug("Session has been rejected by user");
+                    }
 
-				removeSession();
+                    removeSession();
 
-				for (ImsSessionListener listener : listeners) {
-					listener.handleSessionRejectedByUser(contact);
-				}
-				return;
+                    for (ImsSessionListener listener : listeners) {
+                        listener.handleSessionRejectedByUser(contact);
+                    }
+                    return;
 
-			case ImsServiceSession.INVITATION_NOT_ANSWERED:
-				if (logger.isActivated()) {
-					logger.debug("Session has been rejected on timeout");
-				}
+                case ImsServiceSession.INVITATION_NOT_ANSWERED:
+                    if (logger.isActivated()) {
+                        logger.debug("Session has been rejected on timeout");
+                    }
 
-				// Ringing period timeout
-				send486Busy(dialogPath.getInvite(), dialogPath.getLocalTag());
+                    // Ringing period timeout
+                    send486Busy(dialogPath.getInvite(), dialogPath.getLocalTag());
 
-				removeSession();
+                    removeSession();
 
-				for (ImsSessionListener listener : listeners) {
-					listener.handleSessionRejectedByTimeout(contact);
-				}
-				return;
+                    for (ImsSessionListener listener : listeners) {
+                        listener.handleSessionRejectedByTimeout(contact);
+                    }
+                    return;
 
-			case ImsServiceSession.INVITATION_CANCELED:
-				if (logger.isActivated()) {
-					logger.debug("Session has been rejected by remote");
-				}
+                case ImsServiceSession.INVITATION_CANCELED:
+                    if (logger.isActivated()) {
+                        logger.debug("Session has been rejected by remote");
+                    }
 
-				removeSession();
+                    removeSession();
 
-				for (ImsSessionListener listener : listeners) {
-					listener.handleSessionRejectedByRemote(contact);
-				}
-				return;
+                    for (ImsSessionListener listener : listeners) {
+                        listener.handleSessionRejectedByRemote(contact);
+                    }
+                    return;
 
-			case ImsServiceSession.INVITATION_ACCEPTED:
-				setSessionAccepted();
+                case ImsServiceSession.INVITATION_ACCEPTED:
+                    setSessionAccepted();
 
-				for (ImsSessionListener listener : listeners) {
-					listener.handleSessionAccepted(contact);
-				}
-				break;
+                    for (ImsSessionListener listener : listeners) {
+                        listener.handleSessionAccepted(contact);
+                    }
+                    break;
 
-			default:
-				if (logger.isActivated()) {
-					logger.debug("Unknown invitation answer in run; answer=".concat(String
-							.valueOf(answer)));
-				}
-				return;
-			}
+                default:
+                    if (logger.isActivated()) {
+                        logger.debug("Unknown invitation answer in run; answer=".concat(String
+                                .valueOf(answer)));
+                    }
+                    return;
+            }
 
-			IVideoPlayer player = getPlayer();
-			// Check that a video player has been set
-			if (player == null) {
-				handleError(new ContentSharingError(
-						ContentSharingError.MEDIA_PLAYER_NOT_INITIALIZED));
-				return;
-			}
+            IVideoPlayer player = getPlayer();
+            // Check that a video player has been set
+            if (player == null) {
+                handleError(new ContentSharingError(
+                        ContentSharingError.MEDIA_PLAYER_NOT_INITIALIZED));
+                return;
+            }
 
-			// Codec negotiation
-			VideoCodec selectedVideoCodec = VideoCodecManager.negociateVideoCodec(
-					player.getSupportedCodecs(), proposedCodecs);
-			if (selectedVideoCodec == null) {
-				if (logger.isActivated()) {
-					logger.debug("Proposed codecs are not supported");
-				}
+            // Codec negotiation
+            VideoCodec selectedVideoCodec = VideoCodecManager.negociateVideoCodec(
+                    player.getSupportedCodecs(), proposedCodecs);
+            if (selectedVideoCodec == null) {
+                if (logger.isActivated()) {
+                    logger.debug("Proposed codecs are not supported");
+                }
 
-				// Send a 415 Unsupported media type response
-				send415Error(dialogPath.getInvite());
+                // Send a 415 Unsupported media type response
+                send415Error(dialogPath.getInvite());
 
-				// Unsupported media type
-				handleError(new ContentSharingError(ContentSharingError.UNSUPPORTED_MEDIA_TYPE));
-				return;
-			}
+                // Unsupported media type
+                handleError(new ContentSharingError(ContentSharingError.UNSUPPORTED_MEDIA_TYPE));
+                return;
+            }
 
-			// Set the video player orientation
-			SdpOrientationExtension extensionHeader = SdpOrientationExtension.create(mediaVideo);
-			if (extensionHeader != null) {
-				// Update the orientation ID
-				setOrientation(extensionHeader.getExtensionId());
-			}
+            // Set the video player orientation
+            SdpOrientationExtension extensionHeader = SdpOrientationExtension.create(mediaVideo);
+            if (extensionHeader != null) {
+                // Update the orientation ID
+                setOrientation(extensionHeader.getExtensionId());
+            }
 
-			// Build SDP part
-			// Note ID_6_5 Extmap: it is recommended not to change the extmap's local
-			// identifier in the SDP answer from the one in the SDP offer because there
-			// are no reasons to do that since there should only be one extension in use.
-			String ipAddress = dialogPath.getSipStack().getLocalIpAddress();
-			String videoSdp = VideoSdpBuilder.buildSdpAnswer(selectedVideoCodec,
-					player.getLocalRtpPort(), mediaVideo);
-			String sdp = SdpUtils.buildVideoSDP(ipAddress, videoSdp, SdpUtils.DIRECTION_RECVONLY);
+            // Build SDP part
+            // Note ID_6_5 Extmap: it is recommended not to change the extmap's local
+            // identifier in the SDP answer from the one in the SDP offer because there
+            // are no reasons to do that since there should only be one extension in use.
+            String ipAddress = dialogPath.getSipStack().getLocalIpAddress();
+            String videoSdp = VideoSdpBuilder.buildSdpAnswer(selectedVideoCodec,
+                    player.getLocalRtpPort(), mediaVideo);
+            String sdp = SdpUtils.buildVideoSDP(ipAddress, videoSdp, SdpUtils.DIRECTION_RECVONLY);
 
-			// Set the local SDP part in the dialog path
-			dialogPath.setLocalContent(sdp);
+            // Set the local SDP part in the dialog path
+            dialogPath.setLocalContent(sdp);
 
-			// Test if the session should be interrupted
-			if (isInterrupted()) {
-				if (logger.isActivated()) {
-					logger.debug("Session has been interrupted: end of processing");
-				}
-				return;
-			}
+            // Test if the session should be interrupted
+            if (isInterrupted()) {
+                if (logger.isActivated()) {
+                    logger.debug("Session has been interrupted: end of processing");
+                }
+                return;
+            }
 
-			// Create a 200 OK response
-			if (logger.isActivated()) {
-				logger.info("Send 200 OK");
-			}
-			SipResponse resp = SipMessageFactory.create200OkInviteResponse(dialogPath,
-					RichcallService.FEATURE_TAGS_VIDEO_SHARE, sdp);
+            // Create a 200 OK response
+            if (logger.isActivated()) {
+                logger.info("Send 200 OK");
+            }
+            SipResponse resp = SipMessageFactory.create200OkInviteResponse(dialogPath,
+                    RichcallService.FEATURE_TAGS_VIDEO_SHARE, sdp);
 
-			// The signalisation is established
-			dialogPath.sigEstablished();
+            // The signalisation is established
+            dialogPath.sigEstablished();
 
-			// Send response
-			SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
-					.sendSipMessageAndWait(resp);
+            // Send response
+            SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
+                    .sendSipMessageAndWait(resp);
 
-			// Analyze the received response
-			if (ctx.isSipAck()) {
-				// ACK received
-				if (logger.isActivated()) {
-					logger.info("ACK request received");
-				}
+            // Analyze the received response
+            if (ctx.isSipAck()) {
+                // ACK received
+                if (logger.isActivated()) {
+                    logger.info("ACK request received");
+                }
 
-				// The session is established
-				dialogPath.sessionEstablished();
+                // The session is established
+                dialogPath.sessionEstablished();
 
-				// Start session timer
-				if (getSessionTimerManager().isSessionTimerActivated(resp)) {
-					getSessionTimerManager().start(SessionTimerManager.UAS_ROLE,
-							dialogPath.getSessionExpireTime());
-				}
+                // Start session timer
+                if (getSessionTimerManager().isSessionTimerActivated(resp)) {
+                    getSessionTimerManager().start(SessionTimerManager.UAS_ROLE,
+                            dialogPath.getSessionExpireTime());
+                }
 
-				// Set the video player remote info
-				player.setRemoteInfo(selectedVideoCodec, remoteHost, remotePort, getOrientation());
+                // Set the video player remote info
+                player.setRemoteInfo(selectedVideoCodec, remoteHost, remotePort, getOrientation());
 
-				for (ImsSessionListener listener : listeners) {
-					listener.handleSessionStarted(contact);
-				}
-			} else {
-				if (logger.isActivated()) {
-					logger.debug("No ACK received for INVITE");
-				}
+                for (ImsSessionListener listener : listeners) {
+                    listener.handleSessionStarted(contact);
+                }
+            } else {
+                if (logger.isActivated()) {
+                    logger.debug("No ACK received for INVITE");
+                }
 
-				// No response received: timeout
-				handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED));
-			}
-		} catch (Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Session initiation has failed", e);
-			}
+                // No response received: timeout
+                handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED));
+            }
+        } catch (Exception e) {
+            if (logger.isActivated()) {
+                logger.error("Session initiation has failed", e);
+            }
 
-			// Unexpected error
-			handleError(new ContentSharingError(ContentSharingError.UNEXPECTED_EXCEPTION,
-					e.getMessage()));
-		}
-	}
+            // Unexpected error
+            handleError(new ContentSharingError(ContentSharingError.UNEXPECTED_EXCEPTION,
+                    e.getMessage()));
+        }
+    }
 
-	/**
-	 * Handle error
-	 *
-	 * @param error
-	 *            Error
-	 */
-	public void handleError(ContentSharingError error) {
-		if (isSessionInterrupted()) {
-			return;
-		}
+    /**
+     * Handle error
+     * 
+     * @param error Error
+     */
+    public void handleError(ContentSharingError error) {
+        if (isSessionInterrupted()) {
+            return;
+        }
 
-		// Error
-		if (logger.isActivated()) {
-			logger.info(new StringBuilder("Session error: ")
-					.append(String.valueOf(error.getErrorCode())).append(", reason=")
-					.append(error.getMessage()).toString());
-		}
+        // Error
+        if (logger.isActivated()) {
+            logger.info(new StringBuilder("Session error: ")
+                    .append(String.valueOf(error.getErrorCode())).append(", reason=")
+                    .append(error.getMessage()).toString());
+        }
 
-		// Close media session
-		closeMediaSession();
+        // Close media session
+        closeMediaSession();
 
-		// Remove the current session
-		removeSession();
+        // Remove the current session
+        removeSession();
 
-		ContactId contact = getRemoteContact();
-		for (ImsSessionListener listener : getListeners()) {
-			((VideoStreamingSessionListener) listener).handleSharingError(contact, error);
-		}
-	}
+        ContactId contact = getRemoteContact();
+        for (ImsSessionListener listener : getListeners()) {
+            ((VideoStreamingSessionListener) listener).handleSharingError(contact, error);
+        }
+    }
 
-	/**
-	 * Prepare media session
-	 * 
-	 * @throws Exception
-	 */
-	public void prepareMediaSession() throws Exception {
-		// Nothing to do in case of external codec
-	}
+    /**
+     * Prepare media session
+     * 
+     * @throws Exception
+     */
+    public void prepareMediaSession() throws Exception {
+        // Nothing to do in case of external codec
+    }
 
-	/**
-	 * Start media session
-	 * 
-	 * @throws Exception
-	 */
-	public void startMediaSession() throws Exception {
-		// Nothing to do in case of external codec
-	}
+    /**
+     * Start media session
+     * 
+     * @throws Exception
+     */
+    public void startMediaSession() throws Exception {
+        // Nothing to do in case of external codec
+    }
 
-	/**
-	 * Close media session
-	 */
-	public void closeMediaSession() {
-		// Nothing to do in case of external codec
-	}
+    /**
+     * Close media session
+     */
+    public void closeMediaSession() {
+        // Nothing to do in case of external codec
+    }
 
-	@Override
-	public boolean isInitiatedByRemote() {
-		return true;
-	}
+    @Override
+    public boolean isInitiatedByRemote() {
+        return true;
+    }
 }

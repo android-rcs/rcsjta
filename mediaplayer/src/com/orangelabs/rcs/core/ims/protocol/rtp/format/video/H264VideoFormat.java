@@ -25,20 +25,20 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.format.video;
  */
 public class H264VideoFormat extends VideoFormat {
 
-	/**
-	 * Encoding name
-	 */
-	public static final String ENCODING = "H264";
-	
-	/**
-	 * Payload type
-	 */
-	public static final int PAYLOAD = 96;
-	
-	/**
-	 * Constructor
-	 */
-	public H264VideoFormat() {
-		super(ENCODING, PAYLOAD);
-	}
+    /**
+     * Encoding name
+     */
+    public static final String ENCODING = "H264";
+
+    /**
+     * Payload type
+     */
+    public static final int PAYLOAD = 96;
+
+    /**
+     * Constructor
+     */
+    public H264VideoFormat() {
+        super(ENCODING, PAYLOAD);
+    }
 }

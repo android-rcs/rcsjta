@@ -26,24 +26,23 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 /**
  * A class that implements interface to allow access to multimedia session service configuration
  * from API
- *
+ * 
  * @author yplo6403
- *
  */
 public class IMultimediaSessionServiceConfigurationImpl extends
-		IMultimediaSessionServiceConfiguration.Stub {
-	private final RcsSettings mRcsSettings;
+        IMultimediaSessionServiceConfiguration.Stub {
+    private final RcsSettings mRcsSettings;
 
-	/**
-	 * @param rcsSettings
-	 */
-	public IMultimediaSessionServiceConfigurationImpl(RcsSettings rcsSettings) {
-		mRcsSettings = rcsSettings;
-	}
+    /**
+     * @param rcsSettings
+     */
+    public IMultimediaSessionServiceConfigurationImpl(RcsSettings rcsSettings) {
+        mRcsSettings = rcsSettings;
+    }
 
-	@Override
-	public int getMessageMaxLength() throws RemoteException {
-		return mRcsSettings.getMaxMsrpLengthForExtensions();
-	}
+    @Override
+    public int getMessageMaxLength() throws RemoteException {
+        return mRcsSettings.getMaxMsrpLengthForExtensions();
+    }
 
 }

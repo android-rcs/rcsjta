@@ -53,8 +53,7 @@ import com.orangelabs.rcs.ri.utils.Utils;
 public class IPCallList extends Activity {
 
     /**
-     * Contact is the ID since there is a single contact occurrence in the query
-     * result
+     * Contact is the ID since there is a single contact occurrence in the query result
      */
     private static final String CONTACT_AS_ID = new StringBuilder(IPCallLog.CONTACT).append(" AS ")
             .append(BaseColumns._ID).toString();
@@ -76,8 +75,8 @@ public class IPCallList extends Activity {
         setTitle(R.string.menu_ipcall_list);
 
         // Set list adapter
-        listView = (ListView)findViewById(android.R.id.list);
-        TextView emptyView = (TextView)findViewById(android.R.id.empty);
+        listView = (ListView) findViewById(android.R.id.list);
+        TextView emptyView = (TextView) findViewById(android.R.id.empty);
         listView.setEmptyView(emptyView);
     }
 
@@ -138,15 +137,15 @@ public class IPCallList extends Activity {
 
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
-            CallItemCache cache = (CallItemCache)view.getTag();
-            TextView numberView = (TextView)view.findViewById(R.id.number);
+            CallItemCache cache = (CallItemCache) view.getTag();
+            TextView numberView = (TextView) view.findViewById(R.id.number);
             numberView.setText(getString(R.string.label_contact, cache.number));
-            TextView stateView = (TextView)view.findViewById(R.id.state);
+            TextView stateView = (TextView) view.findViewById(R.id.state);
             stateView.setText(getString(R.string.label_session_state, decodeState(cache.state)));
-            TextView directionView = (TextView)view.findViewById(R.id.direction);
+            TextView directionView = (TextView) view.findViewById(R.id.direction);
             directionView.setText(getString(R.string.label_direction,
                     RiApplication.getDirection(cache.direction)));
-            TextView dateView = (TextView)view.findViewById(R.id.date);
+            TextView dateView = (TextView) view.findViewById(R.id.date);
             dateView.setText(getString(R.string.label_session_date, decodeDate(cache.date)));
         }
     }

@@ -33,161 +33,161 @@ import android.net.Uri;
  */
 public class ImageSharingPersistedStorageAccessor {
 
-	private final String mSharingId;
+    private final String mSharingId;
 
-	private final RichCallHistory mRichCallLog;
+    private final RichCallHistory mRichCallLog;
 
-	private ContactId mContact;
+    private ContactId mContact;
 
-	private Direction mDirection;
+    private Direction mDirection;
 
-	private String mFileName;
+    private String mFileName;
 
-	private Long mFileSize;
+    private Long mFileSize;
 
-	private String mMimeType;
+    private String mMimeType;
 
-	private Uri mFile;
+    private Uri mFile;
 
-	private long mTimestamp;
+    private long mTimestamp;
 
-	public ImageSharingPersistedStorageAccessor(String sharingId, RichCallHistory richCallLog) {
-		mSharingId = sharingId;
-		mRichCallLog = richCallLog;
-	}
+    public ImageSharingPersistedStorageAccessor(String sharingId, RichCallHistory richCallLog) {
+        mSharingId = sharingId;
+        mRichCallLog = richCallLog;
+    }
 
-	public ImageSharingPersistedStorageAccessor(String sharingId, ContactId contact,
-			Direction direction, Uri file, String fileName, String mimeType, long fileSize,
-			RichCallHistory richCallLog) {
-		mSharingId = sharingId;
-		mContact = contact;
-		mDirection = direction;
-		mFile = file;
-		mFileName = fileName;
-		mFileSize = fileSize;
-		mMimeType = mimeType;
-		mRichCallLog = richCallLog;
-	}
+    public ImageSharingPersistedStorageAccessor(String sharingId, ContactId contact,
+            Direction direction, Uri file, String fileName, String mimeType, long fileSize,
+            RichCallHistory richCallLog) {
+        mSharingId = sharingId;
+        mContact = contact;
+        mDirection = direction;
+        mFile = file;
+        mFileName = fileName;
+        mFileSize = fileSize;
+        mMimeType = mimeType;
+        mRichCallLog = richCallLog;
+    }
 
-	private void cacheData() {
-		Cursor cursor = null;
-		try {
-			cursor = mRichCallLog.getCacheableImageTransferData(mSharingId);
-			String contact = cursor
-					.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.CONTACT));
-			if (contact != null) {
-				mContact = ContactUtils.createContactId(contact);
-			}
-			mDirection = Direction.valueOf(cursor.getInt(cursor
-					.getColumnIndexOrThrow(ImageSharingLog.DIRECTION)));
-			mFileName = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILENAME));
-			mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.MIME_TYPE));
-			mFileSize = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.FILESIZE));
-			mFile = Uri.parse(cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILE)));
-			mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.TIMESTAMP));
-		} finally {
-			if (cursor != null) {
-				cursor.close();
-			}
-		}
-	}
+    private void cacheData() {
+        Cursor cursor = null;
+        try {
+            cursor = mRichCallLog.getCacheableImageTransferData(mSharingId);
+            String contact = cursor
+                    .getString(cursor.getColumnIndexOrThrow(ImageSharingLog.CONTACT));
+            if (contact != null) {
+                mContact = ContactUtils.createContactId(contact);
+            }
+            mDirection = Direction.valueOf(cursor.getInt(cursor
+                    .getColumnIndexOrThrow(ImageSharingLog.DIRECTION)));
+            mFileName = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILENAME));
+            mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.MIME_TYPE));
+            mFileSize = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.FILESIZE));
+            mFile = Uri.parse(cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILE)));
+            mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.TIMESTAMP));
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
 
-	public ContactId getRemoteContact() {
-		/*
-		 * Utilizing cache here as contact can't be changed in persistent storage after entry
-		 * insertion anyway so no need to query for it multiple times.
-		 */
-		if (mContact == null) {
-			cacheData();
-		}
-		return mContact;
-	}
+    public ContactId getRemoteContact() {
+        /*
+         * Utilizing cache here as contact can't be changed in persistent storage after entry
+         * insertion anyway so no need to query for it multiple times.
+         */
+        if (mContact == null) {
+            cacheData();
+        }
+        return mContact;
+    }
 
-	public Uri getFile() {
-		/*
-		 * Utilizing cache here as file can't be changed in persistent storage after entry insertion
-		 * anyway so no need to query for it multiple times.
-		 */
-		if (mFile == null) {
-			cacheData();
-		}
-		return mFile;
-	}
+    public Uri getFile() {
+        /*
+         * Utilizing cache here as file can't be changed in persistent storage after entry insertion
+         * anyway so no need to query for it multiple times.
+         */
+        if (mFile == null) {
+            cacheData();
+        }
+        return mFile;
+    }
 
-	public String getFileName() {
-		/*
-		 * Utilizing cache here as file name can't be changed in persistent storage after entry
-		 * insertion anyway so no need to query for it multiple times.
-		 */
-		if (mFileName == null) {
-			cacheData();
-		}
-		return mFileName;
-	}
+    public String getFileName() {
+        /*
+         * Utilizing cache here as file name can't be changed in persistent storage after entry
+         * insertion anyway so no need to query for it multiple times.
+         */
+        if (mFileName == null) {
+            cacheData();
+        }
+        return mFileName;
+    }
 
-	public long getFileSize() {
-		/*
-		 * Utilizing cache here as file size can't be changed in persistent storage after entry
-		 * insertion anyway so no need to query for it multiple times.
-		 */
-		if (mFileSize == null) {
-			cacheData();
-		}
-		return mFileSize;
-	}
+    public long getFileSize() {
+        /*
+         * Utilizing cache here as file size can't be changed in persistent storage after entry
+         * insertion anyway so no need to query for it multiple times.
+         */
+        if (mFileSize == null) {
+            cacheData();
+        }
+        return mFileSize;
+    }
 
-	public String getMimeType() {
-		/*
-		 * Utilizing cache here as mime type can't be changed in persistent storage after entry
-		 * insertion anyway so no need to query for it multiple times.
-		 */
-		if (mMimeType == null) {
-			cacheData();
-		}
-		return mMimeType;
-	}
+    public String getMimeType() {
+        /*
+         * Utilizing cache here as mime type can't be changed in persistent storage after entry
+         * insertion anyway so no need to query for it multiple times.
+         */
+        if (mMimeType == null) {
+            cacheData();
+        }
+        return mMimeType;
+    }
 
-	public int getState() {
-		return mRichCallLog.getImageSharingState(mSharingId);
-	}
+    public int getState() {
+        return mRichCallLog.getImageSharingState(mSharingId);
+    }
 
-	public int getReasonCode() {
-		return mRichCallLog.getImageSharingReasonCode(mSharingId);
-	}
+    public int getReasonCode() {
+        return mRichCallLog.getImageSharingReasonCode(mSharingId);
+    }
 
-	public Direction getDirection() {
-		/*
-		 * Utilizing cache here as direction can't be changed in persistent storage after entry
-		 * insertion anyway so no need to query for it multiple times.
-		 */
-		if (mDirection == null) {
-			cacheData();
-		}
-		return mDirection;
-	}
+    public Direction getDirection() {
+        /*
+         * Utilizing cache here as direction can't be changed in persistent storage after entry
+         * insertion anyway so no need to query for it multiple times.
+         */
+        if (mDirection == null) {
+            cacheData();
+        }
+        return mDirection;
+    }
 
-	public long getTimestamp() {
-		/*
-		 * Utilizing cache here as timestamp can't be changed in persistent storage after it has
-		 * been set to some value bigger than zero, so no need to query for it multiple times.
-		 */
-		if (mTimestamp == 0) {
-			cacheData();
-		}
-		return mTimestamp;
-	}
+    public long getTimestamp() {
+        /*
+         * Utilizing cache here as timestamp can't be changed in persistent storage after it has
+         * been set to some value bigger than zero, so no need to query for it multiple times.
+         */
+        if (mTimestamp == 0) {
+            cacheData();
+        }
+        return mTimestamp;
+    }
 
-	public void setStateAndReasonCode(int state, int reasonCode) {
-		mRichCallLog.setImageSharingStateAndReasonCode(mSharingId, state, reasonCode);
-	}
+    public void setStateAndReasonCode(int state, int reasonCode) {
+        mRichCallLog.setImageSharingStateAndReasonCode(mSharingId, state, reasonCode);
+    }
 
-	public void setProgress(long currentSize) {
-		mRichCallLog.setImageSharingProgress(mSharingId, currentSize);
-	}
+    public void setProgress(long currentSize) {
+        mRichCallLog.setImageSharingProgress(mSharingId, currentSize);
+    }
 
-	public Uri addImageSharing(ContactId contact, Direction direction, MmContent content,
-			int status, int reasonCode) {
-		return mRichCallLog.addImageSharing(mSharingId, contact, direction, content, status,
-				reasonCode);
-	}
+    public Uri addImageSharing(ContactId contact, Direction direction, MmContent content,
+            int status, int reasonCode) {
+        return mRichCallLog.addImageSharing(mSharingId, contact, direction, content, status,
+                reasonCode);
+    }
 }

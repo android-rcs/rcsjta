@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.core.ims.service.sip.streaming;
 
 import com.orangelabs.rcs.core.ims.protocol.rtp.media.MediaOutput;
@@ -27,40 +28,39 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.media.MediaSample;
  * @author Jean-Marc AUFFRET
  */
 public class DataReceiver implements MediaOutput {
-	/**
-	 * Parent
-	 */
-	private GenericSipRtpSession parent;
+    /**
+     * Parent
+     */
+    private GenericSipRtpSession parent;
 
-	/**
-	 * Constructor
-	 */
-	public DataReceiver(GenericSipRtpSession parent) {
-		this.parent = parent;
-	}
+    /**
+     * Constructor
+     */
+    public DataReceiver(GenericSipRtpSession parent) {
+        this.parent = parent;
+    }
 
-	/**
-	 * Open the renderer
-	 */
-	public void open() {
-		// TODO
-	}
+    /**
+     * Open the renderer
+     */
+    public void open() {
+        // TODO
+    }
 
-	/**
-	 * Close the renderer
-	 */
-	public void close() {
-		// TODO
-	}
+    /**
+     * Close the renderer
+     */
+    public void close() {
+        // TODO
+    }
 
-	/**
-	 * Write a media sample
-	 *
-	 * @param sample
-	 *            Sample
-	 */
-	public void writeSample(MediaSample sample) {
-		// Notify API
-		parent.receiveData(sample.getData());
-	}
+    /**
+     * Write a media sample
+     * 
+     * @param sample Sample
+     */
+    public void writeSample(MediaSample sample) {
+        // Notify API
+        parent.receiveData(sample.getData());
+    }
 }

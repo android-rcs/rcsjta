@@ -23,7 +23,7 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.util.HexadecimalUtils;
 
 /**
  * Represent H264 base Profile
- *
+ * 
  * @author Deutsche Telekom AG
  */
 public abstract class H264Profile {
@@ -85,7 +85,7 @@ public abstract class H264Profile {
 
     /**
      * Base constructor for H264 Profiles
-     *
+     * 
      * @param profileName Profile name
      * @param level Profile level
      * @param type Profile type
@@ -166,7 +166,7 @@ public abstract class H264Profile {
 
     /**
      * Get the byte that represents the profile IDC
-     *
+     * 
      * @param profileId H264 profile-id
      * @return profile IDC
      */
@@ -176,7 +176,7 @@ public abstract class H264Profile {
 
     /**
      * Get the byte that represents the profile IOP
-     *
+     * 
      * @param profileId H264 profile-id
      * @return profile IOP
      */

@@ -17,5 +17,6 @@
  * - To synchronize capabilities of all the contacts from the RCS account management menu.<br>
  * - To receive supported capabilities when a CS call is established.<br>
  */
+
 package com.gsma.services.rcs.capability;
 

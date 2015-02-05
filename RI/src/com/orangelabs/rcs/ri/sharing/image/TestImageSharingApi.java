@@ -30,7 +30,7 @@ import com.orangelabs.rcs.ri.R;
 
 /**
  * Image sharing API
- *
+ * 
  * @author Jean-Marc AUFFRET
  */
 public class TestImageSharingApi extends ListActivity {

@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.orangelabs.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.contacts.ContactId;
@@ -24,9 +25,9 @@ import android.content.Intent;
  */
 public interface IMultimediaStreamingSessionEventBroadcaster {
 
-	public void broadcastPayloadReceived(ContactId contact, String sessionId, byte[] content);
+    public void broadcastPayloadReceived(ContactId contact, String sessionId, byte[] content);
 
-	public void broadcastStateChanged(ContactId contact, String sessionId, int state, int reasonCode);
+    public void broadcastStateChanged(ContactId contact, String sessionId, int state, int reasonCode);
 
-	public void broadcastInvitation(String sessionId, Intent rtpSessionInvite);
+    public void broadcastInvitation(String sessionId, Intent rtpSessionInvite);
 }

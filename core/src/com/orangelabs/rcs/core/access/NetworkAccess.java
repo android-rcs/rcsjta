@@ -25,56 +25,55 @@ package com.orangelabs.rcs.core.access;
  */
 public abstract class NetworkAccess {
 
-	/**
-	 * Local IP address given to the network access
-	 */
-	protected String ipAddress = null;
+    /**
+     * Local IP address given to the network access
+     */
+    protected String ipAddress = null;
 
-	/**
-	 * Type of access
-	 */
-	protected String type = null;
+    /**
+     * Type of access
+     */
+    protected String type = null;
 
-	/**
-	 * Constructor
-	 */
-	public NetworkAccess() {
-	}
+    /**
+     * Constructor
+     */
+    public NetworkAccess() {
+    }
 
-	/**
-	 * Return the local IP address
-	 * 
-	 * @return IP address
-	 */
-	public String getIpAddress() {
-		return ipAddress;
-	}
+    /**
+     * Return the local IP address
+     * 
+     * @return IP address
+     */
+    public String getIpAddress() {
+        return ipAddress;
+    }
 
-	/**
-	 * Return the type of access
-	 * 
-	 * @return Type
-	 */
-	public abstract String getType();
+    /**
+     * Return the type of access
+     * 
+     * @return Type
+     */
+    public abstract String getType();
 
-	/**
-	 * Return the network name
-	 * 
-	 * @return Name
-	 */
-	public abstract String getNetworkName();
+    /**
+     * Return the network name
+     * 
+     * @return Name
+     */
+    public abstract String getNetworkName();
 
-	/**
-	 * Connect to the network access
-	 * 
-	 * @param ipAddress
-	 *            Local IP address
-	 */
-	public abstract void connect(String ipAddress);
+    /**
+     * Connect to the network access
+     * 
+     * @param ipAddress Local IP address
+     */
+    public abstract void connect(String ipAddress);
 
-	/**
-	 * Disconnect from the network access
-	 */
-	public abstract void disconnect();
+    /**
+     * Disconnect from the network access
+     */
+    public abstract void disconnect();
 
 }

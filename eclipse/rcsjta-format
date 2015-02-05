@@ -1,0 +1,49 @@
+#!/bin/bash
+
+ECLIPSE="$HOME/my_repos/android_eclipse/eclipse"
+
+function formatting {
+	$ECLIPSE -application org.eclipse.jdt.core.JavaCodeFormatter -config ~/org.eclipse.jdt.core.prefs $WORK/core/src/com/
+	$ECLIPSE -application org.eclipse.jdt.core.JavaCodeFormatter -config ~/org.eclipse.jdt.core.prefs $WORK/core/tests/
+	$ECLIPSE -application org.eclipse.jdt.core.JavaCodeFormatter -config ~/org.eclipse.jdt.core.prefs $WORK/RI/
+	$ECLIPSE -application org.eclipse.jdt.core.JavaCodeFormatter -config ~/org.eclipse.jdt.core.prefs $WORK/samples/
+	$ECLIPSE -application org.eclipse.jdt.core.JavaCodeFormatter -config ~/org.eclipse.jdt.core.prefs $WORK/mediaplayer/
+	$ECLIPSE -application org.eclipse.jdt.core.JavaCodeFormatter -config ~/org.eclipse.jdt.core.prefs $WORK/tests/
+}
+
+function lineending {
+	find ./core/src/com/ -name "*.java" | xargs dos2unix
+	find ./core/src/com/ -name "*.xml" | xargs dos2unix
+	find ./core/src/com/ -name "*.properties" | xargs dos2unix
+	find ./core/tests/ -name "*.java" | xargs dos2unix
+	find ./core/tests/ -name "*.xml" | xargs dos2unix
+	find ./core/tests/ -name "*.properties" | xargs dos2unix
+	find ./RI/ -name "*.java" | xargs dos2unix
+	find ./RI/ -name "*.xml" | xargs dos2unix
+	find ./RI/ -name "*.properties" | xargs dos2unix
+	find ./samples/ -name "*.java" | xargs dos2unix
+	find ./samples/ -name "*.xml" | xargs dos2unix
+	find ./samples/ -name "*.properties" | xargs dos2unix
+	find ./mediaplayer/ -name "*.java" | xargs dos2unix
+	find ./mediaplayer/ -name "*.xml" | xargs dos2unix
+	find ./mediaplayer/ -name "*.properties" | xargs dos2unix
+	find ./tests/ -name "*.java" | xargs dos2unix
+	find ./tests/ -name "*.xml" | xargs dos2unix
+	find ./tests/ -name "*.properties" | xargs dos2unix
+}
+
+WORK=$(pwd)
+echo "Put new format at (y/n): " $WORK
+read answer
+
+if [ "$answer" = "y" ];
+then
+	echo "Formatting..."
+	formatting
+	lineending
+	echo "Done!"
+else
+	echo "Exit!"
+fi
+
+exit

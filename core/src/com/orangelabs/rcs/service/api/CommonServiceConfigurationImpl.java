@@ -27,59 +27,56 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.ContactUtils;
 
 /**
- * 
  * A class that implements interface to allow access to common service configuration from APIs
  * 
  * @author yplo6403
- *
  */
 public class CommonServiceConfigurationImpl extends ICommonServiceConfiguration.Stub {
 
-	private final RcsSettings mRcsSettings;
+    private final RcsSettings mRcsSettings;
 
-	/**
-	 * Constructor
-	 * 
-	 */
-	public CommonServiceConfigurationImpl() {
-		mRcsSettings = RcsSettings.getInstance();
-	}
+    /**
+     * Constructor
+     */
+    public CommonServiceConfigurationImpl() {
+        mRcsSettings = RcsSettings.getInstance();
+    }
 
-	@Override
-	public int getDefaultMessagingMethod() throws RemoteException {
-		return mRcsSettings.getDefaultMessagingMethod().toInt();
-	}
+    @Override
+    public int getDefaultMessagingMethod() throws RemoteException {
+        return mRcsSettings.getDefaultMessagingMethod().toInt();
+    }
 
-	@Override
-	public int getMessagingUX() throws RemoteException {
-		return mRcsSettings.getMessagingMode().toInt();
-	}
+    @Override
+    public int getMessagingUX() throws RemoteException {
+        return mRcsSettings.getMessagingMode().toInt();
+    }
 
-	@Override
-	public ContactId getMyContactId() throws RemoteException {
-		String myContact = mRcsSettings.getUserProfileImsUserName();
-		return ContactUtils.createContactId(myContact);
-	}
+    @Override
+    public ContactId getMyContactId() throws RemoteException {
+        String myContact = mRcsSettings.getUserProfileImsUserName();
+        return ContactUtils.createContactId(myContact);
+    }
 
-	@Override
-	public String getMyDisplayName() throws RemoteException {
-		return mRcsSettings.getUserProfileImsDisplayName();
-	}
+    @Override
+    public String getMyDisplayName() throws RemoteException {
+        return mRcsSettings.getUserProfileImsDisplayName();
+    }
 
-	@Override
-	public boolean isConfigValid() throws RemoteException {
-		return mRcsSettings.isConfigurationValid();
-	}
+    @Override
+    public boolean isConfigValid() throws RemoteException {
+        return mRcsSettings.isConfigurationValid();
+    }
 
-	@Override
-	public void setDefaultMessagingMethod(int method) throws RemoteException {
-		MessagingMethod messagingMethod = MessagingMethod.valueOf(method);
-		mRcsSettings.setDefaultMessagingMethod(messagingMethod);
-	}
+    @Override
+    public void setDefaultMessagingMethod(int method) throws RemoteException {
+        MessagingMethod messagingMethod = MessagingMethod.valueOf(method);
+        mRcsSettings.setDefaultMessagingMethod(messagingMethod);
+    }
 
-	@Override
-	public void setMyDisplayName(String name) throws RemoteException {
-		mRcsSettings.setUserProfileImsDisplayName(name);
-	}
+    @Override
+    public void setMyDisplayName(String name) throws RemoteException {
+        mRcsSettings.setUserProfileImsDisplayName(name);
+    }
 
 }

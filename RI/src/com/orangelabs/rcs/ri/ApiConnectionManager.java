@@ -307,7 +307,7 @@ public class ApiConnectionManager {
      * @return the instance
      */
     public CapabilityService getCapabilityApi() {
-        return (CapabilityService)mApis.get(RcsServiceName.CAPABILITY);
+        return (CapabilityService) mApis.get(RcsServiceName.CAPABILITY);
     }
 
     /**
@@ -316,7 +316,7 @@ public class ApiConnectionManager {
      * @return the instance
      */
     public ChatService getChatApi() {
-        return (ChatService)mApis.get(RcsServiceName.CHAT);
+        return (ChatService) mApis.get(RcsServiceName.CHAT);
     }
 
     /**
@@ -325,7 +325,7 @@ public class ApiConnectionManager {
      * @return the instance
      */
     public ContactsService getContactsApi() {
-        return (ContactsService)mApis.get(RcsServiceName.CONTACTS);
+        return (ContactsService) mApis.get(RcsServiceName.CONTACTS);
     }
 
     /**
@@ -334,7 +334,7 @@ public class ApiConnectionManager {
      * @return the instance
      */
     public FileTransferService getFileTransferApi() {
-        return (FileTransferService)mApis.get(RcsServiceName.FILE_TRANSFER);
+        return (FileTransferService) mApis.get(RcsServiceName.FILE_TRANSFER);
     }
 
     /**
@@ -343,7 +343,7 @@ public class ApiConnectionManager {
      * @return the instance
      */
     public VideoSharingService getVideoSharingApi() {
-        return (VideoSharingService)mApis.get(RcsServiceName.VIDEO_SHARING);
+        return (VideoSharingService) mApis.get(RcsServiceName.VIDEO_SHARING);
     }
 
     /**
@@ -352,7 +352,7 @@ public class ApiConnectionManager {
      * @return the instance
      */
     public ImageSharingService getImageSharingApi() {
-        return (ImageSharingService)mApis.get(RcsServiceName.IMAGE_SHARING);
+        return (ImageSharingService) mApis.get(RcsServiceName.IMAGE_SHARING);
     }
 
     /**
@@ -361,7 +361,7 @@ public class ApiConnectionManager {
      * @return the instance
      */
     public GeolocSharingService getGeolocSharingApi() {
-        return (GeolocSharingService)mApis.get(RcsServiceName.GEOLOC_SHARING);
+        return (GeolocSharingService) mApis.get(RcsServiceName.GEOLOC_SHARING);
     }
 
     /**
@@ -370,7 +370,7 @@ public class ApiConnectionManager {
      * @return the instance
      */
     public FileUploadService getFileUploadApi() {
-        return (FileUploadService)mApis.get(RcsServiceName.FILE_UPLOAD);
+        return (FileUploadService) mApis.get(RcsServiceName.FILE_UPLOAD);
     }
 
     /**
@@ -379,7 +379,7 @@ public class ApiConnectionManager {
      * @return the instance
      */
     public IPCallService getIPCallApi() {
-        return (IPCallService)mApis.get(RcsServiceName.IP_CALL);
+        return (IPCallService) mApis.get(RcsServiceName.IP_CALL);
     }
 
     /**
@@ -388,7 +388,7 @@ public class ApiConnectionManager {
      * @return the instance
      */
     public MultimediaSessionService getMultimediaSessionApi() {
-        return (MultimediaSessionService)mApis.get(RcsServiceName.MULTIMEDIA);
+        return (MultimediaSessionService) mApis.get(RcsServiceName.MULTIMEDIA);
     }
 
 }

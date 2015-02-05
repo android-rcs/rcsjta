@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.core.ims.protocol.msrp;
 
 import java.util.Timer;
@@ -22,162 +23,162 @@ import java.util.TimerTask;
 
 /**
  * MSRP transaction
- *
+ * 
  * @author B. JOGUET
  */
 public class MsrpTransaction extends Object {
-	/**
-	 * MRSP report transaction timeout (in seconds)
-	 */
-	private final static int TIMEOUT = 30;
+    /**
+     * MRSP report transaction timeout (in seconds)
+     */
+    private final static int TIMEOUT = 30;
 
-	/**
-	 * Count number of sent requests without response
-	 */
-	private int waitingCount = 0;
+    /**
+     * Count number of sent requests without response
+     */
+    private int waitingCount = 0;
 
-	// Changed by Deutsche Telekom
-	/**
-	 * Count the total number of request received 200OK
-	 */
-	private int totalReceivedResponses = 0;
+    // Changed by Deutsche Telekom
+    /**
+     * Count the total number of request received 200OK
+     */
+    private int totalReceivedResponses = 0;
 
-	/**
-	 * Count number of sent requests without response
-	 */
-	private boolean isWaiting = false;
+    /**
+     * Count number of sent requests without response
+     */
+    private boolean isWaiting = false;
 
-	/**
-	 * is MSRP session terminated ?
-	 */
-	private boolean isTerminated = false;
+    /**
+     * is MSRP session terminated ?
+     */
+    private boolean isTerminated = false;
 
-	/**
-	 * Timer
-	 */
-	private Timer timer = new Timer();
+    /**
+     * Timer
+     */
+    private Timer timer = new Timer();
 
-	/**
-	 * Constructor
-	 */
-	public MsrpTransaction() {
-	}
+    /**
+     * Constructor
+     */
+    public MsrpTransaction() {
+    }
 
-	/**
-	 * Wait all MSRP responses
-	 */
-	public synchronized void waitAllResponses() {
-		if (waitingCount > 0) {
-			isWaiting = true;
-			try {
-				// Start timeout
-				startTimer();
+    /**
+     * Wait all MSRP responses
+     */
+    public synchronized void waitAllResponses() {
+        if (waitingCount > 0) {
+            isWaiting = true;
+            try {
+                // Start timeout
+                startTimer();
 
-				// Wait semaphore
-				super.wait();
-			} catch (InterruptedException e) {
-				// Nothing to do
-			}
-		}
-	}
+                // Wait semaphore
+                super.wait();
+            } catch (InterruptedException e) {
+                // Nothing to do
+            }
+        }
+    }
 
-	/**
-	 * Handle new request
-	 */
-	public void handleRequest() {
-		// Changed by Deutsche Telekom
-		// requests and responses are handled in different threads which need to be synchronized
-		synchronized (this) {
-			waitingCount++;
-		}
-	}
+    /**
+     * Handle new request
+     */
+    public void handleRequest() {
+        // Changed by Deutsche Telekom
+        // requests and responses are handled in different threads which need to be synchronized
+        synchronized (this) {
+            waitingCount++;
+        }
+    }
 
-	/**
-	 * Handle new response
-	 */
-	public synchronized void handleResponse() {
-		// Changed by Deutsche Telekom
-		// requests and responses are handled in different threads which need to be synchronized
-		synchronized (this) {
-			waitingCount--;
-		}
-		// Changed by Deutsche Telekom
-		totalReceivedResponses++;
-		if (isWaiting) {
-			if (waitingCount == 0) {
-				// Unblock semaphore
-				super.notify();
-			} else {
-				// ReInit timeout
-				stopTimer();
-				startTimer();
-			}
-		}
-	}
+    /**
+     * Handle new response
+     */
+    public synchronized void handleResponse() {
+        // Changed by Deutsche Telekom
+        // requests and responses are handled in different threads which need to be synchronized
+        synchronized (this) {
+            waitingCount--;
+        }
+        // Changed by Deutsche Telekom
+        totalReceivedResponses++;
+        if (isWaiting) {
+            if (waitingCount == 0) {
+                // Unblock semaphore
+                super.notify();
+            } else {
+                // ReInit timeout
+                stopTimer();
+                startTimer();
+            }
+        }
+    }
 
-	/**
-	 * Is all responses received
-	 *
-	 * @return Boolean
-	 */
-	public boolean isAllResponsesReceived() {
-		return (waitingCount == 0);
-	}
+    /**
+     * Is all responses received
+     * 
+     * @return Boolean
+     */
+    public boolean isAllResponsesReceived() {
+        return (waitingCount == 0);
+    }
 
-	/**
-	 * Terminate transaction
-	 */
-	public synchronized void terminate() {
-		isTerminated = true;
-		// Unblock semaphore
-		super.notify();
-		// Stop timer
-		stopTimer();
-	}
+    /**
+     * Terminate transaction
+     */
+    public synchronized void terminate() {
+        isTerminated = true;
+        // Unblock semaphore
+        super.notify();
+        // Stop timer
+        stopTimer();
+    }
 
-	/**
-	 * Return isTerminated status.
-	 *
-	 * @return true if terminated
-	 */
-	public boolean isTerminated() {
-		return isTerminated;
-	}
+    /**
+     * Return isTerminated status.
+     * 
+     * @return true if terminated
+     */
+    public boolean isTerminated() {
+        return isTerminated;
+    }
 
-	/**
-	 * Start the timer
-	 */
-	private void startTimer() {
-		timer = new Timer();
-		TimerTask timertask = new TimerTask() {
-			@Override
-			public void run() {
-				timerExpire();
-			}
-		};
-		timer.schedule(timertask, TIMEOUT * 1000);
-	}
+    /**
+     * Start the timer
+     */
+    private void startTimer() {
+        timer = new Timer();
+        TimerTask timertask = new TimerTask() {
+            @Override
+            public void run() {
+                timerExpire();
+            }
+        };
+        timer.schedule(timertask, TIMEOUT * 1000);
+    }
 
-	/**
-	 * Stop the timer
-	 */
-	private void stopTimer() {
-		timer.cancel();
-	}
+    /**
+     * Stop the timer
+     */
+    private void stopTimer() {
+        timer.cancel();
+    }
 
-	/**
-	 * Timer execution
-	 */
-	private synchronized void timerExpire() {
-		// Unblock semaphore
-		super.notify();
-	}
+    /**
+     * Timer execution
+     */
+    private synchronized void timerExpire() {
+        // Unblock semaphore
+        super.notify();
+    }
 
-	// Changed by Deutsche Telekom
-	/**
-	 * @return totalReceivedResponses - number of received reports
-	 */
-	public int getNumberReceivedOk() {
-		return totalReceivedResponses;
-	}
+    // Changed by Deutsche Telekom
+    /**
+     * @return totalReceivedResponses - number of received reports
+     */
+    public int getNumberReceivedOk() {
+        return totalReceivedResponses;
+    }
 }

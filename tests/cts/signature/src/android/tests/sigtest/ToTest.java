@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package android.tests.sigtest;
 
 /**
@@ -23,5 +24,5 @@ package android.tests.sigtest;
  * @author Jean-Marc AUFFRET
  */
 public class ToTest {
-	public static int VERSION = R.xml.blackbird_1_5;
+    public static int VERSION = R.xml.blackbird_1_5;
 }

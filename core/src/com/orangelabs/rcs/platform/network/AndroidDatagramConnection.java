@@ -29,144 +29,139 @@ import java.net.InetAddress;
  * @author jexa7410
  */
 public class AndroidDatagramConnection implements DatagramConnection {
-	/**
-	 * Datagram connection
-	 */
-	private DatagramSocket connection = null;
+    /**
+     * Datagram connection
+     */
+    private DatagramSocket connection = null;
 
-	/**
-	 * Datagram Packet
-	 */
-	private DatagramPacket packet = null;
+    /**
+     * Datagram Packet
+     */
+    private DatagramPacket packet = null;
 
-	/**
-	 * Connection timeout
-	 */
-	private int timeout = 0;
+    /**
+     * Connection timeout
+     */
+    private int timeout = 0;
 
-	/**
-	 * Constructor
-	 */
-	public AndroidDatagramConnection() {
-		packet = new DatagramPacket(new byte[DatagramConnection.DEFAULT_DATAGRAM_SIZE],
-				DatagramConnection.DEFAULT_DATAGRAM_SIZE);
-	}
+    /**
+     * Constructor
+     */
+    public AndroidDatagramConnection() {
+        packet = new DatagramPacket(new byte[DatagramConnection.DEFAULT_DATAGRAM_SIZE],
+                DatagramConnection.DEFAULT_DATAGRAM_SIZE);
+    }
 
-	/**
-	 * Constructor
-	 *
-	 * @param timeout
-	 *            SO Timeout
-	 */
-	public AndroidDatagramConnection(int timeout) {
-		this();
-		this.timeout = timeout;
-	}
+    /**
+     * Constructor
+     * 
+     * @param timeout SO Timeout
+     */
+    public AndroidDatagramConnection(int timeout) {
+        this();
+        this.timeout = timeout;
+    }
 
-	/**
-	 * Open the datagram connection
-	 *
-	 * @throws IOException
-	 */
-	public void open() throws IOException {
-		connection = new DatagramSocket();
-		connection.setSoTimeout(timeout);
-	}
+    /**
+     * Open the datagram connection
+     * 
+     * @throws IOException
+     */
+    public void open() throws IOException {
+        connection = new DatagramSocket();
+        connection.setSoTimeout(timeout);
+    }
 
-	/**
-	 * Open the datagram connection
-	 * 
-	 * @param port
-	 *            Local port
-	 * @throws IOException
-	 */
-	public void open(int port) throws IOException {
-		connection = new DatagramSocket(port);
-		connection.setSoTimeout(timeout);
-	}
+    /**
+     * Open the datagram connection
+     * 
+     * @param port Local port
+     * @throws IOException
+     */
+    public void open(int port) throws IOException {
+        connection = new DatagramSocket(port);
+        connection.setSoTimeout(timeout);
+    }
 
-	/**
-	 * Close the datagram connection
-	 * 
-	 * @throws IOException
-	 */
-	public void close() throws IOException {
-		if (connection != null) {
-			connection.close();
-			connection = null;
-		}
-	}
+    /**
+     * Close the datagram connection
+     * 
+     * @throws IOException
+     */
+    public void close() throws IOException {
+        if (connection != null) {
+            connection.close();
+            connection = null;
+        }
+    }
 
-	/**
-	 * Receive data with a specific buffer size
-	 *
-	 * @return Byte array
-	 * @throws IOException
-	 */
-	public byte[] receive() throws IOException {
-		if (connection != null) {
-			packet.setLength(DatagramConnection.DEFAULT_DATAGRAM_SIZE);
-			connection.receive(packet);
+    /**
+     * Receive data with a specific buffer size
+     * 
+     * @return Byte array
+     * @throws IOException
+     */
+    public byte[] receive() throws IOException {
+        if (connection != null) {
+            packet.setLength(DatagramConnection.DEFAULT_DATAGRAM_SIZE);
+            connection.receive(packet);
 
-			int packetLength = packet.getLength();
-			byte[] data = new byte[packetLength];
-			System.arraycopy(packet.getData(), 0, data, 0, packetLength);
-			return data;
-		} else {
-			throw new IOException("Connection not opened");
-		}
-	}
+            int packetLength = packet.getLength();
+            byte[] data = new byte[packetLength];
+            System.arraycopy(packet.getData(), 0, data, 0, packetLength);
+            return data;
+        } else {
+            throw new IOException("Connection not opened");
+        }
+    }
 
-	/**
-	 * Send data
-	 * 
-	 * @param remoteAddr
-	 *            Remote address
-	 * @param remotePort
-	 *            Remote port
-	 * @param data
-	 *            Data as byte array
-	 * @throws IOException
-	 */
-	public void send(String remoteAddr, int remotePort, byte[] data) throws IOException {
-		if (data == null) {
-			return;
-		}
+    /**
+     * Send data
+     * 
+     * @param remoteAddr Remote address
+     * @param remotePort Remote port
+     * @param data Data as byte array
+     * @throws IOException
+     */
+    public void send(String remoteAddr, int remotePort, byte[] data) throws IOException {
+        if (data == null) {
+            return;
+        }
 
-		if (connection != null) {
-			InetAddress address = InetAddress.getByName(remoteAddr);
-			DatagramPacket packet = new DatagramPacket(data, data.length, address, remotePort);
-			connection.send(packet);
-		} else {
-			throw new IOException("Connection not opened");
-		}
-	}
+        if (connection != null) {
+            InetAddress address = InetAddress.getByName(remoteAddr);
+            DatagramPacket packet = new DatagramPacket(data, data.length, address, remotePort);
+            connection.send(packet);
+        } else {
+            throw new IOException("Connection not opened");
+        }
+    }
 
-	/**
-	 * Returns the local address
-	 * 
-	 * @return Address
-	 * @throws IOException
-	 */
-	public String getLocalAddress() throws IOException {
-		if ((connection != null) && (connection.getLocalAddress() != null)) {
-			return connection.getLocalAddress().getHostAddress();
-		} else {
-			throw new IOException("Connection not opened");
-		}
-	}
+    /**
+     * Returns the local address
+     * 
+     * @return Address
+     * @throws IOException
+     */
+    public String getLocalAddress() throws IOException {
+        if ((connection != null) && (connection.getLocalAddress() != null)) {
+            return connection.getLocalAddress().getHostAddress();
+        } else {
+            throw new IOException("Connection not opened");
+        }
+    }
 
-	/**
-	 * Returns the local port
-	 * 
-	 * @return Port
-	 * @throws IOException
-	 */
-	public int getLocalPort() throws IOException {
-		if (connection != null) {
-			return connection.getLocalPort();
-		} else {
-			throw new IOException("Connection not opened");
-		}
-	}
+    /**
+     * Returns the local port
+     * 
+     * @return Port
+     * @throws IOException
+     */
+    public int getLocalPort() throws IOException {
+        if (connection != null) {
+            return connection.getLocalPort();
+        } else {
+            throw new IOException("Connection not opened");
+        }
+    }
 }

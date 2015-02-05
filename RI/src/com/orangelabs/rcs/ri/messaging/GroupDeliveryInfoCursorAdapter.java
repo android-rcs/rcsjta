@@ -54,7 +54,7 @@ public class GroupDeliveryInfoCursorAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        final ViewHolder holder = (ViewHolder)view.getTag();
+        final ViewHolder holder = (ViewHolder) view.getTag();
 
         // Set the deliver date/time field
         long deliver = cursor.getLong(holder.columnDeliver);
@@ -97,8 +97,8 @@ public class GroupDeliveryInfoCursorAdapter extends CursorAdapter {
     }
 
     /**
-     * A ViewHolder class keeps references to children views to avoid
-     * unnecessary calls to findViewById() or getColumnIndex() on each row.
+     * A ViewHolder class keeps references to children views to avoid unnecessary calls to
+     * findViewById() or getColumnIndex() on each row.
      */
     private class ViewHolder {
         TextView statusText;
@@ -133,11 +133,11 @@ public class GroupDeliveryInfoCursorAdapter extends CursorAdapter {
             columnDisplay = cursor.getColumnIndex(GroupDeliveryInfoLog.TIMESTAMP_DISPLAYED);
             columnStatus = cursor.getColumnIndex(GroupDeliveryInfoLog.STATUS);
             columnReason = cursor.getColumnIndex(GroupDeliveryInfoLog.REASON_CODE);
-            statusText = (TextView)base.findViewById(R.id.status);
-            contactText = (TextView)base.findViewById(R.id.contact);
-            deliverText = (TextView)base.findViewById(R.id.deliver);
-            displayText = (TextView)base.findViewById(R.id.display);
-            reasonText = (TextView)base.findViewById(R.id.reason);
+            statusText = (TextView) base.findViewById(R.id.status);
+            contactText = (TextView) base.findViewById(R.id.contact);
+            deliverText = (TextView) base.findViewById(R.id.deliver);
+            displayText = (TextView) base.findViewById(R.id.display);
+            reasonText = (TextView) base.findViewById(R.id.reason);
         }
     }
 }

@@ -71,11 +71,11 @@ public class SupportedContactsList extends Activity {
         setContentView(R.layout.contacts_supported_list);
 
         // Set a default tag
-        EditText tagEdit = (EditText)findViewById(R.id.tag);
+        EditText tagEdit = (EditText) findViewById(R.id.tag);
         tagEdit.setText("game");
 
         // Set button callback
-        refreshBtn = (Button)findViewById(R.id.refresh_btn);
+        refreshBtn = (Button) findViewById(R.id.refresh_btn);
         refreshBtn.setOnClickListener(btnRefreshListener);
 
         // Register to API connection manager
@@ -110,14 +110,14 @@ public class SupportedContactsList extends Activity {
     private void updateList() {
         try {
             // Get tag to check
-            EditText tagEdit = (EditText)findViewById(R.id.tag);
+            EditText tagEdit = (EditText) findViewById(R.id.tag);
             String tag = tagEdit.getText().toString();
 
             // Get list of RCS contacts supporting a given tag
             Set<RcsContact> supportedContacts = connectionManager.getContactsApi()
                     .getRcsContactsSupporting(tag);
             List<RcsContact> contacts = new ArrayList<RcsContact>(supportedContacts);
-            ListView listView = (ListView)findViewById(R.id.contacts);
+            ListView listView = (ListView) findViewById(R.id.contacts);
             if (contacts.size() > 0) {
                 ArrayList<String> items = new ArrayList<String>();
                 for (int i = 0; i < contacts.size(); i++) {

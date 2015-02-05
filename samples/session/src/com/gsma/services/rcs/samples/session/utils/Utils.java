@@ -39,147 +39,150 @@ import com.gsma.services.rcs.samples.session.R;
  * @author Jean-Marc AUFFRET
  */
 public class Utils {
-	/**
-	 * Notification ID for MM session
-	 */
-	public static int NOTIF_ID_MM_SESSION = 1000; 
-	
-	/**
-	 * Create a contact selector based on the native address book
-	 * 
-	 * @param activity Activity
-	 * @return List adapter
-	 */
-	public static ContactListAdapter createContactListAdapter(Activity activity) {
-	    String[] PROJECTION = new String[] {
-	    		Phone._ID,
-	    		Phone.NUMBER,
-	    		Phone.LABEL,
-	    		Phone.TYPE,
-	    		Phone.CONTACT_ID
-		    };
+    /**
+     * Notification ID for MM session
+     */
+    public static int NOTIF_ID_MM_SESSION = 1000;
+
+    /**
+     * Create a contact selector based on the native address book
+     * 
+     * @param activity Activity
+     * @return List adapter
+     */
+    public static ContactListAdapter createContactListAdapter(Activity activity) {
+        String[] PROJECTION = new String[] {
+                Phone._ID,
+                Phone.NUMBER,
+                Phone.LABEL,
+                Phone.TYPE,
+                Phone.CONTACT_ID
+        };
         ContentResolver content = activity.getContentResolver();
-		Cursor cursor = content.query(Phone.CONTENT_URI, PROJECTION, Phone.NUMBER + "!='null'", null, null);
+        Cursor cursor = content.query(Phone.CONTENT_URI, PROJECTION, Phone.NUMBER + "!='null'",
+                null, null);
 
-		// List of unique number
-		Vector<String> treatedNumbers = new Vector<String>();
-		
-		MatrixCursor matrix = new MatrixCursor(PROJECTION);
-		while (cursor.moveToNext()){
-			// Key is phone number
-			String phoneNumber = cursor.getString(1);
+        // List of unique number
+        Vector<String> treatedNumbers = new Vector<String>();
 
-			// Filter
-			if (!treatedNumbers.contains(phoneNumber)){
-				matrix.addRow(new Object[]{cursor.getLong(0), 
-						phoneNumber,
-						cursor.getString(2),
-						cursor.getInt(3),
-						cursor.getLong(4)});
-				treatedNumbers.add(phoneNumber);
-			}
-		}
-		cursor.close();
-		
-		return new ContactListAdapter(activity, matrix);
-	}
-	
-	/**
-	 * Display a toast
-	 * 
-	 * @param ctx Context
-	 * @param message Message to be displayed
-	 */
+        MatrixCursor matrix = new MatrixCursor(PROJECTION);
+        while (cursor.moveToNext()) {
+            // Key is phone number
+            String phoneNumber = cursor.getString(1);
+
+            // Filter
+            if (!treatedNumbers.contains(phoneNumber)) {
+                matrix.addRow(new Object[] {
+                        cursor.getLong(0),
+                        phoneNumber,
+                        cursor.getString(2),
+                        cursor.getInt(3),
+                        cursor.getLong(4)
+                });
+                treatedNumbers.add(phoneNumber);
+            }
+        }
+        cursor.close();
+
+        return new ContactListAdapter(activity, matrix);
+    }
+
+    /**
+     * Display a toast
+     * 
+     * @param ctx Context
+     * @param message Message to be displayed
+     */
     public static void displayToast(Context ctx, String message) {
         Toast.makeText(ctx, message, Toast.LENGTH_SHORT).show();
     }
 
-	/**
-	 * Display a long toast
-	 * 
-	 * @param ctx Context
-	 * @param message Message to be displayed
-	 */
+    /**
+     * Display a long toast
+     * 
+     * @param ctx Context
+     * @param message Message to be displayed
+     */
     public static void displayLongToast(Context ctx, String message) {
         Toast.makeText(ctx, message, Toast.LENGTH_LONG).show();
     }
-    
+
     /**
-	 * Show a message and exit activity
-	 * 
-	 * @param activity Activity
-	 * @param msg Message to be displayed
-	 */
+     * Show a message and exit activity
+     * 
+     * @param activity Activity
+     * @param msg Message to be displayed
+     */
     public static void showMessageAndExit(final Activity activity, String msg) {
         if (activity.isFinishing()) {
-        	return;
+            return;
         }
 
-		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		builder.setMessage(msg);
-		builder.setTitle(R.string.title_msg);
-		builder.setCancelable(false);
-		builder.setPositiveButton(activity.getString(R.string.label_ok),
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
-						activity.finish();
-					}
-				});
-		AlertDialog alert = builder.create();
-		alert.show();
-    }
-
-	/**
-	 * Show an message
-	 * 
-	 * @param activity Activity
-	 * @param msg Message to be displayed
-	 * @return Dialog
-	 */
-    public static AlertDialog showMessage(Activity activity, String msg) {
-    	AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-    	builder.setMessage(msg);
-    	builder.setTitle(R.string.title_msg);
-    	builder.setCancelable(false);
-    	builder.setPositiveButton(activity.getString(R.string.label_ok), null);
-    	AlertDialog alert = builder.create();
-    	alert.show();
-		return alert;
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setMessage(msg);
+        builder.setTitle(R.string.title_msg);
+        builder.setCancelable(false);
+        builder.setPositiveButton(activity.getString(R.string.label_ok),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        activity.finish();
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     /**
-	 * Show a message with a specific title
-	 * 
-	 * @param activity Activity
-	 * @param title Title of the dialog
-	 * @param msg Message to be displayed
-	 * @return Dialog
-	 */
-    public static AlertDialog showMessage(Activity activity, String title, String msg) {
-    	AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-    	builder.setMessage(msg);
-    	builder.setTitle(title);
-    	builder.setCancelable(false);
-    	builder.setPositiveButton(activity.getString(R.string.label_ok), null);
-    	AlertDialog alert = builder.create();
-    	alert.show();
-		return alert;
+     * Show an message
+     * 
+     * @param activity Activity
+     * @param msg Message to be displayed
+     * @return Dialog
+     */
+    public static AlertDialog showMessage(Activity activity, String msg) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setMessage(msg);
+        builder.setTitle(R.string.title_msg);
+        builder.setCancelable(false);
+        builder.setPositiveButton(activity.getString(R.string.label_ok), null);
+        AlertDialog alert = builder.create();
+        alert.show();
+        return alert;
     }
-    
-	/**
-	 * Show a progress dialog with the given parameters 
-	 * 
-	 * @param activity Activity
-	 * @param msg Message to be displayed
-	 * @return Dialog
-	 */
-	public static ProgressDialog showProgressDialog(Activity activity, String msg) {
+
+    /**
+     * Show a message with a specific title
+     * 
+     * @param activity Activity
+     * @param title Title of the dialog
+     * @param msg Message to be displayed
+     * @return Dialog
+     */
+    public static AlertDialog showMessage(Activity activity, String title, String msg) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setMessage(msg);
+        builder.setTitle(title);
+        builder.setCancelable(false);
+        builder.setPositiveButton(activity.getString(R.string.label_ok), null);
+        AlertDialog alert = builder.create();
+        alert.show();
+        return alert;
+    }
+
+    /**
+     * Show a progress dialog with the given parameters
+     * 
+     * @param activity Activity
+     * @param msg Message to be displayed
+     * @return Dialog
+     */
+    public static ProgressDialog showProgressDialog(Activity activity, String msg) {
         ProgressDialog dlg = new ProgressDialog(activity);
-		dlg.setMessage(msg);
-		dlg.setIndeterminate(true);
-		dlg.setCancelable(true);
-		dlg.setCanceledOnTouchOutside(false);
-		dlg.show();
-		return dlg;
-	}
+        dlg.setMessage(msg);
+        dlg.setIndeterminate(true);
+        dlg.setCancelable(true);
+        dlg.setCanceledOnTouchOutside(false);
+        dlg.show();
+        return dlg;
+    }
 }

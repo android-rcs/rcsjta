@@ -90,7 +90,7 @@ public class GeolocOverlay extends ItemizedOverlay<OverlayItem> {
                 + context.getString(R.string.label_latitude) + " " + latitude + "\n"
                 + context.getString(R.string.label_longitude) + " " + longitude + "\n"
                 + context.getString(R.string.label_accuracy) + " " + accuracy;
-        GeoPoint geoPoint = new GeoPoint((int)(latitude * 1E6), (int)(longitude * 1E6));
+        GeoPoint geoPoint = new GeoPoint((int) (latitude * 1E6), (int) (longitude * 1E6));
         AccuracyOverlayItem overlayitem = new AccuracyOverlayItem(geoPoint, contact, snippet,
                 accuracy);
         overlays.add(overlayitem);

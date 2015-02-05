@@ -28,40 +28,38 @@ import com.orangelabs.rcs.core.ims.protocol.sip.SipResponse;
  * @author jexa7410
  */
 public abstract class RegistrationProcedure {
-	/**
-	 * Initialize procedure
-	 */
-	public abstract void init();
+    /**
+     * Initialize procedure
+     */
+    public abstract void init();
 
-	/**
-	 * Returns the home domain name
-	 * 
-	 * @return Domain name
-	 */
-	public abstract String getHomeDomain();
+    /**
+     * Returns the home domain name
+     * 
+     * @return Domain name
+     */
+    public abstract String getHomeDomain();
 
-	/**
-	 * Returns the public URI or IMPU for registration
-	 * 
-	 * @return Public URI
-	 */
-	public abstract String getPublicUri();
+    /**
+     * Returns the public URI or IMPU for registration
+     * 
+     * @return Public URI
+     */
+    public abstract String getPublicUri();
 
-	/**
-	 * Write the security header to REGISTER request
-	 * 
-	 * @param request
-	 *            Request
-	 * @throws CoreException
-	 */
-	public abstract void writeSecurityHeader(SipRequest request) throws CoreException;
+    /**
+     * Write the security header to REGISTER request
+     * 
+     * @param request Request
+     * @throws CoreException
+     */
+    public abstract void writeSecurityHeader(SipRequest request) throws CoreException;
 
-	/**
-	 * Read the security header from REGISTER response
-	 * 
-	 * @param response
-	 *            Response
-	 * @throws CoreException
-	 */
-	public abstract void readSecurityHeader(SipResponse response) throws CoreException;
+    /**
+     * Read the security header from REGISTER response
+     * 
+     * @param response Response
+     * @throws CoreException
+     */
+    public abstract void readSecurityHeader(SipResponse response) throws CoreException;
 }

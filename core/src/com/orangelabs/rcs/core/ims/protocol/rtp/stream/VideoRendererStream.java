@@ -24,30 +24,28 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.util.Buffer;
 
 /**
  * Video renderer stream
- *
+ * 
  * @author hlxn7157
  */
 public class VideoRendererStream extends MediaRendererStream {
-	/**
-	 * Constructor
-	 *
-	 * @param renderer
-	 *            Media renderer
-	 */
-	public VideoRendererStream(MediaOutput renderer) {
-		super(renderer);
-	}
+    /**
+     * Constructor
+     * 
+     * @param renderer Media renderer
+     */
+    public VideoRendererStream(MediaOutput renderer) {
+        super(renderer);
+    }
 
-	/**
-	 * Write to the stream without blocking
-	 * 
-	 * @param buffer
-	 *            Input buffer
-	 * @throws Exception
-	 */
-	public void write(Buffer buffer) throws Exception {
-		VideoSample sample = new VideoSample((byte[]) buffer.getData(), buffer.getTimeStamp(),
-				buffer.getSequenceNumber(), buffer.getVideoOrientation());
-		getRenderer().writeSample(sample);
-	}
+    /**
+     * Write to the stream without blocking
+     * 
+     * @param buffer Input buffer
+     * @throws Exception
+     */
+    public void write(Buffer buffer) throws Exception {
+        VideoSample sample = new VideoSample((byte[]) buffer.getData(), buffer.getTimeStamp(),
+                buffer.getSequenceNumber(), buffer.getVideoOrientation());
+        getRenderer().writeSample(sample);
+    }
 }

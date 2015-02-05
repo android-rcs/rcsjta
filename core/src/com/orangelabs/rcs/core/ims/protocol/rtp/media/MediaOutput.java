@@ -24,24 +24,23 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.media;
  * @author jexa7410
  */
 public interface MediaOutput {
-	/**
-	 * Open the renderer
-	 * 
-	 * @throws MediaException
-	 */
-	public void open() throws MediaException;
+    /**
+     * Open the renderer
+     * 
+     * @throws MediaException
+     */
+    public void open() throws MediaException;
 
-	/**
-	 * Close the renderer
-	 */
-	public void close();
+    /**
+     * Close the renderer
+     */
+    public void close();
 
-	/**
-	 * Write a media sample
-	 * 
-	 * @param sample
-	 *            Media sample
-	 * @throws MediaException
-	 */
-	public void writeSample(MediaSample sample) throws MediaException;
+    /**
+     * Write a media sample
+     * 
+     * @param sample Media sample
+     * @throws MediaException
+     */
+    public void writeSample(MediaSample sample) throws MediaException;
 }

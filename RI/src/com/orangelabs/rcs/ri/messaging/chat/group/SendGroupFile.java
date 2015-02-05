@@ -115,7 +115,7 @@ public class SendGroupFile extends SendFile {
             final String _state = RiApplication.FT_STATES[state];
             handler.post(new Runnable() {
                 public void run() {
-                    TextView statusView = (TextView)findViewById(R.id.progress_status);
+                    TextView statusView = (TextView) findViewById(R.id.progress_status);
                     switch (state) {
                         case FileTransfer.State.STARTED:
                         case FileTransfer.State.TRANSFERRED:

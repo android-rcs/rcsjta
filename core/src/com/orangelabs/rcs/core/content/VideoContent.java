@@ -31,76 +31,70 @@ import android.net.Uri;
  */
 public class VideoContent extends MmContent {
 
-	/**
-	 * Height
-	 */
-	private int height = 0;
+    /**
+     * Height
+     */
+    private int height = 0;
 
-	/**
-	 * Width
-	 */
-	private int width = 0;
+    /**
+     * Width
+     */
+    private int width = 0;
 
-	/**
-	 * Constructor
-	 * 
-	 * @aparam encoding Encoding
-	 */
-	public VideoContent(String encoding) {
-		super(encoding);
-	}
+    /**
+     * Constructor
+     * 
+     * @aparam encoding Encoding
+     */
+    public VideoContent(String encoding) {
+        super(encoding);
+    }
 
-	/**
-	 * Constructor
-	 *
-	 * @param videoFile
-	 *            URI
-	 * @param encoding
-	 *            Encoding
-	 * @param size
-	 *            Content size
-	 * @param fileName
-	 *            Filename
-	 */
-	public VideoContent(Uri videoFile, String encoding, long size, String fileName) {
-		super(videoFile, encoding, size, fileName);
-	}
+    /**
+     * Constructor
+     * 
+     * @param videoFile URI
+     * @param encoding Encoding
+     * @param size Content size
+     * @param fileName Filename
+     */
+    public VideoContent(Uri videoFile, String encoding, long size, String fileName) {
+        super(videoFile, encoding, size, fileName);
+    }
 
-	/**
-	 * Set the width
-	 *
-	 * @param width
-	 *            width
-	 */
-	public void setWidth(int width) {
-		this.width = width;
-	}
+    /**
+     * Set the width
+     * 
+     * @param width width
+     */
+    public void setWidth(int width) {
+        this.width = width;
+    }
 
-	/**
-	 * Get the width
-	 *
-	 * @return width
-	 */
-	public int getWidth() {
-		return width;
-	}
+    /**
+     * Get the width
+     * 
+     * @return width
+     */
+    public int getWidth() {
+        return width;
+    }
 
-	/**
-	 * Set the height
-	 *
-	 * @param height
-	 *            height
-	 */
-	public void setHeight(int height) {
-		this.height = height;
-	}
+    /**
+     * Set the height
+     * 
+     * @param height height
+     */
+    public void setHeight(int height) {
+        this.height = height;
+    }
 
-	/**
-	 * Get the height
-	 *
-	 * @return height
-	 */
-	public int getHeight() {
-		return height;
-	}
+    /**
+     * Get the height
+     * 
+     * @return height
+     */
+    public int getHeight() {
+        return height;
+    }
 }

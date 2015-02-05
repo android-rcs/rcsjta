@@ -26,27 +26,26 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.core.RtcpPacket;
  * @author jexa7410
  */
 public abstract class RtcpEvent {
-	/**
-	 * RTCP packet
-	 */
-	private RtcpPacket packet;
+    /**
+     * RTCP packet
+     */
+    private RtcpPacket packet;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param packet
-	 *            RTCP packet
-	 */
-	public RtcpEvent(RtcpPacket packet) {
-		this.packet = packet;
-	}
+    /**
+     * Constructor
+     * 
+     * @param packet RTCP packet
+     */
+    public RtcpEvent(RtcpPacket packet) {
+        this.packet = packet;
+    }
 
-	/**
-	 * Returns the RTCP packet
-	 * 
-	 * @return Packet
-	 */
-	public RtcpPacket getPacket() {
-		return packet;
-	}
+    /**
+     * Returns the RTCP packet
+     * 
+     * @return Packet
+     */
+    public RtcpPacket getPacket() {
+        return packet;
+    }
 }

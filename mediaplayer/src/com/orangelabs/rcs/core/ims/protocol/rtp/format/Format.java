@@ -24,9 +24,9 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.format;
  * @author jexa7410
  */
 public abstract class Format {
-	/**
-	 * Unknown payload
-	 */
+    /**
+     * Unknown payload
+     */
     public static final int UNKNOWN_PAYLOAD = -1;
 
     /**
@@ -34,7 +34,7 @@ public abstract class Format {
      */
     private String codec;
 
-	/**
+    /**
      * Payload type
      */
     private int payload;
@@ -46,17 +46,17 @@ public abstract class Format {
      * @param payload Payload type
      */
     public Format(String codec, int payload) {
-    	this.codec = codec;	
-    	this.payload = payload;
+        this.codec = codec;
+        this.payload = payload;
     }
 
     /**
      * Get the codec name
-     *
-     * @return Name 
+     * 
+     * @return Name
      */
     public String getCodec() {
-    	return codec;
+        return codec;
     }
 
     /**
@@ -65,6 +65,6 @@ public abstract class Format {
      * @return Payload type
      */
     public int getPayload() {
-    	return payload;
+        return payload;
     }
 }

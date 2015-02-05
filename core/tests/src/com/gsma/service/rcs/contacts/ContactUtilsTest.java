@@ -112,7 +112,8 @@ public class ContactUtilsTest extends AndroidTestCase {
 
     public void testFormatContactIdWithLocalNumbering() {
         String cac = mContactUtils.getMyCountryAreaCode();
-        if (TextUtils.isEmpty(cac)) return;
+        if (TextUtils.isEmpty(cac))
+            return;
         String cc = mContactUtils.getMyCountryCode();
         try {
             ContactId cid = mContactUtils.formatContact(cac + "612345678");
@@ -124,7 +125,8 @@ public class ContactUtilsTest extends AndroidTestCase {
 
     public void testFormatContactIdWithLocalNumberingButDifferentCountryAreaCode() {
         String cac = mContactUtils.getMyCountryAreaCode();
-        if (TextUtils.isEmpty(cac)) return;
+        if (TextUtils.isEmpty(cac))
+            return;
         try {
             int cacInteger = Integer.parseInt(cac);
             mContactUtils.formatContact((++cacInteger) + "612345678");

@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.gsma.services.rcs.vsh;
 
 import com.gsma.services.rcs.RcsServiceException;
@@ -24,34 +25,33 @@ import com.gsma.services.rcs.RcsServiceException;
  * 
  * @author Jean-Marc AUFFRET
  * @author yplo6403
- *
  */
 public class VideoSharingServiceConfiguration {
 
-	IVideoSharingServiceConfiguration mConfiguration;
+    IVideoSharingServiceConfiguration mConfiguration;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param configuration
-	 * @hide
-	 */
-	public VideoSharingServiceConfiguration(IVideoSharingServiceConfiguration configuration) {
-		mConfiguration = configuration;
-	}
+    /**
+     * Constructor
+     * 
+     * @param configuration
+     * @hide
+     */
+    public VideoSharingServiceConfiguration(IVideoSharingServiceConfiguration configuration) {
+        mConfiguration = configuration;
+    }
 
-	/**
-	 * Returns the maximum authorized duration of the video sharing. It returns 0 if there is no
-	 * limitation.
-	 * 
-	 * @return Duration in seconds
-	 * @throws RcsServiceException
-	 */
-	public long getMaxTime() throws RcsServiceException {
-		try {
-			return mConfiguration.getMaxTime();
-		} catch (Exception e) {
-			throw new RcsServiceException(e);
-		}
-	}
+    /**
+     * Returns the maximum authorized duration of the video sharing. It returns 0 if there is no
+     * limitation.
+     * 
+     * @return Duration in seconds
+     * @throws RcsServiceException
+     */
+    public long getMaxTime() throws RcsServiceException {
+        try {
+            return mConfiguration.getMaxTime();
+        } catch (Exception e) {
+            throw new RcsServiceException(e);
+        }
+    }
 }

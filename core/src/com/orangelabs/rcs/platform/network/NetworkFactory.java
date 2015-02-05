@@ -27,103 +27,99 @@ import com.orangelabs.rcs.platform.FactoryException;
  * @author jexa7410
  */
 public abstract class NetworkFactory {
-	/**
-	 * Current platform factory
-	 */
-	private static NetworkFactory factory = null;
+    /**
+     * Current platform factory
+     */
+    private static NetworkFactory factory = null;
 
-	/**
-	 * Load the factory
-	 * 
-	 * @param classname
-	 *            Factory classname
-	 * @throws Exception
-	 */
-	public static void loadFactory(String classname) throws FactoryException {
-		if (factory != null) {
-			return;
-		}
+    /**
+     * Load the factory
+     * 
+     * @param classname Factory classname
+     * @throws Exception
+     */
+    public static void loadFactory(String classname) throws FactoryException {
+        if (factory != null) {
+            return;
+        }
 
-		try {
-			factory = (NetworkFactory) Class.forName(classname).newInstance();
-		} catch (Exception e) {
-			throw new FactoryException("Can't load the factory " + classname);
-		}
-	}
+        try {
+            factory = (NetworkFactory) Class.forName(classname).newInstance();
+        } catch (Exception e) {
+            throw new FactoryException("Can't load the factory " + classname);
+        }
+    }
 
-	/**
-	 * Returns the current factory
-	 * 
-	 * @return Factory
-	 */
-	public static NetworkFactory getFactory() {
-		return factory;
-	}
+    /**
+     * Returns the current factory
+     * 
+     * @return Factory
+     */
+    public static NetworkFactory getFactory() {
+        return factory;
+    }
 
-	/**
-	 * Returns the local IP address of a given network interface
-	 * 
-	 * @param dnsEntry
-	 *            address to be connected to
-	 * @param type
-	 *            the type of the network interface, should be either
-	 *            {@link android.net.ConnectivityManager#TYPE_WIFI} or
-	 *            {@link android.net.ConnectivityManager#TYPE_MOBILE}
-	 * @return Address
-	 */
-	// Changed by Deutsche Telekom
-	public abstract String getLocalIpAddress(DnsResolvedFields dnsEntry, int type);
+    /**
+     * Returns the local IP address of a given network interface
+     * 
+     * @param dnsEntry address to be connected to
+     * @param type the type of the network interface, should be either
+     *            {@link android.net.ConnectivityManager#TYPE_WIFI} or
+     *            {@link android.net.ConnectivityManager#TYPE_MOBILE}
+     * @return Address
+     */
+    // Changed by Deutsche Telekom
+    public abstract String getLocalIpAddress(DnsResolvedFields dnsEntry, int type);
 
-	/**
-	 * Create a datagram connection
-	 * 
-	 * @return Datagram connection
-	 */
-	public abstract DatagramConnection createDatagramConnection();
+    /**
+     * Create a datagram connection
+     * 
+     * @return Datagram connection
+     */
+    public abstract DatagramConnection createDatagramConnection();
 
-	/**
-	 * Create a datagram connection with a specific SO timeout
-	 *
-	 * @param timeout
-	 *            SO timeout
-	 * @return Datagram connection
-	 */
-	public abstract DatagramConnection createDatagramConnection(int timeout);
+    /**
+     * Create a datagram connection with a specific SO timeout
+     * 
+     * @param timeout SO timeout
+     * @return Datagram connection
+     */
+    public abstract DatagramConnection createDatagramConnection(int timeout);
 
-	/**
-	 * Create a socket client connection
-	 * 
-	 * @return Socket connection
-	 */
-	public abstract SocketConnection createSocketClientConnection();
+    /**
+     * Create a socket client connection
+     * 
+     * @return Socket connection
+     */
+    public abstract SocketConnection createSocketClientConnection();
 
-	/**
-	 * Create a secure socket client connection
-	 * 
-	 * @return Socket connection
-	 */
-	public abstract SocketConnection createSecureSocketClientConnection();
+    /**
+     * Create a secure socket client connection
+     * 
+     * @return Socket connection
+     */
+    public abstract SocketConnection createSecureSocketClientConnection();
 
-	// Changed By Deutsche Telekom
-	/**
-	 * Create a secure socket client connection w/o checking certificates
-	 * 
-	 * @param fingerprint
-	 * @return Socket connection
-	 */
-	public abstract SocketConnection createSimpleSecureSocketClientConnection(String fingerprint);
+    // Changed By Deutsche Telekom
+    /**
+     * Create a secure socket client connection w/o checking certificates
+     * 
+     * @param fingerprint
+     * @return Socket connection
+     */
+    public abstract SocketConnection createSimpleSecureSocketClientConnection(String fingerprint);
 
-	/**
-	 * Create a socket server connection
-	 * 
-	 * @return Socket server connection
-	 */
-	public abstract SocketServerConnection createSocketServerConnection();
+    /**
+     * Create a socket server connection
+     * 
+     * @return Socket server connection
+     */
+    public abstract SocketServerConnection createSocketServerConnection();
 
-	/**
-	 * Create an HTTP connection
-	 * 
-	 * @return HTTP connection
-	 */
-	public abstract HttpConnection createHttpConnection();
+    /**
+     * Create an HTTP connection
+     * 
+     * @return HTTP connection
+     */
+    public abstract HttpConnection createHttpConnection();
 }

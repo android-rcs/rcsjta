@@ -19,6 +19,7 @@
  * NOTE: This file has been modified by Sony Mobile Communications AB.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.gsma.services.rcs.extension;
 
 import com.gsma.services.rcs.RcsServiceException;
@@ -28,34 +29,32 @@ import com.gsma.services.rcs.RcsServiceException;
  * 
  * @author Jean-Marc AUFFRET
  * @author yplo6403
- *
  */
 public class MultimediaSessionServiceConfiguration {
 
-	private final IMultimediaSessionServiceConfiguration mIConfig;
+    private final IMultimediaSessionServiceConfiguration mIConfig;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param iConfig
-	 *            IMultimediaSessionServiceConfiguration instance
-	 * @hide
-	 */
-	public MultimediaSessionServiceConfiguration(IMultimediaSessionServiceConfiguration iConfig) {
-		mIConfig = iConfig;
-	}
+    /**
+     * Constructor
+     * 
+     * @param iConfig IMultimediaSessionServiceConfiguration instance
+     * @hide
+     */
+    public MultimediaSessionServiceConfiguration(IMultimediaSessionServiceConfiguration iConfig) {
+        mIConfig = iConfig;
+    }
 
-	/**
-	 * Return maximum length of a multimedia message
-	 * 
-	 * @return Number of bytes
-	 * @throws RcsServiceException
-	 */
-	public int getMessageMaxLength() throws RcsServiceException {
-		try {
-			return mIConfig.getMessageMaxLength();
-		} catch (Exception e) {
-			throw new RcsServiceException(e);
-		}
-	}
+    /**
+     * Return maximum length of a multimedia message
+     * 
+     * @return Number of bytes
+     * @throws RcsServiceException
+     */
+    public int getMessageMaxLength() throws RcsServiceException {
+        try {
+            return mIConfig.getMessageMaxLength();
+        } catch (Exception e) {
+            throw new RcsServiceException(e);
+        }
+    }
 }

@@ -19,6 +19,7 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.service;
 
 import android.content.BroadcastReceiver;
@@ -35,15 +36,15 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
  * @author Jean-Marc AUFFRET
  */
 public class GetStatusReceiver extends BroadcastReceiver {
-	@Override
-	public void onReceive(Context context, Intent intent) {
-		if (intent.getAction().endsWith(Intents.Service.ACTION_GET_STATUS)) {
-			RcsSettings.createInstance(context);
-			Bundle results = getResultExtras(true);
-			results.putString(Intents.Service.EXTRA_PACKAGENAME, context.getPackageName());
-			results.putBoolean(Intents.Service.EXTRA_STATUS, RcsSettings.getInstance()
-					.isServiceActivated());
-			setResultExtras(results);
-		}
-	}
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        if (intent.getAction().endsWith(Intents.Service.ACTION_GET_STATUS)) {
+            RcsSettings.createInstance(context);
+            Bundle results = getResultExtras(true);
+            results.putString(Intents.Service.EXTRA_PACKAGENAME, context.getPackageName());
+            results.putBoolean(Intents.Service.EXTRA_STATUS, RcsSettings.getInstance()
+                    .isServiceActivated());
+            setResultExtras(results);
+        }
+    }
 }

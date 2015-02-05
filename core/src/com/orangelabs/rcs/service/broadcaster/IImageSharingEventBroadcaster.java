@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.orangelabs.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.contacts.ContactId;
@@ -22,11 +23,11 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 public interface IImageSharingEventBroadcaster {
 
-	public void broadcastStateChanged(ContactId contact, String sharingId, int status,
-			int reasonCode);
+    public void broadcastStateChanged(ContactId contact, String sharingId, int status,
+            int reasonCode);
 
-	public void broadcastProgressUpdate(ContactId contact, String sharingId, long currentSize,
-			long totalSize);
+    public void broadcastProgressUpdate(ContactId contact, String sharingId, long currentSize,
+            long totalSize);
 
-	public void broadcastInvitation(String sharingId);
+    public void broadcastInvitation(String sharingId);
 }

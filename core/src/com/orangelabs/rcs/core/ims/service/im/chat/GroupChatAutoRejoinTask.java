@@ -23,32 +23,32 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 public class GroupChatAutoRejoinTask extends Thread {
 
-	private final MessagingLog mMessagingLog;
+    private final MessagingLog mMessagingLog;
 
-	private final Core mCore;
+    private final Core mCore;
 
-	private static Logger logger = Logger.getLogger(GroupChatAutoRejoinTask.class.getName());
+    private static Logger logger = Logger.getLogger(GroupChatAutoRejoinTask.class.getName());
 
-	public GroupChatAutoRejoinTask(MessagingLog messagingLog, Core core) {
-		mMessagingLog = messagingLog;
-		mCore = core;
-	}
+    public GroupChatAutoRejoinTask(MessagingLog messagingLog, Core core) {
+        mMessagingLog = messagingLog;
+        mCore = core;
+    }
 
-	@Override
-	public void run() {
-		for (String chatId : mMessagingLog.getChatIdsOfActiveGroupChatsForAutoRejoin()) {
-			try {
-				if (isInterrupted()) {
-					return;
-				}
-				mCore.getListener().handleAutoRejoinGroupChat(chatId);
+    @Override
+    public void run() {
+        for (String chatId : mMessagingLog.getChatIdsOfActiveGroupChatsForAutoRejoin()) {
+            try {
+                if (isInterrupted()) {
+                    return;
+                }
+                mCore.getListener().handleAutoRejoinGroupChat(chatId);
 
-			} catch (ServerApiException e) {
-				if (logger.isActivated()) {
-					logger.warn(new StringBuilder("Could not auto-rejoin group chat with chatID '")
-							.append(chatId).append("'").toString());
-				}
-			}
-		}
-	}
+            } catch (ServerApiException e) {
+                if (logger.isActivated()) {
+                    logger.warn(new StringBuilder("Could not auto-rejoin group chat with chatID '")
+                            .append(chatId).append("'").toString());
+                }
+            }
+        }
+    }
 }

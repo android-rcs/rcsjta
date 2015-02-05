@@ -31,28 +31,24 @@ import android.net.Uri;
  */
 public class AudioContent extends MmContent {
 
-	/**
-	 * Constructor
-	 * 
-	 * @aparam encoding Encoding
-	 */
-	public AudioContent(String encoding) {
-		super(encoding);
-	}
+    /**
+     * Constructor
+     * 
+     * @aparam encoding Encoding
+     */
+    public AudioContent(String encoding) {
+        super(encoding);
+    }
 
-	/**
-	 * Constructor
-	 *
-	 * @param audioFile
-	 *            URI
-	 * @param encoding
-	 *            Encoding
-	 * @param size
-	 *            Size
-	 * @param fileName
-	 *            Filename
-	 */
-	public AudioContent(Uri audioFile, String encoding, long size, String fileName) {
-		super(audioFile, encoding, size, fileName);
-	}
+    /**
+     * Constructor
+     * 
+     * @param audioFile URI
+     * @param encoding Encoding
+     * @param size Size
+     * @param fileName Filename
+     */
+    public AudioContent(Uri audioFile, String encoding, long size, String fileName) {
+        super(audioFile, encoding, size, fileName);
+    }
 }

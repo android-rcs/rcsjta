@@ -309,7 +309,7 @@ public class Utils {
 
     /**
      * Construct an NTP time from a date in milliseconds
-     *
+     * 
      * @param date Date in milliseconds
      * @return NTP time in string format
      */
@@ -321,17 +321,17 @@ public class Utils {
 
     /**
      * Returns the local IP address
-     *
+     * 
      * @return IP address
      */
     public static String getLocalIpAddress() {
         try {
             for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en
                     .hasMoreElements();) {
-                NetworkInterface intf = (NetworkInterface)en.nextElement();
+                NetworkInterface intf = (NetworkInterface) en.nextElement();
                 for (Enumeration<InetAddress> addr = intf.getInetAddresses(); addr
                         .hasMoreElements();) {
-                    InetAddress inetAddress = (InetAddress)addr.nextElement();
+                    InetAddress inetAddress = (InetAddress) addr.nextElement();
                     if (!inetAddress.isLoopbackAddress() && !inetAddress.isLinkLocalAddress()) {
                         return inetAddress.getHostAddress().toString();
                     }

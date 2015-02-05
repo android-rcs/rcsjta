@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.core.ims.network.sip;
 
 import java.util.Hashtable;
@@ -27,89 +28,86 @@ import javax2.sip.header.ContentTypeHeader;
  * @author jexa7410
  */
 public class Multipart {
-	/**
-	 * Boundary delimiter
-	 */
-	public final static String BOUNDARY_DELIMITER = "--";
+    /**
+     * Boundary delimiter
+     */
+    public final static String BOUNDARY_DELIMITER = "--";
 
-	/**
-	 * Parts
-	 */
-	private Hashtable<String, String> parts = new Hashtable<String, String>();
+    /**
+     * Parts
+     */
+    private Hashtable<String, String> parts = new Hashtable<String, String>();
 
-	/**
-	 * Constructor
-	 * 
-	 * @param content
-	 *            Content parts
-	 * @param boundary
-	 *            Boundary delimiter
-	 */
-	public Multipart(String content, String boundary) {
-		if ((content != null) && (boundary != null)) {
-			String[] fragments = content.split(BOUNDARY_DELIMITER + boundary);
-			for (String fragment : fragments) {
-				String trimmedFragment = fragment.trim();
-				if ((trimmedFragment.length() > 0) && !BOUNDARY_DELIMITER.equals(trimmedFragment)) {
-					int begin = fragment.indexOf(SipUtils.CRLF + SipUtils.CRLF);
-					if (begin != -1) {
-						try {
-							// Extract content type
-							String type = fragment.substring(0, begin).trim();
+    /**
+     * Constructor
+     * 
+     * @param content Content parts
+     * @param boundary Boundary delimiter
+     */
+    public Multipart(String content, String boundary) {
+        if ((content != null) && (boundary != null)) {
+            String[] fragments = content.split(BOUNDARY_DELIMITER + boundary);
+            for (String fragment : fragments) {
+                String trimmedFragment = fragment.trim();
+                if ((trimmedFragment.length() > 0) && !BOUNDARY_DELIMITER.equals(trimmedFragment)) {
+                    int begin = fragment.indexOf(SipUtils.CRLF + SipUtils.CRLF);
+                    if (begin != -1) {
+                        try {
+                            // Extract content type
+                            String type = fragment.substring(0, begin).trim();
 
-							// Extract content part
-							String part = fragment.substring(begin).trim();
+                            // Extract content part
+                            String part = fragment.substring(begin).trim();
 
-							// Extract MIME type from content type
-							int beginType = type.indexOf(ContentTypeHeader.NAME);
-							int endType = type.indexOf(SipUtils.CRLF, beginType);
-							String mime;
-							if (endType == -1) {
-								mime = type.substring(
-										beginType + ContentTypeHeader.NAME.length() + 1).trim();
-							} else {
-								mime = type.substring(
-										beginType + ContentTypeHeader.NAME.length() + 1, endType)
-										.trim();
-							}
+                            // Extract MIME type from content type
+                            int beginType = type.indexOf(ContentTypeHeader.NAME);
+                            int endType = type.indexOf(SipUtils.CRLF, beginType);
+                            String mime;
+                            if (endType == -1) {
+                                mime = type.substring(
+                                        beginType + ContentTypeHeader.NAME.length() + 1).trim();
+                            } else {
+                                mime = type.substring(
+                                        beginType + ContentTypeHeader.NAME.length() + 1, endType)
+                                        .trim();
+                            }
 
-							// Add part in lowercase
-							parts.put(mime.toLowerCase(), part);
-						} catch (Exception e) {
-							// Nothing to do
-						}
-					}
-				}
-			}
-		}
-	}
+                            // Add part in lowercase
+                            parts.put(mime.toLowerCase(), part);
+                        } catch (Exception e) {
+                            // Nothing to do
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-	/**
-	 * Is a multipart
-	 * 
-	 * @return Boolean
-	 */
-	public boolean isMultipart() {
-		return (parts.size() > 0);
-	}
+    /**
+     * Is a multipart
+     * 
+     * @return Boolean
+     */
+    public boolean isMultipart() {
+        return (parts.size() > 0);
+    }
 
-	/**
-	 * Get part from its MIME-type
-	 * 
-	 * @param type
-	 *            MIME-type
-	 * @return Part as string
-	 */
-	public String getPart(String type) {
-		return parts.get(type.toLowerCase());
-	}
+    /**
+     * Get part from its MIME-type
+     * 
+     * @param type MIME-type
+     * @return Part as string
+     */
+    public String getPart(String type) {
+        return parts.get(type.toLowerCase());
+    }
 
-	/**
-	 * Get parts
-	 * 
-	 * @return List of parts
-	 */
-	public Hashtable<String, String> getParts() {
-		return parts;
-	}
+    /**
+     * Get parts
+     * 
+     * @return List of parts
+     */
+    public Hashtable<String, String> getParts() {
+        return parts;
+    }
 }

@@ -33,7 +33,6 @@ import android.widget.ImageView.ScaleType;
 import android.widget.QuickContactBadge;
 import android.widget.TextView;
 
-
 /**
  * A custom view for an item in the contact list.
  */
@@ -89,7 +88,6 @@ public class ContactListItemView extends ViewGroup {
         super(context, attrs);
         mContext = context;
 
-       
         mPreferredHeight = 100;
 
         Resources resources = context.getResources();
@@ -197,7 +195,7 @@ public class ContactListItemView extends ViewGroup {
         }
 
         // Positions of views on the left are fixed and so are those on the right side.
-        // The stretchable part of the layout is in the middle.  So, we will start off
+        // The stretchable part of the layout is in the middle. So, we will start off
         // by laying out the left and right sides. Then we will allocate the remainder
         // to the text fields in the middle.
 
@@ -238,13 +236,13 @@ public class ContactListItemView extends ViewGroup {
         }
 
         if (isVisible(mPresenceIcon)) {
-            int iconWidth = (height-topBound)/2;
+            int iconWidth = (height - topBound) / 2;
             rightBound -= mPresenceIconMargin + iconWidth;
             mPresenceIcon.layout(
                     rightBound,
-                    (height+topBound - iconWidth)/2,
+                    (height + topBound - iconWidth) / 2,
                     rightBound + iconWidth,
-                    (height+topBound + iconWidth)/2);
+                    (height + topBound + iconWidth) / 2);
         }
 
         if (mHorizontalDividerVisible) {
@@ -317,7 +315,7 @@ public class ContactListItemView extends ViewGroup {
     private void ensureHorizontalDivider() {
         if (mHorizontalDividerDrawable == null) {
             mHorizontalDividerDrawable = mContext.getResources().getDrawable(
-            		17301847);
+                    17301847);
             mHorizontalDividerHeight = 1;
         }
     }
@@ -338,9 +336,9 @@ public class ContactListItemView extends ViewGroup {
      */
     private void ensurePhotoViewSize() {
         if (mPhotoViewWidth == 0 && mPhotoViewHeight == 0) {
-        	mPhotoViewWidth = 72;
+            mPhotoViewWidth = 72;
             mPhotoViewHeight = 72;
-           
+
         }
     }
 
@@ -359,8 +357,7 @@ public class ContactListItemView extends ViewGroup {
     }
 
     /**
-     * Sets the flag that determines whether a divider should drawn at the bottom
-     * of the view.
+     * Sets the flag that determines whether a divider should drawn at the bottom of the view.
      */
     public void setDividerVisible(boolean visible) {
         mHorizontalDividerVisible = visible;

@@ -25,45 +25,43 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.util.Buffer;
 
 /**
  * Video capture stream
- *
+ * 
  * @author hlxn7157
  */
 public class VideoCaptureStream extends MediaCaptureStream {
-	/**
-	 * Constructor
-	 * 
-	 * @param format
-	 *            Input format
-	 * @param player
-	 *            Media player
-	 */
-	public VideoCaptureStream(Format format, MediaInput player) {
-		super(format, player);
-	}
+    /**
+     * Constructor
+     * 
+     * @param format Input format
+     * @param player Media player
+     */
+    public VideoCaptureStream(Format format, MediaInput player) {
+        super(format, player);
+    }
 
-	/**
-	 * Read from the stream
-	 * 
-	 * @return Buffer
-	 * @throws Exception
-	 */
-	public Buffer read() throws Exception {
-		// Read a new sample from the media player
-		VideoSample sample = (VideoSample) getPlayer().readSample();
-		if (sample == null) {
-			return null;
-		}
+    /**
+     * Read from the stream
+     * 
+     * @return Buffer
+     * @throws Exception
+     */
+    public Buffer read() throws Exception {
+        // Read a new sample from the media player
+        VideoSample sample = (VideoSample) getPlayer().readSample();
+        if (sample == null) {
+            return null;
+        }
 
-		// Create a buffer
-		buffer.setData(sample.getData());
-		buffer.setLength(sample.getLength());
-		buffer.setFormat(getFormat());
-		buffer.setSequenceNumber(seqNo++);
-		if (sample.isMarker()) {
-			buffer.setFlags(Buffer.FLAG_RTP_MARKER);
-		}
-		buffer.setTimeStamp(sample.getTimeStamp());
-		buffer.setVideoOrientation(sample.getVideoOrientation());
-		return buffer;
-	}
+        // Create a buffer
+        buffer.setData(sample.getData());
+        buffer.setLength(sample.getLength());
+        buffer.setFormat(getFormat());
+        buffer.setSequenceNumber(seqNo++);
+        if (sample.isMarker()) {
+            buffer.setFlags(Buffer.FLAG_RTP_MARKER);
+        }
+        buffer.setTimeStamp(sample.getTimeStamp());
+        buffer.setVideoOrientation(sample.getVideoOrientation());
+        return buffer;
+    }
 }

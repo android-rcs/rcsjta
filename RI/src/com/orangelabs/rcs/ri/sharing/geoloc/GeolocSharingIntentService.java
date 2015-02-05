@@ -177,7 +177,7 @@ public class GeolocSharingIntentService extends IntentService {
         notif.setContentText(getString(R.string.label_from_args, displayName));
 
         // Send notification
-        NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(sharingId, Utils.NOTIF_ID_GEOLOC_SHARE, notif.build());
     }
 }

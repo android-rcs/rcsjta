@@ -190,7 +190,7 @@ public class FileTransferDAO implements Parcelable {
     public FileTransferDAO(final Context context, final String fileTransferId) throws Exception {
         Uri uri = FileTransferLog.CONTENT_URI;
         String[] whereArgs = new String[] {
-            fileTransferId
+                fileTransferId
         };
         Cursor cursor = null;
         try {

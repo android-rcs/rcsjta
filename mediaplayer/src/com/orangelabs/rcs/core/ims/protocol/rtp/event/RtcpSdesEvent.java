@@ -27,12 +27,12 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.core.RtcpSdesPacket;
  */
 public class RtcpSdesEvent extends RtcpEvent {
 
-	/**
-	 * Constructor
-	 * 
-	 * @param packet RTCP SDES packet
-	 */
-	public RtcpSdesEvent(RtcpSdesPacket packet) {
-		super(packet);
-	}
+    /**
+     * Constructor
+     * 
+     * @param packet RTCP SDES packet
+     */
+    public RtcpSdesEvent(RtcpSdesPacket packet) {
+        super(packet);
+    }
 }

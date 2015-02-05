@@ -12,8 +12,8 @@ import com.orangelabs.rcs.core.ims.service.im.InstantMessagingService;
  */
 public class DelayedDisplayNotificationTask {
 
-	public DelayedDisplayNotificationTask(InstantMessagingService instantMessagingService) {
-		instantMessagingService.getImsModule().getCore().getListener()
-				.tryToDispatchAllPendingDisplayNotifications();
-	}
+    public DelayedDisplayNotificationTask(InstantMessagingService instantMessagingService) {
+        instantMessagingService.getImsModule().getCore().getListener()
+                .tryToDispatchAllPendingDisplayNotifications();
+    }
 }

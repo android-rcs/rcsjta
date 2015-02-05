@@ -32,59 +32,58 @@ import android.text.format.Time;
  * @author Deutsche Telekom
  */
 public class DateUtils {
-	/**
-	 * UTC time zone
-	 */
-	private static TimeZone UTC = TimeZone.getTimeZone("UTC");
+    /**
+     * UTC time zone
+     */
+    private static TimeZone UTC = TimeZone.getTimeZone("UTC");
 
-	/**
-	 * ISO 8601 date formats
-	 */
-	private static SimpleDateFormat ISO8601DATEFORMAT[] = {
-			new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ"),
-			new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ") };
+    /**
+     * ISO 8601 date formats
+     */
+    private static SimpleDateFormat ISO8601DATEFORMAT[] = {
+            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ"),
+            new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ")
+    };
 
-	/**
-	 * Encode a long date to string value in Z format (see RFC 3339)
-	 * 
-	 * @param date
-	 *            Date in milliseconds
-	 * @return String
-	 */
-	public static String encodeDate(long date) {
-		Time t = new Time(UTC.getID());
-		t.set(date);
-		return t.format3339(false);
-	}
+    /**
+     * Encode a long date to string value in Z format (see RFC 3339)
+     * 
+     * @param date Date in milliseconds
+     * @return String
+     */
+    public static String encodeDate(long date) {
+        Time t = new Time(UTC.getID());
+        t.set(date);
+        return t.format3339(false);
+    }
 
-	/**
-	 * Decode a string date to long value (see ISO8601 and RFC 3339)
-	 * 
-	 * @param date
-	 *            Date as string
-	 * @return Milliseconds
-	 */
-	public static long decodeDate(String date) {
-		long millis = -1;
+    /**
+     * Decode a string date to long value (see ISO8601 and RFC 3339)
+     * 
+     * @param date Date as string
+     * @return Milliseconds
+     */
+    public static long decodeDate(String date) {
+        long millis = -1;
 
-		// Try to use ISO8601
-		String normalizedDate = date.replaceAll("Z$", "+0000");
-		for (int i = 0; millis == -1 && i < ISO8601DATEFORMAT.length; i++) {
-			try {
-				Date iso8601 = ISO8601DATEFORMAT[i].parse(normalizedDate);
-				millis = iso8601.getTime();
-			} catch (ParseException ex) {
-				// Try next format
-			}
-		}
+        // Try to use ISO8601
+        String normalizedDate = date.replaceAll("Z$", "+0000");
+        for (int i = 0; millis == -1 && i < ISO8601DATEFORMAT.length; i++) {
+            try {
+                Date iso8601 = ISO8601DATEFORMAT[i].parse(normalizedDate);
+                millis = iso8601.getTime();
+            } catch (ParseException ex) {
+                // Try next format
+            }
+        }
 
-		// If still not valid format is found let's try RFC3339
-		if (millis == -1) {
-			Time t = new Time(UTC.getID());
-			t.parse3339(date);
-			millis = t.toMillis(false);
-		}
+        // If still not valid format is found let's try RFC3339
+        if (millis == -1) {
+            Time t = new Time(UTC.getID());
+            t.parse3339(date);
+            millis = t.toMillis(false);
+        }
 
-		return millis;
-	}
+        return millis;
+    }
 }

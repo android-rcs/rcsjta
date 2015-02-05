@@ -24,5 +24,5 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 public interface ICapabilitiesBroadcaster {
 
-	public void broadcastCapabilitiesReceived(ContactId contact, Capabilities contactCapabilities);
+    public void broadcastCapabilitiesReceived(ContactId contact, Capabilities contactCapabilities);
 }

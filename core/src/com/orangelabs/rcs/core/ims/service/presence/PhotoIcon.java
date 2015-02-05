@@ -24,147 +24,139 @@ package com.orangelabs.rcs.core.ims.service.presence;
  * @author Jean-Marc AUFFRET
  */
 public class PhotoIcon {
-	/**
-	 * Photo content
-	 */
-	private byte[] content = null;
+    /**
+     * Photo content
+     */
+    private byte[] content = null;
 
-	/**
-	 * Image type
-	 */
-	private String type = "image/jpeg";
+    /**
+     * Image type
+     */
+    private String type = "image/jpeg";
 
-	/**
-	 * Width
-	 */
-	private int width = 0;
+    /**
+     * Width
+     */
+    private int width = 0;
 
-	/**
-	 * Height
-	 */
-	private int height = 0;
+    /**
+     * Height
+     */
+    private int height = 0;
 
-	/**
-	 * Etag
-	 */
-	private String etag = null;
+    /**
+     * Etag
+     */
+    private String etag = null;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param content
-	 *            Photo content
-	 * @param width
-	 *            Width
-	 * @param height
-	 *            Height
-	 * @param etag
-	 *            Etag value
-	 */
-	public PhotoIcon(byte[] content, int width, int height, String etag) {
-		this.content = content;
-		this.width = width;
-		this.height = height;
-		this.etag = etag;
-	}
+    /**
+     * Constructor
+     * 
+     * @param content Photo content
+     * @param width Width
+     * @param height Height
+     * @param etag Etag value
+     */
+    public PhotoIcon(byte[] content, int width, int height, String etag) {
+        this.content = content;
+        this.width = width;
+        this.height = height;
+        this.etag = etag;
+    }
 
-	/**
-	 * Constructor
-	 * 
-	 * @param content
-	 *            Photo content
-	 * @param width
-	 *            Width
-	 * @param height
-	 *            Height
-	 */
-	public PhotoIcon(byte[] content, int width, int height) {
-		this(content, width, height, null);
-	}
+    /**
+     * Constructor
+     * 
+     * @param content Photo content
+     * @param width Width
+     * @param height Height
+     */
+    public PhotoIcon(byte[] content, int width, int height) {
+        this(content, width, height, null);
+    }
 
-	/**
-	 * Returns the Etag value
-	 * 
-	 * @return Tag
-	 */
-	public String getEtag() {
-		return etag;
-	}
+    /**
+     * Returns the Etag value
+     * 
+     * @return Tag
+     */
+    public String getEtag() {
+        return etag;
+    }
 
-	/**
-	 * Set the Etag value
-	 * 
-	 * @param etag
-	 *            Etag
-	 */
-	public void setEtag(String etag) {
-		this.etag = etag;
-	}
+    /**
+     * Set the Etag value
+     * 
+     * @param etag Etag
+     */
+    public void setEtag(String etag) {
+        this.etag = etag;
+    }
 
-	/**
-	 * Returns the image type
-	 * 
-	 * @return Type
-	 */
-	public String getType() {
-		return type;
-	}
+    /**
+     * Returns the image type
+     * 
+     * @return Type
+     */
+    public String getType() {
+        return type;
+    }
 
-	/**
-	 * Returns the icon width
-	 * 
-	 * @return Width in pixel
-	 */
-	public int getWidth() {
-		return width;
-	}
+    /**
+     * Returns the icon width
+     * 
+     * @return Width in pixel
+     */
+    public int getWidth() {
+        return width;
+    }
 
-	/**
-	 * Returns the icon height
-	 * 
-	 * @return Height in pixel
-	 */
-	public int getHeight() {
-		return height;
-	}
+    /**
+     * Returns the icon height
+     * 
+     * @return Height in pixel
+     */
+    public int getHeight() {
+        return height;
+    }
 
-	/**
-	 * Returns the icon size
-	 * 
-	 * @return Size in bytes
-	 */
-	public long getSize() {
-		if (content != null) {
-			return content.length;
-		} else {
-			return 0L;
-		}
-	}
+    /**
+     * Returns the icon size
+     * 
+     * @return Size in bytes
+     */
+    public long getSize() {
+        if (content != null) {
+            return content.length;
+        } else {
+            return 0L;
+        }
+    }
 
-	/**
-	 * Returns the photo content
-	 * 
-	 * @return Photo content
-	 */
-	public byte[] getContent() {
-		return content;
-	}
+    /**
+     * Returns the photo content
+     * 
+     * @return Photo content
+     */
+    public byte[] getContent() {
+        return content;
+    }
 
-	/**
-	 * Returns the resolution
-	 * 
-	 * @return String as [width]x[height]
-	 */
-	public String getResolution() {
-		return width + "x" + height;
-	}
+    /**
+     * Returns the resolution
+     * 
+     * @return String as [width]x[height]
+     */
+    public String getResolution() {
+        return width + "x" + height;
+    }
 
-	/**
-	 * Returns a string representation of the object
-	 * 
-	 * @return String
-	 */
-	public String toString() {
-		return "width=" + width + ", height=" + height + ", size=" + getSize() + ", etag=" + etag;
-	}
+    /**
+     * Returns a string representation of the object
+     * 
+     * @return String
+     */
+    public String toString() {
+        return "width=" + width + ", height=" + height + ", size=" + getSize() + ", etag=" + etag;
+    }
 }

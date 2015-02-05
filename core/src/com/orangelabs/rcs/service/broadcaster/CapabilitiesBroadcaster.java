@@ -31,82 +31,82 @@ import java.util.HashMap;
  */
 public class CapabilitiesBroadcaster implements ICapabilitiesBroadcaster {
 
-	private RemoteCallbackList<ICapabilitiesListener> mCapabilitiesListeners = new RemoteCallbackList<ICapabilitiesListener>();
+    private RemoteCallbackList<ICapabilitiesListener> mCapabilitiesListeners = new RemoteCallbackList<ICapabilitiesListener>();
 
-	private HashMap<ContactId, RemoteCallbackList<ICapabilitiesListener>> mCapalitiesListenersPerContact = new HashMap<ContactId, RemoteCallbackList<ICapabilitiesListener>>();
+    private HashMap<ContactId, RemoteCallbackList<ICapabilitiesListener>> mCapalitiesListenersPerContact = new HashMap<ContactId, RemoteCallbackList<ICapabilitiesListener>>();
 
-	private final Logger logger = Logger.getLogger(getClass().getName());
+    private final Logger logger = Logger.getLogger(getClass().getName());
 
-	public CapabilitiesBroadcaster() {
-	}
+    public CapabilitiesBroadcaster() {
+    }
 
-	private void broadcastCapabilitiesReceivedForAllContacts(ContactId contact,
-			Capabilities contactCapabilities) {
-		final int N = mCapabilitiesListeners.beginBroadcast();
-		for (int i = 0; i < N; i++) {
-			try {
-				mCapabilitiesListeners.getBroadcastItem(i).onCapabilitiesReceived(contact,
-						contactCapabilities);
-			} catch (Exception e) {
-				if (logger.isActivated()) {
-					logger.error("Can't notify listener", e);
-				}
-			}
-		}
-		mCapabilitiesListeners.finishBroadcast();
-	}
+    private void broadcastCapabilitiesReceivedForAllContacts(ContactId contact,
+            Capabilities contactCapabilities) {
+        final int N = mCapabilitiesListeners.beginBroadcast();
+        for (int i = 0; i < N; i++) {
+            try {
+                mCapabilitiesListeners.getBroadcastItem(i).onCapabilitiesReceived(contact,
+                        contactCapabilities);
+            } catch (Exception e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener", e);
+                }
+            }
+        }
+        mCapabilitiesListeners.finishBroadcast();
+    }
 
-	private void broadcastCapabilitiesReceivedOnPerContact(ContactId contact,
-			Capabilities contactCapabilities) {
-		RemoteCallbackList<ICapabilitiesListener> capabilitiesListeners = mCapalitiesListenersPerContact
-				.get(contact);
-		if (capabilitiesListeners == null) {
-			return;
-		}
-		final int N = capabilitiesListeners.beginBroadcast();
-		for (int i = 0; i < N; i++) {
-			try {
-				capabilitiesListeners.getBroadcastItem(i).onCapabilitiesReceived(contact,
-						contactCapabilities);
-			} catch (Exception e) {
-				if (logger.isActivated()) {
-					logger.error("Can't notify listener", e);
-				}
-			}
-		}
-		capabilitiesListeners.finishBroadcast();
-	}
+    private void broadcastCapabilitiesReceivedOnPerContact(ContactId contact,
+            Capabilities contactCapabilities) {
+        RemoteCallbackList<ICapabilitiesListener> capabilitiesListeners = mCapalitiesListenersPerContact
+                .get(contact);
+        if (capabilitiesListeners == null) {
+            return;
+        }
+        final int N = capabilitiesListeners.beginBroadcast();
+        for (int i = 0; i < N; i++) {
+            try {
+                capabilitiesListeners.getBroadcastItem(i).onCapabilitiesReceived(contact,
+                        contactCapabilities);
+            } catch (Exception e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener", e);
+                }
+            }
+        }
+        capabilitiesListeners.finishBroadcast();
+    }
 
-	public void addCapabilitiesListener(ICapabilitiesListener listener) {
-		mCapabilitiesListeners.register(listener);
-	}
+    public void addCapabilitiesListener(ICapabilitiesListener listener) {
+        mCapabilitiesListeners.register(listener);
+    }
 
-	public void removeCapabilitiesListener(ICapabilitiesListener listener) {
-		mCapabilitiesListeners.unregister(listener);
-	}
+    public void removeCapabilitiesListener(ICapabilitiesListener listener) {
+        mCapabilitiesListeners.unregister(listener);
+    }
 
-	public void addContactCapabilitiesListener(ContactId contact, ICapabilitiesListener listener) {
-		RemoteCallbackList<ICapabilitiesListener> capabilitiesListeners = mCapalitiesListenersPerContact
-				.get(contact);
-		if (capabilitiesListeners == null) {
-			capabilitiesListeners = new RemoteCallbackList<ICapabilitiesListener>();
-			mCapalitiesListenersPerContact.put(contact, capabilitiesListeners);
-		}
-		capabilitiesListeners.register(listener);
-	}
+    public void addContactCapabilitiesListener(ContactId contact, ICapabilitiesListener listener) {
+        RemoteCallbackList<ICapabilitiesListener> capabilitiesListeners = mCapalitiesListenersPerContact
+                .get(contact);
+        if (capabilitiesListeners == null) {
+            capabilitiesListeners = new RemoteCallbackList<ICapabilitiesListener>();
+            mCapalitiesListenersPerContact.put(contact, capabilitiesListeners);
+        }
+        capabilitiesListeners.register(listener);
+    }
 
-	public void removeContactCapabilitiesListener(ContactId contact, ICapabilitiesListener listener) {
-		RemoteCallbackList<ICapabilitiesListener> listeners = mCapalitiesListenersPerContact
-				.get(contact);
-		if (listeners != null) {
-			listeners.unregister(listener);
-		}
-	}
+    public void removeContactCapabilitiesListener(ContactId contact, ICapabilitiesListener listener) {
+        RemoteCallbackList<ICapabilitiesListener> listeners = mCapalitiesListenersPerContact
+                .get(contact);
+        if (listeners != null) {
+            listeners.unregister(listener);
+        }
+    }
 
-	public void broadcastCapabilitiesReceived(ContactId contact, Capabilities contactCapabilities) {
-		// Notify capabilities listeners
-		broadcastCapabilitiesReceivedForAllContacts(contact, contactCapabilities);
-		// Notify capabilities listeners for a given contact
-		broadcastCapabilitiesReceivedOnPerContact(contact, contactCapabilities);
-	}
+    public void broadcastCapabilitiesReceived(ContactId contact, Capabilities contactCapabilities) {
+        // Notify capabilities listeners
+        broadcastCapabilitiesReceivedForAllContacts(contact, contactCapabilities);
+        // Notify capabilities listeners for a given contact
+        broadcastCapabilitiesReceivedOnPerContact(contact, contactCapabilities);
+    }
 }

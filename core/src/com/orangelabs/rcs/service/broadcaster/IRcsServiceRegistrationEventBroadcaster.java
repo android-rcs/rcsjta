@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.orangelabs.rcs.service.broadcaster;
 
 /**
@@ -20,7 +21,7 @@ package com.orangelabs.rcs.service.broadcaster;
  */
 public interface IRcsServiceRegistrationEventBroadcaster {
 
-	public void broadcastServiceRegistered();
+    public void broadcastServiceRegistered();
 
-	public void broadcastServiceUnRegistered();
+    public void broadcastServiceUnRegistered();
 }

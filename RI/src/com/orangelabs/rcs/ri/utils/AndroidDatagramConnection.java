@@ -54,7 +54,7 @@ public class AndroidDatagramConnection implements DatagramConnection {
 
     /**
      * Constructor
-     *
+     * 
      * @param timeout SO Timeout
      */
     public AndroidDatagramConnection(int timeout) {
@@ -64,7 +64,7 @@ public class AndroidDatagramConnection implements DatagramConnection {
 
     /**
      * Open the datagram connection
-     *
+     * 
      * @throws IOException
      */
     public void open() throws IOException {
@@ -97,7 +97,7 @@ public class AndroidDatagramConnection implements DatagramConnection {
 
     /**
      * Receive data with a specific buffer size
-     *
+     * 
      * @return Byte array
      * @throws IOException
      */

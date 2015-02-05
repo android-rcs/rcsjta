@@ -103,7 +103,7 @@ public class SendSingleFile extends SendFile {
             final String _state = RiApplication.FT_STATES[state];
             handler.post(new Runnable() {
                 public void run() {
-                    TextView statusView = (TextView)findViewById(R.id.progress_status);
+                    TextView statusView = (TextView) findViewById(R.id.progress_status);
                     switch (state) {
                         case FileTransfer.State.STARTED:
                         case FileTransfer.State.TRANSFERRED:
@@ -152,7 +152,7 @@ public class SendSingleFile extends SendFile {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Get contact ID
-        mContact = (ContactId)getIntent().getParcelableExtra(EXTRA_CONTACT);
+        mContact = (ContactId) getIntent().getParcelableExtra(EXTRA_CONTACT);
     }
 
     /**
@@ -163,7 +163,7 @@ public class SendSingleFile extends SendFile {
      */
     public static void startActivity(Context context, ContactId contact) {
         Intent intent = new Intent(context, SendSingleFile.class);
-        intent.putExtra(EXTRA_CONTACT, (Parcelable)contact);
+        intent.putExtra(EXTRA_CONTACT, (Parcelable) contact);
         context.startActivity(intent);
     }
 

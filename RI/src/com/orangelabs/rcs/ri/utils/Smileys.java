@@ -61,7 +61,7 @@ public class Smileys implements AbstractMessageParser.Resources {
             R.drawable.ri_smiley_lips_are_sealed, // 14
             R.drawable.ri_smiley_laughing, // 15
             R.drawable.ri_smiley_wtf
-    // 16
+            // 16
     };
 
     private static final int DEFAULT_SMILEY_TEXTS = R.array.default_smiley_texts;
@@ -87,8 +87,8 @@ public class Smileys implements AbstractMessageParser.Resources {
      * Looks up the resource id of a given smiley.
      * 
      * @param smiley The smiley to look up.
-     * @return the resource id of the specified smiley, or -1 if no resource id
-     *         is associated with it.
+     * @return the resource id of the specified smiley, or -1 if no resource id is associated with
+     *         it.
      */
     public int getSmileyRes(String smiley) {
         Integer i = mSmileyToRes.get(smiley);
@@ -156,8 +156,8 @@ public class Smileys implements AbstractMessageParser.Resources {
         SimpleAdapter.ViewBinder viewBinder = new SimpleAdapter.ViewBinder() {
             public boolean setViewValue(View view, Object data, String textRepresentation) {
                 if (view instanceof ImageView) {
-                    Drawable img = resources.getDrawable((Integer)data);
-                    ((ImageView)view).setImageDrawable(img);
+                    Drawable img = resources.getDrawable((Integer) data);
+                    ((ImageView) view).setImageDrawable(img);
                     return true;
                 }
                 return false;
@@ -171,8 +171,8 @@ public class Smileys implements AbstractMessageParser.Resources {
         b.setAdapter(a, new DialogInterface.OnClickListener() {
             public final void onClick(DialogInterface dialog, int which) {
                 @SuppressWarnings("unchecked")
-                HashMap<String, Object> item = (HashMap<String, Object>)a.getItem(which);
-                textEdit.append((String)item.get("text"));
+                HashMap<String, Object> item = (HashMap<String, Object>) a.getItem(which);
+                textEdit.append((String) item.get("text"));
             }
         });
 

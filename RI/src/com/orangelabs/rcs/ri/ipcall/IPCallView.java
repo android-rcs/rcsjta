@@ -168,7 +168,7 @@ public class IPCallView extends Activity {
             handler.post(new Runnable() {
                 public void run() {
 
-                    ToggleButton holdBtn = (ToggleButton)findViewById(R.id.hold);
+                    ToggleButton holdBtn = (ToggleButton) findViewById(R.id.hold);
                     switch (state) {
                         case IPCall.State.STARTED:
                             // Session is established: hide progress dialog
@@ -233,7 +233,7 @@ public class IPCallView extends Activity {
         setTitle(R.string.title_ipcall);
 
         // Set buttons callback
-        Button hangupBtn = (Button)findViewById(R.id.hangup_btn);
+        Button hangupBtn = (Button) findViewById(R.id.hangup_btn);
         hangupBtn.setOnClickListener(btnHangupListener);
 
         // Register to API connection manager
@@ -380,12 +380,12 @@ public class IPCallView extends Activity {
 
             String from = RcsDisplayName.getInstance(this).getDisplayName(contact);
             // Display call info
-            TextView contactEdit = (TextView)findViewById(R.id.contact);
+            TextView contactEdit = (TextView) findViewById(R.id.contact);
             contactEdit.setText(from);
-            ToggleButton videoBtn = (ToggleButton)findViewById(R.id.video);
+            ToggleButton videoBtn = (ToggleButton) findViewById(R.id.video);
             videoBtn.setChecked(video);
             videoBtn.setOnCheckedChangeListener(btnVideoListener);
-            ToggleButton holdBtn = (ToggleButton)findViewById(R.id.hold);
+            ToggleButton holdBtn = (ToggleButton) findViewById(R.id.hold);
             holdBtn.setChecked(false);
             holdBtn.setOnCheckedChangeListener(btnHoldListener);
         } catch (RcsServiceException e) {

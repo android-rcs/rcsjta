@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.gsma.services.rcs;
 
 /**
@@ -23,13 +24,13 @@ package com.gsma.services.rcs;
  * @author Jean-Marc AUFFRET
  */
 public abstract class RcsServiceRegistrationListener extends IRcsServiceRegistrationListener.Stub {
-	/**
-	 * Callback called when service is registered to the network platform
-	 */
-	public abstract void onServiceRegistered();
+    /**
+     * Callback called when service is registered to the network platform
+     */
+    public abstract void onServiceRegistered();
 
-	/**
-	 * Callback called when service is unregistered from the network platform
-	 */
-	public abstract void onServiceUnregistered();
+    /**
+     * Callback called when service is unregistered from the network platform
+     */
+    public abstract void onServiceUnregistered();
 }

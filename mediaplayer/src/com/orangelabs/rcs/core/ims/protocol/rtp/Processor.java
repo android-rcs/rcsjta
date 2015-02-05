@@ -24,82 +24,83 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.stream.ProcessorOutputStream;
 import com.orangelabs.rcs.core.ims.protocol.rtp.util.Buffer;
 
 /**
- * Media processor. A processor receives an input stream, use a codec chain
- * to filter the data before to send it to the output stream.
- *
+ * Media processor. A processor receives an input stream, use a codec chain to filter the data
+ * before to send it to the output stream.
+ * 
  * @author jexa7410
  */
 public class Processor extends Thread {
-	/**
-	 * Processor input stream
-	 */
-	private ProcessorInputStream inputStream;
+    /**
+     * Processor input stream
+     */
+    private ProcessorInputStream inputStream;
 
-	/**
-	 * Processor output stream
-	 */
-	private ProcessorOutputStream outputStream;
+    /**
+     * Processor output stream
+     */
+    private ProcessorOutputStream outputStream;
 
-	/**
-	 * Codec chain
-	 */
-	private CodecChain codecChain;
+    /**
+     * Codec chain
+     */
+    private CodecChain codecChain;
 
-	/**
-	 * Processor status flag
-	 */
-	private boolean interrupted = false;
+    /**
+     * Processor status flag
+     */
+    private boolean interrupted = false;
 
     /**
      * Constructor
-     *
+     * 
      * @param inputStream Input stream
      * @param outputStream Output stream
      * @param codecs List of codecs
      */
-	public Processor(ProcessorInputStream inputStream, ProcessorOutputStream outputStream, Codec[] codecs) {
+    public Processor(ProcessorInputStream inputStream, ProcessorOutputStream outputStream,
+            Codec[] codecs) {
         super();
 
-		this.inputStream = inputStream;
+        this.inputStream = inputStream;
         this.outputStream = outputStream;
 
-		// Create the codec chain
-		codecChain = new CodecChain(codecs, outputStream);
-	}
+        // Create the codec chain
+        codecChain = new CodecChain(codecs, outputStream);
+    }
 
-	/**
-	 * Start processing
-	 */
-	public void startProcessing() {
-		interrupted = false;
+    /**
+     * Start processing
+     */
+    public void startProcessing() {
+        interrupted = false;
         start();
-	}
+    }
 
-	/**
-	 * Stop processing
-	 */
-	public void stopProcessing() {
-		interrupted = true;
+    /**
+     * Stop processing
+     */
+    public void stopProcessing() {
+        interrupted = true;
 
-		// Close streams
-		outputStream.close();
-		inputStream.close();
-	}
+        // Close streams
+        outputStream.close();
+        inputStream.close();
+    }
 
-	/**
-	 * Background processing
-	 */
-	public void run() {
-		try {
-			// Start processing
-			while (!interrupted) {
-				// Read data from the input stream
-				Buffer inBuffer = inputStream.read();
-				if (inBuffer == null) {
-					interrupted = true;
-					break;
-				}
-				
+    /**
+     * Background processing
+     */
+    public void run() {
+        try {
+            // Start processing
+            while (!interrupted) {
+                // Read data from the input stream
+                Buffer inBuffer = inputStream.read();
+                if (inBuffer == null) {
+                    interrupted = true;
+                    break;
+                }
+
                 // Codec chain processing
                 int result = codecChain.process(inBuffer);
                 if ((result != Codec.BUFFER_PROCESSED_OK)
@@ -107,27 +108,27 @@ public class Processor extends Thread {
                     interrupted = true;
                     break;
                 }
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Returns the input stream
-     *
+     * 
      * @return Stream
      */
-	public ProcessorInputStream getInputStream() {
-		return inputStream;
-	}
+    public ProcessorInputStream getInputStream() {
+        return inputStream;
+    }
 
     /**
      * Returns the output stream
-     *
+     * 
      * @return Stream
      */
-	public ProcessorOutputStream getOutputStream() {
-		return outputStream;
-	}
+    public ProcessorOutputStream getOutputStream() {
+        return outputStream;
+    }
 }

@@ -19,6 +19,7 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.service.broadcaster;
 
 /**
@@ -26,7 +27,7 @@ package com.orangelabs.rcs.service.broadcaster;
  */
 public interface IFileUploadEventBroadcaster {
 
-	public void broadcastStateChanged(String uploadId, int status);
+    public void broadcastStateChanged(String uploadId, int status);
 
-	public void broadcastProgressUpdate(String uploadId, long currentSize, long totalSize);
+    public void broadcastProgressUpdate(String uploadId, long currentSize, long totalSize);
 }

@@ -22,64 +22,57 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.VideoOrientation;
 
 /**
  * Video sample
- *
+ * 
  * @author hlxn7157
  */
 public class VideoSample extends MediaSample {
 
-	/**
-	 * Video Orientation
-	 */
-	private VideoOrientation videoOrientation;
+    /**
+     * Video Orientation
+     */
+    private VideoOrientation videoOrientation;
 
-	/**
-	 * Constructor
-	 *
-	 * @param data
-	 *            Data
-	 * @param time
-	 *            Time stamp
-	 * @param videoOrientation
-	 *            Video orientation
-	 */
-	public VideoSample(byte[] data, long time, VideoOrientation videoOrientation) {
-		super(data, time);
-		this.videoOrientation = videoOrientation;
-	}
+    /**
+     * Constructor
+     * 
+     * @param data Data
+     * @param time Time stamp
+     * @param videoOrientation Video orientation
+     */
+    public VideoSample(byte[] data, long time, VideoOrientation videoOrientation) {
+        super(data, time);
+        this.videoOrientation = videoOrientation;
+    }
 
-	/**
-	 * Constructor
-	 *
-	 * @param data
-	 *            Data
-	 * @param time
-	 *            Time stamp
-	 * @Param sequenceNumber Packet sequence number
-	 * @param videoOrientation
-	 *            Video orientation
-	 */
-	public VideoSample(byte[] data, long time, long sequenceNumber,
-			VideoOrientation videoOrientation) {
-		super(data, time, sequenceNumber);
-		this.videoOrientation = videoOrientation;
-	}
+    /**
+     * Constructor
+     * 
+     * @param data Data
+     * @param time Time stamp
+     * @Param sequenceNumber Packet sequence number
+     * @param videoOrientation Video orientation
+     */
+    public VideoSample(byte[] data, long time, long sequenceNumber,
+            VideoOrientation videoOrientation) {
+        super(data, time, sequenceNumber);
+        this.videoOrientation = videoOrientation;
+    }
 
-	/**
-	 * Gets the video orientation
-	 *
-	 * @return VideoOrientation
-	 */
-	public VideoOrientation getVideoOrientation() {
-		return videoOrientation;
-	}
+    /**
+     * Gets the video orientation
+     * 
+     * @return VideoOrientation
+     */
+    public VideoOrientation getVideoOrientation() {
+        return videoOrientation;
+    }
 
-	/**
-	 * Sets the video orientation
-	 *
-	 * @param videoOrientation
-	 *            VideoOrientation
-	 */
-	public void setVideoOrientation(VideoOrientation orientation) {
-		this.videoOrientation = orientation;
-	}
+    /**
+     * Sets the video orientation
+     * 
+     * @param videoOrientation VideoOrientation
+     */
+    public void setVideoOrientation(VideoOrientation orientation) {
+        this.videoOrientation = orientation;
+    }
 }

@@ -20,7 +20,7 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.profiles;
 
 /**
  * Targeted level to encode
- *
+ * 
  * @author Deutsche Telekom AG
  */
 public enum H264TypeLevel {
@@ -55,7 +55,7 @@ public enum H264TypeLevel {
 
     /**
      * Constructor
-     *
+     * 
      * @param decimalValue level
      * @param constraintSet3Flag constraint Flag
      */
@@ -66,7 +66,7 @@ public enum H264TypeLevel {
 
     /**
      * Get Level value
-     *
+     * 
      * @return level
      */
     public int getDecimalValue() {
@@ -75,7 +75,7 @@ public enum H264TypeLevel {
 
     /**
      * Get Constraint Flag
-     *
+     * 
      * @return Constraint Flag
      */
     public H264ConstraintSetFlagType getH264ConstraintSet3Flag() {
@@ -84,12 +84,13 @@ public enum H264TypeLevel {
 
     /**
      * Get H264TypeLevel
-     *
+     * 
      * @param decimalValue level
      * @param constraintSet3Flag constraint Flag
      * @return H264TypeLevel
      */
-    public static H264TypeLevel getH264LevelType(int decimalValue, H264ConstraintSetFlagType constraintSet3Flag) {
+    public static H264TypeLevel getH264LevelType(int decimalValue,
+            H264ConstraintSetFlagType constraintSet3Flag) {
         for (H264TypeLevel h264LevelType : H264TypeLevel.values()) {
             if ((h264LevelType.getDecimalValue() == decimalValue) &&
                     ((h264LevelType.getH264ConstraintSet3Flag() == H264ConstraintSetFlagType.ANY) ||
@@ -115,7 +116,7 @@ public enum H264TypeLevel {
 
         /**
          * Constructor
-         *
+         * 
          * @param decimalValue constraint flag value
          */
         private H264ConstraintSetFlagType(int decimalValue) {
@@ -124,7 +125,7 @@ public enum H264TypeLevel {
 
         /**
          * Get constraint flag value
-         *
+         * 
          * @return constraint flag
          */
         public int getDecimalValue() {

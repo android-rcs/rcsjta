@@ -42,168 +42,164 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author jexa7410
  */
 public abstract class ImageTransferSession extends ContentSharingSession {
-	/**
-	 * Boundary tag
-	 */
-	private final static String BOUNDARY_TAG = "boundary1";
+    /**
+     * Boundary tag
+     */
+    private final static String BOUNDARY_TAG = "boundary1";
 
-	/**
-	 * Default SO_TIMEOUT value (in seconds)
-	 */
-	public final static int DEFAULT_SO_TIMEOUT = 30;
+    /**
+     * Default SO_TIMEOUT value (in seconds)
+     */
+    public final static int DEFAULT_SO_TIMEOUT = 30;
 
-	/**
-	 * Image transfered
-	 */
-	private boolean imageTransfered = false;
+    /**
+     * Image transfered
+     */
+    private boolean imageTransfered = false;
 
-	/**
-	 * Thumbnail
-	 */
-	MmContent thumbnail;
+    /**
+     * Thumbnail
+     */
+    MmContent thumbnail;
 
-	/**
-	 * The logger
-	 */
-	private static final Logger logger = Logger.getLogger(ImageTransferSession.class
-			.getSimpleName());
+    /**
+     * The logger
+     */
+    private static final Logger logger = Logger.getLogger(ImageTransferSession.class
+            .getSimpleName());
 
-	/**
-	 * Constructor
-	 * 
-	 * @param parent
-	 *            IMS service
-	 * @param content
-	 *            Content to be shared
-	 * @param contact
-	 *            Remote contact Id
-	 * @param thumbnail
-	 *            The thumbnail content
-	 */
-	public ImageTransferSession(ImsService parent, MmContent content, ContactId contact,
-			MmContent thumbnail) {
-		super(parent, content, contact);
+    /**
+     * Constructor
+     * 
+     * @param parent IMS service
+     * @param content Content to be shared
+     * @param contact Remote contact Id
+     * @param thumbnail The thumbnail content
+     */
+    public ImageTransferSession(ImsService parent, MmContent content, ContactId contact,
+            MmContent thumbnail) {
+        super(parent, content, contact);
 
-		this.thumbnail = thumbnail;
-	}
+        this.thumbnail = thumbnail;
+    }
 
-	/**
-	 * Image has been transfered
-	 */
-	public void imageTransfered() {
-		this.imageTransfered = true;
-	}
+    /**
+     * Image has been transfered
+     */
+    public void imageTransfered() {
+        this.imageTransfered = true;
+    }
 
-	/**
-	 * Is image transfered
-	 * 
-	 * @return Boolean
-	 */
-	public boolean isImageTransfered() {
-		return imageTransfered;
-	}
+    /**
+     * Is image transfered
+     * 
+     * @return Boolean
+     */
+    public boolean isImageTransfered() {
+        return imageTransfered;
+    }
 
-	/**
-	 * Returns max image sharing size
-	 * 
-	 * @return Size in bytes
-	 */
-	public static long getMaxImageSharingSize() {
-		return RcsSettings.getInstance().getMaxImageSharingSize();
-	}
+    /**
+     * Returns max image sharing size
+     * 
+     * @return Size in bytes
+     */
+    public static long getMaxImageSharingSize() {
+        return RcsSettings.getInstance().getMaxImageSharingSize();
+    }
 
-	/**
-	 * Create an INVITE request
-	 *
-	 * @return the INVITE request
-	 * @throws SipException
-	 */
-	public SipRequest createInvite() throws SipException {
+    /**
+     * Create an INVITE request
+     * 
+     * @return the INVITE request
+     * @throws SipException
+     */
+    public SipRequest createInvite() throws SipException {
 
-		if (thumbnail != null) {
-			return SipMessageFactory.createMultipartInvite(getDialogPath(),
-					RichcallService.FEATURE_TAGS_IMAGE_SHARE, getDialogPath().getLocalContent(),
-					BOUNDARY_TAG);
-		} else {
-			return SipMessageFactory.createInvite(getDialogPath(),
-					RichcallService.FEATURE_TAGS_IMAGE_SHARE, getDialogPath().getLocalContent());
-		}
-	}
+        if (thumbnail != null) {
+            return SipMessageFactory.createMultipartInvite(getDialogPath(),
+                    RichcallService.FEATURE_TAGS_IMAGE_SHARE, getDialogPath().getLocalContent(),
+                    BOUNDARY_TAG);
+        } else {
+            return SipMessageFactory.createInvite(getDialogPath(),
+                    RichcallService.FEATURE_TAGS_IMAGE_SHARE, getDialogPath().getLocalContent());
+        }
+    }
 
-	/**
-	 * Handle error
-	 *
-	 * @param error
-	 *            Error
-	 */
-	public void handleError(ImsServiceError error) {
-		if (isSessionInterrupted()) {
-			return;
-		}
+    /**
+     * Handle error
+     * 
+     * @param error Error
+     */
+    public void handleError(ImsServiceError error) {
+        if (isSessionInterrupted()) {
+            return;
+        }
 
-		// Error
-		if (logger.isActivated()) {
-			logger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
-		}
+        // Error
+        if (logger.isActivated()) {
+            logger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
+        }
 
-		// Close MSRP session
-		closeMediaSession();
+        // Close MSRP session
+        closeMediaSession();
 
-		// Remove the current session
-		removeSession();
+        // Remove the current session
+        removeSession();
 
-		ContactId contact = getRemoteContact();
-		for (int j = 0; j < getListeners().size(); j++) {
-			((ImageTransferSessionListener) getListeners().get(j)).handleSharingError(contact,
-					new ContentSharingError(error));
-		}
-	}
+        ContactId contact = getRemoteContact();
+        for (int j = 0; j < getListeners().size(); j++) {
+            ((ImageTransferSessionListener) getListeners().get(j)).handleSharingError(contact,
+                    new ContentSharingError(error));
+        }
+    }
 
-	/**
-	 * Returns the thumbnail content
-	 * 
-	 * @return Thumbnail
-	 */
-	public MmContent getThumbnail() {
-		return thumbnail;
-	}
+    /**
+     * Returns the thumbnail content
+     * 
+     * @return Thumbnail
+     */
+    public MmContent getThumbnail() {
+        return thumbnail;
+    }
 
-	/**
-	 * Check if image capacity is acceptable
-	 * 
-	 * @param imageSize
-	 *            Image size in bytes
-	 * @return Error or null if image capacity is acceptable
-	 */
-	public static ContentSharingError isImageCapacityAcceptable(long imageSize) {
-		boolean fileIsToBig = (ImageTransferSession.getMaxImageSharingSize() > 0) ? imageSize > ImageTransferSession
-				.getMaxImageSharingSize() : false;
-		boolean storageIsTooSmall = (StorageUtils.getExternalStorageFreeSpace() > 0) ? imageSize > StorageUtils
-				.getExternalStorageFreeSpace() : false;
-		if (fileIsToBig) {
-			if (logger.isActivated()) {
-				logger.warn("Image is too big, reject the image sharing");
-			}
-			return new ContentSharingError(ContentSharingError.MEDIA_SIZE_TOO_BIG);
-		} else {
-			if (storageIsTooSmall) {
-				if (logger.isActivated()) {
-					logger.warn("Not enough storage capacity, reject the image sharing");
-				}
-				return new ContentSharingError(ContentSharingError.NOT_ENOUGH_STORAGE_SPACE);
-			}
-		}
-		return null;
-	}
+    /**
+     * Check if image capacity is acceptable
+     * 
+     * @param imageSize Image size in bytes
+     * @return Error or null if image capacity is acceptable
+     */
+    public static ContentSharingError isImageCapacityAcceptable(long imageSize) {
+        boolean fileIsToBig = (ImageTransferSession.getMaxImageSharingSize() > 0) ? imageSize > ImageTransferSession
+                .getMaxImageSharingSize()
+                : false;
+        boolean storageIsTooSmall = (StorageUtils.getExternalStorageFreeSpace() > 0) ? imageSize > StorageUtils
+                .getExternalStorageFreeSpace()
+                : false;
+        if (fileIsToBig) {
+            if (logger.isActivated()) {
+                logger.warn("Image is too big, reject the image sharing");
+            }
+            return new ContentSharingError(ContentSharingError.MEDIA_SIZE_TOO_BIG);
+        } else {
+            if (storageIsTooSmall) {
+                if (logger.isActivated()) {
+                    logger.warn("Not enough storage capacity, reject the image sharing");
+                }
+                return new ContentSharingError(ContentSharingError.NOT_ENOUGH_STORAGE_SPACE);
+            }
+        }
+        return null;
+    }
 
-	@Override
-	public void startSession() {
-		getImsService().getImsModule().getRichcallService().addSession(this);
-		start();
-	}
+    @Override
+    public void startSession() {
+        getImsService().getImsModule().getRichcallService().addSession(this);
+        start();
+    }
 
-	@Override
-	public void removeSession() {
-		getImsService().getImsModule().getRichcallService().removeSession(this);
-	}
+    @Override
+    public void removeSession() {
+        getImsService().getImsModule().getRichcallService().removeSession(this);
+    }
 }

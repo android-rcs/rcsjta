@@ -20,23 +20,23 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.decoder;
 
 public class NativeH264Decoder {
 
-	public NativeH264Decoder() {
-	}
+    public NativeH264Decoder() {
+    }
 
-	public static native int InitDecoder();
+    public static native int InitDecoder();
 
-	public static native int DeinitDecoder();
+    public static native int DeinitDecoder();
 
-	public static synchronized native int[] DecodeAndConvert(byte abyte0[], int rotateOrientation,
-			int[] dimensions);
+    public static synchronized native int[] DecodeAndConvert(byte abyte0[], int rotateOrientation,
+            int[] dimensions);
 
-	public static synchronized native int getLastDecodeStatus();
+    public static synchronized native int getLastDecodeStatus();
 
-	static {
-		String libname = "H264Decoder";
-		try {
-			System.loadLibrary(libname);
-		} catch (Exception exception) {
-		}
-	}
+    static {
+        String libname = "H264Decoder";
+        try {
+            System.loadLibrary(libname);
+        } catch (Exception exception) {
+        }
+    }
 }

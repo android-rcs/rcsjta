@@ -159,7 +159,7 @@ public class ImageSharingIntentService extends IntentService {
         notif.setContentText(getString(R.string.label_from_args, displayName));
 
         // Send notification
-        NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager
                 .notify(ishDao.getSharingId(), Utils.NOTIF_ID_IMAGE_SHARE, notif.build());
     }

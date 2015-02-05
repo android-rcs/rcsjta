@@ -24,7 +24,7 @@ import android.content.Intent;
 
 /**
  * Video sharing invitation receiver
- *
+ * 
  * @author Jean-Marc AUFFRET
  * @author YPLO6403
  */

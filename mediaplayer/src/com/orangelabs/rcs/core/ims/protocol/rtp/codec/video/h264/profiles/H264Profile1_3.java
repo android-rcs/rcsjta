@@ -23,7 +23,7 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.JavaPacketizer;
 
 /**
  * Represent H264 Profile to Level 1.3
- *
+ * 
  * @author Deutsche Telekom AG
  */
 public class H264Profile1_3 extends H264Profile {
@@ -34,14 +34,13 @@ public class H264Profile1_3 extends H264Profile {
     public static final String PROFILE_NAME = "H264Profile1.3";
 
     /**
-     * Profile Id
-     * 42 (Baseline 66), 80 (Constrained Baseline), 0d (level 1.3)
+     * Profile Id 42 (Baseline 66), 80 (Constrained Baseline), 0d (level 1.3)
      */
     public static final String BASELINE_PROFILE_ID = "42800d";
 
     private static final int BASELINE_PROFILE_BITRATE = 768000;
 
-//    private static final int HIGH_PROFILE_BITRATE = 960000;
+    // private static final int HIGH_PROFILE_BITRATE = 960000;
 
     private static final String base64CodeSPS = "J0KADZY1BYnI";
 
@@ -51,9 +50,9 @@ public class H264Profile1_3 extends H264Profile {
 
     static {
         profileParams = H264Config.CODEC_PARAM_PROFILEID + "=" + BASELINE_PROFILE_ID + ";" +
-                        H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=1;" +
-                        H264Config.CODEC_PARAM_SPROP_PARAMETER_SETS + "=" +
-                        base64CodeSPS + "," + base64CodePPS + ";";
+                H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=1;" +
+                H264Config.CODEC_PARAM_SPROP_PARAMETER_SETS + "=" +
+                base64CodeSPS + "," + base64CodePPS + ";";
     }
 
     /**

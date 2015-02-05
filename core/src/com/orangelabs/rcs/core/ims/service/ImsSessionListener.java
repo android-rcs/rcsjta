@@ -26,65 +26,57 @@ import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * Listener of events sent during an IMS session
- *
+ * 
  * @author JM. Auffret
  */
 public interface ImsSessionListener {
-	/**
-	 * Session is started
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 */
-	public void handleSessionStarted(ContactId contact);
+    /**
+     * Session is started
+     * 
+     * @param contact Remote contact
+     */
+    public void handleSessionStarted(ContactId contact);
 
-	/**
-	 * Session has been aborted
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 * @param reason
-	 *            Termination reason
-	 */
-	public void handleSessionAborted(ContactId contact, int reason);
+    /**
+     * Session has been aborted
+     * 
+     * @param contact Remote contact
+     * @param reason Termination reason
+     */
+    public void handleSessionAborted(ContactId contact, int reason);
 
-	/**
-	 * Session has been terminated by remote
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 */
-	public void handleSessionTerminatedByRemote(ContactId contact);
+    /**
+     * Session has been terminated by remote
+     * 
+     * @param contact Remote contact
+     */
+    public void handleSessionTerminatedByRemote(ContactId contact);
 
-	/**
-	 * Session is being rejected by user
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 */
-	public void handleSessionRejectedByUser(ContactId contact);
+    /**
+     * Session is being rejected by user
+     * 
+     * @param contact Remote contact
+     */
+    public void handleSessionRejectedByUser(ContactId contact);
 
-	/**
-	 * Session is being rejected due to time out
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 */
-	public void handleSessionRejectedByTimeout(ContactId contact);
+    /**
+     * Session is being rejected due to time out
+     * 
+     * @param contact Remote contact
+     */
+    public void handleSessionRejectedByTimeout(ContactId contact);
 
-	/**
-	 * Session is being rejected by remote
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 */
-	public void handleSessionRejectedByRemote(ContactId contact);
+    /**
+     * Session is being rejected by remote
+     * 
+     * @param contact Remote contact
+     */
+    public void handleSessionRejectedByRemote(ContactId contact);
 
-	/**
-	 * Accept has been called and the session is in the process of being started
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 */
-	public void handleSessionAccepted(ContactId contact);
+    /**
+     * Accept has been called and the session is in the process of being started
+     * 
+     * @param contact Remote contact
+     */
+    public void handleSessionAccepted(ContactId contact);
 }

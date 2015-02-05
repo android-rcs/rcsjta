@@ -30,99 +30,103 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.stream.RtpStreamListener;
  * Media RTP sender
  */
 public class MediaRtpSender {
-	/**
-	 * Format
-	 */
-	protected Format format;
+    /**
+     * Format
+     */
+    protected Format format;
 
     /**
      * Media processor
      */
-	protected Processor processor = null;
+    protected Processor processor = null;
 
     /**
      * MediaCaptureStream
      */
-	protected MediaCaptureStream inputStream = null;
+    protected MediaCaptureStream inputStream = null;
 
     /**
      * RTP output stream
      */
-	protected RtpOutputStream outputStream = null;
+    protected RtpOutputStream outputStream = null;
 
     /**
      * Local RTP port
      */
-	protected int localRtpPort;
+    protected int localRtpPort;
 
     /**
      * Constructor
-     *
+     * 
      * @param format Media format
      */
     public MediaRtpSender(Format format, int localRtpPort) {
-    	this.format = format;
+        this.format = format;
         this.localRtpPort = localRtpPort;
     }
 
     /**
      * Prepare the RTP session
-     *
+     * 
      * @param player Media player
      * @param remoteAddress Remote address
      * @param remotePort Remote port
      * @throws RtpException
      */
-    public void prepareSession(MediaInput player, String remoteAddress, int remotePort, RtpStreamListener rtpStreamListener)
+    public void prepareSession(MediaInput player, String remoteAddress, int remotePort,
+            RtpStreamListener rtpStreamListener)
             throws RtpException {
-    	try {
-    		// Create the input stream
+        try {
+            // Create the input stream
             inputStream = new MediaCaptureStream(format, player);
-    		inputStream.open();
+            inputStream.open();
 
             // Create the output stream
-            outputStream = new RtpOutputStream(remoteAddress, remotePort, localRtpPort, RtpOutputStream.RTCP_SOCKET_TIMEOUT);
+            outputStream = new RtpOutputStream(remoteAddress, remotePort, localRtpPort,
+                    RtpOutputStream.RTCP_SOCKET_TIMEOUT);
             outputStream.addRtpStreamListener(rtpStreamListener);
             outputStream.open();
 
-        	// Create the codec chain
-        	Codec[] codecChain = MediaRegistry.generateEncodingCodecChain(format.getCodec());
+            // Create the codec chain
+            Codec[] codecChain = MediaRegistry.generateEncodingCodecChain(format.getCodec());
 
             // Create the media processor
-    		processor = new Processor(inputStream, outputStream, codecChain);
-        } catch(Exception e) {
-        	throw new RtpException("Can't prepare resources");
+            processor = new Processor(inputStream, outputStream, codecChain);
+        } catch (Exception e) {
+            throw new RtpException("Can't prepare resources");
         }
     }
-    
+
     /**
      * Prepare the RTP session for a sender associated to a receiver
-     *
+     * 
      * @param player Media player
      * @param remoteAddress Remote address
      * @param remotePort Remote port
      * @throws RtpException
      */
-    public void prepareSession(MediaInput player, String remoteAddress, int remotePort, RtpInputStream rtpStream, RtpStreamListener rtpStreamListener)
+    public void prepareSession(MediaInput player, String remoteAddress, int remotePort,
+            RtpInputStream rtpStream, RtpStreamListener rtpStreamListener)
             throws RtpException {
-    	try {
-    		// Create the input stream
+        try {
+            // Create the input stream
             inputStream = new MediaCaptureStream(format, player);
-    		inputStream.open();
+            inputStream.open();
 
             // Create the output stream
-            //outputStream = new RtpOutputStream(remoteAddress, remotePort, localRtpPort, RtpOutputStream.RTCP_SOCKET_TIMEOUT);
-			outputStream = new RtpOutputStream(remoteAddress, remotePort, rtpStream);
+            // outputStream = new RtpOutputStream(remoteAddress, remotePort, localRtpPort,
+            // RtpOutputStream.RTCP_SOCKET_TIMEOUT);
+            outputStream = new RtpOutputStream(remoteAddress, remotePort, rtpStream);
             outputStream.addRtpStreamListener(rtpStreamListener);
             outputStream.open();
 
-        	// Create the codec chain
-        	Codec[] codecChain = MediaRegistry.generateEncodingCodecChain(format.getCodec());
+            // Create the codec chain
+            Codec[] codecChain = MediaRegistry.generateEncodingCodecChain(format.getCodec());
 
             // Create the media processor
-    		processor = new Processor(inputStream, outputStream, codecChain);
-        } catch(Exception e) {
-        	throw new RtpException("Can't prepare resources");
+            processor = new Processor(inputStream, outputStream, codecChain);
+        } catch (Exception e) {
+            throw new RtpException("Can't prepare resources");
         }
     }
 
@@ -131,20 +135,20 @@ public class MediaRtpSender {
      */
     public void startSession() {
 
-    	// Start the media processor
-		if (processor != null) {
-			processor.startProcessing();
-		}
+        // Start the media processor
+        if (processor != null) {
+            processor.startProcessing();
+        }
     }
 
     /**
      * Stop the RTP session
      */
     public void stopSession() {
-    	// Stop the media processor
-		if (processor != null) {
-			processor.stopProcessing();
-		}
+        // Stop the media processor
+        if (processor != null) {
+            processor.stopProcessing();
+        }
 
         if (outputStream != null)
             outputStream.close();

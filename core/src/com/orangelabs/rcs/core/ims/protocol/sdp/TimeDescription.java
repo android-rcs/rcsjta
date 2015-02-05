@@ -26,7 +26,7 @@ import java.util.Vector;
  * @author jexa7410
  */
 public class TimeDescription {
-	public String timeActive;
+    public String timeActive;
 
-	public Vector<String> repeatTimes;
+    public Vector<String> repeatTimes;
 }

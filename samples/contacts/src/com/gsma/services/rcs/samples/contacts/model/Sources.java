@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AuthenticatorDescription;
@@ -44,8 +43,8 @@ import com.google.common.collect.Sets;
 import com.gsma.services.rcs.samples.contacts.model.ContactsSource.DataKind;
 
 /**
- * Singleton holder for all parsed {@link ContactsSource} available on the
- * system, typically filled through {@link PackageManager} queries.
+ * Singleton holder for all parsed {@link ContactsSource} available on the system, typically filled
+ * through {@link PackageManager} queries.
  */
 public class Sources extends BroadcastReceiver implements OnAccountsUpdateListener {
     private static final String TAG = "Sources";
@@ -62,9 +61,9 @@ public class Sources extends BroadcastReceiver implements OnAccountsUpdateListen
     private static SoftReference<Sources> sInstance = null;
 
     /**
-     * Requests the singleton instance of {@link Sources} with data bound from
-     * the available authenticators. This method blocks until its interaction
-     * with {@link AccountManager} is finished, so don't call from a UI thread.
+     * Requests the singleton instance of {@link Sources} with data bound from the available
+     * authenticators. This method blocks until its interaction with {@link AccountManager} is
+     * finished, so don't call from a UI thread.
      */
     public static synchronized Sources getInstance(Context context) {
         Sources sources = sInstance == null ? null : sInstance.get();
@@ -82,8 +81,6 @@ public class Sources extends BroadcastReceiver implements OnAccountsUpdateListen
         mContext = context;
         mApplicationContext = context.getApplicationContext();
         mAccountManager = AccountManager.get(mApplicationContext);
-
-      
 
         queryAccounts();
 
@@ -135,7 +132,9 @@ public class Sources extends BroadcastReceiver implements OnAccountsUpdateListen
                 pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
             } else {
                 final String packageName = intent.getData().getSchemeSpecificPart();
-                pkgList = new String[] { packageName };
+                pkgList = new String[] {
+                        packageName
+                };
             }
             if (pkgList != null) {
                 for (String packageName : pkgList) {
@@ -187,33 +186,33 @@ public class Sources extends BroadcastReceiver implements OnAccountsUpdateListen
         final AccountManager am = mAccountManager;
 
         final SyncAdapterType[] syncs = ContentResolver.getSyncAdapterTypes();
-		final AuthenticatorDescription[] auths = am.getAuthenticatorTypes();
+        final AuthenticatorDescription[] auths = am.getAuthenticatorTypes();
 
-		for (SyncAdapterType sync : syncs) {
-		    if (!ContactsContract.AUTHORITY.equals(sync.authority)) {
-		        // Skip sync adapters that don't provide contact data.
-		        continue;
-		    }
+        for (SyncAdapterType sync : syncs) {
+            if (!ContactsContract.AUTHORITY.equals(sync.authority)) {
+                // Skip sync adapters that don't provide contact data.
+                continue;
+            }
 
-		    // Look for the formatting details provided by each sync
-		    // adapter, using the authenticator to find general resources.
-		    final String accountType = sync.accountType;
-		    final AuthenticatorDescription auth = findAuthenticator(auths, accountType);
+            // Look for the formatting details provided by each sync
+            // adapter, using the authenticator to find general resources.
+            final String accountType = sync.accountType;
+            final AuthenticatorDescription auth = findAuthenticator(auths, accountType);
 
-		    ContactsSource source = new FallbackSource();;
-		   
+            ContactsSource source = new FallbackSource();
+            ;
 
-		    source.accountType = auth.type;
-		    source.titleRes = auth.labelId;
-		    source.iconRes = auth.iconId;
+            source.accountType = auth.type;
+            source.titleRes = auth.labelId;
+            source.iconRes = auth.iconId;
 
-		    addSource(source);
-		}
+            addSource(source);
+        }
     }
 
     /**
-     * Find a specific {@link AuthenticatorDescription} in the provided list
-     * that matches the given account type.
+     * Find a specific {@link AuthenticatorDescription} in the provided list that matches the given
+     * account type.
      */
     protected static AuthenticatorDescription findAuthenticator(AuthenticatorDescription[] auths,
             String accountType) {
@@ -226,8 +225,8 @@ public class Sources extends BroadcastReceiver implements OnAccountsUpdateListen
     }
 
     /**
-     * Return list of all known, writable {@link ContactsSource}. Sources
-     * returned may require inflation before they can be used.
+     * Return list of all known, writable {@link ContactsSource}. Sources returned may require
+     * inflation before they can be used.
      */
     public ArrayList<Account> getAccounts(boolean writableOnly) {
         final AccountManager am = mAccountManager;
@@ -248,11 +247,10 @@ public class Sources extends BroadcastReceiver implements OnAccountsUpdateListen
     }
 
     /**
-     * Find the best {@link DataKind} matching the requested
-     * {@link ContactsSource#accountType} and {@link DataKind#mimeType}. If no
-     * direct match found, we try searching {@link #mFallbackSource}.
-     * When fourceRefresh is set to true, cache is refreshed and inflation of each
-     * EditField will occur.
+     * Find the best {@link DataKind} matching the requested {@link ContactsSource#accountType} and
+     * {@link DataKind#mimeType}. If no direct match found, we try searching
+     * {@link #mFallbackSource}. When fourceRefresh is set to true, cache is refreshed and inflation
+     * of each EditField will occur.
      */
     public DataKind getKindOrFallback(String accountType, String mimeType, Context context,
             int inflateLevel) {
@@ -284,7 +282,8 @@ public class Sources extends BroadcastReceiver implements OnAccountsUpdateListen
     public ContactsSource getInflatedSource(String accountType, int inflateLevel) {
         // Try finding specific source, otherwise use fallback
         ContactsSource source = mSources.get(accountType);
-        if (source == null) source = mFallbackSource;
+        if (source == null)
+            source = mFallbackSource;
 
         if (source.isInflated(inflateLevel)) {
             // Already inflated, so return directly

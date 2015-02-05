@@ -26,26 +26,24 @@ import android.os.RemoteException;
  * @author Jean-Marc AUFFRET
  */
 public class ServerApiException extends RemoteException {
-	static final long serialVersionUID = 1L;
+    static final long serialVersionUID = 1L;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param e
-	 *            Exception
-	 */
-	public ServerApiException(Exception e) {
-		setStackTrace(e.getStackTrace());
-	}
+    /**
+     * Constructor
+     * 
+     * @param e Exception
+     */
+    public ServerApiException(Exception e) {
+        setStackTrace(e.getStackTrace());
+    }
 
-	/**
-	 * Constructor
-	 * 
-	 * @param error
-	 *            Error message
-	 */
-	public ServerApiException(String error) {
-		Exception e = new Exception(error);
-		this.setStackTrace(e.getStackTrace());
-	}
+    /**
+     * Constructor
+     * 
+     * @param error Error message
+     */
+    public ServerApiException(String error) {
+        Exception e = new Exception(error);
+        this.setStackTrace(e.getStackTrace());
+    }
 }

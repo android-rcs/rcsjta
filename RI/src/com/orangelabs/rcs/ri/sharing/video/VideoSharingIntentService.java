@@ -158,7 +158,7 @@ public class VideoSharingIntentService extends IntentService {
         notif.setContentText(getString(R.string.label_from_args, displayName));
 
         // Send notification
-        NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager
                 .notify(vshDao.getSharingId(), Utils.NOTIF_ID_VIDEO_SHARE, notif.build());
     }

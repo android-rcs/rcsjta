@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.provisioning;
 
 /**
@@ -23,87 +24,83 @@ package com.orangelabs.rcs.provisioning;
  * @author jexa7410
  */
 public class Parameter {
-	/**
-	 * Parameter name
-	 */
-	private String name;
+    /**
+     * Parameter name
+     */
+    private String name;
 
-	/**
-	 * Parameter value
-	 */
-	private String value;
+    /**
+     * Parameter value
+     */
+    private String value;
 
-	/**
-	 * Parameter type
-	 */
-	private String type;
+    /**
+     * Parameter type
+     */
+    private String type;
 
-	/**
-	 * Parameter path
-	 */
-	private String path;
+    /**
+     * Parameter path
+     */
+    private String path;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param name
-	 *            Name
-	 * @param value
-	 *            Value
-	 * @param type
-	 *            Type
-	 * @param path
-	 *            Path
-	 */
-	public Parameter(String name, String value, String type, String path) {
-		this.name = name;
-		this.value = value;
-		this.type = type;
-		this.path = path;
-	}
+    /**
+     * Constructor
+     * 
+     * @param name Name
+     * @param value Value
+     * @param type Type
+     * @param path Path
+     */
+    public Parameter(String name, String value, String type, String path) {
+        this.name = name;
+        this.value = value;
+        this.type = type;
+        this.path = path;
+    }
 
-	/**
-	 * Returns parameter name
-	 * 
-	 * @return String
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * Returns parameter name
+     * 
+     * @return String
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * Returns parameter value
-	 * 
-	 * @return String
-	 */
-	public String getValue() {
-		return value;
-	}
+    /**
+     * Returns parameter value
+     * 
+     * @return String
+     */
+    public String getValue() {
+        return value;
+    }
 
-	/**
-	 * Returns parameter type
-	 * 
-	 * @return String
-	 */
-	public String getType() {
-		return type;
-	}
+    /**
+     * Returns parameter type
+     * 
+     * @return String
+     */
+    public String getType() {
+        return type;
+    }
 
-	/**
-	 * Returns the path associated to the parameter
-	 * 
-	 * @return
-	 */
-	public String getPath() {
-		return path;
-	}
+    /**
+     * Returns the path associated to the parameter
+     * 
+     * @return
+     */
+    public String getPath() {
+        return path;
+    }
 
-	/**
-	 * Returns the string representtaion of the parameter
-	 * 
-	 * @return String
-	 */
-	public String toString() {
-		return "Name: " + name + ", value=" + value + ", type=" + type + ", path=" + path;
-	}
+    /**
+     * Returns the string representtaion of the parameter
+     * 
+     * @return String
+     */
+    public String toString() {
+        return "Name: " + name + ", value=" + value + ", type=" + type + ", path=" + path;
+    }
 }

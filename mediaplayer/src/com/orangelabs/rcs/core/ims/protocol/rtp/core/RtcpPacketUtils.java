@@ -20,22 +20,22 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.core;
 
 /**
  * RTCP utils.
- *
+ * 
  * @author hlxn7157
  */
 public class RtcpPacketUtils {
 
     /**
      * Convert 64 bit long to n bytes.
-     *
+     * 
      * @param data data
      * @param n desired number of bytes to convert the long to.
      * @return buffer
      */
     public static byte[] longToBytes(long data, int n) {
         byte buf[] = new byte[n];
-         for (int i = n - 1; i >= 0; i--) {
-            buf[i] = (byte)data;
+        for (int i = n - 1; i >= 0; i--) {
+            buf[i] = (byte) data;
             data = data >> 8;
         }
         return buf;
@@ -43,7 +43,7 @@ public class RtcpPacketUtils {
 
     /**
      * Append two byte arrays.
-     *
+     * 
      * @param pck1 first packet.
      * @param pck2 second packet.
      * @return concatenated packet.

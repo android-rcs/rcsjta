@@ -13,14 +13,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.orangelabs.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.contacts.ContactId;
 
 public interface IIPCallEventBroadcaster {
 
-	public void broadcastIPCallStateChanged(ContactId contact, String callId, int status,
-			int reasonCode);
+    public void broadcastIPCallStateChanged(ContactId contact, String callId, int status,
+            int reasonCode);
 
-	public void broadcastIPCallInvitation(String callId);
+    public void broadcastIPCallInvitation(String callId);
 }

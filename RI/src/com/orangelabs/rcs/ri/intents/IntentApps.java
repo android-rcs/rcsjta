@@ -51,17 +51,17 @@ public class IntentApps extends Activity {
         setContentView(R.layout.intents_apps);
 
         // Set button callback
-        Button btn = (Button)findViewById(R.id.load_chat);
+        Button btn = (Button) findViewById(R.id.load_chat);
         btn.setOnClickListener(btnListener);
-        btn = (Button)findViewById(R.id.load_ft);
+        btn = (Button) findViewById(R.id.load_ft);
         btn.setOnClickListener(btnListener);
-        btn = (Button)findViewById(R.id.load_group_chat);
+        btn = (Button) findViewById(R.id.load_group_chat);
         btn.setOnClickListener(btnListener);
-        btn = (Button)findViewById(R.id.initiate_ft);
+        btn = (Button) findViewById(R.id.initiate_ft);
         btn.setOnClickListener(btnListener);
-        btn = (Button)findViewById(R.id.initiate_group_chat);
+        btn = (Button) findViewById(R.id.initiate_group_chat);
         btn.setOnClickListener(btnListener);
-        btn = (Button)findViewById(R.id.initiate_chat);
+        btn = (Button) findViewById(R.id.initiate_chat);
         btn.setOnClickListener(btnListener);
     }
 

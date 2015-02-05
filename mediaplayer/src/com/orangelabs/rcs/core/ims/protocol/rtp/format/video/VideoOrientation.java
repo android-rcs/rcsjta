@@ -22,7 +22,7 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.RtpUtils;
 
 /**
  * RCS Video orientation
- *
+ * 
  * @author Deutsche Telekom
  */
 public class VideoOrientation {
@@ -44,7 +44,7 @@ public class VideoOrientation {
 
     /**
      * Constructor
-     *
+     * 
      * @param headerId Orientation header id
      * @param camera Camera
      * @param orientation Orientation
@@ -57,7 +57,7 @@ public class VideoOrientation {
 
     /**
      * Constructor
-     *
+     * 
      * @param camera Camera
      * @param orientation Orientation
      */
@@ -68,7 +68,7 @@ public class VideoOrientation {
 
     /**
      * Gets the VideoOrientation camera
-     *
+     * 
      * @return Camera
      */
     public CameraOptions getCamera() {
@@ -77,7 +77,7 @@ public class VideoOrientation {
 
     /**
      * Gets the VideoOrientation orientation
-     *
+     * 
      * @return Orientation
      */
     public Orientation getOrientation() {
@@ -85,9 +85,8 @@ public class VideoOrientation {
     }
 
     /**
-     * Converts the video orientation into the byte used to transmit int RTP
-     * header
-     *
+     * Converts the video orientation into the byte used to transmit int RTP header
+     * 
      * @return Byte representing the video orientation
      */
     public byte getVideoOrientation() {
@@ -96,7 +95,7 @@ public class VideoOrientation {
 
     /**
      * Gets the negotiated header ID.
-     *
+     * 
      * @return Header id
      */
     public int getHeaderId() {
@@ -105,7 +104,7 @@ public class VideoOrientation {
 
     /**
      * Parses the byte into a VideoOrientation object
-     *
+     * 
      * @param videoOrientation Byte representing the video Orientation
      * @return VideoOrientation object
      */

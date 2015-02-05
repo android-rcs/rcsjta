@@ -28,18 +28,17 @@ package com.orangelabs.rcs.core.content;
  * @author jexa7410
  */
 public class LiveVideoContent extends VideoContent {
-	/**
-	 * Livevideo URL constant
-	 */
-	public static final String URL = "capture://video";
+    /**
+     * Livevideo URL constant
+     */
+    public static final String URL = "capture://video";
 
-	/**
-	 * Constructor
-	 * 
-	 * @param encoding
-	 *            Encoding
-	 */
-	public LiveVideoContent(String encoding) {
-		super(encoding);
-	}
+    /**
+     * Constructor
+     * 
+     * @param encoding Encoding
+     */
+    public LiveVideoContent(String encoding) {
+        super(encoding);
+    }
 }

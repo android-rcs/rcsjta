@@ -221,7 +221,7 @@ public class ImageSharingDAO implements Parcelable {
     public ImageSharingDAO(final Context context, final String sharingId) throws Exception {
         Uri uri = ImageSharingLog.CONTENT_URI;
         String[] whereArgs = new String[] {
-            sharingId
+                sharingId
         };
         Cursor cursor = null;
         try {
@@ -270,8 +270,7 @@ public class ImageSharingDAO implements Parcelable {
     }
 
     /**
-     * public CREATOR field that generates instances of Parcelable class from a
-     * VideoSharingDAO.
+     * public CREATOR field that generates instances of Parcelable class from a VideoSharingDAO.
      */
     public static final Parcelable.Creator<ImageSharingDAO> CREATOR = new Parcelable.Creator<ImageSharingDAO>() {
         @Override

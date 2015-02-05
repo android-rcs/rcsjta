@@ -140,7 +140,7 @@ public class ReceiveGeolocSharing extends Activity {
             final String _state = RiApplication.GSH_STATES[state];
             handler.post(new Runnable() {
                 public void run() {
-                    TextView statusView = (TextView)findViewById(R.id.progress_status);
+                    TextView statusView = (TextView) findViewById(R.id.progress_status);
                     switch (state) {
                         case GeolocSharing.State.STARTED:
                             // Session is established: display session status
@@ -165,17 +165,17 @@ public class ReceiveGeolocSharing extends Activity {
                             // Display transfer progress
                             statusView.setText(_state);
                             // Make sure progress bar is at the end
-                            ProgressBar progressBar = (ProgressBar)findViewById(R.id.progress_bar);
+                            ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
                             progressBar.setProgress(progressBar.getMax());
 
                             // Show the shared geoloc
                             Intent intent = new Intent(ReceiveGeolocSharing.this,
                                     DisplayGeoloc.class);
-                            intent.putExtra(DisplayGeoloc.EXTRA_CONTACT, (Parcelable)contact);
+                            intent.putExtra(DisplayGeoloc.EXTRA_CONTACT, (Parcelable) contact);
 
                             try {
                                 mGeoloc = mGeolocSharing.getGeoloc();
-                                intent.putExtra(DisplayGeoloc.EXTRA_GEOLOC, (Parcelable)mGeoloc);
+                                intent.putExtra(DisplayGeoloc.EXTRA_GEOLOC, (Parcelable) mGeoloc);
                                 startActivity(intent);
                             } catch (RcsServiceException e) {
                                 if (LogUtils.isActive) {
@@ -258,7 +258,7 @@ public class ReceiveGeolocSharing extends Activity {
             }
 
             // Display sharing infos
-            TextView fromTextView = (TextView)findViewById(R.id.from);
+            TextView fromTextView = (TextView) findViewById(R.id.from);
             String from = RcsDisplayName.getInstance(this).getDisplayName(mRemoteContact);
             fromTextView.setText(getString(R.string.label_from_args, from));
 
@@ -333,8 +333,8 @@ public class ReceiveGeolocSharing extends Activity {
      * @param totalSize Total size to be transferred
      */
     private void updateProgressBar(long currentSize, long totalSize) {
-        TextView statusView = (TextView)findViewById(R.id.progress_status);
-        ProgressBar progressBar = (ProgressBar)findViewById(R.id.progress_bar);
+        TextView statusView = (TextView) findViewById(R.id.progress_status);
+        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
         String value = "" + (currentSize / 1024);
         if (totalSize != 0) {
@@ -344,8 +344,8 @@ public class ReceiveGeolocSharing extends Activity {
         statusView.setText(value);
 
         if (currentSize != 0) {
-            double position = ((double)currentSize / (double)totalSize) * 100.0;
-            progressBar.setProgress((int)position);
+            double position = ((double) currentSize / (double) totalSize) * 100.0;
+            progressBar.setProgress((int) position);
         } else {
             progressBar.setProgress(0);
         }

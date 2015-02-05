@@ -37,89 +37,88 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class XcapDirectoryParser extends DefaultHandler {
 
-	private StringBuffer accumulator;
-	private Folder folder = null;
-	private Entry entry = null;
+    private StringBuffer accumulator;
+    private Folder folder = null;
+    private Entry entry = null;
 
-	private Hashtable<String, Folder> docs = new Hashtable<String, Folder>();
+    private Hashtable<String, Folder> docs = new Hashtable<String, Folder>();
 
-	/**
-	 * The logger
-	 */
-	private Logger logger = Logger.getLogger(this.getClass().getName());
+    /**
+     * The logger
+     */
+    private Logger logger = Logger.getLogger(this.getClass().getName());
 
-	/**
-	 * Constructor
-	 * 
-	 * @param inputSource
-	 *            Input source
-	 * @throws Exception
-	 */
-	public XcapDirectoryParser(InputSource inputSource) throws Exception {
-		SAXParserFactory factory = SAXParserFactory.newInstance();
-		SAXParser parser = factory.newSAXParser();
-		parser.parse(inputSource, this);
-	}
+    /**
+     * Constructor
+     * 
+     * @param inputSource Input source
+     * @throws Exception
+     */
+    public XcapDirectoryParser(InputSource inputSource) throws Exception {
+        SAXParserFactory factory = SAXParserFactory.newInstance();
+        SAXParser parser = factory.newSAXParser();
+        parser.parse(inputSource, this);
+    }
 
-	public void startDocument() {
-		if (logger.isActivated()) {
-			logger.debug("Start document");
-		}
-		accumulator = new StringBuffer();
-	}
+    public void startDocument() {
+        if (logger.isActivated()) {
+            logger.debug("Start document");
+        }
+        accumulator = new StringBuffer();
+    }
 
-	public void characters(char buffer[], int start, int length) {
-		accumulator.append(buffer, start, length);
-	}
+    public void characters(char buffer[], int start, int length) {
+        accumulator.append(buffer, start, length);
+    }
 
-	public void startElement(String namespaceURL, String localName, String qname, Attributes attr) {
-		accumulator.setLength(0);
+    public void startElement(String namespaceURL, String localName, String qname, Attributes attr) {
+        accumulator.setLength(0);
 
-		if (localName.equals("folder")) {
-			String auid = attr.getValue("auid").trim();
-			folder = new Folder(auid);
-		} else if (localName.equals("entry")) {
-			String uri = attr.getValue("uri").trim();
-			entry = new Entry(uri);
+        if (localName.equals("folder")) {
+            String auid = attr.getValue("auid").trim();
+            folder = new Folder(auid);
+        } else if (localName.equals("entry")) {
+            String uri = attr.getValue("uri").trim();
+            entry = new Entry(uri);
 
-			String etag = attr.getValue("etag");
-			if (etag != null) {
-				entry.setEtag(etag.trim());
-			}
+            String etag = attr.getValue("etag");
+            if (etag != null) {
+                entry.setEtag(etag.trim());
+            }
 
-			String lastModified = attr.getValue("last-modified");
-			if (lastModified != null) {
-				long ts = DateUtils.decodeDate(lastModified.trim());
-				entry.setLastModified(ts);
-			}
-		}
-	}
+            String lastModified = attr.getValue("last-modified");
+            if (lastModified != null) {
+                long ts = DateUtils.decodeDate(lastModified.trim());
+                entry.setLastModified(ts);
+            }
+        }
+    }
 
-	public void endElement(String namespaceURL, String localName, String qname) {
-		if (localName.equals("folder")) {
-			if (folder != null) {
-				docs.put(folder.getAuid(), folder);
-			}
-			folder = null;
-		} else if (localName.equals("entry")) {
-			if ((folder != null) && (entry != null)) {
-				folder.setEntry(entry);
-			}
-			entry = null;
-		} else if (localName.equals("xcap-directory")) {
-			if (logger.isActivated()) {
-				logger.debug("XCAP directory document is complete");
-			}
-		}
-	}
+    public void endElement(String namespaceURL, String localName, String qname) {
+        if (localName.equals("folder")) {
+            if (folder != null) {
+                docs.put(folder.getAuid(), folder);
+            }
+            folder = null;
+        } else if (localName.equals("entry")) {
+            if ((folder != null) && (entry != null)) {
+                folder.setEntry(entry);
+            }
+            entry = null;
+        } else if (localName.equals("xcap-directory")) {
+            if (logger.isActivated()) {
+                logger.debug("XCAP directory document is complete");
+            }
+        }
+    }
 
-	public void endDocument() {
-		if (logger.isActivated()) {
-			logger.debug("End document");
-		}
-	}
+    public void endDocument() {
+        if (logger.isActivated()) {
+            logger.debug("End document");
+        }
+    }
 
-	public Hashtable<String, Folder> getDocuments() {
-		return docs;
-	}
+    public Hashtable<String, Folder> getDocuments() {
+        return docs;
+    }
 }

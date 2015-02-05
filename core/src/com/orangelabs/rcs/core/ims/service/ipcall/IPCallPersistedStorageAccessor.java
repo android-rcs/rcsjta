@@ -34,81 +34,81 @@ import android.net.Uri;
  */
 public class IPCallPersistedStorageAccessor {
 
-	private final String mCallId;
+    private final String mCallId;
 
-	private final IPCallHistory mIPCallLog;
+    private final IPCallHistory mIPCallLog;
 
-	private ContactId mContact;
+    private ContactId mContact;
 
-	private Direction mDirection;
+    private Direction mDirection;
 
-	public IPCallPersistedStorageAccessor(String callId, IPCallHistory ipCallLog) {
-		mCallId = callId;
-		mIPCallLog = ipCallLog;
-	}
+    public IPCallPersistedStorageAccessor(String callId, IPCallHistory ipCallLog) {
+        mCallId = callId;
+        mIPCallLog = ipCallLog;
+    }
 
-	public IPCallPersistedStorageAccessor(String callId, ContactId contact, Direction direction,
-			IPCallHistory ipCallLog) {
-		mCallId = callId;
-		mContact = contact;
-		mDirection = direction;
-		mIPCallLog = ipCallLog;
-	}
+    public IPCallPersistedStorageAccessor(String callId, ContactId contact, Direction direction,
+            IPCallHistory ipCallLog) {
+        mCallId = callId;
+        mContact = contact;
+        mDirection = direction;
+        mIPCallLog = ipCallLog;
+    }
 
-	private void cacheData() {
-		Cursor cursor = null;
-		try {
-			cursor = mIPCallLog.getCacheableIPCallData(mCallId);
-			String contact = cursor.getString(cursor.getColumnIndexOrThrow(IPCallLog.CONTACT));
-			if (contact != null) {
-				mContact = ContactUtils.createContactId(contact);
-			}
-			mDirection = Direction.valueOf(cursor.getInt(cursor
-					.getColumnIndexOrThrow(IPCallLog.DIRECTION)));
-		} finally {
-			if (cursor != null) {
-				cursor.close();
-			}
-		}
-	}
+    private void cacheData() {
+        Cursor cursor = null;
+        try {
+            cursor = mIPCallLog.getCacheableIPCallData(mCallId);
+            String contact = cursor.getString(cursor.getColumnIndexOrThrow(IPCallLog.CONTACT));
+            if (contact != null) {
+                mContact = ContactUtils.createContactId(contact);
+            }
+            mDirection = Direction.valueOf(cursor.getInt(cursor
+                    .getColumnIndexOrThrow(IPCallLog.DIRECTION)));
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
 
-	public ContactId getRemoteContact() {
-		/*
-		 * Utilizing cache here as contact can't be changed in persistent storage after entry
-		 * insertion anyway so no need to query for it multiple times.
-		 */
-		if (mContact == null) {
-			cacheData();
-		}
-		return mContact;
-	}
+    public ContactId getRemoteContact() {
+        /*
+         * Utilizing cache here as contact can't be changed in persistent storage after entry
+         * insertion anyway so no need to query for it multiple times.
+         */
+        if (mContact == null) {
+            cacheData();
+        }
+        return mContact;
+    }
 
-	public int getState() {
-		return mIPCallLog.getState(mCallId);
-	}
+    public int getState() {
+        return mIPCallLog.getState(mCallId);
+    }
 
-	public int getReasonCode() {
-		return mIPCallLog.getReasonCode(mCallId);
-	}
+    public int getReasonCode() {
+        return mIPCallLog.getReasonCode(mCallId);
+    }
 
-	public Direction getDirection() {
-		/*
-		 * Utilizing cache here as direction can't be changed in persistent storage after entry
-		 * insertion anyway so no need to query for it multiple times.
-		 */
-		if (mDirection == null) {
-			cacheData();
-		}
-		return mDirection;
-	}
+    public Direction getDirection() {
+        /*
+         * Utilizing cache here as direction can't be changed in persistent storage after entry
+         * insertion anyway so no need to query for it multiple times.
+         */
+        if (mDirection == null) {
+            cacheData();
+        }
+        return mDirection;
+    }
 
-	public void setStateAndReasonCode(int state, int reasonCode) {
-		mIPCallLog.setCallStateAndReasonCode(mCallId, state, reasonCode);
-	}
+    public void setStateAndReasonCode(int state, int reasonCode) {
+        mIPCallLog.setCallStateAndReasonCode(mCallId, state, reasonCode);
+    }
 
-	public Uri addCall(ContactId contact, Direction direction, AudioContent audiocontent,
-			VideoContent videocontent, int state, int reasonCode) {
-		return mIPCallLog.addCall(mCallId, contact, direction, audiocontent, videocontent, state,
-				reasonCode);
-	}
+    public Uri addCall(ContactId contact, Direction direction, AudioContent audiocontent,
+            VideoContent videocontent, int state, int reasonCode) {
+        return mIPCallLog.addCall(mCallId, contact, direction, audiocontent, videocontent, state,
+                reasonCode);
+    }
 }

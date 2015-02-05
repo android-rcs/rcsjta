@@ -41,11 +41,11 @@ public class DummyPacketSourceStream extends Thread implements ProcessorInputStr
      */
     public final static int DUMMY_SOURCE_PERIOD = 15000;
 
-	/**
-	 * Input format
-	 */
-	private DummyFormat format = new DummyFormat();
- 
+    /**
+     * Input format
+     */
+    private DummyFormat format = new DummyFormat();
+
     /**
      * Time base
      */
@@ -59,7 +59,7 @@ public class DummyPacketSourceStream extends Thread implements ProcessorInputStr
     /**
      * Message buffer
      */
-	private FifoBuffer fifo = new FifoBuffer();
+    private FifoBuffer fifo = new FifoBuffer();
 
     /**
      * Interruption flag
@@ -72,55 +72,55 @@ public class DummyPacketSourceStream extends Thread implements ProcessorInputStr
     private boolean incomingStarted = false;
 
     /**
-	 * Constructor
-	 */
-	public DummyPacketSourceStream() {
-	}
-    
+     * Constructor
+     */
+    public DummyPacketSourceStream() {
+    }
+
     /**
-	 * Open the input stream
-	 */	
+     * Open the input stream
+     */
     public void open() {
-    	start();
-	}    	
-	
+        start();
+    }
+
     /**
      * Close the input stream
      */
     public void close() {
-    	interrupted = true;
-    	try {
-    		fifo.close();
-    	} catch(Exception e) {
+        interrupted = true;
+        try {
+            fifo.close();
+        } catch (Exception e) {
             // Intentionally blank
-    	}
+        }
     }
-    
+
     /**
      * Format of the data provided by the source stream
      * 
      * @return Format
      */
     public Format getFormat() {
-    	return format;
+        return format;
     }
-    
+
     /**
      * Background processing
      */
     public void run() {
-    	while(!interrupted) {
-	    	try {
-	    		// Build a new dummy packet
-	    	    Buffer packet = new Buffer();
-	    	    packet.setData(new byte[0]);
-	    	    packet.setLength(0);
-	    	    packet.setFormat(format);
-	    	    packet.setSequenceNumber(seqNo++);
-	        	packet.setTimeStamp(systemTimeBase.getTime());
+        while (!interrupted) {
+            try {
+                // Build a new dummy packet
+                Buffer packet = new Buffer();
+                packet.setData(new byte[0]);
+                packet.setLength(0);
+                packet.setFormat(format);
+                packet.setSequenceNumber(seqNo++);
+                packet.setTimeStamp(systemTimeBase.getTime());
 
-	        	// Post the packet in the FIFO
-	        	fifo.addObject(packet);
+                // Post the packet in the FIFO
+                fifo.addObject(packet);
 
                 // Make a pause
                 if (!incomingStarted) {
@@ -128,10 +128,10 @@ public class DummyPacketSourceStream extends Thread implements ProcessorInputStr
                 } else {
                     Thread.sleep(DUMMY_SOURCE_PERIOD);
                 }
-	    	} catch(Exception e) {
-	    		e.printStackTrace();
-	    	}
-    	}
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -141,9 +141,9 @@ public class DummyPacketSourceStream extends Thread implements ProcessorInputStr
      * @throws Exception
      */
     public Buffer read() throws Exception {
-    	// Read the FIFO the buffer
-    	Buffer buffer = (Buffer)fifo.getObject();
-    	return buffer;  
+        // Read the FIFO the buffer
+        Buffer buffer = (Buffer) fifo.getObject();
+        return buffer;
     }
 
     /**

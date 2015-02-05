@@ -21,67 +21,66 @@ import com.gsma.services.rcs.contacts.ContactId;
 
 public class ChatMessageImpl extends IChatMessage.Stub {
 
-	private final ChatMessagePersistedStorageAccessor mPersistentStorage;
+    private final ChatMessagePersistedStorageAccessor mPersistentStorage;
 
-	/**
-	 * Constructor
-	 *
-	 * @param persistentStorage
-	 *            ChatMessagePersistedStorageAccessor
-	 */
-	public ChatMessageImpl(ChatMessagePersistedStorageAccessor persistentStorage) {
-		mPersistentStorage = persistentStorage;
-	}
+    /**
+     * Constructor
+     * 
+     * @param persistentStorage ChatMessagePersistedStorageAccessor
+     */
+    public ChatMessageImpl(ChatMessagePersistedStorageAccessor persistentStorage) {
+        mPersistentStorage = persistentStorage;
+    }
 
-	public ContactId getContact() {
-		return mPersistentStorage.getRemoteContact();
-	}
+    public ContactId getContact() {
+        return mPersistentStorage.getRemoteContact();
+    }
 
-	public String getId() {
-		return mPersistentStorage.getId();
-	}
+    public String getId() {
+        return mPersistentStorage.getId();
+    }
 
-	public String getContent() {
-		return mPersistentStorage.getContent();
-	}
+    public String getContent() {
+        return mPersistentStorage.getContent();
+    }
 
-	public String getMimeType() {
-		return mPersistentStorage.getMimeType();
-	}
+    public String getMimeType() {
+        return mPersistentStorage.getMimeType();
+    }
 
-	public int getDirection() {
-		return mPersistentStorage.getDirection().toInt();
-	}
+    public int getDirection() {
+        return mPersistentStorage.getDirection().toInt();
+    }
 
-	public long getTimestamp() {
-		return mPersistentStorage.getTimestamp();
-	}
+    public long getTimestamp() {
+        return mPersistentStorage.getTimestamp();
+    }
 
-	public long getTimestampSent() {
-		return mPersistentStorage.getTimestampSent();
-	}
+    public long getTimestampSent() {
+        return mPersistentStorage.getTimestampSent();
+    }
 
-	public long getTimestampDelivered() {
-		return mPersistentStorage.getTimestampDelivered();
-	}
+    public long getTimestampDelivered() {
+        return mPersistentStorage.getTimestampDelivered();
+    }
 
-	public long getTimestampDisplayed() {
-		return mPersistentStorage.getTimestampDisplayed();
-	}
+    public long getTimestampDisplayed() {
+        return mPersistentStorage.getTimestampDisplayed();
+    }
 
-	public int getStatus() {
-		return mPersistentStorage.getStatus();
-	}
+    public int getStatus() {
+        return mPersistentStorage.getStatus();
+    }
 
-	public int getReasonCode() {
-		return mPersistentStorage.getReasonCode();
-	}
+    public int getReasonCode() {
+        return mPersistentStorage.getReasonCode();
+    }
 
-	public String getChatId() {
-		return mPersistentStorage.getChatId();
-	}
+    public String getChatId() {
+        return mPersistentStorage.getChatId();
+    }
 
-	public boolean isRead() {
-		return mPersistentStorage.isRead();
-	}
+    public boolean isRead() {
+        return mPersistentStorage.isRead();
+    }
 }

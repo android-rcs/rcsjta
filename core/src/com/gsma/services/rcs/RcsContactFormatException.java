@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.gsma.services.rcs;
 
 /**
@@ -28,22 +29,22 @@ package com.gsma.services.rcs;
  * @author Jean-Marc AUFFRET
  */
 public class RcsContactFormatException extends RuntimeException {
-	static final long serialVersionUID = 1L;
+    static final long serialVersionUID = 1L;
 
-	/**
-	 * Constructor
-	 */
-	public RcsContactFormatException() {
-		super("rcs contact format not supported");
-	}
+    /**
+     * Constructor
+     */
+    public RcsContactFormatException() {
+        super("rcs contact format not supported");
+    }
 
-	/**
-	 * Constructor
-	 * 
-	 * @param message
-	 */
-	public RcsContactFormatException(String message) {
-		super(message);
-	}
+    /**
+     * Constructor
+     * 
+     * @param message
+     */
+    public RcsContactFormatException(String message) {
+        super(message);
+    }
 
 }

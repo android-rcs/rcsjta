@@ -46,160 +46,156 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Originating video content sharing session (streaming)
- *
+ * 
  * @author hlxn7157
  */
 public class OriginatingVideoStreamingSession extends VideoStreamingSession {
-	/**
-	 * The logger
-	 */
-	private static final Logger logger = Logger.getLogger(OriginatingVideoStreamingSession.class
-			.getSimpleName());
+    /**
+     * The logger
+     */
+    private static final Logger logger = Logger.getLogger(OriginatingVideoStreamingSession.class
+            .getSimpleName());
 
-	/**
-	 * Constructor
-	 *
-	 * @param parent
-	 *            IMS service
-	 * @param player
-	 *            Media player
-	 * @param content
-	 *            Content to be shared
-	 * @param contact
-	 *            Remote contact Id
-	 */
-	public OriginatingVideoStreamingSession(ImsService parent, IVideoPlayer player,
-			MmContent content, ContactId contact) {
-		super(parent, content, contact);
+    /**
+     * Constructor
+     * 
+     * @param parent IMS service
+     * @param player Media player
+     * @param content Content to be shared
+     * @param contact Remote contact Id
+     */
+    public OriginatingVideoStreamingSession(ImsService parent, IVideoPlayer player,
+            MmContent content, ContactId contact) {
+        super(parent, content, contact);
 
-		// Create dialog path
-		createOriginatingDialogPath();
+        // Create dialog path
+        createOriginatingDialogPath();
 
-		// Set the video player
-		setPlayer(player);
-	}
+        // Set the video player
+        setPlayer(player);
+    }
 
-	/**
-	 * Background processing
-	 */
-	public void run() {
-		try {
-			if (logger.isActivated()) {
-				logger.info("Initiate a new live video sharing session as originating");
-			}
+    /**
+     * Background processing
+     */
+    public void run() {
+        try {
+            if (logger.isActivated()) {
+                logger.info("Initiate a new live video sharing session as originating");
+            }
 
-			SipDialogPath dialogPath = getDialogPath();
-			// Build SDP part
-			String ipAddress = dialogPath.getSipStack().getLocalIpAddress();
-			IVideoPlayer player = getPlayer();
-			String videoSdp = VideoSdpBuilder.buildSdpOfferWithOrientation(
-					player.getSupportedCodecs(), player.getLocalRtpPort());
-			String sdp = SdpUtils.buildVideoSDP(ipAddress, videoSdp, SdpUtils.DIRECTION_SENDONLY);
+            SipDialogPath dialogPath = getDialogPath();
+            // Build SDP part
+            String ipAddress = dialogPath.getSipStack().getLocalIpAddress();
+            IVideoPlayer player = getPlayer();
+            String videoSdp = VideoSdpBuilder.buildSdpOfferWithOrientation(
+                    player.getSupportedCodecs(), player.getLocalRtpPort());
+            String sdp = SdpUtils.buildVideoSDP(ipAddress, videoSdp, SdpUtils.DIRECTION_SENDONLY);
 
-			// Set the local SDP part in the dialog path
-			dialogPath.setLocalContent(sdp);
+            // Set the local SDP part in the dialog path
+            dialogPath.setLocalContent(sdp);
 
-			// Create an INVITE request
-			if (logger.isActivated()) {
-				logger.info("Send INVITE");
-			}
-			SipRequest invite = SipMessageFactory.createInvite(dialogPath,
-					RichcallService.FEATURE_TAGS_VIDEO_SHARE, sdp);
+            // Create an INVITE request
+            if (logger.isActivated()) {
+                logger.info("Send INVITE");
+            }
+            SipRequest invite = SipMessageFactory.createInvite(dialogPath,
+                    RichcallService.FEATURE_TAGS_VIDEO_SHARE, sdp);
 
-			// Set the Authorization header
-			getAuthenticationAgent().setAuthorizationHeader(invite);
+            // Set the Authorization header
+            getAuthenticationAgent().setAuthorizationHeader(invite);
 
-			// Set initial request in the dialog path
-			dialogPath.setInvite(invite);
+            // Set initial request in the dialog path
+            dialogPath.setInvite(invite);
 
-			// Send INVITE request
-			sendInvite(invite);
-		} catch (Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Session initiation has failed", e);
-			}
+            // Send INVITE request
+            sendInvite(invite);
+        } catch (Exception e) {
+            if (logger.isActivated()) {
+                logger.error("Session initiation has failed", e);
+            }
 
-			// Unexpected error
-			handleError(new ContentSharingError(ContentSharingError.UNEXPECTED_EXCEPTION,
-					e.getMessage()));
-		}
-	}
+            // Unexpected error
+            handleError(new ContentSharingError(ContentSharingError.UNEXPECTED_EXCEPTION,
+                    e.getMessage()));
+        }
+    }
 
-	/**
-	 * Prepare media session
-	 *
-	 * @throws Exception
-	 */
-	public void prepareMediaSession() throws Exception {
-		// Parse the remote SDP part
-		SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
-		MediaDescription mediaVideo = parser.getMediaDescription("video");
-		String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaVideo);
-		int remotePort = mediaVideo.port;
+    /**
+     * Prepare media session
+     * 
+     * @throws Exception
+     */
+    public void prepareMediaSession() throws Exception {
+        // Parse the remote SDP part
+        SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
+        MediaDescription mediaVideo = parser.getMediaDescription("video");
+        String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaVideo);
+        int remotePort = mediaVideo.port;
 
-		// Extract video codecs from SDP
-		Vector<MediaDescription> medias = parser.getMediaDescriptions("video");
-		Vector<VideoCodec> proposedCodecs = VideoCodecManager.extractVideoCodecsFromSdp(medias);
+        // Extract video codecs from SDP
+        Vector<MediaDescription> medias = parser.getMediaDescriptions("video");
+        Vector<VideoCodec> proposedCodecs = VideoCodecManager.extractVideoCodecsFromSdp(medias);
 
-		IVideoPlayer player = getPlayer();
+        IVideoPlayer player = getPlayer();
 
-		// Codec negotiation
-		VideoCodec selectedVideoCodec = VideoCodecManager.negociateVideoCodec(
-				player.getSupportedCodecs(), proposedCodecs);
-		if (selectedVideoCodec == null) {
-			if (logger.isActivated()) {
-				logger.debug("Proposed codecs are not supported");
-			}
+        // Codec negotiation
+        VideoCodec selectedVideoCodec = VideoCodecManager.negociateVideoCodec(
+                player.getSupportedCodecs(), proposedCodecs);
+        if (selectedVideoCodec == null) {
+            if (logger.isActivated()) {
+                logger.debug("Proposed codecs are not supported");
+            }
 
-			// Terminate session
-			terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+            // Terminate session
+            terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
 
-			// Report error
-			handleError(new ContentSharingError(ContentSharingError.UNSUPPORTED_MEDIA_TYPE));
-			return;
-		}
-		getContent().setEncoding("video/" + selectedVideoCodec.getEncoding());
+            // Report error
+            handleError(new ContentSharingError(ContentSharingError.UNSUPPORTED_MEDIA_TYPE));
+            return;
+        }
+        getContent().setEncoding("video/" + selectedVideoCodec.getEncoding());
 
-		// Set the video player orientation
-		SdpOrientationExtension extensionHeader = SdpOrientationExtension.create(mediaVideo);
-		if (extensionHeader != null) {
-			// Update the orientation ID
-			setOrientation(extensionHeader.getExtensionId());
-		}
+        // Set the video player orientation
+        SdpOrientationExtension extensionHeader = SdpOrientationExtension.create(mediaVideo);
+        if (extensionHeader != null) {
+            // Update the orientation ID
+            setOrientation(extensionHeader.getExtensionId());
+        }
 
-		// Set the video player remote info
-		player.setRemoteInfo(selectedVideoCodec, remoteHost, remotePort, getOrientation());
-	}
+        // Set the video player remote info
+        player.setRemoteInfo(selectedVideoCodec, remoteHost, remotePort, getOrientation());
+    }
 
-	/**
-	 * Start media session
-	 *
-	 * @throws Exception
-	 */
-	public void startMediaSession() throws Exception {
-		// Nothing to do in case of external codec
-	}
+    /**
+     * Start media session
+     * 
+     * @throws Exception
+     */
+    public void startMediaSession() throws Exception {
+        // Nothing to do in case of external codec
+    }
 
-	/**
-	 * Close media session
-	 */
-	public void closeMediaSession() {
-		// Nothing to do in case of external codec
-	}
+    /**
+     * Close media session
+     */
+    public void closeMediaSession() {
+        // Nothing to do in case of external codec
+    }
 
-	@Override
-	public boolean isInitiatedByRemote() {
-		return false;
-	}
+    @Override
+    public boolean isInitiatedByRemote() {
+        return false;
+    }
 
-	@Override
-	public void handle180Ringing(SipResponse response) {
-		if (logger.isActivated()) {
-			logger.debug("handle180Ringing");
-		}
-		ContactId contact = getRemoteContact();
-		for (ImsSessionListener listener : getListeners()) {
-			((VideoStreamingSessionListener) listener).handle180Ringing(contact);
-		}
-	}
+    @Override
+    public void handle180Ringing(SipResponse response) {
+        if (logger.isActivated()) {
+            logger.debug("handle180Ringing");
+        }
+        ContactId contact = getRemoteContact();
+        for (ImsSessionListener listener : getListeners()) {
+            ((VideoStreamingSessionListener) listener).handle180Ringing(contact);
+        }
+    }
 }

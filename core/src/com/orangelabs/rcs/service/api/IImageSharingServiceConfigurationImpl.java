@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.service.api;
 
 import android.os.RemoteException;
@@ -26,24 +27,23 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
  * A class that implements interface to allow access to image sharing service configuration from API
  * 
  * @author yplo6403
- *
  */
 public class IImageSharingServiceConfigurationImpl extends IImageSharingServiceConfiguration.Stub {
 
-	private final RcsSettings mRcsSettings;
+    private final RcsSettings mRcsSettings;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param rcsSettings
-	 */
-	public IImageSharingServiceConfigurationImpl(RcsSettings rcsSettings) {
-		mRcsSettings = rcsSettings;
-	}
+    /**
+     * Constructor
+     * 
+     * @param rcsSettings
+     */
+    public IImageSharingServiceConfigurationImpl(RcsSettings rcsSettings) {
+        mRcsSettings = rcsSettings;
+    }
 
-	@Override
-	public long getMaxSize() throws RemoteException {
-		return mRcsSettings.getMaxImageSharingSize();
-	}
+    @Override
+    public long getMaxSize() throws RemoteException {
+        return mRcsSettings.getMaxImageSharingSize();
+    }
 
 }

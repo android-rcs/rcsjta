@@ -19,6 +19,7 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.core.ims.service.im.chat.standfw;
 
 import com.gsma.services.rcs.RcsContactFormatException;
@@ -33,83 +34,74 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * Store & forward manager
  */
 public class StoreAndForwardManager {
-	/**
-	 * Store & forward service URI
-	 */
-	public final static String SERVICE_URI = "rcse-standfw@";
+    /**
+     * Store & forward service URI
+     */
+    public final static String SERVICE_URI = "rcse-standfw@";
 
-	/**
-	 * IMS service
-	 */
-	private ImsService imsService;
+    /**
+     * IMS service
+     */
+    private ImsService imsService;
 
-	/**
-	 * The logger
-	 */
-	private final static Logger logger = Logger.getLogger(StoreAndForwardManager.class
-			.getSimpleName());
+    /**
+     * The logger
+     */
+    private final static Logger logger = Logger.getLogger(StoreAndForwardManager.class
+            .getSimpleName());
 
-	/**
-	 * Constructor
-	 * 
-	 * @param imsService
-	 *            IMS service
-	 */
-	public StoreAndForwardManager(ImsService imsService) {
-		this.imsService = imsService;
-	}
+    /**
+     * Constructor
+     * 
+     * @param imsService IMS service
+     */
+    public StoreAndForwardManager(ImsService imsService) {
+        this.imsService = imsService;
+    }
 
-	/**
-	 * Receive stored messages
-	 * 
-	 * @param invite
-	 *            Received invite
-	 * @param contact
-	 *            Contact identifier
-	 * @param rcsSettings
-	 *            RCS settings
-	 * @param messagingLog
-	 *            Messaging log
-	 * @throws RcsContactFormatException
-	 */
-	public void receiveStoredMessages(SipRequest invite, ContactId contact,
-			RcsSettings rcsSettings, MessagingLog messagingLog) {
-		if (logger.isActivated()) {
-			logger.debug("Receive stored messages");
-		}
+    /**
+     * Receive stored messages
+     * 
+     * @param invite Received invite
+     * @param contact Contact identifier
+     * @param rcsSettings RCS settings
+     * @param messagingLog Messaging log
+     * @throws RcsContactFormatException
+     */
+    public void receiveStoredMessages(SipRequest invite, ContactId contact,
+            RcsSettings rcsSettings, MessagingLog messagingLog) {
+        if (logger.isActivated()) {
+            logger.debug("Receive stored messages");
+        }
 
-		TerminatingStoreAndForwardMsgSession session = new TerminatingStoreAndForwardMsgSession(
-				imsService, invite, contact, rcsSettings, messagingLog);
+        TerminatingStoreAndForwardMsgSession session = new TerminatingStoreAndForwardMsgSession(
+                imsService, invite, contact, rcsSettings, messagingLog);
 
-		imsService.getImsModule().getCore().getListener()
-				.handleStoreAndForwardMsgSessionInvitation(session);
+        imsService.getImsModule().getCore().getListener()
+                .handleStoreAndForwardMsgSessionInvitation(session);
 
-		session.startSession();
-	}
+        session.startSession();
+    }
 
-	/**
-	 * Receive stored notifications
-	 * 
-	 * @param invite
-	 *            Received invite
-	 * @param contact
-	 *            Contact identifier
-	 * @param rcsSettings
-	 *            RCS settings
-	 * @param messagingLog
-	 *            Messaging log
-	 * @throws RcsContactFormatException
-	 */
-	public void receiveStoredNotifications(SipRequest invite, ContactId contact,
-			RcsSettings rcsSettings, MessagingLog messagingLog) {
-		if (logger.isActivated()) {
-			logger.debug("Receive stored notifications");
-		}
+    /**
+     * Receive stored notifications
+     * 
+     * @param invite Received invite
+     * @param contact Contact identifier
+     * @param rcsSettings RCS settings
+     * @param messagingLog Messaging log
+     * @throws RcsContactFormatException
+     */
+    public void receiveStoredNotifications(SipRequest invite, ContactId contact,
+            RcsSettings rcsSettings, MessagingLog messagingLog) {
+        if (logger.isActivated()) {
+            logger.debug("Receive stored notifications");
+        }
 
-		TerminatingStoreAndForwardNotifSession session = new TerminatingStoreAndForwardNotifSession(
-				imsService, invite, contact, rcsSettings, messagingLog);
+        TerminatingStoreAndForwardNotifSession session = new TerminatingStoreAndForwardNotifSession(
+                imsService, invite, contact, rcsSettings, messagingLog);
 
-		// Start the session
-		session.startSession();
-	}
+        // Start the session
+        session.startSession();
+    }
 }

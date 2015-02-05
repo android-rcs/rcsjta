@@ -26,128 +26,123 @@ import java.util.Hashtable;
  * @author Jean-Marc AUFFRET
  */
 public class HttpResponse {
-	/**
-	 * Status line
-	 */
-	private String status = null;
+    /**
+     * Status line
+     */
+    private String status = null;
 
-	/**
-	 * Headers
-	 */
-	private Hashtable<String, String> headers = new Hashtable<String, String>();
+    /**
+     * Headers
+     */
+    private Hashtable<String, String> headers = new Hashtable<String, String>();
 
-	/**
-	 * Content
-	 */
-	private byte[] content = null;
+    /**
+     * Content
+     */
+    private byte[] content = null;
 
-	/**
-	 * Constructor
-	 */
-	public HttpResponse() {
-	}
+    /**
+     * Constructor
+     */
+    public HttpResponse() {
+    }
 
-	/**
-	 * Set the status line
-	 * 
-	 * @param status
-	 *            Status line
-	 */
-	public void setStatusLine(String status) {
-		this.status = status;
-	}
+    /**
+     * Set the status line
+     * 
+     * @param status Status line
+     */
+    public void setStatusLine(String status) {
+        this.status = status;
+    }
 
-	/**
-	 * Get the status line
-	 * 
-	 * @return Status line
-	 */
-	public String getStatusLine() {
-		return status;
-	}
+    /**
+     * Get the status line
+     * 
+     * @return Status line
+     */
+    public String getStatusLine() {
+        return status;
+    }
 
-	/**
-	 * Add header
-	 * 
-	 * @param name
-	 *            Header name
-	 * @param value
-	 *            Header value
-	 */
-	public void addHeader(String name, String value) {
-		headers.put(name, value);
-	}
+    /**
+     * Add header
+     * 
+     * @param name Header name
+     * @param value Header value
+     */
+    public void addHeader(String name, String value) {
+        headers.put(name, value);
+    }
 
-	/**
-	 * Get header
-	 * 
-	 * @param name
-	 *            Header name
-	 * @return Header value
-	 */
-	public String getHeader(String name) {
-		return headers.get(name.toLowerCase());
-	}
+    /**
+     * Get header
+     * 
+     * @param name Header name
+     * @return Header value
+     */
+    public String getHeader(String name) {
+        return headers.get(name.toLowerCase());
+    }
 
-	/**
-	 * Returns the response code
-	 * 
-	 * @return Response code or -1 in case of error
-	 */
-	public int getResponseCode() {
-		try {
-			int index1 = status.indexOf(" ") + 1;
-			int index2 = status.indexOf(" ", index1);
-			return Integer.parseInt(status.substring(index1, index2));
-		} catch (Exception e) {
-			return -1;
-		}
-	}
+    /**
+     * Returns the response code
+     * 
+     * @return Response code or -1 in case of error
+     */
+    public int getResponseCode() {
+        try {
+            int index1 = status.indexOf(" ") + 1;
+            int index2 = status.indexOf(" ", index1);
+            return Integer.parseInt(status.substring(index1, index2));
+        } catch (Exception e) {
+            return -1;
+        }
+    }
 
-	/**
-	 * Is a successful response
-	 * 
-	 * @return Boolean
-	 */
-	public boolean isSuccessfullResponse() {
-		int code = getResponseCode();
-		if ((code >= 200) && (code < 300)) {
-			return true;
-		} else {
-			return false;
-		}
-	}
+    /**
+     * Is a successful response
+     * 
+     * @return Boolean
+     */
+    public boolean isSuccessfullResponse() {
+        int code = getResponseCode();
+        if ((code >= 200) && (code < 300)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-	/**
-	 * Is not found response
-	 * 
-	 * @return Boolean
-	 */
-	public boolean isNotFoundResponse() {
-		int code = getResponseCode();
-		if (code == 404) {
-			return true;
-		} else {
-			return false;
-		}
-	}
+    /**
+     * Is not found response
+     * 
+     * @return Boolean
+     */
+    public boolean isNotFoundResponse() {
+        int code = getResponseCode();
+        if (code == 404) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-	/**
-	 * Returns the response content
-	 * 
-	 * @return Content as byte array
-	 */
-	public byte[] getContent() {
-		return content;
-	}
+    /**
+     * Returns the response content
+     * 
+     * @return Content as byte array
+     */
+    public byte[] getContent() {
+        return content;
+    }
 
-	/**
-	 * Set the response content
-	 * 
-	 * @param content
-	 *            Content
-	 */
-	public void setContent(byte[] content) {
-		this.content = content;
-	}
+    /**
+     * Set the response content
+     * 
+     * @param content Content
+     */
+    public void setContent(byte[] content) {
+        this.content = content;
+    }
 }

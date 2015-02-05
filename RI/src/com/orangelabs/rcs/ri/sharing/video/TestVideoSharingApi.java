@@ -30,7 +30,7 @@ import com.orangelabs.rcs.ri.R;
 
 /**
  * Video sharing API
- *
+ * 
  * @author Jean-Marc AUFFRET
  */
 public class TestVideoSharingApi extends ListActivity {

@@ -19,6 +19,7 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.gsma.services.rcs.ft;
 
 /**
@@ -27,28 +28,28 @@ package com.gsma.services.rcs.ft;
  * @author Jean-Marc AUFFRET
  */
 public class FileTransferIntent {
-	/**
-	 * Broadcast action: a new file transfer has been received.
-	 * <p>
-	 * Intent includes the following extras:
-	 * <ul>
-	 * <li> {@link #EXTRA_TRANSFER_ID} containing the unique ID of the file transfer.
-	 * </ul>
-	 */
-	public final static String ACTION_NEW_INVITATION = "com.gsma.services.rcs.ft.action.NEW_FILE_TRANSFER";
+    /**
+     * Broadcast action: a new file transfer has been received.
+     * <p>
+     * Intent includes the following extras:
+     * <ul>
+     * <li> {@link #EXTRA_TRANSFER_ID} containing the unique ID of the file transfer.
+     * </ul>
+     */
+    public final static String ACTION_NEW_INVITATION = "com.gsma.services.rcs.ft.action.NEW_FILE_TRANSFER";
 
-	/**
-	 * Broadcast action: a file transfer is resuming.
-	 * <p>
-	 * Intent includes the following extras:
-	 * <ul>
-	 * <li> {@link #EXTRA_TRANSFER_ID} containing the unique ID of the file transfer.
-	 * </ul>
-	 */
-	public final static String ACTION_RESUME = "com.gsma.services.rcs.ft.action.RESUME_FILE_TRANSFER";
+    /**
+     * Broadcast action: a file transfer is resuming.
+     * <p>
+     * Intent includes the following extras:
+     * <ul>
+     * <li> {@link #EXTRA_TRANSFER_ID} containing the unique ID of the file transfer.
+     * </ul>
+     */
+    public final static String ACTION_RESUME = "com.gsma.services.rcs.ft.action.RESUME_FILE_TRANSFER";
 
-	/**
-	 * Unique ID of the file transfer
-	 */
-	public final static String EXTRA_TRANSFER_ID = "transferId";
+    /**
+     * Unique ID of the file transfer
+     */
+    public final static String EXTRA_TRANSFER_ID = "transferId";
 }

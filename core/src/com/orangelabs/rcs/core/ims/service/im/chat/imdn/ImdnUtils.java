@@ -23,13 +23,13 @@ package com.orangelabs.rcs.core.ims.service.im.chat.imdn;
  */
 public class ImdnUtils {
 
-	/**
-	 * IMDN notification disposition header
-	 */
-	public static final String HEADER_IMDN_DISPO_NOTIF = "imdn.Disposition-Notification";
+    /**
+     * IMDN notification disposition header
+     */
+    public static final String HEADER_IMDN_DISPO_NOTIF = "imdn.Disposition-Notification";
 
-	/**
-	 * IMDN message ID header
-	 */
-	public static final String HEADER_IMDN_MSG_ID = "imdn.Message-ID";
+    /**
+     * IMDN message ID header
+     */
+    public static final String HEADER_IMDN_MSG_ID = "imdn.Message-ID";
 }

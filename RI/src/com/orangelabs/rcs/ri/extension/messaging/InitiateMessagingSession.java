@@ -41,7 +41,7 @@ public class InitiateMessagingSession extends InitiateMultimediaSession {
         Intent intent = new Intent(InitiateMessagingSession.this, MessagingSessionView.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra(MessagingSessionView.EXTRA_MODE, MessagingSessionView.MODE_OUTGOING);
-        intent.putExtra(MessagingSessionView.EXTRA_CONTACT, (Parcelable)contact);
+        intent.putExtra(MessagingSessionView.EXTRA_CONTACT, (Parcelable) contact);
         startActivity(intent);
     }
 }

@@ -20,7 +20,7 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.stream;
 
 /**
  * RTP Stream listener interface
- *
+ * 
  * @author Deutsche Telekom
  */
 public interface RtpStreamListener {

@@ -66,8 +66,7 @@ import com.orangelabs.rcs.ri.utils.Utils;
 public abstract class ChatView extends FragmentActivity implements
         LoaderManager.LoaderCallbacks<Cursor>, IChatView {
     /**
-     * The loader's unique ID. Loader IDs are specific to the Activity in which
-     * they reside.
+     * The loader's unique ID. Loader IDs are specific to the Activity in which they reside.
      */
     protected static final int LOADER_ID = 1;
 
@@ -138,7 +137,7 @@ public abstract class ChatView extends FragmentActivity implements
         setContentView(R.layout.chat_view);
 
         // Set message composer callbacks
-        composeText = (EditText)findViewById(R.id.userText);
+        composeText = (EditText) findViewById(R.id.userText);
         composeText.setOnKeyListener(new OnKeyListener() {
 
             @Override
@@ -182,7 +181,7 @@ public abstract class ChatView extends FragmentActivity implements
         });
 
         // Set send button listener
-        Button sendBtn = (Button)findViewById(R.id.send_button);
+        Button sendBtn = (Button) findViewById(R.id.send_button);
         sendBtn.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -195,7 +194,7 @@ public abstract class ChatView extends FragmentActivity implements
         mAdapter = new ChatCursorAdapter(this, null, 0, isSingleChat());
 
         // Associate the list adapter with the ListView.
-        ListView listView = (ListView)findViewById(android.R.id.list);
+        ListView listView = (ListView) findViewById(android.R.id.list);
         listView.setAdapter(mAdapter);
         registerForContextMenu(listView);
 
@@ -417,7 +416,7 @@ public abstract class ChatView extends FragmentActivity implements
         // Execute on UI handler since callback is executed from service
         handler.post(new Runnable() {
             public void run() {
-                TextView view = (TextView)findViewById(R.id.isComposingText);
+                TextView view = (TextView) findViewById(R.id.isComposingText);
                 if (status) {
                     // Display is-composing notification
                     view.setText(getString(R.string.label_contact_is_composing, from));

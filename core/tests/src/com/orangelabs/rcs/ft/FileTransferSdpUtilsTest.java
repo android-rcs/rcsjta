@@ -58,13 +58,10 @@ public class FileTransferSdpUtilsTest extends TestCase {
         super.setUp();
         // @formatter:off
         /*
-         * v=0 o=- 3600507138 3600507138 IN IP4 10.29.67.37 s=- c=IN IP4
-         * 10.29.67.37 t=0 0 m=message 20000 TCP/MSRP *
-         * a=accept-types:image/jpeg a=file-transfer-id:1391518338244
-         * a=file-disposition:attachment
-         * a=file-selector:name:"phototmp_3_1_1_1.jpg" type:image/jpeg
-         * size:195490 a=setup:actpass
-         * a=path:msrp://10.29.67.37:20000/1391518338240;tcp a=sendonly
+         * v=0 o=- 3600507138 3600507138 IN IP4 10.29.67.37 s=- c=IN IP4 10.29.67.37 t=0 0 m=message
+         * 20000 TCP/MSRP * a=accept-types:image/jpeg a=file-transfer-id:1391518338244
+         * a=file-disposition:attachment a=file-selector:name:"phototmp_3_1_1_1.jpg" type:image/jpeg
+         * size:195490 a=setup:actpass a=path:msrp://10.29.67.37:20000/1391518338240;tcp a=sendonly
          * a=max-size:15728640
          */
         // @formatter:on

@@ -15,11 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.gsma.services.rcs.samples.session;
 
 public class ServiceUtils {
-	/**
-	 * Service ID constant
-	 */
-	public final static String SERVICE_ID = "ext.texto";
+    /**
+     * Service ID constant
+     */
+    public final static String SERVICE_ID = "ext.texto";
 }

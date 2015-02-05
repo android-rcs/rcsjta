@@ -176,7 +176,7 @@ public class InitiateImageSharing extends Activity {
             final String _state = RiApplication.ISH_STATES[state];
             handler.post(new Runnable() {
                 public void run() {
-                    TextView statusView = (TextView)findViewById(R.id.progress_status);
+                    TextView statusView = (TextView) findViewById(R.id.progress_status);
                     switch (state) {
                         case ImageSharing.State.STARTED:
                             // Session is established: hide progress dialog
@@ -242,17 +242,17 @@ public class InitiateImageSharing extends Activity {
         setContentView(R.layout.image_sharing_initiate);
 
         // Set contact selector
-        mSpinner = (Spinner)findViewById(R.id.contact);
+        mSpinner = (Spinner) findViewById(R.id.contact);
         mSpinner.setAdapter(ContactListAdapter.createRcsContactListAdapter(this));
 
         // Set buttons callback
-        Button inviteBtn = (Button)findViewById(R.id.invite_btn);
+        Button inviteBtn = (Button) findViewById(R.id.invite_btn);
         inviteBtn.setOnClickListener(btnInviteListener);
         inviteBtn.setEnabled(false);
-        Button selectBtn = (Button)findViewById(R.id.select_btn);
+        Button selectBtn = (Button) findViewById(R.id.select_btn);
         selectBtn.setOnClickListener(btnSelectListener);
         selectBtn.setEnabled(false);
-        Button dialBtn = (Button)findViewById(R.id.dial_btn);
+        Button dialBtn = (Button) findViewById(R.id.dial_btn);
         dialBtn.setOnClickListener(btnDialListener);
         dialBtn.setEnabled(false);
         // Disable button if no contact available
@@ -308,7 +308,7 @@ public class InitiateImageSharing extends Activity {
     private OnClickListener btnDialListener = new OnClickListener() {
         public void onClick(View v) {
             // get selected phone number
-            ContactListAdapter adapter = (ContactListAdapter)mSpinner.getAdapter();
+            ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
 
             // Initiate a GSM call before to be able to share content
@@ -339,7 +339,7 @@ public class InitiateImageSharing extends Activity {
             }
 
             // Get the remote contact
-            ContactListAdapter adapter = (ContactListAdapter)mSpinner.getAdapter();
+            ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
             ContactUtils contactUtils = ContactUtils.getInstance(InitiateImageSharing.this);
             final ContactId remote;
@@ -375,11 +375,11 @@ public class InitiateImageSharing extends Activity {
                 mSpinner.setEnabled(false);
 
                 // Hide buttons
-                Button inviteBtn = (Button)findViewById(R.id.invite_btn);
+                Button inviteBtn = (Button) findViewById(R.id.invite_btn);
                 inviteBtn.setVisibility(View.INVISIBLE);
-                Button selectBtn = (Button)findViewById(R.id.select_btn);
+                Button selectBtn = (Button) findViewById(R.id.select_btn);
                 selectBtn.setVisibility(View.INVISIBLE);
-                Button dialBtn = (Button)findViewById(R.id.dial_btn);
+                Button dialBtn = (Button) findViewById(R.id.dial_btn);
                 dialBtn.setVisibility(View.INVISIBLE);
             } catch (Exception e) {
                 hideProgressDialog();
@@ -417,7 +417,7 @@ public class InitiateImageSharing extends Activity {
                     // Get selected photo URI
                     mFile = data.getData();
                     // Display the selected filename attribute
-                    TextView uriEdit = (TextView)findViewById(R.id.uri);
+                    TextView uriEdit = (TextView) findViewById(R.id.uri);
                     try {
                         mFilename = FileUtils.getFileName(this, mFile);
                         mFilesize = FileUtils.getFileSize(this, mFile) / 1024;
@@ -427,7 +427,7 @@ public class InitiateImageSharing extends Activity {
                         uriEdit.setText("Unknown");
                     }
                     // Enable invite button
-                    Button inviteBtn = (Button)findViewById(R.id.invite_btn);
+                    Button inviteBtn = (Button) findViewById(R.id.invite_btn);
                     inviteBtn.setEnabled(true);
                 }
                 break;
@@ -454,8 +454,8 @@ public class InitiateImageSharing extends Activity {
      * @param totalSize Total size to be transferred
      */
     private void updateProgressBar(long currentSize, long totalSize) {
-        TextView statusView = (TextView)findViewById(R.id.progress_status);
-        ProgressBar progressBar = (ProgressBar)findViewById(R.id.progress_bar);
+        TextView statusView = (TextView) findViewById(R.id.progress_status);
+        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
         String value = "" + (currentSize / 1024);
         if (totalSize != 0) {
@@ -465,8 +465,8 @@ public class InitiateImageSharing extends Activity {
         statusView.setText(value);
 
         if (currentSize != 0) {
-            double position = ((double)currentSize / (double)totalSize) * 100.0;
-            progressBar.setProgress((int)position);
+            double position = ((double) currentSize / (double) totalSize) * 100.0;
+            progressBar.setProgress((int) position);
         } else {
             progressBar.setProgress(0);
         }

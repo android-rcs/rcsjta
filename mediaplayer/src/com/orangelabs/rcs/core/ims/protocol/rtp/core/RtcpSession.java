@@ -22,7 +22,7 @@ import java.util.Random;
 
 /**
  * RTCP Session Information
- *
+ * 
  * @author hlxn7157
  */
 public class RtcpSession {
@@ -93,8 +93,8 @@ public class RtcpSession {
     public double timeOfLastRTPSent = 0;
 
     /**
-    * The last time an RTCP packet was transmitted.
-    */
+     * The last time an RTCP packet was transmitted.
+     */
     public double timeOfLastRTCPSent = 0;
 
     /**
@@ -128,9 +128,9 @@ public class RtcpSession {
     public long packetCount;
 
     /**
-    * Total Number of payload octets (i.e not including header or padding)
-    * sent out by this source since starting transmission.
-    */
+     * Total Number of payload octets (i.e not including header or padding) sent out by this source
+     * since starting transmission.
+     */
     public long octetCount;
 
     /**
@@ -140,7 +140,7 @@ public class RtcpSession {
 
     /**
      * Constructor.
-     *
+     * 
      * @param isSender is sender
      * @param bandwidth bandwidth (can set 16000 (16kops 128kbps))
      */
@@ -167,7 +167,7 @@ public class RtcpSession {
 
     /**
      * Setter of members
-     *
+     * 
      * @param members no of members
      */
     public void setMembers(int members) {
@@ -176,7 +176,7 @@ public class RtcpSession {
 
     /**
      * Setter of senders
-     *
+     * 
      * @param senders no of senders
      */
     public void setSenders(int senders) {
@@ -185,7 +185,7 @@ public class RtcpSession {
 
     /**
      * Get the interval of RTCP message
-     *
+     * 
      * @return interval
      */
     public double getReportInterval() {
@@ -215,7 +215,7 @@ public class RtcpSession {
         }
 
         // get interval
-        t = (double)avgrtcpsize * n / bandwidth;
+        t = (double) avgrtcpsize * n / bandwidth;
         if (t < rtcp_min_time)
             t = rtcp_min_time;
 
@@ -228,16 +228,16 @@ public class RtcpSession {
 
     /**
      * Update the average RTCP packet size
-     *
+     * 
      * @param size
      */
     public void updateavgrtcpsize(int size) {
-        avgrtcpsize = (int)(0.0625 * (double)size + 0.9375 * (double)avgrtcpsize);
+        avgrtcpsize = (int) (0.0625 * (double) size + 0.9375 * (double) avgrtcpsize);
     }
 
     /**
      * Returns a self source object.
-     *
+     * 
      * @return My source object.
      */
     public RtpSource getMySource() {
@@ -246,11 +246,11 @@ public class RtcpSession {
 
     /**
      * Returns current time from the Date().getTime() function.
-     *
+     * 
      * @return The current time.
      */
     public long currentTime() {
         tc = System.currentTimeMillis();
-        return (long)tc;
+        return (long) tc;
     }
 }

@@ -19,6 +19,7 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.gsma.services.rcs.extension;
 
 import com.gsma.services.rcs.contacts.ContactId;
@@ -29,30 +30,24 @@ import com.gsma.services.rcs.contacts.ContactId;
  * @author Jean-Marc AUFFRET
  */
 public abstract class MultimediaMessagingSessionListener extends
-		IMultimediaMessagingSessionListener.Stub {
-	/**
-	 * Callback called when the multimedia messaging session state/reasonCode is changed.
-	 *
-	 * @param contact
-	 *            Contact ID
-	 * @param sessionId
-	 *            Session Id
-	 * @param state
-	 *            State
-	 * @param reasonCode
-	 *            Reason code
-	 */
-	public abstract void onStateChanged(ContactId contact, String sessionId, int state,
-			int reasonCode);
+        IMultimediaMessagingSessionListener.Stub {
+    /**
+     * Callback called when the multimedia messaging session state/reasonCode is changed.
+     * 
+     * @param contact Contact ID
+     * @param sessionId Session Id
+     * @param state State
+     * @param reasonCode Reason code
+     */
+    public abstract void onStateChanged(ContactId contact, String sessionId, int state,
+            int reasonCode);
 
-	/**
-	 * Callback called when a multimedia message or data is received.
-	 *
-	 * @param contact
-	 *            Contact ID
-	 * @param sessionId
-	 * @param content
-	 *            Message content
-	 */
-	public abstract void onMessageReceived(ContactId contact, String sessionId, byte[] content);
+    /**
+     * Callback called when a multimedia message or data is received.
+     * 
+     * @param contact Contact ID
+     * @param sessionId
+     * @param content Message content
+     */
+    public abstract void onMessageReceived(ContactId contact, String sessionId, byte[] content);
 }

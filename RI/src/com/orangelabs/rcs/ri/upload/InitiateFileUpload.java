@@ -111,13 +111,13 @@ public class InitiateFileUpload extends Activity {
         setContentView(R.layout.fileupload_initiate);
 
         // Set buttons callback
-        Button uploadBtn = (Button)findViewById(R.id.upload_btn);
+        Button uploadBtn = (Button) findViewById(R.id.upload_btn);
         uploadBtn.setOnClickListener(btnUploadListener);
         uploadBtn.setEnabled(false);
-        Button showBtn = (Button)findViewById(R.id.show_btn);
+        Button showBtn = (Button) findViewById(R.id.show_btn);
         showBtn.setOnClickListener(btnShowListener);
         showBtn.setEnabled(false);
-        Button selectBtn = (Button)findViewById(R.id.select_btn);
+        Button selectBtn = (Button) findViewById(R.id.select_btn);
         selectBtn.setOnClickListener(btnSelectListener);
 
         // Register to API connection manager
@@ -183,7 +183,7 @@ public class InitiateFileUpload extends Activity {
                 }
 
                 // Get thumbnail option
-                CheckBox ftThumb = (CheckBox)findViewById(R.id.file_thumb);
+                CheckBox ftThumb = (CheckBox) findViewById(R.id.file_thumb);
                 boolean thumbnail = ftThumb.isChecked();
 
                 // Initiate upload
@@ -191,9 +191,9 @@ public class InitiateFileUpload extends Activity {
                 uploadId = upload.getUploadId();
 
                 // Hide buttons
-                Button uploadBtn = (Button)findViewById(R.id.upload_btn);
+                Button uploadBtn = (Button) findViewById(R.id.upload_btn);
                 uploadBtn.setVisibility(View.GONE);
-                Button selectBtn = (Button)findViewById(R.id.select_btn);
+                Button selectBtn = (Button) findViewById(R.id.select_btn);
                 selectBtn.setVisibility(View.GONE);
             } catch (Exception e) {
                 Utils.showMessageAndExit(InitiateFileUpload.this,
@@ -243,8 +243,8 @@ public class InitiateFileUpload extends Activity {
             return;
         }
         file = data.getData();
-        TextView uriEdit = (TextView)findViewById(R.id.uri);
-        Button uploadBtn = (Button)findViewById(R.id.upload_btn);
+        TextView uriEdit = (TextView) findViewById(R.id.uri);
+        Button uploadBtn = (Button) findViewById(R.id.upload_btn);
         switch (requestCode) {
             case SELECT_IMAGE:
                 // Display file info
@@ -269,7 +269,7 @@ public class InitiateFileUpload extends Activity {
     private class MyFileUploadListener extends FileUploadListener {
         /**
          * Callback called when the upload state changes
-         *
+         * 
          * @param uploadId ID of upload
          * @param state State of upload
          */
@@ -282,7 +282,7 @@ public class InitiateFileUpload extends Activity {
             }
             handler.post(new Runnable() {
                 public void run() {
-                    TextView statusView = (TextView)findViewById(R.id.progress_status);
+                    TextView statusView = (TextView) findViewById(R.id.progress_status);
                     if (state == FileUpload.State.STARTED) {
                         // Display session status
                         statusView.setText(getString(R.string.label_upload_started));
@@ -299,7 +299,7 @@ public class InitiateFileUpload extends Activity {
                         statusView.setText(getString(R.string.label_upload_transferred));
 
                         // Activate show button
-                        Button showBtn = (Button)findViewById(R.id.show_btn);
+                        Button showBtn = (Button) findViewById(R.id.show_btn);
                         showBtn.setEnabled(true);
                     }
                 }
@@ -309,7 +309,7 @@ public class InitiateFileUpload extends Activity {
 
         /**
          * Callback called during the upload progress
-         *
+         * 
          * @param sharingId ID of upload
          * @param currentSize Current transferred size in bytes
          * @param totalSize Total size to transfer in bytes
@@ -332,8 +332,8 @@ public class InitiateFileUpload extends Activity {
      * @param totalSize Total size to be transferred
      */
     private void updateProgressBar(long currentSize, long totalSize) {
-        TextView statusView = (TextView)findViewById(R.id.progress_status);
-        ProgressBar progressBar = (ProgressBar)findViewById(R.id.progress_bar);
+        TextView statusView = (TextView) findViewById(R.id.progress_status);
+        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
         String value = "" + Math.min(currentSize / 1024, totalSize);
         if (totalSize != 0) {
@@ -343,8 +343,8 @@ public class InitiateFileUpload extends Activity {
         statusView.setText(value);
 
         if (currentSize != 0) {
-            double position = ((double)currentSize / (double)totalSize) * 100.0;
-            progressBar.setProgress((int)position);
+            double position = ((double) currentSize / (double) totalSize) * 100.0;
+            progressBar.setProgress((int) position);
         } else {
             progressBar.setProgress(0);
         }

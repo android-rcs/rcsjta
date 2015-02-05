@@ -28,62 +28,62 @@ import com.orangelabs.rcs.core.ims.service.presence.pidf.geoloc.Geopriv;
  * @author jexa7410
  */
 public class PidfDocument {
-	private String entity = null;
-	private Vector<Tuple> tuplesList = new Vector<Tuple>();
-	private Geopriv geopriv = null;
-	private Person person = null;
+    private String entity = null;
+    private Vector<Tuple> tuplesList = new Vector<Tuple>();
+    private Geopriv geopriv = null;
+    private Person person = null;
 
-	public PidfDocument(String entity) {
-		this.entity = entity;
-	}
+    public PidfDocument(String entity) {
+        this.entity = entity;
+    }
 
-	public String getEntity() {
-		return entity;
-	}
+    public String getEntity() {
+        return entity;
+    }
 
-	public Person getPerson() {
-		return person;
-	}
+    public Person getPerson() {
+        return person;
+    }
 
-	public void setPerson(Person newPerson) {
-		if ((person == null) || (newPerson.getTimestamp() >= person.getTimestamp())) {
-			person = newPerson;
-		}
-	}
+    public void setPerson(Person newPerson) {
+        if ((person == null) || (newPerson.getTimestamp() >= person.getTimestamp())) {
+            person = newPerson;
+        }
+    }
 
-	public void addTuple(Tuple newTuple) {
-		Tuple foundTuple = null;
-		String newServiceId = newTuple.getService().getId();
-		for (int i = 0; i < tuplesList.size(); i++) {
-			Tuple tuple = (Tuple) tuplesList.elementAt(i);
-			String serviceId = tuple.getService().getId();
-			if (serviceId.equalsIgnoreCase(newServiceId)) {
-				foundTuple = tuple;
-				break;
-			}
-		}
+    public void addTuple(Tuple newTuple) {
+        Tuple foundTuple = null;
+        String newServiceId = newTuple.getService().getId();
+        for (int i = 0; i < tuplesList.size(); i++) {
+            Tuple tuple = (Tuple) tuplesList.elementAt(i);
+            String serviceId = tuple.getService().getId();
+            if (serviceId.equalsIgnoreCase(newServiceId)) {
+                foundTuple = tuple;
+                break;
+            }
+        }
 
-		if (foundTuple == null) {
-			tuplesList.addElement(newTuple);
-		} else if (newTuple.getTimestamp() >= foundTuple.getTimestamp()) {
-			tuplesList.remove(foundTuple);
-			tuplesList.addElement(newTuple);
-		}
-	}
+        if (foundTuple == null) {
+            tuplesList.addElement(newTuple);
+        } else if (newTuple.getTimestamp() >= foundTuple.getTimestamp()) {
+            tuplesList.remove(foundTuple);
+            tuplesList.addElement(newTuple);
+        }
+    }
 
-	public Vector<Tuple> getTuplesList() {
-		return tuplesList;
-	}
+    public Vector<Tuple> getTuplesList() {
+        return tuplesList;
+    }
 
-	public void setTuplesList(Vector<Tuple> tuplesList) {
-		this.tuplesList = tuplesList;
-	}
+    public void setTuplesList(Vector<Tuple> tuplesList) {
+        this.tuplesList = tuplesList;
+    }
 
-	public void setGeopriv(Geopriv geopriv) {
-		this.geopriv = geopriv;
-	}
+    public void setGeopriv(Geopriv geopriv) {
+        this.geopriv = geopriv;
+    }
 
-	public Geopriv getGeopriv() {
-		return geopriv;
-	}
+    public Geopriv getGeopriv() {
+        return geopriv;
+    }
 }

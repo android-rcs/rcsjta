@@ -85,17 +85,17 @@ public class EditGeoloc extends Activity {
         setContentView(R.layout.geoloc_edit);
 
         // Create editors
-        locationEdit = (EditText)findViewById(R.id.location);
-        latitudeEdit = (EditText)findViewById(R.id.latitude);
-        longitudeEdit = (EditText)findViewById(R.id.longitude);
-        accuracyEdit = (EditText)findViewById(R.id.accuracy);
+        locationEdit = (EditText) findViewById(R.id.location);
+        latitudeEdit = (EditText) findViewById(R.id.latitude);
+        longitudeEdit = (EditText) findViewById(R.id.longitude);
+        accuracyEdit = (EditText) findViewById(R.id.accuracy);
 
         // Set button callback
-        Button validateBtn = (Button)findViewById(R.id.validate_btn);
+        Button validateBtn = (Button) findViewById(R.id.validate_btn);
         validateBtn.setOnClickListener(btnValidateListener);
 
         // Set button callback
-        Button selectBtn = (Button)findViewById(R.id.select_geoloc_btn);
+        Button selectBtn = (Button) findViewById(R.id.select_geoloc_btn);
         selectBtn.setOnClickListener(btnSelectListener);
 
         // Display my current location
@@ -116,7 +116,7 @@ public class EditGeoloc extends Activity {
         if (geolocLabelMaxLength > 0) {
             InputFilter maxLengthFilter = new InputFilter.LengthFilter(geolocLabelMaxLength);
             locationEdit.setFilters(new InputFilter[] {
-                maxLengthFilter
+                    maxLengthFilter
             });
         }
     }
@@ -130,7 +130,7 @@ public class EditGeoloc extends Activity {
      * Set the location of the device
      */
     protected void setMyLocation() {
-        LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         Criteria criteria = new Criteria();
         String bestProvider = lm.getBestProvider(criteria, false);
 
@@ -167,7 +167,7 @@ public class EditGeoloc extends Activity {
             Geoloc geoloc = new Geoloc(locationEdit.getText().toString(), Double.parseDouble(lat),
                     Double.parseDouble(lon), expiration, Float.parseFloat(acc));
             Intent in = new Intent();
-            in.putExtra(EXTRA_GEOLOC, (Parcelable)geoloc);
+            in.putExtra(EXTRA_GEOLOC, (Parcelable) geoloc);
             setResult(-1, in);
             finish();
         }

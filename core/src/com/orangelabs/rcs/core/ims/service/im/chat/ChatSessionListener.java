@@ -35,132 +35,109 @@ import java.util.Set;
  * @author Jean-Marc AUFFRET
  */
 public interface ChatSessionListener extends ImsSessionListener {
-	/**
-	 * New message received
-	 * 
-	 * @param msg
-	 *            Chat message
-	 * @param imdnDisplayedRequested
-	 *            Indicates whether display notification is requested
-	 */
-	public void handleReceiveMessage(ChatMessage msg, boolean imdnDisplayedRequested);
+    /**
+     * New message received
+     * 
+     * @param msg Chat message
+     * @param imdnDisplayedRequested Indicates whether display notification is requested
+     */
+    public void handleReceiveMessage(ChatMessage msg, boolean imdnDisplayedRequested);
 
-	/**
-	 * IM error
-	 * 
-	 * @param error
-	 *            Error
-	 * @param message
-	 */
-	public void handleImError(ChatError error, ChatMessage message);
+    /**
+     * IM error
+     * 
+     * @param error Error
+     * @param message
+     */
+    public void handleImError(ChatError error, ChatMessage message);
 
-	/**
-	 * Is composing event
-	 * 
-	 * @param contact
-	 *            Contact identifier
-	 * @param status
-	 *            Status
-	 */
-	public void handleIsComposingEvent(ContactId contact, boolean status);
+    /**
+     * Is composing event
+     * 
+     * @param contact Contact identifier
+     * @param status Status
+     */
+    public void handleIsComposingEvent(ContactId contact, boolean status);
 
-	/**
-	 * New conference event
-	 * 
-	 * @param contact
-	 *            Contact identifier
-	 * @param contactDisplayname
-	 *            Contact display name
-	 * @param state
-	 *            State associated to the contact
-	 */
-	public void handleConferenceEvent(ContactId contact, String contactDisplayname, String state);
+    /**
+     * New conference event
+     * 
+     * @param contact Contact identifier
+     * @param contactDisplayname Contact display name
+     * @param state State associated to the contact
+     */
+    public void handleConferenceEvent(ContactId contact, String contactDisplayname, String state);
 
-	/**
-	 * Notifying sending of a message
-	 * 
-	 * @param msg
-	 *            Chat message
-	 */
-	public void handleMessageSending(ChatMessage msg);
+    /**
+     * Notifying sending of a message
+     * 
+     * @param msg Chat message
+     */
+    public void handleMessageSending(ChatMessage msg);
 
-	/**
-	 * Notifying that a message has been sent
-	 *
-	 * @param msgId
-	 *            Message ID
-	 * @param mimeType
-	 *            MIME type
-	 */
-	public void handleMessageSent(String msgId, String mimeType);
+    /**
+     * Notifying that a message has been sent
+     * 
+     * @param msgId Message ID
+     * @param mimeType MIME type
+     */
+    public void handleMessageSent(String msgId, String mimeType);
 
-	/**
-	 * Notifying failure of sending message
-	 *
-	 * @param msgId
-	 *            Message ID
-	 * @param mimeType
-	 *            MIME type
-	 */
-	public void handleMessageFailedSend(String msgId, String mimeType);
+    /**
+     * Notifying failure of sending message
+     * 
+     * @param msgId Message ID
+     * @param mimeType MIME type
+     */
+    public void handleMessageFailedSend(String msgId, String mimeType);
 
-	/**
-	 * New message delivery status that are received as part of imdn notification
-	 * 
-	 * @param contact
-	 *            the remote contact identifier
-	 * @param ImdnDocument
-	 *            imdn Imdn document
-	 */
-	public void handleMessageDeliveryStatus(ContactId contact, ImdnDocument imdn);
+    /**
+     * New message delivery status that are received as part of imdn notification
+     * 
+     * @param contact the remote contact identifier
+     * @param ImdnDocument imdn Imdn document
+     */
+    public void handleMessageDeliveryStatus(ContactId contact, ImdnDocument imdn);
 
-	/**
-	 * Request to add participant is successful
-	 *
-	 * @param contact
-	 *            Contact ID
-	 */
-	public void handleAddParticipantSuccessful(ContactId contact);
+    /**
+     * Request to add participant is successful
+     * 
+     * @param contact Contact ID
+     */
+    public void handleAddParticipantSuccessful(ContactId contact);
 
-	/**
-	 * Request to add participant has failed
-	 *
-	 * @param contact
-	 *            Contact ID
-	 * @param reason
-	 *            Error reason
-	 */
-	public void handleAddParticipantFailed(ContactId contact, String reason);
+    /**
+     * Request to add participant has failed
+     * 
+     * @param contact Contact ID
+     * @param reason Error reason
+     */
+    public void handleAddParticipantFailed(ContactId contact, String reason);
 
-	/**
-	 * Participant status changed
-	 * 
-	 * @param participantInfo
-	 *            the participant information
-	 */
-	public void handleParticipantStatusChanged(ParticipantInfo participantInfo);
+    /**
+     * Participant status changed
+     * 
+     * @param participantInfo the participant information
+     */
+    public void handleParticipantStatusChanged(ParticipantInfo participantInfo);
 
-	/**
-	 * A session invitation has been received
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 * @param subject
-	 * @param participants
-	 *            Participants in case of groupchat
-	 */
-	public void handleSessionInvited(ContactId contact, String subject,
-			Set<ParticipantInfo> participants);
+    /**
+     * A session invitation has been received
+     * 
+     * @param contact Remote contact
+     * @param subject
+     * @param participants Participants in case of groupchat
+     */
+    public void handleSessionInvited(ContactId contact, String subject,
+            Set<ParticipantInfo> participants);
 
-	/**
-	 * Chat is auto-accepted and the session is in the process of being started
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 * @param subject
-	 * @param participants
-	 *            Participants in case of groupchat
-	 */
-	public void handleSessionAutoAccepted(ContactId contact, String subject,
-			Set<ParticipantInfo> participants);
+    /**
+     * Chat is auto-accepted and the session is in the process of being started
+     * 
+     * @param contact Remote contact
+     * @param subject
+     * @param participants Participants in case of groupchat
+     */
+    public void handleSessionAutoAccepted(ContactId contact, String subject,
+            Set<ParticipantInfo> participants);
 }

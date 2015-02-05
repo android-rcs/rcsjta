@@ -19,6 +19,7 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
 /**
@@ -28,13 +29,13 @@ package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
  */
 public interface HttpTransferState {
 
-	/**
-	 * Session is pending (not yet accepted by a final response by the remote)
-	 */
-	public final static int PENDING = 0;
+    /**
+     * Session is pending (not yet accepted by a final response by the remote)
+     */
+    public final static int PENDING = 0;
 
-	/**
-	 * Session has been established (i.e. 200 OK/ACK exchanged)
-	 */
-	public final static int ESTABLISHED = 1;
+    /**
+     * Session has been established (i.e. 200 OK/ACK exchanged)
+     */
+    public final static int ESTABLISHED = 1;
 }

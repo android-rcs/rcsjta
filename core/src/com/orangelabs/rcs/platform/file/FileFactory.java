@@ -35,80 +35,75 @@ import java.io.IOException;
  * @author jexa7410
  */
 public abstract class FileFactory {
-	/**
-	 * Current platform factory
-	 */
-	private static FileFactory factory = null;
+    /**
+     * Current platform factory
+     */
+    private static FileFactory factory = null;
 
-	/**
-	 * Load the factory
-	 * 
-	 * @param classname
-	 *            Factory classname
-	 * @throws Exception
-	 */
-	public static void loadFactory(String classname) throws FactoryException {
-		if (factory != null) {
-			return;
-		}
+    /**
+     * Load the factory
+     * 
+     * @param classname Factory classname
+     * @throws Exception
+     */
+    public static void loadFactory(String classname) throws FactoryException {
+        if (factory != null) {
+            return;
+        }
 
-		try {
-			factory = (FileFactory) Class.forName(classname).newInstance();
-		} catch (Exception e) {
-			throw new FactoryException("Can't load the factory " + classname);
-		}
-	}
+        try {
+            factory = (FileFactory) Class.forName(classname).newInstance();
+        } catch (Exception e) {
+            throw new FactoryException("Can't load the factory " + classname);
+        }
+    }
 
-	/**
-	 * Returns the current factory
-	 * 
-	 * @return Factory
-	 */
-	public static FileFactory getFactory() {
-		return factory;
-	}
+    /**
+     * Returns the current factory
+     * 
+     * @return Factory
+     */
+    public static FileFactory getFactory() {
+        return factory;
+    }
 
-	/**
-	 * Returns the description of a file
-	 *
-	 * @param file
-	 *            URI of the file
-	 * @return File description
-	 * @throws IOException
-	 */
-	public abstract FileDescription getFileDescription(Uri file) throws IOException;
+    /**
+     * Returns the description of a file
+     * 
+     * @param file URI of the file
+     * @return File description
+     * @throws IOException
+     */
+    public abstract FileDescription getFileDescription(Uri file) throws IOException;
 
-	/**
-	 * Update the media storage
-	 * 
-	 * @param url
-	 *            New URL to be added
-	 */
-	public abstract void updateMediaStorage(String url);
+    /**
+     * Update the media storage
+     * 
+     * @param url New URL to be added
+     */
+    public abstract void updateMediaStorage(String url);
 
-	/**
-	 * Returns whether a file exists or not
-	 * 
-	 * @param url
-	 *            Url of the file to check
-	 * @return File existence
-	 */
-	public abstract boolean fileExists(String url);
+    /**
+     * Returns whether a file exists or not
+     * 
+     * @param url Url of the file to check
+     * @return File existence
+     */
+    public abstract boolean fileExists(String url);
 
-	/**
-	 * Create a directory if not already exist
-	 * 
-	 * @param path
-	 *            Directory path
-	 * @return true if the directory exists or is created
-	 */
-	public static boolean createDirectory(String path) {
-		File dir = new File(path);
-		if (!dir.exists()) {
-			if (!dir.mkdirs()) {
-				return false;
-			}
-		}
-		return true;
-	}
+    /**
+     * Create a directory if not already exist
+     * 
+     * @param path Directory path
+     * @return true if the directory exists or is created
+     */
+    public static boolean createDirectory(String path) {
+        File dir = new File(path);
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

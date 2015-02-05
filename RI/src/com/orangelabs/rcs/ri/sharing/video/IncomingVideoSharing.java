@@ -140,7 +140,7 @@ public class IncomingVideoSharing extends Activity implements VideoPlayerListene
         // Saved datas
         if (savedInstanceState == null) {
             // Get invitation info
-            mVshDao = (VideoSharingDAO)(getIntent().getExtras()
+            mVshDao = (VideoSharingDAO) (getIntent().getExtras()
                     .getParcelable(VideoSharingIntentService.BUNDLE_VSHDAO_ID));
         } else {
             mVshDao = savedInstanceState.getParcelable(SAVE_VIDEO_SHARING_DAO);
@@ -160,7 +160,7 @@ public class IncomingVideoSharing extends Activity implements VideoPlayerListene
         }
 
         // Create the live video view
-        mVideoView = (VideoSurfaceView)findViewById(R.id.video_view);
+        mVideoView = (VideoSurfaceView) findViewById(R.id.video_view);
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             mVideoView.setAspectRatio(mVideoWidth, mVideoHeight);
         } else {
@@ -246,7 +246,7 @@ public class IncomingVideoSharing extends Activity implements VideoPlayerListene
             String from = RcsDisplayName.getInstance(this).getDisplayName(remote);
 
             // Display sharing information
-            TextView fromTextView = (TextView)findViewById(R.id.from);
+            TextView fromTextView = (TextView) findViewById(R.id.from);
             fromTextView.setText(getString(R.string.label_from_args, from));
 
             if (mWaitForUseAcceptance) {
@@ -494,7 +494,7 @@ public class IncomingVideoSharing extends Activity implements VideoPlayerListene
             String format = new StringBuilder(mVideoSharing.getVideoEncoding()).append(" ")
                     .append(videoDescriptor.getWidth()).append("x")
                     .append(videoDescriptor.getHeight()).toString();
-            TextView fmtView = (TextView)findViewById(R.id.video_format);
+            TextView fmtView = (TextView) findViewById(R.id.video_format);
             fmtView.setVisibility(View.VISIBLE);
             fmtView.setText(getString(R.string.label_video_format, format));
         } catch (Exception e) {
@@ -563,7 +563,7 @@ public class IncomingVideoSharing extends Activity implements VideoPlayerListene
         }
         mVideoView.setAspectRatio(width, height);
 
-        LinearLayout l = (LinearLayout)mVideoView.getParent();
+        LinearLayout l = (LinearLayout) mVideoView.getParent();
         l.setLayoutParams(new FrameLayout.LayoutParams(width, height));
     }
 }

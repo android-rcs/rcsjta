@@ -36,8 +36,7 @@ import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 
 /**
- * A list view of group chat delivery information where the data comes from a
- * cursor.
+ * A list view of group chat delivery information where the data comes from a cursor.
  */
 public class GroupDeliveryInfoList extends FragmentActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
@@ -52,14 +51,12 @@ public class GroupDeliveryInfoList extends FragmentActivity implements
     private String mMessageId;
 
     /**
-     * The loader's unique ID. Loader IDs are specific to the Activity in which
-     * they reside.
+     * The loader's unique ID. Loader IDs are specific to the Activity in which they reside.
      */
     private static final int LOADER_ID = 1;
 
     /**
-     * Contact is the ID since there is a single contact occurrence per message
-     * ID
+     * Contact is the ID since there is a single contact occurrence per message ID
      */
     private static final String CONTACT_AS_ID = new StringBuilder(GroupDeliveryInfoLog.CONTACT)
             .append(" AS ").append(BaseColumns._ID).toString();
@@ -98,7 +95,7 @@ public class GroupDeliveryInfoList extends FragmentActivity implements
         mAdapter = new GroupDeliveryInfoCursorAdapter(this, null, 0);
 
         // Associate the list adapter with the ListView.
-        ListView listView = (ListView)findViewById(android.R.id.list);
+        ListView listView = (ListView) findViewById(android.R.id.list);
         listView.setAdapter(mAdapter);
         // Initialize the Loader with id and callbacks 'mCallbacks'.
         getSupportLoaderManager().initLoader(LOADER_ID, null, this);
@@ -127,7 +124,7 @@ public class GroupDeliveryInfoList extends FragmentActivity implements
         // Create a new CursorLoader with the following query parameters.
         CursorLoader loader = new CursorLoader(this, GroupDeliveryInfoLog.CONTENT_URI, PROJECTION,
                 WHERE_CLAUSE, new String[] {
-                    mMessageId
+                        mMessageId
                 }, null);
         return loader;
     }

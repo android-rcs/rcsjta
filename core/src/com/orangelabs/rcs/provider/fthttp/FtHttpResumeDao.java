@@ -19,31 +19,28 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.provider.fthttp;
 
 import java.util.List;
 
 /**
- * @author YPLO6403
- * 
- *         Interface to get access to FT HTTP data objects
- * 
+ * @author YPLO6403 Interface to get access to FT HTTP data objects
  */
 public interface FtHttpResumeDao {
 
-	/**
-	 * Query all entries sorted in _ID ascending order
-	 * 
-	 * @return the list of entries
-	 */
-	public List<FtHttpResume> queryAll();
+    /**
+     * Query all entries sorted in _ID ascending order
+     * 
+     * @return the list of entries
+     */
+    public List<FtHttpResume> queryAll();
 
-	/**
-	 * Query the upload entry with TID
-	 * 
-	 * @param tId
-	 *            the {@code tId} value.
-	 * @return the entry (Can be {@code null}).
-	 */
-	public FtHttpResumeUpload queryUpload(String tId);
+    /**
+     * Query the upload entry with TID
+     * 
+     * @param tId the {@code tId} value.
+     * @return the entry (Can be {@code null}).
+     */
+    public FtHttpResumeUpload queryUpload(String tId);
 }

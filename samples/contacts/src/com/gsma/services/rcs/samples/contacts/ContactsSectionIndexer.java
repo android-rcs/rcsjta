@@ -21,8 +21,7 @@ import java.util.Arrays;
 import android.widget.SectionIndexer;
 
 /**
- * A section indexer that is configured with precomputed section titles and
- * their respective counts.
+ * A section indexer that is configured with precomputed section titles and their respective counts.
  */
 public class ContactsSectionIndexer implements SectionIndexer {
 
@@ -32,7 +31,7 @@ public class ContactsSectionIndexer implements SectionIndexer {
 
     /**
      * Constructor.
-     *
+     * 
      * @param sections a non-null array
      * @param counts a non-null array of the same size as <code>sections</code>
      */
@@ -84,12 +83,11 @@ public class ContactsSectionIndexer implements SectionIndexer {
         int index = Arrays.binarySearch(mPositions, position);
 
         /*
-         * Consider this example: section positions are 0, 3, 5; the supplied
-         * position is 4. The section corresponding to position 4 starts at
-         * position 3, so the expected return value is 1. Binary search will not
-         * find 4 in the array and thus will return -insertPosition-1, i.e. -3.
-         * To get from that number to the expected value of 1 we need to negate
-         * and subtract 2.
+         * Consider this example: section positions are 0, 3, 5; the supplied position is 4. The
+         * section corresponding to position 4 starts at position 3, so the expected return value is
+         * 1. Binary search will not find 4 in the array and thus will return -insertPosition-1,
+         * i.e. -3. To get from that number to the expected value of 1 we need to negate and
+         * subtract 2.
          */
         return index >= 0 ? index : -index - 2;
     }

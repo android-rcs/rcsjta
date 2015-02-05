@@ -25,18 +25,18 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.util.Packet;
 
 /**
  * Abstract RCTP packet
- *
+ * 
  * @author jexa7410
  */
 public abstract class RtcpPacket extends Packet {
     /**
-     *   Version =2
+     * Version =2
      */
     public static final byte VERSION = 2;
 
     /**
-    *   Padding =0
-    */
+     * Padding =0
+     */
     public static final byte PADDING = 0;
 
     /**
@@ -69,26 +69,26 @@ public abstract class RtcpPacket extends Packet {
      */
     public static final int RTCP_COMPOUND = -1;
 
-	public Packet base;
+    public Packet base;
 
-	public int type;
+    public int type;
 
-	public RtcpPacket() {
-	}
+    public RtcpPacket() {
+    }
 
-	public RtcpPacket(RtcpPacket rtcppacket) {
-		super((Packet)rtcppacket);
+    public RtcpPacket(RtcpPacket rtcppacket) {
+        super((Packet) rtcppacket);
 
-		base = rtcppacket.base;
-	}
+        base = rtcppacket.base;
+    }
 
-	public RtcpPacket(Packet packet) {
-		super(packet);
+    public RtcpPacket(Packet packet) {
+        super(packet);
 
-		base = packet;
-	}
+        base = packet;
+    }
 
-	public abstract void assemble(DataOutputStream dataoutputstream) throws IOException;
+    public abstract void assemble(DataOutputStream dataoutputstream) throws IOException;
 
-	public abstract int calcLength();
+    public abstract int calcLength();
 }

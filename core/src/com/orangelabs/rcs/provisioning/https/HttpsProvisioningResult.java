@@ -20,28 +20,28 @@ package com.orangelabs.rcs.provisioning.https;
 
 /**
  * HTTPS provisioning result
- *
+ * 
  * @author jexa7410
  * @author Deutsche Telekom
  */
 public class HttpsProvisioningResult {
-	/**
-	 * Return code
-	 */
-	public int code = -1;
+    /**
+     * Return code
+     */
+    public int code = -1;
 
-	/**
-	 * Value of header RetryAfter
-	 */
-	public int retryAfter = 0;
+    /**
+     * Value of header RetryAfter
+     */
+    public int retryAfter = 0;
 
-	/**
-	 * Response content
-	 */
-	public String content = null;
+    /**
+     * Response content
+     */
+    public String content = null;
 
-	/**
-	 * Controls if is waiting for the SMS with the one time password (OTP)
-	 */
-	public boolean waitingForSMSOTP = false;
+    /**
+     * Controls if is waiting for the SMS with the one time password (OTP)
+     */
+    public boolean waitingForSMSOTP = false;
 }

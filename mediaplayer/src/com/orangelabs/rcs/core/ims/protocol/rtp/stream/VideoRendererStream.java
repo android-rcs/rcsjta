@@ -24,13 +24,13 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.util.Buffer;
 
 /**
  * Video renderer stream
- *
+ * 
  * @author hlxn7157
  */
 public class VideoRendererStream extends MediaRendererStream {
     /**
      * Constructor
-     *
+     * 
      * @param renderer Media renderer
      */
     public VideoRendererStream(MediaOutput renderer) {

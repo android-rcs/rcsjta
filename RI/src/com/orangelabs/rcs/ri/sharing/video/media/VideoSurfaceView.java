@@ -94,7 +94,7 @@ public class VideoSurfaceView extends SurfaceView implements VideoSurface {
      * @param height Height
      */
     public void setAspectRatio(int width, int height) {
-        setAspectRatio((float)width / (float)height);
+        setAspectRatio((float) width / (float) height);
     }
 
     /**
@@ -125,12 +125,12 @@ public class VideoSurfaceView extends SurfaceView implements VideoSurface {
             int height = heightSpecSize;
 
             if (width > 0 && height > 0) {
-                float defaultRatio = ((float)width) / ((float)height);
+                float defaultRatio = ((float) width) / ((float) height);
                 if (defaultRatio < aspectRatio) {
                     // Need to reduce height
-                    height = (int)(width / aspectRatio);
+                    height = (int) (width / aspectRatio);
                 } else if (defaultRatio > aspectRatio) {
-                    width = (int)(height * aspectRatio);
+                    width = (int) (height * aspectRatio);
                 }
                 width = Math.min(width, widthSpecSize);
                 height = Math.min(height, heightSpecSize);

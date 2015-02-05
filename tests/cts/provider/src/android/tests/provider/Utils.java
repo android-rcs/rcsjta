@@ -15,34 +15,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package android.tests.provider;
 
 import android.test.InstrumentationTestCase;
 
-public class Utils extends InstrumentationTestCase  {
-	
-	public static void checkProjection(String[] expected, String[] obtained) {
-		if (expected != null) {
-			if (obtained == null) {
-				fail("projection is null");
-			}
-			assertEquals(expected.length, obtained.length);
-			for (String field1 : expected) {
-				boolean found = false;
-				for (String field2 : obtained) {
-					if (field1.equals(field2)) {
-						found = true;
-						break;
-					}
-				}
-				if (!found) {
-					fail("field1 is not present");
-				}
-			}
-		} else {
-			if (obtained != null) {
-				fail("invalid Projection");
-			}
-		}
-	}
+public class Utils extends InstrumentationTestCase {
+
+    public static void checkProjection(String[] expected, String[] obtained) {
+        if (expected != null) {
+            if (obtained == null) {
+                fail("projection is null");
+            }
+            assertEquals(expected.length, obtained.length);
+            for (String field1 : expected) {
+                boolean found = false;
+                for (String field2 : obtained) {
+                    if (field1.equals(field2)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    fail("field1 is not present");
+                }
+            }
+        } else {
+            if (obtained != null) {
+                fail("invalid Projection");
+            }
+        }
+    }
 }

@@ -23,50 +23,37 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 public abstract class GroupFileTransferListener extends IGroupFileTransferListener.Stub {
 
-	/**
-	 * Callback called when the group file transfer status/reasonCode is changed.
-	 *
-	 * @param chatId
-	 *            Id of chat
-	 * @param transferId
-	 *            Id of file transfer
-	 * @param state
-	 *            State of file transfer after change
-	 * @param reasonCode
-	 *            Reason code of file transfer after change
-	 */
-	public abstract void onStateChanged(String chatId, String transferId, int state, int reasonCode);
+    /**
+     * Callback called when the group file transfer status/reasonCode is changed.
+     * 
+     * @param chatId Id of chat
+     * @param transferId Id of file transfer
+     * @param state State of file transfer after change
+     * @param reasonCode Reason code of file transfer after change
+     */
+    public abstract void onStateChanged(String chatId, String transferId, int state, int reasonCode);
 
-	/**
-	 * Callback called when a group file transfer state/reasonCode is changed for a single recipient
-	 * only.
-	 *
-	 * @param chatId
-	 *            Id of chat
-	 * @param contact
-	 *            Contact ID
-	 * @param transferId
-	 *            Id of file transfer
-	 * @param state
-	 *            state of file transfer after change
-	 * @param reasonCode
-	 *            Reason code of state after change
-	 */
-	public abstract void onDeliveryInfoChanged(String chatId, ContactId contact, String transferId,
-			int state, int reasonCode);
+    /**
+     * Callback called when a group file transfer state/reasonCode is changed for a single recipient
+     * only.
+     * 
+     * @param chatId Id of chat
+     * @param contact Contact ID
+     * @param transferId Id of file transfer
+     * @param state state of file transfer after change
+     * @param reasonCode Reason code of state after change
+     */
+    public abstract void onDeliveryInfoChanged(String chatId, ContactId contact, String transferId,
+            int state, int reasonCode);
 
-	/**
-	 * Callback called during the transfer progress of group file transfer
-	 *
-	 * @param chatId
-	 *            Id of chat
-	 * @param transferId
-	 *            Id of file transfer
-	 * @param currentSize
-	 *            Current transferred size in bytes
-	 * @param totalSize
-	 *            Total size to transfer in bytes
-	 */
-	public abstract void onProgressUpdate(String chatId, String transferId, long currentSize,
-			long totalSize);
+    /**
+     * Callback called during the transfer progress of group file transfer
+     * 
+     * @param chatId Id of chat
+     * @param transferId Id of file transfer
+     * @param currentSize Current transferred size in bytes
+     * @param totalSize Total size to transfer in bytes
+     */
+    public abstract void onProgressUpdate(String chatId, String transferId, long currentSize,
+            long totalSize);
 }

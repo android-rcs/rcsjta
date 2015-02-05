@@ -42,157 +42,151 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author Jean-Marc AUFFRET
  */
 public class RejoinGroupChatSession extends GroupChatSession {
-	/**
-	 * The logger
-	 */
-	private static final Logger logger = Logger.getLogger(RejoinGroupChatSession.class
-			.getSimpleName());
+    /**
+     * The logger
+     */
+    private static final Logger logger = Logger.getLogger(RejoinGroupChatSession.class
+            .getSimpleName());
 
-	/**
-	 * Constructor
-	 * 
-	 * @param parent
-	 *            IMS service
-	 * @param groupChatInfo
-	 *            Group Chat information
-	 * @param rcsSettings
-	 *            Rcs settings
-	 * @param messagingLog
-	 *            Messaging log
-	 */
-	public RejoinGroupChatSession(ImsService parent, GroupChatInfo groupChatInfo,
-			RcsSettings rcsSettings, MessagingLog messagingLog) {
-		super(parent, null, groupChatInfo.getRejoinId(), groupChatInfo.getParticipants(),
-				rcsSettings, messagingLog);
+    /**
+     * Constructor
+     * 
+     * @param parent IMS service
+     * @param groupChatInfo Group Chat information
+     * @param rcsSettings Rcs settings
+     * @param messagingLog Messaging log
+     */
+    public RejoinGroupChatSession(ImsService parent, GroupChatInfo groupChatInfo,
+            RcsSettings rcsSettings, MessagingLog messagingLog) {
+        super(parent, null, groupChatInfo.getRejoinId(), groupChatInfo.getParticipants(),
+                rcsSettings, messagingLog);
 
-		// Set subject
-		if (!TextUtils.isEmpty(groupChatInfo.getSubject())) {
-			setSubject(groupChatInfo.getSubject());
-		}
+        // Set subject
+        if (!TextUtils.isEmpty(groupChatInfo.getSubject())) {
+            setSubject(groupChatInfo.getSubject());
+        }
 
-		// Create dialog path
-		createOriginatingDialogPath();
+        // Create dialog path
+        createOriginatingDialogPath();
 
-		// Set contribution ID
-		setContributionID(groupChatInfo.getContributionId());
-	}
+        // Set contribution ID
+        setContributionID(groupChatInfo.getContributionId());
+    }
 
-	/**
-	 * Background processing
-	 */
-	public void run() {
-		try {
-			if (logger.isActivated()) {
-				logger.info("Rejoin an existing group chat session");
-			}
+    /**
+     * Background processing
+     */
+    public void run() {
+        try {
+            if (logger.isActivated()) {
+                logger.info("Rejoin an existing group chat session");
+            }
 
-			// Set setup mode
-			String localSetup = createSetupOffer();
-			if (logger.isActivated()) {
-				logger.debug("Local setup attribute is " + localSetup);
-			}
+            // Set setup mode
+            String localSetup = createSetupOffer();
+            if (logger.isActivated()) {
+                logger.debug("Local setup attribute is " + localSetup);
+            }
 
-			// Set local port
-			int localMsrpPort;
-			if ("active".equals(localSetup)) {
-				localMsrpPort = 9; // See RFC4145, Page 4
-			} else {
-				localMsrpPort = getMsrpMgr().getLocalMsrpPort();
-			}
+            // Set local port
+            int localMsrpPort;
+            if ("active".equals(localSetup)) {
+                localMsrpPort = 9; // See RFC4145, Page 4
+            } else {
+                localMsrpPort = getMsrpMgr().getLocalMsrpPort();
+            }
 
-			// Build SDP part
-			String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
-			String sdp = SdpUtils.buildGroupChatSDP(ipAddress, localMsrpPort, getMsrpMgr()
-					.getLocalSocketProtocol(), getAcceptTypes(), getWrappedTypes(), localSetup,
-					getMsrpMgr().getLocalMsrpPath(), SdpUtils.DIRECTION_SENDRECV);
+            // Build SDP part
+            String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
+            String sdp = SdpUtils.buildGroupChatSDP(ipAddress, localMsrpPort, getMsrpMgr()
+                    .getLocalSocketProtocol(), getAcceptTypes(), getWrappedTypes(), localSetup,
+                    getMsrpMgr().getLocalMsrpPath(), SdpUtils.DIRECTION_SENDRECV);
 
-			// Set the local SDP part in the dialog path
-			getDialogPath().setLocalContent(sdp);
+            // Set the local SDP part in the dialog path
+            getDialogPath().setLocalContent(sdp);
 
-			// Create an INVITE request
-			if (logger.isActivated()) {
-				logger.info("Send INVITE");
-			}
-			SipRequest invite = createInviteRequest(sdp);
+            // Create an INVITE request
+            if (logger.isActivated()) {
+                logger.info("Send INVITE");
+            }
+            SipRequest invite = createInviteRequest(sdp);
 
-			// Set the Authorization header
-			getAuthenticationAgent().setAuthorizationHeader(invite);
+            // Set the Authorization header
+            getAuthenticationAgent().setAuthorizationHeader(invite);
 
-			// Set initial request in the dialog path
-			getDialogPath().setInvite(invite);
+            // Set initial request in the dialog path
+            getDialogPath().setInvite(invite);
 
-			// Send INVITE request
-			sendInvite(invite);
-		} catch (Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Session initiation has failed", e);
-			}
+            // Send INVITE request
+            sendInvite(invite);
+        } catch (Exception e) {
+            if (logger.isActivated()) {
+                logger.error("Session initiation has failed", e);
+            }
 
-			// Unexpected error
-			handleError(new ChatError(ChatError.UNEXPECTED_EXCEPTION, e.getMessage()));
-		}
-	}
+            // Unexpected error
+            handleError(new ChatError(ChatError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        }
+    }
 
-	/**
-	 * Create INVITE request
-	 * 
-	 * @param content
-	 *            Content part
-	 * @return Request
-	 * @throws SipException
-	 */
-	private SipRequest createInviteRequest(String content) throws SipException {
-		SipRequest invite = SipMessageFactory.createInvite(getDialogPath(), getFeatureTags(),
-				getAcceptContactTags(), content);
+    /**
+     * Create INVITE request
+     * 
+     * @param content Content part
+     * @return Request
+     * @throws SipException
+     */
+    private SipRequest createInviteRequest(String content) throws SipException {
+        SipRequest invite = SipMessageFactory.createInvite(getDialogPath(), getFeatureTags(),
+                getAcceptContactTags(), content);
 
-		// Test if there is a subject
-		if (getSubject() != null) {
-			// Add a subject header
-			invite.addHeader(SubjectHeader.NAME, getSubject());
-		}
+        // Test if there is a subject
+        if (getSubject() != null) {
+            // Add a subject header
+            invite.addHeader(SubjectHeader.NAME, getSubject());
+        }
 
-		// Add a contribution ID header
-		invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
+        // Add a contribution ID header
+        invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
 
-		return invite;
-	}
+        return invite;
+    }
 
-	/**
-	 * Create an INVITE request
-	 *
-	 * @return the INVITE request
-	 * @throws SipException
-	 */
-	public SipRequest createInvite() throws SipException {
-		return createInviteRequest(getDialogPath().getLocalContent());
-	}
+    /**
+     * Create an INVITE request
+     * 
+     * @return the INVITE request
+     * @throws SipException
+     */
+    public SipRequest createInvite() throws SipException {
+        return createInviteRequest(getDialogPath().getLocalContent());
+    }
 
-	/**
-	 * Handle 404 Session Not Found
-	 *
-	 * @param resp
-	 *            404 response
-	 */
-	public void handle404SessionNotFound(SipResponse resp) {
-		// Rejoin session has failed, we update the database with status terminated by remote
+    /**
+     * Handle 404 Session Not Found
+     * 
+     * @param resp 404 response
+     */
+    public void handle404SessionNotFound(SipResponse resp) {
+        // Rejoin session has failed, we update the database with status terminated by remote
 
-		// TODO Once after CR18 is implemented we will check if this callback is
-		// really required and act accordingly
+        // TODO Once after CR18 is implemented we will check if this callback is
+        // really required and act accordingly
 
-		// MessagingLog.getInstance().updateGroupChatStatus(getContributionID(),
-		// GroupChat.State.TERMINATED, GroupChat.ReasonCode.NONE);
+        // MessagingLog.getInstance().updateGroupChatStatus(getContributionID(),
+        // GroupChat.State.TERMINATED, GroupChat.ReasonCode.NONE);
 
-		handleError(new ChatError(ChatError.SESSION_NOT_FOUND, resp.getReasonPhrase()));
-	}
+        handleError(new ChatError(ChatError.SESSION_NOT_FOUND, resp.getReasonPhrase()));
+    }
 
-	@Override
-	public boolean isInitiatedByRemote() {
-		return false;
-	}
+    @Override
+    public boolean isInitiatedByRemote() {
+        return false;
+    }
 
-	@Override
-	public void startSession() {
-		getImsService().getImsModule().getInstantMessagingService().addSession(this);
-		start();
-	}
+    @Override
+    public void startSession() {
+        getImsService().getImsModule().getInstantMessagingService().addSession(this);
+        start();
+    }
 }

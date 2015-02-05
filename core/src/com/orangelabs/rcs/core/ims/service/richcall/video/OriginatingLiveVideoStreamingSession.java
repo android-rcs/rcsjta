@@ -25,24 +25,20 @@ import com.orangelabs.rcs.core.ims.service.ImsService;
 
 /**
  * Originating live video content sharing session (streaming)
- *
+ * 
  * @author Jean-Marc AUFFRET
  */
 public class OriginatingLiveVideoStreamingSession extends OriginatingVideoStreamingSession {
-	/**
-	 * Constructor
-	 *
-	 * @param parent
-	 *            IMS service
-	 * @param player
-	 *            Media player
-	 * @param content
-	 *            Content to be shared
-	 * @param contact
-	 *            Remote contact Id
-	 */
-	public OriginatingLiveVideoStreamingSession(ImsService parent, IVideoPlayer player,
-			LiveVideoContent content, ContactId contact) {
-		super(parent, player, content, contact);
-	}
+    /**
+     * Constructor
+     * 
+     * @param parent IMS service
+     * @param player Media player
+     * @param content Content to be shared
+     * @param contact Remote contact Id
+     */
+    public OriginatingLiveVideoStreamingSession(ImsService parent, IVideoPlayer player,
+            LiveVideoContent content, ContactId contact) {
+        super(parent, player, content, contact);
+    }
 }

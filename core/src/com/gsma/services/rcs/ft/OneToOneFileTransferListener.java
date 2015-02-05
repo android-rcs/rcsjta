@@ -31,33 +31,25 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 public abstract class OneToOneFileTransferListener extends IOneToOneFileTransferListener.Stub {
 
-	/**
-	 * Callback called when the file transfer state/reasonCode is changed.
-	 * 
-	 * @param contact
-	 *            Contact ID
-	 * @param transferId
-	 *            Id of file transfer
-	 * @param state
-	 *            State of the file transfer
-	 * @param reasonCode
-	 *            Reason code
-	 */
-	public abstract void onStateChanged(ContactId contact, String transferId, int state,
-			int reasonCode);
+    /**
+     * Callback called when the file transfer state/reasonCode is changed.
+     * 
+     * @param contact Contact ID
+     * @param transferId Id of file transfer
+     * @param state State of the file transfer
+     * @param reasonCode Reason code
+     */
+    public abstract void onStateChanged(ContactId contact, String transferId, int state,
+            int reasonCode);
 
-	/**
-	 * Callback called during the file transfer progress.
-	 * 
-	 * @param contact
-	 *            Contact ID
-	 * @param transferId
-	 *            Id of file transfer
-	 * @param currentSize
-	 *            Current transferred size in bytes
-	 * @param totalSize
-	 *            Total size to transfer in bytes
-	 */
-	public abstract void onProgressUpdate(ContactId contact, String transferId, long currentSize,
-			long totalSize);
+    /**
+     * Callback called during the file transfer progress.
+     * 
+     * @param contact Contact ID
+     * @param transferId Id of file transfer
+     * @param currentSize Current transferred size in bytes
+     * @param totalSize Total size to transfer in bytes
+     */
+    public abstract void onProgressUpdate(ContactId contact, String transferId, long currentSize,
+            long totalSize);
 }

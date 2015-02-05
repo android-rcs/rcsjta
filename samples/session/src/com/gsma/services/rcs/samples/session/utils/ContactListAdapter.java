@@ -31,17 +31,17 @@ import android.widget.TextView;
 import com.gsma.services.rcs.samples.session.R;
 
 /**
- * Contact list adapter 
+ * Contact list adapter
  */
 public class ContactListAdapter extends CursorAdapter {
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param context Context
-	 * @param c Cursor
-	 */
-	public ContactListAdapter(Context context, Cursor c) {
+
+    /**
+     * Constructor
+     * 
+     * @param context Context
+     * @param c Cursor
+     */
+    public ContactListAdapter(Context context, Cursor c) {
         super(context, c);
     }
 
@@ -51,54 +51,57 @@ public class ContactListAdapter extends CursorAdapter {
         TextView view = (TextView) inflater.inflate(R.layout.utils_spinner_item, parent, false);
         return view;
     }
-    
+
     @Override
     public View newDropDownView(Context context, Cursor cursor, ViewGroup parent) {
-		LayoutInflater inflater = LayoutInflater.from(context);
-		TextView view = (TextView) inflater.inflate(android.R.layout.simple_dropdown_item_1line, parent, false);
-		return view;
+        LayoutInflater inflater = LayoutInflater.from(context);
+        TextView view = (TextView) inflater.inflate(android.R.layout.simple_dropdown_item_1line,
+                parent, false);
+        return view;
     }
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-         ((TextView)view).setText(formatText(context, cursor));
+        ((TextView) view).setText(formatText(context, cursor));
     }
-    
+
     /**
-     * Format the item to be displayed. The user name + label is displayed if not null,
-     * else the phone number is used
+     * Format the item to be displayed. The user name + label is displayed if not null, else the
+     * phone number is used
      * 
      * @param context Context
      * @param c Cursor
      * @return String
      */
     private String formatText(Context context, Cursor c) {
-    	// Get phone label
-    	String label = c.getString(2);
-    	if (label==null){
-			// Label is not custom, get the string corresponding to the phone type
-			int type = c.getInt(3);
-			label = context.getString(Phone.getTypeLabelResource(type));
-		}
-    	
-    	String name = null;
-    	
-    	// Get contact name from contact id
-    	Cursor personCursor = context.getContentResolver().query(Contacts.CONTENT_URI, 
-    			new String[]{Contacts.DISPLAY_NAME}, 
-    			Contacts._ID + " = " + c.getLong(4), 
-    			null, 
-    			null);
-    	if (personCursor.moveToFirst()){
-    		name = personCursor.getString(0);
-    	}
-    	personCursor.close();
-    	if (name==null){
-    		// Return "phone number"
-    		return c.getString(1);
-    	}else{
-    		// Return "name (phone label)"
-    		return name + " (" + label + " )";
-    	}
+        // Get phone label
+        String label = c.getString(2);
+        if (label == null) {
+            // Label is not custom, get the string corresponding to the phone type
+            int type = c.getInt(3);
+            label = context.getString(Phone.getTypeLabelResource(type));
+        }
+
+        String name = null;
+
+        // Get contact name from contact id
+        Cursor personCursor = context.getContentResolver().query(Contacts.CONTENT_URI,
+                new String[] {
+                    Contacts.DISPLAY_NAME
+                },
+                Contacts._ID + " = " + c.getLong(4),
+                null,
+                null);
+        if (personCursor.moveToFirst()) {
+            name = personCursor.getString(0);
+        }
+        personCursor.close();
+        if (name == null) {
+            // Return "phone number"
+            return c.getString(1);
+        } else {
+            // Return "name (phone label)"
+            return name + " (" + label + " )";
+        }
     }
 }

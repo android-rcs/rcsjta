@@ -19,6 +19,7 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.core.ims.service.im.filetransfer;
 
 import com.gsma.services.rcs.contacts.ContactId;
@@ -31,89 +32,76 @@ import com.orangelabs.rcs.core.ims.service.ImsSessionListener;
  * @author jexa7410
  */
 public interface FileSharingSessionListener extends ImsSessionListener {
-	/**
-	 * File transfer progress
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 * @param currentSize
-	 *            Data size transfered
-	 * @param totalSize
-	 *            Total size to be transfered
-	 */
-	public void handleTransferProgress(ContactId contact, long currentSize, long totalSize);
+    /**
+     * File transfer progress
+     * 
+     * @param contact Remote contact
+     * @param currentSize Data size transfered
+     * @param totalSize Total size to be transfered
+     */
+    public void handleTransferProgress(ContactId contact, long currentSize, long totalSize);
 
-	/**
-	 * File transfer not allowed to send
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 */
-	public void handleTransferNotAllowedToSend(ContactId contact);
+    /**
+     * File transfer not allowed to send
+     * 
+     * @param contact Remote contact
+     */
+    public void handleTransferNotAllowedToSend(ContactId contact);
 
-	/**
-	 * File transfer error
-	 * 
-	 * @param error
-	 *            Error
-	 * @param contact
-	 *            Remote contact
-	 */
-	public void handleTransferError(FileSharingError error, ContactId contact);
+    /**
+     * File transfer error
+     * 
+     * @param error Error
+     * @param contact Remote contact
+     */
+    public void handleTransferError(FileSharingError error, ContactId contact);
 
-	/**
-	 * File has been transfered In case of file transfer over MSRP, the terminating side has
-	 * received the file, but in case of file transfer over HTTP, only the content server has
-	 * received the file.
-	 *
-	 * @param content
-	 *            MmContent associated to the received file
-	 * @param contact
-	 *            Remote contact
-	 */
-	public void handleFileTransfered(MmContent content, ContactId contact);
+    /**
+     * File has been transfered In case of file transfer over MSRP, the terminating side has
+     * received the file, but in case of file transfer over HTTP, only the content server has
+     * received the file.
+     * 
+     * @param content MmContent associated to the received file
+     * @param contact Remote contact
+     */
+    public void handleFileTransfered(MmContent content, ContactId contact);
 
-	/**
-	 * File transfer has been paused by user
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 */
-	public void handleFileTransferPausedByUser(ContactId contact);
+    /**
+     * File transfer has been paused by user
+     * 
+     * @param contact Remote contact
+     */
+    public void handleFileTransferPausedByUser(ContactId contact);
 
-	/**
-	 * File transfer has been paused by system
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 */
-	public void handleFileTransferPausedBySystem(ContactId contact);
+    /**
+     * File transfer has been paused by system
+     * 
+     * @param contact Remote contact
+     */
+    public void handleFileTransferPausedBySystem(ContactId contact);
 
-	/**
-	 * File transfer has been resumed
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 */
-	public void handleFileTransferResumed(ContactId contact);
+    /**
+     * File transfer has been resumed
+     * 
+     * @param contact Remote contact
+     */
+    public void handleFileTransferResumed(ContactId contact);
 
-	/**
-	 * A session invitation has been received
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 * @param file
-	 * @param fileIcon
-	 */
-	public void handleSessionInvited(ContactId contact, MmContent file, MmContent fileIcon);
+    /**
+     * A session invitation has been received
+     * 
+     * @param contact Remote contact
+     * @param file
+     * @param fileIcon
+     */
+    public void handleSessionInvited(ContactId contact, MmContent file, MmContent fileIcon);
 
-	/**
-	 * Session is auto-accepted and the session is in the process of being started
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 * @param file
-	 * @param fileIcon
-	 */
-	public void handleSessionAutoAccepted(ContactId contact, MmContent file, MmContent fileIcon);
+    /**
+     * Session is auto-accepted and the session is in the process of being started
+     * 
+     * @param contact Remote contact
+     * @param file
+     * @param fileIcon
+     */
+    public void handleSessionAutoAccepted(ContactId contact, MmContent file, MmContent fileIcon);
 }

@@ -126,7 +126,7 @@ public class IPCallDAO implements Parcelable {
     public IPCallDAO(final Context context, final String callId) throws Exception {
         Uri uri = IPCallLog.CONTENT_URI;
         String[] whereArgs = new String[] {
-            callId
+                callId
         };
         Cursor cursor = null;
         try {

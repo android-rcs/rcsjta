@@ -73,7 +73,7 @@ public class SelectGeoloc extends MapActivity implements OnTouchListener {
         setContentView(R.layout.geoloc_select);
 
         // Set map
-        mapView = (MapView)findViewById(R.id.mapview);
+        mapView = (MapView) findViewById(R.id.mapview);
         mapView.setBuiltInZoomControls(true);
         mapView.setOnTouchListener(this);
         mapView.getController().setZoom(4);
@@ -86,7 +86,7 @@ public class SelectGeoloc extends MapActivity implements OnTouchListener {
         mapView.invalidate();
 
         // Set button callback
-        Button selectBtn = (Button)findViewById(R.id.select_btn);
+        Button selectBtn = (Button) findViewById(R.id.select_btn);
         selectBtn.setOnClickListener(btnSelectListener);
     }
 
@@ -129,7 +129,7 @@ public class SelectGeoloc extends MapActivity implements OnTouchListener {
         @Override
         public void onLongPress(MotionEvent e) {
             // Get the latitude and the longitude
-            geoPoint = mapView.getProjection().fromPixels((int)e.getX(), (int)e.getY());
+            geoPoint = mapView.getProjection().fromPixels((int) e.getX(), (int) e.getY());
 
             // Remove all overlay from the list, only one marker on the map
             mapView.getOverlays().removeAll(mapView.getOverlays());

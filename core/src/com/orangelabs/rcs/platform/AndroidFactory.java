@@ -30,35 +30,34 @@ import com.orangelabs.rcs.platform.registry.RegistryFactory;
  * @author jexa7410
  */
 public class AndroidFactory {
-	/**
-	 * Android application context
-	 */
-	private static Context context = null;
+    /**
+     * Android application context
+     */
+    private static Context context = null;
 
-	/**
-	 * Returns the application context
-	 * 
-	 * @return Context
-	 */
-	public static Context getApplicationContext() {
-		return context;
-	}
+    /**
+     * Returns the application context
+     * 
+     * @return Context
+     */
+    public static Context getApplicationContext() {
+        return context;
+    }
 
-	/**
-	 * Load factory
-	 * 
-	 * @param context
-	 *            Context
-	 */
-	public static void setApplicationContext(Context context) {
-		AndroidFactory.context = context;
-		try {
-			NetworkFactory.loadFactory("com.orangelabs.rcs.platform.network.AndroidNetworkFactory");
-			RegistryFactory
-					.loadFactory("com.orangelabs.rcs.platform.registry.AndroidRegistryFactory");
-			FileFactory.loadFactory("com.orangelabs.rcs.platform.file.AndroidFileFactory");
-		} catch (FactoryException e) {
-			e.printStackTrace();
-		}
-	}
+    /**
+     * Load factory
+     * 
+     * @param context Context
+     */
+    public static void setApplicationContext(Context context) {
+        AndroidFactory.context = context;
+        try {
+            NetworkFactory.loadFactory("com.orangelabs.rcs.platform.network.AndroidNetworkFactory");
+            RegistryFactory
+                    .loadFactory("com.orangelabs.rcs.platform.registry.AndroidRegistryFactory");
+            FileFactory.loadFactory("com.orangelabs.rcs.platform.file.AndroidFileFactory");
+        } catch (FactoryException e) {
+            e.printStackTrace();
+        }
+    }
 }

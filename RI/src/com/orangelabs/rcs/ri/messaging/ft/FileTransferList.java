@@ -107,8 +107,8 @@ public class FileTransferList extends Activity {
         setContentView(R.layout.filetransfer_list);
 
         // Set list adapter
-        mListView = (ListView)findViewById(android.R.id.list);
-        TextView emptyView = (TextView)findViewById(android.R.id.empty);
+        mListView = (ListView) findViewById(android.R.id.list);
+        TextView emptyView = (TextView) findViewById(android.R.id.empty);
         mListView.setEmptyView(emptyView);
         registerForContextMenu(mListView);
 
@@ -168,7 +168,7 @@ public class FileTransferList extends Activity {
 
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
-            FileTransferItemViewHolder holder = (FileTransferItemViewHolder)view.getTag();
+            FileTransferItemViewHolder holder = (FileTransferItemViewHolder) view.getTag();
             String number = cursor.getString(holder.columnNumber);
             String displayName = RcsDisplayName.getInstance(context).getDisplayName(number);
             holder.numberText.setText(getString(R.string.label_contact, displayName));
@@ -194,8 +194,8 @@ public class FileTransferList extends Activity {
     }
 
     /**
-     * A ViewHolder class keeps references to children views to avoid
-     * unnecessary calls to findViewById() or getColumnIndex() on each row.
+     * A ViewHolder class keeps references to children views to avoid unnecessary calls to
+     * findViewById() or getColumnIndex() on each row.
      */
     private class FileTransferItemViewHolder {
         int columnFilename;
@@ -229,12 +229,12 @@ public class FileTransferList extends Activity {
             columnState = cursor.getColumnIndex(FileTransferLog.STATE);
             columnDirection = cursor.getColumnIndex(FileTransferLog.DIRECTION);
             columnTimestamp = cursor.getColumnIndex(FileTransferLog.TIMESTAMP);
-            numberText = (TextView)base.findViewById(R.id.number);
-            filenameText = (TextView)base.findViewById(R.id.filename);
-            filesizeText = (TextView)base.findViewById(R.id.filesize);
-            stateText = (TextView)base.findViewById(R.id.state);
-            directionText = (TextView)base.findViewById(R.id.direction);
-            timestamptext = (TextView)base.findViewById(R.id.date);
+            numberText = (TextView) base.findViewById(R.id.number);
+            filenameText = (TextView) base.findViewById(R.id.filename);
+            filesizeText = (TextView) base.findViewById(R.id.filesize);
+            stateText = (TextView) base.findViewById(R.id.state);
+            directionText = (TextView) base.findViewById(R.id.direction);
+            timestamptext = (TextView) base.findViewById(R.id.date);
         }
     }
 
@@ -311,8 +311,8 @@ public class FileTransferList extends Activity {
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         // Get the list item position
-        AdapterContextMenuInfo info = (AdapterContextMenuInfo)menuInfo;
-        Cursor cursor = (Cursor)mAdapter.getItem(info.position);
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
+        Cursor cursor = (Cursor) mAdapter.getItem(info.position);
         menu.add(0, MENU_ITEM_DELETE, 0, R.string.menu_delete_message);
         String transferId = cursor.getString(cursor.getColumnIndexOrThrow(BaseColumns._ID));
         if (LogUtils.isActive) {
@@ -333,8 +333,8 @@ public class FileTransferList extends Activity {
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        AdapterContextMenuInfo info = (AdapterContextMenuInfo)item.getMenuInfo();
-        Cursor cursor = (Cursor)(mAdapter.getItem(info.position));
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+        Cursor cursor = (Cursor) (mAdapter.getItem(info.position));
         String transferId = cursor.getString(cursor.getColumnIndexOrThrow(BaseColumns._ID));
         switch (item.getItemId()) {
             case MENU_ITEM_RESEND:

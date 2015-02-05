@@ -16,7 +16,6 @@
 
 package com.gsma.services.rcs.samples.contacts;
 
-
 import java.util.ArrayList;
 
 import android.content.ContentResolver;
@@ -46,12 +45,11 @@ import android.widget.TextView;
 public class ContactsUtils {
     private static final String TAG = "ContactsUtils";
     private static final String WAIT_SYMBOL_AS_STRING = String.valueOf(PhoneNumberUtils.WAIT);
-       
-    
+
     /**
-     * Opens an InputStream for the person's photo and returns the photo as a Bitmap.
-     * If the person's photo isn't present returns null.
-     *
+     * Opens an InputStream for the person's photo and returns the photo as a Bitmap. If the
+     * person's photo isn't present returns null.
+     * 
      * @param aggCursor the Cursor pointing to the data record containing the photo.
      * @param bitmapColumnIndex the column index where the photo Uri is stored.
      * @param options the decoding options, can be set to null
@@ -69,7 +67,7 @@ public class ContactsUtils {
 
     /**
      * Loads a placeholder photo.
-     *
+     * 
      * @param placeholderImageResource the resource to use for the placeholder image
      * @param context the Context
      * @param options the decoding options, can be set to null
@@ -92,7 +90,9 @@ public class ContactsUtils {
         try {
             photoCursor = context.getContentResolver().query(
                     ContentUris.withAppendedId(Data.CONTENT_URI, photoId),
-                    new String[] { Photo.PHOTO },
+                    new String[] {
+                        Photo.PHOTO
+                    },
                     null, null, null);
 
             if (photoCursor.moveToFirst() && !photoCursor.isNull(0)) {
@@ -123,13 +123,12 @@ public class ContactsUtils {
     }
 
     /**
-     * This looks up the provider name defined in
-     * ProviderNames from the predefined IM protocol id.
+     * This looks up the provider name defined in ProviderNames from the predefined IM protocol id.
      * This is used for interacting with the IM application.
-     *
+     * 
      * @param protocol the protocol ID
-     * @return the provider name the IM app uses for the given protocol, or null if no
-     * provider is defined for the given protocol
+     * @return the provider name the IM app uses for the given protocol, or null if no provider is
+     *         defined for the given protocol
      * @hide
      */
     public static String lookupProviderNameFromId(int protocol) {
@@ -154,7 +153,6 @@ public class ContactsUtils {
         return null;
     }
 
-
     private static boolean isProtocolValid(ContentValues values) {
         String protocolString = values.getAsString(Im.PROTOCOL);
         if (protocolString == null) {
@@ -173,7 +171,9 @@ public class ContactsUtils {
         long contactId = -1;
         try {
             contactIdCursor = cr.query(RawContacts.CONTENT_URI,
-                    new String[] {RawContacts.CONTACT_ID},
+                    new String[] {
+                        RawContacts.CONTACT_ID
+                    },
                     RawContacts._ID + "=" + rawContactId, null, null);
             if (contactIdCursor != null && contactIdCursor.moveToFirst()) {
                 contactId = contactIdCursor.getLong(0);
@@ -194,9 +194,11 @@ public class ContactsUtils {
             Uri dataUri = Uri.withAppendedPath(baseUri, Contacts.Data.CONTENT_DIRECTORY);
 
             c = cr.query(dataUri,
-                    new String[] {Phone.NUMBER},
+                    new String[] {
+                        Phone.NUMBER
+                    },
                     Data.MIMETYPE + "=" + Phone.MIMETYPE +
-                        " AND " + Data.IS_SUPER_PRIMARY + "=1",
+                            " AND " + Data.IS_SUPER_PRIMARY + "=1",
                     null, null);
             if (c != null && c.moveToFirst()) {
                 // Just return the first one.
@@ -215,7 +217,9 @@ public class ContactsUtils {
         long rawContactId = -1;
         try {
             rawContactIdCursor = cr.query(RawContacts.CONTENT_URI,
-                    new String[] {RawContacts._ID},
+                    new String[] {
+                        RawContacts._ID
+                    },
                     RawContacts.CONTACT_ID + "=" + contactId, null, null);
             if (rawContactIdCursor != null && rawContactIdCursor.moveToFirst()) {
                 // Just return the first one.
@@ -234,7 +238,9 @@ public class ContactsUtils {
         ArrayList<Long> rawContactIds = new ArrayList<Long>();
         try {
             rawContactIdCursor = cr.query(RawContacts.CONTENT_URI,
-                    new String[] {RawContacts._ID},
+                    new String[] {
+                        RawContacts._ID
+                    },
                     RawContacts.CONTACT_ID + "=" + contactId, null, null);
             if (rawContactIdCursor != null) {
                 while (rawContactIdCursor.moveToNext()) {
@@ -249,17 +255,16 @@ public class ContactsUtils {
         return rawContactIds;
     }
 
-
     /**
      * Utility for creating a standard tab indicator view.
-     *
+     * 
      * @param parent The parent ViewGroup to attach the new view to.
      * @param label The label to display in the tab indicator. If null, not label will be displayed.
      * @param icon The icon to display. If null, no icon will be displayed.
      * @return The tab indicator View.
      */
     public static View createTabIndicatorView(ViewGroup parent, CharSequence label, Drawable icon) {
-        final LayoutInflater inflater = (LayoutInflater)parent.getContext().getSystemService(
+        final LayoutInflater inflater = (LayoutInflater) parent.getContext().getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
         final View tabIndicator = inflater.inflate(R.layout.tab_indicator, parent, false);
         tabIndicator.getBackground().setDither(true);
@@ -273,11 +278,9 @@ public class ContactsUtils {
         return tabIndicator;
     }
 
-   
-
     /**
      * Kick off an intent to initiate a call.
-     *
+     * 
      * @param phoneNumber must not be null.
      * @throws NullPointerException when the given argument is null.
      */
@@ -289,7 +292,7 @@ public class ContactsUtils {
 
     /**
      * Kick off an intent to initiate an Sms/Mms message.
-     *
+     * 
      * @param phoneNumber must not be null.
      * @throws NullPointerException when the given argument is null.
      */
@@ -300,15 +303,15 @@ public class ContactsUtils {
     }
 
     /**
-     * Test if the given {@link CharSequence} contains any graphic characters,
-     * first checking {@link TextUtils#isEmpty(CharSequence)} to handle null.
+     * Test if the given {@link CharSequence} contains any graphic characters, first checking
+     * {@link TextUtils#isEmpty(CharSequence)} to handle null.
      */
     public static boolean isGraphic(CharSequence str) {
         return !TextUtils.isEmpty(str) && TextUtils.isGraphic(str);
     }
 
     /**
-     * Returns true if two objects are considered equal.  Two null references are equal here.
+     * Returns true if two objects are considered equal. Two null references are equal here.
      */
     public static boolean areObjectsEqual(Object a, Object b) {
         return a == b || (a != null && a.equals(b));

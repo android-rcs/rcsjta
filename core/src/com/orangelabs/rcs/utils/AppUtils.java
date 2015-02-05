@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.utils;
 
 import android.content.Context;
@@ -27,20 +28,19 @@ import android.content.pm.PackageManager.NameNotFoundException;
  * @author jexa7410
  */
 public class AppUtils {
-	/**
-	 * Returns the application version from manifest file
-	 * 
-	 * @param ctx
-	 *            Context
-	 * @return Application version or null if not found
-	 */
-	public static String getApplicationVersion(Context ctx) {
-		String version = null;
-		try {
-			PackageInfo info = ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0);
-			version = info.versionName;
-		} catch (NameNotFoundException e) {
-		}
-		return version;
-	}
+    /**
+     * Returns the application version from manifest file
+     * 
+     * @param ctx Context
+     * @return Application version or null if not found
+     */
+    public static String getApplicationVersion(Context ctx) {
+        String version = null;
+        try {
+            PackageInfo info = ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0);
+            version = info.versionName;
+        } catch (NameNotFoundException e) {
+        }
+        return version;
+    }
 }

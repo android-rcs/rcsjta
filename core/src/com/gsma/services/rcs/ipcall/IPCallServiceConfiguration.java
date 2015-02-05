@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.gsma.services.rcs.ipcall;
 
 import com.gsma.services.rcs.RcsServiceException;
@@ -24,35 +25,33 @@ import com.gsma.services.rcs.RcsServiceException;
  * 
  * @author Jean-Marc AUFFRET
  * @author yplo6403
- *
  */
 public class IPCallServiceConfiguration {
 
-	private final IIPCallServiceConfiguration mIConfig;
+    private final IIPCallServiceConfiguration mIConfig;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param iConfig
-	 *            IPCallServiceConfiguration instance
-	 * @hide
-	 */
-	public IPCallServiceConfiguration(IIPCallServiceConfiguration iConfig) {
-		mIConfig = iConfig;
-	}
+    /**
+     * Constructor
+     * 
+     * @param iConfig IPCallServiceConfiguration instance
+     * @hide
+     */
+    public IPCallServiceConfiguration(IIPCallServiceConfiguration iConfig) {
+        mIConfig = iConfig;
+    }
 
-	/**
-	 * Is voice call breakout activated. It returns True if the service can reach any user, else
-	 * returns False if only RCS users supporting the IP call capability may be called.
-	 * 
-	 * @return Boolean
-	 * @throws RcsServiceException
-	 */
-	public boolean isVoiceCallBreakout() throws RcsServiceException {
-		try {
-			return mIConfig.isVoiceCallBreakout();
-		} catch (Exception e) {
-			throw new RcsServiceException(e);
-		}
-	}
+    /**
+     * Is voice call breakout activated. It returns True if the service can reach any user, else
+     * returns False if only RCS users supporting the IP call capability may be called.
+     * 
+     * @return Boolean
+     * @throws RcsServiceException
+     */
+    public boolean isVoiceCallBreakout() throws RcsServiceException {
+        try {
+            return mIConfig.isVoiceCallBreakout();
+        } catch (Exception e) {
+            throw new RcsServiceException(e);
+        }
+    }
 }

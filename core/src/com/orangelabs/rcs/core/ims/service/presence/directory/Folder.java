@@ -19,22 +19,22 @@
 package com.orangelabs.rcs.core.ims.service.presence.directory;
 
 public class Folder {
-	private String auid;
-	private Entry entry;
+    private String auid;
+    private Entry entry;
 
-	public Folder(String auid) {
-		this.auid = auid;
-	}
+    public Folder(String auid) {
+        this.auid = auid;
+    }
 
-	public String getAuid() {
-		return auid;
-	}
+    public String getAuid() {
+        return auid;
+    }
 
-	public Entry getEntry() {
-		return entry;
-	}
+    public Entry getEntry() {
+        return entry;
+    }
 
-	public void setEntry(Entry entry) {
-		this.entry = entry;
-	}
+    public void setEntry(Entry entry) {
+        this.entry = entry;
+    }
 }

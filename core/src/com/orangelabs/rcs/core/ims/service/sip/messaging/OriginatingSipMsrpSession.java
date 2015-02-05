@@ -33,87 +33,84 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author jexa7410
  */
 public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
-	/**
-	 * The logger
-	 */
-	private final static Logger logger = Logger.getLogger(OriginatingSipMsrpSession.class
-			.getSimpleName());
+    /**
+     * The logger
+     */
+    private final static Logger logger = Logger.getLogger(OriginatingSipMsrpSession.class
+            .getSimpleName());
 
-	/**
-	 * Constructor
-	 * 
-	 * @param parent
-	 *            IMS service
-	 * @param contact
-	 *            Remote contact Id
-	 * @param featureTag
-	 *            Feature tag
-	 */
-	public OriginatingSipMsrpSession(ImsService parent, ContactId contact, String featureTag) {
-		super(parent, contact, featureTag);
+    /**
+     * Constructor
+     * 
+     * @param parent IMS service
+     * @param contact Remote contact Id
+     * @param featureTag Feature tag
+     */
+    public OriginatingSipMsrpSession(ImsService parent, ContactId contact, String featureTag) {
+        super(parent, contact, featureTag);
 
-		// Create dialog path
-		createOriginatingDialogPath();
-	}
+        // Create dialog path
+        createOriginatingDialogPath();
+    }
 
-	/**
-	 * Background processing
-	 */
-	public void run() {
-		try {
-			if (logger.isActivated()) {
-				logger.info("Initiate a new MSRP session as originating");
-			}
+    /**
+     * Background processing
+     */
+    public void run() {
+        try {
+            if (logger.isActivated()) {
+                logger.info("Initiate a new MSRP session as originating");
+            }
 
-			// Set setup mode
-			String localSetup = createMobileToMobileSetupOffer();
-			if (logger.isActivated()) {
-				logger.debug("Local setup attribute is " + localSetup);
-			}
+            // Set setup mode
+            String localSetup = createMobileToMobileSetupOffer();
+            if (logger.isActivated()) {
+                logger.debug("Local setup attribute is " + localSetup);
+            }
 
-			// Build SDP offer
-			String sdp = generateSdp(localSetup);
+            // Build SDP offer
+            String sdp = generateSdp(localSetup);
 
-			// Set the local SDP part in the dialog path
-			getDialogPath().setLocalContent(sdp);
+            // Set the local SDP part in the dialog path
+            getDialogPath().setLocalContent(sdp);
 
-			// Create an INVITE request
-			if (logger.isActivated()) {
-				logger.info("Send INVITE");
-			}
-			SipRequest invite = createInvite();
+            // Create an INVITE request
+            if (logger.isActivated()) {
+                logger.info("Send INVITE");
+            }
+            SipRequest invite = createInvite();
 
-			// Set the Authorization header
-			getAuthenticationAgent().setAuthorizationHeader(invite);
+            // Set the Authorization header
+            getAuthenticationAgent().setAuthorizationHeader(invite);
 
-			// Set initial request in the dialog path
-			getDialogPath().setInvite(invite);
+            // Set initial request in the dialog path
+            getDialogPath().setInvite(invite);
 
-			// Send INVITE request
-			sendInvite(invite);
-		} catch (Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Session initiation has failed", e);
-			}
+            // Send INVITE request
+            sendInvite(invite);
+        } catch (Exception e) {
+            if (logger.isActivated()) {
+                logger.error("Session initiation has failed", e);
+            }
 
-			// Unexpected error
-			handleError(new SipSessionError(SipSessionError.UNEXPECTED_EXCEPTION, e.getMessage()));
-		}
-	}
+            // Unexpected error
+            handleError(new SipSessionError(SipSessionError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        }
+    }
 
-	@Override
-	public boolean isInitiatedByRemote() {
-		return false;
-	}
+    @Override
+    public boolean isInitiatedByRemote() {
+        return false;
+    }
 
-	@Override
-	public void handle180Ringing(SipResponse response) {
-		if (logger.isActivated()) {
-			logger.debug("handle180Ringing");
-		}
-		ContactId contact = getRemoteContact();
-		for (ImsSessionListener listener : getListeners()) {
-			((SipSessionListener) listener).handle180Ringing(contact);
-		}
-	}
+    @Override
+    public void handle180Ringing(SipResponse response) {
+        if (logger.isActivated()) {
+            logger.debug("handle180Ringing");
+        }
+        ContactId contact = getRemoteContact();
+        for (ImsSessionListener listener : getListeners()) {
+            ((SipSessionListener) listener).handle180Ringing(contact);
+        }
+    }
 }

@@ -116,7 +116,7 @@ public class GroupChatDAO implements Parcelable {
     public GroupChatDAO(final Context context, final String chatId) throws Exception {
         Uri uri = ChatLog.GroupChat.CONTENT_URI;
         String[] whereArgs = new String[] {
-            chatId
+                chatId
         };
         Cursor cursor = null;
         try {

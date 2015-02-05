@@ -28,20 +28,20 @@ package com.gsma.services.rcs.extension;
  * @author Jean-Marc AUFFRET
  */
 public class MultimediaStreamingSessionIntent {
-	/**
-	 * Broadcast action: a new messaging session invitation has been received.
-	 * <p>
-	 * Intent includes the following extras:
-	 * <ul>
-	 * <li> {@link #EXTRA_SESSION_ID} containing the unique ID of the multimedia session.
-	 * <li>The service ID is read from the method Intent.getType() which returns the MIME type
-	 * included in the intent and corresponding to the invoked service.
-	 * </ul>
-	 */
-	public final static String ACTION_NEW_INVITATION = "com.gsma.services.rcs.extension.action.NEW_STREAMING_SESSION";
+    /**
+     * Broadcast action: a new messaging session invitation has been received.
+     * <p>
+     * Intent includes the following extras:
+     * <ul>
+     * <li> {@link #EXTRA_SESSION_ID} containing the unique ID of the multimedia session.
+     * <li>The service ID is read from the method Intent.getType() which returns the MIME type
+     * included in the intent and corresponding to the invoked service.
+     * </ul>
+     */
+    public final static String ACTION_NEW_INVITATION = "com.gsma.services.rcs.extension.action.NEW_STREAMING_SESSION";
 
-	/**
-	 * Unique ID of the multimedia session
-	 */
-	public final static String EXTRA_SESSION_ID = "sessionId";
+    /**
+     * Unique ID of the multimedia session
+     */
+    public final static String EXTRA_SESSION_ID = "sessionId";
 }

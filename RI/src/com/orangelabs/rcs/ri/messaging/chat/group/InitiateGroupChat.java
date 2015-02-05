@@ -61,14 +61,14 @@ public class InitiateGroupChat extends Activity implements OnItemClickListener {
         setContentView(R.layout.chat_initiate_group);
 
         // Set contact selector
-        ListView contactList = (ListView)findViewById(R.id.contacts);
+        ListView contactList = (ListView) findViewById(R.id.contacts);
         mAdapter = MultiContactListAdapter.createMultiRcsContactListAdapter(this);
         contactList.setAdapter(mAdapter);
         contactList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         contactList.setOnItemClickListener(this);
 
         // Set button callback
-        inviteBtn = (Button)findViewById(R.id.invite_btn);
+        inviteBtn = (Button) findViewById(R.id.invite_btn);
         inviteBtn.setOnClickListener(btnInviteListener);
         inviteBtn.setEnabled(false);
     }
@@ -79,7 +79,7 @@ public class InitiateGroupChat extends Activity implements OnItemClickListener {
     private OnClickListener btnInviteListener = new OnClickListener() {
         public void onClick(View v) {
             // Get subject
-            EditText subjectTxt = (EditText)findViewById(R.id.subject);
+            EditText subjectTxt = (EditText) findViewById(R.id.subject);
             String subject = subjectTxt.getText().toString();
             GroupChatView.initiateGroupChat(InitiateGroupChat.this, subject, participants);
             // Exit activity

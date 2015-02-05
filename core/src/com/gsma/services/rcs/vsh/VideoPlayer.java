@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.gsma.services.rcs.vsh;
 
 /**
@@ -29,46 +30,42 @@ package com.gsma.services.rcs.vsh;
  * @author Jean-Marc AUFFRET
  */
 public abstract class VideoPlayer extends IVideoPlayer.Stub {
-	/**
-	 * Constructor
-	 */
-	public VideoPlayer() {
-	}
+    /**
+     * Constructor
+     */
+    public VideoPlayer() {
+    }
 
-	/**
-	 * Set the remote info
-	 * 
-	 * @param codec
-	 *            Video codec
-	 * @param remoteHost
-	 *            Remote RTP host
-	 * @param remotePort
-	 *            Remote RTP port
-	 * @param orientationHeaderId
-	 *            Orientation header extension ID. The extension ID is a value between 1 and 15
-	 *            arbitrarily chosen by the sender, as defined in RFC5285
-	 */
-	public abstract void setRemoteInfo(VideoCodec codec, String remoteHost, int remotePort,
-			int orientationHeaderId);
+    /**
+     * Set the remote info
+     * 
+     * @param codec Video codec
+     * @param remoteHost Remote RTP host
+     * @param remotePort Remote RTP port
+     * @param orientationHeaderId Orientation header extension ID. The extension ID is a value
+     *            between 1 and 15 arbitrarily chosen by the sender, as defined in RFC5285
+     */
+    public abstract void setRemoteInfo(VideoCodec codec, String remoteHost, int remotePort,
+            int orientationHeaderId);
 
-	/**
-	 * Returns the local RTP port used to stream video
-	 * 
-	 * @return Port number
-	 */
-	public abstract int getLocalRtpPort();
+    /**
+     * Returns the local RTP port used to stream video
+     * 
+     * @return Port number
+     */
+    public abstract int getLocalRtpPort();
 
-	/**
-	 * Returns the list of codecs supported by the player
-	 * 
-	 * @return List of codecs
-	 */
-	public abstract VideoCodec[] getSupportedCodecs();
+    /**
+     * Returns the list of codecs supported by the player
+     * 
+     * @return List of codecs
+     */
+    public abstract VideoCodec[] getSupportedCodecs();
 
-	/**
-	 * Returns the current codec
-	 * 
-	 * @return Codec
-	 */
-	public abstract VideoCodec getCodec();
+    /**
+     * Returns the current codec
+     * 
+     * @return Codec
+     */
+    public abstract VideoCodec getCodec();
 }

@@ -24,16 +24,15 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.event;
  * @author jexa7410
  */
 public interface RtcpEventListener {
-	/**
-	 * Receive RTCP event
-	 * 
-	 * @param event
-	 *            RTCP event
-	 */
-	void receiveRtcpEvent(RtcpEvent event);
+    /**
+     * Receive RTCP event
+     * 
+     * @param event RTCP event
+     */
+    void receiveRtcpEvent(RtcpEvent event);
 
-	/**
-	 * Invoked when the RTCP connection times out
-	 */
-	void connectionTimeout();
+    /**
+     * Invoked when the RTCP connection times out
+     */
+    void connectionTimeout();
 }

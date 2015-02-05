@@ -24,119 +24,113 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Represents the SDP orientation extension
- *
+ * 
  * @author Deutsche Telekom
  */
 public class SdpOrientationExtension {
 
-	/**
-	 * Video Orientation extension URI
-	 */
-	public static final String VIDEO_ORIENTATION_URI = "urn:3gpp:video-orientation";
+    /**
+     * Video Orientation extension URI
+     */
+    public static final String VIDEO_ORIENTATION_URI = "urn:3gpp:video-orientation";
 
-	/**
-	 * Minimum ID value for RTP Extension header. RFC5285
-	 */
-	private static final int MIN_ID_VALUE = 1;
+    /**
+     * Minimum ID value for RTP Extension header. RFC5285
+     */
+    private static final int MIN_ID_VALUE = 1;
 
-	/**
-	 * Maximum ID value for RTP Extension header. RFC5285
-	 */
-	private static final int MAX_ID_VALUE = 14;
+    /**
+     * Maximum ID value for RTP Extension header. RFC5285
+     */
+    private static final int MAX_ID_VALUE = 14;
 
-	/**
-	 * Extension header ID
-	 */
-	private int extensionId;
+    /**
+     * Extension header ID
+     */
+    private int extensionId;
 
-	/**
-	 * ExtensionHeader URI
-	 */
-	private String uri;
+    /**
+     * ExtensionHeader URI
+     */
+    private String uri;
 
-	/**
-	 * Logger
-	 */
-	private static Logger logger = Logger.getLogger(SdpOrientationExtension.class.getName());
+    /**
+     * Logger
+     */
+    private static Logger logger = Logger.getLogger(SdpOrientationExtension.class.getName());
 
-	/**
-	 * Constructor
-	 *
-	 * @param extensionId
-	 *            Extension header ID
-	 * @param uri
-	 *            ExtensionHeader URI
-	 */
-	private SdpOrientationExtension(int extensionId, String uri) {
-		this.extensionId = extensionId;
-		this.uri = uri;
-	}
+    /**
+     * Constructor
+     * 
+     * @param extensionId Extension header ID
+     * @param uri ExtensionHeader URI
+     */
+    private SdpOrientationExtension(int extensionId, String uri) {
+        this.extensionId = extensionId;
+        this.uri = uri;
+    }
 
-	/**
-	 * Gets the extension Header id.
-	 *
-	 * @return Extension header id
-	 */
-	public int getExtensionId() {
-		return this.extensionId;
-	}
+    /**
+     * Gets the extension Header id.
+     * 
+     * @return Extension header id
+     */
+    public int getExtensionId() {
+        return this.extensionId;
+    }
 
-	/**
-	 * Verifies if is a valid SDP Orientation header
-	 *
-	 * @return <code>True</code> if is a valid header, <code>false</code> otherwise.
-	 */
-	public boolean isValid() {
-		return (extensionId >= MIN_ID_VALUE && extensionId <= MAX_ID_VALUE)
-				&& VIDEO_ORIENTATION_URI.equalsIgnoreCase(uri);
-	}
+    /**
+     * Verifies if is a valid SDP Orientation header
+     * 
+     * @return <code>True</code> if is a valid header, <code>false</code> otherwise.
+     */
+    public boolean isValid() {
+        return (extensionId >= MIN_ID_VALUE && extensionId <= MAX_ID_VALUE)
+                && VIDEO_ORIENTATION_URI.equalsIgnoreCase(uri);
+    }
 
-	/**
-	 * Creates a {@link SdpOrientationExtension} from the "extmap" media attribute
-	 *
-	 * @param mediaAttribute
-	 *            Extmap media attribute
-	 * @return A SdpOrientationExtension.
-	 * @throws RuntimeException
-	 *             if attribute is invalid.
-	 */
-	public static SdpOrientationExtension create(MediaAttribute mediaAttribute) {
-		if (mediaAttribute == null || mediaAttribute.getValue() == null) {
-			throw new RuntimeException("Invalid media attribute");
-		}
+    /**
+     * Creates a {@link SdpOrientationExtension} from the "extmap" media attribute
+     * 
+     * @param mediaAttribute Extmap media attribute
+     * @return A SdpOrientationExtension.
+     * @throws RuntimeException if attribute is invalid.
+     */
+    public static SdpOrientationExtension create(MediaAttribute mediaAttribute) {
+        if (mediaAttribute == null || mediaAttribute.getValue() == null) {
+            throw new RuntimeException("Invalid media attribute");
+        }
 
-		try {
-			String[] values = mediaAttribute.getValue().split(" ");
-			return new SdpOrientationExtension(Integer.parseInt(values[0].trim()), values[1].trim());
-		} catch (Exception ex) {
-			throw new RuntimeException("Invalid media attribute value", ex);
-		}
-	}
+        try {
+            String[] values = mediaAttribute.getValue().split(" ");
+            return new SdpOrientationExtension(Integer.parseInt(values[0].trim()), values[1].trim());
+        } catch (Exception ex) {
+            throw new RuntimeException("Invalid media attribute value", ex);
+        }
+    }
 
-	/**
-	 * Creates a {@link SdpOrientationExtension} from the Video MediaDescription
-	 * 
-	 * @param videoMediaDescriptionVideo
-	 *            media description
-	 * @return A new SdpOrientationExtension or null if invalid media description
-	 * @throws RuntimeException
-	 *             if videoMediaDescription is invalid.
-	 */
-	public static SdpOrientationExtension create(MediaDescription videoMediaDescription) {
-		if (videoMediaDescription == null) {
-			throw new RuntimeException("Invalid videoMediaDescription");
-		}
+    /**
+     * Creates a {@link SdpOrientationExtension} from the Video MediaDescription
+     * 
+     * @param videoMediaDescriptionVideo media description
+     * @return A new SdpOrientationExtension or null if invalid media description
+     * @throws RuntimeException if videoMediaDescription is invalid.
+     */
+    public static SdpOrientationExtension create(MediaDescription videoMediaDescription) {
+        if (videoMediaDescription == null) {
+            throw new RuntimeException("Invalid videoMediaDescription");
+        }
 
-		MediaAttribute attribute = videoMediaDescription
-				.getMediaAttribute(VideoSdpBuilder.ATTRIBUTE_EXTENSION);
-		if (attribute != null) {
-			try {
-				return SdpOrientationExtension.create(attribute);
-			} catch (Exception ex) {
-				logger.error("Invalid SDP video orientation extension", ex);
-			}
-		}
+        MediaAttribute attribute = videoMediaDescription
+                .getMediaAttribute(VideoSdpBuilder.ATTRIBUTE_EXTENSION);
+        if (attribute != null) {
+            try {
+                return SdpOrientationExtension.create(attribute);
+            } catch (Exception ex) {
+                logger.error("Invalid SDP video orientation extension", ex);
+            }
+        }
 
-		return null;
-	}
+        return null;
+    }
 }

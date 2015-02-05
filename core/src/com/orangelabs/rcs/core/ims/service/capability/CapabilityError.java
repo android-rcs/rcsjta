@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.core.ims.service.capability;
 
 import com.orangelabs.rcs.core.ims.service.ImsServiceError;
@@ -25,32 +26,29 @@ import com.orangelabs.rcs.core.ims.service.ImsServiceError;
  * @author jexa7410
  */
 public class CapabilityError extends ImsServiceError {
-	static final long serialVersionUID = 1L;
+    static final long serialVersionUID = 1L;
 
-	/**
-	 * Options has failed
-	 */
-	public final static int OPTIONS_FAILED = CAPABILITY_ERROR_CODES + 1;
+    /**
+     * Options has failed
+     */
+    public final static int OPTIONS_FAILED = CAPABILITY_ERROR_CODES + 1;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param code
-	 *            Error code
-	 */
-	public CapabilityError(int code) {
-		super(code);
-	}
+    /**
+     * Constructor
+     * 
+     * @param code Error code
+     */
+    public CapabilityError(int code) {
+        super(code);
+    }
 
-	/**
-	 * Constructor
-	 * 
-	 * @param code
-	 *            Error code
-	 * @param msg
-	 *            Detail message
-	 */
-	public CapabilityError(int code, String msg) {
-		super(code, msg);
-	}
+    /**
+     * Constructor
+     * 
+     * @param code Error code
+     * @param msg Detail message
+     */
+    public CapabilityError(int code, String msg) {
+        super(code, msg);
+    }
 }

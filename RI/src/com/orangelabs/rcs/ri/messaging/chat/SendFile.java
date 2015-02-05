@@ -123,10 +123,10 @@ public abstract class SendFile extends Activity implements ISendFile {
         setContentView(R.layout.chat_send_file);
 
         // Set buttons callback
-        Button inviteBtn = (Button)findViewById(R.id.invite_btn);
+        Button inviteBtn = (Button) findViewById(R.id.invite_btn);
         inviteBtn.setOnClickListener(btnInviteListener);
         inviteBtn.setEnabled(false);
-        Button selectBtn = (Button)findViewById(R.id.select_btn);
+        Button selectBtn = (Button) findViewById(R.id.select_btn);
         selectBtn.setOnClickListener(btnSelectListener);
 
         // Register to API connection manager
@@ -214,7 +214,7 @@ public abstract class SendFile extends Activity implements ISendFile {
         }
 
         // Get thumbnail option
-        CheckBox ftThumb = (CheckBox)findViewById(R.id.ft_thumb);
+        CheckBox ftThumb = (CheckBox) findViewById(R.id.ft_thumb);
         if (transferFile(file, ftThumb.isChecked())) {
 
             // Display a progress dialog
@@ -229,9 +229,9 @@ public abstract class SendFile extends Activity implements ISendFile {
             });
 
             // Hide buttons
-            Button inviteBtn = (Button)findViewById(R.id.invite_btn);
+            Button inviteBtn = (Button) findViewById(R.id.invite_btn);
             inviteBtn.setVisibility(View.INVISIBLE);
-            Button selectBtn = (Button)findViewById(R.id.select_btn);
+            Button selectBtn = (Button) findViewById(R.id.select_btn);
             selectBtn.setVisibility(View.INVISIBLE);
             ftThumb.setVisibility(View.INVISIBLE);
         }
@@ -264,7 +264,7 @@ public abstract class SendFile extends Activity implements ISendFile {
                     // Get selected photo URI
                     file = data.getData();
                     // Display the selected filename attribute
-                    TextView uriEdit = (TextView)findViewById(R.id.uri);
+                    TextView uriEdit = (TextView) findViewById(R.id.uri);
                     try {
                         filename = FileUtils.getFileName(this, file);
                         filesize = FileUtils.getFileSize(this, file) / 1024;
@@ -274,7 +274,7 @@ public abstract class SendFile extends Activity implements ISendFile {
                         uriEdit.setText("Unknown");
                     }
                     // Show invite button
-                    Button inviteBtn = (Button)findViewById(R.id.invite_btn);
+                    Button inviteBtn = (Button) findViewById(R.id.invite_btn);
                     inviteBtn.setEnabled(true);
                 }
                 break;
@@ -298,8 +298,8 @@ public abstract class SendFile extends Activity implements ISendFile {
      * @param totalSize Total size to be transferred
      */
     protected void updateProgressBar(long currentSize, long totalSize) {
-        TextView statusView = (TextView)findViewById(R.id.progress_status);
-        ProgressBar progressBar = (ProgressBar)findViewById(R.id.progress_bar);
+        TextView statusView = (TextView) findViewById(R.id.progress_status);
+        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
         String value = "" + (currentSize / 1024);
         if (totalSize != 0) {
@@ -309,8 +309,8 @@ public abstract class SendFile extends Activity implements ISendFile {
         statusView.setText(value);
 
         if (currentSize != 0) {
-            double position = ((double)currentSize / (double)totalSize) * 100.0;
-            progressBar.setProgress((int)position);
+            double position = ((double) currentSize / (double) totalSize) * 100.0;
+            progressBar.setProgress((int) position);
         } else {
             progressBar.setProgress(0);
         }

@@ -22,12 +22,13 @@ package android.tests.sigtest;
 public interface ResultObserver {
     /**
      * Notify failure.
+     * 
      * @param type Failure type.
      * @param name Name of the failed element (interface/class/method/field)
      * @param errorMessage a descriptive message indicating why it failed.
      */
     void notifyFailure(SignatureTestActivity.FAILURE_TYPE type,
-                       String name,
-                       String errorMessage);
+            String name,
+            String errorMessage);
 
 }

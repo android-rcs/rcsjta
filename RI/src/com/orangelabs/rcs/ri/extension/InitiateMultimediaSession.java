@@ -61,11 +61,11 @@ public abstract class InitiateMultimediaSession extends Activity {
         setContentView(R.layout.extension_initiate_session);
 
         // Set contact selector
-        mSpinner = (Spinner)findViewById(R.id.contact);
+        mSpinner = (Spinner) findViewById(R.id.contact);
         mSpinner.setAdapter(ContactListAdapter.createContactListAdapter(this));
 
         // Set buttons callback
-        Button initiateBtn = (Button)findViewById(R.id.initiate_btn);
+        Button initiateBtn = (Button) findViewById(R.id.initiate_btn);
         initiateBtn.setOnClickListener(btnInitiateListener);
 
         // Disable button if no contact available
@@ -85,7 +85,7 @@ public abstract class InitiateMultimediaSession extends Activity {
     private OnClickListener btnInitiateListener = new OnClickListener() {
         public void onClick(View v) {
             // get selected phone number
-            ContactListAdapter adapter = (ContactListAdapter)mSpinner.getAdapter();
+            ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
             try {
                 // Convert phone number to contactId

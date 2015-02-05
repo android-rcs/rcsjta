@@ -45,11 +45,11 @@ import com.gsma.services.rcs.samples.contacts.model.ContactsSource.StringInflate
 import com.gsma.services.rcs.samples.contacts.model.Sources;
 
 /**
- * Class used for displaying a dialog with a list of phone numbers of which
- * one will be chosen to make a call or initiate an sms message.
+ * Class used for displaying a dialog with a list of phone numbers of which one will be chosen to
+ * make a call or initiate an sms message.
  */
 public class PhoneDisambigDialog implements DialogInterface.OnClickListener,
-        DialogInterface.OnDismissListener, CompoundButton.OnCheckedChangeListener{
+        DialogInterface.OnDismissListener, CompoundButton.OnCheckedChangeListener {
 
     private boolean mMakePrimary = false;
     private Context mContext;
@@ -82,9 +82,9 @@ public class PhoneDisambigDialog implements DialogInterface.OnClickListener,
         // Need to show disambig dialogue.
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(mContext).
                 setAdapter(mPhonesAdapter, this).
-                        setTitle(sendSms ?
-                                R.string.sms_disambig_title : R.string.call_disambig_title).
-                        setView(setPrimaryView);
+                setTitle(sendSms ?
+                        R.string.sms_disambig_title : R.string.call_disambig_title).
+                setView(setPrimaryView);
 
         mDialog = dialogBuilder.create();
     }
@@ -153,7 +153,7 @@ public class PhoneDisambigDialog implements DialogInterface.OnClickListener,
 
             // Obtain a string representation of the phone type specific to the
             // ContactSource associated with that phone number
-            TextView typeView = (TextView)view.findViewById(android.R.id.text1);
+            TextView typeView = (TextView) view.findViewById(android.R.id.text1);
             DataKind kind = source.getKindForMimetype(Phone.CONTENT_ITEM_TYPE);
             if (kind != null) {
                 ContentValues values = new ContentValues();

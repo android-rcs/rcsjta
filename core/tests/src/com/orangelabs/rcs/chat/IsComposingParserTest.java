@@ -35,9 +35,8 @@ public class IsComposingParserTest extends AndroidTestCase {
      * IsComposing SAMPLE: <?xml version="1.0" encoding="UTF-8"?> <isComposing
      * xmlns="urn:ietf:params:xml:ns:im-iscomposing"
      * xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     * xsi:schemaLocation="urn:ietf:params:xml:ns:im-composing iscomposing.xsd">
-     * <state>idle</state> <lastactive>2003-01-27T10:43:00Z</lastactive>
-     * <contenttype>audio</contenttype> </isComposing>
+     * xsi:schemaLocation="urn:ietf:params:xml:ns:im-composing iscomposing.xsd"> <state>idle</state>
+     * <lastactive>2003-01-27T10:43:00Z</lastactive> <contenttype>audio</contenttype> </isComposing>
      */
     // @formatter:on
     private Logger logger = Logger.getLogger(this.getClass().getName());

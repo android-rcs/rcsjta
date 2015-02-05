@@ -27,199 +27,191 @@ import java.util.Random;
 
 /**
  * Network ressource manager
- *
+ * 
  * @author jexa7410
  */
 public class NetworkRessourceManager {
-	/**
-	 * Default SIP port base
-	 */
-	public static final int DEFAULT_LOCAL_SIP_PORT_RANGE_MIN = RcsSettings.getInstance()
-			.getSipListeningPort();
+    /**
+     * Default SIP port base
+     */
+    public static final int DEFAULT_LOCAL_SIP_PORT_RANGE_MIN = RcsSettings.getInstance()
+            .getSipListeningPort();
 
-	/**
-	 * Default SIP port max
-	 */
-	public static final int DEFAULT_LOCAL_SIP_PORT_RANGE_MAX = 65000;
+    /**
+     * Default SIP port max
+     */
+    public static final int DEFAULT_LOCAL_SIP_PORT_RANGE_MAX = 65000;
 
-	/**
-	 * Default RTP port base
-	 */
-	public static final int DEFAULT_LOCAL_RTP_PORT_BASE = RcsSettings.getInstance()
-			.getDefaultRtpPort();
+    /**
+     * Default RTP port base
+     */
+    public static final int DEFAULT_LOCAL_RTP_PORT_BASE = RcsSettings.getInstance()
+            .getDefaultRtpPort();
 
-	/**
-	 * Default MSRP port base
-	 */
-	public static final int DEFAULT_LOCAL_MSRP_PORT_BASE = RcsSettings.getInstance()
-			.getDefaultMsrpPort();
+    /**
+     * Default MSRP port base
+     */
+    public static final int DEFAULT_LOCAL_MSRP_PORT_BASE = RcsSettings.getInstance()
+            .getDefaultMsrpPort();
 
-	/**
-	 * Generate a default free SIP port number
-	 *
-	 * <br>
-	 * This returns a random port which is free both in UDP and in TCP <br>
-	 * Note that it does not bind to those ports, so there still is a chance that something else
-	 * binds to it before you do. <br>
-	 * Minimize this chance by using those ports as soon as possible
-	 *
-	 * @return Local SIP port
-	 */
-	public static synchronized int generateLocalSipPort() {
-		int candidatePort = getDefaultNumber(DEFAULT_LOCAL_SIP_PORT_RANGE_MIN,
-				DEFAULT_LOCAL_SIP_PORT_RANGE_MAX);
-		while (!isLocalUdpPortFree(candidatePort) && !isLocalTcpPortFree(candidatePort)) {
-			// Loop until candidate port is free in UDP and in TCP
-			candidatePort = getDefaultNumber(DEFAULT_LOCAL_SIP_PORT_RANGE_MIN,
-					DEFAULT_LOCAL_SIP_PORT_RANGE_MAX);
-		}
-		return candidatePort;
-	}
+    /**
+     * Generate a default free SIP port number <br>
+     * This returns a random port which is free both in UDP and in TCP <br>
+     * Note that it does not bind to those ports, so there still is a chance that something else
+     * binds to it before you do. <br>
+     * Minimize this chance by using those ports as soon as possible
+     * 
+     * @return Local SIP port
+     */
+    public static synchronized int generateLocalSipPort() {
+        int candidatePort = getDefaultNumber(DEFAULT_LOCAL_SIP_PORT_RANGE_MIN,
+                DEFAULT_LOCAL_SIP_PORT_RANGE_MAX);
+        while (!isLocalUdpPortFree(candidatePort) && !isLocalTcpPortFree(candidatePort)) {
+            // Loop until candidate port is free in UDP and in TCP
+            candidatePort = getDefaultNumber(DEFAULT_LOCAL_SIP_PORT_RANGE_MIN,
+                    DEFAULT_LOCAL_SIP_PORT_RANGE_MAX);
+        }
+        return candidatePort;
+    }
 
-	/**
-	 * Generate a default number from a given range
-	 *
-	 * @param minRange
-	 * @param maxRange
-	 * @return number Random number between minRange and maxRange
-	 */
-	private static int getDefaultNumber(int minRange, int maxRange) {
-		Random random = new Random();
-		return (random.nextInt(maxRange - minRange + 1) + minRange);
-	}
+    /**
+     * Generate a default number from a given range
+     * 
+     * @param minRange
+     * @param maxRange
+     * @return number Random number between minRange and maxRange
+     */
+    private static int getDefaultNumber(int minRange, int maxRange) {
+        Random random = new Random();
+        return (random.nextInt(maxRange - minRange + 1) + minRange);
+    }
 
-	/**
-	 * Generate a default free RTP port number
-	 *
-	 * @return Local RTP port
-	 */
-	public static synchronized int generateLocalRtpPort() {
-		return generateLocalUdpPort(DEFAULT_LOCAL_RTP_PORT_BASE);
-	}
+    /**
+     * Generate a default free RTP port number
+     * 
+     * @return Local RTP port
+     */
+    public static synchronized int generateLocalRtpPort() {
+        return generateLocalUdpPort(DEFAULT_LOCAL_RTP_PORT_BASE);
+    }
 
-	/**
-	 * Generate a default free MSRP port number
-	 *
-	 * @return Local MSRP port
-	 */
-	public static synchronized int generateLocalMsrpPort() {
-		return generateLocalTcpPort(DEFAULT_LOCAL_MSRP_PORT_BASE);
-	}
+    /**
+     * Generate a default free MSRP port number
+     * 
+     * @return Local MSRP port
+     */
+    public static synchronized int generateLocalMsrpPort() {
+        return generateLocalTcpPort(DEFAULT_LOCAL_MSRP_PORT_BASE);
+    }
 
-	/**
-	 * Generate a free UDP port number from a specific port base
-	 *
-	 * @param portBase
-	 *            UDP port base
-	 * @return Local UDP port
-	 */
-	private static int generateLocalUdpPort(int portBase) {
-		int resp = -1;
-		int port = portBase;
-		while ((resp == -1) && (port < Integer.MAX_VALUE)) {
-			if (isLocalUdpPortFree(port)) {
-				// Free UDP port found
-				resp = port;
-			} else {
-				// +2 needed for RTCP port
-				port += 2;
-			}
-		}
-		return resp;
-	}
+    /**
+     * Generate a free UDP port number from a specific port base
+     * 
+     * @param portBase UDP port base
+     * @return Local UDP port
+     */
+    private static int generateLocalUdpPort(int portBase) {
+        int resp = -1;
+        int port = portBase;
+        while ((resp == -1) && (port < Integer.MAX_VALUE)) {
+            if (isLocalUdpPortFree(port)) {
+                // Free UDP port found
+                resp = port;
+            } else {
+                // +2 needed for RTCP port
+                port += 2;
+            }
+        }
+        return resp;
+    }
 
-	/**
-	 * Test if the given local UDP port is really free (not used by other applications)
-	 *
-	 * @param port
-	 *            Port to check
-	 * @return Boolean
-	 */
-	private static boolean isLocalUdpPortFree(int port) {
-		boolean res = false;
-		try {
-			DatagramConnection conn = NetworkFactory.getFactory().createDatagramConnection();
-			conn.open(port);
-			conn.close();
-			res = true;
-		} catch (IOException e) {
-			res = false;
-		}
-		return res;
-	}
+    /**
+     * Test if the given local UDP port is really free (not used by other applications)
+     * 
+     * @param port Port to check
+     * @return Boolean
+     */
+    private static boolean isLocalUdpPortFree(int port) {
+        boolean res = false;
+        try {
+            DatagramConnection conn = NetworkFactory.getFactory().createDatagramConnection();
+            conn.open(port);
+            conn.close();
+            res = true;
+        } catch (IOException e) {
+            res = false;
+        }
+        return res;
+    }
 
-	/**
-	 * Generate a free TCP port number
-	 *
-	 * @param portBase
-	 *            TCP port base
-	 * @return Local TCP port
-	 */
-	private static int generateLocalTcpPort(int portBase) {
-		int resp = -1;
-		int port = portBase;
-		while (resp == -1) {
-			if (isLocalTcpPortFree(port)) {
-				// Free TCP port found
-				resp = port;
-			} else {
-				port++;
-			}
-		}
-		return resp;
-	}
+    /**
+     * Generate a free TCP port number
+     * 
+     * @param portBase TCP port base
+     * @return Local TCP port
+     */
+    private static int generateLocalTcpPort(int portBase) {
+        int resp = -1;
+        int port = portBase;
+        while (resp == -1) {
+            if (isLocalTcpPortFree(port)) {
+                // Free TCP port found
+                resp = port;
+            } else {
+                port++;
+            }
+        }
+        return resp;
+    }
 
-	/**
-	 * Test if the given local TCP port is really free (not used by other applications)
-	 *
-	 * @param port
-	 *            Port to check
-	 * @return Boolean
-	 */
-	private static boolean isLocalTcpPortFree(int port) {
-		boolean res = false;
-		try {
-			SocketServerConnection conn = NetworkFactory.getFactory()
-					.createSocketServerConnection();
-			conn.open(port);
-			conn.close();
-			res = true;
-		} catch (IOException e) {
-			res = false;
-		}
-		return res;
-	}
+    /**
+     * Test if the given local TCP port is really free (not used by other applications)
+     * 
+     * @param port Port to check
+     * @return Boolean
+     */
+    private static boolean isLocalTcpPortFree(int port) {
+        boolean res = false;
+        try {
+            SocketServerConnection conn = NetworkFactory.getFactory()
+                    .createSocketServerConnection();
+            conn.open(port);
+            conn.close();
+            res = true;
+        } catch (IOException e) {
+            res = false;
+        }
+        return res;
+    }
 
-	/**
-	 * Is a valid IP address
-	 *
-	 * @param ipAddress
-	 *            IP address
-	 * @return Boolean
-	 */
-	public static boolean isValidIpAddress(String ipAddress) {
-		boolean result = false;
-		if ((ipAddress != null) && (!ipAddress.equals("127.0.0.1"))
-				&& (!ipAddress.equals("localhost"))) {
-			result = true;
-		}
-		return result;
-	}
+    /**
+     * Is a valid IP address
+     * 
+     * @param ipAddress IP address
+     * @return Boolean
+     */
+    public static boolean isValidIpAddress(String ipAddress) {
+        boolean result = false;
+        if ((ipAddress != null) && (!ipAddress.equals("127.0.0.1"))
+                && (!ipAddress.equals("localhost"))) {
+            result = true;
+        }
+        return result;
+    }
 
-	/**
-	 * Convert an IP address to its integer representation
-	 *
-	 * @param addr
-	 *            IP address
-	 * @return Integer
-	 */
-	public static int ipToInt(String addr) {
-		String[] addrArray = addr.split("\\.");
-		int num = 0;
-		for (int i = 0; i < addrArray.length; i++) {
-			int power = 3 - i;
-			num += ((Integer.parseInt(addrArray[i]) % 256 * Math.pow(256, power)));
-		}
-		return num;
-	}
+    /**
+     * Convert an IP address to its integer representation
+     * 
+     * @param addr IP address
+     * @return Integer
+     */
+    public static int ipToInt(String addr) {
+        String[] addrArray = addr.split("\\.");
+        int num = 0;
+        for (int i = 0; i < addrArray.length; i++) {
+            int power = 3 - i;
+            num += ((Integer.parseInt(addrArray[i]) % 256 * Math.pow(256, power)));
+        }
+        return num;
+    }
 }

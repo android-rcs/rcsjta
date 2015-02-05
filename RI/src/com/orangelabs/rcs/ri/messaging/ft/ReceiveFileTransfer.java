@@ -183,15 +183,15 @@ public class ReceiveFileTransfer extends Activity {
         setContentView(R.layout.filetransfer_receive);
 
         // Set pause and resume button
-        Button pauseBtn = (Button)findViewById(R.id.pause_btn);
+        Button pauseBtn = (Button) findViewById(R.id.pause_btn);
         pauseBtn.setOnClickListener(btnPauseListener);
         pauseBtn.setEnabled(true);
-        Button resumeBtn = (Button)findViewById(R.id.resume_btn);
+        Button resumeBtn = (Button) findViewById(R.id.resume_btn);
         resumeBtn.setOnClickListener(btnResumeListener);
         resumeBtn.setEnabled(false);
 
         // Get invitation info
-        ftDao = (FileTransferDAO)(getIntent().getExtras()
+        ftDao = (FileTransferDAO) (getIntent().getExtras()
                 .getParcelable(FileTransferIntentService.BUNDLE_FTDAO_ID));
         if (ftDao == null) {
             if (LogUtils.isActive) {
@@ -299,11 +299,11 @@ public class ReceiveFileTransfer extends Activity {
             String from = RcsDisplayName.getInstance(this).getDisplayName(ftDao.getContact());
 
             // Display transfer infos
-            TextView fromTextView = (TextView)findViewById(R.id.from);
+            TextView fromTextView = (TextView) findViewById(R.id.from);
             fromTextView.setText(getString(R.string.label_from_args, from));
 
             String size = getString(R.string.label_file_size, ftDao.getSize() / 1024);
-            TextView sizeTxt = (TextView)findViewById(R.id.image_size);
+            TextView sizeTxt = (TextView) findViewById(R.id.image_size);
             sizeTxt.setText(size);
 
             // Do not consider acceptance if resuming
@@ -414,7 +414,7 @@ public class ReceiveFileTransfer extends Activity {
      */
     private boolean isFileTransferInvitationAutoAccepted(FileTransferServiceConfiguration config)
             throws RcsServiceException {
-        TelephonyManager telephony = (TelephonyManager)getSystemService(TELEPHONY_SERVICE);
+        TelephonyManager telephony = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
         if (telephony.isNetworkRoaming()) {
             return config.isAutoAcceptInRoamingEnabled();
         } else {
@@ -469,8 +469,8 @@ public class ReceiveFileTransfer extends Activity {
      * @param totalSize Total size to be transferred
      */
     private void updateProgressBar(long currentSize, long totalSize) {
-        TextView statusView = (TextView)findViewById(R.id.progress_status);
-        ProgressBar progressBar = (ProgressBar)findViewById(R.id.progress_bar);
+        TextView statusView = (TextView) findViewById(R.id.progress_status);
+        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
         String value = "" + (currentSize / 1024);
         if (totalSize != 0) {
@@ -480,8 +480,8 @@ public class ReceiveFileTransfer extends Activity {
         statusView.setText(value);
 
         if (currentSize != 0) {
-            double position = ((double)currentSize / (double)totalSize) * 100.0;
-            progressBar.setProgress((int)position);
+            double position = ((double) currentSize / (double) totalSize) * 100.0;
+            progressBar.setProgress((int) position);
         } else {
             progressBar.setProgress(0);
         }
@@ -543,9 +543,9 @@ public class ReceiveFileTransfer extends Activity {
     private android.view.View.OnClickListener btnPauseListener = new android.view.View.OnClickListener() {
         @Override
         public void onClick(View arg0) {
-            Button resumeBtn = (Button)findViewById(R.id.resume_btn);
+            Button resumeBtn = (Button) findViewById(R.id.resume_btn);
             resumeBtn.setEnabled(true);
-            Button pauseBtn = (Button)findViewById(R.id.pause_btn);
+            Button pauseBtn = (Button) findViewById(R.id.pause_btn);
             pauseBtn.setEnabled(false);
 
             try {
@@ -563,9 +563,9 @@ public class ReceiveFileTransfer extends Activity {
     private android.view.View.OnClickListener btnResumeListener = new android.view.View.OnClickListener() {
         @Override
         public void onClick(View arg0) {
-            Button resumeBtn = (Button)findViewById(R.id.resume_btn);
+            Button resumeBtn = (Button) findViewById(R.id.resume_btn);
             resumeBtn.setEnabled(false);
-            Button pauseBtn = (Button)findViewById(R.id.pause_btn);
+            Button pauseBtn = (Button) findViewById(R.id.pause_btn);
             pauseBtn.setEnabled(true);
 
             try {
@@ -581,8 +581,7 @@ public class ReceiveFileTransfer extends Activity {
      * Check whether file size exceeds the limit
      * 
      * @param size Size of file
-     * @return {@code true} if file size limit is exceeded, otherwise
-     *         {@code false}
+     * @return {@code true} if file size limit is exceeded, otherwise {@code false}
      */
     private boolean isFileSizeExceeded(long size) {
         try {
@@ -597,9 +596,8 @@ public class ReceiveFileTransfer extends Activity {
     }
 
     /**
-     * Get available space in external storage, only if external storage is
-     * ready to write
-     *
+     * Get available space in external storage, only if external storage is ready to write
+     * 
      * @return Available space in bytes, otherwise <code>-1</code>
      */
     @SuppressWarnings("deprecation")
@@ -685,7 +683,7 @@ public class ReceiveFileTransfer extends Activity {
         handler.post(new Runnable() {
 
             public void run() {
-                TextView statusView = (TextView)findViewById(R.id.progress_status);
+                TextView statusView = (TextView) findViewById(R.id.progress_status);
                 switch (state) {
                     case FileTransfer.State.STARTED:
                         // Session is well established display session status
@@ -722,17 +720,17 @@ public class ReceiveFileTransfer extends Activity {
     }
 
     private void displayTransferredFile() {
-        TextView statusView = (TextView)findViewById(R.id.progress_status);
+        TextView statusView = (TextView) findViewById(R.id.progress_status);
         statusView.setText(RiApplication.FT_STATES[FileTransfer.State.TRANSFERRED]);
         // Make sure progress bar is at the end
-        ProgressBar progressBar = (ProgressBar)findViewById(R.id.progress_bar);
+        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         progressBar.setProgress(progressBar.getMax());
 
         // Disable pause button
-        Button pauseBtn = (Button)findViewById(R.id.pause_btn);
+        Button pauseBtn = (Button) findViewById(R.id.pause_btn);
         pauseBtn.setEnabled(false);
         // Disable resume button
-        Button resumeBtn = (Button)findViewById(R.id.resume_btn);
+        Button resumeBtn = (Button) findViewById(R.id.resume_btn);
         resumeBtn.setEnabled(false);
 
         if (VCARD_MIME_TYPE.equals(ftDao.getMimeType())) {

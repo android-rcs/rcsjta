@@ -61,11 +61,11 @@ public class InitiateSingleChat extends Activity {
         setContentView(R.layout.chat_initiate_single);
 
         // Set contact selector
-        mSpinner = (Spinner)findViewById(R.id.contact);
+        mSpinner = (Spinner) findViewById(R.id.contact);
         mSpinner.setAdapter(ContactListAdapter.createRcsContactListAdapter(this));
 
         // Set button callback
-        Button inviteBtn = (Button)findViewById(R.id.invite_btn);
+        Button inviteBtn = (Button) findViewById(R.id.invite_btn);
         inviteBtn.setOnClickListener(btnInviteListener);
 
         // Disable button if no contact available
@@ -81,7 +81,7 @@ public class InitiateSingleChat extends Activity {
     private OnClickListener btnInviteListener = new OnClickListener() {
         public void onClick(View v) {
             // get selected phone number
-            ContactListAdapter adapter = (ContactListAdapter)mSpinner.getAdapter();
+            ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
             // Format phone number to contactId
             ContactUtils contactUtils = ContactUtils.getInstance(InitiateSingleChat.this);

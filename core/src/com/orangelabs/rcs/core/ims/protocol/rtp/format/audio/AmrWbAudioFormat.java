@@ -25,20 +25,20 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.format.audio;
  */
 public class AmrWbAudioFormat extends AudioFormat {
 
-	/**
-	 * Encoding name
-	 */
-	public static final String ENCODING = "AMR-WB";
+    /**
+     * Encoding name
+     */
+    public static final String ENCODING = "AMR-WB";
 
-	/**
-	 * Payload type
-	 */
-	public static final int PAYLOAD = 126;
+    /**
+     * Payload type
+     */
+    public static final int PAYLOAD = 126;
 
-	/**
-	 * Constructor
-	 */
-	public AmrWbAudioFormat() {
-		super(ENCODING, PAYLOAD);
-	}
+    /**
+     * Constructor
+     */
+    public AmrWbAudioFormat() {
+        super(ENCODING, PAYLOAD);
+    }
 }

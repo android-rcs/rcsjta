@@ -25,7 +25,7 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.util.Buffer;
 
 /**
  * Video capture stream
- *
+ * 
  * @author hlxn7157
  */
 public class VideoCaptureStream extends MediaCaptureStream {

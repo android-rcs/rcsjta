@@ -27,12 +27,12 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.core.RtcpByePacket;
  */
 public class RtcpByeEvent extends RtcpEvent {
 
-	/**
-	 * Constructor
-	 * 
-	 * @param packet RTCP BYE packet
-	 */
-	public RtcpByeEvent(RtcpByePacket packet) {
-		super(packet);
-	}
+    /**
+     * Constructor
+     * 
+     * @param packet RTCP BYE packet
+     */
+    public RtcpByeEvent(RtcpByePacket packet) {
+        super(packet);
+    }
 }

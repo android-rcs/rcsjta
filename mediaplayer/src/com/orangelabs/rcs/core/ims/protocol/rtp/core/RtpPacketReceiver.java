@@ -28,18 +28,18 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.util.FifoBuffer;
 
 /**
  * RTP packet receiver
- *
+ * 
  * @author jexa7410
  */
 public class RtpPacketReceiver extends Thread {
     /**
      * Statistics
      */
-	private RtpStatisticsReceiver stats = new RtpStatisticsReceiver();
+    private RtpStatisticsReceiver stats = new RtpStatisticsReceiver();
 
-	/**
-	 * Datagram connection
-	 */
+    /**
+     * Datagram connection
+     */
     public DatagramConnection datagramConnection = null;
 
     /**
@@ -60,12 +60,12 @@ public class RtpPacketReceiver extends Thread {
     /**
      * Max size for the fifo
      */
-    private static final int FIFO_MAX_NUMBER = 100; 
+    private static final int FIFO_MAX_NUMBER = 100;
 
     /**
      * Number of element to clean in the fifo
      */
-    private static final int FIFO_CLEAN_NUMBER = 20; 
+    private static final int FIFO_CLEAN_NUMBER = 20;
 
     /**
      * Last sequence number
@@ -79,13 +79,14 @@ public class RtpPacketReceiver extends Thread {
 
     /**
      * Constructor
-     *
+     * 
      * @param port Listenning port
      * @param rtcpSession
      * @param socketTimeout
      * @throws IOException
      */
-    public RtpPacketReceiver(int port, RtcpSession rtcpSession, int socketTimeout) throws IOException {
+    public RtpPacketReceiver(int port, RtcpSession rtcpSession, int socketTimeout)
+            throws IOException {
         super();
 
         this.rtcpSession = rtcpSession;
@@ -93,11 +94,11 @@ public class RtpPacketReceiver extends Thread {
         // Create the UDP server
         datagramConnection = new AndroidDatagramConnection(socketTimeout);
         datagramConnection.open(port);
-	}
+    }
 
     /**
      * Constructor
-     *
+     * 
      * @param port Listenning port
      * @param rtcpSession
      * @throws IOException
@@ -106,27 +107,27 @@ public class RtpPacketReceiver extends Thread {
         this(port, rtcpSession, 0);
     }
 
-	/**
-	 * Close the receiver
-	 */
-	public void close() {
+    /**
+     * Close the receiver
+     */
+    public void close() {
         // Interrupt the current thread processing
         try {
             interrupt();
-        } catch(Exception e) {
+        } catch (Exception e) {
             // Nothing to do
         }
 
-		// Close the datagram connection
-		if (datagramConnection != null) {
-			try {
+        // Close the datagram connection
+        if (datagramConnection != null) {
+            try {
                 isClosed = true;
-				datagramConnection.close();
-			} catch(Exception e) {
-			}
-			datagramConnection = null;
-		}
-	}
+                datagramConnection.close();
+            } catch (Exception e) {
+            }
+            datagramConnection = null;
+        }
+    }
 
     /**
      * Background processing
@@ -142,7 +143,7 @@ public class RtpPacketReceiver extends Thread {
                     int payloadType = (byte) ((data[1] & 0xff) & 0x7f);
                     if (payloadType != 20) {
                         // Drop too old packet
-                        int seqnum = (char)((data[2] << 8) | (data[3] & 0xff));
+                        int seqnum = (char) ((data[2] << 8) | (data[3] & 0xff));
                         if (seqnum > lastSeqnum - 10) {
                             // Clean the FIFO if full
                             if (fifo.size() >= FIFO_MAX_NUMBER) {
@@ -157,31 +158,31 @@ public class RtpPacketReceiver extends Thread {
                 }
             }
         } catch (SocketTimeoutException ex) {
-            
+
         } catch (Exception e) {
-        	e.printStackTrace();
+            e.printStackTrace();
         }
     }
 
     /**
      * Read a RTP packet (blocking method)
-     *
+     * 
      * @return RTP packet
      */
     public RtpPacket readRtpPacket() throws TimeoutException {
-		try {
+        try {
             // Get a new packet in FIFO
             byte[] data = (byte[]) fifo.getObject(timeout);
             if (data == null) {
                 throw new TimeoutException();
             }
 
-			// Parse the RTP packet
-			RtpPacket pkt = parseRtpPacket(data);
+            // Parse the RTP packet
+            RtpPacket pkt = parseRtpPacket(data);
 
-			if (pkt != null) {
-				// Update statistics
-				stats.numPackets++;
+            if (pkt != null) {
+                // Update statistics
+                stats.numPackets++;
                 stats.numBytes += data.length;
 
                 RtpSource s = rtcpSession.getMySource();
@@ -190,32 +191,32 @@ public class RtpPacketReceiver extends Thread {
                 s.receiveRtpPacket(pkt);
                 pkt.seqnum = s.generateExtendedSequenceNumber(pkt.seqnum);
 
-				return pkt;
-			} else {
-				return readRtpPacket();
-			}
+                return pkt;
+            } else {
+                return readRtpPacket();
+            }
 
-		} catch (Exception e) {
+        } catch (Exception e) {
             if (!isClosed) {
-//                if (logger.isActivated()) {
-//                    logger.error("Can't parse the RTP packet", e);
-//                }
+                // if (logger.isActivated()) {
+                // logger.error("Can't parse the RTP packet", e);
+                // }
                 stats.numBadRtpPkts++;
             }
-			return null;
-		}
-	}
+            return null;
+        }
+    }
 
     /**
      * Parse the RTP packet
-     *
+     * 
      * @param data RTP packet not yet parsed
      * @return RTP packet
      */
-	private RtpPacket parseRtpPacket(byte[] data) {
-		RtpPacket packet = new RtpPacket();
-		try {
-			// Read RTP packet length
+    private RtpPacket parseRtpPacket(byte[] data) {
+        RtpPacket packet = new RtpPacket();
+        try {
+            // Read RTP packet length
             packet.length = data.length;
 
             // Set received timestamp
@@ -224,65 +225,66 @@ public class RtpPacketReceiver extends Thread {
             // Read extension bit
             packet.extension = (data[0] & 0x10) > 0;
 
-			// Read marker
-			if ((byte)((data[1] & 0xff) & 0x80) == (byte) 0x80){
-				packet.marker = 1;
-			}else{
-				packet.marker = 0;
-			}
+            // Read marker
+            if ((byte) ((data[1] & 0xff) & 0x80) == (byte) 0x80) {
+                packet.marker = 1;
+            } else {
+                packet.marker = 0;
+            }
 
-			// Read payload type
-			packet.payloadType = (byte) ((data[1] & 0xff) & 0x7f);
+            // Read payload type
+            packet.payloadType = (byte) ((data[1] & 0xff) & 0x7f);
 
-            // Read sequence number (it's a unsigned 16 bit value. Because Java only supports 
-            // signed values for int and short we use char to do the correct conversion.) 
-            packet.seqnum = (char)((data[2] << 8) | (data[3] & 0xff));
+            // Read sequence number (it's a unsigned 16 bit value. Because Java only supports
+            // signed values for int and short we use char to do the correct conversion.)
+            packet.seqnum = (char) ((data[2] << 8) | (data[3] & 0xff));
 
-			// Read timestamp
-			packet.timestamp = (((data[4] & 0xff) << 24) | ((data[5] & 0xff) << 16)
-					| ((data[6] & 0xff) << 8) | (data[7] & 0xff));
+            // Read timestamp
+            packet.timestamp = (((data[4] & 0xff) << 24) | ((data[5] & 0xff) << 16)
+                    | ((data[6] & 0xff) << 8) | (data[7] & 0xff));
 
-			// Read SSRC
-			packet.ssrc = (((data[8] & 0xff) << 24) | ((data[9] & 0xff) << 16)
-					| ((data[10] & 0xff) << 8) | (data[11] & 0xff));
+            // Read SSRC
+            packet.ssrc = (((data[8] & 0xff) << 24) | ((data[9] & 0xff) << 16)
+                    | ((data[10] & 0xff) << 8) | (data[11] & 0xff));
 
             // Extract the extension header
             if (packet.extension) {
                 int dataId = 11;
                 int extensionHeaderId = ((data[++dataId] & 0xff) << 8) | (data[++dataId] & 0xff);
                 int length = ((data[++dataId] & 0xff) << 8) | (data[++dataId] & 0xff);
-                
+
                 if (extensionHeaderId == RtpExtensionHeader.RTP_EXTENSION_HEADER_ID) {
                     extractExtensionHeader(data, length, dataId, packet);
                 }
-                
-                // increment payload offset = RtpHeader size (12) + Extension Header ID (2) + Header Length (2) +
-                // elements * 4 (32 bits each) + 1 (to set at correct index) 
+
+                // increment payload offset = RtpHeader size (12) + Extension Header ID (2) + Header
+                // Length (2) +
+                // elements * 4 (32 bits each) + 1 (to set at correct index)
                 packet.payloadoffset = 16 + length * 4;
             } else {
                 packet.payloadoffset = 12;
             }
-			packet.payloadlength = packet.length - packet.payloadoffset;
-			packet.data = new byte[packet.payloadlength];
-			System.arraycopy(data, packet.payloadoffset, packet.data, 0, packet.payloadlength);
-		} catch (Exception e) {
-			return null;
-		}
+            packet.payloadlength = packet.length - packet.payloadoffset;
+            packet.data = new byte[packet.payloadlength];
+            System.arraycopy(data, packet.payloadoffset, packet.data, 0, packet.payloadlength);
+        } catch (Exception e) {
+            return null;
+        }
         return packet;
-	}
+    }
 
     /**
      * Returns the statistics of RTP reception
-     *
+     * 
      * @return Statistics
      */
-	public RtpStatisticsReceiver getRtpReceptionStats() {
-		return stats;
-	}
+    public RtpStatisticsReceiver getRtpReceptionStats() {
+        return stats;
+    }
 
     /**
      * Returns the DatagramConnection of RTP
-     *
+     * 
      * @return DatagramConnection
      */
     public DatagramConnection getConnection() {
@@ -291,7 +293,7 @@ public class RtpPacketReceiver extends Thread {
 
     /**
      * Extract Extension Header
-     *
+     * 
      * @param data
      * @param length
      * @param dataId
@@ -319,7 +321,7 @@ public class RtpPacketReceiver extends Thread {
                 byte[] elementData = new byte[elementLength + 1];
                 System.arraycopy(extensionHeaderData, i + 1, elementData, 0, elementData.length);
                 packet.extensionHeader.addElement(elementId, elementData);
-                i = i + elementData.length + 1; 
+                i = i + elementData.length + 1;
             } else {
                 break;
             }

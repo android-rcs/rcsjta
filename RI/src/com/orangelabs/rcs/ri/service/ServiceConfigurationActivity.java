@@ -104,12 +104,12 @@ public class ServiceConfigurationActivity extends Activity {
 
         }
 
-        mCheckBoxIsConfigValid = (CheckBox)findViewById(R.id.label_service_configuration_valid);
-        mTextEditMessagingUX = (TextView)findViewById(R.id.label_messaging_mode);
-        mTextEditContactId = (TextView)findViewById(R.id.label_my_contact_id);
-        mTextEditDisplayName = (TextView)findViewById(R.id.text_my_display_name);
+        mCheckBoxIsConfigValid = (CheckBox) findViewById(R.id.label_service_configuration_valid);
+        mTextEditMessagingUX = (TextView) findViewById(R.id.label_messaging_mode);
+        mTextEditContactId = (TextView) findViewById(R.id.label_my_contact_id);
+        mTextEditDisplayName = (TextView) findViewById(R.id.text_my_display_name);
 
-        mSpinnerDefMessaginMethod = (Spinner)findViewById(R.id.spinner_default_messaging_method);
+        mSpinnerDefMessaginMethod = (Spinner) findViewById(R.id.spinner_default_messaging_method);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, DEF_MSG_METHOD);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

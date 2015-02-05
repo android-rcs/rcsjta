@@ -19,25 +19,12 @@
 package com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264;
 
 /**
- * H264RtpHeaders
- *
- * RFC 3984: Two special headers are added to each H264 packet that
- * immediately follows the RTP header:
- *
- * First Header - The FU indicator octet has the following format:
- * +---------------+
- * |0|1|2|3|4|5|6|7|
- * +-+-+-+-+-+-+-+-+
- * |F|NRI|  Type   |
- * +---------------+
- *
- * Second Header - The FU header has the following format:
- * +---------------+
- * |0|1|2|3|4|5|6|7|
- * +-+-+-+-+-+-+-+-+
- * |S|E|R|  Type   |
- * +---------------+
- *
+ * H264RtpHeaders RFC 3984: Two special headers are added to each H264 packet that immediately
+ * follows the RTP header: First Header - The FU indicator octet has the following format:
+ * +---------------+ |0|1|2|3|4|5|6|7| +-+-+-+-+-+-+-+-+ |F|NRI| Type | +---------------+ Second
+ * Header - The FU header has the following format: +---------------+ |0|1|2|3|4|5|6|7|
+ * +-+-+-+-+-+-+-+-+ |S|E|R| Type | +---------------+
+ * 
  * @author Deutsche Telekom AG
  */
 public class H264RtpHeaders {
@@ -69,7 +56,7 @@ public class H264RtpHeaders {
 
     /**
      * Constructor
-     *
+     * 
      * @param rtpPacketData
      */
     public H264RtpHeaders(byte[] rtpPacketData) {
@@ -93,7 +80,7 @@ public class H264RtpHeaders {
 
     /**
      * Is Frame Non Interleaved
-     *
+     * 
      * @return Is Frame Non Interleaved
      */
     public boolean isFrameNonInterleaved() { // not fragmented
@@ -102,7 +89,7 @@ public class H264RtpHeaders {
 
     /**
      * Header Size
-     *
+     * 
      * @return Header Size
      */
     public int getHeaderSize() {
@@ -115,7 +102,7 @@ public class H264RtpHeaders {
 
     /**
      * Get NAL Header
-     *
+     * 
      * @return NAL Header
      */
     public byte getNALHeader() {
@@ -129,7 +116,7 @@ public class H264RtpHeaders {
 
     /**
      * Verifies if packet is a code slice of a IDR picture
-     *
+     * 
      * @param packet packet to verify
      * @return <code>True</code> if it is, <code>false</code> otherwise
      */
@@ -147,7 +134,7 @@ public class H264RtpHeaders {
 
     /**
      * Verifies if packet is a code slice of a NON IDR picture
-     *
+     * 
      * @param packet packet to verify
      * @return <code>True</code> if it is, <code>false</code> otherwise
      */
@@ -155,17 +142,17 @@ public class H264RtpHeaders {
         if (FUI_TYPE == (byte) 0x01) {
             return true;
         }
-        
+
         if (isFrameNonInterleaved() && FUH_TYPE == (byte) 0x01) {
             return true;
         }
-        
+
         return false;
     }
 
     /**
      * Get FUI_F
-     *
+     * 
      * @return FUI_F
      */
     public boolean getFUI_F() {
@@ -174,7 +161,7 @@ public class H264RtpHeaders {
 
     /**
      * Get FUI_NRI
-     *
+     * 
      * @return FUI_NRI
      */
     public int getFUI_NRI() {
@@ -183,7 +170,7 @@ public class H264RtpHeaders {
 
     /**
      * Get FUI_TYPE
-     *
+     * 
      * @return FUI_TYPE
      */
     public byte getFUI_TYPE() {
@@ -192,7 +179,7 @@ public class H264RtpHeaders {
 
     /**
      * Get FUH_S
-     *
+     * 
      * @return FUH_S
      */
     public boolean getFUH_S() {
@@ -201,7 +188,7 @@ public class H264RtpHeaders {
 
     /**
      * Get FUH_E
-     *
+     * 
      * @return FUH_E
      */
     public boolean getFUH_E() {
@@ -210,7 +197,7 @@ public class H264RtpHeaders {
 
     /**
      * Get FUH_R
-     *
+     * 
      * @return FUH_R
      */
     public boolean getFUH_R() {
@@ -219,7 +206,7 @@ public class H264RtpHeaders {
 
     /**
      * Get FUH_TYPE
-     *
+     * 
      * @return FUH_TYPE
      */
     public byte getFUH_TYPE() {

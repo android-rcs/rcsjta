@@ -28,157 +28,157 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.util.Buffer;
  */
 public abstract class Codec {
 
-	/**
-	 * The input buffer was converted successfully to output
-	 */
-	public static final int BUFFER_PROCESSED_OK = 0;
+    /**
+     * The input buffer was converted successfully to output
+     */
+    public static final int BUFFER_PROCESSED_OK = 0;
 
-	/**
-	 * The input buffer could not be handled
-	 */
-	public static final int BUFFER_PROCESSED_FAILED = 1 << 0;
+    /**
+     * The input buffer could not be handled
+     */
+    public static final int BUFFER_PROCESSED_FAILED = 1 << 0;
 
-	/**
-	 * The input buffer chunk was not fully consumed
-	 */
-	public static final int INPUT_BUFFER_NOT_CONSUMED = 1 << 1;
+    /**
+     * The input buffer chunk was not fully consumed
+     */
+    public static final int INPUT_BUFFER_NOT_CONSUMED = 1 << 1;
 
-	/**
-	 * The output buffer chunk was not filled
-	 */
-	public static final int OUTPUT_BUFFER_NOT_FILLED = 1 << 2;
+    /**
+     * The output buffer chunk was not filled
+     */
+    public static final int OUTPUT_BUFFER_NOT_FILLED = 1 << 2;
 
-	/**
-	 * Input format
-	 */
-	private Format inputFormat;
+    /**
+     * Input format
+     */
+    private Format inputFormat;
 
-	/**
-	 * Ouput format
-	 */
-	private Format outputFormat;
+    /**
+     * Ouput format
+     */
+    private Format outputFormat;
 
-	/**
-	 * Set the input format
-	 * 
-	 * @param input Input format
-	 * @return New format
-	 */
-	public Format setInputFormat(Format input) {
-		inputFormat = input;
-		return input;
-	}
+    /**
+     * Set the input format
+     * 
+     * @param input Input format
+     * @return New format
+     */
+    public Format setInputFormat(Format input) {
+        inputFormat = input;
+        return input;
+    }
 
-	/**
-	 * Set the output format
-	 * 
-	 * @param output Output format
-	 * @return New format
-	 */
-	public Format setOutputFormat(Format output) {
-		outputFormat = output;
-		return output;
-	}
+    /**
+     * Set the output format
+     * 
+     * @param output Output format
+     * @return New format
+     */
+    public Format setOutputFormat(Format output) {
+        outputFormat = output;
+        return output;
+    }
 
-	/**
-	 * Return the input format
-	 * 
-	 * @return Format
-	 */
-	public Format getInputFormat() {
-		return inputFormat;
-	}
+    /**
+     * Return the input format
+     * 
+     * @return Format
+     */
+    public Format getInputFormat() {
+        return inputFormat;
+    }
 
-	/**
-	 * Return the output format
-	 * 
-	 * @return Format
-	 */
-	public Format getOutputFormat() {
-		return outputFormat;
-	}
+    /**
+     * Return the output format
+     * 
+     * @return Format
+     */
+    public Format getOutputFormat() {
+        return outputFormat;
+    }
 
-	/**
-	 * Reset the codec
-	 */
-	public void reset() {
-	}
+    /**
+     * Reset the codec
+     */
+    public void reset() {
+    }
 
-	/**
-	 * Open the codec
-	 */
-	public void open() {
-	}
+    /**
+     * Open the codec
+     */
+    public void open() {
+    }
 
-	/**
-	 * Close the codec
-	 */
-	public void close() {
-	}
+    /**
+     * Close the codec
+     */
+    public void close() {
+    }
 
-	/**
-	 * Test if it's the end of media
-	 * 
-	 * @return Boolean
-	 */
-	protected boolean isEOM(Buffer inputBuffer) {
-		return inputBuffer.isEOM();
-	}
+    /**
+     * Test if it's the end of media
+     * 
+     * @return Boolean
+     */
+    protected boolean isEOM(Buffer inputBuffer) {
+        return inputBuffer.isEOM();
+    }
 
-	/**
-	 * Propagate EOM to the ouput buffer
-	 * 
-	 * @param outputBuffer Ouput buffer
-	 */
-	protected void propagateEOM(Buffer outputBuffer) {
-		updateOutput(outputBuffer, getOutputFormat(), 0, 0);
-		outputBuffer.setEOM(true);
-	}
+    /**
+     * Propagate EOM to the ouput buffer
+     * 
+     * @param outputBuffer Ouput buffer
+     */
+    protected void propagateEOM(Buffer outputBuffer) {
+        updateOutput(outputBuffer, getOutputFormat(), 0, 0);
+        outputBuffer.setEOM(true);
+    }
 
-	/**
-	 * Update the ouput buffer informations
-	 * 
-	 * @param outputBuffer Ouput buffer
-	 * @param format Ouput format
-	 * @param length Ouput length
-	 * @param offset Ouput offset
-	 */
-	protected void updateOutput(Buffer outputBuffer, Format format, int length,
-			int offset) {
-		outputBuffer.setFormat(format);
-		outputBuffer.setLength(length);
-		outputBuffer.setOffset(offset);
-	}
+    /**
+     * Update the ouput buffer informations
+     * 
+     * @param outputBuffer Ouput buffer
+     * @param format Ouput format
+     * @param length Ouput length
+     * @param offset Ouput offset
+     */
+    protected void updateOutput(Buffer outputBuffer, Format format, int length,
+            int offset) {
+        outputBuffer.setFormat(format);
+        outputBuffer.setLength(length);
+        outputBuffer.setOffset(offset);
+    }
 
-	/**
-	 * Validate that the Buffer's data size is at least newSize
-	 * 
-	 * @return Array with sufficient capacity
-	 */
-	protected byte[] validateByteArraySize(Buffer buffer, int newSize) {
-		byte[] typedArray = (byte[]) buffer.getData();
-		if (typedArray != null) {
-			if (typedArray.length >= newSize) {
-				return typedArray;
-			}
+    /**
+     * Validate that the Buffer's data size is at least newSize
+     * 
+     * @return Array with sufficient capacity
+     */
+    protected byte[] validateByteArraySize(Buffer buffer, int newSize) {
+        byte[] typedArray = (byte[]) buffer.getData();
+        if (typedArray != null) {
+            if (typedArray.length >= newSize) {
+                return typedArray;
+            }
 
-			byte[] tempArray = new byte[newSize];
-			System.arraycopy(typedArray, 0, tempArray, 0, typedArray.length);
-			typedArray = tempArray;
-		} else {
-			typedArray = new byte[newSize];
-		}
+            byte[] tempArray = new byte[newSize];
+            System.arraycopy(typedArray, 0, tempArray, 0, typedArray.length);
+            typedArray = tempArray;
+        } else {
+            typedArray = new byte[newSize];
+        }
 
-		buffer.setData(typedArray);
-		return typedArray;
-	}
+        buffer.setData(typedArray);
+        return typedArray;
+    }
 
-	/**
-	 * Performs the media processing defined by this codec
-	 * 
-	 * @param input The buffer that contains the media data to be processed
-	 * @param output The buffer in which to store the processed media data
-	 * @return Processing result
-	 */
-	public abstract int process(Buffer input, Buffer output);
+    /**
+     * Performs the media processing defined by this codec
+     * 
+     * @param input The buffer that contains the media data to be processed
+     * @param output The buffer in which to store the processed media data
+     * @return Processing result
+     */
+    public abstract int process(Buffer input, Buffer output);
 }

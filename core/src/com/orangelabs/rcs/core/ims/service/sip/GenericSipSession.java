@@ -19,6 +19,7 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.core.ims.service.sip;
 
 import gov2.nist.javax2.sip.header.ims.PPreferredServiceHeader;
@@ -44,153 +45,156 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author jexa7410
  */
 public abstract class GenericSipSession extends ImsServiceSession {
-	/**
-	 * Feature tag
-	 */
-	private String featureTag;
+    /**
+     * Feature tag
+     */
+    private String featureTag;
 
-	/**
-	 * The logger
-	 */
-	private final static Logger logger = Logger.getLogger(GenericSipSession.class.getSimpleName());
+    /**
+     * The logger
+     */
+    private final static Logger logger = Logger.getLogger(GenericSipSession.class.getSimpleName());
 
-	/**
-	 * Constructor
-	 * 
-	 * @param parent
-	 *            IMS service
-	 * @param contact
-	 *            Remote contactId
-	 * @param featureTag
-	 *            Feature tag
-	 */
-	public GenericSipSession(ImsService parent, ContactId contact, String featureTag) {
-		super(parent, contact, PhoneUtils.formatContactIdToUri(contact));
+    /**
+     * Constructor
+     * 
+     * @param parent IMS service
+     * @param contact Remote contactId
+     * @param featureTag Feature tag
+     */
+    public GenericSipSession(ImsService parent, ContactId contact, String featureTag) {
+        super(parent, contact, PhoneUtils.formatContactIdToUri(contact));
 
-		// Set the service feature tag
-		this.featureTag = featureTag;
-	}
+        // Set the service feature tag
+        this.featureTag = featureTag;
+    }
 
-	/**
-	 * Returns feature tag of the service
-	 * 
-	 * @return Feature tag
-	 */
-	public String getFeatureTag() {
-		return featureTag;
-	}
+    /**
+     * Returns feature tag of the service
+     * 
+     * @return Feature tag
+     */
+    public String getFeatureTag() {
+        return featureTag;
+    }
 
-	/**
-	 * Returns the service ID
-	 * 
-	 * @return Service ID
-	 */
-	public String getServiceId() {
-		return CapabilityUtils.extractServiceId(featureTag);
-	}
+    /**
+     * Returns the service ID
+     * 
+     * @return Service ID
+     */
+    public String getServiceId() {
+        return CapabilityUtils.extractServiceId(featureTag);
+    }
 
-	/**
-	 * Create an INVITE request
-	 *
-	 * @return Request
-	 * @throws SipException
-	 */
-	public SipRequest createInvite() throws SipException {
-		String ext = FeatureTags.FEATURE_3GPP + "=\"" + FeatureTags.FEATURE_3GPP_EXTENSION + "\"";
-		SipRequest invite = SipMessageFactory.createInvite(getDialogPath(), new String[] {
-				getFeatureTag(), ext }, new String[] { getFeatureTag(), ext,
-				SipUtils.EXPLICIT_REQUIRE }, getDialogPath().getLocalContent());
+    /**
+     * Create an INVITE request
+     * 
+     * @return Request
+     * @throws SipException
+     */
+    public SipRequest createInvite() throws SipException {
+        String ext = FeatureTags.FEATURE_3GPP + "=\"" + FeatureTags.FEATURE_3GPP_EXTENSION + "\"";
+        SipRequest invite = SipMessageFactory.createInvite(getDialogPath(), new String[] {
+                getFeatureTag(), ext
+        }, new String[] {
+                getFeatureTag(), ext,
+                SipUtils.EXPLICIT_REQUIRE
+        }, getDialogPath().getLocalContent());
 
-		try {
-			ExtensionHeader header = (ExtensionHeader) SipUtils.HEADER_FACTORY.createHeader(
-					PPreferredServiceHeader.NAME, FeatureTags.FEATURE_3GPP_SERVICE_EXTENSION);
-			invite.getStackMessage().addHeader(header);
-		} catch (Exception e) {
-			if (logger.isActivated()) {
-				logger.error("Can't add SIP header", e);
-			}
-		}
+        try {
+            ExtensionHeader header = (ExtensionHeader) SipUtils.HEADER_FACTORY.createHeader(
+                    PPreferredServiceHeader.NAME, FeatureTags.FEATURE_3GPP_SERVICE_EXTENSION);
+            invite.getStackMessage().addHeader(header);
+        } catch (Exception e) {
+            if (logger.isActivated()) {
+                logger.error("Can't add SIP header", e);
+            }
+        }
 
-		return invite;
-	}
+        return invite;
+    }
 
-	/**
-	 * Create 200 OK response
-	 *
-	 * @return Response
-	 * @throws SipException
-	 */
-	public SipResponse create200OKResponse() throws SipException {
-		String ext = FeatureTags.FEATURE_3GPP + "=\"" + FeatureTags.FEATURE_3GPP_EXTENSION + "\"";
-		SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
-				new String[] { getFeatureTag(), ext }, new String[] { getFeatureTag(), ext,
-						SipUtils.EXPLICIT_REQUIRE }, getDialogPath().getLocalContent());
-		return resp;
-	}
+    /**
+     * Create 200 OK response
+     * 
+     * @return Response
+     * @throws SipException
+     */
+    public SipResponse create200OKResponse() throws SipException {
+        String ext = FeatureTags.FEATURE_3GPP + "=\"" + FeatureTags.FEATURE_3GPP_EXTENSION + "\"";
+        SipResponse resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
+                new String[] {
+                        getFeatureTag(), ext
+                }, new String[] {
+                        getFeatureTag(), ext,
+                        SipUtils.EXPLICIT_REQUIRE
+                }, getDialogPath().getLocalContent());
+        return resp;
+    }
 
-	/**
-	 * Prepare media session
-	 * 
-	 * @throws Exception
-	 */
-	public abstract void prepareMediaSession() throws Exception;
+    /**
+     * Prepare media session
+     * 
+     * @throws Exception
+     */
+    public abstract void prepareMediaSession() throws Exception;
 
-	/**
-	 * Start media session
-	 * 
-	 * @throws Exception
-	 */
-	public abstract void startMediaSession() throws Exception;
+    /**
+     * Start media session
+     * 
+     * @throws Exception
+     */
+    public abstract void startMediaSession() throws Exception;
 
-	/**
-	 * Close media session
-	 */
-	public abstract void closeMediaSession();
+    /**
+     * Close media session
+     */
+    public abstract void closeMediaSession();
 
-	/**
-	 * Handle error
-	 * 
-	 * @param error
-	 *            Error
-	 */
-	public void handleError(ImsServiceError error) {
-		if (isSessionInterrupted()) {
-			return;
-		}
+    /**
+     * Handle error
+     * 
+     * @param error Error
+     */
+    public void handleError(ImsServiceError error) {
+        if (isSessionInterrupted()) {
+            return;
+        }
 
-		// Error
-		if (logger.isActivated()) {
-			logger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
-		}
+        // Error
+        if (logger.isActivated()) {
+            logger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
+        }
 
-		// Close media session
-		closeMediaSession();
+        // Close media session
+        closeMediaSession();
 
-		// Remove the current session
-		removeSession();
+        // Remove the current session
+        removeSession();
 
-		ContactId contact = getRemoteContact();
-		for (int j = 0; j < getListeners().size(); j++) {
-			((SipSessionListener) getListeners().get(j)).handleSessionError(contact,
-					new SipSessionError(error));
-		}
-	}
+        ContactId contact = getRemoteContact();
+        for (int j = 0; j < getListeners().size(); j++) {
+            ((SipSessionListener) getListeners().get(j)).handleSessionError(contact,
+                    new SipSessionError(error));
+        }
+    }
 
-	@Override
-	public void receiveBye(SipRequest bye) {
-		super.receiveBye(bye);
+    @Override
+    public void receiveBye(SipRequest bye) {
+        super.receiveBye(bye);
 
-		// Request capabilities to the remote
-		getImsService().getImsModule().getCapabilityService()
-				.requestContactCapabilities(getRemoteContact());
-	}
+        // Request capabilities to the remote
+        getImsService().getImsModule().getCapabilityService()
+                .requestContactCapabilities(getRemoteContact());
+    }
 
-	@Override
-	public void receiveCancel(SipRequest cancel) {
-		super.receiveCancel(cancel);
+    @Override
+    public void receiveCancel(SipRequest cancel) {
+        super.receiveCancel(cancel);
 
-		// Request capabilities to the remote
-		getImsService().getImsModule().getCapabilityService()
-				.requestContactCapabilities(getRemoteContact());
-	}
+        // Request capabilities to the remote
+        getImsService().getImsModule().getCapabilityService()
+                .requestContactCapabilities(getRemoteContact());
+    }
 }

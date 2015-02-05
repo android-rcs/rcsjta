@@ -23,8 +23,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Represent a RTP extension header 
- *
+ * Represent a RTP extension header
+ * 
  * @author Deutsche Telekom
  */
 public class RtpExtensionHeader implements Iterable<RtpExtensionHeader.ExtensionElement> {
@@ -47,7 +47,7 @@ public class RtpExtensionHeader implements Iterable<RtpExtensionHeader.Extension
 
     /**
      * Add header element.
-     *
+     * 
      * @param id Element id
      * @param data Element data
      */
@@ -57,7 +57,7 @@ public class RtpExtensionHeader implements Iterable<RtpExtensionHeader.Extension
 
     /**
      * Get ExtensionHeader element by id.
-     *
+     * 
      * @param id ID to search for
      * @return Element data
      */
@@ -72,7 +72,7 @@ public class RtpExtensionHeader implements Iterable<RtpExtensionHeader.Extension
 
     /**
      * Counts the number of elements in the header
-     *
+     * 
      * @return Number of elements
      */
     public int elementsCount() {

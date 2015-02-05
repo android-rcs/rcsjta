@@ -116,7 +116,7 @@ public class SingleChatView extends ChatView {
             .append("')").toString();
 
     private final static String[] PROJECTION_MSG_ID = new String[] {
-        Message.MESSAGE_ID
+            Message.MESSAGE_ID
     };
 
     /**
@@ -197,7 +197,7 @@ public class SingleChatView extends ChatView {
         }
         ChatService chatService = mCnxManager.getChatApi();
         // Open chat
-        ContactId newContact = (ContactId)getIntent().getParcelableExtra(EXTRA_CONTACT);
+        ContactId newContact = (ContactId) getIntent().getParcelableExtra(EXTRA_CONTACT);
         if (newContact == null) {
             if (LogUtils.isActive) {
                 Log.w(LOGTAG, "Cannot process intent: contact is null");
@@ -249,7 +249,7 @@ public class SingleChatView extends ChatView {
         // Create a new CursorLoader with the following query parameters.
         Uri uri = Message.CONTENT_URI;
         return new CursorLoader(this, uri, PROJECTION, WHERE_CLAUSE, new String[] {
-            mContact.toString()
+                mContact.toString()
         }, QUERY_SORT_ORDER);
     }
 
@@ -257,8 +257,8 @@ public class SingleChatView extends ChatView {
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         // Get the list item position
-        AdapterContextMenuInfo info = (AdapterContextMenuInfo)menuInfo;
-        Cursor cursor = (Cursor)mAdapter.getItem(info.position);
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
+        Cursor cursor = (Cursor) mAdapter.getItem(info.position);
         // Adapt the contextual menu according to the selected item
         menu.add(0, CHAT_MENU_ITEM_DELETE, CHAT_MENU_ITEM_DELETE, R.string.menu_delete_message);
         Direction direction = Direction.valueOf(cursor.getInt(cursor
@@ -288,8 +288,8 @@ public class SingleChatView extends ChatView {
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        AdapterContextMenuInfo info = (AdapterContextMenuInfo)item.getMenuInfo();
-        Cursor cursor = (Cursor)(mAdapter.getItem(info.position));
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+        Cursor cursor = (Cursor) (mAdapter.getItem(info.position));
         String messageId = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "onContextItemSelected msgId=".concat(messageId));
@@ -319,7 +319,7 @@ public class SingleChatView extends ChatView {
     public static Intent forgeIntentToStart(Context context, ContactId contact) {
         Intent intent = new Intent(context, SingleChatView.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(EXTRA_CONTACT, (Parcelable)contact);
+        intent.putExtra(EXTRA_CONTACT, (Parcelable) contact);
         return intent;
     }
 
@@ -332,7 +332,7 @@ public class SingleChatView extends ChatView {
     private Set<String> getUnreadMessageIds(ContactId contact) {
         Set<String> unReadMessageIDs = new HashSet<String>();
         String[] where_args = new String[] {
-            contact.toString()
+                contact.toString()
         };
 
         Cursor cursor = null;

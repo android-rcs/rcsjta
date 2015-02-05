@@ -216,7 +216,7 @@ public class GroupChatIntentService extends IntentService {
             Notification notif = buildNotification(contentIntent, title, msg);
 
             // Send notification
-            NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.notify(chatId, Utils.NOTIF_ID_GROUP_CHAT, notif);
         }
     }
@@ -252,7 +252,7 @@ public class GroupChatIntentService extends IntentService {
         Notification notif = buildNotification(contentIntent, title, msg);
 
         // Send notification
-        NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(chatId, Utils.NOTIF_ID_GROUP_CHAT, notif);
     }
 

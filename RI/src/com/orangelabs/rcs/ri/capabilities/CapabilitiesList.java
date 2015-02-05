@@ -47,8 +47,7 @@ import com.orangelabs.rcs.ri.utils.Utils;
 public class CapabilitiesList extends Activity {
 
     /**
-     * Contact is the ID since there is a single contact occurrence per
-     * capabilities
+     * Contact is the ID since there is a single contact occurrence per capabilities
      */
     private static final String CONTACT_AS_ID = new StringBuilder(CapabilitiesLog.CONTACT)
             .append(" AS ").append(BaseColumns._ID).toString();
@@ -77,8 +76,8 @@ public class CapabilitiesList extends Activity {
         setContentView(R.layout.capabilities_list);
 
         // Set list adapter
-        ListView view = (ListView)findViewById(android.R.id.list);
-        TextView emptyView = (TextView)findViewById(android.R.id.empty);
+        ListView view = (ListView) findViewById(android.R.id.list);
+        TextView emptyView = (TextView) findViewById(android.R.id.empty);
         view.setEmptyView(emptyView);
         CapabilitiesListAdapter adapter = createListAdapter();
         view.setAdapter(adapter);
@@ -126,7 +125,7 @@ public class CapabilitiesList extends Activity {
 
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
-            CapabilitiesItemViewHolder holder = (CapabilitiesItemViewHolder)view.getTag();
+            CapabilitiesItemViewHolder holder = (CapabilitiesItemViewHolder) view.getTag();
 
             // Set display name from number
             String number = cursor.getString(holder.columnContact);
@@ -162,8 +161,8 @@ public class CapabilitiesList extends Activity {
     }
 
     /**
-     * A ViewHolder class keeps references to children views to avoid
-     * unnecessary calls to findViewById() or getColumnIndex() on each row.
+     * A ViewHolder class keeps references to children views to avoid unnecessary calls to
+     * findViewById() or getColumnIndex() on each row.
      */
     private class CapabilitiesItemViewHolder {
         public TextView numberText;
@@ -230,17 +229,17 @@ public class CapabilitiesList extends Activity {
             columnAutomata = cursor.getColumnIndex(CapabilitiesLog.AUTOMATA);
             columnTimestamp = cursor.getColumnIndex(CapabilitiesLog.TIMESTAMP);
 
-            numberText = (TextView)base.findViewById(R.id.number);
-            imBox = (CheckBox)base.findViewById(R.id.im);
-            ftBox = (CheckBox)base.findViewById(R.id.file_transfer);
-            ishBox = (CheckBox)base.findViewById(R.id.image_sharing);
-            vshBox = (CheckBox)base.findViewById(R.id.video_sharing);
-            geolocBox = (CheckBox)base.findViewById(R.id.geoloc_push);
-            ipVoiceCallBox = (CheckBox)base.findViewById(R.id.ip_voice_call);
-            ipVideoCallBox = (CheckBox)base.findViewById(R.id.ip_video_call);
-            extsText = (TextView)base.findViewById(R.id.extensions);
-            automataBox = (CheckBox)base.findViewById(R.id.automata);
-            lastRefreshText = (TextView)base.findViewById(R.id.last_refresh);
+            numberText = (TextView) base.findViewById(R.id.number);
+            imBox = (CheckBox) base.findViewById(R.id.im);
+            ftBox = (CheckBox) base.findViewById(R.id.file_transfer);
+            ishBox = (CheckBox) base.findViewById(R.id.image_sharing);
+            vshBox = (CheckBox) base.findViewById(R.id.video_sharing);
+            geolocBox = (CheckBox) base.findViewById(R.id.geoloc_push);
+            ipVoiceCallBox = (CheckBox) base.findViewById(R.id.ip_voice_call);
+            ipVideoCallBox = (CheckBox) base.findViewById(R.id.ip_video_call);
+            extsText = (TextView) base.findViewById(R.id.extensions);
+            automataBox = (CheckBox) base.findViewById(R.id.automata);
+            lastRefreshText = (TextView) base.findViewById(R.id.last_refresh);
         }
 
     }

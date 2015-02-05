@@ -19,6 +19,7 @@
  * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.gsma.services.rcs.ipcall;
 
 import com.gsma.services.rcs.contacts.ContactId;
@@ -29,18 +30,14 @@ import com.gsma.services.rcs.contacts.ContactId;
  * @author Jean-Marc AUFFRET
  */
 public abstract class IPCallListener extends IIPCallListener.Stub {
-	/**
-	 * Callback called when the call state is changed
-	 *
-	 * @param contact
-	 *            Contact ID
-	 * @param callId
-	 *            ID of the call
-	 * @param state
-	 *            State of the call
-	 * @param reasonCode
-	 *            Reason code for the IP call state
-	 */
-	public abstract void onIPCallStateChanged(ContactId contact, String callId, int state,
-			int reasonCode);
+    /**
+     * Callback called when the call state is changed
+     * 
+     * @param contact Contact ID
+     * @param callId ID of the call
+     * @param state State of the call
+     * @param reasonCode Reason code for the IP call state
+     */
+    public abstract void onIPCallStateChanged(ContactId contact, String callId, int state,
+            int reasonCode);
 }

@@ -19,115 +19,113 @@
  * NOTE: This file has been modified by Sony Mobile Communications AB.
  * Modifications are licensed under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
 
 import android.net.Uri;
 
 /**
  * File transfer over HTTP thumbnail
- *
+ * 
  * @author vfml3370
  */
 public class FileTransferHttpThumbnail {
 
-	/**
-	 * Thumbnail size
-	 */
-	private int size = 0;
+    /**
+     * Thumbnail size
+     */
+    private int size = 0;
 
-	/**
-	 * Thumbnail content type
-	 */
-	private String contentType = null;
+    /**
+     * Thumbnail content type
+     */
+    private String contentType = null;
 
-	/**
-	 * Thumbnail URI
-	 */
-	private Uri thumbnail = null;
+    /**
+     * Thumbnail URI
+     */
+    private Uri thumbnail = null;
 
-	/**
-	 * Validity of the file thumbnail
-	 */
-	private long validity = 0;
+    /**
+     * Validity of the file thumbnail
+     */
+    private long validity = 0;
 
-	/**
-	 * Constructor
-	 */
-	public FileTransferHttpThumbnail() {
-	}
+    /**
+     * Constructor
+     */
+    public FileTransferHttpThumbnail() {
+    }
 
-	/**
-	 * Get thumbnail validity
-	 *
-	 * @return Thumbnail validity
-	 */
-	public long getThumbnailValidity() {
-		return validity;
-	}
+    /**
+     * Get thumbnail validity
+     * 
+     * @return Thumbnail validity
+     */
+    public long getThumbnailValidity() {
+        return validity;
+    }
 
-	/**
-	 * Set thumbnail validity
-	 *
-	 * @param validity
-	 *            Thumbnail validity
-	 */
-	public void setThumbnailValidity(long validity) {
-		this.validity = validity;
-	}
+    /**
+     * Set thumbnail validity
+     * 
+     * @param validity Thumbnail validity
+     */
+    public void setThumbnailValidity(long validity) {
+        this.validity = validity;
+    }
 
-	/**
-	 * Get thumbnail URI
-	 *
-	 * @return Thumbnail URI
-	 */
-	public Uri getThumbnailUri() {
-		return thumbnail;
-	}
+    /**
+     * Get thumbnail URI
+     * 
+     * @return Thumbnail URI
+     */
+    public Uri getThumbnailUri() {
+        return thumbnail;
+    }
 
-	/**
-	 * Set thumbnail URI
-	 * 
-	 * @param thumbnail
-	 *            Thumbnail URI
-	 */
-	public void setThumbnailUri(Uri thumbnail) {
-		this.thumbnail = thumbnail;
-	}
+    /**
+     * Set thumbnail URI
+     * 
+     * @param thumbnail Thumbnail URI
+     */
+    public void setThumbnailUri(Uri thumbnail) {
+        this.thumbnail = thumbnail;
+    }
 
-	/**
-	 * Get thumbnail content type
-	 *
-	 * @return Thumbnail content type
-	 */
-	public String getThumbnailType() {
-		return contentType;
-	}
+    /**
+     * Get thumbnail content type
+     * 
+     * @return Thumbnail content type
+     */
+    public String getThumbnailType() {
+        return contentType;
+    }
 
-	/**
-	 * Set thumbnail content type
-	 * 
-	 * @param type
-	 */
-	public void setThumbnailType(String type) {
-		this.contentType = type;
-	}
+    /**
+     * Set thumbnail content type
+     * 
+     * @param type
+     */
+    public void setThumbnailType(String type) {
+        this.contentType = type;
+    }
 
-	/**
-	 * Get thumbnail size
-	 *
-	 * @return Thumbnail size
-	 */
-	public int getThumbnailSize() {
-		return size;
-	}
+    /**
+     * Get thumbnail size
+     * 
+     * @return Thumbnail size
+     */
+    public int getThumbnailSize() {
+        return size;
+    }
 
-	/**
-	 * Set thumbnail size
-	 * 
-	 * @param size
-	 *            Thumbnail size
-	 */
-	public void setThumbnailSize(int size) {
-		this.size = size;
-	}
+    /**
+     * Set thumbnail size
+     * 
+     * @param size Thumbnail size
+     */
+    public void setThumbnailSize(int size) {
+        this.size = size;
+    }
 }

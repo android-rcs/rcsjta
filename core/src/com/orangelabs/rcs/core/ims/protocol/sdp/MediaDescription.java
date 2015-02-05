@@ -26,112 +26,108 @@ import java.util.Vector;
  * @author jexa7410
  */
 public class MediaDescription {
-	/**
-	 * Media name
-	 */
-	public String name;
+    /**
+     * Media name
+     */
+    public String name;
 
-	@Override
-	public String toString() {
-		return "MediaDescription [name=" + name + ", port=" + port + ", protocol=" + protocol
-				+ ", payloadType=" + payloadType + ", payload=" + payload + ", mediaTitle="
-				+ mediaTitle + ", connectionInfo=" + connectionInfo + ", bandwidthInfo="
-				+ bandwidthInfo + ", senderBandwidthInfo=" + senderBandwidthInfo
-				+ ", receiverBandwidthInfo=" + receiverBandwidthInfo + ", encryptionKey="
-				+ encryptionKey + ", mediaAttributes=" + mediaAttributes + "]";
-	}
+    @Override
+    public String toString() {
+        return "MediaDescription [name=" + name + ", port=" + port + ", protocol=" + protocol
+                + ", payloadType=" + payloadType + ", payload=" + payload + ", mediaTitle="
+                + mediaTitle + ", connectionInfo=" + connectionInfo + ", bandwidthInfo="
+                + bandwidthInfo + ", senderBandwidthInfo=" + senderBandwidthInfo
+                + ", receiverBandwidthInfo=" + receiverBandwidthInfo + ", encryptionKey="
+                + encryptionKey + ", mediaAttributes=" + mediaAttributes + "]";
+    }
 
-	/**
-	 * Media port
-	 */
-	public int port;
+    /**
+     * Media port
+     */
+    public int port;
 
-	/**
-	 * Media protocol
-	 */
-	public String protocol;
+    /**
+     * Media protocol
+     */
+    public String protocol;
 
-	/**
-	 * Payload type
-	 */
-	public int payloadType;
+    /**
+     * Payload type
+     */
+    public int payloadType;
 
-	/**
-	 * Payload
-	 */
-	public String payload;
+    /**
+     * Payload
+     */
+    public String payload;
 
-	/**
-	 * Media title
-	 */
-	public String mediaTitle;
+    /**
+     * Media title
+     */
+    public String mediaTitle;
 
-	/**
-	 * Connection info
-	 */
-	public String connectionInfo;
+    /**
+     * Connection info
+     */
+    public String connectionInfo;
 
-	/**
-	 * Bandwidth info
-	 */
-	public String bandwidthInfo;
+    /**
+     * Bandwidth info
+     */
+    public String bandwidthInfo;
 
-	/**
-	 * Sender bandwidth info (RFC 3556)
-	 */
-	public String senderBandwidthInfo;
+    /**
+     * Sender bandwidth info (RFC 3556)
+     */
+    public String senderBandwidthInfo;
 
-	/**
-	 * Receiver bandwidth info (RFC 3556)
-	 */
-	public String receiverBandwidthInfo;
+    /**
+     * Receiver bandwidth info (RFC 3556)
+     */
+    public String receiverBandwidthInfo;
 
-	/**
-	 * Encryption key
-	 */
-	public String encryptionKey;
+    /**
+     * Encryption key
+     */
+    public String encryptionKey;
 
-	/**
-	 * Media attributes
-	 */
-	public Vector<MediaAttribute> mediaAttributes = new Vector<MediaAttribute>();
+    /**
+     * Media attributes
+     */
+    public Vector<MediaAttribute> mediaAttributes = new Vector<MediaAttribute>();
 
-	/**
-	 * Constructor
-	 * 
-	 * @param name
-	 *            Media name
-	 * @param port
-	 *            Media port
-	 * @param protocol
-	 *            Media protocol
-	 * @param payload
-	 *            Media payload
-	 */
-	public MediaDescription(String name, int port, String protocol, String payload) {
-		this.name = name;
-		this.port = port;
-		this.protocol = protocol;
-		this.payload = payload;
-		try {
-			this.payloadType = Integer.parseInt(payload);
-		} catch (Exception e) {
-			this.payloadType = -1;
-		}
-	}
+    /**
+     * Constructor
+     * 
+     * @param name Media name
+     * @param port Media port
+     * @param protocol Media protocol
+     * @param payload Media payload
+     */
+    public MediaDescription(String name, int port, String protocol, String payload) {
+        this.name = name;
+        this.port = port;
+        this.protocol = protocol;
+        this.payload = payload;
+        try {
+            this.payloadType = Integer.parseInt(payload);
+        } catch (Exception e) {
+            this.payloadType = -1;
+        }
+    }
 
-	public MediaAttribute getMediaAttribute(String name) {
-		MediaAttribute attribute = null;
-		if (mediaAttributes != null) {
-			for (int i = 0; i < mediaAttributes.size(); i++) {
-				MediaAttribute entry = (MediaAttribute) mediaAttributes.elementAt(i);
-				if (entry.getName().equals(name)) {
-					attribute = entry;
-					break;
-				}
-			}
-		}
+    public MediaAttribute getMediaAttribute(String name) {
+        MediaAttribute attribute = null;
+        if (mediaAttributes != null) {
+            for (int i = 0; i < mediaAttributes.size(); i++) {
+                MediaAttribute entry = (MediaAttribute) mediaAttributes.elementAt(i);
+                if (entry.getName().equals(name)) {
+                    attribute = entry;
+                    break;
+                }
+            }
+        }
 
-		return attribute;
-	}
+        return attribute;
+    }
 }

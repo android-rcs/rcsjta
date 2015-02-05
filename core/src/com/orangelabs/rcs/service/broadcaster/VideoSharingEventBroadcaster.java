@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.orangelabs.rcs.service.broadcaster;
 
 import android.content.Intent;
@@ -32,41 +33,41 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class VideoSharingEventBroadcaster implements IVideoSharingEventBroadcaster {
 
-	private final RemoteCallbackList<IVideoSharingListener> mVideoSharingListeners = new RemoteCallbackList<IVideoSharingListener>();
+    private final RemoteCallbackList<IVideoSharingListener> mVideoSharingListeners = new RemoteCallbackList<IVideoSharingListener>();
 
-	private final Logger logger = Logger.getLogger(getClass().getName());
+    private final Logger logger = Logger.getLogger(getClass().getName());
 
-	public VideoSharingEventBroadcaster() {
-	}
+    public VideoSharingEventBroadcaster() {
+    }
 
-	public void addEventListener(IVideoSharingListener listener) {
-		mVideoSharingListeners.register(listener);
-	}
+    public void addEventListener(IVideoSharingListener listener) {
+        mVideoSharingListeners.register(listener);
+    }
 
-	public void removeEventListener(IVideoSharingListener listener) {
-		mVideoSharingListeners.unregister(listener);
-	}
+    public void removeEventListener(IVideoSharingListener listener) {
+        mVideoSharingListeners.unregister(listener);
+    }
 
-	public void broadcastStateChanged(ContactId contact, String sharingId, int state, int reasonCode) {
-		final int N = mVideoSharingListeners.beginBroadcast();
-		for (int i = 0; i < N; i++) {
-			try {
-				mVideoSharingListeners.getBroadcastItem(i).onStateChanged(contact, sharingId,
-						state, reasonCode);
-			} catch (Exception e) {
-				if (logger.isActivated()) {
-					logger.error("Can't notify listener", e);
-				}
-			}
-		}
-		mVideoSharingListeners.finishBroadcast();
-	}
+    public void broadcastStateChanged(ContactId contact, String sharingId, int state, int reasonCode) {
+        final int N = mVideoSharingListeners.beginBroadcast();
+        for (int i = 0; i < N; i++) {
+            try {
+                mVideoSharingListeners.getBroadcastItem(i).onStateChanged(contact, sharingId,
+                        state, reasonCode);
+            } catch (Exception e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener", e);
+                }
+            }
+        }
+        mVideoSharingListeners.finishBroadcast();
+    }
 
-	public void broadcastInvitation(String sharingId) {
-		Intent newInvitation = new Intent(VideoSharingIntent.ACTION_NEW_INVITATION);
-		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newInvitation);
-		IntentUtils.tryToSetReceiverForegroundFlag(newInvitation);
-		newInvitation.putExtra(VideoSharingIntent.EXTRA_SHARING_ID, sharingId);
-		AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);
-	}
+    public void broadcastInvitation(String sharingId) {
+        Intent newInvitation = new Intent(VideoSharingIntent.ACTION_NEW_INVITATION);
+        IntentUtils.tryToSetExcludeStoppedPackagesFlag(newInvitation);
+        IntentUtils.tryToSetReceiverForegroundFlag(newInvitation);
+        newInvitation.putExtra(VideoSharingIntent.EXTRA_SHARING_ID, sharingId);
+        AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);
+    }
 }

@@ -53,288 +53,275 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Abstract 1-1 chat session
- *
+ * 
  * @author Jean-Marc AUFFRET
  */
 public abstract class OneToOneChatSession extends ChatSession {
-	/**
-	 * Boundary tag
-	 */
-	private final static String BOUNDARY_TAG = "boundary1";
+    /**
+     * Boundary tag
+     */
+    private final static String BOUNDARY_TAG = "boundary1";
 
-	/**
-	 * The logger
-	 */
-	private final static Logger logger = Logger
-			.getLogger(OneToOneChatSession.class.getSimpleName());
+    /**
+     * The logger
+     */
+    private final static Logger logger = Logger
+            .getLogger(OneToOneChatSession.class.getSimpleName());
 
-	/**
-	 * Constructor
-	 *
-	 * @param parent
-	 *            IMS service
-	 * @param contact
-	 *            Remote contact identifier
-	 * @param remoteUri
-	 *            Remote URI
-	 * @param firstMsg
-	 *            First chat message
-	 * @param rcsSettings
-	 *            RCS settings
-	 * @param messagingLog
-	 *            Messaging log
-	 */
-	public OneToOneChatSession(ImsService parent, ContactId contact, String remoteUri,
-			ChatMessage firstMsg, RcsSettings rcsSettings, MessagingLog messagingLog) {
-		super(parent, contact, remoteUri, OneToOneChatSession.generateOneOneParticipants(contact),
-				rcsSettings, messagingLog, firstMsg);
+    /**
+     * Constructor
+     * 
+     * @param parent IMS service
+     * @param contact Remote contact identifier
+     * @param remoteUri Remote URI
+     * @param firstMsg First chat message
+     * @param rcsSettings RCS settings
+     * @param messagingLog Messaging log
+     */
+    public OneToOneChatSession(ImsService parent, ContactId contact, String remoteUri,
+            ChatMessage firstMsg, RcsSettings rcsSettings, MessagingLog messagingLog) {
+        super(parent, contact, remoteUri, OneToOneChatSession.generateOneOneParticipants(contact),
+                rcsSettings, messagingLog, firstMsg);
 
-		// Set feature tags
-		List<String> featureTags = ChatUtils.getSupportedFeatureTagsForChat();
-		setFeatureTags(featureTags);
+        // Set feature tags
+        List<String> featureTags = ChatUtils.getSupportedFeatureTagsForChat();
+        setFeatureTags(featureTags);
 
-		// Set Accept-Contact header
-		setAcceptContactTags(featureTags);
+        // Set Accept-Contact header
+        setAcceptContactTags(featureTags);
 
-		String acceptTypes = new StringBuilder(CpimMessage.MIME_TYPE).append(" ")
-				.append(IsComposingInfo.MIME_TYPE).toString();
-		setAcceptTypes(acceptTypes);
+        String acceptTypes = new StringBuilder(CpimMessage.MIME_TYPE).append(" ")
+                .append(IsComposingInfo.MIME_TYPE).toString();
+        setAcceptTypes(acceptTypes);
 
-		StringBuilder wrappedTypes = new StringBuilder(MimeType.TEXT_MESSAGE).append(" ").append(
-				ImdnDocument.MIME_TYPE);
-		if (mRcsSettings.isGeoLocationPushSupported()) {
-			wrappedTypes.append(" ").append(GeolocInfoDocument.MIME_TYPE);
-		}
-		if (mRcsSettings.isFileTransferHttpSupported()) {
-			wrappedTypes.append(" ").append(FileTransferHttpInfoDocument.MIME_TYPE);
-		}
-		setWrappedTypes(wrappedTypes.toString());
-	}
+        StringBuilder wrappedTypes = new StringBuilder(MimeType.TEXT_MESSAGE).append(" ").append(
+                ImdnDocument.MIME_TYPE);
+        if (mRcsSettings.isGeoLocationPushSupported()) {
+            wrappedTypes.append(" ").append(GeolocInfoDocument.MIME_TYPE);
+        }
+        if (mRcsSettings.isFileTransferHttpSupported()) {
+            wrappedTypes.append(" ").append(FileTransferHttpInfoDocument.MIME_TYPE);
+        }
+        setWrappedTypes(wrappedTypes.toString());
+    }
 
-	/**
-	 * Is group chat
-	 *
-	 * @return Boolean
-	 */
-	public boolean isGroupChat() {
-		return false;
-	}
+    /**
+     * Is group chat
+     * 
+     * @return Boolean
+     */
+    public boolean isGroupChat() {
+        return false;
+    }
 
-	/**
-	 * Generate the set of participants for a 1-1 chat
-	 *
-	 * @param contact
-	 *            ContactId
-	 * @return Set of participants
-	 */
-	private static Set<ParticipantInfo> generateOneOneParticipants(ContactId contact) {
-		Set<ParticipantInfo> set = new HashSet<ParticipantInfo>();
-		ParticipantInfoUtils.addParticipant(set, contact);
-		return set;
-	}
+    /**
+     * Generate the set of participants for a 1-1 chat
+     * 
+     * @param contact ContactId
+     * @return Set of participants
+     */
+    private static Set<ParticipantInfo> generateOneOneParticipants(ContactId contact) {
+        Set<ParticipantInfo> set = new HashSet<ParticipantInfo>();
+        ParticipantInfoUtils.addParticipant(set, contact);
+        return set;
+    }
 
-	/**
-	 * Returns the set of participants currently connected to the session
-	 *
-	 * @return Set of participants
-	 */
-	public Set<ParticipantInfo> getConnectedParticipants() {
-		return getParticipants();
-	}
+    /**
+     * Returns the set of participants currently connected to the session
+     * 
+     * @return Set of participants
+     */
+    public Set<ParticipantInfo> getConnectedParticipants() {
+        return getParticipants();
+    }
 
-	/**
-	 * Close media session
-	 */
-	public void closeMediaSession() {
-		// Stop the activity manager
-		getActivityManager().stop();
+    /**
+     * Close media session
+     */
+    public void closeMediaSession() {
+        // Stop the activity manager
+        getActivityManager().stop();
 
-		// Close MSRP session
-		closeMsrpSession();
-	}
+        // Close MSRP session
+        closeMsrpSession();
+    }
 
-	/**
-	 * Send a text message
-	 * 
-	 * @param msg
-	 *            Chat message
-	 */
-	@Override
-	public void sendChatMessage(ChatMessage msg) {
-		String from = ChatUtils.ANOMYNOUS_URI;
-		String to = ChatUtils.ANOMYNOUS_URI;
-		String msgId = msg.getMessageId();
-		String networkContent;
-		boolean useImdn = getImdnManager().isImdnActivated() && !mRcsSettings.isAlbatrosRelease();
-		String mimeType = msg.getMimeType();
-		if (useImdn) {
-			networkContent = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, msg.getContent(),
-					mimeType);
+    /**
+     * Send a text message
+     * 
+     * @param msg Chat message
+     */
+    @Override
+    public void sendChatMessage(ChatMessage msg) {
+        String from = ChatUtils.ANOMYNOUS_URI;
+        String to = ChatUtils.ANOMYNOUS_URI;
+        String msgId = msg.getMessageId();
+        String networkContent;
+        boolean useImdn = getImdnManager().isImdnActivated() && !mRcsSettings.isAlbatrosRelease();
+        String mimeType = msg.getMimeType();
+        if (useImdn) {
+            networkContent = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, msg.getContent(),
+                    mimeType);
 
-		} else {
-			networkContent = ChatUtils.buildCpimMessage(from, to, msg.getContent(), mimeType);
-		}
+        } else {
+            networkContent = ChatUtils.buildCpimMessage(from, to, msg.getContent(), mimeType);
+        }
 
-		Collection<ImsSessionListener> listeners = getListeners();
-		for (ImsSessionListener listener : listeners) {
-			((ChatSessionListener) listener).handleMessageSending(msg);
-		}
+        Collection<ImsSessionListener> listeners = getListeners();
+        for (ImsSessionListener listener : listeners) {
+            ((ChatSessionListener) listener).handleMessageSending(msg);
+        }
 
-		boolean sendOperationSucceeded = false;
-		if (ChatUtils.isGeolocType(mimeType)) {
-			sendOperationSucceeded = sendDataChunks(IdGenerator.generateMessageID(),
-					networkContent, CpimMessage.MIME_TYPE, TypeMsrpChunk.GeoLocation);
-		} else {
-			sendOperationSucceeded = sendDataChunks(IdGenerator.generateMessageID(),
-					networkContent, CpimMessage.MIME_TYPE, TypeMsrpChunk.TextMessage);
-		}
+        boolean sendOperationSucceeded = false;
+        if (ChatUtils.isGeolocType(mimeType)) {
+            sendOperationSucceeded = sendDataChunks(IdGenerator.generateMessageID(),
+                    networkContent, CpimMessage.MIME_TYPE, TypeMsrpChunk.GeoLocation);
+        } else {
+            sendOperationSucceeded = sendDataChunks(IdGenerator.generateMessageID(),
+                    networkContent, CpimMessage.MIME_TYPE, TypeMsrpChunk.TextMessage);
+        }
 
-		if (sendOperationSucceeded) {
-			for (ImsSessionListener listener : getListeners()) {
-				((ChatSessionListener) listener).handleMessageSent(msgId,
-						ChatUtils.networkMimeTypeToApiMimeType(mimeType));
-			}
-		} else {
-			for (ImsSessionListener listener : getListeners()) {
-				((ChatSessionListener) listener).handleMessageFailedSend(msgId,
-						ChatUtils.networkMimeTypeToApiMimeType(mimeType));
-			}
-		}
-	}
+        if (sendOperationSucceeded) {
+            for (ImsSessionListener listener : getListeners()) {
+                ((ChatSessionListener) listener).handleMessageSent(msgId,
+                        ChatUtils.networkMimeTypeToApiMimeType(mimeType));
+            }
+        } else {
+            for (ImsSessionListener listener : getListeners()) {
+                ((ChatSessionListener) listener).handleMessageFailedSend(msgId,
+                        ChatUtils.networkMimeTypeToApiMimeType(mimeType));
+            }
+        }
+    }
 
-	/**
-	 * Send is composing status
-	 *
-	 * @param status
-	 *            Status
-	 */
-	public void sendIsComposingStatus(boolean status) {
-		String content = IsComposingInfo.buildIsComposingInfo(status);
-		String msgId = IdGenerator.generateMessageID();
-		sendDataChunks(msgId, content, IsComposingInfo.MIME_TYPE,
-				MsrpSession.TypeMsrpChunk.IsComposing);
-	}
+    /**
+     * Send is composing status
+     * 
+     * @param status Status
+     */
+    public void sendIsComposingStatus(boolean status) {
+        String content = IsComposingInfo.buildIsComposingInfo(status);
+        String msgId = IdGenerator.generateMessageID();
+        sendDataChunks(msgId, content, IsComposingInfo.MIME_TYPE,
+                MsrpSession.TypeMsrpChunk.IsComposing);
+    }
 
-	/**
-	 * Reject the session invitation
-	 */
-	public void rejectSession() {
-		rejectSession(486);
-	}
+    /**
+     * Reject the session invitation
+     */
+    public void rejectSession() {
+        rejectSession(486);
+    }
 
-	/**
-	 * Create INVITE request
-	 *
-	 * @param content
-	 *            Content part
-	 * @return Request
-	 * @throws SipException
-	 */
-	private SipRequest createMultipartInviteRequest(String content) throws SipException {
-		SipRequest invite = SipMessageFactory.createMultipartInvite(getDialogPath(),
-				getFeatureTags(), content, BOUNDARY_TAG);
+    /**
+     * Create INVITE request
+     * 
+     * @param content Content part
+     * @return Request
+     * @throws SipException
+     */
+    private SipRequest createMultipartInviteRequest(String content) throws SipException {
+        SipRequest invite = SipMessageFactory.createMultipartInvite(getDialogPath(),
+                getFeatureTags(), content, BOUNDARY_TAG);
 
-		// Add a contribution ID header
-		invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
+        // Add a contribution ID header
+        invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
 
-		return invite;
-	}
+        return invite;
+    }
 
-	/**
-	 * Create INVITE request
-	 *
-	 * @param content
-	 *            Content part
-	 * @return Request
-	 * @throws SipException
-	 */
-	private SipRequest createInviteRequest(String content) throws SipException {
-		SipRequest invite = SipMessageFactory.createInvite(getDialogPath(),
-				InstantMessagingService.CHAT_FEATURE_TAGS, content);
+    /**
+     * Create INVITE request
+     * 
+     * @param content Content part
+     * @return Request
+     * @throws SipException
+     */
+    private SipRequest createInviteRequest(String content) throws SipException {
+        SipRequest invite = SipMessageFactory.createInvite(getDialogPath(),
+                InstantMessagingService.CHAT_FEATURE_TAGS, content);
 
-		// Add a contribution ID header
-		invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
+        // Add a contribution ID header
+        invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
 
-		return invite;
-	}
+        return invite;
+    }
 
-	/**
-	 * Create an INVITE request
-	 *
-	 * @return the INVITE request
-	 * @throws SipException
-	 */
-	public SipRequest createInvite() throws SipException {
-		// If there is a first message then builds a multipart content else
-		// builds a SDP content
-		String content = getDialogPath().getLocalContent();
-		if (getFirstMessage() != null) {
-			return createMultipartInviteRequest(content);
-		}
-		return createInviteRequest(content);
-	}
+    /**
+     * Create an INVITE request
+     * 
+     * @return the INVITE request
+     * @throws SipException
+     */
+    public SipRequest createInvite() throws SipException {
+        // If there is a first message then builds a multipart content else
+        // builds a SDP content
+        String content = getDialogPath().getLocalContent();
+        if (getFirstMessage() != null) {
+            return createMultipartInviteRequest(content);
+        }
+        return createInviteRequest(content);
+    }
 
-	/**
-	 * Handle 200 0K response
-	 *
-	 * @param resp
-	 *            200 OK response
-	 */
-	public void handle200OK(SipResponse resp) {
-		super.handle200OK(resp);
+    /**
+     * Handle 200 0K response
+     * 
+     * @param resp 200 OK response
+     */
+    public void handle200OK(SipResponse resp) {
+        super.handle200OK(resp);
 
-		// Start the activity manager
-		getActivityManager().start();
-	}
+        // Start the activity manager
+        getActivityManager().start();
+    }
 
-	/**
-	 * Get SDP direction
-	 *
-	 * @return Direction
-	 * @see com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils#DIRECTION_RECVONLY
-	 * @see com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils#DIRECTION_SENDONLY
-	 * @see com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils#DIRECTION_SENDRECV
-	 */
-	public abstract String getSdpDirection();
+    /**
+     * Get SDP direction
+     * 
+     * @return Direction
+     * @see com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils#DIRECTION_RECVONLY
+     * @see com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils#DIRECTION_SENDONLY
+     * @see com.orangelabs.rcs.core.ims.protocol.sdp.SdpUtils#DIRECTION_SENDRECV
+     */
+    public abstract String getSdpDirection();
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSession#msrpTransferError
-	 * (java.lang.String, java.lang.String,
-	 * com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk)
-	 */
-	@Override
-	public void msrpTransferError(String msgId, String error,
-			MsrpSession.TypeMsrpChunk typeMsrpChunk) {
-		super.msrpTransferError(msgId, error, typeMsrpChunk);
-		try {
-			ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
-			// Request capabilities to the remote
-			getImsService().getImsModule().getCapabilityService()
-					.requestContactCapabilities(remote);
-		} catch (RcsContactFormatException e) {
-			if (logger.isActivated()) {
-				logger.warn("Cannot parse contact " + getDialogPath().getRemoteParty());
-			}
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSession#msrpTransferError
+     * (java.lang.String, java.lang.String,
+     * com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk)
+     */
+    @Override
+    public void msrpTransferError(String msgId, String error,
+            MsrpSession.TypeMsrpChunk typeMsrpChunk) {
+        super.msrpTransferError(msgId, error, typeMsrpChunk);
+        try {
+            ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
+            // Request capabilities to the remote
+            getImsService().getImsModule().getCapabilityService()
+                    .requestContactCapabilities(remote);
+        } catch (RcsContactFormatException e) {
+            if (logger.isActivated()) {
+                logger.warn("Cannot parse contact " + getDialogPath().getRemoteParty());
+            }
+        }
+    }
 
-	@Override
-	public void receiveBye(SipRequest bye) {
-		super.receiveBye(bye);
+    @Override
+    public void receiveBye(SipRequest bye) {
+        super.receiveBye(bye);
 
-		// Request capabilities to the remote
-		getImsService().getImsModule().getCapabilityService()
-				.requestContactCapabilities(getRemoteContact());
-	}
+        // Request capabilities to the remote
+        getImsService().getImsModule().getCapabilityService()
+                .requestContactCapabilities(getRemoteContact());
+    }
 
-	@Override
-	public void receiveCancel(SipRequest cancel) {
-		super.receiveCancel(cancel);
+    @Override
+    public void receiveCancel(SipRequest cancel) {
+        super.receiveCancel(cancel);
 
-		// Request capabilities to the remote
-		getImsService().getImsModule().getCapabilityService()
-				.requestContactCapabilities(getRemoteContact());
-	}
+        // Request capabilities to the remote
+        getImsService().getImsModule().getCapabilityService()
+                .requestContactCapabilities(getRemoteContact());
+    }
 }

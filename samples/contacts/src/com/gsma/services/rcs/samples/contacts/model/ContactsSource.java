@@ -39,9 +39,9 @@ import android.provider.ContactsContract.RawContacts;
 import android.widget.EditText;
 
 /**
- * Internal structure that represents constraints and styles for a specific data
- * source, such as the various data types they support, including details on how
- * those types should be rendered and edited.
+ * Internal structure that represents constraints and styles for a specific data source, such as the
+ * various data types they support, including details on how those types should be rendered and
+ * edited.
  * <p>
  * In the future this may be inflated from XML defined by a data source.
  */
@@ -52,8 +52,8 @@ public abstract class ContactsSource {
     public String accountType = null;
 
     /**
-     * Package that resources should be loaded from, either defined through an
-     * {@link Account} or for matching against {@link Data#RES_PACKAGE}.
+     * Package that resources should be loaded from, either defined through an {@link Account} or
+     * for matching against {@link Data#RES_PACKAGE}.
      */
     public String resPackageName;
     public String summaryResPackageName;
@@ -90,8 +90,7 @@ public abstract class ContactsSource {
     }
 
     /**
-     * Ensure that this {@link ContactsSource} has been inflated to the
-     * requested level.
+     * Ensure that this {@link ContactsSource} has been inflated to the requested level.
      */
     public synchronized void ensureInflated(Context context, int inflateLevel) {
         if (!isInflated(inflateLevel)) {
@@ -106,9 +105,8 @@ public abstract class ContactsSource {
     protected abstract void inflate(Context context, int inflateLevel);
 
     /**
-     * Invalidate any cache for this {@link ContactsSource}, removing all
-     * inflated data. Calling {@link #ensureInflated(Context, int)} will
-     * populate again from scratch.
+     * Invalidate any cache for this {@link ContactsSource}, removing all inflated data. Calling
+     * {@link #ensureInflated(Context, int)} will populate again from scratch.
      */
     public synchronized void invalidateCache() {
         this.mKinds.clear();
@@ -152,8 +150,7 @@ public abstract class ContactsSource {
     };
 
     /**
-     * Return list of {@link DataKind} supported, sorted by
-     * {@link DataKind#weight}.
+     * Return list of {@link DataKind} supported, sorted by {@link DataKind#weight}.
      */
     public ArrayList<DataKind> getSortedDataKinds() {
         // TODO: optimize by marking if already sorted
@@ -162,8 +159,8 @@ public abstract class ContactsSource {
     }
 
     /**
-     * Find the {@link DataKind} for a specific MIME-type, if it's handled by
-     * this data source. If you may need a fallback {@link DataKind}, use
+     * Find the {@link DataKind} for a specific MIME-type, if it's handled by this data source. If
+     * you may need a fallback {@link DataKind}, use
      * {@link Sources#getKindOrFallback(String, String, Context, int)}.
      */
     public DataKind getKindForMimetype(String mimeType) {
@@ -181,10 +178,9 @@ public abstract class ContactsSource {
     }
 
     /**
-     * Description of a specific data type, usually marked by a unique
-     * {@link Data#MIMETYPE}. Includes details about how to view and edit
-     * {@link Data} rows of this kind, including the possible {@link EditType}
-     * labels and editable {@link EditField}.
+     * Description of a specific data type, usually marked by a unique {@link Data#MIMETYPE}.
+     * Includes details about how to view and edit {@link Data} rows of this kind, including the
+     * possible {@link EditType} labels and editable {@link EditField}.
      */
     public static class DataKind {
         public String resPackageName;
@@ -197,8 +193,8 @@ public abstract class ContactsSource {
         public boolean editable;
 
         /**
-         * If this is true (default), the user can add and remove values.
-         * If false, the editor will always show a single field (which might be empty).
+         * If this is true (default), the user can add and remove values. If false, the editor will
+         * always show a single field (which might be empty).
          */
         public boolean isList;
 
@@ -211,8 +207,8 @@ public abstract class ContactsSource {
         public String typeColumn;
 
         /**
-         * Maximum number of values allowed in the list. -1 represents infinity.
-         * If {@link DataKind#isList} is false, this value is ignored.
+         * Maximum number of values allowed in the list. -1 represents infinity. If
+         * {@link DataKind#isList} is false, this value is ignored.
          */
         public int typeOverallMax;
 
@@ -236,16 +232,15 @@ public abstract class ContactsSource {
     }
 
     /**
-     * Description of a specific "type" or "label" of a {@link DataKind} row,
-     * such as {@link Phone#TYPE_WORK}. Includes constraints on total number of
-     * rows a {@link Contacts} may have of this type, and details on how
-     * user-defined labels are stored.
+     * Description of a specific "type" or "label" of a {@link DataKind} row, such as
+     * {@link Phone#TYPE_WORK}. Includes constraints on total number of rows a {@link Contacts} may
+     * have of this type, and details on how user-defined labels are stored.
      */
     public static class EditType {
         public int rawValue;
         public int labelRes;
-//        public int actionRes;
-//        public int actionAltRes;
+        // public int actionRes;
+        // public int actionAltRes;
         public boolean secondary;
         public int specificMax;
         public String customColumn;
@@ -274,7 +269,7 @@ public abstract class ContactsSource {
         @Override
         public boolean equals(Object object) {
             if (object instanceof EditType) {
-                final EditType other = (EditType)object;
+                final EditType other = (EditType) object;
                 return other.rawValue == rawValue;
             }
             return false;
@@ -287,9 +282,8 @@ public abstract class ContactsSource {
     }
 
     /**
-     * Description of a user-editable field on a {@link DataKind} row, such as
-     * {@link Phone#NUMBER}. Includes flags to apply to an {@link EditText}, and
-     * the column where this field is stored.
+     * Description of a user-editable field on a {@link DataKind} row, such as {@link Phone#NUMBER}.
+     * Includes flags to apply to an {@link EditText}, and the column where this field is stored.
      */
     public static class EditField {
         public String column;
@@ -315,13 +309,13 @@ public abstract class ContactsSource {
     }
 
     /**
-     * Generic method of inflating a given {@link Cursor} into a user-readable
-     * {@link CharSequence}. For example, an inflater could combine the multiple
-     * columns of {@link StructuredPostal} together using a string resource
-     * before presenting to the user.
+     * Generic method of inflating a given {@link Cursor} into a user-readable {@link CharSequence}.
+     * For example, an inflater could combine the multiple columns of {@link StructuredPostal}
+     * together using a string resource before presenting to the user.
      */
     public interface StringInflater {
         public CharSequence inflateUsing(Context context, Cursor cursor);
+
         public CharSequence inflateUsing(Context context, ContentValues values);
     }
 

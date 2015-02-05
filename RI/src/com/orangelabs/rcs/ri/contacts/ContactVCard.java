@@ -66,12 +66,12 @@ public class ContactVCard extends Activity {
         setContentView(R.layout.contacts_vcard);
 
         // Set the contact selector
-        mSpinner = (Spinner)findViewById(R.id.contact);
+        mSpinner = (Spinner) findViewById(R.id.contact);
         mSpinner.setAdapter(ContactListAdapter.createContactListAdapter(this));
         mSpinner.setOnItemSelectedListener(listenerContact);
 
         // Set button callback
-        Button showBtn = (Button)findViewById(R.id.show_btn);
+        Button showBtn = (Button) findViewById(R.id.show_btn);
         showBtn.setOnClickListener(btnShowListener);
     }
 
@@ -100,7 +100,7 @@ public class ContactVCard extends Activity {
      */
     private String getSelectedContact() {
         // get selected phone number
-        ContactListAdapter adapter = (ContactListAdapter)mSpinner.getAdapter();
+        ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
         return adapter.getSelectedNumber(mSpinner.getSelectedView());
     }
 
@@ -114,7 +114,7 @@ public class ContactVCard extends Activity {
             Uri contactUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
                     Uri.encode(contact));
             String vcard = ContactsService.getVCard(this, contactUri);
-            TextView vcardView = (TextView)findViewById(R.id.vcard);
+            TextView vcardView = (TextView) findViewById(R.id.vcard);
             vcardView.setText(vcard);
         } catch (Exception e) {
             Utils.showMessageAndExit(ContactVCard.this, getString(R.string.label_api_failed),
@@ -128,7 +128,7 @@ public class ContactVCard extends Activity {
     private OnClickListener btnShowListener = new OnClickListener() {
         public void onClick(View v) {
             // Get filename
-            TextView vcardView = (TextView)findViewById(R.id.vcard);
+            TextView vcardView = (TextView) findViewById(R.id.vcard);
             String filename = vcardView.getText().toString();
 
             // Show the transferred vCard

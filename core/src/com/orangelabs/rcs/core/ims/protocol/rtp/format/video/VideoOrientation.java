@@ -22,100 +22,94 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.RtpUtils;
 
 /**
  * RCS Video orientation
- *
+ * 
  * @author Deutsche Telekom
  */
 public class VideoOrientation {
 
-	/**
-	 * Header Id
-	 */
-	private int headerId = RtpUtils.RTP_DEFAULT_EXTENSION_ID;
+    /**
+     * Header Id
+     */
+    private int headerId = RtpUtils.RTP_DEFAULT_EXTENSION_ID;
 
-	/**
-	 * Camera
-	 */
-	private CameraOptions camera;
+    /**
+     * Camera
+     */
+    private CameraOptions camera;
 
-	/**
-	 * Camera orientation
-	 */
-	private Orientation orientation;
+    /**
+     * Camera orientation
+     */
+    private Orientation orientation;
 
-	/**
-	 * Constructor
-	 *
-	 * @param headerId
-	 *            Orientation header id
-	 * @param camera
-	 *            Camera
-	 * @param orientation
-	 *            Orientation
-	 */
-	public VideoOrientation(int headerId, CameraOptions camera, Orientation orientation) {
-		this.headerId = headerId;
-		this.camera = camera;
-		this.orientation = orientation;
-	}
+    /**
+     * Constructor
+     * 
+     * @param headerId Orientation header id
+     * @param camera Camera
+     * @param orientation Orientation
+     */
+    public VideoOrientation(int headerId, CameraOptions camera, Orientation orientation) {
+        this.headerId = headerId;
+        this.camera = camera;
+        this.orientation = orientation;
+    }
 
-	/**
-	 * Constructor
-	 *
-	 * @param camera
-	 *            Camera
-	 * @param orientation
-	 *            Orientation
-	 */
-	public VideoOrientation(CameraOptions camera, Orientation orientation) {
-		this.camera = camera;
-		this.orientation = orientation;
-	}
+    /**
+     * Constructor
+     * 
+     * @param camera Camera
+     * @param orientation Orientation
+     */
+    public VideoOrientation(CameraOptions camera, Orientation orientation) {
+        this.camera = camera;
+        this.orientation = orientation;
+    }
 
-	/**
-	 * Gets the VideoOrientation camera
-	 *
-	 * @return Camera
-	 */
-	public CameraOptions getCamera() {
-		return this.camera;
-	}
+    /**
+     * Gets the VideoOrientation camera
+     * 
+     * @return Camera
+     */
+    public CameraOptions getCamera() {
+        return this.camera;
+    }
 
-	/**
-	 * Gets the VideoOrientation orientation
-	 *
-	 * @return Orientation
-	 */
-	public Orientation getOrientation() {
-		return this.orientation;
-	}
+    /**
+     * Gets the VideoOrientation orientation
+     * 
+     * @return Orientation
+     */
+    public Orientation getOrientation() {
+        return this.orientation;
+    }
 
-	/**
-	 * Converts the video orientation into the byte used to transmit int RTP header
-	 *
-	 * @return Byte representing the video orientation
-	 */
-	public byte getVideoOrientation() {
-		return (byte) ((camera.getValue() << 3) | orientation.getValue());
-	}
+    /**
+     * Converts the video orientation into the byte used to transmit int RTP header
+     * 
+     * @return Byte representing the video orientation
+     */
+    public byte getVideoOrientation() {
+        return (byte) ((camera.getValue() << 3) | orientation.getValue());
+    }
 
-	/**
-	 * Gets the negotiated header ID.
-	 *
-	 * @return Header id
-	 */
-	public int getHeaderId() {
-		return headerId;
-	}
+    /**
+     * Gets the negotiated header ID.
+     * 
+     * @return Header id
+     */
+    public int getHeaderId() {
+        return headerId;
+    }
 
-	/**
-	 * Parses the byte into a VideoOrientation object
-	 *
-	 * @param videoOrientation
-	 *            Byte representing the video Orientation
-	 * @return VideoOrientation object
-	 */
-	public static VideoOrientation parse(byte videoOrientation) {
-		return new VideoOrientation(CameraOptions.convert((videoOrientation & 0x08) >>> 3),
-				Orientation.convert(videoOrientation & 0x07));
-	}
+    /**
+     * Parses the byte into a VideoOrientation object
+     * 
+     * @param videoOrientation Byte representing the video Orientation
+     * @return VideoOrientation object
+     */
+    public static VideoOrientation parse(byte videoOrientation) {
+        return new VideoOrientation(CameraOptions.convert((videoOrientation & 0x08) >>> 3),
+                Orientation.convert(videoOrientation & 0x07));
+    }
 }

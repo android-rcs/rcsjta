@@ -41,83 +41,80 @@ import com.orangelabs.rcs.utils.FileUtils;
  * @author jexa7410
  */
 public class AndroidFileFactory extends FileFactory {
-	/**
-	 * The logger
-	 */
-	private Logger logger = Logger.getLogger(this.getClass().getName());
+    /**
+     * The logger
+     */
+    private Logger logger = Logger.getLogger(this.getClass().getName());
 
-	/**
-	 * Returns the description of a file
-	 *
-	 * @param file
-	 *            URI of the file
-	 * @return File description
-	 * @throws IOException
-	 */
-	public FileDescription getFileDescription(Uri file) throws IOException {
-		Context context = AndroidFactory.getApplicationContext();
-		String fileName = FileUtils.getFileName(context, file);
-		long fileSize = FileUtils.getFileSize(context, file);
-		return new FileDescription(file, fileName, fileSize);
-	}
+    /**
+     * Returns the description of a file
+     * 
+     * @param file URI of the file
+     * @return File description
+     * @throws IOException
+     */
+    public FileDescription getFileDescription(Uri file) throws IOException {
+        Context context = AndroidFactory.getApplicationContext();
+        String fileName = FileUtils.getFileName(context, file);
+        long fileSize = FileUtils.getFileSize(context, file);
+        return new FileDescription(file, fileName, fileSize);
+    }
 
-	/**
-	 * Returns whether a file exists or not
-	 * 
-	 * @param url
-	 *            Url of the file to check
-	 * @return File existence
-	 */
-	public boolean fileExists(String url) {
-		File file = new File(url);
-		return file.exists();
-	}
+    /**
+     * Returns whether a file exists or not
+     * 
+     * @param url Url of the file to check
+     * @return File existence
+     */
+    public boolean fileExists(String url) {
+        File file = new File(url);
+        return file.exists();
+    }
 
-	/**
-	 * Update the media storage
-	 * 
-	 * @param url
-	 *            New URL to be added
-	 */
-	public void updateMediaStorage(String url) {
-		if (logger.isActivated()) {
-			logger.debug("Updating media storage with URL " + url);
-		}
-		MyMediaScannerClient scanner = new MyMediaScannerClient(url);
-		scanner.scan();
-	}
+    /**
+     * Update the media storage
+     * 
+     * @param url New URL to be added
+     */
+    public void updateMediaStorage(String url) {
+        if (logger.isActivated()) {
+            logger.debug("Updating media storage with URL " + url);
+        }
+        MyMediaScannerClient scanner = new MyMediaScannerClient(url);
+        scanner.scan();
+    }
 
-	/**
-	 * Media scanner
-	 */
-	private class MyMediaScannerClient implements MediaScannerConnectionClient {
-		private String filename;
+    /**
+     * Media scanner
+     */
+    private class MyMediaScannerClient implements MediaScannerConnectionClient {
+        private String filename;
 
-		private MediaScannerConnection scanner;
+        private MediaScannerConnection scanner;
 
-		public MyMediaScannerClient(String filename) {
-			this.filename = filename;
-			this.scanner = new MediaScannerConnection(AndroidFactory.getApplicationContext(), this);
-		}
+        public MyMediaScannerClient(String filename) {
+            this.filename = filename;
+            this.scanner = new MediaScannerConnection(AndroidFactory.getApplicationContext(), this);
+        }
 
-		public void onMediaScannerConnected() {
-			if (logger.isActivated()) {
-				logger.debug("Scanning file " + filename);
-			}
-			scanner.scanFile(filename, null);
-		}
+        public void onMediaScannerConnected() {
+            if (logger.isActivated()) {
+                logger.debug("Scanning file " + filename);
+            }
+            scanner.scanFile(filename, null);
+        }
 
-		public void onScanCompleted(String path, Uri uri) {
-			if (logger.isActivated()) {
-				logger.debug("Scan completed for uri " + uri + " with path " + path);
-			}
-			if (path.equals(filename)) {
-				scanner.disconnect();
-			}
-		}
+        public void onScanCompleted(String path, Uri uri) {
+            if (logger.isActivated()) {
+                logger.debug("Scan completed for uri " + uri + " with path " + path);
+            }
+            if (path.equals(filename)) {
+                scanner.disconnect();
+            }
+        }
 
-		public void scan() {
-			scanner.connect();
-		}
-	}
+        public void scan() {
+            scanner.connect();
+        }
+    }
 }

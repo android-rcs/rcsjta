@@ -24,41 +24,41 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.util;
  * @author jexa7410
  */
 public class Packet {
-	/**
-	 * Data
-	 */
-	public byte[] data;
-	
-	/**
-	 * Packet length
-	 */
-	public int length;
+    /**
+     * Data
+     */
+    public byte[] data;
 
-	/**
-	 * Offset
-	 */
-	public int offset;
-		
-	/**
-	 * Received at
-	 */
-	public long receivedAt;
+    /**
+     * Packet length
+     */
+    public int length;
 
-	/**
-	 * Constructor
-	 */
-	public Packet() {
-	}
+    /**
+     * Offset
+     */
+    public int offset;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param packet Packet
-	 */
-	public Packet(Packet packet) {
-		data = packet.data;
-		length = packet.length;
-		offset = packet.offset;
-		receivedAt = packet.receivedAt;
-	}
+    /**
+     * Received at
+     */
+    public long receivedAt;
+
+    /**
+     * Constructor
+     */
+    public Packet() {
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param packet Packet
+     */
+    public Packet(Packet packet) {
+        data = packet.data;
+        length = packet.length;
+        offset = packet.offset;
+        receivedAt = packet.receivedAt;
+    }
 }

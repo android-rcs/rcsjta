@@ -27,12 +27,12 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.core.RtcpAppPacket;
  */
 public class RtcpApplicationEvent extends RtcpEvent {
 
-	/**
-	 * Constructor
-	 * 
-	 * @param packet RTCP APP packet
-	 */
-	public RtcpApplicationEvent(RtcpAppPacket packet) {
-		super(packet);
-	}
+    /**
+     * Constructor
+     * 
+     * @param packet RTCP APP packet
+     */
+    public RtcpApplicationEvent(RtcpAppPacket packet) {
+        super(packet);
+    }
 }

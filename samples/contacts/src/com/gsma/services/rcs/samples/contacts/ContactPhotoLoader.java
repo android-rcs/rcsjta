@@ -37,34 +37,34 @@ import android.widget.ImageView;
 import com.google.common.collect.Lists;
 
 /**
- * Asynchronously loads contact photos and maintains cache of photos.  The class is
- * mostly single-threaded.  The only two methods accessed by the loader thread are
- * {@link #cacheBitmap} and {@link #obtainPhotoIdsToLoad}. Those methods access concurrent
- * hash maps shared with the main thread.
+ * Asynchronously loads contact photos and maintains cache of photos. The class is mostly
+ * single-threaded. The only two methods accessed by the loader thread are {@link #cacheBitmap} and
+ * {@link #obtainPhotoIdsToLoad}. Those methods access concurrent hash maps shared with the main
+ * thread.
  */
 public class ContactPhotoLoader implements Callback {
 
     private static final String LOADER_THREAD_NAME = "ContactPhotoLoader";
 
     /**
-     * Type of message sent by the UI thread to itself to indicate that some photos
-     * need to be loaded.
+     * Type of message sent by the UI thread to itself to indicate that some photos need to be
+     * loaded.
      */
     private static final int MESSAGE_REQUEST_LOADING = 1;
 
     /**
-     * Type of message sent by the loader thread to indicate that some photos have
-     * been loaded.
+     * Type of message sent by the loader thread to indicate that some photos have been loaded.
      */
     private static final int MESSAGE_PHOTOS_LOADED = 2;
 
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
-    private final String[] COLUMNS = new String[] { Photo._ID, Photo.PHOTO };
+    private final String[] COLUMNS = new String[] {
+            Photo._ID, Photo.PHOTO
+    };
 
     /**
-     * The resource ID of the image to be used when the photo is unavailable or being
-     * loaded.
+     * The resource ID of the image to be used when the photo is unavailable or being loaded.
      */
     private final int mDefaultResourceId;
 
@@ -87,8 +87,8 @@ public class ContactPhotoLoader implements Callback {
             new ConcurrentHashMap<Long, BitmapHolder>();
 
     /**
-     * A map from ImageView to the corresponding photo ID. Please note that this
-     * photo ID may change before the photo loading request is started.
+     * A map from ImageView to the corresponding photo ID. Please note that this photo ID may change
+     * before the photo loading request is started.
      */
     private final ConcurrentHashMap<ImageView, Long> mPendingRequests =
             new ConcurrentHashMap<ImageView, Long>();
@@ -99,8 +99,7 @@ public class ContactPhotoLoader implements Callback {
     private final Handler mMainThreadHandler = new Handler(this);
 
     /**
-     * Thread responsible for loading photos from the database. Created upon
-     * the first request.
+     * Thread responsible for loading photos from the database. Created upon the first request.
      */
     private LoaderThread mLoaderThread;
 
@@ -118,10 +117,10 @@ public class ContactPhotoLoader implements Callback {
 
     /**
      * Constructor.
-     *
+     * 
      * @param context content context
-     * @param defaultResourceId the image resource ID to be used when there is
-     *            no photo for a contact
+     * @param defaultResourceId the image resource ID to be used when there is no photo for a
+     *            contact
      */
     public ContactPhotoLoader(Context context, int defaultResourceId) {
         mDefaultResourceId = defaultResourceId;
@@ -129,9 +128,8 @@ public class ContactPhotoLoader implements Callback {
     }
 
     /**
-     * Load photo into the supplied image view.  If the photo is already cached,
-     * it is displayed immediately.  Otherwise a request is sent to load the photo
-     * from the database.
+     * Load photo into the supplied image view. If the photo is already cached, it is displayed
+     * immediately. Otherwise a request is sent to load the photo from the database.
      */
     public void loadPhoto(ImageView view, long photoId) {
         if (photoId == 0) {
@@ -153,9 +151,9 @@ public class ContactPhotoLoader implements Callback {
     }
 
     /**
-     * Checks if the photo is present in cache.  If so, sets the photo on the view,
-     * otherwise sets the state of the photo to {@link BitmapHolder#NEEDED} and
-     * temporarily set the image to the default resource ID.
+     * Checks if the photo is present in cache. If so, sets the photo on the view, otherwise sets
+     * the state of the photo to {@link BitmapHolder#NEEDED} and temporarily set the image to the
+     * default resource ID.
      */
     private boolean loadCachedPhoto(ImageView view, long photoId) {
         BitmapHolder holder = mBitmapCache.get(photoId);
@@ -224,10 +222,9 @@ public class ContactPhotoLoader implements Callback {
     }
 
     /**
-     * Sends a message to this thread itself to start loading images.  If the current
-     * view contains multiple image views, all of those image views will get a chance
-     * to request their respective photos before any of those requests are executed.
-     * This allows us to load images in bulk.
+     * Sends a message to this thread itself to start loading images. If the current view contains
+     * multiple image views, all of those image views will get a chance to request their respective
+     * photos before any of those requests are executed. This allows us to load images in bulk.
      */
     private void requestLoading() {
         if (!mLoadingRequested) {
@@ -265,8 +262,8 @@ public class ContactPhotoLoader implements Callback {
     }
 
     /**
-     * Goes over pending loading requests and displays loaded photos.  If some of the
-     * photos still haven't been loaded, sends another request for image loading.
+     * Goes over pending loading requests and displays loaded photos. If some of the photos still
+     * haven't been loaded, sends another request for image loading.
      */
     private void processLoadedImages() {
         Iterator<ImageView> iterator = mPendingRequests.keySet().iterator();
@@ -314,12 +311,10 @@ public class ContactPhotoLoader implements Callback {
         photoIdsAsStrings.clear();
 
         /*
-         * Since the call is made from the loader thread, the map could be
-         * changing during the iteration. That's not really a problem:
-         * ConcurrentHashMap will allow those changes to happen without throwing
-         * exceptions. Since we may miss some requests in the situation of
-         * concurrent change, we will need to check the map again once loading
-         * is complete.
+         * Since the call is made from the loader thread, the map could be changing during the
+         * iteration. That's not really a problem: ConcurrentHashMap will allow those changes to
+         * happen without throwing exceptions. Since we may miss some requests in the situation of
+         * concurrent change, we will need to check the map again once loading is complete.
          */
         Iterator<Long> iterator = mPendingRequests.values().iterator();
         while (iterator.hasNext()) {
@@ -360,8 +355,8 @@ public class ContactPhotoLoader implements Callback {
         }
 
         /**
-         * Receives the above message, loads photos and then sends a message
-         * to the main thread to process them.
+         * Receives the above message, loads photos and then sends a message to the main thread to
+         * process them.
          */
         public boolean handleMessage(Message msg) {
             loadPhotosFromDatabase();

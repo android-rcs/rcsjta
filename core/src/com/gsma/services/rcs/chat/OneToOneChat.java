@@ -33,124 +33,120 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 public class OneToOneChat {
 
-	/**
-	 * Chat interface
-	 */
-	private final IOneToOneChat mOneToOneChatInf;
+    /**
+     * Chat interface
+     */
+    private final IOneToOneChat mOneToOneChatInf;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param chatIntf
-	 *            Chat interface
-	 */
-	/* package private */OneToOneChat(IOneToOneChat chatIntf) {
-		mOneToOneChatInf = chatIntf;
-	}
+    /**
+     * Constructor
+     * 
+     * @param chatIntf Chat interface
+     */
+    /* package private */OneToOneChat(IOneToOneChat chatIntf) {
+        mOneToOneChatInf = chatIntf;
+    }
 
-	/**
-	 * Returns the remote contact
-	 * 
-	 * @return ContactId
-	 * @throws RcsServiceException
-	 */
-	public ContactId getRemoteContact() throws RcsServiceException {
-		try {
-			return mOneToOneChatInf.getRemoteContact();
-		} catch (Exception e) {
-			throw new RcsServiceException(e.getMessage());
-		}
-	}
+    /**
+     * Returns the remote contact
+     * 
+     * @return ContactId
+     * @throws RcsServiceException
+     */
+    public ContactId getRemoteContact() throws RcsServiceException {
+        try {
+            return mOneToOneChatInf.getRemoteContact();
+        } catch (Exception e) {
+            throw new RcsServiceException(e.getMessage());
+        }
+    }
 
-	/**
-	 * Returns true if it is possible to send messages in this one to one chat right now, else
-	 * return false.
-	 * 
-	 * @return boolean
-	 * @throws RcsServiceException
-	 */
-	public boolean canSendMessage() throws RcsServiceException {
-		try {
-			return mOneToOneChatInf.canSendMessage();
-		} catch (Exception e) {
-			throw new RcsServiceException(e.getMessage());
-		}
-	}
+    /**
+     * Returns true if it is possible to send messages in this one to one chat right now, else
+     * return false.
+     * 
+     * @return boolean
+     * @throws RcsServiceException
+     */
+    public boolean canSendMessage() throws RcsServiceException {
+        try {
+            return mOneToOneChatInf.canSendMessage();
+        } catch (Exception e) {
+            throw new RcsServiceException(e.getMessage());
+        }
+    }
 
-	/**
-	 * Sends a chat message
-	 * 
-	 * @param message
-	 *            Message
-	 * @return Chat message
-	 * @throws RcsServiceException
-	 */
-	public ChatMessage sendMessage(String message) throws RcsServiceException {
-		try {
-			return new ChatMessage(mOneToOneChatInf.sendMessage(message));
-		} catch (Exception e) {
-			throw new RcsServiceException(e.getMessage());
-		}
-	}
+    /**
+     * Sends a chat message
+     * 
+     * @param message Message
+     * @return Chat message
+     * @throws RcsServiceException
+     */
+    public ChatMessage sendMessage(String message) throws RcsServiceException {
+        try {
+            return new ChatMessage(mOneToOneChatInf.sendMessage(message));
+        } catch (Exception e) {
+            throw new RcsServiceException(e.getMessage());
+        }
+    }
 
-	/**
-	 * Sends a geoloc message
-	 * 
-	 * @param geoloc
-	 *            Geoloc info
-	 * @return Chat message
-	 * @throws RcsServiceException
-	 */
-	public ChatMessage sendMessage(Geoloc geoloc) throws RcsServiceException {
-		try {
-			return new ChatMessage(mOneToOneChatInf.sendMessage2(geoloc));
-		} catch (Exception e) {
-			throw new RcsServiceException(e.getMessage());
-		}
-	}
+    /**
+     * Sends a geoloc message
+     * 
+     * @param geoloc Geoloc info
+     * @return Chat message
+     * @throws RcsServiceException
+     */
+    public ChatMessage sendMessage(Geoloc geoloc) throws RcsServiceException {
+        try {
+            return new ChatMessage(mOneToOneChatInf.sendMessage2(geoloc));
+        } catch (Exception e) {
+            throw new RcsServiceException(e.getMessage());
+        }
+    }
 
-	/**
-	 * Sends an Is-composing event. The status is set to true when typing a message, else it is set
-	 * to false.
-	 * 
-	 * @param status
-	 *            Is-composing status
-	 * @throws RcsServiceException
-	 */
-	public void sendIsComposingEvent(boolean status) throws RcsServiceException {
-		try {
-			mOneToOneChatInf.sendIsComposingEvent(status);
-		} catch (Exception e) {
-			throw new RcsServiceException(e.getMessage());
-		}
-	}
+    /**
+     * Sends an Is-composing event. The status is set to true when typing a message, else it is set
+     * to false.
+     * 
+     * @param status Is-composing status
+     * @throws RcsServiceException
+     */
+    public void sendIsComposingEvent(boolean status) throws RcsServiceException {
+        try {
+            mOneToOneChatInf.sendIsComposingEvent(status);
+        } catch (Exception e) {
+            throw new RcsServiceException(e.getMessage());
+        }
+    }
 
-	/**
-	 * open the chat conversation.<br>
-	 * Note: if it is an incoming pending chat session and the parameter IM SESSION START is 0 then
-	 * the session is accepted now.
-	 * 
-	 * @throws RcsServiceException
-	 */
-	public void openChat() throws RcsServiceException {
-		try {
-			mOneToOneChatInf.openChat();
-		} catch (Exception e) {
-			throw new RcsServiceException(e.getMessage());
-		}
-	}
+    /**
+     * open the chat conversation.<br>
+     * Note: if it is an incoming pending chat session and the parameter IM SESSION START is 0 then
+     * the session is accepted now.
+     * 
+     * @throws RcsServiceException
+     */
+    public void openChat() throws RcsServiceException {
+        try {
+            mOneToOneChatInf.openChat();
+        } catch (Exception e) {
+            throw new RcsServiceException(e.getMessage());
+        }
+    }
 
-	/**
-	 * Resend a message which previously failed.
-	 * 
-	 * @param msgId
-	 * @throws RcsServiceException
-	 */
-	public void resendMessage(String msgId) throws RcsServiceException {
-		try {
-			mOneToOneChatInf.resendMessage(msgId);
-		} catch (Exception e) {
-			throw new RcsServiceException(e.getMessage());
-		}
-	}
+    /**
+     * Resend a message which previously failed.
+     * 
+     * @param msgId
+     * @throws RcsServiceException
+     */
+    public void resendMessage(String msgId) throws RcsServiceException {
+        try {
+            mOneToOneChatInf.resendMessage(msgId);
+        } catch (Exception e) {
+            throw new RcsServiceException(e.getMessage());
+        }
+    }
 }

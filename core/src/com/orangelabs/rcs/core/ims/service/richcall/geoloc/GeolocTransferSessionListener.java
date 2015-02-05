@@ -30,40 +30,34 @@ import com.orangelabs.rcs.core.ims.service.richcall.ContentSharingError;
  * @author jexa7410
  */
 public interface GeolocTransferSessionListener extends ImsSessionListener {
-	/**
-	 * Content sharing error
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 * @param error
-	 *            Error
-	 */
-	public void handleSharingError(ContactId contact, ContentSharingError error);
+    /**
+     * Content sharing error
+     * 
+     * @param contact Remote contact
+     * @param error Error
+     */
+    public void handleSharingError(ContactId contact, ContentSharingError error);
 
-	/**
-	 * Content has been transfered
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 * @param geoloc
-	 *            Geolocation
-	 * @param initiatedByRemote
-	 */
-	public void handleContentTransfered(ContactId contact, Geoloc geoloc, boolean initiatedByRemote);
+    /**
+     * Content has been transfered
+     * 
+     * @param contact Remote contact
+     * @param geoloc Geolocation
+     * @param initiatedByRemote
+     */
+    public void handleContentTransfered(ContactId contact, Geoloc geoloc, boolean initiatedByRemote);
 
-	/**
-	 * Destination user agent received INVITE, and is alerting user of call
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 */
-	public void handle180Ringing(ContactId contact);
+    /**
+     * Destination user agent received INVITE, and is alerting user of call
+     * 
+     * @param contact Remote contact
+     */
+    public void handle180Ringing(ContactId contact);
 
-	/**
-	 * A session invitation has been received
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 */
-	public void handleSessionInvited(ContactId contact);
+    /**
+     * A session invitation has been received
+     * 
+     * @param contact Remote contact
+     */
+    public void handleSessionInvited(ContactId contact);
 }

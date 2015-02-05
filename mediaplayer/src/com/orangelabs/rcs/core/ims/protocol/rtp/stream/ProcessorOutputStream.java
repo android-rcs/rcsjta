@@ -25,17 +25,17 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.util.Buffer;
  */
 public interface ProcessorOutputStream {
     /**
-	 * Open the output stream
-	 * 
+     * Open the output stream
+     * 
      * @throws Exception
-	 */	
+     */
     public void open() throws Exception;
 
     /**
      * Close from the output stream
      */
     public void close();
-    
+
     /**
      * Write to the stream without blocking
      * 

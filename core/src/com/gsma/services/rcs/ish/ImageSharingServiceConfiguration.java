@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.gsma.services.rcs.ish;
 
 import com.gsma.services.rcs.RcsServiceException;
@@ -24,34 +25,33 @@ import com.gsma.services.rcs.RcsServiceException;
  * 
  * @author Jean-Marc AUFFRET
  * @author yplo6403
- *
  */
 public class ImageSharingServiceConfiguration {
 
-	IImageSharingServiceConfiguration mConfiguration;
+    IImageSharingServiceConfiguration mConfiguration;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param configuration
-	 * @hide
-	 */
-	public ImageSharingServiceConfiguration(IImageSharingServiceConfiguration configuration) {
-		mConfiguration = configuration;
-	}
+    /**
+     * Constructor
+     * 
+     * @param configuration
+     * @hide
+     */
+    public ImageSharingServiceConfiguration(IImageSharingServiceConfiguration configuration) {
+        mConfiguration = configuration;
+    }
 
-	/**
-	 * Returns the maximum authorized size of the image that can be sent. It returns 0 if there is
-	 * no limitation.
-	 * 
-	 * @return Size in kilobytes
-	 * @throws RcsServiceException
-	 */
-	public long getMaxSize() throws RcsServiceException {
-		try {
-			return mConfiguration.getMaxSize();
-		} catch (Exception e) {
-			throw new RcsServiceException(e);
-		}
-	}
+    /**
+     * Returns the maximum authorized size of the image that can be sent. It returns 0 if there is
+     * no limitation.
+     * 
+     * @return Size in kilobytes
+     * @throws RcsServiceException
+     */
+    public long getMaxSize() throws RcsServiceException {
+        try {
+            return mConfiguration.getMaxSize();
+        } catch (Exception e) {
+            throw new RcsServiceException(e);
+        }
+    }
 }

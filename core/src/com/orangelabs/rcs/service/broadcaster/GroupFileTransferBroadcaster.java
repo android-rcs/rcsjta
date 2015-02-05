@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.orangelabs.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.contacts.ContactId;
@@ -33,83 +34,83 @@ import android.os.RemoteCallbackList;
  */
 public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcaster {
 
-	private final RemoteCallbackList<IGroupFileTransferListener> mGroupFileTransferListeners = new RemoteCallbackList<IGroupFileTransferListener>();
+    private final RemoteCallbackList<IGroupFileTransferListener> mGroupFileTransferListeners = new RemoteCallbackList<IGroupFileTransferListener>();
 
-	private final Logger logger = Logger.getLogger(getClass().getName());
+    private final Logger logger = Logger.getLogger(getClass().getName());
 
-	public GroupFileTransferBroadcaster() {
-	}
+    public GroupFileTransferBroadcaster() {
+    }
 
-	public void addGroupFileTransferListener(IGroupFileTransferListener listener)
-			throws ServerApiException {
-		mGroupFileTransferListeners.register(listener);
-	}
+    public void addGroupFileTransferListener(IGroupFileTransferListener listener)
+            throws ServerApiException {
+        mGroupFileTransferListeners.register(listener);
+    }
 
-	public void removeGroupFileTransferListener(IGroupFileTransferListener listener)
-			throws ServerApiException {
-		mGroupFileTransferListeners.unregister(listener);
-	}
+    public void removeGroupFileTransferListener(IGroupFileTransferListener listener)
+            throws ServerApiException {
+        mGroupFileTransferListeners.unregister(listener);
+    }
 
-	public void broadcastStateChanged(String chatId, String transferId, int state, int reasonCode) {
-		final int N = mGroupFileTransferListeners.beginBroadcast();
-		for (int i = 0; i < N; i++) {
-			try {
-				mGroupFileTransferListeners.getBroadcastItem(i).onStateChanged(chatId, transferId,
-						state, reasonCode);
-			} catch (Exception e) {
-				if (logger.isActivated()) {
-					logger.error("Can't notify listener", e);
-				}
-			}
-		}
-		mGroupFileTransferListeners.finishBroadcast();
-	}
+    public void broadcastStateChanged(String chatId, String transferId, int state, int reasonCode) {
+        final int N = mGroupFileTransferListeners.beginBroadcast();
+        for (int i = 0; i < N; i++) {
+            try {
+                mGroupFileTransferListeners.getBroadcastItem(i).onStateChanged(chatId, transferId,
+                        state, reasonCode);
+            } catch (Exception e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener", e);
+                }
+            }
+        }
+        mGroupFileTransferListeners.finishBroadcast();
+    }
 
-	public void broadcastProgressUpdate(String chatId, String transferId, long currentSize,
-			long totalSize) {
-		final int N = mGroupFileTransferListeners.beginBroadcast();
-		for (int i = 0; i < N; i++) {
-			try {
-				mGroupFileTransferListeners.getBroadcastItem(i).onProgressUpdate(chatId,
-						transferId, currentSize, totalSize);
-			} catch (Exception e) {
-				if (logger.isActivated()) {
-					logger.error("Can't notify listener", e);
-				}
-			}
-		}
-		mGroupFileTransferListeners.finishBroadcast();
-	}
+    public void broadcastProgressUpdate(String chatId, String transferId, long currentSize,
+            long totalSize) {
+        final int N = mGroupFileTransferListeners.beginBroadcast();
+        for (int i = 0; i < N; i++) {
+            try {
+                mGroupFileTransferListeners.getBroadcastItem(i).onProgressUpdate(chatId,
+                        transferId, currentSize, totalSize);
+            } catch (Exception e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener", e);
+                }
+            }
+        }
+        mGroupFileTransferListeners.finishBroadcast();
+    }
 
-	public void broadcastGroupDeliveryInfoStateChanged(String chatId, ContactId contact,
-			String transferId, int state, int reasonCode) {
-		final int N = mGroupFileTransferListeners.beginBroadcast();
-		for (int i = 0; i < N; i++) {
-			try {
-				mGroupFileTransferListeners.getBroadcastItem(i).onDeliveryInfoChanged(chatId,
-						contact, transferId, state, reasonCode);
-			} catch (Exception e) {
-				if (logger.isActivated()) {
-					logger.error("Can't notify listener per contact", e);
-				}
-			}
-		}
-		mGroupFileTransferListeners.finishBroadcast();
-	}
+    public void broadcastGroupDeliveryInfoStateChanged(String chatId, ContactId contact,
+            String transferId, int state, int reasonCode) {
+        final int N = mGroupFileTransferListeners.beginBroadcast();
+        for (int i = 0; i < N; i++) {
+            try {
+                mGroupFileTransferListeners.getBroadcastItem(i).onDeliveryInfoChanged(chatId,
+                        contact, transferId, state, reasonCode);
+            } catch (Exception e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener per contact", e);
+                }
+            }
+        }
+        mGroupFileTransferListeners.finishBroadcast();
+    }
 
-	public void broadcastInvitation(String fileTransferId) {
-		Intent invitation = new Intent(FileTransferIntent.ACTION_NEW_INVITATION);
-		IntentUtils.tryToSetExcludeStoppedPackagesFlag(invitation);
-		IntentUtils.tryToSetReceiverForegroundFlag(invitation);
-		invitation.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, fileTransferId);
-		AndroidFactory.getApplicationContext().sendBroadcast(invitation);
-	}
+    public void broadcastInvitation(String fileTransferId) {
+        Intent invitation = new Intent(FileTransferIntent.ACTION_NEW_INVITATION);
+        IntentUtils.tryToSetExcludeStoppedPackagesFlag(invitation);
+        IntentUtils.tryToSetReceiverForegroundFlag(invitation);
+        invitation.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, fileTransferId);
+        AndroidFactory.getApplicationContext().sendBroadcast(invitation);
+    }
 
-	public void broadcastResumeFileTransfer(String filetransferId) {
-		Intent resumeFileTransfer = new Intent(FileTransferIntent.ACTION_RESUME);
-		IntentUtils.tryToSetExcludeStoppedPackagesFlag(resumeFileTransfer);
-		IntentUtils.tryToSetReceiverForegroundFlag(resumeFileTransfer);
-		resumeFileTransfer.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, filetransferId);
-		AndroidFactory.getApplicationContext().sendBroadcast(resumeFileTransfer);
-	}
+    public void broadcastResumeFileTransfer(String filetransferId) {
+        Intent resumeFileTransfer = new Intent(FileTransferIntent.ACTION_RESUME);
+        IntentUtils.tryToSetExcludeStoppedPackagesFlag(resumeFileTransfer);
+        IntentUtils.tryToSetReceiverForegroundFlag(resumeFileTransfer);
+        resumeFileTransfer.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, filetransferId);
+        AndroidFactory.getApplicationContext().sendBroadcast(resumeFileTransfer);
+    }
 }

@@ -87,8 +87,8 @@ public class GroupChatList extends Activity {
         setContentView(R.layout.chat_list);
 
         // Set list adapter
-        mListView = (ListView)findViewById(android.R.id.list);
-        TextView emptyView = (TextView)findViewById(android.R.id.empty);
+        mListView = (ListView) findViewById(android.R.id.list);
+        TextView emptyView = (TextView) findViewById(android.R.id.empty);
         mListView.setEmptyView(emptyView);
         mListView.setOnItemClickListener(new OnItemClickListener() {
 
@@ -102,7 +102,7 @@ public class GroupChatList extends Activity {
                     return;
 
                 }
-                Cursor cursor = (Cursor)(parent.getAdapter()).getItem(pos);
+                Cursor cursor = (Cursor) (parent.getAdapter()).getItem(pos);
                 String chatId = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
                 try {
                     // Get group chat
@@ -172,7 +172,7 @@ public class GroupChatList extends Activity {
 
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
-            GroupChatListItemViewHolder holder = (GroupChatListItemViewHolder)view.getTag();
+            GroupChatListItemViewHolder holder = (GroupChatListItemViewHolder) view.getTag();
 
             // Set the date/time field by mixing relative and absolute times
             long date = cursor.getLong(holder.columnDate);
@@ -195,8 +195,8 @@ public class GroupChatList extends Activity {
     }
 
     /**
-     * A ViewHolder class keeps references to children views to avoid
-     * unnecessary calls to findViewById() or getColumnIndex() on each row.
+     * A ViewHolder class keeps references to children views to avoid unnecessary calls to
+     * findViewById() or getColumnIndex() on each row.
      */
     private class GroupChatListItemViewHolder {
         TextView titleText;
@@ -213,9 +213,9 @@ public class GroupChatList extends Activity {
             columnSubject = cursor.getColumnIndexOrThrow(ChatLog.GroupChat.SUBJECT);
             columnDate = cursor.getColumnIndexOrThrow(ChatLog.GroupChat.TIMESTAMP);
 
-            titleText = (TextView)base.findViewById(R.id.line1);
-            subjectText = (TextView)base.findViewById(R.id.line2);
-            dateText = (TextView)base.findViewById(R.id.date);
+            titleText = (TextView) base.findViewById(R.id.line1);
+            subjectText = (TextView) base.findViewById(R.id.line2);
+            dateText = (TextView) base.findViewById(R.id.date);
             titleText.setVisibility(View.VISIBLE);
         }
     }

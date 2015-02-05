@@ -20,7 +20,7 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.format.video;
 
 /**
  * Represents the Video frame orientation
- *
+ * 
  * @author Deutsche Telekom
  */
 public enum Orientation {
@@ -43,7 +43,7 @@ public enum Orientation {
 
     /**
      * Constructor
-     *
+     * 
      * @param value Enum value
      */
     private Orientation(int value) {
@@ -52,7 +52,7 @@ public enum Orientation {
 
     /**
      * Return the value of the Orientation
-     *
+     * 
      * @return Orientation value
      */
     public int getValue() {
@@ -61,7 +61,7 @@ public enum Orientation {
 
     /**
      * Converts the Value into an Orientation
-     *
+     * 
      * @param value value to convert
      * @return Orientation
      */

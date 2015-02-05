@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.core.ims.service.im.chat;
 
 import java.util.Set;
@@ -27,106 +28,101 @@ import com.gsma.services.rcs.chat.ParticipantInfo;
  * @author Jean-Marc AUFFRET
  */
 public class GroupChatInfo {
-	/**
-	 * Session ID
-	 */
-	private String sessionId;
+    /**
+     * Session ID
+     */
+    private String sessionId;
 
-	/**
-	 * Rejoin ID
-	 */
-	private String rejoinId;
+    /**
+     * Rejoin ID
+     */
+    private String rejoinId;
 
-	/**
-	 * Contribution Id
-	 */
-	private String contributionId;
+    /**
+     * Contribution Id
+     */
+    private String contributionId;
 
-	/**
-	 * Set of initial participants
-	 */
-	private Set<ParticipantInfo> participants;
+    /**
+     * Set of initial participants
+     */
+    private Set<ParticipantInfo> participants;
 
-	/**
-	 * Subject
-	 */
-	private String subject;
+    /**
+     * Subject
+     */
+    private String subject;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param sessionId
-	 *            Session ID
-	 * @param rejoindId
-	 *            Rejoin ID
-	 * @param contributionId
-	 *            Rejoin ID
-	 * @param particpants
-	 *            Participants
-	 * @param subject
-	 *            Subject
-	 */
-	public GroupChatInfo(String sessionId, String rejoinId, String contributionId,
-			Set<ParticipantInfo> participants, String subject) {
-		this.sessionId = sessionId;
-		this.rejoinId = rejoinId;
-		this.contributionId = contributionId;
-		this.participants = participants;
-		this.subject = subject;
-	}
+    /**
+     * Constructor
+     * 
+     * @param sessionId Session ID
+     * @param rejoindId Rejoin ID
+     * @param contributionId Rejoin ID
+     * @param particpants Participants
+     * @param subject Subject
+     */
+    public GroupChatInfo(String sessionId, String rejoinId, String contributionId,
+            Set<ParticipantInfo> participants, String subject) {
+        this.sessionId = sessionId;
+        this.rejoinId = rejoinId;
+        this.contributionId = contributionId;
+        this.participants = participants;
+        this.subject = subject;
+    }
 
-	/**
-	 * Returns the session ID
-	 * 
-	 * @return ID
-	 */
-	public String getSessionId() {
-		return sessionId;
-	}
+    /**
+     * Returns the session ID
+     * 
+     * @return ID
+     */
+    public String getSessionId() {
+        return sessionId;
+    }
 
-	/**
-	 * Returns the rejoin ID
-	 * 
-	 * @return ID
-	 */
-	public String getRejoinId() {
-		return rejoinId;
-	}
+    /**
+     * Returns the rejoin ID
+     * 
+     * @return ID
+     */
+    public String getRejoinId() {
+        return rejoinId;
+    }
 
-	/**
-	 * Returns the contribution ID
-	 * 
-	 * @return ID
-	 */
-	public String getContributionId() {
-		return contributionId;
-	}
+    /**
+     * Returns the contribution ID
+     * 
+     * @return ID
+     */
+    public String getContributionId() {
+        return contributionId;
+    }
 
-	/**
-	 * Returns set of participants
-	 * 
-	 * @return Participants
-	 */
-	public Set<ParticipantInfo> getParticipants() {
-		return participants;
-	}
+    /**
+     * Returns set of participants
+     * 
+     * @return Participants
+     */
+    public Set<ParticipantInfo> getParticipants() {
+        return participants;
+    }
 
-	/**
-	 * Returns the subject
-	 * 
-	 * @return Subject
-	 */
-	public String getSubject() {
-		return subject;
-	}
+    /**
+     * Returns the subject
+     * 
+     * @return Subject
+     */
+    public String getSubject() {
+        return subject;
+    }
 
-	/**
-	 * Returns a string representation of the object
-	 * 
-	 * @return String
-	 */
-	public String toString() {
-		return "Session ID=" + sessionId + ", Contribution ID=" + contributionId + ", Rejoin ID="
-				+ rejoinId + ", Subject=" + subject + ", Participants=" + participants.size();
-	}
+    /**
+     * Returns a string representation of the object
+     * 
+     * @return String
+     */
+    public String toString() {
+        return "Session ID=" + sessionId + ", Contribution ID=" + contributionId + ", Rejoin ID="
+                + rejoinId + ", Subject=" + subject + ", Participants=" + participants.size();
+    }
 }

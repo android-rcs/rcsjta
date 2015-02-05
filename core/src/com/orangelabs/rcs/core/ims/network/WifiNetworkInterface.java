@@ -28,29 +28,28 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Wi-Fi network interface
- *
+ * 
  * @author JM. Auffret
  */
 public class WifiNetworkInterface extends ImsNetworkInterface {
-	/**
-	 * The logger
-	 */
-	private Logger logger = Logger.getLogger(this.getClass().getName());
+    /**
+     * The logger
+     */
+    private Logger logger = Logger.getLogger(this.getClass().getName());
 
-	/**
-	 * Constructor
-	 *
-	 * @param imsModule
-	 *            IMS module
-	 * @throws CoreException
-	 */
-	public WifiNetworkInterface(ImsModule imsModule, RcsSettings rcsSettings) throws CoreException {
-		super(imsModule, ConnectivityManager.TYPE_WIFI, new WifiNetworkAccess(), rcsSettings
-				.getImsProxyAddrForWifi(), rcsSettings.getImsProxyPortForWifi(), rcsSettings
-				.getSipDefaultProtocolForWifi(), rcsSettings.getImsAuthenticationProcedureForWifi());
+    /**
+     * Constructor
+     * 
+     * @param imsModule IMS module
+     * @throws CoreException
+     */
+    public WifiNetworkInterface(ImsModule imsModule, RcsSettings rcsSettings) throws CoreException {
+        super(imsModule, ConnectivityManager.TYPE_WIFI, new WifiNetworkAccess(), rcsSettings
+                .getImsProxyAddrForWifi(), rcsSettings.getImsProxyPortForWifi(), rcsSettings
+                .getSipDefaultProtocolForWifi(), rcsSettings.getImsAuthenticationProcedureForWifi());
 
-		if (logger.isActivated()) {
-			logger.info("Wi-Fi network interface has been loaded");
-		}
-	}
+        if (logger.isActivated()) {
+            logger.info("Wi-Fi network interface has been loaded");
+        }
+    }
 }

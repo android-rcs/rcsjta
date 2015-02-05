@@ -35,7 +35,7 @@ public class FileUtils {
 
     /**
      * Fetch the file name from URI
-     *
+     * 
      * @param context Context
      * @param file URI
      * @return fileName String
@@ -69,7 +69,7 @@ public class FileUtils {
 
     /**
      * Fetch the file size from URI
-     *
+     * 
      * @param context Context
      * @param file URI
      * @return fileSize long

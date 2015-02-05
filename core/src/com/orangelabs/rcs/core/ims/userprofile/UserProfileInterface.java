@@ -24,16 +24,16 @@ package com.orangelabs.rcs.core.ims.userprofile;
  * @author jexa7410
  */
 public abstract class UserProfileInterface {
-	/**
-	 * Constructor
-	 */
-	public UserProfileInterface() {
-	}
+    /**
+     * Constructor
+     */
+    public UserProfileInterface() {
+    }
 
-	/**
-	 * Read the user profile
-	 * 
-	 * @return User profile
-	 */
-	public abstract UserProfile read();
+    /**
+     * Read the user profile
+     * 
+     * @return User profile
+     */
+    public abstract UserProfile read();
 }

@@ -31,99 +31,98 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author jexa7410
  */
 public class MobileNetworkAccess extends NetworkAccess {
-	/**
-	 * Telephony manager
-	 */
-	private TelephonyManager telephonyManager;
+    /**
+     * Telephony manager
+     */
+    private TelephonyManager telephonyManager;
 
-	/**
-	 * The logger
-	 */
-	private Logger logger = Logger.getLogger(this.getClass().getName());
+    /**
+     * The logger
+     */
+    private Logger logger = Logger.getLogger(this.getClass().getName());
 
-	/**
-	 * Constructor
-	 * 
-	 * @throws CoreException
-	 */
-	public MobileNetworkAccess() throws CoreException {
-		super();
+    /**
+     * Constructor
+     * 
+     * @throws CoreException
+     */
+    public MobileNetworkAccess() throws CoreException {
+        super();
 
-		// Get telephony info
-		telephonyManager = (TelephonyManager) AndroidFactory.getApplicationContext()
-				.getSystemService(Context.TELEPHONY_SERVICE);
+        // Get telephony info
+        telephonyManager = (TelephonyManager) AndroidFactory.getApplicationContext()
+                .getSystemService(Context.TELEPHONY_SERVICE);
 
-		if (logger.isActivated()) {
-			logger.info("Mobile access has been created (interface " + getNetworkName() + ")");
-		}
-	}
+        if (logger.isActivated()) {
+            logger.info("Mobile access has been created (interface " + getNetworkName() + ")");
+        }
+    }
 
-	/**
-	 * Connect to the network access
-	 * 
-	 * @param ipAddress
-	 *            Local IP address
-	 */
-	public void connect(String ipAddress) {
-		if (logger.isActivated()) {
-			logger.info("Network access connected (" + ipAddress + ")");
-		}
-		this.ipAddress = ipAddress;
-	}
+    /**
+     * Connect to the network access
+     * 
+     * @param ipAddress Local IP address
+     */
+    public void connect(String ipAddress) {
+        if (logger.isActivated()) {
+            logger.info("Network access connected (" + ipAddress + ")");
+        }
+        this.ipAddress = ipAddress;
+    }
 
-	/**
-	 * Disconnect from the network access
-	 */
-	public void disconnect() {
-		if (logger.isActivated()) {
-			logger.info("Network access disconnected");
-		}
-		ipAddress = null;
-	}
+    /**
+     * Disconnect from the network access
+     */
+    public void disconnect() {
+        if (logger.isActivated()) {
+            logger.info("Network access disconnected");
+        }
+        ipAddress = null;
+    }
 
-	/**
-	 * Return the type of access
-	 * 
-	 * @return Type
-	 */
-	public String getType() {
-		int type = telephonyManager.getNetworkType();
-		switch (type) {
-		case TelephonyManager.NETWORK_TYPE_GPRS:
-		case TelephonyManager.NETWORK_TYPE_EDGE:
-			return "3GPP-GERAN";
-		case TelephonyManager.NETWORK_TYPE_UMTS:
-		case TelephonyManager.NETWORK_TYPE_HSDPA:
-		case TelephonyManager.NETWORK_TYPE_HSUPA:
-		case TelephonyManager.NETWORK_TYPE_HSPA:
-			return "3GPP-UTRAN-FDD";
-		default:
-			return null;
-		}
-	}
+    /**
+     * Return the type of access
+     * 
+     * @return Type
+     */
+    public String getType() {
+        int type = telephonyManager.getNetworkType();
+        switch (type) {
+            case TelephonyManager.NETWORK_TYPE_GPRS:
+            case TelephonyManager.NETWORK_TYPE_EDGE:
+                return "3GPP-GERAN";
+            case TelephonyManager.NETWORK_TYPE_UMTS:
+            case TelephonyManager.NETWORK_TYPE_HSDPA:
+            case TelephonyManager.NETWORK_TYPE_HSUPA:
+            case TelephonyManager.NETWORK_TYPE_HSPA:
+                return "3GPP-UTRAN-FDD";
+            default:
+                return null;
+        }
+    }
 
-	/**
-	 * Return the network name
-	 * 
-	 * @return Name
-	 */
-	public String getNetworkName() {
-		int type = telephonyManager.getNetworkType();
-		switch (type) {
-		case TelephonyManager.NETWORK_TYPE_GPRS:
-			return "GPRS";
-		case TelephonyManager.NETWORK_TYPE_EDGE:
-			return "EDGE";
-		case TelephonyManager.NETWORK_TYPE_UMTS:
-			return "UMTS";
-		case TelephonyManager.NETWORK_TYPE_HSDPA:
-			return "HSDPA";
-		case TelephonyManager.NETWORK_TYPE_HSUPA:
-			return "HSUPA";
-		case TelephonyManager.NETWORK_TYPE_HSPA:
-			return "HSPA";
-		default:
-			return "unknown";
-		}
-	}
+    /**
+     * Return the network name
+     * 
+     * @return Name
+     */
+    public String getNetworkName() {
+        int type = telephonyManager.getNetworkType();
+        switch (type) {
+            case TelephonyManager.NETWORK_TYPE_GPRS:
+                return "GPRS";
+            case TelephonyManager.NETWORK_TYPE_EDGE:
+                return "EDGE";
+            case TelephonyManager.NETWORK_TYPE_UMTS:
+                return "UMTS";
+            case TelephonyManager.NETWORK_TYPE_HSDPA:
+                return "HSDPA";
+            case TelephonyManager.NETWORK_TYPE_HSUPA:
+                return "HSUPA";
+            case TelephonyManager.NETWORK_TYPE_HSPA:
+                return "HSPA";
+            default:
+                return "unknown";
+        }
+    }
 }

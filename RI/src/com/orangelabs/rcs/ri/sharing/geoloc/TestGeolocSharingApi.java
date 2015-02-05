@@ -35,13 +35,13 @@ import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
 
 /**
  * Geoloc sharing API
- *
+ * 
  * @author Jean-Marc AUFFRET
  */
 public class TestGeolocSharingApi extends ListActivity {
 
     private static final String[] PROJECTION = new String[] {
-        CapabilitiesLog.CONTACT
+            CapabilitiesLog.CONTACT
     };
 
     @Override

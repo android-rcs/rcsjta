@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.gsma.services.rcs.capability;
 
 import com.gsma.services.rcs.capability.ICapabilitiesListener;
@@ -26,13 +27,11 @@ import com.gsma.services.rcs.contacts.ContactId;
  * @author Jean-Marc AUFFRET
  */
 public abstract class CapabilitiesListener extends ICapabilitiesListener.Stub {
-	/**
-	 * Callback called when new capabilities are received for a given contact
-	 * 
-	 * @param contact
-	 *            Contact Identifier
-	 * @param capabilities
-	 *            Received capabilities
-	 */
-	public abstract void onCapabilitiesReceived(ContactId contact, Capabilities capabilities);
+    /**
+     * Callback called when new capabilities are received for a given contact
+     * 
+     * @param contact Contact Identifier
+     * @param capabilities Received capabilities
+     */
+    public abstract void onCapabilitiesReceived(ContactId contact, Capabilities capabilities);
 }

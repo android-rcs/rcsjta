@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.orangelabs.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.contacts.ContactId;
@@ -31,42 +32,42 @@ import android.os.RemoteCallbackList;
  */
 public class IPCallEventBroadcaster implements IIPCallEventBroadcaster {
 
-	private final RemoteCallbackList<IIPCallListener> mIpCallListeners = new RemoteCallbackList<IIPCallListener>();
+    private final RemoteCallbackList<IIPCallListener> mIpCallListeners = new RemoteCallbackList<IIPCallListener>();
 
-	private final Logger logger = Logger.getLogger(getClass().getName());
+    private final Logger logger = Logger.getLogger(getClass().getName());
 
-	public IPCallEventBroadcaster() {
-	}
+    public IPCallEventBroadcaster() {
+    }
 
-	public void addEventListener(IIPCallListener listener) {
-		mIpCallListeners.register(listener);
-	}
+    public void addEventListener(IIPCallListener listener) {
+        mIpCallListeners.register(listener);
+    }
 
-	public void removeEventListener(IIPCallListener listener) {
-		mIpCallListeners.unregister(listener);
-	}
+    public void removeEventListener(IIPCallListener listener) {
+        mIpCallListeners.unregister(listener);
+    }
 
-	public void broadcastIPCallStateChanged(ContactId contact, String callId, int state,
-			int reasonCode) {
-		final int N = mIpCallListeners.beginBroadcast();
-		for (int i = 0; i < N; i++) {
-			try {
-				mIpCallListeners.getBroadcastItem(i).onIPCallStateChanged(contact, callId, state,
-						reasonCode);
-			} catch (Exception e) {
-				if (logger.isActivated()) {
-					logger.error("Can't notify listener", e);
-				}
-			}
-		}
-		mIpCallListeners.finishBroadcast();
-	}
+    public void broadcastIPCallStateChanged(ContactId contact, String callId, int state,
+            int reasonCode) {
+        final int N = mIpCallListeners.beginBroadcast();
+        for (int i = 0; i < N; i++) {
+            try {
+                mIpCallListeners.getBroadcastItem(i).onIPCallStateChanged(contact, callId, state,
+                        reasonCode);
+            } catch (Exception e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener", e);
+                }
+            }
+        }
+        mIpCallListeners.finishBroadcast();
+    }
 
-	public void broadcastIPCallInvitation(String callId) {
-		Intent invitation = new Intent(IPCallIntent.ACTION_NEW_INVITATION);
-		IntentUtils.tryToSetExcludeStoppedPackagesFlag(invitation);
-		IntentUtils.tryToSetReceiverForegroundFlag(invitation);
-		invitation.putExtra(IPCallIntent.EXTRA_CALL_ID, callId);
-		AndroidFactory.getApplicationContext().sendBroadcast(invitation);
-	}
+    public void broadcastIPCallInvitation(String callId) {
+        Intent invitation = new Intent(IPCallIntent.ACTION_NEW_INVITATION);
+        IntentUtils.tryToSetExcludeStoppedPackagesFlag(invitation);
+        IntentUtils.tryToSetReceiverForegroundFlag(invitation);
+        invitation.putExtra(IPCallIntent.EXTRA_CALL_ID, callId);
+        AndroidFactory.getApplicationContext().sendBroadcast(invitation);
+    }
 }

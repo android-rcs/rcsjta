@@ -200,9 +200,8 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      * @param codec Video codec
      * @param remoteHost Remote RTP host
      * @param remotePort Remote RTP port
-     * @param orientationHeaderId Orientation header extension ID. The extension
-     *            ID is a value between 1 and 15 arbitrarily chosen by the
-     *            sender, as defined in RFC5285
+     * @param orientationHeaderId Orientation header extension ID. The extension ID is a value
+     *            between 1 and 15 arbitrarily chosen by the sender, as defined in RFC5285
      */
     public void setRemoteInfo(VideoCodec codec, String remoteHost, int remotePort,
             int orientationHeaderId) {
@@ -219,7 +218,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
     /**
      * Returns the local RTP port
-     *
+     * 
      * @return Port
      */
     public int getLocalRtpPort() {
@@ -257,7 +256,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
         // Init video encoder
         try {
-            timestampInc = (int)(90000 / defaultVideoCodec.getFrameRate());
+            timestampInc = (int) (90000 / defaultVideoCodec.getFrameRate());
             NativeH264EncoderParams nativeH264EncoderParams = new NativeH264EncoderParams();
 
             // Codec dimensions
@@ -361,7 +360,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
         // Player is started
         videoStartTime = SystemClock.uptimeMillis();
         started = true;
-        frameProcess = new FrameProcess((int)defaultVideoCodec.getFrameRate());
+        frameProcess = new FrameProcess((int) defaultVideoCodec.getFrameRate());
         frameProcess.start();
         eventListener.onPlayerStarted();
     }
@@ -395,7 +394,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
     /**
      * Reserve a port.
-     *
+     * 
      * @param port Port to reserve
      */
     private void reservePort(int port) {
@@ -424,7 +423,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
     /**
      * Return the video start time
-     *
+     * 
      * @return Milliseconds
      */
     public long getVideoStartTime() {
@@ -433,7 +432,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
     /**
      * Init sps and pps
-     *
+     * 
      * @return true if done
      */
     private boolean initNAL() {
@@ -446,7 +445,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
     /**
      * Init sps or pps
-     *
+     * 
      * @return true if done
      */
     private boolean initOneNAL() {
@@ -466,7 +465,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
     /**
      * Get video width
-     *
+     * 
      * @return Width
      */
     public int getVideoWidth() {
@@ -479,7 +478,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
     /**
      * Get video height
-     *
+     * 
      * @return Height
      */
     public int getVideoHeight() {
@@ -492,7 +491,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
     /**
      * Set extension header orientation id
-     *
+     * 
      * @param headerId extension header orientation id
      */
     public void setOrientationHeaderId(int headerId) {
@@ -501,7 +500,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
     /**
      * Set video orientation
-     *
+     * 
      * @param orientation
      */
     public void setOrientation(Orientation orientation) {
@@ -510,7 +509,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
     /**
      * Set camera ID
-     *
+     * 
      * @param cameraId Camera ID
      */
     public void setCameraId(int cameraId) {
@@ -519,7 +518,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
     /**
      * Set the mirroring value
-     *
+     * 
      * @param mirroring New mirroring value
      */
     public void setMirroring(boolean mirroring) {
@@ -536,7 +535,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
     /**
      * Preview frame from the camera
-     *
+     * 
      * @param data Frame
      * @param camera Camera
      */
@@ -550,7 +549,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
     /**
      * encode a buffer and add in RTP input
-     *
+     * 
      * @param data
      */
     private void encode(byte[] data) {
@@ -603,7 +602,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
         /**
          * Constructor
-         *
+         * 
          * @param framerate
          */
         public FrameProcess(int framerate) {
@@ -661,7 +660,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
         /**
          * Get the data
-         *
+         * 
          * @return data
          */
         public synchronized byte[] getData() {
@@ -670,7 +669,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
         /**
          * Set the data
-         *
+         * 
          * @param data
          */
         public synchronized void setData(byte[] data) {
@@ -700,7 +699,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
         /**
          * Add a new video frame
-         *
+         * 
          * @param data Data
          * @param timestamp Timestamp
          * @param videoOrientation
@@ -715,7 +714,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
         /**
          * Add a new video frame
-         *
+         * 
          * @param data Data
          * @param timestamp Timestamp
          * @param marker Marker bit
@@ -743,14 +742,14 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
         /**
          * Read a media sample (blocking method)
-         *
+         * 
          * @return Media sample
          * @throws MediaException
          */
         public VideoSample readSample() throws MediaException {
             try {
                 if (fifo != null) {
-                    return (VideoSample)fifo.getObject();
+                    return (VideoSample) fifo.getObject();
                 } else {
                     throw new MediaException("Media input not opened");
                 }

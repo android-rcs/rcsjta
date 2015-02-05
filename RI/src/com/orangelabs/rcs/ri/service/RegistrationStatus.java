@@ -147,7 +147,7 @@ public class RegistrationStatus extends Activity {
      * @param status Status
      */
     private void displayRegistrationStatus(boolean status) {
-        TextView statusTxt = (TextView)findViewById(R.id.registration_status);
+        TextView statusTxt = (TextView) findViewById(R.id.registration_status);
         statusTxt.setText("" + status);
     }
 }

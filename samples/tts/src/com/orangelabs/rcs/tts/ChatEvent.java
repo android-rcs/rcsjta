@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.tts;
 
 import java.util.ArrayList;
@@ -38,35 +39,36 @@ import com.gsma.services.rcs.chat.ChatLog;
  */
 public class ChatEvent extends BroadcastReceiver {
     @Override
-	public void onReceive(Context context, Intent intent) {
-    	// Check activation state before to continue
-        SharedPreferences preferences = context.getSharedPreferences(Registry.REGISTRY, Activity.MODE_PRIVATE);
+    public void onReceive(Context context, Intent intent) {
+        // Check activation state before to continue
+        SharedPreferences preferences = context.getSharedPreferences(Registry.REGISTRY,
+                Activity.MODE_PRIVATE);
         boolean flag = Registry.readBoolean(preferences, Registry.ACTIVATE_TTS, false);
         if (flag) {
-        	// Get the chat message ID from the Intent
-    		String msgId = intent.getParcelableExtra(ChatIntent.EXTRA_MESSAGE_ID);
-    		
-    		// Get the message content associated to the message ID from the database
-    		String message = null;
-    		Uri uri = ChatLog.Message.CONTENT_URI;
-    	    String[] PROJECTION = new String[] {
-    	    		ChatLog.Message.BODY
-    	    };
-    	    String where = ChatLog.Message.MESSAGE_ID + "='" + msgId + "'";
-    		Cursor cursor = context.getContentResolver().query(uri, PROJECTION, where, null, null);
-    		if ((cursor != null) && (cursor.getCount() > 0)) {
-    			message = cursor.getString(0);
-    		}
-    		
-    		if (!TextUtils.isEmpty(message)) {
-				// Play TTS on the chat message
-	        	ArrayList<String> messages = new ArrayList<String>();
-				messages.add(context.getString(R.string.label_new_msg));        		
-				messages.add(message);        		
-				Intent serviceIntent = new Intent(context, PlayTextToSpeech.class);
-				serviceIntent.putStringArrayListExtra("messages", messages);
-				context.startService(serviceIntent);
-    		}
+            // Get the chat message ID from the Intent
+            String msgId = intent.getParcelableExtra(ChatIntent.EXTRA_MESSAGE_ID);
+
+            // Get the message content associated to the message ID from the database
+            String message = null;
+            Uri uri = ChatLog.Message.CONTENT_URI;
+            String[] PROJECTION = new String[] {
+                    ChatLog.Message.BODY
+            };
+            String where = ChatLog.Message.MESSAGE_ID + "='" + msgId + "'";
+            Cursor cursor = context.getContentResolver().query(uri, PROJECTION, where, null, null);
+            if ((cursor != null) && (cursor.getCount() > 0)) {
+                message = cursor.getString(0);
+            }
+
+            if (!TextUtils.isEmpty(message)) {
+                // Play TTS on the chat message
+                ArrayList<String> messages = new ArrayList<String>();
+                messages.add(context.getString(R.string.label_new_msg));
+                messages.add(message);
+                Intent serviceIntent = new Intent(context, PlayTextToSpeech.class);
+                serviceIntent.putStringArrayListExtra("messages", messages);
+                context.startService(serviceIntent);
+            }
         }
     }
 }

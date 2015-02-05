@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.gsma.services.rcs.ipcall;
 
 import java.util.HashSet;
@@ -29,142 +30,135 @@ import java.util.Set;
  * @author Jean-Marc AUFFRET
  */
 public abstract class IPCallPlayer extends IIPCallPlayer.Stub {
-	/**
-	 * IP call player error
-	 */
-	public static class Error {
-		/**
-		 * Internal error
-		 */
-		public final static int INTERNAL_ERROR = 0;
+    /**
+     * IP call player error
+     */
+    public static class Error {
+        /**
+         * Internal error
+         */
+        public final static int INTERNAL_ERROR = 0;
 
-		/**
-		 * Network connection failed
-		 */
-		public final static int NETWORK_FAILURE = 1;
+        /**
+         * Network connection failed
+         */
+        public final static int NETWORK_FAILURE = 1;
 
-		private Error() {
-		}
-	}
+        private Error() {
+        }
+    }
 
-	/**
-	 * IP call player event listeners
-	 */
-	private Set<IIPCallPlayerListener> listeners = new HashSet<IIPCallPlayerListener>();
+    /**
+     * IP call player event listeners
+     */
+    private Set<IIPCallPlayerListener> listeners = new HashSet<IIPCallPlayerListener>();
 
-	/**
-	 * Constructor
-	 */
-	public IPCallPlayer() {
-	}
+    /**
+     * Constructor
+     */
+    public IPCallPlayer() {
+    }
 
-	/**
-	 * Opens the player and prepares resources (e.g. encoder, micro, camera)
-	 * 
-	 * @param audiocodec
-	 *            Audio codec
-	 * @param videocodec
-	 *            Video codec
-	 * @param remoteHost
-	 *            Remote RTP host
-	 * @param remoteAudioPort
-	 *            Remote audio RTP port
-	 * @param remoteVideoPort
-	 *            Remote video RTP port
-	 */
-	public abstract void open(AudioCodec audiocodec, VideoCodec videocodec, String remoteHost,
-			int remoteAudioPort, int remoteVideoPort);
+    /**
+     * Opens the player and prepares resources (e.g. encoder, micro, camera)
+     * 
+     * @param audiocodec Audio codec
+     * @param videocodec Video codec
+     * @param remoteHost Remote RTP host
+     * @param remoteAudioPort Remote audio RTP port
+     * @param remoteVideoPort Remote video RTP port
+     */
+    public abstract void open(AudioCodec audiocodec, VideoCodec videocodec, String remoteHost,
+            int remoteAudioPort, int remoteVideoPort);
 
-	/**
-	 * Closes the player and deallocates resources
-	 */
-	public abstract void close();
+    /**
+     * Closes the player and deallocates resources
+     */
+    public abstract void close();
 
-	/**
-	 * Starts the player
-	 */
-	public abstract void start();
+    /**
+     * Starts the player
+     */
+    public abstract void start();
 
-	/**
-	 * Stops the player
-	 */
-	public abstract void stop();
+    /**
+     * Stops the player
+     */
+    public abstract void stop();
 
-	/**
-	 * Returns the local RTP port used to stream audio
-	 * 
-	 * @return Port number
-	 */
-	public abstract int getLocalAudioRtpPort();
+    /**
+     * Returns the local RTP port used to stream audio
+     * 
+     * @return Port number
+     */
+    public abstract int getLocalAudioRtpPort();
 
-	/**
-	 * Returns the current audio codec
-	 * 
-	 * @return Audo codec
-	 */
-	public abstract AudioCodec getAudioCodec();
+    /**
+     * Returns the current audio codec
+     * 
+     * @return Audo codec
+     */
+    public abstract AudioCodec getAudioCodec();
 
-	/**
-	 * Returns the list of audio codecs supported by the player
-	 * 
-	 * @return List of audio codecs
-	 */
-	public abstract AudioCodec[] getSupportedAudioCodecs();
+    /**
+     * Returns the list of audio codecs supported by the player
+     * 
+     * @return List of audio codecs
+     */
+    public abstract AudioCodec[] getSupportedAudioCodecs();
 
-	/**
-	 * Returns the local RTP port used to stream video
-	 * 
-	 * @return Port number
-	 */
-	public abstract int getLocalVideoRtpPort();
+    /**
+     * Returns the local RTP port used to stream video
+     * 
+     * @return Port number
+     */
+    public abstract int getLocalVideoRtpPort();
 
-	/**
-	 * Returns the current video codec
-	 * 
-	 * @return Video codec
-	 */
-	public abstract VideoCodec getVideoCodec();
+    /**
+     * Returns the current video codec
+     * 
+     * @return Video codec
+     */
+    public abstract VideoCodec getVideoCodec();
 
-	/**
-	 * Returns the list of video codecs supported by the player
-	 * 
-	 * @return List of video codecs
-	 */
-	public abstract VideoCodec[] getSupportedVideoCodecs();
+    /**
+     * Returns the list of video codecs supported by the player
+     * 
+     * @return List of video codecs
+     */
+    public abstract VideoCodec[] getSupportedVideoCodecs();
 
-	/**
-	 * Returns the list of player event listeners
-	 * 
-	 * @return Listeners
-	 */
-	public Set<IIPCallPlayerListener> getEventListeners() {
-		return listeners;
-	}
+    /**
+     * Returns the list of player event listeners
+     * 
+     * @return Listeners
+     */
+    public Set<IIPCallPlayerListener> getEventListeners() {
+        return listeners;
+    }
 
-	/**
-	 * Adds a listener on player events
-	 * 
-	 * @param listener
-	 *            Listener
-	 */
-	public void addEventListener(IIPCallPlayerListener listener) {
-		listeners.add(listener);
-	}
+    /**
+     * Adds a listener on player events
+     * 
+     * @param listener Listener
+     */
+    public void addEventListener(IIPCallPlayerListener listener) {
+        listeners.add(listener);
+    }
 
-	/**
-	 * Removes a listener from player events
-	 * 
-	 * @param listener
-	 *            Listener
-	 */
-	public void removeEventListener(IIPCallPlayerListener listener) {
-		listeners.remove(listener);
-	}
+    /**
+     * Removes a listener from player events
+     * 
+     * @param listener Listener
+     */
+    public void removeEventListener(IIPCallPlayerListener listener) {
+        listeners.remove(listener);
+    }
 
-	/**
-	 * Removes all listeners from player events
-	 */
-	public void removeAllEventListeners() {
-		listeners.clear();
-	}
+    /**
+     * Removes all listeners from player events
+     */
+    public void removeAllEventListeners() {
+        listeners.clear();
+    }
 }

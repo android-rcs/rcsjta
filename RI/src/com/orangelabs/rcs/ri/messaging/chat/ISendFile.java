@@ -32,8 +32,7 @@ public interface ISendFile {
      * Transfer file
      * 
      * @param file Uri of file to transfer
-     * @param fileicon File icon option. If true, the stack tries to attach
-     *            fileicon.
+     * @param fileicon File icon option. If true, the stack tries to attach fileicon.
      * @return True if file transfer is successful
      */
     boolean transferFile(Uri file, boolean fileicon);

@@ -27,8 +27,7 @@ import android.content.res.Resources;
 import com.gsma.services.rcs.RcsService.Direction;
 
 /**
- * This subclass of Application allows to get a resource content from a static
- * context
+ * This subclass of Application allows to get a resource content from a static context
  * 
  * @author YPLO6403
  */
