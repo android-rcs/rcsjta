@@ -16,7 +16,6 @@
  * limitations under the License.
  ******************************************************************************/
 
-
 package com.orangelabs.rcs.ri.messaging.chat.single;
 
 import android.content.BroadcastReceiver;
@@ -28,23 +27,22 @@ import android.content.Intent;
  * 
  * @author Jean-Marc AUFFRET
  * @author YPLO6403
- * 
  */
 public class SingleChatInvitationReceiver extends BroadcastReceiver {
 
-	/**
-	 * Action New One to One CHAT Message
-	 */
-	/* package private */static final String ACTION_NEW_121_CHAT_MSG = "NEW_121_CHAT_MSG";
+    /**
+     * Action New One to One CHAT Message
+     */
+    /* package private */static final String ACTION_NEW_121_CHAT_MSG = "NEW_121_CHAT_MSG";
 
-	@Override
-	public void onReceive(Context context, Intent intent) {
-		// Send intent to service
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        // Send intent to service
 
-		Intent receiverIntent = new Intent(context, SingleChatIntentService.class);
-		receiverIntent.putExtras(intent);
-		receiverIntent.setAction(ACTION_NEW_121_CHAT_MSG);
-		context.startService(receiverIntent);
-	}
+        Intent receiverIntent = new Intent(context, SingleChatIntentService.class);
+        receiverIntent.putExtras(intent);
+        receiverIntent.setAction(ACTION_NEW_121_CHAT_MSG);
+        context.startService(receiverIntent);
+    }
 
 }

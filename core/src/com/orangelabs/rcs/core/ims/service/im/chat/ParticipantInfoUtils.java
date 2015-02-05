@@ -49,7 +49,8 @@ public class ParticipantInfoUtils {
 	/**
 	 * The logger
 	 */
-	private static final Logger logger = Logger.getLogger(ParticipantInfoUtils.class.getSimpleName());
+	private static final Logger logger = Logger.getLogger(ParticipantInfoUtils.class
+			.getSimpleName());
 
 	/**
 	 * Create a set of contacts from a set of ParticipantInfo
@@ -79,8 +80,7 @@ public class ParticipantInfoUtils {
 	public static Set<ParticipantInfo> parseResourceList(String xml) {
 		Set<ParticipantInfo> result = new HashSet<ParticipantInfo>();
 		try {
-			InputSource pidfInput = new InputSource(new ByteArrayInputStream(
-					xml.getBytes(UTF8)));
+			InputSource pidfInput = new InputSource(new ByteArrayInputStream(xml.getBytes(UTF8)));
 			ResourceListParser listParser = new ResourceListParser(pidfInput);
 			ResourceListDocument resList = listParser.getResourceList();
 			if (resList != null) {
@@ -139,7 +139,8 @@ public class ParticipantInfoUtils {
 			if (participant.getStatus() != item.getStatus()) {
 				// Update status
 				set.remove(item);
-				ParticipantInfo updatedParticipant = new ParticipantInfo(participant.getContact(), participant.getStatus());
+				ParticipantInfo updatedParticipant = new ParticipantInfo(participant.getContact(),
+						participant.getStatus());
 				set.add(updatedParticipant);
 				return true;
 			}
@@ -169,10 +170,10 @@ public class ParticipantInfoUtils {
 	}
 
 	/**
-	 * Convert List of contacts to Set of ParticipantInfo because AIDL does not
-	 * support Set type.
+	 * Convert List of contacts to Set of ParticipantInfo because AIDL does not support Set type.
 	 *
-	 * @param contacts list of contact id
+	 * @param contacts
+	 *            list of contact id
 	 * @return the corresponding ParticipantInfo set
 	 */
 	public static Set<ParticipantInfo> getParticipantInfos(List<ContactId> contacts) {

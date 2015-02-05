@@ -31,26 +31,27 @@ public abstract class RegistrationProcedure {
 	/**
 	 * Initialize procedure
 	 */
-	public abstract void init(); 
+	public abstract void init();
 
 	/**
 	 * Returns the home domain name
 	 * 
 	 * @return Domain name
 	 */
-	public abstract String getHomeDomain(); 
-	
+	public abstract String getHomeDomain();
+
 	/**
 	 * Returns the public URI or IMPU for registration
 	 * 
 	 * @return Public URI
 	 */
 	public abstract String getPublicUri();
-	
+
 	/**
 	 * Write the security header to REGISTER request
 	 * 
-	 * @param request Request
+	 * @param request
+	 *            Request
 	 * @throws CoreException
 	 */
 	public abstract void writeSecurityHeader(SipRequest request) throws CoreException;
@@ -58,7 +59,8 @@ public abstract class RegistrationProcedure {
 	/**
 	 * Read the security header from REGISTER response
 	 * 
-	 * @param response Response
+	 * @param response
+	 *            Response
 	 * @throws CoreException
 	 */
 	public abstract void readSecurityHeader(SipResponse response) throws CoreException;

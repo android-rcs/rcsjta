@@ -26,8 +26,7 @@ public interface IMultimediaMessagingSessionEventBroadcaster {
 
 	public void broadcastMessageReceived(ContactId contact, String sessionId, byte[] message);
 
-	public void broadcastStateChanged(ContactId contact, String sessionId,
-			int state, int reasonCode);
+	public void broadcastStateChanged(ContactId contact, String sessionId, int state, int reasonCode);
 
 	public void broadcastInvitation(String sessionId, Intent msrpSessionInvite);
 }

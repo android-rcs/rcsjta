@@ -30,7 +30,7 @@ public interface MediaInput {
 	 * @throws MediaException
 	 */
 	public void open() throws MediaException;
-	
+
 	/**
 	 * Close the player
 	 */

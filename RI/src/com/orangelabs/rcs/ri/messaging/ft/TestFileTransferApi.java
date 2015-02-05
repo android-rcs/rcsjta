@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.messaging.ft;
 
 import android.app.ListActivity;
@@ -36,33 +37,32 @@ public class TestFileTransferApi extends ListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         // Set items
         String[] items = {
-    		getString(R.string.menu_transfer_file),
-    		getString(R.string.menu_file_transfer_log),
-    		getString(R.string.menu_file_transfer_config)
-    	};
+                getString(R.string.menu_transfer_file), getString(R.string.menu_file_transfer_log),
+                getString(R.string.menu_file_transfer_config)
+        };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        switch(position) {
-	        case 0:
-            	startActivity(new Intent(this, InitiateFileTransfer.class));
-	            break;
-	            
-	        case 1:
-            	startActivity(new Intent(this, FileTransferList.class));
-	            break;
-	            
-	        case 2:
-            	startActivity(new Intent(this, FileTransferServiceConfigActivity.class));
-	            break;
+        switch (position) {
+            case 0:
+                startActivity(new Intent(this, InitiateFileTransfer.class));
+                break;
+
+            case 1:
+                startActivity(new Intent(this, FileTransferList.class));
+                break;
+
+            case 2:
+                startActivity(new Intent(this, FileTransferServiceConfigActivity.class));
+                break;
         }
     }
 }

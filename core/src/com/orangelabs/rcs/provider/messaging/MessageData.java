@@ -36,8 +36,8 @@ public class MessageData {
 	static final String KEY_CHAT_ID = ChatLog.Message.CHAT_ID;
 
 	/**
-	 * ContactId formatted number of remote contact or null if the message is an
-	 * outgoing group chat message.
+	 * ContactId formatted number of remote contact or null if the message is an outgoing group chat
+	 * message.
 	 */
 	static final String KEY_CONTACT = ChatLog.Message.CONTACT;
 
@@ -47,8 +47,7 @@ public class MessageData {
 	static final String KEY_MESSAGE_ID = ChatLog.Message.MESSAGE_ID;
 
 	/**
-	 * Content of the message (as defined by one of the mimetypes in
-	 * ChatLog.Message.Mimetype)
+	 * Content of the message (as defined by one of the mimetypes in ChatLog.Message.Mimetype)
 	 */
 	static final String KEY_CONTENT = ChatLog.Message.CONTENT;
 
@@ -62,7 +61,7 @@ public class MessageData {
 	 *
 	 * @see Direction
 	 */
-	static final String KEY_DIRECTION = ChatLog.Message.DIRECTION;	
+	static final String KEY_DIRECTION = ChatLog.Message.DIRECTION;
 
 	/**
 	 * @see ChatLog.Message.Status.Content for the list of status.
@@ -87,19 +86,19 @@ public class MessageData {
 	 * Time when message inserted
 	 */
 	static final String KEY_TIMESTAMP = ChatLog.Message.TIMESTAMP;
-	
+
 	/**
 	 * Time when message sent. If 0 means not sent.
 	 */
-    static final String KEY_TIMESTAMP_SENT = ChatLog.Message.TIMESTAMP_SENT;
-    
+	static final String KEY_TIMESTAMP_SENT = ChatLog.Message.TIMESTAMP_SENT;
+
 	/**
 	 * Time when message delivered. If 0 means not delivered
 	 */
-    static final String KEY_TIMESTAMP_DELIVERED = ChatLog.Message.TIMESTAMP_DELIVERED;
-    
+	static final String KEY_TIMESTAMP_DELIVERED = ChatLog.Message.TIMESTAMP_DELIVERED;
+
 	/**
 	 * Time when message displayed. If 0 means not displayed.
 	 */
-    static final String KEY_TIMESTAMP_DISPLAYED = ChatLog.Message.TIMESTAMP_DISPLAYED;
+	static final String KEY_TIMESTAMP_DISPLAYED = ChatLog.Message.TIMESTAMP_DISPLAYED;
 }

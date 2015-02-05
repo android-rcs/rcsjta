@@ -34,41 +34,40 @@ import com.orangelabs.rcs.ri.R;
  * @author Jean-Marc AUFFRET
  */
 public class TestServiceApi extends ListActivity {
-    
-	@Override
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         // Set items
         String[] items = {
-    		getString(R.string.menu_service_status),
-    		getString(R.string.menu_registration_status),
-    		getString(R.string.menu_others),
-    		getString(R.string.menu_service_configuration)
+                getString(R.string.menu_service_status),
+                getString(R.string.menu_registration_status), getString(R.string.menu_others),
+                getString(R.string.menu_service_configuration)
         };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        switch(position) {
-	        case 0:
-            	startActivity(new Intent(this, ServiceStatus.class));
-                break;
-                
-	        case 1:
-            	startActivity(new Intent(this, RegistrationStatus.class));
+        switch (position) {
+            case 0:
+                startActivity(new Intent(this, ServiceStatus.class));
                 break;
 
-	        case 2:
-            	startActivity(new Intent(this, OtherServices.class));
+            case 1:
+                startActivity(new Intent(this, RegistrationStatus.class));
                 break;
-                
-	        case 3:
-	        	startActivity(new Intent(this, ServiceConfigurationActivity.class));
+
+            case 2:
+                startActivity(new Intent(this, OtherServices.class));
+                break;
+
+            case 3:
+                startActivity(new Intent(this, ServiceConfigurationActivity.class));
                 break;
         }
     }

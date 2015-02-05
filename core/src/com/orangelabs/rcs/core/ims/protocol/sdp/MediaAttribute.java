@@ -37,8 +37,10 @@ public class MediaAttribute {
 	/**
 	 * Constructor
 	 * 
-	 * @param name Attribute name
-	 * @param value Attribute value
+	 * @param name
+	 *            Attribute name
+	 * @param value
+	 *            Attribute value
 	 */
 	public MediaAttribute(String name, String value) {
 		this.name = name;

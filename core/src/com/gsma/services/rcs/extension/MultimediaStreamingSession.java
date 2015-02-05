@@ -26,29 +26,30 @@ import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
- * This class maintains the information related to a multimedia
- * session for a real time streaming service. 
+ * This class maintains the information related to a multimedia session for a real time streaming
+ * service.
  * 
  * @author Jean-Marc AUFFRET
  */
 public class MultimediaStreamingSession extends MultimediaSession {
-    /**
-     * Streaming session interface
-     */
-    private IMultimediaStreamingSession sessionIntf;
+	/**
+	 * Streaming session interface
+	 */
+	private IMultimediaStreamingSession sessionIntf;
 
-    /**
-     * Constructor
-     * 
-     * @param sessionInf Multimedia session interface
-     */
-    MultimediaStreamingSession(IMultimediaStreamingSession sessionIntf) {
-    	super();
-    	
-    	this.sessionIntf = sessionIntf;
-    }
-    
-    /**
+	/**
+	 * Constructor
+	 * 
+	 * @param sessionInf
+	 *            Multimedia session interface
+	 */
+	MultimediaStreamingSession(IMultimediaStreamingSession sessionIntf) {
+		super();
+
+		this.sessionIntf = sessionIntf;
+	}
+
+	/**
 	 * Returns the session ID of the multimedia session
 	 * 
 	 * @return Session ID
@@ -57,7 +58,7 @@ public class MultimediaStreamingSession extends MultimediaSession {
 	public String getSessionId() throws RcsServiceException {
 		try {
 			return sessionIntf.getSessionId();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
@@ -71,11 +72,11 @@ public class MultimediaStreamingSession extends MultimediaSession {
 	public ContactId getRemoteContact() throws RcsServiceException {
 		try {
 			return sessionIntf.getRemoteContact();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Returns the service ID
 	 * 
@@ -85,11 +86,11 @@ public class MultimediaStreamingSession extends MultimediaSession {
 	public String getServiceId() throws RcsServiceException {
 		try {
 			return sessionIntf.getServiceId();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Returns the state of the session
 	 * 
@@ -100,7 +101,7 @@ public class MultimediaStreamingSession extends MultimediaSession {
 	public int getState() throws RcsServiceException {
 		try {
 			return sessionIntf.getState();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
@@ -119,7 +120,7 @@ public class MultimediaStreamingSession extends MultimediaSession {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Returns the direction of the session
 	 *
@@ -130,11 +131,11 @@ public class MultimediaStreamingSession extends MultimediaSession {
 	public Direction getDirection() throws RcsServiceException {
 		try {
 			return Direction.valueOf(sessionIntf.getDirection());
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
-	}	
-	
+	}
+
 	/**
 	 * Accepts session invitation.
 	 * 
@@ -143,11 +144,11 @@ public class MultimediaStreamingSession extends MultimediaSession {
 	public void acceptInvitation() throws RcsServiceException {
 		try {
 			sessionIntf.acceptInvitation();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Rejects session invitation
 	 * 
@@ -156,11 +157,11 @@ public class MultimediaStreamingSession extends MultimediaSession {
 	public void rejectInvitation() throws RcsServiceException {
 		try {
 			sessionIntf.rejectInvitation();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Aborts the session
 	 * 
@@ -169,7 +170,7 @@ public class MultimediaStreamingSession extends MultimediaSession {
 	public void abortSession() throws RcsServiceException {
 		try {
 			sessionIntf.abortSession();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
@@ -177,7 +178,8 @@ public class MultimediaStreamingSession extends MultimediaSession {
 	/**
 	 * Sends a payload in real time
 	 * 
-	 * @param content Payload content
+	 * @param content
+	 *            Payload content
 	 * @throws RcsServiceException
 	 */
 	public void sendPayload(byte[] content) throws RcsServiceException {

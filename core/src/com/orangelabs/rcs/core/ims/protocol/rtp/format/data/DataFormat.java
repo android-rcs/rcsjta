@@ -29,16 +29,16 @@ public class DataFormat extends Format {
 	 * Encoding name
 	 */
 	public static final String ENCODING = "X-RCS";
-	
+
 	/**
 	 * Payload type
 	 */
 	public static final int PAYLOAD = 97;
-	
-    /**
-     * Constructor
-     */
-    public DataFormat() {
-    	super(ENCODING, PAYLOAD);
-    }
+
+	/**
+	 * Constructor
+	 */
+	public DataFormat() {
+		super(ENCODING, PAYLOAD);
+	}
 }

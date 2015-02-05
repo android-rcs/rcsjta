@@ -33,50 +33,54 @@ public class ChatError extends ImsSessionBasedServiceError {
 	 * Media session has failed (e.g. MSRP failure)
 	 */
 	public final static int MEDIA_SESSION_FAILED = CHAT_ERROR_CODES + 1;
-	
+
 	/**
 	 * Subscription to conference package has failed
 	 */
 	public final static int SUBSCRIBE_CONFERENCE_FAILED = CHAT_ERROR_CODES + 2;
-	
+
 	/**
-	 * Group chat session not found in the server 
+	 * Group chat session not found in the server
 	 */
 	public final static int SESSION_NOT_FOUND = CHAT_ERROR_CODES + 3;
-	
+
 	/**
 	 * Group chat restart has failed
 	 */
 	public final static int SESSION_RESTART_FAILED = CHAT_ERROR_CODES + 4;
 
-    /**
-     * Media session can't be used for sending any longer (e.g. MSRP error report received)
-     */
-    public final static int MEDIA_SESSION_BROKEN = CHAT_ERROR_CODES + 5;
-    
-    /**
-     * Constructor
-     *
-     * @param error Error code
-     */
-    public ChatError(ImsServiceError error) {
-        super(error.getErrorCode(), error.getMessage());
-    }
+	/**
+	 * Media session can't be used for sending any longer (e.g. MSRP error report received)
+	 */
+	public final static int MEDIA_SESSION_BROKEN = CHAT_ERROR_CODES + 5;
+
+	/**
+	 * Constructor
+	 *
+	 * @param error
+	 *            Error code
+	 */
+	public ChatError(ImsServiceError error) {
+		super(error.getErrorCode(), error.getMessage());
+	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param code Error code
+	 * @param code
+	 *            Error code
 	 */
 	public ChatError(int code) {
 		super(code);
 	}
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param code Error code
-	 * @param msg Detail message 
+	 * @param code
+	 *            Error code
+	 * @param msg
+	 *            Detail message
 	 */
 	public ChatError(int code, String msg) {
 		super(code, msg);

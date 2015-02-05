@@ -27,7 +27,7 @@ import java.util.Vector;
  */
 public class RlmiDocument {
 	private String uri = null;
-	
+
 	private Vector<ResourceInstance> resourceList = new Vector<ResourceInstance>();
 
 	public RlmiDocument(String uri) {

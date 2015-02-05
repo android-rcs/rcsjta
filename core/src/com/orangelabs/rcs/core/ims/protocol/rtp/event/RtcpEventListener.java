@@ -27,12 +27,13 @@ public interface RtcpEventListener {
 	/**
 	 * Receive RTCP event
 	 * 
-	 * @param event RTCP event
+	 * @param event
+	 *            RTCP event
 	 */
 	void receiveRtcpEvent(RtcpEvent event);
 
-    /**
-     * Invoked when the RTCP connection times out
-     */
-    void connectionTimeout();
+	/**
+	 * Invoked when the RTCP connection times out
+	 */
+	void connectionTimeout();
 }

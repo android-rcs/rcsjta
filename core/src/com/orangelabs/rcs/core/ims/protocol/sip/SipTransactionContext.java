@@ -24,9 +24,9 @@ import javax2.sip.message.Message;
 import javax2.sip.message.Response;
 
 /**
- * SIP transaction context object composed of a request and of the corresponding
- * response. The Transaction context is used for waiting responses of requests
- * and also for waiting an ACK message (special case).
+ * SIP transaction context object composed of a request and of the corresponding response. The
+ * Transaction context is used for waiting responses of requests and also for waiting an ACK message
+ * (special case).
  *
  * @author JM. Auffret
  * @author yplo6403
@@ -41,17 +41,17 @@ public class SipTransactionContext {
 	public interface INotifySipProvisionalResponse {
 		public void handle180Ringing(SipResponse response);
 	}
-	
+
 	/**
 	 * Transaction
 	 */
 	private Transaction mTransaction;
-	
+
 	/**
-	 * Received message 
+	 * Received message
 	 */
 	private SipMessage recvMsg;
-	
+
 	/**
 	 * Callback to handle SIP provisional response
 	 */
@@ -127,7 +127,7 @@ public class SipTransactionContext {
 	 */
 	public boolean isSipIntermediateResponse() {
 		int code = getStatusCode();
-	    return (code < 200);
+		return (code < 200);
 	}
 
 	/**
@@ -137,7 +137,7 @@ public class SipTransactionContext {
 	 */
 	public boolean isSipSuccessfullResponse() {
 		int code = getStatusCode();
-	    return (Response.OK <= code && Response.MULTIPLE_CHOICES > code);
+		return (Response.OK <= code && Response.MULTIPLE_CHOICES > code);
 	}
 
 	/**
@@ -147,7 +147,7 @@ public class SipTransactionContext {
 	 */
 	public boolean isSipAck() {
 		if (recvMsg != null) {
-			SipRequest req = (SipRequest)recvMsg;
+			SipRequest req = (SipRequest) recvMsg;
 			if (req.getMethod().equals("ACK")) {
 				return true;
 			} else {
@@ -165,7 +165,7 @@ public class SipTransactionContext {
 	 */
 	public SipResponse getSipResponse() {
 		if (isSipResponse()) {
-			return (SipResponse)recvMsg;
+			return (SipResponse) recvMsg;
 		} else {
 			return null;
 		}
@@ -177,9 +177,9 @@ public class SipTransactionContext {
 	 * @return Returns a status code or -1 if it's not a SIP response (e.g. ACK message)
 	 */
 	public int getStatusCode() {
-	    int ret = -1;
+		int ret = -1;
 		if (isSipResponse()) {
-			SipResponse resp = (SipResponse)recvMsg;
+			SipResponse resp = (SipResponse) recvMsg;
 			ret = resp.getStatusCode();
 		}
 		return ret;
@@ -191,10 +191,10 @@ public class SipTransactionContext {
 	 * @return Returns a reason phrase or null if it's not a SIP response (e.g. ACK message)
 	 */
 	public String getReasonPhrase() {
-	    String ret = null;
+		String ret = null;
 		SipResponse resp = getSipResponse();
 		if (resp != null) {
-		    ret = resp.getReasonPhrase();
+			ret = resp.getReasonPhrase();
 		}
 		return ret;
 	}
@@ -202,30 +202,32 @@ public class SipTransactionContext {
 	/**
 	 * Wait the response of a request until a timeout occurs
 	 * 
-	 * @param timeout Timeout value
+	 * @param timeout
+	 *            Timeout value
 	 */
 	public void waitResponse(int timeout) {
 		try {
 			if (recvMsg != null) {
 				// Response already received, no need to wait
 				return;
-			}			
-			synchronized(this) {
+			}
+			synchronized (this) {
 				super.wait(timeout * 1000);
 			}
-		} catch(InterruptedException e) {
+		} catch (InterruptedException e) {
 			// Thread has been interrupted
 			recvMsg = null;
 		}
 	}
 
 	/**
-	 * A response has been received (SIP response or ACK or any other SIP message) 
+	 * A response has been received (SIP response or ACK or any other SIP message)
 	 * 
-	 * @param msg SIP message object
+	 * @param msg
+	 *            SIP message object
 	 */
 	public void responseReceived(SipMessage msg) {
-		synchronized(this) {
+		synchronized (this) {
 			recvMsg = msg;
 			super.notify();
 		}
@@ -244,26 +246,29 @@ public class SipTransactionContext {
 	/**
 	 * Get the transaction context ID associated a SIP message
 	 * 
-	 * @param msg SIP message
+	 * @param msg
+	 *            SIP message
 	 * @return Transaction context ID
 	 */
-	public static String getTransactionContextId(SipMessage msg)  {
+	public static String getTransactionContextId(SipMessage msg) {
 		return getTransactionContextId(msg.getStackMessage());
 	}
 
 	/**
 	 * Get the transaction context ID associated a SIP message
 	 * 
-	 * @param msg SIP message
+	 * @param msg
+	 *            SIP message
 	 * @return Transaction context ID
 	 */
-	public static String getTransactionContextId(Message msg)  {
-		CallIdHeader header = (CallIdHeader)msg.getHeader(CallIdHeader.NAME);
+	public static String getTransactionContextId(Message msg) {
+		CallIdHeader header = (CallIdHeader) msg.getHeader(CallIdHeader.NAME);
 		return header.getCallId();
 	}
 
 	/**
 	 * Get the callback to handle provisional SIP response
+	 * 
 	 * @return the callback
 	 */
 	public INotifySipProvisionalResponse getCallbackSipProvisionalResponse() {

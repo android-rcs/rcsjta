@@ -34,7 +34,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-
 /**
  * Multimedia content
  *
@@ -66,18 +65,19 @@ public abstract class MmContent {
 	 */
 	private byte[] data = null;
 
-    /**
-     * Stream to write received data direct to file.
-     */
-    private BufferedOutputStream out = null;
+	/**
+	 * Stream to write received data direct to file.
+	 */
+	private BufferedOutputStream out = null;
 
 	private ParcelFileDescriptor pfd;
 
-    /**
-     * Constructor
-     * 
-     * @param encoding Encoding
-     */
+	/**
+	 * Constructor
+	 * 
+	 * @param encoding
+	 *            Encoding
+	 */
 	public MmContent(String encoding) {
 		this.encoding = encoding;
 		this.size = -1;
@@ -86,9 +86,12 @@ public abstract class MmContent {
 	/**
 	 * Constructor
 	 *
-	 * @param fileName File name
-	 * @param size Content size
-	 * @param encoding Encoding
+	 * @param fileName
+	 *            File name
+	 * @param size
+	 *            Content size
+	 * @param encoding
+	 *            Encoding
 	 */
 	public MmContent(String fileName, long size, String encoding) {
 		this.fileName = fileName;
@@ -96,13 +99,17 @@ public abstract class MmContent {
 		this.encoding = encoding;
 	}
 
-    /**
+	/**
 	 * Constructor
 	 *
-	 * @param file Uri
-	 * @param encoding Encoding
-	 * @param size Content size
-	 * @param fileName File name
+	 * @param file
+	 *            Uri
+	 * @param encoding
+	 *            Encoding
+	 * @param size
+	 *            Content size
+	 * @param fileName
+	 *            File name
 	 */
 	public MmContent(Uri file, String encoding, long size, String fileName) {
 		this.file = file;
@@ -111,7 +118,7 @@ public abstract class MmContent {
 		this.fileName = fileName;
 	}
 
-    /**
+	/**
 	 * Returns the uri
 	 *
 	 * @return uri
@@ -123,122 +130,125 @@ public abstract class MmContent {
 	/**
 	 * Sets the uri
 	 *
-	 * @param file Uri
+	 * @param file
+	 *            Uri
 	 */
 	public void setUri(Uri file) {
 		this.file = file;
 	}
 
-    /**
-     * Returns the content size in bytes
-     * 
-     * @return Size in bytes
-     */
+	/**
+	 * Returns the content size in bytes
+	 * 
+	 * @return Size in bytes
+	 */
 	public long getSize() {
 		return size;
 	}
 
-    /**
-     * Returns the content size in Kbytes
-     * 
-     * @return Size in Kbytes
-     */
+	/**
+	 * Returns the content size in Kbytes
+	 * 
+	 * @return Size in Kbytes
+	 */
 	public long getKbSize() {
-		return size/1024;
+		return size / 1024;
 	}
 
 	/**
-     * Returns the content size in Mbytes
-     * 
-     * @return Size in Mbytes
-     */
-	public long getMbSize(){
-		return size/(1024*1024);
+	 * Returns the content size in Mbytes
+	 * 
+	 * @return Size in Mbytes
+	 */
+	public long getMbSize() {
+		return size / (1024 * 1024);
 	}
 
-    /**
-     * Returns the encoding type
-     * 
-     * @return Encoding type
-     */
+	/**
+	 * Returns the encoding type
+	 * 
+	 * @return Encoding type
+	 */
 	public String getEncoding() {
 		return encoding;
 	}
 
 	/**
-     * Set the encoding type
-     * 
-     * @param encoding Encoding type
-     */
-    public void setEncoding(String encoding) {
-        this.encoding = encoding;
-    }
+	 * Set the encoding type
+	 * 
+	 * @param encoding
+	 *            Encoding type
+	 */
+	public void setEncoding(String encoding) {
+		this.encoding = encoding;
+	}
 
-    /**
-     * Returns the codec from the encoding type
-     * 
-     * @return Codec name
-     */
+	/**
+	 * Returns the codec from the encoding type
+	 * 
+	 * @return Codec name
+	 */
 	public String getCodec() {
 		int index = encoding.indexOf("/");
 		if (index != -1) {
-			return encoding.substring(index+1);
+			return encoding.substring(index + 1);
 		} else {
 			return encoding;
 		}
-    }
+	}
 
 	/**
-     * Get the name
-     * 
-     * @return Name
-     */
+	 * Get the name
+	 * 
+	 * @return Name
+	 */
 	public String getName() {
 		return fileName;
-    }
-	
-	/**
-     * Set the name
-     * 
-     * @return Name
-     */
-	public void setName(String fileName) {
-		this.fileName = fileName;
-    }
+	}
 
 	/**
-     * Returns the string representation of a content
-     * 
-     * @return String
-     */
+	 * Set the name
+	 * 
+	 * @return Name
+	 */
+	public void setName(String fileName) {
+		this.fileName = fileName;
+	}
+
+	/**
+	 * Returns the string representation of a content
+	 * 
+	 * @return String
+	 */
 	public String toString() {
 		return file + " (" + size + " bytes)";
 	}
 
 	/**
-     * Returns the content data
-     * 
-     * @return Data
-     */
+	 * Returns the content data
+	 * 
+	 * @return Data
+	 */
 	public byte[] getData() {
 		return data;
 	}
 
 	/**
-     * Sets the content data
-     * 
-     * @param Data
-     */
+	 * Sets the content data
+	 * 
+	 * @param Data
+	 */
 	public void setData(byte[] data) {
 		this.data = data;
 	}
 
-    /**
-     * Write data chunk to file
-     *
-     * @param data Data to append to file
-     * @throws IOException
-     */
+	/**
+	 * Write data chunk to file
+	 *
+	 * @param data
+	 *            Data to append to file
+	 * @throws IOException
+	 */
 	public void writeData2File(byte[] data) throws IOException, IllegalArgumentException {
 		if (out == null) {
 			pfd = AndroidFactory.getApplicationContext().getContentResolver()
@@ -249,31 +259,31 @@ public abstract class MmContent {
 		out.write(data);
 	}
 
-    /**
-     * Close written file and update media storage.
-     *
-     * @throws IOException
-     */
-    public void closeFile() throws IOException {
-        try {
-            if (out != null) {
-                out.flush();
-                out.close();
-                out = null;
-                FileFactory.getFactory().updateMediaStorage(getUri().getEncodedPath());
-            }
-        } finally {
-            if (pfd != null) {
-                pfd.close();
-            }
-        }
-    }
+	/**
+	 * Close written file and update media storage.
+	 *
+	 * @throws IOException
+	 */
+	public void closeFile() throws IOException {
+		try {
+			if (out != null) {
+				out.flush();
+				out.close();
+				out = null;
+				FileFactory.getFactory().updateMediaStorage(getUri().getEncodedPath());
+			}
+		} finally {
+			if (pfd != null) {
+				pfd.close();
+			}
+		}
+	}
 
-    /**
-     * Delete File.
-     *
-     * @throws IOException
-     */
+	/**
+	 * Delete File.
+	 *
+	 * @throws IOException
+	 */
 	public void deleteFile() throws IOException {
 		if (out != null) {
 			try {

@@ -49,30 +49,38 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
 	 * Boundary tag
 	 */
 	private final static String BOUNDARY_TAG = "boundary1";
-	
+
 	/**
 	 * Default SO_TIMEOUT value (in seconds)
 	 */
 	public final static int DEFAULT_SO_TIMEOUT = 30;
 
-    /**
-     * The logger
-     */
-    private static final Logger logger = Logger.getLogger(ImsFileSharingSession.class.getSimpleName());
+	/**
+	 * The logger
+	 */
+	private static final Logger logger = Logger.getLogger(ImsFileSharingSession.class
+			.getSimpleName());
 
-    /**
+	/**
 	 * Constructor
 	 * 
-	 * @param parent IMS service
-	 * @param content Content of file to be shared
-	 * @param contact Remote contact identifier
-	 * @param fileIcon Content of file icon
-	 * @param filetransferId File transfer Id
+	 * @param parent
+	 *            IMS service
+	 * @param content
+	 *            Content of file to be shared
+	 * @param contact
+	 *            Remote contact identifier
+	 * @param fileIcon
+	 *            Content of file icon
+	 * @param filetransferId
+	 *            File transfer Id
 	 */
-	public ImsFileSharingSession(ImsService parent, MmContent content, ContactId contact, MmContent fileIcon, String filetransferId) {
-		super(parent, content, contact, PhoneUtils.formatContactIdToUri(contact), fileIcon, filetransferId);
+	public ImsFileSharingSession(ImsService parent, MmContent content, ContactId contact,
+			MmContent fileIcon, String filetransferId) {
+		super(parent, content, contact, PhoneUtils.formatContactIdToUri(contact), fileIcon,
+				filetransferId);
 	}
-	
+
 	/**
 	 * Returns the "file-transfer-id" attribute
 	 * 
@@ -80,19 +88,18 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
 	 */
 	public String getFileTransferIdAttribute() {
 		return "" + System.currentTimeMillis();
-	}	
-	
+	}
+
 	/**
 	 * Returns the "file-selector" attribute
 	 * 
 	 * @return String
 	 */
 	public String getFileSelectorAttribute() {
-		return "name:\"" + getContent().getName() + "\"" + 
-			" type:" + getContent().getEncoding() +
-			" size:" + getContent().getSize();
+		return "name:\"" + getContent().getName() + "\"" + " type:" + getContent().getEncoding()
+				+ " size:" + getContent().getSize();
 	}
-	
+
 	/**
 	 * Returns the "file-location" attribute
 	 * 
@@ -107,108 +114,113 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
 		}
 	}
 
-    /**
-     * Create an INVITE request
-     *
-     * @return the INVITE request
-     * @throws SipException 
-     */
-    public SipRequest createInvite() throws SipException {
-        SipRequest invite;
-    	if (getFileicon() != null) {
-	        invite = SipMessageFactory.createMultipartInvite(
-	                getDialogPath(),
-	                InstantMessagingService.FT_FEATURE_TAGS,
-	                getDialogPath().getLocalContent(),
-	                BOUNDARY_TAG);
-    	} else {
-	        invite = SipMessageFactory.createInvite(
-	                getDialogPath(),
-	                InstantMessagingService.FT_FEATURE_TAGS,
-	                getDialogPath().getLocalContent());
-    	}
-        
-    	// Add a contribution ID header
-        invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
+	/**
+	 * Create an INVITE request
+	 *
+	 * @return the INVITE request
+	 * @throws SipException
+	 */
+	public SipRequest createInvite() throws SipException {
+		SipRequest invite;
+		if (getFileicon() != null) {
+			invite = SipMessageFactory.createMultipartInvite(getDialogPath(),
+					InstantMessagingService.FT_FEATURE_TAGS, getDialogPath().getLocalContent(),
+					BOUNDARY_TAG);
+		} else {
+			invite = SipMessageFactory.createInvite(getDialogPath(),
+					InstantMessagingService.FT_FEATURE_TAGS, getDialogPath().getLocalContent());
+		}
 
-        return invite;
-    }
+		// Add a contribution ID header
+		invite.addHeader(ChatUtils.HEADER_CONTRIBUTION_ID, getContributionID());
 
-    /**
-     * Handle error 
-     * 
-     * @param error Error
-     */
-    public void handleError(ImsServiceError error) {
-        if (isSessionInterrupted()) {
-            return;
-        }
+		return invite;
+	}
 
-        // Error    
-        if (logger.isActivated()) {
-            logger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
-        }
+	/**
+	 * Handle error
+	 * 
+	 * @param error
+	 *            Error
+	 */
+	public void handleError(ImsServiceError error) {
+		if (isSessionInterrupted()) {
+			return;
+		}
 
-        // Close media session
-        closeMediaSession();
+		// Error
+		if (logger.isActivated()) {
+			logger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
+		}
 
-        // Remove the current session
-        removeSession();
+		// Close media session
+		closeMediaSession();
 
-        ContactId contact = getRemoteContact();
-        for(int j=0; j < getListeners().size(); j++) {
-            ((FileSharingSessionListener)getListeners().get(j)).handleTransferError(new FileSharingError(error), contact);
-        }
-    }
+		// Remove the current session
+		removeSession();
 
-    /**
-     * Data transfer error
-     *
-     * @param msgId Message ID
-     * @param error Error code
-     */
-    public void msrpTransferError(String msgId, String error, MsrpSession.TypeMsrpChunk typeMsrpChunk) {
-        if (isSessionInterrupted() || getDialogPath().isSessionTerminated()) {
-            return;
-        }
-        
-        if (logger.isActivated()) {
-            logger.info("Data transfer error " + error);
-        }
+		ContactId contact = getRemoteContact();
+		for (int j = 0; j < getListeners().size(); j++) {
+			((FileSharingSessionListener) getListeners().get(j)).handleTransferError(
+					new FileSharingError(error), contact);
+		}
+	}
 
-        try {
+	/**
+	 * Data transfer error
+	 *
+	 * @param msgId
+	 *            Message ID
+	 * @param error
+	 *            Error code
+	 */
+	public void msrpTransferError(String msgId, String error,
+			MsrpSession.TypeMsrpChunk typeMsrpChunk) {
+		if (isSessionInterrupted() || getDialogPath().isSessionTerminated()) {
+			return;
+		}
+
+		if (logger.isActivated()) {
+			logger.info("Data transfer error " + error);
+		}
+
+		try {
 			// Terminate session
 			terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
 
 			// Close the media session
-            closeMediaSession();
-        } catch(Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't close correctly the file transfer session", e);
-            }
-        }
+			closeMediaSession();
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Can't close correctly the file transfer session", e);
+			}
+		}
 
 		try {
 			ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
 			// Request capabilities
-	        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
+			getImsService().getImsModule().getCapabilityService()
+					.requestContactCapabilities(remote);
 
 		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
-				logger.warn("Cannot request capabilities for contact "+getDialogPath().getRemoteParty() );
+				logger.warn("Cannot request capabilities for contact "
+						+ getDialogPath().getRemoteParty());
 			}
 		}
-        
-        // Remove the current session
-        removeSession();
 
-        // Notify listeners
-        if (!isSessionInterrupted() && !isSessionTerminatedByRemote()) {
-        	ContactId contact = getRemoteContact();
-            for(int j=0; j < getListeners().size(); j++) {
-                ((FileSharingSessionListener)getListeners().get(j)).handleTransferError(new FileSharingError(FileSharingError.MEDIA_TRANSFER_FAILED, error), contact);
-            }
-        }
-    }
+		// Remove the current session
+		removeSession();
+
+		// Notify listeners
+		if (!isSessionInterrupted() && !isSessionTerminatedByRemote()) {
+			ContactId contact = getRemoteContact();
+			for (int j = 0; j < getListeners().size(); j++) {
+				((FileSharingSessionListener) getListeners().get(j)).handleTransferError(
+						new FileSharingError(FileSharingError.MEDIA_TRANSFER_FAILED, error),
+						contact);
+			}
+		}
+	}
 
 }

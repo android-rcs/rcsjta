@@ -33,50 +33,52 @@ public class CodecChain {
 	 * List of codecs
 	 */
 	private Codec[] codecs = null;
-	
+
 	/**
 	 * List of buffers
 	 */
 	private Buffer[] buffers = null;
-	
+
 	/**
 	 * Renderer
 	 */
 	private ProcessorOutputStream renderer;
-	
-	/**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    /**
+	/**
+	 * The logger
+	 */
+	private Logger logger = Logger.getLogger(this.getClass().getName());
+
+	/**
 	 * Constructor
 	 * 
-	 * @param codecs Codecs list
+	 * @param codecs
+	 *            Codecs list
 	 */
 	public CodecChain(Codec[] codecs, ProcessorOutputStream renderer) {
 		this.codecs = codecs;
 		this.renderer = renderer;
 
 		// Create the buffer chain
-		buffers = new Buffer[codecs.length+1];
+		buffers = new Buffer[codecs.length + 1];
 		for (int i = 0; i < codecs.length; i++) {
 			buffers[i] = new Buffer();
 		}
-		
+
 		// Prepare codecs
-    	for(int i=0; i < codecs.length; i++) {
-    		if (logger.isActivated()) {
-    			logger.debug("Open codec " + codecs[i].getClass().getName());
-    		}
-    		codecs[i].open();
-    	}
+		for (int i = 0; i < codecs.length; i++) {
+			if (logger.isActivated()) {
+				logger.debug("Open codec " + codecs[i].getClass().getName());
+			}
+			codecs[i].open();
+		}
 	}
-	
+
 	/**
 	 * Codec chain processing
 	 * 
-	 * @param input Input buffer
+	 * @param input
+	 *            Input buffer
 	 * @return Result
 	 */
 	public int process(Buffer input) {
@@ -87,8 +89,10 @@ public class CodecChain {
 	/**
 	 * Recursive codec processing
 	 *
-	 * @param codecNo Codec index
-	 * @param input Input buffer
+	 * @param codecNo
+	 *            Codec index
+	 * @param input
+	 *            Input buffer
 	 * @return Result
 	 */
 	private int doProcess(int codecNo, Buffer input) {
@@ -96,18 +100,18 @@ public class CodecChain {
 			// End of chain
 			try {
 				// Write data to the output stream
-                if (input.isFragmented()) {
-                    // Write data from sub-buffers to the output stream
-                    final Buffer[] fragments = input.getFragments();
-                    for (int i = 0; i < input.getFragmentsSize(); i++) {
-                    	Buffer fragment = fragments[i];
-                        renderer.write(fragment);
-                        fragment.setData(null);
-                    }
-                    input.setFragments(null);
-                } else {
-                    renderer.write(input);
-                }
+				if (input.isFragmented()) {
+					// Write data from sub-buffers to the output stream
+					final Buffer[] fragments = input.getFragments();
+					for (int i = 0; i < input.getFragmentsSize(); i++) {
+						Buffer fragment = fragments[i];
+						renderer.write(fragment);
+						fragment.setData(null);
+					}
+					input.setFragments(null);
+				} else {
+					renderer.write(input);
+				}
 				return Codec.BUFFER_PROCESSED_OK;
 			} catch (Exception e) {
 				return Codec.BUFFER_PROCESSED_FAILED;
@@ -120,17 +124,17 @@ public class CodecChain {
 				try {
 					returnVal = codec.process(input, buffers[codecNo]);
 				} catch (Exception e) {
-                    if (logger.isActivated()) {
-                        logger.error("Codec processing exception", e);
-                    }
+					if (logger.isActivated()) {
+						logger.error("Codec processing exception", e);
+					}
 					return Codec.BUFFER_PROCESSED_FAILED;
 				}
-                if (returnVal == Codec.BUFFER_PROCESSED_FAILED) {
-                    if (logger.isActivated()) {
-                        logger.error("Codec processing error " + returnVal);
-                    }
+				if (returnVal == Codec.BUFFER_PROCESSED_FAILED) {
+					if (logger.isActivated()) {
+						logger.error("Codec processing error " + returnVal);
+					}
 					return Codec.BUFFER_PROCESSED_FAILED;
-                }
+				}
 
 				if ((returnVal & Codec.OUTPUT_BUFFER_NOT_FILLED) == 0) {
 					if (!(buffers[codecNo].isDiscard() || buffers[codecNo].isEOM())) {
@@ -139,9 +143,9 @@ public class CodecChain {
 					buffers[codecNo].setOffset(0);
 					buffers[codecNo].setLength(0);
 					buffers[codecNo].setFlags(0);
-                    buffers[codecNo].setFragments(null);
+					buffers[codecNo].setFragments(null);
 				}
-			} while((returnVal & Codec.INPUT_BUFFER_NOT_CONSUMED) != 0);
+			} while ((returnVal & Codec.INPUT_BUFFER_NOT_CONSUMED) != 0);
 
 			return returnVal;
 		}

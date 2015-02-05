@@ -22,8 +22,7 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 public interface IGroupFileTransferBroadcaster {
 
-	public void broadcastStateChanged(String chatId, String transferId, int status,
-			int reasonCode);
+	public void broadcastStateChanged(String chatId, String transferId, int status, int reasonCode);
 
 	public void broadcastProgressUpdate(String chatId, String transferId, long currentSize,
 			long totalSize);

@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.capabilities;
 
 import android.app.Activity;
@@ -36,44 +37,45 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public class RequestAllCapabilities extends Activity {
-   
-  	/**
-	 * API connection manager
-	 */
-	private ApiConnectionManager mCnxManager;
-	
-	/**
-   	 * A locker to exit only once
-   	 */
-   	private LockAccess mExitOnce = new LockAccess();
-   	
+
+    /**
+     * API connection manager
+     */
+    private ApiConnectionManager mCnxManager;
+
+    /**
+     * A locker to exit only once
+     */
+    private LockAccess mExitOnce = new LockAccess();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.capabilities_refresh);
-        
-		// Set buttons callback
+
+        // Set buttons callback
         Button refreshBtn = (Button)findViewById(R.id.refresh_btn);
-        refreshBtn.setOnClickListener(btnSyncListener);        
-        
-		// Register to API connection manager
-		mCnxManager = ApiConnectionManager.getInstance(this);
-		if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), mExitOnce);
-			return;
-		}
-		mCnxManager.startMonitorServices(this, null, RcsServiceName.CAPABILITY);
+        refreshBtn.setOnClickListener(btnSyncListener);
+
+        // Register to API connection manager
+        mCnxManager = ApiConnectionManager.getInstance(this);
+        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
+            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
+                    mExitOnce);
+            return;
+        }
+        mCnxManager.startMonitorServices(this, null, RcsServiceName.CAPABILITY);
     }
 
     @Override
     public void onDestroy() {
-    	super.onDestroy();
-    	if (mCnxManager != null) {
-			mCnxManager.stopMonitorServices(this);
-    	}
+        super.onDestroy();
+        if (mCnxManager != null) {
+            mCnxManager.stopMonitorServices(this);
+        }
     }
 
     /**
@@ -82,27 +84,31 @@ public class RequestAllCapabilities extends Activity {
     private OnClickListener btnSyncListener = new OnClickListener() {
         public void onClick(View v) {
             // Check if the service is available
-        	boolean registered = false;
-        	try {
-        		registered = mCnxManager.getCapabilityApi().isServiceRegistered();
-        	} catch(Exception e) {
-        		Utils.showMessageAndExit(RequestAllCapabilities.this, getString(R.string.label_api_disabled), mExitOnce, e);
-        		return;
-        	}
+            boolean registered = false;
+            try {
+                registered = mCnxManager.getCapabilityApi().isServiceRegistered();
+            } catch (Exception e) {
+                Utils.showMessageAndExit(RequestAllCapabilities.this,
+                        getString(R.string.label_api_disabled), mExitOnce, e);
+                return;
+            }
             if (!registered) {
-    	    	Utils.showMessage(RequestAllCapabilities.this, getString(R.string.label_service_not_available));
-    	    	return;
-            }        	
-        	
-        	try {
-    			// Refresh all contacts
+                Utils.showMessage(RequestAllCapabilities.this,
+                        getString(R.string.label_service_not_available));
+                return;
+            }
+
+            try {
+                // Refresh all contacts
                 mCnxManager.getCapabilityApi().requestAllContactsCapabilities();
-                
-        		// Display message
-    			Utils.displayLongToast(RequestAllCapabilities.this, getString(R.string.label_refresh_success));
-        	} catch(Exception e) {
-        		Utils.showMessageAndExit(RequestAllCapabilities.this, getString(R.string.label_refresh_failed), mExitOnce, e);
-        	}
+
+                // Display message
+                Utils.displayLongToast(RequestAllCapabilities.this,
+                        getString(R.string.label_refresh_success));
+            } catch (Exception e) {
+                Utils.showMessageAndExit(RequestAllCapabilities.this,
+                        getString(R.string.label_refresh_failed), mExitOnce, e);
+            }
         }
     };
 }

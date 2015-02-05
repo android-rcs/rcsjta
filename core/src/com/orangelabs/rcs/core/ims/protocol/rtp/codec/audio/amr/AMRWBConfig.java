@@ -25,19 +25,19 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.codec.audio.amr;
  */
 public class AMRWBConfig {
 
-    /**
-     * Codec name
-     */
-    public final static String CODEC_NAME = "AMR-WB";
+	/**
+	 * Codec name
+	 */
+	public final static String CODEC_NAME = "AMR-WB";
 
-    /**
-     * Default audio sample rate
-     */
-    public final static int SAMPLE_RATE = 16000;
-    
-    /**
-     * Default payload number
-     */
-    public final static int PAYLOAD = 126;
+	/**
+	 * Default audio sample rate
+	 */
+	public final static int SAMPLE_RATE = 16000;
+
+	/**
+	 * Default payload number
+	 */
+	public final static int PAYLOAD = 126;
 
 }

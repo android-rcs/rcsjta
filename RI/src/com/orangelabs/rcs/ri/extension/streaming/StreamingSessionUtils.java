@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.extension.streaming;
 
 /**
@@ -23,8 +24,8 @@ package com.orangelabs.rcs.ri.extension.streaming;
  * @author Jean-Marc AUFFRET
  */
 public class StreamingSessionUtils {
-	/**
-	 * Service ID constant
-	 */
-	public final static String SERVICE_ID = "ext.streaming";
+    /**
+     * Service ID constant
+     */
+    public final static String SERVICE_ID = "ext.streaming";
 }

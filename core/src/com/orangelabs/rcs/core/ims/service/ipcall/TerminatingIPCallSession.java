@@ -55,29 +55,32 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author opob7414
  */
 public class TerminatingIPCallSession extends IPCallSession {
-    /**
-     * The logger
-     */
-    private final static Logger logger = Logger.getLogger(TerminatingIPCallSession.class.getSimpleName());
+	/**
+	 * The logger
+	 */
+	private final static Logger logger = Logger.getLogger(TerminatingIPCallSession.class
+			.getSimpleName());
 
-    /**
-     * Constructor
-     *
-     * @param parent IMS service
-     * @param invite Initial INVITE request
-     */
-    public TerminatingIPCallSession(ImsService parent, SipRequest invite, ContactId contact) {
-        super(parent, contact,
-        		ContentManager.createLiveAudioContentFromSdp(invite.getContentBytes()),
-        		ContentManager.createLiveVideoContentFromSdp(invite.getContentBytes()));
+	/**
+	 * Constructor
+	 *
+	 * @param parent
+	 *            IMS service
+	 * @param invite
+	 *            Initial INVITE request
+	 */
+	public TerminatingIPCallSession(ImsService parent, SipRequest invite, ContactId contact) {
+		super(parent, contact, ContentManager.createLiveAudioContentFromSdp(invite
+				.getContentBytes()), ContentManager.createLiveVideoContentFromSdp(invite
+				.getContentBytes()));
 
-        // Create dialog path
-        createTerminatingDialogPath(invite);
-    }
+		// Create dialog path
+		createTerminatingDialogPath(invite);
+	}
 
-    /**
-     * Background processing
-     */
+	/**
+	 * Background processing
+	 */
 	public void run() {
 		try {
 			if (logger.isActivated()) {
@@ -91,65 +94,65 @@ public class TerminatingIPCallSession extends IPCallSession {
 			AudioContent audio = getAudioContent();
 			VideoContent video = getVideoContent();
 			for (ImsSessionListener listener : listeners) {
-				((IPCallStreamingSessionListener)listener).handleSessionInvited(contact, audio,
+				((IPCallStreamingSessionListener) listener).handleSessionInvited(contact, audio,
 						video);
 			}
 
 			int answer = waitInvitationAnswer();
 			switch (answer) {
-				case ImsServiceSession.INVITATION_REJECTED:
-					if (logger.isActivated()) {
-						logger.debug("Session has been rejected by user");
-					}
+			case ImsServiceSession.INVITATION_REJECTED:
+				if (logger.isActivated()) {
+					logger.debug("Session has been rejected by user");
+				}
 
-					removeSession();
+				removeSession();
 
-					for (ImsSessionListener listener : listeners) {
-						listener.handleSessionRejectedByUser(contact);
-					}
-					return;
+				for (ImsSessionListener listener : listeners) {
+					listener.handleSessionRejectedByUser(contact);
+				}
+				return;
 
-				case ImsServiceSession.INVITATION_NOT_ANSWERED:
-					if (logger.isActivated()) {
-						logger.debug("Session has been rejected on timeout");
-					}
+			case ImsServiceSession.INVITATION_NOT_ANSWERED:
+				if (logger.isActivated()) {
+					logger.debug("Session has been rejected on timeout");
+				}
 
-					// Ringing period timeout
-					send603Decline(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+				// Ringing period timeout
+				send603Decline(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
-					removeSession();
+				removeSession();
 
-					for (ImsSessionListener listener : listeners) {
-						listener.handleSessionRejectedByTimeout(contact);
-					}
-					return;
+				for (ImsSessionListener listener : listeners) {
+					listener.handleSessionRejectedByTimeout(contact);
+				}
+				return;
 
-				case ImsServiceSession.INVITATION_CANCELED:
-					if (logger.isActivated()) {
-						logger.debug("Session has been rejected by remote");
-					}
+			case ImsServiceSession.INVITATION_CANCELED:
+				if (logger.isActivated()) {
+					logger.debug("Session has been rejected by remote");
+				}
 
-					removeSession();
+				removeSession();
 
-					for (ImsSessionListener listener : listeners) {
-						listener.handleSessionRejectedByRemote(contact);
-					}
-					return;
+				for (ImsSessionListener listener : listeners) {
+					listener.handleSessionRejectedByRemote(contact);
+				}
+				return;
 
-				case ImsServiceSession.INVITATION_ACCEPTED:
-					setSessionAccepted();
+			case ImsServiceSession.INVITATION_ACCEPTED:
+				setSessionAccepted();
 
-					for (ImsSessionListener listener : listeners) {
-						listener.handleSessionAccepted(contact);
-					}
-					break;
+				for (ImsSessionListener listener : listeners) {
+					listener.handleSessionAccepted(contact);
+				}
+				break;
 
-				default:
-					if (logger.isActivated()) {
-						logger.debug("Unknown invitation answer in run; answer="
-									.concat(String.valueOf(answer)));
-					}
-					return;
+			default:
+				if (logger.isActivated()) {
+					logger.debug("Unknown invitation answer in run; answer=".concat(String
+							.valueOf(answer)));
+				}
+				return;
 			}
 
 			// Check if a renderer has been set
@@ -170,15 +173,15 @@ public class TerminatingIPCallSession extends IPCallSession {
 				return;
 			}
 
-	        // Test if the session should be interrupted
-            if (isInterrupted()) {
-            	if (logger.isActivated()) {
-            		logger.debug("Session has been interrupted: end of processing");
-            	}
-            	return;
-            }
+			// Test if the session should be interrupted
+			if (isInterrupted()) {
+				if (logger.isActivated()) {
+					logger.debug("Session has been interrupted: end of processing");
+				}
+				return;
+			}
 
-            // Build SDP response
+			// Build SDP response
 			String sdp = buildSdpAnswer();
 
 			// Set the local SDP in the dialog path
@@ -194,13 +197,11 @@ public class TerminatingIPCallSession extends IPCallSession {
 			SipResponse resp = null;
 			if ((getPlayer().getVideoCodec() != null) && (getRenderer().getVideoCodec() != null)) {
 				// Visio Call
-				resp = SipMessageFactory.create200OkInviteResponse(
-						getDialogPath(),
+				resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
 						IPCallService.FEATURE_TAGS_IP_VIDEO_CALL, sdp);
 			} else {
 				// Audio Call
-				resp = SipMessageFactory.create200OkInviteResponse(
-						getDialogPath(),
+				resp = SipMessageFactory.create200OkInviteResponse(getDialogPath(),
 						IPCallService.FEATURE_TAGS_IP_VOICE_CALL, sdp);
 			}
 
@@ -208,7 +209,8 @@ public class TerminatingIPCallSession extends IPCallSession {
 			getDialogPath().sigEstablished();
 
 			// Send response
-			SipTransactionContext ctx = getImsService().getImsModule().getSipManager().sendSipMessageAndWait(resp);
+			SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
+					.sendSipMessageAndWait(resp);
 
 			// Analyze the received response
 			if (ctx.isSipAck()) {
@@ -223,10 +225,11 @@ public class TerminatingIPCallSession extends IPCallSession {
 				// Start media
 				startMediaSession();
 
-            	// Start session timer
-            	if (getSessionTimerManager().isSessionTimerActivated(resp)) {
-            		getSessionTimerManager().start(SessionTimerManager.UAS_ROLE, getDialogPath().getSessionExpireTime());
-            	}
+				// Start session timer
+				if (getSessionTimerManager().isSessionTimerActivated(resp)) {
+					getSessionTimerManager().start(SessionTimerManager.UAS_ROLE,
+							getDialogPath().getSessionExpireTime());
+				}
 
 				// Notify listeners
 				for (int i = 0; i < getListeners().size(); i++) {
@@ -250,56 +253,58 @@ public class TerminatingIPCallSession extends IPCallSession {
 		}
 	}
 
-    /**
-     * Handle error
-     *
-     * @param error Error
-     */
-    public void handleError(IPCallError error) {
-        if (isSessionInterrupted()) {
-            return;
-        }
+	/**
+	 * Handle error
+	 *
+	 * @param error
+	 *            Error
+	 */
+	public void handleError(IPCallError error) {
+		if (isSessionInterrupted()) {
+			return;
+		}
 
-        // Error
-        if (logger.isActivated()) {
-            logger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
-        }
+		// Error
+		if (logger.isActivated()) {
+			logger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
+		}
 
-        // Close media (audio, video) session
-        closeMediaSession();
+		// Close media (audio, video) session
+		closeMediaSession();
 
-        // Remove the current session
-        removeSession();
+		// Remove the current session
+		removeSession();
 
-        ContactId contact = getRemoteContact();
-        for(int i=0; i < getListeners().size(); i++) {
-            ((IPCallStreamingSessionListener)getListeners().get(i)).handleCallError(contact, error);
-        }
-    }
-
+		ContactId contact = getRemoteContact();
+		for (int i = 0; i < getListeners().size(); i++) {
+			((IPCallStreamingSessionListener) getListeners().get(i))
+					.handleCallError(contact, error);
+		}
+	}
 
 	/**
 	 * Build sdp response for addVideo
 	 *
-	 * @param reInvite  reInvite Request received
+	 * @param reInvite
+	 *            reInvite Request received
 	 */
 	private String buildSdpAnswer() {
 		// Parse the remote SDP part
-        SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(
-                UTF8));
+		SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
 
-        // Extract the audio codecs from SDP
-        Vector<MediaDescription> audio = parser.getMediaDescriptions("audio");
-        Vector<AudioCodec> proposedAudioCodecs = AudioCodecManager.extractAudioCodecsFromSdp(audio);
+		// Extract the audio codecs from SDP
+		Vector<MediaDescription> audio = parser.getMediaDescriptions("audio");
+		Vector<AudioCodec> proposedAudioCodecs = AudioCodecManager.extractAudioCodecsFromSdp(audio);
 
-        // Extract video codecs from SDP
-        Vector<MediaDescription> video = parser.getMediaDescriptions("video");
-        Vector<VideoCodec> proposedVideoCodecs = VideoCodecManager.extractVideoCodecsFromSdp(video);
+		// Extract video codecs from SDP
+		Vector<MediaDescription> video = parser.getMediaDescriptions("video");
+		Vector<VideoCodec> proposedVideoCodecs = VideoCodecManager.extractVideoCodecsFromSdp(video);
 
-        // Audio codec negotiation
+		// Audio codec negotiation
 		AudioCodec selectedAudioCodec;
 		try {
-			selectedAudioCodec = AudioCodecManager.negociateAudioCodec(getRenderer().getSupportedAudioCodecs(), proposedAudioCodecs);
+			selectedAudioCodec = AudioCodecManager.negociateAudioCodec(getRenderer()
+					.getSupportedAudioCodecs(), proposedAudioCodecs);
 			if (selectedAudioCodec == null) {
 				if (logger.isActivated()) {
 					logger.debug("Proposed audio codecs are not supported");
@@ -313,53 +318,50 @@ public class TerminatingIPCallSession extends IPCallSession {
 				return null;
 			}
 
-	        // Video codec negotiation
+			// Video codec negotiation
 			VideoCodec selectedVideoCodec = null;
 			if ((proposedVideoCodecs != null) && (proposedVideoCodecs.size() > 0)) {
-					selectedVideoCodec = VideoCodecManager.negociateVideoCodec(getPlayer().getSupportedVideoCodecs(), proposedVideoCodecs);
-					if (selectedVideoCodec == null) {
-			            if (logger.isActivated()) {
-			                logger.debug("Proposed video codecs are not supported");
-			            }
-			        }
+				selectedVideoCodec = VideoCodecManager.negociateVideoCodec(getPlayer()
+						.getSupportedVideoCodecs(), proposedVideoCodecs);
+				if (selectedVideoCodec == null) {
+					if (logger.isActivated()) {
+						logger.debug("Proposed video codecs are not supported");
+					}
+				}
 			} else {
-	            if (logger.isActivated()) {
-	                logger.debug("No video requested");
-	            }
+				if (logger.isActivated()) {
+					logger.debug("No video requested");
+				}
 			}
 
 			// Build SDP answer
-	    	String audioSdp = AudioSdpBuilder.buildSdpAnswer(selectedAudioCodec, getPlayer().getLocalAudioRtpPort());
-	    	String videoSdp = "";
-        	if (selectedVideoCodec != null) {
-                MediaDescription mediaVideo = parser.getMediaDescription("video");
-            	videoSdp = VideoSdpBuilder.buildSdpAnswer(selectedVideoCodec,
-            			getRenderer().getLocalVideoRtpPort(), mediaVideo);
-            }
-	        String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
-	    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
+			String audioSdp = AudioSdpBuilder.buildSdpAnswer(selectedAudioCodec, getPlayer()
+					.getLocalAudioRtpPort());
+			String videoSdp = "";
+			if (selectedVideoCodec != null) {
+				MediaDescription mediaVideo = parser.getMediaDescription("video");
+				videoSdp = VideoSdpBuilder.buildSdpAnswer(selectedVideoCodec, getRenderer()
+						.getLocalVideoRtpPort(), mediaVideo);
+			}
+			String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
+			String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
 
-	        // Build SDP for response
-	        String sdp =
-	        	"v=0" + SipUtils.CRLF +
-	        	"o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-	        	"s=-" + SipUtils.CRLF +
-	        	"c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-	            "t=0 0" + SipUtils.CRLF +
-	            audioSdp +
-	            videoSdp +
-	            "a=sendrcv" + SipUtils.CRLF;
+			// Build SDP for response
+			String sdp = "v=0" + SipUtils.CRLF + "o=- " + ntpTime + " " + ntpTime + " "
+					+ SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF + "s=-" + SipUtils.CRLF
+					+ "c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF + "t=0 0"
+					+ SipUtils.CRLF + audioSdp + videoSdp + "a=sendrcv" + SipUtils.CRLF;
 
 			return sdp;
 
 		} catch (RemoteException e) {
 			if (logger.isActivated()) {
-                logger.error("Session initiation has failed", e);
-            }
+				logger.error("Session initiation has failed", e);
+			}
 
-            // Unexpected error
-            handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
-            return null;
+			// Unexpected error
+			handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
+			return null;
 		}
 	}
 
@@ -368,4 +370,3 @@ public class TerminatingIPCallSession extends IPCallSession {
 		return true;
 	}
 }
-

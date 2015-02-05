@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.extension;
 
 import android.content.BroadcastReceiver;
@@ -23,18 +24,18 @@ import android.content.Intent;
 
 /**
  * Messaging session invitation receiver
- *  
+ * 
  * @author Jean-Marc AUFFRET
  */
 public class SessionInvitationReceiver extends BroadcastReceiver {
-	
-	@Override
-	public void onReceive(Context context, Intent invitation) {
-		// Start MultiMediaSessionIntentService
-		Intent intent = new Intent( invitation );
-		intent.setClass( context, MultiMediaSessionIntentService.class);
-		invitation.setAction(intent.getAction());
-		context.startService(intent);
+
+    @Override
+    public void onReceive(Context context, Intent invitation) {
+        // Start MultiMediaSessionIntentService
+        Intent intent = new Intent(invitation);
+        intent.setClass(context, MultiMediaSessionIntentService.class);
+        invitation.setAction(intent.getAction());
+        context.startService(intent);
     }
 
 }

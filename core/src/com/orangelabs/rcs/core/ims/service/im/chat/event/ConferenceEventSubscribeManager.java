@@ -69,90 +69,93 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 	private static final String REGISTRY_MIN_EXPIRE_PERIOD = "MinSubscribeConferenceEventExpirePeriod";
 
 	/**
-     * IMS module
-     */
-    private ImsModule imsModule;
-    
-    /**
-     * Group chat session
-     */
-    private GroupChatSession session;
-    
-    /**
-     * Dialog path
-     */
-    private SipDialogPath dialogPath;
-    
-    /**
-     * Expire period
-     */
-    private int expirePeriod;
-    
-    /**
-     * Subscription flag
-     */
-    private boolean subscribed = false;
-    
+	 * IMS module
+	 */
+	private ImsModule imsModule;
+
+	/**
+	 * Group chat session
+	 */
+	private GroupChatSession session;
+
+	/**
+	 * Dialog path
+	 */
+	private SipDialogPath dialogPath;
+
+	/**
+	 * Expire period
+	 */
+	private int expirePeriod;
+
+	/**
+	 * Subscription flag
+	 */
+	private boolean subscribed = false;
+
 	/**
 	 * Authentication agent
 	 */
 	private SessionAuthenticationAgent authenticationAgent;
 
-    /**
+	/**
 	 * List of connected participants
 	 */
-	private Set<ParticipantInfo> participants;	
-	
-	/**
-     * The logger
-     */
-    private final static Logger logger = Logger.getLogger(ConferenceEventSubscribeManager.class.getSimpleName());
+	private Set<ParticipantInfo> participants;
 
-    /**
-     * Constructor
-     * 
-     * @param session Group chat session
-     */
-    public ConferenceEventSubscribeManager(GroupChatSession session) {
-    	this.session  = session;
-    	this.imsModule = session.getImsService().getImsModule();
+	/**
+	 * The logger
+	 */
+	private final static Logger logger = Logger.getLogger(ConferenceEventSubscribeManager.class
+			.getSimpleName());
+
+	/**
+	 * Constructor
+	 * 
+	 * @param session
+	 *            Group chat session
+	 */
+	public ConferenceEventSubscribeManager(GroupChatSession session) {
+		this.session = session;
+		this.imsModule = session.getImsService().getImsModule();
 		this.authenticationAgent = new SessionAuthenticationAgent(imsModule);
 		// Initiate list of participants with list of invited with status UNKNOWN
 		participants = new HashSet<ParticipantInfo>(session.getParticipants());
-		
-    	int defaultExpirePeriod = RcsSettings.getInstance().getSubscribeExpirePeriod();
-    	int minExpireValue = RegistryFactory.getFactory().readInteger(REGISTRY_MIN_EXPIRE_PERIOD, -1);
-    	if ((minExpireValue != -1) && (defaultExpirePeriod < minExpireValue)) {
-        	this.expirePeriod = minExpireValue;
-    	} else {
-    		this.expirePeriod = defaultExpirePeriod;
-    	}
-    }
 
-    /**
-     * Is subscribed
-     * 
-     * @return Boolean
-     */
+		int defaultExpirePeriod = RcsSettings.getInstance().getSubscribeExpirePeriod();
+		int minExpireValue = RegistryFactory.getFactory().readInteger(REGISTRY_MIN_EXPIRE_PERIOD,
+				-1);
+		if ((minExpireValue != -1) && (defaultExpirePeriod < minExpireValue)) {
+			this.expirePeriod = minExpireValue;
+		} else {
+			this.expirePeriod = defaultExpirePeriod;
+		}
+	}
+
+	/**
+	 * Is subscribed
+	 * 
+	 * @return Boolean
+	 */
 	public boolean isSubscribed() {
 		return subscribed;
 	}
 
-    /**
-     * Returns the presentity
-     * 
-     * @return Presentity
-     */
-    public String getPresentity() {
-    	return session.getImSessionIdentity();
-    }
-	
+	/**
+	 * Returns the presentity
+	 * 
+	 * @return Presentity
+	 */
+	public String getPresentity() {
+		return session.getImSessionIdentity();
+	}
+
 	/**
 	 * Returns the list of connected participants
 	 * 
 	 * @return List of participants
 	 */
-    public Set<ParticipantInfo> getParticipants() {
+	public Set<ParticipantInfo> getParticipants() {
 		return participants;
 	}
 
@@ -165,11 +168,12 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 		return dialogPath;
 	}
 
-    /**
-     * Receive a notification
-     * 
-     * @param notify Received notify
-     */
+	/**
+	 * Receive a notification
+	 * 
+	 * @param notify
+	 *            Received notify
+	 */
 	public void receiveNotification(SipRequest notify) {
 		if (logger.isActivated()) {
 			logger.debug("New conference event notification received");
@@ -223,7 +227,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 							// If there is a method then use it as a specific state
 							state = method;
 
-							// If session failed because declined by remote then use it as a specific state
+							// If session failed because declined by remote then use it as a
+							// specific state
 							if (method.equals("failed")) {
 								String reason = user.getFailureReason();
 								if ((reason != null) && reason.contains("603")) {
@@ -232,11 +237,15 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 							}
 						}
 
-						// Manage "pending-out" and "pending-in" status like "pending" status. See RFC 4575 dialing-in: Endpoint is
-						// dialing into the conference, not yet in the roster (probably being authenticated). dialing-out: Focus has
-						// dialed out to connect the endpoint to the conference, but the endpoint is not yet in the roster (probably
+						// Manage "pending-out" and "pending-in" status like "pending" status. See
+						// RFC 4575 dialing-in: Endpoint is
+						// dialing into the conference, not yet in the roster (probably being
+						// authenticated). dialing-out: Focus has
+						// dialed out to connect the endpoint to the conference, but the endpoint is
+						// not yet in the roster (probably
 						// being authenticated).
-						if ((state.equalsIgnoreCase("dialing-out")) || (state.equalsIgnoreCase("dialing-in"))) {
+						if ((state.equalsIgnoreCase("dialing-out"))
+								|| (state.equalsIgnoreCase("dialing-in"))) {
 							state = User.STATE_PENDING;
 						}
 						ParticipantInfo item2add = new ParticipantInfo(contact, getStatus(state));
@@ -246,8 +255,9 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 						if (participants.contains(item2add) == false) {
 							// Notify session listeners
 							for (int j = 0; j < session.getListeners().size(); j++) {
-								((ChatSessionListener) session.getListeners().get(j)).handleConferenceEvent(contact,
-										user.getDisplayName(), state);
+								((ChatSessionListener) session.getListeners().get(j))
+										.handleConferenceEvent(contact, user.getDisplayName(),
+												state);
 							}
 						}
 					}
@@ -264,7 +274,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 		}
 
 		// Check subscription state
-		SubscriptionStateHeader stateHeader = (SubscriptionStateHeader) notify.getHeader(SubscriptionStateHeader.NAME);
+		SubscriptionStateHeader stateHeader = (SubscriptionStateHeader) notify
+				.getHeader(SubscriptionStateHeader.NAME);
 		if ((stateHeader != null) && stateHeader.getState().equalsIgnoreCase("terminated")) {
 			if (logger.isActivated()) {
 				logger.info("Conference event subscription has been terminated by server");
@@ -274,7 +285,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 	}
 
 	/**
-	 * Update the set of participants of the group chat session to be aligned with the provider content
+	 * Update the set of participants of the group chat session to be aligned with the provider
+	 * content
 	 * 
 	 * @param newSet
 	 *            the new set of participants
@@ -284,119 +296,123 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 		Set<ParticipantInfo> oldSet = participants;
 		participants = newSet;
 		// Update provider
-		MessagingLog.getInstance().updateGroupChatParticipant(session.getContributionID(), participants);
+		MessagingLog.getInstance().updateGroupChatParticipant(session.getContributionID(),
+				participants);
 		// Notify participant status change. Make a copy of new set.
 		Set<ParticipantInfo> workSet = new HashSet<ParticipantInfo>(newSet);
 		// Notify status change for the new set
 		workSet.removeAll(oldSet);
 		for (ParticipantInfo item : workSet) {
 			for (int i = 0; i < session.getListeners().size(); i++) {
-				((ChatSessionListener) session.getListeners().get(i)).handleParticipantStatusChanged(item);
+				((ChatSessionListener) session.getListeners().get(i))
+						.handleParticipantStatusChanged(item);
 			}
 		}
 	}
-	
+
 	/**
-     * Check if the received notification if for this subscriber
-     * 
-     * @param SipRequest notify
-     * @return Boolean
-     */
-    public boolean isNotifyForThisSubscriber(SipRequest notify) {
-    	boolean result = false;
-    	if ((dialogPath != null) && notify.getCallId().equals(dialogPath.getCallId())) {
-    		result = true;
-    	}
-    	return result;
-    }
-    
-    /**
-     * Subscription has been terminated by server
-     */
-    public synchronized void terminatedByServer() {
-    	if (!subscribed) {
-    		// Already unsubscribed
-        	return;
-    	}
-    	
-    	if (logger.isActivated()) {
-    		logger.info("Subscription has been terminated by server");
-    	}
-    	
-    	// Stop periodic subscription
-    	stopTimer();
+	 * Check if the received notification if for this subscriber
+	 * 
+	 * @param SipRequest
+	 *            notify
+	 * @return Boolean
+	 */
+	public boolean isNotifyForThisSubscriber(SipRequest notify) {
+		boolean result = false;
+		if ((dialogPath != null) && notify.getCallId().equals(dialogPath.getCallId())) {
+			result = true;
+		}
+		return result;
+	}
 
-    	// Reset dialog path attributes
-        resetDialogPath();
+	/**
+	 * Subscription has been terminated by server
+	 */
+	public synchronized void terminatedByServer() {
+		if (!subscribed) {
+			// Already unsubscribed
+			return;
+		}
 
-        // Force subscription flag to false
-        subscribed = false;
-    }
-    
-    /**
-     * Terminate manager
-     */
-    public void terminate() {
-    	if (logger.isActivated()) {
-    		logger.info("Terminate the subscribe manager");
-    	}
-    	
-    	// Stop periodic subscription
-    	stopTimer();
+		if (logger.isActivated()) {
+			logger.info("Subscription has been terminated by server");
+		}
 
-    	// Unsubscribe before to quit
-		if ((imsModule.getCurrentNetworkInterface() != null) &&
-				imsModule.getCurrentNetworkInterface().isRegistered() && subscribed) {
-				unSubscribe();
-    	}
-		
-        if (logger.isActivated()) {
-        	logger.info("Subscribe manager is terminated");
-        }
-    }
+		// Stop periodic subscription
+		stopTimer();
 
-    /**
-     * Create a SUBSCRIBE request
-     * 
-	 * @param dialog SIP dialog path
-	 * @param expirePeriod Expiration period
+		// Reset dialog path attributes
+		resetDialogPath();
+
+		// Force subscription flag to false
+		subscribed = false;
+	}
+
+	/**
+	 * Terminate manager
+	 */
+	public void terminate() {
+		if (logger.isActivated()) {
+			logger.info("Terminate the subscribe manager");
+		}
+
+		// Stop periodic subscription
+		stopTimer();
+
+		// Unsubscribe before to quit
+		if ((imsModule.getCurrentNetworkInterface() != null)
+				&& imsModule.getCurrentNetworkInterface().isRegistered() && subscribed) {
+			unSubscribe();
+		}
+
+		if (logger.isActivated()) {
+			logger.info("Subscribe manager is terminated");
+		}
+	}
+
+	/**
+	 * Create a SUBSCRIBE request
+	 * 
+	 * @param dialog
+	 *            SIP dialog path
+	 * @param expirePeriod
+	 *            Expiration period
 	 * @return SIP request
 	 * @throws Exception
-     */
-    private SipRequest createSubscribe(SipDialogPath dialog, int expirePeriod) throws Exception {
-    	// Create SUBSCRIBE message
-    	SipRequest subscribe = SipMessageFactory.createSubscribe(dialog, expirePeriod);
+	 */
+	private SipRequest createSubscribe(SipDialogPath dialog, int expirePeriod) throws Exception {
+		// Create SUBSCRIBE message
+		SipRequest subscribe = SipMessageFactory.createSubscribe(dialog, expirePeriod);
 
-        // Set feature tags
-        SipUtils.setFeatureTags(subscribe, InstantMessagingService.CHAT_FEATURE_TAGS);    	
-    	
-    	// Set the Event header
-    	subscribe.addHeader("Event", "conference");
+		// Set feature tags
+		SipUtils.setFeatureTags(subscribe, InstantMessagingService.CHAT_FEATURE_TAGS);
 
-    	// Set the Accept header
-    	subscribe.addHeader("Accept", "application/conference-info+xml");
+		// Set the Event header
+		subscribe.addHeader("Event", "conference");
 
-    	return subscribe;
-    }
-    	
+		// Set the Accept header
+		subscribe.addHeader("Accept", "application/conference-info+xml");
 
-    /**
-     * Subscription refresh processing
-     */
-    public void periodicProcessing() {
-        // Make a subscribe
-    	if (logger.isActivated()) {
-    		logger.info("Execute re-subscribe");
-    	}
+		return subscribe;
+	}
 
-    	// Send SUBSCRIBE request
-    	subscribe();
-    }
-    
-    /**
-     * Subscribe
-     * 
-     */
+	/**
+	 * Subscription refresh processing
+	 */
+	public void periodicProcessing() {
+		// Make a subscribe
+		if (logger.isActivated()) {
+			logger.info("Execute re-subscribe");
+		}
+
+		// Send SUBSCRIBE request
+		subscribe();
+	}
+
+	/**
+	 * Subscribe
+	 * 
+	 */
 	public synchronized void subscribe() {
 		new Thread() {
 			public void run() {
@@ -420,11 +436,12 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 						String remoteParty = getPresentity();
 
 						// Set the route path
-						Vector<String> route = imsModule.getSipManager().getSipStack().getServiceRoutePath();
+						Vector<String> route = imsModule.getSipManager().getSipStack()
+								.getServiceRoutePath();
 
 						// Create a dialog path
-						dialogPath = new SipDialogPath(imsModule.getSipManager().getSipStack(), callId, 1, target, localParty,
-								remoteParty, route);
+						dialogPath = new SipDialogPath(imsModule.getSipManager().getSipStack(),
+								callId, 1, target, localParty, remoteParty, route);
 					} else {
 						// Increment the Cseq number of the dialog path
 						dialogPath.incrementCseq();
@@ -447,48 +464,48 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 	}
 
 	/**
-     * Unsubscribe
-     */
-    public synchronized void unSubscribe() {
-    	if (!subscribed) {
-    		// Already unsubscribed
-        	return;
-    	}
+	 * Unsubscribe
+	 */
+	public synchronized void unSubscribe() {
+		if (!subscribed) {
+			// Already unsubscribed
+			return;
+		}
 
-    	if (logger.isActivated()) {
-    		logger.info("Unsubscribe to " + getPresentity());
-    	}
+		if (logger.isActivated()) {
+			logger.info("Unsubscribe to " + getPresentity());
+		}
 
-    	try {
-	    	// Stop periodic subscription
-	        stopTimer();
+		try {
+			// Stop periodic subscription
+			stopTimer();
 
-        	// Increment the Cseq number of the dialog path
+			// Increment the Cseq number of the dialog path
 
-	        dialogPath.incrementCseq();
+			dialogPath.incrementCseq();
 
-            // Create a SUBSCRIBE with expire 0
-            SipRequest subscribe = createSubscribe(dialogPath, 0);
+			// Create a SUBSCRIBE with expire 0
+			SipRequest subscribe = createSubscribe(dialogPath, 0);
 
-            // Send SUBSCRIBE request
-	        sendSubscribe(subscribe);
-            
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-            	logger.error("UnSubscribe has failed", e);
-            }
-        }
+			// Send SUBSCRIBE request
+			sendSubscribe(subscribe);
 
-        // Force subscription flag to false
-        subscribed = false;
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("UnSubscribe has failed", e);
+			}
+		}
 
-        // Reset dialog path attributes
-        resetDialogPath();
-    }
+		// Force subscription flag to false
+		subscribed = false;
 
-    /**
-     * Reset the dialog path
-     */
+		// Reset dialog path attributes
+		resetDialogPath();
+	}
+
+	/**
+	 * Reset the dialog path
+	 */
 	private void resetDialogPath() {
 		if (dialogPath != null) {
 			Core.getInstance().getImService()
@@ -498,220 +515,227 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 	}
 
 	/**
-     * Retrieve the expire period
-     * 
-     * @param resp SIP response
-     */
+	 * Retrieve the expire period
+	 * 
+	 * @param resp
+	 *            SIP response
+	 */
 	private void retrieveExpirePeriod(SipResponse response) {
-        // Extract expire value from Expires header
-        ExpiresHeader expiresHeader = (ExpiresHeader)response.getHeader(ExpiresHeader.NAME);
-    	if (expiresHeader != null) {
-    		int expires = expiresHeader.getExpires();
-		    if (expires != -1) {
-	    		expirePeriod = expires;
-	    	}
-        }
+		// Extract expire value from Expires header
+		ExpiresHeader expiresHeader = (ExpiresHeader) response.getHeader(ExpiresHeader.NAME);
+		if (expiresHeader != null) {
+			int expires = expiresHeader.getExpires();
+			if (expires != -1) {
+				expirePeriod = expires;
+			}
+		}
 	}
-	
+
 	/**
 	 * Send SUBSCRIBE message
 	 * 
-	 * @param subscribe SIP SUBSCRIBE
+	 * @param subscribe
+	 *            SIP SUBSCRIBE
 	 * @throws Exception
 	 */
 	private void sendSubscribe(SipRequest subscribe) throws Exception {
-        if (logger.isActivated()) {
-        	logger.info("Send SUBSCRIBE, expire=" + subscribe.getExpires());
-        }
+		if (logger.isActivated()) {
+			logger.info("Send SUBSCRIBE, expire=" + subscribe.getExpires());
+		}
 
-        if (subscribed) {
-	        // Set the Authorization header
-            authenticationAgent.setProxyAuthorizationHeader(subscribe);
-        }
-        
-        // Send SUBSCRIBE request
-        SipTransactionContext ctx = imsModule.getSipManager().sendSipMessageAndWait(subscribe);
+		if (subscribed) {
+			// Set the Authorization header
+			authenticationAgent.setProxyAuthorizationHeader(subscribe);
+		}
 
-        // Analyze the received response 
-        if (ctx.isSipResponse()) {
-        	// A response has been received
-            if (ctx.getStatusCode() == 200) {
-        		if (subscribe.getExpires() != 0) {
-        			handle200OK(ctx);
-        		} else {
-        			handle200OkUnsubscribe(ctx);
-        		}
-            } else
-            if (ctx.getStatusCode() == 202) {
-            	// 202 Accepted
-    			handle200OK(ctx);
-            } else
-            if (ctx.getStatusCode() == 407) {
-            	// 407 Proxy Authentication Required
-            	handle407Authentication(ctx);
-            } else
-            if (ctx.getStatusCode() == 423) {
-            	// 423 Interval Too Brief
-            	handle423IntervalTooBrief(ctx);
-            } else {
-            	// Other error response
-    			handleError(new ChatError(ChatError.SUBSCRIBE_CONFERENCE_FAILED,
-    					ctx.getStatusCode() + " " + ctx.getReasonPhrase()));    					
-            }
-        } else {
-    		if (logger.isActivated()) {
-        		logger.debug("No response received for SUBSCRIBE");
-        	}
+		// Send SUBSCRIBE request
+		SipTransactionContext ctx = imsModule.getSipManager().sendSipMessageAndWait(subscribe);
 
-    		// No response received: timeout
-        	handleError(new ChatError(ChatError.SUBSCRIBE_CONFERENCE_FAILED));
-        }
-	}    
+		// Analyze the received response
+		if (ctx.isSipResponse()) {
+			// A response has been received
+			if (ctx.getStatusCode() == 200) {
+				if (subscribe.getExpires() != 0) {
+					handle200OK(ctx);
+				} else {
+					handle200OkUnsubscribe(ctx);
+				}
+			} else if (ctx.getStatusCode() == 202) {
+				// 202 Accepted
+				handle200OK(ctx);
+			} else if (ctx.getStatusCode() == 407) {
+				// 407 Proxy Authentication Required
+				handle407Authentication(ctx);
+			} else if (ctx.getStatusCode() == 423) {
+				// 423 Interval Too Brief
+				handle423IntervalTooBrief(ctx);
+			} else {
+				// Other error response
+				handleError(new ChatError(ChatError.SUBSCRIBE_CONFERENCE_FAILED,
+						ctx.getStatusCode() + " " + ctx.getReasonPhrase()));
+			}
+		} else {
+			if (logger.isActivated()) {
+				logger.debug("No response received for SUBSCRIBE");
+			}
+
+			// No response received: timeout
+			handleError(new ChatError(ChatError.SUBSCRIBE_CONFERENCE_FAILED));
+		}
+	}
 
 	/**
-	 * Handle 200 0K response 
+	 * Handle 200 0K response
 	 * 
-	 * @param ctx SIP transaction context
+	 * @param ctx
+	 *            SIP transaction context
 	 */
 	private void handle200OK(SipTransactionContext ctx) {
-        // 200 OK response received
-        if (logger.isActivated()) {
-            logger.info("200 OK response received");
-        }
-        subscribed = true;
-        
-    	SipResponse resp = ctx.getSipResponse();
+		// 200 OK response received
+		if (logger.isActivated()) {
+			logger.info("200 OK response received");
+		}
+		subscribed = true;
 
-        // Set the route path with the Record-Route header
-        Vector<String> newRoute = SipUtils.routeProcessing(resp, true);
-        dialogPath.setRoute(newRoute);
+		SipResponse resp = ctx.getSipResponse();
 
-        // Set the remote tag
-    	dialogPath.setRemoteTag(resp.getToTag());
-    	
-    	// Set the target
-    	dialogPath.setTarget(resp.getContactURI());
+		// Set the route path with the Record-Route header
+		Vector<String> newRoute = SipUtils.routeProcessing(resp, true);
+		dialogPath.setRoute(newRoute);
 
-        // Set the Proxy-Authorization header
-    	authenticationAgent.readProxyAuthenticateHeader(resp);
+		// Set the remote tag
+		dialogPath.setRemoteTag(resp.getToTag());
 
-    	// Retrieve the expire value in the response
+		// Set the target
+		dialogPath.setTarget(resp.getContactURI());
+
+		// Set the Proxy-Authorization header
+		authenticationAgent.readProxyAuthenticateHeader(resp);
+
+		// Retrieve the expire value in the response
 		retrieveExpirePeriod(resp);
-        
-        // Start the periodic subscribe
-        startTimer(expirePeriod, 0.5);
 
-        Core.getInstance().getImService().addGroupChatConferenceSubscriber(dialogPath.getCallId(), session);
+		// Start the periodic subscribe
+		startTimer(expirePeriod, 0.5);
+
+		Core.getInstance().getImService()
+				.addGroupChatConferenceSubscriber(dialogPath.getCallId(), session);
 	}
-	
+
 	/**
 	 * Handle 200 0K response of UNSUBSCRIBE
 	 * 
-	 * @param ctx SIP transaction context
+	 * @param ctx
+	 *            SIP transaction context
 	 */
 	private void handle200OkUnsubscribe(SipTransactionContext ctx) {
-        // 200 OK response received
-        if (logger.isActivated()) {
-            logger.info("200 OK response received");
-        }
+		// 200 OK response received
+		if (logger.isActivated()) {
+			logger.info("200 OK response received");
+		}
 	}
-		
+
 	/**
-	 * Handle 407 response 
+	 * Handle 407 response
 	 * 
-	 * @param ctx SIP transaction context
+	 * @param ctx
+	 *            SIP transaction context
 	 * @throws Exception
 	 */
 	private void handle407Authentication(SipTransactionContext ctx) throws Exception {
-        // 407 response received
-    	if (logger.isActivated()) {
-    		logger.info("407 response received");
-    	}
+		// 407 response received
+		if (logger.isActivated()) {
+			logger.info("407 response received");
+		}
 
-    	SipResponse resp = ctx.getSipResponse();
+		SipResponse resp = ctx.getSipResponse();
 
-    	// Set the Proxy-Authorization header
-    	authenticationAgent.readProxyAuthenticateHeader(resp);
+		// Set the Proxy-Authorization header
+		authenticationAgent.readProxyAuthenticateHeader(resp);
 
-        // Increment the Cseq number of the dialog path
-        dialogPath.incrementCseq();
+		// Increment the Cseq number of the dialog path
+		dialogPath.incrementCseq();
 
-        // Create a second SUBSCRIBE request with the right token
-        if (logger.isActivated()) {
-        	logger.info("Send second SUBSCRIBE");
-        }
-    	SipRequest subscribe = createSubscribe(dialogPath,
-    			ctx.getTransaction().getRequest().getExpires().getExpires());
-    	
-        // Set the Authorization header
-        authenticationAgent.setProxyAuthorizationHeader(subscribe);
-    	
-        // Send SUBSCRIBE request
-    	sendSubscribe(subscribe);
-	}	
-	
-	/**
-	 * Handle 423 response 
-	 * 
-	 * @param ctx SIP transaction context
-	 * @throws Exception
-	 */
-	private void handle423IntervalTooBrief(SipTransactionContext ctx) throws Exception {
-		// 423 response received
-    	if (logger.isActivated()) {
-    		logger.info("423 interval too brief response received");
-    	}
-
-    	SipResponse resp = ctx.getSipResponse();
-
-    	// Increment the Cseq number of the dialog path
-        dialogPath.incrementCseq();
-
-        // Extract the Min-Expire value
-        int minExpire = SipUtils.getMinExpiresPeriod(resp);
-        if (minExpire == -1) {
-            if (logger.isActivated()) {
-            	logger.error("Can't read the Min-Expires value");
-            }
-        	handleError(new ChatError(ChatError.SUBSCRIBE_CONFERENCE_FAILED, "No Min-Expires value found"));
-        	return;
-        }
-        
-        // Save the min expire value in the terminal registry
-        RegistryFactory.getFactory().writeInteger(REGISTRY_MIN_EXPIRE_PERIOD, minExpire);
-
-        // Set the default expire value
-    	expirePeriod = minExpire;
-    	
-        // Create a new SUBSCRIBE request with the right expire period
-        SipRequest subscribe = createSubscribe(dialogPath, expirePeriod);
+		// Create a second SUBSCRIBE request with the right token
+		if (logger.isActivated()) {
+			logger.info("Send second SUBSCRIBE");
+		}
+		SipRequest subscribe = createSubscribe(dialogPath, ctx.getTransaction().getRequest()
+				.getExpires().getExpires());
 
 		// Set the Authorization header
 		authenticationAgent.setProxyAuthorizationHeader(subscribe);
 
-        // Send SUBSCRIBE request
-        sendSubscribe(subscribe);
-	}	
-	
+		// Send SUBSCRIBE request
+		sendSubscribe(subscribe);
+	}
+
 	/**
-	 * Handle error response 
+	 * Handle 423 response
 	 * 
-	 * @param error Error
+	 * @param ctx
+	 *            SIP transaction context
+	 * @throws Exception
+	 */
+	private void handle423IntervalTooBrief(SipTransactionContext ctx) throws Exception {
+		// 423 response received
+		if (logger.isActivated()) {
+			logger.info("423 interval too brief response received");
+		}
+
+		SipResponse resp = ctx.getSipResponse();
+
+		// Increment the Cseq number of the dialog path
+		dialogPath.incrementCseq();
+
+		// Extract the Min-Expire value
+		int minExpire = SipUtils.getMinExpiresPeriod(resp);
+		if (minExpire == -1) {
+			if (logger.isActivated()) {
+				logger.error("Can't read the Min-Expires value");
+			}
+			handleError(new ChatError(ChatError.SUBSCRIBE_CONFERENCE_FAILED,
+					"No Min-Expires value found"));
+			return;
+		}
+
+		// Save the min expire value in the terminal registry
+		RegistryFactory.getFactory().writeInteger(REGISTRY_MIN_EXPIRE_PERIOD, minExpire);
+
+		// Set the default expire value
+		expirePeriod = minExpire;
+
+		// Create a new SUBSCRIBE request with the right expire period
+		SipRequest subscribe = createSubscribe(dialogPath, expirePeriod);
+
+		// Set the Authorization header
+		authenticationAgent.setProxyAuthorizationHeader(subscribe);
+
+		// Send SUBSCRIBE request
+		sendSubscribe(subscribe);
+	}
+
+	/**
+	 * Handle error response
+	 * 
+	 * @param error
+	 *            Error
 	 */
 	private void handleError(ChatError error) {
-        // Error
-    	if (logger.isActivated()) {
-    		logger.info("Subscribe has failed: " + error.getErrorCode() + ", reason=" + error.getMessage());
-    	}
-        subscribed = false;
-        
-        // Subscribe has failed, stop the periodic subscribe
+		// Error
+		if (logger.isActivated()) {
+			logger.info("Subscribe has failed: " + error.getErrorCode() + ", reason="
+					+ error.getMessage());
+		}
+		subscribed = false;
+
+		// Subscribe has failed, stop the periodic subscribe
 		stopTimer();
-        
-        // Reset dialog path attributes
-        resetDialogPath();
+
+		// Reset dialog path attributes
+		resetDialogPath();
 	}
-	
+
 	/**
 	 * Convert the status into integer
 	 * 

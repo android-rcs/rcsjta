@@ -32,10 +32,14 @@ public abstract class ImageSharingListener extends IImageSharingListener.Stub {
 	/**
 	 * Callback called when the image sharing state/reasonCode has been changed.
 	 *
-	 * @param contact Contact ID
-	 * @param sharingId ID of image sharing
-	 * @param state State of image sharing 
-	 * @param reasonCode Reason code of the image sharing state
+	 * @param contact
+	 *            Contact ID
+	 * @param sharingId
+	 *            ID of image sharing
+	 * @param state
+	 *            State of image sharing
+	 * @param reasonCode
+	 *            Reason code of the image sharing state
 	 */
 	public abstract void onStateChanged(ContactId contact, String sharingId, int state,
 			int reasonCode);
@@ -43,10 +47,15 @@ public abstract class ImageSharingListener extends IImageSharingListener.Stub {
 	/**
 	 * Callback called during the sharing progress.
 	 *
-	 * @param contact Contact ID
-	 * @param sharingId ID of image sharing
-	 * @param currentSize Current transferred size in bytes
-	 * @param totalSize Total size to transfer in bytes
+	 * @param contact
+	 *            Contact ID
+	 * @param sharingId
+	 *            ID of image sharing
+	 * @param currentSize
+	 *            Current transferred size in bytes
+	 * @param totalSize
+	 *            Total size to transfer in bytes
 	 */
-	public abstract void onProgressUpdate(ContactId contact, String sharingId, long currentSize, long totalSize);
+	public abstract void onProgressUpdate(ContactId contact, String sharingId, long currentSize,
+			long totalSize);
 }

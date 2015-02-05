@@ -17,7 +17,8 @@ public class IFileUploadServiceConfigurationImpl extends IFileUploadServiceConfi
 
 	/**
 	 * Constructor
-	 * @param rcsSettings 
+	 * 
+	 * @param rcsSettings
 	 */
 	public IFileUploadServiceConfigurationImpl(RcsSettings rcsSettings) {
 		mRcsSettings = rcsSettings;

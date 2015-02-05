@@ -27,13 +27,14 @@ package com.gsma.services.rcs.vsh;
  * @author Jean-Marc AUFFRET
  */
 public class VideoSharingIntent {
-    /**
-     * Broadcast action: a new video sharing invitation has been received.
-     * <p>Intent includes the following extras:
-     * <ul>
-     * <li> {@link #EXTRA_SHARING_ID} containing the unique ID of the video sharing.
-     * </ul>
-     */
+	/**
+	 * Broadcast action: a new video sharing invitation has been received.
+	 * <p>
+	 * Intent includes the following extras:
+	 * <ul>
+	 * <li> {@link #EXTRA_SHARING_ID} containing the unique ID of the video sharing.
+	 * </ul>
+	 */
 	public final static String ACTION_NEW_INVITATION = "com.gsma.services.rcs.vsh.action.NEW_VIDEO_SHARING";
 
 	/**

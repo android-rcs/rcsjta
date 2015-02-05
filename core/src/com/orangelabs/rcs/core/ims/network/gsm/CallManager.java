@@ -33,10 +33,9 @@ import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
- * Call manager. Note: for outgoing call the capability request is initiated
- * only when we receive the OPTIONS from the remote because the call state goes
- * directly to CONNETED even if the remote has not ringing. For the incoming
- * call, the capability are requested when phone is ringing.
+ * Call manager. Note: for outgoing call the capability request is initiated only when we receive
+ * the OPTIONS from the remote because the call state goes directly to CONNETED even if the remote
+ * has not ringing. For the incoming call, the capability are requested when phone is ringing.
  * 
  * @author jexa7410
  */
@@ -66,70 +65,72 @@ public class CallManager {
 	 */
 	private ImsModule imsModule;
 
-    /**
-     * Call state
-     */
-    private int callState = UNKNOWN;
+	/**
+	 * Call state
+	 */
+	private int callState = UNKNOWN;
 
-    /**
-     * Remote contact
-     */
-    private static ContactId mContact;
-    
-    /**
-     * Multiparty call
-     */
-    private boolean multipartyCall = false;
-    
-    /**
-     * Call hold
-     */
-    private boolean callHold = false;
+	/**
+	 * Remote contact
+	 */
+	private static ContactId mContact;
 
-    /**
-     * Telephony manager
-     */
+	/**
+	 * Multiparty call
+	 */
+	private boolean multipartyCall = false;
+
+	/**
+	 * Call hold
+	 */
+	private boolean callHold = false;
+
+	/**
+	 * Telephony manager
+	 */
 	private TelephonyManager tm;
 
 	/**
-     * The logger
-     */
-    private static final Logger logger = Logger.getLogger(CallManager.class.getSimpleName());
+	 * The logger
+	 */
+	private static final Logger logger = Logger.getLogger(CallManager.class.getSimpleName());
 
-    /**
-     * Constructor
-     * 
-     * @param core Core
-     */
+	/**
+	 * Constructor
+	 * 
+	 * @param core
+	 *            Core
+	 */
 	public CallManager(ImsModule parent) throws CoreException {
 		this.imsModule = parent;
 
 		// Instantiate the telephony manager
-		tm = (TelephonyManager)AndroidFactory.getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
+		tm = (TelephonyManager) AndroidFactory.getApplicationContext().getSystemService(
+				Context.TELEPHONY_SERVICE);
 	}
 
 	/**
-     * Start call monitoring
-     */
+	 * Start call monitoring
+	 */
 	public void startCallMonitoring() {
 		if (logger.isActivated()) {
 			logger.info("Start call monitoring");
 		}
 
 		// Monitor phone state
-	    tm.listen(listener, PhoneStateListener.LISTEN_CALL_STATE);
+		tm.listen(listener, PhoneStateListener.LISTEN_CALL_STATE);
 	}
 
-    /**
-     * Stop call monitoring
-     */
+	/**
+	 * Stop call monitoring
+	 */
 	public void stopCallMonitoring() {
 		if (logger.isActivated()) {
 			logger.info("Stop call monitoring");
 		}
 
 		// Unmonitor phone state
-	    tm.listen(listener, PhoneStateListener.LISTEN_NONE);
+		tm.listen(listener, PhoneStateListener.LISTEN_NONE);
 	}
 
 	/**
@@ -176,7 +177,8 @@ public class CallManager {
 
 				if (mContact != null) {
 					// Disable content sharing capabilities
-					imsModule.getCapabilityService().resetContactCapabilitiesForContentSharing(mContact);
+					imsModule.getCapabilityService().resetContactCapabilitiesForContentSharing(
+							mContact);
 
 					// Request capabilities to the remote
 					imsModule.getCapabilityService().requestContactCapabilities(mContact);
@@ -223,25 +225,26 @@ public class CallManager {
 	};
 
 	/**
-     * Set the remote phone number
-     * 
-     * @param number Phone number
-     */
+	 * Set the remote phone number
+	 * 
+	 * @param number
+	 *            Phone number
+	 */
 	public static void setRemoteParty(String number) {
 		try {
 			CallManager.mContact = ContactUtils.createContactId(number);
 		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
-				logger.error("Cannot parse remote party "+number);
+				logger.error("Cannot parse remote party " + number);
 			}
 		}
 	}
 
 	/**
-     * Get the remote connected phone number
-     * 
-     * @return Phone number or null is disconnected
-     */
+	 * Get the remote connected phone number
+	 * 
+	 * @return Phone number or null is disconnected
+	 */
 	private ContactId getPhoneNumberOfConntectedRemote() {
 		if (callState == CallManager.DISCONNECTED) {
 			return null;
@@ -251,118 +254,124 @@ public class CallManager {
 	}
 
 	/**
-     * Returns the calling remote contact identifier
-     * 
-     * @return MSISDN
-     */
+	 * Returns the calling remote contact identifier
+	 * 
+	 * @return MSISDN
+	 */
 	public ContactId getContact() {
 		return mContact;
 	}
 
 	/**
-     * Is call connected
-     * 
-     * @return Boolean
-     */
+	 * Is call connected
+	 * 
+	 * @return Boolean
+	 */
 	public boolean isCallConnected() {
 		return (callState == CONNECTED);
 	}
 
 	/**
-     * Is call connected with a given contact
-     * 
-     * @param contact Contact identifier
-     * @return Boolean
-     */
+	 * Is call connected with a given contact
+	 * 
+	 * @param contact
+	 *            Contact identifier
+	 * @return Boolean
+	 */
 
 	public boolean isCallConnectedWith(ContactId contact) {
 		if (this.multipartyCall || this.callHold) {
 			return false;
 		}
-		
-		return (isCallConnected() && contact != null && contact.equals(getPhoneNumberOfConntectedRemote()));
+
+		return (isCallConnected() && contact != null && contact
+				.equals(getPhoneNumberOfConntectedRemote()));
 	}
-	
+
 	/**
-     * Is a multiparty call
-     * 
-     * @return Boolean
-     */
+	 * Is a multiparty call
+	 * 
+	 * @return Boolean
+	 */
 	public boolean isMultipartyCall() {
 		return multipartyCall;
-	}	
-	
+	}
+
 	/**
-     * Is call hold
-     * 
-     * @return Boolean
-     */
+	 * Is call hold
+	 * 
+	 * @return Boolean
+	 */
 	public boolean isCallHold() {
 		return callHold;
 	}
 
 	/**
-     * Request capabilities to a given contact
-     * 
-     * @param contact Contact identifier
-     */
+	 * Request capabilities to a given contact
+	 * 
+	 * @param contact
+	 *            Contact identifier
+	 */
 	private void requestCapabilities(ContactId contact) {
-        if (imsModule.getCapabilityService().isServiceStarted()) {
+		if (imsModule.getCapabilityService().isServiceStarted()) {
 			imsModule.getCapabilityService().requestContactCapabilities(contact);
-		 }
-    }
-	
+		}
+	}
+
 	/**
 	 * Call leg has changed
 	 */
 	private void callLegHasChanged() {
 		if (multipartyCall | callHold) {
-		    // Abort pending richcall sessions if call hold or multiparty call
-	    	imsModule.getRichcallService().abortAllSessions();
-    	}
-		
+			// Abort pending richcall sessions if call hold or multiparty call
+			imsModule.getRichcallService().abortAllSessions();
+		}
+
 		// Request new capabilities
-    	requestCapabilities(mContact);
+		requestCapabilities(mContact);
 	}
-	
+
 	/**
 	 * Set multiparty call
 	 * 
-	 * @param state State
+	 * @param state
+	 *            State
 	 */
 	public void setMultiPartyCall(boolean state) {
 		if (logger.isActivated()) {
 			logger.info("Set multiparty call to " + state);
 		}
 		this.multipartyCall = state;
-		
-		callLegHasChanged();	
+
+		callLegHasChanged();
 	}
 
 	/**
 	 * Set call hold
 	 * 
-	 * @param state State
+	 * @param state
+	 *            State
 	 */
-	public void setCallHold(boolean state)  {
+	public void setCallHold(boolean state) {
 		if (logger.isActivated()) {
 			logger.info("Set call hold to " + state);
 		}
 		this.callHold = state;
-		
-		callLegHasChanged();	
+
+		callLegHasChanged();
 	}
-	
+
 	/**
 	 * Connection event
 	 * 
-	 * @param connected Connection state
+	 * @param connected
+	 *            Connection state
 	 */
 	public void connectionEvent(boolean connected) {
 		if (mContact == null) {
 			return;
 		}
-		
+
 		if (connected) {
 			if (logger.isActivated()) {
 				logger.info("Connectivity changed: update content sharing capabilities");

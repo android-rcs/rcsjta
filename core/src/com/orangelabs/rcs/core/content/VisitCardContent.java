@@ -24,7 +24,6 @@ package com.orangelabs.rcs.core.content;
 
 import android.net.Uri;
 
-
 /**
  * Visit Card content
  * 
@@ -35,10 +34,14 @@ public class VisitCardContent extends MmContent {
 	/**
 	 * Constructor
 	 *
-	 * @param visitCardFile URI
-	 * @param encoding the mime-type encoding
-	 * @param size Content size
-	 * @param fileName The filename
+	 * @param visitCardFile
+	 *            URI
+	 * @param encoding
+	 *            the mime-type encoding
+	 * @param size
+	 *            Content size
+	 * @param fileName
+	 *            The filename
 	 */
 	public VisitCardContent(Uri visitCardFile, String encoding, long size, String fileName) {
 		super(visitCardFile, encoding, size, fileName);

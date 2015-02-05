@@ -26,10 +26,9 @@ import android.content.Intent;
 import android.os.RemoteCallbackList;
 
 /**
- * MultimediaMessagingSessionEventBroadcaster maintains the registering and
- * unregistering of IMultimediaMessagingSessionListener and also performs
- * broadcast events on these listeners upon the trigger of corresponding
- * callbacks.
+ * MultimediaMessagingSessionEventBroadcaster maintains the registering and unregistering of
+ * IMultimediaMessagingSessionListener and also performs broadcast events on these listeners upon
+ * the trigger of corresponding callbacks.
  */
 public class MultimediaMessagingSessionEventBroadcaster implements
 		IMultimediaMessagingSessionEventBroadcaster {
@@ -53,8 +52,8 @@ public class MultimediaMessagingSessionEventBroadcaster implements
 		final int N = mMultimediaMessagingListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mMultimediaMessagingListeners.getBroadcastItem(i).onMessageReceived(contact, sessionId,
-						message);
+				mMultimediaMessagingListeners.getBroadcastItem(i).onMessageReceived(contact,
+						sessionId, message);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);
@@ -64,13 +63,12 @@ public class MultimediaMessagingSessionEventBroadcaster implements
 		mMultimediaMessagingListeners.finishBroadcast();
 	}
 
-	public void broadcastStateChanged(ContactId contact, String sessionId,
-			int state, int reasonCode) {
+	public void broadcastStateChanged(ContactId contact, String sessionId, int state, int reasonCode) {
 		final int N = mMultimediaMessagingListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mMultimediaMessagingListeners.getBroadcastItem(i)
-						.onStateChanged(contact, sessionId, state, reasonCode);
+				mMultimediaMessagingListeners.getBroadcastItem(i).onStateChanged(contact,
+						sessionId, state, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);

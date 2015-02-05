@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.gsma.service.rcs;
 
 import java.util.NoSuchElementException;
@@ -25,42 +26,41 @@ import com.gsma.services.rcs.Geoloc;
 
 public class GeolocTest extends AndroidTestCase {
 
-	public void testgetGeolocInvalidData() {
-		try {
-			new Geoloc("abcd,2,3,4.0");
-			fail("Exception is expected");
-		} catch (Exception e) {
-			assertTrue(e instanceof NumberFormatException);
-		}
-	}
+    public void testgetGeolocInvalidData() {
+        try {
+            new Geoloc("abcd,2,3,4.0");
+            fail("Exception is expected");
+        } catch (Exception e) {
+            assertTrue(e instanceof NumberFormatException);
+        }
+    }
 
-	public void testgetGeolocMissingData() {
-		try {
-			new Geoloc("0,1,2");
-		}
-		catch (Exception e) {
-			assertTrue(e instanceof NoSuchElementException);
-		}
-	}
+    public void testgetGeolocMissingData() {
+        try {
+            new Geoloc("0,1,2");
+        } catch (Exception e) {
+            assertTrue(e instanceof NoSuchElementException);
+        }
+    }
 
-	public void testgetGeoloc() {
-		Geoloc geoloc = new Geoloc("label,1,2,3,4.0");
-		assertNotNull(geoloc);
-		assertEquals("label", geoloc.getLabel());
-		assertEquals(1.0d, geoloc.getLatitude());
-		assertEquals(2.0d, geoloc.getLongitude());
-		assertEquals(3L, geoloc.getExpiration());
-		assertEquals(4.0f, geoloc.getAccuracy());
-	}
+    public void testgetGeoloc() {
+        Geoloc geoloc = new Geoloc("label,1,2,3,4.0");
+        assertNotNull(geoloc);
+        assertEquals("label", geoloc.getLabel());
+        assertEquals(1.0d, geoloc.getLatitude());
+        assertEquals(2.0d, geoloc.getLongitude());
+        assertEquals(3L, geoloc.getExpiration());
+        assertEquals(4.0f, geoloc.getAccuracy());
+    }
 
-	public void testgetGeolocNoLabel() {
-		Geoloc geoloc = new Geoloc("1,2,3,4.0");
-		assertNotNull(geoloc);
-		assertEquals(null, geoloc.getLabel());
-		assertEquals(1.0d, geoloc.getLatitude());
-		assertEquals(2.0d, geoloc.getLongitude());
-		assertEquals(3L, geoloc.getExpiration());
-		assertEquals(4.0f, geoloc.getAccuracy());
-	}
+    public void testgetGeolocNoLabel() {
+        Geoloc geoloc = new Geoloc("1,2,3,4.0");
+        assertNotNull(geoloc);
+        assertEquals(null, geoloc.getLabel());
+        assertEquals(1.0d, geoloc.getLatitude());
+        assertEquals(2.0d, geoloc.getLongitude());
+        assertEquals(3L, geoloc.getExpiration());
+        assertEquals(4.0f, geoloc.getAccuracy());
+    }
 
 }

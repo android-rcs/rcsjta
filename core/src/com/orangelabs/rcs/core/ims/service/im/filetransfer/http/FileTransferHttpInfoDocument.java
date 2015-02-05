@@ -74,7 +74,8 @@ public class FileTransferHttpInfoDocument {
 	/**
 	 * Set file thumbnail
 	 *
-	 * @param thumbnail Thumbnail
+	 * @param thumbnail
+	 *            Thumbnail
 	 */
 	public void setFileThumbnail(FileTransferHttpThumbnail thumbnail) {
 		this.thumbnail = thumbnail;
@@ -90,18 +91,19 @@ public class FileTransferHttpInfoDocument {
 	}
 
 	/**
-	 * Get file transfer validity 
+	 * Get file transfer validity
 	 *
-	 * @return Validity 
+	 * @return Validity
 	 */
 	public long getTransferValidity() {
 		return validity;
 	}
 
 	/**
-	 * Set file transfer validity 
+	 * Set file transfer validity
 	 * 
-	 * @param validity Validity
+	 * @param validity
+	 *            Validity
 	 */
 	public void setTransferValidity(long validity) {
 		this.validity = validity;
@@ -137,7 +139,8 @@ public class FileTransferHttpInfoDocument {
 	/**
 	 * Set file content type
 	 *
-	 * @param type File content type
+	 * @param type
+	 *            File content type
 	 */
 	public void setFileType(String type) {
 		this.type = type;
@@ -155,7 +158,8 @@ public class FileTransferHttpInfoDocument {
 	/**
 	 * Set file size
 	 *
-	 * @param size File size
+	 * @param size
+	 *            File size
 	 */
 	public void setFileSize(int size) {
 		this.size = size;
@@ -164,12 +168,13 @@ public class FileTransferHttpInfoDocument {
 	/**
 	 * Set the fileName
 	 * 
-	 * @param fileName FileName
+	 * @param fileName
+	 *            FileName
 	 */
 	public void setFilename(String fileName) {
 		this.fileName = fileName;
 	}
-	
+
 	/**
 	 * Return the fileName
 	 * 

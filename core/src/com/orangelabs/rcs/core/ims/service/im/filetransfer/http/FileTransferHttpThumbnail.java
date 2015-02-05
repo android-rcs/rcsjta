@@ -29,7 +29,7 @@ import android.net.Uri;
  * @author vfml3370
  */
 public class FileTransferHttpThumbnail {
-	
+
 	/**
 	 * Thumbnail size
 	 */
@@ -39,12 +39,12 @@ public class FileTransferHttpThumbnail {
 	 * Thumbnail content type
 	 */
 	private String contentType = null;
-	
+
 	/**
 	 * Thumbnail URI
 	 */
 	private Uri thumbnail = null;
-	
+
 	/**
 	 * Validity of the file thumbnail
 	 */
@@ -68,7 +68,8 @@ public class FileTransferHttpThumbnail {
 	/**
 	 * Set thumbnail validity
 	 *
-	 * @param validity Thumbnail validity
+	 * @param validity
+	 *            Thumbnail validity
 	 */
 	public void setThumbnailValidity(long validity) {
 		this.validity = validity;
@@ -86,7 +87,8 @@ public class FileTransferHttpThumbnail {
 	/**
 	 * Set thumbnail URI
 	 * 
-	 * @param thumbnail Thumbnail URI
+	 * @param thumbnail
+	 *            Thumbnail URI
 	 */
 	public void setThumbnailUri(Uri thumbnail) {
 		this.thumbnail = thumbnail;
@@ -122,7 +124,8 @@ public class FileTransferHttpThumbnail {
 	/**
 	 * Set thumbnail size
 	 * 
-	 * @param size Thumbnail size
+	 * @param size
+	 *            Thumbnail size
 	 */
 	public void setThumbnailSize(int size) {
 		this.size = size;

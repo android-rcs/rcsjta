@@ -26,22 +26,16 @@ import java.util.UUID;
  * @author JF. Jestin
  */
 public class IdGenerator {
-	
+
 	/**
-	 * Every 6 bit are coded using this table (see base64 encoding standard,
-	 * except '/' which was replaced by '_')
+	 * Every 6 bit are coded using this table (see base64 encoding standard, except '/' which was
+	 * replaced by '_')
 	 */
-	private final static char[] CODE_TABLE =
-		{
-	    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-	    'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-	    'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-	    'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
-	    'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
-	    'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-	    'w', 'x', 'y', 'z', '0', '1', '2', '3',
-	    '4', '5', '6', '7', '8', '9', '+', '_'
-		};
+	private final static char[] CODE_TABLE = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+			'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a',
+			'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
+			's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8',
+			'9', '+', '_' };
 
 	/**
 	 * The counter which get a new value for each subsequent call of increment()
@@ -49,27 +43,31 @@ public class IdGenerator {
 	private static int cyclicCounter = 0;
 
 	/**
-	 * How much digits are used for coding the counter, 3 means 3*6 bits,
-	 * that are 18 bits resulting in a max. value of 262144 for the counter which
-	 * seems to be enough.
+	 * How much digits are used for coding the counter, 3 means 3*6 bits, that are 18 bits resulting
+	 * in a max. value of 262144 for the counter which seems to be enough.
 	 */
 	private final static int N_COUNTERS_CHARS = 3;
 
 	/**
-	 * The number of generated characters for the uniq identifier<p>
-	 * System.currentTimeMillis() returns long, but only 42 bit are taken, which
-	 * seems to be enough for more than 100 years after 1970, these 42 bits need
-	 * 7 chars for their coding, the number of chars for the counter is added:
-	 * <pre>maxDigit = 7 + N_COUNTERS_CHARS;</pre>
+	 * The number of generated characters for the uniq identifier
+	 * <p>
+	 * System.currentTimeMillis() returns long, but only 42 bit are taken, which seems to be enough
+	 * for more than 100 years after 1970, these 42 bits need 7 chars for their coding, the number
+	 * of chars for the counter is added:
+	 * 
+	 * <pre>
+	 * maxDigit = 7 + N_COUNTERS_CHARS;
+	 * </pre>
 	 */
 	private final static int MAX_DIGIT = 7 + N_COUNTERS_CHARS;
 
 	/**
-	 * The central method to increment the cyclic counter, synchronized to achieve
-	 * a unique value for each subsequent call<p>
-	 * there is no problem if the counter reaches the maximum counter value,
-	 * defined by N_COUNTERS_CHARS, only the right number of bits are taken into
-	 * account for generating the output
+	 * The central method to increment the cyclic counter, synchronized to achieve a unique value
+	 * for each subsequent call
+	 * <p>
+	 * there is no problem if the counter reaches the maximum counter value, defined by
+	 * N_COUNTERS_CHARS, only the right number of bits are taken into account for generating the
+	 * output
 	 *
 	 * @return The new counter value
 	 */
@@ -78,11 +76,13 @@ public class IdGenerator {
 	}
 
 	/**
-	 * Encode twoumbers into a textual representation using a base64 like coding
-	 * table.
-	 * @param time This should be System.currentTimeMillis
-	 * @param counter The counter value, it is coded into N_COUNTERS_CHARS chars, ie for
-	 *        3 chars we have 18 bit and a max. range of 262144
+	 * Encode twoumbers into a textual representation using a base64 like coding table.
+	 * 
+	 * @param time
+	 *            This should be System.currentTimeMillis
+	 * @param counter
+	 *            The counter value, it is coded into N_COUNTERS_CHARS chars, ie for 3 chars we have
+	 *            18 bit and a max. range of 262144
 	 * @result The converted String containing (7 + N_COUNTERS_CHARS) characters
 	 */
 	private static String encode64(long time, int counter) {
@@ -118,7 +118,7 @@ public class IdGenerator {
 
 		return encode64(time, counter);
 	}
-	
+
 	/**
 	 * Generate a new unique and random message ID (eg. for SIP or MSRP)
 	 * 
@@ -126,11 +126,13 @@ public class IdGenerator {
 	 * 
 	 *         <p>
 	 *         <b>Note:</b><br />
-	 *         The message ID is a string of 32 characters in the range [a-f0-9] in compliance with RFC 4975
+	 *         The message ID is a string of 32 characters in the range [a-f0-9] in compliance with
+	 *         RFC 4975
 	 *         </p>
 	 */
 	public static synchronized String generateMessageID() {
 		UUID id = UUID.randomUUID();
-		return String.format("%016x%016x", id.getMostSignificantBits(), id.getLeastSignificantBits());
+		return String.format("%016x%016x", id.getMostSignificantBits(),
+				id.getLeastSignificantBits());
 	}
 }

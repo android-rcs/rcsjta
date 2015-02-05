@@ -26,9 +26,8 @@ import android.content.Intent;
 import android.os.RemoteCallbackList;
 
 /**
- * IPCallEventBroadcaster maintains the registering and unregistering of
- * IIPCallListener and also performs broadcast events on these listeners upon
- * the trigger of corresponding callbacks.
+ * IPCallEventBroadcaster maintains the registering and unregistering of IIPCallListener and also
+ * performs broadcast events on these listeners upon the trigger of corresponding callbacks.
  */
 public class IPCallEventBroadcaster implements IIPCallEventBroadcaster {
 

@@ -39,65 +39,64 @@ import com.orangelabs.rcs.ri.utils.LogUtils;
  * 
  * @author Jean-Marc AUFFRET
  * @author YPLO6403
- *
  */
 public class InitiateSingleChat extends Activity {
 
-	/**
-	 * The log tag for this class
-	 */
-	private static final String LOGTAG = LogUtils.getTag(InitiateSingleChat.class.getSimpleName());
+    /**
+     * The log tag for this class
+     */
+    private static final String LOGTAG = LogUtils.getTag(InitiateSingleChat.class.getSimpleName());
 
-	/**
-	 * Spinner for contact selection
-	 */
-	private Spinner mSpinner;
+    /**
+     * Spinner for contact selection
+     */
+    private Spinner mSpinner;
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-		// Set layout
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		setContentView(R.layout.chat_initiate_single);
+        // Set layout
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setContentView(R.layout.chat_initiate_single);
 
-		// Set contact selector
-		mSpinner = (Spinner) findViewById(R.id.contact);
-		mSpinner.setAdapter(ContactListAdapter.createRcsContactListAdapter(this));
+        // Set contact selector
+        mSpinner = (Spinner)findViewById(R.id.contact);
+        mSpinner.setAdapter(ContactListAdapter.createRcsContactListAdapter(this));
 
-		// Set button callback
-		Button inviteBtn = (Button) findViewById(R.id.invite_btn);
-		inviteBtn.setOnClickListener(btnInviteListener);
+        // Set button callback
+        Button inviteBtn = (Button)findViewById(R.id.invite_btn);
+        inviteBtn.setOnClickListener(btnInviteListener);
 
-		// Disable button if no contact available
-		if (mSpinner.getAdapter().getCount() == 0) {
-			inviteBtn.setEnabled(false);
-		}
-	}
+        // Disable button if no contact available
+        if (mSpinner.getAdapter().getCount() == 0) {
+            inviteBtn.setEnabled(false);
+        }
+    }
 
-	/**
-	 * Invite button listener
-	 */
+    /**
+     * Invite button listener
+     */
 
-	private OnClickListener btnInviteListener = new OnClickListener() {
-		public void onClick(View v) {
-			// get selected phone number
-			ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
-			String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
-			// Format phone number to contactId
-			ContactUtils contactUtils = ContactUtils.getInstance(InitiateSingleChat.this);
-			try {
-				ContactId contact = contactUtils.formatContact(phoneNumber);
-				// start chat view activity
-				startActivity(SingleChatView.forgeIntentToStart(InitiateSingleChat.this, contact));
-			} catch (RcsContactFormatException e) {
-				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "Cannot parse contact " + phoneNumber);
-				}
-			}
+    private OnClickListener btnInviteListener = new OnClickListener() {
+        public void onClick(View v) {
+            // get selected phone number
+            ContactListAdapter adapter = (ContactListAdapter)mSpinner.getAdapter();
+            String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
+            // Format phone number to contactId
+            ContactUtils contactUtils = ContactUtils.getInstance(InitiateSingleChat.this);
+            try {
+                ContactId contact = contactUtils.formatContact(phoneNumber);
+                // start chat view activity
+                startActivity(SingleChatView.forgeIntentToStart(InitiateSingleChat.this, contact));
+            } catch (RcsContactFormatException e) {
+                if (LogUtils.isActive) {
+                    Log.e(LOGTAG, "Cannot parse contact " + phoneNumber);
+                }
+            }
 
-			// Exit activity
-			finish();
-		}
-	};
+            // Exit activity
+            finish();
+        }
+    };
 }

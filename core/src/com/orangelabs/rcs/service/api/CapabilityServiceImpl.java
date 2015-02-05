@@ -57,7 +57,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	 */
 	private final Object lock = new Object();
 
-    /**
+	/**
 	 * The logger
 	 */
 	private final Logger logger = Logger.getLogger(getClass().getName());
@@ -68,9 +68,8 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	private final ContactsManager mContactsManager;
 
 	/**
-	 * This purpose of this handler is to make the request asynchronous with the
-	 * mechanisms provider by android by placing the request in the main thread
-	 * message queue.
+	 * This purpose of this handler is to make the request asynchronous with the mechanisms provider
+	 * by android by placing the request in the main thread message queue.
 	 */
 	private final Handler mOptionsExchangeRequestHandler;
 
@@ -96,7 +95,8 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
 		private final CapabilityService mCapabilityService;
 
-		public AllCapabilitiesRequester(ContactsManager contactManager, CapabilityService capabilityService) {
+		public AllCapabilitiesRequester(ContactsManager contactManager,
+				CapabilityService capabilityService) {
 			mContactManager = contactManager;
 			mCapabilityService = capabilityService;
 		}
@@ -109,14 +109,15 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	/**
 	 * Constructor
 	 * 
-	 * @param contactsManager Contacts manager
+	 * @param contactsManager
+	 *            Contacts manager
 	 */
 	public CapabilityServiceImpl(ContactsManager contactsManager) {
 		if (logger.isActivated()) {
 			logger.info("Capability service API is loaded");
 		}
-		
-		mContactsManager = contactsManager;		
+
+		mContactsManager = contactsManager;
 		mOptionsExchangeRequestHandler = new Handler();
 	}
 
@@ -128,20 +129,21 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 			logger.info("Capability service API is closed");
 		}
 	}
-    
-    /**
-     * Returns true if the service is registered to the platform, else returns false
-     * 
+
+	/**
+	 * Returns true if the service is registered to the platform, else returns false
+	 * 
 	 * @return Returns true if registered else returns false
-     */
-    public boolean isServiceRegistered() {
-    	return ServerApiUtils.isImsConnected();
-    }
+	 */
+	public boolean isServiceRegistered() {
+		return ServerApiUtils.isImsConnected();
+	}
 
 	/**
 	 * Registers a listener on service registration events
 	 *
-	 * @param listener Service registration listener
+	 * @param listener
+	 *            Service registration listener
 	 */
 	public void addEventListener(IRcsServiceRegistrationListener listener) {
 		if (logger.isActivated()) {
@@ -155,7 +157,8 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	/**
 	 * Unregisters a listener on service registration events
 	 *
-	 * @param listener Service registration listener
+	 * @param listener
+	 *            Service registration listener
 	 */
 	public void removeEventListener(IRcsServiceRegistrationListener listener) {
 		if (logger.isActivated()) {
@@ -169,7 +172,8 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	/**
 	 * Receive registration event
 	 *
-	 * @param state Registration state
+	 * @param state
+	 *            Registration state
 	 */
 	public void notifyRegistrationEvent(boolean state) {
 		// Notify listeners
@@ -182,47 +186,48 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 		}
 	}
 
-    /**
-     * Returns the capabilities supported by the local end user. The supported
-     * capabilities are fixed by the MNO and read during the provisioning.
-     * 
-     * @return Capabilities
-     */
+	/**
+	 * Returns the capabilities supported by the local end user. The supported capabilities are
+	 * fixed by the MNO and read during the provisioning.
+	 * 
+	 * @return Capabilities
+	 */
 	public Capabilities getMyCapabilities() {
 		return ContactsServiceImpl.getCapabilities(RcsSettings.getInstance().getMyCapabilities());
 	}
 
-    /**
-     * Returns the capabilities of a given contact from the local database. This
-     * method does not request any network update to the remote contact. The parameter
-     * contact supports the following formats: MSISDN in national or international
-     * format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not
-     * supported an exception is thrown.
-     * 
-     * @param contact ContactId
-     * @return Capabilities
-     */
+	/**
+	 * Returns the capabilities of a given contact from the local database. This method does not
+	 * request any network update to the remote contact. The parameter contact supports the
+	 * following formats: MSISDN in national or international format, SIP address, SIP-URI or
+	 * Tel-URI. If the format of the contact is not supported an exception is thrown.
+	 * 
+	 * @param contact
+	 *            ContactId
+	 * @return Capabilities
+	 */
 	public Capabilities getContactCapabilities(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Get capabilities for contact " + contact);
 		}
 		// Read capabilities in the local database
-		return ContactsServiceImpl.getCapabilities(mContactsManager.getContactCapabilities(contact));
+		return ContactsServiceImpl
+				.getCapabilities(mContactsManager.getContactCapabilities(contact));
 	}
 
-    /**
-	 * Requests capabilities to a remote contact. This method initiates in background
-	 * a new capability request to the remote contact by sending a SIP OPTIONS. The
-	 * result of the capability request is sent asynchronously via callback method of
-	 * the capabilities listener. A capability refresh is only sent if the timestamp
-	 * associated to the capability has expired (the expiration value is fixed via MNO
-	 * provisioning). The parameter contact supports the following formats: MSISDN in
-	 * national or international format, SIP address, SIP-URI or Tel-URI. If the format
-	 * of the contact is not supported an exception is thrown. The result of the
-	 * capability refresh request is provided to all the clients that have registered
-	 * the listener for this event.
+	/**
+	 * Requests capabilities to a remote contact. This method initiates in background a new
+	 * capability request to the remote contact by sending a SIP OPTIONS. The result of the
+	 * capability request is sent asynchronously via callback method of the capabilities listener. A
+	 * capability refresh is only sent if the timestamp associated to the capability has expired
+	 * (the expiration value is fixed via MNO provisioning). The parameter contact supports the
+	 * following formats: MSISDN in national or international format, SIP address, SIP-URI or
+	 * Tel-URI. If the format of the contact is not supported an exception is thrown. The result of
+	 * the capability refresh request is provided to all the clients that have registered the
+	 * listener for this event.
 	 * 
-	 * @param contact ContactId
+	 * @param contact
+	 *            ContactId
 	 * @throws ServerApiException
 	 */
 	public void requestContactCapabilities(final ContactId contact) throws ServerApiException {
@@ -233,8 +238,9 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 		// Test IMS connection
 		ServerApiUtils.testIms();
 		try {
-			mOptionsExchangeRequestHandler.post(new CapabilitiesRequester(Core.getInstance().getCapabilityService(), contact));
-		} catch(Exception e) {
+			mOptionsExchangeRequestHandler.post(new CapabilitiesRequester(Core.getInstance()
+					.getCapabilityService(), contact));
+		} catch (Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
 			}
@@ -243,45 +249,48 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	}
 
 	/**
-     * Receive capabilities from a contact
-     * 
-     * @param contact ContactId
-     * @param capabilities Capabilities
-     */
-    public void receiveCapabilities(ContactId contact, com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities) {
-    	synchronized(lock) {
-    		if (logger.isActivated()) {
-    			logger.info("Receive capabilities for " + contact);
-    		}
-	
-    		// Create capabilities instance
-    		Capabilities c = ContactsServiceImpl.getCapabilities(capabilities);
+	 * Receive capabilities from a contact
+	 * 
+	 * @param contact
+	 *            ContactId
+	 * @param capabilities
+	 *            Capabilities
+	 */
+	public void receiveCapabilities(ContactId contact,
+			com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities) {
+		synchronized (lock) {
+			if (logger.isActivated()) {
+				logger.info("Receive capabilities for " + contact);
+			}
+
+			// Create capabilities instance
+			Capabilities c = ContactsServiceImpl.getCapabilities(capabilities);
 
 			// Notify capabilities listeners
 			notifyListeners(contact, c);
-    	}
-    }
+		}
+	}
 
 	/**
 	 * Notify listeners
 	 *
-	 * @param contact ContactId
-	 * @param capabilities Capabilities
+	 * @param contact
+	 *            ContactId
+	 * @param capabilities
+	 *            Capabilities
 	 */
 	private void notifyListeners(ContactId contact, Capabilities capabilities) {
-		mCapabilitiesBroadcaster.broadcastCapabilitiesReceived(contact,
-				capabilities);
+		mCapabilitiesBroadcaster.broadcastCapabilitiesReceived(contact, capabilities);
 	}
 
-    /**
-	 * Requests capabilities for all contacts existing in the local address book. This
-	 * method initiates in background new capability requests for each contact of the
-	 * address book by sending SIP OPTIONS. The result of a capability request is sent
-	 * asynchronously via callback method of the capabilities listener. A capability
-	 * refresh is only sent if the timestamp associated to the capability has expired
-	 * (the expiration value is fixed via MNO provisioning). The result of the capability
-	 * refresh request is provided to all the clients that have registered the listener
-	 * for this event.
+	/**
+	 * Requests capabilities for all contacts existing in the local address book. This method
+	 * initiates in background new capability requests for each contact of the address book by
+	 * sending SIP OPTIONS. The result of a capability request is sent asynchronously via callback
+	 * method of the capabilities listener. A capability refresh is only sent if the timestamp
+	 * associated to the capability has expired (the expiration value is fixed via MNO
+	 * provisioning). The result of the capability refresh request is provided to all the clients
+	 * that have registered the listener for this event.
 	 * 
 	 * @throws ServerApiException
 	 */
@@ -293,9 +302,9 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 		ServerApiUtils.testIms();
 
 		try {
-			mOptionsExchangeRequestHandler.post(new AllCapabilitiesRequester(mContactsManager,
-					Core.getInstance().getCapabilityService()));
-		} catch(Exception e) {
+			mOptionsExchangeRequestHandler.post(new AllCapabilitiesRequester(mContactsManager, Core
+					.getInstance().getCapabilityService()));
+		} catch (Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
 			}
@@ -306,7 +315,8 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	/**
 	 * Registers a capabilities listener on any contact
 	 *
-	 * @param listener Capabilities listener
+	 * @param listener
+	 *            Capabilities listener
 	 */
 	public void addCapabilitiesListener(ICapabilitiesListener listener) {
 		if (logger.isActivated()) {
@@ -320,7 +330,8 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	/**
 	 * Unregisters a capabilities listener
 	 *
-	 * @param listener Capabilities listener
+	 * @param listener
+	 *            Capabilities listener
 	 */
 	public void removeCapabilitiesListener(ICapabilitiesListener listener) {
 		if (logger.isActivated()) {
@@ -334,8 +345,10 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	/**
 	 * Registers a listener for receiving capabilities of a given contact
 	 *
-	 * @param contact ContactId
-	 * @param listener Capabilities listener
+	 * @param contact
+	 *            ContactId
+	 * @param listener
+	 *            Capabilities listener
 	 */
 	public void addCapabilitiesListener2(ContactId contact, ICapabilitiesListener listener) {
 		if (logger.isActivated()) {
@@ -349,8 +362,10 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	/**
 	 * Unregisters a listener of capabilities for a given contact
 	 *
-	 * @param contact ContactId
-	 * @param listener Capabilities listener
+	 * @param contact
+	 *            ContactId
+	 * @param listener
+	 *            Capabilities listener
 	 */
 	public void removeCapabilitiesListener2(ContactId contact, ICapabilitiesListener listener) {
 		if (logger.isActivated()) {
@@ -371,7 +386,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	public int getServiceVersion() throws ServerApiException {
 		return RcsService.Build.API_VERSION;
 	}
-	
+
 	/**
 	 * Returns the common service configuration
 	 * 
@@ -380,5 +395,5 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 	public ICommonServiceConfiguration getCommonConfiguration() {
 		return new CommonServiceConfigurationImpl();
 	}
-	
+
 }

@@ -39,13 +39,11 @@ import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
- * Chat service offers the main entry point to initiate chat 1-1 and group
- * conversations with contacts. Several applications may connect/disconnect
- * to the API.
+ * Chat service offers the main entry point to initiate chat 1-1 and group conversations with
+ * contacts. Several applications may connect/disconnect to the API.
  * 
- * The parameter contact in the API supports the following formats:
- * MSISDN in national or international format, SIP address, SIP-URI
- * or Tel-URI.
+ * The parameter contact in the API supports the following formats: MSISDN in national or
+ * international format, SIP address, SIP-URI or Tel-URI.
  * 
  * @author Jean-Marc AUFFRET
  */
@@ -54,86 +52,90 @@ public class ChatService extends RcsService {
 	 * API
 	 */
 	private IChatService mApi;
-	
+
 	private static final String ERROR_CNX = "Chat service not connected";
 
 	/**
-     * Constructor
-     * 
-     * @param ctx Application context
-     * @param listener Service listener
-     */
-    public ChatService(Context ctx, RcsServiceListener listener) {
-    	super(ctx, listener);
-    }
+	 * Constructor
+	 * 
+	 * @param ctx
+	 *            Application context
+	 * @param listener
+	 *            Service listener
+	 */
+	public ChatService(Context ctx, RcsServiceListener listener) {
+		super(ctx, listener);
+	}
 
-    /**
-     * Connects to the API
-     */
-    public void connect() {
-    	mCtx.bindService(new Intent(IChatService.class.getName()), apiConnection, 0);
-    }
-    
-    /**
-     * Disconnects from the API
-     */
-    public void disconnect() {
-    	try {
-    		mCtx.unbindService(apiConnection);
-        } catch(IllegalArgumentException e) {
-        	// Nothing to do
-        }
-    }
+	/**
+	 * Connects to the API
+	 */
+	public void connect() {
+		mCtx.bindService(new Intent(IChatService.class.getName()), apiConnection, 0);
+	}
+
+	/**
+	 * Disconnects from the API
+	 */
+	public void disconnect() {
+		try {
+			mCtx.unbindService(apiConnection);
+		} catch (IllegalArgumentException e) {
+			// Nothing to do
+		}
+	}
 
 	/**
 	 * Set API interface
 	 * 
-	 * @param api API interface
+	 * @param api
+	 *            API interface
 	 */
-    protected void setApi(IInterface api) {
-    	super.setApi(api);
-        mApi = (IChatService)api;
-    }
+	protected void setApi(IInterface api) {
+		super.setApi(api);
+		mApi = (IChatService) api;
+	}
 
-    /**
+	/**
 	 * Service connection
 	 */
 	private ServiceConnection apiConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName className, IBinder service) {
-        	setApi(IChatService.Stub.asInterface(service));
-        	if (mListener != null) {
-        		mListener.onServiceConnected();
-        	}
-        }
+		public void onServiceConnected(ComponentName className, IBinder service) {
+			setApi(IChatService.Stub.asInterface(service));
+			if (mListener != null) {
+				mListener.onServiceConnected();
+			}
+		}
 
-        public void onServiceDisconnected(ComponentName className) {
-        	setApi(null);
-        	if (mListener != null) {
-        		mListener.onServiceDisconnected(ReasonCode.CONNECTION_LOST);
-        	}
-        }
-    };
-	
+		public void onServiceDisconnected(ComponentName className) {
+			setApi(null);
+			if (mListener != null) {
+				mListener.onServiceDisconnected(ReasonCode.CONNECTION_LOST);
+			}
+		}
+	};
+
 	/**
-     * Returns the configuration of the chat service
-     * 
-     * @return Configuration
-     * @throws RcsServiceException
-     */
-    public ChatServiceConfiguration getConfiguration() throws RcsServiceException {
+	 * Returns the configuration of the chat service
+	 * 
+	 * @return Configuration
+	 * @throws RcsServiceException
+	 */
+	public ChatServiceConfiguration getConfiguration() throws RcsServiceException {
 		if (mApi != null) {
 			try {
 				return new ChatServiceConfiguration(mApi.getConfiguration());
-			} catch(Exception e) {
+			} catch (Exception e) {
 				throw new RcsServiceException(e);
 			}
 		} else {
 			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
-	}    
-  
+	}
+
 	/**
-	 * Initiates a group chat with a group of contact and returns a GroupChat instance. The subject is optional and may be null.
+	 * Initiates a group chat with a group of contact and returns a GroupChat instance. The subject
+	 * is optional and may be null.
 	 * 
 	 * @param contacts
 	 *            Set of contact identifiers
@@ -142,30 +144,33 @@ public class ChatService extends RcsService {
 	 * @return a GroupChat instance
 	 * @throws RcsServiceException
 	 */
-    public GroupChat initiateGroupChat(Set<ContactId> contacts, String subject) throws RcsServiceException {
-    	if (mApi != null) {
+	public GroupChat initiateGroupChat(Set<ContactId> contacts, String subject)
+			throws RcsServiceException {
+		if (mApi != null) {
 			try {
-				IGroupChat chatIntf = mApi.initiateGroupChat(new ArrayList<ContactId>(contacts), subject);
+				IGroupChat chatIntf = mApi.initiateGroupChat(new ArrayList<ContactId>(contacts),
+						subject);
 				if (chatIntf != null) {
 					return new GroupChat(chatIntf);
 				} else {
 					return null;
 				}
-			} catch(Exception e) {
+			} catch (Exception e) {
 				throw new RcsServiceException(e);
 			}
 		} else {
 			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
-    }
+	}
 
-    /**
-     * Returns a chat with a given contact
-     * 
-     * @param contact ContactId
-     * @return Chat
-     * @throws RcsServiceException
-     */
+	/**
+	 * Returns a chat with a given contact
+	 * 
+	 * @param contact
+	 *            ContactId
+	 * @return Chat
+	 * @throws RcsServiceException
+	 */
 	public OneToOneChat getOneToOneChat(ContactId contact) throws RcsServiceException {
 		if (mApi != null) {
 			try {
@@ -179,28 +184,27 @@ public class ChatService extends RcsService {
 	}
 
 	/**
-	 * Returns a group chat from its unique ID. An exception is thrown if the
-	 * chat ID does not exist
+	 * Returns a group chat from its unique ID. An exception is thrown if the chat ID does not exist
 	 *
-	 * @param chatId Chat ID
+	 * @param chatId
+	 *            Chat ID
 	 * @return GroupChat
 	 * @throws RcsServiceException
 	 */
-    public GroupChat getGroupChat(String chatId) throws RcsServiceException {
+	public GroupChat getGroupChat(String chatId) throws RcsServiceException {
 		if (mApi != null) {
 			try {
 				return new GroupChat(mApi.getGroupChat(chatId));
-			} catch(Exception e) {
+			} catch (Exception e) {
 				throw new RcsServiceException(e);
 			}
 		} else {
 			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
-    }
+	}
 
 	/**
-	 * Returns true if it is possible to initiate a new group chat now else
-	 * returns false.
+	 * Returns true if it is possible to initiate a new group chat now else returns false.
 	 * 
 	 * @return boolean
 	 * @throws RcsServiceException
@@ -218,10 +222,11 @@ public class ChatService extends RcsService {
 	}
 
 	/**
-	 * Returns true if it's possible to initiate a new group chat with the
-	 * specified contactId right now, else returns false.
+	 * Returns true if it's possible to initiate a new group chat with the specified contactId right
+	 * now, else returns false.
 	 * 
-	 * @param ContactId contact
+	 * @param ContactId
+	 *            contact
 	 * @return boolean
 	 * @throws RcsServiceException
 	 */
@@ -238,8 +243,8 @@ public class ChatService extends RcsService {
 	}
 
 	/**
-	 * Deletes all one to one chat from history and abort/reject any associated
-	 * ongoing session if such exists.
+	 * Deletes all one to one chat from history and abort/reject any associated ongoing session if
+	 * such exists.
 	 * 
 	 * @throws RcsServiceException
 	 */
@@ -256,8 +261,8 @@ public class ChatService extends RcsService {
 	}
 
 	/**
-	 * Deletes all group chat from history and abort/reject any associated
-	 * ongoing session if such exists.
+	 * Deletes all group chat from history and abort/reject any associated ongoing session if such
+	 * exists.
 	 * 
 	 * @throws RcsServiceException
 	 */
@@ -274,10 +279,11 @@ public class ChatService extends RcsService {
 	}
 
 	/**
-	 * Deletes a one to one chat with a given contact from history and
-	 * abort/reject any associated ongoing session if such exists.
+	 * Deletes a one to one chat with a given contact from history and abort/reject any associated
+	 * ongoing session if such exists.
 	 * 
-	 * @param ContactId contact
+	 * @param ContactId
+	 *            contact
 	 * @throws RcsServiceException
 	 */
 	public void deleteOneToOneChat(ContactId contact) throws RcsServiceException {
@@ -293,8 +299,8 @@ public class ChatService extends RcsService {
 	}
 
 	/**
-	 * Delete a group chat by its chat id from history and abort/reject any
-	 * associated ongoing session if such exists.
+	 * Delete a group chat by its chat id from history and abort/reject any associated ongoing
+	 * session if such exists.
 	 * 
 	 * @param chatId
 	 * @throws RcsServiceException
@@ -330,8 +336,7 @@ public class ChatService extends RcsService {
 	}
 
 	/**
-	 * Marks undelivered chat messages to indicate that messages have been
-	 * processed.
+	 * Marks undelivered chat messages to indicate that messages have been processed.
 	 * 
 	 * @param msgIds
 	 * @throws RcsServiceException
@@ -348,26 +353,28 @@ public class ChatService extends RcsService {
 		}
 	}
 
-    /**
-     * Mark a received message as read (ie. displayed in the UI)
-     *
-     * @param msgId Message id
-     * @throws RcsServiceException
-     */
-    public void markMessageAsRead(String msgId) throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                mApi.markMessageAsRead(msgId);
-            } catch(Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
-        }
-    }
+	/**
+	 * Mark a received message as read (ie. displayed in the UI)
+	 *
+	 * @param msgId
+	 *            Message id
+	 * @throws RcsServiceException
+	 */
+	public void markMessageAsRead(String msgId) throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				mApi.markMessageAsRead(msgId);
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
 
 	/**
-	 * Set the parameter that controls whether to respond or not to display reports when requested by the remote.
+	 * Set the parameter that controls whether to respond or not to display reports when requested
+	 * by the remote.
 	 * <p>
 	 * Only applicable to one to one chat messages.
 	 * 
@@ -390,7 +397,8 @@ public class ChatService extends RcsService {
 	/**
 	 * Adds a listener on group chat events
 	 *
-	 * @param listener Group chat listener
+	 * @param listener
+	 *            Group chat listener
 	 * @throws RcsServiceException
 	 */
 	public void addEventListener(GroupChatListener listener) throws RcsServiceException {
@@ -408,11 +416,11 @@ public class ChatService extends RcsService {
 	/**
 	 * Removes a listener on group chat events
 	 *
-	 * @param listener Group chat event listener
+	 * @param listener
+	 *            Group chat event listener
 	 * @throws RcsServiceException
 	 */
-	public void removeEventListener(GroupChatListener listener)
-			throws RcsServiceException {
+	public void removeEventListener(GroupChatListener listener) throws RcsServiceException {
 		if (mApi != null) {
 			try {
 				mApi.removeEventListener3(listener);
@@ -427,7 +435,8 @@ public class ChatService extends RcsService {
 	/**
 	 * Adds a listener for one-to-one chat events
 	 *
-	 * @param listener One-to-one chat listener
+	 * @param listener
+	 *            One-to-one chat listener
 	 * @throws RcsServiceException
 	 */
 	public void addEventListener(OneToOneChatListener listener) throws RcsServiceException {
@@ -445,7 +454,8 @@ public class ChatService extends RcsService {
 	/**
 	 * Removes a listener for one-to-one chat events
 	 *
-	 * @param listener One-to-one chat listener
+	 * @param listener
+	 *            One-to-one chat listener
 	 * @throws RcsServiceException
 	 */
 	public void removeEventListener(OneToOneChatListener listener) throws RcsServiceException {

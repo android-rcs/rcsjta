@@ -39,7 +39,8 @@ public class CpimIdentity {
 	/**
 	 * Pattern to extract display name and Uri from CPIM 'From' header
 	 */
-	private final static Pattern PATTERN_FROM_DISPLAY_NAME = Pattern.compile(REGEXP_FROM_DISPLAY_NAME);
+	private final static Pattern PATTERN_FROM_DISPLAY_NAME = Pattern
+			.compile(REGEXP_FROM_DISPLAY_NAME);
 
 	/**
 	 * The optional display name (may be null)

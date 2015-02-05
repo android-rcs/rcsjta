@@ -39,25 +39,30 @@ public interface Digest {
 	/**
 	 * Update the message digest with a single byte.
 	 * 
-	 * @param in Input byte to be entered.
+	 * @param in
+	 *            Input byte to be entered.
 	 */
 	public void update(byte in);
 
 	/**
 	 * Update the message digest with a block of bytes.
 	 * 
-	 * @param in Byte array containing the data
-	 * @param inOff Offset into the byte array where the data starts
-	 * @param len Length of the data
+	 * @param in
+	 *            Byte array containing the data
+	 * @param inOff
+	 *            Offset into the byte array where the data starts
+	 * @param len
+	 *            Length of the data
 	 */
 	public void update(byte[] in, int inOff, int len);
 
 	/**
-	 * Close the digest, producing the final digest value. The doFinal call
-	 * leaves the digest reset.
+	 * Close the digest, producing the final digest value. The doFinal call leaves the digest reset.
 	 * 
-	 * @param out Array the digest is to be copied into
-	 * @param outOff Offset into the out array the digest is to start at
+	 * @param out
+	 *            Array the digest is to be copied into
+	 * @param outOff
+	 *            Offset into the out array the digest is to start at
 	 */
 	public int doFinal(byte[] out, int outOff);
 

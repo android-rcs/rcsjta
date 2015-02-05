@@ -35,7 +35,7 @@ public class HttpResponse {
 	 * Headers
 	 */
 	private Hashtable<String, String> headers = new Hashtable<String, String>();
-	
+
 	/**
 	 * Content
 	 */
@@ -50,7 +50,8 @@ public class HttpResponse {
 	/**
 	 * Set the status line
 	 * 
-	 * @param status Status line
+	 * @param status
+	 *            Status line
 	 */
 	public void setStatusLine(String status) {
 		this.status = status;
@@ -64,12 +65,14 @@ public class HttpResponse {
 	public String getStatusLine() {
 		return status;
 	}
-	
+
 	/**
 	 * Add header
 	 * 
-	 * @param name Header name
-	 * @param value Header value
+	 * @param name
+	 *            Header name
+	 * @param value
+	 *            Header value
 	 */
 	public void addHeader(String name, String value) {
 		headers.put(name, value);
@@ -78,7 +81,8 @@ public class HttpResponse {
 	/**
 	 * Get header
 	 * 
-	 * @param name Header name
+	 * @param name
+	 *            Header name
 	 * @return Header value
 	 */
 	public String getHeader(String name) {
@@ -92,10 +96,10 @@ public class HttpResponse {
 	 */
 	public int getResponseCode() {
 		try {
-			int index1 = status.indexOf(" ")+1;
+			int index1 = status.indexOf(" ") + 1;
 			int index2 = status.indexOf(" ", index1);
-			return Integer.parseInt(status.substring(index1, index2)); 
-		} catch(Exception e) {
+			return Integer.parseInt(status.substring(index1, index2));
+		} catch (Exception e) {
 			return -1;
 		}
 	}
@@ -113,7 +117,7 @@ public class HttpResponse {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Is not found response
 	 * 
@@ -127,7 +131,7 @@ public class HttpResponse {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Returns the response content
 	 * 
@@ -135,12 +139,13 @@ public class HttpResponse {
 	 */
 	public byte[] getContent() {
 		return content;
-	}	
-	
+	}
+
 	/**
 	 * Set the response content
 	 * 
-	 * @param content Content 
+	 * @param content
+	 *            Content
 	 */
 	public void setContent(byte[] content) {
 		this.content = content;

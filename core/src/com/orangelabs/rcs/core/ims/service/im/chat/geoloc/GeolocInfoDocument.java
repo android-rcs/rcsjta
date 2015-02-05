@@ -27,7 +27,7 @@ public class GeolocInfoDocument {
 	 * MIME type
 	 */
 	public static final String MIME_TYPE = "application/vnd.gsma.rcspushlocation+xml";
-	
+
 	/**
 	 * Entity
 	 */
@@ -37,17 +37,17 @@ public class GeolocInfoDocument {
 	 * Label
 	 */
 	private String label = null;
-	
+
 	/**
 	 * Latitude
 	 */
 	private double latitude = 0;
-	
+
 	/**
 	 * Longitude
 	 */
 	private double longitude = 0;
-	
+
 	/**
 	 * Expiration date
 	 */
@@ -61,7 +61,8 @@ public class GeolocInfoDocument {
 	/**
 	 * Constructor
 	 * 
-	 * @param entity Entity
+	 * @param entity
+	 *            Entity
 	 */
 	public GeolocInfoDocument(String entity) {
 		this.entity = entity;
@@ -82,7 +83,7 @@ public class GeolocInfoDocument {
 	public void setEntity(String entity) {
 		this.entity = entity;
 	}
-	
+
 	public long getExpiration() {
 		return expiration;
 	}
@@ -90,7 +91,7 @@ public class GeolocInfoDocument {
 	public void setExpiration(long expiration) {
 		this.expiration = expiration;
 	}
-	
+
 	public double getLatitude() {
 		return latitude;
 	}
@@ -109,7 +110,7 @@ public class GeolocInfoDocument {
 
 	public float getRadius() {
 		return radius;
-	}	
+	}
 
 	public void setRadius(float r) {
 		radius = r;

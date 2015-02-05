@@ -33,126 +33,144 @@ import com.gsma.services.rcs.contacts.RcsContact;
 
 public class RcsContactTest extends AndroidTestCase {
 
-	private boolean imageSharing;
-	private boolean videoSharing;
-	private boolean imSession;
-	private boolean fileTransfer;
-	private boolean geolocPush;
-	private boolean ipVoiceCall;
-	private boolean ipVideoCall;
-	private Set<String> extensions;
-	private boolean automata;
-	private Capabilities capabilities;
-	private boolean registered;
-	private ContactId contactId;
-	private String displayName;
-	private long timestamp;
-	private boolean valid;
+    private boolean imageSharing;
 
-	protected void setUp() throws Exception {
-		super.setUp();
-		Random random = new Random();
-		imageSharing = random.nextBoolean();
-		videoSharing = random.nextBoolean();
-		imSession = random.nextBoolean();
-		fileTransfer = random.nextBoolean();
-		geolocPush = random.nextBoolean();
-		ipVideoCall = random.nextBoolean();
-		ipVoiceCall = random.nextBoolean();
-		automata = random.nextBoolean();
-		extensions = new HashSet<String>();
-		extensions.add(String.valueOf(random.nextInt(96) + 32));
-		extensions.add(String.valueOf(random.nextInt(96) + 32));
-		timestamp = random.nextLong();
-		valid = random.nextBoolean();
+    private boolean videoSharing;
 
-		capabilities = new Capabilities(imageSharing, videoSharing, imSession, fileTransfer, geolocPush, ipVoiceCall, ipVideoCall,
-				extensions, automata, timestamp, valid);
-		registered = random.nextBoolean();
-		ContactUtils contactUtils = ContactUtils.getInstance(getContext());
-		contactId = contactUtils.formatContact("+33123456789");
-		displayName = "displayName";
-	}
+    private boolean imSession;
 
-	protected void tearDown() throws Exception {
-		super.tearDown();
-	}
+    private boolean fileTransfer;
 
-	public void testRcsContactContactNull() {
-		RcsContact rcsContact = new RcsContact(null, registered, capabilities, displayName, false, -1L);
-		Parcel parcel = Parcel.obtain();
-		rcsContact.writeToParcel(parcel, 0);
-		// done writing, now reset parcel for reading
-		parcel.setDataPosition(0);
-		// finish round trip
-		RcsContact createFromParcel = RcsContact.CREATOR.createFromParcel(parcel);
-		assertTrue(rcsContactIsEqual(createFromParcel, rcsContact));
-	}
-	
-	public void testRcsContactCapabilitiesNull() {
-		RcsContact rcsContact = new RcsContact(contactId, registered, null, displayName, false, -1L);
-		Parcel parcel = Parcel.obtain();
-		rcsContact.writeToParcel(parcel, 0);
-		// done writing, now reset parcel for reading
-		parcel.setDataPosition(0);
-		// finish round trip
-		RcsContact createFromParcel = RcsContact.CREATOR.createFromParcel(parcel);
-		assertTrue(rcsContactIsEqual(createFromParcel, rcsContact));
-	}
-	
-	public void testRcsContactDisplayNameNull() {
-		RcsContact rcsContact = new RcsContact(contactId, registered, capabilities, null, false, -1L);
-		Parcel parcel = Parcel.obtain();
-		rcsContact.writeToParcel(parcel, 0);
-		// done writing, now reset parcel for reading
-		parcel.setDataPosition(0);
-		// finish round trip
-		RcsContact createFromParcel = RcsContact.CREATOR.createFromParcel(parcel);
-		assertTrue(rcsContactIsEqual(createFromParcel, rcsContact));
-	}
-	
-	public void testRcsContact() {
-		RcsContact rcsContact = new RcsContact(contactId, registered, capabilities, displayName, false, -1L);
-		Parcel parcel = Parcel.obtain();
-		rcsContact.writeToParcel(parcel, 0);
-		// done writing, now reset parcel for reading
-		parcel.setDataPosition(0);
-		// finish round trip
-		RcsContact createFromParcel = RcsContact.CREATOR.createFromParcel(parcel);
-		assertTrue(rcsContactIsEqual(createFromParcel, rcsContact));
-	}
+    private boolean geolocPush;
 
-	private boolean rcsContactIsEqual(RcsContact rcs1, RcsContact rcs2) {
-		if (rcs1.isRegistered() != rcs2.isRegistered()) {
-			return false;
-		}
-		if (rcs1.getContactId() != null) {
-			if (!rcs1.getContactId().equals(rcs2.getContactId())) {
-				return false;
-			}
-		} else {
-			if (rcs2.getContactId() != null) {
-				return false;
-			}
-		}
-		if (rcs1.getCapabilities() != null) {
-			if (!CapabilitiesTest.capabilitiesIsEqual(rcs1.getCapabilities(), rcs2.getCapabilities())) {
-				return false;
-			}
-		} else {
-			if (rcs2.getCapabilities() != null) {
-				return false;
-			}
-		}
-		if (rcs1.getDisplayName() != null) {
-			if (!rcs1.getDisplayName().equals(rcs2.getDisplayName())) {
-				return false;
-			}
-		} else {
-			if (rcs2.getDisplayName() != null) {
-				return false;
-			}
-		}
-		return true;
-	}
+    private boolean ipVoiceCall;
+
+    private boolean ipVideoCall;
+
+    private Set<String> extensions;
+
+    private boolean automata;
+
+    private Capabilities capabilities;
+
+    private boolean registered;
+
+    private ContactId contactId;
+
+    private String displayName;
+
+    private long timestamp;
+
+    private boolean valid;
+
+    protected void setUp() throws Exception {
+        super.setUp();
+        Random random = new Random();
+        imageSharing = random.nextBoolean();
+        videoSharing = random.nextBoolean();
+        imSession = random.nextBoolean();
+        fileTransfer = random.nextBoolean();
+        geolocPush = random.nextBoolean();
+        ipVideoCall = random.nextBoolean();
+        ipVoiceCall = random.nextBoolean();
+        automata = random.nextBoolean();
+        extensions = new HashSet<String>();
+        extensions.add(String.valueOf(random.nextInt(96) + 32));
+        extensions.add(String.valueOf(random.nextInt(96) + 32));
+        timestamp = random.nextLong();
+        valid = random.nextBoolean();
+
+        capabilities = new Capabilities(imageSharing, videoSharing, imSession, fileTransfer,
+                geolocPush, ipVoiceCall, ipVideoCall, extensions, automata, timestamp, valid);
+        registered = random.nextBoolean();
+        ContactUtils contactUtils = ContactUtils.getInstance(getContext());
+        contactId = contactUtils.formatContact("+33123456789");
+        displayName = "displayName";
+    }
+
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
+
+    public void testRcsContactContactNull() {
+        RcsContact rcsContact = new RcsContact(null, registered, capabilities, displayName, false,
+                -1L);
+        Parcel parcel = Parcel.obtain();
+        rcsContact.writeToParcel(parcel, 0);
+        // done writing, now reset parcel for reading
+        parcel.setDataPosition(0);
+        // finish round trip
+        RcsContact createFromParcel = RcsContact.CREATOR.createFromParcel(parcel);
+        assertTrue(rcsContactIsEqual(createFromParcel, rcsContact));
+    }
+
+    public void testRcsContactCapabilitiesNull() {
+        RcsContact rcsContact = new RcsContact(contactId, registered, null, displayName, false, -1L);
+        Parcel parcel = Parcel.obtain();
+        rcsContact.writeToParcel(parcel, 0);
+        // done writing, now reset parcel for reading
+        parcel.setDataPosition(0);
+        // finish round trip
+        RcsContact createFromParcel = RcsContact.CREATOR.createFromParcel(parcel);
+        assertTrue(rcsContactIsEqual(createFromParcel, rcsContact));
+    }
+
+    public void testRcsContactDisplayNameNull() {
+        RcsContact rcsContact = new RcsContact(contactId, registered, capabilities, null, false,
+                -1L);
+        Parcel parcel = Parcel.obtain();
+        rcsContact.writeToParcel(parcel, 0);
+        // done writing, now reset parcel for reading
+        parcel.setDataPosition(0);
+        // finish round trip
+        RcsContact createFromParcel = RcsContact.CREATOR.createFromParcel(parcel);
+        assertTrue(rcsContactIsEqual(createFromParcel, rcsContact));
+    }
+
+    public void testRcsContact() {
+        RcsContact rcsContact = new RcsContact(contactId, registered, capabilities, displayName,
+                false, -1L);
+        Parcel parcel = Parcel.obtain();
+        rcsContact.writeToParcel(parcel, 0);
+        // done writing, now reset parcel for reading
+        parcel.setDataPosition(0);
+        // finish round trip
+        RcsContact createFromParcel = RcsContact.CREATOR.createFromParcel(parcel);
+        assertTrue(rcsContactIsEqual(createFromParcel, rcsContact));
+    }
+
+    private boolean rcsContactIsEqual(RcsContact rcs1, RcsContact rcs2) {
+        if (rcs1.isRegistered() != rcs2.isRegistered()) {
+            return false;
+        }
+        if (rcs1.getContactId() != null) {
+            if (!rcs1.getContactId().equals(rcs2.getContactId())) {
+                return false;
+            }
+        } else {
+            if (rcs2.getContactId() != null) {
+                return false;
+            }
+        }
+        if (rcs1.getCapabilities() != null) {
+            if (!CapabilitiesTest.capabilitiesIsEqual(rcs1.getCapabilities(),
+                    rcs2.getCapabilities())) {
+                return false;
+            }
+        } else {
+            if (rcs2.getCapabilities() != null) {
+                return false;
+            }
+        }
+        if (rcs1.getDisplayName() != null) {
+            if (!rcs1.getDisplayName().equals(rcs2.getDisplayName())) {
+                return false;
+            }
+        } else {
+            if (rcs2.getDisplayName() != null) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

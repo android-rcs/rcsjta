@@ -39,25 +39,26 @@ public class PhoneUtils {
 	 */
 	private static boolean TEL_URI_SUPPORTED = true;
 
-    /**
-     * Regular expression of the SIP header
-     *
-     */
-    private final static String REGEXP_EXTRACT_URI = "<(.*)>";
-    
-    /**
-     * Pattern to extract Uri from SIP header
-     */
-    private final static Pattern PATTERN_EXTRACT_URI = Pattern.compile(REGEXP_EXTRACT_URI);
-    
-    private static final String TEL_URI_HEADER = "tel:";
-    
-    private static final String SIP_URI_HEADER = "sip:";
+	/**
+	 * Regular expression of the SIP header
+	 *
+	 */
+	private final static String REGEXP_EXTRACT_URI = "<(.*)>";
+
+	/**
+	 * Pattern to extract Uri from SIP header
+	 */
+	private final static Pattern PATTERN_EXTRACT_URI = Pattern.compile(REGEXP_EXTRACT_URI);
+
+	private static final String TEL_URI_HEADER = "tel:";
+
+	private static final String SIP_URI_HEADER = "sip:";
 
 	/**
 	 * Set the country code
 	 * 
-	 * @param context Context
+	 * @param context
+	 *            Context
 	 */
 	public static synchronized void initialize(Context context) {
 		RcsSettings.createInstance(context);
@@ -67,18 +68,19 @@ public class PhoneUtils {
 	/**
 	 * Format a phone number to a SIP URI
 	 * 
-	 * @param number Phone number
+	 * @param number
+	 *            Phone number
 	 * @return SIP URI
 	 */
 	public static String formatNumberToSipUri(String number) {
 		if (number == null) {
 			return null;
-			
+
 		}
 
 		// Remove spaces
 		number = number.trim();
-		
+
 		// Extract username part
 		if (number.startsWith(TEL_URI_HEADER)) {
 			number = number.substring(TEL_URI_HEADER.length());
@@ -91,20 +93,21 @@ public class PhoneUtils {
 			if (TEL_URI_SUPPORTED) {
 				// Tel-URI format
 				return new StringBuilder(TEL_URI_HEADER).append(number).toString();
-				
+
 			} else {
 				// SIP-URI format
 				return new StringBuilder(SIP_URI_HEADER).append(number).append("@")
-						.append(ImsModule.IMS_USER_PROFILE.getHomeDomain()).append(";user=phone").toString();
-				
+						.append(ImsModule.IMS_USER_PROFILE.getHomeDomain()).append(";user=phone")
+						.toString();
+
 			}
 		} catch (RcsContactFormatException e) {
 			return null;
-			
+
 		}
-		
+
 	}
-	
+
 	/**
 	 * Format ContactId to tel or sip Uri
 	 * 
@@ -115,30 +118,32 @@ public class PhoneUtils {
 	public static String formatContactIdToUri(ContactId contactId) {
 		if (contactId == null) {
 			throw new IllegalArgumentException("ContactId is null");
-			
+
 		}
 		if (TEL_URI_SUPPORTED) {
 			// Tel-URI format
 			return new StringBuilder(TEL_URI_HEADER).append(contactId).toString();
-			
+
 		} else {
 			// SIP-URI format
-			return new StringBuilder(SIP_URI_HEADER).append(contactId).append("@").append(ImsModule.IMS_USER_PROFILE.getHomeDomain())
-					.append(";user=phone").toString();
-			
+			return new StringBuilder(SIP_URI_HEADER).append(contactId).append("@")
+					.append(ImsModule.IMS_USER_PROFILE.getHomeDomain()).append(";user=phone")
+					.toString();
+
 		}
 	}
 
 	/**
 	 * Extract user part phone number from a SIP-URI or Tel-URI or SIP address
 	 * 
-	 * @param uri SIP or Tel URI
+	 * @param uri
+	 *            SIP or Tel URI
 	 * @return Unformatted Number or null in case of error
 	 */
 	public static String extractNumberFromUriWithoutFormatting(String uri) {
 		if (uri == null) {
 			return null;
-			
+
 		}
 
 		try {
@@ -169,29 +174,31 @@ public class PhoneUtils {
 
 			// Returns the extracted number (username part of the URI)
 			return uri;
-			
+
 		} catch (Exception e) {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Extract user part phone number from a SIP-URI or Tel-URI or SIP address
 	 * 
-	 * @param uri SIP or Tel URI
+	 * @param uri
+	 *            SIP or Tel URI
 	 * @return Number or null in case of error
 	 */
 	public static String extractNumberFromUri(String uri) {
 		// Format the extracted number (username part of the URI)
 		try {
-			ContactId contact = ContactUtils.createContactId(extractNumberFromUriWithoutFormatting(uri));
+			ContactId contact = ContactUtils
+					.createContactId(extractNumberFromUriWithoutFormatting(uri));
 			return contact.toString();
-			
+
 		} catch (RcsContactFormatException e) {
 			return null;
 		}
 	}
-		
+
 	/**
 	 * get URI from SIP identity header
 	 * 
@@ -204,7 +211,7 @@ public class PhoneUtils {
 			Matcher matcher = PATTERN_EXTRACT_URI.matcher(header);
 			if (matcher.find()) {
 				return matcher.group(1);
-				
+
 			}
 		}
 		return header;

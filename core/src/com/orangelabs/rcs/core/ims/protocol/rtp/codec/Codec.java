@@ -61,7 +61,8 @@ public abstract class Codec {
 	/**
 	 * Set the input format
 	 * 
-	 * @param input Input format
+	 * @param input
+	 *            Input format
 	 * @return New format
 	 */
 	public Format setInputFormat(Format input) {
@@ -72,7 +73,8 @@ public abstract class Codec {
 	/**
 	 * Set the output format
 	 * 
-	 * @param output Output format
+	 * @param output
+	 *            Output format
 	 * @return New format
 	 */
 	public Format setOutputFormat(Format output) {
@@ -128,7 +130,8 @@ public abstract class Codec {
 	/**
 	 * Propagate EOM to the ouput buffer
 	 * 
-	 * @param outputBuffer Ouput buffer
+	 * @param outputBuffer
+	 *            Ouput buffer
 	 */
 	protected void propagateEOM(Buffer outputBuffer) {
 		updateOutput(outputBuffer, getOutputFormat(), 0, 0);
@@ -138,13 +141,16 @@ public abstract class Codec {
 	/**
 	 * Update the ouput buffer informations
 	 * 
-	 * @param outputBuffer Ouput buffer
-	 * @param format Ouput format
-	 * @param length Ouput length
-	 * @param offset Ouput offset
+	 * @param outputBuffer
+	 *            Ouput buffer
+	 * @param format
+	 *            Ouput format
+	 * @param length
+	 *            Ouput length
+	 * @param offset
+	 *            Ouput offset
 	 */
-	protected void updateOutput(Buffer outputBuffer, Format format, int length,
-			int offset) {
+	protected void updateOutput(Buffer outputBuffer, Format format, int length, int offset) {
 		outputBuffer.setFormat(format);
 		outputBuffer.setLength(length);
 		outputBuffer.setOffset(offset);
@@ -176,8 +182,10 @@ public abstract class Codec {
 	/**
 	 * Performs the media processing defined by this codec
 	 * 
-	 * @param input The buffer that contains the media data to be processed
-	 * @param output The buffer in which to store the processed media data
+	 * @param input
+	 *            The buffer that contains the media data to be processed
+	 * @param output
+	 *            The buffer in which to store the processed media data
 	 * @return Processing result
 	 */
 	public abstract int process(Buffer input, Buffer output);

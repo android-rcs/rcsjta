@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.ipcall.media;
 
 import android.util.Log;
@@ -30,143 +31,139 @@ import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.NetworkRessourceManager;
 
 /**
- * IP call player 
+ * IP call player
  */
 public class MyIPCallPlayer extends IPCallPlayer {
-	/**
-	 * Audio codec
-	 */
-	private AudioCodec audiocodec;
-	
-	/**
-	 * Local RTP port for audio
-	 */
-	private int localAudioRtpPort;
+    /**
+     * Audio codec
+     */
+    private AudioCodec audiocodec;
 
-	/**
-	 * Video codec
-	 */
-	private VideoCodec videocodec;
+    /**
+     * Local RTP port for audio
+     */
+    private int localAudioRtpPort;
 
-	/**
-	 * Local RTP port for video
-	 */
-	private int localVideoRtpPort;
+    /**
+     * Video codec
+     */
+    private VideoCodec videocodec;
 
-	/**
-	 * Is video activated
-	 */
-	private boolean video = false;
-	
-	/**
-	 * The log tag for this class
-	 */
-	private static final String LOGTAG = LogUtils.getTag(MyIPCallPlayer.class.getSimpleName());
-	
+    /**
+     * Local RTP port for video
+     */
+    private int localVideoRtpPort;
+
+    /**
+     * Is video activated
+     */
+    private boolean video = false;
+
+    /**
+     * The log tag for this class
+     */
+    private static final String LOGTAG = LogUtils.getTag(MyIPCallPlayer.class.getSimpleName());
+
     /**
      * Constructor
      */
     public MyIPCallPlayer() {
-    	// Set the local RTP port for audio
+        // Set the local RTP port for audio
         localAudioRtpPort = NetworkRessourceManager.generateLocalRtpPort();
 
         // Set the default audio codec
-    	audiocodec = new AudioCodec("AMR", 97, 8000, "");
-    	
-    	// Set the local RTP port for video
+        audiocodec = new AudioCodec("AMR", 97, 8000, "");
+
+        // Set the local RTP port for video
         localVideoRtpPort = NetworkRessourceManager.generateLocalRtpPort();
 
         // Set the default video codec
-    	videocodec = new VideoCodec(H264Config.CODEC_NAME,
-			H264VideoFormat.PAYLOAD,
-            H264Config.CLOCK_RATE,
-            15,
-            96000,
-            H264Config.QCIF_WIDTH, 
-            H264Config.QCIF_HEIGHT,
-			H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1b.BASELINE_PROFILE_ID + ";" + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=" + JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE);
-		if (LogUtils.isActive) {
-			Log.d(LOGTAG, "MyIPCallPlayer localAudioRtpPort=" + localAudioRtpPort + " localVideoRtpPort=" + localVideoRtpPort);
-		}
+        videocodec = new VideoCodec(H264Config.CODEC_NAME, H264VideoFormat.PAYLOAD,
+                H264Config.CLOCK_RATE, 15, 96000, H264Config.QCIF_WIDTH, H264Config.QCIF_HEIGHT,
+                H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1b.BASELINE_PROFILE_ID + ";"
+                        + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "="
+                        + JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE);
+        if (LogUtils.isActive) {
+            Log.d(LOGTAG, "MyIPCallPlayer localAudioRtpPort=" + localAudioRtpPort
+                    + " localVideoRtpPort=" + localVideoRtpPort);
+        }
     }
-	
-	public void open(AudioCodec audiocodec, VideoCodec videocodec, String remoteHost, int remoteAudioPort, int remoteVideoPort) {
-		// TODO
-		this.audiocodec = audiocodec;
-		this.videocodec = videocodec;
-	}
 
-	public void start() {
-		// TODO
-	}
+    public void open(AudioCodec audiocodec, VideoCodec videocodec, String remoteHost,
+            int remoteAudioPort, int remoteVideoPort) {
+        // TODO
+        this.audiocodec = audiocodec;
+        this.videocodec = videocodec;
+    }
 
-	public void stop() {
-		// TODO
-	}
-	
-	public void close() {
-		// TODO
-	}
+    public void start() {
+        // TODO
+    }
 
-	public AudioCodec getAudioCodec() {
-		return audiocodec;
-	}
+    public void stop() {
+        // TODO
+    }
 
-	public int getLocalAudioRtpPort() {
-		// TODO
-		return 5000;
-	}
+    public void close() {
+        // TODO
+    }
 
-	public int getLocalVideoRtpPort() {
-		// TODO
-		return 5002;
-	}
+    public AudioCodec getAudioCodec() {
+        return audiocodec;
+    }
 
-	public AudioCodec[] getSupportedAudioCodecs() {
-		// TODO
-		AudioCodec[] codecs = {
-			new AudioCodec("AMR", 97, 8000, "")
-		};
-		return codecs;
-	}
+    public int getLocalAudioRtpPort() {
+        // TODO
+        return 5000;
+    }
 
-	public VideoCodec[] getSupportedVideoCodecs() {
-		VideoCodec[] codecs = {
-			new VideoCodec(H264Config.CODEC_NAME,
-    			H264VideoFormat.PAYLOAD,
-                H264Config.CLOCK_RATE,
-                15,
-                96000,
-                H264Config.QCIF_WIDTH, 
-                H264Config.QCIF_HEIGHT,
-    			H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1b.BASELINE_PROFILE_ID + ";" + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=" + JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE)
-		};
-		return codecs;
-	}
+    public int getLocalVideoRtpPort() {
+        // TODO
+        return 5002;
+    }
 
-	public VideoCodec getVideoCodec() {
-		if (video) {
-			return videocodec;
-		} else {
-			return null;			
-		}
-	}
-	
-	/**
-	 * Is video activated
-	 * 
-	 * @return Boolean
-	 */
-	public boolean isVideoActivated() {
-		return video;
-	}
-	
-	/**
-	 * Set video activated
-	 * 
-	 * @param video Video flag
-	 */
-	public void setVideoActivation(boolean video) {
-		this.video = video;
-	}
+    public AudioCodec[] getSupportedAudioCodecs() {
+        // TODO
+        AudioCodec[] codecs = {
+            new AudioCodec("AMR", 97, 8000, "")
+        };
+        return codecs;
+    }
+
+    public VideoCodec[] getSupportedVideoCodecs() {
+        VideoCodec[] codecs = {
+            new VideoCodec(H264Config.CODEC_NAME, H264VideoFormat.PAYLOAD, H264Config.CLOCK_RATE,
+                    15, 96000, H264Config.QCIF_WIDTH, H264Config.QCIF_HEIGHT,
+                    H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1b.BASELINE_PROFILE_ID
+                            + ";" + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "="
+                            + JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE)
+        };
+        return codecs;
+    }
+
+    public VideoCodec getVideoCodec() {
+        if (video) {
+            return videocodec;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Is video activated
+     * 
+     * @return Boolean
+     */
+    public boolean isVideoActivated() {
+        return video;
+    }
+
+    /**
+     * Set video activated
+     * 
+     * @param video Video flag
+     */
+    public void setVideoActivation(boolean video) {
+        this.video = video;
+    }
 }

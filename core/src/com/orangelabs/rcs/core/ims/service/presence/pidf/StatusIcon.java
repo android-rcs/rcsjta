@@ -28,7 +28,7 @@ public class StatusIcon {
 	private String etag = null;
 
 	public StatusIcon() {
-		
+
 	}
 
 	public String getUrl() {

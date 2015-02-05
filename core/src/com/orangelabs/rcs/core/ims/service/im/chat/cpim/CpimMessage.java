@@ -32,7 +32,7 @@ public class CpimMessage {
 	 * MIME type
 	 */
 	public static final String MIME_TYPE = "message/cpim";
-	
+
 	/**
 	 * Header "Content-type"
 	 */
@@ -73,99 +73,105 @@ public class CpimMessage {
 	 * Header "Content-length"
 	 */
 	public static final String HEADER_CONTENT_LENGTH = "Content-length";
-	
+
 	/**
 	 * Header "Require"
 	 */
 	public static final String HEADER_REQUIRE = "Require";
-	
+
 	/**
 	 * Header "Content-Disposition"
 	 */
 	public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
-	
+
 	/**
 	 * Message content
 	 */
 	private String msgContent = null;
-	
+
 	/**
 	 * MIME headers
 	 */
 	private Hashtable<String, String> headers = new Hashtable<String, String>();
-	
+
 	/**
 	 * MIME content headers
 	 */
 	private Hashtable<String, String> contentHeaders = new Hashtable<String, String>();
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param headers MIME headers
-	 * @param contentHeaders MIME content headers
-	 * @param msgContent Content
+	 * @param headers
+	 *            MIME headers
+	 * @param contentHeaders
+	 *            MIME content headers
+	 * @param msgContent
+	 *            Content
 	 */
-	public CpimMessage(Hashtable<String, String> headers, Hashtable<String, String> contentHeaders, String msgContent) {
+	public CpimMessage(Hashtable<String, String> headers, Hashtable<String, String> contentHeaders,
+			String msgContent) {
 		this.headers = headers;
 		this.contentHeaders = contentHeaders;
 		this.msgContent = msgContent;
 	}
-	
-    /**
-     * Returns content type
-     * 
-     * @return Content type
-     */
-    public String getContentType() {
-    	String type = contentHeaders.get(CpimMessage.HEADER_CONTENT_TYPE);
-    	if (type == null) {
-    		return contentHeaders.get(CpimMessage.HEADER_CONTENT_TYPE2);
-    	} else {
-    		return type;
-    	}
-    }
-    
-    /**
-     * Returns MIME header
-     * 
-     * @param name Header name
-     * @return Header value
-     */
-    public String getHeader(String name) {
+
+	/**
+	 * Returns content type
+	 * 
+	 * @return Content type
+	 */
+	public String getContentType() {
+		String type = contentHeaders.get(CpimMessage.HEADER_CONTENT_TYPE);
+		if (type == null) {
+			return contentHeaders.get(CpimMessage.HEADER_CONTENT_TYPE2);
+		} else {
+			return type;
+		}
+	}
+
+	/**
+	 * Returns MIME header
+	 * 
+	 * @param name
+	 *            Header name
+	 * @return Header value
+	 */
+	public String getHeader(String name) {
 		return headers.get(name);
 	}
-	
-    /**
-     * Returns MIME content header
-     * 
-     * @param name Header name
-     * @return Header value
-     */
-    public String getContentHeader(String name) {
+
+	/**
+	 * Returns MIME content header
+	 * 
+	 * @param name
+	 *            Header name
+	 * @return Header value
+	 */
+	public String getContentHeader(String name) {
 		return contentHeaders.get(name);
 	}
 
-    /**
-     * Returns message content
-     * 
-     * @return Content
-     */
-    public String getMessageContent() {
+	/**
+	 * Returns message content
+	 * 
+	 * @return Content
+	 */
+	public String getMessageContent() {
 		return msgContent;
 	}
 
-    /**
-     * Returns message date
-     * 
-     * @return Date
-     */
-    public Date getMessageDate() {
-    	String header = getHeader(CpimMessage.HEADER_DATETIME);
-    	if (header != null) {
-    		return new Date(DateUtils.decodeDate(header));
-    	} else {
-    		return null;
-    	}
+	/**
+	 * Returns message date
+	 * 
+	 * @return Date
+	 */
+	public Date getMessageDate() {
+		String header = getHeader(CpimMessage.HEADER_DATETIME);
+		if (header != null) {
+			return new Date(DateUtils.decodeDate(header));
+		} else {
+			return null;
+		}
 	}
 }

@@ -36,12 +36,12 @@ public class CpuManager {
 	 */
 	private PowerManager.WakeLock powerLock = null;
 
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
-    
-    /**
+	/**
+	 * The logger
+	 */
+	private Logger logger = Logger.getLogger(this.getClass().getName());
+
+	/**
 	 * Constructor
 	 */
 	public CpuManager() {
@@ -51,25 +51,25 @@ public class CpuManager {
 	 * Init
 	 */
 	public void init() {
-        if (RcsSettings.getInstance().isCpuAlwaysOn()) {
-            // Activate the always-on procedure even if the device wakes up
-            PowerManager pm = (PowerManager) AndroidFactory.getApplicationContext()
-                    .getSystemService(Context.POWER_SERVICE);
-            powerLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "RcsCore");
-            powerLock.acquire();
-    		if (logger.isActivated()) {
-    			logger.info("Always-on CPU activated");
-    		}
-        }
+		if (RcsSettings.getInstance().isCpuAlwaysOn()) {
+			// Activate the always-on procedure even if the device wakes up
+			PowerManager pm = (PowerManager) AndroidFactory.getApplicationContext()
+					.getSystemService(Context.POWER_SERVICE);
+			powerLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "RcsCore");
+			powerLock.acquire();
+			if (logger.isActivated()) {
+				logger.info("Always-on CPU activated");
+			}
+		}
 	}
 
 	/**
 	 * Stop
 	 */
 	public void close() {
-        // Release power manager wave lock
-        if (powerLock != null) {
-            powerLock.release();
-        }
+		// Release power manager wave lock
+		if (powerLock != null) {
+			powerLock.release();
+		}
 	}
 }

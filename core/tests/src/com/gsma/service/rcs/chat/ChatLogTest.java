@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.gsma.service.rcs.chat;
 
 import java.util.Set;
@@ -29,35 +30,38 @@ import com.gsma.services.rcs.contacts.ContactUtils;
 
 public class ChatLogTest extends AndroidTestCase {
 
-	private Context mContext;
-	private ContactUtils mContactUtils;
+    private Context mContext;
 
-	protected void setUp() throws Exception {
-		super.setUp();
+    private ContactUtils mContactUtils;
 
-		mContext = getContext();
-		mContactUtils = ContactUtils.getInstance(mContext);
-	}
+    protected void setUp() throws Exception {
+        super.setUp();
 
-	protected void tearDown() throws Exception {
-		super.tearDown();
-	}
+        mContext = getContext();
+        mContactUtils = ContactUtils.getInstance(mContext);
+    }
 
-	public void testGetParticipantInfoNull() {
-		Set<ParticipantInfo> participantInfos = ChatLog.GroupChat.getParticipantInfo(mContext, null);
-		assertNull(participantInfos);
-	}
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
 
-	public void testGetParticipantInfo() {
-		Set<ParticipantInfo> participantInfos = ChatLog.GroupChat.getParticipantInfo(mContext, "+330123=1,+330124=3");
-		assertNotNull(participantInfos);
-		assertEquals(2, participantInfos.size());
-		ContactId participant1 = mContactUtils.formatContact("+330123");
-		ParticipantInfo info1 = new ParticipantInfo(participant1, ParticipantInfo.Status.CONNECTED);
-		assertTrue(participantInfos.contains(info1));
-		ContactId participant2 = mContactUtils.formatContact("+330124");
-		ParticipantInfo info2 = new ParticipantInfo(participant2, ParticipantInfo.Status.DEPARTED);
-		assertTrue(participantInfos.contains(info2));
-	}
+    public void testGetParticipantInfoNull() {
+        Set<ParticipantInfo> participantInfos = ChatLog.GroupChat
+                .getParticipantInfo(mContext, null);
+        assertNull(participantInfos);
+    }
+
+    public void testGetParticipantInfo() {
+        Set<ParticipantInfo> participantInfos = ChatLog.GroupChat.getParticipantInfo(mContext,
+                "+330123=1,+330124=3");
+        assertNotNull(participantInfos);
+        assertEquals(2, participantInfos.size());
+        ContactId participant1 = mContactUtils.formatContact("+330123");
+        ParticipantInfo info1 = new ParticipantInfo(participant1, ParticipantInfo.Status.CONNECTED);
+        assertTrue(participantInfos.contains(info1));
+        ContactId participant2 = mContactUtils.formatContact("+330124");
+        ParticipantInfo info2 = new ParticipantInfo(participant2, ParticipantInfo.Status.DEPARTED);
+        assertTrue(participantInfos.contains(info2));
+    }
 
 }

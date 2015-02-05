@@ -23,7 +23,7 @@ import com.orangelabs.rcs.utils.DateUtils;
 public class OverridingWillingness {
 
 	private Basic basic = null;
-	
+
 	private long until = -1;
 
 	public OverridingWillingness(Basic basic) {
@@ -47,5 +47,5 @@ public class OverridingWillingness {
 
 	public void setUntilTimestamp(String ts) {
 		this.until = DateUtils.decodeDate(ts);
-	}	
+	}
 }

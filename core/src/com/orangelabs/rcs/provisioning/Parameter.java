@@ -27,12 +27,12 @@ public class Parameter {
 	 * Parameter name
 	 */
 	private String name;
-	
+
 	/**
 	 * Parameter value
 	 */
 	private String value;
-	
+
 	/**
 	 * Parameter type
 	 */
@@ -42,14 +42,18 @@ public class Parameter {
 	 * Parameter path
 	 */
 	private String path;
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param name Name
-	 * @param value Value
-	 * @param type Type
-	 * @param path Path
+	 * @param name
+	 *            Name
+	 * @param value
+	 *            Value
+	 * @param type
+	 *            Type
+	 * @param path
+	 *            Path
 	 */
 	public Parameter(String name, String value, String type, String path) {
 		this.name = name;
@@ -57,7 +61,7 @@ public class Parameter {
 		this.type = type;
 		this.path = path;
 	}
-	
+
 	/**
 	 * Returns parameter name
 	 * 
@@ -84,22 +88,22 @@ public class Parameter {
 	public String getType() {
 		return type;
 	}
-	
+
 	/**
 	 * Returns the path associated to the parameter
-	 *  
+	 * 
 	 * @return
 	 */
 	public String getPath() {
 		return path;
 	}
-	
+
 	/**
 	 * Returns the string representtaion of the parameter
 	 * 
 	 * @return String
 	 */
 	public String toString() {
-		return "Name: " + name + ", value=" + value + ", type=" + type + ", path=" + path;  
+		return "Name: " + name + ", value=" + value + ", type=" + type + ", path=" + path;
 	}
 }

@@ -34,7 +34,8 @@ public class ResumeDownloadFileSharingSession extends TerminatingHttpFileSharing
 	/**
 	 * The logger
 	 */
-	private final static Logger logger = Logger.getLogger(ResumeDownloadFileSharingSession.class.getSimpleName());
+	private final static Logger logger = Logger.getLogger(ResumeDownloadFileSharingSession.class
+			.getSimpleName());
 
 	/**
 	 * Constructor create instance of session object to resume download
@@ -46,7 +47,8 @@ public class ResumeDownloadFileSharingSession extends TerminatingHttpFileSharing
 	 * @param resumeDownload
 	 *            the data object in DB
 	 */
-	public ResumeDownloadFileSharingSession(ImsService parent, MmContent content, FtHttpResumeDownload resumeDownload) {
+	public ResumeDownloadFileSharingSession(ImsService parent, MmContent content,
+			FtHttpResumeDownload resumeDownload) {
 		super(parent, content, resumeDownload);
 	}
 
@@ -62,7 +64,7 @@ public class ResumeDownloadFileSharingSession extends TerminatingHttpFileSharing
 			for (int j = 0; j < getListeners().size(); j++) {
 				getListeners().get(j).handleSessionStarted(contact);
 			}
-			
+
 			// Resume download file from the HTTP server
 			if (downloadManager.streamForFile != null && downloadManager.resumeDownload()) {
 				if (logger.isActivated()) {
@@ -70,22 +72,22 @@ public class ResumeDownloadFileSharingSession extends TerminatingHttpFileSharing
 				}
 				// Set file URL
 				getContent().setUri(downloadManager.getDownloadedFileUri());
-				
+
 				// File transfered
 				handleFileTransfered();
 				// Send delivery report "displayed"
 				sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED);
 			} else {
-                // Don't call handleError in case of Pause or Cancel
-                if (downloadManager.isCancelled() || downloadManager.isPaused()) {
-                    return;
-                }
+				// Don't call handleError in case of Pause or Cancel
+				if (downloadManager.isCancelled() || downloadManager.isPaused()) {
+					return;
+				}
 
-                // Upload error
-                if (logger.isActivated()) {
-                    logger.info("Resume Download file has failed");
-                }
-                handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED));
+				// Upload error
+				if (logger.isActivated()) {
+					logger.info("Resume Download file has failed");
+				}
+				handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED));
 			}
 		} catch (Exception e) {
 			if (logger.isActivated()) {

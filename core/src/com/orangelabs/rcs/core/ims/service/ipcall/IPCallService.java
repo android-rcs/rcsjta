@@ -54,24 +54,26 @@ import javax2.sip.message.Response;
  * @author opob7414
  */
 public class IPCallService extends ImsService {
-    /**
-     * IP voice call features tags
-     */
-    public final static String[] FEATURE_TAGS_IP_VOICE_CALL = { FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_3GPP_IP_VOICE_CALL + "\"",
-    		FeatureTags.FEATURE_RCSE_IP_VOICE_CALL};
+	/**
+	 * IP voice call features tags
+	 */
+	public final static String[] FEATURE_TAGS_IP_VOICE_CALL = {
+			FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_3GPP_IP_VOICE_CALL + "\"",
+			FeatureTags.FEATURE_RCSE_IP_VOICE_CALL };
 
-    /**
-     * IP video call features tags
-     */
-    public final static String[] FEATURE_TAGS_IP_VIDEO_CALL = { FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_3GPP_IP_VOICE_CALL + "\"",
-    		FeatureTags.FEATURE_RCSE_IP_VOICE_CALL , FeatureTags.FEATURE_RCSE_IP_VIDEO_CALL};
+	/**
+	 * IP video call features tags
+	 */
+	public final static String[] FEATURE_TAGS_IP_VIDEO_CALL = {
+			FeatureTags.FEATURE_RCSE + "=\"" + FeatureTags.FEATURE_3GPP_IP_VOICE_CALL + "\"",
+			FeatureTags.FEATURE_RCSE_IP_VOICE_CALL, FeatureTags.FEATURE_RCSE_IP_VIDEO_CALL };
 
 	private final RcsSettings mRcsSettings;
 
 	/**
-     * The logger
-     */
-    private static final Logger logger = Logger.getLogger(IPCallService.class.getSimpleName());
+	 * The logger
+	 */
+	private static final Logger logger = Logger.getLogger(IPCallService.class.getSimpleName());
 
 	/**
 	 * IPCallSessionCache with Session ID (Call ID) as key
@@ -81,22 +83,26 @@ public class IPCallService extends ImsService {
 	/**
 	 * Contacts manager
 	 */
-	private final ContactsManager mContactsManager;	
-	
-    /**
-     * Constructor
-     *
-     * @param parent IMS module
-     * @param rcsSettings RcsSettings
-	 * @param contactsManager ContactsManager
-     * @throws CoreException
-     */
-    public IPCallService(ImsModule parent, RcsSettings rcsSettings, ContactsManager contactsManager) throws CoreException {
+	private final ContactsManager mContactsManager;
+
+	/**
+	 * Constructor
+	 *
+	 * @param parent
+	 *            IMS module
+	 * @param rcsSettings
+	 *            RcsSettings
+	 * @param contactsManager
+	 *            ContactsManager
+	 * @throws CoreException
+	 */
+	public IPCallService(ImsModule parent, RcsSettings rcsSettings, ContactsManager contactsManager)
+			throws CoreException {
 		super(parent, true);
-		
+
 		mRcsSettings = rcsSettings;
-        mContactsManager = contactsManager;
-    }
+		mContactsManager = contactsManager;
+	}
 
 	private void handleIPCallInvitationRejected(SipRequest invite, int reasonCode) {
 		ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
@@ -132,8 +138,8 @@ public class IPCallService extends ImsService {
 	}
 
 	/**
-     * Check the IMS service
-     */
+	 * Check the IMS service
+	 */
 	public void check() {
 	}
 
@@ -156,9 +162,8 @@ public class IPCallService extends ImsService {
 					.append("'").toString());
 		}
 		/*
-		 * Performing remove session operation on a new thread so that ongoing
-		 * threads accessing that session can finish up before it is actually
-		 * removed
+		 * Performing remove session operation on a new thread so that ongoing threads accessing
+		 * that session can finish up before it is actually removed
 		 */
 		new Thread() {
 			@Override
@@ -186,8 +191,7 @@ public class IPCallService extends ImsService {
 			int maxSessions = mRcsSettings.getMaxIPCallSessions();
 			if (maxSessions != 0 && mIPCallSessionCache.size() >= maxSessions) {
 				/*
-				 * TODO : Exceptions will be handled better in CR037
-				 * implementation
+				 * TODO : Exceptions will be handled better in CR037 implementation
 				 */
 				throw new CoreException(errorMessage);
 			}
@@ -200,17 +204,22 @@ public class IPCallService extends ImsService {
 		}
 	}
 
-    /**
-     * Initiate an IP call session
-     *
-     * @param contact Remote contact identifier
-     * @param video Video
-     * @param player Player
-     * @param renderer Renderer
-     * @return IP call session
-     * @throws CoreException
-     */
-    public IPCallSession initiateIPCallSession(ContactId contact, boolean video, IIPCallPlayer player, IIPCallRenderer renderer) throws CoreException {
+	/**
+	 * Initiate an IP call session
+	 *
+	 * @param contact
+	 *            Remote contact identifier
+	 * @param video
+	 *            Video
+	 * @param player
+	 *            Player
+	 * @param renderer
+	 *            Renderer
+	 * @return IP call session
+	 * @throws CoreException
+	 */
+	public IPCallSession initiateIPCallSession(ContactId contact, boolean video,
+			IIPCallPlayer player, IIPCallRenderer renderer) throws CoreException {
 		if (logger.isActivated()) {
 			logger.info("Initiate an IP call session");
 		}
@@ -219,60 +228,63 @@ public class IPCallService extends ImsService {
 		assertAvailableIpCallSession("Max sessions achieved");
 
 		// Create content
-        AudioContent audioContent = ContentManager.createGenericLiveAudioContent();
-        VideoContent videoContent = null;
-	    if (video) {
-	    	videoContent = ContentManager.createGenericLiveVideoContent();
-	    }
+		AudioContent audioContent = ContentManager.createGenericLiveAudioContent();
+		VideoContent videoContent = null;
+		if (video) {
+			videoContent = ContentManager.createGenericLiveVideoContent();
+		}
 
 		// Create a new session
-		OriginatingIPCallSession session = new OriginatingIPCallSession(this, contact, audioContent, videoContent, player, renderer);
+		OriginatingIPCallSession session = new OriginatingIPCallSession(this, contact,
+				audioContent, videoContent, player, renderer);
 
 		return session;
 	}
 
-    /**
-     * Receive a IP call invitation
-     *
-     * @param invite Initial invite
-     */
+	/**
+	 * Receive a IP call invitation
+	 *
+	 * @param invite
+	 *            Initial invite
+	 */
 	public void receiveIPCallInvitation(SipRequest invite, boolean audio, boolean video) {
 		// Parse contact
-        ContactId contact = null;
-        try {
+		ContactId contact = null;
+		try {
 			contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
-        } catch (RcsContactFormatException e) {
-        	if (logger.isActivated()) {
-                logger.debug("Cannot parse contact: reject the invitation");
-            }
-            sendErrorResponse(invite, 486);
-            return;
+		} catch (RcsContactFormatException e) {
+			if (logger.isActivated()) {
+				logger.debug("Cannot parse contact: reject the invitation");
+			}
+			sendErrorResponse(invite, 486);
+			return;
 		}
 
-        // Test if the contact is blocked
+		// Test if the contact is blocked
 		if (mContactsManager.isBlockedForContact(contact)) {
 			if (logger.isActivated()) {
-				logger.debug("Contact " + contact + " is blocked: automatically reject the sharing invitation");
+				logger.debug("Contact " + contact
+						+ " is blocked: automatically reject the sharing invitation");
 			}
 
 			// Send a 603 Decline response
 			sendErrorResponse(invite, Response.DECLINE);
 			return;
-		}		
-		
-        // Reject if there is already a call in progress
-        if (isCurrentSharingUnidirectional()) {
-            // Max session
-            if (logger.isActivated()) {
-                logger.debug("The max number of IP call sessions is achieved: reject the invitation");
-            }
-            handleIPCallInvitationRejected(invite, IPCall.ReasonCode.REJECTED_MAX_SESSIONS);
-            sendErrorResponse(invite, 486);
-            return;
-        }
-        
+		}
+
+		// Reject if there is already a call in progress
+		if (isCurrentSharingUnidirectional()) {
+			// Max session
+			if (logger.isActivated()) {
+				logger.debug("The max number of IP call sessions is achieved: reject the invitation");
+			}
+			handleIPCallInvitationRejected(invite, IPCall.ReasonCode.REJECTED_MAX_SESSIONS);
+			sendErrorResponse(invite, 486);
+			return;
+		}
+
 		// Create a new session
-        IPCallSession session = new TerminatingIPCallSession(this, invite, contact);
+		IPCallSession session = new TerminatingIPCallSession(this, invite, contact);
 
 		getImsModule().getCore().getListener().handleIPCallInvitation(session);
 
@@ -290,10 +302,10 @@ public class IPCallService extends ImsService {
 	}
 
 	/**
-     * Is call connected
-     *
-     * @return Boolean
-     */
+	 * Is call connected
+	 *
+	 * @return Boolean
+	 */
 	public boolean isCallConnected() {
 		synchronized (getImsServiceSessionOperationLock()) {
 			return (mIPCallSessionCache.size() > 0);
@@ -301,11 +313,12 @@ public class IPCallService extends ImsService {
 	}
 
 	/**
-     * Is call connected with a given contact
-     *
-     * @param contact Contact Id
-     * @return Boolean
-     */
+	 * Is call connected with a given contact
+	 *
+	 * @param contact
+	 *            Contact Id
+	 * @return Boolean
+	 */
 	public boolean isCallConnectedWith(ContactId contact) {
 		synchronized (getImsServiceSessionOperationLock()) {
 			for (IPCallSession session : mIPCallSessionCache.values()) {

@@ -33,17 +33,17 @@ import java.io.IOException;
  */
 public class RtpPacketTransmitter {
 
-    /**
-     * Sequence number
-     */
+	/**
+	 * Sequence number
+	 */
 	private int seqNumber = 0;
 
-    /**
+	/**
 	 * Remote address
 	 */
 	private String remoteAddress;
 
-    /**
+	/**
 	 * Remote port
 	 */
 	private int remotePort;
@@ -58,110 +58,118 @@ public class RtpPacketTransmitter {
 	 */
 	private DatagramConnection datagramConnection = null;
 
-    /**
-     * RTCP Session
-     */
-    private RtcpSession rtcpSession = null;
+	/**
+	 * RTCP Session
+	 */
+	private RtcpSession rtcpSession = null;
 
 	/**
 	 * The logger
 	 */
 	private final Logger logger = Logger.getLogger(this.getClass().getName());
 
-    /**
-     * Constructor
-     *
-     * @param address Remote address
-     * @param port Remote port
-     * @param rtcpSession RTCP session
-     * @throws IOException
-     */
-    public RtpPacketTransmitter(String address, int port, RtcpSession rtcpSession)
-            throws IOException {
+	/**
+	 * Constructor
+	 *
+	 * @param address
+	 *            Remote address
+	 * @param port
+	 *            Remote port
+	 * @param rtcpSession
+	 *            RTCP session
+	 * @throws IOException
+	 */
+	public RtpPacketTransmitter(String address, int port, RtcpSession rtcpSession)
+			throws IOException {
 		this.remoteAddress = address;
 		this.remotePort = port;
-        this.rtcpSession = rtcpSession;
-        
-        datagramConnection = NetworkFactory.getFactory().createDatagramConnection();
-        datagramConnection.open();
-        
+		this.rtcpSession = rtcpSession;
+
+		datagramConnection = NetworkFactory.getFactory().createDatagramConnection();
+		datagramConnection.open();
+
 		if (logger.isActivated()) {
-            logger.debug("RTP transmitter connected to " + remoteAddress + ":" + remotePort);
+			logger.debug("RTP transmitter connected to " + remoteAddress + ":" + remotePort);
 		}
 	}
 
-    /**
-     * Constructor used for symetric RTP
-     *
-     * @param address Remote address
-     * @param port Remote port
-     * @param rtcpSession RTCP session
-     * @param connection Connection from RTP receiver
-     * @throws IOException
-     */
-    public RtpPacketTransmitter(String address, int port, RtcpSession rtcpSession,
-            DatagramConnection connection)
-            throws IOException {
-        this.remoteAddress = address;
-        this.remotePort = port;
-        this.rtcpSession = rtcpSession;
-        
-        if (connection != null) {
-            this.datagramConnection = connection;
-        } else {
-            this.datagramConnection = NetworkFactory.getFactory().createDatagramConnection();
-            this.datagramConnection.open();
-        }
+	/**
+	 * Constructor used for symetric RTP
+	 *
+	 * @param address
+	 *            Remote address
+	 * @param port
+	 *            Remote port
+	 * @param rtcpSession
+	 *            RTCP session
+	 * @param connection
+	 *            Connection from RTP receiver
+	 * @throws IOException
+	 */
+	public RtpPacketTransmitter(String address, int port, RtcpSession rtcpSession,
+			DatagramConnection connection) throws IOException {
+		this.remoteAddress = address;
+		this.remotePort = port;
+		this.rtcpSession = rtcpSession;
 
-        if (logger.isActivated()) {
-            logger.debug("RTP transmitter connected to " + remoteAddress + ":" + remotePort);
-        }
-    }
+		if (connection != null) {
+			this.datagramConnection = connection;
+		} else {
+			this.datagramConnection = NetworkFactory.getFactory().createDatagramConnection();
+			this.datagramConnection.open();
+		}
 
-    /**
-     * Close the transmitter
-     *
-     * @throws IOException
-     */
+		if (logger.isActivated()) {
+			logger.debug("RTP transmitter connected to " + remoteAddress + ":" + remotePort);
+		}
+	}
+
+	/**
+	 * Close the transmitter
+	 *
+	 * @throws IOException
+	 */
 	public void close() throws IOException {
 		// Close the datagram connection
 		if (datagramConnection != null) {
 			datagramConnection.close();
 		}
 		if (logger.isActivated()) {
-            logger.debug("RTP transmitter closed");
+			logger.debug("RTP transmitter closed");
 		}
 	}
 
-    /**
-     * Send a RTP packet
-     *
-     * @param buffer Input buffer
-     * @throws IOException
-     */
+	/**
+	 * Send a RTP packet
+	 *
+	 * @param buffer
+	 *            Input buffer
+	 * @throws IOException
+	 */
 	public void sendRtpPacket(Buffer buffer) throws IOException {
 		// Build a RTP packet
-    	RtpPacket packet = buildRtpPacket(buffer);
-    	if (packet == null) {
-    		return;
-    	}
+		RtpPacket packet = buildRtpPacket(buffer);
+		if (packet == null) {
+			return;
+		}
 
-    	// Assemble RTP packet
-    	int size = packet.calcLength();
-    	packet.assemble(size);
+		// Assemble RTP packet
+		int size = packet.calcLength();
+		packet.assemble(size);
 
-    	// Send the RTP packet to the remote destination
-    	transmit(packet);
-    }
+		// Send the RTP packet to the remote destination
+		transmit(packet);
+	}
 
-    /**
-     * Build a RTP packet
-     *
-     * @param buffer Input buffer
-     * @return RTP packet
-     */
+	/**
+	 * Build a RTP packet
+	 *
+	 * @param buffer
+	 *            Input buffer
+	 * @return RTP packet
+	 */
 	private RtpPacket buildRtpPacket(Buffer buffer) {
-		byte data[] = (byte[])buffer.getData();
+		byte data[] = (byte[]) buffer.getData();
 		if (data == null) {
 			return null;
 		}
@@ -180,25 +188,25 @@ public class RtpPacketTransmitter {
 		rtppacket.payloadType = buffer.getFormat().getPayload();
 		rtppacket.seqnum = seqNumber++;
 		rtppacket.timestamp = buffer.getTimeStamp();
-        rtppacket.ssrc = rtcpSession.SSRC;
+		rtppacket.ssrc = rtcpSession.SSRC;
 		rtppacket.payloadoffset = buffer.getOffset();
 		rtppacket.payloadlength = buffer.getLength();
-        if (buffer.getVideoOrientation() != null) {
-            rtppacket.extension = true;
-            rtppacket.extensionHeader = new RtpExtensionHeader();
-            rtppacket.extensionHeader.addElement(
-                    buffer.getVideoOrientation().getHeaderId(), 
-                    new byte[]{buffer.getVideoOrientation().getVideoOrientation()});
-        }
+		if (buffer.getVideoOrientation() != null) {
+			rtppacket.extension = true;
+			rtppacket.extensionHeader = new RtpExtensionHeader();
+			rtppacket.extensionHeader.addElement(buffer.getVideoOrientation().getHeaderId(),
+					new byte[] { buffer.getVideoOrientation().getVideoOrientation() });
+		}
 		return rtppacket;
 	}
 
-    /**
-     * Transmit a RTCP compound packet to the remote destination
-     *
-     * @param packet RTP packet
-     * @throws IOException
-     */
+	/**
+	 * Transmit a RTCP compound packet to the remote destination
+	 *
+	 * @param packet
+	 *            RTP packet
+	 * @throws IOException
+	 */
 	private void transmit(Packet packet) {
 		// Prepare data to be sent
 		byte[] data = packet.data;
@@ -214,23 +222,23 @@ public class RtpPacketTransmitter {
 		try {
 			datagramConnection.send(remoteAddress, remotePort, data);
 
-            RtpSource s = rtcpSession.getMySource();
-            s.activeSender = true;
-            rtcpSession.timeOfLastRTPSent = rtcpSession.currentTime();
-            rtcpSession.packetCount++;
-            rtcpSession.octetCount += data.length;
+			RtpSource s = rtcpSession.getMySource();
+			s.activeSender = true;
+			rtcpSession.timeOfLastRTPSent = rtcpSession.currentTime();
+			rtcpSession.packetCount++;
+			rtcpSession.octetCount += data.length;
 		} catch (IOException e) {
-//			if (logger.isActivated()) {
-//				logger.error("Can't send the RTP packet", e);
-//			}
-        }
-    }
+			// if (logger.isActivated()) {
+			// logger.error("Can't send the RTP packet", e);
+			// }
+		}
+	}
 
-    /**
-     * Returns the statistics of RTP transmission
-     *
-     * @return Statistics
-     */
+	/**
+	 * Returns the statistics of RTP transmission
+	 *
+	 * @return Statistics
+	 */
 	public RtpStatisticsTransmitter getStatistics() {
 		return stats;
 	}

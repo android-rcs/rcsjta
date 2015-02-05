@@ -30,7 +30,7 @@ import android.net.Uri;
  *
  * @author hhff3235
  */
-public class FileTransferHttpResumeInfo extends DefaultHandler{
+public class FileTransferHttpResumeInfo extends DefaultHandler {
 	/**
 	 * start-offset in bytes
 	 */
@@ -46,7 +46,6 @@ public class FileTransferHttpResumeInfo extends DefaultHandler{
 	 */
 	private Uri file = null;
 
-
 	/**
 	 * @return the start
 	 */
@@ -55,7 +54,8 @@ public class FileTransferHttpResumeInfo extends DefaultHandler{
 	}
 
 	/**
-	 * @param start the start to set
+	 * @param start
+	 *            the start to set
 	 */
 	protected void setStart(int start) {
 		this.start = start;
@@ -69,7 +69,8 @@ public class FileTransferHttpResumeInfo extends DefaultHandler{
 	}
 
 	/**
-	 * @param end the end to set
+	 * @param end
+	 *            the end to set
 	 */
 	protected void setEnd(int end) {
 		this.end = end;
@@ -83,7 +84,8 @@ public class FileTransferHttpResumeInfo extends DefaultHandler{
 	}
 
 	/**
-	 * @param file the Uri to set
+	 * @param file
+	 *            the Uri to set
 	 */
 	protected void setUri(Uri file) {
 		this.file = file;

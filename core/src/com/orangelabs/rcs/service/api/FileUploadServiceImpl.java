@@ -62,7 +62,8 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 	/**
 	 * The logger
 	 */
-	private static final Logger logger = Logger.getLogger(FileUploadServiceImpl.class.getSimpleName());
+	private static final Logger logger = Logger.getLogger(FileUploadServiceImpl.class
+			.getSimpleName());
 
 	/**
 	 * Lock used for synchronization
@@ -74,8 +75,9 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 	/**
 	 * Constructor
 	 * 
-	 * @param imService InstantMessagingService
-	 * @param rcsSettings 
+	 * @param imService
+	 *            InstantMessagingService
+	 * @param rcsSettings
 	 */
 	public FileUploadServiceImpl(InstantMessagingService imService, RcsSettings rcsSettings) {
 		if (logger.isActivated()) {
@@ -90,7 +92,7 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 	 */
 	public void close() {
 		mFileUploadCache.clear();
-		
+
 		if (logger.isActivated()) {
 			logger.info("File upload service API is closed");
 		}
@@ -99,48 +101,53 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 	/**
 	 * Add a file upload in the list
 	 * 
-	 * @param filUpload File upload
+	 * @param filUpload
+	 *            File upload
 	 */
 	protected void addFileUpload(FileUploadImpl filUpload) {
 		if (logger.isActivated()) {
 			logger.debug("Add a file upload in the list (size=" + mFileUploadCache.size() + ")");
 		}
-		
+
 		mFileUploadCache.put(filUpload.getUploadId(), filUpload);
 	}
 
 	/**
 	 * Remove a file upload from the list
 	 * 
-	 * @param uploadId Upload ID
+	 * @param uploadId
+	 *            Upload ID
 	 */
 	protected void removeFileUpload(String sessionId) {
 		if (logger.isActivated()) {
-			logger.debug("Remove a file upload from the list (size=" + mFileUploadCache.size() + ")");
+			logger.debug("Remove a file upload from the list (size=" + mFileUploadCache.size()
+					+ ")");
 		}
-		
+
 		mFileUploadCache.remove(sessionId);
 	}
 
-    /**
-     * Returns the configuration of the file upload service
-     * 
-     * @return Configuration
-     */
-    public IFileUploadServiceConfiguration getConfiguration() {
-    	return new IFileUploadServiceConfigurationImpl(mRcsSettings);
-    }    	
-	
-    /**
-     * Uploads a file to the RCS content server. The parameter file contains the URI
-     * of the file to be uploaded (for a local or a remote file).
-     * 
-     * @param file Uri of file to upload
-	 * @param fileicon File icon option. If true and if it's an image, a file icon is attached.
+	/**
+	 * Returns the configuration of the file upload service
+	 * 
+	 * @return Configuration
+	 */
+	public IFileUploadServiceConfiguration getConfiguration() {
+		return new IFileUploadServiceConfigurationImpl(mRcsSettings);
+	}
+
+	/**
+	 * Uploads a file to the RCS content server. The parameter file contains the URI of the file to
+	 * be uploaded (for a local or a remote file).
+	 * 
+	 * @param file
+	 *            Uri of file to upload
+	 * @param fileicon
+	 *            File icon option. If true and if it's an image, a file icon is attached.
 	 * @return File upload
-     * @throws ServerApiException
-     */
-    public IFileUpload uploadFile(Uri file, boolean fileicon) throws ServerApiException {
+	 * @throws ServerApiException
+	 */
+	public IFileUpload uploadFile(Uri file, boolean fileicon) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Initiate a file upload session (thumbnail option " + fileicon + ")");
 		}
@@ -152,22 +159,24 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 			mImService.assertAvailableFileTransferSession("Max file transfer sessions achieved.");
 
 			FileDescription desc = FileFactory.getFactory().getFileDescription(file);
-			MmContent content = ContentManager.createMmContent(file, desc.getSize(), desc.getName());
+			MmContent content = ContentManager
+					.createMmContent(file, desc.getSize(), desc.getName());
 
-			mImService.assertFileSizeNotExceedingMaxLimit(content.getSize(), "File exceeds max size.");
+			mImService.assertFileSizeNotExceedingMaxLimit(content.getSize(),
+					"File exceeds max size.");
 
 			final FileUploadSession session = new FileUploadSession(content, fileicon);
 
-			FileUploadImpl fileUpload = new FileUploadImpl(session.getUploadID(),
-					mBroadcaster, mImService, this);
+			FileUploadImpl fileUpload = new FileUploadImpl(session.getUploadID(), mBroadcaster,
+					mImService, this);
 			session.addListener(fileUpload);
 
 			session.startSession();
-			
+
 			addFileUpload(fileUpload);
 			return fileUpload;
 
-		} catch(Exception e) {
+		} catch (Exception e) {
 			// TODO:Handle Security exception in CR037
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
@@ -176,13 +185,13 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 		}
 	}
 
-    /**
-     * Can a file be uploaded now
-     * 
-     * @return Returns true if a file can be uploaded, else returns false
-     * @throws ServerApiException 
-     */
-    public boolean canUploadFile() throws ServerApiException {
+	/**
+	 * Can a file be uploaded now
+	 * 
+	 * @return Returns true if a file can be uploaded, else returns false
+	 * @throws ServerApiException
+	 */
+	public boolean canUploadFile() throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Check if a file can be uploaded");
 		}
@@ -191,15 +200,15 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 		ServerApiUtils.testCore();
 
 		return mImService.isFileTransferSessionAvailable();
-    }
-    
-    /**
-     * Returns the list of file uploads in progress
-     * 
-     * @return List of file uploads
-     * @throws ServerApiException
-     */
-    public List<IBinder> getFileUploads() throws ServerApiException {
+	}
+
+	/**
+	 * Returns the list of file uploads in progress
+	 * 
+	 * @return List of file uploads
+	 * @throws ServerApiException
+	 */
+	public List<IBinder> getFileUploads() throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Get file upload sessions");
 		}
@@ -211,21 +220,22 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 			}
 			return fileUploads;
 
-		} catch(Exception e) {
+		} catch (Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
 			}
 			throw new ServerApiException(e.getMessage());
 		}
-    }
+	}
 
-    /**
-     * Returns a current file upload from its unique ID
-     * @param uploadId 
-     * 
-     * @return File upload
-     * @throws ServerApiException
-     */
+	/**
+	 * Returns a current file upload from its unique ID
+	 * 
+	 * @param uploadId
+	 * 
+	 * @return File upload
+	 * @throws ServerApiException
+	 */
 	public IFileUpload getFileUpload(String uploadId) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Get file upload " + uploadId);
@@ -241,7 +251,8 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 	/**
 	 * Adds a listener on file upload events
 	 * 
-	 * @param listener Listener
+	 * @param listener
+	 *            Listener
 	 */
 	public void addEventListener(IFileUploadListener listener) {
 		if (logger.isActivated()) {
@@ -255,7 +266,8 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 	/**
 	 * Removes a listener on file upload events
 	 * 
-	 * @param listener Listener
+	 * @param listener
+	 *            Listener
 	 */
 	public void removeEventListener(IFileUploadListener listener) {
 		if (logger.isActivated()) {
@@ -276,7 +288,7 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 	public int getServiceVersion() throws ServerApiException {
 		return RcsService.Build.API_VERSION;
 	}
-	
+
 	/**
 	 * Returns the common service configuration
 	 * 

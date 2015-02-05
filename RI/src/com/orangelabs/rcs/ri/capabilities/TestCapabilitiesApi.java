@@ -34,41 +34,41 @@ import com.orangelabs.rcs.ri.R;
  * @author Jean-Marc AUFFRET
  */
 public class TestCapabilitiesApi extends ListActivity {
-    
-	@Override
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         // Set items
         String[] items = {
-    		getString(R.string.menu_my_capabilities),
-    		getString(R.string.menu_capabilities_request),        		
-    		getString(R.string.menu_refresh_capabilities),
-    		getString(R.string.menu_capabilities_log)
+                getString(R.string.menu_my_capabilities),
+                getString(R.string.menu_capabilities_request),
+                getString(R.string.menu_refresh_capabilities),
+                getString(R.string.menu_capabilities_log)
         };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        switch(position) {
-	        case 0:
-            	startActivity(new Intent(this, MyCapabilities.class));
+        switch (position) {
+            case 0:
+                startActivity(new Intent(this, MyCapabilities.class));
                 break;
-                
-	        case 1:
-            	startActivity(new Intent(this, RequestCapabilities.class));
+
+            case 1:
+                startActivity(new Intent(this, RequestCapabilities.class));
                 break;
-                
-	        case 2:
-               	startActivity(new Intent(this, RequestAllCapabilities.class));
+
+            case 2:
+                startActivity(new Intent(this, RequestAllCapabilities.class));
                 break;
-                
-	        case 3:
-               	startActivity(new Intent(this, CapabilitiesList.class));
+
+            case 3:
+                startActivity(new Intent(this, CapabilitiesList.class));
                 break;
         }
     }

@@ -23,7 +23,6 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ImageSpan;
 
-
 import java.util.ArrayList;
 
 /**
@@ -34,13 +33,12 @@ public class SmileyParser extends AbstractMessageParser {
     private Smileys mRes;
 
     public SmileyParser(String text, Smileys res) {
-        super(text,
-                true,   // smilies
-                false,  // acronyms
-                false,  // formatting
-                false,  // urls
-                false,  // music
-                false   // me text
+        super(text, true, // smilies
+                false, // acronyms
+                false, // formatting
+                false, // urls
+                false, // music
+                false // me text
         );
         mRes = res;
     }
@@ -52,6 +50,7 @@ public class SmileyParser extends AbstractMessageParser {
 
     /**
      * Retrieves the parsed text as a spannable string object.
+     * 
      * @param context the context for fetching smiley resources.
      * @return the spannable string as CharSequence.
      */
@@ -73,9 +72,7 @@ public class SmileyParser extends AbstractMessageParser {
             if (token.getType() == AbstractMessageParser.Token.Type.SMILEY) {
                 int resid = mRes.getSmileyRes(token.getRawText());
                 if (resid != -1) {
-                    builder.setSpan(new ImageSpan(context, resid),
-                            start,
-                            builder.length(),
+                    builder.setSpan(new ImageSpan(context, resid), start, builder.length(),
                             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
             }

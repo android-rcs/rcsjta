@@ -29,78 +29,103 @@ import android.net.Uri;
  * @author Jean-Marc AUFFRET
  */
 public class ImageSharingLog {
-    /**
-     * Content provider URI
-     */
-    public static final Uri CONTENT_URI = Uri
-            .parse("content://com.gsma.services.rcs.provider.imageshare/imageshare");
+	/**
+	 * Content provider URI
+	 */
+	public static final Uri CONTENT_URI = Uri
+			.parse("content://com.gsma.services.rcs.provider.imageshare/imageshare");
 
-    /**
-     * The name of the column containing the unique ID of the image sharing.
-     * <P>Type: TEXT</P>
-     */
-    public static final String SHARING_ID = "sharing_id";
+	/**
+	 * The name of the column containing the unique ID of the image sharing.
+	 * <P>
+	 * Type: TEXT
+	 * </P>
+	 */
+	public static final String SHARING_ID = "sharing_id";
 
-    /**
-     * The name of the column containing the MSISDN of the remote contact.
-     * <P>Type: TEXT</P>
-     */
-    public static final String CONTACT = "contact";
+	/**
+	 * The name of the column containing the MSISDN of the remote contact.
+	 * <P>
+	 * Type: TEXT
+	 * </P>
+	 */
+	public static final String CONTACT = "contact";
 
-    /**
-     * The name of the column containing the URI of the file
-     * <P>Type: TEXT</P>
-     */
-    public static final String FILE = "file";
-	
-    /**
-     * The name of the column containing the filename (absolute path).
-     * <P>Type: TEXT</P>
-     */
-    public static final String FILENAME = "filename";
+	/**
+	 * The name of the column containing the URI of the file
+	 * <P>
+	 * Type: TEXT
+	 * </P>
+	 */
+	public static final String FILE = "file";
 
-    /**
-     * The name of the column containing the image size to be transferred (in bytes).
-     * <P>Type: LONG</P>
-     */
-    public static final String FILESIZE = "filesize";
+	/**
+	 * The name of the column containing the filename (absolute path).
+	 * <P>
+	 * Type: TEXT
+	 * </P>
+	 */
+	public static final String FILENAME = "filename";
 
-    /**
-     * The name of the column containing the MIME-type of the file.
-     * <P>Type: TEXT</P>
-     */
-    public static final String MIME_TYPE = "mime_type";
-    
-    /**
-     * The name of the column containing the direction of the sharing.
-     * <P>Type: INTEGER</P>
-     * @see Direction
-     */
-    public static final String DIRECTION = "direction";
-    
-    /**
-     * The name of the column containing the amount of data transferred (in bytes).
-     * <P>Type: LONG</P>
-     */
-    public static final String TRANSFERRED = "transferred";
+	/**
+	 * The name of the column containing the image size to be transferred (in bytes).
+	 * <P>
+	 * Type: LONG
+	 * </P>
+	 */
+	public static final String FILESIZE = "filesize";
 
-    /**
-     * The name of the column containing the date of the sharing (in milliseconds).
-     * <P>Type: LONG</P>
-     */
-    public static final String TIMESTAMP = "timestamp";
+	/**
+	 * The name of the column containing the MIME-type of the file.
+	 * <P>
+	 * Type: TEXT
+	 * </P>
+	 */
+	public static final String MIME_TYPE = "mime_type";
 
-    /**
-     * The name of the column containing the state of the sharing.
-     * <P>Type: INTEGER</P>
+	/**
+	 * The name of the column containing the direction of the sharing.
+	 * <P>
+	 * Type: INTEGER
+	 * </P>
+	 * 
+	 * @see Direction
+	 */
+	public static final String DIRECTION = "direction";
+
+	/**
+	 * The name of the column containing the amount of data transferred (in bytes).
+	 * <P>
+	 * Type: LONG
+	 * </P>
+	 */
+	public static final String TRANSFERRED = "transferred";
+
+	/**
+	 * The name of the column containing the date of the sharing (in milliseconds).
+	 * <P>
+	 * Type: LONG
+	 * </P>
+	 */
+	public static final String TIMESTAMP = "timestamp";
+
+	/**
+	 * The name of the column containing the state of the sharing.
+	 * <P>
+	 * Type: INTEGER
+	 * </P>
+	 * 
 	 * @see ImageSharing.State
-     */
-    public static final String STATE = "state";    
+	 */
+	public static final String STATE = "state";
 
-    /**
-     * The name of the column containing the reason code of the state.
-     * <P>Type: INTEGER</P>
-     * @see ImageSharing.ReasonCode
-     */
-    public static final String REASON_CODE = "reason_code";
+	/**
+	 * The name of the column containing the reason code of the state.
+	 * <P>
+	 * Type: INTEGER
+	 * </P>
+	 * 
+	 * @see ImageSharing.ReasonCode
+	 */
+	public static final String REASON_CODE = "reason_code";
 }

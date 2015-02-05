@@ -27,22 +27,24 @@ package com.gsma.services.rcs.ft;
  * @author Jean-Marc AUFFRET
  */
 public class FileTransferIntent {
-    /**
-     * Broadcast action: a new file transfer has been received.
-     * <p>Intent includes the following extras:
-     * <ul>
-     * <li> {@link #EXTRA_TRANSFER_ID} containing the unique ID of the file transfer.
-     * </ul>
-     */
+	/**
+	 * Broadcast action: a new file transfer has been received.
+	 * <p>
+	 * Intent includes the following extras:
+	 * <ul>
+	 * <li> {@link #EXTRA_TRANSFER_ID} containing the unique ID of the file transfer.
+	 * </ul>
+	 */
 	public final static String ACTION_NEW_INVITATION = "com.gsma.services.rcs.ft.action.NEW_FILE_TRANSFER";
 
 	/**
-     * Broadcast action: a file transfer is resuming.
-     * <p>Intent includes the following extras:
-     * <ul>
-     * <li> {@link #EXTRA_TRANSFER_ID} containing the unique ID of the file transfer.
-     * </ul>
-     */
+	 * Broadcast action: a file transfer is resuming.
+	 * <p>
+	 * Intent includes the following extras:
+	 * <ul>
+	 * <li> {@link #EXTRA_TRANSFER_ID} containing the unique ID of the file transfer.
+	 * </ul>
+	 */
 	public final static String ACTION_RESUME = "com.gsma.services.rcs.ft.action.RESUME_FILE_TRANSFER";
 
 	/**

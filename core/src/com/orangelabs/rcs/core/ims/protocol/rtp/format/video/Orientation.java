@@ -24,65 +24,61 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.format.video;
  * @author Deutsche Telekom
  */
 public enum Orientation {
-    /**
-     * Orientation values
-     */
-    NONE(0),
-    ROTATE_90_CW(1),
-    ROTATE_180(2),
-    ROTATE_90_CCW(3),
-    FLIP_HORIZONTAL(4),
-    ROTATE_90_CW_FLIP_HORIZONTAL(5),
-    ROTATE_180_FLIP_HORIZONTAL(6),
-    ROTATE_90_CCW_FLIP_HORIZONTAL(7);
+	/**
+	 * Orientation values
+	 */
+	NONE(0), ROTATE_90_CW(1), ROTATE_180(2), ROTATE_90_CCW(3), FLIP_HORIZONTAL(4), ROTATE_90_CW_FLIP_HORIZONTAL(
+			5), ROTATE_180_FLIP_HORIZONTAL(6), ROTATE_90_CCW_FLIP_HORIZONTAL(7);
 
-    /**
-     * Private value
-     */
-    private int value;
+	/**
+	 * Private value
+	 */
+	private int value;
 
-    /**
-     * Constructor
-     *
-     * @param value Enum value
-     */
-    private Orientation(int value) {
-        this.value = value;
-    }
+	/**
+	 * Constructor
+	 *
+	 * @param value
+	 *            Enum value
+	 */
+	private Orientation(int value) {
+		this.value = value;
+	}
 
-    /**
-     * Return the value of the Orientation
-     *
-     * @return Orientation value
-     */
-    public int getValue() {
-        return this.value;
-    }
+	/**
+	 * Return the value of the Orientation
+	 *
+	 * @return Orientation value
+	 */
+	public int getValue() {
+		return this.value;
+	}
 
-    /**
-     * Converts the Value into an Orientation
-     *
-     * @param value value to convert
-     * @return Orientation
-     */
-    public static Orientation convert(int value) {
-        if (NONE.value == value) {
-            return NONE;
-        } else if (ROTATE_90_CW.value == value) {
-            return ROTATE_90_CW;
-        } else if (ROTATE_180.value == value) {
-            return ROTATE_180;
-        } else if (ROTATE_90_CCW.value == value) {
-            return ROTATE_90_CCW;
-        } else if (FLIP_HORIZONTAL.value == value) {
-            return FLIP_HORIZONTAL;
-        } else if (ROTATE_90_CW_FLIP_HORIZONTAL.value == value) {
-            return ROTATE_90_CW_FLIP_HORIZONTAL;
-        } else if (ROTATE_180_FLIP_HORIZONTAL.value == value) {
-            return ROTATE_180_FLIP_HORIZONTAL;
-        } else if (ROTATE_90_CCW_FLIP_HORIZONTAL.value == value) {
-            return ROTATE_90_CCW_FLIP_HORIZONTAL;
-        }
-        return NONE;
-    }
+	/**
+	 * Converts the Value into an Orientation
+	 *
+	 * @param value
+	 *            value to convert
+	 * @return Orientation
+	 */
+	public static Orientation convert(int value) {
+		if (NONE.value == value) {
+			return NONE;
+		} else if (ROTATE_90_CW.value == value) {
+			return ROTATE_90_CW;
+		} else if (ROTATE_180.value == value) {
+			return ROTATE_180;
+		} else if (ROTATE_90_CCW.value == value) {
+			return ROTATE_90_CCW;
+		} else if (FLIP_HORIZONTAL.value == value) {
+			return FLIP_HORIZONTAL;
+		} else if (ROTATE_90_CW_FLIP_HORIZONTAL.value == value) {
+			return ROTATE_90_CW_FLIP_HORIZONTAL;
+		} else if (ROTATE_180_FLIP_HORIZONTAL.value == value) {
+			return ROTATE_180_FLIP_HORIZONTAL;
+		} else if (ROTATE_90_CCW_FLIP_HORIZONTAL.value == value) {
+			return ROTATE_90_CCW_FLIP_HORIZONTAL;
+		}
+		return NONE;
+	}
 }

@@ -25,11 +25,12 @@ package com.orangelabs.rcs.core.ims.protocol.msrp;
  */
 public class MsrpException extends Exception {
 	static final long serialVersionUID = 1L;
-	
+
 	/**
 	 * Constructor
 	 *
-	 * @param error Error message
+	 * @param error
+	 *            Error message
 	 */
 	public MsrpException(String error) {
 		super(error);

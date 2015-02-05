@@ -39,7 +39,8 @@ public class ChatMessage {
 	/**
 	 * Constructor
 	 * 
-	 * @param chatMessageInf IChatMessage
+	 * @param chatMessageInf
+	 *            IChatMessage
 	 */
 	/* package private */ChatMessage(IChatMessage chatMessageInf) {
 		mChatMessageInf = chatMessageInf;
@@ -111,15 +112,14 @@ public class ChatMessage {
 	public Direction getDirection() throws RcsServiceException {
 		try {
 			return Direction.valueOf(mChatMessageInf.getDirection());
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
 	/**
-	 * Returns the local time-stamp of when the chat message was sent and/or
-	 * queued for outgoing messages or the local time-stamp of when the chat
-	 * message was received for incoming messages.
+	 * Returns the local time-stamp of when the chat message was sent and/or queued for outgoing
+	 * messages or the local time-stamp of when the chat message was received for incoming messages.
 	 * 
 	 * @return long
 	 * @throws RcsServiceException
@@ -133,9 +133,8 @@ public class ChatMessage {
 	}
 
 	/**
-	 * Returns the local time-stamp of when the chat message was sent and/or
-	 * queued for outgoing messages or the remote time-stamp of when the chat
-	 * message was sent for incoming messages.
+	 * Returns the local time-stamp of when the chat message was sent and/or queued for outgoing
+	 * messages or the remote time-stamp of when the chat message was sent for incoming messages.
 	 * 
 	 * @return long
 	 * @throws RcsServiceException
@@ -149,8 +148,8 @@ public class ChatMessage {
 	}
 
 	/**
-	 * Returns the local timestamp of when the chat message was delivered for
-	 * outgoing messages or 0 for incoming messages or it was not yet delivered.
+	 * Returns the local timestamp of when the chat message was delivered for outgoing messages or 0
+	 * for incoming messages or it was not yet delivered.
 	 * 
 	 * @return long
 	 * @throws RcsServiceException
@@ -164,8 +163,8 @@ public class ChatMessage {
 	}
 
 	/**
-	 * Returns the local timestamp of when the chat message was displayed for
-	 * outgoing messages or 0 for incoming messages or it was not yes displayed.
+	 * Returns the local timestamp of when the chat message was displayed for outgoing messages or 0
+	 * for incoming messages or it was not yes displayed.
 	 * 
 	 * @return long
 	 * @throws RcsServiceException

@@ -37,14 +37,14 @@ public class Person {
 	public void setId(String id) {
 		this.id = id;
 	}
-	
+
 	public Note getNote() {
 		return note;
 	}
 
 	public void setNote(Note note) {
 		this.note = note;
-	}	
+	}
 
 	public OverridingWillingness getOverridingWillingness() {
 		return willingness;
@@ -54,22 +54,22 @@ public class Person {
 		this.willingness = status;
 	}
 
-	public StatusIcon getStatusIcon(){
+	public StatusIcon getStatusIcon() {
 		return statusIcon;
 	}
-	
-	public void setStatusIcon(StatusIcon statusIcon){
+
+	public void setStatusIcon(StatusIcon statusIcon) {
 		this.statusIcon = statusIcon;
 	}
 
-	public String getHomePage(){
+	public String getHomePage() {
 		return homePage;
 	}
-	
-	public void setHomePage(String homePage){
+
+	public void setHomePage(String homePage) {
 		this.homePage = homePage;
 	}
-	
+
 	public long getTimestamp() {
 		return timestamp;
 	}

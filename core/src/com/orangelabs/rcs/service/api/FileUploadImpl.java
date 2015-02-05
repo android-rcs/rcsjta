@@ -50,7 +50,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 	private final FileUploadServiceImpl mFileUploadService;
 
 	/**
-	 * Upload state	
+	 * Upload state
 	 */
 	private int state = FileUpload.State.INACTIVE;
 
@@ -67,10 +67,14 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 	/**
 	 * Constructor
 	 * 
-	 * @param uploadId Unique ID of FileUpload
-	 * @param broadcaster Event broadcaster
-	 * @param imService InstantMessagingService
-	 * @param fileUploadService FileUploadServiceImpl
+	 * @param uploadId
+	 *            Unique ID of FileUpload
+	 * @param broadcaster
+	 *            Event broadcaster
+	 * @param imService
+	 *            InstantMessagingService
+	 * @param fileUploadService
+	 *            FileUploadServiceImpl
 	 */
 	public FileUploadImpl(String uploadId, IFileUploadEventBroadcaster broadcaster,
 			InstantMessagingService imService, FileUploadServiceImpl fileUploadService) {
@@ -88,7 +92,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 	public String getUploadId() {
 		return mUploadId;
 	}
-	
+
 	/**
 	 * Returns info related to upload file
 	 *
@@ -99,8 +103,8 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 		FileUploadSession session = mImService.getFileUploadSession(mUploadId);
 		if (session == null) {
 			/*
-			 * TODO: Throw proper exception as part of CR037 as persisted storage not
-			 * available for this service!
+			 * TODO: Throw proper exception as part of CR037 as persisted storage not available for
+			 * this service!
 			 */
 			throw new IllegalStateException(
 					"Unable to get file upload info since session with upload ID '" + mUploadId
@@ -116,8 +120,8 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 		}
 		return new FileUploadInfo(file.getFileUri(), file.getTransferValidity(),
 				file.getFilename(), file.getFileSize(), file.getFileType(), Uri.EMPTY, 0, 0, "");
-	}	
-	
+	}
+
 	/**
 	 * Returns the URI of the file to upload
 	 * 
@@ -127,8 +131,8 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 		FileUploadSession session = mImService.getFileUploadSession(mUploadId);
 		if (session == null) {
 			/*
-			 * TODO: Throw proper exception as part of CR037 as persisted storage not
-			 * available for this service!
+			 * TODO: Throw proper exception as part of CR037 as persisted storage not available for
+			 * this service!
 			 */
 			throw new IllegalStateException("Unable to get file since session with upload ID '"
 					+ mUploadId + "' not available.");
@@ -139,14 +143,14 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 	/**
 	 * Returns the state of the file upload
 	 * 
-	 * @return State 
+	 * @return State
 	 */
 	public int getState() {
 		FileUploadSession session = mImService.getFileUploadSession(mUploadId);
 		if (session == null) {
 			/*
-			 * TODO: Throw proper exception as part of CR037 as persisted storage not
-			 * available for this service!
+			 * TODO: Throw proper exception as part of CR037 as persisted storage not available for
+			 * this service!
 			 */
 			throw new IllegalStateException("Unable to get state since session with upload ID '"
 					+ mUploadId + "' not available.");
@@ -173,93 +177,97 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 		}
 
 		// Abort the session
-        Thread t = new Thread() {
-    		public void run() {
-    			session.interrupt();
-    		}
-    	};
-    	t.start();		
+		Thread t = new Thread() {
+			public void run() {
+				session.interrupt();
+			}
+		};
+		t.start();
 	}
 
-    /*------------------------------- SESSION EVENTS ----------------------------------*/
-    
-    /**
-     * Upload started
-     */
-    public void handleUploadStarted() {
-    	synchronized(lock) {
-	    	if (logger.isActivated()) {
-	    		logger.debug("File upload started");
-	    	}
-    		state = FileUpload.State.STARTED;
+	/*------------------------------- SESSION EVENTS ----------------------------------*/
+
+	/**
+	 * Upload started
+	 */
+	public void handleUploadStarted() {
+		synchronized (lock) {
+			if (logger.isActivated()) {
+				logger.debug("File upload started");
+			}
+			state = FileUpload.State.STARTED;
 
 			mBroadcaster.broadcastStateChanged(mUploadId, state);
-	    }
-    }
+		}
+	}
 
 	/**
 	 * Upload progress
 	 * 
-	 * @param currentSize Data size transfered 
-	 * @param totalSize Total size to be transfered
+	 * @param currentSize
+	 *            Data size transfered
+	 * @param totalSize
+	 *            Total size to be transfered
 	 */
-    public void handleUploadProgress(long currentSize, long totalSize) {
-    	synchronized(lock) {
+	public void handleUploadProgress(long currentSize, long totalSize) {
+		synchronized (lock) {
 			mBroadcaster.broadcastProgressUpdate(mUploadId, currentSize, totalSize);
-	     }
-    }
-    
-    /**
-     * Upload terminated with success
-     * 
-     * @param info File info document
-     */
-    public void handleUploadTerminated(FileTransferHttpInfoDocument info) {
-    	synchronized(lock) {
-	    	if (logger.isActivated()) {
-	    		logger.debug("File upload terminated");
-	    	}
-    		state = FileUpload.State.TRANSFERRED;
+		}
+	}
 
-			mBroadcaster.broadcastStateChanged(mUploadId, state);
-			
-			mFileUploadService.removeFileUpload(mUploadId);
-	    }
-    }
-
-    /**
-     * Upload error
-     * 
-     * @param error Error
-     */
-    public void handleUploadError(int error) {
-    	synchronized(lock) {
-	    	if (logger.isActivated()) {
-	    		logger.debug("File upload failed");
-	    	}
-    		state = FileUpload.State.FAILED;
+	/**
+	 * Upload terminated with success
+	 * 
+	 * @param info
+	 *            File info document
+	 */
+	public void handleUploadTerminated(FileTransferHttpInfoDocument info) {
+		synchronized (lock) {
+			if (logger.isActivated()) {
+				logger.debug("File upload terminated");
+			}
+			state = FileUpload.State.TRANSFERRED;
 
 			mBroadcaster.broadcastStateChanged(mUploadId, state);
 
 			mFileUploadService.removeFileUpload(mUploadId);
-	    }
-    }
+		}
+	}
 
-    /**
-     * Upload aborted
-     */
-    public void handleUploadAborted() {
-    	synchronized(lock) {
-	    	if (logger.isActivated()) {
-	    		logger.debug("File upload aborted");
-	    	}
-    		state = FileUpload.State.ABORTED;
+	/**
+	 * Upload error
+	 * 
+	 * @param error
+	 *            Error
+	 */
+	public void handleUploadError(int error) {
+		synchronized (lock) {
+			if (logger.isActivated()) {
+				logger.debug("File upload failed");
+			}
+			state = FileUpload.State.FAILED;
 
-    		mBroadcaster.broadcastStateChanged(mUploadId, state);
+			mBroadcaster.broadcastStateChanged(mUploadId, state);
 
-    		mFileUploadService.removeFileUpload(mUploadId);
-	    }
-    }
+			mFileUploadService.removeFileUpload(mUploadId);
+		}
+	}
+
+	/**
+	 * Upload aborted
+	 */
+	public void handleUploadAborted() {
+		synchronized (lock) {
+			if (logger.isActivated()) {
+				logger.debug("File upload aborted");
+			}
+			state = FileUpload.State.ABORTED;
+
+			mBroadcaster.broadcastStateChanged(mUploadId, state);
+
+			mFileUploadService.removeFileUpload(mUploadId);
+		}
+	}
 
 	@Override
 	public void handleUploadNotAllowedToSend() {
@@ -267,8 +275,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 			logger.debug("File upload not allowed");
 		}
 		synchronized (lock) {
-			mBroadcaster.broadcastStateChanged(mUploadId,
-					FileUpload.State.FAILED);
+			mBroadcaster.broadcastStateChanged(mUploadId, FileUpload.State.FAILED);
 			mFileUploadService.removeFileUpload(mUploadId);
 		}
 	}

@@ -32,11 +32,9 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author jexa7410
  */
 public class TermsAckParser extends DefaultHandler {
-	/* SAMPLE:
-	 * <?xml version="1.0" standalone="yes"?>
-	 * <EndUserConfirmationAck id="xxxxxxxxx" status="xxxxxxxxxxx">
-	 *   <Subject>xxxxxxxxxx</Subject>
-	 *   <Text>xxxxxxxxxx</Text>
+	/*
+	 * SAMPLE: <?xml version="1.0" standalone="yes"?> <EndUserConfirmationAck id="xxxxxxxxx"
+	 * status="xxxxxxxxxxx"> <Subject>xxxxxxxxxx</Subject> <Text>xxxxxxxxxx</Text>
 	 * </EndUserConfirmationAck>
 	 */
 
@@ -45,24 +43,25 @@ public class TermsAckParser extends DefaultHandler {
 	private String status = null;
 	private String subject = null;
 	private String text = null;
-	
+
 	/**
 	 * The logger
 	 */
 	private Logger logger = Logger.getLogger(this.getClass().getName());
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param inputSource Input source
+	 * @param inputSource
+	 *            Input source
 	 * @throws Exception
 	 */
 	public TermsAckParser(InputSource inputSource) throws Exception {
 		SAXParserFactory factory = SAXParserFactory.newInstance();
-	    SAXParser parser = factory.newSAXParser();
-	    parser.parse(inputSource, this);
+		SAXParser parser = factory.newSAXParser();
+		parser.parse(inputSource, this);
 	}
-	
+
 	public String getId() {
 		return id;
 	}
@@ -70,11 +69,11 @@ public class TermsAckParser extends DefaultHandler {
 	public String getStatus() {
 		return status;
 	}
-	
+
 	public String getSubject() {
 		return subject;
 	}
-	
+
 	public String getText() {
 		return text;
 	}
@@ -85,34 +84,32 @@ public class TermsAckParser extends DefaultHandler {
 		}
 		accumulator = new StringBuffer();
 	}
-	
+
 	public void characters(char buffer[], int start, int length) {
 		accumulator.append(buffer, start, length);
 	}
-	
-	public void startElement(String namespaceURL, String localName,	String qname, Attributes attr) {
+
+	public void startElement(String namespaceURL, String localName, String qname, Attributes attr) {
 		accumulator.setLength(0);
-	
+
 		if (localName.equals("EndUserConfirmationAck")) {
 			id = attr.getValue("id").trim();
 			status = attr.getValue("status").trim();
 		}
 	}
-	
+
 	public void endElement(String namespaceURL, String localName, String qname) {
 		if (localName.equals("EndUserConfirmationAck")) {
 			if (logger.isActivated()) {
 				logger.debug("Terms request document is complete");
-			}			
-		} else
-		if (localName.equals("Subject")) {
+			}
+		} else if (localName.equals("Subject")) {
 			subject = accumulator.toString().trim();
-		} else
-		if (localName.equals("Text")) {
+		} else if (localName.equals("Text")) {
 			text = accumulator.toString().trim();
 		}
 	}
-	
+
 	public void endDocument() {
 		if (logger.isActivated()) {
 			logger.debug("End document");

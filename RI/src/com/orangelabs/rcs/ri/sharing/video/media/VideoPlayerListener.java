@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.sharing.video.media;
 
 /**
@@ -23,33 +24,33 @@ package com.orangelabs.rcs.ri.sharing.video.media;
  * @author Jean-Marc AUFFRET
  */
 public interface VideoPlayerListener {
-	/**
-	 * Callback called when the player is opened
-	 */
-	public void onPlayerOpened();
+    /**
+     * Callback called when the player is opened
+     */
+    public void onPlayerOpened();
 
-	/**
-	 * Callback called when the player is started
-	 */
-	public void onPlayerStarted();
+    /**
+     * Callback called when the player is started
+     */
+    public void onPlayerStarted();
 
-	/**
-	 * Callback called when the player is stopped
-	 */
-	public void onPlayerStopped();
+    /**
+     * Callback called when the player is stopped
+     */
+    public void onPlayerStopped();
 
-	/**
-	 * Callback called when the player is closed
-	 */
-	public void onPlayerClosed();
+    /**
+     * Callback called when the player is closed
+     */
+    public void onPlayerClosed();
 
-	/**
-	 * Callback called when the player has failed
-	 */
-	public void onPlayerError();
-	
-	/**
-	 * Callback called when the player has been resized
-	 */
-	public void onPlayerResized(int width, int height);
+    /**
+     * Callback called when the player has failed
+     */
+    public void onPlayerError();
+
+    /**
+     * Callback called when the player has been resized
+     */
+    public void onPlayerResized(int width, int height);
 }

@@ -27,7 +27,7 @@ import com.gsma.services.rcs.RcsServiceException;
  *
  */
 public class VideoSharingServiceConfiguration {
-	
+
 	IVideoSharingServiceConfiguration mConfiguration;
 
 	/**
@@ -40,12 +40,12 @@ public class VideoSharingServiceConfiguration {
 		mConfiguration = configuration;
 	}
 
-    /**
-	 * Returns the maximum authorized duration of the video sharing. It returns 0 if
-	 * there is no limitation.
+	/**
+	 * Returns the maximum authorized duration of the video sharing. It returns 0 if there is no
+	 * limitation.
 	 * 
-	 * @return Duration in seconds 
-     * @throws RcsServiceException 
+	 * @return Duration in seconds
+	 * @throws RcsServiceException
 	 */
 	public long getMaxTime() throws RcsServiceException {
 		try {

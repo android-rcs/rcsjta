@@ -29,12 +29,12 @@ public class AmrWbAudioFormat extends AudioFormat {
 	 * Encoding name
 	 */
 	public static final String ENCODING = "AMR-WB";
-	
+
 	/**
 	 * Payload type
 	 */
 	public static final int PAYLOAD = 126;
-	
+
 	/**
 	 * Constructor
 	 */

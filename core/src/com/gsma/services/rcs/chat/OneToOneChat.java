@@ -41,9 +41,10 @@ public class OneToOneChat {
 	/**
 	 * Constructor
 	 * 
-	 * @param chatIntf Chat interface
+	 * @param chatIntf
+	 *            Chat interface
 	 */
-	/* package private */ OneToOneChat(IOneToOneChat chatIntf) {
+	/* package private */OneToOneChat(IOneToOneChat chatIntf) {
 		mOneToOneChatInf = chatIntf;
 	}
 
@@ -62,8 +63,8 @@ public class OneToOneChat {
 	}
 
 	/**
-	 * Returns true if it is possible to send messages in this one to one chat
-	 * right now, else return false.
+	 * Returns true if it is possible to send messages in this one to one chat right now, else
+	 * return false.
 	 * 
 	 * @return boolean
 	 * @throws RcsServiceException
@@ -79,7 +80,8 @@ public class OneToOneChat {
 	/**
 	 * Sends a chat message
 	 * 
-	 * @param message Message
+	 * @param message
+	 *            Message
 	 * @return Chat message
 	 * @throws RcsServiceException
 	 */
@@ -94,7 +96,8 @@ public class OneToOneChat {
 	/**
 	 * Sends a geoloc message
 	 * 
-	 * @param geoloc Geoloc info
+	 * @param geoloc
+	 *            Geoloc info
 	 * @return Chat message
 	 * @throws RcsServiceException
 	 */
@@ -107,10 +110,11 @@ public class OneToOneChat {
 	}
 
 	/**
-	 * Sends an Is-composing event. The status is set to true when typing a
-	 * message, else it is set to false.
+	 * Sends an Is-composing event. The status is set to true when typing a message, else it is set
+	 * to false.
 	 * 
-	 * @param status Is-composing status
+	 * @param status
+	 *            Is-composing status
 	 * @throws RcsServiceException
 	 */
 	public void sendIsComposingEvent(boolean status) throws RcsServiceException {
@@ -123,7 +127,8 @@ public class OneToOneChat {
 
 	/**
 	 * open the chat conversation.<br>
-	 * Note: if it is an incoming pending chat session and the parameter IM SESSION START is 0 then the session is accepted now.
+	 * Note: if it is an incoming pending chat session and the parameter IM SESSION START is 0 then
+	 * the session is accepted now.
 	 * 
 	 * @throws RcsServiceException
 	 */

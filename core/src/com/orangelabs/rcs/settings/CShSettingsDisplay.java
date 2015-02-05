@@ -31,38 +31,38 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
  * 
  * @author jexa7410
  */
-public class CShSettingsDisplay extends PreferenceActivity implements Preference.OnPreferenceChangeListener {
+public class CShSettingsDisplay extends PreferenceActivity implements
+		Preference.OnPreferenceChangeListener {
 	private CheckBoxPreference beep;
 
 	private CheckBoxPreference vibrate;
 
 	@Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        
-        addPreferencesFromResource(R.xml.rcs_settings_csh_preferences);
-        setTitle(R.string.rcs_settings_title_csh_settings);
-        
-        beep = (CheckBoxPreference)findPreference("csh_available");
-        beep.setPersistent(false);
-        beep.setOnPreferenceChangeListener(this);
-        beep.setChecked(RcsSettings.getInstance().isPhoneBeepIfCShAvailable());
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-        vibrate = (CheckBoxPreference)findPreference("csh_invitation_vibration");
-        vibrate.setPersistent(false);
-        vibrate.setOnPreferenceChangeListener(this);
-        vibrate.setChecked(RcsSettings.getInstance().isPhoneVibrateForCShInvitation());
+		addPreferencesFromResource(R.xml.rcs_settings_csh_preferences);
+		setTitle(R.string.rcs_settings_title_csh_settings);
+
+		beep = (CheckBoxPreference) findPreference("csh_available");
+		beep.setPersistent(false);
+		beep.setOnPreferenceChangeListener(this);
+		beep.setChecked(RcsSettings.getInstance().isPhoneBeepIfCShAvailable());
+
+		vibrate = (CheckBoxPreference) findPreference("csh_invitation_vibration");
+		vibrate.setPersistent(false);
+		vibrate.setOnPreferenceChangeListener(this);
+		vibrate.setChecked(RcsSettings.getInstance().isPhoneVibrateForCShInvitation());
 	}
 
-    public boolean onPreferenceChange(Preference preference, Object objValue) {
-        if (preference.getKey().equals("csh_available")) {
-        	Boolean state = (Boolean)objValue;
-        	RcsSettings.getInstance().setPhoneBeepIfCShAvailable(state.booleanValue());
-        } else
-        if (preference.getKey().equals("csh_invitation_vibration")) {
-        	Boolean state = (Boolean)objValue;
-        	RcsSettings.getInstance().setPhoneVibrateForCShInvitation(state.booleanValue());
-    	}
-        return true;
-    }    
+	public boolean onPreferenceChange(Preference preference, Object objValue) {
+		if (preference.getKey().equals("csh_available")) {
+			Boolean state = (Boolean) objValue;
+			RcsSettings.getInstance().setPhoneBeepIfCShAvailable(state.booleanValue());
+		} else if (preference.getKey().equals("csh_invitation_vibration")) {
+			Boolean state = (Boolean) objValue;
+			RcsSettings.getInstance().setPhoneVibrateForCShInvitation(state.booleanValue());
+		}
+		return true;
+	}
 }

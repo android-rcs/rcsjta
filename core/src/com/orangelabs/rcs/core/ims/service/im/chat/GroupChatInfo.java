@@ -31,37 +31,43 @@ public class GroupChatInfo {
 	 * Session ID
 	 */
 	private String sessionId;
-	
+
 	/**
 	 * Rejoin ID
 	 */
 	private String rejoinId;
-	
+
 	/**
 	 * Contribution Id
 	 */
 	private String contributionId;
-	
+
 	/**
 	 * Set of initial participants
 	 */
 	private Set<ParticipantInfo> participants;
-	
+
 	/**
 	 * Subject
 	 */
 	private String subject;
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param sessionId Session ID
-	 * @param rejoindId Rejoin ID
-	 * @param contributionId Rejoin ID
-	 * @param particpants Participants
-	 * @param subject Subject
+	 * @param sessionId
+	 *            Session ID
+	 * @param rejoindId
+	 *            Rejoin ID
+	 * @param contributionId
+	 *            Rejoin ID
+	 * @param particpants
+	 *            Participants
+	 * @param subject
+	 *            Subject
 	 */
-	public GroupChatInfo(String sessionId, String rejoinId, String contributionId, Set<ParticipantInfo> participants, String subject) {
+	public GroupChatInfo(String sessionId, String rejoinId, String contributionId,
+			Set<ParticipantInfo> participants, String subject) {
 		this.sessionId = sessionId;
 		this.rejoinId = rejoinId;
 		this.contributionId = contributionId;
@@ -120,10 +126,7 @@ public class GroupChatInfo {
 	 * @return String
 	 */
 	public String toString() {
-		return "Session ID=" + sessionId +
-			", Contribution ID=" + contributionId +
-			", Rejoin ID=" + rejoinId +
-			", Subject=" + subject +
-			", Participants=" + participants.size();
+		return "Session ID=" + sessionId + ", Contribution ID=" + contributionId + ", Rejoin ID="
+				+ rejoinId + ", Subject=" + subject + ", Participants=" + participants.size();
 	}
 }

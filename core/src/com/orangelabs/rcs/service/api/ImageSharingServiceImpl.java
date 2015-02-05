@@ -80,7 +80,8 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	/**
 	 * The logger
 	 */
-	private static final Logger logger = Logger.getLogger(ImageSharingServiceImpl.class.getSimpleName());
+	private static final Logger logger = Logger.getLogger(ImageSharingServiceImpl.class
+			.getSimpleName());
 
 	/**
 	 * Lock used for synchronization
@@ -90,10 +91,14 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	/**
 	 * Constructor
 	 * 
-	 * @param richcallService RichcallService
-	 * @param richCallLog RichCallHistory
-	 * @param rcsSettings RcsSettings
-	 * @param contactsManager ContactsManager
+	 * @param richcallService
+	 *            RichcallService
+	 * @param richCallLog
+	 *            RichCallHistory
+	 * @param rcsSettings
+	 *            RcsSettings
+	 * @param contactsManager
+	 *            ContactsManager
 	 */
 	public ImageSharingServiceImpl(RichcallService richcallService, RichCallHistory richCallLog,
 			RcsSettings rcsSettings, ContactsManager contactsManager) {
@@ -112,7 +117,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	public void close() {
 		// Clear list of sessions
 		mImageSharingCache.clear();
-		
+
 		if (logger.isActivated()) {
 			logger.info("Image sharing service API is closed");
 		}
@@ -121,42 +126,47 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	/**
 	 * Add an image sharing in the list
 	 * 
-	 * @param imageSharing Image sharing
+	 * @param imageSharing
+	 *            Image sharing
 	 */
 	private void addImageSharing(ImageSharingImpl imageSharing) {
 		if (logger.isActivated()) {
-			logger.debug("Add an image sharing in the list (size=" + mImageSharingCache.size() + ")");
+			logger.debug("Add an image sharing in the list (size=" + mImageSharingCache.size()
+					+ ")");
 		}
-		
+
 		mImageSharingCache.put(imageSharing.getSharingId(), imageSharing);
 	}
 
 	/**
 	 * Remove an image sharing from the list
 	 * 
-	 * @param sharingId Sharing ID
+	 * @param sharingId
+	 *            Sharing ID
 	 */
-	/* package private */ void removeImageSharing(String sharingId) {
+	/* package private */void removeImageSharing(String sharingId) {
 		if (logger.isActivated()) {
-			logger.debug("Remove an image sharing from the list (size=" + mImageSharingCache.size() + ")");
+			logger.debug("Remove an image sharing from the list (size=" + mImageSharingCache.size()
+					+ ")");
 		}
-		
+
 		mImageSharingCache.remove(sharingId);
 	}
-    
-    /**
-     * Returns true if the service is registered to the platform, else returns false
-     * 
+
+	/**
+	 * Returns true if the service is registered to the platform, else returns false
+	 * 
 	 * @return Returns true if registered else returns false
-     */
-    public boolean isServiceRegistered() {
-    	return ServerApiUtils.isImsConnected();
-    }
+	 */
+	public boolean isServiceRegistered() {
+		return ServerApiUtils.isImsConnected();
+	}
 
 	/**
 	 * Registers a listener on service registration events
 	 *
-	 * @param listener Service registration listener
+	 * @param listener
+	 *            Service registration listener
 	 */
 	public void addEventListener(IRcsServiceRegistrationListener listener) {
 		if (logger.isActivated()) {
@@ -170,7 +180,8 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	/**
 	 * Unregisters a listener on service registration events
 	 *
-	 * @param listener Service registration listener
+	 * @param listener
+	 *            Service registration listener
 	 */
 	public void removeEventListener(IRcsServiceRegistrationListener listener) {
 		if (logger.isActivated()) {
@@ -184,7 +195,8 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	/**
 	 * Receive registration event
 	 *
-	 * @param state Registration state
+	 * @param state
+	 *            Registration state
 	 */
 	public void notifyRegistrationEvent(boolean state) {
 		// Notify listeners
@@ -197,20 +209,21 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		}
 	}
 
-    /**
-     * Receive a new image sharing invitation
-     * 
-     * @param session Image sharing session
-     */
-    public void receiveImageSharingInvitation(ImageTransferSession session) {
+	/**
+	 * Receive a new image sharing invitation
+	 * 
+	 * @param session
+	 *            Image sharing session
+	 */
+	public void receiveImageSharingInvitation(ImageTransferSession session) {
 		if (logger.isActivated()) {
-			logger.info("Receive image sharing invitation from " + session.getRemoteContact() + " displayName="
-					+ session.getRemoteDisplayName());
+			logger.info("Receive image sharing invitation from " + session.getRemoteContact()
+					+ " displayName=" + session.getRemoteDisplayName());
 		}
 		ContactId contact = session.getRemoteContact();
 
 		// Update displayName of remote contact
-		 mContactsManager.setContactDisplayName(contact, session.getRemoteDisplayName());
+		mContactsManager.setContactDisplayName(contact, session.getRemoteDisplayName());
 
 		String sharingId = session.getSessionID();
 		ImageSharingPersistedStorageAccessor storageAccessor = new ImageSharingPersistedStorageAccessor(
@@ -219,30 +232,32 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 				mBroadcaster, storageAccessor, this);
 		addImageSharing(imageSharing);
 		session.addListener(imageSharing);
-    }
+	}
 
-    /**
-     * Returns the configuration of image sharing service
-     * 
-     * @return Configuration
-     */
+	/**
+	 * Returns the configuration of image sharing service
+	 * 
+	 * @return Configuration
+	 */
 	public IImageSharingServiceConfiguration getConfiguration() {
 		return new IImageSharingServiceConfigurationImpl(mRcsSettings);
-	}    
-    
-    /**
-     * Shares an image with a contact. The parameter file contains the URI
-     * of the image to be shared(for a local or a remote image). An exception if thrown if there is
-     * no ongoing CS call. The parameter contact supports the following formats: MSISDN
-     * in national or international format, SIP address, SIP-URI or Tel-URI. If the format
-     * of the contact is not supported an exception is thrown.
-     * 
-     * @param contact Contact ID
-     * @param file Uri of file to share
-     * @return Image sharing
-     * @throws ServerApiException
-     */
-    public IImageSharing shareImage(ContactId contact, Uri file) throws ServerApiException {
+	}
+
+	/**
+	 * Shares an image with a contact. The parameter file contains the URI of the image to be
+	 * shared(for a local or a remote image). An exception if thrown if there is no ongoing CS call.
+	 * The parameter contact supports the following formats: MSISDN in national or international
+	 * format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not supported an
+	 * exception is thrown.
+	 * 
+	 * @param contact
+	 *            Contact ID
+	 * @param file
+	 *            Uri of file to share
+	 * @return Image sharing
+	 * @throws ServerApiException
+	 */
+	public IImageSharing shareImage(ContactId contact, Uri file) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Initiate an image sharing session with " + contact);
 		}
@@ -252,16 +267,17 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 
 		try {
 			FileDescription desc = FileFactory.getFactory().getFileDescription(file);
-			MmContent content = ContentManager.createMmContent(file, desc.getSize(), desc.getName());
+			MmContent content = ContentManager
+					.createMmContent(file, desc.getSize(), desc.getName());
 
-			final ImageTransferSession session = mRichcallService.initiateImageSharingSession(contact, content, null);
+			final ImageTransferSession session = mRichcallService.initiateImageSharingSession(
+					contact, content, null);
 
 			String sharingId = session.getSessionID();
-			mRichCallLog.addImageSharing(session.getSessionID(), contact,
-					Direction.OUTGOING, session.getContent(),
-					ImageSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
-			mBroadcaster.broadcastStateChanged(contact, sharingId,
-					ImageSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
+			mRichCallLog.addImageSharing(session.getSessionID(), contact, Direction.OUTGOING,
+					session.getContent(), ImageSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastStateChanged(contact, sharingId, ImageSharing.State.INITIATING,
+					ReasonCode.UNSPECIFIED);
 
 			ImageSharingPersistedStorageAccessor storageAccessor = new ImageSharingPersistedStorageAccessor(
 					sharingId, contact, Direction.OUTGOING, file, content.getName(),
@@ -272,14 +288,14 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 			addImageSharing(imageSharing);
 			session.addListener(imageSharing);
 
-	        new Thread() {
-	    		public void run() {
-	    			session.startSession();
-	    		}
-	    	}.start();	
+			new Thread() {
+				public void run() {
+					session.startSession();
+				}
+			}.start();
 			return imageSharing;
 
-		} catch(Exception e) {
+		} catch (Exception e) {
 			// TODO:Handle Security exception in CR026
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
@@ -288,13 +304,13 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 		}
 	}
 
-    /**
-     * Returns the list of image sharings in progress
-     * 
-     * @return List of image sharings
-     * @throws ServerApiException
-     */
-    public List<IBinder> getImageSharings() throws ServerApiException {
+	/**
+	 * Returns the list of image sharings in progress
+	 * 
+	 * @return List of image sharings
+	 * @throws ServerApiException
+	 */
+	public List<IBinder> getImageSharings() throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Get image sharing sessions");
 		}
@@ -306,21 +322,22 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 			}
 			return imageSharings;
 
-		} catch(Exception e) {
+		} catch (Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
 			}
 			throw new ServerApiException(e.getMessage());
 		}
-    }    
+	}
 
-    /**
-     * Returns a current image sharing from its unique ID
-     * @param sharingId 
-     * 
-     * @return Image sharing
-     * @throws ServerApiException
-     */
+	/**
+	 * Returns a current image sharing from its unique ID
+	 * 
+	 * @param sharingId
+	 * 
+	 * @return Image sharing
+	 * @throws ServerApiException
+	 */
 	public IImageSharing getImageSharing(String sharingId) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Get image sharing session " + sharingId);
@@ -336,25 +353,28 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	}
 
 	/**
-	 * Add and broadcast image sharing invitation rejection
-	 * invitation.
+	 * Add and broadcast image sharing invitation rejection invitation.
 	 *
-	 * @param contact Contact
-	 * @param content Image content
-	 * @param reasonCode Reason code
+	 * @param contact
+	 *            Contact
+	 * @param content
+	 *            Image content
+	 * @param reasonCode
+	 *            Reason code
 	 */
-	public void addAndBroadcastImageSharingInvitationRejected(ContactId contact,
-			MmContent content, int reasonCode) {
+	public void addAndBroadcastImageSharingInvitationRejected(ContactId contact, MmContent content,
+			int reasonCode) {
 		String sessionId = SessionIdGenerator.getNewId();
-		mRichCallLog.addImageSharing(sessionId, contact,
-				Direction.INCOMING, content, ImageSharing.State.REJECTED, reasonCode);
+		mRichCallLog.addImageSharing(sessionId, contact, Direction.INCOMING, content,
+				ImageSharing.State.REJECTED, reasonCode);
 		mBroadcaster.broadcastInvitation(sessionId);
 	}
 
-    /**
+	/**
 	 * Adds a listener on image sharing events
 	 * 
-	 * @param listener Listener
+	 * @param listener
+	 *            Listener
 	 */
 	public void addEventListener2(IImageSharingListener listener) {
 		if (logger.isActivated()) {
@@ -368,7 +388,8 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	/**
 	 * Removes a listener on image sharing events
 	 * 
-	 * @param listener Listener
+	 * @param listener
+	 *            Listener
 	 */
 	public void removeEventListener2(IImageSharingListener listener) {
 		if (logger.isActivated()) {
@@ -380,16 +401,16 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	}
 
 	/**
-	 * Deletes all image sharing from history and abort/reject any associated
-	 * ongoing session if such exists.
+	 * Deletes all image sharing from history and abort/reject any associated ongoing session if
+	 * such exists.
 	 */
 	public void deleteImageSharings() {
 		throw new UnsupportedOperationException("This method has not been implemented yet!");
 	}
 
 	/**
-	 * Deletes image sharing with a given contact from history and abort/reject
-	 * any associated ongoing session if such exists
+	 * Deletes image sharing with a given contact from history and abort/reject any associated
+	 * ongoing session if such exists
 	 * 
 	 * @param contact
 	 */
@@ -398,8 +419,8 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	}
 
 	/**
-	 * deletes an image sharing by its sharing id from history and abort/reject
-	 * any associated ongoing session if such exists.
+	 * deletes an image sharing by its sharing id from history and abort/reject any associated
+	 * ongoing session if such exists.
 	 * 
 	 * @param sharingId
 	 */
@@ -417,7 +438,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 	public int getServiceVersion() throws ServerApiException {
 		return RcsService.Build.API_VERSION;
 	}
-	
+
 	/**
 	 * Returns the common service configuration
 	 * 

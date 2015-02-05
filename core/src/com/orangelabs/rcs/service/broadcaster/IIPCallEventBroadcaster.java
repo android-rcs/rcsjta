@@ -19,7 +19,8 @@ import com.gsma.services.rcs.contacts.ContactId;
 
 public interface IIPCallEventBroadcaster {
 
-	public void broadcastIPCallStateChanged(ContactId contact, String callId, int status, int reasonCode);
+	public void broadcastIPCallStateChanged(ContactId contact, String callId, int status,
+			int reasonCode);
 
 	public void broadcastIPCallInvitation(String callId);
 }

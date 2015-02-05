@@ -42,10 +42,11 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author Philippe LEMORDANT
  */
 public class ContactsServiceImpl extends IContactsService.Stub {
-    /**
+	/**
 	 * The logger
 	 */
-	private static final Logger logger = Logger.getLogger(ContactsServiceImpl.class.getSimpleName());
+	private static final Logger logger = Logger
+			.getLogger(ContactsServiceImpl.class.getSimpleName());
 
 	/**
 	 * Contacts manager
@@ -55,13 +56,14 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 	/**
 	 * Constructor
 	 * 
-	 * @param contactsManager Contacts manager
+	 * @param contactsManager
+	 *            Contacts manager
 	 */
 	public ContactsServiceImpl(ContactsManager contactsManager) {
 		if (logger.isActivated()) {
 			logger.info("Contacts service API is loaded");
 		}
-		
+
 		mContactsManager = contactsManager;
 	}
 
@@ -73,14 +75,15 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 			logger.info("Contacts service API is closed");
 		}
 	}
-    
-    /**
-     * Returns the RCS contact infos from its contact ID (i.e. MSISDN)
-     * 
-     * @param contact Contact ID
-     * @return Contact
-     * @throws ServerApiException
-     */
+
+	/**
+	 * Returns the RCS contact infos from its contact ID (i.e. MSISDN)
+	 * 
+	 * @param contact
+	 *            Contact ID
+	 * @return Contact
+	 * @throws ServerApiException
+	 */
 	public RcsContact getRcsContact(ContactId contact) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Get RCS contact " + contact);
@@ -88,25 +91,30 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 		// Read capabilities in the local database
 		return getRcsContact(mContactsManager.getContactInfo(contact));
 	}
-	
+
 	/**
-	 * Convert the com.orangelabs.rcs.core.ims.service.capability.Capabilities instance into a Capabilities instance
+	 * Convert the com.orangelabs.rcs.core.ims.service.capability.Capabilities instance into a
+	 * Capabilities instance
 	 * 
 	 * @param capabilities
 	 *            com.orangelabs.rcs.core.ims.service.capability.Capabilities instance
 	 * @return Capabilities instance
 	 */
-	/* package private */static Capabilities getCapabilities(com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities) {
+	/* package private */static Capabilities getCapabilities(
+			com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities) {
 		if (capabilities == null) {
 			return null;
 		}
-		return new Capabilities(capabilities.isImageSharingSupported(), capabilities.isVideoSharingSupported(),
-				capabilities.isImSessionSupported(), capabilities.isFileTransferSupported()
-						|| capabilities.isFileTransferHttpSupported(), capabilities.isGeolocationPushSupported(),
-				capabilities.isIPVoiceCallSupported(), capabilities.isIPVideoCallSupported(), capabilities.getSupportedExtensions(),
-				capabilities.isSipAutomata(), capabilities.getTimestampOfLastRefresh(), capabilities.isValid());
+		return new Capabilities(capabilities.isImageSharingSupported(),
+				capabilities.isVideoSharingSupported(), capabilities.isImSessionSupported(),
+				capabilities.isFileTransferSupported()
+						|| capabilities.isFileTransferHttpSupported(),
+				capabilities.isGeolocationPushSupported(), capabilities.isIPVoiceCallSupported(),
+				capabilities.isIPVideoCallSupported(), capabilities.getSupportedExtensions(),
+				capabilities.isSipAutomata(), capabilities.getTimestampOfLastRefresh(),
+				capabilities.isValid());
 	}
-	
+
 	/**
 	 * Convert the ContactInfo instance into a RcsContact instance
 	 * 
@@ -121,14 +129,14 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 		}
 		Capabilities capaApi = getCapabilities(contactInfo.getCapabilities());
 		boolean registered = RegistrationState.ONLINE.equals(contactInfo.getRegistrationState());
-		boolean blocked = (contactInfo.getBlockingState() == BlockingState.BLOCKED); 
-		return new RcsContact(contactInfo.getContact(), registered, capaApi, contactInfo.getDisplayName(),
-				blocked, contactInfo.getBlockingTimestamp());
+		boolean blocked = (contactInfo.getBlockingState() == BlockingState.BLOCKED);
+		return new RcsContact(contactInfo.getContact(), registered, capaApi,
+				contactInfo.getDisplayName(), blocked, contactInfo.getBlockingTimestamp());
 	}
-	
-	
+
 	/**
 	 * Interface to filter ContactInfo
+	 * 
 	 * @author YPLO6403
 	 *
 	 */
@@ -141,7 +149,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 		 */
 		boolean inScope(ContactInfo contactInfo);
 	}
-	
+
 	/**
 	 * Get a filtered list of RcsContact
 	 * 
@@ -166,26 +174,26 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 		}
 		return rcsContacts;
 	}
-	
+
 	/**
-     * Returns the list of rcs contacts
-     * 
-     * @return List of contacts
-     * @throws ServerApiException
-     */
-    public List<RcsContact> getRcsContacts() throws ServerApiException {
+	 * Returns the list of rcs contacts
+	 * 
+	 * @return List of contacts
+	 * @throws ServerApiException
+	 */
+	public List<RcsContact> getRcsContacts() throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Get rcs contacts");
 		}
 		return getRcsContacts(null);
 	}
 
-    /**
-     * Returns the list of online contacts (i.e. registered)
-     * 
-     * @return List of contacts
-     * @throws ServerApiException
-     */
+	/**
+	 * Returns the list of online contacts (i.e. registered)
+	 * 
+	 * @return List of contacts
+	 * @throws ServerApiException
+	 */
 	public List<RcsContact> getRcsContactsOnline() throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Get registered rcs contacts");
@@ -198,15 +206,17 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 			}
 		});
 	}
-    
-    /**
-     * Returns the list of contacts supporting a given extension (i.e. feature tag)
-     * 
-     * @param serviceId Service ID
-     * @return List of contacts
-     * @throws ServerApiException
-     */
-	public List<RcsContact> getRcsContactsSupporting(final String serviceId) throws ServerApiException {
+
+	/**
+	 * Returns the list of contacts supporting a given extension (i.e. feature tag)
+	 * 
+	 * @param serviceId
+	 *            Service ID
+	 * @return List of contacts
+	 * @throws ServerApiException
+	 */
+	public List<RcsContact> getRcsContactsSupporting(final String serviceId)
+			throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Get rcs contacts supporting " + serviceId);
 		}
@@ -215,7 +225,8 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 
 			@Override
 			public boolean inScope(ContactInfo contactInfo) {
-				com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities = contactInfo.getCapabilities();
+				com.orangelabs.rcs.core.ims.service.capability.Capabilities capabilities = contactInfo
+						.getCapabilities();
 				if (capabilities != null) {
 					Set<String> supportedExtensions = capabilities.getSupportedExtensions();
 					if (supportedExtensions != null) {
@@ -241,7 +252,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 	public int getServiceVersion() throws ServerApiException {
 		return RcsService.Build.API_VERSION;
 	}
-	
+
 	/**
 	 * Returns the common service configuration
 	 * 
@@ -253,15 +264,16 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 		}
 		return new CommonServiceConfigurationImpl();
 	}
-	
-    /**
-     * Block a contact. Any communication from the given contact will be
-     * blocked and redirected to the corresponding spambox.
-     * 
-     * @param contact Contact ID
-     * @throws ServerApiException
-     */
-    public void blockContact(ContactId contact) throws ServerApiException {
+
+	/**
+	 * Block a contact. Any communication from the given contact will be blocked and redirected to
+	 * the corresponding spambox.
+	 * 
+	 * @param contact
+	 *            Contact ID
+	 * @throws ServerApiException
+	 */
+	public void blockContact(ContactId contact) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Block contact " + contact);
 		}
@@ -269,23 +281,24 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 			mContactsManager.setBlockingState(contact, BlockingState.BLOCKED);
 		} catch (Exception e) {
 			/*
-			 * TODO: This is not the correct way to handle this exception, and
-			 * will be fixed in CR037
+			 * TODO: This is not the correct way to handle this exception, and will be fixed in
+			 * CR037
 			 */
 			if (logger.isActivated()) {
 				logger.error("Unexpected exception", e);
 			}
 			throw new ServerApiException(e);
 		}
-    }
+	}
 
-    /**
-     * Unblock a contact
-     * 
-     * @param contact Contact ID
-     * @throws ServerApiException
-     */
-    public void unblockContact(ContactId contact) throws ServerApiException {
+	/**
+	 * Unblock a contact
+	 * 
+	 * @param contact
+	 *            Contact ID
+	 * @throws ServerApiException
+	 */
+	public void unblockContact(ContactId contact) throws ServerApiException {
 		try {
 			if (logger.isActivated()) {
 				logger.info("Unblock contact " + contact);
@@ -293,13 +306,13 @@ public class ContactsServiceImpl extends IContactsService.Stub {
 			mContactsManager.setBlockingState(contact, BlockingState.NOT_BLOCKED);
 		} catch (Exception e) {
 			/*
-			 * TODO: This is not the correct way to handle this exception, and
-			 * will be fixed in CR037
+			 * TODO: This is not the correct way to handle this exception, and will be fixed in
+			 * CR037
 			 */
 			if (logger.isActivated()) {
 				logger.error("Unexpected exception", e);
 			}
 			throw new ServerApiException(e);
 		}
-    }
+	}
 }

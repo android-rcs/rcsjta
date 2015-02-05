@@ -32,10 +32,14 @@ public abstract class IPCallListener extends IIPCallListener.Stub {
 	/**
 	 * Callback called when the call state is changed
 	 *
-	 * @param contact Contact ID
-	 * @param callId ID of the call
-	 * @param state State of the call
-	 * @param reasonCode Reason code for the IP call state
+	 * @param contact
+	 *            Contact ID
+	 * @param callId
+	 *            ID of the call
+	 * @param state
+	 *            State of the call
+	 * @param reasonCode
+	 *            Reason code for the IP call state
 	 */
 	public abstract void onIPCallStateChanged(ContactId contact, String callId, int state,
 			int reasonCode);

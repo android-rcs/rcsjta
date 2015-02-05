@@ -34,182 +34,182 @@ import android.net.wifi.WifiManager;
  */
 public class HttpsProvisioningConnection {
 
-    /**
-     * HttpsProvisioningManager manages HTTP and SMS reception to load
-     * provisioning from network
-     */
-    private HttpsProvisioningManager manager;
+	/**
+	 * HttpsProvisioningManager manages HTTP and SMS reception to load provisioning from network
+	 */
+	private HttpsProvisioningManager manager;
 
-    /**
-     * Network state listener
-     */
-    private BroadcastReceiver networkStateListener = null;
+	/**
+	 * Network state listener
+	 */
+	private BroadcastReceiver networkStateListener = null;
 
-    /**
-     * Connection manager
-     */
-    private ConnectivityManager connMgr = null;
+	/**
+	 * Connection manager
+	 */
+	private ConnectivityManager connMgr = null;
 
-    /**
-     * Wifi disabling listener
-     */
-    private BroadcastReceiver wifiDisablingListener = null;
+	/**
+	 * Wifi disabling listener
+	 */
+	private BroadcastReceiver wifiDisablingListener = null;
 
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+	/**
+	 * The logger
+	 */
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    /**
-     * Constructor
-     *
-     * @param httpsProvisioningManager HTTP provisioning manager
-     */
-    public HttpsProvisioningConnection(HttpsProvisioningManager httpsProvisioningManager) {
-        manager = httpsProvisioningManager;
+	/**
+	 * Constructor
+	 *
+	 * @param httpsProvisioningManager
+	 *            HTTP provisioning manager
+	 */
+	public HttpsProvisioningConnection(HttpsProvisioningManager httpsProvisioningManager) {
+		manager = httpsProvisioningManager;
 
-        // Get connectivity manager
-        if (connMgr == null) {
-            connMgr = (ConnectivityManager) httpsProvisioningManager.getContext().getSystemService(
-                    Context.CONNECTIVITY_SERVICE);
-        }
-    }
+		// Get connectivity manager
+		if (connMgr == null) {
+			connMgr = (ConnectivityManager) httpsProvisioningManager.getContext().getSystemService(
+					Context.CONNECTIVITY_SERVICE);
+		}
+	}
 
-    /**
-     * Get connection manager
-     *
-     * @return connection manager
-     */
-    public ConnectivityManager getConnectionMngr() {
-        return connMgr;
-    }
+	/**
+	 * Get connection manager
+	 *
+	 * @return connection manager
+	 */
+	public ConnectivityManager getConnectionMngr() {
+		return connMgr;
+	}
 
-    /**
-     * Register the broadcast receiver for network state
-     */
-    protected void registerNetworkStateListener() {
-        // Check if network state listener is already registered
-        if (networkStateListener != null) {
-            if (logger.isActivated()) {
-                logger.debug("Network state listener already registered");
-            }
-            return;
-        }
+	/**
+	 * Register the broadcast receiver for network state
+	 */
+	protected void registerNetworkStateListener() {
+		// Check if network state listener is already registered
+		if (networkStateListener != null) {
+			if (logger.isActivated()) {
+				logger.debug("Network state listener already registered");
+			}
+			return;
+		}
 
-        if (logger.isActivated()) {
-            logger.debug("Registering network state listener");
-        }
+		if (logger.isActivated()) {
+			logger.debug("Registering network state listener");
+		}
 
-        // Instantiate the network state listener
-        networkStateListener = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, final Intent intent) {
-                Thread t = new Thread() {
-                    public void run() {
-                        if (logger.isActivated()) {
-                            logger.debug("Network state listener - Received broadcast: "
-                                    + intent.toString());
-                        }
+		// Instantiate the network state listener
+		networkStateListener = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, final Intent intent) {
+				Thread t = new Thread() {
+					public void run() {
+						if (logger.isActivated()) {
+							logger.debug("Network state listener - Received broadcast: "
+									+ intent.toString());
+						}
 
-                        manager.connectionEvent(intent.getAction());
-                    }
-                };
-                t.start();
-            }
-        };
+						manager.connectionEvent(intent.getAction());
+					}
+				};
+				t.start();
+			}
+		};
 
-        // Register network state listener
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        manager.getContext().registerReceiver(networkStateListener, intentFilter);
-    }
+		// Register network state listener
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+		manager.getContext().registerReceiver(networkStateListener, intentFilter);
+	}
 
-    /**
-     * Unregister the broadcast receiver for network state
-     */
-    protected void unregisterNetworkStateListener() {
-        if (networkStateListener != null) {
-            if (logger.isActivated()) {
-                logger.debug("Unregistering network state listener");
-            }
+	/**
+	 * Unregister the broadcast receiver for network state
+	 */
+	protected void unregisterNetworkStateListener() {
+		if (networkStateListener != null) {
+			if (logger.isActivated()) {
+				logger.debug("Unregistering network state listener");
+			}
 
-            try {
-                manager.getContext().unregisterReceiver(networkStateListener);
-            } catch (IllegalArgumentException e) {
-                // Nothing to do
-            }
-            networkStateListener = null;
-        }
-    }
+			try {
+				manager.getContext().unregisterReceiver(networkStateListener);
+			} catch (IllegalArgumentException e) {
+				// Nothing to do
+			}
+			networkStateListener = null;
+		}
+	}
 
-    /**
-     * Register the broadcast receiver for wifi disabling
-     */
-    protected void registerWifiDisablingListener() {
-        // Check if wifi disabling listener is already registered
-        if (wifiDisablingListener != null) {
-            if (logger.isActivated()) {
-                logger.debug("WIFI disabling listener already registered");
-            }
-            return;
-        }
+	/**
+	 * Register the broadcast receiver for wifi disabling
+	 */
+	protected void registerWifiDisablingListener() {
+		// Check if wifi disabling listener is already registered
+		if (wifiDisablingListener != null) {
+			if (logger.isActivated()) {
+				logger.debug("WIFI disabling listener already registered");
+			}
+			return;
+		}
 
-        if (logger.isActivated()) {
-            logger.debug("Registering WIFI disabling listener");
-        }
+		if (logger.isActivated()) {
+			logger.debug("Registering WIFI disabling listener");
+		}
 
-        // Instantiate the wifi listener
-        wifiDisablingListener = new BroadcastReceiver() {
-            @Override
-            public void onReceive(final Context context, final Intent intent) {
-                Thread t = new Thread() {
-                    public void run() {
-                        if (logger.isActivated()) {
-                            logger.debug("Wifi disabling listener - Received broadcast: "
-                                    + intent.toString());
-                        }
+		// Instantiate the wifi listener
+		wifiDisablingListener = new BroadcastReceiver() {
+			@Override
+			public void onReceive(final Context context, final Intent intent) {
+				Thread t = new Thread() {
+					public void run() {
+						if (logger.isActivated()) {
+							logger.debug("Wifi disabling listener - Received broadcast: "
+									+ intent.toString());
+						}
 
-                        // Only notify the listener when the wifi is really
-                        // disabled
-                        if (intent != null
-                                && intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
-                                        WifiManager.WIFI_STATE_UNKNOWN) == WifiManager.WIFI_STATE_DISABLED) {
+						// Only notify the listener when the wifi is really
+						// disabled
+						if (intent != null
+								&& intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
+										WifiManager.WIFI_STATE_UNKNOWN) == WifiManager.WIFI_STATE_DISABLED) {
 
-                            manager.resetCounters();
+							manager.resetCounters();
 
-                            // Register network state listener
-                            registerNetworkStateListener();
+							// Register network state listener
+							registerNetworkStateListener();
 
-                            // Unregister wifi disabling listener
-                            unregisterWifiDisablingListener();
-                        }
-                    }
-                };
-                t.start();
-            }
-        };
+							// Unregister wifi disabling listener
+							unregisterWifiDisablingListener();
+						}
+					}
+				};
+				t.start();
+			}
+		};
 
-        // Register wifi disabling listener
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        manager.getContext().registerReceiver(wifiDisablingListener, intentFilter);
-    }
+		// Register wifi disabling listener
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+		manager.getContext().registerReceiver(wifiDisablingListener, intentFilter);
+	}
 
-    /**
-     * Unregister the broadcast receiver for wifi disabling
-     */
-    protected void unregisterWifiDisablingListener() {
-        if (wifiDisablingListener != null) {
-            if (logger.isActivated()) {
-                logger.debug("Unregistering WIFI disabling listener");
-            }
+	/**
+	 * Unregister the broadcast receiver for wifi disabling
+	 */
+	protected void unregisterWifiDisablingListener() {
+		if (wifiDisablingListener != null) {
+			if (logger.isActivated()) {
+				logger.debug("Unregistering WIFI disabling listener");
+			}
 
-            try {
-                manager.getContext().unregisterReceiver(wifiDisablingListener);
-            } catch (IllegalArgumentException e) {
-                // Nothing to do
-            }
-            wifiDisablingListener = null;
-        }
-    }
+			try {
+				manager.getContext().unregisterReceiver(wifiDisablingListener);
+			} catch (IllegalArgumentException e) {
+				// Nothing to do
+			}
+			wifiDisablingListener = null;
+		}
+	}
 }

@@ -28,7 +28,7 @@ public class Packet {
 	 * Data
 	 */
 	public byte[] data;
-	
+
 	/**
 	 * Packet length
 	 */
@@ -38,7 +38,7 @@ public class Packet {
 	 * Offset
 	 */
 	public int offset;
-		
+
 	/**
 	 * Received at
 	 */
@@ -53,7 +53,8 @@ public class Packet {
 	/**
 	 * Constructor
 	 * 
-	 * @param packet Packet
+	 * @param packet
+	 *            Packet
 	 */
 	public Packet(Packet packet) {
 		data = packet.data;

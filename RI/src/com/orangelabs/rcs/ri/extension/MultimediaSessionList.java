@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.extension;
 
 import android.app.ListActivity;
@@ -35,67 +36,68 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public abstract class MultimediaSessionList extends ListActivity {
-	
-   	/**
-	 * API connection manager
-	 */
-	protected ApiConnectionManager mCnxManager;
-	
+
     /**
-	 * A locker to exit only once
-	 */
-	protected LockAccess mExitOnce = new LockAccess();
-	
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		
+     * API connection manager
+     */
+    protected ApiConnectionManager mCnxManager;
+
+    /**
+     * A locker to exit only once
+     */
+    protected LockAccess mExitOnce = new LockAccess();
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		setContentView(R.layout.extension_session_list);
+        setContentView(R.layout.extension_session_list);
 
-		// Register to API connection manager
-		mCnxManager = ApiConnectionManager.getInstance(this);
-		if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
-			Utils.showMessageAndExit(MultimediaSessionList.this, getString(R.string.label_service_not_available), mExitOnce);
-			return;
-		}
-		mCnxManager.startMonitorServices(this, null, RcsServiceName.MULTIMEDIA);
-	}
-	
-	@Override
-	protected void onResume() {
-		super.onResume();
+        // Register to API connection manager
+        mCnxManager = ApiConnectionManager.getInstance(this);
+        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
+            Utils.showMessageAndExit(MultimediaSessionList.this,
+                    getString(R.string.label_service_not_available), mExitOnce);
+            return;
+        }
+        mCnxManager.startMonitorServices(this, null, RcsServiceName.MULTIMEDIA);
+    }
 
-		// Update the list of sessions
-		updateList();
-	}
-	
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		if (mCnxManager != null) {
-			mCnxManager.stopMonitorServices(this);
-    	}
-	}	
-	
-	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		super.onListItemClick(l, v, position, id);
-		
-		// Display the selected session
-		displaySession(position);
-	}
+    @Override
+    protected void onResume() {
+        super.onResume();
 
-	/**
-	 * Display a session
-	 * 
-	 * @param position
-	 */
-	public abstract void displaySession(int position);
-	
+        // Update the list of sessions
+        updateList();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mCnxManager != null) {
+            mCnxManager.stopMonitorServices(this);
+        }
+    }
+
+    @Override
+    protected void onListItemClick(ListView l, View v, int position, long id) {
+        super.onListItemClick(l, v, position, id);
+
+        // Display the selected session
+        displaySession(position);
+    }
+
+    /**
+     * Display a session
+     * 
+     * @param position
+     */
+    public abstract void displaySession(int position);
+
     /**
      * Update the displayed list
      */
-	public abstract void updateList();
+    public abstract void updateList();
 }

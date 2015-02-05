@@ -28,16 +28,16 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author BJ
  */
 public class KeepAliveManager extends PeriodicRefresher {
-    /**
-     * Keep-alive period (in seconds)
-     */
+	/**
+	 * Keep-alive period (in seconds)
+	 */
 	private int period;
-	
-    /**
-     * SIP interface
-     */
-    private SipInterface sip;
-    
+
+	/**
+	 * SIP interface
+	 */
+	private SipInterface sip;
+
 	/**
 	 * The logger
 	 */
@@ -50,7 +50,7 @@ public class KeepAliveManager extends PeriodicRefresher {
 		this.sip = sip;
 		this.period = RcsSettings.getInstance().getSipKeepAlivePeriod();
 	}
-	
+
 	/**
 	 * Start
 	 */
@@ -60,7 +60,7 @@ public class KeepAliveManager extends PeriodicRefresher {
 		}
 		startTimer(period, 1);
 	}
-	
+
 	/**
 	 * Start
 	 */
@@ -70,30 +70,32 @@ public class KeepAliveManager extends PeriodicRefresher {
 		}
 		stopTimer();
 	}
-	
-	/**
-     * Keep-alive processing
-     */
-    public void periodicProcessing() {
-        try {
-    		if (logger.isActivated()) {
-    			logger.debug("Send keep-alive");
-    		}
-
-    		// Send a double-CRLF
-        	sip.getDefaultSipProvider().getListeningPoints()[0].sendHeartbeat(sip.getOutboundProxyAddr(), sip.getOutboundProxyPort());
-        	
-        	// Start timer
-    		startTimer(period, 1);
-        } catch(Exception e) {
-            if (logger.isActivated()) {
-                logger.error("SIP heartbeat has failed", e);
-            }
-        }
-    }
 
 	/**
-	 * @param period the keep alive period in seconds
+	 * Keep-alive processing
+	 */
+	public void periodicProcessing() {
+		try {
+			if (logger.isActivated()) {
+				logger.debug("Send keep-alive");
+			}
+
+			// Send a double-CRLF
+			sip.getDefaultSipProvider().getListeningPoints()[0].sendHeartbeat(
+					sip.getOutboundProxyAddr(), sip.getOutboundProxyPort());
+
+			// Start timer
+			startTimer(period, 1);
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("SIP heartbeat has failed", e);
+			}
+		}
+	}
+
+	/**
+	 * @param period
+	 *            the keep alive period in seconds
 	 */
 	public void setPeriod(int period) {
 		this.period = period;

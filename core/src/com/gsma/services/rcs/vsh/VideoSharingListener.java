@@ -33,10 +33,14 @@ public abstract class VideoSharingListener extends IVideoSharingListener.Stub {
 	/**
 	 * Callback called when the sharing state/reasonCode is changed.
 	 *
-	 * @param contact Contact ID
-	 * @param sharingId ID of video sharing
-	 * @param state State of video sharing
-	 * @param reasonCode Reason code of the video sharing state
+	 * @param contact
+	 *            Contact ID
+	 * @param sharingId
+	 *            ID of video sharing
+	 * @param state
+	 *            State of video sharing
+	 * @param reasonCode
+	 *            Reason code of the video sharing state
 	 * @see VideoSharing.State
 	 * @see VideoSharing.ReasonCode
 	 */

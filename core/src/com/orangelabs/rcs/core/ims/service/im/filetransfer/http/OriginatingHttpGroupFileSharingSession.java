@@ -47,29 +47,31 @@ import com.orangelabs.rcs.utils.logger.Logger;
  *
  * @author vfml3370
  */
-public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSession implements HttpUploadTransferEventListener {
+public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSession implements
+		HttpUploadTransferEventListener {
 
 	private final Core mCore;
 
-    /**
-     * HTTP upload manager
-     */
-    private HttpUploadManager uploadManager;
+	/**
+	 * HTTP upload manager
+	 */
+	private HttpUploadManager uploadManager;
 
-    /**
-     * File information to send via chat
-     */
-    private String mFileInfo;
+	/**
+	 * File information to send via chat
+	 */
+	private String mFileInfo;
 
-    /**
-     * Chat session used to send file info
-     */
-    private ChatSession mChatSession;
+	/**
+	 * Chat session used to send file info
+	 */
+	private ChatSession mChatSession;
 
-    /**
-     * The logger
-     */
-    private static final Logger logger = Logger.getLogger(OriginatingHttpGroupFileSharingSession.class.getName());
+	/**
+	 * The logger
+	 */
+	private static final Logger logger = Logger
+			.getLogger(OriginatingHttpGroupFileSharingSession.class.getName());
 
 	/**
 	 * Constructor
@@ -92,13 +94,15 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 	 *            Chat contribution Id
 	 * @param tId
 	 *            TID of the upload
-	 * @param core Core
+	 * @param core
+	 *            Core
 	 */
 	public OriginatingHttpGroupFileSharingSession(String fileTransferId, ImsService parent,
 			MmContent content, MmContent fileIcon, String conferenceId,
 			Set<ParticipantInfo> participants, String chatSessionId, String chatContributionId,
 			String tId, Core core) {
-		super(parent, content, null, conferenceId, fileIcon, chatSessionId, chatContributionId, fileTransferId);
+		super(parent, content, null, conferenceId, fileIcon, chatSessionId, chatContributionId,
+				fileTransferId);
 		mCore = core;
 		mParticipants = participants;
 
@@ -111,18 +115,18 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 	 */
 	public void run() {
 		try {
-	    	if (logger.isActivated()) {
-	    		logger.info("Initiate a new HTTP group file transfer session as originating");
-	    	}
+			if (logger.isActivated()) {
+				logger.info("Initiate a new HTTP group file transfer session as originating");
+			}
 			// Upload the file to the HTTP server
 			byte[] result = uploadManager.uploadFile();
-            sendResultToContact(result);
-		} catch(Exception e) {
-        	if (logger.isActivated()) {
-        		logger.error("File transfer has failed", e);
-        	}
+			sendResultToContact(result);
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("File transfer has failed", e);
+			}
 
-        	// Unexpected error
+			// Unexpected error
 			handleError(new FileSharingError(FileSharingError.UNEXPECTED_EXCEPTION, e.getMessage()));
 		}
 	}
@@ -143,52 +147,55 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 		uploadManager.interrupt();
 	}
 
-    /**
-     * Send the file transfer information
-     */
+	/**
+	 * Send the file transfer information
+	 */
 	private void sendFileTransferInfo() {
-        String mime = CpimMessage.MIME_TYPE;
-        String from = ImsModule.IMS_USER_PROFILE.getPublicAddress();
-        String to = ChatUtils.ANOMYNOUS_URI;
-        // Note: FileTransferId is always generated to equal the associated msgId of a FileTransfer invitation message.
-        String msgId = getFileTransferId();
+		String mime = CpimMessage.MIME_TYPE;
+		String from = ImsModule.IMS_USER_PROFILE.getPublicAddress();
+		String to = ChatUtils.ANOMYNOUS_URI;
+		// Note: FileTransferId is always generated to equal the associated msgId of a FileTransfer
+		// invitation message.
+		String msgId = getFileTransferId();
 
-        String content = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, mFileInfo, FileTransferHttpInfoDocument.MIME_TYPE);
+		String content = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, mFileInfo,
+				FileTransferHttpInfoDocument.MIME_TYPE);
 
-		mChatSession.sendDataChunks(IdGenerator.generateMessageID(), content, mime, TypeMsrpChunk.FileSharing);
-    }
+		mChatSession.sendDataChunks(IdGenerator.generateMessageID(), content, mime,
+				TypeMsrpChunk.FileSharing);
+	}
 
-
-    /**
-     * Prepare to send the info to terminating side
-     *
-     * @param result byte[] which contains the result of the 200 OK from the content server
-     */
+	/**
+	 * Prepare to send the info to terminating side
+	 *
+	 * @param result
+	 *            byte[] which contains the result of the 200 OK from the content server
+	 */
 	private void sendResultToContact(byte[] result) {
-        if (uploadManager.isCancelled()) {
-        	return;
-        }
-        if (result != null &&  FileTransferUtils.parseFileTransferHttpDocument(result) != null) {
-        	mFileInfo = new String(result, UTF8);
-            if (logger.isActivated()) {
-                logger.debug(new StringBuilder("Upload done with success: ").append(mFileInfo)
-                        .append(".").toString());
-            }
-            mChatSession = mCore.getImService().getGroupChatSession(getContributionID());
-            if (mChatSession != null) {
-                if (logger.isActivated()) {
-                    logger.debug("Send file transfer info via an existing chat session");
-                }
-                sendFileTransferInfo();
-                handleFileTransfered();
+		if (uploadManager.isCancelled()) {
+			return;
+		}
+		if (result != null && FileTransferUtils.parseFileTransferHttpDocument(result) != null) {
+			mFileInfo = new String(result, UTF8);
+			if (logger.isActivated()) {
+				logger.debug(new StringBuilder("Upload done with success: ").append(mFileInfo)
+						.append(".").toString());
+			}
+			mChatSession = mCore.getImService().getGroupChatSession(getContributionID());
+			if (mChatSession != null) {
+				if (logger.isActivated()) {
+					logger.debug("Send file transfer info via an existing chat session");
+				}
+				sendFileTransferInfo();
+				handleFileTransfered();
 
-            } else {
-                handleError(new FileSharingError(FileSharingError.NO_CHAT_SESSION));
-            }
-        } else {
-            if (logger.isActivated()) {
-                logger.debug("Upload has failed");
-            }
+			} else {
+				handleError(new FileSharingError(FileSharingError.NO_CHAT_SESSION));
+			}
+		} else {
+			if (logger.isActivated()) {
+				logger.debug("Upload has failed");
+			}
 			handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED));
 		}
 	}
@@ -198,7 +205,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 	 */
 	@Override
 	public void pauseFileTransfer() {
-        fileTransferPaused();
+		fileTransferPaused();
 		interruptSession();
 		uploadManager.pauseTransferByUser();
 	}
@@ -211,7 +218,8 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					FtHttpResumeUpload upload = FtHttpResumeDaoImpl.getInstance().queryUpload(uploadManager.getTId());
+					FtHttpResumeUpload upload = FtHttpResumeDaoImpl.getInstance().queryUpload(
+							uploadManager.getTId());
 					if (upload != null) {
 						sendResultToContact(uploadManager.resumeUpload());
 					} else {
@@ -228,9 +236,9 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
 	@Override
 	public void uploadStarted() {
 		// TODO restriction : FT HTTP upload resume is not managed
-//        // Create upload entry in fthttp table
-//        resumeFT = new FtHttpResumeUpload(this, uploadManager.getTid(),getThumbnail(),false);
-//        FtHttpResumeDaoImpl.getInstance().insert(resumeFT);
+		// // Create upload entry in fthttp table
+		// resumeFT = new FtHttpResumeUpload(this, uploadManager.getTid(),getThumbnail(),false);
+		// FtHttpResumeDaoImpl.getInstance().insert(resumeFT);
 	}
 
 	@Override

@@ -34,216 +34,218 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 public class FileTransfer {
 
-    /**
-     * File transfer state
-     */
-    public static class State {
-    	/**
-    	 * File transfer invitation received
-    	 */
-    	public final static int INVITED = 0;
-    	
-    	/**
-    	 * File transfer initiating
-    	 */
-    	public final static int INITIATING = 1;
-    	
-    	/**
-    	 * File transfer is started
-    	 */
-    	public final static int STARTED = 2;
-    	
-    	/**
-    	 * File transfer has been transferred with success 
-    	 */
-    	public final static int TRANSFERRED = 3;
-    	
-    	/**
-    	 * File transfer has been aborted 
-    	 */
-    	public final static int ABORTED = 4;
-    	
-    	/**
-    	 * File transfer has failed
-    	 */
-    	public final static int FAILED = 5;
+	/**
+	 * File transfer state
+	 */
+	public static class State {
+		/**
+		 * File transfer invitation received
+		 */
+		public final static int INVITED = 0;
 
-    	/**
-    	 * File transfer is paused
-    	 */
-    	public final static int PAUSED = 6;
+		/**
+		 * File transfer initiating
+		 */
+		public final static int INITIATING = 1;
 
-    	/**
-    	 * File transfer is rejected
-    	 */
-    	public final static int REJECTED = 7;
+		/**
+		 * File transfer is started
+		 */
+		public final static int STARTED = 2;
 
-    	/**
-    	 * File transfer has been accepted and is in the process of becoming started
-    	 */
-    	public final static int ACCEPTING = 8;
-    	
-    	/**
-    	 * File transfer has been delivered
-    	 */
-    	public final static int DELIVERED = 9;
+		/**
+		 * File transfer has been transferred with success
+		 */
+		public final static int TRANSFERRED = 3;
 
-    	/**
-    	 * File transfer has been displayed or opened
-    	 */
-    	public final static int DISPLAYED = 10;
+		/**
+		 * File transfer has been aborted
+		 */
+		public final static int ABORTED = 4;
 
-    	/**
-    	 * File transfer has been queued
-    	 */
-    	public final static int QUEUED = 11;
-    	
-    	private State() {
-        }    	
-    }
+		/**
+		 * File transfer has failed
+		 */
+		public final static int FAILED = 5;
 
-    /**
-     * File transfer reason code
-     */
-    public static class ReasonCode {
-        /**
-         * No specific reason code specified.
-         */
-        public final static int UNSPECIFIED = 0;
+		/**
+		 * File transfer is paused
+		 */
+		public final static int PAUSED = 6;
 
-        /**
-         * File transfer is aborted by local user.
-         */
-        public final static int ABORTED_BY_USER = 1;
+		/**
+		 * File transfer is rejected
+		 */
+		public final static int REJECTED = 7;
 
-        /**
-         * File transfer is aborted by remote user..
-         */
-        public final static int ABORTED_BY_REMOTE = 2;
+		/**
+		 * File transfer has been accepted and is in the process of becoming started
+		 */
+		public final static int ACCEPTING = 8;
 
-        /**
-         * File transfer is aborted by system.
-         */
-        public final static int ABORTED_BY_SYSTEM = 3;
+		/**
+		 * File transfer has been delivered
+		 */
+		public final static int DELIVERED = 9;
 
-        /**
-         * file transfer is rejected because already taken by the secondary device.
-         */
-        public final static int REJECTED_BY_SECONDARY_DEVICE = 4;
+		/**
+		 * File transfer has been displayed or opened
+		 */
+		public final static int DISPLAYED = 10;
 
-        /**
-         * File transfer has been rejected due to time out.
-         */
-        public final static int REJECTED_TIME_OUT = 5;
+		/**
+		 * File transfer has been queued
+		 */
+		public final static int QUEUED = 11;
 
-        /**
-         * Incoming file transfer was rejected as it was detected as spam.
-         */
-        public final static int REJECTED_SPAM = 6;
+		private State() {
+		}
+	}
 
-        /**
-         * Incoming file transfer was rejected as is cannot be received due to lack of local storage space.
-         */
-        public final static int REJECTED_LOW_SPACE = 7;
+	/**
+	 * File transfer reason code
+	 */
+	public static class ReasonCode {
+		/**
+		 * No specific reason code specified.
+		 */
+		public final static int UNSPECIFIED = 0;
 
-        /**
-         * Incoming transfer was rejected as it was too big to be received.
-         */
-        public final static int REJECTED_MAX_SIZE = 8;
+		/**
+		 * File transfer is aborted by local user.
+		 */
+		public final static int ABORTED_BY_USER = 1;
 
-        /**
-         * Incoming file transfer was rejected as there was too many file transfers ongoing.
-         */
-        public final static int REJECTED_MAX_FILE_TRANSFERS = 9;
+		/**
+		 * File transfer is aborted by remote user..
+		 */
+		public final static int ABORTED_BY_REMOTE = 2;
 
-        /**
-         * File transfer invitation was rejected by local user.
-         */
-        public final static int REJECTED_BY_USER = 10;
+		/**
+		 * File transfer is aborted by system.
+		 */
+		public final static int ABORTED_BY_SYSTEM = 3;
 
-        /**
-         * File transfer invitation was rejected by remote.
-         */
-        public final static int REJECTED_BY_REMOTE = 11;
+		/**
+		 * file transfer is rejected because already taken by the secondary device.
+		 */
+		public final static int REJECTED_BY_SECONDARY_DEVICE = 4;
 
-        /**
-         * File transfer was paused by system.
-         */
-        public final static int PAUSED_BY_SYSTEM = 12;
+		/**
+		 * File transfer has been rejected due to time out.
+		 */
+		public final static int REJECTED_TIME_OUT = 5;
 
-        /**
-         * File transfer was paused by user.
-         */
-        public final static int PAUSED_BY_USER = 13;
+		/**
+		 * Incoming file transfer was rejected as it was detected as spam.
+		 */
+		public final static int REJECTED_SPAM = 6;
 
-        /**
-         * File transfer initiation failed.
-         */
-        public final static int FAILED_INITIATION = 14;
+		/**
+		 * Incoming file transfer was rejected as is cannot be received due to lack of local storage
+		 * space.
+		 */
+		public final static int REJECTED_LOW_SPACE = 7;
 
-        /**
-         * The transferring of the file contents (data) from/to remote side failed.
-         */
-        public final static int FAILED_DATA_TRANSFER = 15;
+		/**
+		 * Incoming transfer was rejected as it was too big to be received.
+		 */
+		public final static int REJECTED_MAX_SIZE = 8;
 
-        /**
-         * Saving of the incoming file transfer failed.
-         */
-        public final static int FAILED_SAVING = 16;
+		/**
+		 * Incoming file transfer was rejected as there was too many file transfers ongoing.
+		 */
+		public final static int REJECTED_MAX_FILE_TRANSFERS = 9;
 
-        /**
-         * Delivering of the file transfer invitation failed.
-         */
-        public final static int FAILED_DELIVERY = 17;
+		/**
+		 * File transfer invitation was rejected by local user.
+		 */
+		public final static int REJECTED_BY_USER = 10;
 
-        /**
-         * Displaying of the file transfer invitation failed.
-         */
-        public final static int FAILED_DISPLAY = 18;
+		/**
+		 * File transfer invitation was rejected by remote.
+		 */
+		public final static int REJECTED_BY_REMOTE = 11;
 
-        /**
-         * File transfer not allowed to be sent.
-         */
-        public final static int FAILED_NOT_ALLOWED_TO_SEND = 19;
-    }
-    
-    /**
-     * File transfer error
-     */
-    public static class Error {
-    	/**
-    	 * Transfer has failed
-    	 */
-    	public final static int TRANSFER_FAILED = 0;
-    	
-    	/**
-    	 * Transfer invitation has been declined by remote
-    	 */
-    	public final static int INVITATION_DECLINED = 1;
+		/**
+		 * File transfer was paused by system.
+		 */
+		public final static int PAUSED_BY_SYSTEM = 12;
 
-    	/**
-    	 * File saving has failed 
-       	 */
-    	public final static int SAVING_FAILED = 2;
-    	
-        private Error() {
-        }    	
-    }
+		/**
+		 * File transfer was paused by user.
+		 */
+		public final static int PAUSED_BY_USER = 13;
 
-    /**
-     * File transfer interface
-     */
-    private final IFileTransfer mTransferInf;
-    
-    /**
-     * Constructor
-     * 
-     * @param transferIntf File transfer interface
-     * @hide
-     */
-    /* package private */FileTransfer(IFileTransfer transferIntf) {
-    	mTransferInf = transferIntf;
-    }
+		/**
+		 * File transfer initiation failed.
+		 */
+		public final static int FAILED_INITIATION = 14;
+
+		/**
+		 * The transferring of the file contents (data) from/to remote side failed.
+		 */
+		public final static int FAILED_DATA_TRANSFER = 15;
+
+		/**
+		 * Saving of the incoming file transfer failed.
+		 */
+		public final static int FAILED_SAVING = 16;
+
+		/**
+		 * Delivering of the file transfer invitation failed.
+		 */
+		public final static int FAILED_DELIVERY = 17;
+
+		/**
+		 * Displaying of the file transfer invitation failed.
+		 */
+		public final static int FAILED_DISPLAY = 18;
+
+		/**
+		 * File transfer not allowed to be sent.
+		 */
+		public final static int FAILED_NOT_ALLOWED_TO_SEND = 19;
+	}
+
+	/**
+	 * File transfer error
+	 */
+	public static class Error {
+		/**
+		 * Transfer has failed
+		 */
+		public final static int TRANSFER_FAILED = 0;
+
+		/**
+		 * Transfer invitation has been declined by remote
+		 */
+		public final static int INVITATION_DECLINED = 1;
+
+		/**
+		 * File saving has failed
+		 */
+		public final static int SAVING_FAILED = 2;
+
+		private Error() {
+		}
+	}
+
+	/**
+	 * File transfer interface
+	 */
+	private final IFileTransfer mTransferInf;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param transferIntf
+	 *            File transfer interface
+	 * @hide
+	 */
+	/* package private */FileTransfer(IFileTransfer transferIntf) {
+		mTransferInf = transferIntf;
+	}
 
 	/**
 	 * Returns the chat ID if this file transfer is a group file transfer
@@ -258,8 +260,8 @@ public class FileTransfer {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-    	
-    /**
+
+	/**
 	 * Returns the file transfer ID of the file transfer
 	 * 
 	 * @return Transfer ID
@@ -268,11 +270,11 @@ public class FileTransfer {
 	public String getTransferId() throws RcsServiceException {
 		try {
 			return mTransferInf.getTransferId();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Returns the remote contact identifier
 	 * 
@@ -282,53 +284,53 @@ public class FileTransfer {
 	public ContactId getRemoteContact() throws RcsServiceException {
 		try {
 			return mTransferInf.getRemoteContact();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-	
+
 	/**
-     * Returns the complete filename including the path of the file to be transferred
-     *
-     * @return Filename
-     * @throws RcsServiceException
-     */
+	 * Returns the complete filename including the path of the file to be transferred
+	 *
+	 * @return Filename
+	 * @throws RcsServiceException
+	 */
 	public String getFileName() throws RcsServiceException {
 		try {
 			return mTransferInf.getFileName();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
 	/**
-     * Returns the size of the file to be transferred
-     *
-     * @return Size in bytes
-     * @throws RcsServiceException
-     */
+	 * Returns the size of the file to be transferred
+	 *
+	 * @return Size in bytes
+	 * @throws RcsServiceException
+	 */
 	public long getFileSize() throws RcsServiceException {
 		try {
 			return mTransferInf.getFileSize();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
-	}	
+	}
 
-    /**
-     * Returns the MIME type of the file to be transferred
-     * 
-     * @return Type
-     * @throws RcsServiceException
-     */
-    public String getMimeType() throws RcsServiceException {
+	/**
+	 * Returns the MIME type of the file to be transferred
+	 * 
+	 * @return Type
+	 * @throws RcsServiceException
+	 */
+	public String getMimeType() throws RcsServiceException {
 		try {
 			return mTransferInf.getMimeType();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
-    }
-    
+	}
+
 	/**
 	 * Returns the Uri of the file icon
 	 * 
@@ -381,10 +383,10 @@ public class FileTransfer {
 	public int getState() throws RcsServiceException {
 		try {
 			return mTransferInf.getState();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
-	}		
+	}
 
 	/**
 	 * Returns the reason code of the state of the sharing
@@ -411,15 +413,15 @@ public class FileTransfer {
 	public Direction getDirection() throws RcsServiceException {
 		try {
 			return Direction.valueOf(mTransferInf.getDirection());
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e);
 		}
 	}
 
 	/**
-	 * Returns the local timestamp of when the file transfer was initiated
-	 * and/or queued for outgoing file transfers or the local timestamp of when
-	 * the file transfer invitation was received for incoming file transfers
+	 * Returns the local timestamp of when the file transfer was initiated and/or queued for
+	 * outgoing file transfers or the local timestamp of when the file transfer invitation was
+	 * received for incoming file transfers
 	 * 
 	 * @return long
 	 * @throws RcsServiceException
@@ -433,9 +435,9 @@ public class FileTransfer {
 	}
 
 	/**
-	 * Returns the local timestamp of when the file transfer was initiated and
-	 * /or queued for outgoing file transfers or the remote timestamp of when
-	 * the file transfer was initiated for incoming file transfers
+	 * Returns the local timestamp of when the file transfer was initiated and /or queued for
+	 * outgoing file transfers or the remote timestamp of when the file transfer was initiated for
+	 * incoming file transfers
 	 * 
 	 * @return long
 	 * @throws RcsServiceException
@@ -449,9 +451,8 @@ public class FileTransfer {
 	}
 
 	/**
-	 * Returns the local timestamp of when the file transfer was delivered for
-	 * outgoing file transfers or 0 for incoming file transfers or it was not
-	 * yet displayed
+	 * Returns the local timestamp of when the file transfer was delivered for outgoing file
+	 * transfers or 0 for incoming file transfers or it was not yet displayed
 	 * 
 	 * @return long
 	 * @throws RcsServiceException
@@ -465,9 +466,8 @@ public class FileTransfer {
 	}
 
 	/**
-	 * Returns the local timestamp of when the file transfer was displayed for
-	 * outgoing file transfers or 0 for incoming file transfers or it was not
-	 * yet displayed
+	 * Returns the local timestamp of when the file transfer was displayed for outgoing file
+	 * transfers or 0 for incoming file transfers or it was not yet displayed
 	 * 
 	 * @return long
 	 * @throws RcsServiceException
@@ -488,11 +488,11 @@ public class FileTransfer {
 	public void acceptInvitation() throws RcsServiceException {
 		try {
 			mTransferInf.acceptInvitation();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Rejects file transfer invitation
 	 * 
@@ -501,7 +501,7 @@ public class FileTransfer {
 	public void rejectInvitation() throws RcsServiceException {
 		try {
 			mTransferInf.rejectInvitation();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
@@ -514,16 +514,15 @@ public class FileTransfer {
 	public void abortTransfer() throws RcsServiceException {
 		try {
 			mTransferInf.abortTransfer();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
 	/**
-	 * Returns true if it is possible to pause this file transfer right now,
-	 * else returns false. If this filetransfer corresponds to a file transfer
-	 * that is no longer present in the persistent storage false will be
-	 * returned (this is no error)
+	 * Returns true if it is possible to pause this file transfer right now, else returns false. If
+	 * this filetransfer corresponds to a file transfer that is no longer present in the persistent
+	 * storage false will be returned (this is no error)
 	 * 
 	 * @return boolean
 	 * @throws RcsServiceException
@@ -544,16 +543,15 @@ public class FileTransfer {
 	public void pauseTransfer() throws RcsServiceException {
 		try {
 			mTransferInf.pauseTransfer();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
 	/**
-	 * Returns true if it is possible to resume this file transfer right now,
-	 * else return false. If this filetransfer corresponds to a file transfer
-	 * that is no longer present in the persistent storage false will be
-	 * returned.
+	 * Returns true if it is possible to resume this file transfer right now, else return false. If
+	 * this filetransfer corresponds to a file transfer that is no longer present in the persistent
+	 * storage false will be returned.
 	 * 
 	 * @return boolean
 	 * @throws RcsServiceException
@@ -574,7 +572,7 @@ public class FileTransfer {
 	public void resumeTransfer() throws RcsServiceException {
 		try {
 			mTransferInf.resumeTransfer();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
@@ -594,9 +592,8 @@ public class FileTransfer {
 	}
 
 	/**
-	 * Resend a file transfer which was previously failed. This only for 1-1
-	 * file transfer, an exception is thrown in case of a file transfer to
-	 * group.
+	 * Resend a file transfer which was previously failed. This only for 1-1 file transfer, an
+	 * exception is thrown in case of a file transfer to group.
 	 * 
 	 * @throws RcsServiceException
 	 */
@@ -608,17 +605,17 @@ public class FileTransfer {
 		}
 	}
 
-    /**
-     * Returns true if file transfer has been marked as read
-     * 
-     * @return boolean
-     * @throws RcsServiceException
-     */
-    public boolean isRead() throws RcsServiceException {
-        try {
-            return mTransferInf.isRead();
-        } catch (Exception e) {
-            throw new RcsServiceException(e);
-        }
-    }
+	/**
+	 * Returns true if file transfer has been marked as read
+	 * 
+	 * @return boolean
+	 * @throws RcsServiceException
+	 */
+	public boolean isRead() throws RcsServiceException {
+		try {
+			return mTransferInf.isRead();
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
+	}
 }

@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.messaging.ft;
 
 import android.app.Activity;
@@ -47,174 +48,175 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public class FileTransferServiceConfigActivity extends Activity {
 
-	/**
-	 * API connection manager
-	 */
-	private ApiConnectionManager mCnxManager;
+    /**
+     * API connection manager
+     */
+    private ApiConnectionManager mCnxManager;
 
-	private FileTransferServiceConfiguration mConfig;
+    private FileTransferServiceConfiguration mConfig;
 
-	private Spinner mSpinnerImageResizeOption;
+    private Spinner mSpinnerImageResizeOption;
 
-	private CheckBox mCheckBoxIsAutoAccept;
+    private CheckBox mCheckBoxIsAutoAccept;
 
-	private CheckBox mCheckBoxIsAutoAcceptInRoaming;
+    private CheckBox mCheckBoxIsAutoAcceptInRoaming;
 
-	/**
-	 * A locker to exit only once
-	 */
-	private LockAccess mExitOnce = new LockAccess();
+    /**
+     * A locker to exit only once
+     */
+    private LockAccess mExitOnce = new LockAccess();
 
-	/**
-	 * The log tag for this class
-	 */
-	private static final String LOGTAG = LogUtils.getTag(FileTransferServiceConfigActivity.class
-			.getSimpleName());
+    /**
+     * The log tag for this class
+     */
+    private static final String LOGTAG = LogUtils.getTag(FileTransferServiceConfigActivity.class
+            .getSimpleName());
 
-	private final static String[] ImageResizeOptionTab = new String[] {
-			ImageResizeOption.ALWAYS_PERFORM.toString(),
-			ImageResizeOption.ONLY_ABOVE_MAX_SIZE.toString(), ImageResizeOption.ASK.toString() };
+    private final static String[] ImageResizeOptionTab = new String[] {
+            ImageResizeOption.ALWAYS_PERFORM.toString(),
+            ImageResizeOption.ONLY_ABOVE_MAX_SIZE.toString(), ImageResizeOption.ASK.toString()
+    };
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-		// Set layout
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		setContentView(R.layout.filetransfer_service_config);
+        // Set layout
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setContentView(R.layout.filetransfer_service_config);
 
-		// Register to API connection manager
-		mCnxManager = ApiConnectionManager.getInstance(this);
-		if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
-					mExitOnce);
-			return;
+        // Register to API connection manager
+        mCnxManager = ApiConnectionManager.getInstance(this);
+        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
+            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
+                    mExitOnce);
+            return;
 
-		}
-		try {
-			mConfig = mCnxManager.getFileTransferApi().getConfiguration();
-		} catch (RcsServiceException e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce);
-			return;
+        }
+        try {
+            mConfig = mCnxManager.getFileTransferApi().getConfiguration();
+        } catch (RcsServiceException e) {
+            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce);
+            return;
 
-		}
+        }
 
-		mCnxManager.startMonitorServices(this, null, RcsServiceName.FILE_TRANSFER);
+        mCnxManager.startMonitorServices(this, null, RcsServiceName.FILE_TRANSFER);
 
-		mSpinnerImageResizeOption = (Spinner) findViewById(R.id.ft_ImageResizeOption);
-		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
-				android.R.layout.simple_spinner_item, ImageResizeOptionTab);
-		dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		mSpinnerImageResizeOption.setAdapter(dataAdapter);
-		mSpinnerImageResizeOption.setOnItemSelectedListener(new OnItemSelectedListener() {
-			@Override
-			public void onItemSelected(AdapterView<?> parentView, View selectedItemView,
-					int position, long id) {
-				ImageResizeOption newOption = ImageResizeOption.valueOf(mSpinnerImageResizeOption
-						.getSelectedItemPosition());
-				try {
-					ImageResizeOption oldOption = mConfig.getImageResizeOption();
-					if (!oldOption.equals(newOption)) {
-						mConfig.setImageResizeOption(newOption);
-						if (LogUtils.isActive) {
-							Log.d(LOGTAG, "onClick ImageResizeOption".concat(newOption.toString()));
+        mSpinnerImageResizeOption = (Spinner)findViewById(R.id.ft_ImageResizeOption);
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, ImageResizeOptionTab);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSpinnerImageResizeOption.setAdapter(dataAdapter);
+        mSpinnerImageResizeOption.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView,
+                    int position, long id) {
+                ImageResizeOption newOption = ImageResizeOption.valueOf(mSpinnerImageResizeOption
+                        .getSelectedItemPosition());
+                try {
+                    ImageResizeOption oldOption = mConfig.getImageResizeOption();
+                    if (!oldOption.equals(newOption)) {
+                        mConfig.setImageResizeOption(newOption);
+                        if (LogUtils.isActive) {
+                            Log.d(LOGTAG, "onClick ImageResizeOption".concat(newOption.toString()));
 
-						}
-					}
-				} catch (RcsServiceException e) {
-					if (LogUtils.isActive) {
-						Log.e(LOGTAG, "Exception occurred", e);
-					}
-				}
+                        }
+                    }
+                } catch (RcsServiceException e) {
+                    if (LogUtils.isActive) {
+                        Log.e(LOGTAG, "Exception occurred", e);
+                    }
+                }
 
-			}
+            }
 
-			@Override
-			public void onNothingSelected(AdapterView<?> parentView) {
-			}
-		});
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+            }
+        });
 
-		mCheckBoxIsAutoAccept = (CheckBox) findViewById(R.id.ft_isAutoAccept);
-		mCheckBoxIsAutoAccept.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Boolean autoAccept = mCheckBoxIsAutoAccept.isChecked();
-				try {
-					mConfig.setAutoAccept(autoAccept);
-					if (LogUtils.isActive) {
-						Log.d(LOGTAG, "onClick isAutoAccept ".concat(autoAccept.toString()));
-					}
-				} catch (RcsServiceException e) {
-					if (LogUtils.isActive) {
-						Log.e(LOGTAG, "Exception occurred", e);
-					}
-				}
+        mCheckBoxIsAutoAccept = (CheckBox)findViewById(R.id.ft_isAutoAccept);
+        mCheckBoxIsAutoAccept.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Boolean autoAccept = mCheckBoxIsAutoAccept.isChecked();
+                try {
+                    mConfig.setAutoAccept(autoAccept);
+                    if (LogUtils.isActive) {
+                        Log.d(LOGTAG, "onClick isAutoAccept ".concat(autoAccept.toString()));
+                    }
+                } catch (RcsServiceException e) {
+                    if (LogUtils.isActive) {
+                        Log.e(LOGTAG, "Exception occurred", e);
+                    }
+                }
 
-			}
+            }
 
-		});
+        });
 
-		mCheckBoxIsAutoAcceptInRoaming = (CheckBox) findViewById(R.id.ft_isAutoAcceptInRoaming);
-		mCheckBoxIsAutoAcceptInRoaming.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Boolean autoAcceptInRoaming = mCheckBoxIsAutoAcceptInRoaming.isChecked();
-				try {
-					mConfig.setAutoAcceptInRoaming(autoAcceptInRoaming);
-					if (LogUtils.isActive) {
-						Log.d(LOGTAG, "onClick isAutoAcceptInRoaming ".concat(autoAcceptInRoaming
-								.toString()));
-					}
-				} catch (RcsServiceException e) {
-					Utils.showMessageAndExit(FileTransferServiceConfigActivity.this,
-							getString(R.string.label_api_failed), mExitOnce, e);
-				}
+        mCheckBoxIsAutoAcceptInRoaming = (CheckBox)findViewById(R.id.ft_isAutoAcceptInRoaming);
+        mCheckBoxIsAutoAcceptInRoaming.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Boolean autoAcceptInRoaming = mCheckBoxIsAutoAcceptInRoaming.isChecked();
+                try {
+                    mConfig.setAutoAcceptInRoaming(autoAcceptInRoaming);
+                    if (LogUtils.isActive) {
+                        Log.d(LOGTAG, "onClick isAutoAcceptInRoaming ".concat(autoAcceptInRoaming
+                                .toString()));
+                    }
+                } catch (RcsServiceException e) {
+                    Utils.showMessageAndExit(FileTransferServiceConfigActivity.this,
+                            getString(R.string.label_api_failed), mExitOnce, e);
+                }
 
-			}
+            }
 
-		});
-	}
+        });
+    }
 
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		if (mCnxManager == null) {
-			return;
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mCnxManager == null) {
+            return;
 
-		}
-		mCnxManager.stopMonitorServices(this);
-	}
+        }
+        mCnxManager.stopMonitorServices(this);
+    }
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		try {
-			displayFileTransferServiceConfig();
-		} catch (RcsServiceException e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
-		}
-	}
+    @Override
+    protected void onResume() {
+        super.onResume();
+        try {
+            displayFileTransferServiceConfig();
+        } catch (RcsServiceException e) {
+            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+        }
+    }
 
-	private void displayFileTransferServiceConfig() throws RcsServiceException {
-		TextView textView = (TextView) findViewById(R.id.ft_WarnSize);
-		textView.setText(Long.valueOf(mConfig.getWarnSize()).toString());
+    private void displayFileTransferServiceConfig() throws RcsServiceException {
+        TextView textView = (TextView)findViewById(R.id.ft_WarnSize);
+        textView.setText(Long.valueOf(mConfig.getWarnSize()).toString());
 
-		textView = (TextView) findViewById(R.id.ft_MaxSize);
-		textView.setText(Long.valueOf(mConfig.getMaxSize()).toString());
+        textView = (TextView)findViewById(R.id.ft_MaxSize);
+        textView.setText(Long.valueOf(mConfig.getMaxSize()).toString());
 
-		mCheckBoxIsAutoAccept.setChecked(mConfig.isAutoAcceptEnabled());
+        mCheckBoxIsAutoAccept.setChecked(mConfig.isAutoAcceptEnabled());
 
-		CheckBox checkBox = (CheckBox) findViewById(R.id.ft_isAutoAcceptModeChangeable);
-		checkBox.setChecked(mConfig.isAutoAcceptModeChangeable());
+        CheckBox checkBox = (CheckBox)findViewById(R.id.ft_isAutoAcceptModeChangeable);
+        checkBox.setChecked(mConfig.isAutoAcceptModeChangeable());
 
-		mCheckBoxIsAutoAcceptInRoaming.setChecked(mConfig.isAutoAcceptInRoamingEnabled());
+        mCheckBoxIsAutoAcceptInRoaming.setChecked(mConfig.isAutoAcceptInRoamingEnabled());
 
-		textView = (TextView) findViewById(R.id.MaxFileTransfers);
-		textView.setText(Integer.valueOf(mConfig.getMaxFileTransfers()).toString());
+        textView = (TextView)findViewById(R.id.MaxFileTransfers);
+        textView.setText(Integer.valueOf(mConfig.getMaxFileTransfers()).toString());
 
-		checkBox = (CheckBox) findViewById(R.id.GroupFileTransferSupported); // TODO
-		checkBox.setChecked(true);
+        checkBox = (CheckBox)findViewById(R.id.GroupFileTransferSupported); // TODO
+        checkBox.setChecked(true);
 
-		mSpinnerImageResizeOption.setSelection(mConfig.getImageResizeOption().toInt());
-	}
+        mSpinnerImageResizeOption.setSelection(mConfig.getImageResizeOption().toInt());
+    }
 }

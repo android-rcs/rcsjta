@@ -28,7 +28,7 @@ public interface MediaListener {
 	 * Media is started
 	 */
 	public void mediaStarted();
-	
+
 	/**
 	 * Media is stopped
 	 */
@@ -37,7 +37,8 @@ public interface MediaListener {
 	/**
 	 * Media has failed
 	 * 
-	 * @param error Error code
+	 * @param error
+	 *            Error code
 	 */
 	public void mediaError(String error);
 }

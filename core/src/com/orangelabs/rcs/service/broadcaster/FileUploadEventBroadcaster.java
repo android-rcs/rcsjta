@@ -27,9 +27,8 @@ import com.orangelabs.rcs.utils.logger.Logger;
 import android.os.RemoteCallbackList;
 
 /**
- * FileUploadEventBroadcaster maintains the registering and unregistering of
- * IFileUploadListener and also performs broadcast events on these listeners upon the
- * trigger of corresponding callbacks.
+ * FileUploadEventBroadcaster maintains the registering and unregistering of IFileUploadListener and
+ * also performs broadcast events on these listeners upon the trigger of corresponding callbacks.
  */
 public class FileUploadEventBroadcaster implements IFileUploadEventBroadcaster {
 
@@ -66,7 +65,8 @@ public class FileUploadEventBroadcaster implements IFileUploadEventBroadcaster {
 		final int N = mFileUploadListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mFileUploadListeners.getBroadcastItem(i).onProgressUpdate(uploadId, currentSize, totalSize);
+				mFileUploadListeners.getBroadcastItem(i).onProgressUpdate(uploadId, currentSize,
+						totalSize);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);

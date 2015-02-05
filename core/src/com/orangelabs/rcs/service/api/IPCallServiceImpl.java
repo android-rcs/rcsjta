@@ -89,10 +89,14 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	/**
 	 * Constructor
 	 * 
-	 * @param ipCallService IPCallService
-	 * @param ipCallLog IPCallHistory
-	 * @param contactsManager ContactsManager
-	 * @param rcsSettings RcsSettings
+	 * @param ipCallService
+	 *            IPCallService
+	 * @param ipCallLog
+	 *            IPCallHistory
+	 * @param contactsManager
+	 *            ContactsManager
+	 * @param rcsSettings
+	 *            RcsSettings
 	 */
 	public IPCallServiceImpl(IPCallService ipCallService, IPCallHistory ipCallLog,
 			ContactsManager contactsManager, RcsSettings rcsSettings) {
@@ -105,7 +109,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		mContactsManager = contactsManager;
 	}
 
-		/**
+	/**
 	 * Close API
 	 */
 	public void close() {
@@ -120,7 +124,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	/**
 	 * Add an IP Call session in the list
 	 * 
-	 * @param ipCall IP call session
+	 * @param ipCall
+	 *            IP call session
 	 */
 
 	protected void addIPCall(IPCallImpl ipCall) {
@@ -134,7 +139,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	/**
 	 * Remove an IP Call session from the list
 	 * 
-	 * @param sessionId Session ID
+	 * @param sessionId
+	 *            Session ID
 	 */
 	protected void removeIPCall(String sessionId) {
 		if (logger.isActivated()) {
@@ -145,19 +151,20 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		mIPCallCache.remove(sessionId);
 	}
 
-    /**
-     * Returns true if the service is registered to the platform, else returns false
-     * 
+	/**
+	 * Returns true if the service is registered to the platform, else returns false
+	 * 
 	 * @return Returns true if registered else returns false
-     */
-    public boolean isServiceRegistered() {
-    	return ServerApiUtils.isImsConnected();
-    }
+	 */
+	public boolean isServiceRegistered() {
+		return ServerApiUtils.isImsConnected();
+	}
 
 	/**
 	 * Registers a listener on service registration events
 	 *
-	 * @param listener Service registration listener
+	 * @param listener
+	 *            Service registration listener
 	 */
 	public void addEventListener(IRcsServiceRegistrationListener listener) {
 		if (logger.isActivated()) {
@@ -171,7 +178,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	/**
 	 * Unregisters a listener on service registration events
 	 *
-	 * @param listener Service registration listener
+	 * @param listener
+	 *            Service registration listener
 	 */
 	public void removeEventListener(IRcsServiceRegistrationListener listener) {
 		if (logger.isActivated()) {
@@ -185,7 +193,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	/**
 	 * Receive registration event
 	 *
-	 * @param state Registration state
+	 * @param state
+	 *            Registration state
 	 */
 	public void notifyRegistrationEvent(boolean state) {
 		// Notify listeners
@@ -199,16 +208,17 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	}
 
 	/**
-     * Receive a new IP call invitation
-     * 
-     * @param session IP call session
-     */
+	 * Receive a new IP call invitation
+	 * 
+	 * @param session
+	 *            IP call session
+	 */
 	public void receiveIPCallInvitation(IPCallSession session) {
 		ContactId contact = session.getRemoteContact();
 		if (logger.isActivated()) {
 			logger.info("Receive IP call invitation from " + contact);
 		}
-		
+
 		// Update displayName of remote contact
 		mContactsManager.setContactDisplayName(contact, session.getRemoteDisplayName());
 
@@ -221,18 +231,22 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		session.addListener(ipCall);
 	}
 
-    /**
-     * Initiates an IP call with a contact. The parameter contact supports the following
-     * formats: MSISDN in national or international format, SIP address, SIP-URI or
-     * el-URI. If the format of the contact is not supported an exception is thrown.
-     * 
-     * @param contact Contact ID
-     * @param player IP call player
-     * @param renderer IP call renderer
-     * @return IP call
-	 * @throws ServerApiException 
-     */
-    public IIPCall initiateCall(ContactId contact, IIPCallPlayer player, IIPCallRenderer renderer) throws ServerApiException {
+	/**
+	 * Initiates an IP call with a contact. The parameter contact supports the following formats:
+	 * MSISDN in national or international format, SIP address, SIP-URI or el-URI. If the format of
+	 * the contact is not supported an exception is thrown.
+	 * 
+	 * @param contact
+	 *            Contact ID
+	 * @param player
+	 *            IP call player
+	 * @param renderer
+	 *            IP call renderer
+	 * @return IP call
+	 * @throws ServerApiException
+	 */
+	public IIPCall initiateCall(ContactId contact, IIPCallPlayer player, IIPCallRenderer renderer)
+			throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Initiate an IP call audio session with " + contact);
 		}
@@ -244,17 +258,17 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		if ((player == null) || (renderer == null)) {
 			throw new ServerApiException("Missing audio player or renderer");
 		}
-		
+
 		try {
 			// Initiate a new session
-			final IPCallSession session = mIPCallService.initiateIPCallSession(contact, false, player, renderer);
+			final IPCallSession session = mIPCallService.initiateIPCallSession(contact, false,
+					player, renderer);
 
 			String callId = session.getSessionID();
-			mIPCallLog.addCall(callId, contact,
-					Direction.OUTGOING, session.getAudioContent(),
+			mIPCallLog.addCall(callId, contact, Direction.OUTGOING, session.getAudioContent(),
 					session.getVideoContent(), IPCall.State.INITIATED, ReasonCode.UNSPECIFIED);
-			mBroadcaster.broadcastIPCallStateChanged(contact, callId,
-					IPCall.State.INITIATED, ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastIPCallStateChanged(contact, callId, IPCall.State.INITIATED,
+					ReasonCode.UNSPECIFIED);
 
 			IPCallPersistedStorageAccessor storageAccessor = new IPCallPersistedStorageAccessor(
 					callId, contact, Direction.OUTGOING, mIPCallLog);
@@ -265,35 +279,38 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 			session.addListener(ipCall);
 
 			// Start the session
-	        Thread t = new Thread() {
-	    		public void run() {
-	    			session.startSession();
-	    		}
-	    	};
-	    	t.start();
+			Thread t = new Thread() {
+				public void run() {
+					session.startSession();
+				}
+			};
+			t.start();
 			return ipCall;
 
 		} catch (Exception e) {
-			mIPCallLog.addCall(SessionIdGenerator.getNewId(), contact,
-					Direction.OUTGOING, null, null, IPCall.State.FAILED,
-					ReasonCode.FAILED_INITIATION);
+			mIPCallLog.addCall(SessionIdGenerator.getNewId(), contact, Direction.OUTGOING, null,
+					null, IPCall.State.FAILED, ReasonCode.FAILED_INITIATION);
 			;
 			throw new ServerApiException(e.getMessage());
 		}
-	} 
-	
-    /**
-     * Initiates an IP call visio with a contact (audio and video). The parameter contact supports the following
-     * formats: MSISDN in national or international format, SIP address, SIP-URI or Tel-URI. If the format of
-     * the contact is not supported an exception is thrown.
-     * 
-     * @param contact Contact ID
-     * @param player IP call player
-     * @param renderer IP call renderer
-     * @return IP call
-	 * @throws ServerApiException 
-     */
-    public IIPCall initiateVisioCall(ContactId contact, IIPCallPlayer player, IIPCallRenderer renderer) throws ServerApiException {
+	}
+
+	/**
+	 * Initiates an IP call visio with a contact (audio and video). The parameter contact supports
+	 * the following formats: MSISDN in national or international format, SIP address, SIP-URI or
+	 * Tel-URI. If the format of the contact is not supported an exception is thrown.
+	 * 
+	 * @param contact
+	 *            Contact ID
+	 * @param player
+	 *            IP call player
+	 * @param renderer
+	 *            IP call renderer
+	 * @return IP call
+	 * @throws ServerApiException
+	 */
+	public IIPCall initiateVisioCall(ContactId contact, IIPCallPlayer player,
+			IIPCallRenderer renderer) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Initiate an IP call visio session with " + contact);
 		}
@@ -305,17 +322,17 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		if ((player == null) || (renderer == null)) {
 			throw new ServerApiException("Missing audio player or renderer");
 		}
-		
+
 		try {
 			// Initiate a new session
-			final IPCallSession session = mIPCallService.initiateIPCallSession(contact, true, player, renderer);
+			final IPCallSession session = mIPCallService.initiateIPCallSession(contact, true,
+					player, renderer);
 
 			String callId = session.getSessionID();
-			mIPCallLog.addCall(callId, contact,
-					Direction.OUTGOING, session.getAudioContent(),
+			mIPCallLog.addCall(callId, contact, Direction.OUTGOING, session.getAudioContent(),
 					session.getVideoContent(), IPCall.State.INITIATED, ReasonCode.UNSPECIFIED);
-			mBroadcaster.broadcastIPCallStateChanged(contact, callId,
-					IPCall.State.INITIATED, ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastIPCallStateChanged(contact, callId, IPCall.State.INITIATED,
+					ReasonCode.UNSPECIFIED);
 
 			IPCallPersistedStorageAccessor storageAccessor = new IPCallPersistedStorageAccessor(
 					callId, contact, Direction.OUTGOING, mIPCallLog);
@@ -326,29 +343,29 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 			session.addListener(ipCall);
 
 			// Start the session
-	        Thread t = new Thread() {
-	    		public void run() {
-	    			session.startSession();
-	    		}
-	    	};
-	    	t.start();
+			Thread t = new Thread() {
+				public void run() {
+					session.startSession();
+				}
+			};
+			t.start();
 			return ipCall;
 
 		} catch (Exception e) {
-			mIPCallLog.addCall(SessionIdGenerator.getNewId(), contact,
-					Direction.OUTGOING, null, null, IPCall.State.FAILED,
-					ReasonCode.FAILED_INITIATION);
+			mIPCallLog.addCall(SessionIdGenerator.getNewId(), contact, Direction.OUTGOING, null,
+					null, IPCall.State.FAILED, ReasonCode.FAILED_INITIATION);
 			throw new ServerApiException(e.getMessage());
 		}
-	}     
-    
-    /**
-     * Returns a current IP call from its unique ID
-     * 
-     * @param callId Call ID
-     * @return IP call
-     * @throws ServerApiException
-     */
+	}
+
+	/**
+	 * Returns a current IP call from its unique ID
+	 * 
+	 * @param callId
+	 *            Call ID
+	 * @return IP call
+	 * @throws ServerApiException
+	 */
 	public IIPCall getIPCall(String callId) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Get IP call " + callId);
@@ -363,14 +380,14 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 		return new IPCallImpl(callId, mBroadcaster, mIPCallService, storageAccessor, this);
 	}
 
-    /**
-     * Returns the list of IP calls in progress
-     * 
-     * @return List of IP calls
-     * @throws ServerApiException
-     */
-    public List<IBinder> getIPCalls() throws ServerApiException {
-    	if (logger.isActivated()) {
+	/**
+	 * Returns the list of IP calls in progress
+	 * 
+	 * @return List of IP calls
+	 * @throws ServerApiException
+	 */
+	public List<IBinder> getIPCalls() throws ServerApiException {
+		if (logger.isActivated()) {
 			logger.info("Get IP call sessions");
 		}
 
@@ -381,19 +398,19 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 			}
 			return ipCalls;
 
-		} catch(Exception e) {
+		} catch (Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
 			}
 			throw new ServerApiException(e.getMessage());
-		}		
+		}
 	}
 
-    /**
-     * Returns the configuration of IP call service
-     * 
-     * @return Configuration
-     */
+	/**
+	 * Returns the configuration of IP call service
+	 * 
+	 * @return Configuration
+	 */
 	public IIPCallServiceConfiguration getConfiguration() {
 		return new IPCallServiceConfigurationImpl(mRcsSettings);
 	}
@@ -401,23 +418,28 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	/**
 	 * Add and broadcast video sharing invitation rejections
 	 *
-	 * @param contact Contact ID
-	 * @param audioContent Audio content
-	 * @param videoContent Video content
-	 * @param reasonCode Reason code
+	 * @param contact
+	 *            Contact ID
+	 * @param audioContent
+	 *            Audio content
+	 * @param videoContent
+	 *            Video content
+	 * @param reasonCode
+	 *            Reason code
 	 */
-	public void addAndBroadcastIPCallInvitationRejected(ContactId contact, AudioContent audioContent,
-			VideoContent videoContent, int reasonCode) {
+	public void addAndBroadcastIPCallInvitationRejected(ContactId contact,
+			AudioContent audioContent, VideoContent videoContent, int reasonCode) {
 		String sessionId = SessionIdGenerator.getNewId();
-		mIPCallLog.addCall(sessionId, contact, Direction.INCOMING,
-				audioContent, videoContent, IPCall.State.REJECTED, reasonCode);
+		mIPCallLog.addCall(sessionId, contact, Direction.INCOMING, audioContent, videoContent,
+				IPCall.State.REJECTED, reasonCode);
 		mBroadcaster.broadcastIPCallInvitation(sessionId);
 	}
 
-    /**
+	/**
 	 * Adds an event listener on IP call events
 	 * 
-	 * @param listener Listener
+	 * @param listener
+	 *            Listener
 	 */
 	public void addEventListener2(IIPCallListener listener) {
 		if (logger.isActivated()) {
@@ -431,7 +453,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	/**
 	 * Removes an event listener from IP call events
 	 * 
-	 * @param listener Listener
+	 * @param listener
+	 *            Listener
 	 */
 	public void removeEventListener2(IIPCallListener listener) {
 		if (logger.isActivated()) {
@@ -452,7 +475,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 	public int getServiceVersion() throws ServerApiException {
 		return RcsService.Build.API_VERSION;
 	}
-	
+
 	/**
 	 * Returns the common service configuration
 	 * 

@@ -59,8 +59,8 @@ public class FileUtils {
 	 * @throws IOException
 	 * @throws InvalidArgumentException
 	 */
-	public static void copyFileToDirectory(File srcFile, File destDir, boolean preserveFileDate) throws IOException,
-			InvalidArgumentException {
+	public static void copyFileToDirectory(File srcFile, File destDir, boolean preserveFileDate)
+			throws IOException, InvalidArgumentException {
 		if (srcFile == null) {
 			throw new InvalidArgumentException("Source is null");
 		}
@@ -80,7 +80,8 @@ public class FileUtils {
 			}
 		} else {
 			if (destDir.isDirectory() == false) {
-				throw new IllegalArgumentException("Destination '" + destDir + "' is not a directory");
+				throw new IllegalArgumentException("Destination '" + destDir
+						+ "' is not a directory");
 			}
 		}
 		File destFile = new File(destDir, srcFile.getName());
@@ -172,8 +173,10 @@ public class FileUtils {
 	/**
 	 * Fetch the file name from URI
 	 *
-	 * @param context Context
-	 * @param file URI
+	 * @param context
+	 *            Context
+	 * @param file
+	 *            URI
 	 * @return fileName String
 	 * @throws IllegalArgumentException
 	 */
@@ -206,8 +209,10 @@ public class FileUtils {
 	/**
 	 * Fetch the file size from URI
 	 *
-	 * @param context Context
-	 * @param file URI
+	 * @param context
+	 *            Context
+	 * @param file
+	 *            URI
 	 * @return fileSize long
 	 * @throws IllegalArgumentException
 	 */
@@ -236,5 +241,5 @@ public class FileUtils {
 			}
 		}
 	}
-	
+
 }

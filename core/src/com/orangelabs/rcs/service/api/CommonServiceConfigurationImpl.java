@@ -29,13 +29,14 @@ import com.orangelabs.rcs.utils.ContactUtils;
 /**
  * 
  * A class that implements interface to allow access to common service configuration from APIs
+ * 
  * @author yplo6403
  *
  */
 public class CommonServiceConfigurationImpl extends ICommonServiceConfiguration.Stub {
 
 	private final RcsSettings mRcsSettings;
-	
+
 	/**
 	 * Constructor
 	 * 

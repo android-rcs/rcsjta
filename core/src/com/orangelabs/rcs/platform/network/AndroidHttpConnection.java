@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-
 /**
  * Android HTTP connection
  * 
@@ -35,16 +34,17 @@ public class AndroidHttpConnection implements HttpConnection {
 	 * HTTP connection
 	 */
 	private HttpURLConnection connection = null;
-	
+
 	/**
 	 * Open the HTTP connection
 	 * 
-	 * @param url Remote URL
+	 * @param url
+	 *            Remote URL
 	 * @throws IOException
 	 */
 	public void open(String url) throws IOException {
 		URL urlConn = new URL(url);
-		connection = (HttpURLConnection)urlConn.openConnection();
+		connection = (HttpURLConnection) urlConn.openConnection();
 		connection.connect();
 	}
 
@@ -58,7 +58,7 @@ public class AndroidHttpConnection implements HttpConnection {
 			connection.disconnect();
 		}
 	}
-	
+
 	/**
 	 * HTTP GET request
 	 * 
@@ -72,7 +72,7 @@ public class AndroidHttpConnection implements HttpConnection {
 			throw new IOException("Connection not opened");
 		}
 	}
-	
+
 	/**
 	 * HTTP POST request
 	 * 
@@ -86,29 +86,30 @@ public class AndroidHttpConnection implements HttpConnection {
 			throw new IOException("Connection not opened");
 		}
 	}
-	
+
 	/**
 	 * Send HTTP request
 	 * 
-	 * @param method HTTP method
+	 * @param method
+	 *            HTTP method
 	 * @return Response
 	 * @throws IOException
 	 */
 	private ByteArrayOutputStream sendHttpRequest(String method) throws IOException {
-        connection.setRequestMethod(method);
-        int rc = connection.getResponseCode();
-        if (rc != HttpURLConnection.HTTP_OK) {
-            throw new IOException("HTTP error " + rc);
-        }
-        
-        InputStream inputStream = connection.getInputStream();
-        ByteArrayOutputStream result = new ByteArrayOutputStream();
-    	int ch;
-    	while((ch = inputStream.read()) != -1) {
-    		result.write(ch);
-    	}
-    	inputStream.close();
-    	
-        return result;		
+		connection.setRequestMethod(method);
+		int rc = connection.getResponseCode();
+		if (rc != HttpURLConnection.HTTP_OK) {
+			throw new IOException("HTTP error " + rc);
+		}
+
+		InputStream inputStream = connection.getInputStream();
+		ByteArrayOutputStream result = new ByteArrayOutputStream();
+		int ch;
+		while ((ch = inputStream.read()) != -1) {
+			result.write(ch);
+		}
+		inputStream.close();
+
+		return result;
 	}
 }

@@ -27,15 +27,14 @@ import android.content.Intent;
  * 
  * @author Jean-Marc AUFFRET
  * @author YPLO6403
- *
  */
 public class FileTransferInvitationReceiver extends BroadcastReceiver {
-	@Override
-	public void onReceive(Context context, Intent intent) {
-		Intent invitation = new Intent(context, FileTransferIntentService.class);
-		invitation.putExtras(intent);
-		invitation.setAction(intent.getAction());
-		context.startService(invitation);
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        Intent invitation = new Intent(context, FileTransferIntentService.class);
+        invitation.putExtras(intent);
+        invitation.setAction(intent.getAction());
+        context.startService(invitation);
     }
 
 }

@@ -34,7 +34,7 @@ import com.orangelabs.rcs.ri.R;
  * @author Jean-Marc AUFFRET
  */
 public class TestVideoSharingApi extends ListActivity {
-	@Override
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -43,21 +43,21 @@ public class TestVideoSharingApi extends ListActivity {
 
         // Set items
         String[] items = {
-    		getString(R.string.menu_initiate_video_sharing),
-    		getString(R.string.menu_video_sharing_log)
+                getString(R.string.menu_initiate_video_sharing),
+                getString(R.string.menu_video_sharing_log)
         };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        switch(position) {
-	        case 0:
-	        	startActivity(new Intent(this, OutgoingVideoSharing.class));
+        switch (position) {
+            case 0:
+                startActivity(new Intent(this, OutgoingVideoSharing.class));
                 break;
-                
-	        case 1:
-	        	startActivity(new Intent(this, VideoSharingList.class));
+
+            case 1:
+                startActivity(new Intent(this, VideoSharingList.class));
                 break;
         }
     }

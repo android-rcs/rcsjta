@@ -35,12 +35,12 @@ public abstract class MsrpConnection {
 	 * MSRP traces enabled
 	 */
 	public static boolean MSRP_TRACE_ENABLED = false;
-	
+
 	/**
 	 * MSRP session
 	 */
 	private MsrpSession session;
-	
+
 	/**
 	 * Socket connection
 	 */
@@ -55,7 +55,7 @@ public abstract class MsrpConnection {
 	 * Socket input stream
 	 */
 	private InputStream inputStream = null;
-	
+
 	/**
 	 * Chunk receiver
 	 */
@@ -74,7 +74,8 @@ public abstract class MsrpConnection {
 	/**
 	 * Constructor
 	 * 
-	 * @param session MSRP session
+	 * @param session
+	 *            MSRP session
 	 */
 	public MsrpConnection(MsrpSession session) {
 		this.session = session;
@@ -86,9 +87,9 @@ public abstract class MsrpConnection {
 	 * @return MSRP session
 	 */
 	public MsrpSession getSession() {
-		return session; 
+		return session;
 	}
-	
+
 	/**
 	 * Open the connection
 	 * 
@@ -101,7 +102,7 @@ public abstract class MsrpConnection {
 		// Open I/O stream
 		inputStream = socket.getInputStream();
 		outputStream = socket.getOutputStream();
-		
+
 		// Create the chunk receiver
 		receiver = new ChunkReceiver(this, inputStream);
 		receiver.start();
@@ -114,11 +115,12 @@ public abstract class MsrpConnection {
 			logger.debug("Connection has been opened");
 		}
 	}
-	
+
 	/**
 	 * Open the connection with SO_TIMEOUT on the socket
 	 * 
-	 * @param timeout Timeout value (in seconds)
+	 * @param timeout
+	 *            Timeout value (in seconds)
 	 * @throws IOException
 	 */
 	public void open(int timeout) throws IOException {
@@ -126,12 +128,12 @@ public abstract class MsrpConnection {
 		socket = getSocketConnection();
 
 		// Set SoTimeout
-		socket.setSoTimeout(timeout*1000);
-		
+		socket.setSoTimeout(timeout * 1000);
+
 		// Open I/O stream
 		inputStream = socket.getInputStream();
 		outputStream = socket.getOutputStream();
-		
+
 		// Create the chunk receiver
 		receiver = new ChunkReceiver(this, inputStream);
 		receiver.start();
@@ -153,7 +155,7 @@ public abstract class MsrpConnection {
 		if (sender != null) {
 			sender.terminate();
 		}
-		
+
 		// Terminate chunk receiver
 		if (receiver != null) {
 			receiver.terminate();
@@ -178,32 +180,34 @@ public abstract class MsrpConnection {
 				logger.error("Can't close the socket correctly", e);
 			}
 		}
-		
+
 		if (logger.isActivated()) {
 			logger.debug("Connection has been closed");
 		}
 	}
-	
+
 	/**
 	 * Send a new data chunk
 	 * 
-	 * @param chunk Data chunk
+	 * @param chunk
+	 *            Data chunk
 	 * @throws IOException
 	 */
 	public void sendChunk(byte chunk[]) throws IOException {
 		sender.sendChunk(chunk);
-	}	
+	}
 
 	/**
 	 * Send a new data chunk immediately
 	 * 
-	 * @param chunk Data chunk
+	 * @param chunk
+	 *            Data chunk
 	 * @throws IOException
 	 */
 	public void sendChunkImmediately(byte chunk[]) throws IOException {
 		sender.sendChunkImmediately(chunk);
 	}
-	
+
 	/**
 	 * Returns the socket connection
 	 * 

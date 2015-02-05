@@ -18,7 +18,6 @@
 
 package com.orangelabs.rcs.core.ims.protocol.http;
 
-
 /**
  * HTTP GET request
  * 
@@ -28,12 +27,13 @@ public class HttpGetRequest extends HttpRequest {
 	/**
 	 * Constructor
 	 * 
-	 * @param url URL
+	 * @param url
+	 *            URL
 	 */
 	public HttpGetRequest(String url) {
 		super(url, null, null);
 	}
-	
+
 	/**
 	 * Returns the HTTP method
 	 * 

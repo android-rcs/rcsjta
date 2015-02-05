@@ -24,8 +24,8 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.stream;
  * @author Deutsche Telekom
  */
 public interface RtpStreamListener {
-    /**
-     * Invoked when the RTP stream was aborted.
-     */
-    void rtpStreamAborted();
+	/**
+	 * Invoked when the RTP stream was aborted.
+	 */
+	void rtpStreamAborted();
 }

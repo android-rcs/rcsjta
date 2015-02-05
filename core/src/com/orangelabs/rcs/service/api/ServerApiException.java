@@ -27,11 +27,12 @@ import android.os.RemoteException;
  */
 public class ServerApiException extends RemoteException {
 	static final long serialVersionUID = 1L;
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param e Exception
+	 * @param e
+	 *            Exception
 	 */
 	public ServerApiException(Exception e) {
 		setStackTrace(e.getStackTrace());
@@ -40,10 +41,11 @@ public class ServerApiException extends RemoteException {
 	/**
 	 * Constructor
 	 * 
-	 * @param error Error message
+	 * @param error
+	 *            Error message
 	 */
 	public ServerApiException(String error) {
 		Exception e = new Exception(error);
-		this.setStackTrace(e.getStackTrace());		
+		this.setStackTrace(e.getStackTrace());
 	}
 }

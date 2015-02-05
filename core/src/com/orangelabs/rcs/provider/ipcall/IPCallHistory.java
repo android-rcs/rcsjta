@@ -61,13 +61,10 @@ public class IPCallHistory {
 	 * 
 	 * @param columnName
 	 * @param callId
-	 * @return Cursor the caller of this method has to close the cursor if a
-	 *         cursor is returned
+	 * @return Cursor the caller of this method has to close the cursor if a cursor is returned
 	 */
 	private Cursor getIPCallData(String columnName, String callId) {
-		String[] projection = new String[] {
-			columnName
-		};
+		String[] projection = new String[] { columnName };
 		Cursor cursor = null;
 		try {
 			cursor = mLocalContentResolver.query(
@@ -101,14 +98,15 @@ public class IPCallHistory {
 	/**
 	 * Create instance
 	 * 
-	 * @param localContentResolver Local content resolver
+	 * @param localContentResolver
+	 *            Local content resolver
 	 */
 	public static synchronized void createInstance(LocalContentResolver localContentResolver) {
 		if (instance == null) {
 			instance = new IPCallHistory(localContentResolver);
 		}
 	}
-	
+
 	/**
 	 * Returns instance
 	 * 
@@ -117,38 +115,46 @@ public class IPCallHistory {
 	public static IPCallHistory getInstance() {
 		return instance;
 	}
-	
+
 	/**
-     * Constructor
-     * 
-     * @param localContentResolver Local content resolver
-     */
+	 * Constructor
+	 * 
+	 * @param localContentResolver
+	 *            Local content resolver
+	 */
 	private IPCallHistory(LocalContentResolver localContentResolver) {
 		super();
 		mLocalContentResolver = localContentResolver;
 	}
-	
+
 	/**
 	 * Add a new entry in the call history
 	 * 
-	 * @param callId Call ID
-	 * @param contact Remote contact Id
-	 * @param direction Direction 
-	 * @param audiocontent Audio content
-	 * @param videocontent Video content
-	 * @param state Call state
-	 * @param  Reason code
+	 * @param callId
+	 *            Call ID
+	 * @param contact
+	 *            Remote contact Id
+	 * @param direction
+	 *            Direction
+	 * @param audiocontent
+	 *            Audio content
+	 * @param videocontent
+	 *            Video content
+	 * @param state
+	 *            Call state
+	 * @param Reason
+	 *            code
 	 */
-	public Uri addCall(String callId, ContactId contact, Direction direction, AudioContent audiocontent,
-			VideoContent videocontent, int state, int reasonCode) {
-		if(logger.isActivated()){
+	public Uri addCall(String callId, ContactId contact, Direction direction,
+			AudioContent audiocontent, VideoContent videocontent, int state, int reasonCode) {
+		if (logger.isActivated()) {
 			logger.debug(new StringBuilder("Add new call entry for contact ").append(contact)
 					.append(": call=").append(callId).append(", state=").append(state)
 					.append(", reasonCode =").append(reasonCode).toString());
 		}
 
 		ContentValues values = new ContentValues();
-		values.put(IPCallData.KEY_CALL_ID, callId );
+		values.put(IPCallData.KEY_CALL_ID, callId);
 		values.put(IPCallData.KEY_CONTACT, contact.toString());
 		values.put(IPCallData.KEY_DIRECTION, direction.toInt());
 		values.put(IPCallData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
@@ -168,9 +174,12 @@ public class IPCallHistory {
 	/**
 	 * Set the call state and reason code
 	 * 
-	 * @param callId Call ID
-	 * @param state New state
-	 * @param reasonCode Reason code
+	 * @param callId
+	 *            Call ID
+	 * @param state
+	 *            New state
+	 * @param reasonCode
+	 *            Reason code
 	 */
 	public void setCallStateAndReasonCode(String callId, int state, int reasonCode) {
 		if (logger.isActivated()) {
@@ -178,12 +187,12 @@ public class IPCallHistory {
 					.append(" state=").append(state).append(", reasonCode=").append(reasonCode)
 					.toString());
 		}
-		
+
 		ContentValues values = new ContentValues();
 		values.put(IPCallData.KEY_STATE, state);
 		values.put(IPCallData.KEY_REASON_CODE, reasonCode);
-		mLocalContentResolver.update(Uri.withAppendedPath(IPCallLog.CONTENT_URI, callId),
-				values, null, null);
+		mLocalContentResolver.update(Uri.withAppendedPath(IPCallLog.CONTENT_URI, callId), values,
+				null, null);
 	}
 
 	/**
@@ -223,8 +232,7 @@ public class IPCallHistory {
 	 * Get IPCall session info from its unique Id
 	 * 
 	 * @param callId
-	 * @return Cursor the caller of this method has to close the cursor if a
-	 *         cursor is returned
+	 * @return Cursor the caller of this method has to close the cursor if a cursor is returned
 	 */
 	public Cursor getCacheableIPCallData(String callId) {
 		Cursor cursor = null;

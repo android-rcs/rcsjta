@@ -33,172 +33,181 @@ import java.util.StringTokenizer;
  */
 public class Geoloc implements Parcelable, Serializable {
 
-    private static final long serialVersionUID = 0L;
+	private static final long serialVersionUID = 0L;
 
-    private final String mLabel;
+	private final String mLabel;
 
-    private final double mLatitude;
+	private final double mLatitude;
 
-    private final double mLongitude;
+	private final double mLongitude;
 
-    private final long mExpiration;
+	private final long mExpiration;
 
-    /**
-     * Accuracy (in meters)
-     */
-    private final float mAccuracy;
+	/**
+	 * Accuracy (in meters)
+	 */
+	private final float mAccuracy;
 
-    /**
-     * Constructor
-     * 
-     * @param label Label
-     * @param latitude Latitude
-     * @param longitude Longitude
-     * @param expiration Expiration date
-     * @param accuracy Accuracy
-     */
-    public Geoloc(String label, double latitude, double longitude, long expiration, float accuracy) {
-        mLabel = label;
-        mLatitude = latitude;
-        mLongitude = longitude;
-        mExpiration = expiration;
-        mAccuracy = accuracy;
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param label
+	 *            Label
+	 * @param latitude
+	 *            Latitude
+	 * @param longitude
+	 *            Longitude
+	 * @param expiration
+	 *            Expiration date
+	 * @param accuracy
+	 *            Accuracy
+	 */
+	public Geoloc(String label, double latitude, double longitude, long expiration, float accuracy) {
+		mLabel = label;
+		mLatitude = latitude;
+		mLongitude = longitude;
+		mExpiration = expiration;
+		mAccuracy = accuracy;
+	}
 
-    /**
-     * Constructor: returns a Geoloc instance as parsed from the GEOLOC field in
-     * the GeolocSharingLog provider or the CONTENT field of a GelocMessage in
-     * the ChatLog.Message provider.
-     * 
-     * @param geoloc Provider geoloc format
-     */
-    public Geoloc(String geoloc) {
-        StringTokenizer items = new StringTokenizer(geoloc, ",");
-        if (items.countTokens() > 4) {
-            mLabel = items.nextToken();
-        } else {
-            mLabel = null;
-        }
-        mLatitude = Double.valueOf(items.nextToken());
-        mLongitude = Double.valueOf(items.nextToken());
-        mExpiration = Long.valueOf(items.nextToken());
-        mAccuracy = Float.valueOf(items.nextToken());
-    }
+	/**
+	 * Constructor: returns a Geoloc instance as parsed from the GEOLOC field in the
+	 * GeolocSharingLog provider or the CONTENT field of a GelocMessage in the ChatLog.Message
+	 * provider.
+	 * 
+	 * @param geoloc
+	 *            Provider geoloc format
+	 */
+	public Geoloc(String geoloc) {
+		StringTokenizer items = new StringTokenizer(geoloc, ",");
+		if (items.countTokens() > 4) {
+			mLabel = items.nextToken();
+		} else {
+			mLabel = null;
+		}
+		mLatitude = Double.valueOf(items.nextToken());
+		mLongitude = Double.valueOf(items.nextToken());
+		mExpiration = Long.valueOf(items.nextToken());
+		mAccuracy = Float.valueOf(items.nextToken());
+	}
 
-    /**
-     * Constructor
-     * 
-     * @param source Parcelable source
-     * @hide
-     */
-    public Geoloc(Parcel source) {
-        mLabel = source.readString();
-        mLatitude = source.readDouble();
-        mLongitude = source.readDouble();
-        mExpiration = source.readLong();
-        mAccuracy = source.readFloat();
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param source
+	 *            Parcelable source
+	 * @hide
+	 */
+	public Geoloc(Parcel source) {
+		mLabel = source.readString();
+		mLatitude = source.readDouble();
+		mLongitude = source.readDouble();
+		mExpiration = source.readLong();
+		mAccuracy = source.readFloat();
+	}
 
-    /**
-     * Describe the kinds of special objects contained in this Parcelable's
-     * marshalled representation.
-     * 
-     * @return Integer
-     * @hide
-     */
-    public int describeContents() {
-        return 0;
-    }
+	/**
+	 * Describe the kinds of special objects contained in this Parcelable's marshalled
+	 * representation.
+	 * 
+	 * @return Integer
+	 * @hide
+	 */
+	public int describeContents() {
+		return 0;
+	}
 
-    /**
-     * Write parcelable object.
-     * 
-     * @param dest The Parcel in which the object should be written
-     * @param flags Additional flags about how the object should be written
-     * @hide
-     */
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mLabel);
-        dest.writeDouble(mLatitude);
-        dest.writeDouble(mLongitude);
-        dest.writeLong(mExpiration);
-        dest.writeFloat(mAccuracy);
-    }
+	/**
+	 * Write parcelable object.
+	 * 
+	 * @param dest
+	 *            The Parcel in which the object should be written
+	 * @param flags
+	 *            Additional flags about how the object should be written
+	 * @hide
+	 */
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(mLabel);
+		dest.writeDouble(mLatitude);
+		dest.writeDouble(mLongitude);
+		dest.writeLong(mExpiration);
+		dest.writeFloat(mAccuracy);
+	}
 
-    /**
-     * Parcelable creator.
-     * 
-     * @hide
-     */
-    public static final Parcelable.Creator<Geoloc> CREATOR = new Parcelable.Creator<Geoloc>() {
-        public Geoloc createFromParcel(Parcel source) {
-            return new Geoloc(source);
-        }
+	/**
+	 * Parcelable creator.
+	 * 
+	 * @hide
+	 */
+	public static final Parcelable.Creator<Geoloc> CREATOR = new Parcelable.Creator<Geoloc>() {
+		public Geoloc createFromParcel(Parcel source) {
+			return new Geoloc(source);
+		}
 
-        public Geoloc[] newArray(int size) {
-            return new Geoloc[size];
-        }
-    };
+		public Geoloc[] newArray(int size) {
+			return new Geoloc[size];
+		}
+	};
 
-    /**
-     * Returns the label.
-     * 
-     * @return Label
-     */
-    public String getLabel() {
-        return mLabel;
-    }
+	/**
+	 * Returns the label.
+	 * 
+	 * @return Label
+	 */
+	public String getLabel() {
+		return mLabel;
+	}
 
-    /**
-     * Returns the latitude.
-     * 
-     * @return Latitude
-     */
-    public double getLatitude() {
-        return mLatitude;
-    }
+	/**
+	 * Returns the latitude.
+	 * 
+	 * @return Latitude
+	 */
+	public double getLatitude() {
+		return mLatitude;
+	}
 
-    /**
-     * Returns the longitude.
-     * 
-     * @return Longitude
-     */
-    public double getLongitude() {
-        return mLongitude;
-    }
+	/**
+	 * Returns the longitude.
+	 * 
+	 * @return Longitude
+	 */
+	public double getLongitude() {
+		return mLongitude;
+	}
 
-    /**
-     * Returns the expiration date of the geoloc.
-     * 
-     * @return Expiration date. 0 means no expiration date has been defined.
-     */
-    public long getExpiration() {
-        return mExpiration;
-    }
+	/**
+	 * Returns the expiration date of the geoloc.
+	 * 
+	 * @return Expiration date. 0 means no expiration date has been defined.
+	 */
+	public long getExpiration() {
+		return mExpiration;
+	}
 
-    /**
-     * Returns the accuracy
-     * 
-     * @return Accuracy in meters. 0 means no accuracy has been defined.
-     */
-    public float getAccuracy() {
-        return mAccuracy;
-    }
+	/**
+	 * Returns the accuracy
+	 * 
+	 * @return Accuracy in meters. 0 means no accuracy has been defined.
+	 */
+	public float getAccuracy() {
+		return mAccuracy;
+	}
 
-    /**
-     * Returns the geoloc in provider format.
-     * 
-     * @return String
-     */
-    @Override
-    public String toString() {
-        StringBuilder providerContent;
-        if (mLabel == null) {
-            providerContent = new StringBuilder();
-        } else {
-            providerContent = new StringBuilder(mLabel);
-        }
-        return providerContent.append(",").append(mLatitude).append(",").append(mLongitude)
-                .append(",").append(mExpiration).append(",").append(mAccuracy).toString();
-    }
+	/**
+	 * Returns the geoloc in provider format.
+	 * 
+	 * @return String
+	 */
+	@Override
+	public String toString() {
+		StringBuilder providerContent;
+		if (mLabel == null) {
+			providerContent = new StringBuilder();
+		} else {
+			providerContent = new StringBuilder(mLabel);
+		}
+		return providerContent.append(",").append(mLatitude).append(",").append(mLongitude)
+				.append(",").append(mExpiration).append(",").append(mAccuracy).toString();
+	}
 }

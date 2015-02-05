@@ -15,26 +15,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.utils;
 
 public class LogUtils {
 
-	/**
-	 * Flag {@code isActive} to disable or enable log
-	 */
-	public static final boolean isActive = true;
+    /**
+     * Flag {@code isActive} to disable or enable log
+     */
+    public static final boolean isActive = true;
 
-	/**
-	 * Utility routine to forge log tag of the RI client application
-	 * 
-	 * @param classname
-	 *            the class name
-	 * @return the log tag
-	 */
-	public static String getTag(final String classname) {
-		StringBuilder sb = new StringBuilder("[RI][");
-		sb.append(classname);
-		sb.append("]");
-		return sb.toString();
-	}
+    /**
+     * Utility routine to forge log tag of the RI client application
+     * 
+     * @param classname the class name
+     * @return the log tag
+     */
+    public static String getTag(final String classname) {
+        StringBuilder sb = new StringBuilder("[RI][");
+        sb.append(classname);
+        sb.append("]");
+        return sb.toString();
+    }
 }

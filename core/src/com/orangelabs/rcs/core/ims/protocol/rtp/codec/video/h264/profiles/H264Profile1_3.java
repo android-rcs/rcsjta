@@ -28,45 +28,39 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.JavaPacketizer;
  */
 public class H264Profile1_3 extends H264Profile {
 
-    /**
-     * Profile name
-     */
-    public static final String PROFILE_NAME = "H264Profile1.3";
+	/**
+	 * Profile name
+	 */
+	public static final String PROFILE_NAME = "H264Profile1.3";
 
-    /**
-     * Profile Id
-     * 42 (Baseline 66), 80 (Constrained Baseline), 0d (level 1.3)
-     */
-    public static final String BASELINE_PROFILE_ID = "42800d";
+	/**
+	 * Profile Id 42 (Baseline 66), 80 (Constrained Baseline), 0d (level 1.3)
+	 */
+	public static final String BASELINE_PROFILE_ID = "42800d";
 
-    private static final int BASELINE_PROFILE_BITRATE = 768000;
+	private static final int BASELINE_PROFILE_BITRATE = 768000;
 
-//    private static final int HIGH_PROFILE_BITRATE = 960000;
+	// private static final int HIGH_PROFILE_BITRATE = 960000;
 
-    private static final String base64CodeSPS = "J0KADZY1BYnI";
+	private static final String base64CodeSPS = "J0KADZY1BYnI";
 
-    private static final String base64CodePPS = "KM4C/IA=";
+	private static final String base64CodePPS = "KM4C/IA=";
 
-    private static String profileParams;
+	private static String profileParams;
 
-    static {
-        profileParams = H264Config.CODEC_PARAM_PROFILEID + "=" + BASELINE_PROFILE_ID + ";" +
-                        H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=1;" +
-                        H264Config.CODEC_PARAM_SPROP_PARAMETER_SETS + "=" +
-                        base64CodeSPS + "," + base64CodePPS + ";";
-    }
+	static {
+		profileParams = H264Config.CODEC_PARAM_PROFILEID + "=" + BASELINE_PROFILE_ID + ";"
+				+ H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=1;"
+				+ H264Config.CODEC_PARAM_SPROP_PARAMETER_SETS + "=" + base64CodeSPS + ","
+				+ base64CodePPS + ";";
+	}
 
-    /**
-     * Constructor
-     */
-    public H264Profile1_3() {
-        super(PROFILE_NAME,
-                H264TypeLevel.LEVEL_1_3,
-                H264TypeProfile.PROFILE_BASELINE,
-                BASELINE_PROFILE_ID,
-                176, 144, 15.0f,
-                BASELINE_PROFILE_BITRATE,
-                JavaPacketizer.H264_MAX_PACKET_FRAME_SIZE,
-                profileParams);
-    }
+	/**
+	 * Constructor
+	 */
+	public H264Profile1_3() {
+		super(PROFILE_NAME, H264TypeLevel.LEVEL_1_3, H264TypeProfile.PROFILE_BASELINE,
+				BASELINE_PROFILE_ID, 176, 144, 15.0f, BASELINE_PROFILE_BITRATE,
+				JavaPacketizer.H264_MAX_PACKET_FRAME_SIZE, profileParams);
+	}
 }

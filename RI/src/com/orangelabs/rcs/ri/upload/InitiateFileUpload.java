@@ -52,58 +52,56 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public class InitiateFileUpload extends Activity {
-	/**
-	 * Activity result constants
-	 */
-	private final static int SELECT_IMAGE = 0;
-	
-	/**
-	 * UI handler
-	 */
-	private final Handler handler = new Handler();
-	
-	/**
-	 * Selected file URI
-	 */
-	private Uri file;
-	
-	/**
-	 * Selected filesize (kB)
-	 */
-	private long filesize = -1;	
-	
-	/**
+    /**
+     * Activity result constants
+     */
+    private final static int SELECT_IMAGE = 0;
+
+    /**
+     * UI handler
+     */
+    private final Handler handler = new Handler();
+
+    /**
+     * Selected file URI
+     */
+    private Uri file;
+
+    /**
+     * Selected filesize (kB)
+     */
+    private long filesize = -1;
+
+    /**
      * File upload session
      */
     private FileUpload upload;
-    
-	
-	/**
+
+    /**
      * File upload Id
      */
     private String uploadId;
-    
+
     /**
-	 * A locker to exit only once
-	 */
-	private LockAccess mExitOnce = new LockAccess();
-	
-   	/**
-	 * API connection manager
-	 */
-	private ApiConnectionManager mCnxManager;
-	
-    
+     * A locker to exit only once
+     */
+    private LockAccess mExitOnce = new LockAccess();
+
+    /**
+     * API connection manager
+     */
+    private ApiConnectionManager mCnxManager;
+
     /**
      * File upload listener
      */
-    private MyFileUploadListener uploadListener = new MyFileUploadListener();  
-    
+    private MyFileUploadListener uploadListener = new MyFileUploadListener();
+
     /**
-   	 * The log tag for this class
-   	 */
-   	private static final String LOGTAG = LogUtils.getTag(InitiateFileUpload.class.getSimpleName());
-    
+     * The log tag for this class
+     */
+    private static final String LOGTAG = LogUtils.getTag(InitiateFileUpload.class.getSimpleName());
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,7 +109,7 @@ public class InitiateFileUpload extends Activity {
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.fileupload_initiate);
-        
+
         // Set buttons callback
         Button uploadBtn = (Button)findViewById(R.id.upload_btn);
         uploadBtn.setOnClickListener(btnUploadListener);
@@ -122,112 +120,117 @@ public class InitiateFileUpload extends Activity {
         Button selectBtn = (Button)findViewById(R.id.select_btn);
         selectBtn.setOnClickListener(btnSelectListener);
 
-		// Register to API connection manager
-		mCnxManager = ApiConnectionManager.getInstance(this);
-		if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), mExitOnce);
-			return;
-		}
-		mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.FILE_UPLOAD);
-		try {
-			// Add upload listener
-			mCnxManager.getFileUploadApi().addEventListener(uploadListener);
-		} catch (RcsServiceNotAvailableException e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), mExitOnce, e);
-		} catch (RcsServiceException e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
-		}
-    }
-    
-    @Override
-    public void onDestroy() {
-    	super.onDestroy();
-    	if (mCnxManager == null) {
-			return;
-		}
-		mCnxManager.stopMonitorServices(this);
-        // Remove upload listener
-        if (mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
-        	try {
-        		mCnxManager.getFileUploadApi().removeEventListener(uploadListener);
-        	} catch(Exception e) {
-        		if (LogUtils.isActive) {
-					Log.e(LOGTAG, "Failed to remove listener", e);
-				}
-        	}
+        // Register to API connection manager
+        mCnxManager = ApiConnectionManager.getInstance(this);
+        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
+            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
+                    mExitOnce);
+            return;
+        }
+        mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.FILE_UPLOAD);
+        try {
+            // Add upload listener
+            mCnxManager.getFileUploadApi().addEventListener(uploadListener);
+        } catch (RcsServiceNotAvailableException e) {
+            Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), mExitOnce, e);
+        } catch (RcsServiceException e) {
+            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
         }
     }
-    
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mCnxManager == null) {
+            return;
+        }
+        mCnxManager.stopMonitorServices(this);
+        // Remove upload listener
+        if (mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
+            try {
+                mCnxManager.getFileUploadApi().removeEventListener(uploadListener);
+            } catch (Exception e) {
+                if (LogUtils.isActive) {
+                    Log.e(LOGTAG, "Failed to remove listener", e);
+                }
+            }
+        }
+    }
+
     /**
      * Upload button listener
      */
     private OnClickListener btnUploadListener = new OnClickListener() {
         public void onClick(View v) {
-        	try {
-        		// Check max size
-            	long maxSize = 0;
-            	try {
-            		maxSize = mCnxManager.getFileUploadApi().getConfiguration().getMaxSize();
-            		if (LogUtils.isActive) {
-    					Log.d(LOGTAG, "FileUpload max size=".concat(Long.valueOf(maxSize).toString()));
-    				}
-            	} catch(Exception e) {
-            		e.printStackTrace();
-            	}
+            try {
+                // Check max size
+                long maxSize = 0;
+                try {
+                    maxSize = mCnxManager.getFileUploadApi().getConfiguration().getMaxSize();
+                    if (LogUtils.isActive) {
+                        Log.d(LOGTAG,
+                                "FileUpload max size=".concat(Long.valueOf(maxSize).toString()));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 if ((maxSize > 0) && (filesize >= maxSize)) {
-    				// Display an error
-                	Utils.showMessage(InitiateFileUpload.this, getString(R.string.label_upload_max_size, maxSize));
-                	return;
-                	
+                    // Display an error
+                    Utils.showMessage(InitiateFileUpload.this,
+                            getString(R.string.label_upload_max_size, maxSize));
+                    return;
+
                 }
 
                 // Get thumbnail option
-        		CheckBox ftThumb = (CheckBox) findViewById(R.id.file_thumb);
-        		boolean thumbnail = ftThumb.isChecked();
-        		
-            	// Initiate upload
-        		upload = mCnxManager.getFileUploadApi().uploadFile(file, thumbnail);
-        		uploadId = upload.getUploadId();
-        		
+                CheckBox ftThumb = (CheckBox)findViewById(R.id.file_thumb);
+                boolean thumbnail = ftThumb.isChecked();
+
+                // Initiate upload
+                upload = mCnxManager.getFileUploadApi().uploadFile(file, thumbnail);
+                uploadId = upload.getUploadId();
+
                 // Hide buttons
                 Button uploadBtn = (Button)findViewById(R.id.upload_btn);
                 uploadBtn.setVisibility(View.GONE);
                 Button selectBtn = (Button)findViewById(R.id.select_btn);
                 selectBtn.setVisibility(View.GONE);
-        	} catch(Exception e) {
-				Utils.showMessageAndExit(InitiateFileUpload.this, getString(R.string.label_upload_failed), mExitOnce, e);
-        	}
+            } catch (Exception e) {
+                Utils.showMessageAndExit(InitiateFileUpload.this,
+                        getString(R.string.label_upload_failed), mExitOnce, e);
+            }
         }
     };
-    
+
     /**
      * Select file button listener
      */
     private OnClickListener btnSelectListener = new OnClickListener() {
-		public void onClick(View v) {
-			FileUtils.openFile(InitiateFileUpload.this, "image/*", SELECT_IMAGE);
-		}
+        public void onClick(View v) {
+            FileUtils.openFile(InitiateFileUpload.this, "image/*", SELECT_IMAGE);
+        }
     };
-    
+
     /**
      * Show uploaded file button listener
      */
     private OnClickListener btnShowListener = new OnClickListener() {
         public void onClick(View v) {
-        	// Show upload info
-        	try {
-        		Intent intent = new Intent(Intent.ACTION_VIEW);
-        		String filename = upload.getUploadInfo().getFile().toString() + "/" + upload.getUploadInfo().getFileName();
-        		intent.setData(Uri.parse(filename));
-        		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        		startActivity(intent);
-        	} catch(Exception e) {
-        		e.printStackTrace();
-        		Utils.showMessage(InitiateFileUpload.this, getString(R.string.label_upload_failed));
-        	}
+            // Show upload info
+            try {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                String filename = upload.getUploadInfo().getFile().toString() + "/"
+                        + upload.getUploadInfo().getFileName();
+                intent.setData(Uri.parse(filename));
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Utils.showMessage(InitiateFileUpload.this, getString(R.string.label_upload_failed));
+            }
         }
-    };    
-	
+    };
+
     /**
      * On activity result
      * 
@@ -235,95 +238,93 @@ public class InitiateFileUpload extends Activity {
      * @param resultCode Result code
      * @param data Data
      */
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (resultCode != RESULT_OK || (data == null) || (data.getData() == null)) {
-			return;
-		}
-		file = data.getData();
-		TextView uriEdit = (TextView) findViewById(R.id.uri);
-		Button uploadBtn = (Button) findViewById(R.id.upload_btn);
-		switch (requestCode) {
-		case SELECT_IMAGE:
-			// Display file info
-			try {
-				// Get image filename and size
-				filesize = FileUtils.getFileSize(this, file) / 1024;
-				uriEdit.setText(filesize + " KB");
-			} catch (Exception e) {
-				filesize = -1;
-				uriEdit.setText("Unknown");
-			}
-			
-			// Enable upload button
-			uploadBtn.setEnabled(true);
-			break;
-		}
-	}
-    
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != RESULT_OK || (data == null) || (data.getData() == null)) {
+            return;
+        }
+        file = data.getData();
+        TextView uriEdit = (TextView)findViewById(R.id.uri);
+        Button uploadBtn = (Button)findViewById(R.id.upload_btn);
+        switch (requestCode) {
+            case SELECT_IMAGE:
+                // Display file info
+                try {
+                    // Get image filename and size
+                    filesize = FileUtils.getFileSize(this, file) / 1024;
+                    uriEdit.setText(filesize + " KB");
+                } catch (Exception e) {
+                    filesize = -1;
+                    uriEdit.setText("Unknown");
+                }
+
+                // Enable upload button
+                uploadBtn.setEnabled(true);
+                break;
+        }
+    }
+
     /**
      * File upload event listener
      */
     private class MyFileUploadListener extends FileUploadListener {
-    	/**
-    	 * Callback called when the upload state changes
-    	 *
-    	 * @param uploadId ID of upload
-    	 * @param state State of upload 
-    	 */
-    	@Override
-    	public void onStateChanged(String uploadId, final int state) {
-			// Discard event if not for current uploadId
-			if (InitiateFileUpload.this.uploadId == null || !InitiateFileUpload.this.uploadId.equals(uploadId)) {
-				return;
-			}
-			handler.post(new Runnable() { 
-				public void run() {
-					TextView statusView = (TextView)findViewById(R.id.progress_status);
-					if (state == FileUpload.State.STARTED) {
-						// Display session status
-						statusView.setText(getString(R.string.label_upload_started));
-					} else
-					if (state == FileUpload.State.FAILED) {
-						// Display sharing status
-	                    Utils.showMessageAndExit(InitiateFileUpload.this,
-							getString(R.string.label_upload_failed));
-					} else
-					if (state == FileUpload.State.ABORTED) {
-						// Display sharing status
-	                    Utils.showMessage(InitiateFileUpload.this,
-							getString(R.string.label_upload_aborted));
-					} else
-					if (state == FileUpload.State.TRANSFERRED) {
-						// Display sharing status
-						statusView.setText(getString(R.string.label_upload_transferred));
-						
-						// Activate show button
-				        Button showBtn = (Button)findViewById(R.id.show_btn);
-				        showBtn.setEnabled(true);
-					}						
-				}
-			});
-    		
-    	}
+        /**
+         * Callback called when the upload state changes
+         *
+         * @param uploadId ID of upload
+         * @param state State of upload
+         */
+        @Override
+        public void onStateChanged(String uploadId, final int state) {
+            // Discard event if not for current uploadId
+            if (InitiateFileUpload.this.uploadId == null
+                    || !InitiateFileUpload.this.uploadId.equals(uploadId)) {
+                return;
+            }
+            handler.post(new Runnable() {
+                public void run() {
+                    TextView statusView = (TextView)findViewById(R.id.progress_status);
+                    if (state == FileUpload.State.STARTED) {
+                        // Display session status
+                        statusView.setText(getString(R.string.label_upload_started));
+                    } else if (state == FileUpload.State.FAILED) {
+                        // Display sharing status
+                        Utils.showMessageAndExit(InitiateFileUpload.this,
+                                getString(R.string.label_upload_failed));
+                    } else if (state == FileUpload.State.ABORTED) {
+                        // Display sharing status
+                        Utils.showMessage(InitiateFileUpload.this,
+                                getString(R.string.label_upload_aborted));
+                    } else if (state == FileUpload.State.TRANSFERRED) {
+                        // Display sharing status
+                        statusView.setText(getString(R.string.label_upload_transferred));
 
-    	/**
-    	 * Callback called during the upload progress
-    	 *
-    	 * @param sharingId ID of upload
-    	 * @param currentSize Current transferred size in bytes
-    	 * @param totalSize Total size to transfer in bytes
-    	 */
-    	@Override
-    	public void onProgressUpdate(String uploadId, final long currentSize, final long totalSize) {
-			handler.post(new Runnable() { 
-    			public void run() {
-					// Display sharing progress
-    				updateProgressBar(currentSize, totalSize);
-    			}
-    		});
-    	}
+                        // Activate show button
+                        Button showBtn = (Button)findViewById(R.id.show_btn);
+                        showBtn.setEnabled(true);
+                    }
+                }
+            });
+
+        }
+
+        /**
+         * Callback called during the upload progress
+         *
+         * @param sharingId ID of upload
+         * @param currentSize Current transferred size in bytes
+         * @param totalSize Total size to transfer in bytes
+         */
+        @Override
+        public void onProgressUpdate(String uploadId, final long currentSize, final long totalSize) {
+            handler.post(new Runnable() {
+                public void run() {
+                    // Display sharing progress
+                    updateProgressBar(currentSize, totalSize);
+                }
+            });
+        }
     };
-    
+
     /**
      * Show the sharing progress
      * 
@@ -331,51 +332,51 @@ public class InitiateFileUpload extends Activity {
      * @param totalSize Total size to be transferred
      */
     private void updateProgressBar(long currentSize, long totalSize) {
-    	TextView statusView = (TextView)findViewById(R.id.progress_status);
+        TextView statusView = (TextView)findViewById(R.id.progress_status);
         ProgressBar progressBar = (ProgressBar)findViewById(R.id.progress_bar);
-    	
-		String value = "" + Math.min(currentSize/1024, totalSize);
-		if (totalSize != 0) {
-			value += "/" + (totalSize/1024);
-		}
-		value += " Kb";
-		statusView.setText(value);
-	    
-	    if (currentSize != 0) {
-	    	double position = ((double)currentSize / (double)totalSize)*100.0;
-	    	progressBar.setProgress((int)position);
-	    } else {
-	    	progressBar.setProgress(0);
-	    }
+
+        String value = "" + Math.min(currentSize / 1024, totalSize);
+        if (totalSize != 0) {
+            value += "/" + (totalSize / 1024);
+        }
+        value += " Kb";
+        statusView.setText(value);
+
+        if (currentSize != 0) {
+            double position = ((double)currentSize / (double)totalSize) * 100.0;
+            progressBar.setProgress((int)position);
+        } else {
+            progressBar.setProgress(0);
+        }
     }
-    
+
     /**
      * Quit the upload
      */
     private void quitUpload() {
-		// Stop upload
-    	try {
+        // Stop upload
+        try {
             if (upload != null) {
-            	upload.abortUpload();
+                upload.abortUpload();
             }
-    	} catch(Exception e) {
-    		e.printStackTrace();
-    	}
-    	upload = null;
-		
-	    // Exit activity
-		finish();
-    }    
-    
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        upload = null;
+
+        // Exit activity
+        finish();
+    }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
-            	// Quit the upload
-            	quitUpload();
+                // Quit the upload
+                quitUpload();
                 return true;
         }
 
         return super.onKeyDown(keyCode, event);
     }
-}    
+}

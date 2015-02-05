@@ -64,8 +64,10 @@ public class ChunkSender extends Thread {
 	/**
 	 * Constructor
 	 *
-	 * @param connection MSRP connection
-	 * @param stream TCP output stream
+	 * @param connection
+	 *            MSRP connection
+	 * @param stream
+	 *            TCP output stream
 	 */
 	public ChunkSender(MsrpConnection connection, OutputStream stream) {
 		this.connection = connection;
@@ -89,7 +91,8 @@ public class ChunkSender extends Thread {
 		buffer.unblockRead();
 		try {
 			interrupt();
-		} catch(Exception e) {}
+		} catch (Exception e) {
+		}
 		if (logger.isActivated()) {
 			logger.debug("Sender is terminated");
 		}
@@ -106,11 +109,10 @@ public class ChunkSender extends Thread {
 
 			// Read chunk to be sent
 			byte chunk[] = null;
-			while ((chunk = (byte[])buffer.getMessage()) != null) {
+			while ((chunk = (byte[]) buffer.getMessage()) != null) {
 				// Write chunk to the output stream
 				if (MsrpConnection.MSRP_TRACE_ENABLED) {
-					System.out.println(">>> Send MSRP message:\n"
-							+ new String(chunk, UTF8));
+					System.out.println(">>> Send MSRP message:\n" + new String(chunk, UTF8));
 				}
 				writeData(chunk);
 			}
@@ -126,7 +128,8 @@ public class ChunkSender extends Thread {
 
 				// Notify the msrp session listener that an error has occured
 				// Changed by Deutsche Telekom
-				connection.getSession().getMsrpEventListener().msrpTransferError(null, e.getMessage(), TypeMsrpChunk.Unknown);
+				connection.getSession().getMsrpEventListener()
+						.msrpTransferError(null, e.getMessage(), TypeMsrpChunk.Unknown);
 			}
 		}
 	}
@@ -134,7 +137,8 @@ public class ChunkSender extends Thread {
 	/**
 	 * Send a chunk
 	 *
-	 * @param chunk New chunk
+	 * @param chunk
+	 *            New chunk
 	 * @throws IOException
 	 */
 	public void sendChunk(byte chunk[]) throws IOException {
@@ -148,13 +152,13 @@ public class ChunkSender extends Thread {
 	/**
 	 * Send a chunk immediately
 	 *
-	 * @param chunk New chunk
+	 * @param chunk
+	 *            New chunk
 	 * @throws IOException
 	 */
 	public void sendChunkImmediately(byte chunk[]) throws IOException {
 		if (MsrpConnection.MSRP_TRACE_ENABLED) {
-			System.out.println(">>> Send MSRP message:\n"
-					+ new String(chunk, UTF8));
+			System.out.println(">>> Send MSRP message:\n" + new String(chunk, UTF8));
 		}
 		writeData(chunk);
 	}
@@ -162,7 +166,8 @@ public class ChunkSender extends Thread {
 	/**
 	 * Write data to the stream
 	 *
-	 * @param chunk Data chunk
+	 * @param chunk
+	 *            Data chunk
 	 * @throws IOException
 	 */
 	private synchronized void writeData(byte chunk[]) throws IOException {

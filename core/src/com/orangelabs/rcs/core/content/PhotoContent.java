@@ -24,7 +24,6 @@ package com.orangelabs.rcs.core.content;
 
 import android.net.Uri;
 
-
 /**
  * Photo content
  * 
@@ -35,10 +34,14 @@ public class PhotoContent extends MmContent {
 	/**
 	 * Constructor
 	 *
-	 * @param photoFile URI
-	 * @param encoding Encoding
-	 * @param size Size
-	 * @param fileName Filename
+	 * @param photoFile
+	 *            URI
+	 * @param encoding
+	 *            Encoding
+	 * @param size
+	 *            Size
+	 * @param fileName
+	 *            Filename
 	 */
 	public PhotoContent(Uri photoFile, String encoding, long size, String fileName) {
 		super(photoFile, encoding, size, fileName);

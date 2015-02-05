@@ -25,11 +25,12 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.media;
  */
 public class MediaException extends java.lang.Exception {
 	static final long serialVersionUID = 1L;
-	
+
 	/**
 	 * Constructor
 	 *
-	 * @param error Error message
+	 * @param error
+	 *            Error message
 	 */
 	public MediaException(String error) {
 		super(error);

@@ -59,62 +59,61 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public abstract class SendFile extends Activity implements ISendFile {
 
-	/**
-	 * Activity result constants
-	 */
-	private final static int SELECT_IMAGE = 0;
-	
-	/**
-	 * UI handler
-	 */
-	protected final Handler handler = new Handler();
+    /**
+     * Activity result constants
+     */
+    private final static int SELECT_IMAGE = 0;
 
-	/**
-	 * Transfer Id
-	 */
-	protected String mTransferId;
-	
-	/**
-	 * Selected filename
-	 */
-	protected String filename;
+    /**
+     * UI handler
+     */
+    protected final Handler handler = new Handler();
 
-	/**
-	 * Selected fileUri
-	 */
-	private Uri file;
-	
-	/**
-	 * Selected filesize (kB)
-	 */
-	protected long filesize = -1;
-	
-   	/**
-	 * API connection manager
-	 */
-	protected ApiConnectionManager mCnxManager;
-    
+    /**
+     * Transfer Id
+     */
+    protected String mTransferId;
+
+    /**
+     * Selected filename
+     */
+    protected String filename;
+
+    /**
+     * Selected fileUri
+     */
+    private Uri file;
+
+    /**
+     * Selected filesize (kB)
+     */
+    protected long filesize = -1;
+
+    /**
+     * API connection manager
+     */
+    protected ApiConnectionManager mCnxManager;
+
     /**
      * File transfer
      */
     protected FileTransfer fileTransfer;
-    
+
     /**
-   	 * The log tag for this class
-   	 */
-   	private static final String LOGTAG = LogUtils.getTag(SendFile.class.getSimpleName());
-    
+     * The log tag for this class
+     */
+    private static final String LOGTAG = LogUtils.getTag(SendFile.class.getSimpleName());
+
     /**
      * Progress dialog
      */
     private Dialog progressDialog;
-      
-    /**
-	 * A locker to exit only once
-	 */
-	protected LockAccess mExitOnce = new LockAccess();
 
-    
+    /**
+     * A locker to exit only once
+     */
+    protected LockAccess mExitOnce = new LockAccess();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -122,125 +121,131 @@ public abstract class SendFile extends Activity implements ISendFile {
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.chat_send_file);
-        
+
         // Set buttons callback
         Button inviteBtn = (Button)findViewById(R.id.invite_btn);
         inviteBtn.setOnClickListener(btnInviteListener);
-    	inviteBtn.setEnabled(false);
+        inviteBtn.setEnabled(false);
         Button selectBtn = (Button)findViewById(R.id.select_btn);
         selectBtn.setOnClickListener(btnSelectListener);
-               
-		// Register to API connection manager
-		mCnxManager = ApiConnectionManager.getInstance(this);
-		if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACTS)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), mExitOnce);
-		} else {
-			mCnxManager
-					.startMonitorServices(this, mExitOnce, RcsServiceName.CHAT, RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACTS);
-			FileTransferService ftApi = mCnxManager.getFileTransferApi();
-			try {
-				addFileTransferEventListener(ftApi);
-			} catch (Exception e) {
-				Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
-			}
-		}
+
+        // Register to API connection manager
+        mCnxManager = ApiConnectionManager.getInstance(this);
+        if (mCnxManager == null
+                || !mCnxManager.isServiceConnected(RcsServiceName.CHAT,
+                        RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACTS)) {
+            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
+                    mExitOnce);
+        } else {
+            mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.CHAT,
+                    RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACTS);
+            FileTransferService ftApi = mCnxManager.getFileTransferApi();
+            try {
+                addFileTransferEventListener(ftApi);
+            } catch (Exception e) {
+                Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+            }
+        }
     }
-    
+
     @Override
     public void onDestroy() {
-    	super.onDestroy();
-		if (mCnxManager == null) {
-			return;
-		}
-		mCnxManager.stopMonitorServices(this);
-		if (mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
-			// Remove file listener
-			try {
-				removeFileTransferEventListener(mCnxManager.getFileTransferApi());
-			} catch (RcsServiceException e) {
-			}
-		}
+        super.onDestroy();
+        if (mCnxManager == null) {
+            return;
+        }
+        mCnxManager.stopMonitorServices(this);
+        if (mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
+            // Remove file listener
+            try {
+                removeFileTransferEventListener(mCnxManager.getFileTransferApi());
+            } catch (RcsServiceException e) {
+            }
+        }
     }
-    
+
     /**
      * Invite button listener
      */
     private OnClickListener btnInviteListener = new OnClickListener() {
         public void onClick(View v) {
-        	long warnSize = 0;
-        	try {
-        		warnSize = mCnxManager.getFileTransferApi().getConfiguration().getWarnSize();
-        	} catch(Exception e) {
-        		e.printStackTrace();
-        	}
-        	
-            if ((warnSize > 0) && (filesize >= warnSize)) {
-				// Display a warning message
-            	AlertDialog.Builder builder = new AlertDialog.Builder(SendFile.this);
-            	builder.setMessage(getString(R.string.label_sharing_warn_size, filesize));
-            	builder.setCancelable(false);
-            	builder.setPositiveButton(getString(R.string.label_yes), new DialogInterface.OnClickListener() {
-                	public void onClick(DialogInterface dialog, int position) {
-                		initiateTransfer();
-                	}
-        		});	                    			
-            	builder.setNegativeButton(getString(R.string.label_no), null);
-                AlertDialog alert = builder.create();
-            	alert.show();
-            } else {
-            	initiateTransfer();
+            long warnSize = 0;
+            try {
+                warnSize = mCnxManager.getFileTransferApi().getConfiguration().getWarnSize();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-    	}
-	};
-	
-	/**
-	 * Initiate transfer
-	 */
+
+            if ((warnSize > 0) && (filesize >= warnSize)) {
+                // Display a warning message
+                AlertDialog.Builder builder = new AlertDialog.Builder(SendFile.this);
+                builder.setMessage(getString(R.string.label_sharing_warn_size, filesize));
+                builder.setCancelable(false);
+                builder.setPositiveButton(getString(R.string.label_yes),
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int position) {
+                                initiateTransfer();
+                            }
+                        });
+                builder.setNegativeButton(getString(R.string.label_no), null);
+                AlertDialog alert = builder.create();
+                alert.show();
+            } else {
+                initiateTransfer();
+            }
+        }
+    };
+
+    /**
+     * Initiate transfer
+     */
     private void initiateTransfer() {
-    	// Check if the service is available
-		boolean registered = false;
-		try {
-			registered = mCnxManager.getFileTransferApi().isServiceRegistered();
-		} catch (Exception e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
-			return;
-		}
-		if (!registered) {
-			Utils.showMessage(SendFile.this, getString(R.string.label_service_not_available));
-			return;
-		}
+        // Check if the service is available
+        boolean registered = false;
+        try {
+            registered = mCnxManager.getFileTransferApi().isServiceRegistered();
+        } catch (Exception e) {
+            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+            return;
+        }
+        if (!registered) {
+            Utils.showMessage(SendFile.this, getString(R.string.label_service_not_available));
+            return;
+        }
 
-		// Get thumbnail option
-		CheckBox ftThumb = (CheckBox) findViewById(R.id.ft_thumb);
-		if (transferFile(file, ftThumb.isChecked())) {
+        // Get thumbnail option
+        CheckBox ftThumb = (CheckBox)findViewById(R.id.ft_thumb);
+        if (transferFile(file, ftThumb.isChecked())) {
 
-			// Display a progress dialog
-			progressDialog = Utils.showProgressDialog(SendFile.this, getString(R.string.label_command_in_progress));
-			progressDialog.setOnCancelListener(new OnCancelListener() {
-				public void onCancel(DialogInterface dialog) {
-					Toast.makeText(SendFile.this, getString(R.string.label_transfer_cancelled), Toast.LENGTH_SHORT).show();
-					quitSession();
-				}
-			});
+            // Display a progress dialog
+            progressDialog = Utils.showProgressDialog(SendFile.this,
+                    getString(R.string.label_command_in_progress));
+            progressDialog.setOnCancelListener(new OnCancelListener() {
+                public void onCancel(DialogInterface dialog) {
+                    Toast.makeText(SendFile.this, getString(R.string.label_transfer_cancelled),
+                            Toast.LENGTH_SHORT).show();
+                    quitSession();
+                }
+            });
 
-			// Hide buttons
-			Button inviteBtn = (Button) findViewById(R.id.invite_btn);
-			inviteBtn.setVisibility(View.INVISIBLE);
-			Button selectBtn = (Button) findViewById(R.id.select_btn);
-			selectBtn.setVisibility(View.INVISIBLE);
-			ftThumb.setVisibility(View.INVISIBLE);
-		}
+            // Hide buttons
+            Button inviteBtn = (Button)findViewById(R.id.invite_btn);
+            inviteBtn.setVisibility(View.INVISIBLE);
+            Button selectBtn = (Button)findViewById(R.id.select_btn);
+            selectBtn.setVisibility(View.INVISIBLE);
+            ftThumb.setVisibility(View.INVISIBLE);
+        }
     }
-       
+
     /**
      * Select file button listener
      */
-	private OnClickListener btnSelectListener = new OnClickListener() {
-		public void onClick(View v) {
-			FileUtils.openFile(SendFile.this, "image/*", SELECT_IMAGE);
-		}
-	};
-    
+    private OnClickListener btnSelectListener = new OnClickListener() {
+        public void onClick(View v) {
+            FileUtils.openFile(SendFile.this, "image/*", SELECT_IMAGE);
+        }
+    };
+
     /**
      * On activity result
      * 
@@ -248,44 +253,44 @@ public abstract class SendFile extends Activity implements ISendFile {
      * @param resultCode Result code
      * @param data Data
      */
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (resultCode != RESULT_OK) {
-			return;
-		}
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != RESULT_OK) {
+            return;
+        }
 
-		switch (requestCode) {
-		case SELECT_IMAGE:
-			if ((data != null) && (data.getData() != null)) {
-				// Get selected photo URI
-				file = data.getData();
-				// Display the selected filename attribute
-				TextView uriEdit = (TextView) findViewById(R.id.uri);
-				try {
-					filename = FileUtils.getFileName(this, file);
-					filesize = FileUtils.getFileSize(this, file) / 1024;
-					uriEdit.setText(filesize + " KB");
-				} catch (Exception e) {
-					filesize = -1;
-					uriEdit.setText("Unknown");
-				}
-				// Show invite button
-				Button inviteBtn = (Button) findViewById(R.id.invite_btn);
-				inviteBtn.setEnabled(true);
-			}
-			break;
-		}
-	}
+        switch (requestCode) {
+            case SELECT_IMAGE:
+                if ((data != null) && (data.getData() != null)) {
+                    // Get selected photo URI
+                    file = data.getData();
+                    // Display the selected filename attribute
+                    TextView uriEdit = (TextView)findViewById(R.id.uri);
+                    try {
+                        filename = FileUtils.getFileName(this, file);
+                        filesize = FileUtils.getFileSize(this, file) / 1024;
+                        uriEdit.setText(filesize + " KB");
+                    } catch (Exception e) {
+                        filesize = -1;
+                        uriEdit.setText("Unknown");
+                    }
+                    // Show invite button
+                    Button inviteBtn = (Button)findViewById(R.id.invite_btn);
+                    inviteBtn.setEnabled(true);
+                }
+                break;
+        }
+    }
 
-	/**
-	 * Hide progress dialog
-	 */
+    /**
+     * Hide progress dialog
+     */
     public void hideProgressDialog() {
-		if (progressDialog != null && progressDialog.isShowing()) {
-			progressDialog.dismiss();
-			progressDialog = null;
-		}
-    }    
-    
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
+    }
+
     /**
      * Show the transfer progress
      * 
@@ -293,69 +298,69 @@ public abstract class SendFile extends Activity implements ISendFile {
      * @param totalSize Total size to be transferred
      */
     protected void updateProgressBar(long currentSize, long totalSize) {
-    	TextView statusView = (TextView)findViewById(R.id.progress_status);
+        TextView statusView = (TextView)findViewById(R.id.progress_status);
         ProgressBar progressBar = (ProgressBar)findViewById(R.id.progress_bar);
-    	
-		String value = "" + (currentSize/1024);
-		if (totalSize != 0) {
-			value += "/" + (totalSize/1024);
-		}
-		value += " Kb";
-		statusView.setText(value);
-	    
-	    if (currentSize != 0) {
-	    	double position = ((double)currentSize / (double)totalSize)*100.0;
-	    	progressBar.setProgress((int)position);
-	    } else {
-	    	progressBar.setProgress(0);
-	    }
+
+        String value = "" + (currentSize / 1024);
+        if (totalSize != 0) {
+            value += "/" + (totalSize / 1024);
+        }
+        value += " Kb";
+        statusView.setText(value);
+
+        if (currentSize != 0) {
+            double position = ((double)currentSize / (double)totalSize) * 100.0;
+            progressBar.setProgress((int)position);
+        } else {
+            progressBar.setProgress(0);
+        }
     }
 
     /**
      * Quit the session
      */
     private void quitSession() {
-		// Stop session
-    	try {
+        // Stop session
+        try {
             if (fileTransfer != null) {
-            	fileTransfer.abortTransfer();
+                fileTransfer.abortTransfer();
             }
-    	} catch(Exception e) {
-    		e.printStackTrace();
-    	}
-    	fileTransfer = null;
-    	
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        fileTransfer = null;
+
         // Exit activity
-		finish();
-    }    
+        finish();
+    }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
-				// Quit session
-            	quitSession();
+                // Quit session
+                quitSession();
                 return true;
         }
         return super.onKeyDown(keyCode, event);
-    }    
+    }
 
     @Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater=new MenuInflater(getApplicationContext());
-		inflater.inflate(R.menu.menu_ft, menu);
-		return true;
-	}
-    
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = new MenuInflater(getApplicationContext());
+        inflater.inflate(R.menu.menu_ft, menu);
+        return true;
+    }
+
     @Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-			case R.id.menu_close_session:
-				// Quit the session
-				quitSession();
-				break;
-		}
-		return true;
-	}
-    
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_close_session:
+                // Quit the session
+                quitSession();
+                break;
+        }
+        return true;
+    }
+
 }

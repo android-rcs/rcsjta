@@ -39,41 +39,41 @@ import java.util.Map;
  * @author jexa7410
  */
 public abstract class ImsService {
-    /**
-     * Terms & conditions service
-     */
+	/**
+	 * Terms & conditions service
+	 */
 	public static final int TERMS_SERVICE = 0;
 
 	/**
-     * Capability service
-     */
+	 * Capability service
+	 */
 	public static final int CAPABILITY_SERVICE = 1;
 
-    /**
-     * Instant Messaging service
-     */
-	public static final int IM_SERVICE = 2;
-	
 	/**
-     * IP call service
-     */
+	 * Instant Messaging service
+	 */
+	public static final int IM_SERVICE = 2;
+
+	/**
+	 * IP call service
+	 */
 	public static final int IPCALL_SERVICE = 3;
 
-    /**
-     * Richcall service
-     */
+	/**
+	 * Richcall service
+	 */
 	public static final int RICHCALL_SERVICE = 4;
 
-    /**
-     * Presence service
-     */
+	/**
+	 * Presence service
+	 */
 	public static final int PRESENCE_SERVICE = 5;
 
-    /**
-     * SIP service
-     */
+	/**
+	 * SIP service
+	 */
 	public static final int SIP_SERVICE = 6;
-	
+
 	/**
 	 * Activation flag
 	 */
@@ -95,9 +95,9 @@ public abstract class ImsService {
 	private Map<String, ImsServiceSession> mImsServiceSessionCache = new HashMap<String, ImsServiceSession>();
 
 	/**
-     * The logger
-     */
-    private static final Logger logger = Logger.getLogger(ImsService.class.getSimpleName());
+	 * The logger
+	 */
+	private static final Logger logger = Logger.getLogger(ImsService.class.getSimpleName());
 
 	protected final static class SharingDirection {
 
@@ -106,62 +106,63 @@ public abstract class ImsService {
 		public static final int BIDIRECTIONAL = 2;
 	}
 
-    /**
-     * Constructor
-     * 
-     * @param parent IMS module
-     * @param activated Activation flag
-     * @throws CoreException
-     */
+	/**
+	 * Constructor
+	 * 
+	 * @param parent
+	 *            IMS module
+	 * @param activated
+	 *            Activation flag
+	 * @throws CoreException
+	 */
 	public ImsService(ImsModule parent, boolean activated) throws CoreException {
 		this.imsModule = parent;
 		this.activated = activated;
 	}
 
-    /**
-     * Is service activated
-     * 
-     * @return Boolean
-     */
+	/**
+	 * Is service activated
+	 * 
+	 * @return Boolean
+	 */
 	public boolean isActivated() {
 		return activated;
 	}
 
-    /**
-     * Change the activation flag of the service
-     * 
-     * @param activated Activation flag
-     */
+	/**
+	 * Change the activation flag of the service
+	 * 
+	 * @param activated
+	 *            Activation flag
+	 */
 	public void setActivated(boolean activated) {
 		this.activated = activated;
 	}
 
-    /**
-     * Returns the IMS module
-     * 
-     * @return IMS module
-     */
+	/**
+	 * Returns the IMS module
+	 * 
+	 * @return IMS module
+	 */
 	public ImsModule getImsModule() {
 		return imsModule;
 	}
 
 	/*
-	 * This method is by choice not synchronized here since the class
-	 * extending this base-class will need to handle the synchronization
-	 * over a larger scope when calling this method anyway and we would like
-	 * to avoid double locks.
+	 * This method is by choice not synchronized here since the class extending this base-class will
+	 * need to handle the synchronization over a larger scope when calling this method anyway and we
+	 * would like to avoid double locks.
 	 */
-	protected void addImsServiceSession(ImsServiceSession session){
+	protected void addImsServiceSession(ImsServiceSession session) {
 		mImsServiceSessionCache.put(session.getDialogPath().getCallId(), session);
 	}
 
 	/*
-	 * This method is by choice not synchronized here since the class
-	 * extending this base-class will need to handle the synchronization
-	 * over a larger scope when calling this method anyway and we would like
-	 * to avoid double locks.
+	 * This method is by choice not synchronized here since the class extending this base-class will
+	 * need to handle the synchronization over a larger scope when calling this method anyway and we
+	 * would like to avoid double locks.
 	 */
-	protected void removeImsServiceSession(ImsServiceSession session){
+	protected void removeImsServiceSession(ImsServiceSession session) {
 		mImsServiceSessionCache.remove(session.getDialogPath().getCallId());
 	}
 
@@ -175,37 +176,38 @@ public abstract class ImsService {
 		return mImsServiceSessionCache;
 	}
 
-    /**
-     * Is service started
-     * 
-     * @return Boolean
-     */
+	/**
+	 * Is service started
+	 * 
+	 * @return Boolean
+	 */
 	public boolean isServiceStarted() {
 		return started;
 	}
 
-    /**
-     * Set service state
-     * 
-     * @param state State
-     */
+	/**
+	 * Set service state
+	 * 
+	 * @param state
+	 *            State
+	 */
 	public void setServiceStarted(boolean state) {
 		started = state;
 	}
 
 	/**
-     * Start the IMS service
-     */
+	 * Start the IMS service
+	 */
 	public abstract void start();
 
-    /**
-     * Stop the IMS service
-     */
+	/**
+	 * Stop the IMS service
+	 */
 	public abstract void stop();
 
 	/**
-     * Check the IMS service
-     */
+	 * Check the IMS service
+	 */
 	public abstract void check();
 
 	public void abortAllSessions(int imsAbortionReason) {
@@ -216,25 +218,28 @@ public abstract class ImsService {
 		}
 	}
 
-    /**
-     * Send an error response to an invitation before to create a service session
-     *
-     * @param invite Invite request
-	 * @param error Error code
-     */
-    public void sendErrorResponse(SipRequest invite, int error) {
-        try {
-            if (logger.isActivated()) {
-                logger.info("Send error " + error);
-            }
-            SipResponse resp = SipMessageFactory.createResponse(invite, IdGenerator.getIdentifier(), error);
+	/**
+	 * Send an error response to an invitation before to create a service session
+	 *
+	 * @param invite
+	 *            Invite request
+	 * @param error
+	 *            Error code
+	 */
+	public void sendErrorResponse(SipRequest invite, int error) {
+		try {
+			if (logger.isActivated()) {
+				logger.info("Send error " + error);
+			}
+			SipResponse resp = SipMessageFactory.createResponse(invite,
+					IdGenerator.getIdentifier(), error);
 
-            // Send response
-            getImsModule().getSipManager().sendSipResponse(resp);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't send error " + error, e);
-            }
-        }
-    }	
+			// Send response
+			getImsModule().getSipManager().sendSipResponse(resp);
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Can't send error " + error, e);
+			}
+		}
+	}
 }

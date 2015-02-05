@@ -34,19 +34,20 @@ import com.orangelabs.rcs.core.ims.protocol.sdp.MediaDescription;
  */
 public class VideoSdpBuilder {
 
-    /**
-     * Extension attribute name, RFC5285
-     */
-    public static final String ATTRIBUTE_EXTENSION = "extmap";
+	/**
+	 * Extension attribute name, RFC5285
+	 */
+	public static final String ATTRIBUTE_EXTENSION = "extmap";
 
-    /**
-     * Build SDP offer without the orientation extension ordered by the
-     * preferred codec
-     * 
-     * @param supportedCodecs Codecs to create SDP
-     * @param localRtpPort Local RTP port
-     * @return SDP offer
-     */
+	/**
+	 * Build SDP offer without the orientation extension ordered by the preferred codec
+	 * 
+	 * @param supportedCodecs
+	 *            Codecs to create SDP
+	 * @param localRtpPort
+	 *            Local RTP port
+	 * @return SDP offer
+	 */
 	public static String buildSdpOfferWithoutOrientation(VideoCodec[] supportedCodecs,
 			int localRtpPort) {
 		// Create video codec list
@@ -85,29 +86,33 @@ public class VideoSdpBuilder {
 		return result.toString();
 	}
 
-    /**
-     * Build SDP offer without the orientation extension ordered by the
-     * preferred codec
-     * 
-     * @param supportedCodecs Codecs to create SDP
-     * @param localRtpPort Local RTP port
-     * @return SDP offer
-     */
-    public static String buildSdpOfferWithOrientation(VideoCodec[] supportedCodecs, int localRtpPort) {
-        StringBuilder sdp = new StringBuilder(buildSdpOfferWithoutOrientation(supportedCodecs, localRtpPort))
-                .append("a=").append(ATTRIBUTE_EXTENSION).append(':').append(RtpUtils.RTP_DEFAULT_EXTENSION_ID)
-                .append(" ").append(SdpOrientationExtension.VIDEO_ORIENTATION_URI).append(SipUtils.CRLF);
-        return sdp.toString();
-    }
+	/**
+	 * Build SDP offer without the orientation extension ordered by the preferred codec
+	 * 
+	 * @param supportedCodecs
+	 *            Codecs to create SDP
+	 * @param localRtpPort
+	 *            Local RTP port
+	 * @return SDP offer
+	 */
+	public static String buildSdpOfferWithOrientation(VideoCodec[] supportedCodecs, int localRtpPort) {
+		StringBuilder sdp = new StringBuilder(buildSdpOfferWithoutOrientation(supportedCodecs,
+				localRtpPort)).append("a=").append(ATTRIBUTE_EXTENSION).append(':')
+				.append(RtpUtils.RTP_DEFAULT_EXTENSION_ID).append(" ")
+				.append(SdpOrientationExtension.VIDEO_ORIENTATION_URI).append(SipUtils.CRLF);
+		return sdp.toString();
+	}
 
-    /**
-     * Create the SDP part for a given codec
-     *
-     * @param codec Media codec
-     * @param localRtpPort Local RTP port
-     * @return SDP
-     */
-    private static String buildSdpWithoutOrientation(VideoCodec videoCodec, int localRtpPort) {
+	/**
+	 * Create the SDP part for a given codec
+	 *
+	 * @param codec
+	 *            Media codec
+	 * @param localRtpPort
+	 *            Local RTP port
+	 * @return SDP
+	 */
+	private static String buildSdpWithoutOrientation(VideoCodec videoCodec, int localRtpPort) {
 		int payloadType = videoCodec.getPayloadType();
 		StringBuilder sdp = new StringBuilder("m=video ").append(localRtpPort).append(" RTP/AVP ")
 				.append(payloadType).append(SipUtils.CRLF).append("a=rtpmap:").append(payloadType)
@@ -126,43 +131,48 @@ public class VideoSdpBuilder {
 		sdp.append("a=fmtp:").append(frameRate).append(" ").append(videoCodec.getParameters())
 				.append(SipUtils.CRLF);
 		return sdp.toString();
-    }
+	}
 
-    /**
-     * Create the SDP part with orientation extension for a given codec
-     *
-     * @param codec Media Codec
-     * @param localRtpPort Local RTP Port
-     * @param extensionId
-     * @return SDP
-     */
-    private static String buildSdpWithOrientationExtension(VideoCodec codec, int localRtpPort, int extensionId) {
-        StringBuilder sdp = new StringBuilder(buildSdpWithoutOrientation(codec, localRtpPort))
-                .append("a=").append(ATTRIBUTE_EXTENSION).append(':').append(extensionId)
-                .append(" ").append(SdpOrientationExtension.VIDEO_ORIENTATION_URI).append(SipUtils.CRLF);
-        return sdp.toString();
-    }
+	/**
+	 * Create the SDP part with orientation extension for a given codec
+	 *
+	 * @param codec
+	 *            Media Codec
+	 * @param localRtpPort
+	 *            Local RTP Port
+	 * @param extensionId
+	 * @return SDP
+	 */
+	private static String buildSdpWithOrientationExtension(VideoCodec codec, int localRtpPort,
+			int extensionId) {
+		StringBuilder sdp = new StringBuilder(buildSdpWithoutOrientation(codec, localRtpPort))
+				.append("a=").append(ATTRIBUTE_EXTENSION).append(':').append(extensionId)
+				.append(" ").append(SdpOrientationExtension.VIDEO_ORIENTATION_URI)
+				.append(SipUtils.CRLF);
+		return sdp.toString();
+	}
 
+	/**
+	 * Builds the SDP for a SIP INVITE response. If the SIP INVITE SDP doesn't have the orientation
+	 * extension then the response SDP also shouldn't have.
+	 * 
+	 * @param codec
+	 *            Media Codec
+	 * @param localRtpPort
+	 *            Local RTP Port
+	 * @param inviteVideoMedia
+	 * @return SDP answer
+	 */
+	public static String buildSdpAnswer(VideoCodec codec, int localRtpPort,
+			MediaDescription inviteVideoMedia) {
+		if (inviteVideoMedia != null) {
+			SdpOrientationExtension extension = SdpOrientationExtension.create(inviteVideoMedia);
+			if (extension != null) {
+				return buildSdpWithOrientationExtension(codec, localRtpPort,
+						extension.getExtensionId());
+			}
+		}
 
-    /**
-     * Builds the SDP for a SIP INVITE response. If the SIP INVITE SDP
-     * doesn't have the orientation extension then the response SDP
-     * also shouldn't have.
-     * 
-     * @param codec Media Codec
-     * @param localRtpPort Local RTP Port
-     * @param inviteVideoMedia 
-     * @return SDP answer
-     */
-    public static String buildSdpAnswer(VideoCodec codec, int localRtpPort, MediaDescription inviteVideoMedia) {
-        if (inviteVideoMedia != null) {
-            SdpOrientationExtension extension = SdpOrientationExtension.create(inviteVideoMedia);
-            if (extension != null) {
-                return buildSdpWithOrientationExtension(codec, localRtpPort,
-                        extension.getExtensionId());
-            }
-        }
-
-        return buildSdpWithoutOrientation(codec, localRtpPort);
-    }
+		return buildSdpWithoutOrientation(codec, localRtpPort);
+	}
 }

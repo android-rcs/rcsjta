@@ -26,10 +26,9 @@ import com.orangelabs.rcs.utils.ContactUtils;
 import android.database.Cursor;
 
 /**
- * ChatMessagePersistedStorageAccessor helps in retrieving persisted data
- * related to a chat message from the persisted storage. It can utilize caching
- * for such data that will not be changed after creation of the group chat to
- * speed up consecutive access.
+ * ChatMessagePersistedStorageAccessor helps in retrieving persisted data related to a chat message
+ * from the persisted storage. It can utilize caching for such data that will not be changed after
+ * creation of the group chat to speed up consecutive access.
  */
 public class ChatMessagePersistedStorageAccessor {
 
@@ -56,8 +55,10 @@ public class ChatMessagePersistedStorageAccessor {
 	/**
 	 * Constructor for outgoing message
 	 *
-	 * @param messagingLog MessagingLog
-	 * @param id Message Id
+	 * @param messagingLog
+	 *            MessagingLog
+	 * @param id
+	 *            Message Id
 	 */
 	public ChatMessagePersistedStorageAccessor(MessagingLog messagingLog, String id) {
 		mMessagingLog = messagingLog;
@@ -67,13 +68,20 @@ public class ChatMessagePersistedStorageAccessor {
 	/**
 	 * Constructor for outgoing message
 	 *
-	 * @param messagingLog MessagingLog
-	 * @param id Message Id
-	 * @param remoteContact Contact Id
-	 * @param content Message content
-	 * @param mimeType Mime type
-	 * @param chatId Chat ID
-	 * @param direction Direction
+	 * @param messagingLog
+	 *            MessagingLog
+	 * @param id
+	 *            Message Id
+	 * @param remoteContact
+	 *            Contact Id
+	 * @param content
+	 *            Message content
+	 * @param mimeType
+	 *            Mime type
+	 * @param chatId
+	 *            Chat ID
+	 * @param direction
+	 *            Direction
 	 */
 	public ChatMessagePersistedStorageAccessor(MessagingLog messagingLog, String id,
 			ContactId remoteContact, String content, String mimeType, String chatId,
@@ -91,18 +99,18 @@ public class ChatMessagePersistedStorageAccessor {
 		Cursor cursor = null;
 		try {
 			cursor = mMessagingLog.getCacheableChatMessageData(mId);
-			String contact = cursor.getString(cursor
-					.getColumnIndexOrThrow(Message.CONTACT));
+			String contact = cursor.getString(cursor.getColumnIndexOrThrow(Message.CONTACT));
 			if (contact != null) {
 				mRemoteContact = ContactUtils.createContactId(contact);
 			}
-			mDirection = Direction.valueOf(cursor.getInt(cursor.getColumnIndexOrThrow(Message.DIRECTION)));
+			mDirection = Direction.valueOf(cursor.getInt(cursor
+					.getColumnIndexOrThrow(Message.DIRECTION)));
 			mContent = cursor.getString(cursor.getColumnIndexOrThrow(Message.CONTENT));
 			mChatId = cursor.getString(cursor.getColumnIndexOrThrow(Message.CHAT_ID));
 			mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(Message.MIME_TYPE));
 			if (!mRead) {
-			    mRead = ReadStatus.READ.toInt() == cursor.getInt(cursor
-			            .getColumnIndexOrThrow(Message.READ_STATUS));
+				mRead = ReadStatus.READ.toInt() == cursor.getInt(cursor
+						.getColumnIndexOrThrow(Message.READ_STATUS));
 			}
 			if (mTimestampDelivered <= 0) {
 				mTimestampDelivered = cursor.getLong(cursor
@@ -161,9 +169,9 @@ public class ChatMessagePersistedStorageAccessor {
 
 	public long getTimestampDelivered() {
 		/*
-		 * Utilizing cache here as Timestamp delivered can't be changed in
-		 * persistent storage after it has been set to some value bigger than
-		 * zero, so no need to query for it multiple times.
+		 * Utilizing cache here as Timestamp delivered can't be changed in persistent storage after
+		 * it has been set to some value bigger than zero, so no need to query for it multiple
+		 * times.
 		 */
 		if (mTimestampDelivered == 0) {
 			cacheData();
@@ -173,9 +181,9 @@ public class ChatMessagePersistedStorageAccessor {
 
 	public long getTimestampDisplayed() {
 		/*
-		 * Utilizing cache here as Timestamp displayed can't be changed in
-		 * persistent storage after it has been set to some value bigger than
-		 * zero, so no need to query for it multiple times.
+		 * Utilizing cache here as Timestamp displayed can't be changed in persistent storage after
+		 * it has been set to some value bigger than zero, so no need to query for it multiple
+		 * times.
 		 */
 		if (mTimestampDisplayed == 0) {
 			cacheData();
@@ -200,8 +208,7 @@ public class ChatMessagePersistedStorageAccessor {
 
 	public boolean isRead() {
 		/*
-		 * No need to read from provider unless incoming and not already marked
-		 * as read.
+		 * No need to read from provider unless incoming and not already marked as read.
 		 */
 		if (Direction.INCOMING == mDirection && !mRead) {
 			cacheData();

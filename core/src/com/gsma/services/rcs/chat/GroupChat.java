@@ -36,158 +36,159 @@ import com.gsma.services.rcs.contacts.ContactId;
  * @author Jean-Marc AUFFRET
  */
 public class GroupChat {
-    /**
-     * Group chat state
-     */
-    public static class State {
-    	/**
-    	 * Chat invitation received
-    	 */
-    	public final static int INVITED = 0;
-    	
-    	/**
-    	 * Chat invitation sent
-    	 */
-    	public final static int INITIATING = 1;
-    	
-    	/**
-    	 * Chat is started
-    	 */
-    	public final static int STARTED = 2;
-    	   	
-    	/**
-    	 * Chat has been aborted 
-    	 */
-    	public final static int ABORTED = 3;
+	/**
+	 * Group chat state
+	 */
+	public static class State {
+		/**
+		 * Chat invitation received
+		 */
+		public final static int INVITED = 0;
 
-    	/**
-    	 * Chat has failed 
-    	 */
-    	public final static int FAILED = 4;
+		/**
+		 * Chat invitation sent
+		 */
+		public final static int INITIATING = 1;
 
-    	/**
-    	 * Chat has been accepted and is in the process of becoming started.
-    	 */
-    	public final static int ACCEPTING = 5;
+		/**
+		 * Chat is started
+		 */
+		public final static int STARTED = 2;
 
-    	/**
-    	 * Chat invitation was rejected.
-    	 */
-    	public final static int REJECTED = 6;
-    	
-        private State() {
-        }    	
-    }
-    
-    /**
-     * Group chat state reason code
-     */
-    public static class ReasonCode {
+		/**
+		 * Chat has been aborted
+		 */
+		public final static int ABORTED = 3;
 
-        /**
-         * No specific reason code specified.
-         */
-        public final static int UNSPECIFIED = 0;
+		/**
+		 * Chat has failed
+		 */
+		public final static int FAILED = 4;
 
-        /**
-         * Group chat is aborted by local user.
-         */
-        public final static int ABORTED_BY_USER = 1;
+		/**
+		 * Chat has been accepted and is in the process of becoming started.
+		 */
+		public final static int ACCEPTING = 5;
 
-        /**
-         * Group chat is aborted by remote user.
-         */
+		/**
+		 * Chat invitation was rejected.
+		 */
+		public final static int REJECTED = 6;
 
-        public final static int ABORTED_BY_REMOTE = 2;
+		private State() {
+		}
+	}
 
-        /**
-         * Group chat is aborted by system.
-         */
-        public final static int ABORTED_BY_SYSTEM = 3;
+	/**
+	 * Group chat state reason code
+	 */
+	public static class ReasonCode {
 
-        /**
-         * Group chat is rejected because already taken by the secondary device.
-         */
-        public final static int REJECTED_BY_SECONDARY_DEVICE = 4;
+		/**
+		 * No specific reason code specified.
+		 */
+		public final static int UNSPECIFIED = 0;
 
-        /**
-         * Group chat invitation was rejected as it was detected as spam.
-         */
-        public final static int REJECTED_SPAM = 5;
+		/**
+		 * Group chat is aborted by local user.
+		 */
+		public final static int ABORTED_BY_USER = 1;
 
-        /**
-         * Group chat invitation was rejected due to max number of chats open already.
-         */
-        public final static int REJECTED_MAX_CHATS = 6;
+		/**
+		 * Group chat is aborted by remote user.
+		 */
 
-        /**
-         * Group chat invitation was rejected by local user.
-         */
-        public final static int REJECTED_BY_USER = 7;
+		public final static int ABORTED_BY_REMOTE = 2;
 
-        /**
-         * Group chat invitation was rejected by remote.
-         */
-        public final static int REJECTED_BY_REMOTE = 8;
+		/**
+		 * Group chat is aborted by system.
+		 */
+		public final static int ABORTED_BY_SYSTEM = 3;
 
-        /**
-         * Group chat invitation was rejected due to time out.
-         */
-        public final static int REJECTED_TIME_OUT = 9;
+		/**
+		 * Group chat is rejected because already taken by the secondary device.
+		 */
+		public final static int REJECTED_BY_SECONDARY_DEVICE = 4;
 
-        /**
-         * Group chat initiation failed.
-         */
-        public final static int FAILED_INITIATION = 10;
-    }
-    
-    /**
-     * Group chat error
-     */
-    public static class Error {
-    	/**
-    	 * Group chat has failed
-    	 */
-    	public final static int CHAT_FAILED = 0;
-    	
-    	/**
-    	 * Group chat invitation has been declined by remote
-    	 */
-    	public final static int INVITATION_DECLINED = 1;
+		/**
+		 * Group chat invitation was rejected as it was detected as spam.
+		 */
+		public final static int REJECTED_SPAM = 5;
 
-    	/**
-    	 * Chat conversation not found
-    	 */
-    	public final static int CHAT_NOT_FOUND = 2;
-    	    	
-        private Error() {
-        }    	
-    }
+		/**
+		 * Group chat invitation was rejected due to max number of chats open already.
+		 */
+		public final static int REJECTED_MAX_CHATS = 6;
 
-    /**
-     * Group chat interface
-     */
-    private final IGroupChat mGroupChatInf;
-    
-    /**
-     * Constructor
-     * 
-     * @param chatIntf Group chat interface
-     */
-    /* package private */GroupChat(IGroupChat chatIntf) {
-    	mGroupChatInf = chatIntf;
-    }
+		/**
+		 * Group chat invitation was rejected by local user.
+		 */
+		public final static int REJECTED_BY_USER = 7;
 
-    /**
-     * Returns the chat ID
-     * 
-     * @return Chat ID
-     * @throws RcsServiceException
-     */
+		/**
+		 * Group chat invitation was rejected by remote.
+		 */
+		public final static int REJECTED_BY_REMOTE = 8;
+
+		/**
+		 * Group chat invitation was rejected due to time out.
+		 */
+		public final static int REJECTED_TIME_OUT = 9;
+
+		/**
+		 * Group chat initiation failed.
+		 */
+		public final static int FAILED_INITIATION = 10;
+	}
+
+	/**
+	 * Group chat error
+	 */
+	public static class Error {
+		/**
+		 * Group chat has failed
+		 */
+		public final static int CHAT_FAILED = 0;
+
+		/**
+		 * Group chat invitation has been declined by remote
+		 */
+		public final static int INVITATION_DECLINED = 1;
+
+		/**
+		 * Chat conversation not found
+		 */
+		public final static int CHAT_NOT_FOUND = 2;
+
+		private Error() {
+		}
+	}
+
+	/**
+	 * Group chat interface
+	 */
+	private final IGroupChat mGroupChatInf;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param chatIntf
+	 *            Group chat interface
+	 */
+	/* package private */GroupChat(IGroupChat chatIntf) {
+		mGroupChatInf = chatIntf;
+	}
+
+	/**
+	 * Returns the chat ID
+	 * 
+	 * @return Chat ID
+	 * @throws RcsServiceException
+	 */
 	public String getChatId() throws RcsServiceException {
 		try {
 			return mGroupChatInf.getChatId();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
@@ -202,11 +203,11 @@ public class GroupChat {
 	public Direction getDirection() throws RcsServiceException {
 		try {
 			return Direction.valueOf(mGroupChatInf.getDirection());
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
-	}	
-	
+	}
+
 	/**
 	 * Returns the state of the group chat
 	 * 
@@ -217,10 +218,10 @@ public class GroupChat {
 	public int getState() throws RcsServiceException {
 		try {
 			return mGroupChatInf.getState();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
-	}		
+	}
 
 	/**
 	 * Returns the reason code of the state of the group chat
@@ -237,7 +238,6 @@ public class GroupChat {
 		}
 	}
 
-	
 	/**
 	 * Returns the remote contact
 	 * 
@@ -261,14 +261,14 @@ public class GroupChat {
 	public String getSubject() throws RcsServiceException {
 		try {
 			return mGroupChatInf.getSubject();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
 	/**
-	 * Returns the list of connected participants. A participant is identified
-	 * by its MSISDN in national or international format, SIP address, SIP-URI or Tel-URI.
+	 * Returns the list of connected participants. A participant is identified by its MSISDN in
+	 * national or international format, SIP address, SIP-URI or Tel-URI.
 	 * 
 	 * @return List of participants
 	 * @throws RcsServiceException
@@ -276,14 +276,14 @@ public class GroupChat {
 	public Set<ParticipantInfo> getParticipants() throws RcsServiceException {
 		try {
 			return new HashSet<ParticipantInfo>(mGroupChatInf.getParticipants());
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
-		}		
+		}
 	}
 
 	/**
-	 * Returns true if it is possible to send messages in the group chat right
-	 * now, else returns false.
+	 * Returns true if it is possible to send messages in the group chat right now, else returns
+	 * false.
 	 * 
 	 * @return boolean
 	 * @throws RcsServiceException
@@ -299,51 +299,54 @@ public class GroupChat {
 	/**
 	 * Sends a text message to the group
 	 * 
-	 * @param text Message
+	 * @param text
+	 *            Message
 	 * @return ChatMessage
 	 * @throws RcsServiceException
 	 */
 	public ChatMessage sendMessage(String text) throws RcsServiceException {
 		try {
 			return new ChatMessage(mGroupChatInf.sendMessage(text));
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
-		}		
+		}
 	}
-	
-	/**
-     * Sends a geoloc message
-     * 
-     * @param geoloc Geoloc info
-     * @return ChatMessage
-     * @throws RcsServiceException
-     */
-    public ChatMessage sendMessage(Geoloc geoloc) throws RcsServiceException {
-		try {
-			return new ChatMessage(mGroupChatInf.sendMessage2(geoloc));
-		} catch(Exception e) {
-			throw new RcsServiceException(e.getMessage());
-		}    	
-    }	
 
 	/**
-	 * Sends an Is-composing event. The status is set to true when typing
-	 * a message, else it is set to false.
+	 * Sends a geoloc message
 	 * 
-	 * @param status Is-composing status
+	 * @param geoloc
+	 *            Geoloc info
+	 * @return ChatMessage
+	 * @throws RcsServiceException
+	 */
+	public ChatMessage sendMessage(Geoloc geoloc) throws RcsServiceException {
+		try {
+			return new ChatMessage(mGroupChatInf.sendMessage2(geoloc));
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Sends an Is-composing event. The status is set to true when typing a message, else it is set
+	 * to false.
+	 * 
+	 * @param status
+	 *            Is-composing status
 	 * @throws RcsServiceException
 	 */
 	public void sendIsComposingEvent(boolean status) throws RcsServiceException {
 		try {
 			mGroupChatInf.sendIsComposingEvent(status);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
-		}		
+		}
 	}
 
 	/**
-	 * Returns true if it is possible to invite additional participants to the
-	 * group chat right now, else returns false.
+	 * Returns true if it is possible to invite additional participants to the group chat right now,
+	 * else returns false.
 	 * 
 	 * @return boolean
 	 * @throws RcsServiceException
@@ -357,10 +360,11 @@ public class GroupChat {
 	}
 
 	/**
-	 * Returns true if it is possible to invite the specified participant to
-	 * the group chat right now, else returns false.
+	 * Returns true if it is possible to invite the specified participant to the group chat right
+	 * now, else returns false.
 	 * 
-	 * @param ContactId participant
+	 * @param ContactId
+	 *            participant
 	 * @return boolean
 	 * @throws RcsServiceException
 	 */
@@ -375,7 +379,8 @@ public class GroupChat {
 	/**
 	 * Invite additional participants to this group chat.
 	 * 
-	 * @param participants List of participants
+	 * @param participants
+	 *            List of participants
 	 * @throws RcsServiceException
 	 */
 	public void inviteParticipants(Set<ContactId> participants) throws RcsServiceException {
@@ -387,9 +392,8 @@ public class GroupChat {
 	}
 
 	/**
-	 * Returns the max number of participants in the group chat. This limit is
-	 * read during the conference event subscription and overrides the provisioning
-	 * parameter.
+	 * Returns the max number of participants in the group chat. This limit is read during the
+	 * conference event subscription and overrides the provisioning parameter.
 	 * 
 	 * @return Number
 	 * @throws RcsServiceException
@@ -397,9 +401,9 @@ public class GroupChat {
 	public int getMaxParticipants() throws RcsServiceException {
 		try {
 			return mGroupChatInf.getMaxParticipants();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
-		}		
+		}
 	}
 
 	/**
@@ -417,22 +421,23 @@ public class GroupChat {
 	}
 
 	/**
-	 * Leaves a group chat willingly and permanently. The group chat will
-	 * continue between other participants if there are enough participants.
+	 * Leaves a group chat willingly and permanently. The group chat will continue between other
+	 * participants if there are enough participants.
 	 * 
 	 * @throws RcsServiceException
 	 */
 	public void leave() throws RcsServiceException {
 		try {
 			mGroupChatInf.leave();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
 	/**
 	 * open the chat conversation.<br>
-	 * Note: if it is an incoming pending chat session and the parameter IM SESSION START is 0 then the session is accepted now.
+	 * Note: if it is an incoming pending chat session and the parameter IM SESSION START is 0 then
+	 * the session is accepted now.
 	 * 
 	 * @throws RcsServiceException
 	 */

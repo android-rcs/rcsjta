@@ -25,8 +25,8 @@ package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
  */
 public interface HttpUploadTransferEventListener extends HttpTransferEventListener {
 	/**
-	 * notify the start of the HTTP Upload transfer (once the thumbnail transfer iis done)
-	 * <br>The upload resume is only possible once thumbnail is transferred 
+	 * notify the start of the HTTP Upload transfer (once the thumbnail transfer iis done) <br>
+	 * The upload resume is only possible once thumbnail is transferred
 	 */
 	public void uploadStarted();
 }

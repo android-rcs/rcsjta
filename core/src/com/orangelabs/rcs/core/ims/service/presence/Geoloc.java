@@ -18,42 +18,44 @@
 
 package com.orangelabs.rcs.core.ims.service.presence;
 
-
 /**
  * Geoloc info
  * 
  * @author Jean-Marc AUFFRET
  */
-public class Geoloc {	
+public class Geoloc {
 	/**
 	 * Latitude
 	 */
 	private double latitude;
-	
+
 	/**
 	 * Longitude
 	 */
 	private double longitude;
-	
+
 	/**
 	 * Altitude
 	 */
 	private double altitude;
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param latitude Latitude
-	 * @param longitude Longitude
-	 * @param altitude Altitude
+	 * @param latitude
+	 *            Latitude
+	 * @param longitude
+	 *            Longitude
+	 * @param altitude
+	 *            Altitude
 	 */
 	public Geoloc(double latitude, double longitude, double altitude) {
 		this.latitude = latitude;
 		this.longitude = longitude;
 		this.altitude = altitude;
 	}
-    
-    /**
+
+	/**
 	 * Returns the latitude
 	 * 
 	 * @return Latitude
@@ -61,16 +63,17 @@ public class Geoloc {
 	public double getLatitude() {
 		return latitude;
 	}
-	
+
 	/**
 	 * Set the latitude
 	 * 
-	 * @param latitude Latitude
+	 * @param latitude
+	 *            Latitude
 	 */
 	public void setLatitude(double latitude) {
 		this.latitude = latitude;
 	}
-	
+
 	/**
 	 * Returns the longitude
 	 * 
@@ -79,11 +82,12 @@ public class Geoloc {
 	public double getLongitude() {
 		return longitude;
 	}
-	
+
 	/**
 	 * Set the longitude
 	 * 
-	 * @param longitude Longitude
+	 * @param longitude
+	 *            Longitude
 	 */
 	public void setLongitude(double longitude) {
 		this.longitude = longitude;
@@ -97,11 +101,12 @@ public class Geoloc {
 	public double getAltitude() {
 		return altitude;
 	}
-	
+
 	/**
 	 * Set the altitude
 	 * 
-	 * @param altitude Altitude
+	 * @param altitude
+	 *            Altitude
 	 */
 	public void setAltitude(double altitude) {
 		this.altitude = altitude;

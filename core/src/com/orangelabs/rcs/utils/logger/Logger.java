@@ -45,7 +45,7 @@ public class Logger {
 	 * INFO level
 	 */
 	public static final int INFO_LEVEL = 1;
-	
+
 	/**
 	 * WARN level
 	 */
@@ -60,7 +60,7 @@ public class Logger {
 	 * FATAL level
 	 */
 	public static final int FATAL_LEVEL = 4;
-	
+
 	/**
 	 * Trace flag
 	 */
@@ -70,33 +70,32 @@ public class Logger {
 	 * Trace level
 	 */
 	public static int traceLevel = DEBUG_LEVEL;
-	
+
 	/**
 	 * List of appenders
 	 */
-	private static Appender[] appenders = new Appender[] { 
-		new AndroidAppender()
-	};
-	
+	private static Appender[] appenders = new Appender[] { new AndroidAppender() };
+
 	/**
 	 * Classname
 	 */
 	private String classname;
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param classname Classname
+	 * @param classname
+	 *            Classname
 	 */
 	private Logger(String classname) {
 		int index = classname.lastIndexOf('.');
 		if (index != -1) {
-			this.classname = classname.substring(index+1);
+			this.classname = classname.substring(index + 1);
 		} else {
-			this.classname = classname;		
+			this.classname = classname;
 		}
 	}
-	
+
 	/**
 	 * Is logger activated
 	 * 
@@ -109,7 +108,8 @@ public class Logger {
 	/**
 	 * Debug trace
 	 * 
-	 * @param trace Trace
+	 * @param trace
+	 *            Trace
 	 */
 	public void debug(String trace) {
 		printTrace(trace, DEBUG_LEVEL);
@@ -118,79 +118,90 @@ public class Logger {
 	/**
 	 * Info trace
 	 * 
-	 * @param trace Trace
+	 * @param trace
+	 *            Trace
 	 */
 	public void info(String trace) {
-		printTrace(trace, INFO_LEVEL);		
+		printTrace(trace, INFO_LEVEL);
 	}
-	
+
 	/**
 	 * Warning trace
 	 * 
-	 * @param trace Trace
+	 * @param trace
+	 *            Trace
 	 */
 	public void warn(String trace) {
-		printTrace(trace, WARN_LEVEL);		
-	}
-	
-	/**
-	 * Error trace
-	 * 
-	 * @param trace Trace
-	 */
-	public void error(String trace) {
-		printTrace(trace, ERROR_LEVEL);	
+		printTrace(trace, WARN_LEVEL);
 	}
 
 	/**
 	 * Error trace
 	 * 
-	 * @param trace Trace
-	 * @param e Exception
+	 * @param trace
+	 *            Trace
+	 */
+	public void error(String trace) {
+		printTrace(trace, ERROR_LEVEL);
+	}
+
+	/**
+	 * Error trace
+	 * 
+	 * @param trace
+	 *            Trace
+	 * @param e
+	 *            Exception
 	 */
 	public void error(String trace, Throwable e) {
 		printTrace(trace, ERROR_LEVEL);
 		e.printStackTrace();
 	}
-	
+
 	/**
 	 * Fatal trace
 	 * 
-	 * @param trace Trace
+	 * @param trace
+	 *            Trace
 	 */
 	public void fatal(String trace) {
-		printTrace(trace, FATAL_LEVEL);	
+		printTrace(trace, FATAL_LEVEL);
 	}
 
 	/**
 	 * Fatal trace
 	 * 
-	 * @param trace Trace
-	 * @param e Exception
+	 * @param trace
+	 *            Trace
+	 * @param e
+	 *            Exception
 	 */
 	public void fatal(String trace, Throwable e) {
-		printTrace(trace, FATAL_LEVEL);	
+		printTrace(trace, FATAL_LEVEL);
 		e.printStackTrace();
 	}
 
 	/**
 	 * Print a trace
 	 * 
-	 * @param trace Trace
-	 * @param level Trace level
+	 * @param trace
+	 *            Trace
+	 * @param level
+	 *            Trace level
 	 */
 	private void printTrace(String trace, int level) {
 		if ((appenders != null) && (level >= traceLevel)) {
-			for(int i=0; i < appenders.length; i++) {
+			for (int i = 0; i < appenders.length; i++) {
 				appenders[i].printTrace(classname, level, trace);
 			}
 		}
 	}
-	
+
 	/**
 	 * Set the list of appenders
 	 * 
-	 * @param appenders List of appenders
+	 * @param appenders
+	 *            List of appenders
 	 */
 	public static void setAppenders(Appender[] appenders) {
 		Logger.appenders = appenders;
@@ -199,13 +210,14 @@ public class Logger {
 	/**
 	 * Create a static instance
 	 * 
-	 * @param classname Classname
+	 * @param classname
+	 *            Classname
 	 * @return Instance
 	 */
 	public static synchronized Logger getLogger(String classname) {
 		return new Logger(classname);
 	}
-	
+
 	/**
 	 * Get the current appenders
 	 * 

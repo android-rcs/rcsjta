@@ -27,12 +27,12 @@ package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
  * @author jexa7410
  */
 public interface HttpTransferState {
-	
+
 	/**
 	 * Session is pending (not yet accepted by a final response by the remote)
 	 */
 	public final static int PENDING = 0;
-	
+
 	/**
 	 * Session has been established (i.e. 200 OK/ACK exchanged)
 	 */

@@ -45,7 +45,7 @@ public class ImageSharingData {
 	 * ContactId formatted number of the remote contact
 	 */
 	static final String KEY_CONTACT = ImageSharingLog.CONTACT;
-	
+
 	/**
 	 * @see ImageSharing.State
 	 */
@@ -62,7 +62,7 @@ public class ImageSharingData {
 	 * Multipurpose Internet Mail Extensions (MIME) type of file
 	 */
 	static final String KEY_MIME_TYPE = ImageSharingLog.MIME_TYPE;
-	
+
 	/**
 	 * URI of the file
 	 */
@@ -88,5 +88,5 @@ public class ImageSharingData {
 	 *
 	 * @see Direction
 	 */
-	static final String KEY_DIRECTION = ImageSharingLog.DIRECTION;	
+	static final String KEY_DIRECTION = ImageSharingLog.DIRECTION;
 }

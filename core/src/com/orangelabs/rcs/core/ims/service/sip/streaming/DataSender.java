@@ -23,69 +23,71 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.media.MediaSample;
 import com.orangelabs.rcs.utils.FifoBuffer;
 
 /**
- * Data player in charge of sending data payload to the network via
- * the RTP protocol
+ * Data player in charge of sending data payload to the network via the RTP protocol
  * 
  * @author Jean-Marc AUFFRET
  */
 public class DataSender implements MediaInput {
-    /**
-     * Received frames
-     */
-    private FifoBuffer fifo = null;
+	/**
+	 * Received frames
+	 */
+	private FifoBuffer fifo = null;
 
-    /**
-     * Constructor
-     */
-    public DataSender() {
-    }
+	/**
+	 * Constructor
+	 */
+	public DataSender() {
+	}
 
-    /**
-     * Add a new video frame
-     *
-     * @param data Data
-     * @param timestamp Timestamp
-     * @param marker Marker bit 
-     */
-    public void addFrame(byte[] data, long timestamp) {
-        if (fifo != null) {
-        	MediaSample sample = new MediaSample(data, timestamp);
-            fifo.addObject(sample);
-        }
-    }
+	/**
+	 * Add a new video frame
+	 *
+	 * @param data
+	 *            Data
+	 * @param timestamp
+	 *            Timestamp
+	 * @param marker
+	 *            Marker bit
+	 */
+	public void addFrame(byte[] data, long timestamp) {
+		if (fifo != null) {
+			MediaSample sample = new MediaSample(data, timestamp);
+			fifo.addObject(sample);
+		}
+	}
 
-    /**
-     * Open the player
-     */
-    public void open() {
-        fifo = new FifoBuffer();
-    }
+	/**
+	 * Open the player
+	 */
+	public void open() {
+		fifo = new FifoBuffer();
+	}
 
-    /**
-     * Close the player
-     */
-    public void close() {
-        if (fifo != null) {
-            fifo.close();
-            fifo = null;
-        }
-    }
+	/**
+	 * Close the player
+	 */
+	public void close() {
+		if (fifo != null) {
+			fifo.close();
+			fifo = null;
+		}
+	}
 
-    /**
-     * Read a media sample (blocking method)
-     *
-     * @return Media sample
-     * @throws MediaException
-     */
-    public MediaSample readSample() throws MediaException {
-        try {
-            if (fifo != null) {
-                return (MediaSample)fifo.getObject();
-            } else {
-                throw new MediaException("Media input not opened");
-            }
-        } catch (Exception e) {
-            throw new MediaException("Can't read media sample");
-        }
-    }
+	/**
+	 * Read a media sample (blocking method)
+	 *
+	 * @return Media sample
+	 * @throws MediaException
+	 */
+	public MediaSample readSample() throws MediaException {
+		try {
+			if (fifo != null) {
+				return (MediaSample) fifo.getObject();
+			} else {
+				throw new MediaException("Media input not opened");
+			}
+		} catch (Exception e) {
+			throw new MediaException("Can't read media sample");
+		}
+	}
 }

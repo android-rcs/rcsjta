@@ -55,7 +55,7 @@ public class FileUploadInfo implements Parcelable {
 	 * File MIME type
 	 */
 	private String mMimeType;
-	
+
 	/**
 	 * URI of the file icon on the content server
 	 */
@@ -76,21 +76,23 @@ public class FileUploadInfo implements Parcelable {
 	 */
 	private final String mFileIconMimeType;
 
-    /**
-     * Constructor for outgoing message
-     * @param file 
-     * @param validity 
-     * @param filename 
-     * @param size 
-     * @param type 
-     * @param fileIcon 
-     * @param fileIconValidity 
-     * @param fileIconSize 
-     * @param fileIconType 
-     * 
-     * @hide
+	/**
+	 * Constructor for outgoing message
+	 * 
+	 * @param file
+	 * @param validity
+	 * @param filename
+	 * @param size
+	 * @param type
+	 * @param fileIcon
+	 * @param fileIconValidity
+	 * @param fileIconSize
+	 * @param fileIconType
+	 * 
+	 * @hide
 	 */
-	public FileUploadInfo(Uri file, long validity, String filename, long size, String type, Uri fileIcon, long fileIconValidity, long fileIconSize, String fileIconType) {
+	public FileUploadInfo(Uri file, long validity, String filename, long size, String type,
+			Uri fileIcon, long fileIconValidity, long fileIconSize, String fileIconType) {
 		mFile = file;
 		mValidity = validity;
 		mFileName = filename;
@@ -101,12 +103,13 @@ public class FileUploadInfo implements Parcelable {
 		mFileIconSize = fileIconSize;
 		mFileIconMimeType = fileIconType;
 	}
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param source Parcelable source
-     * @hide
+	 * @param source
+	 *            Parcelable source
+	 * @hide
 	 */
 	public FileUploadInfo(Parcel source) {
 		mFile = Uri.parse(source.readString());
@@ -118,57 +121,58 @@ public class FileUploadInfo implements Parcelable {
 		mFileIconValidity = source.readLong();
 		mFileIconSize = source.readLong();
 		mFileIconMimeType = source.readString();
-    }
-	
+	}
+
 	/**
-	 * Describe the kinds of special objects contained in this Parcelable's
-	 * marshalled representation
+	 * Describe the kinds of special objects contained in this Parcelable's marshalled
+	 * representation
 	 * 
 	 * @return Integer
-     * @hide
+	 * @hide
 	 */
 	public int describeContents() {
-        return 0;
-    }
+		return 0;
+	}
 
 	/**
 	 * Write parcelable object
 	 * 
-	 * @param dest The Parcel in which the object should be written
-	 * @param flags Additional flags about how the object should be written
-     * @hide
+	 * @param dest
+	 *            The Parcel in which the object should be written
+	 * @param flags
+	 *            Additional flags about how the object should be written
+	 * @hide
 	 */
-    public void writeToParcel(Parcel dest, int flags) {
-    	dest.writeString(mFile.toString());
-    	dest.writeLong(mValidity);
-    	dest.writeString(mFileName);
-    	dest.writeLong(mSize);
-    	dest.writeString(mMimeType);
-    	dest.writeString(mFileIcon.toString());
-    	dest.writeLong(mFileIconValidity);
-    	dest.writeLong(mFileIconSize);
-    	dest.writeString(mFileIconMimeType);
-    }
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(mFile.toString());
+		dest.writeLong(mValidity);
+		dest.writeString(mFileName);
+		dest.writeLong(mSize);
+		dest.writeString(mMimeType);
+		dest.writeString(mFileIcon.toString());
+		dest.writeLong(mFileIconValidity);
+		dest.writeLong(mFileIconSize);
+		dest.writeString(mFileIconMimeType);
+	}
 
-    /**
-     * Parcelable creator
-     * 
-     * @hide
-     */
-    public static final Parcelable.Creator<FileUploadInfo> CREATOR
-            = new Parcelable.Creator<FileUploadInfo>() {
-        public FileUploadInfo createFromParcel(Parcel source) {
-            return new FileUploadInfo(source);
-        }
+	/**
+	 * Parcelable creator
+	 * 
+	 * @hide
+	 */
+	public static final Parcelable.Creator<FileUploadInfo> CREATOR = new Parcelable.Creator<FileUploadInfo>() {
+		public FileUploadInfo createFromParcel(Parcel source) {
+			return new FileUploadInfo(source);
+		}
 
-        public FileUploadInfo[] newArray(int size) {
-            return new FileUploadInfo[size];
-        }
-    };	
-	
+		public FileUploadInfo[] newArray(int size) {
+			return new FileUploadInfo[size];
+		}
+	};
+
 	/**
 	 * Returns URI of the file on the content server
-	 *  
+	 * 
 	 * @return Uri
 	 */
 	public Uri getFile() {
@@ -176,8 +180,8 @@ public class FileUploadInfo implements Parcelable {
 	}
 
 	/**
-	 * Returns the validity of the file on the content server. This corresponds
-	 * to the date and time from when the file will be removed on the content server.
+	 * Returns the validity of the file on the content server. This corresponds to the date and time
+	 * from when the file will be removed on the content server.
 	 * 
 	 * @return Duration
 	 */
@@ -196,7 +200,7 @@ public class FileUploadInfo implements Parcelable {
 
 	/**
 	 * Returns the size of the file
-	 *  
+	 * 
 	 * @return Size
 	 */
 	public long getSize() {
@@ -214,16 +218,16 @@ public class FileUploadInfo implements Parcelable {
 
 	/**
 	 * Returns URI of the file icon on the content server
-	 *  
+	 * 
 	 * @return Uri
-	 */	
+	 */
 	public Uri getFileIcon() {
 		return mFileIcon;
 	}
 
 	/**
-	 * Returns the validity of the file icon on the content server. This corresponds
-	 * to the date and time from when the file icon will be removed on the content server.
+	 * Returns the validity of the file icon on the content server. This corresponds to the date and
+	 * time from when the file icon will be removed on the content server.
 	 * 
 	 * @return Duration
 	 */
@@ -233,7 +237,7 @@ public class FileUploadInfo implements Parcelable {
 
 	/**
 	 * Returns the size of the file icon
-	 *  
+	 * 
 	 * @return Size
 	 */
 	public long getFileIconSize() {

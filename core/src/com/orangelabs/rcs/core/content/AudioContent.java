@@ -24,7 +24,6 @@ package com.orangelabs.rcs.core.content;
 
 import android.net.Uri;
 
-
 /**
  * Audio content
  * 
@@ -44,10 +43,14 @@ public class AudioContent extends MmContent {
 	/**
 	 * Constructor
 	 *
-	 * @param audioFile URI
-	 * @param encoding Encoding
-	 * @param size Size
-	 * @param fileName Filename
+	 * @param audioFile
+	 *            URI
+	 * @param encoding
+	 *            Encoding
+	 * @param size
+	 *            Size
+	 * @param fileName
+	 *            Filename
 	 */
 	public AudioContent(Uri audioFile, String encoding, long size, String fileName) {
 		super(audioFile, encoding, size, fileName);

@@ -32,11 +32,12 @@ public class LiveVideoContent extends VideoContent {
 	 * Livevideo URL constant
 	 */
 	public static final String URL = "capture://video";
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param encoding Encoding
+	 * @param encoding
+	 *            Encoding
 	 */
 	public LiveVideoContent(String encoding) {
 		super(encoding);

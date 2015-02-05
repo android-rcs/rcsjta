@@ -48,20 +48,21 @@ public class XcapPhotoIconResponseParser extends DefaultHandler {
 	private String desc = null;
 
 	/**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+	 * The logger
+	 */
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    /**
-     * Constructor
-     *
-     * @param inputSource Input source
-     * @throws Exception
-     */
-    public XcapPhotoIconResponseParser(InputSource inputSource) throws Exception {
-    	SAXParserFactory factory = SAXParserFactory.newInstance();
-        SAXParser parser = factory.newSAXParser();
-        parser.parse(inputSource, this);
+	/**
+	 * Constructor
+	 *
+	 * @param inputSource
+	 *            Input source
+	 * @throws Exception
+	 */
+	public XcapPhotoIconResponseParser(InputSource inputSource) throws Exception {
+		SAXParserFactory factory = SAXParserFactory.newInstance();
+		SAXParser parser = factory.newSAXParser();
+		parser.parse(inputSource, this);
 	}
 
 	public void startDocument() {
@@ -75,21 +76,18 @@ public class XcapPhotoIconResponseParser extends DefaultHandler {
 		accumulator.append(buffer, start, length);
 	}
 
-	public void startElement(String namespaceURL, String localName,	String qname, Attributes attr) {
+	public void startElement(String namespaceURL, String localName, String qname, Attributes attr) {
 		accumulator.setLength(0);
 	}
 
 	public void endElement(String namespaceURL, String localName, String qname) {
 		if (localName.equals("data")) {
 			data = accumulator.toString().getBytes(UTF8);
-		} else
-		if (localName.equals("mime-type")) {
+		} else if (localName.equals("mime-type")) {
 			mime = accumulator.toString();
-		} else
-		if (localName.equals("encoding")) {
+		} else if (localName.equals("encoding")) {
 			encoding = accumulator.toString();
-		} else
-		if (localName.equals("description")) {
+		} else if (localName.equals("description")) {
 			desc = accumulator.toString();
 		}
 	}

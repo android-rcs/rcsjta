@@ -50,11 +50,11 @@ public class SipManager {
 	public static int TIMEOUT = 30;
 
 	/**
-     * IMS network interface
-     */
-    private ImsNetworkInterface networkInterface;
+	 * IMS network interface
+	 */
+	private ImsNetworkInterface networkInterface;
 
-    /**
+	/**
 	 * SIP stack
 	 */
 	private SipInterface sipstack;
@@ -65,10 +65,11 @@ public class SipManager {
 	private static Logger logger = Logger.getLogger(SipManager.class.getSimpleName());
 
 	/**
-     * Constructor
-     *
-     * @param parent IMS network interface
-     */
+	 * Constructor
+	 *
+	 * @param parent
+	 *            IMS network interface
+	 */
 	public SipManager(ImsNetworkInterface parent) {
 		this.networkInterface = parent;
 
@@ -78,22 +79,22 @@ public class SipManager {
 	}
 
 	/**
-     * Returns the network interface
-     *
-     * @return Network interface
-     */
+	 * Returns the network interface
+	 *
+	 * @return Network interface
+	 */
 	public ImsNetworkInterface getNetworkInterface() {
 		return networkInterface;
-    }
+	}
 
 	/**
-     * Returns the SIP stack
-     *
-     * @return SIP stack
-     */
+	 * Returns the SIP stack
+	 *
+	 * @return SIP stack
+	 */
 	public SipInterface getSipStack() {
 		return sipstack;
-    }
+	}
 
 	/**
 	 * Terminate the manager
@@ -114,25 +115,32 @@ public class SipManager {
 	}
 
 	/**
-     * Initialize the SIP stack
-     *
-     * @param localAddr Local IP address
-     * @param proxyAddr Outbound proxy address
-     * @param proxyPort Outbound proxy port
-     * @param isSecure Need secure connection or not
-     * @param tcpFallback TCP fallback according to RFC3261 chapter 18.1.1
-     * @param networkType type of network
-     * @return SIP stack
-     * @throws SipException
-     */
-    public synchronized void initStack(String localAddr, String proxyAddr,
-    		int proxyPort, String protocol, boolean tcpFallback, int networkType) throws SipException {
+	 * Initialize the SIP stack
+	 *
+	 * @param localAddr
+	 *            Local IP address
+	 * @param proxyAddr
+	 *            Outbound proxy address
+	 * @param proxyPort
+	 *            Outbound proxy port
+	 * @param isSecure
+	 *            Need secure connection or not
+	 * @param tcpFallback
+	 *            TCP fallback according to RFC3261 chapter 18.1.1
+	 * @param networkType
+	 *            type of network
+	 * @return SIP stack
+	 * @throws SipException
+	 */
+	public synchronized void initStack(String localAddr, String proxyAddr, int proxyPort,
+			String protocol, boolean tcpFallback, int networkType) throws SipException {
 		// Close the stack if necessary
 		closeStack();
 
 		// Create the SIP stack
-        sipstack = new SipInterface(localAddr, proxyAddr, proxyPort, protocol, tcpFallback, networkType);
-    }
+		sipstack = new SipInterface(localAddr, proxyAddr, proxyPort, protocol, tcpFallback,
+				networkType);
+	}
 
 	/**
 	 * Close the SIP stack
@@ -147,7 +155,7 @@ public class SipManager {
 			// Close the SIP stack
 			sipstack.close();
 			sipstack = null;
-		} catch(Exception e) {
+		} catch (Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Can't close SIP stack properly", e);
 			}
@@ -155,16 +163,17 @@ public class SipManager {
 	}
 
 	/**
-     * Send a SIP message and create a context to wait a response
-     *
-     * @param message SIP message
-     * @return Transaction context
-     * @throws SipException
-     */
-    public SipTransactionContext sendSipMessageAndWait(SipMessage message) throws SipException {
-    	return sendSipMessageAndWait(message, SipManager.TIMEOUT);
+	 * Send a SIP message and create a context to wait a response
+	 *
+	 * @param message
+	 *            SIP message
+	 * @return Transaction context
+	 * @throws SipException
+	 */
+	public SipTransactionContext sendSipMessageAndWait(SipMessage message) throws SipException {
+		return sendSipMessageAndWait(message, SipManager.TIMEOUT);
 	}
-    
+
 	/**
 	 * Send a SIP message and create a context to wait for response
 	 * 
@@ -175,11 +184,11 @@ public class SipManager {
 	 * @return SIP transaction context
 	 * @throws SipException
 	 */
-	public SipTransactionContext sendSipMessageAndWait(SipMessage message, int timeout, SipTransactionContext.INotifySipProvisionalResponse callback)
-			throws SipException {
-        if (sipstack == null) {
+	public SipTransactionContext sendSipMessageAndWait(SipMessage message, int timeout,
+			SipTransactionContext.INotifySipProvisionalResponse callback) throws SipException {
+		if (sipstack == null) {
 			throw new SipException("Stack not initialized");
-        }
+		}
 		SipTransactionContext ctx = sipstack.sendSipMessageAndWait(message, callback);
 
 		// wait the response
@@ -188,13 +197,13 @@ public class SipManager {
 		if (!(message instanceof SipRequest) || !ctx.isSipResponse()) {
 			// Return the transaction context
 			return ctx;
-			
+
 		}
 		String method = ((SipRequest) message).getMethod();
 		SipResponse response = ctx.getSipResponse();
 		if (response == null) {
 			return ctx;
-			
+
 		}
 		// Analyze the received response
 		if (!Request.REGISTER.equals(method)) {
@@ -206,21 +215,22 @@ public class SipManager {
 
 				if (callback == null) {
 					throw new SipException("Not registered");
-					
+
 				}
 			}
 		}
 		if (!Request.INVITE.equals(method) && !Request.REGISTER.equals(method)) {
 			return ctx;
-			
+
 		}
-		
-		KeepAliveManager keepAliveManager = networkInterface.getSipManager().getSipStack().getKeepAliveManager();
+
+		KeepAliveManager keepAliveManager = networkInterface.getSipManager().getSipStack()
+				.getKeepAliveManager();
 		if (keepAliveManager == null) {
 			return ctx;
-			
+
 		}
-		
+
 		// Message is a response to INVITE or REGISTER: analyze "keep" flag of "Via" header
 		int viaKeep = -1;
 		RcsSettings rcsSettings = RcsSettings.getInstance();
@@ -228,14 +238,14 @@ public class SipManager {
 		if (!iterator.hasNext()) {
 			keepAliveManager.setPeriod(rcsSettings.getSipKeepAlivePeriod());
 			return ctx;
-			
+
 		}
 		ViaHeader respViaHeader = iterator.next();
 		String keepStr = respViaHeader.getParameter("keep");
 		if (keepStr == null) {
 			keepAliveManager.setPeriod(rcsSettings.getSipKeepAlivePeriod());
 			return ctx;
-			
+
 		}
 		try {
 			viaKeep = Integer.parseInt(keepStr);
@@ -257,27 +267,30 @@ public class SipManager {
 
 		// Return the transaction context
 		return ctx;
-    }
-    
-    /**
-     * Send a SIP message and create a context to wait a response
-     *
-     * @param message SIP message
-     * @param timeout SIP timeout
-     * @return Transaction context
-     * @throws SipException
-     */
-    public SipTransactionContext sendSipMessageAndWait(SipMessage message, int timeout) throws SipException {
-        return sendSipMessageAndWait(message, timeout, null);
 	}
 
+	/**
+	 * Send a SIP message and create a context to wait a response
+	 *
+	 * @param message
+	 *            SIP message
+	 * @param timeout
+	 *            SIP timeout
+	 * @return Transaction context
+	 * @throws SipException
+	 */
+	public SipTransactionContext sendSipMessageAndWait(SipMessage message, int timeout)
+			throws SipException {
+		return sendSipMessageAndWait(message, timeout, null);
+	}
 
 	/**
-     * Send a SIP response
-     *
-     * @param response SIP response
-     * @throws SipException
-     */
+	 * Send a SIP response
+	 *
+	 * @param response
+	 *            SIP response
+	 * @throws SipException
+	 */
 	public void sendSipResponse(SipResponse response) throws SipException {
 		if (sipstack != null) {
 			sipstack.sendSipResponse(response);
@@ -286,12 +299,13 @@ public class SipManager {
 		}
 	}
 
-    /**
-     * Send a SIP ACK
-     *
-     * @param dialog Dialog path
-     * @throws SipException
-     */
+	/**
+	 * Send a SIP ACK
+	 *
+	 * @param dialog
+	 *            Dialog path
+	 * @throws SipException
+	 */
 	public void sendSipAck(SipDialogPath dialog) throws SipException {
 		if (sipstack != null) {
 			sipstack.sendSipAck(dialog);
@@ -300,12 +314,13 @@ public class SipManager {
 		}
 	}
 
-    /**
-     * Send a SIP BYE
-     *
-     * @param dialog Dialog path
-     * @throws SipException
-     */
+	/**
+	 * Send a SIP BYE
+	 *
+	 * @param dialog
+	 *            Dialog path
+	 * @throws SipException
+	 */
 	public void sendSipBye(SipDialogPath dialog) throws SipException {
 		if (sipstack != null) {
 			sipstack.sendSipBye(dialog);
@@ -314,12 +329,13 @@ public class SipManager {
 		}
 	}
 
-    /**
-     * Send a SIP CANCEL
-     *
-     * @param dialog Dialog path
-     * @throws SipException
-     */
+	/**
+	 * Send a SIP CANCEL
+	 *
+	 * @param dialog
+	 *            Dialog path
+	 * @throws SipException
+	 */
 	public void sendSipCancel(SipDialogPath dialog) throws SipException {
 		if (sipstack != null) {
 			sipstack.sendSipCancel(dialog);
@@ -328,46 +344,54 @@ public class SipManager {
 		}
 	}
 
-    /**
-     * Send a subsequent SIP request
-     *
-     * @param dialog Dialog path
-     * @param request Request
-     * @throws SipException
-     */
-	public SipTransactionContext sendSubsequentRequest(SipDialogPath dialog, SipRequest request) throws SipException {
+	/**
+	 * Send a subsequent SIP request
+	 *
+	 * @param dialog
+	 *            Dialog path
+	 * @param request
+	 *            Request
+	 * @throws SipException
+	 */
+	public SipTransactionContext sendSubsequentRequest(SipDialogPath dialog, SipRequest request)
+			throws SipException {
 		return sendSubsequentRequest(dialog, request, SipManager.TIMEOUT);
 	}
-	
+
 	/**
-     * Send a subsequent SIP request
-     *
-     * @param dialog Dialog path
-     * @param request Request
-     * @param timeout SIP timeout
-     * @throws SipException
-     */
-	public SipTransactionContext sendSubsequentRequest(SipDialogPath dialog, SipRequest request, int timeout) throws SipException {
+	 * Send a subsequent SIP request
+	 *
+	 * @param dialog
+	 *            Dialog path
+	 * @param request
+	 *            Request
+	 * @param timeout
+	 *            SIP timeout
+	 * @throws SipException
+	 */
+	public SipTransactionContext sendSubsequentRequest(SipDialogPath dialog, SipRequest request,
+			int timeout) throws SipException {
 		if (sipstack != null) {
-		    SipTransactionContext ctx = sipstack.sendSubsequentRequest(dialog, request);
+			SipTransactionContext ctx = sipstack.sendSubsequentRequest(dialog, request);
 
-            // wait the response
-            ctx.waitResponse(timeout);
+			// wait the response
+			ctx.waitResponse(timeout);
 
-            // Analyze the received response
-            if (ctx.isSipResponse()) {
-                int code = ctx.getStatusCode();
-                // Check if not registered and warning header
-                WarningHeader warn = (WarningHeader)ctx.getSipResponse().getHeader(WarningHeader.NAME);
-                if ((code == 403) && (warn == null)) {
-                    // Launch new registration
-                    networkInterface.getRegistrationManager().restart();
+			// Analyze the received response
+			if (ctx.isSipResponse()) {
+				int code = ctx.getStatusCode();
+				// Check if not registered and warning header
+				WarningHeader warn = (WarningHeader) ctx.getSipResponse().getHeader(
+						WarningHeader.NAME);
+				if ((code == 403) && (warn == null)) {
+					// Launch new registration
+					networkInterface.getRegistrationManager().restart();
 
-                    // Throw not registered exception 
-                    throw new SipException("Not registered");
-                }
-            }
-            return ctx;
+					// Throw not registered exception
+					throw new SipException("Not registered");
+				}
+			}
+			return ctx;
 		} else {
 			throw new SipException("Stack not initialized");
 		}

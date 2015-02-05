@@ -47,145 +47,151 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public class ServiceConfigurationActivity extends Activity {
 
-	/**
-	 * The log tag for this class
-	 */
-	private static final String LOGTAG = LogUtils.getTag(ServiceConfigurationActivity.class
-			.getSimpleName());
+    /**
+     * The log tag for this class
+     */
+    private static final String LOGTAG = LogUtils.getTag(ServiceConfigurationActivity.class
+            .getSimpleName());
 
-	private static final String[] DEF_MSG_METHOD = new String[] { MessagingMethod.AUTOMATIC.name(),
-			MessagingMethod.RCS.name(), MessagingMethod.NON_RCS.name() };
+    private static final String[] DEF_MSG_METHOD = new String[] {
+            MessagingMethod.AUTOMATIC.name(), MessagingMethod.RCS.name(),
+            MessagingMethod.NON_RCS.name()
+    };
 
-	/**
-	 * API connection manager
-	 */
-	private ApiConnectionManager mCnxManager;
+    /**
+     * API connection manager
+     */
+    private ApiConnectionManager mCnxManager;
 
-	/**
-	 * A locker to exit only once
-	 */
-	private LockAccess mExitOnce = new LockAccess();
+    /**
+     * A locker to exit only once
+     */
+    private LockAccess mExitOnce = new LockAccess();
 
-	private Spinner mSpinnerDefMessaginMethod;
-	private TextView mTextEditDisplayName;
-	private CheckBox mCheckBoxIsConfigValid;
-	private TextView mTextEditMessagingUX;
-	private TextView mTextEditContactId;
+    private Spinner mSpinnerDefMessaginMethod;
 
-	private CommonServiceConfiguration mConfiguration;
+    private TextView mTextEditDisplayName;
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    private CheckBox mCheckBoxIsConfigValid;
 
-		// Set layout
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		setContentView(R.layout.service_configuration);
+    private TextView mTextEditMessagingUX;
 
-		// Register to API connection manager
-		mCnxManager = ApiConnectionManager.getInstance(this);
-		if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CONTACTS)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
-					mExitOnce);
-			return;
+    private TextView mTextEditContactId;
 
-		}
-		try {
-			mConfiguration = mCnxManager.getContactsApi().getCommonConfiguration();
-		} catch (RcsServiceException e1) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce);
-			return;
+    private CommonServiceConfiguration mConfiguration;
 
-		}
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-		mCheckBoxIsConfigValid = (CheckBox) findViewById(R.id.label_service_configuration_valid);
-		mTextEditMessagingUX = (TextView) findViewById(R.id.label_messaging_mode);
-		mTextEditContactId = (TextView) findViewById(R.id.label_my_contact_id);
-		mTextEditDisplayName = (TextView) findViewById(R.id.text_my_display_name);
+        // Set layout
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setContentView(R.layout.service_configuration);
 
-		mSpinnerDefMessaginMethod = (Spinner) findViewById(R.id.spinner_default_messaging_method);
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-				android.R.layout.simple_spinner_item, DEF_MSG_METHOD);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		mSpinnerDefMessaginMethod.setAdapter(adapter);
+        // Register to API connection manager
+        mCnxManager = ApiConnectionManager.getInstance(this);
+        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CONTACTS)) {
+            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
+                    mExitOnce);
+            return;
 
-		mSpinnerDefMessaginMethod.setOnItemSelectedListener(new OnItemSelectedListener() {
+        }
+        try {
+            mConfiguration = mCnxManager.getContactsApi().getCommonConfiguration();
+        } catch (RcsServiceException e1) {
+            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce);
+            return;
 
-			@Override
-			public void onItemSelected(AdapterView<?> parentView, View selectedItemView,
-					int position, long id) {
-				MessagingMethod method = MessagingMethod.valueOf(mSpinnerDefMessaginMethod
-						.getSelectedItemPosition());
-				try {
-					MessagingMethod oldMethod = mConfiguration.getDefaultMessagingMethod();
-					if (!oldMethod.equals(method)) {
-						mConfiguration.setDefaultMessagingMethod(method);
-						if (LogUtils.isActive) {
-							Log.d(LOGTAG,
-									"onClick DefaultMessagingMethod ".concat(method.toString()));
-						}
-					}
-				} catch (RcsServiceException e) {
-					Utils.showMessageAndExit(ServiceConfigurationActivity.this,
-							getString(R.string.label_api_failed), mExitOnce, e);
-				}
+        }
 
-			}
+        mCheckBoxIsConfigValid = (CheckBox)findViewById(R.id.label_service_configuration_valid);
+        mTextEditMessagingUX = (TextView)findViewById(R.id.label_messaging_mode);
+        mTextEditContactId = (TextView)findViewById(R.id.label_my_contact_id);
+        mTextEditDisplayName = (TextView)findViewById(R.id.text_my_display_name);
 
-			@Override
-			public void onNothingSelected(AdapterView<?> parentView) {
-			}
-		});
+        mSpinnerDefMessaginMethod = (Spinner)findViewById(R.id.spinner_default_messaging_method);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, DEF_MSG_METHOD);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSpinnerDefMessaginMethod.setAdapter(adapter);
 
-		mCnxManager.startMonitorServices(this, null, RcsServiceName.CONTACTS);
+        mSpinnerDefMessaginMethod.setOnItemSelectedListener(new OnItemSelectedListener() {
 
-		if (LogUtils.isActive) {
-			Log.d(LOGTAG, "onCreate");
-		}
-	}
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView,
+                    int position, long id) {
+                MessagingMethod method = MessagingMethod.valueOf(mSpinnerDefMessaginMethod
+                        .getSelectedItemPosition());
+                try {
+                    MessagingMethod oldMethod = mConfiguration.getDefaultMessagingMethod();
+                    if (!oldMethod.equals(method)) {
+                        mConfiguration.setDefaultMessagingMethod(method);
+                        if (LogUtils.isActive) {
+                            Log.d(LOGTAG,
+                                    "onClick DefaultMessagingMethod ".concat(method.toString()));
+                        }
+                    }
+                } catch (RcsServiceException e) {
+                    Utils.showMessageAndExit(ServiceConfigurationActivity.this,
+                            getString(R.string.label_api_failed), mExitOnce, e);
+                }
 
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		
-		String newDisplayName = mTextEditDisplayName.getText().toString();
-		setDisplayName(newDisplayName);
-		
-		if (mCnxManager == null) {
-			return;
-		}
-		mCnxManager.stopMonitorServices(this);
-	}
-	
-	@Override
-	protected void onResume() {
-		super.onResume();
-		displayServiceConfiguration();
-	}
+            }
 
-	private void displayServiceConfiguration() {
-		try {
-			mCheckBoxIsConfigValid.setChecked(mConfiguration.isConfigValid());
-			mSpinnerDefMessaginMethod.setSelection(mConfiguration.getDefaultMessagingMethod()
-					.toInt());
-			mTextEditMessagingUX.setText(mConfiguration.getMessagingUX().name());
-			mTextEditDisplayName.setText(mConfiguration.getMyDisplayName());
-			mTextEditContactId.setText(mConfiguration.getMyContactId().toString());
-		} catch (RcsServiceException e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
-		}
-	}
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+            }
+        });
 
-	private void setDisplayName(String newDisplayName) {
-		if (LogUtils.isActive) {
-			Log.d(LOGTAG, "Refresh display name to ".concat(newDisplayName));
-		}
-		try {
-			mConfiguration.setMyDisplayName(newDisplayName);
-		} catch (RcsServiceException e) {
-			if (LogUtils.isActive) {
-				Log.e(LOGTAG, "Exception occurred", e);
-			}
-		}
-	}
+        mCnxManager.startMonitorServices(this, null, RcsServiceName.CONTACTS);
+
+        if (LogUtils.isActive) {
+            Log.d(LOGTAG, "onCreate");
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        String newDisplayName = mTextEditDisplayName.getText().toString();
+        setDisplayName(newDisplayName);
+
+        if (mCnxManager == null) {
+            return;
+        }
+        mCnxManager.stopMonitorServices(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        displayServiceConfiguration();
+    }
+
+    private void displayServiceConfiguration() {
+        try {
+            mCheckBoxIsConfigValid.setChecked(mConfiguration.isConfigValid());
+            mSpinnerDefMessaginMethod.setSelection(mConfiguration.getDefaultMessagingMethod()
+                    .toInt());
+            mTextEditMessagingUX.setText(mConfiguration.getMessagingUX().name());
+            mTextEditDisplayName.setText(mConfiguration.getMyDisplayName());
+            mTextEditContactId.setText(mConfiguration.getMyContactId().toString());
+        } catch (RcsServiceException e) {
+            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+        }
+    }
+
+    private void setDisplayName(String newDisplayName) {
+        if (LogUtils.isActive) {
+            Log.d(LOGTAG, "Refresh display name to ".concat(newDisplayName));
+        }
+        try {
+            mConfiguration.setMyDisplayName(newDisplayName);
+        } catch (RcsServiceException e) {
+            if (LogUtils.isActive) {
+                Log.e(LOGTAG, "Exception occurred", e);
+            }
+        }
+    }
 }

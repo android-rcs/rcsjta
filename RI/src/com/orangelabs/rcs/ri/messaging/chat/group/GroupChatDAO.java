@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.messaging.chat.group;
 
 import android.content.Context;
@@ -30,137 +31,139 @@ import com.gsma.services.rcs.chat.ChatLog;
  * Group CHAT Data Object
  * 
  * @author YPLO6403
- * 
  */
 public class GroupChatDAO implements Parcelable {
 
-	private String mChatId;
-	
-	private Direction mDirection;
-	
-	private String mParticipants;
-	
-	private int mState;
-	
-	private String mSubject;
-	
-	private long mTimestamp;
-	
-	private int mReasonCode;
+    private String mChatId;
 
-	private static final String WHERE_CLAUSE = ChatLog.GroupChat.CHAT_ID.concat("=?");
+    private Direction mDirection;
 
-	public int getState() {
-		return mState;
-	}
+    private String mParticipants;
 
-	public String getChatId() {
-		return mChatId;
-	}
+    private int mState;
 
-	public String getParticipants() {
-		return mParticipants;
-	}
+    private String mSubject;
 
-	public String getSubject() {
-		return mSubject;
-	}
+    private long mTimestamp;
 
-	public Direction getDirection() {
-		return mDirection;
-	}
+    private int mReasonCode;
 
-	public long getTimestamp() {
-		return mTimestamp;
-	}
+    private static final String WHERE_CLAUSE = ChatLog.GroupChat.CHAT_ID.concat("=?");
 
-	public int getReasonCode() {
-		return mReasonCode;
-	}
+    public int getState() {
+        return mState;
+    }
 
-	/**
-	 * Constructor
-	 * 
-	 * @param source
-	 *            Parcelable source
-	 */
-	public GroupChatDAO(Parcel source) {
-		mChatId = source.readString();
-		mState = source.readInt();
-		mDirection = Direction.valueOf(source.readInt());
-		mTimestamp = source.readLong();
-		mSubject = source.readString();
-		mParticipants = source.readString();
-		mReasonCode = source.readInt();
-	}
-	
-	@Override
-	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeString(mChatId);
-		dest.writeInt(mState);
-		dest.writeInt(mDirection.toInt());
-		dest.writeLong(mTimestamp);
-		dest.writeString(mSubject);
-		dest.writeString(mParticipants);
-		dest.writeInt(mReasonCode);
-	};
+    public String getChatId() {
+        return mChatId;
+    }
 
-	/**
-	 * Construct the Group CHAT data object from the provider
-	 * <p>
-	 * Note: to change with CR025 (enums)
-	 * 
-	 * @param context
-	 * @param chatId
-	 * @throws Exception
-	 */
-	public GroupChatDAO(final Context context, final String chatId) throws Exception {
-		Uri uri = ChatLog.GroupChat.CONTENT_URI;
-		String[] whereArgs = new String[] { chatId };
-		Cursor cursor = null;
-		try {
-			cursor = context.getContentResolver().query(uri, null, WHERE_CLAUSE, whereArgs, null);
-			if (!cursor.moveToFirst()) {
-				throw new IllegalArgumentException("ChatId not found");
-			}
-			this.mChatId = chatId;
-			mSubject = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.SUBJECT));
-			mState = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.STATE));
-			mDirection = Direction.valueOf(cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.DIRECTION)));
-			mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.TIMESTAMP));
-			mParticipants = cursor.getString(cursor
-					.getColumnIndexOrThrow(ChatLog.GroupChat.PARTICIPANTS));
-			mReasonCode = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.REASON_CODE));
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			if (cursor != null) {
-				cursor.close();
-			}
-		}
-	}
+    public String getParticipants() {
+        return mParticipants;
+    }
 
-	@Override
-	public int describeContents() {
-		return 0;
-	}
+    public String getSubject() {
+        return mSubject;
+    }
 
-	public static final Parcelable.Creator<GroupChatDAO> CREATOR = new Parcelable.Creator<GroupChatDAO>() {
-		@Override
-		public GroupChatDAO createFromParcel(Parcel in) {
-			return new GroupChatDAO(in);
-		}
+    public Direction getDirection() {
+        return mDirection;
+    }
 
-		@Override
-		public GroupChatDAO[] newArray(int size) {
-			return new GroupChatDAO[size];
-		}
-	};
+    public long getTimestamp() {
+        return mTimestamp;
+    }
 
-	@Override
-	public String toString() {
-		return "GroupChatDAO [chatId=" + mChatId + ", direction=" + mDirection + ", state=" + mState + ", subject=" + mSubject + "]";
-	}
-	
-	
+    public int getReasonCode() {
+        return mReasonCode;
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param source Parcelable source
+     */
+    public GroupChatDAO(Parcel source) {
+        mChatId = source.readString();
+        mState = source.readInt();
+        mDirection = Direction.valueOf(source.readInt());
+        mTimestamp = source.readLong();
+        mSubject = source.readString();
+        mParticipants = source.readString();
+        mReasonCode = source.readInt();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mChatId);
+        dest.writeInt(mState);
+        dest.writeInt(mDirection.toInt());
+        dest.writeLong(mTimestamp);
+        dest.writeString(mSubject);
+        dest.writeString(mParticipants);
+        dest.writeInt(mReasonCode);
+    };
+
+    /**
+     * Construct the Group CHAT data object from the provider
+     * <p>
+     * Note: to change with CR025 (enums)
+     * 
+     * @param context
+     * @param chatId
+     * @throws Exception
+     */
+    public GroupChatDAO(final Context context, final String chatId) throws Exception {
+        Uri uri = ChatLog.GroupChat.CONTENT_URI;
+        String[] whereArgs = new String[] {
+            chatId
+        };
+        Cursor cursor = null;
+        try {
+            cursor = context.getContentResolver().query(uri, null, WHERE_CLAUSE, whereArgs, null);
+            if (!cursor.moveToFirst()) {
+                throw new IllegalArgumentException("ChatId not found");
+            }
+            this.mChatId = chatId;
+            mSubject = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.SUBJECT));
+            mState = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.STATE));
+            mDirection = Direction.valueOf(cursor.getInt(cursor
+                    .getColumnIndexOrThrow(ChatLog.GroupChat.DIRECTION)));
+            mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.TIMESTAMP));
+            mParticipants = cursor.getString(cursor
+                    .getColumnIndexOrThrow(ChatLog.GroupChat.PARTICIPANTS));
+            mReasonCode = cursor
+                    .getInt(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.REASON_CODE));
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Parcelable.Creator<GroupChatDAO> CREATOR = new Parcelable.Creator<GroupChatDAO>() {
+        @Override
+        public GroupChatDAO createFromParcel(Parcel in) {
+            return new GroupChatDAO(in);
+        }
+
+        @Override
+        public GroupChatDAO[] newArray(int size) {
+            return new GroupChatDAO[size];
+        }
+    };
+
+    @Override
+    public String toString() {
+        return "GroupChatDAO [chatId=" + mChatId + ", direction=" + mDirection + ", state="
+                + mState + ", subject=" + mSubject + "]";
+    }
+
 }

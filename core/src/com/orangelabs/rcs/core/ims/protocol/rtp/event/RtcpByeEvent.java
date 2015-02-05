@@ -30,7 +30,8 @@ public class RtcpByeEvent extends RtcpEvent {
 	/**
 	 * Constructor
 	 * 
-	 * @param packet RTCP BYE packet
+	 * @param packet
+	 *            RTCP BYE packet
 	 */
 	public RtcpByeEvent(RtcpByePacket packet) {
 		super(packet);

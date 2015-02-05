@@ -46,7 +46,8 @@ import android.content.Intent;
  *
  * @author Jean-Marc AUFFRET
  */
-public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.Stub implements SipSessionListener {
+public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.Stub implements
+		SipSessionListener {
 
 	private final String mSessionId;
 
@@ -60,8 +61,8 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 	 * Lock used for synchronization
 	 */
 	private final Object lock = new Object();
-	
-    /**
+
+	/**
 	 * The logger
 	 */
 	private final Logger logger = Logger.getLogger(getClass().getName());
@@ -69,14 +70,17 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 	/**
 	 * Constructor
 	 * 
-	 * @param sessionId Session Id
-	 * @param broadcaster IMultimediaStreamingSessionEventBroadcaster
-	 * @param sipService SipService
-	 * @param multimediaSessionService MultimediaSessionServiceImpl
+	 * @param sessionId
+	 *            Session Id
+	 * @param broadcaster
+	 *            IMultimediaStreamingSessionEventBroadcaster
+	 * @param sipService
+	 *            SipService
+	 * @param multimediaSessionService
+	 *            MultimediaSessionServiceImpl
 	 */
 	public MultimediaStreamingSessionImpl(String sessionId,
-			IMultimediaStreamingSessionEventBroadcaster broadcaster,
-			SipService sipService,
+			IMultimediaStreamingSessionEventBroadcaster broadcaster, SipService sipService,
 			MultimediaSessionServiceImpl multimediaSessionService) {
 		mSessionId = sessionId;
 		mBroadcaster = broadcaster;
@@ -97,7 +101,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		}
 	}
 
-    /**
+	/**
 	 * Returns the session ID of the multimedia session
 	 * 
 	 * @return Session ID
@@ -115,8 +119,8 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		GenericSipRtpSession session = mSipService.getGenericSipRtpSession(mSessionId);
 		if (session == null) {
 			/*
-			 * TODO: Throw correct exception as part of CR037 as persisted storage not
-			 * available for this service!
+			 * TODO: Throw correct exception as part of CR037 as persisted storage not available for
+			 * this service!
 			 */
 			throw new IllegalStateException(
 					"Unable to retrieve contact since session with session ID '" + mSessionId
@@ -125,7 +129,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 
 		return session.getRemoteContact();
 	}
-	
+
 	/**
 	 * Returns the state of the session
 	 * 
@@ -135,8 +139,8 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		GenericSipRtpSession session = mSipService.getGenericSipRtpSession(mSessionId);
 		if (session == null) {
 			/*
-			 * TODO: Throw correct exception as part of CR037 as persisted storage not
-			 * available for this service!
+			 * TODO: Throw correct exception as part of CR037 as persisted storage not available for
+			 * this service!
 			 */
 			throw new IllegalStateException(
 					"Unable to retrieve state since session with session ID '" + mSessionId
@@ -173,8 +177,8 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		GenericSipRtpSession session = mSipService.getGenericSipRtpSession(mSessionId);
 		if (session == null) {
 			/*
-			 * TODO: Throw correct exception as part of CR037 as persisted storage not
-			 * available for this service!
+			 * TODO: Throw correct exception as part of CR037 as persisted storage not available for
+			 * this service!
 			 */
 			throw new IllegalStateException(
 					"Unable to retrieve direction since session with session ID '" + mSessionId
@@ -185,7 +189,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		}
 		return Direction.OUTGOING.toInt();
 	}
-	
+
 	/**
 	 * Returns the service ID
 	 * 
@@ -195,8 +199,8 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		GenericSipRtpSession session = mSipService.getGenericSipRtpSession(mSessionId);
 		if (session == null) {
 			/*
-			 * TODO: Throw correct exception as part of CR037 as persisted storage not
-			 * available for this service!
+			 * TODO: Throw correct exception as part of CR037 as persisted storage not available for
+			 * this service!
 			 */
 			throw new IllegalStateException(
 					"Unable to retrieve service Id since session with session ID '" + mSessionId
@@ -204,8 +208,8 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		}
 
 		return session.getServiceId();
-	}	
-	
+	}
+
 	/**
 	 * Accepts session invitation
 	 * 
@@ -228,19 +232,19 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		ServerApiUtils.testApiExtensionPermission(session.getServiceId());
 
 		// Accept invitation
-        new Thread() {
-    		public void run() {
-    			session.acceptSession();
-    		}
-    	}.start();
+		new Thread() {
+			public void run() {
+				session.acceptSession();
+			}
+		}.start();
 	}
 
 	/**
 	 * Rejects session invitation
 	 * 
-	 * @throws ServerApiException 
+	 * @throws ServerApiException
 	 */
-	public void rejectInvitation() throws ServerApiException  {
+	public void rejectInvitation() throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Reject session invitation");
 		}
@@ -257,19 +261,19 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		ServerApiUtils.testApiExtensionPermission(session.getServiceId());
 
 		// Reject invitation
-        new Thread() {
-    		public void run() {
-    			session.rejectSession(Response.DECLINE);
-    		}
-    	}.start();
-    }
+		new Thread() {
+			public void run() {
+				session.rejectSession(Response.DECLINE);
+			}
+		}.start();
+	}
 
 	/**
 	 * Aborts the session
 	 * 
 	 * @throws ServerApiException
 	 */
-	public void abortSession() throws ServerApiException  {
+	public void abortSession() throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Cancel session");
 		}
@@ -286,17 +290,18 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		ServerApiUtils.testApiExtensionPermission(session.getServiceId());
 
 		// Abort the session
-        new Thread() {
-    		public void run() {
-    			session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
-    		}
-    	}.start();
+		new Thread() {
+			public void run() {
+				session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+			}
+		}.start();
 	}
 
 	/**
 	 * Sends a payload in real time
 	 * 
-	 * @param content Payload content
+	 * @param content
+	 *            Payload content
 	 * @throws ServerApiException
 	 */
 	public void sendPayload(byte[] content) throws ServerApiException {
@@ -318,8 +323,8 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 		}
 
 	}
-	
-    /*------------------------------- SESSION EVENTS ----------------------------------*/
+
+	/*------------------------------- SESSION EVENTS ----------------------------------*/
 
 	/**
 	 * Session is started
@@ -336,7 +341,9 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 
 	/**
 	 * Session has been aborted
-	 * @param reason Termination reason
+	 * 
+	 * @param reason
+	 *            Termination reason
 	 */
 	public void handleSessionAborted(ContactId contact, int reason) {
 		if (logger.isActivated()) {
@@ -365,13 +372,16 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 					MultimediaSession.State.ABORTED, ReasonCode.UNSPECIFIED);
 		}
 	}
-    
-    /**
-     * Session error
-     * @param contact Remote contact
-     * @param error Error
-     */
-    public void handleSessionError(ContactId contact, SipSessionError error) {
+
+	/**
+	 * Session error
+	 * 
+	 * @param contact
+	 *            Remote contact
+	 * @param error
+	 *            Error
+	 */
+	public void handleSessionError(ContactId contact, SipSessionError error) {
 		if (logger.isActivated()) {
 			logger.info("Session error " + error.getErrorCode());
 		}
@@ -379,31 +389,33 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
 			mMultimediaSessionService.removeMultimediaStreaming(mSessionId);
 
 			switch (error.getErrorCode()) {
-				case SipSessionError.SESSION_INITIATION_DECLINED:
-					mBroadcaster.broadcastStateChanged(contact, mSessionId,
-							MultimediaSession.State.REJECTED, ReasonCode.REJECTED_BY_REMOTE);
-					break;
-				case SipSessionError.MEDIA_FAILED:
-					mBroadcaster.broadcastStateChanged(contact, mSessionId,
-							MultimediaSession.State.FAILED, ReasonCode.FAILED_MEDIA);
-					break;
-				default:
-					mBroadcaster.broadcastStateChanged(contact, mSessionId,
-							MultimediaSession.State.FAILED, ReasonCode.FAILED_SESSION);
+			case SipSessionError.SESSION_INITIATION_DECLINED:
+				mBroadcaster.broadcastStateChanged(contact, mSessionId,
+						MultimediaSession.State.REJECTED, ReasonCode.REJECTED_BY_REMOTE);
+				break;
+			case SipSessionError.MEDIA_FAILED:
+				mBroadcaster.broadcastStateChanged(contact, mSessionId,
+						MultimediaSession.State.FAILED, ReasonCode.FAILED_MEDIA);
+				break;
+			default:
+				mBroadcaster.broadcastStateChanged(contact, mSessionId,
+						MultimediaSession.State.FAILED, ReasonCode.FAILED_SESSION);
 			}
 		}
 	}
-    
-    /**
-     * Receive data
-     * @param data Data
-     * @param contact
-     */
-    public void handleReceiveData(ContactId contact, byte[] data) {
+
+	/**
+	 * Receive data
+	 * 
+	 * @param data
+	 *            Data
+	 * @param contact
+	 */
+	public void handleReceiveData(ContactId contact, byte[] data) {
 		synchronized (lock) {
 			mBroadcaster.broadcastPayloadReceived(contact, mSessionId, data);
 		}
-    }
+	}
 
 	@Override
 	public void handleSessionAccepted(ContactId contact) {

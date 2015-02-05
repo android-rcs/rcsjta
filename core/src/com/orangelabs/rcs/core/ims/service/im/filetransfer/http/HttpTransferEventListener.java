@@ -27,36 +27,38 @@ package com.orangelabs.rcs.core.ims.service.im.filetransfer.http;
  * @author B. JOGUET
  */
 public interface HttpTransferEventListener {
-    /**
-     * HTTP transfer started
-     */
-    public void httpTransferStarted();
-    
-    /**
-     * HTTP transfer paused by user
-     */
-    public void httpTransferPausedByUser();
-    
-    /**
-     * HTTP transfer paused by system
-     */
-    public void httpTransferPausedBySystem();
-    
-    /**
-     * HTTP transfer resumed
-     */
-    public void httpTransferResumed();
+	/**
+	 * HTTP transfer started
+	 */
+	public void httpTransferStarted();
 
-    /**
-     * HTTP transfer progress
-     *
-     * @param currentSize Current transfered size in bytes
-     * @param totalSize Total size in bytes
-     */
-    public void httpTransferProgress(long currentSize, long totalSize);
+	/**
+	 * HTTP transfer paused by user
+	 */
+	public void httpTransferPausedByUser();
 
-    /**
-     * HTTP transfer not allowed to send
-     */
-    public void httpTransferNotAllowedToSend();
+	/**
+	 * HTTP transfer paused by system
+	 */
+	public void httpTransferPausedBySystem();
+
+	/**
+	 * HTTP transfer resumed
+	 */
+	public void httpTransferResumed();
+
+	/**
+	 * HTTP transfer progress
+	 *
+	 * @param currentSize
+	 *            Current transfered size in bytes
+	 * @param totalSize
+	 *            Total size in bytes
+	 */
+	public void httpTransferProgress(long currentSize, long totalSize);
+
+	/**
+	 * HTTP transfer not allowed to send
+	 */
+	public void httpTransferNotAllowedToSend();
 }

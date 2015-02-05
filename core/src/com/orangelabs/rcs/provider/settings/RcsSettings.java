@@ -64,7 +64,8 @@ public class RcsSettings {
 	 */
 	private static final int GROUP_CHAT_SUBJECT_MAX_LENGTH = 50;
 
-	private static final String WHERE_CLAUSE = new StringBuilder(RcsSettingsData.KEY_KEY).append("=?").toString();
+	private static final String WHERE_CLAUSE = new StringBuilder(RcsSettingsData.KEY_KEY).append(
+			"=?").toString();
 
 	/**
 	 * Current instance
@@ -79,7 +80,7 @@ public class RcsSettings {
 	/**
 	 * A cache for storing settings in order to increase performance
 	 */
-	final private Map<String,String> mCache;
+	final private Map<String, String> mCache;
 
 	/**
 	 * Create instance
@@ -93,7 +94,8 @@ public class RcsSettings {
 		}
 		synchronized (RcsSettings.class) {
 			if (instance == null) {
-				instance = new RcsSettings(ctx);;
+				instance = new RcsSettings(ctx);
+				;
 			}
 		}
 	}
@@ -156,7 +158,7 @@ public class RcsSettings {
 	private int readInteger(String key) {
 		return Integer.parseInt(readParameter(key));
 	}
-	
+
 	/**
 	 * Read long parameter
 	 * <p>
@@ -205,7 +207,7 @@ public class RcsSettings {
 	public void writeLong(String key, Long value) {
 		writeParameter(key, value.toString());
 	}
-	
+
 	/**
 	 * Read a parameter
 	 *
@@ -227,7 +229,8 @@ public class RcsSettings {
 		Cursor c = null;
 		try {
 			String[] whereArg = new String[] { key };
-			c = mContentResolver.query(RcsSettingsData.CONTENT_URI, null, WHERE_CLAUSE, whereArg, null);
+			c = mContentResolver.query(RcsSettingsData.CONTENT_URI, null, WHERE_CLAUSE, whereArg,
+					null);
 			if (!c.moveToFirst()) {
 				throw new IllegalArgumentException("Illegal setting key:".concat(key));
 			}
@@ -256,7 +259,8 @@ public class RcsSettings {
 		ContentValues values = new ContentValues();
 		values.put(RcsSettingsData.KEY_VALUE, value);
 		String[] whereArgs = new String[] { key };
-		int count = mContentResolver.update(RcsSettingsData.CONTENT_URI, values, WHERE_CLAUSE, whereArgs);
+		int count = mContentResolver.update(RcsSettingsData.CONTENT_URI, values, WHERE_CLAUSE,
+				whereArgs);
 		if (count != 0) {
 			// Put in cache
 			mCache.put(key, value);
@@ -616,7 +620,8 @@ public class RcsSettings {
 
 	/**
 	 * Set the value of the MSISDN
-	 * @param value 
+	 * 
+	 * @param value
 	 */
 	public void setMsisdn(String value) {
 		writeParameter(RcsSettingsData.MSISDN, value);
@@ -1006,13 +1011,14 @@ public class RcsSettings {
 
 	/**
 	 * Sets max photo-icon size
-	 * @param size 
+	 * 
+	 * @param size
 	 *
 	 */
 	public void setMaxPhotoIconSize(long size) {
 		writeLong(RcsSettingsData.MAX_PHOTO_ICON_SIZE, size);
 	}
-	
+
 	/**
 	 * Get max freetext length
 	 *
@@ -1076,13 +1082,14 @@ public class RcsSettings {
 
 	/**
 	 * Sets warning threshold for max file transfer size
-	 * @param size 
+	 * 
+	 * @param size
 	 *
 	 */
 	public void setMaxFileTransferSize(long size) {
 		writeLong(RcsSettingsData.MAX_FILE_TRANSFER_SIZE, size);
 	}
-	
+
 	/**
 	 * Get warning threshold for max file transfer size
 	 *
@@ -1091,10 +1098,11 @@ public class RcsSettings {
 	public long getWarningMaxFileTransferSize() {
 		return readLong(RcsSettingsData.WARN_FILE_TRANSFER_SIZE);
 	}
-	
+
 	/**
 	 * Sets warning threshold for max file transfer size
-	 * @param size 
+	 * 
+	 * @param size
 	 *
 	 */
 	public void setWarningMaxFileTransferSize(long size) {
@@ -1109,10 +1117,11 @@ public class RcsSettings {
 	public long getMaxImageSharingSize() {
 		return readLong(RcsSettingsData.MAX_IMAGE_SHARE_SIZE);
 	}
-	
+
 	/**
 	 * Sets the max image share size
-	 * @param size 
+	 * 
+	 * @param size
 	 */
 	public void setMaxImageSharingSize(long size) {
 		writeLong(RcsSettingsData.MAX_IMAGE_SHARE_SIZE, size);
@@ -1214,11 +1223,15 @@ public class RcsSettings {
 	 * @return the IM session start mode
 	 *         <p>
 	 *         <ul>
-	 *         <li>0 (RCS-e default): The 200 OK is sent when the receiver consumes the notification opening the chat window.
-	 *         <li>1 (RCS default): The 200 OK is sent when the receiver starts to type a message back in the chat window.
-	 *         <li>2: The 200 OK is sent when the receiver presses the button to send a message (that is the message will be
-	 *         buffered in the client until the MSRP session is established). Note: as described in section 3.2, the parameter only
-	 *         affects the behavior for 1-to-1 sessions in case no session between the parties has been established yet.
+	 *         <li>0 (RCS-e default): The 200 OK is sent when the receiver consumes the notification
+	 *         opening the chat window.
+	 *         <li>1 (RCS default): The 200 OK is sent when the receiver starts to type a message
+	 *         back in the chat window.
+	 *         <li>2: The 200 OK is sent when the receiver presses the button to send a message
+	 *         (that is the message will be buffered in the client until the MSRP session is
+	 *         established). Note: as described in section 3.2, the parameter only affects the
+	 *         behavior for 1-to-1 sessions in case no session between the parties has been
+	 *         established yet.
 	 *         </ul>
 	 * 
 	 */
@@ -1254,7 +1267,8 @@ public class RcsSettings {
 	}
 
 	/**
-	 * Get polling period used before each IMS service check (e.g. test subscription state for presence service)
+	 * Get polling period used before each IMS service check (e.g. test subscription state for
+	 * presence service)
 	 *
 	 * @return Period in seconds
 	 */
@@ -1394,11 +1408,13 @@ public class RcsSettings {
 	 * @return Authentication procedure
 	 */
 	public AuthenticationProcedure getImsAuthenticationProcedureForMobile() {
-		return AuthenticationProcedure.valueOf(readString(RcsSettingsData.IMS_AUTHENT_PROCEDURE_MOBILE));
+		return AuthenticationProcedure
+				.valueOf(readString(RcsSettingsData.IMS_AUTHENT_PROCEDURE_MOBILE));
 	}
 
 	/**
 	 * Set the authentication procedure for mobile
+	 * 
 	 * @param procedure
 	 */
 	public void setImsAuthenticationProcedureForMobile(AuthenticationProcedure procedure) {
@@ -1411,17 +1427,19 @@ public class RcsSettings {
 	 * @return Authentication procedure
 	 */
 	public AuthenticationProcedure getImsAuthenticationProcedureForWifi() {
-		return AuthenticationProcedure.valueOf(readString(RcsSettingsData.IMS_AUTHENT_PROCEDURE_WIFI));
+		return AuthenticationProcedure
+				.valueOf(readString(RcsSettingsData.IMS_AUTHENT_PROCEDURE_WIFI));
 	}
 
 	/**
 	 * Set the authentication procedure for Wi-Fi
+	 * 
 	 * @param procedure
 	 */
 	public void setImsAuhtenticationProcedureForWifi(AuthenticationProcedure procedure) {
 		writeParameter(RcsSettingsData.IMS_AUTHENT_PROCEDURE_WIFI, procedure.name());
 	}
-	
+
 	/**
 	 * Is Tel-URI format used
 	 *
@@ -1572,7 +1590,8 @@ public class RcsSettings {
 	 * @return Boolean
 	 */
 	public boolean isFileTransferHttpSupported() {
-		if ((getFtHttpServer().length() > 0) && (getFtHttpLogin().length() > 0) && (getFtHttpPassword().length() > 0)) {
+		if ((getFtHttpServer().length() > 0) && (getFtHttpLogin().length() > 0)
+				&& (getFtHttpPassword().length() > 0)) {
 			return readBoolean(RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP);
 		}
 		return false;
@@ -1701,7 +1720,8 @@ public class RcsSettings {
 	 * @return the set of extensions
 	 */
 	public Set<String> getSupportedRcsExtensions() {
-		return ServiceExtensionManager.getExtensions(readString(RcsSettingsData.CAPABILITY_RCS_EXTENSIONS));
+		return ServiceExtensionManager
+				.getExtensions(readString(RcsSettingsData.CAPABILITY_RCS_EXTENSIONS));
 	}
 
 	/**
@@ -1711,7 +1731,8 @@ public class RcsSettings {
 	 *            Set of extensions
 	 */
 	public void setSupportedRcsExtensions(Set<String> extensions) {
-		writeParameter(RcsSettingsData.CAPABILITY_RCS_EXTENSIONS, ServiceExtensionManager.getExtensions(extensions));
+		writeParameter(RcsSettingsData.CAPABILITY_RCS_EXTENSIONS,
+				ServiceExtensionManager.getExtensions(extensions));
 	}
 
 	/**
@@ -1752,12 +1773,13 @@ public class RcsSettings {
 
 	/**
 	 * Set network access type
+	 * 
 	 * @param networkAccess
 	 */
 	public void setNetworkAccess(NetworkAccessType networkAccess) {
 		writeInteger(RcsSettingsData.NETWORK_ACCESS, networkAccess.toInt());
 	}
-	
+
 	/**
 	 * Get SIP timer T1
 	 *
@@ -1856,11 +1878,12 @@ public class RcsSettings {
 	public ConfigurationMode getConfigurationMode() {
 		return ConfigurationMode.valueOf(readInteger(RcsSettingsData.CONFIG_MODE));
 	}
-	
+
 	/**
 	 * Set configuration mode
 	 *
-	 * @param mode MANUAL | AUTO
+	 * @param mode
+	 *            MANUAL | AUTO
 	 * 
 	 */
 	public void setConfigurationMode(ConfigurationMode mode) {
@@ -1934,7 +1957,8 @@ public class RcsSettings {
 
 	/**
 	 * Set secondary provisioning address only used
-	 * @param value 
+	 * 
+	 * @param value
 	 */
 	public void setSecondaryProvisioningAddressOnly(boolean value) {
 		writeBoolean(RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY, value);
@@ -2101,6 +2125,7 @@ public class RcsSettings {
 
 	/**
 	 * Set provisioning token
+	 * 
 	 * @param token
 	 */
 	public void setProvisioningToken(String token) {
@@ -2327,7 +2352,8 @@ public class RcsSettings {
 	}
 
 	/**
-	 * returns the image resize option for file transfer in the range [ALWAYS_PERFORM, ONLY_ABOVE_MAX_SIZE, ASK]
+	 * returns the image resize option for file transfer in the range [ALWAYS_PERFORM,
+	 * ONLY_ABOVE_MAX_SIZE, ASK]
 	 * 
 	 * @return image resize option (0: ALWAYS_PERFORM, 1: ONLY_ABOVE_MAX_SIZE, 2: ASK)
 	 */
@@ -2391,12 +2417,13 @@ public class RcsSettings {
 
 	/**
 	 * Sets RCS activation changeable by the client applications
+	 * 
 	 * @param enableSwitch
 	 */
 	public void setEnableRcseSwitch(EnableRcseSwitch enableSwitch) {
 		writeInteger(RcsSettingsData.ENABLE_RCS_SWITCH, enableSwitch.toInt());
 	}
-	
+
 	/**
 	 * Returns how to show the RCS enabled/disabled switch
 	 *

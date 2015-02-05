@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.gsma.service.rcs.capabilities;
 
 import java.util.HashSet;
@@ -28,29 +29,31 @@ import com.orangelabs.rcs.core.ims.service.extension.ServiceExtensionManager;
 
 public class ServiceExtensionManagerTest extends AndroidTestCase {
 
-	private Set<String> extensions;
+    private Set<String> extensions;
 
-	protected void setUp() throws Exception {
-		super.setUp();
-		extensions = new HashSet<String>();
-		extensions.add(UUID.randomUUID().toString());
-		extensions.add(UUID.randomUUID().toString());
-	}
+    protected void setUp() throws Exception {
+        super.setUp();
+        extensions = new HashSet<String>();
+        extensions.add(UUID.randomUUID().toString());
+        extensions.add(UUID.randomUUID().toString());
+    }
 
-	protected void tearDown() throws Exception {
-		super.tearDown();
-	}
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
 
-	public void testGetExtensions() {
-		String concatenatedExtensions = ServiceExtensionManager.getInstance().getExtensions(extensions);
-		Log.d("RCS", "testGetExtensions concatenatedExtensions=" + concatenatedExtensions);
-		Set<String> newExtensions = ServiceExtensionManager.getInstance().getExtensions(concatenatedExtensions);
-		assertEquals(newExtensions, extensions);
-	}
-	
-	public void testGetExtensionsEmptyTokens() {
-		Set<String> newExtensions = ServiceExtensionManager.getInstance().getExtensions("; ;");
-		assertTrue(newExtensions.isEmpty());
-	}
+    public void testGetExtensions() {
+        String concatenatedExtensions = ServiceExtensionManager.getInstance().getExtensions(
+                extensions);
+        Log.d("RCS", "testGetExtensions concatenatedExtensions=" + concatenatedExtensions);
+        Set<String> newExtensions = ServiceExtensionManager.getInstance().getExtensions(
+                concatenatedExtensions);
+        assertEquals(newExtensions, extensions);
+    }
+
+    public void testGetExtensionsEmptyTokens() {
+        Set<String> newExtensions = ServiceExtensionManager.getInstance().getExtensions("; ;");
+        assertTrue(newExtensions.isEmpty());
+    }
 
 }

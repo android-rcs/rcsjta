@@ -26,10 +26,11 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 public interface DiscoveryManager {
 	/**
-     * Request contact capabilities
-     * 
-     * @param contact Remote contact identifier
-     * @return Returns true if success
-     */
-    public boolean requestCapabilities(ContactId contact);
+	 * Request contact capabilities
+	 * 
+	 * @param contact
+	 *            Remote contact identifier
+	 * @return Returns true if success
+	 */
+	public boolean requestCapabilities(ContactId contact);
 }

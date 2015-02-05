@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
-
 /**
  * Android socket connection
  * 
@@ -34,17 +33,18 @@ public class AndroidSocketConnection implements SocketConnection {
 	 * Socket connection
 	 */
 	private Socket socket = null;
-	
+
 	/**
 	 * Constructor
 	 */
 	public AndroidSocketConnection() {
 	}
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param socket Socket
+	 * @param socket
+	 *            Socket
 	 */
 	public AndroidSocketConnection(Socket socket) {
 		this.socket = socket;
@@ -53,8 +53,10 @@ public class AndroidSocketConnection implements SocketConnection {
 	/**
 	 * Open the socket
 	 * 
-	 * @param remoteAddr Remote address
-	 * @param remotePort Remote port
+	 * @param remoteAddr
+	 *            Remote address
+	 * @param remotePort
+	 *            Remote port
 	 * @throws IOException
 	 */
 	public void open(String remoteAddr, int remotePort) throws IOException {
@@ -64,7 +66,8 @@ public class AndroidSocketConnection implements SocketConnection {
 	/**
 	 * Set the socket
 	 * 
-	 * @param socket Socket
+	 * @param socket
+	 *            Socket
 	 */
 	public void setSocket(Socket socket) {
 		this.socket = socket;
@@ -88,9 +91,9 @@ public class AndroidSocketConnection implements SocketConnection {
 		if (socket != null) {
 			socket.close();
 			socket = null;
-		}		
+		}
 	}
-	
+
 	/**
 	 * Returns the socket input stream
 	 * 
@@ -104,7 +107,7 @@ public class AndroidSocketConnection implements SocketConnection {
 			throw new IOException("Connection not opened");
 		}
 	}
-	
+
 	/**
 	 * Returns the socket output stream
 	 * 
@@ -118,7 +121,7 @@ public class AndroidSocketConnection implements SocketConnection {
 			throw new IOException("Connection not opened");
 		}
 	}
-	
+
 	/**
 	 * Returns the remote address of the connection
 	 * 
@@ -132,7 +135,7 @@ public class AndroidSocketConnection implements SocketConnection {
 			throw new IOException("Connection not opened");
 		}
 	}
-	
+
 	/**
 	 * Returns the remote port of the connection
 	 * 
@@ -174,10 +177,10 @@ public class AndroidSocketConnection implements SocketConnection {
 			throw new IOException("Connection not opened");
 		}
 	}
-	
+
 	/**
-	 * Get the timeout for this socket during which a reading
-	 * operation shall block while waiting for data
+	 * Get the timeout for this socket during which a reading operation shall block while waiting
+	 * for data
 	 * 
 	 * @return Timeout in milliseconds
 	 * @throws IOException
@@ -191,10 +194,11 @@ public class AndroidSocketConnection implements SocketConnection {
 	}
 
 	/**
-	 * Set the timeout for this socket during which a reading
-	 * operation shall block while waiting for data
+	 * Set the timeout for this socket during which a reading operation shall block while waiting
+	 * for data
 	 * 
-	 * @param timeout Timeout in milliseconds
+	 * @param timeout
+	 *            Timeout in milliseconds
 	 * @throws IOException
 	 */
 	public void setSoTimeout(int timeout) throws IOException {

@@ -31,32 +31,32 @@ public class User {
 	public final static String STATE_BUSY = "busy";
 	public final static String STATE_DECLINED = "declined";
 	public final static String STATE_PENDING = "pending";
-	
+
 	private String entity;
-	
+
 	private boolean me;
-	
+
 	private String state = STATE_UNKNOWN;
-	
+
 	private String displayName = null;
-	
+
 	private String disconnectionMethod = null;
-	
+
 	private String failureReason = null;
-	
+
 	public User(String entity, boolean me) {
 		this.entity = entity;
 		this.me = me;
 	}
-	
+
 	public String getEntity() {
 		return entity;
 	}
-	
+
 	public boolean isMe() {
 		return me;
 	}
-	
+
 	public String getState() {
 		return state;
 	}
@@ -64,7 +64,7 @@ public class User {
 	public void setState(String state) {
 		this.state = state;
 	}
-	
+
 	public String getDisplayName() {
 		return displayName;
 	}
@@ -72,7 +72,7 @@ public class User {
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
-	
+
 	public void setDisconnectionMethod(String method) {
 		this.disconnectionMethod = method;
 	}
@@ -80,7 +80,7 @@ public class User {
 	public String getDisconnectionMethod() {
 		return disconnectionMethod;
 	}
-	
+
 	public void setFailureReason(String reason) {
 		this.failureReason = reason;
 	}
@@ -92,10 +92,10 @@ public class User {
 	public String toString() {
 		String result = "user=" + entity + ", state=" + state;
 		if (disconnectionMethod != null) {
-			result += ", method=" + disconnectionMethod; 
+			result += ", method=" + disconnectionMethod;
 		}
 		if (failureReason != null) {
-			result += ", reason=" + failureReason; 
+			result += ", reason=" + failureReason;
 		}
 		return result;
 	}

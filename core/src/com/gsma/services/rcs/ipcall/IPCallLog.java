@@ -29,78 +29,104 @@ import android.net.Uri;
  * @author Jean-Marc AUFFRET
  */
 public class IPCallLog {
-    /**
-     * Content provider URI
-     */
-    public static final Uri CONTENT_URI = Uri.parse("content://com.gsma.services.rcs.provider.ipcall/ipcall");
+	/**
+	 * Content provider URI
+	 */
+	public static final Uri CONTENT_URI = Uri
+			.parse("content://com.gsma.services.rcs.provider.ipcall/ipcall");
 
-    /**
-     * The name of the column containing the unique ID of the call.
-     * <P>Type: TEXT</P>
-     */
-    public static final String CALL_ID = "call_id";
+	/**
+	 * The name of the column containing the unique ID of the call.
+	 * <P>
+	 * Type: TEXT
+	 * </P>
+	 */
+	public static final String CALL_ID = "call_id";
 
-    /**
-     * The name of the column containing the MSISDN of the remote contact.
-     * <P>Type: TEXT</P>
-     */
-    public static final String CONTACT = "contact";
-    
-    /**
-     * The name of the column containing the direction of the call.
-     * <P>Type: INTEGER</P>
-     * @see Direction
-     */
-    public static final String DIRECTION = "direction";
+	/**
+	 * The name of the column containing the MSISDN of the remote contact.
+	 * <P>
+	 * Type: TEXT
+	 * </P>
+	 */
+	public static final String CONTACT = "contact";
 
-    /**
-     * The name of the column containing the date of the call (in milliseconds).
-     * <P>Type: LONG</P>
-     */
-    public static final String TIMESTAMP = "timestamp";
-    
-    /**
-     * The name of the column containing the duration of the call (in seconds). The
-     * value is only set at the end of the call.
-     * <P>Type: LONG</P>
-     */
-    public static final String DURATION = "duration";    
+	/**
+	 * The name of the column containing the direction of the call.
+	 * <P>
+	 * Type: INTEGER
+	 * </P>
+	 * 
+	 * @see Direction
+	 */
+	public static final String DIRECTION = "direction";
 
-    /**
-     * The name of the column containing the state of the call.
-     * <P>Type: INTEGER</P>
+	/**
+	 * The name of the column containing the date of the call (in milliseconds).
+	 * <P>
+	 * Type: LONG
+	 * </P>
+	 */
+	public static final String TIMESTAMP = "timestamp";
+
+	/**
+	 * The name of the column containing the duration of the call (in seconds). The value is only
+	 * set at the end of the call.
+	 * <P>
+	 * Type: LONG
+	 * </P>
+	 */
+	public static final String DURATION = "duration";
+
+	/**
+	 * The name of the column containing the state of the call.
+	 * <P>
+	 * Type: INTEGER
+	 * </P>
+	 * 
 	 * @see IPCall.State
-     */
-    public static final String STATE = "state";    
+	 */
+	public static final String STATE = "state";
 
-    /**
-     * The name of the column containing the reason code of the ip call state.
-     * <P>Type: INTEGER</P>
-     *  @see IPCall.ReasonCode
-     */
-    public static final String REASON_CODE = "reason_code";
+	/**
+	 * The name of the column containing the reason code of the ip call state.
+	 * <P>
+	 * Type: INTEGER
+	 * </P>
+	 * 
+	 * @see IPCall.ReasonCode
+	 */
+	public static final String REASON_CODE = "reason_code";
 
-    /**
-     * The name of the column containing the encoding type of video
-     * <P>Type: INTEGER</P>
-     */
-    public static final String VIDEO_ENCODING = "videoEncoding";
+	/**
+	 * The name of the column containing the encoding type of video
+	 * <P>
+	 * Type: INTEGER
+	 * </P>
+	 */
+	public static final String VIDEO_ENCODING = "videoEncoding";
 
-    /**
-     * The name of the column containing the encoding type of audio
-     * <P>Type: INTEGER</P>
-     */
-    public static final String AUDIO_ENCODING = "audioEncoding";
+	/**
+	 * The name of the column containing the encoding type of audio
+	 * <P>
+	 * Type: INTEGER
+	 * </P>
+	 */
+	public static final String AUDIO_ENCODING = "audioEncoding";
 
-    /**
-     * The name of the column containing the width of video
-     * <P>Type: INTEGER</P>
-     */
-    public static final String WIDTH = "width";
+	/**
+	 * The name of the column containing the width of video
+	 * <P>
+	 * Type: INTEGER
+	 * </P>
+	 */
+	public static final String WIDTH = "width";
 
-    /**
-     * The name of the column containing the height of video
-     * <P>Type: INTEGER</P>
-     */
-    public static final String HEIGHT = "height";
+	/**
+	 * The name of the column containing the height of video
+	 * <P>
+	 * Type: INTEGER
+	 * </P>
+	 */
+	public static final String HEIGHT = "height";
 }

@@ -31,111 +31,112 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class MediaCaptureStream implements ProcessorInputStream {
 	/**
-     * Media player
-     */
+	 * Media player
+	 */
 	private MediaInput player;
 
 	/**
 	 * Media format
 	 */
 	private Format format;
-	
-    /**
-     * Sequence number
-     */
-    protected long seqNo = 0;
 
-    /**
-     * Input buffer
-     */
+	/**
+	 * Sequence number
+	 */
+	protected long seqNo = 0;
+
+	/**
+	 * Input buffer
+	 */
 	protected Buffer buffer = new Buffer();
 
 	/**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+	 * The logger
+	 */
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    /**
+	/**
 	 * Constructor
 	 * 
-	 * @param format Input format
-     * @param player Media player
+	 * @param format
+	 *            Input format
+	 * @param player
+	 *            Media player
 	 */
-    public MediaCaptureStream(Format format, MediaInput player) {
-    	this.format = format;
+	public MediaCaptureStream(Format format, MediaInput player) {
+		this.format = format;
 		this.player = player;
 	}
-    
-    
-    /**
+
+	/**
 	 * Open the input stream
 	 * 
-     * @throws Exception
-	 */	
-    public void open() throws Exception {
-    	try {
-	    	player.open();
+	 * @throws Exception
+	 */
+	public void open() throws Exception {
+		try {
+			player.open();
 			if (logger.isActivated()) {
 				logger.debug("Media capture stream opened");
 			}
-    	} catch(Exception e) {
+		} catch (Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Media capture stream failed", e);
 			}
 			throw e;
-    	}
-	}    	
-	
-    /**
-     * Close the input stream
-     */
-    public void close() {
+		}
+	}
+
+	/**
+	 * Close the input stream
+	 */
+	public void close() {
 		player.close();
 		if (logger.isActivated()) {
 			logger.debug("Media capture stream closed");
 		}
-    }
+	}
 
-    /**
-     * Format of the data provided by the source stream
-     * 
-     * @return Format
-     */
-    public Format getFormat() {
-    	return format;
-    }
+	/**
+	 * Format of the data provided by the source stream
+	 * 
+	 * @return Format
+	 */
+	public Format getFormat() {
+		return format;
+	}
 
-    /**
-     * returns the MediaInput
-     *
-     * @return MediaInput
-     */
-    public MediaInput getPlayer() {
-        return player;
-    }
+	/**
+	 * returns the MediaInput
+	 *
+	 * @return MediaInput
+	 */
+	public MediaInput getPlayer() {
+		return player;
+	}
 
-    /**
-     * Read from the stream
-     * 
-     * @return Buffer
-     * @throws Exception
-     */
-    public Buffer read() throws Exception {
-    	// Read a new sample from the media player
-    	MediaSample sample = player.readSample();
-    	if (sample == null) {
-    		return null;
-    	}
+	/**
+	 * Read from the stream
+	 * 
+	 * @return Buffer
+	 * @throws Exception
+	 */
+	public Buffer read() throws Exception {
+		// Read a new sample from the media player
+		MediaSample sample = player.readSample();
+		if (sample == null) {
+			return null;
+		}
 
-    	// Create a buffer
-	    buffer.setData(sample.getData());
-	    buffer.setLength(sample.getLength());
-    	buffer.setFormat(format);
-    	buffer.setSequenceNumber(seqNo++);
-    	if (sample.isMarker()) {
-    		buffer.setFlags(Buffer.FLAG_RTP_MARKER);
-    	}
-    	buffer.setTimeStamp(sample.getTimeStamp());
-    	return buffer;
-    }
+		// Create a buffer
+		buffer.setData(sample.getData());
+		buffer.setLength(sample.getLength());
+		buffer.setFormat(format);
+		buffer.setSequenceNumber(seqNo++);
+		if (sample.isMarker()) {
+			buffer.setFlags(Buffer.FLAG_RTP_MARKER);
+		}
+		buffer.setTimeStamp(sample.getTimeStamp());
+		return buffer;
+	}
 }

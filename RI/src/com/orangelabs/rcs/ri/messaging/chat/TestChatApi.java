@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.messaging.chat;
 
 import java.util.ArrayList;
@@ -42,71 +43,73 @@ import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
  * @author Jean-Marc AUFFRET
  */
 public class TestChatApi extends ListActivity {
-	
-	private static final String[] PROJECTION = new String[] { CapabilitiesLog.CONTACT };
-	
+
+    private static final String[] PROJECTION = new String[] {
+        CapabilitiesLog.CONTACT
+    };
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         // Set items
         String[] items = {
-    		getString(R.string.menu_initiate_chat),
-    		getString(R.string.menu_chat_log),
-    		getString(R.string.menu_initiate_group_chat),
-    		getString(R.string.menu_group_chat_log),
-    		getString(R.string.menu_chat_service_config),
-    		getString(R.string.menu_showus_map),
+                getString(R.string.menu_initiate_chat), getString(R.string.menu_chat_log),
+                getString(R.string.menu_initiate_group_chat),
+                getString(R.string.menu_group_chat_log),
+                getString(R.string.menu_chat_service_config), getString(R.string.menu_showus_map),
 
-    	};
+        };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
 
-	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		switch (position) {
-		case 0:
-			startActivity(new Intent(this, InitiateSingleChat.class));
-			break;
+    @Override
+    protected void onListItemClick(ListView l, View v, int position, long id) {
+        switch (position) {
+            case 0:
+                startActivity(new Intent(this, InitiateSingleChat.class));
+                break;
 
-		case 1:
-			startActivity(new Intent(this, SingleChatList.class));
-			break;
+            case 1:
+                startActivity(new Intent(this, SingleChatList.class));
+                break;
 
-		case 2:
-			startActivity(new Intent(this, InitiateGroupChat.class));
-			break;
+            case 2:
+                startActivity(new Intent(this, InitiateGroupChat.class));
+                break;
 
-		case 3:
-			startActivity(new Intent(this, GroupChatList.class));
-			break;
+            case 3:
+                startActivity(new Intent(this, GroupChatList.class));
+                break;
 
-		case 4:
-			startActivity(new Intent(this, ChatServiceConfigActivity.class));
-			break;
-			
-		case 5:
-			ArrayList<String> list = new ArrayList<String>();
-			Cursor cursor = null;
-			try {
-				cursor = getContentResolver().query(CapabilitiesLog.CONTENT_URI, PROJECTION, null, null, null);
-				while (cursor.moveToNext()) {
-					String contact = cursor.getString(cursor.getColumnIndex(CapabilitiesLog.CONTACT));
-					list.add(contact);
-				}
-				ShowUsInMap.startShowUsInMap(this, list);
-			} catch (Exception e) {
-				// Skip intentionally
-			} finally {
-				if (cursor != null) {
-					cursor.close();
-				}
-			}
-			break;
+            case 4:
+                startActivity(new Intent(this, ChatServiceConfigActivity.class));
+                break;
 
-		}
+            case 5:
+                ArrayList<String> list = new ArrayList<String>();
+                Cursor cursor = null;
+                try {
+                    cursor = getContentResolver().query(CapabilitiesLog.CONTENT_URI, PROJECTION,
+                            null, null, null);
+                    while (cursor.moveToNext()) {
+                        String contact = cursor.getString(cursor
+                                .getColumnIndex(CapabilitiesLog.CONTACT));
+                        list.add(contact);
+                    }
+                    ShowUsInMap.startShowUsInMap(this, list);
+                } catch (Exception e) {
+                    // Skip intentionally
+                } finally {
+                    if (cursor != null) {
+                        cursor.close();
+                    }
+                }
+                break;
+
+        }
     }
 }

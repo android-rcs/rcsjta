@@ -33,15 +33,15 @@ public class DeviceShutdown extends BroadcastReceiver {
 	/**
 	 * The logger
 	 */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    @Override
+	@Override
 	public void onReceive(Context context, Intent intent) {
 		if (logger.isActivated()) {
 			logger.debug("Device shutdown");
 		}
 
 		// Stop the RCS service
-        LauncherUtils.stopRcsService(context);
+		LauncherUtils.stopRcsService(context);
 	}
 }

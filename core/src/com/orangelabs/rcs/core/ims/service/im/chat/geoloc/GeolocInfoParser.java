@@ -38,51 +38,46 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author vfml3370
  */
 public class GeolocInfoParser extends DefaultHandler {
-	
-	/* Geoloc-Info SAMPLE:
-	<?xml version="1.0" encoding="UTF-8"?>
-	<rcsenvelope xmlns="urn:gsma:params:xml:ns:rcs:rcs:geolocation" xmlns:rpid="urn:ietf:params:xml:ns:pidf:rpid" xmlns:gp="urn:ietf:params:xml:ns:pidf:geopriv10" xmlns:gml="http://www.opengis.net/gml" xmlns:gs="http://www.opengis.net/pidflo/1.0" entity="tel:+12345678901">
-	<rcspushlocation id="a123" label ="meeting location" >
-	<rpid:place-type rpid:until="2012-03-15T21:00:00-05:00">
-	</rpid:place-type>
-	<rpid:time-offset rpid:until="2012-03-15T21:00:00-05:00"></rpid:time-offset>
-	<gp:geopriv>
-	<gp:location-info>
-	<gs:Circle srsName="urn:ogc:def:crs:EPSG::4326">
-	<gml:pos>48.731964 -3.45829</gml:pos>
-	<gs:radius uom="urn:ogc:def:uom:EPSG::9001">10</gs:radius>
-	</gs:Circle>
-	</gp:location-info>
-	<gp:usage-rules>
-	<gp:retention-expiry>2012-03-15T21:00:00-05:00</gp:retention-expiry>
-	</gp:usage-rules>
-	</gp:geopriv>
-	<timestamp>2012-03-15T16:09:44-05:00</timestamp>
-	</rcspushlocation>
-	</rcsenvelope>
-   */
-	
+
+	/*
+	 * Geoloc-Info SAMPLE: <?xml version="1.0" encoding="UTF-8"?> <rcsenvelope
+	 * xmlns="urn:gsma:params:xml:ns:rcs:rcs:geolocation"
+	 * xmlns:rpid="urn:ietf:params:xml:ns:pidf:rpid"
+	 * xmlns:gp="urn:ietf:params:xml:ns:pidf:geopriv10" xmlns:gml="http://www.opengis.net/gml"
+	 * xmlns:gs="http://www.opengis.net/pidflo/1.0" entity="tel:+12345678901"> <rcspushlocation
+	 * id="a123" label ="meeting location" > <rpid:place-type
+	 * rpid:until="2012-03-15T21:00:00-05:00"> </rpid:place-type> <rpid:time-offset
+	 * rpid:until="2012-03-15T21:00:00-05:00"></rpid:time-offset> <gp:geopriv> <gp:location-info>
+	 * <gs:Circle srsName="urn:ogc:def:crs:EPSG::4326"> <gml:pos>48.731964 -3.45829</gml:pos>
+	 * <gs:radius uom="urn:ogc:def:uom:EPSG::9001">10</gs:radius> </gs:Circle> </gp:location-info>
+	 * <gp:usage-rules> <gp:retention-expiry>2012-03-15T21:00:00-05:00</gp:retention-expiry>
+	 * </gp:usage-rules> </gp:geopriv> <timestamp>2012-03-15T16:09:44-05:00</timestamp>
+	 * </rcspushlocation> </rcsenvelope>
+	 */
+
 	private StringBuffer accumulator;
 	private GeolocInfoDocument geoloc = null;
 
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+	/**
+	 * The logger
+	 */
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    /**
-     * Constructor
-     *
-     * @param inputSource Input source
-     * @throws SAXException
-     * @throws ParserConfigurationException
-     * @throws IOException
-     * @throws Exception
-     */
-    public GeolocInfoParser(InputSource inputSource) throws ParserConfigurationException, SAXException, IOException {
-    	SAXParserFactory factory = SAXParserFactory.newInstance();
-        SAXParser parser = factory.newSAXParser();
-        parser.parse(inputSource, this);
+	/**
+	 * Constructor
+	 *
+	 * @param inputSource
+	 *            Input source
+	 * @throws SAXException
+	 * @throws ParserConfigurationException
+	 * @throws IOException
+	 * @throws Exception
+	 */
+	public GeolocInfoParser(InputSource inputSource) throws ParserConfigurationException,
+			SAXException, IOException {
+		SAXParserFactory factory = SAXParserFactory.newInstance();
+		SAXParser parser = factory.newSAXParser();
+		parser.parse(inputSource, this);
 	}
 
 	public GeolocInfoDocument getGeoLocInfo() {
@@ -100,21 +95,20 @@ public class GeolocInfoParser extends DefaultHandler {
 		accumulator.append(buffer, start, length);
 	}
 
-	public void startElement(String namespaceURL, String localName,	String qname, Attributes attr) {
+	public void startElement(String namespaceURL, String localName, String qname, Attributes attr) {
 		accumulator.setLength(0);
 		if (localName.equals("rcsenvelope")) {
-			String entity = attr.getValue("entity").trim();			
+			String entity = attr.getValue("entity").trim();
 			geoloc = new GeolocInfoDocument(entity);
-		} else
-		if (localName.equals("rcspushlocation")) {
+		} else if (localName.equals("rcspushlocation")) {
 			if (logger.isActivated()) {
 				logger.debug("rcspushlocation");
 			}
 			if (geoloc != null) {
-				String label = attr.getValue("label").trim();	
+				String label = attr.getValue("label").trim();
 				geoloc.setLabel(label);
 			}
-		} 
+		}
 	}
 
 	public void endElement(String namespaceURL, String localName, String qname) {
@@ -122,13 +116,11 @@ public class GeolocInfoParser extends DefaultHandler {
 			if (geoloc != null) {
 				geoloc.setRadius(Float.parseFloat(accumulator.toString().trim()));
 			}
-		} else
-		if (localName.equals("retention-expiry")) {			                  
+		} else if (localName.equals("retention-expiry")) {
 			if (geoloc != null) {
 				geoloc.setExpiration(DateUtils.decodeDate(accumulator.toString().trim()));
 			}
-		} else		
-		if (localName.equals("pos")) {
+		} else if (localName.equals("pos")) {
 			if (geoloc != null) {
 				StringTokenizer st = new StringTokenizer(accumulator.toString().trim());
 				try {
@@ -138,7 +130,7 @@ public class GeolocInfoParser extends DefaultHandler {
 					if (st.hasMoreTokens()) {
 						geoloc.setLongitude(Double.parseDouble(st.nextToken()));
 					}
-				} catch(Exception e) {
+				} catch (Exception e) {
 					if (logger.isActivated()) {
 						logger.error("Can't parse geoloc value", e);
 					}

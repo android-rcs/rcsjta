@@ -26,9 +26,9 @@ import android.content.Intent;
 import android.os.RemoteCallbackList;
 
 /**
- * ImageSharingEventBroadcaster maintains the registering and unregistering of
- * IImageSharingListener and also performs broadcast events on these listeners upon the
- * trigger of corresponding callbacks.
+ * ImageSharingEventBroadcaster maintains the registering and unregistering of IImageSharingListener
+ * and also performs broadcast events on these listeners upon the trigger of corresponding
+ * callbacks.
  */
 public class ImageSharingEventBroadcaster implements IImageSharingEventBroadcaster {
 
@@ -47,13 +47,12 @@ public class ImageSharingEventBroadcaster implements IImageSharingEventBroadcast
 		mImageSharingListeners.unregister(listener);
 	}
 
-	public void broadcastStateChanged(ContactId contact, String sharingId, int state,
-			int reasonCode) {
+	public void broadcastStateChanged(ContactId contact, String sharingId, int state, int reasonCode) {
 		final int N = mImageSharingListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mImageSharingListeners.getBroadcastItem(i).onStateChanged(contact,
-						sharingId, state, reasonCode);
+				mImageSharingListeners.getBroadcastItem(i).onStateChanged(contact, sharingId,
+						state, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);
@@ -68,8 +67,8 @@ public class ImageSharingEventBroadcaster implements IImageSharingEventBroadcast
 		final int N = mImageSharingListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mImageSharingListeners.getBroadcastItem(i).onProgressUpdate(contact,
-						sharingId, currentSize, totalSize);
+				mImageSharingListeners.getBroadcastItem(i).onProgressUpdate(contact, sharingId,
+						currentSize, totalSize);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);

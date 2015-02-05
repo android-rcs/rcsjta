@@ -27,44 +27,46 @@ public abstract class Format {
 	/**
 	 * Unknown payload
 	 */
-    public static final int UNKNOWN_PAYLOAD = -1;
-
-    /**
-     * Codec
-     */
-    private String codec;
+	public static final int UNKNOWN_PAYLOAD = -1;
 
 	/**
-     * Payload type
-     */
-    private int payload;
+	 * Codec
+	 */
+	private String codec;
 
-    /**
-     * Constructor
-     * 
-     * @param codec Codec
-     * @param payload Payload type
-     */
-    public Format(String codec, int payload) {
-    	this.codec = codec;	
-    	this.payload = payload;
-    }
+	/**
+	 * Payload type
+	 */
+	private int payload;
 
-    /**
-     * Get the codec name
-     *
-     * @return Name 
-     */
-    public String getCodec() {
-    	return codec;
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param codec
+	 *            Codec
+	 * @param payload
+	 *            Payload type
+	 */
+	public Format(String codec, int payload) {
+		this.codec = codec;
+		this.payload = payload;
+	}
 
-    /**
-     * Get the type of payload
-     * 
-     * @return Payload type
-     */
-    public int getPayload() {
-    	return payload;
-    }
+	/**
+	 * Get the codec name
+	 *
+	 * @return Name
+	 */
+	public String getCodec() {
+		return codec;
+	}
+
+	/**
+	 * Get the type of payload
+	 * 
+	 * @return Payload type
+	 */
+	public int getPayload() {
+		return payload;
+	}
 }

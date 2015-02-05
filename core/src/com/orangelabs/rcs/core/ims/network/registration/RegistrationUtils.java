@@ -36,11 +36,11 @@ public class RegistrationUtils {
 	 *
 	 * @return List of tags
 	 */
- 	public static String[] getSupportedFeatureTags() {
+	public static String[] getSupportedFeatureTags() {
 		List<String> tags = new ArrayList<String>();
 		List<String> icsiTags = new ArrayList<String>();
 		List<String> iariTags = new ArrayList<String>();
-		
+
 		// IM support
 		if (RcsSettings.getInstance().isImSessionSupported()) {
 			tags.add(FeatureTags.FEATURE_OMA_IM);
@@ -50,7 +50,7 @@ public class RegistrationUtils {
 		if (RcsSettings.getInstance().isVideoSharingSupported()) {
 			tags.add(FeatureTags.FEATURE_3GPP_VIDEO_SHARE);
 		}
-		
+
 		// IP call support
 		if (RcsSettings.getInstance().isIPVoiceCallSupported()) {
 			tags.add(FeatureTags.FEATURE_RCSE_IP_VOICE_CALL);
@@ -58,20 +58,21 @@ public class RegistrationUtils {
 		if (RcsSettings.getInstance().isIPVideoCallSupported()) {
 			tags.add(FeatureTags.FEATURE_RCSE_IP_VIDEO_CALL);
 		}
-		if (RcsSettings.getInstance().isIPVoiceCallSupported() || RcsSettings.getInstance().isIPVideoCallSupported()) {
+		if (RcsSettings.getInstance().isIPVoiceCallSupported()
+				|| RcsSettings.getInstance().isIPVideoCallSupported()) {
 			icsiTags.add(FeatureTags.FEATURE_3GPP_IP_VOICE_CALL);
-		}		
+		}
 
 		// Automata support
 		if (RcsSettings.getInstance().isSipAutomata()) {
 			tags.add(FeatureTags.FEATURE_SIP_AUTOMATA);
 		}
-		
+
 		// Image share support
 		if (RcsSettings.getInstance().isImageSharingSupported()) {
 			iariTags.add(FeatureTags.FEATURE_RCSE_IMAGE_SHARE);
 		}
-		
+
 		// Geoloc push support
 		if (RcsSettings.getInstance().isGeoLocationPushSupported()) {
 			iariTags.add(FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH);
@@ -81,20 +82,20 @@ public class RegistrationUtils {
 		if (RcsSettings.getInstance().isFileTransferHttpSupported()) {
 			iariTags.add(FeatureTags.FEATURE_RCSE_FT_HTTP);
 		}
-		
+
 		// Extensions
 		if (RcsSettings.getInstance().isExtensionsAllowed()) {
 			icsiTags.add(FeatureTags.FEATURE_3GPP_EXTENSION);
 		}
-		
+
 		// Add IARI prefix
 		if (!iariTags.isEmpty()) {
-            tags.add(FeatureTags.FEATURE_RCSE + "=\"" + TextUtils.join(",", iariTags) + "\"");
+			tags.add(FeatureTags.FEATURE_RCSE + "=\"" + TextUtils.join(",", iariTags) + "\"");
 		}
-		
+
 		// Add ICSI prefix
 		if (!icsiTags.isEmpty()) {
-            tags.add(FeatureTags.FEATURE_3GPP + "=\"" + TextUtils.join(",", icsiTags) + "\"");
+			tags.add(FeatureTags.FEATURE_3GPP + "=\"" + TextUtils.join(",", icsiTags) + "\"");
 		}
 
 		return tags.toArray(new String[tags.size()]);

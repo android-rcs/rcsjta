@@ -26,7 +26,8 @@ public class MsrpUtils {
 	/**
 	 * Get the chunk size
 	 *
-	 * @param header MSRP header
+	 * @param header
+	 *            MSRP header
 	 * @return Size in bytes or 0 for "*" range
 	 */
 	public static int getChunkSize(String header) {
@@ -38,10 +39,10 @@ public class MsrpUtils {
 		if ((index1 != -1) && (index2 != -1)) {
 			try {
 				int lowByte = Integer.parseInt(header.substring(0, index1));
-                String highByteString = header.substring(index1+1, index2);
-                if (highByteString.equals("*")) {
-                    return 0;
-                }
+				String highByteString = header.substring(index1 + 1, index2);
+				if (highByteString.equals("*")) {
+					return 0;
+				}
 				int highByte = Integer.parseInt(highByteString);
 				return (highByte - lowByte) + 1;
 			} catch (NumberFormatException e) {
@@ -50,11 +51,12 @@ public class MsrpUtils {
 		}
 		return -1;
 	}
-	
+
 	/**
 	 * Get the total size
 	 *
-	 * @param header MSRP header
+	 * @param header
+	 *            MSRP header
 	 * @return Size in bytes
 	 */
 	public static int getTotalSize(String header) {
@@ -64,7 +66,7 @@ public class MsrpUtils {
 		int index = header.indexOf("/");
 		if (index != -1) {
 			try {
-				return Integer.parseInt(header.substring(index+1));
+				return Integer.parseInt(header.substring(index + 1));
 			} catch (NumberFormatException e) {
 				return -1;
 			}

@@ -1,4 +1,3 @@
-
 package com.orangelabs.rcs.provisioning;
 
 /**
@@ -12,12 +11,12 @@ public class ProvisioningFailureReasons {
 	 * Action string for provisioning failure
 	 */
 	public static final String ACTION_HTTPS_PROVISIONING_FAILS = "ProvisioningFailed";
-	
+
 	/**
 	 * Key string for provisioning failure reason in Intent's extra
 	 */
 	public static final String EXTRA_PROVISIONING_FAILURE_REASON = "ProvisioningFailedReason";
-	
+
 	/**
 	 * Provisioning is blocked with this account
 	 */

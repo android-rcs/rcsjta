@@ -37,7 +37,7 @@ public class ChatData {
 	 */
 	protected static final Uri CONTENT_URI = Uri
 			.parse("content://com.orangelabs.rcs.chat/groupchat");
-	
+
 	/**
 	 * Id for chat room
 	 */
@@ -68,8 +68,8 @@ public class ChatData {
 	static final String KEY_SUBJECT = ChatLog.GroupChat.SUBJECT;
 
 	/**
-	 * List of participants and associated status stored as a String
-	 * parseable with the ChatLog.GroupChat.getParticipantInfos() method.
+	 * List of participants and associated status stored as a String parseable with the
+	 * ChatLog.GroupChat.getParticipantInfos() method.
 	 */
 	static final String KEY_PARTICIPANTS = ChatLog.GroupChat.PARTICIPANTS;
 
@@ -78,7 +78,7 @@ public class ChatData {
 	 *
 	 * @see Direction
 	 */
-	static final String KEY_DIRECTION = ChatLog.GroupChat.DIRECTION;	
+	static final String KEY_DIRECTION = ChatLog.GroupChat.DIRECTION;
 
 	/**
 	 * Timestamp of the invitation
@@ -91,9 +91,8 @@ public class ChatData {
 	public static final String KEY_USER_ABORTION = "user_abortion";
 
 	/**
-	 * ContactId formatted number of the inviter of the group chat or null if
-	 * this is a group chat initiated by the local user (ie outgoing group
-	 * chat).
+	 * ContactId formatted number of the inviter of the group chat or null if this is a group chat
+	 * initiated by the local user (ie outgoing group chat).
 	 */
 	public static final String KEY_CONTACT = ChatLog.GroupChat.CONTACT;
 }

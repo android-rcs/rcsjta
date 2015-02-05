@@ -25,11 +25,12 @@ package com.orangelabs.rcs.platform;
  */
 public class FactoryException extends java.lang.Exception {
 	static final long serialVersionUID = 1L;
-	
+
 	/**
 	 * Constructor
 	 *
-	 * @param error Error message
+	 * @param error
+	 *            Error message
 	 */
 	public FactoryException(String error) {
 		super(error);

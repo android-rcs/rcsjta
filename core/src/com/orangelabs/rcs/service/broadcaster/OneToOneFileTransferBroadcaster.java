@@ -28,8 +28,8 @@ import android.os.RemoteCallbackList;
 
 /**
  * OneToOneFileTransferBroadcaster maintains the registering and unregistering of
- * IFileTransferListener and also performs broadcast events on these listeners upon
- * the trigger of corresponding callbacks.
+ * IFileTransferListener and also performs broadcast events on these listeners upon the trigger of
+ * corresponding callbacks.
  */
 public class OneToOneFileTransferBroadcaster implements IOneToOneFileTransferBroadcaster {
 
@@ -50,7 +50,8 @@ public class OneToOneFileTransferBroadcaster implements IOneToOneFileTransferBro
 		mOneToOneFileTransferListeners.unregister(listener);
 	}
 
-	public void broadcastStateChanged(ContactId contact, String transferId, int state, int reasonCode) {
+	public void broadcastStateChanged(ContactId contact, String transferId, int state,
+			int reasonCode) {
 		final int N = mOneToOneFileTransferListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {

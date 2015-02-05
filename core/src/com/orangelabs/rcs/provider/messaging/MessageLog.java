@@ -71,21 +71,20 @@ public class MessageLog implements IMessageLog {
 	 * @param groupChatLog
 	 * @param groupChatDeliveryInfoLog
 	 */
-	/* package private */MessageLog(LocalContentResolver localContentResolver, GroupChatLog groupChatLog, GroupDeliveryInfoLog groupChatDeliveryInfoLog) {
+	/* package private */MessageLog(LocalContentResolver localContentResolver,
+			GroupChatLog groupChatLog, GroupDeliveryInfoLog groupChatDeliveryInfoLog) {
 		mLocalContentResolver = localContentResolver;
 		this.groupChatLog = groupChatLog;
 		this.groupChatDeliveryInfoLog = groupChatDeliveryInfoLog;
 	}
 
-	private void addIncomingOneToOneMessage(ChatMessage msg, int status,
-			int reasonCode) {
+	private void addIncomingOneToOneMessage(ChatMessage msg, int status, int reasonCode) {
 		ContactId contact = msg.getRemoteContact();
 		String msgId = msg.getMessageId();
 		if (logger.isActivated()) {
-			logger.debug(new StringBuilder("Add incoming chat message: contact=")
-					.append(contact).append(", msg=").append(msgId).append(", status=")
-					.append(status).append(", reasonCode=").append(reasonCode).append(".")
-					.toString());
+			logger.debug(new StringBuilder("Add incoming chat message: contact=").append(contact)
+					.append(", msg=").append(msgId).append(", status=").append(status)
+					.append(", reasonCode=").append(reasonCode).append(".").toString());
 		}
 
 		ContentValues values = new ContentValues();
@@ -111,20 +110,21 @@ public class MessageLog implements IMessageLog {
 	/**
 	 * Add outgoing one-to-one chat message
 	 *
-	 * @param msg Chat message
-	 * @param status Status
-	 * @param reasonCode Reason code
+	 * @param msg
+	 *            Chat message
+	 * @param status
+	 *            Status
+	 * @param reasonCode
+	 *            Reason code
 	 */
 	@Override
-	public void addOutgoingOneToOneChatMessage(ChatMessage msg, int status,
-			int reasonCode) {
+	public void addOutgoingOneToOneChatMessage(ChatMessage msg, int status, int reasonCode) {
 		ContactId contact = msg.getRemoteContact();
 		String msgId = msg.getMessageId();
 		if (logger.isActivated()) {
-			logger.debug(new StringBuilder("Add outgoing chat message: contact=")
-					.append(contact).append(", msg=").append(msgId).append(", status=")
-					.append(status).append(", reasonCode=").append(reasonCode).append(".")
-					.toString());
+			logger.debug(new StringBuilder("Add outgoing chat message: contact=").append(contact)
+					.append(", msg=").append(msgId).append(", status=").append(status)
+					.append(", reasonCode=").append(reasonCode).append(".").toString());
 		}
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_CHAT_ID, contact.toString());
@@ -134,8 +134,7 @@ public class MessageLog implements IMessageLog {
 		values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD.toInt());
 		String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
 		values.put(MessageData.KEY_MIME_TYPE, apiMimeType);
-		values.put(MessageData.KEY_CONTENT,
-				ChatUtils.networkContentToPersistedContent(msg));
+		values.put(MessageData.KEY_CONTENT, ChatUtils.networkContentToPersistedContent(msg));
 
 		values.put(MessageData.KEY_TIMESTAMP, msg.getDate().getTime());
 		values.put(MessageData.KEY_TIMESTAMP_SENT, msg.getDate().getTime());
@@ -156,8 +155,10 @@ public class MessageLog implements IMessageLog {
 	/**
 	 * Add incoming one-to-one chat message
 	 *
-	 * @param msg Chat message
-	 * @param imdnDisplayedRequested Indicates whether IMDN display was requested
+	 * @param msg
+	 *            Chat message
+	 * @param imdnDisplayedRequested
+	 *            Indicates whether IMDN display was requested
 	 */
 	@Override
 	public void addIncomingOneToOneChatMessage(ChatMessage msg, boolean imdnDisplayedRequested) {
@@ -175,16 +176,22 @@ public class MessageLog implements IMessageLog {
 	/**
 	 * Add group chat message
 	 *
-	 * @param chatId Chat ID
-	 * @param msg Chat message
-	 * @param msg direction Direction
-	 * @param status Status
-	 * @param reasonCode Reason code
+	 * @param chatId
+	 *            Chat ID
+	 * @param msg
+	 *            Chat message
+	 * @param msg
+	 *            direction Direction
+	 * @param status
+	 *            Status
+	 * @param reasonCode
+	 *            Reason code
 	 */
 	@Override
-	public void addGroupChatMessage(String chatId, ChatMessage msg, Direction direction, int status, int reasonCode) {
+	public void addGroupChatMessage(String chatId, ChatMessage msg, Direction direction,
+			int status, int reasonCode) {
 		String msgId = msg.getMessageId();
-		ContactId contact = msg.getRemoteContact() ;
+		ContactId contact = msg.getRemoteContact();
 		if (logger.isActivated()) {
 			logger.debug(new StringBuilder("Add group chat message; chatId=").append(chatId)
 					.append(", msg=").append(msgId).append(", dir=").append(direction)
@@ -203,8 +210,7 @@ public class MessageLog implements IMessageLog {
 		values.put(MessageData.KEY_REASON_CODE, reasonCode);
 		String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
 		values.put(MessageData.KEY_MIME_TYPE, apiMimeType);
-		values.put(MessageData.KEY_CONTENT,
-				ChatUtils.networkContentToPersistedContent(msg));
+		values.put(MessageData.KEY_CONTENT, ChatUtils.networkContentToPersistedContent(msg));
 
 		if (direction == Direction.INCOMING) {
 			// Receive message
@@ -227,18 +233,22 @@ public class MessageLog implements IMessageLog {
 				if (RcsSettings.getInstance().isAlbatrosRelease()) {
 					deliveryStatus = com.gsma.services.rcs.GroupDeliveryInfoLog.Status.UNSUPPORTED;
 				}
-				Set<ParticipantInfo> participants = groupChatLog.getGroupChatConnectedParticipants(chatId);
+				Set<ParticipantInfo> participants = groupChatLog
+						.getGroupChatConnectedParticipants(chatId);
 				for (ParticipantInfo participant : participants) {
 					groupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId,
 							participant.getContact(), msgId, deliveryStatus,
 							com.gsma.services.rcs.GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
 				}
 			} catch (Exception e) {
-				mLocalContentResolver.delete(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), null, null);
-				mLocalContentResolver.delete(Uri.withAppendedPath(GroupDeliveryInfoData.CONTENT_URI, msgId), null, null);
+				mLocalContentResolver.delete(
+						Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), null, null);
+				mLocalContentResolver.delete(
+						Uri.withAppendedPath(GroupDeliveryInfoData.CONTENT_URI, msgId), null, null);
 				/* TODO: Throw exception */
 				if (logger.isActivated()) {
-					logger.warn("Group chat message with msgId '" + msgId + "' could not be added to database!");
+					logger.warn("Group chat message with msgId '" + msgId
+							+ "' could not be added to database!");
 				}
 			}
 		}
@@ -247,7 +257,8 @@ public class MessageLog implements IMessageLog {
 	@Override
 	public void addGroupChatEvent(String chatId, ContactId contact, int status) {
 		if (logger.isActivated()) {
-			logger.debug("Add group chat system message: chatID=" + chatId + ", contact=" + contact + ", status=" + status);
+			logger.debug("Add group chat system message: chatID=" + chatId + ", contact=" + contact
+					+ ", status=" + status);
 		}
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_CHAT_ID, chatId);
@@ -270,13 +281,15 @@ public class MessageLog implements IMessageLog {
 	@Override
 	public void markMessageAsRead(String msgId) {
 		if (logger.isActivated()) {
-			logger.debug(new StringBuilder("Marking chat message as read: msgID=").append(msgId).toString());
+			logger.debug(new StringBuilder("Marking chat message as read: msgID=").append(msgId)
+					.toString());
 		}
 		ContentValues values = new ContentValues();
 		values.put(MessageData.KEY_READ_STATUS, ReadStatus.READ.toInt());
 		values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, Calendar.getInstance().getTimeInMillis());
 
-		if (mLocalContentResolver.update(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), values, null, null) < 1) {
+		if (mLocalContentResolver.update(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId),
+				values, null, null) < 1) {
 			/* TODO: Throw exception */
 			if (logger.isActivated()) {
 				logger.warn("There was no message with msgId '" + msgId + "' to mark as read.");
@@ -299,7 +312,8 @@ public class MessageLog implements IMessageLog {
 					.getTimeInMillis());
 		}
 
-		if (mLocalContentResolver.update(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), values, null, null) < 1) {
+		if (mLocalContentResolver.update(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId),
+				values, null, null) < 1) {
 			/* TODO: Throw exception */
 			if (logger.isActivated()) {
 				logger.warn("There was no message with msgId '" + msgId + "' to update status for.");
@@ -310,16 +324,21 @@ public class MessageLog implements IMessageLog {
 	@Override
 	public void markIncomingChatMessageAsReceived(String msgId) {
 		if (logger.isActivated()) {
-			logger.debug(new StringBuilder("Mark incoming chat message status as received for msgID=").append(msgId).toString());
+			logger.debug(new StringBuilder(
+					"Mark incoming chat message status as received for msgID=").append(msgId)
+					.toString());
 		}
-		setChatMessageStatusAndReasonCode(msgId, ChatLog.Message.Status.Content.RECEIVED, ChatLog.Message.ReasonCode.UNSPECIFIED);
+		setChatMessageStatusAndReasonCode(msgId, ChatLog.Message.Status.Content.RECEIVED,
+				ChatLog.Message.ReasonCode.UNSPECIFIED);
 	}
 
 	@Override
 	public boolean isMessagePersisted(String msgId) {
 		Cursor cursor = null;
 		try {
-			cursor = mLocalContentResolver.query(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), PROJECTION_MESSAGE_ID, null, null, null);
+			cursor = mLocalContentResolver.query(
+					Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId),
+					PROJECTION_MESSAGE_ID, null, null, null);
 			return cursor.moveToFirst();
 		} finally {
 			if (cursor != null) {
@@ -329,9 +348,7 @@ public class MessageLog implements IMessageLog {
 	}
 
 	private Cursor getMessageData(String columnName, String msgId) throws SQLException {
-		String[] projection = new String[] {
-			columnName
-		};
+		String[] projection = new String[] { columnName };
 		Cursor cursor = null;
 		try {
 			cursor = mLocalContentResolver.query(

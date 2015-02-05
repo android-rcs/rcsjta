@@ -31,31 +31,32 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
  * 
  * @author jexa7410
  */
-public class UserprofileSettingsDisplay extends PreferenceActivity implements Preference.OnPreferenceChangeListener {
-	
+public class UserprofileSettingsDisplay extends PreferenceActivity implements
+		Preference.OnPreferenceChangeListener {
+
 	private EditTextPreference displaynameEdit;
-	
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        
-        addPreferencesFromResource(R.xml.rcs_settings_userprofile_preferences);
-        setTitle(R.string.rcs_settings_title_userprofile_settings);
 
-        displaynameEdit = (EditTextPreference)findPreference("edit_displayname");
-        displaynameEdit.setPersistent(false);
-        displaynameEdit.setOnPreferenceChangeListener(this);
-        String name = RcsSettings.getInstance().getUserProfileImsDisplayName();
-        displaynameEdit.setText(name);
-    	displaynameEdit.setTitle(name);
-    }
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-    public boolean onPreferenceChange(Preference preference, Object objValue) {
-        if (preference.getKey().equals("edit_displayname")) {
-            String name = (String)objValue;
-            RcsSettings.getInstance().setUserProfileImsDisplayName(name);
-            displaynameEdit.setTitle(name);
-        }        	
-        return true;
-    }    
+		addPreferencesFromResource(R.xml.rcs_settings_userprofile_preferences);
+		setTitle(R.string.rcs_settings_title_userprofile_settings);
+
+		displaynameEdit = (EditTextPreference) findPreference("edit_displayname");
+		displaynameEdit.setPersistent(false);
+		displaynameEdit.setOnPreferenceChangeListener(this);
+		String name = RcsSettings.getInstance().getUserProfileImsDisplayName();
+		displaynameEdit.setText(name);
+		displaynameEdit.setTitle(name);
+	}
+
+	public boolean onPreferenceChange(Preference preference, Object objValue) {
+		if (preference.getKey().equals("edit_displayname")) {
+			String name = (String) objValue;
+			RcsSettings.getInstance().setUserProfileImsDisplayName(name);
+			displaynameEdit.setTitle(name);
+		}
+		return true;
+	}
 }

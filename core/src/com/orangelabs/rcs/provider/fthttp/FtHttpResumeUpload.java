@@ -73,15 +73,15 @@ public class FtHttpResumeUpload extends FtHttpResume {
 	 *            the {@code contactId} value.
 	 * @param chatId
 	 *            the {@code chatId} value.
-     * @param fileTransferId
-     *            the {@code fileTransferId} value.
+	 * @param fileTransferId
+	 *            the {@code fileTransferId} value.
 	 * @param isGroup
 	 *            the {@code isGroup} value.
 	 */
 	public FtHttpResumeUpload(MmContent file, Uri fileIcon, String tId, ContactId contact,
 			String chatId, String fileTransferId, boolean isGroup) {
-		super(Direction.OUTGOING, file.getUri(), file.getName(), file.getEncoding(), file
-				.getSize(), fileIcon, contact, chatId, fileTransferId, isGroup);
+		super(Direction.OUTGOING, file.getUri(), file.getName(), file.getEncoding(),
+				file.getSize(), fileIcon, contact, chatId, fileTransferId, isGroup);
 		if (tId == null)
 			throw new IllegalArgumentException("Null tId");
 		mTId = tId;
@@ -93,10 +93,11 @@ public class FtHttpResumeUpload extends FtHttpResume {
 
 	@Override
 	public String toString() {
-		return "FtHttpResumeUpload [tId=" + mTId + ", file=" + getFile() + ",getFileName()=" + getFileName() + ", getSize()=" + getSize()
-				+ ", getFileicon()=" + getFileicon() + ", getContact()=" + getContact() + ", getChatId()=" + getChatId()
-				+ ", getFileTransferId()=" + getFileTransferId() + ", isGroup()=" + isGroupTransfer()
-				+ "]";
+		return "FtHttpResumeUpload [tId=" + mTId + ", file=" + getFile() + ",getFileName()="
+				+ getFileName() + ", getSize()=" + getSize() + ", getFileicon()=" + getFileicon()
+				+ ", getContact()=" + getContact() + ", getChatId()=" + getChatId()
+				+ ", getFileTransferId()=" + getFileTransferId() + ", isGroup()="
+				+ isGroupTransfer() + "]";
 	}
 
 }

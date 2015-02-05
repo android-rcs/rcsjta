@@ -33,10 +33,12 @@ public class MediaDescription {
 
 	@Override
 	public String toString() {
-		return "MediaDescription [name=" + name + ", port=" + port + ", protocol=" + protocol + ", payloadType=" + payloadType
-				+ ", payload=" + payload + ", mediaTitle=" + mediaTitle + ", connectionInfo=" + connectionInfo + ", bandwidthInfo="
-				+ bandwidthInfo + ", senderBandwidthInfo=" + senderBandwidthInfo + ", receiverBandwidthInfo=" + receiverBandwidthInfo
-				+ ", encryptionKey=" + encryptionKey + ", mediaAttributes=" + mediaAttributes + "]";
+		return "MediaDescription [name=" + name + ", port=" + port + ", protocol=" + protocol
+				+ ", payloadType=" + payloadType + ", payload=" + payload + ", mediaTitle="
+				+ mediaTitle + ", connectionInfo=" + connectionInfo + ", bandwidthInfo="
+				+ bandwidthInfo + ", senderBandwidthInfo=" + senderBandwidthInfo
+				+ ", receiverBandwidthInfo=" + receiverBandwidthInfo + ", encryptionKey="
+				+ encryptionKey + ", mediaAttributes=" + mediaAttributes + "]";
 	}
 
 	/**
@@ -74,15 +76,15 @@ public class MediaDescription {
 	 */
 	public String bandwidthInfo;
 
-    /**
-     * Sender bandwidth info (RFC 3556)
-     */
-    public String senderBandwidthInfo;
+	/**
+	 * Sender bandwidth info (RFC 3556)
+	 */
+	public String senderBandwidthInfo;
 
-    /**
-     * Receiver bandwidth info (RFC 3556)
-     */
-    public String receiverBandwidthInfo;
+	/**
+	 * Receiver bandwidth info (RFC 3556)
+	 */
+	public String receiverBandwidthInfo;
 
 	/**
 	 * Encryption key
@@ -97,28 +99,32 @@ public class MediaDescription {
 	/**
 	 * Constructor
 	 * 
-	 * @param name Media name
-	 * @param port Media port
-	 * @param protocol Media protocol
-	 * @param payload Media payload
+	 * @param name
+	 *            Media name
+	 * @param port
+	 *            Media port
+	 * @param protocol
+	 *            Media protocol
+	 * @param payload
+	 *            Media payload
 	 */
-    public MediaDescription(String name, int port, String protocol, String payload) {
-        this.name = name;
-        this.port = port;
-        this.protocol = protocol;
-        this.payload = payload;
-        try {
-            this.payloadType = Integer.parseInt(payload);
-        } catch (Exception e) {
-            this.payloadType = -1;
-        }
-    }
+	public MediaDescription(String name, int port, String protocol, String payload) {
+		this.name = name;
+		this.port = port;
+		this.protocol = protocol;
+		this.payload = payload;
+		try {
+			this.payloadType = Integer.parseInt(payload);
+		} catch (Exception e) {
+			this.payloadType = -1;
+		}
+	}
 
 	public MediaAttribute getMediaAttribute(String name) {
 		MediaAttribute attribute = null;
 		if (mediaAttributes != null) {
 			for (int i = 0; i < mediaAttributes.size(); i++) {
-				MediaAttribute entry = (MediaAttribute)mediaAttributes.elementAt(i);
+				MediaAttribute entry = (MediaAttribute) mediaAttributes.elementAt(i);
 				if (entry.getName().equals(name)) {
 					attribute = entry;
 					break;

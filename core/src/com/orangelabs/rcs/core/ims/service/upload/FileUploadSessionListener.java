@@ -26,40 +26,44 @@ import com.orangelabs.rcs.core.ims.service.im.filetransfer.http.FileTransferHttp
  *
  */
 public interface FileUploadSessionListener {
-    /**
-     * Upload started
-     */
-    public void handleUploadStarted();
+	/**
+	 * Upload started
+	 */
+	public void handleUploadStarted();
 
 	/**
 	 * Upload progress
 	 * 
-	 * @param currentSize Data size transfered 
-	 * @param totalSize Total size to be transfered
+	 * @param currentSize
+	 *            Data size transfered
+	 * @param totalSize
+	 *            Total size to be transfered
 	 */
-    public void handleUploadProgress(long currentSize, long totalSize);
-    
-    /**
-     * Upload terminated with success
-     * 
-     * @param info File info document
-     */
-    public void handleUploadTerminated(FileTransferHttpInfoDocument info);
+	public void handleUploadProgress(long currentSize, long totalSize);
 
-    /**
-     * Upload error
-     * 
-     * @param error Error
-     */
-    public void handleUploadError(int error);    
+	/**
+	 * Upload terminated with success
+	 * 
+	 * @param info
+	 *            File info document
+	 */
+	public void handleUploadTerminated(FileTransferHttpInfoDocument info);
 
-    /**
-     * Upload aborted
-     */
-    public void handleUploadAborted();    
+	/**
+	 * Upload error
+	 * 
+	 * @param error
+	 *            Error
+	 */
+	public void handleUploadError(int error);
 
-    /**
-     * Not allowed to send
-     */
-    public void handleUploadNotAllowedToSend();
+	/**
+	 * Upload aborted
+	 */
+	public void handleUploadAborted();
+
+	/**
+	 * Not allowed to send
+	 */
+	public void handleUploadNotAllowedToSend();
 }

@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.messaging.chat;
 
 import android.net.Uri;
@@ -22,35 +23,35 @@ import android.net.Uri;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.ft.FileTransferService;
 
-
 /**
  * @author YPLO6403
- *
  */
 public interface ISendFile {
 
-	/**
-	 * Transfer file
-	 * @param file
-	 *            Uri of file to transfer
-	 * @param fileicon
-	 *            File icon option. If true, the stack tries to attach fileicon.
-	 * @return True if file transfer is successful
-	 */
-	boolean transferFile(Uri file, boolean fileicon);
-	
-	/**
-	 * Add file transfer event listener
-	 * 
-	 * @param fileTransferService
-	 */
-	void addFileTransferEventListener(FileTransferService fileTransferService) throws RcsServiceException;
+    /**
+     * Transfer file
+     * 
+     * @param file Uri of file to transfer
+     * @param fileicon File icon option. If true, the stack tries to attach
+     *            fileicon.
+     * @return True if file transfer is successful
+     */
+    boolean transferFile(Uri file, boolean fileicon);
 
-	/**
-	 * Remove file transfer event listener
-	 * 
-	 * @param fileTransferService
-	 */
-	void removeFileTransferEventListener(FileTransferService fileTransferService) throws RcsServiceException;
+    /**
+     * Add file transfer event listener
+     * 
+     * @param fileTransferService
+     */
+    void addFileTransferEventListener(FileTransferService fileTransferService)
+            throws RcsServiceException;
+
+    /**
+     * Remove file transfer event listener
+     * 
+     * @param fileTransferService
+     */
+    void removeFileTransferEventListener(FileTransferService fileTransferService)
+            throws RcsServiceException;
 
 }

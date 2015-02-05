@@ -28,12 +28,12 @@ import android.content.Intent;
  * @author vfml3370
  */
 public class GeolocSharingInvitationReceiver extends BroadcastReceiver {
-	
-	@Override
-	public void onReceive(Context context, Intent intent) {
-		Intent receiverIntent = new Intent(context, GeolocSharingIntentService.class);
-		receiverIntent.putExtras(intent);
-		receiverIntent.setAction(intent.getAction());
-		context.startService(receiverIntent);
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        Intent receiverIntent = new Intent(context, GeolocSharingIntentService.class);
+        receiverIntent.putExtras(intent);
+        receiverIntent.setAction(intent.getAction());
+        context.startService(receiverIntent);
     }
 }

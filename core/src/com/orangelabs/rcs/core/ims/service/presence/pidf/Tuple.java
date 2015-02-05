@@ -63,12 +63,12 @@ public class Tuple {
 	public void setService(Service service) {
 		this.service = service;
 	}
-	
+
 	public long getTimestamp() {
 		return timestamp;
 	}
 
 	public void setTimestamp(long ts) {
 		this.timestamp = ts;
-	}	
+	}
 }

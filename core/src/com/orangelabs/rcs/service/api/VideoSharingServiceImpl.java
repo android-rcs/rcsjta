@@ -87,15 +87,22 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	/**
 	 * The logger
 	 */
-	private static final  Logger logger = Logger.getLogger(VideoSharingServiceImpl.class.getSimpleName());
+	private static final Logger logger = Logger.getLogger(VideoSharingServiceImpl.class
+			.getSimpleName());
 
 	/**
 	 * Constructor
-	 * @param richcallService RichcallService
-	 * @param richCallLog RichCallHistory
-	 * @param rcsSettings RcsSettings
-	 * @param contactsManager ContactsManager
-	 * @param core Core
+	 * 
+	 * @param richcallService
+	 *            RichcallService
+	 * @param richCallLog
+	 *            RichCallHistory
+	 * @param rcsSettings
+	 *            RcsSettings
+	 * @param contactsManager
+	 *            ContactsManager
+	 * @param core
+	 *            Core
 	 */
 	public VideoSharingServiceImpl(RichcallService richcallService, RichCallHistory richCallLog,
 			RcsSettings rcsSettings, ContactsManager contactsManager, Core core) {
@@ -115,51 +122,54 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	public void close() {
 		// Clear list of sessions
 		mVideoSharingCache.clear();
-		
+
 		if (logger.isActivated()) {
 			logger.info("Video sharing service API is closed");
 		}
 	}
 
-    /**
-     * Add a video sharing in the list
-     * 
-     * @param videoSharing Video sharing
-     */
+	/**
+	 * Add a video sharing in the list
+	 * 
+	 * @param videoSharing
+	 *            Video sharing
+	 */
 	private void addVideoSharing(VideoSharingImpl videoSharing) {
 		if (logger.isActivated()) {
 			logger.debug("Add a video sharing");
 		}
-		
+
 		mVideoSharingCache.put(videoSharing.getSharingId(), videoSharing);
 	}
 
-    /**
-     * Remove a video sharing from the list
-     * 
-     * @param sharingId Sharing ID
-     */
-	/* package private */ void removeVideoSharing(String sharingId) {
+	/**
+	 * Remove a video sharing from the list
+	 * 
+	 * @param sharingId
+	 *            Sharing ID
+	 */
+	/* package private */void removeVideoSharing(String sharingId) {
 		if (logger.isActivated()) {
 			logger.debug("Remove a video sharing");
 		}
-		
+
 		mVideoSharingCache.remove(sharingId);
 	}
 
-    /**
-     * Returns true if the service is registered to the platform, else returns false
-     * 
+	/**
+	 * Returns true if the service is registered to the platform, else returns false
+	 * 
 	 * @return Returns true if registered else returns false
-     */
-    public boolean isServiceRegistered() {
-    	return ServerApiUtils.isImsConnected();
-    }
+	 */
+	public boolean isServiceRegistered() {
+		return ServerApiUtils.isImsConnected();
+	}
 
 	/**
 	 * Registers a listener on service registration events
 	 *
-	 * @param listener Service registration listener
+	 * @param listener
+	 *            Service registration listener
 	 */
 	public void addEventListener(IRcsServiceRegistrationListener listener) {
 		if (logger.isActivated()) {
@@ -173,7 +183,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	/**
 	 * Unregisters a listener on service registration events
 	 *
-	 * @param listener Service registration listener
+	 * @param listener
+	 *            Service registration listener
 	 */
 	public void removeEventListener(IRcsServiceRegistrationListener listener) {
 		if (logger.isActivated()) {
@@ -187,7 +198,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	/**
 	 * Receive registration event
 	 *
-	 * @param state Registration state
+	 * @param state
+	 *            Registration state
 	 */
 	public void notifyRegistrationEvent(boolean state) {
 		// Notify listeners
@@ -201,11 +213,11 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	}
 
 	/**
-     * Get the remote contact Id involved in the current call
-     * 
-     * @return ContactId or null if there is no call in progress
-     * @throws ServerApiException
-     */
+	 * Get the remote contact Id involved in the current call
+	 * 
+	 * @return ContactId or null if there is no call in progress
+	 * @throws ServerApiException
+	 */
 	public ContactId getRemotePhoneNumber() throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Get remote phone number");
@@ -216,17 +228,18 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
 		try {
 			return mCore.getImsModule().getCallManager().getContact();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new ServerApiException(e);
 		}
 	}
 
 	/**
-     * Receive a new video sharing invitation
-     * 
-     * @param session Video sharing session
-     */
-    public void receiveVideoSharingInvitation(VideoStreamingSession session) {
+	 * Receive a new video sharing invitation
+	 * 
+	 * @param session
+	 *            Video sharing session
+	 */
+	public void receiveVideoSharingInvitation(VideoStreamingSession session) {
 		ContactId contact = session.getRemoteContact();
 		if (logger.isActivated()) {
 			logger.info(new StringBuilder("Receive video sharing invitation from ")
@@ -243,30 +256,33 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 				mBroadcaster, storageAccessor, this);
 		addVideoSharing(videoSharing);
 		session.addListener(videoSharing);
-    }
-    
-    /**
-     * Returns the configuration of video sharing service
-     * 
-     * @return Configuration
-     */
-    public IVideoSharingServiceConfiguration getConfiguration() {
+	}
+
+	/**
+	 * Returns the configuration of video sharing service
+	 * 
+	 * @return Configuration
+	 */
+	public IVideoSharingServiceConfiguration getConfiguration() {
 		return new IVideoSharingServiceConfigurationImpl(mRcsSettings);
 	}
 
-    /**
-     * Shares a live video with a contact. The parameter renderer contains the video player
-     * provided by the application. An exception if thrown if there is no ongoing CS call. The
-     * parameter contact supports the following formats: MSISDN in national or international
-     * format, SIP address, SIP-URI or Tel-URI. If the format of the contact is not supported
-     * an exception is thrown.
-     * 
-     * @param contact Contact ID
-     * @param player Video player
-     * @return Video sharing
+	/**
+	 * Shares a live video with a contact. The parameter renderer contains the video player provided
+	 * by the application. An exception if thrown if there is no ongoing CS call. The parameter
+	 * contact supports the following formats: MSISDN in national or international format, SIP
+	 * address, SIP-URI or Tel-URI. If the format of the contact is not supported an exception is
+	 * thrown.
+	 * 
+	 * @param contact
+	 *            Contact ID
+	 * @param player
+	 *            Video player
+	 * @return Video sharing
 	 * @throws ServerApiException
-     */
-    public IVideoSharing shareVideo(ContactId contact, IVideoPlayer player) throws ServerApiException {
+	 */
+	public IVideoSharing shareVideo(ContactId contact, IVideoPlayer player)
+			throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Initiate a live video session with ".concat(contact.toString()));
 		}
@@ -280,15 +296,15 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 		}
 
 		try {
-            final VideoStreamingSession session = mRichcallService.initiateLiveVideoSharingSession(contact, player);
+			final VideoStreamingSession session = mRichcallService.initiateLiveVideoSharingSession(
+					contact, player);
 
 			String sharingId = session.getSessionID();
-			VideoContent content = (VideoContent)session.getContent();
-			mRichCallLog.addVideoSharing(sharingId, contact,
-					Direction.OUTGOING, content,
+			VideoContent content = (VideoContent) session.getContent();
+			mRichCallLog.addVideoSharing(sharingId, contact, Direction.OUTGOING, content,
 					VideoSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
-			mBroadcaster.broadcastStateChanged(contact, sharingId,
-					VideoSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
+			mBroadcaster.broadcastStateChanged(contact, sharingId, VideoSharing.State.INITIATING,
+					ReasonCode.UNSPECIFIED);
 
 			VideoSharingPersistedStorageAccessor storageAccessor = new VideoSharingPersistedStorageAccessor(
 					sharingId, contact, Direction.OUTGOING, mRichCallLog, content.getEncoding(),
@@ -298,25 +314,26 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 			addVideoSharing(videoSharing);
 			session.addListener(videoSharing);
 
-	        new Thread() {
-	    		public void run() {
-	    			session.startSession();
-	    		}
-	    	}.start();	
+			new Thread() {
+				public void run() {
+					session.startSession();
+				}
+			}.start();
 			return videoSharing;
 
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new ServerApiException(e);
 		}
 	}
 
-    /**
-     * Returns a current video sharing from its unique ID
-     * @param sharingId 
-     * 
-     * @return Video sharing
-     * @throws ServerApiException
-     */
+	/**
+	 * Returns a current video sharing from its unique ID
+	 * 
+	 * @param sharingId
+	 * 
+	 * @return Video sharing
+	 * @throws ServerApiException
+	 */
 	public IVideoSharing getVideoSharing(String sharingId) throws ServerApiException {
 		if (logger.isActivated()) {
 			logger.info("Get video sharing ".concat(sharingId));
@@ -332,14 +349,14 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 				this);
 	}
 
-    /**
-     * Returns the list of video sharings in progress
-     * 
-     * @return List of video sharings
-     * @throws ServerApiException
-     */
-    public List<IBinder> getVideoSharings() throws ServerApiException {
-    	if (logger.isActivated()) {
+	/**
+	 * Returns the list of video sharings in progress
+	 * 
+	 * @return List of video sharings
+	 * @throws ServerApiException
+	 */
+	public List<IBinder> getVideoSharings() throws ServerApiException {
+		if (logger.isActivated()) {
 			logger.info("Get video sharing sessions");
 		}
 
@@ -350,30 +367,34 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 			}
 			return videoSharings;
 
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new ServerApiException(e);
-		}		
+		}
 	}
 
 	/**
 	 * Add and broadcast video sharing invitation rejections
 	 *
-	 * @param contact Contact ID
-	 * @param content Video content
-	 * @param reasonCode Reason code
+	 * @param contact
+	 *            Contact ID
+	 * @param content
+	 *            Video content
+	 * @param reasonCode
+	 *            Reason code
 	 */
-	public void addAndBroadcastVideoSharingInvitationRejected(ContactId contact, VideoContent content,
-			int reasonCode) {
+	public void addAndBroadcastVideoSharingInvitationRejected(ContactId contact,
+			VideoContent content, int reasonCode) {
 		String sessionId = SessionIdGenerator.getNewId();
-		mRichCallLog.addVideoSharing(sessionId, contact,
-				Direction.INCOMING, content, VideoSharing.State.REJECTED, reasonCode);
+		mRichCallLog.addVideoSharing(sessionId, contact, Direction.INCOMING, content,
+				VideoSharing.State.REJECTED, reasonCode);
 		mBroadcaster.broadcastInvitation(sessionId);
 	}
 
-    /**
+	/**
 	 * Adds a listener on video sharing events
 	 * 
-	 * @param listener Listener
+	 * @param listener
+	 *            Listener
 	 */
 	public void addEventListener2(IVideoSharingListener listener) {
 		if (logger.isActivated()) {
@@ -387,7 +408,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	/**
 	 * Removes a listener from video sharing events
 	 * 
-	 * @param listener Listener
+	 * @param listener
+	 *            Listener
 	 */
 	public void removeEventListener2(IVideoSharingListener listener) {
 		if (logger.isActivated()) {
@@ -402,13 +424,13 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	 * Returns service version
 	 * 
 	 * @return Version
-	 * @throws ServerApiException 
+	 * @throws ServerApiException
 	 * @see VERSION_CODES
 	 */
 	public int getServiceVersion() throws ServerApiException {
 		return RcsService.Build.API_VERSION;
 	}
-	
+
 	/**
 	 * Returns the common service configuration
 	 * 
@@ -419,16 +441,16 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	}
 
 	/**
-	 * Deletes all video sharing from history and abort/reject any associated
-	 * ongoing session if such exists.
+	 * Deletes all video sharing from history and abort/reject any associated ongoing session if
+	 * such exists.
 	 */
 	public void deleteVideoSharings() {
 		throw new UnsupportedOperationException("This method has not been implemented yet!");
 	}
 
 	/**
-	 * Delete video sharing associated with a given contact from history and
-	 * abort/reject any associated ongoing session if such exists.
+	 * Delete video sharing associated with a given contact from history and abort/reject any
+	 * associated ongoing session if such exists.
 	 * 
 	 * @param contact
 	 */
@@ -437,8 +459,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 	}
 
 	/**
-	 * Deletes a video sharing by its sharing ID from history and abort/reject
-	 * any associated ongoing session if such exists.
+	 * Deletes a video sharing by its sharing ID from history and abort/reject any associated
+	 * ongoing session if such exists.
 	 * 
 	 * @param sharingId
 	 */

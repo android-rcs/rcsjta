@@ -18,8 +18,6 @@
 
 package com.orangelabs.rcs.core.ims.protocol.http;
 
-
-
 /**
  * HTTP POST request
  * 
@@ -29,14 +27,17 @@ public class HttpPostRequest extends HttpRequest {
 	/**
 	 * Constructor
 	 * 
-	 * @param url URL
-	 * @param content Content
-	 * @param contentType Content type
+	 * @param url
+	 *            URL
+	 * @param content
+	 *            Content
+	 * @param contentType
+	 *            Content type
 	 */
 	public HttpPostRequest(String url, String content, String contentType) {
 		super(url, content, contentType);
 	}
-	
+
 	/**
 	 * Returns the HTTP method
 	 * 

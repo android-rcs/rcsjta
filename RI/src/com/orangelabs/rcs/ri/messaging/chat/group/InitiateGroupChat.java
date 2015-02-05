@@ -16,7 +16,6 @@
  * limitations under the License.
  ******************************************************************************/
 
-
 package com.orangelabs.rcs.ri.messaging.chat.group;
 
 import java.util.ArrayList;
@@ -45,9 +44,9 @@ public class InitiateGroupChat extends Activity implements OnItemClickListener {
      * List of participants
      */
     private ArrayList<String> participants = new ArrayList<String>();
-    
+
     private MultiContactListAdapter mAdapter;
-    
+
     /**
      * Invite button
      */
@@ -67,43 +66,43 @@ public class InitiateGroupChat extends Activity implements OnItemClickListener {
         contactList.setAdapter(mAdapter);
         contactList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         contactList.setOnItemClickListener(this);
-        
+
         // Set button callback
         inviteBtn = (Button)findViewById(R.id.invite_btn);
         inviteBtn.setOnClickListener(btnInviteListener);
-    	inviteBtn.setEnabled(false);
+        inviteBtn.setEnabled(false);
     }
-    
+
     /**
      * Invite button listener
      */
     private OnClickListener btnInviteListener = new OnClickListener() {
         public void onClick(View v) {
-        	// Get subject
-        	EditText subjectTxt = (EditText)findViewById(R.id.subject);
-        	String subject = subjectTxt.getText().toString();
-        	GroupChatView.initiateGroupChat(InitiateGroupChat.this, subject, participants);
-        	// Exit activity
-        	finish();
+            // Get subject
+            EditText subjectTxt = (EditText)findViewById(R.id.subject);
+            String subject = subjectTxt.getText().toString();
+            GroupChatView.initiateGroupChat(InitiateGroupChat.this, subject, participants);
+            // Exit activity
+            finish();
         }
     };
-    
-	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-		// Check if number is in participants list
-		String number =  mAdapter.getSelectedNumber(view);
-		if (participants.contains(number)){
-			// Number is in list, we remove it
-			participants.remove(number);
-		} else {
-			// Number is not in list, add it
-			participants.add(number);
-		}
-		
-		// Disable the invite button if no contact selected
-    	if (participants.size() == 0) {
-    		inviteBtn.setEnabled(false);
-		} else {
-			inviteBtn.setEnabled(true);
-		}		
-	}
-}    
+
+    public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+        // Check if number is in participants list
+        String number = mAdapter.getSelectedNumber(view);
+        if (participants.contains(number)) {
+            // Number is in list, we remove it
+            participants.remove(number);
+        } else {
+            // Number is not in list, add it
+            participants.add(number);
+        }
+
+        // Disable the invite button if no contact selected
+        if (participants.size() == 0) {
+            inviteBtn.setEnabled(false);
+        } else {
+            inviteBtn.setEnabled(true);
+        }
+    }
+}

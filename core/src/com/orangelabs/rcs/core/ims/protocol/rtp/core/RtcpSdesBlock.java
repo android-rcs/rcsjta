@@ -25,6 +25,6 @@ package com.orangelabs.rcs.core.ims.protocol.rtp.core;
  */
 public class RtcpSdesBlock {
 	public int ssrc;
-	
+
 	public RtcpSdesItem[] items;
 }

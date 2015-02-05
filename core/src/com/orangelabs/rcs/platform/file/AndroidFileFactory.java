@@ -49,7 +49,8 @@ public class AndroidFileFactory extends FileFactory {
 	/**
 	 * Returns the description of a file
 	 *
-	 * @param file URI of the file
+	 * @param file
+	 *            URI of the file
 	 * @return File description
 	 * @throws IOException
 	 */
@@ -59,14 +60,15 @@ public class AndroidFileFactory extends FileFactory {
 		long fileSize = FileUtils.getFileSize(context, file);
 		return new FileDescription(file, fileName, fileSize);
 	}
-	
+
 	/**
 	 * Returns whether a file exists or not
 	 * 
-	 * @param url Url of the file to check
+	 * @param url
+	 *            Url of the file to check
 	 * @return File existence
 	 */
-	public boolean fileExists(String url){
+	public boolean fileExists(String url) {
 		File file = new File(url);
 		return file.exists();
 	}
@@ -74,36 +76,37 @@ public class AndroidFileFactory extends FileFactory {
 	/**
 	 * Update the media storage
 	 * 
-	 * @param url New URL to be added
+	 * @param url
+	 *            New URL to be added
 	 */
 	public void updateMediaStorage(String url) {
 		if (logger.isActivated()) {
 			logger.debug("Updating media storage with URL " + url);
 		}
-		MyMediaScannerClient scanner = new MyMediaScannerClient(url); 
+		MyMediaScannerClient scanner = new MyMediaScannerClient(url);
 		scanner.scan();
 	}
-	
+
 	/**
 	 * Media scanner
 	 */
 	private class MyMediaScannerClient implements MediaScannerConnectionClient {
 		private String filename;
-		
+
 		private MediaScannerConnection scanner;
-		
+
 		public MyMediaScannerClient(String filename) {
 			this.filename = filename;
-			this.scanner = new MediaScannerConnection(AndroidFactory.getApplicationContext(), this); 
+			this.scanner = new MediaScannerConnection(AndroidFactory.getApplicationContext(), this);
 		}
-		
-		public void onMediaScannerConnected() { 
+
+		public void onMediaScannerConnected() {
 			if (logger.isActivated()) {
 				logger.debug("Scanning file " + filename);
 			}
 			scanner.scanFile(filename, null);
 		}
-		
+
 		public void onScanCompleted(String path, Uri uri) {
 			if (logger.isActivated()) {
 				logger.debug("Scan completed for uri " + uri + " with path " + path);
@@ -112,7 +115,7 @@ public class AndroidFileFactory extends FileFactory {
 				scanner.disconnect();
 			}
 		}
-		
+
 		public void scan() {
 			scanner.connect();
 		}

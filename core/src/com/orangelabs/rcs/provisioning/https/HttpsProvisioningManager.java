@@ -97,62 +97,62 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class HttpsProvisioningManager {
 
-    /**
-     * First launch flag
-     */
-    private boolean first = false;
+	/**
+	 * First launch flag
+	 */
+	private boolean first = false;
 
-    /**
-     * User action flag
-     */
-    private boolean user = false;
-    /**
-     * Retry counter
-     */
-    private int retryCount = 0;
+	/**
+	 * User action flag
+	 */
+	private boolean user = false;
+	/**
+	 * Retry counter
+	 */
+	private int retryCount = 0;
 
-    /**
-     * Check if a provisioning request is already pending
-     */
-    private boolean isPending = false;
+	/**
+	 * Check if a provisioning request is already pending
+	 */
+	private boolean isPending = false;
 
-    private final LocalContentResolver mLocalContentResolver;
+	private final LocalContentResolver mLocalContentResolver;
 
-    /**
-     * The Service Context
-     */
+	/**
+	 * The Service Context
+	 */
 	private final Context mCtx;
 
-    /**
-     * Provisioning SMS manager
-     */
-    HttpsProvisioningSMS smsManager;
+	/**
+	 * Provisioning SMS manager
+	 */
+	HttpsProvisioningSMS smsManager;
 
-    /**
-     * Provisioning Connection manager
-     */
-    HttpsProvisioningConnection networkConnection;
+	/**
+	 * Provisioning Connection manager
+	 */
+	HttpsProvisioningConnection networkConnection;
 
-    /**
-     * Retry after 511 "Network authentication required" counter
-     */
-    private int retryAfter511ErrorCount = 0;
+	/**
+	 * Retry after 511 "Network authentication required" counter
+	 */
+	private int retryAfter511ErrorCount = 0;
 
-    /**
-     * Retry intent
-     */
-    private PendingIntent retryIntent;
+	/**
+	 * Retry intent
+	 */
+	private PendingIntent retryIntent;
 
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+	/**
+	 * The logger
+	 */
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
 	/**
 	 * Constructor
 	 * 
 	 * @param applicationContext
-	 * @param localContentResolver 
+	 * @param localContentResolver
 	 * @param retryIntent
 	 *            pending intent to update periodically the configuration
 	 * @param first
@@ -172,290 +172,322 @@ public class HttpsProvisioningManager {
 		this.networkConnection = new HttpsProvisioningConnection(this);
 	}
 
-    /**
-     * @return the context
-     */
-    protected Context getContext() {
-        return mCtx;
-    }
-
-    /**
-     * Connection event
-     *
-     * @param action Connectivity action
-     * @return true if the updateConfig has been done
-     */
-    protected boolean connectionEvent(String action) {
-        if (!isPending) {
-    		if (logger.isActivated()) {
-    			logger.debug("Connection event " + action);
-    		}
-
-    		if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-    			
-    			// Check received network info
-    	    	NetworkInfo networkInfo = networkConnection.getConnectionMngr().getActiveNetworkInfo();
-    			if ((networkInfo != null) && networkInfo.isConnected()) {
-                    isPending = true;
-    				if (logger.isActivated()) {
-    					logger.debug("Connected to data network");
-    				}
-    	            Thread t = new Thread() {
-    	                public void run() {
-    	                    updateConfig();
-    	                }
-    	            };
-    	            t.start();
-
-                    // Unregister network state listener
-    	            networkConnection.unregisterNetworkStateListener();
-                    isPending = false;
-                    return true;
-    			}
-    		}
-        }
-        return false;
-    } 
+	/**
+	 * @return the context
+	 */
+	protected Context getContext() {
+		return mCtx;
+	}
 
 	/**
-     * Execute an HTTP request
-     *
-     * @param protocol HTTP protocol
-     * @param request HTTP request
-     * @return HTTP response
-     * @throws URISyntaxException 
-     * @throws IOException 
-     * @throws ClientProtocolException 
-     */
-    protected HttpResponse executeRequest(String protocol, String request, DefaultHttpClient client, HttpContext localContext) throws URISyntaxException, ClientProtocolException, IOException {
-        try {
-            HttpGet get = new HttpGet();
-            get.setURI(new URI(protocol + "://" + request));
-            get.addHeader("Accept-Language", HttpsProvisioningUtils.getUserLanguage());
-            if (logger.isActivated()) {
-                logger.debug("HTTP request: " + get.getURI().toString());
-            }
-            
-            HttpResponse response = client.execute(get, localContext);
-            if (logger.isActivated()) {
-                logger.debug("HTTP response: " + response.getStatusLine().toString());
-            }
-            return response;
-        } catch (UnknownHostException e) {
-            if (logger.isActivated()) {
-                logger.debug("The server " + request + " can't be reached!");
-            }
-            return null;
-        }
-    }
+	 * Connection event
+	 *
+	 * @param action
+	 *            Connectivity action
+	 * @return true if the updateConfig has been done
+	 */
+	protected boolean connectionEvent(String action) {
+		if (!isPending) {
+			if (logger.isActivated()) {
+				logger.debug("Connection event " + action);
+			}
 
-    /**
-     * Get the HTTPS request arguments
-     * 
-     * @param imsi Imsi
-     * @param imei Imei
-     * @return {@link String} with the HTTPS request arguments.
-     */
-    protected String getHttpsRequestArguments(String imsi, String imei) {
-        return getHttpsRequestArguments(imsi, imei, null, null, null);
-    }
+			if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
 
-    /**
-     * Get the HTTPS request arguments
-     * 
-     * @param imsi Imsi
-     * @param imei Imei
-     * @param smsPort SMS port
-     * @param token Provisioning token
-     * @param msisdn MSISDN
-     * @return {@link String} with the HTTPS request arguments. 
-     */
-    private String getHttpsRequestArguments(String imsi, String imei, String smsPort, String token, String msisdn) {
-    	String vers = RcsSettings.getInstance().getProvisioningVersion();
-    	if (this.user && ProvisioningInfo.Version.DISABLED_DORMANT.equals(vers)) {
-    		vers = LauncherUtils.getProvisioningVersion(mCtx);
-    		this.user = false;
-    	}
-    		
-        String args = "?vers=" + vers
-        		+ "&rcs_version=" + HttpsProvisioningUtils.getRcsVersion()
-                + "&rcs_profile=" + HttpsProvisioningUtils.getRcsProfile()
-                + "&client_vendor=" + HttpsProvisioningUtils.getClientVendorFromContext(mCtx)
-                + "&client_version=" + HttpsProvisioningUtils.getClientVersionFromContext(mCtx)
-                + "&terminal_vendor=" + HttpUtils.encodeURL(HttpsProvisioningUtils.getTerminalVendor())
-                + "&terminal_model=" + HttpUtils.encodeURL(HttpsProvisioningUtils.getTerminalModel())
-                + "&terminal_sw_version=" + HttpUtils.encodeURL(HttpsProvisioningUtils.getTerminalSoftwareVersion());
-        if (imsi != null) {
-        	// Add optional parameter IMSI only if available
-            args += "&IMSI=" + imsi;
-        }
-        if (imei != null) {
-        	// Add optional parameter IMEI only if available
-            args += "&IMEI=" + imei;
-        }
-        if (smsPort != null) {
-        	// Add SMS port if available
-            args += "&SMS_port=" + smsPort;
-        }
-        if (msisdn != null) {
-        	// Add token if available
-            args += "&msisdn=" + msisdn;
-        }
-        if (token != null) {
-        	// Add token if available
-            args += "&token=" + token;
-        }
-        return args;
-    }
+				// Check received network info
+				NetworkInfo networkInfo = networkConnection.getConnectionMngr()
+						.getActiveNetworkInfo();
+				if ((networkInfo != null) && networkInfo.isConnected()) {
+					isPending = true;
+					if (logger.isActivated()) {
+						logger.debug("Connected to data network");
+					}
+					Thread t = new Thread() {
+						public void run() {
+							updateConfig();
+						}
+					};
+					t.start();
+
+					// Unregister network state listener
+					networkConnection.unregisterNetworkStateListener();
+					isPending = false;
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Execute an HTTP request
+	 *
+	 * @param protocol
+	 *            HTTP protocol
+	 * @param request
+	 *            HTTP request
+	 * @return HTTP response
+	 * @throws URISyntaxException
+	 * @throws IOException
+	 * @throws ClientProtocolException
+	 */
+	protected HttpResponse executeRequest(String protocol, String request,
+			DefaultHttpClient client, HttpContext localContext) throws URISyntaxException,
+			ClientProtocolException, IOException {
+		try {
+			HttpGet get = new HttpGet();
+			get.setURI(new URI(protocol + "://" + request));
+			get.addHeader("Accept-Language", HttpsProvisioningUtils.getUserLanguage());
+			if (logger.isActivated()) {
+				logger.debug("HTTP request: " + get.getURI().toString());
+			}
+
+			HttpResponse response = client.execute(get, localContext);
+			if (logger.isActivated()) {
+				logger.debug("HTTP response: " + response.getStatusLine().toString());
+			}
+			return response;
+		} catch (UnknownHostException e) {
+			if (logger.isActivated()) {
+				logger.debug("The server " + request + " can't be reached!");
+			}
+			return null;
+		}
+	}
+
+	/**
+	 * Get the HTTPS request arguments
+	 * 
+	 * @param imsi
+	 *            Imsi
+	 * @param imei
+	 *            Imei
+	 * @return {@link String} with the HTTPS request arguments.
+	 */
+	protected String getHttpsRequestArguments(String imsi, String imei) {
+		return getHttpsRequestArguments(imsi, imei, null, null, null);
+	}
+
+	/**
+	 * Get the HTTPS request arguments
+	 * 
+	 * @param imsi
+	 *            Imsi
+	 * @param imei
+	 *            Imei
+	 * @param smsPort
+	 *            SMS port
+	 * @param token
+	 *            Provisioning token
+	 * @param msisdn
+	 *            MSISDN
+	 * @return {@link String} with the HTTPS request arguments.
+	 */
+	private String getHttpsRequestArguments(String imsi, String imei, String smsPort, String token,
+			String msisdn) {
+		String vers = RcsSettings.getInstance().getProvisioningVersion();
+		if (this.user && ProvisioningInfo.Version.DISABLED_DORMANT.equals(vers)) {
+			vers = LauncherUtils.getProvisioningVersion(mCtx);
+			this.user = false;
+		}
+
+		String args = "?vers=" + vers + "&rcs_version=" + HttpsProvisioningUtils.getRcsVersion()
+				+ "&rcs_profile=" + HttpsProvisioningUtils.getRcsProfile() + "&client_vendor="
+				+ HttpsProvisioningUtils.getClientVendorFromContext(mCtx) + "&client_version="
+				+ HttpsProvisioningUtils.getClientVersionFromContext(mCtx) + "&terminal_vendor="
+				+ HttpUtils.encodeURL(HttpsProvisioningUtils.getTerminalVendor())
+				+ "&terminal_model="
+				+ HttpUtils.encodeURL(HttpsProvisioningUtils.getTerminalModel())
+				+ "&terminal_sw_version="
+				+ HttpUtils.encodeURL(HttpsProvisioningUtils.getTerminalSoftwareVersion());
+		if (imsi != null) {
+			// Add optional parameter IMSI only if available
+			args += "&IMSI=" + imsi;
+		}
+		if (imei != null) {
+			// Add optional parameter IMEI only if available
+			args += "&IMEI=" + imei;
+		}
+		if (smsPort != null) {
+			// Add SMS port if available
+			args += "&SMS_port=" + smsPort;
+		}
+		if (msisdn != null) {
+			// Add token if available
+			args += "&msisdn=" + msisdn;
+		}
+		if (token != null) {
+			// Add token if available
+			args += "&token=" + token;
+		}
+		return args;
+	}
 
 	/**
 	 * Send the first HTTPS request to require the one time password (OTP)
 	 * 
-	 * @param imsi IMSI
-	 * @param imei IMEI
-	 * @param requestUri Request URI
-	 * @param client Instance of {@link DefaultHttpClient} 
-	 * @param localContext Instance of {@link HttpContext}
+	 * @param imsi
+	 *            IMSI
+	 * @param imei
+	 *            IMEI
+	 * @param requestUri
+	 *            Request URI
+	 * @param client
+	 *            Instance of {@link DefaultHttpClient}
+	 * @param localContext
+	 *            Instance of {@link HttpContext}
 	 * @return Instance of {@link HttpsProvisioningResult} or null in case of internal exception
 	 */
-    protected HttpsProvisioningResult sendFirstRequestsToRequireOTP(String imsi, String imei, String msisdn, String primaryUri, String secondaryUri, DefaultHttpClient client, HttpContext localContext) {
-        HttpsProvisioningResult result = new HttpsProvisioningResult();
-        try {
-            if (logger.isActivated()) {
-                logger.debug("HTTP provisioning - Send first HTTPS request to require OTP");
-            }
+	protected HttpsProvisioningResult sendFirstRequestsToRequireOTP(String imsi, String imei,
+			String msisdn, String primaryUri, String secondaryUri, DefaultHttpClient client,
+			HttpContext localContext) {
+		HttpsProvisioningResult result = new HttpsProvisioningResult();
+		try {
+			if (logger.isActivated()) {
+				logger.debug("HTTP provisioning - Send first HTTPS request to require OTP");
+			}
 
-            // Generate the SMS port for provisioning
-            String smsPortForOTP = HttpsProvisioningSMS.generateSmsPortForProvisioning();
+			// Generate the SMS port for provisioning
+			String smsPortForOTP = HttpsProvisioningSMS.generateSmsPortForProvisioning();
 
-            // Format first HTTPS request with extra parameters (IMSI and IMEI if available plus SMS_port and token)
-            String token = (!TextUtils.isEmpty(RcsSettings.getInstance().getProvisioningToken()) ? RcsSettings.getInstance().getProvisioningToken() : "");
-            String args = getHttpsRequestArguments(imsi, imei, smsPortForOTP, token, msisdn);
+			// Format first HTTPS request with extra parameters (IMSI and IMEI if available plus
+			// SMS_port and token)
+			String token = (!TextUtils.isEmpty(RcsSettings.getInstance().getProvisioningToken()) ? RcsSettings
+					.getInstance().getProvisioningToken() : "");
+			String args = getHttpsRequestArguments(imsi, imei, smsPortForOTP, token, msisdn);
 
-            // Execute first HTTPS request with extra parameters
-            String request = primaryUri + args;
-            HttpResponse response = executeRequest("https", request, client, localContext);
-            if (response == null && !StringUtils.isEmpty(secondaryUri)) {
-                // First server not available, try the secondaryUri
-                request = secondaryUri + args;
-                response = executeRequest("https", request, client, localContext);
-            }
-            if (response == null) {
-                return null;
-            }
+			// Execute first HTTPS request with extra parameters
+			String request = primaryUri + args;
+			HttpResponse response = executeRequest("https", request, client, localContext);
+			if (response == null && !StringUtils.isEmpty(secondaryUri)) {
+				// First server not available, try the secondaryUri
+				request = secondaryUri + args;
+				response = executeRequest("https", request, client, localContext);
+			}
+			if (response == null) {
+				return null;
+			}
 
-            result.code = response.getStatusLine().getStatusCode();
-            result.content = new String(EntityUtils.toByteArray(response.getEntity()),
-                    UTF8);
-            if (result.code != 200) {
-                if (result.code == 403) {
-                    if (logger.isActivated()) {
-                        logger.debug("First HTTPS request to require OTP failed: Forbidden (request status code: 403) for msisdn "+msisdn);
-                    }
-                    
-                    msisdn = RcsSettings.getInstance().getMsisdn();
-                    msisdn = HttpsProvionningMSISDNInput.getInstance().displayPopupAndWaitResponse(mCtx);
+			result.code = response.getStatusLine().getStatusCode();
+			result.content = new String(EntityUtils.toByteArray(response.getEntity()), UTF8);
+			if (result.code != 200) {
+				if (result.code == 403) {
+					if (logger.isActivated()) {
+						logger.debug("First HTTPS request to require OTP failed: Forbidden (request status code: 403) for msisdn "
+								+ msisdn);
+					}
 
-                    if (msisdn == null) {
-                        return null;
-                    } else {
-                        return sendFirstRequestsToRequireOTP(imsi, imei, msisdn, primaryUri, secondaryUri, client, localContext);
-                    }
+					msisdn = RcsSettings.getInstance().getMsisdn();
+					msisdn = HttpsProvionningMSISDNInput.getInstance().displayPopupAndWaitResponse(
+							mCtx);
 
-                } else if (result.code == 503) {
-                    if (logger.isActivated()) {
-                        logger.debug("First HTTPS request to require OTP failed: Retry After (request status code: 503)");
-                    }
-                    result.retryAfter = getRetryAfter(response);
-                } else if (result.code == 511) {
-                    if (logger.isActivated()) {
-                        logger.debug("First HTTPS request to require OTP failed: Invalid token (request status code: 511)");
-                    }
-                }
+					if (msisdn == null) {
+						return null;
+					} else {
+						return sendFirstRequestsToRequireOTP(imsi, imei, msisdn, primaryUri,
+								secondaryUri, client, localContext);
+					}
 
-            } else {
-                if (logger.isActivated()) {
-                    logger.debug("HTTPS request returns with 200 OK.");
-                }
-                
-                // Register SMS provisioning receiver
-                smsManager.registerSmsProvisioningReceiver(mLocalContentResolver, smsPortForOTP, primaryUri, client, localContext);
-                
-                // Save the MSISDN
-                RcsSettings.getInstance().setMsisdn(msisdn);
-                
-                // If the content is empty, means that the configuration XML is not present 
-                // and the Token is invalid then we need to wait for the SMS with OTP
-                if (TextUtils.isEmpty(result.content)) {
-                    // Wait for SMS OTP
-                    result.waitingForSMSOTP = true;
-                }
-            }
+				} else if (result.code == 503) {
+					if (logger.isActivated()) {
+						logger.debug("First HTTPS request to require OTP failed: Retry After (request status code: 503)");
+					}
+					result.retryAfter = getRetryAfter(response);
+				} else if (result.code == 511) {
+					if (logger.isActivated()) {
+						logger.debug("First HTTPS request to require OTP failed: Invalid token (request status code: 511)");
+					}
+				}
 
-            // If not waiting for the sms with OTP
-            if (!result.waitingForSMSOTP) {
-                // Unregister SMS provisioning receiver
-            	smsManager.unregisterSmsProvisioningReceiver();
-            }
+			} else {
+				if (logger.isActivated()) {
+					logger.debug("HTTPS request returns with 200 OK.");
+				}
 
-            return result;
-        } catch (UnknownHostException e) {
-            if (logger.isActivated()) {
-                logger.warn("First HTTPS request to require OTP failed: Provisioning server not reachable");
-            }
-            return null;
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("First HTTPS request to require OTP failed: Can't get config via HTTPS", e);
-            }
-            return null;
-        }
-    }
+				// Register SMS provisioning receiver
+				smsManager.registerSmsProvisioningReceiver(mLocalContentResolver, smsPortForOTP,
+						primaryUri, client, localContext);
 
-    
-    /**
-     * Update provisioning config with OTP
-     * 
-     * @param otp One time password
-     * @param requestUri Request URI
-     * @param client Instance of {@link DefaultHttpClient}
-     * @param localContext Instance of {@link HttpContext}
-     */
-    protected void updateConfigWithOTP(String otp, String requestUri, DefaultHttpClient client, HttpContext localContext) {
+				// Save the MSISDN
+				RcsSettings.getInstance().setMsisdn(msisdn);
+
+				// If the content is empty, means that the configuration XML is not present
+				// and the Token is invalid then we need to wait for the SMS with OTP
+				if (TextUtils.isEmpty(result.content)) {
+					// Wait for SMS OTP
+					result.waitingForSMSOTP = true;
+				}
+			}
+
+			// If not waiting for the sms with OTP
+			if (!result.waitingForSMSOTP) {
+				// Unregister SMS provisioning receiver
+				smsManager.unregisterSmsProvisioningReceiver();
+			}
+
+			return result;
+		} catch (UnknownHostException e) {
+			if (logger.isActivated()) {
+				logger.warn("First HTTPS request to require OTP failed: Provisioning server not reachable");
+			}
+			return null;
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error(
+						"First HTTPS request to require OTP failed: Can't get config via HTTPS", e);
+			}
+			return null;
+		}
+	}
+
+	/**
+	 * Update provisioning config with OTP
+	 * 
+	 * @param otp
+	 *            One time password
+	 * @param requestUri
+	 *            Request URI
+	 * @param client
+	 *            Instance of {@link DefaultHttpClient}
+	 * @param localContext
+	 *            Instance of {@link HttpContext}
+	 */
+	protected void updateConfigWithOTP(String otp, String requestUri, DefaultHttpClient client,
+			HttpContext localContext) {
 		// Cancel previous retry alarm
 		HttpsProvisioningService.cancelRetryAlarm(mCtx, retryIntent);
 
-        // Get config via HTTPS with OTP
-        HttpsProvisioningResult result = sendSecondHttpsRequestWithOTP(otp, requestUri, client, localContext);
-        
-        // Process HTTPS provisioning result
-        processProvisioningResult(result);
-    }
-    
+		// Get config via HTTPS with OTP
+		HttpsProvisioningResult result = sendSecondHttpsRequestWithOTP(otp, requestUri, client,
+				localContext);
 
-    /**
-     * Build the provisioning address with SIM information
-     *
-     * @return provisioning URI
-     */
-    private String buildProvisioningAddress(TelephonyManager tm) {
-        // Get SIM info
-        String ope = tm.getSimOperator();
-        if (ope == null || ope.length() < 4) {
-            if (logger.isActivated()) {
-                logger.warn("Can not read network operator from SIM card!");
-            }
-            return null;
-        }
-        String mnc = ope.substring(3);
-        String mcc = ope.substring(0, 3);
-        while (mnc.length() < 3) { // Set mnc on 3 digits
-            mnc = "0" + mnc;
-        }
-        return "config.rcs." + "mnc" + mnc + ".mcc" + mcc + ".pub.3gppnetwork.org";
-    }
+		// Process HTTPS provisioning result
+		processProvisioningResult(result);
+	}
 
-    /**
+	/**
+	 * Build the provisioning address with SIM information
+	 *
+	 * @return provisioning URI
+	 */
+	private String buildProvisioningAddress(TelephonyManager tm) {
+		// Get SIM info
+		String ope = tm.getSimOperator();
+		if (ope == null || ope.length() < 4) {
+			if (logger.isActivated()) {
+				logger.warn("Can not read network operator from SIM card!");
+			}
+			return null;
+		}
+		String mnc = ope.substring(3);
+		String mcc = ope.substring(0, 3);
+		while (mnc.length() < 3) { // Set mnc on 3 digits
+			mnc = "0" + mnc;
+		}
+		return "config.rcs." + "mnc" + mnc + ".mcc" + mcc + ".pub.3gppnetwork.org";
+	}
+
+	/**
 	 * Get configuration
 	 * 
 	 * @return Result or null in case of internal exception
@@ -467,66 +499,70 @@ public class HttpsProvisioningManager {
 				logger.debug("Request config via HTTPS");
 			}
 
-            // Get provisioning address
-            TelephonyManager tm = (TelephonyManager)mCtx.getSystemService(Context.TELEPHONY_SERVICE);
-            String primaryUri = null;
-            String secondaryUri = null;
-            if (RcsSettings.getInstance().isSecondaryProvisioningAddressOnly()) {
-                primaryUri = RcsSettings.getInstance().getSecondaryProvisioningAddress();
-            } else {
-                primaryUri = buildProvisioningAddress(tm);
-                secondaryUri = RcsSettings.getInstance().getSecondaryProvisioningAddress();
-            }
+			// Get provisioning address
+			TelephonyManager tm = (TelephonyManager) mCtx
+					.getSystemService(Context.TELEPHONY_SERVICE);
+			String primaryUri = null;
+			String secondaryUri = null;
+			if (RcsSettings.getInstance().isSecondaryProvisioningAddressOnly()) {
+				primaryUri = RcsSettings.getInstance().getSecondaryProvisioningAddress();
+			} else {
+				primaryUri = buildProvisioningAddress(tm);
+				secondaryUri = RcsSettings.getInstance().getSecondaryProvisioningAddress();
+			}
 
-            // Check if a configuration file for HTTPS provisioning exists
-            String PROVISIONING_FILE = Environment.getExternalStorageDirectory().getPath() + "/joyn_provisioning.txt";
-            try {
-                File file = new File(PROVISIONING_FILE);
-                if (file.exists()) {
-                	if (logger.isActivated()) {
-                        logger.debug("Provisioning file found !");
-                    }
-                    FileInputStream fis = new FileInputStream(PROVISIONING_FILE);
-                    DataInputStream in = new DataInputStream(fis);
-                    BufferedReader br = new BufferedReader(new InputStreamReader(in));
-                    primaryUri = br.readLine();
-                    secondaryUri = null;
-                    in.close();
-                }
-            } catch (Exception e) {
-                // Nothing to do
-            }
+			// Check if a configuration file for HTTPS provisioning exists
+			String PROVISIONING_FILE = Environment.getExternalStorageDirectory().getPath()
+					+ "/joyn_provisioning.txt";
+			try {
+				File file = new File(PROVISIONING_FILE);
+				if (file.exists()) {
+					if (logger.isActivated()) {
+						logger.debug("Provisioning file found !");
+					}
+					FileInputStream fis = new FileInputStream(PROVISIONING_FILE);
+					DataInputStream in = new DataInputStream(fis);
+					BufferedReader br = new BufferedReader(new InputStreamReader(in));
+					primaryUri = br.readLine();
+					secondaryUri = null;
+					in.close();
+				}
+			} catch (Exception e) {
+				// Nothing to do
+			}
 
-            if (logger.isActivated()) {
-                logger.debug("HCS/RCS Uri to connect: "+ primaryUri + " or " + secondaryUri);
-            }
+			if (logger.isActivated()) {
+				logger.debug("HCS/RCS Uri to connect: " + primaryUri + " or " + secondaryUri);
+			}
 
 			String imsi = tm.getSubscriberId();
 			String imei = tm.getDeviceId();
-	    	tm = null;
+			tm = null;
 
-	    	// Format HTTP request
+			// Format HTTP request
 			SchemeRegistry schemeRegistry = new SchemeRegistry();
 			schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
 			schemeRegistry.register(new Scheme("https", new EasySSLSocketFactory(), 443));
 
 			HttpParams params = new BasicHttpParams();
 			params.setParameter(ConnManagerPNames.MAX_TOTAL_CONNECTIONS, 30);
-			params.setParameter(ConnManagerPNames.MAX_CONNECTIONS_PER_ROUTE, 
-					new ConnPerRouteBean(30));
+			params.setParameter(ConnManagerPNames.MAX_CONNECTIONS_PER_ROUTE, new ConnPerRouteBean(
+					30));
 			params.setParameter(HttpProtocolParams.USE_EXPECT_CONTINUE, false);
-            NetworkInfo networkInfo = networkConnection.getConnectionMngr().getActiveNetworkInfo();
+			NetworkInfo networkInfo = networkConnection.getConnectionMngr().getActiveNetworkInfo();
 
-            if (networkInfo != null) {
-                String proxyHost = Proxy.getDefaultHost();
-                if (proxyHost != null && proxyHost.length() > 1) {
-                    int proxyPort = Proxy.getDefaultPort();
-                    params.setParameter(ConnRoutePNames.DEFAULT_PROXY, new HttpHost(proxyHost, proxyPort));
-                }
-            }
+			if (networkInfo != null) {
+				String proxyHost = Proxy.getDefaultHost();
+				if (proxyHost != null && proxyHost.length() > 1) {
+					int proxyPort = Proxy.getDefaultPort();
+					params.setParameter(ConnRoutePNames.DEFAULT_PROXY, new HttpHost(proxyHost,
+							proxyPort));
+				}
+			}
 			HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
 
-			// Support broad variety of different cookie types (not just Netscape but RFC 2109 and RFC2965 compliant ones, too)  
+			// Support broad variety of different cookie types (not just Netscape but RFC 2109 and
+			// RFC2965 compliant ones, too)
 			HttpClientParams.setCookiePolicy(params, CookiePolicy.BROWSER_COMPATIBILITY);
 
 			ClientConnectionManager cm = new SingleClientConnManager(params, schemeRegistry);
@@ -535,70 +571,72 @@ public class HttpsProvisioningManager {
 			HttpContext localContext = new BasicHttpContext();
 			localContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
 
-            // If network is not mobile network, use request with OTP
-            if (networkInfo != null && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE) {
-                // Proceed with non mobile network registration
-                return sendFirstRequestsToRequireOTP(imsi, imei, null, primaryUri, secondaryUri, client, localContext);
-            }
+			// If network is not mobile network, use request with OTP
+			if (networkInfo != null && networkInfo.getType() != ConnectivityManager.TYPE_MOBILE) {
+				// Proceed with non mobile network registration
+				return sendFirstRequestsToRequireOTP(imsi, imei, null, primaryUri, secondaryUri,
+						client, localContext);
+			}
 
-            if (logger.isActivated()) {
-                logger.debug("HTTP provisioning on mobile network");
-            }
+			if (logger.isActivated()) {
+				logger.debug("HTTP provisioning on mobile network");
+			}
 
 			// Execute first HTTP request
-            String requestUri = primaryUri;
-            HttpResponse response = executeRequest("http", requestUri, client, localContext);
-            if (response == null && !StringUtils.isEmpty(secondaryUri)) {
-                // First server not available, try the secondaryUri
-                requestUri = secondaryUri;
-                response = executeRequest("http", requestUri, client, localContext);
-            }
-            if (response == null) {
-                return null;
-            }
+			String requestUri = primaryUri;
+			HttpResponse response = executeRequest("http", requestUri, client, localContext);
+			if (response == null && !StringUtils.isEmpty(secondaryUri)) {
+				// First server not available, try the secondaryUri
+				requestUri = secondaryUri;
+				response = executeRequest("http", requestUri, client, localContext);
+			}
+			if (response == null) {
+				return null;
+			}
 
-            result.code = response.getStatusLine().getStatusCode(); 
-            result.content = new String(EntityUtils.toByteArray(response.getEntity()),
-                    UTF8);
-            if (result.code == 511) {
-                // Blackbird guidelines ID_2_6 Configuration mechanism over PS without Header Enrichment
-                // Use SMS provisioning on PS data network if server reply 511 NETWORK AUTHENTICATION REQUIRED 
-                return sendFirstRequestsToRequireOTP(imsi, imei, null, primaryUri, secondaryUri, client, localContext);
-            } else if (result.code != 200) {
-                if (result.code == 503) {
-                    result.retryAfter = getRetryAfter(response);
-                }
-                return result;
-            }
+			result.code = response.getStatusLine().getStatusCode();
+			result.content = new String(EntityUtils.toByteArray(response.getEntity()), UTF8);
+			if (result.code == 511) {
+				// Blackbird guidelines ID_2_6 Configuration mechanism over PS without Header
+				// Enrichment
+				// Use SMS provisioning on PS data network if server reply 511 NETWORK
+				// AUTHENTICATION REQUIRED
+				return sendFirstRequestsToRequireOTP(imsi, imei, null, primaryUri, secondaryUri,
+						client, localContext);
+			} else if (result.code != 200) {
+				if (result.code == 503) {
+					result.retryAfter = getRetryAfter(response);
+				}
+				return result;
+			}
 
 			// Format second HTTPS request
 			String args = getHttpsRequestArguments(imsi, imei);
-            String request = requestUri + args;
-            if (logger.isActivated()) {
-                logger.info("Request provisioning: "+ request);
-            }
+			String request = requestUri + args;
+			if (logger.isActivated()) {
+				logger.info("Request provisioning: " + request);
+			}
 
-            // Execute second HTTPS request
-            response = executeRequest("https", request, client, localContext);
-            if (response == null) {
-                return null;
-            }
+			// Execute second HTTPS request
+			response = executeRequest("https", request, client, localContext);
+			if (response == null) {
+				return null;
+			}
 			result.code = response.getStatusLine().getStatusCode();
 			if (result.code != 200) {
-                if (result.code == 503) {
-                    result.retryAfter = getRetryAfter(response);
-                }
+				if (result.code == 503) {
+					result.retryAfter = getRetryAfter(response);
+				}
 				return result;
 			}
-			result.content = new String(EntityUtils.toByteArray(response.getEntity()),
-					UTF8);
+			result.content = new String(EntityUtils.toByteArray(response.getEntity()), UTF8);
 			return result;
-		} catch(UnknownHostException e) {
+		} catch (UnknownHostException e) {
 			if (logger.isActivated()) {
 				logger.warn("Provisioning server not reachable");
 			}
 			return null;
-		} catch(Exception e) {
+		} catch (Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Can't get config via HTTPS", e);
 			}
@@ -606,94 +644,99 @@ public class HttpsProvisioningManager {
 		}
 	}
 
-    /**
-     * Update provisioning config
-     */
-    protected void updateConfig() {
+	/**
+	 * Update provisioning config
+	 */
+	protected void updateConfig() {
 		// Cancel previous retry alarm
 		HttpsProvisioningService.cancelRetryAlarm(mCtx, retryIntent);
 
-        // Get config via HTTPS
-        HttpsProvisioningResult result = getConfig();
-        
-        // Process HTTPS provisioning result
-        processProvisioningResult(result);
-    }
-    
-    /**
-     * Send the second HTTPS request with the one time password (OTP)
-     * 
-     * @param otp One time password
-     * @param requestUri Request URI
-     * @param client Instance of {@link DefaultHttpClient} 
-     * @param localContext Instance of {@link HttpContext}
-     * @return Instance of {@link HttpsProvisioningResult} or null in case of internal exception
-     */
-	protected HttpsProvisioningResult sendSecondHttpsRequestWithOTP(String otp, String requestUri, DefaultHttpClient client, HttpContext localContext) {
-        HttpsProvisioningResult result = new HttpsProvisioningResult();
-        try {
-            if (logger.isActivated()) {
-                logger.debug("Send second HTTPS with OTP");
-            }
+		// Get config via HTTPS
+		HttpsProvisioningResult result = getConfig();
 
-            // Format second HTTPS request
-            String args = "?OTP=" + otp;
-            String request = requestUri + args;
+		// Process HTTPS provisioning result
+		processProvisioningResult(result);
+	}
 
-            if (logger.isActivated()) {
-                logger.info("Request provisioning with OTP: " + request);
-            }
+	/**
+	 * Send the second HTTPS request with the one time password (OTP)
+	 * 
+	 * @param otp
+	 *            One time password
+	 * @param requestUri
+	 *            Request URI
+	 * @param client
+	 *            Instance of {@link DefaultHttpClient}
+	 * @param localContext
+	 *            Instance of {@link HttpContext}
+	 * @return Instance of {@link HttpsProvisioningResult} or null in case of internal exception
+	 */
+	protected HttpsProvisioningResult sendSecondHttpsRequestWithOTP(String otp, String requestUri,
+			DefaultHttpClient client, HttpContext localContext) {
+		HttpsProvisioningResult result = new HttpsProvisioningResult();
+		try {
+			if (logger.isActivated()) {
+				logger.debug("Send second HTTPS with OTP");
+			}
 
-            // Execute second HTTPS request
-            HttpResponse response = executeRequest("https", request, client, localContext);
-            if (response == null) {
-                return null;
-            }
-            result.code = response.getStatusLine().getStatusCode();
-            if (result.code != 200) {
-                if (result.code == 503) {
-                    result.retryAfter = getRetryAfter(response);
-                } else if (result.code == 511) {
-                    if (logger.isActivated()) {
-                        logger.debug("Second HTTPS request with OTP failed: Invalid one time password (request status code: 511)");
-                    }
-                }
-                return result;
-            }
-            result.content = new String(EntityUtils.toByteArray(response.getEntity()),
-                    UTF8);
+			// Format second HTTPS request
+			String args = "?OTP=" + otp;
+			String request = requestUri + args;
 
-            return result;
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Second HTTPS request with OTP failed: Can't get config via HTTPS", e);
-            }
-            return null;
-        }
-    }
-	
-    /**
-     * Get retry-after value
-     * 
-     * @return retry-after value
-     */
-    protected int getRetryAfter(HttpResponse response) {
-        Header[] headers = response.getHeaders("Retry-After");
-        if (headers.length > 0) {
-            try {
-                return Integer.parseInt(headers[0].getValue());
-            } catch (NumberFormatException e) {
-                return 0;
-            }
-        }
-        return 0;
-    }
+			if (logger.isActivated()) {
+				logger.info("Request provisioning with OTP: " + request);
+			}
 
-    /**
-     * Process provisioning result
-     * 
-     * @param result Instance of {@link HttpsProvisioningResult}
-     */
+			// Execute second HTTPS request
+			HttpResponse response = executeRequest("https", request, client, localContext);
+			if (response == null) {
+				return null;
+			}
+			result.code = response.getStatusLine().getStatusCode();
+			if (result.code != 200) {
+				if (result.code == 503) {
+					result.retryAfter = getRetryAfter(response);
+				} else if (result.code == 511) {
+					if (logger.isActivated()) {
+						logger.debug("Second HTTPS request with OTP failed: Invalid one time password (request status code: 511)");
+					}
+				}
+				return result;
+			}
+			result.content = new String(EntityUtils.toByteArray(response.getEntity()), UTF8);
+
+			return result;
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Second HTTPS request with OTP failed: Can't get config via HTTPS", e);
+			}
+			return null;
+		}
+	}
+
+	/**
+	 * Get retry-after value
+	 * 
+	 * @return retry-after value
+	 */
+	protected int getRetryAfter(HttpResponse response) {
+		Header[] headers = response.getHeaders("Retry-After");
+		if (headers.length > 0) {
+			try {
+				return Integer.parseInt(headers[0].getValue());
+			} catch (NumberFormatException e) {
+				return 0;
+			}
+		}
+		return 0;
+	}
+
+	/**
+	 * Process provisioning result
+	 * 
+	 * @param result
+	 *            Instance of {@link HttpsProvisioningResult}
+	 */
 	private void processProvisioningResult(HttpsProvisioningResult result) {
 		if (result != null) {
 			RcsSettings rcsSettings = RcsSettings.getInstance();
@@ -714,32 +757,32 @@ public class HttpsProvisioningManager {
 
 				// Parse the received content
 				ProvisioningParser parser = new ProvisioningParser(result.content, rcsSettings);
-				
+
 				// Save GSMA release set into the provider
 				GsmaRelease gsmaRelease = rcsSettings.getGsmaRelease();
 				// Save client Messaging Mode set into the provider
 				MessagingMode messagingMode = rcsSettings.getMessagingMode();
-				
+
 				// Before parsing the provisioning, the GSMA release is set to Albatros
 				rcsSettings.setGsmaRelease(GsmaRelease.ALBATROS);
-				// Before parsing the provisioning, the client Messaging mode is set to NONE 
+				// Before parsing the provisioning, the client Messaging mode is set to NONE
 				rcsSettings.setMessagingMode(MessagingMode.NONE);
-				
+
 				if (parser.parse(gsmaRelease, first)) {
 					// Successfully provisioned, 1st time reg finalized
 					first = false;
 					ProvisioningInfo info = parser.getProvisioningInfo();
-					
+
 					// Save version
 					String version = info.getVersion();
 					long validity = info.getValidity();
 					if (logger.isActivated()) {
 						logger.debug("Provisioning version=" + version + ", validity=" + validity);
 					}
-					
+
 					// Save the latest positive version of the configuration
 					LauncherUtils.saveProvisioningVersion(mCtx, version);
-					
+
 					// Save the validity of the configuration
 					LauncherUtils.saveProvisioningValidity(mCtx, validity);
 					rcsSettings.setProvisioningVersion(version);
@@ -751,9 +794,9 @@ public class HttpsProvisioningManager {
 						logger.debug("Provisioning Token=" + token + ", validity=" + tokenValidity);
 					}
 					rcsSettings.setProvisioningToken(token);
-					
+
 					// Reset retry alarm counter
-			        retryCount = 0;
+					retryCount = 0;
 					if (ProvisioningInfo.Version.DISABLED_DORMANT.equals(version)) {
 						// -3 : Put RCS client in dormant state
 						if (logger.isActivated()) {
@@ -761,7 +804,8 @@ public class HttpsProvisioningManager {
 						}
 						// Start retry alarm
 						if (validity > 0) {
-							HttpsProvisioningService.startRetryAlarm(mCtx, retryIntent, validity * 1000);
+							HttpsProvisioningService.startRetryAlarm(mCtx, retryIntent,
+									validity * 1000);
 						}
 						// We parsed successfully the configuration
 						rcsSettings.setConfigurationValid(true);
@@ -800,10 +844,12 @@ public class HttpsProvisioningManager {
 								} else {
 									// Start retry alarm
 									if (validity > 0) {
-										HttpsProvisioningService.startRetryAlarm(mCtx, retryIntent, validity * 1000);
+										HttpsProvisioningService.startRetryAlarm(mCtx, retryIntent,
+												validity * 1000);
 									}
 									// Terms request
-									if (info.getMessage() != null && !rcsSettings.isProvisioningTermsAccepted()) {
+									if (info.getMessage() != null
+											&& !rcsSettings.isProvisioningTermsAccepted()) {
 										showTermsAndConditions(info);
 									}
 									// We parsed successfully the configuration
@@ -825,10 +871,10 @@ public class HttpsProvisioningManager {
 					}
 					// Restore GSMA release saved before parsing of the provisioning
 					rcsSettings.setGsmaRelease(gsmaRelease);
-					
+
 					// Restore the client messaging mode saved before parsing of the provisioning
 					rcsSettings.setMessagingMode(messagingMode);
-					
+
 					if (first) {
 						if (logger.isActivated()) {
 							logger.debug("As this is first launch and we do not have a valid configuration yet, retry later");
@@ -852,7 +898,8 @@ public class HttpsProvisioningManager {
 					// Reason: Unable to get configuration
 					provisioningFails(ProvisioningFailureReasons.UNABLE_TO_GET_CONFIGURATION);
 					if (result.retryAfter > 0) {
-						HttpsProvisioningService.startRetryAlarm(mCtx, retryIntent, result.retryAfter * 1000);
+						HttpsProvisioningService.startRetryAlarm(mCtx, retryIntent,
+								result.retryAfter * 1000);
 					}
 				} else {
 					tryLaunchRcsCoreService(mCtx, result.retryAfter * 1000);
@@ -908,7 +955,7 @@ public class HttpsProvisioningManager {
 			}
 		}
 	}
-    
+
 	/**
 	 * Try to launch RCS Core Service. RCS Service is only launched if version is positive.
 	 * 
@@ -940,120 +987,127 @@ public class HttpsProvisioningManager {
 		}
 	}
 
-    /**
-     * Show the terms and conditions request
-     *
-     * @param info Provisioning info
-     */
-    private void showTermsAndConditions(ProvisioningInfo info) {
-        final Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setClass(mCtx, TermsAndConditionsRequest.class);
+	/**
+	 * Show the terms and conditions request
+	 *
+	 * @param info
+	 *            Provisioning info
+	 */
+	private void showTermsAndConditions(ProvisioningInfo info) {
+		final Intent intent = new Intent(Intent.ACTION_VIEW);
+		intent.setClass(mCtx, TermsAndConditionsRequest.class);
 
-        // Required as the activity is started outside of an Activity context
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+		// Required as the activity is started outside of an Activity context
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
 
-        // Add intent parameters
-        intent.putExtra(TermsAndConditionsRequest.ACCEPT_BTN_KEY, info.getAcceptBtn());
-        intent.putExtra(TermsAndConditionsRequest.REJECT_BTN_KEY, info.getRejectBtn());
-        intent.putExtra(TermsAndConditionsRequest.TITLE_KEY, info.getTitle());
-        intent.putExtra(TermsAndConditionsRequest.MESSAGE_KEY, info.getMessage());
+		// Add intent parameters
+		intent.putExtra(TermsAndConditionsRequest.ACCEPT_BTN_KEY, info.getAcceptBtn());
+		intent.putExtra(TermsAndConditionsRequest.REJECT_BTN_KEY, info.getRejectBtn());
+		intent.putExtra(TermsAndConditionsRequest.TITLE_KEY, info.getTitle());
+		intent.putExtra(TermsAndConditionsRequest.MESSAGE_KEY, info.getMessage());
 
-        mCtx.startActivity(intent);
-    }
-    
-    /**
-     * Retry after 511 "Network authentication required" procedure
-     * 
-     * @return <code>true</code> if retry is performed, otherwise <code>false</code>
-     */
-    private boolean retryAfter511Error() {
-        if (retryAfter511ErrorCount < HttpsProvisioningUtils.RETRY_AFTER_511_ERROR_MAX_COUNT) {
-            retryAfter511ErrorCount++;
-            HttpsProvisioningService.startRetryAlarm(mCtx, retryIntent, HttpsProvisioningUtils.RETRY_AFTER_511_ERROR_TIMEOUT);
-            if (logger.isActivated()) {
-                logger.debug("Retry after 511 error (" + retryAfter511ErrorCount + "/" + HttpsProvisioningUtils.RETRY_AFTER_511_ERROR_MAX_COUNT + ") provisionning after " + HttpsProvisioningUtils.RETRY_AFTER_511_ERROR_TIMEOUT + "ms");
-            }
-            return true;
-        }
+		mCtx.startActivity(intent);
+	}
 
-        if (logger.isActivated()) {
-            logger.debug("No more retry after 511 error for provisionning");
-        }
-        
-        // Reset after 511 counter
-        retryAfter511ErrorCount = 0;
+	/**
+	 * Retry after 511 "Network authentication required" procedure
+	 * 
+	 * @return <code>true</code> if retry is performed, otherwise <code>false</code>
+	 */
+	private boolean retryAfter511Error() {
+		if (retryAfter511ErrorCount < HttpsProvisioningUtils.RETRY_AFTER_511_ERROR_MAX_COUNT) {
+			retryAfter511ErrorCount++;
+			HttpsProvisioningService.startRetryAlarm(mCtx, retryIntent,
+					HttpsProvisioningUtils.RETRY_AFTER_511_ERROR_TIMEOUT);
+			if (logger.isActivated()) {
+				logger.debug("Retry after 511 error (" + retryAfter511ErrorCount + "/"
+						+ HttpsProvisioningUtils.RETRY_AFTER_511_ERROR_MAX_COUNT
+						+ ") provisionning after "
+						+ HttpsProvisioningUtils.RETRY_AFTER_511_ERROR_TIMEOUT + "ms");
+			}
+			return true;
+		}
 
-        return false;
-    }
-    
-    /**
-     * Provisioning fails.
-     * 
-     * @param reason Reason of failure
-     */
-    public void provisioningFails(int reason) {
-        // If wifi is active network access type
-        if (NetworkUtils.getNetworkAccessType() == NetworkUtils.NETWORK_ACCESS_WIFI) {
-            // Register Wifi disabling listener
-        	networkConnection.registerWifiDisablingListener();
-        }
-    }
+		if (logger.isActivated()) {
+			logger.debug("No more retry after 511 error for provisionning");
+		}
 
-    /**
-     * Retry procedure
-     */
-    private void retry() {
-        if (retryCount < HttpsProvisioningUtils.RETRY_MAX_COUNT) {
-            retryCount++;
-            int retryDelay = HttpsProvisioningUtils.RETRY_BASE_TIMEOUT + 2 * (retryCount - 1) * HttpsProvisioningUtils.RETRY_BASE_TIMEOUT;
-            HttpsProvisioningService.startRetryAlarm(mCtx, retryIntent, retryDelay);
-            if (logger.isActivated()) {
-                logger.debug("Retry provisionning count: "+retryCount );
-            }
-        } else {
-            if (logger.isActivated()) {
-                logger.debug("No more retry for provisionning");
-            }
-        }
-    }
-    
-    /**
-     * Transmit to SMS unregister method
-     */
+		// Reset after 511 counter
+		retryAfter511ErrorCount = 0;
+
+		return false;
+	}
+
+	/**
+	 * Provisioning fails.
+	 * 
+	 * @param reason
+	 *            Reason of failure
+	 */
+	public void provisioningFails(int reason) {
+		// If wifi is active network access type
+		if (NetworkUtils.getNetworkAccessType() == NetworkUtils.NETWORK_ACCESS_WIFI) {
+			// Register Wifi disabling listener
+			networkConnection.registerWifiDisablingListener();
+		}
+	}
+
+	/**
+	 * Retry procedure
+	 */
+	private void retry() {
+		if (retryCount < HttpsProvisioningUtils.RETRY_MAX_COUNT) {
+			retryCount++;
+			int retryDelay = HttpsProvisioningUtils.RETRY_BASE_TIMEOUT + 2 * (retryCount - 1)
+					* HttpsProvisioningUtils.RETRY_BASE_TIMEOUT;
+			HttpsProvisioningService.startRetryAlarm(mCtx, retryIntent, retryDelay);
+			if (logger.isActivated()) {
+				logger.debug("Retry provisionning count: " + retryCount);
+			}
+		} else {
+			if (logger.isActivated()) {
+				logger.debug("No more retry for provisionning");
+			}
+		}
+	}
+
+	/**
+	 * Transmit to SMS unregister method
+	 */
 	public void unregisterSmsProvisioningReceiver() {
 		smsManager.unregisterSmsProvisioningReceiver();
 	}
 
-    /**
-     * Transmit to Network unregister method
-     */
+	/**
+	 * Transmit to Network unregister method
+	 */
 	public void unregisterNetworkStateListener() {
 		networkConnection.unregisterNetworkStateListener();
 	}
 
-    /**
-     * Transmit to Network unregister wifi method
-     */
+	/**
+	 * Transmit to Network unregister wifi method
+	 */
 	public void unregisterWifiDisablingListener() {
 		networkConnection.unregisterWifiDisablingListener();
 	}
 
-    /**
-     * Transmit to Network register method
-     */
+	/**
+	 * Transmit to Network register method
+	 */
 	public void registerNetworkStateListener() {
 		networkConnection.registerNetworkStateListener();
 	}
 
-    /**
-     * Retry procedure
-     */
+	/**
+	 * Retry procedure
+	 */
 	public void resetCounters() {
-		 // Reset retry alarm counter
-        retryCount = 0;
+		// Reset retry alarm counter
+		retryCount = 0;
 
-        // Reset after 511 counter
-        retryAfter511ErrorCount = 0;
+		// Reset after 511 counter
+		retryAfter511ErrorCount = 0;
 	}
 }

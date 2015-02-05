@@ -36,33 +36,34 @@ public class ServerApiUtils {
 			throw new ServerApiException("Core is not instanciated");
 		}
 	}
-	
+
 	/**
 	 * Test IMS connection
 	 * 
 	 * @throws ServerApiException
 	 */
 	public static void testIms() throws ServerApiException {
-		if (!isImsConnected()) { 
-			throw new ServerApiException("Core is not connected to IMS"); 
+		if (!isImsConnected()) {
+			throw new ServerApiException("Core is not connected to IMS");
 		}
 	}
-	
+
 	/**
 	 * Is connected to IMS
 	 * 
 	 * @return Boolean
 	 */
-	public static boolean isImsConnected(){
-		return ((Core.getInstance() != null) &&
-				(Core.getInstance().getImsModule().getCurrentNetworkInterface() != null) &&
-				(Core.getInstance().getImsModule().getCurrentNetworkInterface().isRegistered()));
+	public static boolean isImsConnected() {
+		return ((Core.getInstance() != null)
+				&& (Core.getInstance().getImsModule().getCurrentNetworkInterface() != null) && (Core
+				.getInstance().getImsModule().getCurrentNetworkInterface().isRegistered()));
 	}
-	
+
 	/**
 	 * Test API extension permission
 	 * 
-	 * @param ext Extension ID
+	 * @param ext
+	 *            Extension ID
 	 * @throws ServerApiException
 	 */
 	public static void testApiExtensionPermission(String ext) throws ServerApiException {

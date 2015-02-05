@@ -20,8 +20,6 @@ package com.orangelabs.rcs.core.ims.service.presence;
 
 import java.util.Calendar;
 
-
-
 /**
  * Presence info
  * 
@@ -37,42 +35,44 @@ public class PresenceInfo {
 	 * Presence status "online"
 	 */
 	public final static String ONLINE = "open";
-	
+
 	/**
 	 * Presence status "offline"
 	 */
 	public final static String OFFLINE = "closed";
 
-    /** 
-     * Presence relationship: contact 'rcs granted' with the user 
-     */
-    public final static String RCS_ACTIVE = "active";
-    
-    /**
-     * Presence relationship: the user has revoked the contact 
-     */
-    public final static String RCS_REVOKED = "revoked";
-    
-    /**
-     * Presence relationship: the user has blocked the contact 
-     */
-    public final static String RCS_BLOCKED = "blocked";
-    
-    /**
-     * Presence relationship: the user has sent an invitation to the contact without response for now 
-     */
-    public final static String RCS_PENDING_OUT = "pending_out";
-    
-    /**
-     * Presence relationship: the contact has sent an invitation to the user without response for now 
-     */
-    public final static String RCS_PENDING = "pending";
-    
-    /** 
-     * Presence relationship: the contact has sent an invitation to the user and cancel it
-     */
-    public final static String RCS_CANCELLED = "cancelled";
-    
+	/**
+	 * Presence relationship: contact 'rcs granted' with the user
+	 */
+	public final static String RCS_ACTIVE = "active";
+
+	/**
+	 * Presence relationship: the user has revoked the contact
+	 */
+	public final static String RCS_REVOKED = "revoked";
+
+	/**
+	 * Presence relationship: the user has blocked the contact
+	 */
+	public final static String RCS_BLOCKED = "blocked";
+
+	/**
+	 * Presence relationship: the user has sent an invitation to the contact without response for
+	 * now
+	 */
+	public final static String RCS_PENDING_OUT = "pending_out";
+
+	/**
+	 * Presence relationship: the contact has sent an invitation to the user without response for
+	 * now
+	 */
+	public final static String RCS_PENDING = "pending";
+
+	/**
+	 * Presence relationship: the contact has sent an invitation to the user and cancel it
+	 */
+	public final static String RCS_CANCELLED = "cancelled";
+
 	/**
 	 * Presence timestamp
 	 */
@@ -82,12 +82,12 @@ public class PresenceInfo {
 	 * Presence status
 	 */
 	private String status = PresenceInfo.ONLINE;
-	
+
 	/**
 	 * Free text
 	 */
 	private String freetext = null;
-	
+
 	/**
 	 * Favorite link
 	 */
@@ -102,28 +102,29 @@ public class PresenceInfo {
 	 * Geoloc
 	 */
 	private Geoloc geoloc = null;
-	
+
 	/**
 	 * Constructor
 	 */
 	public PresenceInfo() {
 	}
 
-    /**
+	/**
 	 * Set the timestamp
 	 * 
-	 * @param timestamp Timestamp
+	 * @param timestamp
+	 *            Timestamp
 	 */
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
 	}
-	
+
 	/**
 	 * Returns the timestamp
 	 * 
 	 * @return Timestamp
 	 */
-	public long getTimestamp(){
+	public long getTimestamp() {
 		return timestamp;
 	}
 
@@ -133,7 +134,7 @@ public class PresenceInfo {
 	public void resetTimestamp() {
 		timestamp = PresenceInfo.getNewTimestamp();
 	}
-	
+
 	/**
 	 * Returns a new timestamp
 	 * 
@@ -142,10 +143,10 @@ public class PresenceInfo {
 	public static long getNewTimestamp() {
 		return Calendar.getInstance().getTimeInMillis();
 	}
-	
+
 	/**
 	 * Returns the presence status
-	 *  
+	 * 
 	 * @return Status
 	 */
 	public String getPresenceStatus() {
@@ -155,12 +156,13 @@ public class PresenceInfo {
 	/**
 	 * Set the presence status
 	 * 
-	 * @param status New status
+	 * @param status
+	 *            New status
 	 */
 	public void setPresenceStatus(String status) {
 		this.status = status;
 	}
-	
+
 	/**
 	 * Is status online
 	 * 
@@ -177,11 +179,11 @@ public class PresenceInfo {
 	 */
 	public boolean isOffline() {
 		return (OFFLINE.equals(status));
-	}	
+	}
 
 	/**
 	 * Returns the free text
-	 *  
+	 * 
 	 * @return Free text
 	 */
 	public String getFreetext() {
@@ -191,49 +193,52 @@ public class PresenceInfo {
 	/**
 	 * Set the free text
 	 * 
-	 * @param freetext New free text
+	 * @param freetext
+	 *            New free text
 	 */
 	public void setFreetext(String freetext) {
 		this.freetext = freetext;
 	}
-	
+
 	/**
 	 * Get the favorite link
 	 * 
 	 * @return Favorite link
 	 */
-	public FavoriteLink getFavoriteLink(){
+	public FavoriteLink getFavoriteLink() {
 		return favoriteLink;
 	}
-	
+
 	/**
 	 * Get the favorite link URL
 	 * 
 	 * @return Favorite link URL
 	 */
-	public String getFavoriteLinkUrl(){
+	public String getFavoriteLinkUrl() {
 		String url = null;
 		if (favoriteLink != null) {
 			url = favoriteLink.getLink();
 		}
 		return url;
 	}
-	
+
 	/**
 	 * Set the favorite link
 	 * 
-	 * @param favoriteLink Favorite link
+	 * @param favoriteLink
+	 *            Favorite link
 	 */
-	public void setFavoriteLink(FavoriteLink favoriteLink){
+	public void setFavoriteLink(FavoriteLink favoriteLink) {
 		this.favoriteLink = favoriteLink;
 	}
 
 	/**
 	 * Set the favorite link URL
 	 * 
-	 * @param url Favorite link URL
+	 * @param url
+	 *            Favorite link URL
 	 */
-	public void setFavoriteLinkUrl(String url){
+	public void setFavoriteLinkUrl(String url) {
 		if (favoriteLink == null) {
 			favoriteLink = new FavoriteLink(url);
 		}
@@ -250,7 +255,8 @@ public class PresenceInfo {
 	/**
 	 * Set the photo-icon
 	 * 
-	 * @param photo Photo-icon
+	 * @param photo
+	 *            Photo-icon
 	 */
 	public void setPhotoIcon(PhotoIcon photo) {
 		this.photo = photo;
@@ -263,26 +269,26 @@ public class PresenceInfo {
 	 */
 	public Geoloc getGeoloc() {
 		return geoloc;
-	}	
+	}
 
 	/**
 	 * Set the geoloc
 	 * 
-	 * @param geoloc Geoloc
+	 * @param geoloc
+	 *            Geoloc
 	 */
 	public void setGeoloc(Geoloc geoloc) {
 		this.geoloc = geoloc;
 	}
-	
+
 	/**
 	 * Returns a string representation of the object
 	 * 
 	 * @return String
 	 */
 	public String toString() {
-		String result =  "- Timestamp: " + timestamp + "\n" +
-			"- Status: " + status + "\n" +
-			"- Freetext: " + freetext + "\n";
+		String result = "- Timestamp: " + timestamp + "\n" + "- Status: " + status + "\n"
+				+ "- Freetext: " + freetext + "\n";
 		if (favoriteLink != null) {
 			result += "- Favorite link: " + favoriteLink.toString() + "\n";
 		}

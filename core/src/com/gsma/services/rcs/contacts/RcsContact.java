@@ -54,7 +54,7 @@ public class RcsContact implements Parcelable {
 	 * Blocking state
 	 */
 	private boolean mBlocked;
-	
+
 	/**
 	 * Blocking timestamp
 	 */
@@ -63,12 +63,18 @@ public class RcsContact implements Parcelable {
 	/**
 	 * Constructor
 	 * 
-	 * @param contact Contact ID
-	 * @param registered Registration state
-	 * @param capabilities Capabilities
-	 * @param displayName Display name
-	 * @param blocked Blocking state
-	 * @param blockingTs Blocking timestamp
+	 * @param contact
+	 *            Contact ID
+	 * @param registered
+	 *            Registration state
+	 * @param capabilities
+	 *            Capabilities
+	 * @param displayName
+	 *            Display name
+	 * @param blocked
+	 *            Blocking state
+	 * @param blockingTs
+	 *            Blocking timestamp
 	 * @hide
 	 */
 	public RcsContact(ContactId contact, boolean registered, Capabilities capabilities,
@@ -84,7 +90,8 @@ public class RcsContact implements Parcelable {
 	/**
 	 * Constructor
 	 * 
-	 * @param source Parcelable source
+	 * @param source
+	 *            Parcelable source
 	 * @hide
 	 */
 	public RcsContact(Parcel source) {
@@ -107,8 +114,8 @@ public class RcsContact implements Parcelable {
 	}
 
 	/**
-	 * Describe the kinds of special objects contained in this Parcelable's
-	 * marshalled representation
+	 * Describe the kinds of special objects contained in this Parcelable's marshalled
+	 * representation
 	 * 
 	 * @return Integer
 	 * @hide
@@ -120,8 +127,10 @@ public class RcsContact implements Parcelable {
 	/**
 	 * Write parcelable object
 	 * 
-	 * @param dest The Parcel in which the object should be written
-	 * @param flags Additional flags about how the object should be written
+	 * @param dest
+	 *            The Parcel in which the object should be written
+	 * @param flags
+	 *            Additional flags about how the object should be written
 	 * @hide
 	 */
 	public void writeToParcel(Parcel dest, int flags) {

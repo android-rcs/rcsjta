@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcsrcs.br;
 
 import java.io.File;
@@ -29,76 +30,81 @@ import com.orangelabs.rcs.utils.FileUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 public class DbBackupRestoreTest extends AndroidTestCase {
-	
-	private static final int MAX_SAVED_ACCOUNT = 3;
-	
-	private Logger logger = Logger.getLogger(this.getClass().getName());
-	File srcdir = new File(Environment.getDataDirectory() + "/data/com.orangelabs.rcs/databases");
-	File[] savedAccounts = null;
 
-	protected void setUp() throws Exception {
-		super.setUp();
-		// Clean up all saved configurations
-		savedAccounts = BackupRestoreDb.listOfSavedAccounts(srcdir);
-		if (savedAccounts != null) {
-			for (File savedAccount : savedAccounts) {
-				try {
-					FileUtils.deleteDirectory(savedAccount);
-				} catch (Exception e) {
-					logger.info("Failed to delete account " + savedAccount.getName());
-				}
-			}
-		}
-	}
+    private static final int MAX_SAVED_ACCOUNT = 3;
 
-	protected void tearDown() throws Exception {
-		super.tearDown();
-	}
+    private Logger logger = Logger.getLogger(this.getClass().getName());
 
-	public void testBackupAccount() {
-		assertTrue(BackupRestoreDb.backupAccount("1111"));
-		assertTrue(BackupRestoreDb.backupAccount("2222"));
-		assertTrue(BackupRestoreDb.backupAccount("3333"));
-		assertTrue(BackupRestoreDb.backupAccount("4444"));
-		try {
-			savedAccounts = BackupRestoreDb.listOfSavedAccounts(srcdir);
-			for (File file : savedAccounts) {
-				logger.info("account " + file);
-			}
-		} catch (InvalidArgumentException e) {
-			fail(e.getMessage());
-		}
-		assertTrue("listOfSavedAccounts failed", savedAccounts != null && savedAccounts.length == 4);
-		assertTrue("getOldestFile failed", FileUtils.getOldestFile(savedAccounts).getName().equals("1111"));
-	}
+    File srcdir = new File(Environment.getDataDirectory() + "/data/com.orangelabs.rcs/databases");
 
-	public void testCleanBackups() {
-		// This cleanBackups removes the oldest directory (if MAX_SAVED_ACCOUNT is reached)
-		assertTrue(BackupRestoreDb.backupAccount("1111"));
-		assertTrue(BackupRestoreDb.backupAccount("2222"));
-		assertTrue(BackupRestoreDb.backupAccount("3333"));
-		assertTrue(BackupRestoreDb.backupAccount("4444"));
-		BackupRestoreDb.cleanBackups("3333");
-		savedAccounts = null;
-		String oldestConfig = "1111";
-		try {
-			savedAccounts = BackupRestoreDb.listOfSavedAccounts(srcdir);
-			for (File file : savedAccounts) {
-				logger.info("account " + file);
-				if ("1111".equals(file.getName())) {
-					oldestConfig = null;
-				}
-			}
-		} catch (InvalidArgumentException e) {
-			fail(e.getMessage());
-		}
-		assertTrue("listOfSavedAccounts MAX_SAVED_ACCOUNT failed", savedAccounts != null && savedAccounts.length == MAX_SAVED_ACCOUNT);
-		assertTrue("listOfSavedAccounts Oldest configuration removed failed",  oldestConfig != null);
-	}
+    File[] savedAccounts = null;
 
-	public void testRestoreDb() {
-		assertTrue(BackupRestoreDb.backupAccount("2222"));
-		assertTrue("restoreAccountProviders failed", BackupRestoreDb.restoreAccount("2222"));
-	}
+    protected void setUp() throws Exception {
+        super.setUp();
+        // Clean up all saved configurations
+        savedAccounts = BackupRestoreDb.listOfSavedAccounts(srcdir);
+        if (savedAccounts != null) {
+            for (File savedAccount : savedAccounts) {
+                try {
+                    FileUtils.deleteDirectory(savedAccount);
+                } catch (Exception e) {
+                    logger.info("Failed to delete account " + savedAccount.getName());
+                }
+            }
+        }
+    }
+
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
+
+    public void testBackupAccount() {
+        assertTrue(BackupRestoreDb.backupAccount("1111"));
+        assertTrue(BackupRestoreDb.backupAccount("2222"));
+        assertTrue(BackupRestoreDb.backupAccount("3333"));
+        assertTrue(BackupRestoreDb.backupAccount("4444"));
+        try {
+            savedAccounts = BackupRestoreDb.listOfSavedAccounts(srcdir);
+            for (File file : savedAccounts) {
+                logger.info("account " + file);
+            }
+        } catch (InvalidArgumentException e) {
+            fail(e.getMessage());
+        }
+        assertTrue("listOfSavedAccounts failed", savedAccounts != null && savedAccounts.length == 4);
+        assertTrue("getOldestFile failed",
+                FileUtils.getOldestFile(savedAccounts).getName().equals("1111"));
+    }
+
+    public void testCleanBackups() {
+        // This cleanBackups removes the oldest directory (if MAX_SAVED_ACCOUNT
+        // is reached)
+        assertTrue(BackupRestoreDb.backupAccount("1111"));
+        assertTrue(BackupRestoreDb.backupAccount("2222"));
+        assertTrue(BackupRestoreDb.backupAccount("3333"));
+        assertTrue(BackupRestoreDb.backupAccount("4444"));
+        BackupRestoreDb.cleanBackups("3333");
+        savedAccounts = null;
+        String oldestConfig = "1111";
+        try {
+            savedAccounts = BackupRestoreDb.listOfSavedAccounts(srcdir);
+            for (File file : savedAccounts) {
+                logger.info("account " + file);
+                if ("1111".equals(file.getName())) {
+                    oldestConfig = null;
+                }
+            }
+        } catch (InvalidArgumentException e) {
+            fail(e.getMessage());
+        }
+        assertTrue("listOfSavedAccounts MAX_SAVED_ACCOUNT failed", savedAccounts != null
+                && savedAccounts.length == MAX_SAVED_ACCOUNT);
+        assertTrue("listOfSavedAccounts Oldest configuration removed failed", oldestConfig != null);
+    }
+
+    public void testRestoreDb() {
+        assertTrue(BackupRestoreDb.backupAccount("2222"));
+        assertTrue("restoreAccountProviders failed", BackupRestoreDb.restoreAccount("2222"));
+    }
 
 }

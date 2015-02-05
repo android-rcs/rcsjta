@@ -66,7 +66,8 @@ public class FtHttpResumeManager {
 	/**
 	 * The logger
 	 */
-	private static final Logger logger = Logger.getLogger(FtHttpResumeManager.class.getSimpleName());
+	private static final Logger logger = Logger
+			.getLogger(FtHttpResumeManager.class.getSimpleName());
 
 	private boolean terminate = false; // TODO
 
@@ -121,10 +122,11 @@ public class FtHttpResumeManager {
 		switch (ftHttpResume.getDirection()) {
 		case INCOMING:
 			FtHttpResumeDownload downloadInfo = (FtHttpResumeDownload) ftHttpResume;
-			MmContent downloadContent = ContentManager.createMmContent(ftHttpResume.getFile(),downloadInfo.getSize(),downloadInfo.getFileName());
+			MmContent downloadContent = ContentManager.createMmContent(ftHttpResume.getFile(),
+					downloadInfo.getSize(), downloadInfo.getFileName());
 			// Creates the Resume Download session object
 			final ResumeDownloadFileSharingSession resumeDownload = new ResumeDownloadFileSharingSession(
-                    imsService, downloadContent, downloadInfo);
+					imsService, downloadContent, downloadInfo);
 			resumeDownload.addListener(getFileSharingSessionListener());
 			// Start the download HTTP FT session object
 			new Thread() {
@@ -137,35 +139,36 @@ public class FtHttpResumeManager {
 					.getImsModule()
 					.getCore()
 					.getListener()
-					.handleIncomingFileTransferResuming(resumeDownload, resumeDownload.isGroupFileTransfer(), resumeDownload.getChatSessionID(),
-							resumeDownload.getContributionID());
+					.handleIncomingFileTransferResuming(resumeDownload,
+							resumeDownload.isGroupFileTransfer(),
+							resumeDownload.getChatSessionID(), resumeDownload.getContributionID());
 			break;
 		case OUTGOING:
-		    // TODO : only managed for 1-1 FToHTTP
-            FtHttpResumeUpload uploadInfo = (FtHttpResumeUpload) ftHttpResume;
-            if (!ftHttpResume.isGroupTransfer()) {
-                // Get upload content
-                    MmContent uploadContent = ContentManager.createMmContentFromMime(
-                            uploadInfo.getFile(), uploadInfo.getMimetype(),
-                            uploadInfo.getSize(), uploadInfo.getFileName());
+			// TODO : only managed for 1-1 FToHTTP
+			FtHttpResumeUpload uploadInfo = (FtHttpResumeUpload) ftHttpResume;
+			if (!ftHttpResume.isGroupTransfer()) {
+				// Get upload content
+				MmContent uploadContent = ContentManager.createMmContentFromMime(
+						uploadInfo.getFile(), uploadInfo.getMimetype(), uploadInfo.getSize(),
+						uploadInfo.getFileName());
 
-                // Create Resume Upload session 
-                final ResumeUploadFileSharingSession resumeUpload = new ResumeUploadFileSharingSession(imsService, uploadContent,
-                        uploadInfo);
-                resumeUpload.addListener(getFileSharingSessionListener());
+				// Create Resume Upload session
+				final ResumeUploadFileSharingSession resumeUpload = new ResumeUploadFileSharingSession(
+						imsService, uploadContent, uploadInfo);
+				resumeUpload.addListener(getFileSharingSessionListener());
 
-                // Start Resume Upload session
-                new Thread() {
-                    public void run() {
-                        resumeUpload.startSession();
-                    }
-                }.start();
+				// Start Resume Upload session
+				new Thread() {
+					public void run() {
+						resumeUpload.startSession();
+					}
+				}.start();
 
-                // Notify the UI and update rich messaging
-                imsService.getImsModule().getCore().getListener()
-                        .handleOutgoingFileTransferResuming(resumeUpload, false);
-            }
-            break;
+				// Notify the UI and update rich messaging
+				imsService.getImsModule().getCore().getListener()
+						.handleOutgoingFileTransferResuming(resumeUpload, false);
+			}
+			break;
 		}
 
 	}
@@ -252,7 +255,8 @@ public class FtHttpResumeManager {
 			}
 
 			@Override
-			public void handleSessionAutoAccepted(ContactId contact, MmContent file, MmContent fileIcon) {
+			public void handleSessionAutoAccepted(ContactId contact, MmContent file,
+					MmContent fileIcon) {
 			}
 		};
 	}

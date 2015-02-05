@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.extension.messaging;
 
 import java.util.ArrayList;
@@ -36,51 +37,53 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public class MessagingSessionList extends MultimediaSessionList {
-	/**
-	 * List of sessions
-	 */
-	private List<MultimediaMessagingSession> sessions = new ArrayList<MultimediaMessagingSession>();
-	
-	/**
-	 * Display a session
-	 * 
-	 * @param position
-	 */
-	public void displaySession(int position) {
-		try {
-			Intent intent = new Intent(this, MessagingSessionView.class);
-			String sessionId = sessions.get(position).getSessionId();
-			intent.putExtra(MessagingSessionView.EXTRA_MODE, MessagingSessionView.MODE_OPEN);
-			intent.putExtra(MessagingSessionView.EXTRA_SESSION_ID, sessionId);
-			startActivity(intent);
-		} catch(RcsServiceException e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
-		}
-	}
-	
+    /**
+     * List of sessions
+     */
+    private List<MultimediaMessagingSession> sessions = new ArrayList<MultimediaMessagingSession>();
+
+    /**
+     * Display a session
+     * 
+     * @param position
+     */
+    public void displaySession(int position) {
+        try {
+            Intent intent = new Intent(this, MessagingSessionView.class);
+            String sessionId = sessions.get(position).getSessionId();
+            intent.putExtra(MessagingSessionView.EXTRA_MODE, MessagingSessionView.MODE_OPEN);
+            intent.putExtra(MessagingSessionView.EXTRA_SESSION_ID, sessionId);
+            startActivity(intent);
+        } catch (RcsServiceException e) {
+            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+        }
+    }
+
     /**
      * Update the displayed list
      */
     public void updateList() {
-		try {
-			// Reset the list
-			sessions.clear();
+        try {
+            // Reset the list
+            sessions.clear();
 
-			// Get list of pending sessions
-			Set<MultimediaMessagingSession> currentSessions = mCnxManager.getMultimediaSessionApi().getMessagingSessions(
-					MessagingSessionUtils.SERVICE_ID);
-			sessions = new ArrayList<MultimediaMessagingSession>(currentSessions);
-			if (sessions.size() > 0) {
-				String[] items = new String[sessions.size()];
-				for (int i = 0; i < items.length; i++) {
-					items[i] = getString(R.string.label_session, sessions.get(i).getSessionId());
-				}
-				setListAdapter(new ArrayAdapter<String>(MessagingSessionList.this, android.R.layout.simple_list_item_1, items));
-			} else {
-				setListAdapter(null);
-			}
-		} catch (Exception e) {
-			Utils.showMessageAndExit(MessagingSessionList.this, getString(R.string.label_api_failed), mExitOnce, e);
-		}
-	}
+            // Get list of pending sessions
+            Set<MultimediaMessagingSession> currentSessions = mCnxManager.getMultimediaSessionApi()
+                    .getMessagingSessions(MessagingSessionUtils.SERVICE_ID);
+            sessions = new ArrayList<MultimediaMessagingSession>(currentSessions);
+            if (sessions.size() > 0) {
+                String[] items = new String[sessions.size()];
+                for (int i = 0; i < items.length; i++) {
+                    items[i] = getString(R.string.label_session, sessions.get(i).getSessionId());
+                }
+                setListAdapter(new ArrayAdapter<String>(MessagingSessionList.this,
+                        android.R.layout.simple_list_item_1, items));
+            } else {
+                setListAdapter(null);
+            }
+        } catch (Exception e) {
+            Utils.showMessageAndExit(MessagingSessionList.this,
+                    getString(R.string.label_api_failed), mExitOnce, e);
+        }
+    }
 }

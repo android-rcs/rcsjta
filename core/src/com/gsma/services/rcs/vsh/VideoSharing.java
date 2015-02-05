@@ -32,141 +32,142 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 public class VideoSharing {
 
-    /**
-     * Video sharing state
-     */
-    public static class State {
-    	/**
-    	 * Sharing invitation received
-    	 */
-    	public final static int INVITED = 0;
-    	
-    	/**
-    	 * Sharing invitation sent
-    	 */
-    	public final static int INITIATING = 1;
-    	
-    	/**
-    	 * Sharing is started
-    	 */
-    	public final static int STARTED = 2;
-    	
-    	/**
-    	 * Sharing has been aborted
-    	 */
-    	public final static int ABORTED = 3;
+	/**
+	 * Video sharing state
+	 */
+	public static class State {
+		/**
+		 * Sharing invitation received
+		 */
+		public final static int INVITED = 0;
 
-    	/**
-    	 * Sharing has failed
-    	 */
-    	public final static int FAILED = 4;
+		/**
+		 * Sharing invitation sent
+		 */
+		public final static int INITIATING = 1;
 
-        /**
-    	 * Sharing has been rejected
-    	 */
-    	public final static int REJECTED = 5;
+		/**
+		 * Sharing is started
+		 */
+		public final static int STARTED = 2;
 
-        /**
-    	 * Ringing
-    	 */
-    	public final static int RINGING = 6;
+		/**
+		 * Sharing has been aborted
+		 */
+		public final static int ABORTED = 3;
 
-    	/**
-    	 * Sharing has been accepted and is in the process of becoming started
-    	 */
-    	public final static int ACCEPTING = 7;
+		/**
+		 * Sharing has failed
+		 */
+		public final static int FAILED = 4;
 
-    	private State() {
-        }    	
-    }
+		/**
+		 * Sharing has been rejected
+		 */
+		public final static int REJECTED = 5;
 
-    /**
-     * Reason code associated with the video share state.
-     */
-    public static class ReasonCode {
+		/**
+		 * Ringing
+		 */
+		public final static int RINGING = 6;
 
-        /**
-         * No specific reason code specified.
-         */
-        public static final int UNSPECIFIED = 0;
+		/**
+		 * Sharing has been accepted and is in the process of becoming started
+		 */
+		public final static int ACCEPTING = 7;
 
-        /**
-         * Video share is aborted by local user.
-         */
-        public static final int ABORTED_BY_USER = 1;
+		private State() {
+		}
+	}
 
-        /**
-         * Video share is aborted by remote user.
-         */
-        public static final int ABORTED_BY_REMOTE = 2;
+	/**
+	 * Reason code associated with the video share state.
+	 */
+	public static class ReasonCode {
 
-        /**
-         * Video share is aborted by system.
-         */
-        public static final int ABORTED_BY_SYSTEM = 3;
+		/**
+		 * No specific reason code specified.
+		 */
+		public static final int UNSPECIFIED = 0;
 
-        /**
-         * Video share is rejected because already taken by the secondary device.
-         */
-        public static final int REJECTED_BY_SECONDARY_DEVICE = 4;
+		/**
+		 * Video share is aborted by local user.
+		 */
+		public static final int ABORTED_BY_USER = 1;
 
-        /**
-         * Video share invitation was rejected due to max number of sharing sessions
-         * already are open.
-         */
-        public static final int REJECTED_MAX_SHARING_SESSIONS = 5;
+		/**
+		 * Video share is aborted by remote user.
+		 */
+		public static final int ABORTED_BY_REMOTE = 2;
 
-        /**
-         * Video share invitation was rejected by local user.
-         */
-        public static final int REJECTED_BY_USER = 6;
+		/**
+		 * Video share is aborted by system.
+		 */
+		public static final int ABORTED_BY_SYSTEM = 3;
 
-        /**
-         * Video share invitation was rejected by remote.
-         */
-        public static final int REJECTED_BY_REMOTE = 7;
+		/**
+		 * Video share is rejected because already taken by the secondary device.
+		 */
+		public static final int REJECTED_BY_SECONDARY_DEVICE = 4;
 
-        /**
-         * Video share been rejected due to time out.
-         */
-        public static final int REJECTED_TIME_OUT = 8;
+		/**
+		 * Video share invitation was rejected due to max number of sharing sessions already are
+		 * open.
+		 */
+		public static final int REJECTED_MAX_SHARING_SESSIONS = 5;
 
-        /**
-         * Video share initiation failed.
-         */
-        public static final int FAILED_INITIATION = 9;
+		/**
+		 * Video share invitation was rejected by local user.
+		 */
+		public static final int REJECTED_BY_USER = 6;
 
-        /**
-         * Sharing of the video share has failed.
-         */
-        public static final int FAILED_SHARING = 10;
-    }
-    
-    /**
-     * Video encoding
-     */
-    public static class Encoding {
-        /**
-         * H264
-         */
-        public static final String H264 = "H264";
-    }      
-    
-    /**
-     * Video sharing interface
-     */
-    private final IVideoSharing mSharingInf;
-    
-    /**
-     * Constructor
-     * 
-     * @param sharingInf Video sharing interface
-     */
-    /* package private */VideoSharing(IVideoSharing sharingInf) {
-    	mSharingInf = sharingInf;
-    }
-    	
-    /**
+		/**
+		 * Video share invitation was rejected by remote.
+		 */
+		public static final int REJECTED_BY_REMOTE = 7;
+
+		/**
+		 * Video share been rejected due to time out.
+		 */
+		public static final int REJECTED_TIME_OUT = 8;
+
+		/**
+		 * Video share initiation failed.
+		 */
+		public static final int FAILED_INITIATION = 9;
+
+		/**
+		 * Sharing of the video share has failed.
+		 */
+		public static final int FAILED_SHARING = 10;
+	}
+
+	/**
+	 * Video encoding
+	 */
+	public static class Encoding {
+		/**
+		 * H264
+		 */
+		public static final String H264 = "H264";
+	}
+
+	/**
+	 * Video sharing interface
+	 */
+	private final IVideoSharing mSharingInf;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param sharingInf
+	 *            Video sharing interface
+	 */
+	/* package private */VideoSharing(IVideoSharing sharingInf) {
+		mSharingInf = sharingInf;
+	}
+
+	/**
 	 * Returns the sharing ID of the video sharing
 	 * 
 	 * @return Sharing ID
@@ -175,11 +176,11 @@ public class VideoSharing {
 	public String getSharingId() throws RcsServiceException {
 		try {
 			return mSharingInf.getSharingId();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Returns the remote contact identifier
 	 * 
@@ -189,7 +190,7 @@ public class VideoSharing {
 	public ContactId getRemoteContact() throws RcsServiceException {
 		try {
 			return mSharingInf.getRemoteContact();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
@@ -204,7 +205,7 @@ public class VideoSharing {
 	public int getState() throws RcsServiceException {
 		try {
 			return mSharingInf.getState();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
@@ -234,25 +235,26 @@ public class VideoSharing {
 	public Direction getDirection() throws RcsServiceException {
 		try {
 			return Direction.valueOf(mSharingInf.getDirection());
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
-	}	
-	
+	}
+
 	/**
 	 * Accepts video sharing invitation
 	 * 
-	 * @param player Video player
+	 * @param player
+	 *            Video player
 	 * @throws RcsServiceException
 	 */
 	public void acceptInvitation(VideoPlayer player) throws RcsServiceException {
 		try {
 			mSharingInf.acceptInvitation(player);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Rejects video sharing invitation
 	 * 
@@ -261,7 +263,7 @@ public class VideoSharing {
 	public void rejectInvitation() throws RcsServiceException {
 		try {
 			mSharingInf.rejectInvitation();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
@@ -274,11 +276,11 @@ public class VideoSharing {
 	public void abortSharing() throws RcsServiceException {
 		try {
 			mSharingInf.abortSharing();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Return the video encoding (eg. H.264)
 	 * 
@@ -288,25 +290,25 @@ public class VideoSharing {
 	public String getVideoEncoding() throws RcsServiceException {
 		try {
 			return mSharingInf.getVideoEncoding();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
 	/**
-	 * Returns the local timestamp of when the video sharing was initiated for outgoing
-	 * video sharing or the local timestamp of when the video sharing invitation was received
-	 * for incoming video sharings.
-	 *  
+	 * Returns the local timestamp of when the video sharing was initiated for outgoing video
+	 * sharing or the local timestamp of when the video sharing invitation was received for incoming
+	 * video sharings.
+	 * 
 	 * @return Timestamp in milliseconds
 	 * @throws RcsServiceException
 	 */
 	public long getTimestamp() throws RcsServiceException {
 		try {
 			return mSharingInf.getTimestamp();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
-		}		
+		}
 	}
 
 	/**
@@ -318,23 +320,23 @@ public class VideoSharing {
 	public long getDuration() throws RcsServiceException {
 		try {
 			return mSharingInf.getDuration();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
-		}		
+		}
 	}
 
-	/** 		
+	/**
 	 * Returns the video descriptor
-	 * 		
-	 * @return Video descriptor 		
-	 * @see VideoDescriptor 		
-	 * @throws RcsServiceException 		
-	 */ 		
-	public VideoDescriptor getVideoDescriptor() throws RcsServiceException { 		
-		try { 		
-			return mSharingInf.getVideoDescriptor(); 		
-		} catch(Exception e) { 		
-			throw new RcsServiceException(e.getMessage()); 		
-		} 		
+	 * 
+	 * @return Video descriptor
+	 * @see VideoDescriptor
+	 * @throws RcsServiceException
+	 */
+	public VideoDescriptor getVideoDescriptor() throws RcsServiceException {
+		try {
+			return mSharingInf.getVideoDescriptor();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
 	}
 }

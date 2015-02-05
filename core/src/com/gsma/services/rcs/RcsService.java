@@ -39,7 +39,7 @@ public abstract class RcsService {
 	 * Action to broadcast when RCS service is provisioned.
 	 */
 	public static final String ACTION_SERVICE_PROVISIONED = "com.gsma.services.rcs.action.SERVICE_PROVISIONED";
-	
+
 	private static final String ERROR_CNX = "Service not connected";
 
 	/**
@@ -74,8 +74,7 @@ public abstract class RcsService {
 		public static final int API_VERSION = VERSION_CODES.BLACKBIRD;
 
 		/**
-		 * Internal number used by the underlying source control to represent
-		 * this build
+		 * Internal number used by the underlying source control to represent this build
 		 */
 		public static final int API_INCREMENTAL = 1;
 
@@ -83,97 +82,97 @@ public abstract class RcsService {
 		}
 	}
 
-    /**
-     * Direction of the communication for Chat message, Geolocation,
-     * Filetransfer, Imageshare, Videoshare etc.
-     */
-    public enum Direction {
+	/**
+	 * Direction of the communication for Chat message, Geolocation, Filetransfer, Imageshare,
+	 * Videoshare etc.
+	 */
+	public enum Direction {
 
-        /**
-         * Incoming communication
-         */
-        INCOMING(0),
+		/**
+		 * Incoming communication
+		 */
+		INCOMING(0),
 
-        /**
-         * Outgoing communication
-         */
-        OUTGOING(1),
+		/**
+		 * Outgoing communication
+		 */
+		OUTGOING(1),
 
-        /**
-         * Irrelevant or not applicable (e.g. for group chat event message)
-         */
-        IRRELEVANT(2);
+		/**
+		 * Irrelevant or not applicable (e.g. for group chat event message)
+		 */
+		IRRELEVANT(2);
 
-        private final int mValue;
+		private final int mValue;
 
-        private static SparseArray<Direction> mValueToEnum = new SparseArray<Direction>();
-        static {
-            for (Direction entry : Direction.values()) {
-                mValueToEnum.put(entry.toInt(), entry);
-            }
-        }
+		private static SparseArray<Direction> mValueToEnum = new SparseArray<Direction>();
+		static {
+			for (Direction entry : Direction.values()) {
+				mValueToEnum.put(entry.toInt(), entry);
+			}
+		}
 
-        private Direction(int value) {
-            mValue = value;
-        }
+		private Direction(int value) {
+			mValue = value;
+		}
 
-        public final int toInt() {
-            return mValue;
-        }
+		public final int toInt() {
+			return mValue;
+		}
 
-        public final static Direction valueOf(int value) {
-            Direction entry = mValueToEnum.get(value);
-            if (entry != null) {
-                return entry;
-            }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(Direction.class.getName()).append(".").append(value).append("!")
-                    .toString());
-        }
-    }
+		public final static Direction valueOf(int value) {
+			Direction entry = mValueToEnum.get(value);
+			if (entry != null) {
+				return entry;
+			}
+			throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+					.append(Direction.class.getName()).append(".").append(value).append("!")
+					.toString());
+		}
+	}
 
 	/**
-     * Read status of the message
-     */
-    public enum ReadStatus {
-        /**
-         * The message has not yet been displayed in the UI.
-         */
-        UNREAD(0),
-        /**
-         * The message has been displayed in the UI.
-         */
-        READ(1);
-    
-        private final int mValue;
-    
-        private static SparseArray<ReadStatus> mValueToEnum = new SparseArray<ReadStatus>();
-        static {
-            for (ReadStatus entry : ReadStatus.values()) {
-                mValueToEnum.put(entry.toInt(), entry);
-            }
-        }
-    
-        private ReadStatus(int value) {
-            mValue = value;
-        }
-    
-        public final int toInt() {
-            return mValue;
-        }
-    
-        public final static ReadStatus valueOf(int value) {
-            ReadStatus entry = mValueToEnum.get(value);
-            if (entry != null) {
-                return entry;
-            }
-            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
-                    .append(ReadStatus.class.getName()).append(".").append(value).append("!")
-                    .toString());
-        }
-    }
+	 * Read status of the message
+	 */
+	public enum ReadStatus {
+		/**
+		 * The message has not yet been displayed in the UI.
+		 */
+		UNREAD(0),
+		/**
+		 * The message has been displayed in the UI.
+		 */
+		READ(1);
 
-    /**
+		private final int mValue;
+
+		private static SparseArray<ReadStatus> mValueToEnum = new SparseArray<ReadStatus>();
+		static {
+			for (ReadStatus entry : ReadStatus.values()) {
+				mValueToEnum.put(entry.toInt(), entry);
+			}
+		}
+
+		private ReadStatus(int value) {
+			mValue = value;
+		}
+
+		public final int toInt() {
+			return mValue;
+		}
+
+		public final static ReadStatus valueOf(int value) {
+			ReadStatus entry = mValueToEnum.get(value);
+			if (entry != null) {
+				return entry;
+			}
+			throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+					.append(ReadStatus.class.getName()).append(".").append(value).append("!")
+					.toString());
+		}
+	}
+
+	/**
 	 * Application context
 	 */
 	protected Context mCtx;
@@ -192,12 +191,14 @@ public abstract class RcsService {
 	 * Service version
 	 */
 	private Integer version;
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param ctx Application context
-	 * @param listener Service listener
+	 * @param ctx
+	 *            Application context
+	 * @param listener
+	 *            Service listener
 	 */
 	public RcsService(Context ctx, RcsServiceListener listener) {
 		mCtx = ctx;
@@ -207,35 +208,39 @@ public abstract class RcsService {
 	/**
 	 * Call specific method on the API interface
 	 * 
-	 * @param method Method to be called
-	 * @param param Parameters of the method
-	 * @param paramClass Class of the parameter passed
+	 * @param method
+	 *            Method to be called
+	 * @param param
+	 *            Parameters of the method
+	 * @param paramClass
+	 *            Class of the parameter passed
 	 * @return Object
 	 * @throws RcsServiceException
 	 */
-	private Object callApiMethod(String method, Object param, Class<IRcsServiceRegistrationListener> paramClass)
-			throws RcsServiceException {
+	private Object callApiMethod(String method, Object param,
+			Class<IRcsServiceRegistrationListener> paramClass) throws RcsServiceException {
 		if (mApi == null) {
 			throw new RcsServiceNotAvailableException();
 		}
 		Class<? extends IInterface> c = mApi.getClass();
-        try {
-            if (param != null) {
-                Method m = c.getDeclaredMethod(method, paramClass);
-                return m.invoke(mApi, param);
-            } else {
-                Method m = c.getDeclaredMethod(method, (Class[])null);
-                return m.invoke(mApi);
-            }
-        } catch (Exception e) {
-            throw new RcsServiceException(e);
-        }
+		try {
+			if (param != null) {
+				Method m = c.getDeclaredMethod(method, paramClass);
+				return m.invoke(mApi, param);
+			} else {
+				Method m = c.getDeclaredMethod(method, (Class[]) null);
+				return m.invoke(mApi);
+			}
+		} catch (Exception e) {
+			throw new RcsServiceException(e);
+		}
 	}
 
 	/**
 	 * Set API interface
 	 * 
-	 * @param api API interface
+	 * @param api
+	 *            API interface
 	 */
 	protected void setApi(IInterface api) {
 		mApi = api;
@@ -271,7 +276,7 @@ public abstract class RcsService {
 		if (mApi != null) {
 			if (version == null) {
 				try {
-					version = (Integer)callApiMethod("getServiceVersion", null, null);
+					version = (Integer) callApiMethod("getServiceVersion", null, null);
 				} catch (Exception e) {
 					throw new RcsServiceException(e.getMessage());
 				}
@@ -283,15 +288,14 @@ public abstract class RcsService {
 	}
 
 	/**
-	 * Returns true if the service is registered to the platform, else returns
-	 * false
+	 * Returns true if the service is registered to the platform, else returns false
 	 * 
 	 * @return Returns true if registered else returns false
 	 * @throws RcsServiceException
 	 */
 	public boolean isServiceRegistered() throws RcsServiceException {
 		if (mApi != null) {
-			return (Boolean)callApiMethod("isServiceRegistered", null, null);
+			return (Boolean) callApiMethod("isServiceRegistered", null, null);
 		} else {
 			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
@@ -300,10 +304,12 @@ public abstract class RcsService {
 	/**
 	 * Adds a listener on service registration events
 	 * 
-	 * @param listener Service registration listener
+	 * @param listener
+	 *            Service registration listener
 	 * @throws RcsServiceException
 	 */
-	public void addEventListener(RcsServiceRegistrationListener listener) throws RcsServiceException {
+	public void addEventListener(RcsServiceRegistrationListener listener)
+			throws RcsServiceException {
 		if (mApi != null) {
 			callApiMethod("addEventListener", listener, IRcsServiceRegistrationListener.class);
 		} else {
@@ -314,17 +320,19 @@ public abstract class RcsService {
 	/**
 	 * Removes a listener on service registration events
 	 * 
-	 * @param listener Service registration listener
-     * @throws RcsServiceException
+	 * @param listener
+	 *            Service registration listener
+	 * @throws RcsServiceException
 	 */
-	public void removeEventListener(RcsServiceRegistrationListener listener) throws RcsServiceException {
+	public void removeEventListener(RcsServiceRegistrationListener listener)
+			throws RcsServiceException {
 		if (mApi != null) {
 			callApiMethod("removeEventListener", listener, IRcsServiceRegistrationListener.class);
 		} else {
 			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
-	
+
 	/**
 	 * Returns the configuration that is common for all the service APIs
 	 * 
@@ -333,7 +341,8 @@ public abstract class RcsService {
 	 */
 	public CommonServiceConfiguration getCommonConfiguration() throws RcsServiceException {
 		if (mApi != null) {
-			ICommonServiceConfiguration configuration = (ICommonServiceConfiguration)callApiMethod("getCommonConfiguration", null, null);
+			ICommonServiceConfiguration configuration = (ICommonServiceConfiguration) callApiMethod(
+					"getCommonConfiguration", null, null);
 			return new CommonServiceConfiguration(configuration);
 		} else {
 			throw new RcsServiceNotAvailableException(ERROR_CNX);

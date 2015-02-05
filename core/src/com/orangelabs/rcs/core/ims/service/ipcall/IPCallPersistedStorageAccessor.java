@@ -28,10 +28,9 @@ import android.database.Cursor;
 import android.net.Uri;
 
 /**
- * IPCallPersistedStorageAccessor helps in retrieving persisted data related to
- * a IP call from the persisted storage. It can utilize caching for such data
- * that will not be changed after creation of the IP call to speed up consecutive
- * access.
+ * IPCallPersistedStorageAccessor helps in retrieving persisted data related to a IP call from the
+ * persisted storage. It can utilize caching for such data that will not be changed after creation
+ * of the IP call to speed up consecutive access.
  */
 public class IPCallPersistedStorageAccessor {
 
@@ -56,17 +55,16 @@ public class IPCallPersistedStorageAccessor {
 		mIPCallLog = ipCallLog;
 	}
 
-
 	private void cacheData() {
 		Cursor cursor = null;
 		try {
 			cursor = mIPCallLog.getCacheableIPCallData(mCallId);
-			String contact = cursor.getString(cursor
-					.getColumnIndexOrThrow(IPCallLog.CONTACT));
+			String contact = cursor.getString(cursor.getColumnIndexOrThrow(IPCallLog.CONTACT));
 			if (contact != null) {
 				mContact = ContactUtils.createContactId(contact);
 			}
-			mDirection = Direction.valueOf(cursor.getInt(cursor.getColumnIndexOrThrow(IPCallLog.DIRECTION)));
+			mDirection = Direction.valueOf(cursor.getInt(cursor
+					.getColumnIndexOrThrow(IPCallLog.DIRECTION)));
 		} finally {
 			if (cursor != null) {
 				cursor.close();
@@ -76,9 +74,8 @@ public class IPCallPersistedStorageAccessor {
 
 	public ContactId getRemoteContact() {
 		/*
-		 * Utilizing cache here as contact can't be changed in persistent
-		 * storage after entry insertion anyway so no need to query for it
-		 * multiple times.
+		 * Utilizing cache here as contact can't be changed in persistent storage after entry
+		 * insertion anyway so no need to query for it multiple times.
 		 */
 		if (mContact == null) {
 			cacheData();
@@ -96,9 +93,8 @@ public class IPCallPersistedStorageAccessor {
 
 	public Direction getDirection() {
 		/*
-		 * Utilizing cache here as direction can't be changed in persistent
-		 * storage after entry insertion anyway so no need to query for it
-		 * multiple times.
+		 * Utilizing cache here as direction can't be changed in persistent storage after entry
+		 * insertion anyway so no need to query for it multiple times.
 		 */
 		if (mDirection == null) {
 			cacheData();

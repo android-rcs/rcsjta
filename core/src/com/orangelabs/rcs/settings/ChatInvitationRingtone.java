@@ -33,27 +33,27 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
  */
 public class ChatInvitationRingtone extends RingtonePreference {
 
-    public ChatInvitationRingtone(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
+	public ChatInvitationRingtone(Context context, AttributeSet attrs) {
+		super(context, attrs);
+	}
 
-    @Override
-    protected Uri onRestoreRingtone() {
-        String uri = RcsSettings.getInstance().getChatInvitationRingtone();
-        
-        if (TextUtils.isEmpty(uri)) {
-            return null;
-        }
-        
-        return Uri.parse(uri);
-    }
+	@Override
+	protected Uri onRestoreRingtone() {
+		String uri = RcsSettings.getInstance().getChatInvitationRingtone();
 
-    @Override
-    protected void onSaveRingtone(Uri ringtoneUri) {
-    	if (ringtoneUri != null) {
-    		RcsSettings.getInstance().setChatInvitationRingtone(ringtoneUri.toString());
-    	} else {
-    		RcsSettings.getInstance().setChatInvitationRingtone("");
-    	}
-    }
+		if (TextUtils.isEmpty(uri)) {
+			return null;
+		}
+
+		return Uri.parse(uri);
+	}
+
+	@Override
+	protected void onSaveRingtone(Uri ringtoneUri) {
+		if (ringtoneUri != null) {
+			RcsSettings.getInstance().setChatInvitationRingtone(ringtoneUri.toString());
+		} else {
+			RcsSettings.getInstance().setChatInvitationRingtone("");
+		}
+	}
 }

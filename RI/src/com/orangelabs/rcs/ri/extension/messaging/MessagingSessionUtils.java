@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.extension.messaging;
 
 /**
@@ -23,8 +24,8 @@ package com.orangelabs.rcs.ri.extension.messaging;
  * @author Jean-Marc AUFFRET
  */
 public class MessagingSessionUtils {
-	/**
-	 * Service ID constant
-	 */
-	public final static String SERVICE_ID = "ext.messaging";
+    /**
+     * Service ID constant
+     */
+    public final static String SERVICE_ID = "ext.messaging";
 }

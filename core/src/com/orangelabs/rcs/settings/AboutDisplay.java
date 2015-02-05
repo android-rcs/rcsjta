@@ -25,7 +25,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.widget.TextView;
 
-
 /**
  * About the application display
  * 
@@ -33,18 +32,18 @@ import android.widget.TextView;
  */
 public class AboutDisplay extends Activity {
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
 		// Set title
-        setTitle(R.string.rcs_settings_title_about);
-        setContentView(R.layout.rcs_settings_about_layout);
-        
-        // Set the release number
-        TextView releaseView = (TextView)findViewById(R.id.settings_label_release);
-        String relLabel = getString(R.string.rcs_settings_label_release);
-        String relNumber = AppUtils.getApplicationVersion(this);
-        releaseView.setText(relLabel + " " + relNumber);
-    }
+		setTitle(R.string.rcs_settings_title_about);
+		setContentView(R.layout.rcs_settings_about_layout);
+
+		// Set the release number
+		TextView releaseView = (TextView) findViewById(R.id.settings_label_release);
+		String relLabel = getString(R.string.rcs_settings_label_release);
+		String relNumber = AppUtils.getApplicationVersion(this);
+		releaseView.setText(relLabel + " " + relNumber);
+	}
 }

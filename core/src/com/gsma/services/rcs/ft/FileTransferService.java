@@ -45,14 +45,13 @@ import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
- * This class offers the main entry point to transfer files and to
- * receive files. Several applications may connect/disconnect to the API.
+ * This class offers the main entry point to transfer files and to receive files. Several
+ * applications may connect/disconnect to the API.
  * 
- * The parameter contact in the API supports the following formats:
- * MSISDN in national or international format, SIP address, SIP-URI
- * or Tel-URI.
+ * The parameter contact in the API supports the following formats: MSISDN in national or
+ * international format, SIP address, SIP-URI or Tel-URI.
  * 
- * @author Jean-Marc AUFFRET 
+ * @author Jean-Marc AUFFRET
  */
 public class FileTransferService extends RcsService {
 
@@ -61,84 +60,86 @@ public class FileTransferService extends RcsService {
 	private static final String TAKE_PERSISTABLE_URI_PERMISSION_METHOD_NAME = "takePersistableUriPermission";
 
 	private static final Class<?>[] TAKE_PERSISTABLE_URI_PERMISSION_PARAM_TYPES = new Class[] {
-			Uri.class, int.class
-	};
+			Uri.class, int.class };
 
 	/**
 	 * API
 	 */
 	private IFileTransferService mApi;
-	
-	private static final String ERROR_CNX = "FileTransfer service not connected";
-	
-    /**
-     * Constructor
-     * 
-     * @param ctx Application context
-     * @param listener Service listener
-     */
-    public FileTransferService(Context ctx, RcsServiceListener listener) {
-    	super(ctx, listener);
-    }
 
-    /**
-     * Connects to the API
-     */
-    public void connect() {
-    	mCtx.bindService(new Intent(IFileTransferService.class.getName()), apiConnection, 0);
-    }
-    
-    /**
-     * Disconnects from the API
-     */
-    public void disconnect() {
-    	try {
-    		mCtx.unbindService(apiConnection);
-        } catch(IllegalArgumentException e) {
-        	// Nothing to do
-        }
-    }
+	private static final String ERROR_CNX = "FileTransfer service not connected";
+
+	/**
+	 * Constructor
+	 * 
+	 * @param ctx
+	 *            Application context
+	 * @param listener
+	 *            Service listener
+	 */
+	public FileTransferService(Context ctx, RcsServiceListener listener) {
+		super(ctx, listener);
+	}
+
+	/**
+	 * Connects to the API
+	 */
+	public void connect() {
+		mCtx.bindService(new Intent(IFileTransferService.class.getName()), apiConnection, 0);
+	}
+
+	/**
+	 * Disconnects from the API
+	 */
+	public void disconnect() {
+		try {
+			mCtx.unbindService(apiConnection);
+		} catch (IllegalArgumentException e) {
+			// Nothing to do
+		}
+	}
 
 	/**
 	 * Set API interface
 	 * 
-	 * @param api API interface
+	 * @param api
+	 *            API interface
 	 */
-    protected void setApi(IInterface api) {
-    	super.setApi(api);
-        mApi = (IFileTransferService)api;
-    }
-    
-    /**
+	protected void setApi(IInterface api) {
+		super.setApi(api);
+		mApi = (IFileTransferService) api;
+	}
+
+	/**
 	 * Service connection
 	 */
 	private ServiceConnection apiConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName className, IBinder service) {
-        	setApi(IFileTransferService.Stub.asInterface(service));
-        	if (mListener != null) {
-        		mListener.onServiceConnected();
-        	}
-        }
+		public void onServiceConnected(ComponentName className, IBinder service) {
+			setApi(IFileTransferService.Stub.asInterface(service));
+			if (mListener != null) {
+				mListener.onServiceConnected();
+			}
+		}
 
-        public void onServiceDisconnected(ComponentName className) {
-        	setApi(null);
-        	if (mListener != null) {
-        		mListener.onServiceDisconnected(ReasonCode.CONNECTION_LOST);
-        	}
-        }
-    };
+		public void onServiceDisconnected(ComponentName className) {
+			setApi(null);
+			if (mListener != null) {
+				mListener.onServiceDisconnected(ReasonCode.CONNECTION_LOST);
+			}
+		}
+	};
 
-    /**
-     * Returns the configuration of the file transfer service
-     * 
-     * @return Configuration
-     * @throws RcsServiceException
-     */
-    public FileTransferServiceConfiguration getConfiguration() throws RcsServiceException {
+	/**
+	 * Returns the configuration of the file transfer service
+	 * 
+	 * @return Configuration
+	 * @throws RcsServiceException
+	 */
+	public FileTransferServiceConfiguration getConfiguration() throws RcsServiceException {
 		if (mApi != null) {
 			try {
 				return new FileTransferServiceConfiguration(mApi.getConfiguration());
-			} catch(Exception e) {
+			} catch (Exception e) {
 				throw new RcsServiceException(e);
 			}
 		} else {
@@ -157,10 +158,11 @@ public class FileTransferService extends RcsService {
 	}
 
 	/**
-	 * Using reflection to persist Uri permission in order to support backward
-	 * compatibility since this API is available only from Kitkat onwards.
+	 * Using reflection to persist Uri permission in order to support backward compatibility since
+	 * this API is available only from Kitkat onwards.
 	 *
-	 * @param file Uri of file to transfer
+	 * @param file
+	 *            Uri of file to transfer
 	 * @throws RcsServiceException
 	 */
 	private void takePersistableUriPermission(Uri file) throws RcsServiceException {
@@ -169,10 +171,8 @@ public class FileTransferService extends RcsService {
 			Method takePersistableUriPermissionMethod = contentResolver.getClass().getMethod(
 					TAKE_PERSISTABLE_URI_PERMISSION_METHOD_NAME,
 					TAKE_PERSISTABLE_URI_PERMISSION_PARAM_TYPES);
-			Object[] methodArgs = new Object[] {
-					file,
-					Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-			};
+			Object[] methodArgs = new Object[] { file,
+					Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION };
 			takePersistableUriPermissionMethod.invoke(contentResolver, methodArgs);
 		} catch (Exception e) {
 			throw new RcsServiceException(e);
@@ -181,7 +181,9 @@ public class FileTransferService extends RcsService {
 
 	/**
 	 * Grant permission to the stack and persist access permission
-	 * @param file the file URI
+	 * 
+	 * @param file
+	 *            the file URI
 	 * @throws RcsServiceException
 	 */
 	private void tryToGrantAndPersistUriPermission(Uri file) throws RcsServiceException {
@@ -199,10 +201,11 @@ public class FileTransferService extends RcsService {
 	}
 
 	/**
-	 * Returns true if it is possible to initiate file transfer to the contact
-	 * specified by the contact parameter, else returns false.
+	 * Returns true if it is possible to initiate file transfer to the contact specified by the
+	 * contact parameter, else returns false.
 	 * 
-	 * @param ContactId contact
+	 * @param ContactId
+	 *            contact
 	 * @return boolean
 	 * @throws RcsServiceException
 	 */
@@ -219,23 +222,25 @@ public class FileTransferService extends RcsService {
 	}
 
 	/**
-     * Transfers a file to a contact. The parameter file contains the URI of the
-     * file to be transferred (for a local or a remote file). The parameter
-     * contact supports the following formats: MSISDN in national or
-     * international format, SIP address, SIP-URI or Tel-URI. If the format of
-     * the contact is not supported an exception is thrown.
+	 * Transfers a file to a contact. The parameter file contains the URI of the file to be
+	 * transferred (for a local or a remote file). The parameter contact supports the following
+	 * formats: MSISDN in national or international format, SIP address, SIP-URI or Tel-URI. If the
+	 * format of the contact is not supported an exception is thrown.
 	 * 
-	 * @param contact the remote contact Identifier
+	 * @param contact
+	 *            the remote contact Identifier
 	 * @param file
 	 *            Uri of file to transfer
 	 * @param attachFileIcon
-	 *            File icon option. If true, the stack tries to attach fileicon. Fileicon may not be attached if file is not an
-	 *            image or if local or remote contact does not support fileicon.
+	 *            File icon option. If true, the stack tries to attach fileicon. Fileicon may not be
+	 *            attached if file is not an image or if local or remote contact does not support
+	 *            fileicon.
 	 * @return File transfer
 	 * @throws RcsServiceException
 	 */
-	public FileTransfer transferFile(ContactId contact, Uri file, boolean attachFileIcon) throws RcsServiceException {
-    	if (mApi != null) {
+	public FileTransfer transferFile(ContactId contact, Uri file, boolean attachFileIcon)
+			throws RcsServiceException {
+		if (mApi != null) {
 			try {
 				tryToGrantAndPersistUriPermission(file);
 
@@ -245,7 +250,7 @@ public class FileTransferService extends RcsService {
 				} else {
 					return null;
 				}
-			} catch(Exception e) {
+			} catch (Exception e) {
 				throw new RcsServiceException(e);
 			}
 		} else {
@@ -254,8 +259,8 @@ public class FileTransferService extends RcsService {
 	}
 
 	/**
-	 * Returns true if it is possible to initiate file transfer to the group
-	 * chat specified by the chatId parameter, else returns false.
+	 * Returns true if it is possible to initiate file transfer to the group chat specified by the
+	 * chatId parameter, else returns false.
 	 * 
 	 * @param chatId
 	 * @return boolean
@@ -277,11 +282,12 @@ public class FileTransferService extends RcsService {
 	 * Transfers a file to a group chat with an optional file icon.
 	 * 
 	 * @param chatId
-	 * @param file Uri of file to transfer
-	 * @param attachFileIcon Attach file icon option. If true, the stack tries
-	 *            to attach fileIcon. FileIcon may not be attached if file is
-	 *            not an image or if local or remote contact does not support
-	 *            fileIcon.
+	 * @param file
+	 *            Uri of file to transfer
+	 * @param attachFileIcon
+	 *            Attach file icon option. If true, the stack tries to attach fileIcon. FileIcon may
+	 *            not be attached if file is not an image or if local or remote contact does not
+	 *            support fileIcon.
 	 * @return FileTransfer
 	 * @throws RcsServiceException
 	 */
@@ -290,7 +296,7 @@ public class FileTransferService extends RcsService {
 		if (mApi != null) {
 			try {
 				tryToGrantAndPersistUriPermission(file);
-				
+
 				IFileTransfer ftIntf = mApi.transferFileToGroupChat(chatId, file, attachFileIcon);
 				if (ftIntf != null) {
 					return new FileTransfer(ftIntf);
@@ -305,47 +311,48 @@ public class FileTransferService extends RcsService {
 		}
 	}
 
-    /**
-     * Mark a received file transfer as read (i.e. the invitation or the file has been displayed in the UI).
-     *
-     * @param transferId
-     * @throws RcsServiceException
-     */
-    public void markFileTransferAsRead(String transferId) throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                mApi.markFileTransferAsRead(transferId);
-            } catch(Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
-        }
-    }
-    
-    /**
-     * Returns the list of file transfers in progress
-     * 
-     * @return List of file transfers
-     * @throws RcsServiceException
-     */
-    public Set<FileTransfer> getFileTransfers() throws RcsServiceException {
+	/**
+	 * Mark a received file transfer as read (i.e. the invitation or the file has been displayed in
+	 * the UI).
+	 *
+	 * @param transferId
+	 * @throws RcsServiceException
+	 */
+	public void markFileTransferAsRead(String transferId) throws RcsServiceException {
 		if (mApi != null) {
 			try {
-	    		Set<FileTransfer> result = new HashSet<FileTransfer>();
+				mApi.markFileTransferAsRead(transferId);
+			} catch (Exception e) {
+				throw new RcsServiceException(e);
+			}
+		} else {
+			throw new RcsServiceNotAvailableException(ERROR_CNX);
+		}
+	}
+
+	/**
+	 * Returns the list of file transfers in progress
+	 * 
+	 * @return List of file transfers
+	 * @throws RcsServiceException
+	 */
+	public Set<FileTransfer> getFileTransfers() throws RcsServiceException {
+		if (mApi != null) {
+			try {
+				Set<FileTransfer> result = new HashSet<FileTransfer>();
 				List<IBinder> ftList = mApi.getFileTransfers();
 				for (IBinder binder : ftList) {
 					FileTransfer ft = new FileTransfer(IFileTransfer.Stub.asInterface(binder));
 					result.add(ft);
 				}
 				return result;
-			} catch(Exception e) {
+			} catch (Exception e) {
 				throw new RcsServiceException(e);
 			}
 		} else {
 			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
-    }    
+	}
 
 	/**
 	 * Returns a current file transfer from its unique ID
@@ -355,7 +362,7 @@ public class FileTransferService extends RcsService {
 	 * @return File transfer or null if not found
 	 * @throws RcsServiceException
 	 */
-    public FileTransfer getFileTransfer(String transferId) throws RcsServiceException {
+	public FileTransfer getFileTransfer(String transferId) throws RcsServiceException {
 		if (mApi != null) {
 			try {
 				IFileTransfer ftIntf = mApi.getFileTransfer(transferId);
@@ -364,25 +371,26 @@ public class FileTransferService extends RcsService {
 				} else {
 					return null;
 				}
-			} catch(Exception e) {
+			} catch (Exception e) {
 				throw new RcsServiceException(e);
 			}
 		} else {
 			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
-    }    
-    
-    /**
+	}
+
+	/**
 	 * Adds a listener on file transfer events
 	 * 
-	 * @param listener One-to-one file transfer listener
+	 * @param listener
+	 *            One-to-one file transfer listener
 	 * @throws RcsServiceException
 	 */
 	public void addEventListener(OneToOneFileTransferListener listener) throws RcsServiceException {
 		if (mApi != null) {
 			try {
 				mApi.addEventListener2(listener);
-			} catch(Exception e) {
+			} catch (Exception e) {
 				throw new RcsServiceException(e);
 			}
 		} else {
@@ -393,14 +401,16 @@ public class FileTransferService extends RcsService {
 	/**
 	 * Removes a listener on file transfer events
 	 * 
-	 * @param listener File transfer listener
+	 * @param listener
+	 *            File transfer listener
 	 * @throws RcsServiceException
 	 */
-	public void removeEventListener(OneToOneFileTransferListener listener) throws RcsServiceException {
+	public void removeEventListener(OneToOneFileTransferListener listener)
+			throws RcsServiceException {
 		if (mApi != null) {
 			try {
 				mApi.removeEventListener2(listener);
-			} catch(Exception e) {
+			} catch (Exception e) {
 				throw new RcsServiceException(e);
 			}
 		} else {
@@ -411,7 +421,8 @@ public class FileTransferService extends RcsService {
 	/**
 	 * Adds a listener on group file transfer events
 	 *
-	 * @param listener Group file transfer listener
+	 * @param listener
+	 *            Group file transfer listener
 	 * @throws RcsServiceException
 	 */
 	public void addEventListener(GroupFileTransferListener listener) throws RcsServiceException {
@@ -429,7 +440,8 @@ public class FileTransferService extends RcsService {
 	/**
 	 * Removes a listener on group file transfer events
 	 *
-	 * @param listener Group file transfer listener
+	 * @param listener
+	 *            Group file transfer listener
 	 * @throws RcsServiceException
 	 */
 	public void removeEventListener(GroupFileTransferListener listener) throws RcsServiceException {
@@ -447,30 +459,31 @@ public class FileTransferService extends RcsService {
 	/**
 	 * set the Auto Accept Mode of a File Transfer configuration.
 	 * <p>
-	 * The Auto Accept Mode can only be modified by client application if isAutoAcceptModeChangeable (see
-	 * FileTransferServiceConfiguration class) is true
+	 * The Auto Accept Mode can only be modified by client application if isAutoAcceptModeChangeable
+	 * (see FileTransferServiceConfiguration class) is true
 	 * 
 	 * @param enable
 	 *            true to enable else false
 	 * @throws RcsServiceException
 	 */
-    public void setAutoAccept(boolean enable) throws RcsServiceException {
+	public void setAutoAccept(boolean enable) throws RcsServiceException {
 		if (mApi != null) {
 			try {
 				mApi.setAutoAccept(enable);
-			} catch(Exception e) {
+			} catch (Exception e) {
 				throw new RcsServiceException(e);
 			}
 		} else {
 			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
-	
+
 	/**
 	 * set the Auto Accept Mode of a File Transfer configuration while roaming.
 	 * <p>
-	 * The AutoAcceptModeInRoaming can only be modified by client application if isAutoAcceptModeChangeable (@see
-	 * FileTransferServiceConfiguration class) is true and if the Auto Accept Mode in normal conditions is true
+	 * The AutoAcceptModeInRoaming can only be modified by client application if
+	 * isAutoAcceptModeChangeable (@see FileTransferServiceConfiguration class) is true and if the
+	 * Auto Accept Mode in normal conditions is true
 	 * 
 	 * @param enable
 	 *            true to enable else false
@@ -487,7 +500,7 @@ public class FileTransferService extends RcsService {
 			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
 	}
-    
+
 	/**
 	 * set the image resize option for file transfer.
 	 * 
@@ -495,11 +508,11 @@ public class FileTransferService extends RcsService {
 	 *            the image resize option (0: ALWAYS_PERFORM, 1: ONLY_ABOVE_MAX_SIZE, 2: ASK)
 	 * @throws RcsServiceException
 	 */
-    public void setImageResizeOption(int option) throws RcsServiceException {
+	public void setImageResizeOption(int option) throws RcsServiceException {
 		if (mApi != null) {
 			try {
 				mApi.setImageResizeOption(option);
-			} catch(Exception e) {
+			} catch (Exception e) {
 				throw new RcsServiceException(e);
 			}
 		} else {
@@ -508,8 +521,8 @@ public class FileTransferService extends RcsService {
 	}
 
 	/**
-	 * Deletes all one to one file transfer from history and abort/reject any
-	 * associated ongoing session if such exists.
+	 * Deletes all one to one file transfer from history and abort/reject any associated ongoing
+	 * session if such exists.
 	 * 
 	 * @throws RcsServiceException
 	 */
@@ -526,8 +539,8 @@ public class FileTransferService extends RcsService {
 	}
 
 	/**
-	 * Deletes all group file transfer from history and abort/reject any
-	 * associated ongoing session if such exists.
+	 * Deletes all group file transfer from history and abort/reject any associated ongoing session
+	 * if such exists.
 	 * 
 	 * @throws RcsServiceException
 	 */
@@ -544,9 +557,8 @@ public class FileTransferService extends RcsService {
 	}
 
 	/**
-	 * Deletes file transfer corresponding to a given one to one chat specified
-	 * by contact from history and abort/reject any associated ongoing session
-	 * if such exists.
+	 * Deletes file transfer corresponding to a given one to one chat specified by contact from
+	 * history and abort/reject any associated ongoing session if such exists.
 	 * 
 	 * @param contact
 	 * @throws RcsServiceException
@@ -564,9 +576,8 @@ public class FileTransferService extends RcsService {
 	}
 
 	/**
-	 * Deletes file transfer corresponding to a given group chat specified by
-	 * chat id from history and abort/reject any associated ongoing session if
-	 * such exists.
+	 * Deletes file transfer corresponding to a given group chat specified by chat id from history
+	 * and abort/reject any associated ongoing session if such exists.
 	 * 
 	 * @param chatId
 	 * @throws RcsServiceException
@@ -584,8 +595,8 @@ public class FileTransferService extends RcsService {
 	}
 
 	/**
-	 * Deletes a file transfer by its unique id from history and abort/reject
-	 * any associated ongoing session if such exists.
+	 * Deletes a file transfer by its unique id from history and abort/reject any associated ongoing
+	 * session if such exists.
 	 * 
 	 * @param transferId
 	 * @throws RcsServiceException
@@ -603,8 +614,8 @@ public class FileTransferService extends RcsService {
 	}
 
 	/**
-	 * Marks undelivered file transfers to indicate the specified file transfers
-	 * have been processed.
+	 * Marks undelivered file transfers to indicate the specified file transfers have been
+	 * processed.
 	 * 
 	 * @param transferIds
 	 * @throws RcsServiceException

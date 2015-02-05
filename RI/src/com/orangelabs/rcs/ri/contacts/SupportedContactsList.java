@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.contacts;
 
 import java.util.ArrayList;
@@ -45,21 +46,21 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public class SupportedContactsList extends Activity {
-    
+
     /**
      * Refresh button
      */
     private Button refreshBtn;
-    
-  	/**
-	 * API connection manager
-	 */
-	private ApiConnectionManager connectionManager;
-	
+
     /**
-   	 * A locker to exit only once
-   	 */
-   	private LockAccess exitOnce = new LockAccess();
+     * API connection manager
+     */
+    private ApiConnectionManager connectionManager;
+
+    /**
+     * A locker to exit only once
+     */
+    private LockAccess exitOnce = new LockAccess();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -68,105 +69,108 @@ public class SupportedContactsList extends Activity {
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.contacts_supported_list);
-        
-		// Set a default tag
-		EditText tagEdit = (EditText)findViewById(R.id.tag);			
-		tagEdit.setText("game");
+
+        // Set a default tag
+        EditText tagEdit = (EditText)findViewById(R.id.tag);
+        tagEdit.setText("game");
 
         // Set button callback
         refreshBtn = (Button)findViewById(R.id.refresh_btn);
         refreshBtn.setOnClickListener(btnRefreshListener);
 
-		// Register to API connection manager
-		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.CONTACTS)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
-			return;
-		}
-		connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.CONTACTS);
+        // Register to API connection manager
+        connectionManager = ApiConnectionManager.getInstance(this);
+        if (connectionManager == null
+                || !connectionManager.isServiceConnected(RcsServiceName.CONTACTS)) {
+            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
+                    exitOnce);
+            return;
+        }
+        connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.CONTACTS);
     }
-    
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		if (connectionManager != null) {
-			connectionManager.stopMonitorServices(this);
-    	}
-	}	
-	
-	@Override
-	protected void onResume() {
-		super.onResume();
-    	// Update the list of RCS contacts
-		updateList();
-	}
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (connectionManager != null) {
+            connectionManager.stopMonitorServices(this);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Update the list of RCS contacts
+        updateList();
+    }
 
     /**
      * Update the list
      */
     private void updateList() {
-		try {
-			// Get tag to check
-			EditText tagEdit = (EditText)findViewById(R.id.tag);			
-			String tag = tagEdit.getText().toString();
-			
-	    	// Get list of RCS contacts supporting a given tag
-	    	Set<RcsContact> supportedContacts = connectionManager.getContactsApi().getRcsContactsSupporting(tag);
-	    	List<RcsContact> contacts = new ArrayList<RcsContact>(supportedContacts);
-	        ListView listView = (ListView)findViewById(R.id.contacts);
-			if (contacts.size() > 0){
-				ArrayList<String> items = new ArrayList<String>();
-		        for (int i = 0; i < contacts.size(); i++) {
-		        	RcsContact contact = contacts.get(i);
-		        	String status;
-		        	if (contact.isRegistered()) {
-						status = "online";
-		        	} else {
-						status = "offline";
-		        	}
-					items.add(contact.getContactId() + " (" + status + ")");
-		        }
-			    ContactListAdapter adapter = new ContactListAdapter(this, android.R.layout.simple_list_item_1, items);
-			    listView.setAdapter(adapter);
-			} else {
-				listView.setAdapter(null);
-			}
-		} catch(Exception e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce, e);
-		}
+        try {
+            // Get tag to check
+            EditText tagEdit = (EditText)findViewById(R.id.tag);
+            String tag = tagEdit.getText().toString();
+
+            // Get list of RCS contacts supporting a given tag
+            Set<RcsContact> supportedContacts = connectionManager.getContactsApi()
+                    .getRcsContactsSupporting(tag);
+            List<RcsContact> contacts = new ArrayList<RcsContact>(supportedContacts);
+            ListView listView = (ListView)findViewById(R.id.contacts);
+            if (contacts.size() > 0) {
+                ArrayList<String> items = new ArrayList<String>();
+                for (int i = 0; i < contacts.size(); i++) {
+                    RcsContact contact = contacts.get(i);
+                    String status;
+                    if (contact.isRegistered()) {
+                        status = "online";
+                    } else {
+                        status = "offline";
+                    }
+                    items.add(contact.getContactId() + " (" + status + ")");
+                }
+                ContactListAdapter adapter = new ContactListAdapter(this,
+                        android.R.layout.simple_list_item_1, items);
+                listView.setAdapter(adapter);
+            } else {
+                listView.setAdapter(null);
+            }
+        } catch (Exception e) {
+            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce, e);
+        }
     }
-    
-	/**
+
+    /**
      * Refresh button listener
      */
     private OnClickListener btnRefreshListener = new OnClickListener() {
         public void onClick(View v) {
-        	// Update list
-        	updateList();
+            // Update list
+            updateList();
         }
     };
-    
-	/**
-	 * Contact list adapter
-	 */
-	private class ContactListAdapter extends ArrayAdapter<String> {
-		private List<String> list;
 
-		public ContactListAdapter(Context context, int textViewResourceId, List<String> list) {
-			super(context, textViewResourceId, list);
-			
-			this.list = list;
-		}
+    /**
+     * Contact list adapter
+     */
+    private class ContactListAdapter extends ArrayAdapter<String> {
+        private List<String> list;
 
-		@Override
-		public String getItem(int position) {
-			return list.get(position);
-		}
-		
-		@Override
-		public long getItemId(int position) {
-			return position;
-		}
-	}
+        public ContactListAdapter(Context context, int textViewResourceId, List<String> list) {
+            super(context, textViewResourceId, list);
+
+            this.list = list;
+        }
+
+        @Override
+        public String getItem(int position) {
+            return list.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+    }
 }
-

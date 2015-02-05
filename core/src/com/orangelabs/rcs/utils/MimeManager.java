@@ -39,7 +39,8 @@ public class MimeManager {
 
 	private static final String DEFAULT_FILE_ENCONDING = "application/octet-stream";
 	/**
-	 * Singleton instance to access Two-way map that maps MIME-types to file extensions and vice versa.
+	 * Singleton instance to access Two-way map that maps MIME-types to file extensions and vice
+	 * versa.
 	 */
 	private static MimeManager instance;
 
@@ -177,130 +178,139 @@ public class MimeManager {
 		}
 		return mimeTypeToExtensionMap.get(mimeType);
 	}
-  
+
 	/**
 	 * Returns URL extension
 	 * 
-	 * @param url URL
+	 * @param url
+	 *            URL
 	 * @return Extension
 	 */
 	public static String getFileExtension(String url) {
-		if ((url != null) && (url.indexOf('.')!=-1)) {
-			return url.substring(url.lastIndexOf('.')+1);
+		if ((url != null) && (url.indexOf('.') != -1)) {
+			return url.substring(url.lastIndexOf('.') + 1);
 		} else {
 			return null;
 		}
-	}	
-    
+	}
+
 	/**
 	 * Returns MIME type extension
 	 * 
-	 * @param mime MIME type
+	 * @param mime
+	 *            MIME type
 	 * @return Extension
 	 */
 	public static String getMimeExtension(String mime) {
-		if ((mime != null) && (mime.indexOf('/')!=-1)) {
-    		return mime.substring(mime.indexOf('/')+1);
+		if ((mime != null) && (mime.indexOf('/') != -1)) {
+			return mime.substring(mime.indexOf('/') + 1);
 		}
-		
+
 		return "";
-	}	
+	}
 
-    /**
-     * Is a image type
-     * 
-     * @param mime MIME type
-     * @return Boolean
-     */
-    public static boolean isImageType(String mime ){
-    	if (mime.toLowerCase().startsWith("image/")){
-    		return true;
-    	} else {
-    		return false;
-    	}
-    }
-    
-    /**
-     * Is a video type
-     * 
-     * @param mime MIME type
-     * @return Boolean
-     */
-    public static boolean isVideoType(String mime) {
-    	if (mime.toLowerCase().startsWith("video/")){
-    		return true;
-    	} else {
-    		return false;
-    	}
-    }
-    
-    /**
-     * Is an audio type
-     * 
-     * @param mime MIME type
-     * @return Boolean
-     */
-    public static boolean isAudioType(String mime) {
-    	if (mime.toLowerCase().startsWith("audio/")) {
-    		return true;
-    	} else {
-    		return false;
-    	}
-    }
+	/**
+	 * Is a image type
+	 * 
+	 * @param mime
+	 *            MIME type
+	 * @return Boolean
+	 */
+	public static boolean isImageType(String mime) {
+		if (mime.toLowerCase().startsWith("image/")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
-    /**
-     * Is a text type
-     * 
-     * @param mime MIME type
-     * @return Boolean
-     */
-    public static boolean isTextType(String mime) {
-    	if (mime.toLowerCase().startsWith("text/")) {
-    		return true;
-    	} else {
-    		return false;
-    	}
-    }
-    
-    /**
-     * Is an application type
-     * 
-     * @param mime MIME type
-     * @return Boolean
-     */
-    public static boolean isApplicationType(String mime) {
-    	if (mime.toLowerCase().startsWith("application/")) {
-    		return true;
-    	} else {
-    		return false;
-    	}
-    }
+	/**
+	 * Is a video type
+	 * 
+	 * @param mime
+	 *            MIME type
+	 * @return Boolean
+	 */
+	public static boolean isVideoType(String mime) {
+		if (mime.toLowerCase().startsWith("video/")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
-    /**
-     * Is a VCard type
-     * 
-     * @param mime MIME type
-     * @return Boolean
-     */
-    public static boolean isVCardType(String mime) {
-    	if (mime.toLowerCase().equalsIgnoreCase("text/vcard")) {
-    		return true;
-    	} else {
-    		return false;
-    	}
-    }    
-    
-    /**
-     * Is a geoloc type
-     * 
-     * @param mime MIME type
-     * @return Boolean
-     */
-    public static boolean isGeolocType(String mime) {
-    	if (mime.toLowerCase().equalsIgnoreCase("application/vnd.gsma.rcspushlocation+xml")) {
-    		return true;
-    	} else {
-    		return false;
-    	}
-    }
+	/**
+	 * Is an audio type
+	 * 
+	 * @param mime
+	 *            MIME type
+	 * @return Boolean
+	 */
+	public static boolean isAudioType(String mime) {
+		if (mime.toLowerCase().startsWith("audio/")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Is a text type
+	 * 
+	 * @param mime
+	 *            MIME type
+	 * @return Boolean
+	 */
+	public static boolean isTextType(String mime) {
+		if (mime.toLowerCase().startsWith("text/")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Is an application type
+	 * 
+	 * @param mime
+	 *            MIME type
+	 * @return Boolean
+	 */
+	public static boolean isApplicationType(String mime) {
+		if (mime.toLowerCase().startsWith("application/")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Is a VCard type
+	 * 
+	 * @param mime
+	 *            MIME type
+	 * @return Boolean
+	 */
+	public static boolean isVCardType(String mime) {
+		if (mime.toLowerCase().equalsIgnoreCase("text/vcard")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Is a geoloc type
+	 * 
+	 * @param mime
+	 *            MIME type
+	 * @return Boolean
+	 */
+	public static boolean isGeolocType(String mime) {
+		if (mime.toLowerCase().equalsIgnoreCase("application/vnd.gsma.rcspushlocation+xml")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 }

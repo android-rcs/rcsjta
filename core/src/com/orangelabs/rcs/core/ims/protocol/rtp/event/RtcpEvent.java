@@ -30,11 +30,12 @@ public abstract class RtcpEvent {
 	 * RTCP packet
 	 */
 	private RtcpPacket packet;
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param packet RTCP packet
+	 * @param packet
+	 *            RTCP packet
 	 */
 	public RtcpEvent(RtcpPacket packet) {
 		this.packet = packet;
@@ -47,5 +48,5 @@ public abstract class RtcpEvent {
 	 */
 	public RtcpPacket getPacket() {
 		return packet;
-	}	
+	}
 }

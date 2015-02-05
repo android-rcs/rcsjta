@@ -34,39 +34,39 @@ import android.widget.EditText;
  */
 public class HttpsProvisioningAlertDialog extends Activity {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle(R.string.label_edit_msisdn);
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+		alert.setTitle(R.string.label_edit_msisdn);
 
-        // Set an EditText view to get user input
-        final EditText input = new EditText(this);
-        alert.setView(input);
+		// Set an EditText view to get user input
+		final EditText input = new EditText(this);
+		alert.setView(input);
 
-        alert.setPositiveButton(R.string.label_ok, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                String value = input.getText().toString();
-                HttpsProvionningMSISDNInput.getInstance().responseReceived(value);
-                finish();
-            }
-        });
+		alert.setPositiveButton(R.string.label_ok, new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				String value = input.getText().toString();
+				HttpsProvionningMSISDNInput.getInstance().responseReceived(value);
+				finish();
+			}
+		});
 
 		alert.setNegativeButton(R.string.label_cancel, new DialogInterface.OnClickListener() {
-		  public void onClick(DialogInterface dialog, int whichButton) {
-			  HttpsProvionningMSISDNInput.getInstance().responseReceived(null);
-			  finish();
-		  }
+			public void onClick(DialogInterface dialog, int whichButton) {
+				HttpsProvionningMSISDNInput.getInstance().responseReceived(null);
+				finish();
+			}
 		});
 
 		final AlertDialog dial = alert.show();
 		new Handler().postDelayed(new Runnable() {
-		    public void run() {
+			public void run() {
 				HttpsProvionningMSISDNInput.getInstance().responseReceived(null);
 				dial.dismiss();
 				finish();
-		    }
+			}
 		}, HttpsProvisioningUtils.INPUT_MSISDN_TIMEOUT);
 	}
 }

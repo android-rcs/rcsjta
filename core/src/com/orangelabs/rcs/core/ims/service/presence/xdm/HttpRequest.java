@@ -18,7 +18,6 @@
 
 package com.orangelabs.rcs.core.ims.service.presence.xdm;
 
-
 /**
  * HTTP request
  * 
@@ -34,12 +33,12 @@ public abstract class HttpRequest {
 	 * Content
 	 */
 	private String content;
-	
+
 	/**
 	 * Content type
 	 */
 	private String contentType;
-	
+
 	/**
 	 * Cookie
 	 */
@@ -50,12 +49,15 @@ public abstract class HttpRequest {
 	 */
 	private HttpAuthenticationAgent authenticationAgent = new HttpAuthenticationAgent();
 
-    /**
+	/**
 	 * Constructor
 	 * 
-	 * @param url URL
-	 * @param content Content
-	 * @param contentType Content type
+	 * @param url
+	 *            URL
+	 * @param content
+	 *            Content
+	 * @param contentType
+	 *            Content type
 	 */
 	public HttpRequest(String url, String content, String contentType) {
 		this.url = url;
@@ -71,14 +73,14 @@ public abstract class HttpRequest {
 	public HttpAuthenticationAgent getAuthenticationAgent() {
 		return authenticationAgent;
 	}
-	
+
 	/**
 	 * Returns the HTTP method
 	 * 
 	 * @return Method
 	 */
 	public abstract String getMethod();
-	
+
 	/**
 	 * Returns the HTTP URL
 	 * 
@@ -87,7 +89,7 @@ public abstract class HttpRequest {
 	public String getUrl() {
 		return url;
 	}
-	
+
 	/**
 	 * Returns the HTTP content
 	 * 
@@ -96,7 +98,7 @@ public abstract class HttpRequest {
 	public String getContent() {
 		return content;
 	}
-	
+
 	/**
 	 * Returns the HTTP content
 	 * 
@@ -131,12 +133,13 @@ public abstract class HttpRequest {
 	/**
 	 * Set the cookie
 	 * 
-	 * @param cookie Cookie
+	 * @param cookie
+	 *            Cookie
 	 */
 	public void setCookie(String cookie) {
 		this.cookie = cookie;
 	}
-	
+
 	/**
 	 * Returns the AUID of the request
 	 * 
@@ -146,8 +149,8 @@ public abstract class HttpRequest {
 		try {
 			String[] parts = url.split("/");
 			return parts[1];
-		} catch(Exception e) {
-			return  null;
+		} catch (Exception e) {
+			return null;
 		}
 	}
 }

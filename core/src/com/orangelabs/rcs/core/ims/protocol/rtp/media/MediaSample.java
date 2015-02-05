@@ -29,7 +29,7 @@ public class MediaSample {
 	 * Data
 	 */
 	private byte[] data;
-	
+
 	/**
 	 * Time stamp
 	 */
@@ -38,32 +38,37 @@ public class MediaSample {
 	/**
 	 * RTP marker bit
 	 */
-	private boolean marker = false;	
+	private boolean marker = false;
 
-    /**
-     * Sequence number
-     */
-    private long sequenceNumber;
-    // TODO: remove after implement receiver buffer
+	/**
+	 * Sequence number
+	 */
+	private long sequenceNumber;
 
-    /**
-     * Constructor
-     * 
-     * @param data Data
-     * @param time Time stamp
-     * @Param sequenceNumber Packet sequence number
-     */
-    public MediaSample(byte[] data, long time, long sequenceNumber) {
-        this.data = data;
-        this.time = time;
-        this.sequenceNumber = sequenceNumber;
-    }
+	// TODO: remove after implement receiver buffer
+
+	/**
+	 * Constructor
+	 * 
+	 * @param data
+	 *            Data
+	 * @param time
+	 *            Time stamp
+	 * @Param sequenceNumber Packet sequence number
+	 */
+	public MediaSample(byte[] data, long time, long sequenceNumber) {
+		this.data = data;
+		this.time = time;
+		this.sequenceNumber = sequenceNumber;
+	}
 
 	/**
 	 * Constructor
 	 *
-	 * @param data Data
-	 * @param time Time stamp
+	 * @param data
+	 *            Data
+	 * @param time
+	 *            Time stamp
 	 */
 	public MediaSample(byte[] data, long time) {
 		this.data = data;
@@ -73,9 +78,12 @@ public class MediaSample {
 	/**
 	 * Constructor
 	 * 
-	 * @param data Data
-	 * @param time Time stamp
-	 * @param marker Marker bit
+	 * @param data
+	 *            Data
+	 * @param time
+	 *            Time stamp
+	 * @param marker
+	 *            Marker bit
 	 */
 	public MediaSample(byte[] data, long time, boolean marker) {
 		this.data = data;
@@ -91,7 +99,7 @@ public class MediaSample {
 	public byte[] getData() {
 		return data;
 	}
-	
+
 	/**
 	 * Returns the length of the data sample
 	 * 
@@ -113,7 +121,7 @@ public class MediaSample {
 	public long getTimeStamp() {
 		return time;
 	}
-	
+
 	/**
 	 * Is RTP marker bit
 	 * 
@@ -123,13 +131,13 @@ public class MediaSample {
 		return marker;
 	}
 
-    /**
-     * Get the sequence number
-     *
-     * @return sequence number
-     */
-    public long getSequenceNumber() {
-        return this.sequenceNumber;
-    }
+	/**
+	 * Get the sequence number
+	 *
+	 * @return sequence number
+	 */
+	public long getSequenceNumber() {
+		return this.sequenceNumber;
+	}
 
 }

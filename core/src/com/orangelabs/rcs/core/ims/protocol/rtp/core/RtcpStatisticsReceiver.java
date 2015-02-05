@@ -28,7 +28,7 @@ public class RtcpStatisticsReceiver {
 	 * Number of RTCP packets received
 	 */
 	public int numRtcpPkts = 0;
-	
+
 	/**
 	 * Number of RTCP bytes received
 	 */
@@ -38,17 +38,17 @@ public class RtcpStatisticsReceiver {
 	 * Number of RTCP SR packets received
 	 */
 	public int numSrPkts = 0;
-	
+
 	/**
 	 * Number of bad RTCP packets received
 	 */
 	public int numBadRtcpPkts = 0;
-	
+
 	/**
 	 * Number of unknown RTCP packets received
 	 */
 	public int numUnknownTypes = 0;
-	
+
 	/**
 	 * Number of malformed RTCP packets received
 	 */

@@ -24,14 +24,15 @@ package com.orangelabs.rcs.core.ims.security.cert;
  * @author B. Joguet
  */
 public class KeyStoreManagerException extends java.lang.Exception {
-    static final long serialVersionUID = 1L;
+	static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor
-     * 
-     * @param error Error message
-     */
-    public KeyStoreManagerException(String error) {
-        super(error);
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param error
+	 *            Error message
+	 */
+	public KeyStoreManagerException(String error) {
+		super(error);
+	}
 }

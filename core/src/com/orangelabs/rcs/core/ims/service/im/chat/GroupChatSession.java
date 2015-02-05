@@ -76,26 +76,31 @@ public abstract class GroupChatSession extends ChatSession {
 	private ConferenceEventSubscribeManager conferenceSubscriber;
 
 	/**
-	 * Boolean variable indicating that the session is no longer marked as the
-	 * active one for outgoing operations and pending to be removed when it
-	 * times out.
+	 * Boolean variable indicating that the session is no longer marked as the active one for
+	 * outgoing operations and pending to be removed when it times out.
 	 */
 	private boolean mPendingRemoval = false;
 
 	/**
-     * The logger
-     */
-    private static final Logger logger = Logger.getLogger(GroupChatSession.class.getSimpleName());
+	 * The logger
+	 */
+	private static final Logger logger = Logger.getLogger(GroupChatSession.class.getSimpleName());
 
-    /**
+	/**
 	 * Constructor for originating side
 	 *
-	 * @param parent IMS service
-     * @param contact remote contact identifier
-     * @param conferenceId Conference id
-     * @param participants Set of invited participants
-     * @param rcsSettings RCS settings
-     * @param messagingLog Messaging log
+	 * @param parent
+	 *            IMS service
+	 * @param contact
+	 *            remote contact identifier
+	 * @param conferenceId
+	 *            Conference id
+	 * @param participants
+	 *            Set of invited participants
+	 * @param rcsSettings
+	 *            RCS settings
+	 * @param messagingLog
+	 *            Messaging log
 	 */
 	public GroupChatSession(ImsService parent, ContactId contact, String conferenceId,
 			Set<ParticipantInfo> participants, RcsSettings rcsSettings, MessagingLog messagingLog) {
@@ -104,43 +109,44 @@ public abstract class GroupChatSession extends ChatSession {
 		conferenceSubscriber = new ConferenceEventSubscribeManager(this);
 
 		// Set feature tags
-        setFeatureTags(ChatUtils.getSupportedFeatureTagsForGroupChat());
+		setFeatureTags(ChatUtils.getSupportedFeatureTagsForGroupChat());
 
-        // Set Accept-Contact header
-        setAcceptContactTags(ChatUtils.getAcceptContactTagsForGroupChat());
+		// Set Accept-Contact header
+		setAcceptContactTags(ChatUtils.getAcceptContactTagsForGroupChat());
 
 		String acceptTypes = CpimMessage.MIME_TYPE;
-        setAcceptTypes(acceptTypes);
+		setAcceptTypes(acceptTypes);
 
-		StringBuilder wrappedTypes = new StringBuilder(MimeType.TEXT_MESSAGE).append(" ")
-				.append(IsComposingInfo.MIME_TYPE);
+		StringBuilder wrappedTypes = new StringBuilder(MimeType.TEXT_MESSAGE).append(" ").append(
+				IsComposingInfo.MIME_TYPE);
 		if (rcsSettings.isGeoLocationPushSupported()) {
-        	wrappedTypes.append(" ").append(GeolocInfoDocument.MIME_TYPE);
-        }
-        if (rcsSettings.isFileTransferHttpSupported()) {
-        	wrappedTypes.append(" ").append(FileTransferHttpInfoDocument.MIME_TYPE);
-        }
-        setWrappedTypes(wrappedTypes.toString());
+			wrappedTypes.append(" ").append(GeolocInfoDocument.MIME_TYPE);
+		}
+		if (rcsSettings.isFileTransferHttpSupported()) {
+			wrappedTypes.append(" ").append(FileTransferHttpInfoDocument.MIME_TYPE);
+		}
+		setWrappedTypes(wrappedTypes.toString());
 	}
 
-    @Override
+	@Override
 	public boolean isGroupChat() {
 		return true;
 	}
 
-    @Override
-    public Set<ParticipantInfo> getConnectedParticipants() {
+	@Override
+	public Set<ParticipantInfo> getConnectedParticipants() {
 		return conferenceSubscriber.getParticipants();
 	}
 
-    /**
+	/**
 	 * Get replaced session ID
 	 *
 	 * @return Session ID
 	 */
 	public String getReplacedSessionId() {
 		String result = null;
-		ExtensionHeader sessionReplace = (ExtensionHeader)getDialogPath().getInvite().getHeader(SipUtils.HEADER_SESSION_REPLACES);
+		ExtensionHeader sessionReplace = (ExtensionHeader) getDialogPath().getInvite().getHeader(
+				SipUtils.HEADER_SESSION_REPLACES);
 		if (sessionReplace != null) {
 			result = sessionReplace.getValue();
 		} else {
@@ -149,7 +155,7 @@ public abstract class GroupChatSession extends ChatSession {
 				int index1 = content.indexOf("Session-Replaces=");
 				if (index1 != -1) {
 					int index2 = content.indexOf("\"", index1);
-					result = content.substring(index1+17, index2);
+					result = content.substring(index1 + 17, index2);
 				}
 			}
 		}
@@ -165,18 +171,19 @@ public abstract class GroupChatSession extends ChatSession {
 		return conferenceSubscriber;
 	}
 
-    /**
-     * Close media session
-     */
-    public void closeMediaSession() {
-        // Close MSRP session
-        closeMsrpSession();
-    }
+	/**
+	 * Close media session
+	 */
+	public void closeMediaSession() {
+		// Close MSRP session
+		closeMsrpSession();
+	}
 
-    /**
+	/**
 	 * Terminate session
 	 *
-	 * @param reason Reason
+	 * @param reason
+	 *            Reason
 	 */
 	public void terminateSession(int reason) {
 		// Stop conference subscription
@@ -188,13 +195,15 @@ public abstract class GroupChatSession extends ChatSession {
 
 	/**
 	 * Request capabilities to contact
+	 * 
 	 * @param contact
 	 */
 	private void requestContactCapabilities(String contact) {
 		try {
 			ContactId remote = ContactUtils.createContactId(contact);
 			// Request capabilities to the remote
-			getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
+			getImsService().getImsModule().getCapabilityService()
+					.requestContactCapabilities(remote);
 		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
 				logger.debug("Failed to request capabilities: cannot parse contact " + contact);
@@ -202,40 +211,44 @@ public abstract class GroupChatSession extends ChatSession {
 		}
 	}
 
-    /**
-     * Receive BYE request
-     *
-     * @param bye BYE request
-     */
-    public void receiveBye(SipRequest bye) {
-        // Stop conference subscription
-        conferenceSubscriber.terminate();
+	/**
+	 * Receive BYE request
+	 *
+	 * @param bye
+	 *            BYE request
+	 */
+	public void receiveBye(SipRequest bye) {
+		// Stop conference subscription
+		conferenceSubscriber.terminate();
 
-        // Receive BYE request
-        super.receiveBye(bye);
+		// Receive BYE request
+		super.receiveBye(bye);
 
-        // Request capabilities if remote contact is valid
-        requestContactCapabilities(getDialogPath().getRemoteParty());
-    }
+		// Request capabilities if remote contact is valid
+		requestContactCapabilities(getDialogPath().getRemoteParty());
+	}
 
-    /**
-     * Receive CANCEL request
-     *
-     * @param cancel CANCEL request
-     */
-    public void receiveCancel(SipRequest cancel) {
-        // Stop conference subscription
-        conferenceSubscriber.terminate();
+	/**
+	 * Receive CANCEL request
+	 *
+	 * @param cancel
+	 *            CANCEL request
+	 */
+	public void receiveCancel(SipRequest cancel) {
+		// Stop conference subscription
+		conferenceSubscriber.terminate();
 
-        super.receiveCancel(cancel);
+		super.receiveCancel(cancel);
 
-        // Request capabilities if remote contact is valid
-        requestContactCapabilities(getDialogPath().getRemoteParty());
+		// Request capabilities if remote contact is valid
+		requestContactCapabilities(getDialogPath().getRemoteParty());
 	}
 
 	/**
 	 * Send a text message
-	 * @param msg Chat message
+	 * 
+	 * @param msg
+	 *            Chat message
 	 */
 	@Override
 	public void sendChatMessage(ChatMessage msg) {
@@ -244,66 +257,67 @@ public abstract class GroupChatSession extends ChatSession {
 		String msgId = msg.getMessageId();
 		String networkContent;
 		String mimeType = msg.getMimeType();
-		boolean useImdn = getImdnManager().isImdnActivated()
-				&& !mRcsSettings.isAlbatrosRelease();
+		boolean useImdn = getImdnManager().isImdnActivated() && !mRcsSettings.isAlbatrosRelease();
 		if (useImdn) {
 			networkContent = ChatUtils.buildCpimMessageWithDeliveredImdn(from, to, msgId,
 					msg.getContent(), mimeType);
 
 		} else {
-			networkContent = ChatUtils.buildCpimMessage(from, to,
-					msg.getContent(), mimeType);
+			networkContent = ChatUtils.buildCpimMessage(from, to, msg.getContent(), mimeType);
 		}
 
 		Collection<ImsSessionListener> listeners = getListeners();
 		for (ImsSessionListener listener : listeners) {
-			((ChatSessionListener)listener).handleMessageSending(msg);
+			((ChatSessionListener) listener).handleMessageSending(msg);
 		}
 
 		boolean sendOperationSucceeded = false;
 		if (ChatUtils.isGeolocType(mimeType)) {
-			sendOperationSucceeded = sendDataChunks(IdGenerator.generateMessageID(), networkContent,
-					CpimMessage.MIME_TYPE, TypeMsrpChunk.GeoLocation);
+			sendOperationSucceeded = sendDataChunks(IdGenerator.generateMessageID(),
+					networkContent, CpimMessage.MIME_TYPE, TypeMsrpChunk.GeoLocation);
 		} else {
-			sendOperationSucceeded = sendDataChunks(IdGenerator.generateMessageID(), networkContent,
-					CpimMessage.MIME_TYPE, TypeMsrpChunk.TextMessage);
+			sendOperationSucceeded = sendDataChunks(IdGenerator.generateMessageID(),
+					networkContent, CpimMessage.MIME_TYPE, TypeMsrpChunk.TextMessage);
 		}
 
 		/* TODO:This will be redone with CR037 */
 		if (sendOperationSucceeded) {
 			for (ImsSessionListener listener : getListeners()) {
-				((ChatSessionListener)listener).handleMessageSent(msgId,
-				        ChatUtils.networkMimeTypeToApiMimeType(mimeType));
+				((ChatSessionListener) listener).handleMessageSent(msgId,
+						ChatUtils.networkMimeTypeToApiMimeType(mimeType));
 			}
 		} else {
 			for (ImsSessionListener listener : getListeners()) {
-				((ChatSessionListener)listener).handleMessageFailedSend(msgId,
-				        ChatUtils.networkMimeTypeToApiMimeType(mimeType));
+				((ChatSessionListener) listener).handleMessageFailedSend(msgId,
+						ChatUtils.networkMimeTypeToApiMimeType(mimeType));
 			}
 		}
 	}
 
-    @Override
+	@Override
 	public void sendIsComposingStatus(boolean status) {
 		String from = ImsModule.IMS_USER_PROFILE.getPublicUri();
 		String to = ChatUtils.ANOMYNOUS_URI;
 		String msgId = IdGenerator.generateMessageID();
-		String content = ChatUtils.buildCpimMessage(from, to, IsComposingInfo.buildIsComposingInfo(status), IsComposingInfo.MIME_TYPE);
+		String content = ChatUtils.buildCpimMessage(from, to,
+				IsComposingInfo.buildIsComposingInfo(status), IsComposingInfo.MIME_TYPE);
 		sendDataChunks(msgId, content, CpimMessage.MIME_TYPE, TypeMsrpChunk.IsComposing);
 	}
 
-    @Override
-    public void sendMsrpMessageDeliveryStatus(ContactId remote, String msgId, String status) {
+	@Override
+	public void sendMsrpMessageDeliveryStatus(ContactId remote, String msgId, String status) {
 		// Send status in CPIM + IMDN headers
 		String to = (remote != null) ? remote.toString() : ChatUtils.ANOMYNOUS_URI;
 		sendMsrpMessageDeliveryStatus(null, to, msgId, status);
-    }
+	}
 
-    @Override
-    public void sendMsrpMessageDeliveryStatus(String fromUri, String toUri, String msgId, String status) {
+	@Override
+	public void sendMsrpMessageDeliveryStatus(String fromUri, String toUri, String msgId,
+			String status) {
 		// Do not perform Message Delivery Status in Albatros for group chat
-    	// Only perform delivery status delivered in GC
-		if (RcsSettings.getInstance().isAlbatrosRelease() || !status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
+		// Only perform delivery status delivered in GC
+		if (RcsSettings.getInstance().isAlbatrosRelease()
+				|| !status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
 			return;
 		}
 		if (logger.isActivated()) {
@@ -311,122 +325,134 @@ public abstract class GroupChatSession extends ChatSession {
 		}
 		// Send status in CPIM + IMDN headers
 		String imdn = ChatUtils.buildDeliveryReport(msgId, status);
-		String content = ChatUtils.buildCpimDeliveryReport(ImsModule.IMS_USER_PROFILE.getPublicUri(), toUri, imdn);
+		String content = ChatUtils.buildCpimDeliveryReport(
+				ImsModule.IMS_USER_PROFILE.getPublicUri(), toUri, imdn);
 
 		// Send data
-		sendDataChunks(IdGenerator.generateMessageID(), content, CpimMessage.MIME_TYPE, TypeMsrpChunk.MessageDeliveredReport);
-    }
+		sendDataChunks(IdGenerator.generateMessageID(), content, CpimMessage.MIME_TYPE,
+				TypeMsrpChunk.MessageDeliveredReport);
+	}
 
 	/**
 	 * Add a participant to the session
 	 *
-	 * @param participant Participant
+	 * @param participant
+	 *            Participant
 	 */
 	public void addParticipant(ContactId participant) {
 		try {
-        	if (logger.isActivated()) {
-        		logger.debug("Add one participant (" + participant + ") to the session");
-        	}
+			if (logger.isActivated()) {
+				logger.debug("Add one participant (" + participant + ") to the session");
+			}
 
-    		// Re-use INVITE dialog path
-    		SessionAuthenticationAgent authenticationAgent = getAuthenticationAgent();
+			// Re-use INVITE dialog path
+			SessionAuthenticationAgent authenticationAgent = getAuthenticationAgent();
 
-    		// Increment the Cseq number of the dialog path
-            getDialogPath().incrementCseq();
+			// Increment the Cseq number of the dialog path
+			getDialogPath().incrementCseq();
 
-            // Send REFER request
-    		if (logger.isActivated()) {
-        		logger.debug("Send REFER");
-        	}
-    		String contactUri = PhoneUtils.formatContactIdToUri(participant);
-	        SipRequest refer = SipMessageFactory.createRefer(getDialogPath(), contactUri, getSubject(), getContributionID());
-    		SipTransactionContext ctx = getImsService().getImsModule().getSipManager().sendSubsequentRequest(getDialogPath(), refer);
+			// Send REFER request
+			if (logger.isActivated()) {
+				logger.debug("Send REFER");
+			}
+			String contactUri = PhoneUtils.formatContactIdToUri(participant);
+			SipRequest refer = SipMessageFactory.createRefer(getDialogPath(), contactUri,
+					getSubject(), getContributionID());
+			SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
+					.sendSubsequentRequest(getDialogPath(), refer);
 
-	        // Analyze received message
-            if (ctx.getStatusCode() == 407) {
-                // 407 response received
-            	if (logger.isActivated()) {
-            		logger.debug("407 response received");
-            	}
+			// Analyze received message
+			if (ctx.getStatusCode() == 407) {
+				// 407 response received
+				if (logger.isActivated()) {
+					logger.debug("407 response received");
+				}
 
-    	        // Set the Proxy-Authorization header
-            	authenticationAgent.readProxyAuthenticateHeader(ctx.getSipResponse());
+				// Set the Proxy-Authorization header
+				authenticationAgent.readProxyAuthenticateHeader(ctx.getSipResponse());
 
-                // Increment the Cseq number of the dialog path
-                getDialogPath().incrementCseq();
+				// Increment the Cseq number of the dialog path
+				getDialogPath().incrementCseq();
 
-                // Create a second REFER request with the right token
-                if (logger.isActivated()) {
-                	logger.info("Send second REFER");
-                }
-    	        refer = SipMessageFactory.createRefer(getDialogPath(), contactUri, getSubject(), getContributionID());
+				// Create a second REFER request with the right token
+				if (logger.isActivated()) {
+					logger.info("Send second REFER");
+				}
+				refer = SipMessageFactory.createRefer(getDialogPath(), contactUri, getSubject(),
+						getContributionID());
 
-    	        // Set the Authorization header
-    	        authenticationAgent.setProxyAuthorizationHeader(refer);
+				// Set the Authorization header
+				authenticationAgent.setProxyAuthorizationHeader(refer);
 
-                // Send REFER request
-        		ctx = getImsService().getImsModule().getSipManager().sendSubsequentRequest(getDialogPath(), refer);
+				// Send REFER request
+				ctx = getImsService().getImsModule().getSipManager()
+						.sendSubsequentRequest(getDialogPath(), refer);
 
-                // Analyze received message
-                if ((ctx.getStatusCode() >= 200) && (ctx.getStatusCode() < 300)) {
-                    // 200 OK response
-                	if (logger.isActivated()) {
-                		logger.debug("200 OK response received");
-                	}
+				// Analyze received message
+				if ((ctx.getStatusCode() >= 200) && (ctx.getStatusCode() < 300)) {
+					// 200 OK response
+					if (logger.isActivated()) {
+						logger.debug("200 OK response received");
+					}
 
-        			// Notify listeners
-        	    	for(int i=0; i < getListeners().size(); i++) {
-        	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantSuccessful(participant);
-        	        }
-                } else {
-                    // Error
-                    if (logger.isActivated()) {
-                    	logger.debug("REFER has failed (" + ctx.getStatusCode() + ")");
-                    }
+					// Notify listeners
+					for (int i = 0; i < getListeners().size(); i++) {
+						((ChatSessionListener) getListeners().get(i))
+								.handleAddParticipantSuccessful(participant);
+					}
+				} else {
+					// Error
+					if (logger.isActivated()) {
+						logger.debug("REFER has failed (" + ctx.getStatusCode() + ")");
+					}
 
-        			// Notify listeners
-        	    	for(int i=0; i < getListeners().size(); i++) {
-        	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantFailed(participant, ctx.getReasonPhrase());
-        	        }
-                }
-            } else
-            if ((ctx.getStatusCode() >= 200) && (ctx.getStatusCode() < 300)) {
-	            // 200 OK received
-            	if (logger.isActivated()) {
-            		logger.debug("200 OK response received");
-            	}
+					// Notify listeners
+					for (int i = 0; i < getListeners().size(); i++) {
+						((ChatSessionListener) getListeners().get(i)).handleAddParticipantFailed(
+								participant, ctx.getReasonPhrase());
+					}
+				}
+			} else if ((ctx.getStatusCode() >= 200) && (ctx.getStatusCode() < 300)) {
+				// 200 OK received
+				if (logger.isActivated()) {
+					logger.debug("200 OK response received");
+				}
 
-    			// Notify listeners
-    	    	for(int i=0; i < getListeners().size(); i++) {
-    	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantSuccessful(participant);
-    	        }
-	        } else {
-	            // Error responses
-            	if (logger.isActivated()) {
-            		logger.debug("No response received");
-            	}
+				// Notify listeners
+				for (int i = 0; i < getListeners().size(); i++) {
+					((ChatSessionListener) getListeners().get(i))
+							.handleAddParticipantSuccessful(participant);
+				}
+			} else {
+				// Error responses
+				if (logger.isActivated()) {
+					logger.debug("No response received");
+				}
 
-    			// Notify listeners
-    	    	for(int i=0; i < getListeners().size(); i++) {
-    	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantFailed(participant, ctx.getReasonPhrase());
-    	        }
-	        }
-        } catch(Exception e) {
-        	if (logger.isActivated()) {
-        		logger.error("REFER request has failed", e);
-        	}
+				// Notify listeners
+				for (int i = 0; i < getListeners().size(); i++) {
+					((ChatSessionListener) getListeners().get(i)).handleAddParticipantFailed(
+							participant, ctx.getReasonPhrase());
+				}
+			}
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("REFER request has failed", e);
+			}
 
 			// Notify listeners
-	    	for(int i=0; i < getListeners().size(); i++) {
-	    		((ChatSessionListener)getListeners().get(i)).handleAddParticipantFailed(participant, e.getMessage());
-	        }
-        }
+			for (int i = 0; i < getListeners().size(); i++) {
+				((ChatSessionListener) getListeners().get(i)).handleAddParticipantFailed(
+						participant, e.getMessage());
+			}
+		}
 	}
 
 	/**
 	 * Add a set of participants to the session
 	 *
-	 * @param participants set of participants
+	 * @param participants
+	 *            set of participants
 	 */
 	public void addParticipants(Set<ContactId> participants) {
 		try {
@@ -435,117 +461,120 @@ public abstract class GroupChatSession extends ChatSession {
 				return;
 			}
 
-        	if (logger.isActivated()) {
-        		logger.debug("Add " + participants.size()+ " participants to the session");
-        	}
+			if (logger.isActivated()) {
+				logger.debug("Add " + participants.size() + " participants to the session");
+			}
 
-    		// Re-use INVITE dialog path
-    		SessionAuthenticationAgent authenticationAgent = getAuthenticationAgent();
+			// Re-use INVITE dialog path
+			SessionAuthenticationAgent authenticationAgent = getAuthenticationAgent();
 
-            // Increment the Cseq number of the dialog path
-    		getDialogPath().incrementCseq();
+			// Increment the Cseq number of the dialog path
+			getDialogPath().incrementCseq();
 
-	        // Send REFER request
-    		if (logger.isActivated()) {
-        		logger.debug("Send REFER");
-        	}
-	        SipRequest refer = SipMessageFactory.createRefer(getDialogPath(), participants, getSubject(), getContributionID());
-	        SipTransactionContext ctx = getImsService().getImsModule().getSipManager().sendSubsequentRequest(getDialogPath(), refer);
+			// Send REFER request
+			if (logger.isActivated()) {
+				logger.debug("Send REFER");
+			}
+			SipRequest refer = SipMessageFactory.createRefer(getDialogPath(), participants,
+					getSubject(), getContributionID());
+			SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
+					.sendSubsequentRequest(getDialogPath(), refer);
 
-	        // Analyze received message
-            if (ctx.getStatusCode() == 407) {
-                // 407 response received
-            	if (logger.isActivated()) {
-            		logger.debug("407 response received");
-            	}
+			// Analyze received message
+			if (ctx.getStatusCode() == 407) {
+				// 407 response received
+				if (logger.isActivated()) {
+					logger.debug("407 response received");
+				}
 
-    	        // Set the Proxy-Authorization header
-            	authenticationAgent.readProxyAuthenticateHeader(ctx.getSipResponse());
+				// Set the Proxy-Authorization header
+				authenticationAgent.readProxyAuthenticateHeader(ctx.getSipResponse());
 
-                // Increment the Cseq number of the dialog path
-            	getDialogPath().incrementCseq();
+				// Increment the Cseq number of the dialog path
+				getDialogPath().incrementCseq();
 
-    			// Create a second REFER request with the right token
-                if (logger.isActivated()) {
-                	logger.info("Send second REFER");
-                }
-    	        refer = SipMessageFactory.createRefer(getDialogPath(), participants, getSubject(), getContributionID());
+				// Create a second REFER request with the right token
+				if (logger.isActivated()) {
+					logger.info("Send second REFER");
+				}
+				refer = SipMessageFactory.createRefer(getDialogPath(), participants, getSubject(),
+						getContributionID());
 
-    	        // Set the Authorization header
-    	        authenticationAgent.setProxyAuthorizationHeader(refer);
+				// Set the Authorization header
+				authenticationAgent.setProxyAuthorizationHeader(refer);
 
-                // Send REFER request
-    	        ctx = getImsService().getImsModule().getSipManager().sendSubsequentRequest(getDialogPath(), refer);
+				// Send REFER request
+				ctx = getImsService().getImsModule().getSipManager()
+						.sendSubsequentRequest(getDialogPath(), refer);
 
-                // Analyze received message
-                if ((ctx.getStatusCode() >= 200) && (ctx.getStatusCode() < 300)) {
-                    // 200 OK response
-                	if (logger.isActivated()) {
-                		logger.debug("20x OK response received");
-                	}
+				// Analyze received message
+				if ((ctx.getStatusCode() >= 200) && (ctx.getStatusCode() < 300)) {
+					// 200 OK response
+					if (logger.isActivated()) {
+						logger.debug("20x OK response received");
+					}
 
-                    // Notify listeners
-                    for (ContactId participant : participants) {
-                        for (int i = 0; i < getListeners().size(); i++) {
-                            ((ChatSessionListener)getListeners().get(i))
-                                    .handleAddParticipantSuccessful(participant);
-                        }
-                    }
-                } else {
-                    // Error
-                    if (logger.isActivated()) {
-                    	logger.debug("REFER has failed (" + ctx.getStatusCode() + ")");
-                    }
+					// Notify listeners
+					for (ContactId participant : participants) {
+						for (int i = 0; i < getListeners().size(); i++) {
+							((ChatSessionListener) getListeners().get(i))
+									.handleAddParticipantSuccessful(participant);
+						}
+					}
+				} else {
+					// Error
+					if (logger.isActivated()) {
+						logger.debug("REFER has failed (" + ctx.getStatusCode() + ")");
+					}
 
-                    // Notify listeners
-                    for (ContactId participant : participants) {
-                        for (int i = 0; i < getListeners().size(); i++) {
-                            ((ChatSessionListener)getListeners().get(i))
-                                    .handleAddParticipantFailed(participant, ctx.getReasonPhrase());
-                        }
-                    }
-                }
-            } else
-            if ((ctx.getStatusCode() >= 200) && (ctx.getStatusCode() < 300)) {
-	            // 200 OK received
-            	if (logger.isActivated()) {
-            		logger.debug("20x OK response received");
-            	}
+					// Notify listeners
+					for (ContactId participant : participants) {
+						for (int i = 0; i < getListeners().size(); i++) {
+							((ChatSessionListener) getListeners().get(i))
+									.handleAddParticipantFailed(participant, ctx.getReasonPhrase());
+						}
+					}
+				}
+			} else if ((ctx.getStatusCode() >= 200) && (ctx.getStatusCode() < 300)) {
+				// 200 OK received
+				if (logger.isActivated()) {
+					logger.debug("20x OK response received");
+				}
 
-                // Notify listeners
-                for (ContactId participant : participants) {
-                    for (int i = 0; i < getListeners().size(); i++) {
-                        ((ChatSessionListener)getListeners().get(i))
-                                .handleAddParticipantSuccessful(participant);
-                    }
-                }
-	        } else {
-	            // Error responses
-            	if (logger.isActivated()) {
-            		logger.debug("No response received");
-            	}
+				// Notify listeners
+				for (ContactId participant : participants) {
+					for (int i = 0; i < getListeners().size(); i++) {
+						((ChatSessionListener) getListeners().get(i))
+								.handleAddParticipantSuccessful(participant);
+					}
+				}
+			} else {
+				// Error responses
+				if (logger.isActivated()) {
+					logger.debug("No response received");
+				}
 
-                // Notify listeners
-                for (ContactId participant : participants) {
-                    for (int i = 0; i < getListeners().size(); i++) {
-                        ((ChatSessionListener)getListeners().get(i)).handleAddParticipantFailed(
-                                participant, ctx.getReasonPhrase());
-                    }
-                }
-	        }
-        } catch(Exception e) {
-        	if (logger.isActivated()) {
-        		logger.error("REFER request has failed", e);
-        	}
+				// Notify listeners
+				for (ContactId participant : participants) {
+					for (int i = 0; i < getListeners().size(); i++) {
+						((ChatSessionListener) getListeners().get(i)).handleAddParticipantFailed(
+								participant, ctx.getReasonPhrase());
+					}
+				}
+			}
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("REFER request has failed", e);
+			}
 
-            // Notify listeners
-            for (ContactId participant : participants) {
-                for (int i = 0; i < getListeners().size(); i++) {
-                    ((ChatSessionListener)getListeners().get(i)).handleAddParticipantFailed(
-                            participant, e.getMessage());
-                }
-            }
-        }
+			// Notify listeners
+			for (ContactId participant : participants) {
+				for (int i = 0; i < getListeners().size(); i++) {
+					((ChatSessionListener) getListeners().get(i)).handleAddParticipantFailed(
+							participant, e.getMessage());
+				}
+			}
+		}
 	}
 
 	/**
@@ -555,33 +584,38 @@ public abstract class GroupChatSession extends ChatSession {
 		rejectSession(603);
 	}
 
-    /**
-     * Create an INVITE request
-     *
-     * @return the INVITE request
-     * @throws SipException
-     */
-    public SipRequest createInvite() throws SipException {
-        // Nothing to do in terminating side
-        return null;
-    }
+	/**
+	 * Create an INVITE request
+	 *
+	 * @return the INVITE request
+	 * @throws SipException
+	 */
+	public SipRequest createInvite() throws SipException {
+		// Nothing to do in terminating side
+		return null;
+	}
 
-    /**
-     * Handle 200 0K response
-     *
-     * @param resp 200 OK response
-     */
-    public void handle200OK(SipResponse resp) {
-        super.handle200OK(resp);
+	/**
+	 * Handle 200 0K response
+	 *
+	 * @param resp
+	 *            200 OK response
+	 */
+	public void handle200OK(SipResponse resp) {
+		super.handle200OK(resp);
 
-        // Subscribe to event package
-        getConferenceEventSubscriber().subscribe();
-    }
+		// Subscribe to event package
+		getConferenceEventSubscriber().subscribe();
+	}
 
-    /* (non-Javadoc)
-     * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSession#msrpDataReceived(java.lang.String, byte[], java.lang.String)
-     */
-    @Override
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.orangelabs.rcs.core.ims.service.im.chat.ChatSession#msrpDataReceived(java.lang.String,
+	 * byte[], java.lang.String)
+	 */
+	@Override
 	public void msrpDataReceived(String msgId, byte[] data, String mimeType) {
 		if (logger.isActivated()) {
 			logger.info("Data received (type " + mimeType + ")");
@@ -604,9 +638,8 @@ public abstract class GroupChatSession extends ChatSession {
 			return;
 
 		} else if (ChatUtils.isTextPlainType(mimeType)) {
-			ChatMessage msg = new ChatMessage(msgId, getRemoteContact(), new String(data,
-					UTF8), MimeType.TEXT_MESSAGE, new Date(),
-					null);
+			ChatMessage msg = new ChatMessage(msgId, getRemoteContact(), new String(data, UTF8),
+					MimeType.TEXT_MESSAGE, new Date(), null);
 			boolean imdnDisplayedRequested = false;
 			receive(msg, imdnDisplayedRequested);
 			return;
@@ -653,7 +686,8 @@ public abstract class GroupChatSession extends ChatSession {
 			}
 		} catch (Exception e) {
 			if (logger.isActivated()) {
-				logger.warn("Cannot parse FROM Cpim Identity: " + cpimMsg.getHeader(CpimMessage.HEADER_FROM));
+				logger.warn("Cannot parse FROM Cpim Identity: "
+						+ cpimMsg.getHeader(CpimMessage.HEADER_FROM));
 			}
 		}
 		// Extract local contactId from "TO" header
@@ -677,16 +711,16 @@ public abstract class GroupChatSession extends ChatSession {
 		if (isFToHTTP) {
 			// File transfer over HTTP message
 			// Parse HTTP document
-            FileTransferHttpInfoDocument fileInfo = FileTransferUtils
-                    .parseFileTransferHttpDocument(cpimMsg.getMessageContent().getBytes(
-                            UTF8));
+			FileTransferHttpInfoDocument fileInfo = FileTransferUtils
+					.parseFileTransferHttpDocument(cpimMsg.getMessageContent().getBytes(UTF8));
 			if (fileInfo != null) {
 				receiveHttpFileTransfer(remoteId, pseudo, fileInfo, cpimMsgId);
 			} else {
 				// TODO : else return error to Originating side
 			}
 			// Process delivery request
-			sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId, ImdnDocument.DELIVERY_STATUS_DELIVERED);
+			sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId,
+					ImdnDocument.DELIVERY_STATUS_DELIVERED);
 		} else {
 			if (ChatUtils.isTextPlainType(contentType)) {
 				ChatMessage msg = new ChatMessage(cpimMsgId, remoteId, cpimMsg.getMessageContent(),
@@ -696,13 +730,13 @@ public abstract class GroupChatSession extends ChatSession {
 			} else {
 				if (ChatUtils.isApplicationIsComposingType(contentType)) {
 					// Is composing event
-                    receiveIsComposing(remoteId,
-                            cpimMsg.getMessageContent().getBytes(UTF8));
+					receiveIsComposing(remoteId, cpimMsg.getMessageContent().getBytes(UTF8));
 				} else {
 					if (ChatUtils.isMessageImdnType(contentType)) {
 						// Delivery report
 						try {
-							ContactId me = ContactUtils.createContactId(ImsModule.IMS_USER_PROFILE.getPublicUri());
+							ContactId me = ContactUtils.createContactId(ImsModule.IMS_USER_PROFILE
+									.getPublicUri());
 							// Only consider delivery report if sent to me
 							if (localId != null && localId.equals(me)) {
 								receiveMessageDeliveryStatus(remoteId, cpimMsg.getMessageContent());
@@ -729,23 +763,22 @@ public abstract class GroupChatSession extends ChatSession {
 			if (dispositionNotification != null) {
 				if (dispositionNotification.contains(ImdnDocument.POSITIVE_DELIVERY)) {
 					// Positive delivery requested, send MSRP message with status "delivered"
-					sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId, ImdnDocument.DELIVERY_STATUS_DELIVERED);
+					sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId,
+							ImdnDocument.DELIVERY_STATUS_DELIVERED);
 				}
 			}
 		}
 	}
 
 	/**
-	 * Since the session is no longer used it is marked to be removed when
-	 * it times out.
+	 * Since the session is no longer used it is marked to be removed when it times out.
 	 */
 	public void markForPendingRemoval() {
 		mPendingRemoval = true;
 	}
 
 	/**
-	 * Returns true if this session is no longer used and it is pending to be removed
-	 * upon timeout.
+	 * Returns true if this session is no longer used and it is pending to be removed upon timeout.
 	 */
 	public boolean isPendingForRemoval() {
 		return mPendingRemoval;
@@ -754,11 +787,10 @@ public abstract class GroupChatSession extends ChatSession {
 	@Override
 	public void abortSession(int abortedReason) {
 		/*
-		 * If there is an ongoing group chat session with same chatId, this
-		 * session has to be silently aborted so after aborting the session we
-		 * make sure to not call the rest of this method that would otherwise
-		 * abort the "current" session also and the GroupChat as a whole which
-		 * is of course not the intention here
+		 * If there is an ongoing group chat session with same chatId, this session has to be
+		 * silently aborted so after aborting the session we make sure to not call the rest of this
+		 * method that would otherwise abort the "current" session also and the GroupChat as a whole
+		 * which is of course not the intention here
 		 */
 		if (!isPendingForRemoval()) {
 			super.abortSession(abortedReason);
@@ -774,6 +806,6 @@ public abstract class GroupChatSession extends ChatSession {
 
 	@Override
 	public void removeSession() {
-			getImsService().getImsModule().getInstantMessagingService().removeSession(this);
+		getImsService().getImsModule().getInstantMessagingService().removeSession(this);
 	}
 }

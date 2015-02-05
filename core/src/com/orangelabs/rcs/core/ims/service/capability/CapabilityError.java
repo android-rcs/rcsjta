@@ -31,21 +31,24 @@ public class CapabilityError extends ImsServiceError {
 	 * Options has failed
 	 */
 	public final static int OPTIONS_FAILED = CAPABILITY_ERROR_CODES + 1;
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param code Error code
+	 * @param code
+	 *            Error code
 	 */
 	public CapabilityError(int code) {
 		super(code);
 	}
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param code Error code
-	 * @param msg Detail message 
+	 * @param code
+	 *            Error code
+	 * @param msg
+	 *            Detail message
 	 */
 	public CapabilityError(int code, String msg) {
 		super(code, msg);

@@ -23,7 +23,7 @@ public class Geopriv {
 	private double latitude = 0;
 	private double longitude = 0;
 	private double altitude = 0;
-	
+
 	public Geopriv() {
 	}
 
@@ -53,7 +53,7 @@ public class Geopriv {
 
 	public double getAltitude() {
 		return altitude;
-	}	
+	}
 
 	public void setAltitude(double a) {
 		altitude = a;

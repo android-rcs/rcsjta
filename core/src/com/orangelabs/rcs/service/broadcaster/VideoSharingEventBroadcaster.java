@@ -26,9 +26,9 @@ import com.orangelabs.rcs.utils.IntentUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
- * VideoSharingEventBroadcaster maintains the registering and unregistering of
- * IVideoSharingListener and also performs broadcast events on these listeners upon the
- * trigger of corresponding callbacks.
+ * VideoSharingEventBroadcaster maintains the registering and unregistering of IVideoSharingListener
+ * and also performs broadcast events on these listeners upon the trigger of corresponding
+ * callbacks.
  */
 public class VideoSharingEventBroadcaster implements IVideoSharingEventBroadcaster {
 
@@ -47,13 +47,12 @@ public class VideoSharingEventBroadcaster implements IVideoSharingEventBroadcast
 		mVideoSharingListeners.unregister(listener);
 	}
 
-	public void broadcastStateChanged(ContactId contact, String sharingId, int state,
-			int reasonCode) {
+	public void broadcastStateChanged(ContactId contact, String sharingId, int state, int reasonCode) {
 		final int N = mVideoSharingListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mVideoSharingListeners.getBroadcastItem(i).onStateChanged(contact,
-						sharingId, state, reasonCode);
+				mVideoSharingListeners.getBroadcastItem(i).onStateChanged(contact, sharingId,
+						state, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);

@@ -28,8 +28,7 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.VideoOrientation;
  */
 public class Buffer {
 	/**
-	 * Indicates that this buffer marks the end of media for the
-	 * data stream
+	 * Indicates that this buffer marks the end of media for the data stream
 	 */
 	public final static int FLAG_EOM = (1 << 0);
 
@@ -38,16 +37,15 @@ public class Buffer {
 	 */
 	public final static int FLAG_DISCARD = (1 << 1);
 
-    /**
-     * This is a marker bit for RTP
-     */
-    public final static int FLAG_RTP_MARKER = (1 << 11);
+	/**
+	 * This is a marker bit for RTP
+	 */
+	public final static int FLAG_RTP_MARKER = (1 << 11);
 
-    /**
-     * Indicates that the buffer carries a time stamp that's in RTP (NTP)
-     * time units
-     */
-    public final static int FLAG_RTP_TIME = (1 << 12);
+	/**
+	 * Indicates that the buffer carries a time stamp that's in RTP (NTP) time units
+	 */
+	public final static int FLAG_RTP_TIME = (1 << 12);
 
 	/**
 	 * Default value if the time stamp of the media is not known
@@ -74,21 +72,21 @@ public class Buffer {
 	 */
 	protected int length = 0;
 
-    /** 
-     * Starting point (offset) into the array where the valid data begins
-     */ 
-    protected int offset = 0;
+	/**
+	 * Starting point (offset) into the array where the valid data begins
+	 */
+	protected int offset = 0;
 
-    /**
+	/**
 	 * A flag mask that describes the boolean attributes of the buffer
 	 */
 	protected int flags = 0;
 
-    /**
-     * The duration of the data in the buffer in nanoseconds
-     */
-    protected long duration = TIME_UNKNOWN;    
-    
+	/**
+	 * The duration of the data in the buffer in nanoseconds
+	 */
+	protected long duration = TIME_UNKNOWN;
+
 	/**
 	 * Media data chunk
 	 */
@@ -99,20 +97,20 @@ public class Buffer {
 	 */
 	protected long sequenceNumber = SEQUENCE_UNKNOWN;
 
-    /**
-     * The array of buffer fragments
-     */
-    protected Buffer[] fragments = null;
+	/**
+	 * The array of buffer fragments
+	 */
+	protected Buffer[] fragments = null;
 
-    /**
-     * The size of used items from array of buffer fragments
-     */
-    protected int fragmentsSize = 0;
+	/**
+	 * The size of used items from array of buffer fragments
+	 */
+	protected int fragmentsSize = 0;
 
-    /**
-     * Video orientation
-     */
-    private VideoOrientation videoOrientation;
+	/**
+	 * Video orientation
+	 */
+	private VideoOrientation videoOrientation;
 
 	/**
 	 * Get the data format
@@ -126,7 +124,8 @@ public class Buffer {
 	/**
 	 * Set the data format
 	 * 
-	 * @param format New format
+	 * @param format
+	 *            New format
 	 */
 	public void setFormat(Format format) {
 		this.format = format;
@@ -144,7 +143,8 @@ public class Buffer {
 	/**
 	 * Set the flag mask
 	 * 
-	 * @param flags New flags
+	 * @param flags
+	 *            New flags
 	 */
 	public void setFlags(int flags) {
 		this.flags = flags;
@@ -162,7 +162,8 @@ public class Buffer {
 	/**
 	 * Set the EOM flag
 	 * 
-	 * @param eom EOM status flag
+	 * @param eom
+	 *            EOM status flag
 	 */
 	public void setEOM(boolean eom) {
 		if (eom)
@@ -170,7 +171,7 @@ public class Buffer {
 		else
 			flags &= ~FLAG_EOM;
 	}
-	
+
 	/**
 	 * Check if the RTP marker is set
 	 * 
@@ -183,7 +184,8 @@ public class Buffer {
 	/**
 	 * Set the RTP marker
 	 * 
-	 * @param marker RTP marker flag
+	 * @param marker
+	 *            RTP marker flag
 	 */
 	public void setRTPMarker(boolean marker) {
 		if (marker)
@@ -204,7 +206,8 @@ public class Buffer {
 	/**
 	 * Set the discard flag
 	 * 
-	 * @param discard Discard flag.
+	 * @param discard
+	 *            Discard flag.
 	 */
 	public void setDiscard(boolean discard) {
 		if (discard)
@@ -225,7 +228,8 @@ public class Buffer {
 	/**
 	 * Set the internal data that holds the media chunk
 	 * 
-	 * @param data Data
+	 * @param data
+	 *            Data
 	 */
 	public void setData(Object data) {
 		this.data = data;
@@ -243,7 +247,8 @@ public class Buffer {
 	/**
 	 * Set the length of the valid data stored in the buffer
 	 * 
-	 * @param length The length of the valid data
+	 * @param length
+	 *            The length of the valid data
 	 */
 	public void setLength(int length) {
 		this.length = length;
@@ -261,7 +266,8 @@ public class Buffer {
 	/**
 	 * Set the offset
 	 * 
-	 * @param offset The starting point for the valid data
+	 * @param offset
+	 *            The starting point for the valid data
 	 */
 	public void setOffset(int offset) {
 		this.offset = offset;
@@ -279,7 +285,8 @@ public class Buffer {
 	/**
 	 * Set the time stamp
 	 * 
-	 * @param timeStamp Time stamp in nanoseconds
+	 * @param timeStamp
+	 *            Time stamp in nanoseconds
 	 */
 	public void setTimeStamp(long timeStamp) {
 		this.timeStamp = timeStamp;
@@ -297,7 +304,8 @@ public class Buffer {
 	/**
 	 * Set the duration
 	 * 
-	 * @param duration Duration
+	 * @param duration
+	 *            Duration
 	 */
 	public void setDuration(long duration) {
 		this.duration = duration;
@@ -306,7 +314,8 @@ public class Buffer {
 	/**
 	 * Set the sequence number
 	 * 
-	 * @param number Sequence number
+	 * @param number
+	 *            Sequence number
 	 */
 	public void setSequenceNumber(long number) {
 		sequenceNumber = number;
@@ -321,68 +330,70 @@ public class Buffer {
 		return sequenceNumber;
 	}
 
-    /**
-     * Get the buffer fragments
-     *
-     * @return the fragments
-     */
-    public Buffer[] getFragments() {
-        return fragments;
-    }
+	/**
+	 * Get the buffer fragments
+	 *
+	 * @return the fragments
+	 */
+	public Buffer[] getFragments() {
+		return fragments;
+	}
 
-    /**
-     * Set the buffer fragments
-     *
-     * @param fragments the fragments to set
-     */
-    public void setFragments(Buffer[] fragments) {
-        this.fragments = fragments;
-    }
+	/**
+	 * Set the buffer fragments
+	 *
+	 * @param fragments
+	 *            the fragments to set
+	 */
+	public void setFragments(Buffer[] fragments) {
+		this.fragments = fragments;
+	}
 
-    /**
-     * Get the buffer fragments size
-     *
-     * @return the fragments size
-     */
-    public int getFragmentsSize() {
-        return fragmentsSize;
-    }
+	/**
+	 * Get the buffer fragments size
+	 *
+	 * @return the fragments size
+	 */
+	public int getFragmentsSize() {
+		return fragmentsSize;
+	}
 
-    /**
-     * Set the buffer fragments size
-     *
-     * @param fragments the fragments size to set
-     */
-    public void setFragmentsSize(int fragmentsSize) {
-        this.fragmentsSize = fragmentsSize;
-    }
+	/**
+	 * Set the buffer fragments size
+	 *
+	 * @param fragments
+	 *            the fragments size to set
+	 */
+	public void setFragmentsSize(int fragmentsSize) {
+		this.fragmentsSize = fragmentsSize;
+	}
 
-    /**
-     * Get the sub buffers
-     * 
-     * @return <code>true</code> in case of fragmented buffer, otherwise
-     *         <code>false</code>
-     */
-    public boolean isFragmented() {
-        return (fragments != null && fragments.length > 0 && fragmentsSize > 0);
-    }
+	/**
+	 * Get the sub buffers
+	 * 
+	 * @return <code>true</code> in case of fragmented buffer, otherwise <code>false</code>
+	 */
+	public boolean isFragmented() {
+		return (fragments != null && fragments.length > 0 && fragmentsSize > 0);
+	}
 
-    /**
-     * Gets the VideoOrientation
-     *
-     * @return Video orientation
-     */
-    public VideoOrientation getVideoOrientation() {
-        return videoOrientation;
-    }
+	/**
+	 * Gets the VideoOrientation
+	 *
+	 * @return Video orientation
+	 */
+	public VideoOrientation getVideoOrientation() {
+		return videoOrientation;
+	}
 
-    /**
-     * Sets the video orientation
-     *
-     * @param videoOrientation VideoOrientation
-     */
-    public void setVideoOrientation(VideoOrientation videoOrientation) {
-        this.videoOrientation = videoOrientation;
-    }
+	/**
+	 * Sets the video orientation
+	 *
+	 * @param videoOrientation
+	 *            VideoOrientation
+	 */
+	public void setVideoOrientation(VideoOrientation videoOrientation) {
+		this.videoOrientation = videoOrientation;
+	}
 
 }

@@ -29,14 +29,14 @@ import java.util.Set;
  */
 public class ResourceListDocument {
 	private Set<String> entries = new HashSet<String>();
-	
+
 	public ResourceListDocument() {
 	}
-	
+
 	public void addEntry(String uri) {
 		entries.add(uri);
 	}
-	
+
 	public Set<String> getEntries() {
 		return entries;
 	}

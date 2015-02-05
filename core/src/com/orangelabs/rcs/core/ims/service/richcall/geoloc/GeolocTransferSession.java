@@ -45,7 +45,7 @@ public abstract class GeolocTransferSession extends ContentSharingSession {
 	 * Default SO_TIMEOUT value (in seconds)
 	 */
 	public final static int DEFAULT_SO_TIMEOUT = 30;
-	
+
 	/**
 	 * Geoloc transfered
 	 */
@@ -55,32 +55,37 @@ public abstract class GeolocTransferSession extends ContentSharingSession {
 	 * Geoloc info
 	 */
 	private Geoloc mGeoloc;
-	
-	/**
-     * The logger
-     */
-    private static final Logger logger = Logger.getLogger(GeolocTransferSession.class.getSimpleName());
 
-    /**
+	/**
+	 * The logger
+	 */
+	private static final Logger logger = Logger.getLogger(GeolocTransferSession.class
+			.getSimpleName());
+
+	/**
 	 * Constructor
 	 * 
-	 * @param parent IMS service
-	 * @param content Content to be shared
-	 * @param contact Remote contact Id
+	 * @param parent
+	 *            IMS service
+	 * @param content
+	 *            Content to be shared
+	 * @param contact
+	 *            Remote contact Id
 	 */
 	public GeolocTransferSession(ImsService parent, MmContent content, ContactId contact) {
 		super(parent, content, contact);
 	}
-	
+
 	/**
 	 * Set geoloc
 	 * 
-	 * @param geoloc Geoloc
+	 * @param geoloc
+	 *            Geoloc
 	 */
 	public void setGeoloc(Geoloc geoloc) {
 		mGeoloc = geoloc;
 	}
-	
+
 	/**
 	 * Get geoloc
 	 * 
@@ -89,62 +94,62 @@ public abstract class GeolocTransferSession extends ContentSharingSession {
 	public Geoloc getGeoloc() {
 		return mGeoloc;
 	}
-	
+
 	/**
 	 * Geoloc has been transfered
 	 */
 	public void geolocTransfered() {
 		this.geolocTransfered = true;
 	}
-	
+
 	/**
 	 * Is geoloc transfered
 	 * 
 	 * @retrurn Boolean
 	 */
 	public boolean isGeolocTransfered() {
-		return geolocTransfered; 
+		return geolocTransfered;
 	}
 
-    /**
-     * Create an INVITE request
-     *
-     * @return the INVITE request
-     * @throws SipException 
-     */
-    public SipRequest createInvite() throws SipException {
-        return SipMessageFactory.createInvite(
-                getDialogPath(),
-                RichcallService.FEATURE_TAGS_GEOLOC_SHARE,
-                getDialogPath().getLocalContent());
-    }
-    
-    /**
-     * Handle error 
-     *
-     * @param error Error
-     */
-    public void handleError(ImsServiceError error) {
-        if (isSessionInterrupted()) {
-            return;
-        }
+	/**
+	 * Create an INVITE request
+	 *
+	 * @return the INVITE request
+	 * @throws SipException
+	 */
+	public SipRequest createInvite() throws SipException {
+		return SipMessageFactory.createInvite(getDialogPath(),
+				RichcallService.FEATURE_TAGS_GEOLOC_SHARE, getDialogPath().getLocalContent());
+	}
 
-        // Error
-        if (logger.isActivated()) {
-            logger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
-        }
+	/**
+	 * Handle error
+	 *
+	 * @param error
+	 *            Error
+	 */
+	public void handleError(ImsServiceError error) {
+		if (isSessionInterrupted()) {
+			return;
+		}
 
-        // Close MSRP session
-        closeMediaSession();
+		// Error
+		if (logger.isActivated()) {
+			logger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
+		}
 
-        // Remove the current session
-        removeSession();
+		// Close MSRP session
+		closeMediaSession();
 
-        ContactId contact = getRemoteContact();
-        for(int j=0; j < getListeners().size(); j++) {
-            ((GeolocTransferSessionListener)getListeners().get(j)).handleSharingError(contact, new ContentSharingError(error));
-        }
-    }
+		// Remove the current session
+		removeSession();
+
+		ContactId contact = getRemoteContact();
+		for (int j = 0; j < getListeners().size(); j++) {
+			((GeolocTransferSessionListener) getListeners().get(j)).handleSharingError(contact,
+					new ContentSharingError(error));
+		}
+	}
 
 	@Override
 	public void startSession() {

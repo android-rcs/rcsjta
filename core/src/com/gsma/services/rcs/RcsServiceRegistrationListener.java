@@ -17,7 +17,6 @@
  ******************************************************************************/
 package com.gsma.services.rcs;
 
-
 /**
  * Service registration events listener
  * 
@@ -28,7 +27,7 @@ public abstract class RcsServiceRegistrationListener extends IRcsServiceRegistra
 	 * Callback called when service is registered to the network platform
 	 */
 	public abstract void onServiceRegistered();
-	
+
 	/**
 	 * Callback called when service is unregistered from the network platform
 	 */

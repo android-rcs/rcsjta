@@ -25,11 +25,12 @@ package com.orangelabs.rcs.core.ims.protocol.sip;
  */
 public class SipException extends java.lang.Exception {
 	static final long serialVersionUID = 1L;
-	
+
 	/**
 	 * Constructor
 	 *
-	 * @param error Error message
+	 * @param error
+	 *            Error message
 	 */
 	public SipException(String error) {
 		super(error);

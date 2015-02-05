@@ -38,97 +38,97 @@ import java.io.OutputStream;
 
 public class LocalContentResolver {
 
-    private final ContentResolver mContentResolver;
+	private final ContentResolver mContentResolver;
 
-    public LocalContentResolver(ContentResolver contentResolver) {
-        mContentResolver = contentResolver;
-    }
+	public LocalContentResolver(ContentResolver contentResolver) {
+		mContentResolver = contentResolver;
+	}
 
-    public final Cursor query(Uri uri, String[] projection, String selection,
-            String[] selectionArgs, String sortOrder) {
-        ContentProviderClient contentProviderClient = null;
-        try {
-            contentProviderClient = mContentResolver.acquireContentProviderClient(uri);
-            return contentProviderClient.getLocalContentProvider().query(uri, projection,
-                    selection, selectionArgs, sortOrder);
+	public final Cursor query(Uri uri, String[] projection, String selection,
+			String[] selectionArgs, String sortOrder) {
+		ContentProviderClient contentProviderClient = null;
+		try {
+			contentProviderClient = mContentResolver.acquireContentProviderClient(uri);
+			return contentProviderClient.getLocalContentProvider().query(uri, projection,
+					selection, selectionArgs, sortOrder);
 
-        } finally {
-            if (contentProviderClient != null) {
-                contentProviderClient.release();
-            }
-        }
-    }
+		} finally {
+			if (contentProviderClient != null) {
+				contentProviderClient.release();
+			}
+		}
+	}
 
-    public final Uri insert(Uri uri, ContentValues values) {
-        ContentProviderClient contentProviderClient = null;
-        try {
-            contentProviderClient = mContentResolver.acquireContentProviderClient(uri);
-            return contentProviderClient.getLocalContentProvider().insert(uri, values);
+	public final Uri insert(Uri uri, ContentValues values) {
+		ContentProviderClient contentProviderClient = null;
+		try {
+			contentProviderClient = mContentResolver.acquireContentProviderClient(uri);
+			return contentProviderClient.getLocalContentProvider().insert(uri, values);
 
-        } finally {
-            if (contentProviderClient != null) {
-                contentProviderClient.release();
-            }
-        }
-    }
+		} finally {
+			if (contentProviderClient != null) {
+				contentProviderClient.release();
+			}
+		}
+	}
 
-    public final int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        ContentProviderClient contentProviderClient = null;
-        try {
-            contentProviderClient = mContentResolver.acquireContentProviderClient(uri);
-            return contentProviderClient.getLocalContentProvider().update(uri, values, selection,
-                    selectionArgs);
+	public final int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+		ContentProviderClient contentProviderClient = null;
+		try {
+			contentProviderClient = mContentResolver.acquireContentProviderClient(uri);
+			return contentProviderClient.getLocalContentProvider().update(uri, values, selection,
+					selectionArgs);
 
-        } finally {
-            if (contentProviderClient != null) {
-                contentProviderClient.release();
-            }
-        }
-    }
+		} finally {
+			if (contentProviderClient != null) {
+				contentProviderClient.release();
+			}
+		}
+	}
 
-    public final int delete(Uri uri, String selection, String[] selectionArgs) {
-        ContentProviderClient contentProviderClient = null;
-        try {
-            contentProviderClient = mContentResolver.acquireContentProviderClient(uri);
-            return contentProviderClient.getLocalContentProvider().delete(uri, selection,
-                    selectionArgs);
+	public final int delete(Uri uri, String selection, String[] selectionArgs) {
+		ContentProviderClient contentProviderClient = null;
+		try {
+			contentProviderClient = mContentResolver.acquireContentProviderClient(uri);
+			return contentProviderClient.getLocalContentProvider().delete(uri, selection,
+					selectionArgs);
 
-        } finally {
-            if (contentProviderClient != null) {
-                contentProviderClient.release();
-            }
-        }
-    }
+		} finally {
+			if (contentProviderClient != null) {
+				contentProviderClient.release();
+			}
+		}
+	}
 
-    public final InputStream openContentInputStream(Uri uri) throws FileNotFoundException {
-        ContentProviderClient contentProviderClient = null;
-        try {
-            contentProviderClient = mContentResolver.acquireContentProviderClient(uri);
-            return contentProviderClient.getLocalContentProvider().openAssetFile(uri, "r")
-                    .createInputStream();
+	public final InputStream openContentInputStream(Uri uri) throws FileNotFoundException {
+		ContentProviderClient contentProviderClient = null;
+		try {
+			contentProviderClient = mContentResolver.acquireContentProviderClient(uri);
+			return contentProviderClient.getLocalContentProvider().openAssetFile(uri, "r")
+					.createInputStream();
 
-        } catch (IOException e) {
-            throw new FileNotFoundException("Unable to create stream");
-        } finally {
-            if (contentProviderClient != null) {
-                contentProviderClient.release();
-            }
-        }
-    }
+		} catch (IOException e) {
+			throw new FileNotFoundException("Unable to create stream");
+		} finally {
+			if (contentProviderClient != null) {
+				contentProviderClient.release();
+			}
+		}
+	}
 
-    public final OutputStream openContentOutputStream(Uri uri) throws FileNotFoundException {
-        ContentProviderClient contentProviderClient = null;
-        try {
-            contentProviderClient = mContentResolver.acquireContentProviderClient(uri);
-            return contentProviderClient.getLocalContentProvider().openAssetFile(uri, "w")
-                    .createOutputStream();
+	public final OutputStream openContentOutputStream(Uri uri) throws FileNotFoundException {
+		ContentProviderClient contentProviderClient = null;
+		try {
+			contentProviderClient = mContentResolver.acquireContentProviderClient(uri);
+			return contentProviderClient.getLocalContentProvider().openAssetFile(uri, "w")
+					.createOutputStream();
 
-        } catch (IOException e) {
-            throw new FileNotFoundException("Unable to create stream");
-        } finally {
-            if (contentProviderClient != null) {
-                contentProviderClient.release();
-            }
-        }
-    }
+		} catch (IOException e) {
+			throw new FileNotFoundException("Unable to create stream");
+		} finally {
+			if (contentProviderClient != null) {
+				contentProviderClient.release();
+			}
+		}
+	}
 }

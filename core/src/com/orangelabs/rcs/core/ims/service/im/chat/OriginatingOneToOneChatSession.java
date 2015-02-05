@@ -55,15 +55,21 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
 	/**
 	 * Constructor
 	 * 
-	 * @param parent IMS service
-	 * @param contact Remote contact identifier
-	 * @param msg First message of the session
-	 * @param rcsSettings RCS settings
-	 * @param messagingLog Messaging log
+	 * @param parent
+	 *            IMS service
+	 * @param contact
+	 *            Remote contact identifier
+	 * @param msg
+	 *            First message of the session
+	 * @param rcsSettings
+	 *            RCS settings
+	 * @param messagingLog
+	 *            Messaging log
 	 */
 	public OriginatingOneToOneChatSession(ImsService parent, ContactId contact, ChatMessage msg,
 			RcsSettings rcsSettings, MessagingLog messagingLog) {
-		super(parent, contact, PhoneUtils.formatContactIdToUri(contact), msg, rcsSettings, messagingLog);
+		super(parent, contact, PhoneUtils.formatContactIdToUri(contact), msg, rcsSettings,
+				messagingLog);
 		// Create dialog path
 		createOriginatingDialogPath();
 		// Set contribution ID
@@ -125,14 +131,12 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
 				String multipart = new StringBuilder(Multipart.BOUNDARY_DELIMITER)
 						.append(BOUNDARY_TAG).append(SipUtils.CRLF)
 						.append("Content-Type: application/sdp").append(SipUtils.CRLF)
-						.append("Content-Length: ")
-						.append(sdp.getBytes(UTF8).length)
+						.append("Content-Length: ").append(sdp.getBytes(UTF8).length)
 						.append(SipUtils.CRLF).append(SipUtils.CRLF).append(sdp)
 						.append(SipUtils.CRLF).append(Multipart.BOUNDARY_DELIMITER)
 						.append(BOUNDARY_TAG).append(SipUtils.CRLF).append("Content-Type: ")
 						.append(CpimMessage.MIME_TYPE).append(SipUtils.CRLF)
-						.append("Content-Length: ")
-						.append(cpim.getBytes(UTF8).length)
+						.append("Content-Length: ").append(cpim.getBytes(UTF8).length)
 						.append(SipUtils.CRLF).append(SipUtils.CRLF).append(cpim)
 						.append(SipUtils.CRLF).append(Multipart.BOUNDARY_DELIMITER)
 						.append(BOUNDARY_TAG).append(Multipart.BOUNDARY_DELIMITER).toString();

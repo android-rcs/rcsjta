@@ -20,7 +20,7 @@ package com.orangelabs.rcs.core.ims.service.presence.pidf;
 
 public class Service {
 	private String id = null;
-	
+
 	public Service(String id) {
 		this.id = id;
 	}

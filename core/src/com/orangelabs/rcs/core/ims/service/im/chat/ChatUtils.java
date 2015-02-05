@@ -93,10 +93,10 @@ public class ChatUtils {
 	 */
 	private static final String CRLF = "\r\n";
 
-	 /**
-     * The logger
-     */
-    private static final Logger logger = Logger.getLogger(ChatUtils.class.getName());
+	/**
+	 * The logger
+	 */
+	private static final Logger logger = Logger.getLogger(ChatUtils.class.getName());
 
 	/**
 	 * Get supported feature tags for a group chat
@@ -107,35 +107,36 @@ public class ChatUtils {
 		List<String> tags = new ArrayList<String>();
 		tags.add(FeatureTags.FEATURE_OMA_IM);
 
-        List<String> additionalRcseTags = new ArrayList<String>();
+		List<String> additionalRcseTags = new ArrayList<String>();
 		if (RcsSettings.getInstance().isGeoLocationPushSupported()) {
-        	additionalRcseTags.add(FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH);
-        }
-        if (RcsSettings.getInstance().isFileTransferSupported()) {
-        	additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT);
-        }
-        if (RcsSettings.getInstance().isFileTransferHttpSupported()) {
-        	additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT_HTTP);
-        }
-        if (RcsSettings.getInstance().isFileTransferStoreForwardSupported()) {
-        	additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT_SF);
-        }
-        if (!additionalRcseTags.isEmpty()) {
-            tags.add(FeatureTags.FEATURE_RCSE + "=\"" + TextUtils.join(",", additionalRcseTags) + "\"");
-        }
+			additionalRcseTags.add(FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH);
+		}
+		if (RcsSettings.getInstance().isFileTransferSupported()) {
+			additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT);
+		}
+		if (RcsSettings.getInstance().isFileTransferHttpSupported()) {
+			additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT_HTTP);
+		}
+		if (RcsSettings.getInstance().isFileTransferStoreForwardSupported()) {
+			additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT_SF);
+		}
+		if (!additionalRcseTags.isEmpty()) {
+			tags.add(FeatureTags.FEATURE_RCSE + "=\"" + TextUtils.join(",", additionalRcseTags)
+					+ "\"");
+		}
 
-        return tags;
-    }
+		return tags;
+	}
 
-    /**
-     * Get Accept-Contact tags for a group chat
-     *
-     * @return List of tags
-     */
-    public static List<String> getAcceptContactTagsForGroupChat() {
-        List<String> tags = new ArrayList<String>();
-        tags.add(FeatureTags.FEATURE_OMA_IM);
-        return tags;
+	/**
+	 * Get Accept-Contact tags for a group chat
+	 *
+	 * @return List of tags
+	 */
+	public static List<String> getAcceptContactTagsForGroupChat() {
+		List<String> tags = new ArrayList<String>();
+		tags.add(FeatureTags.FEATURE_OMA_IM);
+		return tags;
 	}
 
 	/**
@@ -147,24 +148,25 @@ public class ChatUtils {
 		List<String> tags = new ArrayList<String>();
 		tags.add(FeatureTags.FEATURE_OMA_IM);
 
-        List<String> additionalRcseTags = new ArrayList<String>();
+		List<String> additionalRcseTags = new ArrayList<String>();
 		if (RcsSettings.getInstance().isGeoLocationPushSupported()) {
-        	additionalRcseTags.add(FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH);
-        }
-        if (RcsSettings.getInstance().isFileTransferSupported()) {
-        	additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT);
-        }
-        if (RcsSettings.getInstance().isFileTransferHttpSupported()) {
-        	additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT_HTTP);
-        }
-        if (RcsSettings.getInstance().isFileTransferStoreForwardSupported()) {
-        	additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT_SF);
-        }
-        if (!additionalRcseTags.isEmpty()) {
-            tags.add(FeatureTags.FEATURE_RCSE + "=\"" + TextUtils.join(",", additionalRcseTags) + "\"");
-        }
+			additionalRcseTags.add(FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH);
+		}
+		if (RcsSettings.getInstance().isFileTransferSupported()) {
+			additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT);
+		}
+		if (RcsSettings.getInstance().isFileTransferHttpSupported()) {
+			additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT_HTTP);
+		}
+		if (RcsSettings.getInstance().isFileTransferStoreForwardSupported()) {
+			additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT_SF);
+		}
+		if (!additionalRcseTags.isEmpty()) {
+			tags.add(FeatureTags.FEATURE_RCSE + "=\"" + TextUtils.join(",", additionalRcseTags)
+					+ "\"");
+		}
 
-	    return tags;
+		return tags;
 	}
 
 	/**
@@ -173,7 +175,8 @@ public class ChatUtils {
 	 * @return String
 	 */
 	public static String getContributionId(SipRequest request) {
-		ExtensionHeader contribHeader = (ExtensionHeader)request.getHeader(ChatUtils.HEADER_CONTRIBUTION_ID);
+		ExtensionHeader contribHeader = (ExtensionHeader) request
+				.getHeader(ChatUtils.HEADER_CONTRIBUTION_ID);
 		if (contribHeader != null) {
 			return contribHeader.getValue();
 		} else {
@@ -184,11 +187,12 @@ public class ChatUtils {
 	/**
 	 * Is a group chat session invitation
 	 *
-	 * @param request Request
+	 * @param request
+	 *            Request
 	 * @return Boolean
 	 */
 	public static boolean isGroupChatInvitation(SipRequest request) {
-        ContactHeader contactHeader = (ContactHeader)request.getHeader(ContactHeader.NAME);
+		ContactHeader contactHeader = (ContactHeader) request.getHeader(ContactHeader.NAME);
 		String param = contactHeader.getParameter("isfocus");
 		if (param != null) {
 			return true;
@@ -200,11 +204,13 @@ public class ChatUtils {
 	/**
 	 * Get referred identity as a ContactId
 	 *
-	 * @param request SIP request
+	 * @param request
+	 *            SIP request
 	 * @return ContactId
 	 * @throws RcsContactFormatException
 	 */
-	public static ContactId getReferredIdentityAsContactId(SipRequest request) throws RcsContactFormatException {
+	public static ContactId getReferredIdentityAsContactId(SipRequest request)
+			throws RcsContactFormatException {
 		try {
 			// Use the Referred-By header
 			return ContactUtils.createContactId(SipUtils.getReferredByHeader(request));
@@ -217,7 +223,8 @@ public class ChatUtils {
 	/**
 	 * Get referred identity as a contact URI
 	 *
-	 * @param request SIP request
+	 * @param request
+	 *            SIP request
 	 * @return SIP URI
 	 */
 	public static String getReferredIdentityAsContactUri(SipRequest request) {
@@ -232,279 +239,307 @@ public class ChatUtils {
 	}
 
 	/**
-     * Is a plain text type
-     *
-     * @param mime MIME type
-     * @return Boolean
-     */
-    public static boolean isTextPlainType(String mime) {
-        return mime != null && mime.toLowerCase().startsWith(MimeType.TEXT_MESSAGE);
-    }
+	 * Is a plain text type
+	 *
+	 * @param mime
+	 *            MIME type
+	 * @return Boolean
+	 */
+	public static boolean isTextPlainType(String mime) {
+		return mime != null && mime.toLowerCase().startsWith(MimeType.TEXT_MESSAGE);
+	}
 
-    /**
-     * Is a composing event type
-     *
-     * @param mime MIME type
-     * @return Boolean
-     */
-    public static boolean isApplicationIsComposingType(String mime) {
-        return mime != null && mime.toLowerCase().startsWith(IsComposingInfo.MIME_TYPE);
-    }
+	/**
+	 * Is a composing event type
+	 *
+	 * @param mime
+	 *            MIME type
+	 * @return Boolean
+	 */
+	public static boolean isApplicationIsComposingType(String mime) {
+		return mime != null && mime.toLowerCase().startsWith(IsComposingInfo.MIME_TYPE);
+	}
 
-    /**
-     * Is a CPIM message type
-     *
-     * @param mime MIME type
-     * @return Boolean
-     */
-    public static boolean isMessageCpimType(String mime) {
-        return mime != null && mime.toLowerCase().startsWith(CpimMessage.MIME_TYPE);
-    }
+	/**
+	 * Is a CPIM message type
+	 *
+	 * @param mime
+	 *            MIME type
+	 * @return Boolean
+	 */
+	public static boolean isMessageCpimType(String mime) {
+		return mime != null && mime.toLowerCase().startsWith(CpimMessage.MIME_TYPE);
+	}
 
-    /**
-     * Is an IMDN message type
-     *
-     * @param mime MIME type
-     * @return Boolean
-     */
-    public static boolean isMessageImdnType(String mime) {
-        return mime != null && mime.toLowerCase().startsWith(ImdnDocument.MIME_TYPE);
-    }
+	/**
+	 * Is an IMDN message type
+	 *
+	 * @param mime
+	 *            MIME type
+	 * @return Boolean
+	 */
+	public static boolean isMessageImdnType(String mime) {
+		return mime != null && mime.toLowerCase().startsWith(ImdnDocument.MIME_TYPE);
+	}
 
-    /**
-     * Is a geolocation event type
-     *
-     * @param mime MIME type
-     * @return Boolean
-     */
-    public static boolean isGeolocType(String mime) {
+	/**
+	 * Is a geolocation event type
+	 *
+	 * @param mime
+	 *            MIME type
+	 * @return Boolean
+	 */
+	public static boolean isGeolocType(String mime) {
 		return mime != null && mime.toLowerCase().startsWith(GeolocInfoDocument.MIME_TYPE);
-    }
+	}
 
-    /**
-     * Generate resource-list for a chat session
-     *
-     * @param participants Set of participants
-     * @return XML document
-     */
-    public static String generateChatResourceList(Set<ContactId> participants) {
-        StringBuilder resources = new StringBuilder("<?xml version=\"1.0\" encoding=\"")
-                .append(UTF8_STR).append("\"?>").append(CRLF)
-                .append("<resource-lists xmlns=\"urn:ietf:params:xml:ns:resource-lists\" ")
-                .append("xmlns:cp=\"urn:ietf:params:xml:ns:copycontrol\">").append("<list>")
-                .append(CRLF);
-        for (ContactId contact : participants) {
-            resources.append(" <entry uri=\"").append(PhoneUtils.formatContactIdToUri(contact))
-                    .append("\" cp:copyControl=\"to\"/>").append(CRLF);
-        }
-        return resources.append("</list></resource-lists>").toString();
-    }
+	/**
+	 * Generate resource-list for a chat session
+	 *
+	 * @param participants
+	 *            Set of participants
+	 * @return XML document
+	 */
+	public static String generateChatResourceList(Set<ContactId> participants) {
+		StringBuilder resources = new StringBuilder("<?xml version=\"1.0\" encoding=\"")
+				.append(UTF8_STR).append("\"?>").append(CRLF)
+				.append("<resource-lists xmlns=\"urn:ietf:params:xml:ns:resource-lists\" ")
+				.append("xmlns:cp=\"urn:ietf:params:xml:ns:copycontrol\">").append("<list>")
+				.append(CRLF);
+		for (ContactId contact : participants) {
+			resources.append(" <entry uri=\"").append(PhoneUtils.formatContactIdToUri(contact))
+					.append("\" cp:copyControl=\"to\"/>").append(CRLF);
+		}
+		return resources.append("</list></resource-lists>").toString();
+	}
 
-    /**
-     * Is IMDN service
-     *
-     * @param request Request
-     * @return Boolean
-     */
-    public static boolean isImdnService(SipRequest request) {
-    	String content = request.getContent();
-    	String contentType = request.getContentType();
-    	if ((content != null) && (content.contains(ImdnDocument.IMDN_NAMESPACE)) &&
-    			(contentType != null) && (contentType.equalsIgnoreCase(CpimMessage.MIME_TYPE))) {
-    		return true;
-    	} else {
-    		return false;
-    	}
-    }
+	/**
+	 * Is IMDN service
+	 *
+	 * @param request
+	 *            Request
+	 * @return Boolean
+	 */
+	public static boolean isImdnService(SipRequest request) {
+		String content = request.getContent();
+		String contentType = request.getContentType();
+		if ((content != null) && (content.contains(ImdnDocument.IMDN_NAMESPACE))
+				&& (contentType != null) && (contentType.equalsIgnoreCase(CpimMessage.MIME_TYPE))) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
-    /**
-     * Is IMDN notification "delivered" requested
-     *
-     * @param request Request
-     * @return Boolean
-     */
-    public static boolean isImdnDeliveredRequested(SipRequest request) {
-    	boolean result = false;
+	/**
+	 * Is IMDN notification "delivered" requested
+	 *
+	 * @param request
+	 *            Request
+	 * @return Boolean
+	 */
+	public static boolean isImdnDeliveredRequested(SipRequest request) {
+		boolean result = false;
 		try {
 			// Read ID from multipart content
-		    String content = request.getContent();
+			String content = request.getContent();
 			int index = content.indexOf(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
 			if (index != -1) {
-				index = index+ImdnUtils.HEADER_IMDN_DISPO_NOTIF.length()+1;
+				index = index + ImdnUtils.HEADER_IMDN_DISPO_NOTIF.length() + 1;
 				String part = content.substring(index);
 				String notif = part.substring(0, part.indexOf(CRLF));
-		    	if (notif.indexOf(ImdnDocument.POSITIVE_DELIVERY) != -1) {
-		    		result = true;
-		    	}
+				if (notif.indexOf(ImdnDocument.POSITIVE_DELIVERY) != -1) {
+					result = true;
+				}
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			result = false;
 		}
 		return result;
-    }
+	}
 
-    /**
-     * Is IMDN notification "displayed" requested
-     *
-     * @param request Request
-     * @return Boolean
-     */
-    public static boolean isImdnDisplayedRequested(SipRequest request) {
-    	boolean result = false;
+	/**
+	 * Is IMDN notification "displayed" requested
+	 *
+	 * @param request
+	 *            Request
+	 * @return Boolean
+	 */
+	public static boolean isImdnDisplayedRequested(SipRequest request) {
+		boolean result = false;
 		try {
 			// Read ID from multipart content
-		    String content = request.getContent();
+			String content = request.getContent();
 			int index = content.indexOf(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
 			if (index != -1) {
-				index = index+ImdnUtils.HEADER_IMDN_DISPO_NOTIF.length()+1;
+				index = index + ImdnUtils.HEADER_IMDN_DISPO_NOTIF.length() + 1;
 				String part = content.substring(index);
 				String notif = part.substring(0, part.indexOf(CRLF));
-		    	if (notif.indexOf(ImdnDocument.DISPLAY) != -1) {
-		    		result = true;
-		    	}
+				if (notif.indexOf(ImdnDocument.DISPLAY) != -1) {
+					result = true;
+				}
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			result = false;
 		}
 		return result;
-    }
+	}
 
 	/**
 	 * Returns the message ID from a SIP request
 	 *
-     * @param request Request
+	 * @param request
+	 *            Request
 	 * @return Message ID
 	 */
 	public static String getMessageId(SipRequest request) {
 		String result = null;
 		try {
 			// Read ID from multipart content
-		    String content = request.getContent();
+			String content = request.getContent();
 			int index = content.indexOf(ImdnUtils.HEADER_IMDN_MSG_ID);
 			if (index != -1) {
-				index = index+ImdnUtils.HEADER_IMDN_MSG_ID.length()+1;
+				index = index + ImdnUtils.HEADER_IMDN_MSG_ID.length() + 1;
 				String part = content.substring(index);
 				String msgId = part.substring(0, part.indexOf(CRLF));
 				result = msgId.trim();
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			result = null;
 		}
 		return result;
 	}
 
-    /**
-     * Format to a SIP-URI for CPIM message
-     *
-     * @param input Input
-     * @return SIP-URI
-     */
-    private static String formatCpimSipUri(String input) {
-    	input = input.trim();
+	/**
+	 * Format to a SIP-URI for CPIM message
+	 *
+	 * @param input
+	 *            Input
+	 * @return SIP-URI
+	 */
+	private static String formatCpimSipUri(String input) {
+		input = input.trim();
 
-    	if (input.startsWith("<")) {
-    		// Already a SIP-URI format
-    		return input;
-    	}
+		if (input.startsWith("<")) {
+			// Already a SIP-URI format
+			return input;
+		}
 
-    	// It's already a SIP address with display name
+		// It's already a SIP address with display name
 		if (input.startsWith("\"")) {
 			return input;
 		}
 
-    	if (input.startsWith("sip:") || input.startsWith("tel:")) {
-    		// Just add URI delimiter
-    		return "<" + input + ">";
-    	} else {
-    		// It's a number, format it
-    		return "<" + PhoneUtils.formatNumberToSipUri(input) + ">";
-    	}
-    }
+		if (input.startsWith("sip:") || input.startsWith("tel:")) {
+			// Just add URI delimiter
+			return "<" + input + ">";
+		} else {
+			// It's a number, format it
+			return "<" + PhoneUtils.formatNumberToSipUri(input) + ">";
+		}
+	}
 
 	/**
 	 * Build a CPIM message
 	 *
-	 * @param from From
-	 * @param to To
-	 * @param content Content
-	 * @param contentType Content type
+	 * @param from
+	 *            From
+	 * @param to
+	 *            To
+	 * @param content
+	 *            Content
+	 * @param contentType
+	 *            Content type
 	 * @return String
 	 */
-    public static String buildCpimMessage(String from, String to, String content, String contentType) {
-        return new StringBuilder(CpimMessage.HEADER_FROM).append(": ")
-                .append(ChatUtils.formatCpimSipUri(from)).append(CRLF)
-                .append(CpimMessage.HEADER_TO).append(": ").append(ChatUtils.formatCpimSipUri(to))
-                .append(CRLF).append(CpimMessage.HEADER_DATETIME).append(": ")
-                .append(DateUtils.encodeDate(System.currentTimeMillis())).append(CRLF).append(CRLF)
-                .append(CpimMessage.HEADER_CONTENT_TYPE).append(": ").append(contentType)
-                .append(";charset=").append(UTF8_STR).append(CRLF).append(CRLF)
-                .append(content).toString();
-    }
+	public static String buildCpimMessage(String from, String to, String content, String contentType) {
+		return new StringBuilder(CpimMessage.HEADER_FROM).append(": ")
+				.append(ChatUtils.formatCpimSipUri(from)).append(CRLF)
+				.append(CpimMessage.HEADER_TO).append(": ").append(ChatUtils.formatCpimSipUri(to))
+				.append(CRLF).append(CpimMessage.HEADER_DATETIME).append(": ")
+				.append(DateUtils.encodeDate(System.currentTimeMillis())).append(CRLF).append(CRLF)
+				.append(CpimMessage.HEADER_CONTENT_TYPE).append(": ").append(contentType)
+				.append(";charset=").append(UTF8_STR).append(CRLF).append(CRLF).append(content)
+				.toString();
+	}
 
 	/**
 	 * Build a CPIM message with full IMDN headers
 	 *
-	 * @param from From URI
-	 * @param to To URI
-	 * @param messageId Message ID
-	 * @param content Content
-	 * @param contentType Content type
+	 * @param from
+	 *            From URI
+	 * @param to
+	 *            To URI
+	 * @param messageId
+	 *            Message ID
+	 * @param content
+	 *            Content
+	 * @param contentType
+	 *            Content type
 	 * @return String
 	 */
 	public static String buildCpimMessageWithImdn(String from, String to, String messageId,
 			String content, String contentType) {
-        return new StringBuilder(CpimMessage.HEADER_FROM).append(": ")
-                .append(ChatUtils.formatCpimSipUri(from)).append(CRLF)
-                .append(CpimMessage.HEADER_TO).append(": ").append(ChatUtils.formatCpimSipUri(to))
-                .append(CRLF).append(CpimMessage.HEADER_NS).append(": ")
-                .append(ImdnDocument.IMDN_NAMESPACE).append(CRLF)
-                .append(ImdnUtils.HEADER_IMDN_MSG_ID).append(": ").append(messageId).append(CRLF)
-                .append(CpimMessage.HEADER_DATETIME).append(": ")
-                .append(DateUtils.encodeDate(System.currentTimeMillis())).append(CRLF)
-                .append(ImdnUtils.HEADER_IMDN_DISPO_NOTIF).append(": ")
-                .append(ImdnDocument.POSITIVE_DELIVERY).append(", ").append(ImdnDocument.DISPLAY)
-                .append(CRLF).append(CRLF).append(CpimMessage.HEADER_CONTENT_TYPE).append(": ")
-                .append(contentType).append(";charset=").append(UTF8_STR).append(CRLF)
-                .append(CpimMessage.HEADER_CONTENT_LENGTH).append(": ")
-                .append(content.getBytes(UTF8).length).append(CRLF)
-                .append(CRLF).append(content).toString();
+		return new StringBuilder(CpimMessage.HEADER_FROM).append(": ")
+				.append(ChatUtils.formatCpimSipUri(from)).append(CRLF)
+				.append(CpimMessage.HEADER_TO).append(": ").append(ChatUtils.formatCpimSipUri(to))
+				.append(CRLF).append(CpimMessage.HEADER_NS).append(": ")
+				.append(ImdnDocument.IMDN_NAMESPACE).append(CRLF)
+				.append(ImdnUtils.HEADER_IMDN_MSG_ID).append(": ").append(messageId).append(CRLF)
+				.append(CpimMessage.HEADER_DATETIME).append(": ")
+				.append(DateUtils.encodeDate(System.currentTimeMillis())).append(CRLF)
+				.append(ImdnUtils.HEADER_IMDN_DISPO_NOTIF).append(": ")
+				.append(ImdnDocument.POSITIVE_DELIVERY).append(", ").append(ImdnDocument.DISPLAY)
+				.append(CRLF).append(CRLF).append(CpimMessage.HEADER_CONTENT_TYPE).append(": ")
+				.append(contentType).append(";charset=").append(UTF8_STR).append(CRLF)
+				.append(CpimMessage.HEADER_CONTENT_LENGTH).append(": ")
+				.append(content.getBytes(UTF8).length).append(CRLF).append(CRLF).append(content)
+				.toString();
 	}
 
 	/**
 	 * Build a CPIM message with IMDN delivered header
 	 *
-	 * @param from From URI
-	 * @param to To URI
-	 * @param messageId Message ID
-	 * @param content Content
-	 * @param contentType Content type
+	 * @param from
+	 *            From URI
+	 * @param to
+	 *            To URI
+	 * @param messageId
+	 *            Message ID
+	 * @param content
+	 *            Content
+	 * @param contentType
+	 *            Content type
 	 * @return String
 	 */
 	public static String buildCpimMessageWithDeliveredImdn(String from, String to,
 			String messageId, String content, String contentType) {
-        return new StringBuilder(CpimMessage.HEADER_FROM).append(": ")
-                .append(ChatUtils.formatCpimSipUri(from)).append(CRLF)
-                .append(CpimMessage.HEADER_TO).append(": ").append(ChatUtils.formatCpimSipUri(to))
-                .append(CRLF).append(CpimMessage.HEADER_NS).append(": ")
-                .append(ImdnDocument.IMDN_NAMESPACE).append(CRLF)
-                .append(ImdnUtils.HEADER_IMDN_MSG_ID).append(": ").append(messageId).append(CRLF)
-                .append(CpimMessage.HEADER_DATETIME).append(": ")
-                .append(DateUtils.encodeDate(System.currentTimeMillis())).append(CRLF)
-                .append(ImdnUtils.HEADER_IMDN_DISPO_NOTIF).append(": ")
-                .append(ImdnDocument.POSITIVE_DELIVERY).append(CRLF).append(CRLF)
-                .append(CpimMessage.HEADER_CONTENT_TYPE).append(": ").append(contentType)
-                .append(";charset=").append(UTF8_STR).append(CRLF)
-                .append(CpimMessage.HEADER_CONTENT_LENGTH).append(": ")
-                .append(content.getBytes(UTF8).length).append(CRLF)
-                .append(CRLF).append(content).toString();
+		return new StringBuilder(CpimMessage.HEADER_FROM).append(": ")
+				.append(ChatUtils.formatCpimSipUri(from)).append(CRLF)
+				.append(CpimMessage.HEADER_TO).append(": ").append(ChatUtils.formatCpimSipUri(to))
+				.append(CRLF).append(CpimMessage.HEADER_NS).append(": ")
+				.append(ImdnDocument.IMDN_NAMESPACE).append(CRLF)
+				.append(ImdnUtils.HEADER_IMDN_MSG_ID).append(": ").append(messageId).append(CRLF)
+				.append(CpimMessage.HEADER_DATETIME).append(": ")
+				.append(DateUtils.encodeDate(System.currentTimeMillis())).append(CRLF)
+				.append(ImdnUtils.HEADER_IMDN_DISPO_NOTIF).append(": ")
+				.append(ImdnDocument.POSITIVE_DELIVERY).append(CRLF).append(CRLF)
+				.append(CpimMessage.HEADER_CONTENT_TYPE).append(": ").append(contentType)
+				.append(";charset=").append(UTF8_STR).append(CRLF)
+				.append(CpimMessage.HEADER_CONTENT_LENGTH).append(": ")
+				.append(content.getBytes(UTF8).length).append(CRLF).append(CRLF).append(content)
+				.toString();
 	}
 
 	/**
 	 * Build a CPIM delivery report
 	 *
-	 * @param from From
-	 * @param to To
-	 * @param imdn IMDN report
+	 * @param from
+	 *            From
+	 * @param to
+	 *            To
+	 * @param imdn
+	 *            IMDN report
 	 * @return String
 	 */
 	public static String buildCpimDeliveryReport(String from, String to, String imdn) {
@@ -522,14 +557,15 @@ public class ChatUtils {
 				.append(CpimMessage.HEADER_CONTENT_DISPOSITION).append(": ")
 				.append(ImdnDocument.NOTIFICATION).append(CRLF)
 				.append(CpimMessage.HEADER_CONTENT_LENGTH).append(": ")
-				.append(imdn.getBytes(UTF8).length)
-				.append(CRLF).append(CRLF).append(imdn).toString();
+				.append(imdn.getBytes(UTF8).length).append(CRLF).append(CRLF).append(imdn)
+				.toString();
 	}
 
 	/**
 	 * Parse a CPIM delivery report
 	 *
-	 * @param cpim CPIM document
+	 * @param cpim
+	 *            CPIM document
 	 * @return IMDN document
 	 * @throws Exception
 	 */
@@ -552,60 +588,64 @@ public class ChatUtils {
 	/**
 	 * Parse a delivery report
 	 *
-	 * @param xml XML document
+	 * @param xml
+	 *            XML document
 	 * @return IMDN document
 	 */
 	public static ImdnDocument parseDeliveryReport(String xml) {
 		try {
-			InputSource input = new InputSource(new ByteArrayInputStream(
-					xml.getBytes()));
+			InputSource input = new InputSource(new ByteArrayInputStream(xml.getBytes()));
 			ImdnParser parser = new ImdnParser(input);
 			return parser.getImdnDocument();
-    	} catch(Exception e) {
-    		return null;
-    	}
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 	/**
 	 * Build a delivery report
 	 *
-	 * @param msgId Message ID
-	 * @param status Status
+	 * @param msgId
+	 *            Message ID
+	 * @param status
+	 *            Status
 	 * @return XML document
 	 */
 	public static String buildDeliveryReport(String msgId, String status) {
 		String method;
 		if (status.equals(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
 			method = "display-notification";
-		} else
-		if (status.equals(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
+		} else if (status.equals(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
 			method = "delivery-notification";
 		} else {
 			method = "processing-notification";
 		}
 
-		return new StringBuilder("<?xml version=\"1.0\" encoding=\"")
-				.append(UTF8_STR).append("\"?>").append(CRLF)
-				.append("<imdn xmlns=\"urn:ietf:params:xml:ns:imdn\">").append(CRLF)
-				.append("<message-id>").append(msgId).append("</message-id>").append(CRLF)
-				.append("<datetime>").append(DateUtils.encodeDate(System.currentTimeMillis()))
-				.append("</datetime>").append(CRLF).append("<").append(method).append("><status><")
-				.append(status).append("/></status></").append(method).append(">").append(CRLF)
-				.append("</imdn>").toString();
+		return new StringBuilder("<?xml version=\"1.0\" encoding=\"").append(UTF8_STR)
+				.append("\"?>").append(CRLF).append("<imdn xmlns=\"urn:ietf:params:xml:ns:imdn\">")
+				.append(CRLF).append("<message-id>").append(msgId).append("</message-id>")
+				.append(CRLF).append("<datetime>")
+				.append(DateUtils.encodeDate(System.currentTimeMillis())).append("</datetime>")
+				.append(CRLF).append("<").append(method).append("><status><").append(status)
+				.append("/></status></").append(method).append(">").append(CRLF).append("</imdn>")
+				.toString();
 	}
 
 	/**
-	* Build a geoloc document
-	*
-	* @param geoloc Geolocation
-	* @param contact Contact
-	* @param msgId Message ID
-	* @return XML document
-	*/
+	 * Build a geoloc document
+	 *
+	 * @param geoloc
+	 *            Geolocation
+	 * @param contact
+	 *            Contact
+	 * @param msgId
+	 *            Message ID
+	 * @return XML document
+	 */
 	public static String buildGeolocDocument(Geoloc geoloc, String contact, String msgId) {
 		String expire = DateUtils.encodeDate(geoloc.getExpiration());
-		return new StringBuilder("<?xml version=\"1.0\" encoding=\"")
-				.append(UTF8_STR).append("\"?>").append(CRLF)
+		return new StringBuilder("<?xml version=\"1.0\" encoding=\"").append(UTF8_STR)
+				.append("\"?>").append(CRLF)
 				.append("<rcsenvelope xmlns=\"urn:gsma:params:xml:ns:rcs:rcs:geolocation\"")
 				.append(" xmlns:rpid=\"urn:ietf:params:xml:ns:pidf:rpid\"")
 				.append(" xmlns:gp=\"urn:ietf:params:xml:ns:pidf:geopriv10\"")
@@ -635,14 +675,14 @@ public class ChatUtils {
 	/**
 	 * Parse a geoloc document
 	 *
-	 * @param xml XML document
+	 * @param xml
+	 *            XML document
 	 * @return Geolocation
 	 * @throws IllegalArgumentException
 	 */
 	public static Geoloc parseGeolocDocument(String xml) {
 		try {
-			InputSource geolocInput = new InputSource(new ByteArrayInputStream(
-					xml.getBytes(UTF8)));
+			InputSource geolocInput = new InputSource(new ByteArrayInputStream(xml.getBytes(UTF8)));
 			GeolocInfoParser geolocParser = new GeolocInfoParser(geolocInput);
 			GeolocInfoDocument geolocDocument = geolocParser.getGeoLocInfo();
 			if (geolocDocument == null) {
@@ -664,15 +704,17 @@ public class ChatUtils {
 	/**
 	 * Parse a file transfer resume info
 	 *
-	 * @param xml XML document
+	 * @param xml
+	 *            XML document
 	 * @return File transfer resume info
 	 */
 	public static FileTransferHttpResumeInfo parseFileTransferHttpResumeInfo(byte[] xml) {
 		try {
-		    InputSource ftHttpInput = new InputSource(new ByteArrayInputStream(xml));
-		    FileTransferHttpResumeInfoParser ftHttpParser = new FileTransferHttpResumeInfoParser(ftHttpInput);
-		    return ftHttpParser.getResumeInfo();
-		} catch(Exception e) {
+			InputSource ftHttpInput = new InputSource(new ByteArrayInputStream(xml));
+			FileTransferHttpResumeInfoParser ftHttpParser = new FileTransferHttpResumeInfoParser(
+					ftHttpInput);
+			return ftHttpParser.getResumeInfo();
+		} catch (Exception e) {
 			return null;
 		}
 	}
@@ -680,8 +722,10 @@ public class ChatUtils {
 	/**
 	 * Create a text message
 	 *
-	 * @param remote Remote contact identifier
-	 * @param msg Text message
+	 * @param remote
+	 *            Remote contact identifier
+	 * @param msg
+	 *            Text message
 	 * @return Text message
 	 */
 	public static ChatMessage createTextMessage(ContactId remote, String msg) {
@@ -692,10 +736,14 @@ public class ChatUtils {
 	/**
 	 * Create a file transfer message
 	 *
-	 * @param remote Remote contact identifier
-	 * @param fileInfo File XML description
-	 * @param imdn IMDN flag
-	 * @param msgId Message ID
+	 * @param remote
+	 *            Remote contact identifier
+	 * @param fileInfo
+	 *            File XML description
+	 * @param imdn
+	 *            IMDN flag
+	 * @param msgId
+	 *            Message ID
 	 * @return File message
 	 */
 	public static ChatMessage createFileTransferMessage(ContactId remote, String fileInfo,
@@ -707,21 +755,25 @@ public class ChatUtils {
 	/**
 	 * Create a geoloc message
 	 *
-	 * @param remote Remote contact
-	 * @param geoloc Geolocation
+	 * @param remote
+	 *            Remote contact
+	 * @param geoloc
+	 *            Geolocation
 	 * @return Geolocation message
 	 */
 	public static ChatMessage createGeolocMessage(ContactId remote, Geoloc geoloc) {
 		String msgId = IdGenerator.generateMessageID();
 		String geolocContent = ChatUtils.buildGeolocDocument(geoloc,
 				ImsModule.IMS_USER_PROFILE.getPublicUri(), msgId);
-		return new ChatMessage(msgId, remote, geolocContent, GeolocInfoDocument.MIME_TYPE, null, null);
+		return new ChatMessage(msgId, remote, geolocContent, GeolocInfoDocument.MIME_TYPE, null,
+				null);
 	}
 
 	/**
 	 * Get the first message
 	 *
-	 * @param invite Request
+	 * @param invite
+	 *            Request
 	 * @return First message
 	 */
 	public static ChatMessage getFirstMessage(SipRequest invite) {
@@ -736,7 +788,8 @@ public class ChatUtils {
 	/**
 	 * Get the subject
 	 *
-	 * @param invite Request
+	 * @param invite
+	 *            Request
 	 * @return String
 	 */
 	public static String getSubject(SipRequest invite) {
@@ -746,7 +799,8 @@ public class ChatUtils {
 	/**
 	 * Get the first message from CPIM content
 	 *
-	 * @param invite Request
+	 * @param invite
+	 *            Request
 	 * @return First message
 	 */
 	private static ChatMessage getFirstMessageFromCpim(SipRequest invite) {
@@ -786,7 +840,8 @@ public class ChatUtils {
 	/**
 	 * Get the first message from the Subject header
 	 *
-	 * @param invite Request
+	 * @param invite
+	 *            Request
 	 * @return First message
 	 */
 	private static ChatMessage getFirstMessageFromSubject(SipRequest invite) {
@@ -807,40 +862,42 @@ public class ChatUtils {
 				MimeType.TEXT_MESSAGE, new Date(), null);
 	}
 
-    /**
-     * Extract CPIM message from incoming INVITE request
-     *
-     * @param request Request
-     * @return Boolean
-     */
-    public static CpimMessage extractCpimMessage(SipRequest request) {
-    	CpimMessage message = null;
+	/**
+	 * Extract CPIM message from incoming INVITE request
+	 *
+	 * @param request
+	 *            Request
+	 * @return Boolean
+	 */
+	public static CpimMessage extractCpimMessage(SipRequest request) {
+		CpimMessage message = null;
 		try {
 			// Extract message from content/CPIM
-		    String content = request.getContent();
-		    String boundary = request.getBoundaryContentType();
+			String content = request.getContent();
+			String boundary = request.getBoundaryContentType();
 			Multipart multi = new Multipart(content, boundary);
-		    if (multi.isMultipart()) {
-		    	String cpimPart = multi.getPart(CpimMessage.MIME_TYPE);
-		    	if (cpimPart != null) {
+			if (multi.isMultipart()) {
+				String cpimPart = multi.getPart(CpimMessage.MIME_TYPE);
+				if (cpimPart != null) {
 					// CPIM part
-	    			message = new CpimParser(cpimPart.getBytes(UTF8)).getCpimMessage();
-		    	}
-		    }
-		} catch(Exception e) {
+					message = new CpimParser(cpimPart.getBytes(UTF8)).getCpimMessage();
+				}
+			}
+		} catch (Exception e) {
 			message = null;
 		}
 		return message;
-    }
+	}
 
-    /**
-     * Get list of participants from 'resource-list' present in XML document and
-     * include the 'remote' as participant.
-     *
-     * @param request Request
-     * @return {@link Set<ParticipantInfo>} participant list
-     */
-	public static Set<ParticipantInfo> getListOfParticipants(SipRequest request)  {
+	/**
+	 * Get list of participants from 'resource-list' present in XML document and include the
+	 * 'remote' as participant.
+	 *
+	 * @param request
+	 *            Request
+	 * @return {@link Set<ParticipantInfo>} participant list
+	 */
+	public static Set<ParticipantInfo> getListOfParticipants(SipRequest request) {
 		Set<ParticipantInfo> participants = new HashSet<ParticipantInfo>();
 		String content = request.getContent();
 		String boundary = request.getBoundaryContentType();
@@ -862,53 +919,57 @@ public class ChatUtils {
 		return participants;
 	}
 
-    /**
-     * Is request is for FToHTTP
-     *
-     * @param request SIP request
-     * @return true if FToHTTP
-     */
-    public static boolean isFileTransferOverHttp(SipRequest request) {
-        CpimMessage message = extractCpimMessage(request);
-        if (message != null && message.getContentType().startsWith(FileTransferHttpInfoDocument.MIME_TYPE)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+	/**
+	 * Is request is for FToHTTP
+	 *
+	 * @param request
+	 *            SIP request
+	 * @return true if FToHTTP
+	 */
+	public static boolean isFileTransferOverHttp(SipRequest request) {
+		CpimMessage message = extractCpimMessage(request);
+		if (message != null
+				&& message.getContentType().startsWith(FileTransferHttpInfoDocument.MIME_TYPE)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
-    /**
-     * Generate persisted MIME-type from network pay-load
-     *
-     * @param Network pay-load MIME-type
-     * @return API MIME-type
-     */
-    public static String networkMimeTypeToApiMimeType(String networkMimeType) {
-        /*
-         * Geolocation chat messages does not have the same mimetype in the
-         * payload as in the TAPI. Text chat messages do.
-         */
-        if (ChatUtils.isGeolocType(networkMimeType)) {
-            return MimeType.GEOLOC_MESSAGE;
-        }
-        return networkMimeType;
-    }
+	/**
+	 * Generate persisted MIME-type from network pay-load
+	 *
+	 * @param Network
+	 *            pay-load MIME-type
+	 * @return API MIME-type
+	 */
+	public static String networkMimeTypeToApiMimeType(String networkMimeType) {
+		/*
+		 * Geolocation chat messages does not have the same mimetype in the payload as in the TAPI.
+		 * Text chat messages do.
+		 */
+		if (ChatUtils.isGeolocType(networkMimeType)) {
+			return MimeType.GEOLOC_MESSAGE;
+		}
+		return networkMimeType;
+	}
 
-    /**
-     * Generate persisted content from network pay-load
-     * @param msg 
-     *
-     * @return Persisted content
-     */
-    public static String networkContentToPersistedContent(ChatMessage msg) {
-        /*
-         * Geolocation chat messages does not have the same mimetype in the
-         * payload as in the TAPI. Text chat messages do.
-         */
-        if (ChatUtils.isGeolocType(msg.getMimeType())) {
-            Geoloc geoloc = parseGeolocDocument(msg.getContent());
-            return geoloc.toString();
-        }
-        return msg.getContent();
-    }
+	/**
+	 * Generate persisted content from network pay-load
+	 * 
+	 * @param msg
+	 *
+	 * @return Persisted content
+	 */
+	public static String networkContentToPersistedContent(ChatMessage msg) {
+		/*
+		 * Geolocation chat messages does not have the same mimetype in the payload as in the TAPI.
+		 * Text chat messages do.
+		 */
+		if (ChatUtils.isGeolocType(msg.getMimeType())) {
+			Geoloc geoloc = parseGeolocDocument(msg.getContent());
+			return geoloc.toString();
+		}
+		return msg.getContent();
+	}
 }

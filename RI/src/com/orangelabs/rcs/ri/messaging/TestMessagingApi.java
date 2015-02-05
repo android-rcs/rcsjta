@@ -39,28 +39,27 @@ public class TestMessagingApi extends ListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         // Set items
         String[] items = {
-    		getString(R.string.menu_file_transfer),
-    		getString(R.string.menu_chat)
-    	};
+                getString(R.string.menu_file_transfer), getString(R.string.menu_chat)
+        };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        switch(position) {
-	        case 0:
-            	startActivity(new Intent(this, TestFileTransferApi.class));
-	            break;
-	            
-	        case 1:
-            	startActivity(new Intent(this, TestChatApi.class));
-	            break;
+        switch (position) {
+            case 0:
+                startActivity(new Intent(this, TestFileTransferApi.class));
+                break;
+
+            case 1:
+                startActivity(new Intent(this, TestChatApi.class));
+                break;
         }
     }
 }

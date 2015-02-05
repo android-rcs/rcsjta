@@ -46,23 +46,27 @@ import com.orangelabs.rcs.utils.logger.Logger;
 public abstract class VideoStreamingSession extends ContentSharingSession {
 
 	private int mOrientation;
-	
+
 	private int mWidth;
-	
+
 	private int mHeight;
 
-    private IVideoPlayer mPlayer;
-    
-    private final long mTimestamp;
-    
-    private final static Logger logger = Logger.getLogger(VideoStreamingSession.class.getSimpleName());
+	private IVideoPlayer mPlayer;
+
+	private final long mTimestamp;
+
+	private final static Logger logger = Logger.getLogger(VideoStreamingSession.class
+			.getSimpleName());
 
 	/**
 	 * Constructor
 	 * 
-	 * @param parent IMS service
-	 * @param content Content to be shared
-	 * @param contact Remote contact Id
+	 * @param parent
+	 *            IMS service
+	 * @param content
+	 *            Content to be shared
+	 * @param contact
+	 *            Remote contact Id
 	 */
 	public VideoStreamingSession(ImsService parent, MmContent content, ContactId contact) {
 		super(parent, content, contact);
@@ -86,7 +90,7 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
 	public void setOrientation(int orientation) {
 		mOrientation = orientation;
 	}
-	
+
 	/**
 	 * Get the video width
 	 * 
@@ -105,62 +109,64 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
 		return mHeight;
 	}
 
-    /**
-     * Get the video player
-     * 
-     * @return Player
-     */
-    public IVideoPlayer getPlayer() {
-        return mPlayer;
-    }
+	/**
+	 * Get the video player
+	 * 
+	 * @return Player
+	 */
+	public IVideoPlayer getPlayer() {
+		return mPlayer;
+	}
 
-    /**
-     * Set the video player
-     *
-     * @param player
-     */
-    public void setPlayer(IVideoPlayer player) {
-        mPlayer = player;
-    }
+	/**
+	 * Set the video player
+	 *
+	 * @param player
+	 */
+	public void setPlayer(IVideoPlayer player) {
+		mPlayer = player;
+	}
 
-    /**
-     * Create an INVITE request
-     *
-     * @return the INVITE request
-     * @throws SipException 
-     */
-    public SipRequest createInvite() throws SipException {
-        return SipMessageFactory.createInvite(getDialogPath(),
-                RichcallService.FEATURE_TAGS_VIDEO_SHARE, getDialogPath().getLocalContent());
-    }
+	/**
+	 * Create an INVITE request
+	 *
+	 * @return the INVITE request
+	 * @throws SipException
+	 */
+	public SipRequest createInvite() throws SipException {
+		return SipMessageFactory.createInvite(getDialogPath(),
+				RichcallService.FEATURE_TAGS_VIDEO_SHARE, getDialogPath().getLocalContent());
+	}
 
-    /**
-     * Handle error
-     *
-     * @param error Error
-     */
-    public void handleError(ImsServiceError error) {
-        if (isSessionInterrupted()) {
-            return;
-        }
+	/**
+	 * Handle error
+	 *
+	 * @param error
+	 *            Error
+	 */
+	public void handleError(ImsServiceError error) {
+		if (isSessionInterrupted()) {
+			return;
+		}
 
-        boolean logActivated = logger.isActivated();
-        // Error
-        if (logActivated) {
+		boolean logActivated = logger.isActivated();
+		// Error
+		if (logActivated) {
 			logger.info(new StringBuilder("Session error: ").append(error.getErrorCode())
 					.append(", reason=").append(error.getMessage()).toString());
-        }
+		}
 
-        // Close media session
-        closeMediaSession();
+		// Close media session
+		closeMediaSession();
 
-        // Remove the current session
-        removeSession();
+		// Remove the current session
+		removeSession();
 
-        try {
+		try {
 			ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
 			// Request capabilities to the remote
-	        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(remote);
+			getImsService().getImsModule().getCapabilityService()
+					.requestContactCapabilities(remote);
 		} catch (RcsContactFormatException e) {
 			if (logActivated) {
 				logger.warn(new StringBuilder("Cannot parse contact ").append(
@@ -168,12 +174,12 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
 			}
 		}
 
-        ContactId contact = getRemoteContact();
-        for (ImsSessionListener imsSessionListener : getListeners()) {
-        	 ((VideoStreamingSessionListener) imsSessionListener)
-             .handleSharingError(contact, new ContentSharingError(error));
+		ContactId contact = getRemoteContact();
+		for (ImsSessionListener imsSessionListener : getListeners()) {
+			((VideoStreamingSessionListener) imsSessionListener).handleSharingError(contact,
+					new ContentSharingError(error));
 		}
-    }
+	}
 
 	@Override
 	public void startSession() {

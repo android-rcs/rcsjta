@@ -41,18 +41,19 @@ public class SdpParser extends Parser {
 	 * Input stream
 	 */
 	private ByteArrayInputStream bin = null;
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param data Data
+	 * @param data
+	 *            Data
 	 */
 	public SdpParser(byte data[]) {
 		bin = new ByteArrayInputStream(data);
 		if (getToken(bin, "v=")) {
 			parseSessionDescription();
 			parseMediaDescriptions();
-	    }
+		}
 	}
 
 	/**
@@ -104,7 +105,7 @@ public class SdpParser extends Parser {
 
 		// Time description
 		sessionDescription.timeDescriptions = new Vector<TimeDescription>();
-		while(getToken(bin, "t=")) {
+		while (getToken(bin, "t=")) {
 			TimeDescription timeDescription = parseTimeDescription();
 			this.sessionDescription.timeDescriptions.addElement(timeDescription);
 		}
@@ -121,7 +122,7 @@ public class SdpParser extends Parser {
 
 		// Session attributes
 		sessionDescription.sessionAttributes = new Vector<MediaAttribute>();
-		while(getToken(bin, "a=")) {
+		while (getToken(bin, "a=")) {
 			String sessionAttribute = getLine(bin);
 			int index = sessionAttribute.indexOf(':');
 			if (index > 0) {
@@ -132,7 +133,7 @@ public class SdpParser extends Parser {
 			}
 		}
 	}
-	
+
 	/**
 	 * Parse time description
 	 * 
@@ -140,144 +141,145 @@ public class SdpParser extends Parser {
 	 */
 	private TimeDescription parseTimeDescription() {
 		TimeDescription td = new TimeDescription();
-		
+
 		// Time the session is active
 		td.timeActive = getLine(bin);
 
 		// Repeat times
 		td.repeatTimes = new Vector<String>();
-		while(getToken(bin, "r=")) {
+		while (getToken(bin, "r=")) {
 			String repeatTime = getLine(bin);
 			td.repeatTimes.addElement(repeatTime);
 		}
-		
+
 		return td;
 	}
-	
+
 	/**
 	 * Parse media descriptions
 	 */
 	private void parseMediaDescriptions() {
-        while(getToken(bin, "m=")) {
-            Vector<MediaDescription> descs = new Vector<MediaDescription>();
-            
-            // Media name and transport address
-            String line = getLine(bin);
-            int end = line.indexOf(' ');
-            String name = line.substring(0, end);
+		while (getToken(bin, "m=")) {
+			Vector<MediaDescription> descs = new Vector<MediaDescription>();
 
-            int start = end + 1;
-            end = line.indexOf(' ', start);
-            int port = Integer.parseInt(line.substring(start, end));
+			// Media name and transport address
+			String line = getLine(bin);
+			int end = line.indexOf(' ');
+			String name = line.substring(0, end);
 
-            start = end + 1;
-            end = line.indexOf(' ', start);
-            String protocol = line.substring(start, end);
+			int start = end + 1;
+			end = line.indexOf(' ', start);
+			int port = Integer.parseInt(line.substring(start, end));
 
-            String payload;
-            start = end + 1;
-            end = line.indexOf(' ', start);
-            while (end != -1) {
-                payload = line.substring(start, end);
-                descs.addElement(new MediaDescription(name, port, protocol, payload));
-                start = end + 1;
-                end = line.indexOf(' ', start);
-            }
-            payload = line.substring(start);
-            descs.addElement(new MediaDescription(name, port, protocol, payload));
+			start = end + 1;
+			end = line.indexOf(' ', start);
+			String protocol = line.substring(start, end);
 
-            // Session and media information
-            if (getToken(bin, "i=")) {
-                String mediaTitle = getLine(bin);
-                for (int i = 0; i < descs.size(); i++) {
-                    descs.elementAt(i).mediaTitle = mediaTitle;
-                }
-            }
-            
-            // Connection information
-            if (getToken(bin, "c=")) {
-                String connectionInfo = getLine(bin);
-                for (int i = 0; i < descs.size(); i++) {
-                    descs.elementAt(i).connectionInfo = connectionInfo;
-                }
-            }
+			String payload;
+			start = end + 1;
+			end = line.indexOf(' ', start);
+			while (end != -1) {
+				payload = line.substring(start, end);
+				descs.addElement(new MediaDescription(name, port, protocol, payload));
+				start = end + 1;
+				end = line.indexOf(' ', start);
+			}
+			payload = line.substring(start);
+			descs.addElement(new MediaDescription(name, port, protocol, payload));
 
-            // Bandwidth information
-            while(getToken(bin, "b=")) {
-                line = getLine(bin);
-                int index = line.indexOf(':');
-                if (index > 0) {
-                    String valueAttribute = line.substring(index + 1);
-                    if (line.contains("AS")) {
-                        for (int i = 0; i < descs.size(); i++) {
-                            descs.elementAt(i).bandwidthInfo = valueAttribute;
-                        }
-                    } else if (line.contains("RS")) {
-                        for (int i = 0; i < descs.size(); i++) {
-                            descs.elementAt(i).senderBandwidthInfo = valueAttribute;
-                        }
-                    } else if (line.contains("RR")) {
-                        for (int i = 0; i < descs.size(); i++) {
-                            descs.elementAt(i).receiverBandwidthInfo = valueAttribute;
-                        }
-                    }
-                }
-            }
+			// Session and media information
+			if (getToken(bin, "i=")) {
+				String mediaTitle = getLine(bin);
+				for (int i = 0; i < descs.size(); i++) {
+					descs.elementAt(i).mediaTitle = mediaTitle;
+				}
+			}
 
-            // Encryption key
-            if (getToken(bin, "k=")) {
-                String encryptionKey = getLine(bin);
-                for (int i = 0; i < descs.size(); i++) {
-                    descs.elementAt(i).encryptionKey = encryptionKey;
-                }
-            }
+			// Connection information
+			if (getToken(bin, "c=")) {
+				String connectionInfo = getLine(bin);
+				for (int i = 0; i < descs.size(); i++) {
+					descs.elementAt(i).connectionInfo = connectionInfo;
+				}
+			}
 
-            // Media attributes
-            while(getToken(bin, "a=")) {
-                line = getLine(bin);
-                int index = line.indexOf(':');
-                if (index > 0) {
-                    String nameAttribute = line.substring(0, index);
-                    String valueAttribute = line.substring(index + 1);
-                    MediaAttribute attribute = new MediaAttribute(nameAttribute, valueAttribute);
+			// Bandwidth information
+			while (getToken(bin, "b=")) {
+				line = getLine(bin);
+				int index = line.indexOf(':');
+				if (index > 0) {
+					String valueAttribute = line.substring(index + 1);
+					if (line.contains("AS")) {
+						for (int i = 0; i < descs.size(); i++) {
+							descs.elementAt(i).bandwidthInfo = valueAttribute;
+						}
+					} else if (line.contains("RS")) {
+						for (int i = 0; i < descs.size(); i++) {
+							descs.elementAt(i).senderBandwidthInfo = valueAttribute;
+						}
+					} else if (line.contains("RR")) {
+						for (int i = 0; i < descs.size(); i++) {
+							descs.elementAt(i).receiverBandwidthInfo = valueAttribute;
+						}
+					}
+				}
+			}
 
-                    // Dispatch for specific payload
-                    if (valueAttribute.indexOf(' ') != -1) {
-                        // Add the attribute only for same payload
-                        boolean payloadFound = false;
-                        for (int i = 0; i < descs.size(); i++) {
-                            // Check if first element is a payload 
-                            if (valueAttribute.startsWith(descs.elementAt(i).payload)) {
-                                descs.elementAt(i).mediaAttributes.addElement(attribute);
-                                payloadFound = true;
-                            }
-                        }
-                        // Add for all if first element is not a payload
-                        if (!payloadFound) {
-                            for (int i = 0; i < descs.size(); i++) {
-                                descs.elementAt(i).mediaAttributes.addElement(attribute);
-                            }
-                        }
-                    } else {
-                        // Add for all
-                        for (int i = 0; i < descs.size(); i++) {
-                            descs.elementAt(i).mediaAttributes.addElement(attribute);
-                        }
-                    }
-                }
-            }
-            
-            // Copy in media descriptions
-            for(int i = 0; i < descs.size(); i++) {
-                mediaDescriptions.addElement((MediaDescription)descs.elementAt(i));
-            }
-        }
+			// Encryption key
+			if (getToken(bin, "k=")) {
+				String encryptionKey = getLine(bin);
+				for (int i = 0; i < descs.size(); i++) {
+					descs.elementAt(i).encryptionKey = encryptionKey;
+				}
+			}
+
+			// Media attributes
+			while (getToken(bin, "a=")) {
+				line = getLine(bin);
+				int index = line.indexOf(':');
+				if (index > 0) {
+					String nameAttribute = line.substring(0, index);
+					String valueAttribute = line.substring(index + 1);
+					MediaAttribute attribute = new MediaAttribute(nameAttribute, valueAttribute);
+
+					// Dispatch for specific payload
+					if (valueAttribute.indexOf(' ') != -1) {
+						// Add the attribute only for same payload
+						boolean payloadFound = false;
+						for (int i = 0; i < descs.size(); i++) {
+							// Check if first element is a payload
+							if (valueAttribute.startsWith(descs.elementAt(i).payload)) {
+								descs.elementAt(i).mediaAttributes.addElement(attribute);
+								payloadFound = true;
+							}
+						}
+						// Add for all if first element is not a payload
+						if (!payloadFound) {
+							for (int i = 0; i < descs.size(); i++) {
+								descs.elementAt(i).mediaAttributes.addElement(attribute);
+							}
+						}
+					} else {
+						// Add for all
+						for (int i = 0; i < descs.size(); i++) {
+							descs.elementAt(i).mediaAttributes.addElement(attribute);
+						}
+					}
+				}
+			}
+
+			// Copy in media descriptions
+			for (int i = 0; i < descs.size(); i++) {
+				mediaDescriptions.addElement((MediaDescription) descs.elementAt(i));
+			}
+		}
 	}
 
 	/**
 	 * Returns session attribute
 	 * 
-	 * @param name Attribute name
+	 * @param name
+	 *            Attribute name
 	 * @return Attribute
 	 */
 	public MediaAttribute getSessionAttribute(String name) {
@@ -291,14 +293,15 @@ public class SdpParser extends Parser {
 	/**
 	 * Returns a media description
 	 * 
-	 * @param name Media name
+	 * @param name
+	 *            Media name
 	 * @return Media
 	 */
 	public MediaDescription getMediaDescription(String name) {
 		MediaDescription description = null;
 		if (mediaDescriptions != null) {
 			for (int i = 0; i < mediaDescriptions.size(); i++) {
-				MediaDescription entry = (MediaDescription)mediaDescriptions.elementAt(i);
+				MediaDescription entry = (MediaDescription) mediaDescriptions.elementAt(i);
 				if (entry.name.equals(name)) {
 					description = entry;
 					break;
@@ -311,14 +314,15 @@ public class SdpParser extends Parser {
 	/**
 	 * Returns media descriptions
 	 * 
-	 * @param name Media name
+	 * @param name
+	 *            Media name
 	 * @return Medias
 	 */
 	public Vector<MediaDescription> getMediaDescriptions(String name) {
 		Vector<MediaDescription> result = new Vector<MediaDescription>();
 		if (mediaDescriptions != null) {
 			for (int i = 0; i < mediaDescriptions.size(); i++) {
-				MediaDescription entry = (MediaDescription)mediaDescriptions.elementAt(i);
+				MediaDescription entry = (MediaDescription) mediaDescriptions.elementAt(i);
 				if (entry.name.equals(name)) {
 					result.add(entry);
 				}

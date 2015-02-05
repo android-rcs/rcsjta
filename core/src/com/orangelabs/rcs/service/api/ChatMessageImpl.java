@@ -26,7 +26,8 @@ public class ChatMessageImpl extends IChatMessage.Stub {
 	/**
 	 * Constructor
 	 *
-	 * @param persistentStorage ChatMessagePersistedStorageAccessor
+	 * @param persistentStorage
+	 *            ChatMessagePersistedStorageAccessor
 	 */
 	public ChatMessageImpl(ChatMessagePersistedStorageAccessor persistentStorage) {
 		mPersistentStorage = persistentStorage;

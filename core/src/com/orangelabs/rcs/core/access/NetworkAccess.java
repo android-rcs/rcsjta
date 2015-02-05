@@ -24,17 +24,17 @@ package com.orangelabs.rcs.core.access;
  * @author jexa7410
  */
 public abstract class NetworkAccess {
-	
-    /**
-     * Local IP address given to the network access
-     */
+
+	/**
+	 * Local IP address given to the network access
+	 */
 	protected String ipAddress = null;
 
 	/**
 	 * Type of access
 	 */
 	protected String type = null;
-	
+
 	/**
 	 * Constructor
 	 */
@@ -62,18 +62,19 @@ public abstract class NetworkAccess {
 	 * 
 	 * @return Name
 	 */
-	public abstract String getNetworkName();	
-	
+	public abstract String getNetworkName();
+
 	/**
-     * Connect to the network access
-     * 
-     * @param ipAddress Local IP address
-     */
-    public abstract void connect(String ipAddress);
-    
+	 * Connect to the network access
+	 * 
+	 * @param ipAddress
+	 *            Local IP address
+	 */
+	public abstract void connect(String ipAddress);
+
 	/**
-     * Disconnect from the network access
-     */
-    public abstract void disconnect();
-    
+	 * Disconnect from the network access
+	 */
+	public abstract void disconnect();
+
 }

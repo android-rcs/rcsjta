@@ -27,7 +27,7 @@ public class ImdnUtils {
 	 * IMDN notification disposition header
 	 */
 	public static final String HEADER_IMDN_DISPO_NOTIF = "imdn.Disposition-Notification";
-	
+
 	/**
 	 * IMDN message ID header
 	 */

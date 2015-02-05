@@ -23,35 +23,36 @@ import java.util.Map;
 
 public class DatabaseUtils {
 
-    private static final Map<String, Integer> sModeBits = new HashMap<String, Integer>();;
-    static {
-        sModeBits.put("r", ParcelFileDescriptor.MODE_READ_ONLY);
-        sModeBits.put("w", ParcelFileDescriptor.MODE_WRITE_ONLY
-                | ParcelFileDescriptor.MODE_CREATE | ParcelFileDescriptor.MODE_TRUNCATE);
-        sModeBits.put("wt", ParcelFileDescriptor.MODE_WRITE_ONLY
-                | ParcelFileDescriptor.MODE_CREATE | ParcelFileDescriptor.MODE_TRUNCATE);
-        sModeBits.put("wa", ParcelFileDescriptor.MODE_WRITE_ONLY | ParcelFileDescriptor.MODE_CREATE
-                | ParcelFileDescriptor.MODE_APPEND);
-        sModeBits.put("rw", ParcelFileDescriptor.MODE_READ_WRITE | ParcelFileDescriptor.MODE_CREATE);
-        sModeBits.put("rwt", ParcelFileDescriptor.MODE_READ_WRITE | ParcelFileDescriptor.MODE_CREATE
-                | ParcelFileDescriptor.MODE_TRUNCATE);
-    }
+	private static final Map<String, Integer> sModeBits = new HashMap<String, Integer>();;
+	static {
+		sModeBits.put("r", ParcelFileDescriptor.MODE_READ_ONLY);
+		sModeBits.put("w", ParcelFileDescriptor.MODE_WRITE_ONLY | ParcelFileDescriptor.MODE_CREATE
+				| ParcelFileDescriptor.MODE_TRUNCATE);
+		sModeBits.put("wt", ParcelFileDescriptor.MODE_WRITE_ONLY | ParcelFileDescriptor.MODE_CREATE
+				| ParcelFileDescriptor.MODE_TRUNCATE);
+		sModeBits.put("wa", ParcelFileDescriptor.MODE_WRITE_ONLY | ParcelFileDescriptor.MODE_CREATE
+				| ParcelFileDescriptor.MODE_APPEND);
+		sModeBits
+				.put("rw", ParcelFileDescriptor.MODE_READ_WRITE | ParcelFileDescriptor.MODE_CREATE);
+		sModeBits.put("rwt", ParcelFileDescriptor.MODE_READ_WRITE
+				| ParcelFileDescriptor.MODE_CREATE | ParcelFileDescriptor.MODE_TRUNCATE);
+	}
 
-    public static String[] appendSelectionArgs(String[] selectionArgs,
-            String[] selectionArgsToAppend) {
-        String[] resultingSelectionArgs = new String[selectionArgs.length
-                + selectionArgsToAppend.length];
-        System.arraycopy(selectionArgs, 0, resultingSelectionArgs, 0, selectionArgs.length);
-        System.arraycopy(selectionArgsToAppend, 0, resultingSelectionArgs, selectionArgs.length,
-                selectionArgsToAppend.length);
-        return resultingSelectionArgs;
-    }
+	public static String[] appendSelectionArgs(String[] selectionArgs,
+			String[] selectionArgsToAppend) {
+		String[] resultingSelectionArgs = new String[selectionArgs.length
+				+ selectionArgsToAppend.length];
+		System.arraycopy(selectionArgs, 0, resultingSelectionArgs, 0, selectionArgs.length);
+		System.arraycopy(selectionArgsToAppend, 0, resultingSelectionArgs, selectionArgs.length,
+				selectionArgsToAppend.length);
+		return resultingSelectionArgs;
+	}
 
-    public static int parseMode(String mode) {
-        Integer modeBits = sModeBits.get(mode);
-        if (modeBits == null) {
-            throw new IllegalArgumentException("Bad mode '" + mode + "!");
-        }
-        return modeBits.intValue();
-    }
+	public static int parseMode(String mode) {
+		Integer modeBits = sModeBits.get(mode);
+		if (modeBits == null) {
+			throw new IllegalArgumentException("Bad mode '" + mode + "!");
+		}
+		return modeBits.intValue();
+	}
 }

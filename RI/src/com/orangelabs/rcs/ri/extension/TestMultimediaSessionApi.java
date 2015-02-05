@@ -38,41 +38,41 @@ import com.orangelabs.rcs.ri.extension.streaming.StreamingSessionList;
  * @author Jean-Marc AUFFRET
  */
 public class TestMultimediaSessionApi extends ListActivity {
-	@Override
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         // Set items
         String[] items = {
-    		getString(R.string.menu_initiate_messaging_session),
-    		getString(R.string.menu_messaging_sessions_list),
-    		getString(R.string.menu_initiate_streaming_session),
-    		getString(R.string.menu_streaming_sessions_list)
-    	};
+                getString(R.string.menu_initiate_messaging_session),
+                getString(R.string.menu_messaging_sessions_list),
+                getString(R.string.menu_initiate_streaming_session),
+                getString(R.string.menu_streaming_sessions_list)
+        };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        switch(position) {
-	        case 0:
-            	startActivity(new Intent(this, InitiateMessagingSession.class));
-	            break;
-	            
-	        case 1:
-            	startActivity(new Intent(this, MessagingSessionList.class));
-	            break;
+        switch (position) {
+            case 0:
+                startActivity(new Intent(this, InitiateMessagingSession.class));
+                break;
 
-	        case 2:
-            	startActivity(new Intent(this, InitiateStreamingSession.class));
-	            break;
-	            
-	        case 3:
-            	startActivity(new Intent(this, StreamingSessionList.class));
-	            break;
+            case 1:
+                startActivity(new Intent(this, MessagingSessionList.class));
+                break;
+
+            case 2:
+                startActivity(new Intent(this, InitiateStreamingSession.class));
+                break;
+
+            case 3:
+                startActivity(new Intent(this, StreamingSessionList.class));
+                break;
         }
     }
 }

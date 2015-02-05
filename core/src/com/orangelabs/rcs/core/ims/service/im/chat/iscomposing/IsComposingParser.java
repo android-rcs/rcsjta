@@ -33,35 +33,33 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * Is composing event parser (RFC3994)
  */
 public class IsComposingParser extends DefaultHandler {
-	/* IsComposing SAMPLE:
-		<?xml version="1.0" encoding="UTF-8"?>
-		<isComposing xmlns="urn:ietf:params:xml:ns:im-iscomposing" 
-			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			xsi:schemaLocation="urn:ietf:params:xml:ns:im-composing iscomposing.xsd">
-			<state>idle</state>
-			<lastactive>2003-01-27T10:43:00Z</lastactive>
-			<contenttype>audio</contenttype>
-		</isComposing>
-	*/
+	/*
+	 * IsComposing SAMPLE: <?xml version="1.0" encoding="UTF-8"?> <isComposing
+	 * xmlns="urn:ietf:params:xml:ns:im-iscomposing"
+	 * xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	 * xsi:schemaLocation="urn:ietf:params:xml:ns:im-composing iscomposing.xsd"> <state>idle</state>
+	 * <lastactive>2003-01-27T10:43:00Z</lastactive> <contenttype>audio</contenttype> </isComposing>
+	 */
 	private StringBuffer accumulator = null;
-	
-	private IsComposingInfo isComposingInfo = null;
-	
-	/**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    /**
-     * Constructor
-     * 
-     * @param inputSource Input source
-     * @throws Exception
-     */
-    public IsComposingParser(InputSource inputSource) throws Exception {
-    	SAXParserFactory factory = SAXParserFactory.newInstance();
-        SAXParser parser = factory.newSAXParser();
-        parser.parse(inputSource, this);
+	private IsComposingInfo isComposingInfo = null;
+
+	/**
+	 * The logger
+	 */
+	private Logger logger = Logger.getLogger(this.getClass().getName());
+
+	/**
+	 * Constructor
+	 * 
+	 * @param inputSource
+	 *            Input source
+	 * @throws Exception
+	 */
+	public IsComposingParser(InputSource inputSource) throws Exception {
+		SAXParserFactory factory = SAXParserFactory.newInstance();
+		SAXParser parser = factory.newSAXParser();
+		parser.parse(inputSource, this);
 	}
 
 	public void startDocument() {
@@ -75,13 +73,13 @@ public class IsComposingParser extends DefaultHandler {
 		accumulator.append(buffer, start, length);
 	}
 
-	public void startElement(String namespaceURL, String localName,	String qname, Attributes attr) {
+	public void startElement(String namespaceURL, String localName, String qname, Attributes attr) {
 		accumulator.setLength(0);
 
 		if (localName.equals("isComposing")) {
 			isComposingInfo = new IsComposingInfo();
-		} 
-		
+		}
+
 	}
 
 	public void endElement(String namespaceURL, String localName, String qname) {
@@ -89,23 +87,19 @@ public class IsComposingParser extends DefaultHandler {
 			if (isComposingInfo != null) {
 				isComposingInfo.setState(accumulator.toString());
 			}
-		} else
-		if (localName.equals("lastactive")) {
+		} else if (localName.equals("lastactive")) {
 			if (isComposingInfo != null) {
 				isComposingInfo.setLastActiveDate(accumulator.toString());
 			}
-		} else
-		if (localName.equals("contenttype")) {
+		} else if (localName.equals("contenttype")) {
 			if (isComposingInfo != null) {
 				isComposingInfo.setContentType(accumulator.toString());
 			}
-		} else		
-		if (localName.equals("refresh")) {
+		} else if (localName.equals("refresh")) {
 			if (isComposingInfo != null) {
 				isComposingInfo.setRefreshTime(accumulator.toString());
 			}
-		} else
-		if (localName.equals("isComposing")) {
+		} else if (localName.equals("isComposing")) {
 			if (logger.isActivated()) {
 				logger.debug("Watcher document is complete");
 			}
@@ -121,21 +115,19 @@ public class IsComposingParser extends DefaultHandler {
 	public void warning(SAXParseException exception) {
 		if (logger.isActivated()) {
 			logger.error("Warning: line " + exception.getLineNumber() + ": "
-				+ exception.getMessage());
+					+ exception.getMessage());
 		}
 	}
 
 	public void error(SAXParseException exception) {
 		if (logger.isActivated()) {
-			logger.error("Error: line " + exception.getLineNumber() + ": "
-				+ exception.getMessage());
+			logger.error("Error: line " + exception.getLineNumber() + ": " + exception.getMessage());
 		}
 	}
 
 	public void fatalError(SAXParseException exception) throws SAXException {
 		if (logger.isActivated()) {
-			logger.error("Fatal: line " + exception.getLineNumber() + ": "
-				+ exception.getMessage());
+			logger.error("Fatal: line " + exception.getLineNumber() + ": " + exception.getMessage());
 		}
 		throw exception;
 	}

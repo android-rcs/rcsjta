@@ -33,9 +33,12 @@ public abstract class Appender {
 	/**
 	 * Print a trace
 	 *
-	 * @param classname Classname
-	 * @param level Trace level
-	 * @param trace Trace
+	 * @param classname
+	 *            Classname
+	 * @param level
+	 *            Trace level
+	 * @param trace
+	 *            Trace
 	 */
 	public abstract void printTrace(String classname, int level, String trace);
 }

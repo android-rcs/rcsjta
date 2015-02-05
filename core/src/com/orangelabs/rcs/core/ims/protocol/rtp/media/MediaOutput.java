@@ -18,7 +18,6 @@
 
 package com.orangelabs.rcs.core.ims.protocol.rtp.media;
 
-
 /**
  * Media output (e.g. screen, headset)
  * 
@@ -31,7 +30,7 @@ public interface MediaOutput {
 	 * @throws MediaException
 	 */
 	public void open() throws MediaException;
-	
+
 	/**
 	 * Close the renderer
 	 */
@@ -40,7 +39,8 @@ public interface MediaOutput {
 	/**
 	 * Write a media sample
 	 * 
-	 * @param sample Media sample
+	 * @param sample
+	 *            Media sample
 	 * @throws MediaException
 	 */
 	public void writeSample(MediaSample sample) throws MediaException;

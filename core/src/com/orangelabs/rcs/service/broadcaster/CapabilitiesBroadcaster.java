@@ -26,9 +26,8 @@ import android.os.RemoteCallbackList;
 import java.util.HashMap;
 
 /**
- * CapabilitiesBroadcaster maintains the registering and unregistering of
- * ICapabilitiesListener and also performs broadcast events on these listeners
- * upon the trigger of corresponding callbacks.
+ * CapabilitiesBroadcaster maintains the registering and unregistering of ICapabilitiesListener and
+ * also performs broadcast events on these listeners upon the trigger of corresponding callbacks.
  */
 public class CapabilitiesBroadcaster implements ICapabilitiesBroadcaster {
 

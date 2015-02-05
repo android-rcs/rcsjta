@@ -32,7 +32,7 @@ public class PidfDocument {
 	private Vector<Tuple> tuplesList = new Vector<Tuple>();
 	private Geopriv geopriv = null;
 	private Person person = null;
-	
+
 	public PidfDocument(String entity) {
 		this.entity = entity;
 	}
@@ -40,33 +40,32 @@ public class PidfDocument {
 	public String getEntity() {
 		return entity;
 	}
-	
+
 	public Person getPerson() {
 		return person;
 	}
-	
+
 	public void setPerson(Person newPerson) {
 		if ((person == null) || (newPerson.getTimestamp() >= person.getTimestamp())) {
 			person = newPerson;
-		}		
+		}
 	}
-	
+
 	public void addTuple(Tuple newTuple) {
 		Tuple foundTuple = null;
-		String newServiceId = newTuple.getService().getId();  
-		for(int i=0; i < tuplesList.size(); i++) {
-			Tuple tuple = (Tuple)tuplesList.elementAt(i);
+		String newServiceId = newTuple.getService().getId();
+		for (int i = 0; i < tuplesList.size(); i++) {
+			Tuple tuple = (Tuple) tuplesList.elementAt(i);
 			String serviceId = tuple.getService().getId();
 			if (serviceId.equalsIgnoreCase(newServiceId)) {
 				foundTuple = tuple;
 				break;
 			}
 		}
-		
+
 		if (foundTuple == null) {
 			tuplesList.addElement(newTuple);
-		} else
-		if (newTuple.getTimestamp() >= foundTuple.getTimestamp()) {
+		} else if (newTuple.getTimestamp() >= foundTuple.getTimestamp()) {
 			tuplesList.remove(foundTuple);
 			tuplesList.addElement(newTuple);
 		}

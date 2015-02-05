@@ -42,7 +42,7 @@ import com.orangelabs.rcs.utils.NetworkRessourceManager;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
- * Generic SIP RTP session 
+ * Generic SIP RTP session
  * 
  * @author jexa7410
  */
@@ -51,48 +51,52 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
 	 * RTP payload format
 	 */
 	private DataFormat format = new DataFormat();
-	
+
 	/**
 	 * Local RTP port
 	 */
 	private int localRtpPort = -1;
-    
-    /**
+
+	/**
 	 * Data sender
 	 */
 	private DataSender dataSender = new DataSender();
-	
-    /**
-     * Data receiver
-     */
-    private DataReceiver dataReceiver = new DataReceiver(this);	
-	
+
+	/**
+	 * Data receiver
+	 */
+	private DataReceiver dataReceiver = new DataReceiver(this);
+
 	/**
 	 * RTP receiver
 	 */
 	private MediaRtpReceiver rtpReceiver;
-	
+
 	/**
 	 * RTP sender
 	 */
 	private MediaRtpSender rtpSender;
-	
+
 	/**
 	 * Startup flag
 	 */
 	private boolean started = false;
-	
-	/**
-     * The logger
-     */
-    private final static Logger logger = Logger.getLogger(GenericSipRtpSession.class.getSimpleName());
 
-    /**
+	/**
+	 * The logger
+	 */
+	private final static Logger logger = Logger.getLogger(GenericSipRtpSession.class
+			.getSimpleName());
+
+	/**
 	 * Constructor
 	 * 
-	 * @param parent IMS service
-	 * @param contact Remote contact Id
-	 * @param featureTag Feature tag
+	 * @param parent
+	 *            IMS service
+	 * @param contact
+	 *            Remote contact Id
+	 * @param featureTag
+	 *            Feature tag
 	 */
 	public GenericSipRtpSession(ImsService parent, ContactId contact, String featureTag) {
 		super(parent, contact, featureTag);
@@ -100,20 +104,20 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
 		// Get local port
 		localRtpPort = NetworkRessourceManager.generateLocalRtpPort();
 
-        // Create the RTP sender & receiver
+		// Create the RTP sender & receiver
 		rtpReceiver = new MediaRtpReceiver(localRtpPort);
 		rtpSender = new MediaRtpSender(format, localRtpPort);
 	}
 
-    /**
-     * Get local port
-     * 
-     * @return RTP port
-     */
-    public int getLocalRtpPort() {
-    	return localRtpPort;
-    }	
-	
+	/**
+	 * Get local port
+	 * 
+	 * @return RTP port
+	 */
+	public int getLocalRtpPort() {
+		return localRtpPort;
+	}
+
 	/**
 	 * Returns the RTP receiver
 	 * 
@@ -121,8 +125,8 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
 	 */
 	public MediaRtpReceiver getRtpReceiver() {
 		return rtpReceiver;
-	}	
-	
+	}
+
 	/**
 	 * Returns the RTP sender
 	 * 
@@ -131,7 +135,7 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
 	public MediaRtpSender getRtpSender() {
 		return rtpSender;
 	}
-	
+
 	/**
 	 * Returns the RTP format
 	 * 
@@ -139,124 +143,126 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
 	 */
 	public Format getRtpFormat() {
 		return format;
-	}	
-	
-    /**
-     * Generate SDP
-     */
-    public String generateSdp() {
-    	String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
-    	String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
-    	return "v=0" + SipUtils.CRLF +
-            "o=- " + ntpTime + " " + ntpTime + " " + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-            "s=-" + SipUtils.CRLF +
-			"c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF +
-            "t=0 0" + SipUtils.CRLF +			
-            "m=application " + localRtpPort + " RTP/AVP " + getRtpFormat().getPayload() + SipUtils.CRLF + 
-            "a=rtpmap:" + getRtpFormat().getPayload() + " " + getRtpFormat().getCodec() + "/90000" + SipUtils.CRLF + // TODO: hardcoded value for clock rate and codec
-			"a=sendrecv" + SipUtils.CRLF;
-    }
-    
-    /**
-     * Prepare media session
-     * 
-     * @throws Exception 
-     */
-    public void prepareMediaSession() throws Exception {
-        // Parse the remote SDP part
-        SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(
-                UTF8));
-        MediaDescription mediaApp = parser.getMediaDescription("application");
-        String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaApp);
-        int remotePort = mediaApp.port;
+	}
 
-        // Prepare media
-        rtpReceiver.prepareSession(remoteHost, remotePort, dataReceiver, format, this);
-    	rtpSender.prepareSession(dataSender, remoteHost, remotePort, rtpReceiver.getInputStream(), this);
-    }
+	/**
+	 * Generate SDP
+	 */
+	public String generateSdp() {
+		String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
+		String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
+		return "v=0" + SipUtils.CRLF + "o=- " + ntpTime + " " + ntpTime + " "
+				+ SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF + "s=-" + SipUtils.CRLF
+				+ "c=" + SdpUtils.formatAddressType(ipAddress) + SipUtils.CRLF + "t=0 0"
+				+ SipUtils.CRLF + "m=application " + localRtpPort + " RTP/AVP "
+				+ getRtpFormat().getPayload() + SipUtils.CRLF + "a=rtpmap:"
+				+ getRtpFormat().getPayload() + " " + getRtpFormat().getCodec() + "/90000"
+				+ SipUtils.CRLF + // TODO: hardcoded value for clock rate and codec
+				"a=sendrecv" + SipUtils.CRLF;
+	}
 
-    /**
-     * Start media session
-     * 
-     * @throws Exception 
-     */
-    public void startMediaSession() throws Exception {
-    	synchronized(this) {
-    		// Start media
-	    	rtpReceiver.startSession();
-	    	rtpSender.startSession();
-	    	
-	    	started = true;
-    	}
-    }
+	/**
+	 * Prepare media session
+	 * 
+	 * @throws Exception
+	 */
+	public void prepareMediaSession() throws Exception {
+		// Parse the remote SDP part
+		SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
+		MediaDescription mediaApp = parser.getMediaDescription("application");
+		String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaApp);
+		int remotePort = mediaApp.port;
 
-    /**
-     * Close media session
-     */
-    public void closeMediaSession() {
-    	synchronized(this) {
-	    	started = false;
-	    	
-    		// Stop media
-	    	rtpSender.stopSession();
-	    	rtpReceiver.stopSession();
-    	}
-    }
+		// Prepare media
+		rtpReceiver.prepareSession(remoteHost, remotePort, dataReceiver, format, this);
+		rtpSender.prepareSession(dataSender, remoteHost, remotePort, rtpReceiver.getInputStream(),
+				this);
+	}
 
-    /**
-     * Sends a payload in real time
-     * 
-     * @param content Payload content
+	/**
+	 * Start media session
+	 * 
+	 * @throws Exception
+	 */
+	public void startMediaSession() throws Exception {
+		synchronized (this) {
+			// Start media
+			rtpReceiver.startSession();
+			rtpSender.startSession();
+
+			started = true;
+		}
+	}
+
+	/**
+	 * Close media session
+	 */
+	public void closeMediaSession() {
+		synchronized (this) {
+			started = false;
+
+			// Stop media
+			rtpSender.stopSession();
+			rtpReceiver.stopSession();
+		}
+	}
+
+	/**
+	 * Sends a payload in real time
+	 * 
+	 * @param content
+	 *            Payload content
 	 * @return Returns true if sent successfully else returns false
-     */
-    public boolean sendPlayload(byte[] content) {
-    	if (started) {
-    		dataSender.addFrame(content, System.currentTimeMillis());
-    		return true;
-    	} else {
-    		return false;
-    	}
-    }
-    
-    /**
-     * Invoked when the RTP stream was aborted
-     */
-    public void rtpStreamAborted() {
-        if (isSessionInterrupted()) {
-            return;
-        }
+	 */
+	public boolean sendPlayload(byte[] content) {
+		if (started) {
+			dataSender.addFrame(content, System.currentTimeMillis());
+			return true;
+		} else {
+			return false;
+		}
+	}
 
-        if (logger.isActivated()) {
-            logger.error("Media has failed: network failure");
-        }
+	/**
+	 * Invoked when the RTP stream was aborted
+	 */
+	public void rtpStreamAborted() {
+		if (isSessionInterrupted()) {
+			return;
+		}
 
-        // Close the media session
-        closeMediaSession();
+		if (logger.isActivated()) {
+			logger.error("Media has failed: network failure");
+		}
 
-        // Terminate session
-        terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+		// Close the media session
+		closeMediaSession();
 
-        // Remove the current session
-        removeSession();
+		// Terminate session
+		terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
 
-        ContactId contact = getRemoteContact();
-        for (int j = 0; j < getListeners().size(); j++) {
-            ((SipSessionListener) getListeners().get(j))
-                    .handleSessionError(contact, new SipSessionError(SipSessionError.MEDIA_FAILED));
-        }
-    }
-    
-    /**
-     * Receive media data
-     *
-     * @param data Data
-     */
-    public void receiveData(byte[] data) {
-    	ContactId contact = getRemoteContact();
-        for (int j = 0; j < getListeners().size(); j++) {
-            ((SipSessionListener) getListeners().get(j)).handleReceiveData(contact, data);
-        }
-    }
+		// Remove the current session
+		removeSession();
+
+		ContactId contact = getRemoteContact();
+		for (int j = 0; j < getListeners().size(); j++) {
+			((SipSessionListener) getListeners().get(j)).handleSessionError(contact,
+					new SipSessionError(SipSessionError.MEDIA_FAILED));
+		}
+	}
+
+	/**
+	 * Receive media data
+	 *
+	 * @param data
+	 *            Data
+	 */
+	public void receiveData(byte[] data) {
+		ContactId contact = getRemoteContact();
+		for (int j = 0; j < getListeners().size(); j++) {
+			((SipSessionListener) getListeners().get(j)).handleReceiveData(contact, data);
+		}
+	}
 
 	@Override
 	public void startSession() {

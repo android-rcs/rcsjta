@@ -32,27 +32,27 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author JM. Auffret
  */
 public class MobileNetworkInterface extends ImsNetworkInterface {
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+	/**
+	 * The logger
+	 */
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    /**
-     * Constructor
-     *
-     * @param imsModule IMS module
-     * @throws CoreException
-     */
-    public MobileNetworkInterface(ImsModule imsModule, RcsSettings rcsSettings) throws CoreException {
-    	super(imsModule, ConnectivityManager.TYPE_MOBILE,
-    			new MobileNetworkAccess(),
-    			rcsSettings.getImsProxyAddrForMobile(),
-    			rcsSettings.getImsProxyPortForMobile(),
-    			rcsSettings.getSipDefaultProtocolForMobile(),
-    			rcsSettings.getImsAuthenticationProcedureForMobile());
+	/**
+	 * Constructor
+	 *
+	 * @param imsModule
+	 *            IMS module
+	 * @throws CoreException
+	 */
+	public MobileNetworkInterface(ImsModule imsModule, RcsSettings rcsSettings)
+			throws CoreException {
+		super(imsModule, ConnectivityManager.TYPE_MOBILE, new MobileNetworkAccess(), rcsSettings
+				.getImsProxyAddrForMobile(), rcsSettings.getImsProxyPortForMobile(), rcsSettings
+				.getSipDefaultProtocolForMobile(), rcsSettings
+				.getImsAuthenticationProcedureForMobile());
 
-    	if (logger.isActivated()) {
-    		logger.info("Mobile network interface has been loaded");
-    	}
-    }
+		if (logger.isActivated()) {
+			logger.info("Mobile network interface has been loaded");
+		}
+	}
 }

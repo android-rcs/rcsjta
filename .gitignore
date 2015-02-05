@@ -6,3 +6,4 @@ rcs_api.jar
 project.properties
 *.classpath
 *.project
+build

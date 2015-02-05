@@ -39,7 +39,8 @@ public class FifoBuffer {
 	/**
 	 * Add a message in the buffer
 	 *
-	 * @param obj Message
+	 * @param obj
+	 *            Message
 	 */
 	public synchronized void putMessage(Object obj) {
 		fifo.addElement(obj);
@@ -48,8 +49,8 @@ public class FifoBuffer {
 	}
 
 	/**
-	 * Read a message in the buffer. This is a blocking method until a
-	 * message is received in the buffer.
+	 * Read a message in the buffer. This is a blocking method until a message is received in the
+	 * buffer.
 	 * 
 	 * @return Message
 	 */
@@ -72,10 +73,11 @@ public class FifoBuffer {
 	}
 
 	/**
-	 * Read a message in the buffer. This is a blocking method until a timeout
-	 * occurs or a message is received in the buffer.
+	 * Read a message in the buffer. This is a blocking method until a timeout occurs or a message
+	 * is received in the buffer.
 	 * 
-	 * @param timeout Timeout
+	 * @param timeout
+	 *            Timeout
 	 * @return Message
 	 */
 	public synchronized Object getMessage(int timeout) {

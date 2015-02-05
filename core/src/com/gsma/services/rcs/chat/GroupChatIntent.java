@@ -27,13 +27,14 @@ package com.gsma.services.rcs.chat;
  * @author Jean-Marc AUFFRET
  */
 public class GroupChatIntent {
-    /**
-     * Broadcast action: a new group chat invitation has been received.
-     * <p>Intent includes the following extras:
-     * <ul>
-     * <li> {@link #EXTRA_CHAT_ID} containing the unique ID of the chat conversation.
-     * </ul>
-     */
+	/**
+	 * Broadcast action: a new group chat invitation has been received.
+	 * <p>
+	 * Intent includes the following extras:
+	 * <ul>
+	 * <li> {@link #EXTRA_CHAT_ID} containing the unique ID of the chat conversation.
+	 * </ul>
+	 */
 	public final static String ACTION_NEW_INVITATION = "com.gsma.services.rcs.chat.action.NEW_GROUP_CHAT";
 
 	/**

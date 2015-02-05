@@ -46,74 +46,78 @@ public class AndroidNetworkFactory extends NetworkFactory {
 	/**
 	 * Returns the local IP address of a given network interface
 	 * 
-	 * @param dnsEntry remote address to find an according local socket address
-     * @param type the type of the network interface, should be either
-     *        {@link android.net.ConnectivityManager#TYPE_WIFI} or {@link android.net.ConnectivityManager#TYPE_MOBILE}
+	 * @param dnsEntry
+	 *            remote address to find an according local socket address
+	 * @param type
+	 *            the type of the network interface, should be either
+	 *            {@link android.net.ConnectivityManager#TYPE_WIFI} or
+	 *            {@link android.net.ConnectivityManager#TYPE_MOBILE}
 	 * @return Address
 	 */
 	// Changed by Deutsche Telekom
-    public String getLocalIpAddress(DnsResolvedFields dnsEntry, int type) {
-        String ipAddress = null;
-        try {
-            // What kind of remote address (P-CSCF) are we trying to reach?
-            boolean isIpv4 = dnsEntry != null ? InetAddressUtils.isIPv4Address(dnsEntry.ipAddress) : true;
+	public String getLocalIpAddress(DnsResolvedFields dnsEntry, int type) {
+		String ipAddress = null;
+		try {
+			// What kind of remote address (P-CSCF) are we trying to reach?
+			boolean isIpv4 = dnsEntry != null ? InetAddressUtils.isIPv4Address(dnsEntry.ipAddress)
+					: true;
 
-            // check all available interfaces
-            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); (en != null) && en.hasMoreElements();) {
-                NetworkInterface netIntf = (NetworkInterface) en.nextElement();
-                for (Enumeration<InetAddress> addr = netIntf.getInetAddresses(); addr.hasMoreElements();) {
-                    InetAddress inetAddress = addr.nextElement();
-                    ipAddress = IpAddressUtils.extractHostAddress(inetAddress.getHostAddress());
-                    // if IP address version doesn't match to remote address
-                    // version then skip
-                    if (!inetAddress.isLoopbackAddress()
-                            && !inetAddress.isLinkLocalAddress()
-                            && (InetAddressUtils.isIPv4Address(ipAddress) == isIpv4)) {
-                        String intfName = netIntf.getDisplayName()
-                                .toLowerCase();
-                        // some devices do list several interfaces though only
-                        // one is active
-                        if (((type == ConnectivityManager.TYPE_WIFI) && intfName
-                                .startsWith("wlan"))
-                                || ((type == ConnectivityManager.TYPE_MOBILE) && !intfName
-                                .startsWith("wlan"))) {
-                            return ipAddress;
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("getLocalIpAddress failed with ", e);
-            }
-        }
-        return ipAddress;
-    }
+			// check all available interfaces
+			for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); (en != null)
+					&& en.hasMoreElements();) {
+				NetworkInterface netIntf = (NetworkInterface) en.nextElement();
+				for (Enumeration<InetAddress> addr = netIntf.getInetAddresses(); addr
+						.hasMoreElements();) {
+					InetAddress inetAddress = addr.nextElement();
+					ipAddress = IpAddressUtils.extractHostAddress(inetAddress.getHostAddress());
+					// if IP address version doesn't match to remote address
+					// version then skip
+					if (!inetAddress.isLoopbackAddress() && !inetAddress.isLinkLocalAddress()
+							&& (InetAddressUtils.isIPv4Address(ipAddress) == isIpv4)) {
+						String intfName = netIntf.getDisplayName().toLowerCase();
+						// some devices do list several interfaces though only
+						// one is active
+						if (((type == ConnectivityManager.TYPE_WIFI) && intfName.startsWith("wlan"))
+								|| ((type == ConnectivityManager.TYPE_MOBILE) && !intfName
+										.startsWith("wlan"))) {
+							return ipAddress;
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("getLocalIpAddress failed with ", e);
+			}
+		}
+		return ipAddress;
+	}
 
-    /**
-     * Create a datagram connection
-     * 
-     * @return Datagram connection
-     */
+	/**
+	 * Create a datagram connection
+	 * 
+	 * @return Datagram connection
+	 */
 	public DatagramConnection createDatagramConnection() {
 		return new AndroidDatagramConnection();
 	}
 
-    /**
-     * Create a datagram connection with a specific SO timeout
-     *
-     * @param timeout SO timeout
-     * @return Datagram connection
-     */
-    public DatagramConnection createDatagramConnection(int timeout) {
-        return new AndroidDatagramConnection(timeout);
-    }
+	/**
+	 * Create a datagram connection with a specific SO timeout
+	 *
+	 * @param timeout
+	 *            SO timeout
+	 * @return Datagram connection
+	 */
+	public DatagramConnection createDatagramConnection(int timeout) {
+		return new AndroidDatagramConnection(timeout);
+	}
 
-    /**
-     * Create a socket client connection
-     * 
-     * @return Socket connection
-     */
+	/**
+	 * Create a socket client connection
+	 * 
+	 * @return Socket connection
+	 */
 	public SocketConnection createSocketClientConnection() {
 		return new AndroidSocketConnection();
 	}
@@ -126,7 +130,7 @@ public class AndroidNetworkFactory extends NetworkFactory {
 	public SocketConnection createSecureSocketClientConnection() {
 		return new AndroidSecureSocketConnection();
 	}
-	
+
 	// Changed by Deutsche Telekom
 	/**
 	 * Create a secure socket client connection w/o checking certificates
@@ -137,21 +141,21 @@ public class AndroidNetworkFactory extends NetworkFactory {
 	public SocketConnection createSimpleSecureSocketClientConnection(String fingerprint) {
 		return new AndroidSecureSocketConnection(fingerprint);
 	}
-	
+
 	/**
-     * Create a socket server connection
-     * 
-     * @return Socket server connection
-     */
+	 * Create a socket server connection
+	 * 
+	 * @return Socket server connection
+	 */
 	public SocketServerConnection createSocketServerConnection() {
 		return new AndroidSocketServerConnection();
 	}
 
-    /**
-     * Create an HTTP connection
-     * 
-     * @return HTTP connection
-     */
+	/**
+	 * Create an HTTP connection
+	 * 
+	 * @return HTTP connection
+	 */
 	public HttpConnection createHttpConnection() {
 		return new AndroidHttpConnection();
 	}

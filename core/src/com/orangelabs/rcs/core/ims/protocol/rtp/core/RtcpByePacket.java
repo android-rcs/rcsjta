@@ -51,15 +51,13 @@ public class RtcpByePacket extends RtcpPacket {
 	}
 
 	public int calcLength() {
-		return 4 + (ssrc.length << 2)
-				+ (reason.length <= 0 ? 0 : reason.length + 4 & -4);
+		return 4 + (ssrc.length << 2) + (reason.length <= 0 ? 0 : reason.length + 4 & -4);
 	}
 
 	public void assemble(DataOutputStream out) throws IOException {
 		out.writeByte(128 + ssrc.length);
 		out.writeByte(203);
-		out.writeShort(ssrc.length
-				+ (reason.length <= 0 ? 0 : reason.length + 4 >> 2));
+		out.writeShort(ssrc.length + (reason.length <= 0 ? 0 : reason.length + 4 >> 2));
 		for (int i = 0; i < ssrc.length; i++) {
 			out.writeInt(ssrc[i]);
 		}

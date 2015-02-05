@@ -37,7 +37,7 @@ import com.orangelabs.rcs.ri.sharing.video.TestVideoSharingApi;
  * @author Jean-Marc AUFFRET
  */
 public class TestSharingApi extends ListActivity {
-	@Override
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -46,27 +46,26 @@ public class TestSharingApi extends ListActivity {
 
         // Set items
         String[] items = {
-    		getString(R.string.menu_image_sharing),
-    		getString(R.string.menu_video_sharing),
-    		getString(R.string.menu_geoloc_sharing)
+                getString(R.string.menu_image_sharing), getString(R.string.menu_video_sharing),
+                getString(R.string.menu_geoloc_sharing)
         };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        switch(position) {
-	        case 0:
-	        	startActivity(new Intent(this, TestImageSharingApi.class));
+        switch (position) {
+            case 0:
+                startActivity(new Intent(this, TestImageSharingApi.class));
                 break;
-                
-	        case 1:
-	        	startActivity(new Intent(this, TestVideoSharingApi.class));
+
+            case 1:
+                startActivity(new Intent(this, TestVideoSharingApi.class));
                 break;
-                
-	        case 2:
-	        	startActivity(new Intent(this, TestGeolocSharingApi.class));
-                break;            
+
+            case 2:
+                startActivity(new Intent(this, TestGeolocSharingApi.class));
+                break;
         }
     }
 }

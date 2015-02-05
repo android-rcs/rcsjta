@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.sharing.image;
 
 import android.app.ListActivity;
@@ -33,7 +34,7 @@ import com.orangelabs.rcs.ri.R;
  * @author Jean-Marc AUFFRET
  */
 public class TestImageSharingApi extends ListActivity {
-	@Override
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -42,22 +43,22 @@ public class TestImageSharingApi extends ListActivity {
 
         // Set items
         String[] items = {
-    		getString(R.string.menu_initiate_image_sharing),
-    		getString(R.string.menu_image_sharing_log)
+                getString(R.string.menu_initiate_image_sharing),
+                getString(R.string.menu_image_sharing_log)
         };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        switch(position) {
-	        case 0:
-	        	startActivity(new Intent(this, InitiateImageSharing.class));
+        switch (position) {
+            case 0:
+                startActivity(new Intent(this, InitiateImageSharing.class));
                 break;
-                
-	        case 1:
-	        	startActivity(new Intent(this, ImageSharingList.class));
-                break;            
+
+            case 1:
+                startActivity(new Intent(this, ImageSharingList.class));
+                break;
         }
     }
 }

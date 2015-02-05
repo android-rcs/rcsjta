@@ -59,8 +59,8 @@ public class GroupChatLog implements IGroupChatLog {
 			ChatData.KEY_CHAT_ID).append("=? AND ").append(ChatData.KEY_STATE).append("=")
 			.append(GroupChat.State.ABORTED).append(" AND ").append(ChatData.KEY_REASON_CODE)
 			.append("=").append(GroupChat.ReasonCode.ABORTED_BY_USER).append(" AND ")
-			.append(ChatData.KEY_USER_ABORTION).append("=").append(UserAbortion.SERVER_NOT_NOTIFIED.toInt())
-			.toString();
+			.append(ChatData.KEY_USER_ABORTION).append("=")
+			.append(UserAbortion.SERVER_NOT_NOTIFIED.toInt()).toString();
 
 	private static final String SELECT_ACTIVE_GROUP_CHATS = new StringBuilder(ChatData.KEY_STATE)
 			.append("=").append(GroupChat.State.STARTED).toString();
@@ -135,11 +135,11 @@ public class GroupChatLog implements IGroupChatLog {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#addGroupChat(java.lang.String, java.lang.String, java.util.Set,
-	 * int, int)
+	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#addGroupChat(java.lang.String,
+	 * java.lang.String, java.util.Set, int, int)
 	 */
-	public void addGroupChat(String chatId, ContactId contact, String subject, Set<ParticipantInfo> participants,
-			int state, int reasonCode, Direction direction) {
+	public void addGroupChat(String chatId, ContactId contact, String subject,
+			Set<ParticipantInfo> participants, int state, int reasonCode, Direction direction) {
 		if (logger.isActivated()) {
 			logger.debug(new StringBuilder("addGroupChat; chatID=").append(chatId)
 					.append(",subject=").append(subject).append(",state").append(state)
@@ -164,7 +164,9 @@ public class GroupChatLog implements IGroupChatLog {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#acceptGroupChatNextInvitation(java.lang.String)
+	 * @see
+	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#acceptGroupChatNextInvitation(java.lang
+	 * .String)
 	 */
 	@Override
 	public void acceptGroupChatNextInvitation(String chatId) {
@@ -174,7 +176,8 @@ public class GroupChatLog implements IGroupChatLog {
 		ContentValues values = new ContentValues();
 		values.put(ChatData.KEY_USER_ABORTION, UserAbortion.SERVER_NOTIFIED.toInt());
 		String[] selectionArgs = { chatId };
-		mLocalContentResolver.update(ChatData.CONTENT_URI, values, SELECT_CHAT_ID_STATUS_REJECTED, selectionArgs);
+		mLocalContentResolver.update(ChatData.CONTENT_URI, values, SELECT_CHAT_ID_STATUS_REJECTED,
+				selectionArgs);
 		if (logger.isActivated()) {
 			logger.debug("acceptGroupChatNextInvitation (chatID=" + chatId + ")");
 		}
@@ -189,32 +192,36 @@ public class GroupChatLog implements IGroupChatLog {
 		ContentValues values = new ContentValues();
 		values.put(ChatData.KEY_STATE, state);
 		values.put(ChatData.KEY_REASON_CODE, reasonCode);
-		String selectionArgs[] = new String[] {
-			chatId
-		};
+		String selectionArgs[] = new String[] { chatId };
 		mLocalContentResolver.update(ChatData.CONTENT_URI, values, SELECT_CHAT_ID, selectionArgs);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#updateGroupChatParticipant(java.lang.String, java.util.Set)
+	 * @see
+	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#updateGroupChatParticipant(java.lang.
+	 * String, java.util.Set)
 	 */
 	@Override
 	public void updateGroupChatParticipant(String chatId, Set<ParticipantInfo> participants) {
 		String encodedParticipants = writeParticipantInfo(participants);
 		if (logger.isActivated()) {
-			logger.debug("updateGroupChatParticipant (chatId=" + chatId + ") (participants=" + encodedParticipants + ")");
+			logger.debug("updateGroupChatParticipant (chatId=" + chatId + ") (participants="
+					+ encodedParticipants + ")");
 		}
 		ContentValues values = new ContentValues();
 		values.put(ChatData.KEY_PARTICIPANTS, encodedParticipants);
-		mLocalContentResolver.update(ChatData.CONTENT_URI, values, ChatData.KEY_CHAT_ID + " = '" + chatId + "'", null);
+		mLocalContentResolver.update(ChatData.CONTENT_URI, values, ChatData.KEY_CHAT_ID + " = '"
+				+ chatId + "'", null);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#updateGroupChatRejoinIdOnSessionStart(java.lang.String, java.lang.String)
+	 * @see
+	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#updateGroupChatRejoinIdOnSessionStart
+	 * (java.lang.String, java.lang.String)
 	 */
 	@Override
 	public void setGroupChatRejoinId(String chatId, String rejoinId) {
@@ -224,7 +231,8 @@ public class GroupChatLog implements IGroupChatLog {
 		ContentValues values = new ContentValues();
 		values.put(ChatData.KEY_REJOIN_ID, rejoinId);
 		values.put(ChatData.KEY_STATE, GroupChat.State.STARTED);
-		mLocalContentResolver.update(ChatData.CONTENT_URI, values, ChatData.KEY_CHAT_ID + " = '" + chatId + "'", null);
+		mLocalContentResolver.update(ChatData.CONTENT_URI, values, ChatData.KEY_CHAT_ID + " = '"
+				+ chatId + "'", null);
 	}
 
 	/*
@@ -241,17 +249,19 @@ public class GroupChatLog implements IGroupChatLog {
 		Cursor cursor = null;
 
 		// @formatter:off
-		String[] projection = new String[] { ChatData.KEY_CHAT_ID, ChatData.KEY_REJOIN_ID, ChatData.KEY_PARTICIPANTS,
-				ChatData.KEY_SUBJECT };
+		String[] projection = new String[] { ChatData.KEY_CHAT_ID, ChatData.KEY_REJOIN_ID,
+				ChatData.KEY_PARTICIPANTS, ChatData.KEY_SUBJECT };
 		// @formatter:on
 		String[] selArgs = new String[] { chatId };
 		try {
-			cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection, SELECT_CHAT_ID, selArgs,
-					ORDER_BY_TIMESTAMP_DESC);
+			cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection, SELECT_CHAT_ID,
+					selArgs, ORDER_BY_TIMESTAMP_DESC);
 			if (cursor.moveToFirst()) {
 				// Decode list of participants
-				Set<ParticipantInfo> participants = ChatLog.GroupChat.getParticipantInfo(mCtx, cursor.getString(2));
-				result = new GroupChatInfo(cursor.getString(0), cursor.getString(1), chatId, participants, cursor.getString(3));
+				Set<ParticipantInfo> participants = ChatLog.GroupChat.getParticipantInfo(mCtx,
+						cursor.getString(2));
+				result = new GroupChatInfo(cursor.getString(0), cursor.getString(1), chatId,
+						participants, cursor.getString(3));
 			}
 		} finally {
 			if (cursor != null) {
@@ -264,7 +274,9 @@ public class GroupChatLog implements IGroupChatLog {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#getGroupChatConnectedParticipants(java.lang.String)
+	 * @see
+	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#getGroupChatConnectedParticipants(java
+	 * .lang.String)
 	 */
 	@Override
 	public Set<ParticipantInfo> getGroupChatConnectedParticipants(String chatId) {
@@ -276,11 +288,12 @@ public class GroupChatLog implements IGroupChatLog {
 		String[] selArgs = new String[] { chatId };
 		Cursor cursor = null;
 		try {
-			cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection, SELECT_CHAT_ID, selArgs,
-					ORDER_BY_TIMESTAMP_DESC);
+			cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection, SELECT_CHAT_ID,
+					selArgs, ORDER_BY_TIMESTAMP_DESC);
 			if (cursor.moveToFirst()) {
 				// Decode list of participants
-				Set<ParticipantInfo> participants = ChatLog.GroupChat.getParticipantInfo(mCtx, cursor.getString(0));
+				Set<ParticipantInfo> participants = ChatLog.GroupChat.getParticipantInfo(mCtx,
+						cursor.getString(0));
 				if (participants != null) {
 					for (ParticipantInfo participantInfo : participants) {
 						// Only consider participants who have not declined or left GC
@@ -296,7 +309,7 @@ public class GroupChatLog implements IGroupChatLog {
 			}
 		} catch (Exception e) {
 			if (logger.isActivated()) {
-				logger.error("Exception",e);
+				logger.error("Exception", e);
 			}
 		} finally {
 			if (cursor != null) {
@@ -309,7 +322,9 @@ public class GroupChatLog implements IGroupChatLog {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#isGroupChatNextInviteRejected(java.lang.String)
+	 * @see
+	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#isGroupChatNextInviteRejected(java.lang
+	 * .String)
 	 */
 	@Override
 	public boolean isGroupChatNextInviteRejected(String chatId) {
@@ -317,8 +332,8 @@ public class GroupChatLog implements IGroupChatLog {
 		String[] selectionArgs = { chatId };
 		Cursor cursor = null;
 		try {
-			cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection, SELECT_CHAT_ID_STATUS_REJECTED,
-					selectionArgs, ORDER_BY_TIMESTAMP_DESC);
+			cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection,
+					SELECT_CHAT_ID_STATUS_REJECTED, selectionArgs, ORDER_BY_TIMESTAMP_DESC);
 			if (cursor.getCount() != 0) {
 				return true;
 			}
@@ -332,24 +347,20 @@ public class GroupChatLog implements IGroupChatLog {
 
 	/*
 	 * (non-Javadoc)
-	 * @see
-	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#getGroupChatData(
-	 * java.lang.String, java.lang.String)
+	 * 
+	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#getGroupChatData( java.lang.String,
+	 * java.lang.String)
 	 */
 	private Cursor getGroupChatData(String columnName, String chatId) {
 		if (logger.isActivated()) {
 			logger.debug("Get group chat info for ".concat(chatId));
 		}
-		String[] projection = new String[] {
-			columnName
-		};
-		String[] selArgs = new String[] {
-			chatId
-		};
+		String[] projection = new String[] { columnName };
+		String[] selArgs = new String[] { chatId };
 		Cursor cursor = null;
 		try {
-			cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection, SELECT_CHAT_ID, selArgs,
-					ORDER_BY_TIMESTAMP_DESC);
+			cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection, SELECT_CHAT_ID,
+					selArgs, ORDER_BY_TIMESTAMP_DESC);
 			if (cursor.moveToFirst()) {
 				return cursor;
 			}
@@ -389,9 +400,8 @@ public class GroupChatLog implements IGroupChatLog {
 
 	/*
 	 * (non-Javadoc)
-	 * @see
-	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#getParticipants(java
-	 * .lang.String)
+	 * 
+	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#getParticipants(java .lang.String)
 	 */
 	public Set<ParticipantInfo> getParticipants(String participants) {
 		return ChatLog.GroupChat.getParticipantInfo(mCtx, participants);
@@ -399,9 +409,8 @@ public class GroupChatLog implements IGroupChatLog {
 
 	/*
 	 * (non-Javadoc)
-	 * @see
-	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#getGroupChatState
-	 * (java.lang.String)
+	 * 
+	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#getGroupChatState (java.lang.String)
 	 */
 	public int getGroupChatState(String chatId) {
 		if (logger.isActivated()) {
@@ -412,8 +421,8 @@ public class GroupChatLog implements IGroupChatLog {
 
 	/*
 	 * (non-Javadoc)
-	 * @see
-	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#getGroupChatReasonCode
+	 * 
+	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#getGroupChatReasonCode
 	 * (java.lang.String)
 	 */
 	public int getGroupChatReasonCode(String chatId) {
@@ -425,8 +434,8 @@ public class GroupChatLog implements IGroupChatLog {
 
 	/*
 	 * (non-Javadoc)
-	 * @see
-	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#getGroupChatParticipants
+	 * 
+	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#getGroupChatParticipants
 	 * (java.lang.String)
 	 */
 	public Set<ParticipantInfo> getGroupChatParticipants(String chatId) {
@@ -438,8 +447,8 @@ public class GroupChatLog implements IGroupChatLog {
 
 	/*
 	 * (non-Javadoc)
-	 * @see
-	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#setRejectNextGroupChatNextInvitation
+	 * 
+	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#setRejectNextGroupChatNextInvitation
 	 * (java.lang.String)
 	 */
 	public void setRejectNextGroupChatNextInvitation(String chatId) {
@@ -454,13 +463,12 @@ public class GroupChatLog implements IGroupChatLog {
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#
 	 * retrieveChatIdsOfActiveGroupChatsForAutoRejoin
 	 */
 	public Set<String> getChatIdsOfActiveGroupChatsForAutoRejoin() {
-		String[] projection = new String[] {
-			ChatData.KEY_CHAT_ID
-		};
+		String[] projection = new String[] { ChatData.KEY_CHAT_ID };
 		Cursor cursor = null;
 		try {
 			cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection,
@@ -481,17 +489,15 @@ public class GroupChatLog implements IGroupChatLog {
 
 	/*
 	 * (non-Javadoc)
-	 * @see
-	 * com.orangelabs.rcs.provider.messaging.IGroupChatLog#getCacheableGroupChatData
-	 * ( java.lang.String)
+	 * 
+	 * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog#getCacheableGroupChatData (
+	 * java.lang.String)
 	 */
 	public Cursor getCacheableGroupChatData(String chatId) {
 		if (logger.isActivated()) {
 			logger.debug("Get group chat info for ".concat(chatId));
 		}
-		String[] selArgs = new String[] {
-			chatId
-		};
+		String[] selArgs = new String[] { chatId };
 		Cursor cursor = null;
 		try {
 			cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, null, SELECT_CHAT_ID,

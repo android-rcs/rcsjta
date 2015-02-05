@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.messaging.geoloc;
 
 import android.graphics.drawable.Drawable;
@@ -32,58 +33,63 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * Display a geoloc on a Google map
  */
 public class DisplayGeoloc extends MapActivity {
-	/**
-	 * Intent parameters
-	 */
-	public final static String EXTRA_GEOLOC = "geoloc";
-	@SuppressWarnings("javadoc")
-	public final static String EXTRA_CONTACT = "contact";
+    /**
+     * Intent parameters
+     */
+    public final static String EXTRA_GEOLOC = "geoloc";
 
-	/**
-	 * Map view
-	 */
-	private MapView mapView;
+    @SuppressWarnings("javadoc")
+    public final static String EXTRA_CONTACT = "contact";
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		
-		// Set layout
-		setContentView(R.layout.geoloc_display);
+    /**
+     * Map view
+     */
+    private MapView mapView;
 
-		// Set map
-		mapView = (MapView)findViewById(R.id.mapview);
-		mapView.setBuiltInZoomControls(true);
-		mapView.getController().setZoom(4);
-		
-		// Clear the list of overlay
-		mapView.getOverlays().clear();
-		mapView.invalidate();		
-		
-		// Get geoloc value
-		ContactId contact = getIntent().getParcelableExtra(EXTRA_CONTACT);
-		Geoloc geoloc = getIntent().getParcelableExtra(EXTRA_GEOLOC);
-		if ((contact == null) || (geoloc == null)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_geoloc_not_found));
-			return;
-		}
-		
-		// Create an overlay
-		Drawable drawable = getResources().getDrawable(R.drawable.ri_map_icon);
-		GeolocOverlay overlay = new GeolocOverlay(this, drawable);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-		// Add an overlay item
-		overlay.addOverlayItem(contact.toString(), geoloc.getLabel(), geoloc.getLatitude(), geoloc.getLongitude(), geoloc.getAccuracy());
+        // Set layout
+        setContentView(R.layout.geoloc_display);
 
-		// Add overlay to the map
-		mapView.getOverlays().add(overlay);
-		
-		// Center the map
-		mapView.getController().setCenter(new GeoPoint((int)(geoloc.getLatitude() * 1E6), (int)(geoloc.getLongitude() * 1E6)));
-	}
-	
-	@Override
-	protected boolean isRouteDisplayed() {
-		return false;
-	}
+        // Set map
+        mapView = (MapView)findViewById(R.id.mapview);
+        mapView.setBuiltInZoomControls(true);
+        mapView.getController().setZoom(4);
+
+        // Clear the list of overlay
+        mapView.getOverlays().clear();
+        mapView.invalidate();
+
+        // Get geoloc value
+        ContactId contact = getIntent().getParcelableExtra(EXTRA_CONTACT);
+        Geoloc geoloc = getIntent().getParcelableExtra(EXTRA_GEOLOC);
+        if ((contact == null) || (geoloc == null)) {
+            Utils.showMessageAndExit(this, getString(R.string.label_geoloc_not_found));
+            return;
+        }
+
+        // Create an overlay
+        Drawable drawable = getResources().getDrawable(R.drawable.ri_map_icon);
+        GeolocOverlay overlay = new GeolocOverlay(this, drawable);
+
+        // Add an overlay item
+        overlay.addOverlayItem(contact.toString(), geoloc.getLabel(), geoloc.getLatitude(),
+                geoloc.getLongitude(), geoloc.getAccuracy());
+
+        // Add overlay to the map
+        mapView.getOverlays().add(overlay);
+
+        // Center the map
+        mapView.getController()
+                .setCenter(
+                        new GeoPoint((int)(geoloc.getLatitude() * 1E6),
+                                (int)(geoloc.getLongitude() * 1E6)));
+    }
+
+    @Override
+    protected boolean isRouteDisplayed() {
+        return false;
+    }
 }

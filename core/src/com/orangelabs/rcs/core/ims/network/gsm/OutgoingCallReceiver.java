@@ -27,8 +27,8 @@ import android.content.Intent;
  * @author jexa7410
  */
 public class OutgoingCallReceiver extends BroadcastReceiver {
-    @Override
+	@Override
 	public void onReceive(Context context, Intent intent) {
-    	CallManager.setRemoteParty(intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER));
+		CallManager.setRemoteParty(intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER));
 	}
 }

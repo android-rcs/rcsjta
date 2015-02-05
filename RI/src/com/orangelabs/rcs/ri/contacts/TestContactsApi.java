@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.contacts;
 
 import android.app.ListActivity;
@@ -36,60 +37,59 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public class TestContactsApi extends ListActivity {
-    
-	@Override
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         // Set items
         String[] items = {
-    		getString(R.string.menu_address_book),
-    		getString(R.string.menu_list_rcs_contacts),
-    		getString(R.string.menu_list_online_contacts),        		
-    		getString(R.string.menu_list_supported_contacts),
-    		getString(R.string.menu_contact_vcard),
-    		getString(R.string.menu_blocking_contact)
+                getString(R.string.menu_address_book), getString(R.string.menu_list_rcs_contacts),
+                getString(R.string.menu_list_online_contacts),
+                getString(R.string.menu_list_supported_contacts),
+                getString(R.string.menu_contact_vcard), getString(R.string.menu_blocking_contact)
         };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        switch(position) {
-	        case 0:
-	    		try {
-	    			startActivity(new Intent(Intent.ACTION_VIEW).setType(ContactsContract.Contacts.CONTENT_TYPE));
-	    		} catch(ActivityNotFoundException e1) {
-	    			try {
-	    				startActivity(new Intent("com.android.contacts.action.LIST_DEFAULT"));
-	    			} catch(ActivityNotFoundException e2) {
-	    				e2.printStackTrace();
-	    				Utils.showMessage(this, getString(R.string.label_ab_not_found));
-	    			}
-	    		}
-	    		break;
-        	
-	        case 1:
-            	startActivity(new Intent(this, RcsContactsList.class));
-                break;
-                
-	        case 2:
-            	startActivity(new Intent(this, OnlineContactsList.class));
-                break;
-                
-	        case 3:
-            	startActivity(new Intent(this, SupportedContactsList.class));
+        switch (position) {
+            case 0:
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW)
+                            .setType(ContactsContract.Contacts.CONTENT_TYPE));
+                } catch (ActivityNotFoundException e1) {
+                    try {
+                        startActivity(new Intent("com.android.contacts.action.LIST_DEFAULT"));
+                    } catch (ActivityNotFoundException e2) {
+                        e2.printStackTrace();
+                        Utils.showMessage(this, getString(R.string.label_ab_not_found));
+                    }
+                }
                 break;
 
-	        case 4:
-            	startActivity(new Intent(this, ContactVCard.class));
+            case 1:
+                startActivity(new Intent(this, RcsContactsList.class));
                 break;
 
-	        case 5:
-            	startActivity(new Intent(this, BlockingContact.class));
+            case 2:
+                startActivity(new Intent(this, OnlineContactsList.class));
+                break;
+
+            case 3:
+                startActivity(new Intent(this, SupportedContactsList.class));
+                break;
+
+            case 4:
+                startActivity(new Intent(this, ContactVCard.class));
+                break;
+
+            case 5:
+                startActivity(new Intent(this, BlockingContact.class));
                 break;
         }
     }

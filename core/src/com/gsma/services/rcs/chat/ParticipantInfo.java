@@ -62,7 +62,7 @@ public class ParticipantInfo implements Parcelable {
 		 * Connected
 		 */
 		public final static int CONNECTED = 1;
-		
+
 		/**
 		 * Disconnected
 		 */
@@ -101,7 +101,7 @@ public class ParticipantInfo implements Parcelable {
 		private Status() {
 		}
 	}
-	
+
 	/**
 	 * Constructor
 	 * 
@@ -122,7 +122,7 @@ public class ParticipantInfo implements Parcelable {
 	 *            Status
 	 * @hide
 	 */
-	public ParticipantInfo(ContactId contact,int status) {
+	public ParticipantInfo(ContactId contact, int status) {
 		super();
 		this.status = status;
 		this.contact = contact;
@@ -131,7 +131,8 @@ public class ParticipantInfo implements Parcelable {
 	/**
 	 * Constructor
 	 * 
-	 * @param in Parcelable source
+	 * @param in
+	 *            Parcelable source
 	 */
 	public ParticipantInfo(Parcel in) {
 		boolean flag = in.readInt() != 0;
@@ -167,7 +168,7 @@ public class ParticipantInfo implements Parcelable {
 	public int getStatus() {
 		return status;
 	}
-	
+
 	/**
 	 * Returns the contact number
 	 * 
@@ -178,7 +179,8 @@ public class ParticipantInfo implements Parcelable {
 	}
 
 	/**
-	 * Describe the kinds of special objects contained in this Parcelable's marshalled representation
+	 * Describe the kinds of special objects contained in this Parcelable's marshalled
+	 * representation
 	 * 
 	 * @return Integer
 	 * @hide
@@ -191,8 +193,10 @@ public class ParticipantInfo implements Parcelable {
 	/**
 	 * Write parcelable object
 	 * 
-	 * @param dest The Parcel in which the object should be written
-	 * @param flags Additional flags about how the object should be written
+	 * @param dest
+	 *            The Parcel in which the object should be written
+	 * @param flags
+	 *            Additional flags about how the object should be written
 	 * @hide
 	 */
 	@Override
@@ -240,5 +244,5 @@ public class ParticipantInfo implements Parcelable {
 		}
 		return true;
 	}
-	
+
 }

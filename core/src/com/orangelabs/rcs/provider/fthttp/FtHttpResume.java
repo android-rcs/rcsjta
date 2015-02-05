@@ -31,7 +31,7 @@ import com.gsma.services.rcs.contacts.ContactId;
 /**
  * @author YPLO6403
  *
- * FtHttpResume is the abstract base class for all FT HTTP resume classes
+ *         FtHttpResume is the abstract base class for all FT HTTP resume classes
  */
 public abstract class FtHttpResume {
 
@@ -91,16 +91,17 @@ public abstract class FtHttpResume {
 	final private boolean mGroupTransfer;
 
 	/**
-	 * Works just like FtHttpResume(int,Uri,String,String,long,Uri,ContactId,String,String,String,String,boolean,Date) except the date
-	 * is always null
+	 * Works just like
+	 * FtHttpResume(int,Uri,String,String,long,Uri,ContactId,String,String,String,String
+	 * ,boolean,Date) except the date is always null
 	 *
 	 * @see #FtHttpResume(int,Uri,String,String,long,Uri,ContactId,String,String,String,String,boolean,Date)
 	 */
-	public FtHttpResume(Direction direction, Uri file, String fileName,
-			String mimeType, long size, Uri fileIcon, ContactId contact, String chatId,
-			String fileTransferId, boolean groupTransfer) {
-		this(direction, file, fileName, mimeType, size, fileIcon, contact, chatId,
-				fileTransferId, groupTransfer, null);
+	public FtHttpResume(Direction direction, Uri file, String fileName, String mimeType, long size,
+			Uri fileIcon, ContactId contact, String chatId, String fileTransferId,
+			boolean groupTransfer) {
+		this(direction, file, fileName, mimeType, size, fileIcon, contact, chatId, fileTransferId,
+				groupTransfer, null);
 	}
 
 	/**
@@ -112,10 +113,10 @@ public abstract class FtHttpResume {
 	 *            the {@code Uri of file} value.
 	 * @param fileName
 	 *            the {@code fileName} value.
-     * @param mimeType
-     *            the {@code mimeType} value.
-     * @param size
-     *            the {@code size} value.
+	 * @param mimeType
+	 *            the {@code mimeType} value.
+	 * @param size
+	 *            the {@code size} value.
 	 * @param fileIcon
 	 *            the {@code fileIcon} value.
 	 * @param contact
@@ -130,8 +131,8 @@ public abstract class FtHttpResume {
 	 *            the {@code date} value.
 	 */
 	public FtHttpResume(Direction direction, Uri file, String fileName, String mimeType, long size,
-	        Uri fileIcon, ContactId contact, String chatId, String fileTransferId,
-	        boolean groupTransfer, Date date) {
+			Uri fileIcon, ContactId contact, String chatId, String fileTransferId,
+			boolean groupTransfer, Date date) {
 		if (size <= 0 || mimeType == null || file == null || fileName == null)
 			throw new IllegalArgumentException("Null argument");
 		mDate = date;
@@ -164,11 +165,11 @@ public abstract class FtHttpResume {
 	}
 
 	public String getMimetype() {
-	    return mMimeType;
+		return mMimeType;
 	}
 
 	public long getSize() {
-	    return mSize;
+		return mSize;
 	}
 
 	public Uri getFileicon() {
@@ -193,7 +194,8 @@ public abstract class FtHttpResume {
 
 	@Override
 	public String toString() {
-		return "FtHttpResume [date=" + mDate + ", dir=" + mDirection + ", file=" + mFile + ", fileName=" + mFileName + ",fileIcon="+mFileIcon+"]";
+		return "FtHttpResume [date=" + mDate + ", dir=" + mDirection + ", file=" + mFile
+				+ ", fileName=" + mFileName + ",fileIcon=" + mFileIcon + "]";
 	}
 
 }

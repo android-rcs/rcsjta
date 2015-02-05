@@ -24,12 +24,12 @@ package com.orangelabs.rcs.core.ims.service;
  */
 public class ImsServiceError extends Error {
 	static final long serialVersionUID = 1L;
-	
+
 	/**
 	 * Error code base for IMS sessions
 	 */
 	protected static final int SESSION_ERROR_CODES = 100;
-	
+
 	/**
 	 * Error code base for capabitity service
 	 */
@@ -39,37 +39,40 @@ public class ImsServiceError extends Error {
 	 * Error code base for presence service
 	 */
 	protected static final int PRESENCE_ERROR_CODES = 300;
-	
+
 	/**
 	 * Unexpected exception occurs in the module (e.g. internal exception)
 	 */
 	public final static int UNEXPECTED_EXCEPTION = 1;
-	
+
 	/**
 	 * Error code
 	 */
 	private int code;
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param code Error code
+	 * @param code
+	 *            Error code
 	 */
 	public ImsServiceError(int code) {
 		super();
-		
+
 		this.code = code;
 	}
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param code Error code
-	 * @param msg Detail message 
+	 * @param code
+	 *            Error code
+	 * @param msg
+	 *            Detail message
 	 */
 	public ImsServiceError(int code, String msg) {
 		super(msg);
-		
+
 		this.code = code;
 	}
 
@@ -79,6 +82,6 @@ public class ImsServiceError extends Error {
 	 * @return Error code
 	 */
 	public int getErrorCode() {
-		return code; 
+		return code;
 	}
 }

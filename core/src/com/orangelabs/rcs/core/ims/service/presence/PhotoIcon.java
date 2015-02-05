@@ -18,7 +18,6 @@
 
 package com.orangelabs.rcs.core.ims.service.presence;
 
-
 /**
  * Photo icon
  * 
@@ -29,34 +28,38 @@ public class PhotoIcon {
 	 * Photo content
 	 */
 	private byte[] content = null;
-	
+
 	/**
 	 * Image type
 	 */
 	private String type = "image/jpeg";
-	
+
 	/**
 	 * Width
 	 */
 	private int width = 0;
-	
+
 	/**
 	 * Height
 	 */
 	private int height = 0;
-	
+
 	/**
 	 * Etag
 	 */
 	private String etag = null;
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param content Photo content
-	 * @param width Width
-	 * @param height Height
-	 * @param etag Etag value
+	 * @param content
+	 *            Photo content
+	 * @param width
+	 *            Width
+	 * @param height
+	 *            Height
+	 * @param etag
+	 *            Etag value
 	 */
 	public PhotoIcon(byte[] content, int width, int height, String etag) {
 		this.content = content;
@@ -68,15 +71,18 @@ public class PhotoIcon {
 	/**
 	 * Constructor
 	 * 
-	 * @param content Photo content
-	 * @param width Width
-	 * @param height Height
+	 * @param content
+	 *            Photo content
+	 * @param width
+	 *            Width
+	 * @param height
+	 *            Height
 	 */
 	public PhotoIcon(byte[] content, int width, int height) {
 		this(content, width, height, null);
 	}
-	
-    /**
+
+	/**
 	 * Returns the Etag value
 	 * 
 	 * @return Tag
@@ -88,7 +94,8 @@ public class PhotoIcon {
 	/**
 	 * Set the Etag value
 	 * 
-	 * @param etag Etag
+	 * @param etag
+	 *            Etag
 	 */
 	public void setEtag(String etag) {
 		this.etag = etag;

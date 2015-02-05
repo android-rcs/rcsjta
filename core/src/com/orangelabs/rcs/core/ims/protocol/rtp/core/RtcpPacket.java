@@ -28,45 +28,45 @@ import java.io.IOException;
  * @author jexa7410
  */
 public abstract class RtcpPacket extends Packet {
-    /**
-     *   Version =2
-     */
-    public static final byte VERSION = 2;
+	/**
+	 * Version =2
+	 */
+	public static final byte VERSION = 2;
 
-    /**
-    *   Padding =0
-    */
-    public static final byte PADDING = 0;
+	/**
+	 * Padding =0
+	 */
+	public static final byte PADDING = 0;
 
-    /**
-     * RTCP SR
-     */
-    public static final int RTCP_SR = 200;
+	/**
+	 * RTCP SR
+	 */
+	public static final int RTCP_SR = 200;
 
-    /**
-     * RTCP RR
-     */
-    public static final int RTCP_RR = 201;
+	/**
+	 * RTCP RR
+	 */
+	public static final int RTCP_RR = 201;
 
-    /**
-     * RTCP SDES
-     */
-    public static final int RTCP_SDES = 202;
+	/**
+	 * RTCP SDES
+	 */
+	public static final int RTCP_SDES = 202;
 
-    /**
-     * RTCP BYE
-     */
-    public static final int RTCP_BYE = 203;
+	/**
+	 * RTCP BYE
+	 */
+	public static final int RTCP_BYE = 203;
 
-    /**
-     * RTCP APP
-     */
-    public static final int RTCP_APP = 204;
+	/**
+	 * RTCP APP
+	 */
+	public static final int RTCP_APP = 204;
 
-    /**
-     * RTCP APP
-     */
-    public static final int RTCP_COMPOUND = -1;
+	/**
+	 * RTCP APP
+	 */
+	public static final int RTCP_COMPOUND = -1;
 
 	public Packet base;
 
@@ -76,7 +76,7 @@ public abstract class RtcpPacket extends Packet {
 	}
 
 	public RtcpPacket(RtcpPacket rtcppacket) {
-		super((Packet)rtcppacket);
+		super((Packet) rtcppacket);
 
 		base = rtcppacket.base;
 	}

@@ -24,10 +24,10 @@ package com.orangelabs.rcs.provider.ipcall;
 import com.gsma.services.rcs.ipcall.IPCallLog;
 
 /**
-* IP call history provider data 
-* 
-* @author owom5460
-*/
+ * IP call history provider data
+ * 
+ * @author owom5460
+ */
 public class IPCallData {
 
 	/**
@@ -38,7 +38,7 @@ public class IPCallData {
 	/**
 	 * Column name
 	 */
-	static final String KEY_DIRECTION = IPCallLog.DIRECTION;	
+	static final String KEY_DIRECTION = IPCallLog.DIRECTION;
 
 	/**
 	 * Column name

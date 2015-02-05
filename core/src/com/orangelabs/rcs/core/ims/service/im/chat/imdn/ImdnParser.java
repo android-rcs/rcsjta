@@ -36,41 +36,36 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * IMDN parser (RFC5438)
  */
 public class ImdnParser extends DefaultHandler {
-	/* IMDN SAMPLE:
-	   <?xml version="1.0" encoding="UTF-8"?>
-	   <imdn xmlns="urn:ietf:params:xml:ns:imdn">
-		<message-id>34jk324j</message-id>
-		<datetime>2008-04-04T12:16:49-05:00</datetime>
-		<display-notification>
-		    <status>
-		       <displayed/>
-		    </status>
-		</display-notification>
-       </imdn>
-   	*/
-    private StringBuffer accumulator;
+	/*
+	 * IMDN SAMPLE: <?xml version="1.0" encoding="UTF-8"?> <imdn
+	 * xmlns="urn:ietf:params:xml:ns:imdn"> <message-id>34jk324j</message-id>
+	 * <datetime>2008-04-04T12:16:49-05:00</datetime> <display-notification> <status> <displayed/>
+	 * </status> </display-notification> </imdn>
+	 */
+	private StringBuffer accumulator;
 
-    private String mNotificationType;
+	private String mNotificationType;
 
-    private String mStatus;
+	private String mStatus;
 
-    private String mMsgId;
+	private String mMsgId;
 
 	/**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+	 * The logger
+	 */
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    /**
-     * Constructor
-     * 
-     * @param inputSource Input source
-     * @throws Exception
-     */
-    public ImdnParser(InputSource inputSource) throws Exception {
-    	SAXParserFactory factory = SAXParserFactory.newInstance();
-        SAXParser parser = factory.newSAXParser();
-        parser.parse(inputSource, this);
+	/**
+	 * Constructor
+	 * 
+	 * @param inputSource
+	 *            Input source
+	 * @throws Exception
+	 */
+	public ImdnParser(InputSource inputSource) throws Exception {
+		SAXParserFactory factory = SAXParserFactory.newInstance();
+		SAXParser parser = factory.newSAXParser();
+		parser.parse(inputSource, this);
 	}
 
 	public void startDocument() {
@@ -84,7 +79,7 @@ public class ImdnParser extends DefaultHandler {
 		accumulator.append(buffer, start, length);
 	}
 
-	public void startElement(String namespaceURL, String localName,	String qname, Attributes attr) {
+	public void startElement(String namespaceURL, String localName, String qname, Attributes attr) {
 		accumulator.setLength(0);
 
 		if (ImdnDocument.IMDN_TAG.equals(localName)) {
@@ -101,7 +96,7 @@ public class ImdnParser extends DefaultHandler {
 	}
 
 	public void endElement(String namespaceURL, String localName, String qname) {
-		 if (ImdnDocument.MESSAGE_ID_TAG.equals(localName)) {
+		if (ImdnDocument.MESSAGE_ID_TAG.equals(localName)) {
 			mMsgId = accumulator.toString();
 
 		} else if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(localName)) {
@@ -135,21 +130,19 @@ public class ImdnParser extends DefaultHandler {
 	public void warning(SAXParseException exception) {
 		if (logger.isActivated()) {
 			logger.error("Warning: line " + exception.getLineNumber() + ": "
-				+ exception.getMessage());
+					+ exception.getMessage());
 		}
 	}
 
 	public void error(SAXParseException exception) {
 		if (logger.isActivated()) {
-			logger.error("Error: line " + exception.getLineNumber() + ": "
-				+ exception.getMessage());
+			logger.error("Error: line " + exception.getLineNumber() + ": " + exception.getMessage());
 		}
 	}
 
 	public void fatalError(SAXParseException exception) throws SAXException {
 		if (logger.isActivated()) {
-			logger.error("Fatal: line " + exception.getLineNumber() + ": "
-				+ exception.getMessage());
+			logger.error("Fatal: line " + exception.getLineNumber() + ": " + exception.getMessage());
 		}
 		throw exception;
 	}

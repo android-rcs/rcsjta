@@ -28,12 +28,12 @@ public class RtpStatisticsReceiver {
 	 * Number of RTP packets received
 	 */
 	public int numPackets = 0;
-	
+
 	/**
 	 * Number of RTP bytes received
 	 */
 	public int numBytes = 0;
-	
+
 	/**
 	 * Number of bad RTP packet received
 	 */

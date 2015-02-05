@@ -55,22 +55,22 @@ public class TermsConditionsService extends ImsService {
 	 * Request MIME type
 	 */
 	private final static String REQUEST_MIME_TYPE = "application/end-user-confirmation-request+xml";
-	
+
 	/**
 	 * Ack MIME type
 	 */
 	private final static String ACK_MIME_TYPE = "application/end-user-confirmation-ack+xml";
 
-    /**
-     * User notification MIME type
-     */
-    private final static String USER_NOTIFICATION_MIME_TYPE = "application/end-user-notification-request+xml";
+	/**
+	 * User notification MIME type
+	 */
+	private final static String USER_NOTIFICATION_MIME_TYPE = "application/end-user-notification-request+xml";
 
 	/**
 	 * Response MIME type
 	 */
 	private final static String RESPONSE_MIME_TYPE = "application/end-user-confirmation-response+xml";
-	
+
 	/**
 	 * Accept response
 	 */
@@ -84,20 +84,22 @@ public class TermsConditionsService extends ImsService {
 	private final RcsSettings mRcsSettings;
 
 	/**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+	 * The logger
+	 */
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
 	/**
-     * Constructor
-     * 
-     * @param parent IMS module
-	 * @param rcsSettings RcsSettings
-     * @throws CoreException
-     */
+	 * Constructor
+	 * 
+	 * @param parent
+	 *            IMS module
+	 * @param rcsSettings
+	 *            RcsSettings
+	 * @throws CoreException
+	 */
 	public TermsConditionsService(ImsModule parent, RcsSettings rcsSettings) throws CoreException {
-        super(parent, true);
-        mRcsSettings = rcsSettings;
+		super(parent, true);
+		mRcsSettings = rcsSettings;
 	}
 
 	/**
@@ -111,9 +113,9 @@ public class TermsConditionsService extends ImsService {
 		setServiceStarted(true);
 	}
 
-    /**
-     * Stop the IMS service
-     */
+	/**
+	 * Stop the IMS service
+	 */
 	public synchronized void stop() {
 		if (!isServiceStarted()) {
 			// Already stopped
@@ -123,34 +125,35 @@ public class TermsConditionsService extends ImsService {
 	}
 
 	/**
-     * Check the IMS service
-     */
+	 * Check the IMS service
+	 */
 	public void check() {
 	}
 
 	/**
-     * Receive a SIP message
-     * 
-     * @param message Received message
-     */
-    public void receiveMessage(SipRequest message) {
-    	if (logger.isActivated()) {
-    		logger.debug("Receive terms message");
-    	}
-    	
+	 * Receive a SIP message
+	 * 
+	 * @param message
+	 *            Received message
+	 */
+	public void receiveMessage(SipRequest message) {
+		if (logger.isActivated()) {
+			logger.debug("Receive terms message");
+		}
+
 		// Send a 200 OK response
 		try {
 			if (logger.isActivated()) {
 				logger.info("Send 200 OK");
 			}
-	        SipResponse response = SipMessageFactory.createResponse(message,
-	        		IdGenerator.getIdentifier(), 200);
+			SipResponse response = SipMessageFactory.createResponse(message,
+					IdGenerator.getIdentifier(), 200);
 			getImsModule().getSipManager().sendSipResponse(response);
-		} catch(Exception e) {
-	       	if (logger.isActivated()) {
-	    		logger.error("Can't send 200 OK response", e);
-	    	}
-	       	return;
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Can't send 200 OK response", e);
+			}
+			return;
 		}
 
 		// Parse received message
@@ -160,40 +163,45 @@ public class TermsConditionsService extends ImsService {
 			ContactId contact = ContactUtils.createContactId(getRemoteIdentity(message));
 			if (message.getContentType().equals(REQUEST_MIME_TYPE)) {
 				// Parse terms request
-				InputSource input = new InputSource(new ByteArrayInputStream(message.getContentBytes()));
+				InputSource input = new InputSource(new ByteArrayInputStream(
+						message.getContentBytes()));
 				TermsRequestParser parser = new TermsRequestParser(input, lang);
 
 				// Notify listener
 				getImsModule()
 						.getCore()
 						.getListener()
-						.handleUserConfirmationRequest(contact, parser.getId(), parser.getType(), parser.getPin(),
-								parser.getSubject(), parser.getText(), parser.getButtonAccept(), parser.getButtonReject(),
+						.handleUserConfirmationRequest(contact, parser.getId(), parser.getType(),
+								parser.getPin(), parser.getSubject(), parser.getText(),
+								parser.getButtonAccept(), parser.getButtonReject(),
 								parser.getTimeout());
 			} else {
 				if (message.getContentType().equals(ACK_MIME_TYPE)) {
 					// Parse terms ack
-					InputSource input = new InputSource(new ByteArrayInputStream(message.getContentBytes()));
+					InputSource input = new InputSource(new ByteArrayInputStream(
+							message.getContentBytes()));
 					TermsAckParser parser = new TermsAckParser(input);
 
 					// Notify listener
 					getImsModule()
 							.getCore()
 							.getListener()
-							.handleUserConfirmationAck(contact, parser.getId(), parser.getStatus(), parser.getSubject(),
-									parser.getText());
+							.handleUserConfirmationAck(contact, parser.getId(), parser.getStatus(),
+									parser.getSubject(), parser.getText());
 				} else {
 					if (message.getContentType().equals(USER_NOTIFICATION_MIME_TYPE)) {
 						// Parse terms notification
-						InputSource input = new InputSource(new ByteArrayInputStream(message.getContentBytes()));
-						EndUserNotificationParser parser = new EndUserNotificationParser(input, lang);
+						InputSource input = new InputSource(new ByteArrayInputStream(
+								message.getContentBytes()));
+						EndUserNotificationParser parser = new EndUserNotificationParser(input,
+								lang);
 
 						// Notify listener
 						getImsModule()
 								.getCore()
 								.getListener()
-								.handleUserNotification(contact, parser.getId(), parser.getSubject(), parser.getText(),
-										parser.getButtonOk());
+								.handleUserNotification(contact, parser.getId(),
+										parser.getSubject(), parser.getText(), parser.getButtonOk());
 					} else {
 						if (logger.isActivated()) {
 							logger.warn("Unknown terms request " + message.getContentType());
@@ -212,18 +220,20 @@ public class TermsConditionsService extends ImsService {
 		}
 	}
 
-    /**
+	/**
 	 * Accept terms
 	 * 
-	 * @param id Request ID
-	 * @param pin Response value
+	 * @param id
+	 *            Request ID
+	 * @param pin
+	 *            Response value
 	 * @return Boolean result
 	 */
 	public boolean acceptTerms(String id, String pin) {
 		if (logger.isActivated()) {
 			logger.debug("Send response for request " + id);
 		}
-		
+
 		// Send SIP MESSAGE
 		return sendSipMessage(mRcsSettings.getEndUserConfirmationRequestUri(), id, ACCEPT_RESPONSE,
 				pin);
@@ -232,8 +242,10 @@ public class TermsConditionsService extends ImsService {
 	/**
 	 * Reject terms
 	 * 
-	 * @param id Request ID
-	 * @param pin Response value
+	 * @param id
+	 *            Request ID
+	 * @param pin
+	 *            Response value
 	 * @return Boolean result
 	 */
 	public boolean rejectTerms(String id, String pin) {
@@ -249,129 +261,131 @@ public class TermsConditionsService extends ImsService {
 	/**
 	 * Send SIP MESSAGE
 	 * 
-	 * @param remote Remote server
-	 * @param id Request ID
-	 * @param value Response value
-	 * @param pin Response value
+	 * @param remote
+	 *            Remote server
+	 * @param id
+	 *            Request ID
+	 * @param value
+	 *            Response value
+	 * @param pin
+	 *            Response value
 	 * @return Boolean result
 	 */
 	private boolean sendSipMessage(String remote, String id, String value, String pin) {
 		if (StringUtils.isEmpty(remote)) {
 			if (logger.isActivated()) {
-       			logger.error("Remote URI not set");
-       		}
+				logger.error("Remote URI not set");
+			}
 			return false;
 		}
-		
+
 		if (StringUtils.isEmpty(id)) {
 			if (logger.isActivated()) {
-       			logger.error("Request ID not set");
-       		}
+				logger.error("Request ID not set");
+			}
 			return false;
 		}
 
 		boolean result = false;
 		try {
 			if (logger.isActivated()) {
-       			logger.debug("Send SIP response");
-       		}
+				logger.debug("Send SIP response");
+			}
 
 			// Build response
-			String response = "<?xml version=\"1.0\" standalone=\"yes\"?>" +
-					"<EndUserConfirmationResponse id=\"" + id + "\" value=\"" + value + "\"";
+			String response = "<?xml version=\"1.0\" standalone=\"yes\"?>"
+					+ "<EndUserConfirmationResponse id=\"" + id + "\" value=\"" + value + "\"";
 			if (pin != null) {
 				response += " pin=\"";
 			}
 			response += "/>";
-			
-		    // Create authentication agent 
-       		SessionAuthenticationAgent authenticationAgent = new SessionAuthenticationAgent(getImsModule());
-       		
-       		// Create a dialog path
-        	SipDialogPath dialogPath = new SipDialogPath(
-        			getImsModule().getSipManager().getSipStack(),
-        			getImsModule().getSipManager().getSipStack().generateCallId(),
-    				1,
-    				remote,
-    				ImsModule.IMS_USER_PROFILE.getPublicUri(),
-    				remote,
-    				getImsModule().getSipManager().getSipStack().getServiceRoutePath());        	
-        	
-	        // Create MESSAGE request
-        	if (logger.isActivated()) {
-        		logger.info("Send first MESSAGE");
-        	}
-	        SipRequest msg = SipMessageFactory.createMessage(dialogPath, RESPONSE_MIME_TYPE, response);
-	        
-	        // Send MESSAGE request
-	        SipTransactionContext ctx = getImsModule().getSipManager().sendSipMessageAndWait(msg);
-	
-	        // Analyze received message
-            if (ctx.getStatusCode() == 407) {
-                // 407 response received
-            	if (logger.isActivated()) {
-            		logger.info("407 response received");
-            	}
 
-    	        // Set the Proxy-Authorization header
-            	authenticationAgent.readProxyAuthenticateHeader(ctx.getSipResponse());
+			// Create authentication agent
+			SessionAuthenticationAgent authenticationAgent = new SessionAuthenticationAgent(
+					getImsModule());
 
-                // Increment the Cseq number of the dialog path
-                dialogPath.incrementCseq();
+			// Create a dialog path
+			SipDialogPath dialogPath = new SipDialogPath(getImsModule().getSipManager()
+					.getSipStack(), getImsModule().getSipManager().getSipStack().generateCallId(),
+					1, remote, ImsModule.IMS_USER_PROFILE.getPublicUri(), remote, getImsModule()
+							.getSipManager().getSipStack().getServiceRoutePath());
 
-                // Create a second MESSAGE request with the right token
-                if (logger.isActivated()) {
-                	logger.info("Send second MESSAGE");
-                }
-    	        msg = SipMessageFactory.createMessage(dialogPath, RESPONSE_MIME_TYPE, response);
-    	        
-    	        // Set the Authorization header
-    	        authenticationAgent.setProxyAuthorizationHeader(msg);
-                
-                // Send MESSAGE request
-    	        ctx = getImsModule().getSipManager().sendSipMessageAndWait(msg);
+			// Create MESSAGE request
+			if (logger.isActivated()) {
+				logger.info("Send first MESSAGE");
+			}
+			SipRequest msg = SipMessageFactory.createMessage(dialogPath, RESPONSE_MIME_TYPE,
+					response);
 
-                // Analyze received message
-                if ((ctx.getStatusCode() == 200) || (ctx.getStatusCode() == 202)) {
-                    // 200 OK response
-                	if (logger.isActivated()) {
-                		logger.info("20x OK response received");
-                	}
-                	result = true;
-                } else {
-                    // Error
-                	if (logger.isActivated()) {
-                		logger.info("Delivery report has failed: " + ctx.getStatusCode()
-    	                    + " response received");
-                	}
-                }
-            } else
-            if ((ctx.getStatusCode() == 200) || (ctx.getStatusCode() == 202)) {
-	            // 200 OK received
-            	if (logger.isActivated()) {
-            		logger.info("20x OK response received");
-            	}
-            	result = true;
-	        } else {
-	            // Error responses
-            	if (logger.isActivated()) {
-            		logger.info("Delivery report has failed: " + ctx.getStatusCode()
-	                    + " response received");
-            	}
-	        }
-        } catch(Exception e) {
-        	if (logger.isActivated()) {
-        		logger.error("Can't send MESSAGE request", e);
-        	}
-        }
-        return result;
-	}	
+			// Send MESSAGE request
+			SipTransactionContext ctx = getImsModule().getSipManager().sendSipMessageAndWait(msg);
+
+			// Analyze received message
+			if (ctx.getStatusCode() == 407) {
+				// 407 response received
+				if (logger.isActivated()) {
+					logger.info("407 response received");
+				}
+
+				// Set the Proxy-Authorization header
+				authenticationAgent.readProxyAuthenticateHeader(ctx.getSipResponse());
+
+				// Increment the Cseq number of the dialog path
+				dialogPath.incrementCseq();
+
+				// Create a second MESSAGE request with the right token
+				if (logger.isActivated()) {
+					logger.info("Send second MESSAGE");
+				}
+				msg = SipMessageFactory.createMessage(dialogPath, RESPONSE_MIME_TYPE, response);
+
+				// Set the Authorization header
+				authenticationAgent.setProxyAuthorizationHeader(msg);
+
+				// Send MESSAGE request
+				ctx = getImsModule().getSipManager().sendSipMessageAndWait(msg);
+
+				// Analyze received message
+				if ((ctx.getStatusCode() == 200) || (ctx.getStatusCode() == 202)) {
+					// 200 OK response
+					if (logger.isActivated()) {
+						logger.info("20x OK response received");
+					}
+					result = true;
+				} else {
+					// Error
+					if (logger.isActivated()) {
+						logger.info("Delivery report has failed: " + ctx.getStatusCode()
+								+ " response received");
+					}
+				}
+			} else if ((ctx.getStatusCode() == 200) || (ctx.getStatusCode() == 202)) {
+				// 200 OK received
+				if (logger.isActivated()) {
+					logger.info("20x OK response received");
+				}
+				result = true;
+			} else {
+				// Error responses
+				if (logger.isActivated()) {
+					logger.info("Delivery report has failed: " + ctx.getStatusCode()
+							+ " response received");
+				}
+			}
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Can't send MESSAGE request", e);
+			}
+		}
+		return result;
+	}
 
 	/**
 	 * Get remote identity of the incoming request
 	 * 
-     * @param request Request
-     * @return ID
+	 * @param request
+	 *            Request
+	 * @return ID
 	 */
 	private String getRemoteIdentity(SipRequest request) {
 		// Use the Asserted-Identity header
@@ -381,16 +395,16 @@ public class TermsConditionsService extends ImsService {
 	/**
 	 * Is a terms & conditions request
 	 * 
-     * @param request Request
-     * @return Boolean
+	 * @param request
+	 *            Request
+	 * @return Boolean
 	 */
 	public static boolean isTermsRequest(SipRequest request) {
-    	String contentType = request.getContentType();
-    	if ((contentType != null) &&
-                contentType.startsWith("application/end-user")) {
-    		return true;
-    	} else {
-    		return false;
-    	}
+		String contentType = request.getContentType();
+		if ((contentType != null) && contentType.startsWith("application/end-user")) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

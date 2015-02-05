@@ -27,12 +27,13 @@ public class HttpDeleteRequest extends HttpRequest {
 	/**
 	 * Constructor
 	 * 
-	 * @param url URL
+	 * @param url
+	 *            URL
 	 */
 	public HttpDeleteRequest(String url) {
 		super(url, null, null);
 	}
-	
+
 	/**
 	 * Returns the HTTP method
 	 * 

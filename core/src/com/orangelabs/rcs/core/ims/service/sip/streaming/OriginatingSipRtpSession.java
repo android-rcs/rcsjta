@@ -28,25 +28,29 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Originating SIP RTP session
- *  
+ * 
  * @author Jean-Marc AUFFRET
  */
 public class OriginatingSipRtpSession extends GenericSipRtpSession {
 	/**
-     * The logger
-     */
-    private final static Logger logger = Logger.getLogger(OriginatingSipRtpSession.class.getSimpleName());
+	 * The logger
+	 */
+	private final static Logger logger = Logger.getLogger(OriginatingSipRtpSession.class
+			.getSimpleName());
 
 	/**
 	 * Constructor
 	 * 
-	 * @param parent IMS service
-	 * @param contact Remote contact Id
-	 * @param featureTag Feature tag
+	 * @param parent
+	 *            IMS service
+	 * @param contact
+	 *            Remote contact Id
+	 * @param featureTag
+	 *            Feature tag
 	 */
 	public OriginatingSipRtpSession(ImsService parent, ContactId contact, String featureTag) {
 		super(parent, contact, featureTag);
-		
+
 		// Create dialog path
 		createOriginatingDialogPath();
 	}
@@ -56,38 +60,37 @@ public class OriginatingSipRtpSession extends GenericSipRtpSession {
 	 */
 	public void run() {
 		try {
-	    	if (logger.isActivated()) {
-	    		logger.info("Initiate a new RTP session as originating");
-	    	}
-	    	
+			if (logger.isActivated()) {
+				logger.info("Initiate a new RTP session as originating");
+			}
+
 			// Build SDP part
-	    	String sdp = generateSdp();
-	    	
-	    	// Set the local SDP part in the dialog path
-	        getDialogPath().setLocalContent(sdp);
+			String sdp = generateSdp();
 
-	        // Create an INVITE request
-	        if (logger.isActivated()) {
-	        	logger.info("Send INVITE");
-	        }
-	        SipRequest invite = createInvite();
+			// Set the local SDP part in the dialog path
+			getDialogPath().setLocalContent(sdp);
 
-	        // Set the Authorization header
-	        getAuthenticationAgent().setAuthorizationHeader(invite);
-	        
-	        // Set initial request in the dialog path
-	        getDialogPath().setInvite(invite);
-	        
-	        // Send INVITE request
-	        sendInvite(invite);	        
-		} catch(Exception e) {
-        	if (logger.isActivated()) {
-        		logger.error("Session initiation has failed", e);
-        	}
+			// Create an INVITE request
+			if (logger.isActivated()) {
+				logger.info("Send INVITE");
+			}
+			SipRequest invite = createInvite();
 
-        	// Unexpected error
-			handleError(new SipSessionError(SipSessionError.UNEXPECTED_EXCEPTION,
-					e.getMessage()));
+			// Set the Authorization header
+			getAuthenticationAgent().setAuthorizationHeader(invite);
+
+			// Set initial request in the dialog path
+			getDialogPath().setInvite(invite);
+
+			// Send INVITE request
+			sendInvite(invite);
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Session initiation has failed", e);
+			}
+
+			// Unexpected error
+			handleError(new SipSessionError(SipSessionError.UNEXPECTED_EXCEPTION, e.getMessage()));
 		}
 	}
 
@@ -95,7 +98,7 @@ public class OriginatingSipRtpSession extends GenericSipRtpSession {
 	public boolean isInitiatedByRemote() {
 		return false;
 	}
-	
+
 	@Override
 	public void handle180Ringing(SipResponse response) {
 		if (logger.isActivated()) {
@@ -103,7 +106,7 @@ public class OriginatingSipRtpSession extends GenericSipRtpSession {
 		}
 		ContactId contact = getRemoteContact();
 		for (ImsSessionListener listener : getListeners()) {
-			((SipSessionListener)listener).handle180Ringing(contact);
+			((SipSessionListener) listener).handle180Ringing(contact);
 		}
 	}
 }

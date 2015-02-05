@@ -55,7 +55,8 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * 
  * @author vfml3370
  */
-public class TerminatingHttpFileSharingSession extends HttpFileTransferSession implements HttpTransferEventListener {
+public class TerminatingHttpFileSharingSession extends HttpFileTransferSession implements
+		HttpTransferEventListener {
 
 	/**
 	 * HTTP download manager
@@ -70,13 +71,14 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	/**
 	 * The logger
 	 */
-	private final static Logger logger = Logger.getLogger(TerminatingHttpFileSharingSession.class.getSimpleName());
+	private final static Logger logger = Logger.getLogger(TerminatingHttpFileSharingSession.class
+			.getSimpleName());
 
 	/**
 	 * Is File Transfer initiated from a GC
 	 */
 	protected final boolean mGroupFileTransfer;
-		
+
 	/**
 	 * Constructor
 	 * 
@@ -94,23 +96,26 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	 *            the display name of the remote contact
 	 */
 	public TerminatingHttpFileSharingSession(ImsService parent, ChatSession chatSession,
-			FileTransferHttpInfoDocument fileTransferInfo, String fileTransferId, ContactId contact, String displayName) {
-		super(parent, ContentManager.createMmContent(
-				ContentManager.generateUriForReceivedContent(fileTransferInfo.getFilename(), fileTransferInfo.getFileType()),
-				fileTransferInfo.getFileSize(), fileTransferInfo.getFilename()), contact, PhoneUtils.formatContactIdToUri(contact),
-				null, chatSession.getSessionID(), chatSession.getContributionID(), fileTransferId);
+			FileTransferHttpInfoDocument fileTransferInfo, String fileTransferId,
+			ContactId contact, String displayName) {
+		super(parent, ContentManager.createMmContent(ContentManager.generateUriForReceivedContent(
+				fileTransferInfo.getFilename(), fileTransferInfo.getFileType()), fileTransferInfo
+				.getFileSize(), fileTransferInfo.getFilename()), contact, PhoneUtils
+				.formatContactIdToUri(contact), null, chatSession.getSessionID(), chatSession
+				.getContributionID(), fileTransferId);
 
 		setRemoteDisplayName(displayName);
-        // Build a new dialogPath with this of chatSession and an empty CallId
+		// Build a new dialogPath with this of chatSession and an empty CallId
 		setDialogPath(new SipDialogPath(chatSession.getDialogPath()));
 		getDialogPath().setCallId("");
 
-		ContactHeader inviteContactHeader = (ContactHeader) chatSession.getDialogPath().getInvite().getHeader(ContactHeader.NAME);
+		ContactHeader inviteContactHeader = (ContactHeader) chatSession.getDialogPath().getInvite()
+				.getHeader(ContactHeader.NAME);
 		if (inviteContactHeader != null) {
 			this.remoteInstanceId = inviteContactHeader.getParameter(SipUtils.SIP_INSTANCE_PARAM);
 		}
 		mGroupFileTransfer = chatSession.isGroupChat();
-		
+
 		// Instantiate the download manager
 		MmContent content = getContent();
 		downloadManager = new HttpDownloadManager(content, this, fileTransferInfo.getFileUri());
@@ -118,7 +123,8 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 		// Download thumbnail
 		if (fileTransferInfo.getFileThumbnail() != null) {
 			FileTransferHttpThumbnail thumbnailInfo = fileTransferInfo.getFileThumbnail();
-			String iconName = FileTransferUtils.buildFileiconUrl(fileTransferId,thumbnailInfo.getThumbnailType());
+			String iconName = FileTransferUtils.buildFileiconUrl(fileTransferId,
+					thumbnailInfo.getThumbnailType());
 			setFileicon(downloadManager.downloadThumbnail(thumbnailInfo, iconName));
 		}
 
@@ -137,15 +143,17 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	 * @param resume
 	 *            the Data Object to access FT HTTP table in DB
 	 */
-	public TerminatingHttpFileSharingSession(ImsService parent, MmContent content, FtHttpResumeDownload resume) {
-		super(parent, content, resume.getContact(), PhoneUtils.formatContactIdToUri(resume.getContact()),
-				resume.getFileicon() != null ? FileTransferUtils.createMmContent(resume
-						.getFileicon()) : null, null, resume.getChatId(),
-				resume.getFileTransferId());
+	public TerminatingHttpFileSharingSession(ImsService parent, MmContent content,
+			FtHttpResumeDownload resume) {
+		super(parent, content, resume.getContact(), PhoneUtils.formatContactIdToUri(resume
+				.getContact()), resume.getFileicon() != null ? FileTransferUtils
+				.createMmContent(resume.getFileicon()) : null, null, resume.getChatId(), resume
+				.getFileTransferId());
 		mGroupFileTransfer = resume.isGroupTransfer();
 		this.resumeFT = resume;
 		// Instantiate the download manager
-		downloadManager = new HttpDownloadManager(getContent(), this, resume.getDownloadServerAddress());
+		downloadManager = new HttpDownloadManager(getContent(), this,
+				resume.getDownloadServerAddress());
 
 		if (shouldBeAutoAccepted()) {
 			setSessionAccepted();
@@ -153,8 +161,8 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	}
 
 	/**
-	 * Check is session should be auto accepted depending on settings and
-	 * roaming conditions This method should only be called once per session
+	 * Check is session should be auto accepted depending on settings and roaming conditions This
+	 * method should only be called once per session
 	 *
 	 * @return true if file transfer should be auto accepted
 	 */
@@ -166,7 +174,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 		return RcsSettings.getInstance().isFileTransferAutoAccepted();
 	}
 
-	protected boolean isGroupFileTransfer(){
+	protected boolean isGroupFileTransfer() {
 		return mGroupFileTransfer;
 	}
 
@@ -201,8 +209,8 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 				}
 
 				for (ImsSessionListener listener : listeners) {
-					((FileSharingSessionListener)listener).handleSessionAutoAccepted(contact, content,
-							fileIcon);
+					((FileSharingSessionListener) listener).handleSessionAutoAccepted(contact,
+							content, fileIcon);
 				}
 			} else {
 				if (logger.isActivated()) {
@@ -210,75 +218,77 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 				}
 
 				for (ImsSessionListener listener : listeners) {
-					((FileSharingSessionListener)listener).handleSessionInvited(contact, content,
+					((FileSharingSessionListener) listener).handleSessionInvited(contact, content,
 							fileIcon);
 				}
 
 				int answer = waitInvitationAnswer();
 				switch (answer) {
-					case ImsServiceSession.INVITATION_REJECTED:
-						if (logger.isActivated()) {
-							logger.debug("Transfer has been rejected by user");
-						}
+				case ImsServiceSession.INVITATION_REJECTED:
+					if (logger.isActivated()) {
+						logger.debug("Transfer has been rejected by user");
+					}
+
+					removeSession();
+
+					for (ImsSessionListener listener : listeners) {
+						listener.handleSessionRejectedByUser(contact);
+					}
+					return;
+
+				case ImsServiceSession.INVITATION_NOT_ANSWERED:
+					if (logger.isActivated()) {
+						logger.debug("Transfer has been rejected on timeout");
+					}
+
+					removeSession();
+
+					for (ImsSessionListener listener : listeners) {
+						listener.handleSessionRejectedByTimeout(contact);
+					}
+					return;
+
+				case ImsServiceSession.INVITATION_CANCELED:
+					if (logger.isActivated()) {
+						logger.debug("Http transfer has been rejected by remote.");
 
 						removeSession();
 
 						for (ImsSessionListener listener : listeners) {
-							listener.handleSessionRejectedByUser(contact);
+							listener.handleSessionRejectedByRemote(contact);
 						}
-						return;
+					}
+					return;
 
-					case ImsServiceSession.INVITATION_NOT_ANSWERED:
-						if (logger.isActivated()) {
-							logger.debug("Transfer has been rejected on timeout");
-						}
+				case ImsServiceSession.INVITATION_ACCEPTED:
+					setSessionAccepted();
 
-						removeSession();
+					for (ImsSessionListener listener : listeners) {
+						((FileSharingSessionListener) listener).handleSessionAccepted(contact);
+					}
+					break;
 
-						for (ImsSessionListener listener : listeners) {
-							listener.handleSessionRejectedByTimeout(contact);
-						}
-						return;
-
-					case ImsServiceSession.INVITATION_CANCELED:
-						if (logger.isActivated()) {
-							logger.debug("Http transfer has been rejected by remote.");
-
-							removeSession();
-
-							for (ImsSessionListener listener : listeners) {
-								listener.handleSessionRejectedByRemote(contact);
-							}
-						}
-						return;
-
-					case ImsServiceSession.INVITATION_ACCEPTED:
-						setSessionAccepted();
-
-						for (ImsSessionListener listener : listeners) {
-							((FileSharingSessionListener)listener).handleSessionAccepted(contact);
-						}
-						break;
-
-					default:
-						if (logger.isActivated()) {
-							logger.debug("Unknown invitation answer in run; answer="
-									.concat(String.valueOf(answer)));
-						}
-						return;
+				default:
+					if (logger.isActivated()) {
+						logger.debug("Unknown invitation answer in run; answer=".concat(String
+								.valueOf(answer)));
+					}
+					return;
 				}
 			}
 
-            // Reject if file is too big or size exceeds device storage capacity. This control should be done
-            // on UI. It is done after end user accepts invitation to enable prior handling by the application.
-            FileSharingError error = isFileCapacityAcceptable(getContent().getSize());
-            if (error != null) {
-                // Invitation cannot be declined in MSRP or SIP at this level
-            	
-                // Close session and notify listeners
-                handleError(error);
-                return;
-            }
+			// Reject if file is too big or size exceeds device storage capacity. This control
+			// should be done
+			// on UI. It is done after end user accepts invitation to enable prior handling by the
+			// application.
+			FileSharingError error = isFileCapacityAcceptable(getContent().getSize());
+			if (error != null) {
+				// Invitation cannot be declined in MSRP or SIP at this level
+
+				// Close session and notify listeners
+				handleError(error);
+				return;
+			}
 
 			// Notify listeners
 			for (int j = 0; j < getListeners().size(); j++) {
@@ -287,7 +297,8 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 			Uri file = downloadManager.getDownloadedFileUri();
 			Uri downloadServerAddress = downloadManager.getHttpServerAddr();
 
-			MessagingLog.getInstance().setFileDownloadAddress(getFileTransferId(), downloadServerAddress);
+			MessagingLog.getInstance().setFileDownloadAddress(getFileTransferId(),
+					downloadServerAddress);
 			// Download file from the HTTP server
 			if (downloadManager.downloadFile()) {
 				if (logger.isActivated()) {
@@ -306,12 +317,12 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 					sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED);
 				}
 			} else {
-                // Don't call handleError in case of Pause or Cancel
+				// Don't call handleError in case of Pause or Cancel
 				if (downloadManager.isCancelled() || downloadManager.isPaused()) {
 					return;
 				}
 
-                // Upload error
+				// Upload error
 				if (logger.isActivated()) {
 					logger.info("Download file has failed");
 				}
@@ -327,7 +338,8 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 		}
 	}
 
-	// If session is rejected by user, session cannot be rejected at SIP level (already accepted 200OK).
+	// If session is rejected by user, session cannot be rejected at SIP level (already accepted
+	// 200OK).
 	@Override
 	public void rejectSession(int code) {
 		if (logger.isActivated()) {
@@ -336,10 +348,10 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 		invitationStatus = INVITATION_REJECTED;
 
 		// Unblock semaphore
-		synchronized(waitUserAnswer) {
+		synchronized (waitUserAnswer) {
 			waitUserAnswer.notifyAll();
 		}
-			
+
 		// Remove the session in the session manager
 		removeSession();
 	}
@@ -408,16 +420,16 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 					// Send delivery report "displayed"
 					sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED);
 				} else {
-                    // Don't call handleError in case of Pause or Cancel
-                    if (downloadManager.isCancelled() || downloadManager.isPaused()) {
-                        return;
-                    }
+					// Don't call handleError in case of Pause or Cancel
+					if (downloadManager.isCancelled() || downloadManager.isPaused()) {
+						return;
+					}
 
-                    // Upload error
-                    if (logger.isActivated()) {
-                        logger.info("Download file has failed");
-                    }
-                    handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED));
+					// Upload error
+					if (logger.isActivated()) {
+						logger.info("Download file has failed");
+					}
+					handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED));
 				}
 			}
 		}).start();
@@ -437,6 +449,5 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 	public boolean isInitiatedByRemote() {
 		return true;
 	}
-
 
 }

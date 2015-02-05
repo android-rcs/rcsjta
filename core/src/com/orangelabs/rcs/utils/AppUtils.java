@@ -28,9 +28,10 @@ import android.content.pm.PackageManager.NameNotFoundException;
  */
 public class AppUtils {
 	/**
-	 * Returns the application version from manifest file 
+	 * Returns the application version from manifest file
 	 * 
-	 * @param ctx Context
+	 * @param ctx
+	 *            Context
 	 * @return Application version or null if not found
 	 */
 	public static String getApplicationVersion(Context ctx) {
@@ -38,7 +39,7 @@ public class AppUtils {
 		try {
 			PackageInfo info = ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0);
 			version = info.versionName;
-		} catch(NameNotFoundException e) {
+		} catch (NameNotFoundException e) {
 		}
 		return version;
 	}

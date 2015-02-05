@@ -22,7 +22,7 @@ import com.orangelabs.rcs.core.ims.network.ImsNetworkInterface.DnsResolvedFields
 import com.orangelabs.rcs.platform.FactoryException;
 
 /**
- * Network factory 
+ * Network factory
  * 
  * @author jexa7410
  */
@@ -31,25 +31,26 @@ public abstract class NetworkFactory {
 	 * Current platform factory
 	 */
 	private static NetworkFactory factory = null;
-	
+
 	/**
 	 * Load the factory
 	 * 
-	 * @param classname Factory classname
+	 * @param classname
+	 *            Factory classname
 	 * @throws Exception
 	 */
 	public static void loadFactory(String classname) throws FactoryException {
 		if (factory != null) {
 			return;
 		}
-		
+
 		try {
-			factory = (NetworkFactory)Class.forName(classname).newInstance();
-		} catch(Exception e) {
+			factory = (NetworkFactory) Class.forName(classname).newInstance();
+		} catch (Exception e) {
 			throw new FactoryException("Can't load the factory " + classname);
 		}
 	}
-	
+
 	/**
 	 * Returns the current factory
 	 * 
@@ -62,14 +63,17 @@ public abstract class NetworkFactory {
 	/**
 	 * Returns the local IP address of a given network interface
 	 * 
-	 * @param dnsEntry address to be connected to
-     * @param type the type of the network interface, should be either
-     *        {@link android.net.ConnectivityManager#TYPE_WIFI} or {@link android.net.ConnectivityManager#TYPE_MOBILE}
+	 * @param dnsEntry
+	 *            address to be connected to
+	 * @param type
+	 *            the type of the network interface, should be either
+	 *            {@link android.net.ConnectivityManager#TYPE_WIFI} or
+	 *            {@link android.net.ConnectivityManager#TYPE_MOBILE}
 	 * @return Address
 	 */
 	// Changed by Deutsche Telekom
 	public abstract String getLocalIpAddress(DnsResolvedFields dnsEntry, int type);
-	
+
 	/**
 	 * Create a datagram connection
 	 * 
@@ -77,13 +81,14 @@ public abstract class NetworkFactory {
 	 */
 	public abstract DatagramConnection createDatagramConnection();
 
-    /**
-     * Create a datagram connection with a specific SO timeout
-     *
-     * @param timeout SO timeout
-     * @return Datagram connection
-     */
-    public abstract DatagramConnection createDatagramConnection(int timeout);
+	/**
+	 * Create a datagram connection with a specific SO timeout
+	 *
+	 * @param timeout
+	 *            SO timeout
+	 * @return Datagram connection
+	 */
+	public abstract DatagramConnection createDatagramConnection(int timeout);
 
 	/**
 	 * Create a socket client connection
@@ -114,7 +119,7 @@ public abstract class NetworkFactory {
 	 * @return Socket server connection
 	 */
 	public abstract SocketServerConnection createSocketServerConnection();
-	
+
 	/**
 	 * Create an HTTP connection
 	 * 

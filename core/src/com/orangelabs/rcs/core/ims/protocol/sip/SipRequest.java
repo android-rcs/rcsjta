@@ -27,11 +27,12 @@ import javax2.sip.message.Request;
  * @author jexa7410
  */
 public class SipRequest extends SipMessage {
-	
+
 	/**
 	 * Constructor
 	 *
-	 * @param request SIP stack request
+	 * @param request
+	 *            SIP stack request
 	 */
 	public SipRequest(Request request) {
 		super(request);
@@ -43,9 +44,9 @@ public class SipRequest extends SipMessage {
 	 * @return SIP request
 	 */
 	public Request getStackMessage() {
-		return (Request)stackMessage;
+		return (Request) stackMessage;
 	}
-	
+
 	/**
 	 * Returns the method value
 	 * 
@@ -54,7 +55,7 @@ public class SipRequest extends SipMessage {
 	public String getMethod() {
 		return getStackMessage().getMethod();
 	}
-	
+
 	/**
 	 * Return the request URI
 	 * 
@@ -63,18 +64,18 @@ public class SipRequest extends SipMessage {
 	public String getRequestURI() {
 		return getStackMessage().getRequestURI().toString();
 	}
-	
+
 	/**
 	 * Return the expires value
 	 * 
 	 * @return Expire value
 	 */
 	public int getExpires() {
-        ExpiresHeader expires = (ExpiresHeader)getStackMessage().getHeader(ExpiresHeader.NAME);
-    	if (expires != null) {
-            return expires.getExpires();            
-        } else {
-        	return -1;
-        }
-	}	
+		ExpiresHeader expires = (ExpiresHeader) getStackMessage().getHeader(ExpiresHeader.NAME);
+		if (expires != null) {
+			return expires.getExpires();
+		} else {
+			return -1;
+		}
+	}
 }

@@ -29,7 +29,8 @@ public interface SocketServerConnection {
 	/**
 	 * Open the socket
 	 * 
-	 * @param port Local port
+	 * @param port
+	 *            Local port
 	 * @throws IOException
 	 */
 	public void open(int port) throws IOException;
@@ -40,7 +41,7 @@ public interface SocketServerConnection {
 	 * @throws IOException
 	 */
 	public void close() throws IOException;
-	
+
 	/**
 	 * Accept connection
 	 * 

@@ -27,8 +27,8 @@ import android.os.RemoteCallbackList;
 
 /**
  * GeolocSharingEventBroadcaster maintains the registering and unregistering of
- * IGeolocSharingListener and also performs broadcast events on these listeners upon
- * the trigger of corresponding callbacks.
+ * IGeolocSharingListener and also performs broadcast events on these listeners upon the trigger of
+ * corresponding callbacks.
  */
 public class GeolocSharingEventBroadcaster implements IGeolocSharingEventBroadcaster {
 
@@ -51,8 +51,8 @@ public class GeolocSharingEventBroadcaster implements IGeolocSharingEventBroadca
 		final int N = mGeolocSharingListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mGeolocSharingListeners.getBroadcastItem(i).onStateChanged(contact,
-						sharingId, state, reasonCode);
+				mGeolocSharingListeners.getBroadcastItem(i).onStateChanged(contact, sharingId,
+						state, reasonCode);
 			} catch (Exception e) {
 			}
 		}
@@ -64,8 +64,8 @@ public class GeolocSharingEventBroadcaster implements IGeolocSharingEventBroadca
 		final int N = mGeolocSharingListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mGeolocSharingListeners.getBroadcastItem(i).onProgressUpdate(contact,
-						sharingId, currentSize, totalSize);
+				mGeolocSharingListeners.getBroadcastItem(i).onProgressUpdate(contact, sharingId,
+						currentSize, totalSize);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);

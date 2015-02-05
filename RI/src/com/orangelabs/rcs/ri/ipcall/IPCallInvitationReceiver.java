@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.ipcall;
 
 import android.content.BroadcastReceiver;
@@ -28,13 +29,13 @@ import android.content.Intent;
  */
 public class IPCallInvitationReceiver extends BroadcastReceiver {
 
-	@Override
-	public void onReceive(Context context, Intent intent) {
-		// Start IPCallIntentService Intent service
-		Intent receiverIntent = new Intent(context, IPCallIntentService.class);
-		receiverIntent.putExtras(intent);
-		receiverIntent.setAction(intent.getAction());
-		context.startService(receiverIntent);
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        // Start IPCallIntentService Intent service
+        Intent receiverIntent = new Intent(context, IPCallIntentService.class);
+        receiverIntent.putExtras(intent);
+        receiverIntent.setAction(intent.getAction());
+        context.startService(receiverIntent);
     }
 
 }

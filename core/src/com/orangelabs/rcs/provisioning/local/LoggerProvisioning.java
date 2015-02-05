@@ -68,26 +68,30 @@ public class LoggerProvisioning extends Activity {
 			updateView(null);
 		}
 	}
-	
+
 	@Override
 	protected void onPause() {
 		super.onPause();
 		isInFront = false;
 	}
-	
+
 	/**
 	 * Update view
+	 * 
 	 * @param bundle
 	 */
 	private void updateView(Bundle bundle) {
 		// Display parameters
 		setCheckBoxParameter(this, R.id.TraceActivated, RcsSettingsData.TRACE_ACTIVATED, bundle);
-		setCheckBoxParameter(this, R.id.SipTraceActivated, RcsSettingsData.SIP_TRACE_ACTIVATED, bundle);
-		setCheckBoxParameter(this, R.id.MediaTraceActivated, RcsSettingsData.MEDIA_TRACE_ACTIVATED, bundle);
+		setCheckBoxParameter(this, R.id.SipTraceActivated, RcsSettingsData.SIP_TRACE_ACTIVATED,
+				bundle);
+		setCheckBoxParameter(this, R.id.MediaTraceActivated, RcsSettingsData.MEDIA_TRACE_ACTIVATED,
+				bundle);
 		setEditTextParameter(this, R.id.SipTraceFile, RcsSettingsData.SIP_TRACE_FILE, bundle);
 
 		Spinner spinner = (Spinner) findViewById(R.id.TraceLevel);
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, TRACE_LEVEL);
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+				android.R.layout.simple_spinner_item, TRACE_LEVEL);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinner.setAdapter(adapter);
 		Integer parameter = null;
@@ -120,8 +124,10 @@ public class LoggerProvisioning extends Activity {
 	 */
 	private void saveInstanceState(Bundle bundle) {
 		saveCheckBoxParameter(this, R.id.TraceActivated, RcsSettingsData.TRACE_ACTIVATED, bundle);
-		saveCheckBoxParameter(this, R.id.SipTraceActivated, RcsSettingsData.SIP_TRACE_ACTIVATED, bundle);
-		saveCheckBoxParameter(this, R.id.MediaTraceActivated, RcsSettingsData.MEDIA_TRACE_ACTIVATED, bundle);
+		saveCheckBoxParameter(this, R.id.SipTraceActivated, RcsSettingsData.SIP_TRACE_ACTIVATED,
+				bundle);
+		saveCheckBoxParameter(this, R.id.MediaTraceActivated,
+				RcsSettingsData.MEDIA_TRACE_ACTIVATED, bundle);
 		saveEditTextParameter(this, R.id.SipTraceFile, RcsSettingsData.SIP_TRACE_FILE, bundle);
 		Spinner spinner = (Spinner) findViewById(R.id.TraceLevel);
 		if (bundle != null) {

@@ -21,8 +21,8 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.media.MediaOutput;
 import com.orangelabs.rcs.core.ims.protocol.rtp.media.MediaSample;
 
 /**
- * Data renderer in charge of receiving data payload and to forward it to
- * the application via the API 
+ * Data renderer in charge of receiving data payload and to forward it to the application via the
+ * API
  * 
  * @author Jean-Marc AUFFRET
  */
@@ -31,35 +31,36 @@ public class DataReceiver implements MediaOutput {
 	 * Parent
 	 */
 	private GenericSipRtpSession parent;
-	
-    /**
-     * Constructor
-     */
-    public DataReceiver(GenericSipRtpSession parent) {
-    	this.parent = parent;
-    }
 
-    /**
-     * Open the renderer
-     */
-    public void open() {
-        // TODO
-    }
+	/**
+	 * Constructor
+	 */
+	public DataReceiver(GenericSipRtpSession parent) {
+		this.parent = parent;
+	}
 
-    /**
-     * Close the renderer
-     */
-    public void close() {
-        // TODO
-    }
+	/**
+	 * Open the renderer
+	 */
+	public void open() {
+		// TODO
+	}
 
-    /**
-     * Write a media sample
-     *
-     * @param sample Sample
-     */
-    public void writeSample(MediaSample sample) {
-    	// Notify API
-    	parent.receiveData(sample.getData());
-    }
+	/**
+	 * Close the renderer
+	 */
+	public void close() {
+		// TODO
+	}
+
+	/**
+	 * Write a media sample
+	 *
+	 * @param sample
+	 *            Sample
+	 */
+	public void writeSample(MediaSample sample) {
+		// Notify API
+		parent.receiveData(sample.getData());
+	}
 }

@@ -30,7 +30,8 @@ public class RtcpSenderReportEvent extends RtcpEvent {
 	/**
 	 * Constructor
 	 * 
-	 * @param packet RTCP SR packet
+	 * @param packet
+	 *            RTCP SR packet
 	 */
 	public RtcpSenderReportEvent(RtcpSenderReportPacket packet) {
 		super(packet);

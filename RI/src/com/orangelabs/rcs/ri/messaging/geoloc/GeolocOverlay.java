@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.messaging.geoloc;
 
 import java.util.ArrayList;
@@ -38,104 +39,106 @@ import com.orangelabs.rcs.ri.R;
  * Geoloc overlay
  */
 public class GeolocOverlay extends ItemizedOverlay<OverlayItem> {
-	/**
-	 * Context
-	 */
-	private Context context;
+    /**
+     * Context
+     */
+    private Context context;
 
-	/**
-	 * Painter
-	 */
+    /**
+     * Painter
+     */
     private Paint paint;
-    
-	/**
-	 * List of overlay items
-	 */
-	private ArrayList<AccuracyOverlayItem> overlays = new ArrayList<AccuracyOverlayItem>();
-	
-	/**
-	 * Contsructor
-	 * 
-	 * @param context Context
-	 * @param defaultMarker Marker
-	 */
-	public GeolocOverlay(Context context, Drawable defaultMarker) {
-		super(boundCenterBottom(defaultMarker));
-		
-		this.context = context;
-		this.paint = new Paint();
-		this.paint.setColor(Color.BLUE);
-		this.paint.setAlpha(25);
-		this.paint.setAntiAlias(true);
-		this.paint.setStyle(Paint.Style.FILL);
-	}
+
+    /**
+     * List of overlay items
+     */
+    private ArrayList<AccuracyOverlayItem> overlays = new ArrayList<AccuracyOverlayItem>();
+
+    /**
+     * Contsructor
+     * 
+     * @param context Context
+     * @param defaultMarker Marker
+     */
+    public GeolocOverlay(Context context, Drawable defaultMarker) {
+        super(boundCenterBottom(defaultMarker));
+
+        this.context = context;
+        this.paint = new Paint();
+        this.paint.setColor(Color.BLUE);
+        this.paint.setAlpha(25);
+        this.paint.setAntiAlias(true);
+        this.paint.setStyle(Paint.Style.FILL);
+    }
 
     @Override
-	protected OverlayItem createItem(int i) {
-		return overlays.get(i);
-	}
+    protected OverlayItem createItem(int i) {
+        return overlays.get(i);
+    }
 
-	@Override
-	public int size() {
-		return overlays.size();
-	}
+    @Override
+    public int size() {
+        return overlays.size();
+    }
 
-	public void addOverlayItem(String contact, String label, double latitude, double longitude, float accuracy) {
-		if (label == null) {
-			label = "";
-		}
-		String snippet = context.getString(R.string.label_location) + " " + label + "\n" +
-				context.getString(R.string.label_latitude) + " "  + latitude + "\n" +
-				context.getString(R.string.label_longitude) + " "  + longitude + "\n" +
-				context.getString(R.string.label_accuracy) + " " + accuracy;
-		GeoPoint geoPoint = new GeoPoint((int)(latitude * 1E6),	(int)(longitude * 1E6));
-		AccuracyOverlayItem overlayitem = new AccuracyOverlayItem(geoPoint, contact, snippet, accuracy);
-		overlays.add(overlayitem);
-		populate();
-	}
-	
-	@Override
-	protected boolean onTap(int index) {
-	  OverlayItem item = overlays.get(index);
-	  if (item != null) {
-		  AlertDialog.Builder dialog = new AlertDialog.Builder(context);
-		  dialog.setTitle(item.getTitle());
-		  dialog.setMessage(item.getSnippet());
-		  dialog.show();
-	  }
-	  return true;
-	}
-	
-	@Override
-	public void draw(Canvas canvas, MapView mapView, boolean shadow) {
-    	super.draw(canvas, mapView, shadow);
+    public void addOverlayItem(String contact, String label, double latitude, double longitude,
+            float accuracy) {
+        if (label == null) {
+            label = "";
+        }
+        String snippet = context.getString(R.string.label_location) + " " + label + "\n"
+                + context.getString(R.string.label_latitude) + " " + latitude + "\n"
+                + context.getString(R.string.label_longitude) + " " + longitude + "\n"
+                + context.getString(R.string.label_accuracy) + " " + accuracy;
+        GeoPoint geoPoint = new GeoPoint((int)(latitude * 1E6), (int)(longitude * 1E6));
+        AccuracyOverlayItem overlayitem = new AccuracyOverlayItem(geoPoint, contact, snippet,
+                accuracy);
+        overlays.add(overlayitem);
+        populate();
+    }
 
-    	for(int i=0; i < overlays.size(); i++) {
-	    	AccuracyOverlayItem item = overlays.get(i);
-	    	if (item.getAccuracy() != 0) {
-		    	Point pt = new Point();
-		    	Projection projection = mapView.getProjection();
-		        projection.toPixels(item.getPoint(), pt);
-		        float circleRadius = projection.metersToEquatorPixels(item.getAccuracy());	        
-	            canvas.drawCircle(pt.x, pt.y, circleRadius, paint);
-	    	}
-	    }
-	}
+    @Override
+    protected boolean onTap(int index) {
+        OverlayItem item = overlays.get(index);
+        if (item != null) {
+            AlertDialog.Builder dialog = new AlertDialog.Builder(context);
+            dialog.setTitle(item.getTitle());
+            dialog.setMessage(item.getSnippet());
+            dialog.show();
+        }
+        return true;
+    }
 
-	/**
-	 * Overlay item with accuracy info
-	 */
-	private class AccuracyOverlayItem extends OverlayItem {
-	    private float accuracy = 0;
+    @Override
+    public void draw(Canvas canvas, MapView mapView, boolean shadow) {
+        super.draw(canvas, mapView, shadow);
 
-	    public AccuracyOverlayItem(GeoPoint point, String title, String snippet, float accuracy) {
-	    	super(point, title, snippet);
-	    	
-	    	this.accuracy = accuracy;
-	    }
-	    
-	    public float getAccuracy() {
-	    	return accuracy;
-	    }
-	}
+        for (int i = 0; i < overlays.size(); i++) {
+            AccuracyOverlayItem item = overlays.get(i);
+            if (item.getAccuracy() != 0) {
+                Point pt = new Point();
+                Projection projection = mapView.getProjection();
+                projection.toPixels(item.getPoint(), pt);
+                float circleRadius = projection.metersToEquatorPixels(item.getAccuracy());
+                canvas.drawCircle(pt.x, pt.y, circleRadius, paint);
+            }
+        }
+    }
+
+    /**
+     * Overlay item with accuracy info
+     */
+    private class AccuracyOverlayItem extends OverlayItem {
+        private float accuracy = 0;
+
+        public AccuracyOverlayItem(GeoPoint point, String title, String snippet, float accuracy) {
+            super(point, title, snippet);
+
+            this.accuracy = accuracy;
+        }
+
+        public float getAccuracy() {
+            return accuracy;
+        }
+    }
 }

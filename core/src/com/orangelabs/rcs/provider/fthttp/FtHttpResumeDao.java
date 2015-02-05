@@ -37,7 +37,7 @@ public interface FtHttpResumeDao {
 	 * @return the list of entries
 	 */
 	public List<FtHttpResume> queryAll();
-	
+
 	/**
 	 * Query the upload entry with TID
 	 * 

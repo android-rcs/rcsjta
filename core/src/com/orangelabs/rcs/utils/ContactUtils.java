@@ -47,33 +47,39 @@ import com.orangelabs.rcs.platform.AndroidFactory;
  */
 public class ContactUtils {
 
-	private static final String[] PROJECTION_CONTACTID_NUMBER = new String[] { ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
+	private static final String[] PROJECTION_CONTACTID_NUMBER = new String[] {
+			ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
 			ContactsContract.CommonDataKinds.Phone.NUMBER };
 
 	private static final String[] PROJECTION_RAW_CONTACT_ID = new String[] { Data.RAW_CONTACT_ID };
 
-	private static final String SELECTION_LOOSE = new StringBuilder(Data.MIMETYPE).append("=? AND PHONE_NUMBERS_EQUAL(")
-			.append(Phone.NUMBER).append(", ?)").toString();
+	private static final String SELECTION_LOOSE = new StringBuilder(Data.MIMETYPE)
+			.append("=? AND PHONE_NUMBERS_EQUAL(").append(Phone.NUMBER).append(", ?)").toString();
 
-	private static final String SELECTION_STRICT = new StringBuilder(Data.MIMETYPE).append("=? AND (NOT PHONE_NUMBERS_EQUAL(")
-			.append(Phone.NUMBER).append(", ?) AND PHONE_NUMBERS_EQUAL(").append(Phone.NUMBER).append(", ?, 1))").toString();
+	private static final String SELECTION_STRICT = new StringBuilder(Data.MIMETYPE)
+			.append("=? AND (NOT PHONE_NUMBERS_EQUAL(").append(Phone.NUMBER)
+			.append(", ?) AND PHONE_NUMBERS_EQUAL(").append(Phone.NUMBER).append(", ?, 1))")
+			.toString();
 
 	private static final String[] PROJECTION_DATA_CONTACTID = new String[] { Data.CONTACT_ID };
-	
+
 	private static final String WHERE_DATA_ID = new StringBuilder(Data._ID).append("=?").toString();
-	
+
 	/**
 	 * Returns the contact id associated to a contact number in the Address Book
 	 * 
-	 * @param context Application context
-	 * @param contactId Contact ID
+	 * @param context
+	 *            Application context
+	 * @param contactId
+	 *            Contact ID
 	 * @return Id or -1 if the contact number does not exist
 	 */
 	private static int getContactIdOfAddressBook(Context context, ContactId contactId) {
 		// Query the Phone API
 		Cursor cursor = null;
 		try {
-			cursor = context.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+			cursor = context.getContentResolver().query(
+					ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
 					PROJECTION_CONTACTID_NUMBER, null, null, null);
 			while (cursor.moveToNext()) {
 				String databaseNumber = PhoneUtils.extractNumberFromUri(cursor.getString(1));
@@ -89,18 +95,22 @@ public class ContactUtils {
 		}
 		return -1;
 	}
-	
+
 	/**
 	 * Create a RCS contact if the given contact is not already present in the address book
 	 * 
-	 * @param context Application context
-	 * @param contactId Contact ID
-	 * @return URI of the newly created contact or URI of the corresponding contact if there is already a match
+	 * @param context
+	 *            Application context
+	 * @param contactId
+	 *            Contact ID
+	 * @return URI of the newly created contact or URI of the corresponding contact if there is
+	 *         already a match
 	 */
-	public static Uri createRcsContactIfNeeded(Context context, ContactId contactId) throws Exception{
+	public static Uri createRcsContactIfNeeded(Context context, ContactId contactId)
+			throws Exception {
 		// Check if contact is already in address book
 		int phoneId = getContactIdOfAddressBook(context, contactId);
-		
+
 		if (phoneId == -1) {
 			// If the contact is not present in address book, create an entry with this number
 			ContentValues values = new ContentValues();
@@ -108,9 +118,9 @@ public class ContactUtils {
 			values.putNull(ContactsContract.Contacts.DISPLAY_NAME);
 			values.put(Phone.NUMBER, contactId.toString());
 			values.put(Phone.TYPE, Phone.TYPE_MOBILE);
-			
+
 			Uri newPersonUri = createContact(context, values);
-			
+
 			return newPersonUri;
 		} else {
 			// Contact already in address book
@@ -119,11 +129,14 @@ public class ContactUtils {
 	}
 
 	/**
-	 * Create a contact in address book
-	 * <br>This is done with Contacts 2.0 API, and new contact is a "Phone" contact, not associated with any particular account type
+	 * Create a contact in address book <br>
+	 * This is done with Contacts 2.0 API, and new contact is a "Phone" contact, not associated with
+	 * any particular account type
 	 * 
-	 * @param context Application context
-	 * @param values Contact values
+	 * @param context
+	 *            Application context
+	 * @param values
+	 *            Contact values
 	 * @return URI of the created contact
 	 */
 	private static Uri createContact(Context context, ContentValues values) throws Exception {
@@ -134,28 +147,35 @@ public class ContactUtils {
 		ArrayList<ContentProviderOperation> operations = new ArrayList<ContentProviderOperation>();
 
 		int backRefIndex = 0;
-		operations.add(ContentProviderOperation.newInsert(RawContacts.CONTENT_URI).withValue(RawContacts.ACCOUNT_TYPE, null)
+		operations.add(ContentProviderOperation.newInsert(RawContacts.CONTENT_URI)
+				.withValue(RawContacts.ACCOUNT_TYPE, null)
 				.withValue(RawContacts.ACCOUNT_NAME, null).build());
 
 		// Set the name
-		operations.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
+		operations.add(ContentProviderOperation
+				.newInsert(Data.CONTENT_URI)
 				.withValueBackReference(Data.RAW_CONTACT_ID, backRefIndex)
 				.withValue(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE)
-				.withValue(StructuredName.DISPLAY_NAME, values.get(ContactsContract.Contacts.DISPLAY_NAME)).build());
+				.withValue(StructuredName.DISPLAY_NAME,
+						values.get(ContactsContract.Contacts.DISPLAY_NAME)).build());
 
 		operations.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
-				.withValueBackReference(Data.RAW_CONTACT_ID, backRefIndex).withValue(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE)
-				.withValue(Phone.NUMBER, values.get(Phone.NUMBER)).withValue(Phone.TYPE, values.get(Phone.TYPE)).build());
+				.withValueBackReference(Data.RAW_CONTACT_ID, backRefIndex)
+				.withValue(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE)
+				.withValue(Phone.NUMBER, values.get(Phone.NUMBER))
+				.withValue(Phone.TYPE, values.get(Phone.TYPE)).build());
 
 		long rawContactId = 0;
-		ContentProviderResult[] result = mResolver.applyBatch(ContactsContract.AUTHORITY, operations);
+		ContentProviderResult[] result = mResolver.applyBatch(ContactsContract.AUTHORITY,
+				operations);
 		rawContactId = ContentUris.parseId(result[1].uri);
 		long contactId = 0;
 		// Search the corresponding contact id
 		Cursor c = null;
 		try {
 			String[] whereArgs = new String[] { String.valueOf(rawContactId) };
-			c = mResolver.query(Data.CONTENT_URI, PROJECTION_DATA_CONTACTID, WHERE_DATA_ID, whereArgs, null);
+			c = mResolver.query(Data.CONTENT_URI, PROJECTION_DATA_CONTACTID, WHERE_DATA_ID,
+					whereArgs, null);
 			if (c.moveToFirst()) {
 				contactId = c.getLong(0);
 			}
@@ -172,17 +192,20 @@ public class ContactUtils {
 	/**
 	 * Check if the given number is present in the address book
 	 * 
-	 * @param contact Contact ID to be checked
+	 * @param contact
+	 *            Contact ID to be checked
 	 * @return boolean indicating if number is present in the address book or not
 	 */
-	public static boolean isNumberInAddressBook(ContactId contact){
+	public static boolean isNumberInAddressBook(ContactId contact) {
 		String[] selectionArgs = { Phone.CONTENT_ITEM_TYPE, contact.toString() };
-		ContentResolver contentResolver = AndroidFactory.getApplicationContext().getContentResolver();
-		
+		ContentResolver contentResolver = AndroidFactory.getApplicationContext()
+				.getContentResolver();
+
 		// Starting query phone_numbers_equal
 		Cursor cur = null;
 		try {
-			cur = contentResolver.query(Data.CONTENT_URI, PROJECTION_RAW_CONTACT_ID, SELECTION_LOOSE, selectionArgs, Data.RAW_CONTACT_ID);
+			cur = contentResolver.query(Data.CONTENT_URI, PROJECTION_RAW_CONTACT_ID,
+					SELECTION_LOOSE, selectionArgs, Data.RAW_CONTACT_ID);
 			// We found at least one data with this number
 			if (cur.getCount() > 0) {
 				return true;
@@ -196,10 +219,11 @@ public class ContactUtils {
 		}
 
 		// No match found using LOOSE equals, try using STRICT equals.
-		String[] selectionArgsStrict = { Phone.CONTENT_ITEM_TYPE, contact.toString(), contact.toString() };
+		String[] selectionArgsStrict = { Phone.CONTENT_ITEM_TYPE, contact.toString(),
+				contact.toString() };
 		try {
-			cur = contentResolver.query(Data.CONTENT_URI, PROJECTION_RAW_CONTACT_ID, SELECTION_STRICT, selectionArgsStrict,
-					Data.RAW_CONTACT_ID);
+			cur = contentResolver.query(Data.CONTENT_URI, PROJECTION_RAW_CONTACT_ID,
+					SELECTION_STRICT, selectionArgsStrict, Data.RAW_CONTACT_ID);
 			// We found at least one data with this number
 			if (cur.getCount() > 0) {
 				return true;
@@ -214,7 +238,7 @@ public class ContactUtils {
 		// We found no contact with this number
 		return false;
 	}
-	
+
 	/**
 	 * Create a ContactId from a phone number received in the payload
 	 * 
@@ -227,7 +251,8 @@ public class ContactUtils {
 		com.gsma.services.rcs.contacts.ContactUtils contactUtils = com.gsma.services.rcs.contacts.ContactUtils
 				.getInstance(AndroidFactory.getApplicationContext());
 		if (contactUtils != null) {
-			return contactUtils.formatContact(PhoneUtils.extractNumberFromUriWithoutFormatting(phoneNumber));
+			return contactUtils.formatContact(PhoneUtils
+					.extractNumberFromUriWithoutFormatting(phoneNumber));
 		}
 		throw new RcsContactFormatException();
 	}

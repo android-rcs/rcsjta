@@ -128,8 +128,10 @@ public class FileTransferUtils {
 			byte[] fileIconData = out.toByteArray();
 
 			// Generate fileIcon content
-			Uri fileIconUri = ContentManager.generateUriForReceivedContent(fileIconName, "image/jpeg");
-			MmContent fileIcon = ContentManager.createMmContent(fileIconUri, fileIconData.length, fileIconName);
+			Uri fileIconUri = ContentManager.generateUriForReceivedContent(fileIconName,
+					"image/jpeg");
+			MmContent fileIcon = ContentManager.createMmContent(fileIconUri, fileIconData.length,
+					fileIconName);
 			// Save the fileIcon data
 			fileIcon.setData(fileIconData);
 			// persist the fileIcon content
@@ -194,14 +196,16 @@ public class FileTransferUtils {
 				}
 				if (data != null) {
 					// Build fileIcon name
-					String iconName = buildFileiconUrl(ChatUtils.getContributionId(request), mimeType);
+					String iconName = buildFileiconUrl(ChatUtils.getContributionId(request),
+							mimeType);
 					// Generate URL
-					Uri fileIconUri = ContentManager.generateUriForReceivedContent(iconName, mimeType);
+					Uri fileIconUri = ContentManager.generateUriForReceivedContent(iconName,
+							mimeType);
 					// Get binary data
-					byte[] fileIconData = Base64.decodeBase64(mimeType
-							.getBytes(UTF8));
+					byte[] fileIconData = Base64.decodeBase64(mimeType.getBytes(UTF8));
 					// Generate fileIcon content
-					MmContent result = ContentManager.createMmContent(fileIconUri, fileIconData.length, iconName);
+					MmContent result = ContentManager.createMmContent(fileIconUri,
+							fileIconData.length, iconName);
 					result.setData(fileIconData);
 					// Decode the content and persist on disk
 					result.writeData2File(fileIconData);
@@ -253,7 +257,8 @@ public class FileTransferUtils {
 	/**
 	 * Create a content object from URI
 	 *
-	 * @param uri Uri of file
+	 * @param uri
+	 *            Uri of file
 	 * @return Content instance
 	 */
 	public static MmContent createMmContent(Uri uri) {

@@ -62,13 +62,12 @@ public class VideoSharingData {
 	 *
 	 * @see Direction
 	 */
-	static final String KEY_DIRECTION = VideoSharingLog.DIRECTION;	
+	static final String KEY_DIRECTION = VideoSharingLog.DIRECTION;
 
 	/**
-	 * Duration of the sharing in seconds. The value is only set at the end of
-	 * the sharing.
+	 * Duration of the sharing in seconds. The value is only set at the end of the sharing.
 	 */
-	static final String KEY_DURATION = VideoSharingLog.DURATION;	
+	static final String KEY_DURATION = VideoSharingLog.DURATION;
 
 	/**
 	 * Encoding of the shared video

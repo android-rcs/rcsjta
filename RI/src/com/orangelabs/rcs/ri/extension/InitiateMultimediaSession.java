@@ -41,73 +41,74 @@ import com.orangelabs.rcs.ri.utils.LogUtils;
  */
 public abstract class InitiateMultimediaSession extends Activity {
 
-	/**
-	 * Spinner for contact selection
-	 */
-	private Spinner mSpinner;
+    /**
+     * Spinner for contact selection
+     */
+    private Spinner mSpinner;
 
-	/**
-	 * The log tag for this class
-	 */
-	private static final String LOGTAG = LogUtils.getTag(InitiateMultimediaSession.class.getSimpleName());
+    /**
+     * The log tag for this class
+     */
+    private static final String LOGTAG = LogUtils.getTag(InitiateMultimediaSession.class
+            .getSimpleName());
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-		// Set layout
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		setContentView(R.layout.extension_initiate_session);
+        // Set layout
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setContentView(R.layout.extension_initiate_session);
 
-		// Set contact selector
-		mSpinner = (Spinner) findViewById(R.id.contact);
-		mSpinner.setAdapter(ContactListAdapter.createContactListAdapter(this));
+        // Set contact selector
+        mSpinner = (Spinner)findViewById(R.id.contact);
+        mSpinner.setAdapter(ContactListAdapter.createContactListAdapter(this));
 
-		// Set buttons callback
-		Button initiateBtn = (Button) findViewById(R.id.initiate_btn);
-		initiateBtn.setOnClickListener(btnInitiateListener);
+        // Set buttons callback
+        Button initiateBtn = (Button)findViewById(R.id.initiate_btn);
+        initiateBtn.setOnClickListener(btnInitiateListener);
 
-		// Disable button if no contact available
-		if (mSpinner.getAdapter().getCount() == 0) {
-			initiateBtn.setEnabled(false);
-		}
-	}
+        // Disable button if no contact available
+        if (mSpinner.getAdapter().getCount() == 0) {
+            initiateBtn.setEnabled(false);
+        }
+    }
 
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-	}
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
 
-	/**
-	 * Initiate button callback
-	 */
-	private OnClickListener btnInitiateListener = new OnClickListener() {
-		public void onClick(View v) {
-			// get selected phone number
-			ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
-			String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
-			try {
-				// Convert phone number to contactId
-				ContactUtils contactUtils = ContactUtils.getInstance(InitiateMultimediaSession.this);
-				ContactId contact = contactUtils.formatContact(phoneNumber);
-				// Initiate session
-				initiateSession(contact);
-			} catch (RcsContactFormatException e) {
-				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "Cannot parse contact " + phoneNumber);
-				}
-			} finally {
-				// Exit activity
-				finish();
-			}
-		}
-	};
+    /**
+     * Initiate button callback
+     */
+    private OnClickListener btnInitiateListener = new OnClickListener() {
+        public void onClick(View v) {
+            // get selected phone number
+            ContactListAdapter adapter = (ContactListAdapter)mSpinner.getAdapter();
+            String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
+            try {
+                // Convert phone number to contactId
+                ContactUtils contactUtils = ContactUtils
+                        .getInstance(InitiateMultimediaSession.this);
+                ContactId contact = contactUtils.formatContact(phoneNumber);
+                // Initiate session
+                initiateSession(contact);
+            } catch (RcsContactFormatException e) {
+                if (LogUtils.isActive) {
+                    Log.e(LOGTAG, "Cannot parse contact " + phoneNumber);
+                }
+            } finally {
+                // Exit activity
+                finish();
+            }
+        }
+    };
 
-	/**
-	 * Initiate session
-	 * 
-	 * @param contact
-	 *            Remote contact
-	 */
-	public abstract void initiateSession(ContactId contact);
+    /**
+     * Initiate session
+     * 
+     * @param contact Remote contact
+     */
+    public abstract void initiateSession(ContactId contact);
 }

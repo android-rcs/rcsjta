@@ -32,21 +32,30 @@ public abstract class GeolocSharingListener extends IGeolocSharingListener.Stub 
 	/**
 	 * Callback called when the geoloc sharing state changes
 	 *
-	 * @param contact Contact ID
-	 * @param sharingId ID of geoloc sharing
-	 * @param state State of image sharing
-	 * @param reasonCode Reason code of geoloc sharing state
+	 * @param contact
+	 *            Contact ID
+	 * @param sharingId
+	 *            ID of geoloc sharing
+	 * @param state
+	 *            State of image sharing
+	 * @param reasonCode
+	 *            Reason code of geoloc sharing state
 	 */
-	public abstract void onStateChanged(ContactId contact, String sharingId,
-			int state, int reasonCode);
+	public abstract void onStateChanged(ContactId contact, String sharingId, int state,
+			int reasonCode);
 
 	/**
 	 * Callback called during the sharing progress
 	 *
-	 * @param contact Contact ID
-	 * @param sharingId ID of geoloc sharing
-	 * @param currentSize Current transferred size in bytes
-	 * @param totalSize Total size to transfer in bytes
+	 * @param contact
+	 *            Contact ID
+	 * @param sharingId
+	 *            ID of geoloc sharing
+	 * @param currentSize
+	 *            Current transferred size in bytes
+	 * @param totalSize
+	 *            Total size to transfer in bytes
 	 */
-	public abstract void onProgressUpdate(ContactId contact, String sharingId, long currentSize, long totalSize);
+	public abstract void onProgressUpdate(ContactId contact, String sharingId, long currentSize,
+			long totalSize);
 }

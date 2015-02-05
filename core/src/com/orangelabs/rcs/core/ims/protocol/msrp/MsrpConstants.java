@@ -26,23 +26,23 @@ package com.orangelabs.rcs.core.ims.protocol.msrp;
 public interface MsrpConstants {
 	public static final String MSRP_PROTOCOL = "msrp";
 	public static final String MSRP_SECURED_PROTOCOL = "msrps";
-    public static final String SOCKET_MSRP_PROTOCOL = "TCP/MSRP";
-    public static final String SOCKET_MSRP_SECURED_PROTOCOL = "TCP/TLS/MSRP";
+	public static final String SOCKET_MSRP_PROTOCOL = "TCP/MSRP";
+	public static final String SOCKET_MSRP_SECURED_PROTOCOL = "TCP/TLS/MSRP";
 
 	public static final String MSRP_HEADER = "MSRP";
 	public static final String NEW_LINE = "\r\n";
 	public static final String END_MSRP_MSG = "-------";
-	
+
 	public static final int FLAG_LAST_CHUNK = '$';
 	public static final int FLAG_MORE_CHUNK = '+';
 	public static final int FLAG_ABORT_CHUNK = '#';
-	
+
 	public static final byte CHAR_SP = ' ';
 	public static final byte CHAR_LF = '\r';
 	public static final byte CHAR_CR = '\n';
 	public static final byte CHAR_MIN = '-';
 	public static final byte CHAR_DOUBLE_POINT = ':';
-	
+
 	public static final String HEADER_BYTE_RANGE = "Byte-Range";
 	public static final String HEADER_STATUS = "Status";
 	public static final String HEADER_CONTENT_TYPE = "Content-Type";
@@ -51,12 +51,12 @@ public interface MsrpConstants {
 	public static final String HEADER_FROM_PATH = "From-Path";
 	public static final String HEADER_FAILURE_REPORT = "Failure-Report";
 	public static final String HEADER_SUCCESS_REPORT = "Success-Report";
-	
+
 	public static final String METHOD_SEND = "SEND";
 	public static final String METHOD_REPORT = "REPORT";
-	
+
 	public static final int RESPONSE_OK = 200;
-	
+
 	public static final int CHUNK_MAX_SIZE = 10 * 1024;
 	public static final String COMMENT_OK = "OK";
 }

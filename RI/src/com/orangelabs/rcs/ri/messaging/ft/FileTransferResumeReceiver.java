@@ -26,19 +26,18 @@ import android.content.Intent;
  * File transfer resume receiver
  * 
  * @author YPLO6403
- *
  */
 public class FileTransferResumeReceiver extends BroadcastReceiver {
-	/**
-	 * Action FT is resuming
-	 */
-	static final String ACTION_FT_RESUME = "FT_RESUME";
-	
-	@Override
-	public void onReceive(Context context, Intent intent) {
-		Intent receiverIntent = new Intent(context, FileTransferIntentService.class);
-		receiverIntent.putExtras(intent);
-		receiverIntent.setAction(ACTION_FT_RESUME);
-		context.startService(receiverIntent);
-	}
+    /**
+     * Action FT is resuming
+     */
+    static final String ACTION_FT_RESUME = "FT_RESUME";
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        Intent receiverIntent = new Intent(context, FileTransferIntentService.class);
+        receiverIntent.putExtras(intent);
+        receiverIntent.setAction(ACTION_FT_RESUME);
+        context.startService(receiverIntent);
+    }
 }

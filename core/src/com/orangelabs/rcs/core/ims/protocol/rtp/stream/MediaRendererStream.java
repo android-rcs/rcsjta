@@ -24,17 +24,17 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.util.Buffer;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
- * Media renderer stream 
+ * Media renderer stream
  * 
  * @author jexa7410
  */
 public class MediaRendererStream implements ProcessorOutputStream {
 	/**
-     * Media renderer
-     */
+	 * Media renderer
+	 */
 	private MediaOutput renderer;
 
-    /**
+	/**
 	 * The logger
 	 */
 	private final Logger logger = Logger.getLogger(this.getClass().getName());
@@ -42,58 +42,61 @@ public class MediaRendererStream implements ProcessorOutputStream {
 	/**
 	 * Constructor
 	 * 
-     * @param renderer Media renderer
+	 * @param renderer
+	 *            Media renderer
 	 */
 	public MediaRendererStream(MediaOutput renderer) {
 		this.renderer = renderer;
 	}
 
-    /**
-     * Get Media renderer
-     *
-     * @return renderer Media renderer
-     */
-    public MediaOutput getRenderer() {
-        return renderer;
-    }
+	/**
+	 * Get Media renderer
+	 *
+	 * @return renderer Media renderer
+	 */
+	public MediaOutput getRenderer() {
+		return renderer;
+	}
 
 	/**
 	 * Open the output stream
 	 * 
-     * @throws Exception
-	 */	
-    public void open() throws Exception {
-    	try {
-	    	renderer.open();
+	 * @throws Exception
+	 */
+	public void open() throws Exception {
+		try {
+			renderer.open();
 			if (logger.isActivated()) {
 				logger.debug("Media renderer stream opened");
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Media renderer stream failed", e);
 			}
-			throw e; 
+			throw e;
 		}
-    }
+	}
 
-    /**
-     * Close the output stream
-     */
-    public void close() {
+	/**
+	 * Close the output stream
+	 */
+	public void close() {
 		renderer.close();
 		if (logger.isActivated()) {
 			logger.debug("Media renderer stream closed");
 		}
-    }
+	}
 
-    /**
-     * Write to the stream without blocking
-     *
-     * @param buffer Input buffer 
-     * @throws Exception
-     */
-    public void write(Buffer buffer) throws Exception {
-        MediaSample sample = new MediaSample((byte[])buffer.getData(), buffer.getTimeStamp(), buffer.getSequenceNumber());
-        renderer.writeSample(sample);
-    }
+	/**
+	 * Write to the stream without blocking
+	 *
+	 * @param buffer
+	 *            Input buffer
+	 * @throws Exception
+	 */
+	public void write(Buffer buffer) throws Exception {
+		MediaSample sample = new MediaSample((byte[]) buffer.getData(), buffer.getTimeStamp(),
+				buffer.getSequenceNumber());
+		renderer.writeSample(sample);
+	}
 }

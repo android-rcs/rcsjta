@@ -27,7 +27,7 @@ public class PresenceUtils {
 	 * RCS 2.0 video share feature tag
 	 */
 	public final static String FEATURE_RCS2_VIDEO_SHARE = "org.gsma.videoshare";
-	
+
 	/**
 	 * RCS 2.0 image share feature tag
 	 */
@@ -42,7 +42,7 @@ public class PresenceUtils {
 	 * RCS 2.0 chat feature tag
 	 */
 	public final static String FEATURE_RCS2_CHAT = "org.openmobilealliance:IM-session";
-	
+
 	/**
 	 * RCS 2.0 CS video feature tag
 	 */

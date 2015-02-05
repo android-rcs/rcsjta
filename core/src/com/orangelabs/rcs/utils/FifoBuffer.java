@@ -39,7 +39,8 @@ public class FifoBuffer {
 	/**
 	 * Add an object in the buffer
 	 *
-	 * @param obj Message
+	 * @param obj
+	 *            Message
 	 */
 	public synchronized void addObject(Object obj) {
 		fifo.addElement(obj);
@@ -71,10 +72,11 @@ public class FifoBuffer {
 	}
 
 	/**
-	 * Read an object in the buffer. This is a blocking method until a timeout
-	 * occurs or an object is read.
+	 * Read an object in the buffer. This is a blocking method until a timeout occurs or an object
+	 * is read.
 	 * 
-	 * @param timeout Timeout
+	 * @param timeout
+	 *            Timeout
 	 * @return Message
 	 */
 	public synchronized Object getObject(int timeout) {
@@ -103,27 +105,27 @@ public class FifoBuffer {
 		this.notifyAll();
 	}
 
-    /**
-     * Get FIFO size
-     *
-     * @return size of the FIFO
-     */
-    public int size() {
-        return fifo.size();
-    }
+	/**
+	 * Get FIFO size
+	 *
+	 * @return size of the FIFO
+	 */
+	public int size() {
+		return fifo.size();
+	}
 
-    /**
-     * clean FIFO
-     *
-     * @return size of the FIFO
-     */
-    public void clean(int size) {
-        if (fifo.size() > size) {
-            while (size > 0) {
-                fifo.removeElementAt(0);
-                nbObjects--;
-                size--;
-            }
-        }
-    }
+	/**
+	 * clean FIFO
+	 *
+	 * @return size of the FIFO
+	 */
+	public void clean(int size) {
+		if (fifo.size() > size) {
+			while (size > 0) {
+				fifo.removeElementAt(0);
+				nbObjects--;
+				size--;
+			}
+		}
+	}
 }

@@ -25,8 +25,8 @@ import com.orangelabs.rcs.core.ims.protocol.rtp.util.Buffer;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
- * Media processor. A processor receives an input stream, use a codec chain
- * to filter the data before to send it to the output stream.
+ * Media processor. A processor receives an input stream, use a codec chain to filter the data
+ * before to send it to the output stream.
  *
  * @author jexa7410
  */
@@ -51,30 +51,34 @@ public class Processor extends Thread {
 	 */
 	private boolean interrupted = false;
 
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+	/**
+	 * The logger
+	 */
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    /**
-     * Constructor
-     *
-     * @param inputStream Input stream
-     * @param outputStream Output stream
-     * @param codecs List of codecs
-     */
-	public Processor(ProcessorInputStream inputStream, ProcessorOutputStream outputStream, Codec[] codecs) {
-        super();
+	/**
+	 * Constructor
+	 *
+	 * @param inputStream
+	 *            Input stream
+	 * @param outputStream
+	 *            Output stream
+	 * @param codecs
+	 *            List of codecs
+	 */
+	public Processor(ProcessorInputStream inputStream, ProcessorOutputStream outputStream,
+			Codec[] codecs) {
+		super();
 
 		this.inputStream = inputStream;
-        this.outputStream = outputStream;
+		this.outputStream = outputStream;
 
 		// Create the codec chain
 		codecChain = new CodecChain(codecs, outputStream);
 
-    	if (logger.isActivated()) {
-    		logger.debug("Media processor created");
-        }
+		if (logger.isActivated()) {
+			logger.debug("Media processor created");
+		}
 	}
 
 	/**
@@ -85,7 +89,7 @@ public class Processor extends Thread {
 			logger.debug("Start media processor");
 		}
 		interrupted = false;
-        start();
+		start();
 	}
 
 	/**
@@ -122,17 +126,17 @@ public class Processor extends Thread {
 					}
 					break;
 				}
-				
-                // Codec chain processing
-                int result = codecChain.process(inBuffer);
-                if ((result != Codec.BUFFER_PROCESSED_OK)
-                        && (result != Codec.OUTPUT_BUFFER_NOT_FILLED)) {
-                    interrupted = true;
-                    if (logger.isActivated()) {
-                        logger.error("Codec chain processing error: " + result);
-                    }
-                    break;
-                }
+
+				// Codec chain processing
+				int result = codecChain.process(inBuffer);
+				if ((result != Codec.BUFFER_PROCESSED_OK)
+						&& (result != Codec.OUTPUT_BUFFER_NOT_FILLED)) {
+					interrupted = true;
+					if (logger.isActivated()) {
+						logger.error("Codec chain processing error: " + result);
+					}
+					break;
+				}
 			}
 		} catch (Exception e) {
 			if (!interrupted) {
@@ -147,20 +151,20 @@ public class Processor extends Thread {
 		}
 	}
 
-    /**
-     * Returns the input stream
-     *
-     * @return Stream
-     */
+	/**
+	 * Returns the input stream
+	 *
+	 * @return Stream
+	 */
 	public ProcessorInputStream getInputStream() {
 		return inputStream;
 	}
 
-    /**
-     * Returns the output stream
-     *
-     * @return Stream
-     */
+	/**
+	 * Returns the output stream
+	 *
+	 * @return Stream
+	 */
 	public ProcessorOutputStream getOutputStream() {
 		return outputStream;
 	}

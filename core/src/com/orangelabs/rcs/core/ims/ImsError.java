@@ -25,12 +25,12 @@ package com.orangelabs.rcs.core.ims;
  */
 public class ImsError extends Error {
 	static final long serialVersionUID = 1L;
-	
+
 	/**
 	 * Unexpected exception occurs in the module (e.g. internal exception)
 	 */
 	public final static int UNEXPECTED_EXCEPTION = 0x01;
-	
+
 	/**
 	 * Registration has failed
 	 */
@@ -40,27 +40,30 @@ public class ImsError extends Error {
 	 * Error code
 	 */
 	private int code;
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param code Error code
+	 * @param code
+	 *            Error code
 	 */
 	public ImsError(int code) {
 		super();
-		
+
 		this.code = code;
 	}
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param code Error code
-	 * @param msg Detail message 
+	 * @param code
+	 *            Error code
+	 * @param msg
+	 *            Detail message
 	 */
 	public ImsError(int code, String msg) {
 		super(msg);
-		
+
 		this.code = code;
 	}
 
@@ -70,6 +73,6 @@ public class ImsError extends Error {
 	 * @return Error code
 	 */
 	public int getErrorCode() {
-		return code; 
+		return code;
 	}
 }

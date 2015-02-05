@@ -55,7 +55,8 @@ public class IFileTransferServiceConfigurationImpl extends IFileTransferServiceC
 
 	@Override
 	public boolean isGroupFileTransferSupported() throws RemoteException {
-		return mRcsSettings.getMyCapabilities().isFileTransferHttpSupported() && mRcsSettings.isGroupChatActivated();
+		return mRcsSettings.getMyCapabilities().isFileTransferHttpSupported()
+				&& mRcsSettings.isGroupChatActivated();
 	}
 
 	@Override

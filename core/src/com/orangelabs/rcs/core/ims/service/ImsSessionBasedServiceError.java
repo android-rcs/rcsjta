@@ -24,12 +24,12 @@ package com.orangelabs.rcs.core.ims.service;
  */
 public class ImsSessionBasedServiceError extends ImsServiceError {
 	static final long serialVersionUID = 1L;
-	
+
 	/**
 	 * Error code base for chat service
 	 */
 	protected static final int CHAT_ERROR_CODES = SESSION_ERROR_CODES + 10;
-	
+
 	/**
 	 * Error code base for file transfer service
 	 */
@@ -39,12 +39,12 @@ public class ImsSessionBasedServiceError extends ImsServiceError {
 	 * Error code base for rich call service
 	 */
 	protected static final int RICHCALL_ERROR_CODES = SESSION_ERROR_CODES + 30;
-	
+
 	/**
 	 * Error code base for SIP generic service
 	 */
 	protected static final int SIP_ERROR_CODES = SESSION_ERROR_CODES + 40;
-	
+
 	/**
 	 * Error code base for IP call service
 	 */
@@ -54,7 +54,7 @@ public class ImsSessionBasedServiceError extends ImsServiceError {
 	 * Session initiation has failed (e.g. 408 timeout)
 	 */
 	public final static int SESSION_INITIATION_FAILED = SESSION_ERROR_CODES + 1;
-	
+
 	/**
 	 * Session initiation has been declined (e.g. 603 Decline or 486 Busy)
 	 */
@@ -64,30 +64,34 @@ public class ImsSessionBasedServiceError extends ImsServiceError {
 	 * Session initiation has been cancelled (e.g. 487 Session terminated)
 	 */
 	public final static int SESSION_INITIATION_CANCELLED = SESSION_ERROR_CODES + 3;
-	
+
 	/**
-     * Constructor
-     *
-     * @param error Error
-     */
-    public ImsSessionBasedServiceError(ImsServiceError error) {
-        super(error.getErrorCode(), error.getMessage());
-    }
+	 * Constructor
+	 *
+	 * @param error
+	 *            Error
+	 */
+	public ImsSessionBasedServiceError(ImsServiceError error) {
+		super(error.getErrorCode(), error.getMessage());
+	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param code Error code
+	 * @param code
+	 *            Error code
 	 */
 	public ImsSessionBasedServiceError(int code) {
 		super(code);
 	}
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param code Error code
-	 * @param msg Detail message 
+	 * @param code
+	 *            Error code
+	 * @param msg
+	 *            Detail message
 	 */
 	public ImsSessionBasedServiceError(int code, String msg) {
 		super(code, msg);

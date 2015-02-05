@@ -43,6 +43,7 @@ public interface IFileTransferLog {
 
 	/**
 	 * Add outgoing file transfer
+	 * 
 	 * @param fileTransferId
 	 *            File Transfer ID
 	 * @param contact
@@ -63,6 +64,7 @@ public interface IFileTransferLog {
 
 	/**
 	 * Add an outgoing File Transfer supported by Group Chat
+	 * 
 	 * @param fileTransferId
 	 *            the identity of the file transfer
 	 * @param chatId
@@ -81,6 +83,7 @@ public interface IFileTransferLog {
 
 	/**
 	 * Add incoming group file transfer
+	 * 
 	 * @param fileTransferId
 	 *            File transfer ID
 	 * @param chatId
@@ -96,8 +99,8 @@ public interface IFileTransferLog {
 	 * @param reasonCode
 	 *            Reason code
 	 */
-	public void addIncomingGroupFileTransfer(String fileTransferId, String chatId, ContactId contact, MmContent content,
-			MmContent fileIcon, int state, int reasonCode);
+	public void addIncomingGroupFileTransfer(String fileTransferId, String chatId,
+			ContactId contact, MmContent content, MmContent fileIcon, int state, int reasonCode);
 
 	/**
 	 * Set file transfer state and reason code
@@ -109,8 +112,7 @@ public interface IFileTransferLog {
 	 * @param reasonCode
 	 *            File transfer state reason code
 	 */
-	public void setFileTransferStateAndReasonCode(String fileTransferId,
-			int state, int reasonCode);
+	public void setFileTransferStateAndReasonCode(String fileTransferId, int state, int reasonCode);
 
 	/**
 	 * Update file transfer read status
@@ -177,14 +179,16 @@ public interface IFileTransferLog {
 	/**
 	 * Retrieve resumable file upload
 	 *
-	 * @param tId Unique Id used while uploading
+	 * @param tId
+	 *            Unique Id used while uploading
 	 */
 	public FtHttpResumeUpload retrieveFtHttpResumeUpload(String tId);
 
 	/**
 	 * Get file transfer state from its unique ID
 	 * 
-	 * @param fileTransferId Unique ID of file transfer
+	 * @param fileTransferId
+	 *            Unique ID of file transfer
 	 * @return State
 	 */
 	public int getFileTransferState(String fileTransferId);
@@ -192,7 +196,8 @@ public interface IFileTransferLog {
 	/**
 	 * Get file transfer reason code from its unique ID
 	 * 
-	 * @param fileTransferId Unique ID of file transfer
+	 * @param fileTransferId
+	 *            Unique ID of file transfer
 	 * @return reason code of the state
 	 */
 	public int getFileTransferStateReasonCode(String fileTransferId);

@@ -34,33 +34,34 @@ public class AndroidDatagramConnection implements DatagramConnection {
 	 */
 	private DatagramSocket connection = null;
 
-    /**
-     * Datagram Packet
-     */
-    private DatagramPacket packet = null;
+	/**
+	 * Datagram Packet
+	 */
+	private DatagramPacket packet = null;
 
-    /**
-     * Connection timeout
-     */
-    private int timeout = 0;
+	/**
+	 * Connection timeout
+	 */
+	private int timeout = 0;
 
 	/**
 	 * Constructor
 	 */
 	public AndroidDatagramConnection() {
-        packet = new DatagramPacket(new byte[DatagramConnection.DEFAULT_DATAGRAM_SIZE],
-                DatagramConnection.DEFAULT_DATAGRAM_SIZE);
+		packet = new DatagramPacket(new byte[DatagramConnection.DEFAULT_DATAGRAM_SIZE],
+				DatagramConnection.DEFAULT_DATAGRAM_SIZE);
 	}
 
-    /**
-     * Constructor
-     *
-     * @param timeout SO Timeout
-     */
-    public AndroidDatagramConnection(int timeout) {
-        this();
-        this.timeout = timeout;
-    }
+	/**
+	 * Constructor
+	 *
+	 * @param timeout
+	 *            SO Timeout
+	 */
+	public AndroidDatagramConnection(int timeout) {
+		this();
+		this.timeout = timeout;
+	}
 
 	/**
 	 * Open the datagram connection
@@ -69,18 +70,19 @@ public class AndroidDatagramConnection implements DatagramConnection {
 	 */
 	public void open() throws IOException {
 		connection = new DatagramSocket();
-        connection.setSoTimeout(timeout);
+		connection.setSoTimeout(timeout);
 	}
 
 	/**
 	 * Open the datagram connection
 	 * 
-	 * @param port Local port
+	 * @param port
+	 *            Local port
 	 * @throws IOException
 	 */
 	public void open(int port) throws IOException {
 		connection = new DatagramSocket(port);
-        connection.setSoTimeout(timeout);
+		connection.setSoTimeout(timeout);
 	}
 
 	/**
@@ -94,7 +96,7 @@ public class AndroidDatagramConnection implements DatagramConnection {
 			connection = null;
 		}
 	}
-	
+
 	/**
 	 * Receive data with a specific buffer size
 	 *
@@ -103,12 +105,12 @@ public class AndroidDatagramConnection implements DatagramConnection {
 	 */
 	public byte[] receive() throws IOException {
 		if (connection != null) {
-            packet.setLength(DatagramConnection.DEFAULT_DATAGRAM_SIZE);
-            connection.receive(packet);
+			packet.setLength(DatagramConnection.DEFAULT_DATAGRAM_SIZE);
+			connection.receive(packet);
 
-            int packetLength = packet.getLength();
-            byte[] data = new byte[packetLength];
-            System.arraycopy(packet.getData(), 0, data, 0, packetLength);
+			int packetLength = packet.getLength();
+			byte[] data = new byte[packetLength];
+			System.arraycopy(packet.getData(), 0, data, 0, packetLength);
 			return data;
 		} else {
 			throw new IOException("Connection not opened");
@@ -118,16 +120,19 @@ public class AndroidDatagramConnection implements DatagramConnection {
 	/**
 	 * Send data
 	 * 
-	 * @param remoteAddr Remote address
-	 * @param remotePort Remote port
-	 * @param data Data as byte array
+	 * @param remoteAddr
+	 *            Remote address
+	 * @param remotePort
+	 *            Remote port
+	 * @param data
+	 *            Data as byte array
 	 * @throws IOException
 	 */
 	public void send(String remoteAddr, int remotePort, byte[] data) throws IOException {
 		if (data == null) {
 			return;
 		}
-		
+
 		if (connection != null) {
 			InetAddress address = InetAddress.getByName(remoteAddr);
 			DatagramPacket packet = new DatagramPacket(data, data.length, address, remotePort);
@@ -136,7 +141,7 @@ public class AndroidDatagramConnection implements DatagramConnection {
 			throw new IOException("Connection not opened");
 		}
 	}
-	
+
 	/**
 	 * Returns the local address
 	 * 

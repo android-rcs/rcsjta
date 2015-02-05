@@ -38,20 +38,24 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSession {
 
-    /**
-     * The logger
-     */
-    private final static Logger logger = Logger.getLogger(ResumeUploadFileSharingSession.class
-            .getSimpleName());
+	/**
+	 * The logger
+	 */
+	private final static Logger logger = Logger.getLogger(ResumeUploadFileSharingSession.class
+			.getSimpleName());
 
-    /**
-     * Constructor create instance of session object to resume download
-     *
-     * @param parent IMS service
-     * @param content the content (url, mime-type and size)
-     * @param resumeUpload the data object in DB
-     */
-	public ResumeUploadFileSharingSession(ImsService parent, MmContent content, FtHttpResumeUpload resumeUpload) {
+	/**
+	 * Constructor create instance of session object to resume download
+	 *
+	 * @param parent
+	 *            IMS service
+	 * @param content
+	 *            the content (url, mime-type and size)
+	 * @param resumeUpload
+	 *            the data object in DB
+	 */
+	public ResumeUploadFileSharingSession(ImsService parent, MmContent content,
+			FtHttpResumeUpload resumeUpload) {
 		super(resumeUpload.getFileTransferId(), parent, content, resumeUpload.getContact(),
 				resumeUpload.getFileicon() != null ? FileTransferUtils.createMmContent(resumeUpload
 						.getFileicon()) : null, resumeUpload.getTId(), Core.getInstance(),
@@ -59,34 +63,34 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
 		this.resumeFT = resumeUpload;
 	}
 
-    /**
-     * Background processing
-     */
-    public void run() {
-        try {
-            if (logger.isActivated()) {
-                logger.info("Resume a HTTP file transfer session as originating");
-            }
-            ContactId contact = getRemoteContact();
-            for (int j = 0; j < getListeners().size(); j++) {
-                getListeners().get(j).handleSessionStarted(contact);
-            }
+	/**
+	 * Background processing
+	 */
+	public void run() {
+		try {
+			if (logger.isActivated()) {
+				logger.info("Resume a HTTP file transfer session as originating");
+			}
+			ContactId contact = getRemoteContact();
+			for (int j = 0; j < getListeners().size(); j++) {
+				getListeners().get(j).handleSessionStarted(contact);
+			}
 
-            // Resume the file upload to the HTTP server 
-            byte[] result = uploadManager.resumeUpload();
-            sendResultToContact(result);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Transfer has failed", e);
-            }
-            // Unexpected error
-            handleError(new FileSharingError(FileSharingError.UNEXPECTED_EXCEPTION, e.getMessage()));
-        }
-    }
-    
+			// Resume the file upload to the HTTP server
+			byte[] result = uploadManager.resumeUpload();
+			sendResultToContact(result);
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Transfer has failed", e);
+			}
+			// Unexpected error
+			handleError(new FileSharingError(FileSharingError.UNEXPECTED_EXCEPTION, e.getMessage()));
+		}
+	}
+
 	@Override
 	public void uploadStarted() {
-        // Upload entry already created in fthttp table
+		// Upload entry already created in fthttp table
 	}
 
 }

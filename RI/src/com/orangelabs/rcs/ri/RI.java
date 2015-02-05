@@ -44,66 +44,62 @@ public class RI extends ListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-               
-		// Set items
+
+        // Set items
         String[] items = {
-    		getString(R.string.menu_contacts),
-    		getString(R.string.menu_capabilities),
-    		getString(R.string.menu_messaging),
-    		getString(R.string.menu_sharing),
-    		getString(R.string.menu_mm_session),
-    		getString(R.string.menu_intents),
-    		getString(R.string.menu_service),
-    		getString(R.string.menu_upload),
-    		getString(R.string.menu_about)
+                getString(R.string.menu_contacts), getString(R.string.menu_capabilities),
+                getString(R.string.menu_messaging), getString(R.string.menu_sharing),
+                getString(R.string.menu_mm_session), getString(R.string.menu_intents),
+                getString(R.string.menu_service), getString(R.string.menu_upload),
+                getString(R.string.menu_about)
         };
-    	setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
-    	// Create the API connection manager
-    	ApiConnectionManager.getInstance(this);
-    }		
+        setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
+        // Create the API connection manager
+        ApiConnectionManager.getInstance(this);
+    }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-    	switch(position) {
-        	case 0:
-        		startActivity(new Intent(this, TestContactsApi.class));
-        		break;
-        		
-        	case 1:
-        		startActivity(new Intent(this, TestCapabilitiesApi.class));
-        		break;
-        		
-        	case 2:
-        		startActivity(new Intent(this, TestMessagingApi.class));
-        		break;
-        		
-        	case 3:
-        		startActivity(new Intent(this, TestSharingApi.class));
-        		break;
-        		
-        	case 4:
-        		startActivity(new Intent(this, TestMultimediaSessionApi.class));
-        		break;
+        switch (position) {
+            case 0:
+                startActivity(new Intent(this, TestContactsApi.class));
+                break;
 
-        	case 5:
-        		startActivity(new Intent(this, TestIntentsApi.class));
-        		break;
+            case 1:
+                startActivity(new Intent(this, TestCapabilitiesApi.class));
+                break;
 
-        	case 6:
-        		startActivity(new Intent(this, TestServiceApi.class));
-        		break;
+            case 2:
+                startActivity(new Intent(this, TestMessagingApi.class));
+                break;
 
-        	case 7:
-        		startActivity(new Intent(this, InitiateFileUpload.class));
-        		break;
+            case 3:
+                startActivity(new Intent(this, TestSharingApi.class));
+                break;
 
-        	case 8:
-        		startActivity(new Intent(this, AboutRI.class));
-        		break;
-    	}
+            case 4:
+                startActivity(new Intent(this, TestMultimediaSessionApi.class));
+                break;
+
+            case 5:
+                startActivity(new Intent(this, TestIntentsApi.class));
+                break;
+
+            case 6:
+                startActivity(new Intent(this, TestServiceApi.class));
+                break;
+
+            case 7:
+                startActivity(new Intent(this, InitiateFileUpload.class));
+                break;
+
+            case 8:
+                startActivity(new Intent(this, AboutRI.class));
+                break;
+        }
     }
-    
+
 }

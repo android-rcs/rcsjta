@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.contacts;
 
 import java.util.ArrayList;
@@ -35,79 +36,82 @@ import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * List of RCS contacts who are online (i.e. registered)
- *  
+ * 
  * @author Jean-Marc AUFFRET
  */
 public class OnlineContactsList extends ListActivity {
-	/**
-	 * API connection manager
-	 */
-	private ApiConnectionManager connectionManager;
-	
-	/**
-   	 * A locker to exit only once
-   	 */
-   	private LockAccess exitOnce = new LockAccess();
-	
-	@Override
+    /**
+     * API connection manager
+     */
+    private ApiConnectionManager connectionManager;
+
+    /**
+     * A locker to exit only once
+     */
+    private LockAccess exitOnce = new LockAccess();
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.contacts_rcs_list);
-        
-		// Register to API connection manager
-		connectionManager = ApiConnectionManager.getInstance(this);
-		if (connectionManager == null || !connectionManager.isServiceConnected(RcsServiceName.CONTACTS)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), exitOnce);
-			return;
-		}
-		connectionManager.startMonitorServices(this, null, RcsServiceName.CONTACTS);
-	}
-	
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		if (connectionManager != null) {
-			connectionManager.stopMonitorServices(this);
-    	}
-	}	
-	
-	@Override
-	protected void onResume() {
-		super.onResume();
-    	// Update the list of RCS contacts
-		updateList();
-	}
+
+        // Register to API connection manager
+        connectionManager = ApiConnectionManager.getInstance(this);
+        if (connectionManager == null
+                || !connectionManager.isServiceConnected(RcsServiceName.CONTACTS)) {
+            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
+                    exitOnce);
+            return;
+        }
+        connectionManager.startMonitorServices(this, null, RcsServiceName.CONTACTS);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (connectionManager != null) {
+            connectionManager.stopMonitorServices(this);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Update the list of RCS contacts
+        updateList();
+    }
 
     /**
      * Update the list
      */
     private void updateList() {
-		try {
-	    	// Get list of RCS contacts who are online
-	    	Set<RcsContact> onlineContacts = connectionManager.getContactsApi().getRcsContactsOnline();
-	    	List<RcsContact> contacts = new ArrayList<RcsContact>(onlineContacts);
-			if (contacts.size() > 0){
-		        String[] items = new String[contacts.size()];    
-		        for (int i = 0; i < contacts.size(); i++) {
-		        	RcsContact contact = contacts.get(i);
-		        	String status;
-		        	if (contact.isRegistered()) {
-						status = "online";
-		        	} else {
-						status = "offline";
-		        	}
-					items[i] = contact.getContactId() + " (" + status + ")";
-		        }
-				setListAdapter(new ArrayAdapter<String>(OnlineContactsList.this, android.R.layout.simple_list_item_1, items));
-			} else {
-				setListAdapter(null);
-			}
-		} catch(Exception e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce, e);
-		}
+        try {
+            // Get list of RCS contacts who are online
+            Set<RcsContact> onlineContacts = connectionManager.getContactsApi()
+                    .getRcsContactsOnline();
+            List<RcsContact> contacts = new ArrayList<RcsContact>(onlineContacts);
+            if (contacts.size() > 0) {
+                String[] items = new String[contacts.size()];
+                for (int i = 0; i < contacts.size(); i++) {
+                    RcsContact contact = contacts.get(i);
+                    String status;
+                    if (contact.isRegistered()) {
+                        status = "online";
+                    } else {
+                        status = "offline";
+                    }
+                    items[i] = contact.getContactId() + " (" + status + ")";
+                }
+                setListAdapter(new ArrayAdapter<String>(OnlineContactsList.this,
+                        android.R.layout.simple_list_item_1, items));
+            } else {
+                setListAdapter(null);
+            }
+        } catch (Exception e) {
+            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce, e);
+        }
     }
 }
-

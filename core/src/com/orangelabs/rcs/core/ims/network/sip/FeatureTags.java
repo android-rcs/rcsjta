@@ -33,32 +33,32 @@ public class FeatureTags {
 	 * 3GPP video share feature tag
 	 */
 	public final static String FEATURE_3GPP_VIDEO_SHARE = "+g.3gpp.cs-voice";
-	
+
 	/**
-     * 3GPP image share feature tag
-     */
-    public final static String FEATURE_3GPP_IMAGE_SHARE = "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.gsma-is\"";
-											
+	 * 3GPP image share feature tag
+	 */
+	public final static String FEATURE_3GPP_IMAGE_SHARE = "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.gsma-is\"";
+
 	/**
 	 * 3GPP image share feature tag for RCS 2.0
 	 */
 	public final static String FEATURE_3GPP_IMAGE_SHARE_RCS2 = "+g.3gpp.app_ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.gsma-is\"";
-	
+
 	/**
 	 * 3GPP location share feature tag
 	 */
 	public final static String FEATURE_3GPP_LOCATION_SHARE = "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.geopush\"";
-	
+
 	/**
 	 * RCS-e feature tag prefix
 	 */
 	public final static String FEATURE_RCSE = "+g.3gpp.iari-ref";
-	
+
 	/**
 	 * 3GPP feature tag prefix
 	 */
 	public final static String FEATURE_3GPP = "+g.3gpp.icsi-ref";
-	
+
 	/**
 	 * RCS-e image share feature tag
 	 */
@@ -93,7 +93,7 @@ public class FeatureTags {
 	 * RCS-e geolocation push feature tag
 	 */
 	public final static String FEATURE_RCSE_GEOLOCATION_PUSH = "urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.geopush";
-	
+
 	/**
 	 * RCS-e file transfer thumbnail feature tag
 	 */
@@ -108,17 +108,17 @@ public class FeatureTags {
 	 * RCS-e group chat S&F feature tag
 	 */
 	public final static String FEATURE_RCSE_GC_SF = "urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.fullsfgroupchat";
-	
+
 	/**
 	 * 3GPP IP call feature tag
 	 */
 	public final static String FEATURE_3GPP_IP_VOICE_CALL = "urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel";
-	
+
 	/**
 	 * RCS-e IP call feature tag
 	 */
 	public final static String FEATURE_RCSE_IP_VOICE_CALL = "+g.gsma.rcs.ipcall";
-	
+
 	/**
 	 * RCS IP video call feature tag
 	 */
@@ -128,7 +128,7 @@ public class FeatureTags {
 	 * RCS-e extension feature tag prefix
 	 */
 	public final static String FEATURE_RCSE_EXTENSION = "urn%3Aurn-7%3A3gpp-application.ims.iari.rcs";
-	
+
 	/**
 	 * 3GPP RCS extension feature tag
 	 */

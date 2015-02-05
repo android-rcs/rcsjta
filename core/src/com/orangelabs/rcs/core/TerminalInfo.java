@@ -34,7 +34,7 @@ public class TerminalInfo {
 	 * Product version
 	 */
 	private static String productVersion = "v2.2";
-	
+
 	/**
 	 * Returns the product name
 	 * 
@@ -56,18 +56,19 @@ public class TerminalInfo {
 	/**
 	 * Set the product version
 	 * 
-	 * @param version Version
+	 * @param version
+	 *            Version
 	 */
 	public static void setProductVersion(String version) {
 		TerminalInfo.productVersion = version;
 	}
 
-    /**
-     * Returns the product name + version
-     *
-     * @return product information
-     */
-    public static String getProductInfo() {
-        return productName + "/" + productVersion;
-    }
+	/**
+	 * Returns the product name + version
+	 *
+	 * @return product information
+	 */
+	public static String getProductInfo() {
+		return productName + "/" + productVersion;
+	}
 }

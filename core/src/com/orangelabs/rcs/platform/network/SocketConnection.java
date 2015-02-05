@@ -31,8 +31,10 @@ public interface SocketConnection {
 	/**
 	 * Open the socket
 	 * 
-	 * @param remoteAddr Remote address
-	 * @param remotePort Remote port
+	 * @param remoteAddr
+	 *            Remote address
+	 * @param remotePort
+	 *            Remote port
 	 * @throws IOException
 	 */
 	public void open(String remoteAddr, int remotePort) throws IOException;
@@ -43,7 +45,7 @@ public interface SocketConnection {
 	 * @throws IOException
 	 */
 	public void close() throws IOException;
-	
+
 	/**
 	 * Returns the socket input stream
 	 * 
@@ -51,7 +53,7 @@ public interface SocketConnection {
 	 * @throws IOException
 	 */
 	public InputStream getInputStream() throws IOException;
-	
+
 	/**
 	 * Returns the socket output stream
 	 * 
@@ -67,7 +69,7 @@ public interface SocketConnection {
 	 * @throws IOException
 	 */
 	public String getRemoteAddress() throws IOException;
-	
+
 	/**
 	 * Returns the remote port of the connection
 	 * 
@@ -83,7 +85,7 @@ public interface SocketConnection {
 	 * @throws IOException
 	 */
 	public String getLocalAddress() throws IOException;
-	
+
 	/**
 	 * Returns the local port of the connection
 	 * 
@@ -91,10 +93,10 @@ public interface SocketConnection {
 	 * @throws IOException
 	 */
 	public int getLocalPort() throws IOException;
-	
+
 	/**
-	 * Get the timeout for this socket during which a reading
-	 * operation shall block while waiting for data
+	 * Get the timeout for this socket during which a reading operation shall block while waiting
+	 * for data
 	 * 
 	 * @return Milliseconds
 	 * @throws IOException
@@ -102,10 +104,11 @@ public interface SocketConnection {
 	public int getSoTimeout() throws IOException;
 
 	/**
-	 * Set the timeout for this socket during which a reading
-	 * operation shall block while waiting for data
+	 * Set the timeout for this socket during which a reading operation shall block while waiting
+	 * for data
 	 * 
-	 * @param timeout Timeout in milliseconds
+	 * @param timeout
+	 *            Timeout in milliseconds
 	 * @throws IOException
 	 */
 	public void setSoTimeout(int timeout) throws IOException;

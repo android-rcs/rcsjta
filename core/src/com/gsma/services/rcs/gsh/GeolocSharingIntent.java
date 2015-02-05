@@ -27,13 +27,14 @@ package com.gsma.services.rcs.gsh;
  * @author Jean-Marc AUFFRET
  */
 public class GeolocSharingIntent {
-    /**
-     * Broadcast action: a new geoloc sharing invitation has been received.
-     * <p>Intent includes the following extras:
-     * <ul>
-     * <li> {@link #EXTRA_SHARING_ID} containing the unique ID of the geoloc sharing.
-     * </ul>
-     */
+	/**
+	 * Broadcast action: a new geoloc sharing invitation has been received.
+	 * <p>
+	 * Intent includes the following extras:
+	 * <ul>
+	 * <li> {@link #EXTRA_SHARING_ID} containing the unique ID of the geoloc sharing.
+	 * </ul>
+	 */
 	public final static String ACTION_NEW_INVITATION = "com.gsma.services.rcs.gsh.action.NEW_GEOLOC_SHARING";
 
 	/**

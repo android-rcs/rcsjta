@@ -1,3 +1,4 @@
+
 package com.orangelabs.rcs.utils;
 
 import android.test.AndroidTestCase;

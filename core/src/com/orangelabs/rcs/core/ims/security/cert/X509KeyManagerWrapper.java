@@ -28,50 +28,49 @@ import javax.net.ssl.X509KeyManager;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 // Changed by Deutsche Telekom
-/** 
- * This is a wrapper class to allow overwriting of requested DN in certificate request 
+/**
+ * This is a wrapper class to allow overwriting of requested DN in certificate request
  * 
  * @author Deutsche Telekom AG
  *
  */
 public class X509KeyManagerWrapper implements X509KeyManager {
 	/**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+	 * The logger
+	 */
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    private X509KeyManager defaultKeyManager;
-	
-	public X509KeyManagerWrapper(KeyManager[] keyManagers){
-		for (KeyManager keyManager : keyManagers){
-			if (keyManager instanceof X509KeyManager){
+	private X509KeyManager defaultKeyManager;
+
+	public X509KeyManagerWrapper(KeyManager[] keyManagers) {
+		for (KeyManager keyManager : keyManagers) {
+			if (keyManager instanceof X509KeyManager) {
 				defaultKeyManager = (X509KeyManager) keyManager;
-				if (logger.isActivated()){
-					logger.debug("Choosen key manager: "
-							+ defaultKeyManager.toString() + " of class "
-							+ defaultKeyManager.getClass().getName());
+				if (logger.isActivated()) {
+					logger.debug("Choosen key manager: " + defaultKeyManager.toString()
+							+ " of class " + defaultKeyManager.getClass().getName());
 				}
 			}
 		}
-		 
+
 	}
-	
+
 	@Override
 	public String chooseClientAlias(String[] keyType, Principal[] issuers, Socket socket) {
 		String alias = null;
-        if (logger.isActivated()){
-            if ((keyType != null) && (keyType.length > 0)) {
-                for (String kt : keyType) {
-                    logger.debug("chooseClientAlias;  key: " + kt);
-                }
-            }
-            if ((issuers != null) && (issuers.length > 0)) {
-    			for (Principal issuer : issuers){
-    				logger.debug("chooseClientAlias;  issuer: " + issuer.getName());
-    			}
-    		}
-        }
-        
+		if (logger.isActivated()) {
+			if ((keyType != null) && (keyType.length > 0)) {
+				for (String kt : keyType) {
+					logger.debug("chooseClientAlias;  key: " + kt);
+				}
+			}
+			if ((issuers != null) && (issuers.length > 0)) {
+				for (Principal issuer : issuers) {
+					logger.debug("chooseClientAlias;  issuer: " + issuer.getName());
+				}
+			}
+		}
+
 		alias = defaultKeyManager.chooseClientAlias(keyType, issuers, socket);
 		// patch to work around TLS handshake which request a client certificate
 		// from a specific issuer

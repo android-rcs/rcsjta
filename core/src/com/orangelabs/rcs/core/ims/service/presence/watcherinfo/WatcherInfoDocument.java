@@ -36,7 +36,7 @@ public class WatcherInfoDocument {
 		this.resource = resource;
 		this.packageId = packageId;
 	}
-	
+
 	public void addWatcher(Watcher watcher) {
 		watcherList.addElement(watcher);
 	}
@@ -51,5 +51,5 @@ public class WatcherInfoDocument {
 
 	public String getPackageId() {
 		return packageId;
-	}	
+	}
 }

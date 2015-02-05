@@ -50,7 +50,8 @@ public class HttpDigestMd5Authentication {
 	/**
 	 * Hex chars
 	 */
-	private static final char[] HEX = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+	private static final char[] HEX = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b',
+			'c', 'd', 'e', 'f' };
 
 	/**
 	 * Domain name
@@ -93,11 +94,11 @@ public class HttpDigestMd5Authentication {
 	private MD5Digest md5Digest = new MD5Digest();
 
 	/**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+	 * The logger
+	 */
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    /**
+	/**
 	 * Constructor
 	 */
 	public HttpDigestMd5Authentication() {
@@ -115,7 +116,8 @@ public class HttpDigestMd5Authentication {
 	/**
 	 * Set the realm parameter
 	 *
-	 * @param realm Realm
+	 * @param realm
+	 *            Realm
 	 */
 	public void setRealm(String realm) {
 		this.realm = realm;
@@ -133,7 +135,8 @@ public class HttpDigestMd5Authentication {
 	/**
 	 * Set the opaque parameter
 	 *
-	 * @param opaque Opaque
+	 * @param opaque
+	 *            Opaque
 	 */
 	public void setOpaque(String opaque) {
 		this.opaque = opaque;
@@ -160,7 +163,8 @@ public class HttpDigestMd5Authentication {
 	/**
 	 * Set the nonce parameter
 	 *
-	 * @param nonce Nonce
+	 * @param nonce
+	 *            Nonce
 	 */
 	public void setNonce(String nonce) {
 		this.nonce = nonce;
@@ -178,7 +182,8 @@ public class HttpDigestMd5Authentication {
 	/**
 	 * Set the next nonce parameter
 	 *
-	 * @param nextnonce Next nonce
+	 * @param nextnonce
+	 *            Next nonce
 	 */
 	public void setNextnonce(String nextnonce) {
 		this.nextnonce = nextnonce;
@@ -196,12 +201,13 @@ public class HttpDigestMd5Authentication {
 	/**
 	 * Set the Qop parameter
 	 *
-	 * @param qop Qop parameter
+	 * @param qop
+	 *            Qop parameter
 	 */
 	public void setQop(String qop) {
-   		if (qop != null) {
-   			qop = qop.split(",")[0];
-   		}
+		if (qop != null) {
+			qop = qop.split(",")[0];
+		}
 		this.qop = qop;
 	}
 
@@ -211,13 +217,13 @@ public class HttpDigestMd5Authentication {
 	public void updateNonceParameters() {
 		// Update nonce and nc
 		if (nextnonce.equals(nonce)) {
-	   		// Next nonce == nonce
+			// Next nonce == nonce
 			nc++;
 		} else {
-	   		// Next nonce != nonce
+			// Next nonce != nonce
 			nc = 1;
 			nonce = nextnonce;
-	   	}
+		}
 	}
 
 	/**
@@ -227,7 +233,7 @@ public class HttpDigestMd5Authentication {
 	 */
 	public String buildNonceCounter() {
 		String result = Integer.toHexString(nc);
-		while(result.length() != 8) {
+		while (result.length() != 8) {
 			result = "0" + result;
 		}
 		return result;
@@ -236,7 +242,8 @@ public class HttpDigestMd5Authentication {
 	/**
 	 * Convert to hexa string
 	 *
-	 * @param value Value to convert
+	 * @param value
+	 *            Value to convert
 	 * @return String
 	 */
 	private String toHexString(byte[] value) {
@@ -252,18 +259,25 @@ public class HttpDigestMd5Authentication {
 	/**
 	 * Calculate HTTP Digest nonce response
 	 *
-	 * @param user User
-	 * @param password Password
-	 * @param method Method
-	 * @param uri Request URI
-	 * @param nc Nonce counter
-	 * @param body Entity body
+	 * @param user
+	 *            User
+	 * @param password
+	 *            Password
+	 * @param method
+	 *            Method
+	 * @param uri
+	 *            Request URI
+	 * @param nc
+	 *            Nonce counter
+	 * @param body
+	 *            Entity body
 	 * @throws Exception
 	 */
-	public String calculateResponse(String user, String password, String method, String uri, String nc, String body) throws Exception {
+	public String calculateResponse(String user, String password, String method, String uri,
+			String nc, String body) throws Exception {
 		if (user == null || realm == null || uri == null || nonce == null) {
-			throw new Exception("Invalid Authorization header" +
-					user + "/" + realm + "/" + uri + "/" + nonce);
+			throw new Exception("Invalid Authorization header" + user + "/" + realm + "/" + uri
+					+ "/" + nonce);
 		}
 
 		String a1 = user + ":" + realm + ":" + password;
@@ -291,8 +305,9 @@ public class HttpDigestMd5Authentication {
 	/**
 	 * HTTP Digest algo
 	 *
-	 *  @param data Input data
-	 *  @return Hash key
+	 * @param data
+	 *            Input data
+	 * @return Hash key
 	 */
 	private String H(String data) {
 		try {

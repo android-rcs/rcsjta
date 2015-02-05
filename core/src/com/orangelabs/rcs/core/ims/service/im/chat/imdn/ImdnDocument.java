@@ -57,17 +57,17 @@ public class ImdnDocument {
 	public static final String MESSAGE_ID_TAG = "message-id";
 
 	public static final String IMDN_NAMESPACE = "imdn <urn:ietf:params:imdn>";
-	
+
 	/**
 	 * Disposition notification header positive delivery value
 	 */
 	public static final String POSITIVE_DELIVERY = "positive-delivery";
-		
+
 	/**
 	 * Disposition notification header display value
 	 */
 	public static final String DISPLAY = "display";
-	
+
 	/**
 	 * Content-Disposition header notification value
 	 */

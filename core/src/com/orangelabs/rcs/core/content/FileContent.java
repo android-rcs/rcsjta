@@ -24,7 +24,6 @@ package com.orangelabs.rcs.core.content;
 
 import android.net.Uri;
 
-
 /**
  * File content
  * 
@@ -39,9 +38,12 @@ public class FileContent extends MmContent {
 	/**
 	 * Constructor
 	 *
-	 * @param file URI
-	 * @param size Content size
-	 * @param fileName Filename
+	 * @param file
+	 *            URI
+	 * @param size
+	 *            Content size
+	 * @param fileName
+	 *            Filename
 	 */
 	public FileContent(Uri file, long size, String fileName) {
 		super(file, ENCODING, size, fileName);

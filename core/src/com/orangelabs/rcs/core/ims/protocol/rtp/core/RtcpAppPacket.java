@@ -33,7 +33,7 @@ public class RtcpAppPacket extends RtcpPacket {
 
 	public RtcpAppPacket(RtcpPacket parent) {
 		super(parent);
-		
+
 		super.type = 204;
 	}
 

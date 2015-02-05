@@ -35,9 +35,10 @@ public class ContactId implements Parcelable, Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	/**
-	 * The ContactId formatted in the international representation of the phone number "<CC><NDCCS><SN>" <br>
+	 * The ContactId formatted in the international representation of the phone number
+	 * "<CC><NDCCS><SN>" <br>
 	 * with:
 	 * <ul>
 	 * <li>- CC : the country code with a leading '+' character
@@ -46,8 +47,9 @@ public class ContactId implements Parcelable, Serializable {
 	 * </ul>
 	 * All these codes CC, NDCS, SN are digits.
 	 * <p>
-	 * If this number needs to be displayed in the UI with some particular UI formatting, it is in the scope of UI code to format
-	 * that. This class will never hold specific UI formatted numbers since they need to be unique.
+	 * If this number needs to be displayed in the UI with some particular UI formatting, it is in
+	 * the scope of UI code to format that. This class will never hold specific UI formatted numbers
+	 * since they need to be unique.
 	 */
 	private String mContactId;
 
@@ -78,7 +80,8 @@ public class ContactId implements Parcelable, Serializable {
 	}
 
 	/**
-	 * Describe the kinds of special objects contained in this Parcelable's marshalled representation
+	 * Describe the kinds of special objects contained in this Parcelable's marshalled
+	 * representation
 	 * 
 	 * @return Integer
 	 * @hide

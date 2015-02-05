@@ -46,7 +46,8 @@ import com.orangelabs.rcs.ri.utils.NetworkRessourceManager;
 /**
  * Live RTP video player based on H264 QCIF format
  */
-public class OriginatingVideoPlayer extends VideoPlayer implements Camera.PreviewCallback, RtpStreamListener {
+public class OriginatingVideoPlayer extends VideoPlayer implements Camera.PreviewCallback,
+        RtpStreamListener {
     /**
      * Default video codec
      */
@@ -60,8 +61,8 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
     /**
      * Is player started
      */
-    private boolean started = false;    
-    
+    private boolean started = false;
+
     /**
      * Local RTP port
      */
@@ -91,7 +92,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      * NAL SPS
      */
     private byte[] sps = new byte[0];
-    
+
     /**
      * NAL PPS
      */
@@ -101,16 +102,16 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      * Timestamp increment
      */
     private int timestampInc;
-    
+
     /***
      * Current time stamp
      */
     private long timeStamp = 0;
-    
+
     /**
-	 * NAL initialization
-	 */
-	private boolean nalInit = false;
+     * NAL initialization
+     */
+    private boolean nalInit = false;
 
     /**
      * NAL repeat
@@ -126,17 +127,17 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      * Scaling factor for encoding
      */
     private float scaleFactor = 1;
-   
+
     /**
      * Mirroring (horizontal and vertival) for encoding
      */
     private boolean mirroring = false;
-    
+
     /**
      * Video Orientation
      */
     private Orientation mOrientation = Orientation.NONE;
-    
+
     /**
      * Orientation header id
      */
@@ -156,17 +157,17 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      * Frame buffer
      */
     private FrameBuffer frameBuffer = new FrameBuffer();
-    
+
     /**
      * Video player event listener
      */
     private VideoPlayerListener eventListener;
-    
+
     /**
      * Remote host
      */
     private String remoteHost;
-    
+
     /**
      * Remote port
      */
@@ -178,44 +179,44 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      * @param eventListener Player event listener
      */
     public OriginatingVideoPlayer(VideoPlayerListener eventListener) {
-    	// Set event listener
-    	this.eventListener = eventListener;
-    	
-    	// Set the local RTP port
+        // Set event listener
+        this.eventListener = eventListener;
+
+        // Set the local RTP port
         localRtpPort = NetworkRessourceManager.generateLocalRtpPort();
         reservePort(localRtpPort);
 
         // Set the default media codec
-    	defaultVideoCodec = new VideoCodec(H264Config.CODEC_NAME,
-    			H264VideoFormat.PAYLOAD,
-                H264Config.CLOCK_RATE,
-                15,
-                96000,
-                H264Config.QCIF_WIDTH, H264Config.QCIF_HEIGHT,
-    			H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1b.BASELINE_PROFILE_ID + ";" + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=" + JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE);
+        defaultVideoCodec = new VideoCodec(H264Config.CODEC_NAME, H264VideoFormat.PAYLOAD,
+                H264Config.CLOCK_RATE, 15, 96000, H264Config.QCIF_WIDTH, H264Config.QCIF_HEIGHT,
+                H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1b.BASELINE_PROFILE_ID + ";"
+                        + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "="
+                        + JavaPacketizer.H264_ENABLED_PACKETIZATION_MODE);
     }
 
     /**
-	 * Set the remote info
-	 * 
-	 * @param codec Video codec
-	 * @param remoteHost Remote RTP host
-	 * @param remotePort Remote RTP port
-	 * @param orientationHeaderId Orientation header extension ID. The extension ID is
-	 *  a value between 1 and 15 arbitrarily chosen by the sender, as defined in RFC5285
-	 */
-	public void setRemoteInfo(VideoCodec codec, String remoteHost, int remotePort, int orientationHeaderId) {
+     * Set the remote info
+     * 
+     * @param codec Video codec
+     * @param remoteHost Remote RTP host
+     * @param remotePort Remote RTP port
+     * @param orientationHeaderId Orientation header extension ID. The extension
+     *            ID is a value between 1 and 15 arbitrarily chosen by the
+     *            sender, as defined in RFC5285
+     */
+    public void setRemoteInfo(VideoCodec codec, String remoteHost, int remotePort,
+            int orientationHeaderId) {
         // Set the video codec
         defaultVideoCodec = codec;
-        
+
         // Set remote host and port
         this.remoteHost = remoteHost;
         this.remotePort = remotePort;
-        
+
         // Set the orientation ID
         this.orientationHeaderId = orientationHeaderId;
-	}
-    
+    }
+
     /**
      * Returns the local RTP port
      *
@@ -224,36 +225,36 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
     public int getLocalRtpPort() {
         return localRtpPort;
     }
-    
-	/**
-	 * Returns the list of codecs supported by the player
-	 * 
-	 * @return List of codecs
-	 */
-	public VideoCodec[] getSupportedCodecs() {
-		VideoCodec[] list = new VideoCodec[1];
-		list[0] = defaultVideoCodec;
-		return list;
-	}
-    
-	/**
-	 * Returns the current codec
-	 * 
-	 * @return Codec
-	 */
-	public VideoCodec getCodec() {
-		return defaultVideoCodec;
-	}
-	
+
     /**
-	 * Opens the player and prepares resources
-	 */
-	public synchronized void open() {
+     * Returns the list of codecs supported by the player
+     * 
+     * @return List of codecs
+     */
+    public VideoCodec[] getSupportedCodecs() {
+        VideoCodec[] list = new VideoCodec[1];
+        list[0] = defaultVideoCodec;
+        return list;
+    }
+
+    /**
+     * Returns the current codec
+     * 
+     * @return Codec
+     */
+    public VideoCodec getCodec() {
+        return defaultVideoCodec;
+    }
+
+    /**
+     * Opens the player and prepares resources
+     */
+    public synchronized void open() {
         if (opened) {
             // Already opened
             return;
         }
-        
+
         // Init video encoder
         try {
             timestampInc = (int)(90000 / defaultVideoCodec.getFrameRate());
@@ -275,13 +276,13 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
             int result = NativeH264Encoder.InitEncoder(nativeH264EncoderParams);
             if (result != 0) {
-            	// Encoder init has failed
-        		eventListener.onPlayerError();
-               return;
+                // Encoder init has failed
+                eventListener.onPlayerError();
+                return;
             }
         } catch (UnsatisfiedLinkError e) {
-        	// Native encoder not found
-    		eventListener.onPlayerError();
+            // Native encoder not found
+            eventListener.onPlayerError();
             return;
         }
 
@@ -293,23 +294,23 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
             rtpInput.open();
             rtpSender.prepareSession(rtpInput, remoteHost, remotePort, this);
         } catch (Exception e) {
-        	// RTP failure
-        	e.printStackTrace();
-    		eventListener.onPlayerError();
+            // RTP failure
+            e.printStackTrace();
+            eventListener.onPlayerError();
             return;
         }
 
         // Player is opened
         opened = true;
-		eventListener.onPlayerOpened();
+        eventListener.onPlayerOpened();
     }
 
-	/**
-	 * Closes the player and deallocates resources
-	 * 
-	 * @throws JoynServiceException
-	 */
-	public synchronized void close() {
+    /**
+     * Closes the player and deallocates resources
+     * 
+     * @throws JoynServiceException
+     */
+    public synchronized void close() {
         if (!opened) {
             // Already closed
             return;
@@ -322,18 +323,18 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
             // Close the video encoder
             NativeH264Encoder.DeinitEncoder();
         } catch (UnsatisfiedLinkError e) {
-        	e.printStackTrace();
+            e.printStackTrace();
         }
 
         // Player is closed
         opened = false;
-		eventListener.onPlayerClosed();
+        eventListener.onPlayerClosed();
     }
 
-	/**
-	 * Starts the player
-	 */
-	public synchronized void start() {
+    /**
+     * Starts the player
+     */
+    public synchronized void start() {
         if (!opened) {
             // Player not opened
             return;
@@ -356,19 +357,19 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
         // Start RTP layer
         rtpSender.startSession();
-        
+
         // Player is started
         videoStartTime = SystemClock.uptimeMillis();
         started = true;
         frameProcess = new FrameProcess((int)defaultVideoCodec.getFrameRate());
         frameProcess.start();
-		eventListener.onPlayerStarted();
+        eventListener.onPlayerStarted();
     }
 
-	/**
-	 * Stops the player
-	 */
-	public synchronized void stop() {
+    /**
+     * Stops the player
+     */
+    public synchronized void stop() {
         if (!opened) {
             // Player not opened
             return;
@@ -387,7 +388,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
         } catch (Exception e) {
             // Nothing to do
         }
-		eventListener.onPlayerStopped();
+        eventListener.onPlayerStopped();
     }
 
     /*---------------------------------------------------------------------*/
@@ -495,9 +496,9 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      * @param headerId extension header orientation id
      */
     public void setOrientationHeaderId(int headerId) {
-    	this.orientationHeaderId = headerId;
+        this.orientationHeaderId = headerId;
     }
-    
+
     /**
      * Set video orientation
      *
@@ -505,7 +506,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      */
     public void setOrientation(Orientation orientation) {
         mOrientation = orientation;
-    }    
+    }
 
     /**
      * Set camera ID
@@ -529,8 +530,8 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      * Notify RTP aborted
      */
     public void rtpStreamAborted() {
-    	// RTP failure
-		eventListener.onPlayerError();
+        // RTP failure
+        eventListener.onPlayerError();
     }
 
     /**
@@ -540,11 +541,11 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      * @param camera Camera
      */
     public void onPreviewFrame(byte[] data, Camera camera) {
-    	if (!started) {
-			return;
-		}
-		
-		frameBuffer.setData(data);
+        if (!started) {
+            return;
+        }
+
+        frameBuffer.setData(data);
     };
 
     /**
@@ -565,25 +566,25 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
 
             rtpInput.addFrame(pps, timeStamp);
             timeStamp += timestampInc;
-            
+
             nalInit = true;
-        } 
+        }
 
         // Encode frame
         byte[] encoded;
         if (frameBuffer.dataSrcWidth != 0 && frameBuffer.dataSrcHeight != 0) {
-            encoded = NativeH264Encoder.ResizeAndEncodeFrame(data, timeStamp, mirroring, frameBuffer.dataSrcWidth, frameBuffer.dataSrcHeight);
+            encoded = NativeH264Encoder.ResizeAndEncodeFrame(data, timeStamp, mirroring,
+                    frameBuffer.dataSrcWidth, frameBuffer.dataSrcHeight);
         } else {
-            encoded = NativeH264Encoder.EncodeFrame(data, timeStamp, mirroring, frameBuffer.dataScaleFactor);
+            encoded = NativeH264Encoder.EncodeFrame(data, timeStamp, mirroring,
+                    frameBuffer.dataScaleFactor);
         }
         int encodeResult = NativeH264Encoder.getLastEncodeStatus();
         if ((encodeResult == 0) && (encoded.length > 0)) {
             VideoOrientation videoOrientation = null;
-            if (orientationHeaderId > 0 ) {
-                videoOrientation = new VideoOrientation(
-                        orientationHeaderId,
-                        CameraOptions.convert(cameraId),
-                        mOrientation);
+            if (orientationHeaderId > 0) {
+                videoOrientation = new VideoOrientation(orientationHeaderId,
+                        CameraOptions.convert(cameraId), mOrientation);
             }
             rtpInput.addFrame(encoded, timeStamp, videoOrientation);
             timeStamp += timestampInc;
@@ -594,7 +595,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
      * Frame process
      */
     private class FrameProcess extends Thread {
-        
+
         /**
          * Time between two frame
          */
@@ -702,8 +703,8 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
          *
          * @param data Data
          * @param timestamp Timestamp
-         * @param videoOrientation 
-         * @param marker Marker bit 
+         * @param videoOrientation
+         * @param marker Marker bit
          */
         public void addFrame(byte[] data, long timestamp, VideoOrientation videoOrientation) {
             if (fifo != null) {
@@ -717,7 +718,7 @@ public class OriginatingVideoPlayer extends VideoPlayer implements Camera.Previe
          *
          * @param data Data
          * @param timestamp Timestamp
-         * @param marker Marker bit 
+         * @param marker Marker bit
          */
         public void addFrame(byte[] data, long timestamp) {
             addFrame(data, timestamp, null);

@@ -24,7 +24,6 @@ import java.net.Socket;
 
 import com.orangelabs.rcs.utils.logger.Logger;
 
-
 /**
  * Android socket connection
  * 
@@ -34,14 +33,14 @@ public class AndroidSocketServerConnection implements SocketServerConnection {
 	/**
 	 * Socket server connection
 	 */
-	private ServerSocket acceptSocket = null; 
+	private ServerSocket acceptSocket = null;
 
 	/**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+	 * The logger
+	 */
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    /**
+	/**
 	 * Constructor
 	 */
 	public AndroidSocketServerConnection() {
@@ -50,7 +49,8 @@ public class AndroidSocketServerConnection implements SocketServerConnection {
 	/**
 	 * Open the socket
 	 * 
-	 * @param port Local port
+	 * @param port
+	 *            Local port
 	 * @throws IOException
 	 */
 	public void open(int port) throws IOException {
@@ -65,10 +65,10 @@ public class AndroidSocketServerConnection implements SocketServerConnection {
 	public void close() throws IOException {
 		if (acceptSocket != null) {
 			acceptSocket.close();
-			acceptSocket = null;		
+			acceptSocket = null;
 		}
 	}
-	
+
 	/**
 	 * Accept connection
 	 * 
@@ -76,11 +76,11 @@ public class AndroidSocketServerConnection implements SocketServerConnection {
 	 * @throws IOException
 	 */
 	public SocketConnection acceptConnection() throws IOException {
-		if (acceptSocket != null) { 
+		if (acceptSocket != null) {
 			if (logger.isActivated()) {
 				logger.debug("Socket serverSocket is waiting for incoming connection");
 			}
-			Socket socket = acceptSocket.accept();		
+			Socket socket = acceptSocket.accept();
 			return new AndroidSocketConnection(socket);
 		} else {
 			throw new IOException("Connection not opened");

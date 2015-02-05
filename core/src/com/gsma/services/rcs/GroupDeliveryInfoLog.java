@@ -18,8 +18,7 @@ package com.gsma.services.rcs;
 import android.net.Uri;
 
 /**
- * Delivery info (delivery information on group messages and group file
- * transfers)
+ * Delivery info (delivery information on group messages and group file transfers)
  */
 public class GroupDeliveryInfoLog {
 
@@ -30,45 +29,61 @@ public class GroupDeliveryInfoLog {
 			.parse("content://com.gsma.services.rcs.provider.groupdeliveryinfo/groupdeliveryinfo");
 
 	/**
-     * The name of the column containing the status of a group delivery info.
-     * <P>Type: INTEGER</P>
-     */
+	 * The name of the column containing the status of a group delivery info.
+	 * <P>
+	 * Type: INTEGER
+	 * </P>
+	 */
 	public static final String STATUS = "status";
 
 	/**
-     * The name of the column containing the reason code of a group delivery info.
-     * <P>Type: INTEGER</P>
-     */
+	 * The name of the column containing the reason code of a group delivery info.
+	 * <P>
+	 * Type: INTEGER
+	 * </P>
+	 */
 	public static final String REASON_CODE = "reason_code";
 
 	/**
-     * The name of the column containing the unique ID of the chat message ("msg_id") or file transfer ("ft_id").
-     * <P>Type: TEXT</P>
-     */
+	 * The name of the column containing the unique ID of the chat message ("msg_id") or file
+	 * transfer ("ft_id").
+	 * <P>
+	 * Type: TEXT
+	 * </P>
+	 */
 	public static final String ID = "id";
 
 	/**
-     * The name of the column containing the unique ID of the group chat.
-     * <P>Type: TEXT</P>
-     */
+	 * The name of the column containing the unique ID of the group chat.
+	 * <P>
+	 * Type: TEXT
+	 * </P>
+	 */
 	public static final String CHAT_ID = "chat_id";
 
-	  /**
-     * ContactId formatted number of the inviter of the group chat or the group file transfer.
-     * <P>Type: TEXT</P>
-     */
+	/**
+	 * ContactId formatted number of the inviter of the group chat or the group file transfer.
+	 * <P>
+	 * Type: TEXT
+	 * </P>
+	 */
 	public static final String CONTACT = "contact";
 
 	/**
-     * The name of the column containing the time when message or file transfer notification is displayed.
-     * <P>Type: LONG</P>
-     */
+	 * The name of the column containing the time when message or file transfer notification is
+	 * displayed.
+	 * <P>
+	 * Type: LONG
+	 * </P>
+	 */
 	public static final String TIMESTAMP_DELIVERED = "timestamp_delivered";
 
 	/**
-     * The name of the column containing the time when message is displayed or file transfer is done
-     * <P>Type: LONG</P>
-     */
+	 * The name of the column containing the time when message is displayed or file transfer is done
+	 * <P>
+	 * Type: LONG
+	 * </P>
+	 */
 	public static final String TIMESTAMP_DISPLAYED = "timestamp_displayed";
 
 	/**
@@ -77,31 +92,29 @@ public class GroupDeliveryInfoLog {
 	public static class Status {
 
 		/**
-		 * Delivery notifications were unsupported at the time the message or
-		 * file-transfer was sent and no delivery notification has been requested.
+		 * Delivery notifications were unsupported at the time the message or file-transfer was sent
+		 * and no delivery notification has been requested.
 		 */
 		public static final int UNSUPPORTED = 0;
 		/**
-		 * The message or file-transfer has not received any delivery report
-		 * for the specified contact.
+		 * The message or file-transfer has not received any delivery report for the specified
+		 * contact.
 		 */
 		public static final int NOT_DELIVERED = 1;
 
 		/**
-		 * The message or file-transfer has received a delivery report for the
-		 * specified contact
+		 * The message or file-transfer has received a delivery report for the specified contact
 		 */
 		public static final int DELIVERED = 2;
 
 		/**
-		 * The message or file-transfer has received a displayed report for the
-		 * specified contact.
+		 * The message or file-transfer has received a displayed report for the specified contact.
 		 */
 		public static final int DISPLAYED = 3;
 
 		/**
-		 * The message or file-transfer has received a delivery report failure
-		 * for the specified contact.
+		 * The message or file-transfer has received a delivery report failure for the specified
+		 * contact.
 		 */
 		public static final int FAILED = 4;
 	}

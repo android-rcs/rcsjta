@@ -28,7 +28,7 @@ public class RtcpStatisticsTransmitter {
 	 * Total number of packets sent
 	 */
 	public int numPackets = 0;
-    
+
 	/**
 	 * Total number of bytes sent
 	 */

@@ -83,7 +83,8 @@ public class HttpDownloadManager extends HttpTransferManager {
 	/**
 	 * The logger
 	 */
-	private static final Logger logger = Logger.getLogger(HttpDownloadManager.class.getSimpleName());
+	private static final Logger logger = Logger
+			.getLogger(HttpDownloadManager.class.getSimpleName());
 
 	/**
 	 * Constructor
@@ -95,13 +96,15 @@ public class HttpDownloadManager extends HttpTransferManager {
 	 * @param httpServerAddress
 	 *            Server address from where file is downloaded
 	 */
-	public HttpDownloadManager(MmContent content, HttpTransferEventListener listener, Uri httpServerAddress) {
+	public HttpDownloadManager(MmContent content, HttpTransferEventListener listener,
+			Uri httpServerAddress) {
 		super(listener, httpServerAddress);
 		this.content = content;
 		downloadedFile = content.getUri();
 		file = new File(downloadedFile.getPath());
 		if (logger.isActivated()) {
-			logger.debug("HttpDownloadManager file from " + httpServerAddress + " length=" + content.getSize());
+			logger.debug("HttpDownloadManager file from " + httpServerAddress + " length="
+					+ content.getSize());
 		}
 		streamForFile = openStreamForFile(file);
 	}
@@ -150,7 +153,7 @@ public class HttpDownloadManager extends HttpTransferManager {
 			}
 			// Send GET request
 			HttpGet request = new HttpGet(getHttpServerAddr().toString());
-            request.addHeader("User-Agent", SipUtils.userAgentString());
+			request.addHeader("User-Agent", SipUtils.userAgentString());
 			if (HTTP_TRACE_ENABLED) {
 				String trace = ">>> Send HTTP request:";
 				trace += "\n" + request.getMethod() + " " + request.getRequestLine().getUri();
@@ -162,15 +165,15 @@ public class HttpDownloadManager extends HttpTransferManager {
 					retryCount++;
 					return downloadFile();
 				} else {
-                    if (logger.isActivated()) {
-                        if (isPaused()) {
-                            logger.debug("Download file paused");
-                        } else if (isCancelled()) {
-                            logger.debug("Download file cancelled");
-                        } else {
-                            logger.debug("Failed to download file");
-                        }
-                    }
+					if (logger.isActivated()) {
+						if (isPaused()) {
+							logger.debug("Download file paused");
+						} else if (isCancelled()) {
+							logger.debug("Download file cancelled");
+						} else {
+							logger.debug("Failed to download file");
+						}
+					}
 					return false;
 				}
 			}
@@ -191,7 +194,7 @@ public class HttpDownloadManager extends HttpTransferManager {
 	 * @return Returns true if successful
 	 */
 	private boolean getFile(HttpGet request) {
-        HttpResponse response = null;
+		HttpResponse response = null;
 		try {
 			// Execute HTTP request
 			response = getHttpClient().execute(request);
@@ -210,15 +213,15 @@ public class HttpDownloadManager extends HttpTransferManager {
 			} else {
 				return false;
 			}
-        } catch (Exception e) {
-                if (logger.isActivated()) {
-                    logger.error("Download file exception", e);
-                }
-                return false;
-        }
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Download file exception", e);
+			}
+			return false;
+		}
 
-        try {
-            // Read content
+		try {
+			// Read content
 			byte[] buffer = new byte[CHUNK_MAX_SIZE];
 			HttpEntity entity = response.getEntity();
 			InputStream input = entity.getContent();
@@ -228,16 +231,16 @@ public class HttpDownloadManager extends HttpTransferManager {
 				getListener().httpTransferProgress(calclength, content.getSize());
 				streamForFile.write(buffer, 0, num);
 			}
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Download file exception. Set in paused", e);
-            }
-            pauseTransferBySystem();
-            return false;
-        }
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Download file exception. Set in paused", e);
+			}
+			pauseTransferBySystem();
+			return false;
+		}
 
-        try {
-            streamForFile.flush();
+		try {
+			streamForFile.flush();
 			if (isPaused()) {
 				return false;
 			}
@@ -263,7 +266,8 @@ public class HttpDownloadManager extends HttpTransferManager {
 	 * 
 	 * @param fileIcon
 	 *            file icon info
-	 * @param fileName the file icon filename
+	 * @param fileName
+	 *            the file icon filename
 	 * @return fileIcon picture content or null in case of error
 	 */
 	public MmContent downloadThumbnail(FileTransferHttpThumbnail thumbnailInfo, String fileName) {
@@ -290,7 +294,8 @@ public class HttpDownloadManager extends HttpTransferManager {
 				return null;
 			}
 			// Create the content for filename
-			Uri fileIconUri = ContentManager.generateUriForReceivedContent(fileName, thumbnailInfo.getThumbnailType());
+			Uri fileIconUri = ContentManager.generateUriForReceivedContent(fileName,
+					thumbnailInfo.getThumbnailType());
 			fileIcon = ContentManager.createMmContent(fileIconUri, baos.size(), fileName);
 			// Save data to file
 			fileIcon.writeData2File(baos.toByteArray());
@@ -363,6 +368,7 @@ public class HttpDownloadManager extends HttpTransferManager {
 
 	/**
 	 * Resume FToHTTP download
+	 * 
 	 * @return True if successful
 	 */
 	public boolean resumeDownload() {
@@ -375,14 +381,15 @@ public class HttpDownloadManager extends HttpTransferManager {
 		try {
 			Uri serverAddress = getHttpServerAddr();
 			if (logger.isActivated()) {
-				logger.debug("Resume Download file " + serverAddress + " from byte " + file.length());
+				logger.debug("Resume Download file " + serverAddress + " from byte "
+						+ file.length());
 			}
 
 			// Send GET request
 			HttpGet request = new HttpGet(serverAddress.toString());
 			long downloadedLength = file.length();
 			long completeSize = content.getSize();
-            request.addHeader("User-Agent", SipUtils.userAgentString());
+			request.addHeader("User-Agent", SipUtils.userAgentString());
 			request.addHeader("Range", "bytes=" + downloadedLength + "-" + completeSize);
 			if (HTTP_TRACE_ENABLED) {
 				String trace = ">>> Send HTTP request:";
@@ -391,23 +398,23 @@ public class HttpDownloadManager extends HttpTransferManager {
 			}
 
 			// Execute request with retry procedure
-            if (!getFile(request)) {
-                if (retryCount < RETRY_MAX && !isCancelled() && !isPaused()) {
-                    retryCount++;
-                    return downloadFile();
-                } else {
-                    if (logger.isActivated()) {
-                        if (isPaused()) {
-                            logger.debug("Download file paused");
-                        } else if (isCancelled()) {
-                            logger.debug("Download file cancelled");
-                        } else {
-                            logger.debug("Failed to download file");
-                        }
-                    }
-                    return false;
-                }
-            }
+			if (!getFile(request)) {
+				if (retryCount < RETRY_MAX && !isCancelled() && !isPaused()) {
+					retryCount++;
+					return downloadFile();
+				} else {
+					if (logger.isActivated()) {
+						if (isPaused()) {
+							logger.debug("Download file paused");
+						} else if (isCancelled()) {
+							logger.debug("Download file cancelled");
+						} else {
+							logger.debug("Failed to download file");
+						}
+					}
+					return false;
+				}
+			}
 
 			return true;
 		} catch (Exception e) {

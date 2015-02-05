@@ -29,7 +29,7 @@ public abstract class UserProfileInterface {
 	 */
 	public UserProfileInterface() {
 	}
-	
+
 	/**
 	 * Read the user profile
 	 * 

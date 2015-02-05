@@ -73,15 +73,21 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 	/**
 	 * Constructor
 	 *
-	 * @param sharingId Unique Id of Image Sharing
-	 * @param richcallService RichcallService
-	 * @param broadcaster IImageSharingEventBroadcaster
-	 * @param persistentStorage ImageSharingPersistedStorageAccessor
-	 * @param imageSharingService ImageSharingServiceImpl
+	 * @param sharingId
+	 *            Unique Id of Image Sharing
+	 * @param richcallService
+	 *            RichcallService
+	 * @param broadcaster
+	 *            IImageSharingEventBroadcaster
+	 * @param persistentStorage
+	 *            ImageSharingPersistedStorageAccessor
+	 * @param imageSharingService
+	 *            ImageSharingServiceImpl
 	 */
 	public ImageSharingImpl(String sharingId, RichcallService richcallService,
 			IImageSharingEventBroadcaster broadcaster,
-			ImageSharingPersistedStorageAccessor persistentStorage, ImageSharingServiceImpl imageSharingService) {
+			ImageSharingPersistedStorageAccessor persistentStorage,
+			ImageSharingServiceImpl imageSharingService) {
 		mSharingId = sharingId;
 		mRichcallService = richcallService;
 		mBroadcaster = broadcaster;
@@ -92,46 +98,46 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 	private ImageSharingStateAndReasonCode toStateAndReasonCode(ContentSharingError error) {
 		int contentSharingError = error.getErrorCode();
 		switch (contentSharingError) {
-			case ContentSharingError.SESSION_INITIATION_FAILED:
-				return new ImageSharingStateAndReasonCode(ImageSharing.State.FAILED,
-						ReasonCode.FAILED_INITIATION);
-			case ContentSharingError.SESSION_INITIATION_CANCELLED:
-			case ContentSharingError.SESSION_INITIATION_DECLINED:
-				return new ImageSharingStateAndReasonCode(ImageSharing.State.REJECTED,
-						ReasonCode.REJECTED_BY_REMOTE);
-			case ContentSharingError.MEDIA_SAVING_FAILED:
-				return new ImageSharingStateAndReasonCode(ImageSharing.State.FAILED,
-						ReasonCode.FAILED_SAVING);
-			case ContentSharingError.MEDIA_TRANSFER_FAILED:
-			case ContentSharingError.MEDIA_STREAMING_FAILED:
-			case ContentSharingError.UNSUPPORTED_MEDIA_TYPE:
-				return new ImageSharingStateAndReasonCode(ImageSharing.State.FAILED,
-						ReasonCode.FAILED_SHARING);
-			case ContentSharingError.NOT_ENOUGH_STORAGE_SPACE:
-				return new ImageSharingStateAndReasonCode(ImageSharing.State.REJECTED,
-						ReasonCode.REJECTED_LOW_SPACE);
-			case ContentSharingError.MEDIA_SIZE_TOO_BIG:
-				return new ImageSharingStateAndReasonCode(ImageSharing.State.REJECTED,
-						ReasonCode.REJECTED_MAX_SIZE);
-			default:
-				throw new IllegalArgumentException(
-						new StringBuilder(
-								"Unknown reason in ImageSharingImpl.toStateAndReasonCode; contentSharingError=")
-								.append(contentSharingError).append("!").toString());
+		case ContentSharingError.SESSION_INITIATION_FAILED:
+			return new ImageSharingStateAndReasonCode(ImageSharing.State.FAILED,
+					ReasonCode.FAILED_INITIATION);
+		case ContentSharingError.SESSION_INITIATION_CANCELLED:
+		case ContentSharingError.SESSION_INITIATION_DECLINED:
+			return new ImageSharingStateAndReasonCode(ImageSharing.State.REJECTED,
+					ReasonCode.REJECTED_BY_REMOTE);
+		case ContentSharingError.MEDIA_SAVING_FAILED:
+			return new ImageSharingStateAndReasonCode(ImageSharing.State.FAILED,
+					ReasonCode.FAILED_SAVING);
+		case ContentSharingError.MEDIA_TRANSFER_FAILED:
+		case ContentSharingError.MEDIA_STREAMING_FAILED:
+		case ContentSharingError.UNSUPPORTED_MEDIA_TYPE:
+			return new ImageSharingStateAndReasonCode(ImageSharing.State.FAILED,
+					ReasonCode.FAILED_SHARING);
+		case ContentSharingError.NOT_ENOUGH_STORAGE_SPACE:
+			return new ImageSharingStateAndReasonCode(ImageSharing.State.REJECTED,
+					ReasonCode.REJECTED_LOW_SPACE);
+		case ContentSharingError.MEDIA_SIZE_TOO_BIG:
+			return new ImageSharingStateAndReasonCode(ImageSharing.State.REJECTED,
+					ReasonCode.REJECTED_MAX_SIZE);
+		default:
+			throw new IllegalArgumentException(
+					new StringBuilder(
+							"Unknown reason in ImageSharingImpl.toStateAndReasonCode; contentSharingError=")
+							.append(contentSharingError).append("!").toString());
 		}
 	}
 
 	private int imsServiceSessionErrorToReasonCode(int imsServiceSessionErrorCode) {
 		switch (imsServiceSessionErrorCode) {
-			case ImsServiceSession.TERMINATION_BY_SYSTEM:
-			case ImsServiceSession.TERMINATION_BY_TIMEOUT:
-				return ReasonCode.ABORTED_BY_SYSTEM;
-			case ImsServiceSession.TERMINATION_BY_USER:
-				return ReasonCode.ABORTED_BY_USER;
-			default:
-				throw new IllegalArgumentException(
-						"Unknown reason in ImageSharingImpl.imsServiceSessionErrorToReasonCode; imsServiceSessionErrorCode="
-								+ imsServiceSessionErrorCode + "!");
+		case ImsServiceSession.TERMINATION_BY_SYSTEM:
+		case ImsServiceSession.TERMINATION_BY_TIMEOUT:
+			return ReasonCode.ABORTED_BY_SYSTEM;
+		case ImsServiceSession.TERMINATION_BY_USER:
+			return ReasonCode.ABORTED_BY_USER;
+		default:
+			throw new IllegalArgumentException(
+					"Unknown reason in ImageSharingImpl.imsServiceSessionErrorToReasonCode; imsServiceSessionErrorCode="
+							+ imsServiceSessionErrorCode + "!");
 		}
 	}
 
@@ -142,8 +148,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 		synchronized (lock) {
 			mImageSharingService.removeImageSharing(mSharingId);
 
-			mPersistentStorage.setStateAndReasonCode(ImageSharing.State.REJECTED,
-					reasonCode);
+			mPersistentStorage.setStateAndReasonCode(ImageSharing.State.REJECTED, reasonCode);
 
 			mBroadcaster.broadcastStateChanged(contact, mSharingId, ImageSharing.State.REJECTED,
 					reasonCode);
@@ -173,10 +178,10 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 	}
 
 	/**
-     * Returns the complete filename including the path of the file to be transferred
-     *
-     * @return Filename
-     */
+	 * Returns the complete filename including the path of the file to be transferred
+	 *
+	 * @return Filename
+	 */
 	public String getFileName() {
 		ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
 		if (session == null) {
@@ -199,10 +204,10 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 	}
 
 	/**
-     * Returns the size of the file to be transferred
-     *
-     * @return Size in bytes
-     */
+	 * Returns the size of the file to be transferred
+	 *
+	 * @return Size in bytes
+	 */
 	public long getFileSize() {
 		ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
 		if (session == null) {
@@ -211,11 +216,11 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 		return session.getContent().getSize();
 	}
 
-    /**
-     * Returns the MIME type of the file to be transferred
-     *
-     * @return Type
-     */
+	/**
+	 * Returns the MIME type of the file to be transferred
+	 *
+	 * @return Type
+	 */
 	public String getMimeType() {
 		ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
 		if (session == null) {
@@ -296,11 +301,11 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 					+ "' not available.");
 		}
 		// Accept invitation
-        new Thread() {
-    		public void run() {
-    			session.acceptSession();
-    		}
-    	}.start();
+		new Thread() {
+			public void run() {
+				session.acceptSession();
+			}
+		}.start();
 	}
 
 	/**
@@ -319,12 +324,12 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 					+ "' not available.");
 		}
 		// Reject invitation
-        new Thread() {
-    		public void run() {
-    			session.rejectSession(Response.DECLINE);
-    		}
-    	}.start();
-    }
+		new Thread() {
+			public void run() {
+				session.rejectSession(Response.DECLINE);
+			}
+		}.start();
+	}
 
 	/**
 	 * Aborts the sharing
@@ -346,19 +351,19 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 			return;
 		}
 		// Abort the session
-        new Thread() {
-    		public void run() {
-    			session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
-    		}
-    	}.start();
+		new Thread() {
+			public void run() {
+				session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+			}
+		}.start();
 	}
 
-    /*------------------------------- SESSION EVENTS ----------------------------------*/
+	/*------------------------------- SESSION EVENTS ----------------------------------*/
 
 	/**
 	 * Session is started
 	 */
-    public void handleSessionStarted(ContactId contact) {
+	public void handleSessionStarted(ContactId contact) {
 		if (logger.isActivated()) {
 			logger.info("Session started");
 		}
@@ -369,11 +374,13 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 			mBroadcaster.broadcastStateChanged(contact, mSharingId, ImageSharing.State.STARTED,
 					ReasonCode.UNSPECIFIED);
 		}
-    }
+	}
 
 	/**
 	 * * Session has been aborted
-	 * @param reason Termination reason
+	 * 
+	 * @param reason
+	 *            Termination reason
 	 */
 	public void handleSessionAborted(ContactId contact, int reason) {
 		if (logger.isActivated()) {
@@ -383,8 +390,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 		synchronized (lock) {
 			mImageSharingService.removeImageSharing(mSharingId);
 
-			mPersistentStorage.setStateAndReasonCode(ImageSharing.State.ABORTED,
-					reasonCode);
+			mPersistentStorage.setStateAndReasonCode(ImageSharing.State.ABORTED, reasonCode);
 
 			mBroadcaster.broadcastStateChanged(contact, mSharingId, ImageSharing.State.ABORTED,
 					reasonCode);
@@ -402,9 +408,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 		synchronized (lock) {
 			mImageSharingService.removeImageSharing(mSharingId);
 			/*
-			 * TODO : Fix sending of SIP BYE by sender once transfer is
-			 * completed and media session is closed. Then this check of state
-			 * can be removed.
+			 * TODO : Fix sending of SIP BYE by sender once transfer is completed and media session
+			 * is closed. Then this check of state can be removed.
 			 */
 			if (State.TRANSFERRED != getState()) {
 				mPersistentStorage.setStateAndReasonCode(ImageSharing.State.ABORTED,
@@ -417,7 +422,9 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
 	/**
 	 * Content sharing error
-	 * @param error Error
+	 * 
+	 * @param error
+	 *            Error
 	 */
 	public void handleSharingError(ContactId contact, ContentSharingError error) {
 		if (logger.isActivated()) {
@@ -435,25 +442,31 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 		}
 	}
 
-    /**
-     * Content sharing progress
-     * @param currentSize Data size transferred
-     * @param totalSize Total size to be transferred
-     */
-    public void handleSharingProgress(ContactId contact, long currentSize, long totalSize) {
-    	synchronized(lock) {
+	/**
+	 * Content sharing progress
+	 * 
+	 * @param currentSize
+	 *            Data size transferred
+	 * @param totalSize
+	 *            Total size to be transferred
+	 */
+	public void handleSharingProgress(ContactId contact, long currentSize, long totalSize) {
+		synchronized (lock) {
 			mPersistentStorage.setProgress(currentSize);
 
 			mBroadcaster.broadcastProgressUpdate(contact, getSharingId(), currentSize, totalSize);
-	     }
-    }
+		}
+	}
 
-    /**
-     * Content has been transferred
-     * @param contact Remote contact
-     * @param file File URI associated to the received content
-     */
-    public void handleContentTransfered(ContactId contact, Uri file) {
+	/**
+	 * Content has been transferred
+	 * 
+	 * @param contact
+	 *            Remote contact
+	 * @param file
+	 *            File URI associated to the received content
+	 */
+	public void handleContentTransfered(ContactId contact, Uri file) {
 		if (logger.isActivated()) {
 			logger.info("Image transferred");
 		}
@@ -465,8 +478,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
 			mBroadcaster.broadcastStateChanged(contact, mSharingId, ImageSharing.State.TRANSFERRED,
 					ReasonCode.UNSPECIFIED);
-	    }
-    }
+		}
+	}
 
 	@Override
 	public void handleSessionAccepted(ContactId contact) {

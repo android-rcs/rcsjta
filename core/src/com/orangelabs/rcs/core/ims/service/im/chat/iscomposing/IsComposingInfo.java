@@ -68,62 +68,63 @@ public class IsComposingInfo {
 	}
 
 	public void setState(String state) {
-		if (state.equalsIgnoreCase("active")){
+		if (state.equalsIgnoreCase("active")) {
 			this.state = true;
 		} else {
 			this.state = false;
 		}
 	}
 
-	public void setLastActiveDate(String lastActiveTimeStamp){
-		this.lastActiveDate = DateUtils.decodeDate(lastActiveTimeStamp)/1000;
+	public void setLastActiveDate(String lastActiveTimeStamp) {
+		this.lastActiveDate = DateUtils.decodeDate(lastActiveTimeStamp) / 1000;
 	}
 
-	public void setRefreshTime(String refreshTime){
+	public void setRefreshTime(String refreshTime) {
 		this.refreshTime = Long.parseLong(refreshTime);
 	}
 
-	public void setContentType(String contentType){
+	public void setContentType(String contentType) {
 		this.contentType = contentType;
 	}
 
-	public boolean isStateActive(){
+	public boolean isStateActive() {
 		return state;
 	}
 
-	public long getLastActiveDate(){
+	public long getLastActiveDate() {
 		return lastActiveDate;
 	}
 
-	public long getRefreshTime(){
+	public long getRefreshTime() {
 		return refreshTime;
 	}
 
-	public String getContentType(){
+	public String getContentType() {
 		return contentType;
 	}
 
 	/**
 	 * Build is composing document
 	 *
-	 * @param status Status
+	 * @param status
+	 *            Status
 	 * @return XML document
 	 */
-    public static String buildIsComposingInfo(boolean status) {
-        return new StringBuilder("<?xml version=\"1.0\" encoding=\"")
-                .append(UTF8_STR)
-                .append("\"?>")
-                .append(CRLF)
-                .append("<isComposing xmlns=\"urn:ietf:params:xml:ns:im-iscomposing\"")
-                .append(CRLF)
-                .append("xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"")
-                .append(CRLF)
-                .append("xsi:schemaLocation=\"urn:ietf:params:xml:ns:im-composing iscomposing.xsd\">")
-                .append(CRLF).append("<state>").append(status ? "active" : "idle")
-                .append("</state>").append(CRLF).append("<contenttype>")
-                .append(MimeType.TEXT_MESSAGE).append("</contenttype>").append(CRLF)
-                .append("<lastactive>").append(DateUtils.encodeDate(System.currentTimeMillis()))
-                .append("</lastactive>").append(CRLF).append("<refresh>60</refresh>").append(CRLF)
-                .append("</isComposing>").toString();
-    }
+	public static String buildIsComposingInfo(boolean status) {
+		return new StringBuilder("<?xml version=\"1.0\" encoding=\"")
+				.append(UTF8_STR)
+				.append("\"?>")
+				.append(CRLF)
+				.append("<isComposing xmlns=\"urn:ietf:params:xml:ns:im-iscomposing\"")
+				.append(CRLF)
+				.append("xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"")
+				.append(CRLF)
+				.append("xsi:schemaLocation=\"urn:ietf:params:xml:ns:im-composing iscomposing.xsd\">")
+				.append(CRLF).append("<state>").append(status ? "active" : "idle")
+				.append("</state>").append(CRLF).append("<contenttype>")
+				.append(MimeType.TEXT_MESSAGE).append("</contenttype>").append(CRLF)
+				.append("<lastactive>").append(DateUtils.encodeDate(System.currentTimeMillis()))
+				.append("</lastactive>").append(CRLF).append("<refresh>60</refresh>").append(CRLF)
+				.append("</isComposing>").toString();
+	}
 }

@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.extension.messaging;
 
 import android.content.Intent;
@@ -25,22 +26,22 @@ import com.orangelabs.rcs.ri.extension.InitiateMultimediaSession;
 
 /**
  * Initiate messaging session
- *  
+ * 
  * @author Jean-Marc AUFFRET
  */
 public class InitiateMessagingSession extends InitiateMultimediaSession {
 
-	/**
-	 * Initiate session
-	 * 
-	 * @param contact Remote contact
-	 */
-	public void initiateSession(ContactId contact) {
-		// Display session view
-		Intent intent = new Intent(InitiateMessagingSession.this, MessagingSessionView.class);
-    	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-    	intent.putExtra(MessagingSessionView.EXTRA_MODE, MessagingSessionView.MODE_OUTGOING);
-    	intent.putExtra(MessagingSessionView.EXTRA_CONTACT, (Parcelable)contact);
-		startActivity(intent);
-	}
+    /**
+     * Initiate session
+     * 
+     * @param contact Remote contact
+     */
+    public void initiateSession(ContactId contact) {
+        // Display session view
+        Intent intent = new Intent(InitiateMessagingSession.this, MessagingSessionView.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra(MessagingSessionView.EXTRA_MODE, MessagingSessionView.MODE_OUTGOING);
+        intent.putExtra(MessagingSessionView.EXTRA_CONTACT, (Parcelable)contact);
+        startActivity(intent);
+    }
 }

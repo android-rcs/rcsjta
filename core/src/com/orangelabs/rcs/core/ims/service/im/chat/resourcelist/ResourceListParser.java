@@ -32,37 +32,34 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author jexa7410
  */
 public class ResourceListParser extends DefaultHandler {
-	
-	/* Resource-List SAMPLE:
-	 <?xml version="1.0" encoding="UTF-8"?>
-	   <resource-lists xmlns="urn:ietf:params:xml:ns:resource-lists"
-	             xmlns:cp="urn:ietf:params:xml:ns:copycontrol">
-	     <list>
-	       <entry uri="sip:bill@example.com" cp:copyControl="to"  />
-	       <entry uri="sip:joe@example.org" cp:copyControl="cc" />
-	       <entry uri="sip:ted@example.net" cp:copyControl="bcc" />
-	     </list>
-	   </resource-lists>
-	  */
-	
+
+	/*
+	 * Resource-List SAMPLE: <?xml version="1.0" encoding="UTF-8"?> <resource-lists
+	 * xmlns="urn:ietf:params:xml:ns:resource-lists" xmlns:cp="urn:ietf:params:xml:ns:copycontrol">
+	 * <list> <entry uri="sip:bill@example.com" cp:copyControl="to" /> <entry
+	 * uri="sip:joe@example.org" cp:copyControl="cc" /> <entry uri="sip:ted@example.net"
+	 * cp:copyControl="bcc" /> </list> </resource-lists>
+	 */
+
 	private StringBuffer accumulator;
 	private ResourceListDocument list = null;
-	
-	/**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    /**
-     * Constructor
-     * 
-     * @param inputSource Input source
-     * @throws Exception
-     */
-    public ResourceListParser(InputSource inputSource) throws Exception {
-    	SAXParserFactory factory = SAXParserFactory.newInstance();
-        SAXParser parser = factory.newSAXParser();
-        parser.parse(inputSource, this);
+	/**
+	 * The logger
+	 */
+	private Logger logger = Logger.getLogger(this.getClass().getName());
+
+	/**
+	 * Constructor
+	 * 
+	 * @param inputSource
+	 *            Input source
+	 * @throws Exception
+	 */
+	public ResourceListParser(InputSource inputSource) throws Exception {
+		SAXParserFactory factory = SAXParserFactory.newInstance();
+		SAXParser parser = factory.newSAXParser();
+		parser.parse(inputSource, this);
 	}
 
 	public ResourceListDocument getResourceList() {
@@ -80,13 +77,12 @@ public class ResourceListParser extends DefaultHandler {
 		accumulator.append(buffer, start, length);
 	}
 
-	public void startElement(String namespaceURL, String localName,	String qname, Attributes attr) {
+	public void startElement(String namespaceURL, String localName, String qname, Attributes attr) {
 		accumulator.setLength(0);
 
 		if (localName.equals("resource-lists")) {
 			list = new ResourceListDocument();
-		} else
-		if (localName.equals("entry")) {
+		} else if (localName.equals("entry")) {
 			String uri = attr.getValue("uri").trim();
 			list.addEntry(uri);
 		}

@@ -38,50 +38,53 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class ExternalCapabilityMonitoring extends BroadcastReceiver {
 	/**
-     * The logger
-     */
-    private final static Logger logger = Logger.getLogger(ExternalCapabilityMonitoring.class.getSimpleName());
-	
-    @Override
-	public void onReceive(Context context, Intent intent) {
-    	try {
-	    	// Instantiate the settings manager
-	    	RcsSettings.createInstance(context);
-	    	
-	    	// Get Intent parameters
-	        String action = intent.getAction();
-	    	Integer uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
-	    	if (uid == -1) {
-	    		return;
-	    	}
-	    	
-            if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
-            	// Get extensions associated to the new application
-    	        PackageManager pm = context.getPackageManager();
-    	        String packageName = intent.getData().getSchemeSpecificPart();
-    	        ApplicationInfo appInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-    	        if (appInfo == null) {
-    	        	// No app info
-    	        	return;
-    	        }
-    	        Bundle appMeta = appInfo.metaData;
-    	        if (appMeta == null) {
-    	        	// No app meta
-    	        	return;
-    	        }
-    	        
-    	        String exts = appMeta.getString(CapabilityService.INTENT_EXTENSIONS);
-    	        if (exts == null) {
-    	        	// No RCS extension
-    	        	return;
-    	        }
-    	        
-            	if (logger.isActivated()) {
-            		logger.debug("Add extensions " + exts + " for application " + uid);
-            	}
+	 * The logger
+	 */
+	private final static Logger logger = Logger.getLogger(ExternalCapabilityMonitoring.class
+			.getSimpleName());
 
-    	        // Add the new extension in the supported RCS extensions
-		    	ServiceExtensionManager.getInstance().addNewSupportedExtensions(AndroidFactory.getApplicationContext());
+	@Override
+	public void onReceive(Context context, Intent intent) {
+		try {
+			// Instantiate the settings manager
+			RcsSettings.createInstance(context);
+
+			// Get Intent parameters
+			String action = intent.getAction();
+			Integer uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+			if (uid == -1) {
+				return;
+			}
+
+			if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
+				// Get extensions associated to the new application
+				PackageManager pm = context.getPackageManager();
+				String packageName = intent.getData().getSchemeSpecificPart();
+				ApplicationInfo appInfo = pm.getApplicationInfo(packageName,
+						PackageManager.GET_META_DATA);
+				if (appInfo == null) {
+					// No app info
+					return;
+				}
+				Bundle appMeta = appInfo.metaData;
+				if (appMeta == null) {
+					// No app meta
+					return;
+				}
+
+				String exts = appMeta.getString(CapabilityService.INTENT_EXTENSIONS);
+				if (exts == null) {
+					// No RCS extension
+					return;
+				}
+
+				if (logger.isActivated()) {
+					logger.debug("Add extensions " + exts + " for application " + uid);
+				}
+
+				// Add the new extension in the supported RCS extensions
+				ServiceExtensionManager.getInstance().addNewSupportedExtensions(
+						AndroidFactory.getApplicationContext());
 			} else {
 				if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
 					if (logger.isActivated()) {
@@ -89,11 +92,12 @@ public class ExternalCapabilityMonitoring extends BroadcastReceiver {
 					}
 
 					// Remove the extensions in the supported RCS extensions
-					ServiceExtensionManager.getInstance().removeSupportedExtensions(AndroidFactory.getApplicationContext());
+					ServiceExtensionManager.getInstance().removeSupportedExtensions(
+							AndroidFactory.getApplicationContext());
 				}
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-    }
+	}
 }

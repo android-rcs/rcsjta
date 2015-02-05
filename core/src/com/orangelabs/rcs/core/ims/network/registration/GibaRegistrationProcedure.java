@@ -47,42 +47,43 @@ public class GibaRegistrationProcedure extends RegistrationProcedure {
 	 * IMSI
 	 */
 	private String imsi = null;
-	
+
 	/**
 	 * MNC
 	 */
 	private String mnc = null;
-	
+
 	/**
 	 * MCC
 	 */
 	private String mcc = null;
-	
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    /**
+	/**
+	 * The logger
+	 */
+	private Logger logger = Logger.getLogger(this.getClass().getName());
+
+	/**
 	 * Constructor
 	 */
 	public GibaRegistrationProcedure() {
 	}
-	
+
 	/**
 	 * Initialize procedure
 	 */
 	public void init() {
-		TelephonyManager mgr = (TelephonyManager)AndroidFactory.getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
+		TelephonyManager mgr = (TelephonyManager) AndroidFactory.getApplicationContext()
+				.getSystemService(Context.TELEPHONY_SERVICE);
 		imsi = mgr.getSubscriberId();
 		String mcc_mnc = mgr.getSimOperator();
 		mcc = mcc_mnc.substring(0, 3);
 		mnc = mcc_mnc.substring(3);
-		if (mcc_mnc.length() == 5) { 
+		if (mcc_mnc.length() == 5) {
 			mnc = "0" + mnc;
 		}
 	}
-	
+
 	/**
 	 * Returns the home domain name
 	 * 
@@ -91,7 +92,7 @@ public class GibaRegistrationProcedure extends RegistrationProcedure {
 	public String getHomeDomain() {
 		return "ims.mnc" + mnc + ".mcc" + mcc + ".3gppnetwork.org";
 	}
-	
+
 	/**
 	 * Returns the public URI or IMPU for registration
 	 * 
@@ -105,7 +106,8 @@ public class GibaRegistrationProcedure extends RegistrationProcedure {
 	/**
 	 * Write the security header to REGISTER request
 	 * 
-	 * @param request Request
+	 * @param request
+	 *            Request
 	 */
 	public void writeSecurityHeader(SipRequest request) {
 		// Nothing to do here
@@ -114,7 +116,8 @@ public class GibaRegistrationProcedure extends RegistrationProcedure {
 	/**
 	 * Read the security header from REGISTER response
 	 * 
-	 * @param response Response
+	 * @param response
+	 *            Response
 	 * @throws CoreException
 	 */
 	public void readSecurityHeader(SipResponse response) throws CoreException {
@@ -122,24 +125,25 @@ public class GibaRegistrationProcedure extends RegistrationProcedure {
 			// Read the associated-URI from the 200 OK response
 			ListIterator<Header> list = response.getHeaders(SipUtils.HEADER_P_ASSOCIATED_URI);
 			SipURI sipUri = null;
-			while(list.hasNext()) { 
-				ExtensionHeader associatedHeader = (ExtensionHeader)list.next();
+			while (list.hasNext()) {
+				ExtensionHeader associatedHeader = (ExtensionHeader) list.next();
 				Address sipAddr = SipUtils.ADDR_FACTORY.createAddress(associatedHeader.getValue());
 				URI uri = sipAddr.getURI();
 				if (uri instanceof SipURI) {
 					// SIP-URI
-					sipUri = (SipURI)sipAddr.getURI();
-				}			
+					sipUri = (SipURI) sipAddr.getURI();
+				}
 			}
-			if (sipUri == null)  {
+			if (sipUri == null) {
 				throw new CoreException("No SIP-URI found in the P-Associated-URI header");
 			}
-			
+
 			// Update the user profile
 			ImsModule.IMS_USER_PROFILE.setUsername(ContactUtils.createContactId(sipUri.getUser()));
 			ImsModule.IMS_USER_PROFILE.setHomeDomain(sipUri.getHost());
-			ImsModule.IMS_USER_PROFILE.setXdmServerLogin("sip:" + sipUri.getUser() + "@" + sipUri.getHost());
-		} catch(Exception e) {
+			ImsModule.IMS_USER_PROFILE.setXdmServerLogin("sip:" + sipUri.getUser() + "@"
+					+ sipUri.getHost());
+		} catch (Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Can't read a SIP-URI from the P-Associated-URI header", e);
 			}

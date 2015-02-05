@@ -37,28 +37,24 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 @SuppressWarnings("deprecation")
 public class Provisioning extends TabActivity {
 	@Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        
-        // Instantiate the settings manager
-        RcsSettings.createInstance(getApplicationContext());
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-        // Set tabs
-        final TabHost tabHost = getTabHost();
-        tabHost.addTab(tabHost.newTabSpec("profile")
-                .setIndicator("Profile", null)
-                .setContent(new Intent(this, ProfileProvisioning.class)));
-        tabHost.addTab(tabHost.newTabSpec("stack")
-                .setIndicator("Stack", null)
-                .setContent(new Intent(this, StackProvisioning.class)));
-        tabHost.addTab(tabHost.newTabSpec("ui")
-                .setIndicator("Service", null)
-                .setContent(new Intent(this, ServiceProvisioning.class)));
-        tabHost.addTab(tabHost.newTabSpec("logger")
-                .setIndicator("Logger", null)
-                .setContent(new Intent(this, LoggerProvisioning.class)));
-    }
-	
+		// Instantiate the settings manager
+		RcsSettings.createInstance(getApplicationContext());
+
+		// Set tabs
+		final TabHost tabHost = getTabHost();
+		tabHost.addTab(tabHost.newTabSpec("profile").setIndicator("Profile", null)
+				.setContent(new Intent(this, ProfileProvisioning.class)));
+		tabHost.addTab(tabHost.newTabSpec("stack").setIndicator("Stack", null)
+				.setContent(new Intent(this, StackProvisioning.class)));
+		tabHost.addTab(tabHost.newTabSpec("ui").setIndicator("Service", null)
+				.setContent(new Intent(this, ServiceProvisioning.class)));
+		tabHost.addTab(tabHost.newTabSpec("logger").setIndicator("Logger", null)
+				.setContent(new Intent(this, LoggerProvisioning.class)));
+	}
+
 	/**
 	 * 
 	 * Set edit text either from bundle or from RCS settings if bundle is null
@@ -72,7 +68,8 @@ public class Provisioning extends TabActivity {
 	 * @param bundle
 	 *            the bundle to save parameter
 	 */
-	public static void setEditTextParameter(final Activity activity, int viewID, String rcsSettingsKey, final Bundle bundle) {
+	public static void setEditTextParameter(final Activity activity, int viewID,
+			String rcsSettingsKey, final Bundle bundle) {
 		String parameter = null;
 		if (bundle != null && bundle.containsKey(rcsSettingsKey)) {
 			parameter = bundle.getString(rcsSettingsKey);
@@ -82,7 +79,7 @@ public class Provisioning extends TabActivity {
 		EditText editText = (EditText) activity.findViewById(viewID);
 		editText.setText(parameter);
 	}
-	
+
 	/**
 	 * 
 	 * Set check box either from bundle or from RCS settings if bundle is null
@@ -96,12 +93,14 @@ public class Provisioning extends TabActivity {
 	 * @param bundle
 	 *            the bundle to save parameter
 	 */
-	public static void setCheckBoxParameter(final Activity activity, int viewID, String rcsSettingsKey, final Bundle bundle) {
+	public static void setCheckBoxParameter(final Activity activity, int viewID,
+			String rcsSettingsKey, final Bundle bundle) {
 		Boolean parameter = null;
 		if (bundle != null && bundle.containsKey(rcsSettingsKey)) {
 			parameter = bundle.getBoolean(rcsSettingsKey);
 		} else {
-			parameter = Boolean.parseBoolean(RcsSettings.getInstance().readParameter(rcsSettingsKey));
+			parameter = Boolean.parseBoolean(RcsSettings.getInstance()
+					.readParameter(rcsSettingsKey));
 		}
 		CheckBox box = (CheckBox) activity.findViewById(viewID);
 		box.setChecked(parameter);
@@ -121,8 +120,8 @@ public class Provisioning extends TabActivity {
 	 *            table of string representing choice selection
 	 * @return the index of the spinner selection
 	 */
-	public static int setSpinnerParameter(final Spinner spinner, String rcsSettingsKey, final Bundle bundle,
-			final String[] selection) {
+	public static int setSpinnerParameter(final Spinner spinner, String rcsSettingsKey,
+			final Bundle bundle, final String[] selection) {
 		Integer parameter = null;
 		if (bundle != null && bundle.containsKey(rcsSettingsKey)) {
 			parameter = bundle.getInt(rcsSettingsKey);
@@ -133,7 +132,7 @@ public class Provisioning extends TabActivity {
 		spinner.setSelection(parameter % selection.length);
 		return parameter;
 	}
-	
+
 	/**
 	 * Save string either in bundle or in RCS settings if bundle is null
 	 * 
@@ -146,7 +145,8 @@ public class Provisioning extends TabActivity {
 	 * @param bundle
 	 *            the bundle to save parameter
 	 */
-	public static void saveEditTextParameter(Activity activity, int viewID, String rcsSettingsKey, Bundle bundle) {
+	public static void saveEditTextParameter(Activity activity, int viewID, String rcsSettingsKey,
+			Bundle bundle) {
 		EditText txt = (EditText) activity.findViewById(viewID);
 		if (bundle != null) {
 			bundle.putString(rcsSettingsKey, txt.getText().toString());
@@ -154,7 +154,7 @@ public class Provisioning extends TabActivity {
 			RcsSettings.getInstance().writeParameter(rcsSettingsKey, txt.getText().toString());
 		}
 	}
-    
+
 	/**
 	 * Save boolean either in bundle or in RCS settings if bundle is null
 	 * 
@@ -167,7 +167,8 @@ public class Provisioning extends TabActivity {
 	 * @param bundle
 	 *            the bundle to save parameter
 	 */
-	public static void saveCheckBoxParameter(Activity activity, int viewID, String rcsSettingsKey, Bundle bundle) {
+	public static void saveCheckBoxParameter(Activity activity, int viewID, String rcsSettingsKey,
+			Bundle bundle) {
 		CheckBox box = (CheckBox) activity.findViewById(viewID);
 		if (bundle != null) {
 			bundle.putBoolean(rcsSettingsKey, box.isChecked());

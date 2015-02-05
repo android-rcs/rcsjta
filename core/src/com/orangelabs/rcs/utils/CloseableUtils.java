@@ -21,7 +21,7 @@ import java.io.Closeable;
 import java.io.IOException;
 
 public class CloseableUtils {
-	
+
 	/**
 	 * Closes properly objects implementing Closeable (input stream, output stream...)
 	 * 
@@ -31,7 +31,8 @@ public class CloseableUtils {
 	 * 
 	 *         <p>
 	 *         <b>Be Careful:</b><br />
-	 *         In Android SDK 15 and earlier Cursor does not implement Closeable. So do not use with cursor.
+	 *         In Android SDK 15 and earlier Cursor does not implement Closeable. So do not use with
+	 *         cursor.
 	 *         </p>
 	 */
 	public static IOException close(Closeable c) {

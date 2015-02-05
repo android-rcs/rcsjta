@@ -27,14 +27,14 @@ public class SessionIdGenerator {
 	 * Counter
 	 */
 	private static long current = System.currentTimeMillis();
-	
+
 	/**
-	 * Returns a unique integer ID 
+	 * Returns a unique integer ID
 	 * 
 	 * @return ID
 	 */
 	public static synchronized String getNewId() {
 		current++;
-		return ""+current;
-	}	
+		return "" + current;
+	}
 }

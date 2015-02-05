@@ -25,53 +25,55 @@ package com.orangelabs.rcs.utils;
  */
 public class HexadecimalUtils {
 
-    /**
-     * Decode hex string to a byte array
-     *
-     * @param s hexadecimal encoded string
-     * @return array of bytes
-     */
-    public static byte[] hexStringToByteArray(String s) {
+	/**
+	 * Decode hex string to a byte array
+	 *
+	 * @param s
+	 *            hexadecimal encoded string
+	 * @return array of bytes
+	 */
+	public static byte[] hexStringToByteArray(String s) {
 
-        if (s == null || s.length() == 0) {
-            return null;
-        }
+		if (s == null || s.length() == 0) {
+			return null;
+		}
 
-        int len = s.length();
+		int len = s.length();
 
-        // '111' is not a valid hex encoding.
-        if (len % 2 != 0) {
-            throw new IllegalArgumentException();
-        }
+		// '111' is not a valid hex encoding.
+		if (len % 2 != 0) {
+			throw new IllegalArgumentException();
+		}
 
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i + 1), 16));
-        }
-        return data;
-    }
+		byte[] data = new byte[len / 2];
+		for (int i = 0; i < len; i += 2) {
+			data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(
+					s.charAt(i + 1), 16));
+		}
+		return data;
+	}
 
-    /**
-     * Convert byte array into Hexadecimal string
-     *
-     * @param bytes
-     * @return {@link String} if valid byte array, otherwise <code>null</code>
-     */
-    public static String byteArrayToHexString(byte[] bytes) {
+	/**
+	 * Convert byte array into Hexadecimal string
+	 *
+	 * @param bytes
+	 * @return {@link String} if valid byte array, otherwise <code>null</code>
+	 */
+	public static String byteArrayToHexString(byte[] bytes) {
 
-        if (bytes == null || bytes.length == 0) {
-            return null;
-        }
+		if (bytes == null || bytes.length == 0) {
+			return null;
+		}
 
-        final char[] hexArray = {'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
-        char[] hexChars = new char[bytes.length * 2];
-        int value;
-        for ( int j = 0; j < bytes.length; j++) {
-            value = bytes[j] & 0xFF;
-            hexChars[j * 2] = hexArray[value >>> 4];
-            hexChars[j * 2 + 1] = hexArray[value & 0x0F];
-        }
-        return new String(hexChars);
-    }
+		final char[] hexArray = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c',
+				'd', 'e', 'f' };
+		char[] hexChars = new char[bytes.length * 2];
+		int value;
+		for (int j = 0; j < bytes.length; j++) {
+			value = bytes[j] & 0xFF;
+			hexChars[j * 2] = hexArray[value >>> 4];
+			hexChars[j * 2 + 1] = hexArray[value & 0x0F];
+		}
+		return new String(hexChars);
+	}
 }

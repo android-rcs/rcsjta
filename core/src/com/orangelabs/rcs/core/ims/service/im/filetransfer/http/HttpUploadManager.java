@@ -244,7 +244,8 @@ public class HttpUploadManager extends HttpTransferManager {
 	 * @throws URISyntaxException
 	 * @throws UnsupportedEncodingException
 	 */
-	private HttpPost generatePost() throws MalformedURLException, URISyntaxException, UnsupportedEncodingException {
+	private HttpPost generatePost() throws MalformedURLException, URISyntaxException,
+			UnsupportedEncodingException {
 		// Check server address
 		url = new URL(getHttpServerAddr().toString());
 		String protocol = url.getProtocol(); // TODO : exit if not HTTPS
@@ -253,7 +254,7 @@ public class HttpUploadManager extends HttpTransferManager {
 
 		// Build POST request
 		HttpPost post = new HttpPost(new URI(protocol + "://" + host + serviceRoot));
-        post.addHeader("User-Agent", SipUtils.userAgentString());
+		post.addHeader("User-Agent", SipUtils.userAgentString());
 		if (HTTP_TRACE_ENABLED) {
 			String trace = ">>> Send HTTP request:";
 			trace += "\n " + post.getMethod() + " " + post.getRequestLine().getUri();
@@ -273,7 +274,8 @@ public class HttpUploadManager extends HttpTransferManager {
 	 * @throws IOException
 	 * @throws Exception
 	 */
-	private byte[] sendMultipartPost(HttpResponse resp) throws CoreException, IOException, Exception {
+	private byte[] sendMultipartPost(HttpResponse resp) throws CoreException, IOException,
+			Exception {
 		DataOutputStream outputStream = null;
 		Uri file = content.getUri();
 
@@ -283,7 +285,8 @@ public class HttpUploadManager extends HttpTransferManager {
 		connection = (HttpsURLConnection) url.openConnection();
 
 		try {
-			connection.setSSLSocketFactory(FileTransSSLFactory.getFileTransferSSLContext().getSocketFactory());
+			connection.setSSLSocketFactory(FileTransSSLFactory.getFileTransferSSLContext()
+					.getSocketFactory());
 		} catch (Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Failed to initiate SSL for connection:", e);
@@ -299,7 +302,8 @@ public class HttpUploadManager extends HttpTransferManager {
 		connection.setRequestMethod("POST");
 		connection.setRequestProperty("Connection", "Keep-Alive");
 		connection.setRequestProperty("User-Agent", SipUtils.userAgentString());
-		connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY_TAG);
+		connection.setRequestProperty("Content-Type", "multipart/form-data; boundary="
+				+ BOUNDARY_TAG);
 
 		// Construct the Body
 		String body = "";
@@ -318,7 +322,8 @@ public class HttpUploadManager extends HttpTransferManager {
 			auth = new HttpAuthenticationAgent(getHttpServerLogin(), getHttpServerPwd());
 			auth.readWwwAuthenticateHeader(authHeaders[0].getValue());
 
-			String authValue = auth.generateAuthorizationHeaderValue(connection.getRequestMethod(), url.getPath(), body);
+			String authValue = auth.generateAuthorizationHeaderValue(connection.getRequestMethod(),
+					url.getPath(), body);
 			if (authValue != null) {
 				connection.setRequestProperty("Authorization", authValue);
 			}
@@ -345,7 +350,7 @@ public class HttpUploadManager extends HttpTransferManager {
 			writeThumbnailMultipart(outputStream);
 		}
 		// From this point, resuming is possible
-		((HttpUploadTransferEventListener)getListener()).uploadStarted();
+		((HttpUploadTransferEventListener) getListener()).uploadStarted();
 		try {
 			// Add File
 			writeFileMultipart(outputStream, file);
@@ -356,7 +361,8 @@ public class HttpUploadManager extends HttpTransferManager {
 				// Check response status code
 				int responseCode = connection.getResponseCode();
 				if (logger.isActivated()) {
-					logger.debug("Second POST response " + responseCode + " "+connection.getResponseMessage());
+					logger.debug("Second POST response " + responseCode + " "
+							+ connection.getResponseMessage());
 				}
 				byte[] result = null;
 				boolean success = false;
@@ -415,11 +421,11 @@ public class HttpUploadManager extends HttpTransferManager {
 				} else if (retry) {
 					return sendMultipartPost(resp);
 				} else {
-                    if (logger.isActivated()) {
-                        logger.warn("File Upload aborted, Received " + responseCode
-                                + " from server");
-                    }
-                    return null;
+					if (logger.isActivated()) {
+						logger.warn("File Upload aborted, Received " + responseCode
+								+ " from server");
+					}
+					return null;
 				}
 			} else {
 				if (isPaused()) {
@@ -429,7 +435,8 @@ public class HttpUploadManager extends HttpTransferManager {
 					// Sent data are bufferized. Must wait for response to enable sending to server.
 					int responseCode = connection.getResponseCode();
 					if (logger.isActivated()) {
-						logger.debug("Second POST response " + responseCode + " " + connection.getResponseMessage());
+						logger.debug("Second POST response " + responseCode + " "
+								+ connection.getResponseMessage());
 					}
 				} else {
 					if (logger.isActivated()) {
@@ -443,7 +450,10 @@ public class HttpUploadManager extends HttpTransferManager {
 				return null;
 			}
 		} catch (SecurityException e) {
-			/*Note! This is needed since this can be called during dequeuing as will be implemented in CR018.*/
+			/*
+			 * Note! This is needed since this can be called during dequeuing as will be implemented
+			 * in CR018.
+			 */
 			if (logger.isActivated()) {
 				logger.error("Upload has failed due to that the file is not accessible!", e);
 			}
@@ -453,7 +463,8 @@ public class HttpUploadManager extends HttpTransferManager {
 			e.printStackTrace();
 
 			if (logger.isActivated()) {
-				logger.warn("File Upload aborted due to " + e.getLocalizedMessage() + " now in state pause, waiting for resume...");
+				logger.warn("File Upload aborted due to " + e.getLocalizedMessage()
+						+ " now in state pause, waiting for resume...");
 			}
 			pauseTransferBySystem();
 			return null;
@@ -468,12 +479,14 @@ public class HttpUploadManager extends HttpTransferManager {
 	 */
 	private void writeThumbnailMultipart(DataOutputStream outputStream) throws IOException {
 		if (logger.isActivated()) {
-			logger.debug("write file icon " + fileIcon.getName() + " (size=" + fileIcon.getSize() + ")");
+			logger.debug("write file icon " + fileIcon.getName() + " (size=" + fileIcon.getSize()
+					+ ")");
 		}
 		if (fileIcon.getSize() > 0) {
 			outputStream.writeBytes(twoHyphens + BOUNDARY_TAG + lineEnd);
-			outputStream.writeBytes("Content-Disposition: form-data; name=\"Thumbnail\"; filename=\"thumb_" + content.getName() + "\""
-					+ lineEnd);
+			outputStream
+					.writeBytes("Content-Disposition: form-data; name=\"Thumbnail\"; filename=\"thumb_"
+							+ content.getName() + "\"" + lineEnd);
 			outputStream.writeBytes("Content-Type: image/jpeg" + lineEnd);
 			outputStream.writeBytes("Content-Length: " + fileIcon.getSize());
 			outputStream.writeBytes(lineEnd + lineEnd);
@@ -486,10 +499,10 @@ public class HttpUploadManager extends HttpTransferManager {
 				// Thumbnail must be loaded from file.
 				FileInputStream fileInputStream = null;
 				try {
-					fileInputStream = (FileInputStream)AndroidFactory.getApplicationContext()
+					fileInputStream = (FileInputStream) AndroidFactory.getApplicationContext()
 							.getContentResolver().openInputStream(fileIcon.getUri());
-					byte[] buffer = new byte[(int)fileIcon.getSize()];
-					int bytesRead = fileInputStream.read(buffer, 0, (int)fileIcon.getSize());
+					byte[] buffer = new byte[(int) fileIcon.getSize()];
+					int bytesRead = fileInputStream.read(buffer, 0, (int) fileIcon.getSize());
 					if (bytesRead > 0) {
 						outputStream.write(buffer);
 					}
@@ -530,25 +543,24 @@ public class HttpUploadManager extends HttpTransferManager {
 	 *            File Uri
 	 * @throws IOException
 	 */
-	private void writeFileMultipart(DataOutputStream outputStream, Uri file)
-			throws IOException {
+	private void writeFileMultipart(DataOutputStream outputStream, Uri file) throws IOException {
 		// Check file path
 		String filename = content.getName();
 		long fileSize = content.getSize();
 
 		// Build and write headers
-        StringBuilder filePartHeader = new StringBuilder(twoHyphens).append(BOUNDARY_TAG)
-                .append(lineEnd)
-                .append("Content-Disposition: form-data; name=\"File\"; filename=\"")
-                .append(URLEncoder.encode(filename, UTF8_STR)).append("\"").append(lineEnd)
-                .append("Content-Type: ").append(content.getEncoding()).append(lineEnd)
-                .append("Content-Length: ").append(fileSize).append(lineEnd).append(lineEnd);
-        outputStream.writeBytes(filePartHeader.toString());
+		StringBuilder filePartHeader = new StringBuilder(twoHyphens).append(BOUNDARY_TAG)
+				.append(lineEnd)
+				.append("Content-Disposition: form-data; name=\"File\"; filename=\"")
+				.append(URLEncoder.encode(filename, UTF8_STR)).append("\"").append(lineEnd)
+				.append("Content-Type: ").append(content.getEncoding()).append(lineEnd)
+				.append("Content-Length: ").append(fileSize).append(lineEnd).append(lineEnd);
+		outputStream.writeBytes(filePartHeader.toString());
 
 		// Write file content
 		InputStream fileInputStream = null;
 		try {
-			fileInputStream = (FileInputStream)AndroidFactory.getApplicationContext()
+			fileInputStream = (FileInputStream) AndroidFactory.getApplicationContext()
 					.getContentResolver().openInputStream(file);
 			int bytesAvailable = fileInputStream.available();
 			int bufferSize = Math.min(bytesAvailable, CHUNK_MAX_SIZE);
@@ -566,7 +578,7 @@ public class HttpUploadManager extends HttpTransferManager {
 				bytesRead = fileInputStream.read(buffer, 0, bufferSize);
 			}
 		} catch (SecurityException e) {
-			/*TODO: WIll be changed in CR037*/
+			/* TODO: WIll be changed in CR037 */
 			throw e;
 		} catch (Exception e) {
 			if (logger.isActivated()) {
@@ -655,28 +667,29 @@ public class HttpUploadManager extends HttpTransferManager {
 				trace += "\n " + content;
 				System.out.println(trace);
 			}
-			FileTransferHttpResumeInfo ftResumeInfo = ChatUtils.parseFileTransferHttpResumeInfo(bytes);
+			FileTransferHttpResumeInfo ftResumeInfo = ChatUtils
+					.parseFileTransferHttpResumeInfo(bytes);
 
 			if (ftResumeInfo == null) {
 				if (logger.isActivated()) {
-					logger.error( "Cannot parse resume info! restart upload");
+					logger.error("Cannot parse resume info! restart upload");
 				}
 				return uploadFile();
 			}
 			if ((ftResumeInfo.getEnd() - ftResumeInfo.getStart()) >= (this.content.getSize() - 1)) {
 				if (logger.isActivated()) {
-					logger.info( "Nothing to resume: uploaded complete");
+					logger.info("Nothing to resume: uploaded complete");
 				}
 				return getDownloadInfo(); // The file has already been uploaded completely
 			}
 			try {
-				if (sendPutForResumingUpload(ftResumeInfo) != null)  {
+				if (sendPutForResumingUpload(ftResumeInfo) != null) {
 					return getDownloadInfo();
 				}
 				return null;
 			} catch (Exception e) {
 				if (logger.isActivated()) {
-					logger.error( "Exception occurred",e);
+					logger.error("Exception occurred", e);
 				}
 				return null;
 			}
@@ -693,7 +706,8 @@ public class HttpUploadManager extends HttpTransferManager {
 	 */
 	private byte[] sendPutForResumingUpload(FileTransferHttpResumeInfo resumeInfo) throws Exception {
 		if (logger.isActivated()) {
-			logger.debug("sendPutForResumingUpload. Already sent from "+resumeInfo.getStart()+" to "+resumeInfo.getEnd());
+			logger.debug("sendPutForResumingUpload. Already sent from " + resumeInfo.getStart()
+					+ " to " + resumeInfo.getEnd());
 		}
 		DataOutputStream outputStream = null;
 		Uri file = content.getUri();
@@ -704,7 +718,8 @@ public class HttpUploadManager extends HttpTransferManager {
 		connection = (HttpsURLConnection) new URL(resumeInfo.getUri().toString()).openConnection();
 
 		try {
-			connection.setSSLSocketFactory(FileTransSSLFactory.getFileTransferSSLContext().getSocketFactory());
+			connection.setSSLSocketFactory(FileTransSSLFactory.getFileTransferSSLContext()
+					.getSocketFactory());
 		} catch (Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Failed to initiate SSL for connection:", e);
@@ -720,17 +735,20 @@ public class HttpUploadManager extends HttpTransferManager {
 		connection.setRequestProperty("Connection", "Keep-Alive");
 		connection.setRequestProperty("User-Agent", SipUtils.userAgentString());
 		connection.setRequestProperty("Content-Type", this.content.getEncoding());
-		connection.setRequestProperty("Content-Length", String.valueOf(content.getSize() - (resumeInfo.getEnd()+1)));
-        // according to RFC 2616, section 14.16 the Content-Range header must contain an element bytes-unit
-        connection.setRequestProperty("Content-Range", "bytes " + (resumeInfo.getEnd()+1) + "-" + (content.getSize()-1) + "/"
-                + content.getSize());
+		connection.setRequestProperty("Content-Length",
+				String.valueOf(content.getSize() - (resumeInfo.getEnd() + 1)));
+		// according to RFC 2616, section 14.16 the Content-Range header must contain an element
+		// bytes-unit
+		connection.setRequestProperty("Content-Range", "bytes " + (resumeInfo.getEnd() + 1) + "-"
+				+ (content.getSize() - 1) + "/" + content.getSize());
 
 		// Construct the Body
 		String body = "";
 
 		// Update authentication agent from response
 		if (authenticationFlag && auth != null) {
-			String authValue = auth.generateAuthorizationHeaderValue(connection.getRequestMethod(), url.getPath(), body);
+			String authValue = auth.generateAuthorizationHeaderValue(connection.getRequestMethod(),
+					url.getPath(), body);
 			if (authValue != null) {
 				connection.setRequestProperty("Authorization", authValue);
 			}
@@ -759,7 +777,8 @@ public class HttpUploadManager extends HttpTransferManager {
 				// Check response status code
 				int responseCode = connection.getResponseCode();
 				if (logger.isActivated()) {
-					logger.debug("PUT response " + responseCode+" "+connection.getResponseMessage());
+					logger.debug("PUT response " + responseCode + " "
+							+ connection.getResponseMessage());
 				}
 				byte[] result = null;
 				boolean success = false;
@@ -799,7 +818,8 @@ public class HttpUploadManager extends HttpTransferManager {
 					// Sent data are bufferized. Must wait for response to enable sending to server.
 					int responseCode = connection.getResponseCode();
 					if (logger.isActivated()) {
-						logger.debug("PUT response " + responseCode + " " + connection.getResponseMessage());
+						logger.debug("PUT response " + responseCode + " "
+								+ connection.getResponseMessage());
 					}
 				} else {
 					if (logger.isActivated()) {
@@ -813,7 +833,10 @@ public class HttpUploadManager extends HttpTransferManager {
 				return null;
 			}
 		} catch (SecurityException e) {
-			/*Note! This is needed since this can be called during dequeuing as will be implemented in CR018.*/
+			/*
+			 * Note! This is needed since this can be called during dequeuing as will be implemented
+			 * in CR018.
+			 */
 			if (logger.isActivated()) {
 				logger.error("Upload reasume has failed due to that the file is not accessible!", e);
 			}
@@ -823,7 +846,8 @@ public class HttpUploadManager extends HttpTransferManager {
 			e.printStackTrace();
 
 			if (logger.isActivated()) {
-				logger.warn("File Upload aborted due to " + e.getLocalizedMessage() + " now in state pause, waiting for resume...");
+				logger.warn("File Upload aborted due to " + e.getLocalizedMessage()
+						+ " now in state pause, waiting for resume...");
 			}
 			pauseTransferBySystem();
 			return null;
@@ -841,19 +865,20 @@ public class HttpUploadManager extends HttpTransferManager {
 	 *            the offset in bytes
 	 * @throws IOException
 	 */
-	private void writeRemainingFileData(DataOutputStream outputStream, Uri file, int offset) throws IOException {
+	private void writeRemainingFileData(DataOutputStream outputStream, Uri file, int offset)
+			throws IOException {
 		// Write file content
-		FileInputStream fileInputStream = (FileInputStream)AndroidFactory.getApplicationContext()
+		FileInputStream fileInputStream = (FileInputStream) AndroidFactory.getApplicationContext()
 				.getContentResolver().openInputStream(file);
 		// Skip bytes already received
-		int bytesRead = (int) fileInputStream.skip(offset+1);
+		int bytesRead = (int) fileInputStream.skip(offset + 1);
 		int bytesAvailable = fileInputStream.available();
 		int bufferSize = Math.min(bytesAvailable, CHUNK_MAX_SIZE);
 		byte[] buffer = new byte[bufferSize];
 		int progress = bytesRead;
 		bytesRead = fileInputStream.read(buffer, 0, bufferSize);
 		if (logger.isActivated()) {
-			logger.debug("Send "+bytesAvailable+" remaining bytes starting from " + progress);
+			logger.debug("Send " + bytesAvailable + " remaining bytes starting from " + progress);
 		}
 		// Send remaining bytes
 		while (bytesRead > 0 && !isCancelled()) {
@@ -875,7 +900,8 @@ public class HttpUploadManager extends HttpTransferManager {
 	 * @param suffix
 	 *            String that specifies if it is for upload or download info
 	 * @param authRequired
-	 *            Boolean that indicates whether or not the request has to be authenticated with a authorization header
+	 *            Boolean that indicates whether or not the request has to be authenticated with a
+	 *            authorization header
 	 * @return HttpResponse The last response of the server (401 are hidden)
 	 */
 	private HttpResponse sendGetInfo(String suffix, boolean authRequired) throws Exception {
@@ -886,10 +912,12 @@ public class HttpUploadManager extends HttpTransferManager {
 		String serviceRoot = url.getPath();
 
 		// Build POST request
-		HttpGet get = new HttpGet(new URI(protocol + "://" + host + serviceRoot + "?tid=" + mTId + suffix));
+		HttpGet get = new HttpGet(new URI(protocol + "://" + host + serviceRoot + "?tid=" + mTId
+				+ suffix));
 		get.addHeader("User-Agent", SipUtils.userAgentString());
 		if (authRequired && auth != null) {
-			get.addHeader("Authorization", auth.generateAuthorizationHeaderValue(get.getMethod(), get.getURI().toString(), ""));
+			get.addHeader("Authorization", auth.generateAuthorizationHeaderValue(get.getMethod(),
+					get.getURI().toString(), ""));
 		}
 
 		// Trace
@@ -908,7 +936,7 @@ public class HttpUploadManager extends HttpTransferManager {
 		// Check response status code
 		int statusCode = resp.getStatusLine().getStatusCode();
 		if (logger.isActivated()) {
-			logger.debug("Get Info ("+suffix+") Response " + resp.getStatusLine());
+			logger.debug("Get Info (" + suffix + ") Response " + resp.getStatusLine());
 		}
 		if (HTTP_TRACE_ENABLED) {
 			String trace = "<<< Receive HTTP response:";

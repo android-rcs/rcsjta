@@ -41,11 +41,10 @@ import com.orangelabs.rcs.utils.logger.Logger;
  *
  */
 public class RcsSettingsData {
-    /**
-     * Content provider URI
-     */
-	public static final Uri CONTENT_URI = Uri
-			.parse("content://com.orangelabs.rcs.setting/setting");
+	/**
+	 * Content provider URI
+	 */
+	public static final Uri CONTENT_URI = Uri.parse("content://com.orangelabs.rcs.setting/setting");
 
 	/**
 	 * Key of the Rcs configuration parameter
@@ -62,18 +61,18 @@ public class RcsSettingsData {
 	 */
 	public static final String DEFAULT_GROUP_CHAT_URI = "sip:foo@bar";
 
-    /**
-     * File type for certificate
-     */
-    public static final String CERTIFICATE_FILE_TYPE = ".crt";
-    
+	/**
+	 * File type for certificate
+	 */
+	public static final String CERTIFICATE_FILE_TYPE = ".crt";
+
 	// ---------------------------------------------------------------------------
 	// Enumerated
 	// ---------------------------------------------------------------------------
-	   
-    /**
-     * The authentication procedure enumerated type.
-     */
+
+	/**
+	 * The authentication procedure enumerated type.
+	 */
 	public enum AuthenticationProcedure {
 		/**
 		 * GIBA authentication
@@ -84,21 +83,21 @@ public class RcsSettingsData {
 		 */
 		DIGEST
 	};
-    
+
 	/**
-	 * Option for what ux-operation to react on when handling manual acceptance
-	 * of one2one and group chat invitations.
+	 * Option for what ux-operation to react on when handling manual acceptance of one2one and group
+	 * chat invitations.
 	 */
 	public static enum ImSessionStartMode {
 
 		/**
 		 * Group chat session is accepted when opening conversation
 		 */
-		ON_OPENING(0), 
+		ON_OPENING(0),
 		/**
 		 * Group chat session is accepted when composing first message
 		 */
-		ON_COMPOSING(1), 
+		ON_COMPOSING(1),
 		/**
 		 * Group chat session is accepted when sending first message
 		 */
@@ -138,26 +137,26 @@ public class RcsSettingsData {
 		}
 
 	}
-    
-    /**
-     * Network access type
-     *
-     */
-    public enum NetworkAccessType {
+
+	/**
+	 * Network access type
+	 *
+	 */
+	public enum NetworkAccessType {
 		/**
 		 * Mobile access type
 		 */
-		MOBILE(ConnectivityManager.TYPE_MOBILE), 
+		MOBILE(ConnectivityManager.TYPE_MOBILE),
 		/**
-    	 * Wifi access type
-    	 */
-		WIFI(ConnectivityManager.TYPE_WIFI), 
+		 * Wifi access type
+		 */
+		WIFI(ConnectivityManager.TYPE_WIFI),
 		/**
-    	 * All access types
-    	 */
+		 * All access types
+		 */
 		ANY(-1);
-		
-    	private int mValue;
+
+		private int mValue;
 
 		private static SparseArray<NetworkAccessType> mValueToEnum = new SparseArray<NetworkAccessType>();
 		static {
@@ -190,9 +189,9 @@ public class RcsSettingsData {
 					+ NetworkAccessType.class.getName() + "." + value);
 
 		}
-		
+
 	};
-	
+
 	/**
 	 * EnableRcseSwitch describes whether or not to show the RCS enabled/disabled switch permanently
 	 *
@@ -254,12 +253,12 @@ public class RcsSettingsData {
 		/**
 		 * Manual configuration
 		 */
-		MANUAL(0), 
+		MANUAL(0),
 		/**
 		 * Automatic configuration
 		 */
 		AUTO(1);
-		
+
 		private int mValue;
 
 		private static SparseArray<ConfigurationMode> mValueToEnum = new SparseArray<ConfigurationMode>();
@@ -294,38 +293,38 @@ public class RcsSettingsData {
 
 		}
 	};
-    
-    /**
-     * The File Transfer protocol enumerated type.
-     */
+
+	/**
+	 * The File Transfer protocol enumerated type.
+	 */
 	public enum FileTransferProtocol {
 		/**
 		 * MSRP protocol
 		 */
-		MSRP, 
+		MSRP,
 		/**
 		 * HTTP protocol
 		 */
 		HTTP
 	};
-    
-    /**
-     * The GSMA release enumerated type.
-     */
+
+	/**
+	 * The GSMA release enumerated type.
+	 */
 	public enum GsmaRelease {
 		/**
 		 * Albatros release
 		 */
-		ALBATROS(0), 
+		ALBATROS(0),
 		/**
 		 * Blackbird release
 		 */
-		BLACKBIRD(1), 
+		BLACKBIRD(1),
 		/**
 		 * Crane release
 		 */
 		CRANE(2);
-		
+
 		private int mValue;
 
 		private static SparseArray<GsmaRelease> mValueToEnum = new SparseArray<GsmaRelease>();
@@ -355,14 +354,14 @@ public class RcsSettingsData {
 			if (entry != null) {
 				return entry;
 			}
-			throw new IllegalArgumentException("No enum const class "
-					+ GsmaRelease.class.getName() + "." + value);
+			throw new IllegalArgumentException("No enum const class " + GsmaRelease.class.getName()
+					+ "." + value);
 
 		}
 
 	}
 
-    // ---------------------------------------------------------------------------
+	// ---------------------------------------------------------------------------
 	// UI settings
 	// ---------------------------------------------------------------------------
 
@@ -395,7 +394,7 @@ public class RcsSettingsData {
 	 */
 	public static final String CSH_INVITATION_VIBRATE = "CShInvitationVibrate";
 	/* package private */static final Boolean DEFAULT_CSH_INVITATION_VIBRATE = true;
-    
+
 	/**
 	 * Make a beep or not when content sharing is available during a call
 	 */
@@ -420,9 +419,9 @@ public class RcsSettingsData {
 	public static final String CHAT_INVITATION_RINGTONE = "ChatInvitationRingtone";
 	/* package private */static final String DEFAULT_CHAT_INVITATION_RINGTONE = "";
 
-    /**
-     * Vibrate or not when a chat invitation is received
-     */
+	/**
+	 * Vibrate or not when a chat invitation is received
+	 */
 	public static final String CHAT_INVITATION_VIBRATE = "ChatInvitationVibrate";
 	/* package private */static final Boolean DEFAULT_CHAT_INVITATION_VIBRATE = true;
 
@@ -563,7 +562,7 @@ public class RcsSettingsData {
 	 */
 	public static final String AUTO_ACCEPT_FILE_TRANSFER = "AutoAcceptFileTransfer";
 	/* package private */static final Boolean DEFAULT_AUTO_ACCEPT_FT = false;
-	
+
 	/**
 	 * Auto accept chat invitation
 	 */
@@ -581,7 +580,7 @@ public class RcsSettingsData {
 	 */
 	public static final String WARN_SF_SERVICE = "StoreForwardServiceWarning";
 	/* package private */static final Boolean DEFAULT_WARN_SF_SERVICE = false;
-	
+
 	/**
 	 * Define when the chat receiver sends the 200 OK back to the sender
 	 */
@@ -599,7 +598,7 @@ public class RcsSettingsData {
 	 */
 	public static final String MAX_RICHCALL_LOG_ENTRIES = "MaxRichcallLogEntries";
 	/* package private */static final Integer DEFAULT_MAX_RICHCALL_LOG_ENTRIES = 200;
-	
+
 	/**
 	 * Max entries for IP call log
 	 */
@@ -623,21 +622,22 @@ public class RcsSettingsData {
 	 */
 	public static final String MIN_STORAGE_CAPACITY = "MinStorageCapacity";
 	/* package private */static final Long DEFAULT_MIN_STORAGE_CAPACITY = 10240L * 1024L;
-    
+
 	/**
 	 * Convergent messaging UX option
 	 */
 	public static final String KEY_MESSAGING_MODE = "MessagingMode";
-	/* package private */static final Integer DEFAULT_KEY_MESSAGING_MODE = MessagingMode.NONE.toInt();
-	
+	/* package private */static final Integer DEFAULT_KEY_MESSAGING_MODE = MessagingMode.NONE
+			.toInt();
+
 	/**
 	 * Default messaging method
 	 */
 	public static final String KEY_DEFAULT_MESSAGING_METHOD = "DefaultMessagingMethod";
-	/* package private */static final Integer DEFAULT_KEY_DEFAULT_MESSAGING_METHOD = MessagingMethod.AUTOMATIC.toInt();
+	/* package private */static final Integer DEFAULT_KEY_DEFAULT_MESSAGING_METHOD = MessagingMethod.AUTOMATIC
+			.toInt();
 
-	
-    // ---------------------------------------------------------------------------
+	// ---------------------------------------------------------------------------
 	// User profile settings
 	// ---------------------------------------------------------------------------
 
@@ -718,7 +718,7 @@ public class RcsSettingsData {
 	 */
 	public static final String XDM_PASSWORD = "XdmServerPassword";
 	/* package private */static final String DEFAULT_XDM_PASSWORD = "";
-	
+
 	/**
 	 * File transfer HTTP server address & port
 	 */
@@ -766,7 +766,8 @@ public class RcsSettingsData {
 	// ---------------------------------------------------------------------------
 
 	/**
-	 * Polling period used before each IMS service check (e.g. test subscription state for presence service)
+	 * Polling period used before each IMS service check (e.g. test subscription state for presence
+	 * service)
 	 */
 	public static final String IMS_SERVICE_POLLING_PERIOD = "ImsServicePollingPeriod";
 	/* package private */static final Integer DEFAULT_IMS_SERVICE_POLLING_PERIOD = 300;
@@ -859,13 +860,15 @@ public class RcsSettingsData {
 	 * IMS authentication procedure for mobile access
 	 */
 	public static final String IMS_AUTHENT_PROCEDURE_MOBILE = "ImsAuthenticationProcedureForMobile";
-	/* package private */static final String DEFAULT_IMS_AUTHENT_PROCEDURE_MOBILE = AuthenticationProcedure.DIGEST.name();
-	
+	/* package private */static final String DEFAULT_IMS_AUTHENT_PROCEDURE_MOBILE = AuthenticationProcedure.DIGEST
+			.name();
+
 	/**
 	 * IMS authentication procedure for Wi-Fi access
 	 */
 	public static final String IMS_AUTHENT_PROCEDURE_WIFI = "ImsAuthenticationProcedureForWifi";
-	/* package private */static final String DEFAULT_IMS_AUTHENT_PROCEDURE_WIFI = AuthenticationProcedure.DIGEST.name();
+	/* package private */static final String DEFAULT_IMS_AUTHENT_PROCEDURE_WIFI = AuthenticationProcedure.DIGEST
+			.name();
 
 	/**
 	 * Activate or not Tel-URI format
@@ -925,7 +928,8 @@ public class RcsSettingsData {
 	 * SIP trace file
 	 */
 	public static final String SIP_TRACE_FILE = "SipTraceFile";
-	/* package private */static final String DEFAULT_SIP_TRACE_FILE = Environment.getExternalStorageDirectory() + "/sip.txt";
+	/* package private */static final String DEFAULT_SIP_TRACE_FILE = Environment
+			.getExternalStorageDirectory() + "/sip.txt";
 
 	/**
 	 * Activate or not the media trace
@@ -1046,7 +1050,7 @@ public class RcsSettingsData {
 	 */
 	public static final String CAPABILITY_RCS_EXTENSIONS = "CapabilityRcsExtensions";
 	/* package private */static final String DEFAULT_CAPABILITY_RCS_EXTENSIONS = "";
-	
+
 	/**
 	 * Instant messaging is always on (Store & Forward server)
 	 */
@@ -1075,7 +1079,8 @@ public class RcsSettingsData {
 	 * Network access authorized
 	 */
 	public static final String NETWORK_ACCESS = "NetworkAccess";
-	/* package private */static final Integer DEFAULT_NETWORK_ACCESS = NetworkAccessType.ANY.toInt();
+	/* package private */static final Integer DEFAULT_NETWORK_ACCESS = NetworkAccessType.ANY
+			.toInt();
 
 	/**
 	 * SIP stack timer T1
@@ -1154,7 +1159,7 @@ public class RcsSettingsData {
 	 */
 	public static final String PROVISIONING_VERSION = "ProvisioningVersion";
 	/* package private */static final String DEFAULT_PROVISIONING_VERSION = "0";
-    
+
 	/**
 	 * Provisioning version
 	 */
@@ -1177,22 +1182,22 @@ public class RcsSettingsData {
 	 * Directory path for photos
 	 */
 	public static final String DIRECTORY_PATH_PHOTOS = "DirectoryPathPhotos";
-	/* package private */static final String DEFAULT_DIRECTORY_PATH_PHOTOS = Environment.getExternalStorageDirectory()
-			+ "/rcs/photos/";
+	/* package private */static final String DEFAULT_DIRECTORY_PATH_PHOTOS = Environment
+			.getExternalStorageDirectory() + "/rcs/photos/";
 
 	/**
 	 * Directory path for videos
 	 */
 	public static final String DIRECTORY_PATH_VIDEOS = "DirectoryPathVideos";
-	/* package private */static final String DEFAULT_DIRECTORY_PATH_VIDEOS = Environment.getExternalStorageDirectory()
-			+ "/rcs/videos/";
+	/* package private */static final String DEFAULT_DIRECTORY_PATH_VIDEOS = Environment
+			.getExternalStorageDirectory() + "/rcs/videos/";
 
 	/**
 	 * Directory path for files
 	 */
 	public static final String DIRECTORY_PATH_FILES = "DirectoryPathFiles";
-	/* package private */static final String DEFAULT_DIRECTORY_PATH_FILES = Environment.getExternalStorageDirectory()
-			+ "/rcs/files/";
+	/* package private */static final String DEFAULT_DIRECTORY_PATH_FILES = Environment
+			.getExternalStorageDirectory() + "/rcs/files/";
 
 	/**
 	 * Secure MSRP over Wi-Fi
@@ -1210,8 +1215,9 @@ public class RcsSettingsData {
 	 * Key and associated values for GSMA release of the device as provisioned by the network
 	 */
 	public static final String KEY_GSMA_RELEASE = "GsmaRelease";
-	/* package private */static final Integer DEFAULT_KEY_GSMA_RELEASE = GsmaRelease.BLACKBIRD.toInt();
-    
+	/* package private */static final Integer DEFAULT_KEY_GSMA_RELEASE = GsmaRelease.BLACKBIRD
+			.toInt();
+
 	/**
 	 * IP voice call breakout capabilities in RCS-AA mode
 	 */
@@ -1237,8 +1243,8 @@ public class RcsSettingsData {
 	/* package private */static final Boolean DEFAULT_IPVIDEOCALL_UPGRADE_ON_CAPERROR = false;
 
 	/**
-	 * Leaf node that tells an RCS-CS device whether it can initiate an RCS IP Video Call upgrade without first tearing down the CS
-	 * voice call
+	 * Leaf node that tells an RCS-CS device whether it can initiate an RCS IP Video Call upgrade
+	 * without first tearing down the CS voice call
 	 */
 	public static final String IPVIDEOCALL_UPGRADE_ATTEMPT_EARLY = "rcsIPVideoCallUpgradeAttemptEarly";
 	/* package private */static final Boolean DEFAULT_IPVIDEOCALL_UPGRADE_ATTEMPT_EARLY = false;
@@ -1290,17 +1296,19 @@ public class RcsSettingsData {
 	 */
 	public static final String AUTO_ACCEPT_FT_CHANGEABLE = "AutoAcceptFtChangeable";
 	/* package private */static final Boolean DEFAULT_AUTO_ACCEPT_FT_CHANGEABLE = false;
-	
+
 	/**
 	 * Image resize option
 	 */
 	public static final String KEY_IMAGE_RESIZE_OPTION = "ImageResizeOption";
-	/* package private */static final Integer DEFAULT_KEY_IMAGE_RESIZE_OPTION = ImageResizeOption.ONLY_ABOVE_MAX_SIZE.toInt();
+	/* package private */static final Integer DEFAULT_KEY_IMAGE_RESIZE_OPTION = ImageResizeOption.ONLY_ABOVE_MAX_SIZE
+			.toInt();
 
 	/**
 	 * RCS stack can be activated/deactivated by client applications
 	 */
 	public static final String ENABLE_RCS_SWITCH = "enableRcseSwitch";
-	/* package private */static final int DEFAULT_ENABLE_RCS_SWITCH = EnableRcseSwitch.ALWAYS_SHOW.toInt();
-	
+	/* package private */static final int DEFAULT_ENABLE_RCS_SWITCH = EnableRcseSwitch.ALWAYS_SHOW
+			.toInt();
+
 }

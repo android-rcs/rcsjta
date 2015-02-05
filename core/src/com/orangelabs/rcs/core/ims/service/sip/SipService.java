@@ -58,9 +58,9 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class SipService extends ImsService {
 	/**
-     * The logger
-     */
-    private final static Logger logger = Logger.getLogger(SipService.class.getSimpleName());
+	 * The logger
+	 */
+	private final static Logger logger = Logger.getLogger(SipService.class.getSimpleName());
 
 	/**
 	 * MIME-type for multimedia services
@@ -80,24 +80,26 @@ public class SipService extends ImsService {
 	/**
 	 * Contacts manager
 	 */
-	private final ContactsManager mContactsManager;	
-	
+	private final ContactsManager mContactsManager;
+
 	/**
-     * Constructor
-     * 
-     * @param parent IMS module
-	 * @param contactsManager ContactsManager
-     * @throws CoreException
-     */
+	 * Constructor
+	 * 
+	 * @param parent
+	 *            IMS module
+	 * @param contactsManager
+	 *            ContactsManager
+	 * @throws CoreException
+	 */
 	public SipService(ImsModule parent, ContactsManager contactsManager) throws CoreException {
-        super(parent, true);
-        
-        mContactsManager = contactsManager;
+		super(parent, true);
+
+		mContactsManager = contactsManager;
 	}
 
-    /**
-     * /** Start the IMS service
-     */
+	/**
+	 * /** Start the IMS service
+	 */
 	public synchronized void start() {
 		if (isServiceStarted()) {
 			// Already started
@@ -106,9 +108,9 @@ public class SipService extends ImsService {
 		setServiceStarted(true);
 	}
 
-    /**
-     * Stop the IMS service
-     */
+	/**
+	 * Stop the IMS service
+	 */
 	public synchronized void stop() {
 		if (!isServiceStarted()) {
 			// Already stopped
@@ -118,44 +120,49 @@ public class SipService extends ImsService {
 	}
 
 	/**
-     * Check the IMS service
-     */
+	 * Check the IMS service
+	 */
 	public void check() {
 	}
 
-    /**
-     * Initiate a MSRP session
-     * 
-     * @param contact Remote contact Id
-     * @param featureTag Feature tag of the service
-     * @return SIP session
-     */
+	/**
+	 * Initiate a MSRP session
+	 * 
+	 * @param contact
+	 *            Remote contact Id
+	 * @param featureTag
+	 *            Feature tag of the service
+	 * @return SIP session
+	 */
 	public GenericSipMsrpSession initiateMsrpSession(ContactId contact, String featureTag) {
 		if (logger.isActivated()) {
 			logger.info("Initiate a MSRP session with contact " + contact);
 		}
-		
+
 		// Create a new session
 		OriginatingSipMsrpSession session = new OriginatingSipMsrpSession(this, contact, featureTag);
-		
+
 		return session;
 	}
 
-    /**
-     * Receive a session invitation with MSRP media
-     * 
-     * @param sessionInvite Resolved intent
-     * @param invite Initial invite
-     */
+	/**
+	 * Receive a session invitation with MSRP media
+	 * 
+	 * @param sessionInvite
+	 *            Resolved intent
+	 * @param invite
+	 *            Initial invite
+	 */
 	public void receiveMsrpSessionInvitation(Intent sessionInvite, SipRequest invite) {
 		try {
 			// Test if the contact is blocked
 			ContactId remote = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
 			if (mContactsManager.isBlockedForContact(remote)) {
 				if (logger.isActivated()) {
-					logger.debug("Contact " + remote + " is blocked: automatically reject the session invitation");
+					logger.debug("Contact " + remote
+							+ " is blocked: automatically reject the session invitation");
 				}
-	
+
 				// Send a 603 Decline response
 				sendErrorResponse(invite, Response.DECLINE);
 				return;
@@ -166,48 +173,56 @@ public class SipService extends ImsService {
 			}
 			return;
 		}
-			
-		// Create a new session
-		TerminatingSipMsrpSession session = new TerminatingSipMsrpSession(this, invite, sessionInvite);
 
-		getImsModule().getCore().getListener().handleSipMsrpSessionInvitation(sessionInvite, session);
+		// Create a new session
+		TerminatingSipMsrpSession session = new TerminatingSipMsrpSession(this, invite,
+				sessionInvite);
+
+		getImsModule().getCore().getListener()
+				.handleSipMsrpSessionInvitation(sessionInvite, session);
 
 		session.startSession();
 	}
 
-    /**
-     * Initiate a RTP session
-     * 
-     * @param contact Remote contact
-     * @param featureTag Feature tag of the service
-     * @return SIP session
-     */
+	/**
+	 * Initiate a RTP session
+	 * 
+	 * @param contact
+	 *            Remote contact
+	 * @param featureTag
+	 *            Feature tag of the service
+	 * @return SIP session
+	 */
 	public GenericSipRtpSession initiateRtpSession(ContactId contact, String featureTag) {
 		if (logger.isActivated()) {
 			logger.info("Initiate a RTP session with contact " + contact);
 		}
-		
+
 		// Create a new session
 		OriginatingSipRtpSession session = new OriginatingSipRtpSession(this, contact, featureTag);
-		
+
 		return session;
 	}
 
 	/**
-     * Receive a session invitation with RTP media
-     * 
-     * @param sessionInvite Resolved intent
-     * @param invite Initial invite
-     */
-	public void receiveRtpSessionInvitation(Intent sessionInvite, SipRequest invite) throws RcsContactFormatException {
+	 * Receive a session invitation with RTP media
+	 * 
+	 * @param sessionInvite
+	 *            Resolved intent
+	 * @param invite
+	 *            Initial invite
+	 */
+	public void receiveRtpSessionInvitation(Intent sessionInvite, SipRequest invite)
+			throws RcsContactFormatException {
 		try {
 			// Test if the contact is blocked
 			ContactId remote = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
 			if (mContactsManager.isBlockedForContact(remote)) {
 				if (logger.isActivated()) {
-					logger.debug("Contact " + remote + " is blocked: automatically reject the session invitation");
+					logger.debug("Contact " + remote
+							+ " is blocked: automatically reject the session invitation");
 				}
-	
+
 				// Send a 603 Decline response
 				sendErrorResponse(invite, Response.DECLINE);
 				return;
@@ -218,11 +233,12 @@ public class SipService extends ImsService {
 			}
 			return;
 		}
-		
+
 		// Create a new session
 		TerminatingSipRtpSession session = new TerminatingSipRtpSession(this, invite, sessionInvite);
 
-		getImsModule().getCore().getListener().handleSipRtpSessionInvitation(sessionInvite, session);
+		getImsModule().getCore().getListener()
+				.handleSipRtpSessionInvitation(sessionInvite, session);
 
 		session.startSession();
 	}
@@ -246,9 +262,8 @@ public class SipService extends ImsService {
 					.append(sessionId).append("'").toString());
 		}
 		/*
-		 * Performing remove session operation on a new thread so that ongoing
-		 * threads accessing that session can finish up before it is actually
-		 * removed
+		 * Performing remove session operation on a new thread so that ongoing threads accessing
+		 * that session can finish up before it is actually removed
 		 */
 		new Thread() {
 			@Override
@@ -290,9 +305,8 @@ public class SipService extends ImsService {
 					.append(sessionId).append("'").toString());
 		}
 		/*
-		 * Performing remove session operation on a new thread so that ongoing
-		 * threads accessing that session can finish up before it is actually
-		 * removed
+		 * Performing remove session operation on a new thread so that ongoing threads accessing
+		 * that session can finish up before it is actually removed
 		 */
 		new Thread() {
 			@Override
@@ -318,101 +332,100 @@ public class SipService extends ImsService {
 	/**
 	 * Send an instant message (SIP MESSAGE)
 	 * 
-     * @param contact Contact
-	 * @param featureTag Feature tag of the service
-     * @param content Content
+	 * @param contact
+	 *            Contact
+	 * @param featureTag
+	 *            Feature tag of the service
+	 * @param content
+	 *            Content
 	 * @return True if successful else returns false
 	 */
 	public boolean sendInstantMessage(String contact, String featureTag, byte[] content) {
 		boolean result = false;
 		try {
 			if (logger.isActivated()) {
-       			logger.debug("Send instant message to " + contact);
-       		}
-			
-		    // Create authentication agent 
-       		SessionAuthenticationAgent authenticationAgent = new SessionAuthenticationAgent(getImsModule());
-       		
-       		// Create a dialog path
-        	String contactUri = PhoneUtils.formatNumberToSipUri(contact);
-        	SipDialogPath dialogPath = new SipDialogPath(
-        			getImsModule().getSipManager().getSipStack(),
-        			getImsModule().getSipManager().getSipStack().generateCallId(),
-    				1,
-    				contactUri,
-    				ImsModule.IMS_USER_PROFILE.getPublicUri(),
-    				contactUri,
-    				getImsModule().getSipManager().getSipStack().getServiceRoutePath());        	
-        	
-	        // Create MESSAGE request
-        	if (logger.isActivated()) {
-        		logger.info("Send first MESSAGE");
-        	}
-	        SipRequest msg = SipMessageFactory.createMessage(dialogPath,
-	        		featureTag,	SipService.MIME_TYPE, content);
-	        
-	        // Send MESSAGE request
-	        SipTransactionContext ctx = getImsModule().getSipManager().sendSipMessageAndWait(msg);
-	
-	        // Analyze received message
-            if (ctx.getStatusCode() == 407) {
-                // 407 response received
-            	if (logger.isActivated()) {
-            		logger.info("407 response received");
-            	}
+				logger.debug("Send instant message to " + contact);
+			}
 
-    	        // Set the Proxy-Authorization header
-            	authenticationAgent.readProxyAuthenticateHeader(ctx.getSipResponse());
+			// Create authentication agent
+			SessionAuthenticationAgent authenticationAgent = new SessionAuthenticationAgent(
+					getImsModule());
 
-                // Increment the Cseq number of the dialog path
-                dialogPath.incrementCseq();
+			// Create a dialog path
+			String contactUri = PhoneUtils.formatNumberToSipUri(contact);
+			SipDialogPath dialogPath = new SipDialogPath(getImsModule().getSipManager()
+					.getSipStack(), getImsModule().getSipManager().getSipStack().generateCallId(),
+					1, contactUri, ImsModule.IMS_USER_PROFILE.getPublicUri(), contactUri,
+					getImsModule().getSipManager().getSipStack().getServiceRoutePath());
 
-                // Create a second MESSAGE request with the right token
-                if (logger.isActivated()) {
-                	logger.info("Send second MESSAGE");
-                }
-    	        msg = SipMessageFactory.createMessage(dialogPath,
-    	        		featureTag,	SipService.MIME_TYPE, content);
+			// Create MESSAGE request
+			if (logger.isActivated()) {
+				logger.info("Send first MESSAGE");
+			}
+			SipRequest msg = SipMessageFactory.createMessage(dialogPath, featureTag,
+					SipService.MIME_TYPE, content);
 
-    	        // Set the Authorization header
-    	        authenticationAgent.setProxyAuthorizationHeader(msg);
-                
-                // Send MESSAGE request
-    	        ctx = getImsModule().getSipManager().sendSipMessageAndWait(msg);
+			// Send MESSAGE request
+			SipTransactionContext ctx = getImsModule().getSipManager().sendSipMessageAndWait(msg);
 
-                // Analyze received message
-                if ((ctx.getStatusCode() == 200) || (ctx.getStatusCode() == 202)) {
-                    // 200 OK response
-                	if (logger.isActivated()) {
-                		logger.info("20x OK response received");
-                	}
-                	result = true;
-                } else {
-                    // Error
-                	if (logger.isActivated()) {
-                		logger.info("Send instant message has failed: " + ctx.getStatusCode()
-    	                    + " response received");
-                	}
-                }
-            } else
-            if ((ctx.getStatusCode() == 200) || (ctx.getStatusCode() == 202)) {
-	            // 200 OK received
-            	if (logger.isActivated()) {
-            		logger.info("20x OK response received");
-            	}
-            	result = true;
-	        } else {
-	            // Error responses
-            	if (logger.isActivated()) {
-            		logger.info("Send instant message has failed: " + ctx.getStatusCode()
-	                    + " response received");
-            	}
-	        }
-        } catch(Exception e) {
-        	if (logger.isActivated()) {
-        		logger.error("Can't send MESSAGE request", e);
-        	}
-        }
-        return result;
+			// Analyze received message
+			if (ctx.getStatusCode() == 407) {
+				// 407 response received
+				if (logger.isActivated()) {
+					logger.info("407 response received");
+				}
+
+				// Set the Proxy-Authorization header
+				authenticationAgent.readProxyAuthenticateHeader(ctx.getSipResponse());
+
+				// Increment the Cseq number of the dialog path
+				dialogPath.incrementCseq();
+
+				// Create a second MESSAGE request with the right token
+				if (logger.isActivated()) {
+					logger.info("Send second MESSAGE");
+				}
+				msg = SipMessageFactory.createMessage(dialogPath, featureTag, SipService.MIME_TYPE,
+						content);
+
+				// Set the Authorization header
+				authenticationAgent.setProxyAuthorizationHeader(msg);
+
+				// Send MESSAGE request
+				ctx = getImsModule().getSipManager().sendSipMessageAndWait(msg);
+
+				// Analyze received message
+				if ((ctx.getStatusCode() == 200) || (ctx.getStatusCode() == 202)) {
+					// 200 OK response
+					if (logger.isActivated()) {
+						logger.info("20x OK response received");
+					}
+					result = true;
+				} else {
+					// Error
+					if (logger.isActivated()) {
+						logger.info("Send instant message has failed: " + ctx.getStatusCode()
+								+ " response received");
+					}
+				}
+			} else if ((ctx.getStatusCode() == 200) || (ctx.getStatusCode() == 202)) {
+				// 200 OK received
+				if (logger.isActivated()) {
+					logger.info("20x OK response received");
+				}
+				result = true;
+			} else {
+				// Error responses
+				if (logger.isActivated()) {
+					logger.info("Send instant message has failed: " + ctx.getStatusCode()
+							+ " response received");
+				}
+			}
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Can't send MESSAGE request", e);
+			}
+		}
+		return result;
 	}
 }

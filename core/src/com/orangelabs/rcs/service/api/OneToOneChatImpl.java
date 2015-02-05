@@ -79,16 +79,22 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	/**
 	 * Constructor
 	 * 
-	 * @param contact Remote contact ID
-	 * @param broadcaster IChatEventBroadcaster
-	 * @param imService InstantMessagingService
-	 * @param messagingLog MessagingLog
-	 * @param rcsSettings RcsSettings
-	 * @param chatService ChatServiceImpl
+	 * @param contact
+	 *            Remote contact ID
+	 * @param broadcaster
+	 *            IChatEventBroadcaster
+	 * @param imService
+	 *            InstantMessagingService
+	 * @param messagingLog
+	 *            MessagingLog
+	 * @param rcsSettings
+	 *            RcsSettings
+	 * @param chatService
+	 *            ChatServiceImpl
 	 */
 	public OneToOneChatImpl(ContactId contact, IOneToOneChatEventBroadcaster broadcaster,
-			InstantMessagingService imService, MessagingLog messagingLog,
-			RcsSettings rcsSettings, ChatServiceImpl chatService) {
+			InstantMessagingService imService, MessagingLog messagingLog, RcsSettings rcsSettings,
+			ChatServiceImpl chatService) {
 		mContact = contact;
 		mBroadcaster = broadcaster;
 		mImService = imService;
@@ -143,7 +149,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	/**
 	 * Sends a chat message
 	 * 
-	 * @param msg Message
+	 * @param msg
+	 *            Message
 	 */
 	private void sendChatMessage(final ChatMessage msg) {
 		synchronized (lock) {
@@ -171,8 +178,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 				return;
 			}
 			/*
-			 * TODO : If session is originated by remote, then queue the message
-			 * and accept the pending session as part of this send operation
+			 * TODO : If session is originated by remote, then queue the message and accept the
+			 * pending session as part of this send operation
 			 */
 			addOutgoingChatMessage(msg, Message.Status.Content.QUEUED);
 			if (session.isInitiatedByRemote()) {
@@ -184,7 +191,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	/**
 	 * Resends a chat message
 	 *
-	 * @param msg Message
+	 * @param msg
+	 *            Message
 	 */
 	private void resendChatMessage(final ChatMessage msg) {
 		synchronized (lock) {
@@ -204,11 +212,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 					setChatMessageStatus(msgId, mimeType, Message.Status.Content.QUEUED);
 					return;
 				}
-				
+
 				if (logger.isActivated()) {
 					logger.debug("Core session is not yet established: initiate a new session to send the message");
 				}
-			
+
 				setChatMessageStatus(msgId, mimeType, Message.Status.Content.SENDING);
 				sendChatMessageInNewSession(msg);
 				return;
@@ -222,8 +230,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 				return;
 			}
 			/*
-			 * TODO : If session is originated by remote, then queue the message
-			 * and accept the pending session as part of this re-send operation
+			 * TODO : If session is originated by remote, then queue the message and accept the
+			 * pending session as part of this re-send operation
 			 */
 			setChatMessageStatus(msgId, mimeType, Message.Status.Content.QUEUED);
 			if (session.isInitiatedByRemote()) {
@@ -242,8 +250,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	}
 
 	/**
-	 * Returns true if it is possible to send messages in this one to one chat
-	 * right now, else return false.
+	 * Returns true if it is possible to send messages in this one to one chat right now, else
+	 * return false.
 	 * 
 	 * @return boolean
 	 */
@@ -254,12 +262,13 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	/**
 	 * Add chat message to Db
 	 * 
-	 * @param msg InstantMessage
-	 * @param state state of message
+	 * @param msg
+	 *            InstantMessage
+	 * @param state
+	 *            state of message
 	 */
 	private void addOutgoingChatMessage(ChatMessage msg, int state) {
-		mMessagingLog.addOutgoingOneToOneChatMessage(msg,
-				state, ReasonCode.UNSPECIFIED);
+		mMessagingLog.addOutgoingOneToOneChatMessage(msg, state, ReasonCode.UNSPECIFIED);
 		String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
 		mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msg.getMessageId(),
 				state, ReasonCode.UNSPECIFIED);
@@ -270,7 +279,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	 *
 	 * @param msgId
 	 * @param mimeType
-	 * @param state state of message
+	 * @param state
+	 *            state of message
 	 */
 	private void setChatMessageStatus(String msgId, String mimeType, int state) {
 		mMessagingLog.setChatMessageStatusAndReasonCode(msgId, state, ReasonCode.UNSPECIFIED);
@@ -281,10 +291,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	/**
 	 * Sends a plain text message
 	 * 
-	 * @param message Text message
-     * @return Chat message
-     */
-    public IChatMessage sendMessage(String message) {
+	 * @param message
+	 *            Text message
+	 * @return Chat message
+	 */
+	public IChatMessage sendMessage(String message) {
 		if (logger.isActivated()) {
 			logger.debug("Send text message.");
 		}
@@ -306,7 +317,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	/**
 	 * Sends a geoloc message
 	 *
-	 * @param geoloc Geoloc
+	 * @param geoloc
+	 *            Geoloc
 	 * @return ChatMessage
 	 */
 	public IChatMessage sendMessage2(Geoloc geoloc) {
@@ -331,8 +343,10 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	/**
 	 * Sends a displayed delivery report for a given message ID
 	 * 
-	 * @param contact Contact ID
-	 * @param msgId Message ID
+	 * @param contact
+	 *            Contact ID
+	 * @param msgId
+	 *            Message ID
 	 */
 	/* package private */void sendDisplayedDeliveryReport(final ContactId contact,
 			final String msgId) {
@@ -368,10 +382,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	}
 
 	/**
-	 * Sends an is-composing event. The status is set to true when typing a
-	 * message, else it is set to false.
+	 * Sends an   is-composing   event. The status is set to true when typing a message, else it is
+	 * set to false.
 	 * 
-	 * @param status Is-composing status
+	 * @param status
+	 *            Is-composing status
 	 * @see ImSessionStartMode
 	 */
 	public void sendIsComposingEvent(final boolean status) {
@@ -393,22 +408,21 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 		}
 		ImSessionStartMode imSessionStartMode = mRcsSettings.getImSessionStartMode();
 		switch (imSessionStartMode) {
-			case ON_OPENING:
-			case ON_COMPOSING:
-				if (logger.isActivated()) {
-					logger.debug("Core chat session is pending: auto accept it.");
-				}
-				session.acceptSession();
-				break;
-			default:
-				break;
+		case ON_OPENING:
+		case ON_COMPOSING:
+			if (logger.isActivated()) {
+				logger.debug("Core chat session is pending: auto accept it.");
+			}
+			session.acceptSession();
+			break;
+		default:
+			break;
 		}
 	}
 
 	/**
-	 * open the chat conversation. Note: if it’s an incoming pending chat
-	 * session and the parameter IM SESSION START is 0 then the session is
-	 * accepted now.
+	 * open the chat conversation. Note: if it   s an incoming pending chat session and the
+	 * parameter IM SESSION START is 0 then the session is accepted now.
 	 * 
 	 * @see ImSessionStartMode
 	 */
@@ -420,11 +434,10 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 			final OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
 			if (session == null) {
 				/*
-				 * If there is no session ongoing right now then we do not need
-				 * to open anything right now so we just return here. A sending
-				 * of a new message on this one-to-one chat will anyway result
-				 * in creating a new session so we do not need to do anything
-				 * more here for now.
+				 * If there is no session ongoing right now then we do not need to open anything
+				 * right now so we just return here. A sending of a new message on this one-to-one
+				 * chat will anyway result in creating a new session so we do not need to do
+				 * anything more here for now.
 				 */
 				return;
 			}
@@ -432,9 +445,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 				ImSessionStartMode imSessionStartMode = mRcsSettings.getImSessionStartMode();
 				if (!session.isInitiatedByRemote()) {
 					/*
-					 * This method needs to accept pending invitation if
-					 * IM_SESSION_START_MODE is 0, which is not applicable if
-					 * session is remote originated so we return here.
+					 * This method needs to accept pending invitation if IM_SESSION_START_MODE is 0,
+					 * which is not applicable if session is remote originated so we return here.
 					 */
 					return;
 				}
@@ -474,9 +486,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 
 	/*
 	 * (non-Javadoc)
-	 * @see
-	 * com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionStarted
-	 * ()
+	 * 
+	 * @see com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionStarted ()
 	 */
 	@Override
 	public void handleSessionStarted(ContactId contact) {
@@ -487,9 +498,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 
 	/*
 	 * (non-Javadoc)
-	 * @see
-	 * com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionAborted
-	 * (int)
+	 * 
+	 * @see com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionAborted (int)
 	 */
 	@Override
 	public void handleSessionAborted(ContactId contact, int reason) {
@@ -504,6 +514,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see com.orangelabs.rcs.core.ims.service.ImsSessionListener#
 	 * handleSessionTerminatedByRemote()
 	 */
@@ -519,8 +530,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 
 	/*
 	 * (non-Javadoc)
-	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#
-	 * handleReceiveMessage
+	 * 
+	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener# handleReceiveMessage
 	 * (com.orangelabs.rcs.core.ims.service.im.chat.ChatMessage, boolean)
 	 */
 	@Override
@@ -539,8 +550,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 
 	/*
 	 * (non-Javadoc)
-	 * @see
-	 * com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleImError
+	 * 
+	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#handleImError
 	 * (com.orangelabs.rcs.core.ims.service.im.chat.ChatError)
 	 */
 	@Override
@@ -552,20 +563,20 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 			mChatService.removeOneToOneChat(mContact);
 
 			switch (error.getErrorCode()) {
-				case ChatError.SESSION_INITIATION_FAILED:
-				case ChatError.SESSION_INITIATION_CANCELLED:
-					if (message != null) {
-						String msgId = message.getMessageId();
-						String mimeType = message.getMimeType();
-						String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(mimeType);
-						mMessagingLog.setChatMessageStatusAndReasonCode(msgId,
-								Message.Status.Content.FAILED, ReasonCode.FAILED_SEND);
-						mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId,
-								Message.Status.Content.FAILED, ReasonCode.FAILED_SEND);
-					}
-					break;
-				default:
-					break;
+			case ChatError.SESSION_INITIATION_FAILED:
+			case ChatError.SESSION_INITIATION_CANCELLED:
+				if (message != null) {
+					String msgId = message.getMessageId();
+					String mimeType = message.getMimeType();
+					String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(mimeType);
+					mMessagingLog.setChatMessageStatusAndReasonCode(msgId,
+							Message.Status.Content.FAILED, ReasonCode.FAILED_SEND);
+					mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId,
+							Message.Status.Content.FAILED, ReasonCode.FAILED_SEND);
+				}
+				break;
+			default:
+				break;
 			}
 		}
 	}
@@ -583,8 +594,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 
 	/*
 	 * (non-Javadoc)
-	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#
-	 * handleMessageSending(
+	 * 
+	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener# handleMessageSending(
 	 * com.orangelabs.rcs.core.ims.service.im.chat.ChatMessage)
 	 */
 	@Override
@@ -597,8 +608,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 		}
 		String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(networkMimeType);
 		synchronized (lock) {
-			mMessagingLog.setChatMessageStatusAndReasonCode(msgId,
-					Message.Status.Content.SENDING, ReasonCode.UNSPECIFIED);
+			mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Message.Status.Content.SENDING,
+					ReasonCode.UNSPECIFIED);
 			mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId,
 					ChatLog.Message.Status.Content.SENDING, ReasonCode.UNSPECIFIED);
 		}
@@ -606,8 +617,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 
 	/*
 	 * (non-Javadoc)
-	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#
-	 * handleMessageSent(
+	 * 
+	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener# handleMessageSent(
 	 * com.orangelabs.rcs.core.ims.service.im.chat.ChatMessage)
 	 */
 	@Override
@@ -628,9 +639,9 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#
-	 * handleMessageFailedSend(
-	 * com.orangelabs.rcs.core.ims.service.im.chat.ChatMessage)
+	 * handleMessageFailedSend( com.orangelabs.rcs.core.ims.service.im.chat.ChatMessage)
 	 */
 	@Override
 	public void handleMessageFailedSend(String msgId, String mimeType) {
@@ -726,6 +737,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#
 	 * handleAddParticipantSuccessful(com.gsma.services.rcs.contact.ContactId)
 	 */
@@ -736,9 +748,9 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#
-	 * handleAddParticipantFailed(com.gsma.services.rcs.contact.ContactId,
-	 * java.lang.String)
+	 * handleAddParticipantFailed(com.gsma.services.rcs.contact.ContactId, java.lang.String)
 	 */
 	@Override
 	public void handleAddParticipantFailed(ContactId contact, String reason) {
@@ -747,9 +759,9 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSessionListener#
-	 * handleParticipantStatusChanged
-	 * (com.gsma.services.rcs.chat.ParticipantInfo)
+	 * handleParticipantStatusChanged (com.gsma.services.rcs.chat.ParticipantInfo)
 	 */
 	@Override
 	public void handleParticipantStatusChanged(ParticipantInfo participantInfo) {
@@ -762,12 +774,14 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 	}
 
 	@Override
-	public void handleSessionInvited(ContactId contact, String subject, Set<ParticipantInfo> participants) {
+	public void handleSessionInvited(ContactId contact, String subject,
+			Set<ParticipantInfo> participants) {
 		/* Not used by one-to-one chat */
 	}
 
 	@Override
-	public void handleSessionAutoAccepted(ContactId contact, String subject, Set<ParticipantInfo> participants) {
+	public void handleSessionAutoAccepted(ContactId contact, String subject,
+			Set<ParticipantInfo> participants) {
 		/* Not used by one-to-one chat */
 	}
 }

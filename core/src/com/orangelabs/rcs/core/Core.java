@@ -34,7 +34,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Core (singleton pattern)
- *  
+ * 
  * @author JM. Auffret
  */
 public class Core {
@@ -42,18 +42,18 @@ public class Core {
 	 * Singleton instance
 	 */
 	private static Core instance = null;
-	
-    /**
-     * Core listener
-     */
-    private CoreListener listener;
-    
-    /**
-     * Core status
-     */
+
+	/**
+	 * Core listener
+	 */
+	private CoreListener listener;
+
+	/**
+	 * Core status
+	 */
 	private boolean started = false;
 
-    /**
+	/**
 	 * IMS module
 	 */
 	private ImsModule imsModule;
@@ -63,77 +63,79 @@ public class Core {
 	 */
 	private AddressBookManager addressBookManager;
 
-    /**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+	/**
+	 * The logger
+	 */
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    
-    /**
-     * Returns the singleton instance
-     * 
-     * @return Core instance
-     */
-    public static Core getInstance() {
-    	return instance;
-    }
-    
-    /**
-     * Instanciate the core
-     * 
-	 * @param listener Listener
-     * @return Core instance
-     * @throws CoreException
-     */
-    public synchronized static Core createCore(CoreListener listener) throws CoreException {
-    	if (instance == null) {
-    		instance = new Core(listener);
-    	}
-    	return instance;
-    }
-    
-    /**
-     * Terminate the core
-     */
-    public synchronized static void terminateCore() {
-    	if (instance != null) {
-    		instance.stopCore();
-    	}
-   		instance = null;
-    }
+	/**
+	 * Returns the singleton instance
+	 * 
+	 * @return Core instance
+	 */
+	public static Core getInstance() {
+		return instance;
+	}
 
-    /**
-     * Constructor
-     * 
-	 * @param listener Listener
-     * @throws CoreException
-     */
-    private Core(CoreListener listener) throws CoreException {
+	/**
+	 * Instanciate the core
+	 * 
+	 * @param listener
+	 *            Listener
+	 * @return Core instance
+	 * @throws CoreException
+	 */
+	public synchronized static Core createCore(CoreListener listener) throws CoreException {
+		if (instance == null) {
+			instance = new Core(listener);
+		}
+		return instance;
+	}
+
+	/**
+	 * Terminate the core
+	 */
+	public synchronized static void terminateCore() {
+		if (instance != null) {
+			instance.stopCore();
+		}
+		instance = null;
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param listener
+	 *            Listener
+	 * @throws CoreException
+	 */
+	private Core(CoreListener listener) throws CoreException {
 		if (logger.isActivated()) {
-        	logger.info("Terminal core initialization");
-    	}
+			logger.info("Terminal core initialization");
+		}
 
 		// Set core event listener
 		this.listener = listener;
-       
-        // Get UUID
+
+		// Get UUID
 		if (logger.isActivated()) {
-			logger.info("My device UUID is " + DeviceUtils.getDeviceUUID(AndroidFactory.getApplicationContext()));
+			logger.info("My device UUID is "
+					+ DeviceUtils.getDeviceUUID(AndroidFactory.getApplicationContext()));
 		}
 
-        // Initialize the phone utils
-    	PhoneUtils.initialize(AndroidFactory.getApplicationContext());
+		// Initialize the phone utils
+		PhoneUtils.initialize(AndroidFactory.getApplicationContext());
 
-        // Create the address book manager
-        addressBookManager = new AddressBookManager();
+		// Create the address book manager
+		addressBookManager = new AddressBookManager();
 
-        // Create the IMS module
-        imsModule = new ImsModule(this);
-        
-        if (logger.isActivated()) {
-    		logger.info("Terminal core is created with success");
-    	}
-    }
+		// Create the IMS module
+		imsModule = new ImsModule(this);
+
+		if (logger.isActivated()) {
+			logger.info("Terminal core is created with success");
+		}
+	}
 
 	/**
 	 * Returns the event listener
@@ -145,10 +147,10 @@ public class Core {
 	}
 
 	/**
-     * Returns the IMS module
-     * 
-     * @return IMS module
-     */
+	 * Returns the IMS module
+	 * 
+	 * @return IMS module
+	 */
 	public ImsModule getImsModule() {
 		return imsModule;
 	}
@@ -156,78 +158,78 @@ public class Core {
 	/**
 	 * Returns the address book manager
 	 */
-	public AddressBookManager getAddressBookManager(){
+	public AddressBookManager getAddressBookManager() {
 		return addressBookManager;
 	}
-	
+
 	/**
-     * Is core started
-     * 
-     * @return Boolean
-     */
-    public boolean isCoreStarted() {
-    	return started;
-    }
+	 * Is core started
+	 * 
+	 * @return Boolean
+	 */
+	public boolean isCoreStarted() {
+		return started;
+	}
 
-    /**
-     * Start the terminal core
-     * 
-     * @throws CoreException
-     */
-    public synchronized void startCore() throws CoreException {
-    	if (started) {
-    		// Already started
-    		return;
-    	}
+	/**
+	 * Start the terminal core
+	 * 
+	 * @throws CoreException
+	 */
+	public synchronized void startCore() throws CoreException {
+		if (started) {
+			// Already started
+			return;
+		}
 
-    	// Start the IMS module 
-    	imsModule.start();
+		// Start the IMS module
+		imsModule.start();
 
-    	// Start the address book monitoring
-    	addressBookManager.startAddressBookMonitoring();
-    	
-    	// Notify event listener
+		// Start the address book monitoring
+		addressBookManager.startAddressBookMonitoring();
+
+		// Notify event listener
 		listener.handleCoreLayerStarted();
-		
-		started = true;
-    	if (logger.isActivated()) {
-    		logger.info("RCS core service has been started with success");
-    	}
-    }
-    	
-    /**
-     * Stop the terminal core
-     */
-    public synchronized void stopCore() {
-    	if (!started) {
-    		// Already stopped
-    		return;
-    	}    	
-    	
-    	if (logger.isActivated()) {
-    		logger.info("Stop the RCS core service");
-    	}
-    	
-    	// Stop the address book monitoring
-    	addressBookManager.stopAddressBookMonitoring();
 
-    	try {
-	    	// Stop the IMS module 
-	    	imsModule.stop();	    	
-    	} catch(Exception e) {
-    		if (logger.isActivated()) {
-    			logger.error("Error during core shutdown", e);
-    		}
-    	}
-    	
-    	// Notify event listener
+		started = true;
+		if (logger.isActivated()) {
+			logger.info("RCS core service has been started with success");
+		}
+	}
+
+	/**
+	 * Stop the terminal core
+	 */
+	public synchronized void stopCore() {
+		if (!started) {
+			// Already stopped
+			return;
+		}
+
+		if (logger.isActivated()) {
+			logger.info("Stop the RCS core service");
+		}
+
+		// Stop the address book monitoring
+		addressBookManager.stopAddressBookMonitoring();
+
+		try {
+			// Stop the IMS module
+			imsModule.stop();
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Error during core shutdown", e);
+			}
+		}
+
+		// Notify event listener
 		listener.handleCoreLayerStopped();
 
-    	started = false;
-    	if (logger.isActivated()) {
-    		logger.info("RCS core service has been stopped with success");
-    	}
-    }
+		started = false;
+		if (logger.isActivated()) {
+			logger.info("RCS core service has been stopped with success");
+		}
+	}
 
 	/**
 	 * Returns the terms service
@@ -246,7 +248,7 @@ public class Core {
 	public PresenceService getPresenceService() {
 		return getImsModule().getPresenceService();
 	}
-	
+
 	/**
 	 * Returns the capabity service
 	 * 
@@ -264,7 +266,7 @@ public class Core {
 	public IPCallService getIPCallService() {
 		return getImsModule().getIPCallService();
 	}
-	
+
 	/**
 	 * Returns the richcall service
 	 * 
@@ -273,7 +275,7 @@ public class Core {
 	public RichcallService getRichcallService() {
 		return getImsModule().getRichcallService();
 	}
-	
+
 	/**
 	 * Returns the IM service
 	 * 
@@ -282,7 +284,7 @@ public class Core {
 	public InstantMessagingService getImService() {
 		return getImsModule().getInstantMessagingService();
 	}
-	
+
 	/**
 	 * Returns the SIP service
 	 * 

@@ -49,31 +49,30 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author hlxn7157
  */
 public class LauncherUtils {
-    /**
-     * Last user account used
-     */
-    public static final String REGISTRY_LAST_USER_ACCOUNT = "LastUserAccount";
-    
-    /**
-     * Key for storing the latest positive provisioning version
-     */
-    private static final String REGISTRY_PROVISIONING_VERSION = "ProvisioningVersion";
-    
-    /**
-     * Key for storing the latest positive provisioning validity
-     */
-    private static final String REGISTRY_PROVISIONING_VALIDITY = "ProvisioningValidity";
-    
-    /**
-     * Key for storing the expiration date of the provisioning
-     */
-    private static final String REGISTRY_PROVISIONING_EXPIRATION = "ProvisioningExpiration";
+	/**
+	 * Last user account used
+	 */
+	public static final String REGISTRY_LAST_USER_ACCOUNT = "LastUserAccount";
 
+	/**
+	 * Key for storing the latest positive provisioning version
+	 */
+	private static final String REGISTRY_PROVISIONING_VERSION = "ProvisioningVersion";
 
-    /**
-     * Logger
-     */
-    private static Logger logger = Logger.getLogger(LauncherUtils.class.getName());
+	/**
+	 * Key for storing the latest positive provisioning validity
+	 */
+	private static final String REGISTRY_PROVISIONING_VALIDITY = "ProvisioningValidity";
+
+	/**
+	 * Key for storing the expiration date of the provisioning
+	 */
+	private static final String REGISTRY_PROVISIONING_EXPIRATION = "ProvisioningExpiration";
+
+	/**
+	 * Logger
+	 */
+	private static Logger logger = Logger.getLogger(LauncherUtils.class.getName());
 
 	/**
 	 * Launch the RCS service
@@ -97,162 +96,176 @@ public class LauncherUtils {
 			StartService.LaunchRcsStartService(context, boot, user);
 		}
 	}
-    
-    /**
-     * Launch the RCS core service
-     *
-     * @param context Application context
-     */
-    public static void launchRcsCoreService(Context context) {
-        if (logger.isActivated()) {
-            logger.debug("Launch core service");
-        }
-        if (RcsSettings.getInstance().isServiceActivated()) {
-        	if (RcsSettings.getInstance().isUserProfileConfigured()) {
-                context.startService(new Intent(context, RcsCoreService.class));
-	        } else {
-		        if (logger.isActivated()) {
-		            logger.debug("RCS service not configured");
-		        }
-	        }
-        } else {
-	        if (logger.isActivated()) {
-	            logger.debug("RCS service is disabled");
-	        }        	
-        }
-    }
 
-    /**
-     * Force launch the RCS core service
-     *
-     * @param context Application context
-     */
-    // TODO: not used.
-    public static void forceLaunchRcsCoreService(Context context) {
-        if (logger.isActivated()) {
-            logger.debug("Force launch core service");
-        }
-    	if (RcsSettings.getInstance().isUserProfileConfigured()) {
-            RcsSettings.getInstance().setServiceActivationState(true);
-            context.startService(new Intent(context, RcsCoreService.class));
-        } else {
-            if (logger.isActivated()) {
-                logger.debug("RCS service not configured");
-            }
-        }
-    }
+	/**
+	 * Launch the RCS core service
+	 *
+	 * @param context
+	 *            Application context
+	 */
+	public static void launchRcsCoreService(Context context) {
+		if (logger.isActivated()) {
+			logger.debug("Launch core service");
+		}
+		if (RcsSettings.getInstance().isServiceActivated()) {
+			if (RcsSettings.getInstance().isUserProfileConfigured()) {
+				context.startService(new Intent(context, RcsCoreService.class));
+			} else {
+				if (logger.isActivated()) {
+					logger.debug("RCS service not configured");
+				}
+			}
+		} else {
+			if (logger.isActivated()) {
+				logger.debug("RCS service is disabled");
+			}
+		}
+	}
 
-    /**
-     * Stop the RCS service
-     *
-     * @param context Application context
-     */
-    public static void stopRcsService(Context context) {
-        if (logger.isActivated()) {
-            logger.debug("Stop RCS service");
-        }
-        context.stopService(new Intent(context, StartService.class));
-        context.stopService(new Intent(context, HttpsProvisioningService.class));
-        context.stopService(new Intent(context, RcsCoreService.class));
-    }
-    
-    /**
-     * Stop the RCS core service (but keep provisioning)
-     *
-     * @param context Application context
-     */
-    public static void stopRcsCoreService( Context context) {
-        if (logger.isActivated()) {
-            logger.debug("Stop RCS core service");
-        }
-        context.stopService(new Intent(context, StartService.class));
-        context.stopService(new Intent(context, RcsCoreService.class));
-    }
+	/**
+	 * Force launch the RCS core service
+	 *
+	 * @param context
+	 *            Application context
+	 */
+	// TODO: not used.
+	public static void forceLaunchRcsCoreService(Context context) {
+		if (logger.isActivated()) {
+			logger.debug("Force launch core service");
+		}
+		if (RcsSettings.getInstance().isUserProfileConfigured()) {
+			RcsSettings.getInstance().setServiceActivationState(true);
+			context.startService(new Intent(context, RcsCoreService.class));
+		} else {
+			if (logger.isActivated()) {
+				logger.debug("RCS service not configured");
+			}
+		}
+	}
 
-    /**
-     * Reset RCS config
-     *
-     * @param ctx Application context
-     * @param localContentResolver Local content resolver
-     */
+	/**
+	 * Stop the RCS service
+	 *
+	 * @param context
+	 *            Application context
+	 */
+	public static void stopRcsService(Context context) {
+		if (logger.isActivated()) {
+			logger.debug("Stop RCS service");
+		}
+		context.stopService(new Intent(context, StartService.class));
+		context.stopService(new Intent(context, HttpsProvisioningService.class));
+		context.stopService(new Intent(context, RcsCoreService.class));
+	}
+
+	/**
+	 * Stop the RCS core service (but keep provisioning)
+	 *
+	 * @param context
+	 *            Application context
+	 */
+	public static void stopRcsCoreService(Context context) {
+		if (logger.isActivated()) {
+			logger.debug("Stop RCS core service");
+		}
+		context.stopService(new Intent(context, StartService.class));
+		context.stopService(new Intent(context, RcsCoreService.class));
+	}
+
+	/**
+	 * Reset RCS config
+	 *
+	 * @param ctx
+	 *            Application context
+	 * @param localContentResolver
+	 *            Local content resolver
+	 */
 	public static void resetRcsConfig(Context ctx, LocalContentResolver localContentResolver) {
 		if (logger.isActivated()) {
 			logger.debug("Reset RCS config");
 		}
-        // Stop the Core service
-        ctx.stopService(new Intent(ctx, RcsCoreService.class));
+		// Stop the Core service
+		ctx.stopService(new Intent(ctx, RcsCoreService.class));
 
-        // Reset user profile
-        RcsSettings.createInstance(ctx);
-        RcsSettings.getInstance().resetUserProfile();
+		// Reset user profile
+		RcsSettings.createInstance(ctx);
+		RcsSettings.getInstance().resetUserProfile();
 
-        // Clear all entries in chat, message and file transfer tables
-        MessagingLog.createInstance(ctx, localContentResolver);
-        MessagingLog.getInstance().deleteAllEntries();
+		// Clear all entries in chat, message and file transfer tables
+		MessagingLog.createInstance(ctx, localContentResolver);
+		MessagingLog.getInstance().deleteAllEntries();
 
-        // Clear all entries in IP call table 
-        IPCallHistory.createInstance(localContentResolver);
-        IPCallHistory.getInstance().deleteAllEntries();
-        
-        // Clear all entries in Rich Call tables (image and video)
-        RichCallHistory.createInstance(localContentResolver);
-        RichCallHistory.getInstance().deleteAllEntries();
-        
+		// Clear all entries in IP call table
+		IPCallHistory.createInstance(localContentResolver);
+		IPCallHistory.getInstance().deleteAllEntries();
+
+		// Clear all entries in Rich Call tables (image and video)
+		RichCallHistory.createInstance(localContentResolver);
+		RichCallHistory.getInstance().deleteAllEntries();
+
 		// Clean the previous account RCS databases : because
 		// they may not be overwritten in the case of a very new account
 		// or if the back-up files of an older one have been destroyed
 		ContactsManager.createInstance(ctx, ctx.getContentResolver(), localContentResolver);
-        ContactsManager.getInstance().deleteRCSEntries();
+		ContactsManager.getInstance().deleteRCSEntries();
 
-        // Remove the RCS account 
-        AuthenticationService.removeRcsAccount(ctx, null);
-        // Ensure that factory is set up properly to avoid NullPointerException in AccountChangedReceiver.setAccountResetByEndUser
-        AndroidFactory.setApplicationContext(ctx);
-        AccountChangedReceiver.setAccountResetByEndUser(false);
+		// Remove the RCS account
+		AuthenticationService.removeRcsAccount(ctx, null);
+		// Ensure that factory is set up properly to avoid NullPointerException in
+		// AccountChangedReceiver.setAccountResetByEndUser
+		AndroidFactory.setApplicationContext(ctx);
+		AccountChangedReceiver.setAccountResetByEndUser(false);
 
-        // Clean terms status
-        RcsSettings.getInstance().setProvisioningTermsAccepted(false);
-        
-        // Set the configuration validity flag to false 
-        RcsSettings.getInstance().setConfigurationValid(false);
-    }
+		// Clean terms status
+		RcsSettings.getInstance().setProvisioningTermsAccepted(false);
 
-    /**
-     * Get the last user account
-     *
-     * @param context Application context
-     * @return last user account
-     */
-    public static String getLastUserAccount(Context context) {
-        SharedPreferences preferences = context.getSharedPreferences(AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
-        return preferences.getString(REGISTRY_LAST_USER_ACCOUNT, null);
-    }
+		// Set the configuration validity flag to false
+		RcsSettings.getInstance().setConfigurationValid(false);
+	}
 
-    /**
-     * Set the last user account
-     *
-     * @param context Application context
-     * @param value last user account
-     */
-    public static void setLastUserAccount(Context context, String value) {
-        SharedPreferences preferences = context.getSharedPreferences(AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(REGISTRY_LAST_USER_ACCOUNT, value);
-        editor.commit();
-    }
+	/**
+	 * Get the last user account
+	 *
+	 * @param context
+	 *            Application context
+	 * @return last user account
+	 */
+	public static String getLastUserAccount(Context context) {
+		SharedPreferences preferences = context.getSharedPreferences(
+				AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
+		return preferences.getString(REGISTRY_LAST_USER_ACCOUNT, null);
+	}
 
-    /**
-     * Get current user account
-     *
-     * @param context Application context
-     * @return current user account
-     */
-    public static String getCurrentUserAccount(Context context) {
-        TelephonyManager mgr = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
-        String currentUserAccount = mgr.getSubscriberId();
-        mgr = null;
-        return currentUserAccount;
-    }
+	/**
+	 * Set the last user account
+	 *
+	 * @param context
+	 *            Application context
+	 * @param value
+	 *            last user account
+	 */
+	public static void setLastUserAccount(Context context, String value) {
+		SharedPreferences preferences = context.getSharedPreferences(
+				AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
+		SharedPreferences.Editor editor = preferences.edit();
+		editor.putString(REGISTRY_LAST_USER_ACCOUNT, value);
+		editor.commit();
+	}
+
+	/**
+	 * Get current user account
+	 *
+	 * @param context
+	 *            Application context
+	 * @return current user account
+	 */
+	public static String getCurrentUserAccount(Context context) {
+		TelephonyManager mgr = (TelephonyManager) context
+				.getSystemService(Context.TELEPHONY_SERVICE);
+		String currentUserAccount = mgr.getSubscriberId();
+		mgr = null;
+		return currentUserAccount;
+	}
 
 	/**
 	 * Get the latest positive provisioning version
@@ -262,10 +275,11 @@ public class LauncherUtils {
 	 * @return the latest positive provisioning version
 	 */
 	public static String getProvisioningVersion(Context context) {
-		SharedPreferences preferences = context.getSharedPreferences(AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
+		SharedPreferences preferences = context.getSharedPreferences(
+				AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
 		return preferences.getString(REGISTRY_PROVISIONING_VERSION, "0");
 	}
-    
+
 	/**
 	 * Save the latest positive provisioning version in shared preferences
 	 * 
@@ -278,7 +292,8 @@ public class LauncherUtils {
 		try {
 			int vers = Integer.parseInt(value);
 			if (vers > 0) {
-				SharedPreferences preferences = context.getSharedPreferences(AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
+				SharedPreferences preferences = context.getSharedPreferences(
+						AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
 				SharedPreferences.Editor editor = preferences.edit();
 				editor.putString(REGISTRY_PROVISIONING_VERSION, value);
 				editor.commit();
@@ -286,7 +301,7 @@ public class LauncherUtils {
 		} catch (NumberFormatException e) {
 		}
 	}
-	
+
 	/**
 	 * Get the expiration date of the provisioning
 	 * 
@@ -295,14 +310,15 @@ public class LauncherUtils {
 	 * @return the expiration date
 	 */
 	public static Date getProvisioningExpirationDate(Context context) {
-		SharedPreferences preferences = context.getSharedPreferences(AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
+		SharedPreferences preferences = context.getSharedPreferences(
+				AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
 		Long expiration = preferences.getLong(REGISTRY_PROVISIONING_EXPIRATION, 0L);
 		if (expiration > 0L) {
 			return new Date(expiration);
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Get the expiration date of the provisioning
 	 * 
@@ -311,13 +327,15 @@ public class LauncherUtils {
 	 * @return the expiration date in seconds
 	 */
 	public static Long getProvisioningValidity(Context context) {
-		SharedPreferences preferences = context.getSharedPreferences(AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
-		Long validity = preferences.getLong(REGISTRY_PROVISIONING_VALIDITY, 24*3600L);
+		SharedPreferences preferences = context.getSharedPreferences(
+				AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
+		Long validity = preferences.getLong(REGISTRY_PROVISIONING_VALIDITY, 24 * 3600L);
 		if (validity > 0L) {
 			return validity;
 		}
 		return null;
 	}
+
 	/**
 	 * Save the provisioning validity in shared preferences
 	 * 
@@ -325,11 +343,12 @@ public class LauncherUtils {
 	 * @param validity
 	 *            validity of the provisioning expressed in seconds
 	 */
-	public static void saveProvisioningValidity(Context context, long validity) {			
+	public static void saveProvisioningValidity(Context context, long validity) {
 		if (validity > 0L) {
 			// Calculate next expiration date in msec
 			long next = System.currentTimeMillis() + validity * 1000L;
-			SharedPreferences preferences = context.getSharedPreferences(AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
+			SharedPreferences preferences = context.getSharedPreferences(
+					AndroidRegistryFactory.RCS_PREFS_NAME, Activity.MODE_PRIVATE);
 			SharedPreferences.Editor editor = preferences.edit();
 			editor.putLong(REGISTRY_PROVISIONING_VALIDITY, validity);
 			editor.putLong(REGISTRY_PROVISIONING_EXPIRATION, next);

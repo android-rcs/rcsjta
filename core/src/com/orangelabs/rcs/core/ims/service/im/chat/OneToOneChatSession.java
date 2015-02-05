@@ -71,12 +71,18 @@ public abstract class OneToOneChatSession extends ChatSession {
 	/**
 	 * Constructor
 	 *
-	 * @param parent IMS service
-	 * @param contact Remote contact identifier
-	 * @param remoteUri Remote URI
-	 * @param firstMsg First chat message
-	 * @param rcsSettings RCS settings
-	 * @param messagingLog Messaging log
+	 * @param parent
+	 *            IMS service
+	 * @param contact
+	 *            Remote contact identifier
+	 * @param remoteUri
+	 *            Remote URI
+	 * @param firstMsg
+	 *            First chat message
+	 * @param rcsSettings
+	 *            RCS settings
+	 * @param messagingLog
+	 *            Messaging log
 	 */
 	public OneToOneChatSession(ImsService parent, ContactId contact, String remoteUri,
 			ChatMessage firstMsg, RcsSettings rcsSettings, MessagingLog messagingLog) {
@@ -94,8 +100,8 @@ public abstract class OneToOneChatSession extends ChatSession {
 				.append(IsComposingInfo.MIME_TYPE).toString();
 		setAcceptTypes(acceptTypes);
 
-		StringBuilder wrappedTypes = new StringBuilder(MimeType.TEXT_MESSAGE).append(" ")
-				.append(ImdnDocument.MIME_TYPE);
+		StringBuilder wrappedTypes = new StringBuilder(MimeType.TEXT_MESSAGE).append(" ").append(
+				ImdnDocument.MIME_TYPE);
 		if (mRcsSettings.isGeoLocationPushSupported()) {
 			wrappedTypes.append(" ").append(GeolocInfoDocument.MIME_TYPE);
 		}
@@ -117,7 +123,8 @@ public abstract class OneToOneChatSession extends ChatSession {
 	/**
 	 * Generate the set of participants for a 1-1 chat
 	 *
-	 * @param contact ContactId
+	 * @param contact
+	 *            ContactId
 	 * @return Set of participants
 	 */
 	private static Set<ParticipantInfo> generateOneOneParticipants(ContactId contact) {
@@ -148,7 +155,9 @@ public abstract class OneToOneChatSession extends ChatSession {
 
 	/**
 	 * Send a text message
-	 * @param msg Chat message
+	 * 
+	 * @param msg
+	 *            Chat message
 	 */
 	@Override
 	public void sendChatMessage(ChatMessage msg) {
@@ -156,41 +165,39 @@ public abstract class OneToOneChatSession extends ChatSession {
 		String to = ChatUtils.ANOMYNOUS_URI;
 		String msgId = msg.getMessageId();
 		String networkContent;
-		boolean useImdn = getImdnManager().isImdnActivated()
-				&& !mRcsSettings.isAlbatrosRelease();
+		boolean useImdn = getImdnManager().isImdnActivated() && !mRcsSettings.isAlbatrosRelease();
 		String mimeType = msg.getMimeType();
 		if (useImdn) {
-			networkContent = ChatUtils.buildCpimMessageWithImdn(from, to, msgId,
-					msg.getContent(), mimeType);
+			networkContent = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, msg.getContent(),
+					mimeType);
 
 		} else {
-			networkContent = ChatUtils.buildCpimMessage(from, to,
-					msg.getContent(), mimeType);
+			networkContent = ChatUtils.buildCpimMessage(from, to, msg.getContent(), mimeType);
 		}
 
 		Collection<ImsSessionListener> listeners = getListeners();
 		for (ImsSessionListener listener : listeners) {
-			((ChatSessionListener)listener).handleMessageSending(msg);
+			((ChatSessionListener) listener).handleMessageSending(msg);
 		}
 
 		boolean sendOperationSucceeded = false;
 		if (ChatUtils.isGeolocType(mimeType)) {
-			sendOperationSucceeded = sendDataChunks(IdGenerator.generateMessageID(), networkContent,
-					CpimMessage.MIME_TYPE, TypeMsrpChunk.GeoLocation);
+			sendOperationSucceeded = sendDataChunks(IdGenerator.generateMessageID(),
+					networkContent, CpimMessage.MIME_TYPE, TypeMsrpChunk.GeoLocation);
 		} else {
-			sendOperationSucceeded = sendDataChunks(IdGenerator.generateMessageID(), networkContent,
-					CpimMessage.MIME_TYPE, TypeMsrpChunk.TextMessage);
+			sendOperationSucceeded = sendDataChunks(IdGenerator.generateMessageID(),
+					networkContent, CpimMessage.MIME_TYPE, TypeMsrpChunk.TextMessage);
 		}
 
 		if (sendOperationSucceeded) {
 			for (ImsSessionListener listener : getListeners()) {
-				((ChatSessionListener)listener).handleMessageSent(msgId,
-				        ChatUtils.networkMimeTypeToApiMimeType(mimeType));
+				((ChatSessionListener) listener).handleMessageSent(msgId,
+						ChatUtils.networkMimeTypeToApiMimeType(mimeType));
 			}
 		} else {
 			for (ImsSessionListener listener : getListeners()) {
-				((ChatSessionListener)listener).handleMessageFailedSend(msgId,
-				        ChatUtils.networkMimeTypeToApiMimeType(mimeType));
+				((ChatSessionListener) listener).handleMessageFailedSend(msgId,
+						ChatUtils.networkMimeTypeToApiMimeType(mimeType));
 			}
 		}
 	}
@@ -198,7 +205,8 @@ public abstract class OneToOneChatSession extends ChatSession {
 	/**
 	 * Send is composing status
 	 *
-	 * @param status Status
+	 * @param status
+	 *            Status
 	 */
 	public void sendIsComposingStatus(boolean status) {
 		String content = IsComposingInfo.buildIsComposingInfo(status);
@@ -217,12 +225,12 @@ public abstract class OneToOneChatSession extends ChatSession {
 	/**
 	 * Create INVITE request
 	 *
-	 * @param content Content part
+	 * @param content
+	 *            Content part
 	 * @return Request
 	 * @throws SipException
 	 */
-	private SipRequest createMultipartInviteRequest(String content)
-			throws SipException {
+	private SipRequest createMultipartInviteRequest(String content) throws SipException {
 		SipRequest invite = SipMessageFactory.createMultipartInvite(getDialogPath(),
 				getFeatureTags(), content, BOUNDARY_TAG);
 
@@ -235,7 +243,8 @@ public abstract class OneToOneChatSession extends ChatSession {
 	/**
 	 * Create INVITE request
 	 *
-	 * @param content Content part
+	 * @param content
+	 *            Content part
 	 * @return Request
 	 * @throws SipException
 	 */
@@ -268,7 +277,8 @@ public abstract class OneToOneChatSession extends ChatSession {
 	/**
 	 * Handle 200 0K response
 	 *
-	 * @param resp 200 OK response
+	 * @param resp
+	 *            200 OK response
 	 */
 	public void handle200OK(SipResponse resp) {
 		super.handle200OK(resp);
@@ -289,8 +299,8 @@ public abstract class OneToOneChatSession extends ChatSession {
 
 	/*
 	 * (non-Javadoc)
-	 * @see
-	 * com.orangelabs.rcs.core.ims.service.im.chat.ChatSession#msrpTransferError
+	 * 
+	 * @see com.orangelabs.rcs.core.ims.service.im.chat.ChatSession#msrpTransferError
 	 * (java.lang.String, java.lang.String,
 	 * com.orangelabs.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk)
 	 */

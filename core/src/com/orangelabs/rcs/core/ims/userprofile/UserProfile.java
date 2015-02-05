@@ -30,12 +30,12 @@ import javax2.sip.header.ExtensionHeader;
 import javax2.sip.header.Header;
 
 /**
- * User profile 
+ * User profile
  *
  * @author JM. Auffret
  */
 public class UserProfile {
-	
+
 	/**
 	 * User name
 	 */
@@ -85,33 +85,36 @@ public class UserProfile {
 	 * Associated URIs
 	 */
 	private Vector<String> associatedUriList = new Vector<String>();
-	
+
 	/**
 	 * Preferred URI
 	 */
 	private String preferredUri = null;
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param contact Username
-	 * @param homeDomain Home domain
-	 * @param privateID Private id
-	 * @param password Password
-	 * @param realm Realm
-	 * @param xdmServerAddr XDM server address
-	 * @param xdmServerLogin Outbound proxy address
-	 * @param xdmServerPassword Outbound proxy address
-	 * @param imConferenceUri IM conference factory URI
+	 * @param contact
+	 *            Username
+	 * @param homeDomain
+	 *            Home domain
+	 * @param privateID
+	 *            Private id
+	 * @param password
+	 *            Password
+	 * @param realm
+	 *            Realm
+	 * @param xdmServerAddr
+	 *            XDM server address
+	 * @param xdmServerLogin
+	 *            Outbound proxy address
+	 * @param xdmServerPassword
+	 *            Outbound proxy address
+	 * @param imConferenceUri
+	 *            IM conference factory URI
 	 */
-	public UserProfile(ContactId contact,
-			String homeDomain,
-			String privateID,
-			String password,
-			String realm,
-			String xdmServerAddr,
-			String xdmServerLogin,
-			String xdmServerPassword,
+	public UserProfile(ContactId contact, String homeDomain, String privateID, String password,
+			String realm, String xdmServerAddr, String xdmServerLogin, String xdmServerPassword,
 			String imConferenceUri) {
 		this.contact = contact;
 		this.homeDomain = homeDomain;
@@ -136,16 +139,17 @@ public class UserProfile {
 	public ContactId getUsername() {
 		return contact;
 	}
-	
+
 	/**
 	 * Set the user name
 	 * 
-	 * @param contact Contact Id
+	 * @param contact
+	 *            Contact Id
 	 */
 	public void setUsername(ContactId contact) {
 		this.contact = contact;
 	}
-	
+
 	/**
 	 * Get the user preferred URI
 	 * 
@@ -153,7 +157,7 @@ public class UserProfile {
 	 */
 	public String getPreferredUri() {
 		return preferredUri;
-	}	
+	}
 
 	/**
 	 * Get the user public URI
@@ -161,24 +165,24 @@ public class UserProfile {
 	 * @return Public URI
 	 */
 	public String getPublicUri() {
-		if (preferredUri == null) { 
+		if (preferredUri == null) {
 			// Changed by Deutsche Telekom
-		    // Continuation from the changes done by "AS" on "2012-09-01"
-		    return getPublicUriForRegistration();
+			// Continuation from the changes done by "AS" on "2012-09-01"
+			return getPublicUriForRegistration();
 		} else {
 			return preferredUri;
 		}
 	}
-	
-    /**
-     * Get the user public URI for registration
-     * 
-     * @return Public URI
-     */
+
+	/**
+	 * Get the user public URI for registration
+	 * 
+	 * @return Public URI
+	 */
 	public String getPublicUriForRegistration() {
 		return "sip:" + contact + "@" + homeDomain;
 	}
-    
+
 	/**
 	 * Get the user public address
 	 * 
@@ -201,40 +205,38 @@ public class UserProfile {
 	/**
 	 * Set the user associated URIs
 	 * 
-	 * @param uris List of URIs
+	 * @param uris
+	 *            List of URIs
 	 */
 	public void setAssociatedUri(ListIterator<Header> uris) {
 		if (uris == null) {
 			return;
 		}
-		
+
 		String sipUri = null;
 		String telUri = null;
-		while(uris.hasNext()) {
-			ExtensionHeader header = (ExtensionHeader)uris.next();
+		while (uris.hasNext()) {
+			ExtensionHeader header = (ExtensionHeader) uris.next();
 			String value = header.getValue();
 			value = SipUtils.extractUriFromAddress(value);
 			associatedUriList.addElement(value);
 
 			if (value.startsWith("sip:")) {
 				sipUri = value;
-			} else
-			if (value.startsWith("tel:")) {
+			} else if (value.startsWith("tel:")) {
 				telUri = value;
 			}
 		}
-		
+
 		if ((sipUri != null) && (telUri != null)) {
 			preferredUri = telUri;
-		} else
-		if (telUri != null) {
+		} else if (telUri != null) {
 			preferredUri = telUri;
-		} else
-		if (sipUri != null) {
+		} else if (sipUri != null) {
 			preferredUri = sipUri;
 		}
 	}
-	
+
 	/**
 	 * Get the private ID used for HTTP Digest authentication
 	 * 
@@ -243,7 +245,7 @@ public class UserProfile {
 	public String getPrivateID() {
 		return privateID;
 	}
-	
+
 	/**
 	 * Returns the password used for HTTP Digest authentication
 	 * 
@@ -270,20 +272,22 @@ public class UserProfile {
 	public String getHomeDomain() {
 		return homeDomain;
 	}
-	
+
 	/**
 	 * Set the home domain
 	 * 
-	 * @param domain Home domain
+	 * @param domain
+	 *            Home domain
 	 */
 	public void setHomeDomain(String domain) {
 		this.homeDomain = domain;
 	}
-	
+
 	/**
 	 * Set the XDM server address
 	 * 
-	 * @param addr Server address
+	 * @param addr
+	 *            Server address
 	 */
 	public void setXdmServerAddr(String addr) {
 		this.xdmServerAddr = addr;
@@ -297,11 +301,12 @@ public class UserProfile {
 	public String getXdmServerAddr() {
 		return xdmServerAddr;
 	}
-	
+
 	/**
 	 * Set the XDM server login
 	 * 
-	 * @param login Login
+	 * @param login
+	 *            Login
 	 */
 	public void setXdmServerLogin(String login) {
 		this.xdmServerLogin = login;
@@ -319,7 +324,8 @@ public class UserProfile {
 	/**
 	 * Set the XDM server password
 	 * 
-	 * @param pwd Password
+	 * @param pwd
+	 *            Password
 	 */
 	public void setXdmServerPassword(String pwd) {
 		this.xdmServerPassword = pwd;
@@ -333,11 +339,12 @@ public class UserProfile {
 	public String getXdmServerPassword() {
 		return xdmServerPassword;
 	}
-	
+
 	/**
 	 * Set the IM conference URI
 	 * 
-	 * @param uri URI
+	 * @param uri
+	 *            URI
 	 */
 	public void setImConferenceUri(String uri) {
 		this.imConferenceUri = uri;
@@ -353,19 +360,16 @@ public class UserProfile {
 	}
 
 	/**
-     * Returns the profile value as string
-     * 
-     * @return String
-     */
+	 * Returns the profile value as string
+	 * 
+	 * @return String
+	 */
 	public String toString() {
-		String result = "IMS username=" + contact + ", " 
-			+ "IMS private ID=" + privateID + ", "
-			+ "IMS password=" + password + ", "
-			+ "IMS home domain=" + homeDomain + ", "
-			+ "XDM server=" + xdmServerAddr + ", "
-			+ "XDM login=" + xdmServerLogin + ", "
-			+ "XDM password=" + xdmServerPassword + ", " 
-			+ "IM Conference URI=" + imConferenceUri;
+		String result = "IMS username=" + contact + ", " + "IMS private ID=" + privateID + ", "
+				+ "IMS password=" + password + ", " + "IMS home domain=" + homeDomain + ", "
+				+ "XDM server=" + xdmServerAddr + ", " + "XDM login=" + xdmServerLogin + ", "
+				+ "XDM password=" + xdmServerPassword + ", " + "IM Conference URI="
+				+ imConferenceUri;
 		return result;
 	}
 }

@@ -25,7 +25,7 @@ public class Watcher {
 	private String event;
 	private String uri;
 	private String displayName;
-	
+
 	public Watcher(String id) {
 		this.id = id;
 	}

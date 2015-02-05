@@ -26,11 +26,12 @@ import javax2.sip.message.Response;
  * @author jexa7410
  */
 public class SipResponse extends SipMessage {
-	
+
 	/**
 	 * Constructor
 	 *
-	 * @param response SIP stack response
+	 * @param response
+	 *            SIP stack response
 	 */
 	public SipResponse(Response response) {
 		super(response);
@@ -42,9 +43,9 @@ public class SipResponse extends SipMessage {
 	 * @return SIP response
 	 */
 	public Response getStackMessage() {
-		return (Response)stackMessage;
+		return (Response) stackMessage;
 	}
-	
+
 	/**
 	 * Returns the status code value
 	 * 
@@ -58,7 +59,7 @@ public class SipResponse extends SipMessage {
 			return -1;
 		}
 	}
-	
+
 	/**
 	 * Returns the reason phrase of the response
 	 * 

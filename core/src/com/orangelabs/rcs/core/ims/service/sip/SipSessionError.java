@@ -33,30 +33,34 @@ public class SipSessionError extends ImsSessionBasedServiceError {
 	 * Media has failed (e.g. RTP or MSRP failure)
 	 */
 	public final static int MEDIA_FAILED = SESSION_ERROR_CODES + 1;
-	
+
 	/**
-     * Constructor
-     *
-     * @param error Error
-     */
-    public SipSessionError(ImsServiceError error) {
-        super(error.getErrorCode(), error.getMessage());
-    }
+	 * Constructor
+	 *
+	 * @param error
+	 *            Error
+	 */
+	public SipSessionError(ImsServiceError error) {
+		super(error.getErrorCode(), error.getMessage());
+	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param code Error code
+	 * @param code
+	 *            Error code
 	 */
 	public SipSessionError(int code) {
 		super(code);
 	}
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param code Error code
-	 * @param msg Detail message 
+	 * @param code
+	 *            Error code
+	 * @param msg
+	 *            Detail message
 	 */
 	public SipSessionError(int code, String msg) {
 		super(code, msg);

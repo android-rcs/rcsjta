@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.utils;
 
 import android.content.Context;
@@ -32,102 +33,103 @@ import com.orangelabs.rcs.ri.R;
  * Utilities to manage the RCS display name
  * 
  * @author YPLO6403
- *
  */
 public class RcsDisplayName {
 
-	private static final String LOGTAG = LogUtils.getTag(RcsDisplayName.class.getSimpleName());
+    private static final String LOGTAG = LogUtils.getTag(RcsDisplayName.class.getSimpleName());
 
-	/**
-	 * Singleton of RcsDisplayName
-	 */
-	private static volatile RcsDisplayName mInstance;
+    /**
+     * Singleton of RcsDisplayName
+     */
+    private static volatile RcsDisplayName mInstance;
 
-	private Context mContext;
-	private ContactsService mService;
-	private ContactUtils mContactUtils;
-	
-	/**
-	 * The default display name
-	 */
-	private static String DefaultDisplayName; 
+    private Context mContext;
 
-	/**
-	 * Constructor
-	 * @param context
-	 */
-	private RcsDisplayName(Context context) {
-		mContext = context;
-		mService = ApiConnectionManager.getInstance(mContext).getContactsApi();
-		mContactUtils = ContactUtils.getInstance(mContext);
-		DefaultDisplayName = context.getString(R.string.label_no_contact);
-	}
+    private ContactsService mService;
 
-	/**
-	 * Get an instance of RcsDisplayName.
-	 * 
-	 * @param context
-	 *            the context
-	 * @return the singleton instance.
-	 */
-	public static RcsDisplayName getInstance(Context context) {
-		if (mInstance == null) {
-			synchronized (RcsDisplayName.class) {
-				if (mInstance == null) {
-					if (context == null) {
-						throw new IllegalArgumentException("Context is null");
-					}
-					mInstance = new RcsDisplayName(context);
-				}
-			}
-		}
-		return mInstance;
-	}
+    private ContactUtils mContactUtils;
 
-	/**
-	 * Returns RCS display name which can be displayed on UI
-	 * 
-	 * @param contact
-	 * @return the RCS display name
-	 */
-	public String getDisplayName(ContactId contact) {
-		if (contact == null) {
-			return DefaultDisplayName;
-		}
-		try {
-			if (mService == null) {
-				mService = ApiConnectionManager.getInstance(mContext).getContactsApi();
-			}
-			RcsContact rcsContact = mService.getRcsContact(contact);
-			String displayName = rcsContact.getDisplayName();
-			if (displayName == null) {
-				return contact.toString();
-			} else {
-				return displayName;
-			}
-		} catch (Exception e) {
-			if (LogUtils.isActive) {
-				Log.e(LOGTAG, "Cannot get displayName", e);
-			}
-			return contact.toString();
-		}
-	}
+    /**
+     * The default display name
+     */
+    private static String DefaultDisplayName;
 
-	/**
-	 * get RCS display in a String which can be displayed on UI
-	 * 
-	 * @param number
-	 * @return the name which can be displayed on UI
-	 */
-	public String getDisplayName(String number) {
-		if (number == null) {
-			return DefaultDisplayName;
-		}
-		try {
-			ContactId contact = mContactUtils.formatContact(number);
-			return getDisplayName(contact);
-		} catch (RcsContactFormatException e) {
-			return number;
-		}
-	}
+    /**
+     * Constructor
+     * 
+     * @param context
+     */
+    private RcsDisplayName(Context context) {
+        mContext = context;
+        mService = ApiConnectionManager.getInstance(mContext).getContactsApi();
+        mContactUtils = ContactUtils.getInstance(mContext);
+        DefaultDisplayName = context.getString(R.string.label_no_contact);
+    }
+
+    /**
+     * Get an instance of RcsDisplayName.
+     * 
+     * @param context the context
+     * @return the singleton instance.
+     */
+    public static RcsDisplayName getInstance(Context context) {
+        if (mInstance == null) {
+            synchronized (RcsDisplayName.class) {
+                if (mInstance == null) {
+                    if (context == null) {
+                        throw new IllegalArgumentException("Context is null");
+                    }
+                    mInstance = new RcsDisplayName(context);
+                }
+            }
+        }
+        return mInstance;
+    }
+
+    /**
+     * Returns RCS display name which can be displayed on UI
+     * 
+     * @param contact
+     * @return the RCS display name
+     */
+    public String getDisplayName(ContactId contact) {
+        if (contact == null) {
+            return DefaultDisplayName;
+        }
+        try {
+            if (mService == null) {
+                mService = ApiConnectionManager.getInstance(mContext).getContactsApi();
+            }
+            RcsContact rcsContact = mService.getRcsContact(contact);
+            String displayName = rcsContact.getDisplayName();
+            if (displayName == null) {
+                return contact.toString();
+            } else {
+                return displayName;
+            }
+        } catch (Exception e) {
+            if (LogUtils.isActive) {
+                Log.e(LOGTAG, "Cannot get displayName", e);
+            }
+            return contact.toString();
+        }
+    }
+
+    /**
+     * get RCS display in a String which can be displayed on UI
+     * 
+     * @param number
+     * @return the name which can be displayed on UI
+     */
+    public String getDisplayName(String number) {
+        if (number == null) {
+            return DefaultDisplayName;
+        }
+        try {
+            ContactId contact = mContactUtils.formatContact(number);
+            return getDisplayName(contact);
+        } catch (RcsContactFormatException e) {
+            return number;
+        }
+    }
 }

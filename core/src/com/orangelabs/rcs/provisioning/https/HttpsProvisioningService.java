@@ -48,37 +48,37 @@ import com.orangelabs.rcs.utils.logger.Logger;
  * @author Deutsche Telekom AG
  */
 public class HttpsProvisioningService extends Service {
-    /**
-     * Intent key - Provisioning requested after (re)boot
-     */
-    private static final String FIRST_KEY = "first";
+	/**
+	 * Intent key - Provisioning requested after (re)boot
+	 */
+	private static final String FIRST_KEY = "first";
 
-    /**
-     * Intent key - Provisioning requested by user
-     */
-    private static final String USER_KEY = "user";
+	/**
+	 * Intent key - Provisioning requested by user
+	 */
+	private static final String USER_KEY = "user";
 
-    /**
-     * Retry Intent
-     */
-    private PendingIntent retryIntent = null;
+	/**
+	 * Retry Intent
+	 */
+	private PendingIntent retryIntent = null;
 
-    /**
-     * Provisioning manager
-     */
-    HttpsProvisioningManager httpsProvisioningMng;
+	/**
+	 * Provisioning manager
+	 */
+	HttpsProvisioningManager httpsProvisioningMng;
 
-    LocalContentResolver mLocalContentResolver;
+	LocalContentResolver mLocalContentResolver;
 
-    /**
+	/**
 	 * Retry action for provisioning failure
 	 */
-    private static final String ACTION_RETRY = "com.orangelabs.rcs.provisioning.https.HttpsProvisioningService.ACTION_RETRY";
+	private static final String ACTION_RETRY = "com.orangelabs.rcs.provisioning.https.HttpsProvisioningService.ACTION_RETRY";
 
 	/**
 	 * The logger
 	 */
-    private static Logger logger = Logger.getLogger(HttpsProvisioningService.class.getSimpleName());
+	private static Logger logger = Logger.getLogger(HttpsProvisioningService.class.getSimpleName());
 
 	@Override
 	public void onCreate() {
@@ -88,7 +88,8 @@ public class HttpsProvisioningService extends Service {
 		Context ctx = getApplicationContext();
 		mLocalContentResolver = new LocalContentResolver(ctx.getContentResolver());
 		RcsSettings.createInstance(ctx);
-		this.retryIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(ACTION_RETRY), 0);
+		this.retryIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(
+				ACTION_RETRY), 0);
 	}
 
 	@Override
@@ -108,60 +109,61 @@ public class HttpsProvisioningService extends Service {
 		// if version = 0, then (re)set first to true
 		try {
 			int ver = Integer.parseInt(version);
-            if (ver == 0) {
-                first = true;
-            }
+			if (ver == 0) {
+				first = true;
+			}
 		} catch (NumberFormatException e) {
-            // Nothing to do
+			// Nothing to do
 		}
 		registerReceiver(retryReceiver, new IntentFilter(ACTION_RETRY));
 
 		httpsProvisioningMng = new HttpsProvisioningManager(getApplicationContext(),
 				mLocalContentResolver, retryIntent, first, user);
 		if (logger.isActivated()) {
-			logger.debug("Provisioning parameter: boot=" + first + ", user=" + user + ", version=" + version);
+			logger.debug("Provisioning parameter: boot=" + first + ", user=" + user + ", version="
+					+ version);
 		}
 
 		boolean requestConfig = false;
-        if (first) {
-            requestConfig = true;
-        } else {
-            if (ProvisioningInfo.Version.RESETED_NOQUERY.equals(version)) {
-                // Nothing to do
-            } else if (ProvisioningInfo.Version.DISABLED_NOQUERY.equals(version)) {
-                if (user == true) {
-                    requestConfig = true;
-                }
-            } else if (ProvisioningInfo.Version.DISABLED_DORMANT.equals(version) && user == true) {
-                requestConfig = true;
-            } else { // version > 0
-                Date expiration = LauncherUtils.getProvisioningExpirationDate(this);
-                if (expiration == null) {
-                    requestConfig = true;
-                } else {
-                    Date now = new Date();
-                    if (expiration.before(now)) {
-                        if (logger.isActivated())
-                            logger.debug("Configuration validity expired at " + expiration);
-                        requestConfig = true;
-                    } else {
-                        long delay = (expiration.getTime() - now.getTime());
-                        if (delay <= 0L) {
-                            requestConfig = true;
-                        } else {
-                            Long validity = LauncherUtils.getProvisioningValidity(this) * 1000L;
-                            if (validity != null && delay > validity) {
-                                delay = validity;
-                            }
-                            if (logger.isActivated())
-                                logger.debug("Configuration will expire in " + (delay / 1000)
-                                        + " secs at " + expiration);
-                            startRetryAlarm(this, retryIntent, delay);
-                        }
-                    }
-                }
-            }
-        }
+		if (first) {
+			requestConfig = true;
+		} else {
+			if (ProvisioningInfo.Version.RESETED_NOQUERY.equals(version)) {
+				// Nothing to do
+			} else if (ProvisioningInfo.Version.DISABLED_NOQUERY.equals(version)) {
+				if (user == true) {
+					requestConfig = true;
+				}
+			} else if (ProvisioningInfo.Version.DISABLED_DORMANT.equals(version) && user == true) {
+				requestConfig = true;
+			} else { // version > 0
+				Date expiration = LauncherUtils.getProvisioningExpirationDate(this);
+				if (expiration == null) {
+					requestConfig = true;
+				} else {
+					Date now = new Date();
+					if (expiration.before(now)) {
+						if (logger.isActivated())
+							logger.debug("Configuration validity expired at " + expiration);
+						requestConfig = true;
+					} else {
+						long delay = (expiration.getTime() - now.getTime());
+						if (delay <= 0L) {
+							requestConfig = true;
+						} else {
+							Long validity = LauncherUtils.getProvisioningValidity(this) * 1000L;
+							if (validity != null && delay > validity) {
+								delay = validity;
+							}
+							if (logger.isActivated())
+								logger.debug("Configuration will expire in " + (delay / 1000)
+										+ " secs at " + expiration);
+							startRetryAlarm(this, retryIntent, delay);
+						}
+					}
+				}
+			}
+		}
 
 		if (requestConfig) {
 			if (logger.isActivated())
@@ -176,7 +178,6 @@ public class HttpsProvisioningService extends Service {
 		// stopped, so return sticky.
 		return START_STICKY;
 	}
-    
 
 	/**
 	 * Start retry alarm
@@ -188,7 +189,7 @@ public class HttpsProvisioningService extends Service {
 	 */
 	public static void startRetryAlarm(Context context, PendingIntent intent, long delay) {
 		if (logger.isActivated()) {
-			logger.debug( "Retry HTTP configuration update in "+(delay/1000)+" secs");
+			logger.debug("Retry HTTP configuration update in " + (delay / 1000) + " secs");
 		}
 		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 		am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + delay, intent);
@@ -202,14 +203,14 @@ public class HttpsProvisioningService extends Service {
 	 */
 	public static void cancelRetryAlarm(Context context, PendingIntent intent) {
 		if (logger.isActivated()) {
-			logger.debug( "Stop retry configuration update");
+			logger.debug("Stop retry configuration update");
 		}
 		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 		am.cancel(intent);
 	}
-    
-    @Override
-    public void onDestroy() {
+
+	@Override
+	public void onDestroy() {
 		if (httpsProvisioningMng != null) {
 			// Unregister network state listener
 			httpsProvisioningMng.unregisterNetworkStateListener();
@@ -222,34 +223,34 @@ public class HttpsProvisioningService extends Service {
 		}
 
 		cancelRetryAlarm(this, retryIntent);
-        // Unregister retry receiver
-        try {
-	        unregisterReceiver(retryReceiver);
-	    } catch (IllegalArgumentException e) {
-	    	// Nothing to do
-	    }
-    }
+		// Unregister retry receiver
+		try {
+			unregisterReceiver(retryReceiver);
+		} catch (IllegalArgumentException e) {
+			// Nothing to do
+		}
+	}
 
-    @Override
-    public IBinder onBind(Intent intent) {
-    	return null;
-    }
+	@Override
+	public IBinder onBind(Intent intent) {
+		return null;
+	}
 
-    /**
-     * Retry receiver
-     */
-    private BroadcastReceiver retryReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Thread t = new Thread() {
-                public void run() {
-                    httpsProvisioningMng.updateConfig();
-                }
-            };
-            t.start();
-        }
-    };
-    
+	/**
+	 * Retry receiver
+	 */
+	private BroadcastReceiver retryReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Thread t = new Thread() {
+				public void run() {
+					httpsProvisioningMng.updateConfig();
+				}
+			};
+			t.start();
+		}
+	};
+
 	/**
 	 * Start the HTTPs provisioning service
 	 * 
@@ -259,7 +260,8 @@ public class HttpsProvisioningService extends Service {
 	 * @param userLaunch
 	 *            launch is requested by user action
 	 */
-	public static void startHttpsProvisioningService(Context context , boolean firstLaunch, boolean userLaunch) {
+	public static void startHttpsProvisioningService(Context context, boolean firstLaunch,
+			boolean userLaunch) {
 		// Start Https provisioning service
 		Intent provisioningIntent = new Intent(context, HttpsProvisioningService.class);
 		provisioningIntent.putExtra(FIRST_KEY, firstLaunch);

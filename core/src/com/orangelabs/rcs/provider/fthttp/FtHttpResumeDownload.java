@@ -57,10 +57,10 @@ public final class FtHttpResumeDownload extends FtHttpResume {
 	 * @param isGroup
 	 *            the {@code isGroup} value.
 	 */
-	public FtHttpResumeDownload(HttpFileTransferSession session, Uri downloadServerAddress, Uri file, String filetransferId, Uri fileIcon,
-			boolean isGroup) {
-		this(downloadServerAddress, file, fileIcon, session.getContent(), session.getRemoteContact(),
-				session.getContributionID(), filetransferId, isGroup);
+	public FtHttpResumeDownload(HttpFileTransferSession session, Uri downloadServerAddress,
+			Uri file, String filetransferId, Uri fileIcon, boolean isGroup) {
+		this(downloadServerAddress, file, fileIcon, session.getContent(), session
+				.getRemoteContact(), session.getContributionID(), filetransferId, isGroup);
 	}
 
 	/**
@@ -83,9 +83,11 @@ public final class FtHttpResumeDownload extends FtHttpResume {
 	 * @param isGroup
 	 *            the {@code isGroup} value.
 	 */
-	public FtHttpResumeDownload(Uri downloadServerAddress, Uri file, Uri fileIcon, MmContent content, ContactId contact,
-			String chatId, String filetransferId, boolean isGroup) {
-		super(Direction.INCOMING, file, content.getName(), content.getEncoding(), content.getSize(), fileIcon, contact, chatId, filetransferId, isGroup);
+	public FtHttpResumeDownload(Uri downloadServerAddress, Uri file, Uri fileIcon,
+			MmContent content, ContactId contact, String chatId, String filetransferId,
+			boolean isGroup) {
+		super(Direction.INCOMING, file, content.getName(), content.getEncoding(),
+				content.getSize(), fileIcon, contact, chatId, filetransferId, isGroup);
 		mDownloadServerAddress = downloadServerAddress;
 		if (downloadServerAddress == null || filetransferId == null)
 			throw new IllegalArgumentException("Invalid argument");
@@ -97,9 +99,11 @@ public final class FtHttpResumeDownload extends FtHttpResume {
 
 	@Override
 	public String toString() {
-		return "FtHttpResumeDownload [downloadServerAddress=" + mDownloadServerAddress + ", file=" + getFile() + ",getFileName()=" + getFileName()
-				+ ", getSize()=" + getSize() + ", getFileicon()=" + getFileicon() + ", getContact()=" + getContact()
-				+ ", getChatId()=" + getChatId() + ", getFileTransferId()=" + getFileTransferId() + ", isGroup()=" + isGroupTransfer() + "]";
+		return "FtHttpResumeDownload [downloadServerAddress=" + mDownloadServerAddress + ", file="
+				+ getFile() + ",getFileName()=" + getFileName() + ", getSize()=" + getSize()
+				+ ", getFileicon()=" + getFileicon() + ", getContact()=" + getContact()
+				+ ", getChatId()=" + getChatId() + ", getFileTransferId()=" + getFileTransferId()
+				+ ", isGroup()=" + isGroupTransfer() + "]";
 	}
 
 }

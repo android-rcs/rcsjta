@@ -17,20 +17,20 @@ package com.orangelabs.rcs.provider.messaging;
 
 public class GroupChatStateAndReasonCode {
 
-    private final int mState;
+	private final int mState;
 
-    private final int mReasonCode;
+	private final int mReasonCode;
 
-    public GroupChatStateAndReasonCode(int state, int reasonCode) {
-        mState = state;
-        mReasonCode = reasonCode;
-    }
+	public GroupChatStateAndReasonCode(int state, int reasonCode) {
+		mState = state;
+		mReasonCode = reasonCode;
+	}
 
-    public int getState() {
-        return mState;
-    }
+	public int getState() {
+		return mState;
+	}
 
-    public int getReasonCode() {
-        return mReasonCode;
-    }
+	public int getReasonCode() {
+		return mReasonCode;
+	}
 }

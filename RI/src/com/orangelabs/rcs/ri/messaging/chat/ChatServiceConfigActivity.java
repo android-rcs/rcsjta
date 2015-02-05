@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.messaging.chat;
 
 import android.app.Activity;
@@ -42,145 +43,133 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public class ChatServiceConfigActivity extends Activity {
 
-	/**
-	 * API connection manager
-	 */
-	private ApiConnectionManager mCnxManager;
+    /**
+     * API connection manager
+     */
+    private ApiConnectionManager mCnxManager;
 
-	private ChatServiceConfiguration mConfig;
+    private ChatServiceConfiguration mConfig;
 
-	/**
-	 * A locker to exit only once
-	 */
-	private LockAccess mExitOnce = new LockAccess();
+    /**
+     * A locker to exit only once
+     */
+    private LockAccess mExitOnce = new LockAccess();
 
-	private CheckBox mRespondToDisplayReports;
+    private CheckBox mRespondToDisplayReports;
 
-	/**
-	 * The log tag for this class
-	 */
-	private static final String LOGTAG = LogUtils
-			.getTag(ChatServiceConfigActivity.class.getSimpleName());
+    /**
+     * The log tag for this class
+     */
+    private static final String LOGTAG = LogUtils.getTag(ChatServiceConfigActivity.class
+            .getSimpleName());
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-		// Set layout
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		setContentView(R.layout.chat_service_config);
+        // Set layout
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setContentView(R.layout.chat_service_config);
 
-		// Register to API connection manager
-		mCnxManager = ApiConnectionManager.getInstance(this);
-		if (mCnxManager == null
-				|| !mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
-			Utils.showMessageAndExit(this,
-					getString(R.string.label_service_not_available), mExitOnce);
-			return;
-			
-		}
-		try {
-			mConfig = mCnxManager.getChatApi().getConfiguration();
-		} catch (RcsServiceException e) {
-			Utils.showMessageAndExit(this,
-					getString(R.string.label_api_failed), mExitOnce);
-			return;
-			
-		}
-		
-		mCnxManager.startMonitorServices(this, null, RcsServiceName.CHAT);
+        // Register to API connection manager
+        mCnxManager = ApiConnectionManager.getInstance(this);
+        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
+            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
+                    mExitOnce);
+            return;
 
-		mRespondToDisplayReports = (CheckBox) findViewById(R.id.RespondToDisplayReports);
-		mRespondToDisplayReports.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Boolean enable = mRespondToDisplayReports.isChecked();
-				try {
-					mConfig.setRespondToDisplayReports(enable);
-					if (LogUtils.isActive) {
-						Log.d(LOGTAG, "onClick RespondToDisplayReports "
-								.concat(enable.toString()));
-					}
-				} catch (RcsServiceException e) {
-					Utils.showMessageAndExit(ChatServiceConfigActivity.this,
-							getString(R.string.label_api_failed), mExitOnce, e);
-				}
+        }
+        try {
+            mConfig = mCnxManager.getChatApi().getConfiguration();
+        } catch (RcsServiceException e) {
+            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce);
+            return;
 
-			}
+        }
 
-		});
+        mCnxManager.startMonitorServices(this, null, RcsServiceName.CHAT);
 
-	}
+        mRespondToDisplayReports = (CheckBox)findViewById(R.id.RespondToDisplayReports);
+        mRespondToDisplayReports.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Boolean enable = mRespondToDisplayReports.isChecked();
+                try {
+                    mConfig.setRespondToDisplayReports(enable);
+                    if (LogUtils.isActive) {
+                        Log.d(LOGTAG, "onClick RespondToDisplayReports ".concat(enable.toString()));
+                    }
+                } catch (RcsServiceException e) {
+                    Utils.showMessageAndExit(ChatServiceConfigActivity.this,
+                            getString(R.string.label_api_failed), mExitOnce, e);
+                }
 
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		if (mCnxManager == null) {
-			return;
+            }
 
-		}
-		mCnxManager.stopMonitorServices(this);
-	}
+        });
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		try {
-			displayChatServiceConfig();
-		} catch (RcsServiceException e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
-		}
-	}
+    }
 
-	private void displayChatServiceConfig() throws RcsServiceException {
-		CheckBox checkBox = (CheckBox) findViewById(R.id.ImAlwaysOn);
-		checkBox.setChecked(mConfig.isChatSf());
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mCnxManager == null) {
+            return;
 
-		checkBox = (CheckBox) findViewById(R.id.WarnSF);
-		checkBox.setChecked(mConfig.isChatWarnSF());
+        }
+        mCnxManager.stopMonitorServices(this);
+    }
 
-		TextView textView = (TextView) findViewById(R.id.IsComposingTimeout);
-		textView.setText(Integer.valueOf(mConfig.getIsComposingTimeout())
-				.toString());
+    @Override
+    protected void onResume() {
+        super.onResume();
+        try {
+            displayChatServiceConfig();
+        } catch (RcsServiceException e) {
+            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+        }
+    }
 
-		textView = (TextView) findViewById(R.id.ChatTimeout);
-		textView.setText(Integer.valueOf(mConfig.getChatTimeout()).toString());
+    private void displayChatServiceConfig() throws RcsServiceException {
+        CheckBox checkBox = (CheckBox)findViewById(R.id.ImAlwaysOn);
+        checkBox.setChecked(mConfig.isChatSf());
 
-		textView = (TextView) findViewById(R.id.MinGroupChatParticipants);
-		textView.setText(Integer.valueOf(mConfig.getGroupChatMinParticipants())
-				.toString());
+        checkBox = (CheckBox)findViewById(R.id.WarnSF);
+        checkBox.setChecked(mConfig.isChatWarnSF());
 
-		textView = (TextView) findViewById(R.id.MaxGroupChatParticipants);
-		textView.setText(Integer.valueOf(mConfig.getGroupChatMaxParticipants())
-				.toString());
+        TextView textView = (TextView)findViewById(R.id.IsComposingTimeout);
+        textView.setText(Integer.valueOf(mConfig.getIsComposingTimeout()).toString());
 
-		textView = (TextView) findViewById(R.id.MaxMsgLengthGroupChat);
-		textView.setText(Integer
-				.valueOf(mConfig.getGroupChatMessageMaxLength()).toString());
+        textView = (TextView)findViewById(R.id.ChatTimeout);
+        textView.setText(Integer.valueOf(mConfig.getChatTimeout()).toString());
 
-		textView = (TextView) findViewById(R.id.GroupChatSubjectMaxLength);
-		textView.setText(Integer
-				.valueOf(mConfig.getGroupChatSubjectMaxLength()).toString());
+        textView = (TextView)findViewById(R.id.MinGroupChatParticipants);
+        textView.setText(Integer.valueOf(mConfig.getGroupChatMinParticipants()).toString());
 
-		textView = (TextView) findViewById(R.id.MaxMsgLengthOneToOneChat);
-		textView.setText(Integer.valueOf(
-				mConfig.getOneToOneChatMessageMaxLength()).toString());
+        textView = (TextView)findViewById(R.id.MaxGroupChatParticipants);
+        textView.setText(Integer.valueOf(mConfig.getGroupChatMaxParticipants()).toString());
 
-		checkBox = (CheckBox) findViewById(R.id.SmsFallback);
-		checkBox.setChecked(mConfig.isSmsFallback());
+        textView = (TextView)findViewById(R.id.MaxMsgLengthGroupChat);
+        textView.setText(Integer.valueOf(mConfig.getGroupChatMessageMaxLength()).toString());
 
-		mRespondToDisplayReports.setChecked(mConfig
-				.isRespondToDisplayReportsEnabled());
+        textView = (TextView)findViewById(R.id.GroupChatSubjectMaxLength);
+        textView.setText(Integer.valueOf(mConfig.getGroupChatSubjectMaxLength()).toString());
 
-		textView = (TextView) findViewById(R.id.MaxGeolocLabelLength);
-		textView.setText(Integer.valueOf(mConfig.getGeolocLabelMaxLength())
-				.toString());
+        textView = (TextView)findViewById(R.id.MaxMsgLengthOneToOneChat);
+        textView.setText(Integer.valueOf(mConfig.getOneToOneChatMessageMaxLength()).toString());
 
-		textView = (TextView) findViewById(R.id.GeolocExpireTime);
-		textView.setText(Integer.valueOf(mConfig.getGeolocExpirationTime())
-				.toString());
+        checkBox = (CheckBox)findViewById(R.id.SmsFallback);
+        checkBox.setChecked(mConfig.isSmsFallback());
 
-		checkBox = (CheckBox) findViewById(R.id.GroupChatSupported);
-		checkBox.setChecked(mConfig.isGroupChatSupported());
-	}
+        mRespondToDisplayReports.setChecked(mConfig.isRespondToDisplayReportsEnabled());
+
+        textView = (TextView)findViewById(R.id.MaxGeolocLabelLength);
+        textView.setText(Integer.valueOf(mConfig.getGeolocLabelMaxLength()).toString());
+
+        textView = (TextView)findViewById(R.id.GeolocExpireTime);
+        textView.setText(Integer.valueOf(mConfig.getGeolocExpirationTime()).toString());
+
+        checkBox = (CheckBox)findViewById(R.id.GroupChatSupported);
+        checkBox.setChecked(mConfig.isGroupChatSupported());
+    }
 }

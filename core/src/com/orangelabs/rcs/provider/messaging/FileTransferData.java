@@ -51,28 +51,28 @@ public class FileTransferData {
 	 * Date of the transfer
 	 */
 	static final String KEY_TIMESTAMP = FileTransferLog.TIMESTAMP;
-	
+
 	/**
 	 * Time when file is sent. If 0 means not sent.
 	 */
-    static final String KEY_TIMESTAMP_SENT = FileTransferLog.TIMESTAMP_SENT;
-    
+	static final String KEY_TIMESTAMP_SENT = FileTransferLog.TIMESTAMP_SENT;
+
 	/**
 	 * Time when file is delivered. If 0 means not delivered.
 	 */
-    static final String KEY_TIMESTAMP_DELIVERED = FileTransferLog.TIMESTAMP_DELIVERED;
-    
+	static final String KEY_TIMESTAMP_DELIVERED = FileTransferLog.TIMESTAMP_DELIVERED;
+
 	/**
 	 * Time when file is displayed.
 	 */
-    static final String KEY_TIMESTAMP_DISPLAYED = FileTransferLog.TIMESTAMP_DISPLAYED;	
+	static final String KEY_TIMESTAMP_DISPLAYED = FileTransferLog.TIMESTAMP_DISPLAYED;
 
 	/**
-	 * ContactId formatted number of remote contact or null if the filetransfer
-	 * is an outgoing group file transfer.
+	 * ContactId formatted number of remote contact or null if the filetransfer is an outgoing group
+	 * file transfer.
 	 */
 	static final String KEY_CONTACT = FileTransferLog.CONTACT;
-	
+
 	/**
 	 * @see FileTransfer.State for possible states.
 	 */
@@ -84,9 +84,9 @@ public class FileTransferData {
 	 * @see FileTransfer.ReasonCode for possible reason codes.
 	 */
 	static final String KEY_REASON_CODE = FileTransferLog.REASON_CODE;
-	
+
 	/**
-	 * @see ReadStatus 
+	 * @see ReadStatus
 	 */
 	static final String KEY_READ_STATUS = FileTransferLog.READ_STATUS;
 
@@ -94,7 +94,7 @@ public class FileTransferData {
 	 * Multipurpose Internet Mail Extensions (MIME) type of message
 	 */
 	static final String KEY_MIME_TYPE = FileTransferLog.MIME_TYPE;
-	
+
 	/**
 	 * URI of the file
 	 */
@@ -104,12 +104,12 @@ public class FileTransferData {
 	 * Filename
 	 */
 	static final String KEY_FILENAME = FileTransferLog.FILENAME;
-	
+
 	/**
 	 * Size transferred in bytes
 	 */
 	static final String KEY_TRANSFERRED = FileTransferLog.TRANSFERRED;
-	
+
 	/**
 	 * File size in bytes
 	 */
@@ -125,7 +125,7 @@ public class FileTransferData {
 	/**
 	 * Column name KEY_FILEICON : the URI of the file icon
 	 */
-	static final String KEY_FILEICON =  FileTransferLog.FILEICON;
+	static final String KEY_FILEICON = FileTransferLog.FILEICON;
 
 	/**
 	 * URI of the file icon

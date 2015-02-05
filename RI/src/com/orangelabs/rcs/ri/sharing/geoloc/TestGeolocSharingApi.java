@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.sharing.geoloc;
 
 import java.util.ArrayList;
@@ -38,10 +39,12 @@ import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
  * @author Jean-Marc AUFFRET
  */
 public class TestGeolocSharingApi extends ListActivity {
-	
-	private static final String[] PROJECTION = new String[] { CapabilitiesLog.CONTACT };
-	
-	@Override
+
+    private static final String[] PROJECTION = new String[] {
+        CapabilitiesLog.CONTACT
+    };
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -50,37 +53,39 @@ public class TestGeolocSharingApi extends ListActivity {
 
         // Set items
         String[] items = {
-    		getString(R.string.menu_initiate_geoloc_sharing),
-    		getString(R.string.menu_showus_map)
+                getString(R.string.menu_initiate_geoloc_sharing),
+                getString(R.string.menu_showus_map)
         };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
 
     @Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		switch (position) {
-		case 0:
-			startActivity(new Intent(this, InitiateGeolocSharing.class));
-			break;
+    protected void onListItemClick(ListView l, View v, int position, long id) {
+        switch (position) {
+            case 0:
+                startActivity(new Intent(this, InitiateGeolocSharing.class));
+                break;
 
-		case 1:
-			ArrayList<String> list = new ArrayList<String>();
-			Cursor cursor = null;
-			try {
-				cursor = getContentResolver().query(CapabilitiesLog.CONTENT_URI, PROJECTION, null, null, null);
-				while (cursor.moveToNext()) {
-					String contact = cursor.getString(cursor.getColumnIndex(CapabilitiesLog.CONTACT));
-					list.add(contact);
-				}
-				ShowUsInMap.startShowUsInMap(this, list);
-			} catch (Exception e) {
-				// Skip intentionally
-			} finally {
-				if (cursor != null) {
-					cursor.close();
-				}
-			}
-			break;
-		}
-	}
+            case 1:
+                ArrayList<String> list = new ArrayList<String>();
+                Cursor cursor = null;
+                try {
+                    cursor = getContentResolver().query(CapabilitiesLog.CONTENT_URI, PROJECTION,
+                            null, null, null);
+                    while (cursor.moveToNext()) {
+                        String contact = cursor.getString(cursor
+                                .getColumnIndex(CapabilitiesLog.CONTACT));
+                        list.add(contact);
+                    }
+                    ShowUsInMap.startShowUsInMap(this, list);
+                } catch (Exception e) {
+                    // Skip intentionally
+                } finally {
+                    if (cursor != null) {
+                        cursor.close();
+                    }
+                }
+                break;
+        }
+    }
 }

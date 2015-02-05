@@ -34,22 +34,22 @@ public class FileDescription {
 	 * Name
 	 */
 	private String name;
-	
+
 	/**
-     * file URI
-     */
-    private Uri file;
+	 * file URI
+	 */
+	private Uri file;
 
 	/**
 	 * Size
 	 */
 	private long size = -1;
-		
+
 	/**
 	 * Directory
-	 */	
+	 */
 	private boolean directory = false;
-	
+
 	/**
 	 * Constructor
 	 */

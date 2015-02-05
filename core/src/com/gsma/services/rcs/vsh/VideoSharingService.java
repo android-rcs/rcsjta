@@ -40,11 +40,11 @@ import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
- * This class offers the main entry point to share live video during a CS call.
- * Several applications may connect/disconnect to the API.
+ * This class offers the main entry point to share live video during a CS call. Several applications
+ * may connect/disconnect to the API.
  * 
- * The parameter contact in the API supports the following formats: MSISDN in
- * national or international format, SIP address, SIP-URI or Tel-URI.
+ * The parameter contact in the API supports the following formats: MSISDN in national or
+ * international format, SIP address, SIP-URI or Tel-URI.
  * 
  * @author Jean-Marc AUFFRET
  */
@@ -53,7 +53,7 @@ public class VideoSharingService extends RcsService {
 	 * API
 	 */
 	private IVideoSharingService mApi;
-	
+
 	private static final String ERROR_CNX = "VideoSharing service not connected";
 
 	/**
@@ -72,8 +72,7 @@ public class VideoSharingService extends RcsService {
 	 * Connects to the API
 	 */
 	public void connect() {
-		mCtx.bindService(new Intent(IVideoSharingService.class.getName()),
-				apiConnection, 0);
+		mCtx.bindService(new Intent(IVideoSharingService.class.getName()), apiConnection, 0);
 	}
 
 	/**
@@ -90,14 +89,15 @@ public class VideoSharingService extends RcsService {
 	/**
 	 * Set API interface
 	 * 
-	 * @param api API interface
+	 * @param api
+	 *            API interface
 	 */
-    protected void setApi(IInterface api) {
-    	super.setApi(api);
-        mApi = (IVideoSharingService)api;
-    }
-    
-    /**
+	protected void setApi(IInterface api) {
+		super.setApi(api);
+		mApi = (IVideoSharingService) api;
+	}
+
+	/**
 	 * Service connection
 	 */
 	private ServiceConnection apiConnection = new ServiceConnection() {
@@ -109,7 +109,7 @@ public class VideoSharingService extends RcsService {
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
-        	setApi(null);
+			setApi(null);
 			if (mListener != null) {
 				mListener.onServiceDisconnected(ReasonCode.CONNECTION_LOST);
 			}
@@ -134,11 +134,10 @@ public class VideoSharingService extends RcsService {
 	}
 
 	/**
-	 * Shares a live video with a contact. The parameter renderer contains the
-	 * video player provided by the application. An exception if thrown if there
-	 * is no ongoing CS call. The parameter contact supports the following
-	 * formats: MSISDN in national or international format, SIP address, SIP-URI
-	 * or Tel-URI. If the format of the contact is not supported an exception is
+	 * Shares a live video with a contact. The parameter renderer contains the video player provided
+	 * by the application. An exception if thrown if there is no ongoing CS call. The parameter
+	 * contact supports the following formats: MSISDN in national or international format, SIP
+	 * address, SIP-URI or Tel-URI. If the format of the contact is not supported an exception is
 	 * thrown.
 	 * 
 	 * @param contact
@@ -196,8 +195,7 @@ public class VideoSharingService extends RcsService {
 	 * @return Video sharing or null if not found
 	 * @throws RcsServiceException
 	 */
-	public VideoSharing getVideoSharing(String sharingId)
-			throws RcsServiceException {
+	public VideoSharing getVideoSharing(String sharingId) throws RcsServiceException {
 		if (mApi == null) {
 			throw new RcsServiceNotAvailableException(ERROR_CNX);
 		}
@@ -211,7 +209,8 @@ public class VideoSharingService extends RcsService {
 	/**
 	 * Adds a listener on video sharing events
 	 * 
-	 * @param listener Listener
+	 * @param listener
+	 *            Listener
 	 * @throws RcsServiceException
 	 */
 	public void addEventListener(VideoSharingListener listener) throws RcsServiceException {
@@ -228,7 +227,8 @@ public class VideoSharingService extends RcsService {
 	/**
 	 * Removes a listener on video sharing events
 	 * 
-	 * @param listener Listener
+	 * @param listener
+	 *            Listener
 	 * @throws RcsServiceException
 	 */
 	public void removeEventListener(VideoSharingListener listener) throws RcsServiceException {
@@ -243,8 +243,8 @@ public class VideoSharingService extends RcsService {
 	}
 
 	/**
-	 * Deletes all video sharing from history and abort/reject any associated
-	 * ongoing session if such exists.
+	 * Deletes all video sharing from history and abort/reject any associated ongoing session if
+	 * such exists.
 	 * 
 	 * @throws RcsServiceException
 	 */
@@ -260,8 +260,8 @@ public class VideoSharingService extends RcsService {
 	}
 
 	/**
-	 * Delete video sharing associated with a given contact from history and
-	 * abort/reject any associated ongoing session if such exists.
+	 * Delete video sharing associated with a given contact from history and abort/reject any
+	 * associated ongoing session if such exists.
 	 * 
 	 * @param contact
 	 * @throws RcsServiceException
@@ -278,8 +278,8 @@ public class VideoSharingService extends RcsService {
 	}
 
 	/**
-	 * Deletes a video sharing by its sharing ID from history and abort/reject
-	 * any associated ongoing session if such exists.
+	 * Deletes a video sharing by its sharing ID from history and abort/reject any associated
+	 * ongoing session if such exists.
 	 * 
 	 * @param sharingId
 	 * @throws RcsServiceException

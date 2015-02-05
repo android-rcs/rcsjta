@@ -57,18 +57,19 @@ public class StackProvisioning extends Activity {
 	/**
 	 * Folder path for certificate
 	 */
-	public static final String CERTIFICATE_FOLDER_PATH = Environment.getExternalStorageDirectory().getPath();
+	public static final String CERTIFICATE_FOLDER_PATH = Environment.getExternalStorageDirectory()
+			.getPath();
 
 	/**
 	 * Configuration modes
 	 */
 	private String[] mConfigModes;
-	
+
 	/**
 	 * SIP protocol
 	 */
 	private static final String[] SIP_PROTOCOL = { "UDP", "TCP", "TLS" };
-	
+
 	/**
 	 * Enable RCS switch
 	 */
@@ -83,17 +84,18 @@ public class StackProvisioning extends Activity {
 	/**
 	 * FT protocol
 	 */
-	private static final String[] FT_PROTOCOL = { RcsSettingsData.FileTransferProtocol.HTTP.name(),  RcsSettingsData.FileTransferProtocol.MSRP.name() };
+	private static final String[] FT_PROTOCOL = { RcsSettingsData.FileTransferProtocol.HTTP.name(),
+			RcsSettingsData.FileTransferProtocol.MSRP.name() };
 
 	private boolean isInFront;
 
 	@Override
 	public void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
-		
+
 		// Set layout
 		setContentView(R.layout.rcs_provisioning_stack);
-		
+
 		// Set buttons callback
 		Button btn = (Button) findViewById(R.id.save_btn);
 		btn.setOnClickListener(saveBtnListener);
@@ -150,12 +152,13 @@ public class StackProvisioning extends Activity {
 
 		spinner = (Spinner) findViewById(R.id.SipDefaultProtocolForMobile);
 		if (bundle != null) {
-			bundle.putString(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE, (String) spinner.getSelectedItem());
+			bundle.putString(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE,
+					(String) spinner.getSelectedItem());
 		} else {
 			rcsSettings.writeParameter(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_MOBILE,
 					(String) spinner.getSelectedItem());
 		}
-		
+
 		spinner = (Spinner) findViewById(R.id.EnableRcsSwitch);
 		switch (spinner.getSelectedItemPosition()) {
 		case 0:
@@ -185,7 +188,8 @@ public class StackProvisioning extends Activity {
 
 		spinner = (Spinner) findViewById(R.id.SipDefaultProtocolForWifi);
 		if (bundle != null) {
-			bundle.putString(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI, (String) spinner.getSelectedItem());
+			bundle.putString(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI,
+					(String) spinner.getSelectedItem());
 		} else {
 			rcsSettings.writeParameter(RcsSettingsData.SIP_DEFAULT_PROTOCOL_FOR_WIFI,
 					(String) spinner.getSelectedItem());
@@ -201,7 +205,8 @@ public class StackProvisioning extends Activity {
 				rcsSettings.writeParameter(RcsSettingsData.TLS_CERTIFICATE_ROOT, "");
 			}
 		} else {
-			String path = CERTIFICATE_FOLDER_PATH + File.separator + (String) spinner.getSelectedItem();
+			String path = CERTIFICATE_FOLDER_PATH + File.separator
+					+ (String) spinner.getSelectedItem();
 			if (bundle != null) {
 				bundle.putString(RcsSettingsData.TLS_CERTIFICATE_ROOT, path);
 			} else {
@@ -217,7 +222,8 @@ public class StackProvisioning extends Activity {
 				rcsSettings.writeParameter(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, "");
 			}
 		} else {
-			String path = CERTIFICATE_FOLDER_PATH + File.separator + (String) spinner.getSelectedItem();
+			String path = CERTIFICATE_FOLDER_PATH + File.separator
+					+ (String) spinner.getSelectedItem();
 			if (bundle != null) {
 				bundle.putString(RcsSettingsData.TLS_CERTIFICATE_INTERMEDIATE, path);
 			} else {
@@ -253,53 +259,78 @@ public class StackProvisioning extends Activity {
 		if (bundle != null) {
 			bundle.putString(RcsSettingsData.FT_PROTOCOL, (String) spinner.getSelectedItem());
 		} else {
-			FileTransferProtocol protocol = FileTransferProtocol.valueOf((String) spinner.getSelectedItem());
+			FileTransferProtocol protocol = FileTransferProtocol.valueOf((String) spinner
+					.getSelectedItem());
 			rcsSettings.setFtProtocol(protocol);
 		}
 
-        spinner = (Spinner)findViewById(R.id.client_vendor);
-        String value = (String)spinner.getSelectedItem();
-        rcsSettings.writeParameter(RcsSettingsData.VENDOR_NAME, value);
+		spinner = (Spinner) findViewById(R.id.client_vendor);
+		String value = (String) spinner.getSelectedItem();
+		rcsSettings.writeParameter(RcsSettingsData.VENDOR_NAME, value);
 
-		saveEditTextParameter(this, R.id.SecondaryProvisioningAddress, RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS, bundle);
-		saveCheckBoxParameter(this, R.id.SecondaryProvisioningAddressOnly, RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY,
-				bundle);
-		saveEditTextParameter(this, R.id.ImsServicePollingPeriod, RcsSettingsData.IMS_SERVICE_POLLING_PERIOD, bundle);
+		saveEditTextParameter(this, R.id.SecondaryProvisioningAddress,
+				RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS, bundle);
+		saveCheckBoxParameter(this, R.id.SecondaryProvisioningAddressOnly,
+				RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY, bundle);
+		saveEditTextParameter(this, R.id.ImsServicePollingPeriod,
+				RcsSettingsData.IMS_SERVICE_POLLING_PERIOD, bundle);
 		saveEditTextParameter(this, R.id.SipListeningPort, RcsSettingsData.SIP_DEFAULT_PORT, bundle);
 		saveEditTextParameter(this, R.id.SipTimerT1, RcsSettingsData.SIP_TIMER_T1, bundle);
 		saveEditTextParameter(this, R.id.SipTimerT2, RcsSettingsData.SIP_TIMER_T2, bundle);
 		saveEditTextParameter(this, R.id.SipTimerT4, RcsSettingsData.SIP_TIMER_T4, bundle);
-		saveEditTextParameter(this, R.id.SipTransactionTimeout, RcsSettingsData.SIP_TRANSACTION_TIMEOUT, bundle);
-		saveEditTextParameter(this, R.id.SipKeepAlivePeriod, RcsSettingsData.SIP_KEEP_ALIVE_PERIOD, bundle);
+		saveEditTextParameter(this, R.id.SipTransactionTimeout,
+				RcsSettingsData.SIP_TRANSACTION_TIMEOUT, bundle);
+		saveEditTextParameter(this, R.id.SipKeepAlivePeriod, RcsSettingsData.SIP_KEEP_ALIVE_PERIOD,
+				bundle);
 		saveEditTextParameter(this, R.id.DefaultMsrpPort, RcsSettingsData.MSRP_DEFAULT_PORT, bundle);
 		saveEditTextParameter(this, R.id.DefaultRtpPort, RcsSettingsData.RTP_DEFAULT_PORT, bundle);
-		saveEditTextParameter(this, R.id.MsrpTransactionTimeout, RcsSettingsData.MSRP_TRANSACTION_TIMEOUT, bundle);
-		saveEditTextParameter(this, R.id.RegisterExpirePeriod, RcsSettingsData.REGISTER_EXPIRE_PERIOD, bundle);
-		saveEditTextParameter(this, R.id.RegisterRetryBaseTime, RcsSettingsData.REGISTER_RETRY_BASE_TIME, bundle);
-		saveEditTextParameter(this, R.id.RegisterRetryMaxTime, RcsSettingsData.REGISTER_RETRY_MAX_TIME, bundle);
-		saveEditTextParameter(this, R.id.PublishExpirePeriod, RcsSettingsData.PUBLISH_EXPIRE_PERIOD, bundle);
+		saveEditTextParameter(this, R.id.MsrpTransactionTimeout,
+				RcsSettingsData.MSRP_TRANSACTION_TIMEOUT, bundle);
+		saveEditTextParameter(this, R.id.RegisterExpirePeriod,
+				RcsSettingsData.REGISTER_EXPIRE_PERIOD, bundle);
+		saveEditTextParameter(this, R.id.RegisterRetryBaseTime,
+				RcsSettingsData.REGISTER_RETRY_BASE_TIME, bundle);
+		saveEditTextParameter(this, R.id.RegisterRetryMaxTime,
+				RcsSettingsData.REGISTER_RETRY_MAX_TIME, bundle);
+		saveEditTextParameter(this, R.id.PublishExpirePeriod,
+				RcsSettingsData.PUBLISH_EXPIRE_PERIOD, bundle);
 		saveEditTextParameter(this, R.id.RevokeTimeout, RcsSettingsData.REVOKE_TIMEOUT, bundle);
-		saveEditTextParameter(this, R.id.RingingPeriod, RcsSettingsData.RINGING_SESSION_PERIOD, bundle);
-		saveEditTextParameter(this, R.id.SubscribeExpirePeriod, RcsSettingsData.SUBSCRIBE_EXPIRE_PERIOD, bundle);
-		saveEditTextParameter(this, R.id.IsComposingTimeout, RcsSettingsData.IS_COMPOSING_TIMEOUT, bundle);
-		saveEditTextParameter(this, R.id.SessionRefreshExpirePeriod, RcsSettingsData.SESSION_REFRESH_EXPIRE_PERIOD, bundle);
-		saveEditTextParameter(this, R.id.CapabilityRefreshTimeout, RcsSettingsData.CAPABILITY_REFRESH_TIMEOUT, bundle);
-		saveEditTextParameter(this, R.id.CapabilityExpiryTimeout, RcsSettingsData.CAPABILITY_EXPIRY_TIMEOUT, bundle);
-		saveEditTextParameter(this, R.id.CapabilityPollingPeriod, RcsSettingsData.CAPABILITY_POLLING_PERIOD, bundle);
+		saveEditTextParameter(this, R.id.RingingPeriod, RcsSettingsData.RINGING_SESSION_PERIOD,
+				bundle);
+		saveEditTextParameter(this, R.id.SubscribeExpirePeriod,
+				RcsSettingsData.SUBSCRIBE_EXPIRE_PERIOD, bundle);
+		saveEditTextParameter(this, R.id.IsComposingTimeout, RcsSettingsData.IS_COMPOSING_TIMEOUT,
+				bundle);
+		saveEditTextParameter(this, R.id.SessionRefreshExpirePeriod,
+				RcsSettingsData.SESSION_REFRESH_EXPIRE_PERIOD, bundle);
+		saveEditTextParameter(this, R.id.CapabilityRefreshTimeout,
+				RcsSettingsData.CAPABILITY_REFRESH_TIMEOUT, bundle);
+		saveEditTextParameter(this, R.id.CapabilityExpiryTimeout,
+				RcsSettingsData.CAPABILITY_EXPIRY_TIMEOUT, bundle);
+		saveEditTextParameter(this, R.id.CapabilityPollingPeriod,
+				RcsSettingsData.CAPABILITY_POLLING_PERIOD, bundle);
 		saveCheckBoxParameter(this, R.id.SipKeepAlive, RcsSettingsData.SIP_KEEP_ALIVE, bundle);
-		saveCheckBoxParameter(this, R.id.PermanentState, RcsSettingsData.PERMANENT_STATE_MODE, bundle);
+		saveCheckBoxParameter(this, R.id.PermanentState, RcsSettingsData.PERMANENT_STATE_MODE,
+				bundle);
 		saveCheckBoxParameter(this, R.id.TelUriFormat, RcsSettingsData.TEL_URI_FORMAT, bundle);
-		saveCheckBoxParameter(this, R.id.ImAlwaysOn, RcsSettingsData.IM_CAPABILITY_ALWAYS_ON, bundle);
-		saveCheckBoxParameter(this, R.id.FtAlwaysOn, RcsSettingsData.FT_CAPABILITY_ALWAYS_ON, bundle);
+		saveCheckBoxParameter(this, R.id.ImAlwaysOn, RcsSettingsData.IM_CAPABILITY_ALWAYS_ON,
+				bundle);
+		saveCheckBoxParameter(this, R.id.FtAlwaysOn, RcsSettingsData.FT_CAPABILITY_ALWAYS_ON,
+				bundle);
 		saveCheckBoxParameter(this, R.id.ImUseReports, RcsSettingsData.IM_USE_REPORTS, bundle);
 		saveCheckBoxParameter(this, R.id.Gruu, RcsSettingsData.GRUU, bundle);
 		saveCheckBoxParameter(this, R.id.CpuAlwaysOn, RcsSettingsData.CPU_ALWAYS_ON, bundle);
-		saveCheckBoxParameter(this, R.id.SecureMsrpOverWifi, RcsSettingsData.SECURE_MSRP_OVER_WIFI, bundle);
-		saveCheckBoxParameter(this, R.id.SecureRtpOverWifi, RcsSettingsData.SECURE_RTP_OVER_WIFI, bundle);
-		saveCheckBoxParameter(this, R.id.ImeiAsDeviceId, RcsSettingsData.USE_IMEI_AS_DEVICE_ID, bundle);
-		saveCheckBoxParameter(this, R.id.ControlExtensions, RcsSettingsData.CONTROL_EXTENSIONS, bundle);
+		saveCheckBoxParameter(this, R.id.SecureMsrpOverWifi, RcsSettingsData.SECURE_MSRP_OVER_WIFI,
+				bundle);
+		saveCheckBoxParameter(this, R.id.SecureRtpOverWifi, RcsSettingsData.SECURE_RTP_OVER_WIFI,
+				bundle);
+		saveCheckBoxParameter(this, R.id.ImeiAsDeviceId, RcsSettingsData.USE_IMEI_AS_DEVICE_ID,
+				bundle);
+		saveCheckBoxParameter(this, R.id.ControlExtensions, RcsSettingsData.CONTROL_EXTENSIONS,
+				bundle);
 		saveCheckBoxParameter(this, R.id.AllowExtensions, RcsSettingsData.ALLOW_EXTENSIONS, bundle);
-		saveEditTextParameter(this, R.id.MaxMsrpLengthExtensions, RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS, bundle);
+		saveEditTextParameter(this, R.id.MaxMsrpLengthExtensions,
+				RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS, bundle);
 	}
 
 	/**
@@ -311,7 +342,8 @@ public class StackProvisioning extends Activity {
 		RcsSettings rcsSettings = RcsSettings.getInstance();
 		// Display stack parameters
 		Spinner spinner = (Spinner) findViewById(R.id.Autoconfig);
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, mConfigModes);
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+				android.R.layout.simple_spinner_item, mConfigModes);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinner.setAdapter(adapter);
 		ConfigurationMode mode;
@@ -322,28 +354,28 @@ public class StackProvisioning extends Activity {
 		}
 		spinner.setSelection(ConfigurationMode.AUTO.equals(mode) ? 1 : 0);
 
-        spinner = (Spinner)findViewById(R.id.client_vendor);
-        ArrayAdapter<CharSequence> adapterVendor = ArrayAdapter.createFromResource(this,
-                R.array.vendors, android.R.layout.simple_spinner_item);
-        adapterVendor.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapterVendor);
-        
-        String[] vendorArray = getResources().getStringArray(R.array.vendors);
-        String vendorInDB = rcsSettings.getVendor();
+		spinner = (Spinner) findViewById(R.id.client_vendor);
+		ArrayAdapter<CharSequence> adapterVendor = ArrayAdapter.createFromResource(this,
+				R.array.vendors, android.R.layout.simple_spinner_item);
+		adapterVendor.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spinner.setAdapter(adapterVendor);
 
-        if (vendorInDB != null && vendorInDB.length() > 0) {
-            if (vendorInDB.equals(vendorArray[0])) {
-                spinner.setSelection(0);
-            } else if (vendorInDB.equals(vendorArray[1])) {
-                spinner.setSelection(1);
-            }
-        } else {
-            spinner.setSelection(0);
-        }
-        
+		String[] vendorArray = getResources().getStringArray(R.array.vendors);
+		String vendorInDB = rcsSettings.getVendor();
+
+		if (vendorInDB != null && vendorInDB.length() > 0) {
+			if (vendorInDB.equals(vendorArray[0])) {
+				spinner.setSelection(0);
+			} else if (vendorInDB.equals(vendorArray[1])) {
+				spinner.setSelection(1);
+			}
+		} else {
+			spinner.setSelection(0);
+		}
+
 		spinner = (Spinner) findViewById(R.id.EnableRcsSwitch);
-		adapter = new ArrayAdapter<String>(this,
-				android.R.layout.simple_spinner_item, ENABLE_RCS_SWITCH);
+		adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,
+				ENABLE_RCS_SWITCH);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinner.setAdapter(adapter);
 		EnableRcseSwitch rcsSwitch;
@@ -361,12 +393,14 @@ public class StackProvisioning extends Activity {
 			spinner.setSelection(2);
 		}
 
-		setEditTextParameter(this, R.id.SecondaryProvisioningAddress, RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS, bundle);
-		setCheckBoxParameter(this, R.id.SecondaryProvisioningAddressOnly, RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY,
-				bundle);
+		setEditTextParameter(this, R.id.SecondaryProvisioningAddress,
+				RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS, bundle);
+		setCheckBoxParameter(this, R.id.SecondaryProvisioningAddressOnly,
+				RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS_ONLY, bundle);
 
 		spinner = (Spinner) findViewById(R.id.NetworkAccess);
-		adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, mNetworkAccesses);
+		adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,
+				mNetworkAccesses);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinner.setAdapter(adapter);
 		NetworkAccessType access;
@@ -474,7 +508,8 @@ public class StackProvisioning extends Activity {
 		spinner.setAdapter(adapter);
 		FileTransferProtocol ftProtocol;
 		if (bundle != null && bundle.containsKey(RcsSettingsData.FT_PROTOCOL)) {
-			ftProtocol = FileTransferProtocol.valueOf(bundle.getString(RcsSettingsData.FT_PROTOCOL));
+			ftProtocol = FileTransferProtocol
+					.valueOf(bundle.getString(RcsSettingsData.FT_PROTOCOL));
 		} else {
 			ftProtocol = rcsSettings.getFtProtocol();
 		}
@@ -484,43 +519,64 @@ public class StackProvisioning extends Activity {
 			spinner.setSelection(1);
 		}
 
-		setEditTextParameter(this, R.id.ImsServicePollingPeriod, RcsSettingsData.IMS_SERVICE_POLLING_PERIOD, bundle);
+		setEditTextParameter(this, R.id.ImsServicePollingPeriod,
+				RcsSettingsData.IMS_SERVICE_POLLING_PERIOD, bundle);
 		setEditTextParameter(this, R.id.SipListeningPort, RcsSettingsData.SIP_DEFAULT_PORT, bundle);
 		setEditTextParameter(this, R.id.SipTimerT1, RcsSettingsData.SIP_TIMER_T1, bundle);
 		setEditTextParameter(this, R.id.SipTimerT2, RcsSettingsData.SIP_TIMER_T2, bundle);
 		setEditTextParameter(this, R.id.SipTimerT4, RcsSettingsData.SIP_TIMER_T4, bundle);
-		setEditTextParameter(this, R.id.SipTransactionTimeout, RcsSettingsData.SIP_TRANSACTION_TIMEOUT, bundle);
-		setEditTextParameter(this, R.id.SipKeepAlivePeriod, RcsSettingsData.SIP_KEEP_ALIVE_PERIOD, bundle);
+		setEditTextParameter(this, R.id.SipTransactionTimeout,
+				RcsSettingsData.SIP_TRANSACTION_TIMEOUT, bundle);
+		setEditTextParameter(this, R.id.SipKeepAlivePeriod, RcsSettingsData.SIP_KEEP_ALIVE_PERIOD,
+				bundle);
 		setEditTextParameter(this, R.id.DefaultMsrpPort, RcsSettingsData.MSRP_DEFAULT_PORT, bundle);
 		setEditTextParameter(this, R.id.DefaultRtpPort, RcsSettingsData.RTP_DEFAULT_PORT, bundle);
-		setEditTextParameter(this, R.id.MsrpTransactionTimeout, RcsSettingsData.MSRP_TRANSACTION_TIMEOUT, bundle);
-		setEditTextParameter(this, R.id.RegisterExpirePeriod, RcsSettingsData.REGISTER_EXPIRE_PERIOD, bundle);
-		setEditTextParameter(this, R.id.RegisterRetryBaseTime, RcsSettingsData.REGISTER_RETRY_BASE_TIME, bundle);
-		setEditTextParameter(this, R.id.RegisterRetryMaxTime, RcsSettingsData.REGISTER_RETRY_MAX_TIME, bundle);
-		setEditTextParameter(this, R.id.PublishExpirePeriod, RcsSettingsData.PUBLISH_EXPIRE_PERIOD, bundle);
+		setEditTextParameter(this, R.id.MsrpTransactionTimeout,
+				RcsSettingsData.MSRP_TRANSACTION_TIMEOUT, bundle);
+		setEditTextParameter(this, R.id.RegisterExpirePeriod,
+				RcsSettingsData.REGISTER_EXPIRE_PERIOD, bundle);
+		setEditTextParameter(this, R.id.RegisterRetryBaseTime,
+				RcsSettingsData.REGISTER_RETRY_BASE_TIME, bundle);
+		setEditTextParameter(this, R.id.RegisterRetryMaxTime,
+				RcsSettingsData.REGISTER_RETRY_MAX_TIME, bundle);
+		setEditTextParameter(this, R.id.PublishExpirePeriod, RcsSettingsData.PUBLISH_EXPIRE_PERIOD,
+				bundle);
 		setEditTextParameter(this, R.id.RevokeTimeout, RcsSettingsData.REVOKE_TIMEOUT, bundle);
-		setEditTextParameter(this, R.id.RingingPeriod, RcsSettingsData.RINGING_SESSION_PERIOD, bundle);
-		setEditTextParameter(this, R.id.SubscribeExpirePeriod, RcsSettingsData.SUBSCRIBE_EXPIRE_PERIOD, bundle);
-		setEditTextParameter(this, R.id.IsComposingTimeout, RcsSettingsData.IS_COMPOSING_TIMEOUT, bundle);
-		setEditTextParameter(this, R.id.SessionRefreshExpirePeriod, RcsSettingsData.SESSION_REFRESH_EXPIRE_PERIOD, bundle);
-		setEditTextParameter(this, R.id.CapabilityRefreshTimeout, RcsSettingsData.CAPABILITY_REFRESH_TIMEOUT, bundle);
-		setEditTextParameter(this, R.id.CapabilityExpiryTimeout, RcsSettingsData.CAPABILITY_EXPIRY_TIMEOUT, bundle);
-		setEditTextParameter(this, R.id.CapabilityPollingPeriod, RcsSettingsData.CAPABILITY_POLLING_PERIOD, bundle);
+		setEditTextParameter(this, R.id.RingingPeriod, RcsSettingsData.RINGING_SESSION_PERIOD,
+				bundle);
+		setEditTextParameter(this, R.id.SubscribeExpirePeriod,
+				RcsSettingsData.SUBSCRIBE_EXPIRE_PERIOD, bundle);
+		setEditTextParameter(this, R.id.IsComposingTimeout, RcsSettingsData.IS_COMPOSING_TIMEOUT,
+				bundle);
+		setEditTextParameter(this, R.id.SessionRefreshExpirePeriod,
+				RcsSettingsData.SESSION_REFRESH_EXPIRE_PERIOD, bundle);
+		setEditTextParameter(this, R.id.CapabilityRefreshTimeout,
+				RcsSettingsData.CAPABILITY_REFRESH_TIMEOUT, bundle);
+		setEditTextParameter(this, R.id.CapabilityExpiryTimeout,
+				RcsSettingsData.CAPABILITY_EXPIRY_TIMEOUT, bundle);
+		setEditTextParameter(this, R.id.CapabilityPollingPeriod,
+				RcsSettingsData.CAPABILITY_POLLING_PERIOD, bundle);
 		setCheckBoxParameter(this, R.id.TcpFallback, RcsSettingsData.TCP_FALLBACK, bundle);
 		setCheckBoxParameter(this, R.id.SipKeepAlive, RcsSettingsData.SIP_KEEP_ALIVE, bundle);
-		setCheckBoxParameter(this, R.id.PermanentState, RcsSettingsData.PERMANENT_STATE_MODE, bundle);
+		setCheckBoxParameter(this, R.id.PermanentState, RcsSettingsData.PERMANENT_STATE_MODE,
+				bundle);
 		setCheckBoxParameter(this, R.id.TelUriFormat, RcsSettingsData.TEL_URI_FORMAT, bundle);
 		setCheckBoxParameter(this, R.id.ImAlwaysOn, RcsSettingsData.IM_CAPABILITY_ALWAYS_ON, bundle);
 		setCheckBoxParameter(this, R.id.FtAlwaysOn, RcsSettingsData.FT_CAPABILITY_ALWAYS_ON, bundle);
 		setCheckBoxParameter(this, R.id.ImUseReports, RcsSettingsData.IM_USE_REPORTS, bundle);
 		setCheckBoxParameter(this, R.id.Gruu, RcsSettingsData.GRUU, bundle);
 		setCheckBoxParameter(this, R.id.CpuAlwaysOn, RcsSettingsData.CPU_ALWAYS_ON, bundle);
-		setCheckBoxParameter(this, R.id.SecureMsrpOverWifi, RcsSettingsData.SECURE_MSRP_OVER_WIFI, bundle);
-		setCheckBoxParameter(this, R.id.SecureRtpOverWifi, RcsSettingsData.SECURE_RTP_OVER_WIFI, bundle);
-		setCheckBoxParameter(this, R.id.ImeiAsDeviceId, RcsSettingsData.USE_IMEI_AS_DEVICE_ID, bundle);
-		setCheckBoxParameter(this, R.id.ControlExtensions, RcsSettingsData.CONTROL_EXTENSIONS, bundle);
+		setCheckBoxParameter(this, R.id.SecureMsrpOverWifi, RcsSettingsData.SECURE_MSRP_OVER_WIFI,
+				bundle);
+		setCheckBoxParameter(this, R.id.SecureRtpOverWifi, RcsSettingsData.SECURE_RTP_OVER_WIFI,
+				bundle);
+		setCheckBoxParameter(this, R.id.ImeiAsDeviceId, RcsSettingsData.USE_IMEI_AS_DEVICE_ID,
+				bundle);
+		setCheckBoxParameter(this, R.id.ControlExtensions, RcsSettingsData.CONTROL_EXTENSIONS,
+				bundle);
 		setCheckBoxParameter(this, R.id.AllowExtensions, RcsSettingsData.ALLOW_EXTENSIONS, bundle);
-		setEditTextParameter(this, R.id.MaxMsrpLengthExtensions, RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS, bundle);
+		setEditTextParameter(this, R.id.MaxMsrpLengthExtensions,
+				RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS, bundle);
 	}
 
 	/**
@@ -530,7 +586,8 @@ public class StackProvisioning extends Activity {
 		public void onClick(View v) {
 			// Save parameters
 			saveInstanceState(null);
-			Toast.makeText(StackProvisioning.this, getString(R.string.label_reboot_service), Toast.LENGTH_LONG).show();
+			Toast.makeText(StackProvisioning.this, getString(R.string.label_reboot_service),
+					Toast.LENGTH_LONG).show();
 		}
 	};
 

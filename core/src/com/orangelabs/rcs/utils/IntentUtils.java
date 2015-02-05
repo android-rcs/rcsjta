@@ -35,9 +35,7 @@ public class IntentUtils {
 
 	private static final String ADD_FLAGS_METHOD_NAME = "addFlags";
 
-	private static final Class[] ADD_FLAGS_PARAM = new Class[] {
-		int.class
-	};
+	private static final Class[] ADD_FLAGS_PARAM = new Class[] { int.class };
 
 	private static final String FLAG_EXCLUDE_STOPPED_PACKAGES = "FLAG_EXCLUDE_STOPPED_PACKAGES";
 
@@ -46,18 +44,18 @@ public class IntentUtils {
 	private static final Logger logger = Logger.getLogger(IntentUtils.class.getSimpleName());
 
 	/**
-	 * Using reflection to add FLAG_EXCLUDE_STOPPED_PACKAGES support backward
-	 * compatibility.
+	 * Using reflection to add FLAG_EXCLUDE_STOPPED_PACKAGES support backward compatibility.
 	 *
-	 * @param intent Intent to set flags
+	 * @param intent
+	 *            Intent to set flags
 	 */
 	public static void tryToSetExcludeStoppedPackagesFlag(Intent intent) {
 
 		if (Build.VERSION.SDK_INT < HONEYCOMB_MR1_VERSION_CODE) {
 			/*
-			 * Since FLAG_EXCLUDE_STOPPED_PACKAGES is introduced only from API
-			 * level HONEYCOMB_MR1_VERSION_CODE we need to do nothing if we are
-			 * running on a version prior that so we just return then.
+			 * Since FLAG_EXCLUDE_STOPPED_PACKAGES is introduced only from API level
+			 * HONEYCOMB_MR1_VERSION_CODE we need to do nothing if we are running on a version prior
+			 * that so we just return then.
 			 */
 			return;
 		}
@@ -77,18 +75,18 @@ public class IntentUtils {
 	}
 
 	/**
-	 * Using reflection to add FLAG_RECEIVER_FOREGROUND support backward
-	 * compatibility.
+	 * Using reflection to add FLAG_RECEIVER_FOREGROUND support backward compatibility.
 	 *
-	 * @param intent Intent to set flags
+	 * @param intent
+	 *            Intent to set flags
 	 */
 	public static void tryToSetReceiverForegroundFlag(Intent intent) {
 
 		if (Build.VERSION.SDK_INT < JELLY_BEAN_VERSION_CODE) {
 			/*
 			 * Since FLAG_RECEIVER_FOREGROUND is introduced only from API level
-			 * JELLY_BEAN_VERSION_CODE we need to do nothing if we are running
-			 * on a version prior that so we just return then.
+			 * JELLY_BEAN_VERSION_CODE we need to do nothing if we are running on a version prior
+			 * that so we just return then.
 			 */
 			return;
 		}

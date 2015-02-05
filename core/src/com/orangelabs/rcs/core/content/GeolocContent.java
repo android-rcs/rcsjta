@@ -40,9 +40,12 @@ public class GeolocContent extends MmContent {
 	/**
 	 * Constructor
 	 * 
-	 * @param fileName File name
-	 * @param size Content size
-	 * @param geolocDoc Geoloc
+	 * @param fileName
+	 *            File name
+	 * @param size
+	 *            Content size
+	 * @param geolocDoc
+	 *            Geoloc
 	 */
 	public GeolocContent(String fileName, long size, byte[] geolocDoc) {
 		super(fileName, size, ENCODING);
@@ -53,9 +56,12 @@ public class GeolocContent extends MmContent {
 	/**
 	 * Constructor
 	 *
-	 * @param geolocFile URI
-	 * @param size Content size
-	 * @param fileName Filename
+	 * @param geolocFile
+	 *            URI
+	 * @param size
+	 *            Content size
+	 * @param fileName
+	 *            Filename
 	 */
 	public GeolocContent(Uri geolocFile, long size, String fileName) {
 		super(geolocFile, ENCODING, size, fileName);

@@ -57,240 +57,247 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
 	/**
-     * The logger
-     */
-    private final static Logger logger = Logger.getLogger(TerminatingSipMsrpSession.class.getSimpleName());
+	 * The logger
+	 */
+	private final static Logger logger = Logger.getLogger(TerminatingSipMsrpSession.class
+			.getSimpleName());
 
-    private final Intent mSessionInvite;
+	private final Intent mSessionInvite;
 
-    /**
-     * Constructor
-     * 
-	 * @param parent IMS service
-	 * @param invite Initial INVITE request
+	/**
+	 * Constructor
+	 * 
+	 * @param parent
+	 *            IMS service
+	 * @param invite
+	 *            Initial INVITE request
 	 * @throws RcsContactFormatException
 	 */
-	public TerminatingSipMsrpSession(ImsService parent, SipRequest invite, Intent sessionInvite) throws RcsContactFormatException {
-		super(parent, ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite)), invite.getFeatureTags().get(0));
+	public TerminatingSipMsrpSession(ImsService parent, SipRequest invite, Intent sessionInvite)
+			throws RcsContactFormatException {
+		super(parent, ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite)), invite
+				.getFeatureTags().get(0));
 
 		mSessionInvite = sessionInvite;
 
 		// Create dialog path
 		createTerminatingDialogPath(invite);
 	}
-		
+
 	/**
 	 * Background processing
 	 */
 	public void run() {
-		try {		
-	    	if (logger.isActivated()) {
-	    		logger.info("Initiate a new MSRP session as terminating");
-	    	}
-	
+		try {
+			if (logger.isActivated()) {
+				logger.info("Initiate a new MSRP session as terminating");
+			}
+
 			send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
-            Collection<ImsSessionListener> listeners = getListeners();
-            ContactId contact = getRemoteContact();
-            for (ImsSessionListener listener : listeners) {
-            	((SipSessionListener)listener).handleSessionInvited(contact, mSessionInvite);
-            }
+			Collection<ImsSessionListener> listeners = getListeners();
+			ContactId contact = getRemoteContact();
+			for (ImsSessionListener listener : listeners) {
+				((SipSessionListener) listener).handleSessionInvited(contact, mSessionInvite);
+			}
 
-            int answer = waitInvitationAnswer();
-            switch (answer) {
-                case ImsServiceSession.INVITATION_REJECTED:
-                    if (logger.isActivated()) {
-                        logger.debug("Session has been rejected by user");
-                    }
+			int answer = waitInvitationAnswer();
+			switch (answer) {
+			case ImsServiceSession.INVITATION_REJECTED:
+				if (logger.isActivated()) {
+					logger.debug("Session has been rejected by user");
+				}
 
-                    removeSession();
+				removeSession();
 
-                    for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionRejectedByUser(contact);
-                    }
-                    return;
+				for (ImsSessionListener listener : listeners) {
+					listener.handleSessionRejectedByUser(contact);
+				}
+				return;
 
-                case ImsServiceSession.INVITATION_NOT_ANSWERED:
-                    if (logger.isActivated()) {
-                        logger.debug("Session has been rejected on timeout");
-                    }
+			case ImsServiceSession.INVITATION_NOT_ANSWERED:
+				if (logger.isActivated()) {
+					logger.debug("Session has been rejected on timeout");
+				}
 
-                    // Ringing period timeout
-                    send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
+				// Ringing period timeout
+				send486Busy(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
-                    removeSession();
+				removeSession();
 
-                    for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionRejectedByTimeout(contact);
-                    }
-                    return;
+				for (ImsSessionListener listener : listeners) {
+					listener.handleSessionRejectedByTimeout(contact);
+				}
+				return;
 
-                case ImsServiceSession.INVITATION_CANCELED:
-                    if (logger.isActivated()) {
-                        logger.debug("Session has been rejected by remote");
-                    }
+			case ImsServiceSession.INVITATION_CANCELED:
+				if (logger.isActivated()) {
+					logger.debug("Session has been rejected by remote");
+				}
 
-                    removeSession();
+				removeSession();
 
-                    for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionRejectedByRemote(contact);
-                    }
-                    return;
+				for (ImsSessionListener listener : listeners) {
+					listener.handleSessionRejectedByRemote(contact);
+				}
+				return;
 
-                case ImsServiceSession.INVITATION_ACCEPTED:
-                    setSessionAccepted();
+			case ImsServiceSession.INVITATION_ACCEPTED:
+				setSessionAccepted();
 
-                    for (ImsSessionListener listener : listeners) {
-                        listener.handleSessionAccepted(contact);
-                    }
-                    break;
+				for (ImsSessionListener listener : listeners) {
+					listener.handleSessionAccepted(contact);
+				}
+				break;
 
-                default:
-                    if (logger.isActivated()) {
-                        logger.debug("Unknown invitation answer in run; answer="
-                                .concat(String.valueOf(answer)));
-                    }
-                    return;
-            }
-			
-        	// Parse the remote SDP part
+			default:
+				if (logger.isActivated()) {
+					logger.debug("Unknown invitation answer in run; answer=".concat(String
+							.valueOf(answer)));
+				}
+				return;
+			}
+
+			// Parse the remote SDP part
 			String remoteSdp = getDialogPath().getInvite().getSdpContent();
 			SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));
-    		Vector<MediaDescription> media = parser.getMediaDescriptions();
+			Vector<MediaDescription> media = parser.getMediaDescriptions();
 			MediaDescription mediaDesc = media.elementAt(0);
 			MediaAttribute attr1 = mediaDesc.getMediaAttribute("path");
-            String remotePath = attr1.getValue();
-            String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
-    		int remotePort = mediaDesc.port;
-			
-            // Extract the "setup" parameter
-            String remoteSetup = "passive";
+			String remotePath = attr1.getValue();
+			String remoteHost = SdpUtils.extractRemoteHost(parser.sessionDescription, mediaDesc);
+			int remotePort = mediaDesc.port;
+
+			// Extract the "setup" parameter
+			String remoteSetup = "passive";
 			MediaAttribute attr2 = mediaDesc.getMediaAttribute("setup");
 			if (attr2 != null) {
 				remoteSetup = attr2.getValue();
 			}
-            if (logger.isActivated()){
+			if (logger.isActivated()) {
 				logger.debug("Remote setup attribute is " + remoteSetup);
 			}
-            
-    		// Set setup mode
-            String localSetup = createSetupAnswer(remoteSetup);
-            if (logger.isActivated()){
+
+			// Set setup mode
+			String localSetup = createSetupAnswer(remoteSetup);
+			if (logger.isActivated()) {
 				logger.debug("Local setup attribute is " + localSetup);
 			}
 
 			// Build SDP answer
-	    	String sdp = generateSdp(localSetup);
+			String sdp = generateSdp(localSetup);
 
-	    	// Set the local SDP part in the dialog path
-	        getDialogPath().setLocalContent(sdp);
+			// Set the local SDP part in the dialog path
+			getDialogPath().setLocalContent(sdp);
 
-	        // Test if the session should be interrupted
-            if (isInterrupted()) {
-            	if (logger.isActivated()) {
-            		logger.debug("Session has been interrupted: end of processing");
-            	}
-            	return;
-            }
+			// Test if the session should be interrupted
+			if (isInterrupted()) {
+				if (logger.isActivated()) {
+					logger.debug("Session has been interrupted: end of processing");
+				}
+				return;
+			}
 
-            // Create the MSRP server session
-            if (localSetup.equals("passive")) {
-            	// Passive mode: client wait a connection
-            	MsrpSession session = getMsrpMgr().createMsrpServerSession(remotePath, this);
-    			session.setFailureReportOption(false);
-    			session.setSuccessReportOption(false);
-    			
-    			// Open the connection
-    			Thread thread = new Thread(){
-    				public void run(){
-    					try {
-    						// Open the MSRP session
-    						getMsrpMgr().openMsrpSession();
+			// Create the MSRP server session
+			if (localSetup.equals("passive")) {
+				// Passive mode: client wait a connection
+				MsrpSession session = getMsrpMgr().createMsrpServerSession(remotePath, this);
+				session.setFailureReportOption(false);
+				session.setSuccessReportOption(false);
+
+				// Open the connection
+				Thread thread = new Thread() {
+					public void run() {
+						try {
+							// Open the MSRP session
+							getMsrpMgr().openMsrpSession();
 						} catch (IOException e) {
 							if (logger.isActivated()) {
-				        		logger.error("Can't create the MSRP server session", e);
-				        	}
-						}		
-    				}
-    			};
-    			thread.start();
-            } else {
-            	// Active mode: client should connect
-            	// MSRP session without TLS 
-            	MsrpSession session = getMsrpMgr().createMsrpClientSession(remoteHost, remotePort, remotePath, this, null);
-    			session.setFailureReportOption(false);
-    			session.setSuccessReportOption(false);
-    			
-    			// Open the MSRP session
-    			Thread thread = new Thread(){
-    				public void run(){
-    					try {
-    						getMsrpMgr().openMsrpSession();
+								logger.error("Can't create the MSRP server session", e);
+							}
+						}
+					}
+				};
+				thread.start();
+			} else {
+				// Active mode: client should connect
+				// MSRP session without TLS
+				MsrpSession session = getMsrpMgr().createMsrpClientSession(remoteHost, remotePort,
+						remotePath, this, null);
+				session.setFailureReportOption(false);
+				session.setSuccessReportOption(false);
+
+				// Open the MSRP session
+				Thread thread = new Thread() {
+					public void run() {
+						try {
+							getMsrpMgr().openMsrpSession();
 						} catch (IOException e) {
 							if (logger.isActivated()) {
-				        		logger.error("Can't create the MSRP server session", e);
-				        	}
-						}		
-    				}
-    			};
-    			thread.start();
-            }
-			
-	        // Test if the session should be interrupted
-            if (isInterrupted()) {
-            	if (logger.isActivated()) {
-            		logger.debug("Session has been interrupted: end of processing");
-            	}
-            	return;
-            }
+								logger.error("Can't create the MSRP server session", e);
+							}
+						}
+					}
+				};
+				thread.start();
+			}
 
-            // Create a 200 OK response
+			// Test if the session should be interrupted
+			if (isInterrupted()) {
+				if (logger.isActivated()) {
+					logger.debug("Session has been interrupted: end of processing");
+				}
+				return;
+			}
+
+			// Create a 200 OK response
 			if (logger.isActivated()) {
 				logger.info("Send 200 OK");
 			}
 			SipResponse resp = create200OKResponse();
 
-            // The signalisation is established
-            getDialogPath().sigEstablished();
+			// The signalisation is established
+			getDialogPath().sigEstablished();
 
-	        // Send response
-	        SipTransactionContext ctx = getImsService().getImsModule().getSipManager().sendSipMessageAndWait(resp);
+			// Send response
+			SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
+					.sendSipMessageAndWait(resp);
 
-			// Analyze the received response 
+			// Analyze the received response
 			if (ctx.isSipAck()) {
 				// ACK received
 				if (logger.isActivated()) {
 					logger.info("ACK request received");
 				}
-				
+
 				// The session is established
 				getDialogPath().sessionEstablished();
 
-            	// Start session timer
-            	if (getSessionTimerManager().isSessionTimerActivated(resp)) {        	
-            		getSessionTimerManager().start(SessionTimerManager.UAS_ROLE, getDialogPath().getSessionExpireTime());
-            	}
+				// Start session timer
+				if (getSessionTimerManager().isSessionTimerActivated(resp)) {
+					getSessionTimerManager().start(SessionTimerManager.UAS_ROLE,
+							getDialogPath().getSessionExpireTime());
+				}
 
-            	// Notify listeners
-    	    	for(int j=0; j < getListeners().size(); j++) {
-    	    		getListeners().get(j).handleSessionStarted(contact);
-    	    	}
+				// Notify listeners
+				for (int j = 0; j < getListeners().size(); j++) {
+					getListeners().get(j).handleSessionStarted(contact);
+				}
 			} else {
-	    		if (logger.isActivated()) {
-	        		logger.debug("No ACK received for INVITE");
-	        	}
+				if (logger.isActivated()) {
+					logger.debug("No ACK received for INVITE");
+				}
 
-	    		// No response received: timeout
-            	handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED));
+				// No response received: timeout
+				handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED));
 			}
-		} catch(Exception e) {
-        	if (logger.isActivated()) {
-        		logger.error("Session initiation has failed", e);
-        	}
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Session initiation has failed", e);
+			}
 
-        	// Unexpected error
-			handleError(new SipSessionError(SipSessionError.UNEXPECTED_EXCEPTION,
-					e.getMessage()));
+			// Unexpected error
+			handleError(new SipSessionError(SipSessionError.UNEXPECTED_EXCEPTION, e.getMessage()));
 		}
 	}
 
@@ -303,4 +310,3 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
 		return mSessionInvite;
 	}
 }
-

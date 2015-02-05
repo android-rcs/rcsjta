@@ -39,8 +39,8 @@ public class RtpPacket extends Packet {
 	public int ssrc;
 	public int payloadoffset;
 	public int payloadlength;
-    public boolean extension;
-    public RtpExtensionHeader extensionHeader;
+	public boolean extension;
+	public RtpExtensionHeader extensionHeader;
 
 	public RtpPacket() {
 		super();
@@ -48,7 +48,7 @@ public class RtpPacket extends Packet {
 
 	public RtpPacket(Packet packet) {
 		super(packet);
-		
+
 		base = packet;
 	}
 
@@ -58,11 +58,11 @@ public class RtpPacket extends Packet {
 
 		ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream(length);
 		DataOutputStream dataoutputstream = new DataOutputStream(bytearrayoutputstream);
-        if (extension) {
-            dataoutputstream.writeByte(144);
-        } else {
-            dataoutputstream.writeByte(128);
-        }
+		if (extension) {
+			dataoutputstream.writeByte(144);
+		} else {
+			dataoutputstream.writeByte(128);
+		}
 
 		int i = payloadType;
 		if (marker == 1) {
@@ -73,19 +73,18 @@ public class RtpPacket extends Packet {
 		dataoutputstream.writeInt((int) timestamp);
 		dataoutputstream.writeInt(ssrc);
 
-        if (extension && extensionHeader != null) {
-            // Write extension header id
-            dataoutputstream.writeShort(RtpExtensionHeader.RTP_EXTENSION_HEADER_ID);
-            // Write extension header length
-            dataoutputstream.writeShort(extensionHeader.elementsCount());
-            // Write extension element. For now we will only support the orientation element
-            for (RtpExtensionHeader.ExtensionElement element : extensionHeader) {
-                int orientationElement = (((((element.id & 0xff) << 4) | ((element.data.length - 1) & 0xff)) << 8)
-                        | (element.data[0] & 0xff)) << 16;
-                dataoutputstream.writeInt(orientationElement);
-            }
-        }
-        dataoutputstream.write(base.data, base.offset, base.length);
+		if (extension && extensionHeader != null) {
+			// Write extension header id
+			dataoutputstream.writeShort(RtpExtensionHeader.RTP_EXTENSION_HEADER_ID);
+			// Write extension header length
+			dataoutputstream.writeShort(extensionHeader.elementsCount());
+			// Write extension element. For now we will only support the orientation element
+			for (RtpExtensionHeader.ExtensionElement element : extensionHeader) {
+				int orientationElement = (((((element.id & 0xff) << 4) | ((element.data.length - 1) & 0xff)) << 8) | (element.data[0] & 0xff)) << 16;
+				dataoutputstream.writeInt(orientationElement);
+			}
+		}
+		dataoutputstream.write(base.data, base.offset, base.length);
 		data = bytearrayoutputstream.toByteArray();
 	}
 

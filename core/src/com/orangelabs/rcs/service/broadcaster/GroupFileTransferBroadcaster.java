@@ -28,8 +28,8 @@ import android.os.RemoteCallbackList;
 
 /**
  * GroupFileTransferBroadcaster maintains the registering and unregistering of
- * IGroupFileTransferListener and also performs broadcast events on these listeners upon
- * the trigger of corresponding callbacks.
+ * IGroupFileTransferListener and also performs broadcast events on these listeners upon the trigger
+ * of corresponding callbacks.
  */
 public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcaster {
 
@@ -50,13 +50,12 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
 		mGroupFileTransferListeners.unregister(listener);
 	}
 
-	public void broadcastStateChanged(String chatId, String transferId, int state,
-			int reasonCode) {
+	public void broadcastStateChanged(String chatId, String transferId, int state, int reasonCode) {
 		final int N = mGroupFileTransferListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mGroupFileTransferListeners.getBroadcastItem(i).onStateChanged(chatId,
-						transferId, state, reasonCode);
+				mGroupFileTransferListeners.getBroadcastItem(i).onStateChanged(chatId, transferId,
+						state, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);
@@ -87,9 +86,8 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
 		final int N = mGroupFileTransferListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mGroupFileTransferListeners.getBroadcastItem(i)
-						.onDeliveryInfoChanged(chatId, contact, transferId,
-								state, reasonCode);
+				mGroupFileTransferListeners.getBroadcastItem(i).onDeliveryInfoChanged(chatId,
+						contact, transferId, state, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener per contact", e);

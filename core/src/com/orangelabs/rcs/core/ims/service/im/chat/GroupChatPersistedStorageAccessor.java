@@ -29,10 +29,9 @@ import android.database.Cursor;
 import java.util.Set;
 
 /**
- * GroupChatPersistedStorageAccessor helps in retrieving persisted data related
- * to a group chat from the persisted storage. It can utilize caching for such
- * data that will not be changed after creation of the group chat to speed up
- * consecutive access.
+ * GroupChatPersistedStorageAccessor helps in retrieving persisted data related to a group chat from
+ * the persisted storage. It can utilize caching for such data that will not be changed after
+ * creation of the group chat to speed up consecutive access.
  */
 public class GroupChatPersistedStorageAccessor {
 
@@ -64,9 +63,9 @@ public class GroupChatPersistedStorageAccessor {
 		try {
 			cursor = mMessagingLog.getCacheableGroupChatData(mChatId);
 			mSubject = cursor.getString(cursor.getColumnIndexOrThrow(GroupChat.SUBJECT));
-			mDirection = Direction.valueOf(cursor.getInt(cursor.getColumnIndexOrThrow(GroupChat.DIRECTION)));
-			String contact = cursor.getString(cursor
-					.getColumnIndexOrThrow(GroupChat.CONTACT));
+			mDirection = Direction.valueOf(cursor.getInt(cursor
+					.getColumnIndexOrThrow(GroupChat.DIRECTION)));
+			String contact = cursor.getString(cursor.getColumnIndexOrThrow(GroupChat.CONTACT));
 			if (contact != null) {
 				mContact = ContactUtils.createContactId(contact);
 			}
@@ -79,9 +78,8 @@ public class GroupChatPersistedStorageAccessor {
 
 	public Direction getDirection() {
 		/*
-		 * Utilizing cache here as direction can't be changed in persistent
-		 * storage after entry insertion anyway so no need to query for it
-		 * multiple times.
+		 * Utilizing cache here as direction can't be changed in persistent storage after entry
+		 * insertion anyway so no need to query for it multiple times.
 		 */
 		if (mDirection == null) {
 			cacheData();
@@ -99,9 +97,8 @@ public class GroupChatPersistedStorageAccessor {
 
 	public String getSubject() {
 		/*
-		 * Utilizing cache here as subject can't be changed in persistent
-		 * storage after entry insertion anyway so no need to query for it
-		 * multiple times.
+		 * Utilizing cache here as subject can't be changed in persistent storage after entry
+		 * insertion anyway so no need to query for it multiple times.
 		 */
 		if (mSubject == null) {
 			cacheData();
@@ -115,9 +112,8 @@ public class GroupChatPersistedStorageAccessor {
 			return null;
 		}
 		/*
-		 * Utilizing cache here as remote contact can't be changed in persistent
-		 * storage after entry insertion anyway so no need to query for it
-		 * multiple times.
+		 * Utilizing cache here as remote contact can't be changed in persistent storage after entry
+		 * insertion anyway so no need to query for it multiple times.
 		 */
 		if (mContact == null) {
 			cacheData();
@@ -166,7 +162,7 @@ public class GroupChatPersistedStorageAccessor {
 	}
 
 	public void addGroupChatEvent(String chatId, ContactId contact, int status) {
-		mMessagingLog.addGroupChatEvent(mChatId,  contact,  status);
+		mMessagingLog.addGroupChatEvent(mChatId, contact, status);
 	}
 
 	public void addGroupChatMessage(ChatMessage msg, Direction direction, int status, int reasonCode) {
@@ -177,8 +173,7 @@ public class GroupChatPersistedStorageAccessor {
 		mMessagingLog.setRejectNextGroupChatNextInvitation(mChatId);
 	}
 
-	public void setFileTransferStateAndReasonCode(String fileTransferId, int state,
-			int reasonCode) {
+	public void setFileTransferStateAndReasonCode(String fileTransferId, int state, int reasonCode) {
 		mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, state, reasonCode);
 	}
 }

@@ -25,11 +25,12 @@ package com.orangelabs.rcs.provider.eab;
  */
 public class ContactsManagerException extends java.lang.Exception {
 	static final long serialVersionUID = 1L;
-	
+
 	/**
 	 * Constructor
 	 *
-	 * @param error Error message
+	 * @param error
+	 *            Error message
 	 */
 	public ContactsManagerException(String error) {
 		super(error);

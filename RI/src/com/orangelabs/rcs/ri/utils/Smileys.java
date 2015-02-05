@@ -42,39 +42,41 @@ import com.orangelabs.rcs.ri.utils.AbstractMessageParser.TrieNode;
  */
 public class Smileys implements AbstractMessageParser.Resources {
     private HashMap<String, Integer> mSmileyToRes = new HashMap<String, Integer>();
-    
+
     private static final int[] DEFAULT_SMILEY_RES_IDS = {
-        R.drawable.ri_smiley_happy,                //  0
-        R.drawable.ri_smiley_sad,                  //  1
-        R.drawable.ri_smiley_winking,              //  2
-        R.drawable.ri_smiley_tongue_sticking_out,  //  3
-        R.drawable.ri_smiley_surprised,            //  4
-        R.drawable.ri_smiley_kissing,              //  5
-        R.drawable.ri_smiley_yelling,              //  6
-        R.drawable.ri_smiley_cool,                 //  7
-        R.drawable.ri_smiley_money_mouth,          //  8
-        R.drawable.ri_smiley_foot_in_mouth,        //  9
-        R.drawable.ri_smiley_embarrassed,          //  10
-        R.drawable.ri_smiley_angel,                //  11
-        R.drawable.ri_smiley_undecided,            //  12
-        R.drawable.ri_smiley_crying,               //  13
-        R.drawable.ri_smiley_lips_are_sealed,      //  14
-        R.drawable.ri_smiley_laughing,             //  15
-        R.drawable.ri_smiley_wtf                   //  16
+            R.drawable.ri_smiley_happy, // 0
+            R.drawable.ri_smiley_sad, // 1
+            R.drawable.ri_smiley_winking, // 2
+            R.drawable.ri_smiley_tongue_sticking_out, // 3
+            R.drawable.ri_smiley_surprised, // 4
+            R.drawable.ri_smiley_kissing, // 5
+            R.drawable.ri_smiley_yelling, // 6
+            R.drawable.ri_smiley_cool, // 7
+            R.drawable.ri_smiley_money_mouth, // 8
+            R.drawable.ri_smiley_foot_in_mouth, // 9
+            R.drawable.ri_smiley_embarrassed, // 10
+            R.drawable.ri_smiley_angel, // 11
+            R.drawable.ri_smiley_undecided, // 12
+            R.drawable.ri_smiley_crying, // 13
+            R.drawable.ri_smiley_lips_are_sealed, // 14
+            R.drawable.ri_smiley_laughing, // 15
+            R.drawable.ri_smiley_wtf
+    // 16
     };
-    
+
     private static final int DEFAULT_SMILEY_TEXTS = R.array.default_smiley_texts;
-    
+
     private static final int DEFAULT_SMILEY_NAMES = R.array.default_smiley_names;
+
     /**
      * Constructor
      * 
      * @param context
      */
     public Smileys(Context context) {
-    	String[] smilies = context.getResources().getStringArray(DEFAULT_SMILEY_TEXTS);
-		int[] smileyResIds = DEFAULT_SMILEY_RES_IDS;
-    	
+        String[] smilies = context.getResources().getStringArray(DEFAULT_SMILEY_TEXTS);
+        int[] smileyResIds = DEFAULT_SMILEY_RES_IDS;
+
         for (int i = 0; i < smilies.length; i++) {
             TrieNode.addToTrie(smileys, smilies[i], "");
             mSmileyToRes.put(smilies[i], smileyResIds[i]);
@@ -82,10 +84,11 @@ public class Smileys implements AbstractMessageParser.Resources {
     }
 
     /**
-     * Looks up the resource id of a given smiley. 
+     * Looks up the resource id of a given smiley.
+     * 
      * @param smiley The smiley to look up.
-     * @return the resource id of the specified smiley, or -1 if no resource
-     *         id is associated with it.  
+     * @return the resource id of the specified smiley, or -1 if no resource id
+     *         is associated with it.
      */
     public int getSmileyRes(String smiley) {
         Integer i = mSmileyToRes.get(smiley);
@@ -112,11 +115,12 @@ public class Smileys implements AbstractMessageParser.Resources {
     public TrieNode getAcronyms() {
         return null;
     }
-    
+
     /**
      * Show a list of smileys
      */
-    public static void showSmileyDialog(Context context, final EditText textEdit, final Resources resources, String title) {
+    public static void showSmileyDialog(Context context, final EditText textEdit,
+            final Resources resources, String title) {
         int[] icons = DEFAULT_SMILEY_RES_IDS;
         String[] names = resources.getStringArray(DEFAULT_SMILEY_NAMES);
         final String[] texts = resources.getStringArray(DEFAULT_SMILEY_TEXTS);
@@ -136,19 +140,19 @@ public class Smileys implements AbstractMessageParser.Resources {
             }
             if (!added) {
                 HashMap<String, Object> entry = new HashMap<String, Object>();
-                entry. put("icon", icons[i]);
-                entry. put("name", names[i]);
+                entry.put("icon", icons[i]);
+                entry.put("name", names[i]);
                 entry.put("text", texts[i]);
                 entries.add(entry);
             }
         }
 
-        final SimpleAdapter a = new SimpleAdapter(
-                context,
-                entries,
-                R.layout.utils_smiley_menu_item,
-                new String[] {"icon", "name", "text"},
-                new int[] {R.id.smiley_icon, R.id.smiley_name, R.id.smiley_text});
+        final SimpleAdapter a = new SimpleAdapter(context, entries,
+                R.layout.utils_smiley_menu_item, new String[] {
+                        "icon", "name", "text"
+                }, new int[] {
+                        R.id.smiley_icon, R.id.smiley_name, R.id.smiley_text
+                });
         SimpleAdapter.ViewBinder viewBinder = new SimpleAdapter.ViewBinder() {
             public boolean setViewValue(View view, Object data, String textRepresentation) {
                 if (view instanceof ImageView) {
@@ -167,7 +171,7 @@ public class Smileys implements AbstractMessageParser.Resources {
         b.setAdapter(a, new DialogInterface.OnClickListener() {
             public final void onClick(DialogInterface dialog, int which) {
                 @SuppressWarnings("unchecked")
-				HashMap<String, Object> item = (HashMap<String, Object>)a.getItem(which);
+                HashMap<String, Object> item = (HashMap<String, Object>)a.getItem(which);
                 textEdit.append((String)item.get("text"));
             }
         });

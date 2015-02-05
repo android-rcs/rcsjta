@@ -71,7 +71,8 @@ public class BackupRestoreDb {
 	 * @return the array of RCS saved accounts (may be empty) or null
 	 * @throws InvalidArgumentException
 	 */
-	public static File[] listOfSavedAccounts(final File databasesDir) throws InvalidArgumentException {
+	public static File[] listOfSavedAccounts(final File databasesDir)
+			throws InvalidArgumentException {
 		if (databasesDir == null) {
 			throw new InvalidArgumentException();
 		}
@@ -206,7 +207,8 @@ public class BackupRestoreDb {
 	 *            the account
 	 * @throws InvalidArgumentException
 	 */
-	private static void cleanBackups(final File databasesDir, final String currentUserAccount) throws InvalidArgumentException {
+	private static void cleanBackups(final File databasesDir, final String currentUserAccount)
+			throws InvalidArgumentException {
 		File[] files = listOfSavedAccounts(databasesDir);
 		if (files != null && files.length > MAX_SAVED_ACCOUNT) {
 

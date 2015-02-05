@@ -31,7 +31,7 @@ public interface HttpConnection {
 	 * GET method
 	 */
 	public final static String GET_METHOD = "GET";
-	
+
 	/**
 	 * POST method
 	 */
@@ -40,7 +40,8 @@ public interface HttpConnection {
 	/**
 	 * Open the HTTP connection
 	 * 
-	 * @param url Remote URL
+	 * @param url
+	 *            Remote URL
 	 * @throws IOException
 	 */
 	public void open(String url) throws IOException;
@@ -51,7 +52,7 @@ public interface HttpConnection {
 	 * @throws IOException
 	 */
 	public void close() throws IOException;
-	
+
 	/**
 	 * HTTP GET request
 	 * 
@@ -59,7 +60,7 @@ public interface HttpConnection {
 	 * @throws IOException
 	 */
 	public ByteArrayOutputStream get() throws IOException;
-	
+
 	/**
 	 * HTTP POST request
 	 * 

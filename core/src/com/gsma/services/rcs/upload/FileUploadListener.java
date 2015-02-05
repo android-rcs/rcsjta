@@ -32,17 +32,22 @@ public abstract class FileUploadListener extends IFileUploadListener.Stub {
 	/**
 	 * Callback called when the file upload state has been changed.
 	 *
-	 * @param uploadId ID of upload
-	 * @param state State of upload 
+	 * @param uploadId
+	 *            ID of upload
+	 * @param state
+	 *            State of upload
 	 */
 	public abstract void onStateChanged(String uploadId, int state);
 
 	/**
 	 * Callback called during the upload progress
 	 *
-	 * @param uploadId ID of upload
-	 * @param currentSize Current transferred size in bytes
-	 * @param totalSize Total size to transfer in bytes
+	 * @param uploadId
+	 *            ID of upload
+	 * @param currentSize
+	 *            Current transferred size in bytes
+	 * @param totalSize
+	 *            Total size to transfer in bytes
 	 */
 	public abstract void onProgressUpdate(String uploadId, long currentSize, long totalSize);
 }

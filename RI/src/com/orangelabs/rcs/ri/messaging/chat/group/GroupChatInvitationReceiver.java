@@ -29,18 +29,18 @@ import android.content.Intent;
  */
 public class GroupChatInvitationReceiver extends BroadcastReceiver {
 
-	/**
-	 * Action New Group CHAT Invitation
-	 */
-	/* package private */static final String ACTION_NEW_GC = "NEW_GC";
+    /**
+     * Action New Group CHAT Invitation
+     */
+    /* package private */static final String ACTION_NEW_GC = "NEW_GC";
 
-	@Override
-	public void onReceive(Context context, Intent intent) {
-		// Send intent to service
-		Intent receiverIntent = new Intent(context, GroupChatIntentService.class);
-		receiverIntent.putExtras(intent);
-		receiverIntent.setAction(ACTION_NEW_GC);
-		context.startService(receiverIntent);
-	}
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        // Send intent to service
+        Intent receiverIntent = new Intent(context, GroupChatIntentService.class);
+        receiverIntent.putExtras(intent);
+        receiverIntent.setAction(ACTION_NEW_GC);
+        context.startService(receiverIntent);
+    }
 
 }

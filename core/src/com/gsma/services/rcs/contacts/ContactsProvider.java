@@ -42,7 +42,7 @@ public class ContactsProvider {
 	 * Image sharing capability support
 	 */
 	public final static String MIME_TYPE_IMAGE_SHARING = "vnd.android.cursor.item/com.gsma.services.rcs.image-sharing";
-		
+
 	/**
 	 * Video sharing capability support
 	 */
@@ -72,7 +72,7 @@ public class ContactsProvider {
 	 * IP video call capability support
 	 */
 	public final static String MIME_TYPE_IP_VIDEO_CALL = "vnd.android.cursor.item/com.gsma.services.rcs.ip-video-call";
-	
+
 	/**
 	 * RCS extensions supported
 	 */

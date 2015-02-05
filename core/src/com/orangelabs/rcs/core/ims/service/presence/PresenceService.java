@@ -52,7 +52,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
  *
  * @author Jean-Marc AUFFRET
  */
-public class PresenceService extends ImsService implements AddressBookEventListener{
+public class PresenceService extends ImsService implements AddressBookEventListener {
 
 	private final RcsSettings mRcsSettings;
 
@@ -64,9 +64,9 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 	public boolean permanentState;
 
 	/**
-     * Presence info
-     */
-    private PresenceInfo presenceInfo = new PresenceInfo();
+	 * Presence info
+	 */
+	private PresenceInfo presenceInfo = new PresenceInfo();
 
 	/**
 	 * Publish manager
@@ -89,43 +89,46 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 	private SubscribeManager presenceSubscriber;
 
 	/**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+	 * The logger
+	 */
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    /**
-     * Constructor
-     *
-     * @param parent IMS module
-     * @param rcsSettings RcsSettings
-     * @param contactsManager ContactsManager
-     * @throws CoreException
-     */
+	/**
+	 * Constructor
+	 *
+	 * @param parent
+	 *            IMS module
+	 * @param rcsSettings
+	 *            RcsSettings
+	 * @param contactsManager
+	 *            ContactsManager
+	 * @throws CoreException
+	 */
 	public PresenceService(ImsModule parent, RcsSettings rcsSettings,
 			ContactsManager contactsManager) throws CoreException {
-        super(parent, RcsSettings.getInstance().isSocialPresenceSupported());
-        mRcsSettings = rcsSettings;
-        mContactsManager = contactsManager;
+		super(parent, RcsSettings.getInstance().isSocialPresenceSupported());
+		mRcsSettings = rcsSettings;
+		mContactsManager = contactsManager;
 		// Set presence service options
 		this.permanentState = mRcsSettings.isPermanentStateModeActivated();
 
 		// Instantiate the XDM manager
-    	xdm = new XdmManager(parent);
+		xdm = new XdmManager(parent);
 
-    	// Instantiate the publish manager
-        publisher = new PublishManager(parent);
+		// Instantiate the publish manager
+		publisher = new PublishManager(parent);
 
-    	// Instantiate the subscribe manager for watcher info
-    	watcherInfoSubscriber = new WatcherInfoSubscribeManager(parent);
+		// Instantiate the subscribe manager for watcher info
+		watcherInfoSubscriber = new WatcherInfoSubscribeManager(parent);
 
-    	// Instantiate the subscribe manager for presence
-        presenceSubscriber = new PresenceSubscribeManager(parent);
+		// Instantiate the subscribe manager for presence
+		presenceSubscriber = new PresenceSubscribeManager(parent);
 	}
 
 	/**
 	 * Start the IMS service
 	 */
-    public synchronized void start() {
+	public synchronized void start() {
 		if (isServiceStarted()) {
 			// Already started
 			return;
@@ -144,7 +147,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 		// Initialize the XDM interface
 		xdm.initialize();
 
-    	// Add me in the granted set if necessary
+		// Add me in the granted set if necessary
 		Set<ContactId> grantedContacts = xdm.getGrantedContacts();
 
 		ContactId me = ImsModule.IMS_USER_PROFILE.getUsername();
@@ -157,66 +160,69 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 		}
 
 		// It may be necessary to initiate the address book first launch or account check procedure
-        if (StartService.getNewUserAccount(AndroidFactory.getApplicationContext())) {
+		if (StartService.getNewUserAccount(AndroidFactory.getApplicationContext())) {
 			Set<ContactId> blockedContacts = xdm.getBlockedContacts();
 			firstLaunchOrAccountChangedCheck(grantedContacts, blockedContacts);
 		}
 
-        // Subscribe to watcher-info events
-    	if (watcherInfoSubscriber.subscribe()) {
-        	if (logger.isActivated()) {
-        		logger.debug("Subscribe manager is started with success for watcher-info");
-            }
+		// Subscribe to watcher-info events
+		if (watcherInfoSubscriber.subscribe()) {
+			if (logger.isActivated()) {
+				logger.debug("Subscribe manager is started with success for watcher-info");
+			}
 		} else {
-        	if (logger.isActivated()) {
-        		logger.debug("Subscribe manager can't be started for watcher-info");
-        	}
+			if (logger.isActivated()) {
+				logger.debug("Subscribe manager can't be started for watcher-info");
+			}
 		}
 
 		// Subscribe to presence events
-    	if (presenceSubscriber.subscribe()) {
-        	if (logger.isActivated()) {
-        		logger.debug("Subscribe manager is started with success for presence");
-            }
+		if (presenceSubscriber.subscribe()) {
+			if (logger.isActivated()) {
+				logger.debug("Subscribe manager is started with success for presence");
+			}
 		} else {
-        	if (logger.isActivated()) {
-        		logger.debug("Subscribe manager can't be started for presence");
-        	}
+			if (logger.isActivated()) {
+				logger.debug("Subscribe manager can't be started for presence");
+			}
 		}
 
-    	// Publish initial presence info
-    	String xml;
-    	if (permanentState) {
-    		xml = buildPartialPresenceInfoDocument(presenceInfo);
-    	} else {
-    		xml = buildPresenceInfoDocument(presenceInfo);
-    	}
-    	if (publisher.publish(xml)) {
-        	if (logger.isActivated()) {
-        		logger.debug("Publish manager is started with success");
-        	}
+		// Publish initial presence info
+		String xml;
+		if (permanentState) {
+			xml = buildPartialPresenceInfoDocument(presenceInfo);
 		} else {
-        	if (logger.isActivated()) {
-        		logger.debug("Publish manager can't be started");
-        	}
+			xml = buildPresenceInfoDocument(presenceInfo);
+		}
+		if (publisher.publish(xml)) {
+			if (logger.isActivated()) {
+				logger.debug("Publish manager is started with success");
+			}
+		} else {
+			if (logger.isActivated()) {
+				logger.debug("Publish manager can't be started");
+			}
 		}
 
-    	// Force a presence check
-    	handleAddressBookHasChanged();
+		// Force a presence check
+		handleAddressBookHasChanged();
 	}
 
-    /**
-     * First launch or account changed check <br>
-     * Check done at first launch of the service on the phone after install of
-     * the application or when the user account changed <br>
-     * We create a new contact with the adequate state for each RCS number in
-     * the XDM lists that is not already existing on the phone
-     *
-     * @param list of granted contacts
-     * @param list of blocked contacts
-     */
-	private void firstLaunchOrAccountChangedCheck(Set<ContactId> grantedContacts, Set<ContactId> blockedContacts){
-		if (logger.isActivated()){
+	/**
+	 * First launch or account changed check <br>
+	 * Check done at first launch of the service on the phone after install of the application or
+	 * when the user account changed <br>
+	 * We create a new contact with the adequate state for each RCS number in the XDM lists that is
+	 * not already existing on the phone
+	 *
+	 * @param list
+	 *            of granted contacts
+	 * @param list
+	 *            of blocked contacts
+	 */
+	private void firstLaunchOrAccountChangedCheck(Set<ContactId> grantedContacts,
+			Set<ContactId> blockedContacts) {
+		if (logger.isActivated()) {
 			logger.debug("First launch or account change check procedure");
 		}
 
@@ -228,8 +234,9 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 			me = ContactUtils.createContactId(ImsModule.IMS_USER_PROFILE.getPublicUri());
 		} catch (RcsContactFormatException e) {
 			if (logger.isActivated()) {
-        		logger.error("Cannot parse user contact "+ImsModule.IMS_USER_PROFILE.getPublicUri());
-        	}
+				logger.error("Cannot parse user contact "
+						+ ImsModule.IMS_USER_PROFILE.getPublicUri());
+			}
 		}
 		// Treat the buddy list
 		for (ContactId contact : grantedContacts) {
@@ -238,12 +245,14 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 				if (!ContactUtils.isNumberInAddressBook(contact)) {
 					// If it is not present in the address book
 					if (logger.isActivated()) {
-						logger.debug("The RCS number " + contact + " was not found in the address book: add it");
+						logger.debug("The RCS number " + contact
+								+ " was not found in the address book: add it");
 					}
 
 					// => We create the entry in the regular address book
 					try {
-						ContactUtils.createRcsContactIfNeeded(AndroidFactory.getApplicationContext(), contact);
+						ContactUtils.createRcsContactIfNeeded(
+								AndroidFactory.getApplicationContext(), contact);
 					} catch (Exception e) {
 						if (logger.isActivated()) {
 							logger.error("Something went wrong when creating contact " + contact, e);
@@ -262,12 +271,14 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 			if (!ContactUtils.isNumberInAddressBook(contact)) {
 				// If it is not present in the address book
 				if (logger.isActivated()) {
-					logger.debug("The RCS number " + contact + " was not found in the address book: add it");
+					logger.debug("The RCS number " + contact
+							+ " was not found in the address book: add it");
 				}
 
 				// => We create the entry in the regular address book
 				try {
-					ContactUtils.createRcsContactIfNeeded(AndroidFactory.getApplicationContext(), contact);
+					ContactUtils.createRcsContactIfNeeded(AndroidFactory.getApplicationContext(),
+							contact);
 				} catch (Exception e) {
 					if (logger.isActivated()) {
 						logger.error("Something went wrong when creating contact " + contact, e);
@@ -289,8 +300,8 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 	}
 
 	/**
-     * Stop the IMS service
-     */
+	 * Stop the IMS service
+	 */
 	public synchronized void stop() {
 		if (!isServiceStarted()) {
 			// Already stopped
@@ -302,136 +313,138 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 		getImsModule().getCore().getAddressBookManager().removeAddressBookListener(this);
 
 		if (!permanentState) {
-            // If not permanent state mode: publish a last presence info before
-            // to quit
-			if ((getImsModule().getCurrentNetworkInterface() != null) &&
-					getImsModule().getCurrentNetworkInterface().isRegistered() &&
-				publisher.isPublished()) {
+			// If not permanent state mode: publish a last presence info before
+			// to quit
+			if ((getImsModule().getCurrentNetworkInterface() != null)
+					&& getImsModule().getCurrentNetworkInterface().isRegistered()
+					&& publisher.isPublished()) {
 				String xml = buildPresenceInfoDocument(presenceInfo);
-		    	publisher.publish(xml);
+				publisher.publish(xml);
 			}
-    	}
+		}
 
-    	// Stop publish
-    	publisher.terminate();
+		// Stop publish
+		publisher.terminate();
 
-    	// Stop subscriptions
-    	watcherInfoSubscriber.terminate();
-    	presenceSubscriber.terminate();
+		// Stop subscriptions
+		watcherInfoSubscriber.terminate();
+		presenceSubscriber.terminate();
 	}
 
 	/**
-     * Check the IMS service
-     */
+	 * Check the IMS service
+	 */
 	public void check() {
-    	if (logger.isActivated()) {
-    		logger.debug("Check presence service");
-    	}
+		if (logger.isActivated()) {
+			logger.debug("Check presence service");
+		}
 
-        // Check subscribe manager status for watcher-info events
+		// Check subscribe manager status for watcher-info events
 		if (!watcherInfoSubscriber.isSubscribed()) {
-        	if (logger.isActivated()) {
-        		logger.debug("Subscribe manager not yet started for watcher-info");
-        	}
+			if (logger.isActivated()) {
+				logger.debug("Subscribe manager not yet started for watcher-info");
+			}
 
-        	if (watcherInfoSubscriber.subscribe()) {
-	        	if (logger.isActivated()) {
-	        		logger.debug("Subscribe manager is started with success for watcher-info");
-                }
+			if (watcherInfoSubscriber.subscribe()) {
+				if (logger.isActivated()) {
+					logger.debug("Subscribe manager is started with success for watcher-info");
+				}
 			} else {
-	        	if (logger.isActivated()) {
-	        		logger.debug("Subscribe manager can't be started for watcher-info");
-	        	}
+				if (logger.isActivated()) {
+					logger.debug("Subscribe manager can't be started for watcher-info");
+				}
 			}
 		}
 
 		// Check subscribe manager status for presence events
 		if (!presenceSubscriber.isSubscribed()) {
-        	if (logger.isActivated()) {
-        		logger.debug("Subscribe manager not yet started for presence");
-        	}
+			if (logger.isActivated()) {
+				logger.debug("Subscribe manager not yet started for presence");
+			}
 
-        	if (presenceSubscriber.subscribe()) {
-	        	if (logger.isActivated()) {
-	        		logger.debug("Subscribe manager is started with success for presence");
-                }
+			if (presenceSubscriber.subscribe()) {
+				if (logger.isActivated()) {
+					logger.debug("Subscribe manager is started with success for presence");
+				}
 			} else {
-	        	if (logger.isActivated()) {
-	        		logger.debug("Subscribe manager can't be started for presence");
-	        	}
+				if (logger.isActivated()) {
+					logger.debug("Subscribe manager can't be started for presence");
+				}
 			}
 		}
 	}
 
 	/**
-     * Is permanent state procedure
-     *
-     * @return Boolean
-     */
+	 * Is permanent state procedure
+	 *
+	 * @return Boolean
+	 */
 	public boolean isPermanentState() {
 		return permanentState;
 	}
 
 	/**
-     * Set the presence info
-     *
-     * @param info Presence info
-     */
+	 * Set the presence info
+	 *
+	 * @param info
+	 *            Presence info
+	 */
 	public void setPresenceInfo(PresenceInfo info) {
 		presenceInfo = info;
 	}
 
 	/**
-     * Returns the presence info
-     *
-     * @return Presence info
-     */
+	 * Returns the presence info
+	 *
+	 * @return Presence info
+	 */
 	public PresenceInfo getPresenceInfo() {
 		return presenceInfo;
 	}
 
 	/**
-     * Returns the publish manager
-     *
-     * @return Publish manager
-     */
-    public PublishManager getPublishManager() {
-        return publisher;
-    }
+	 * Returns the publish manager
+	 *
+	 * @return Publish manager
+	 */
+	public PublishManager getPublishManager() {
+		return publisher;
+	}
 
 	/**
-     * Returns the watcher-info subscribe manager
-     *
-     * @return Subscribe manager
-     */
+	 * Returns the watcher-info subscribe manager
+	 *
+	 * @return Subscribe manager
+	 */
 	public SubscribeManager getWatcherInfoSubscriber() {
 		return watcherInfoSubscriber;
 	}
 
-    /**
-     * Returns the presence subscribe manager
-     *
-     * @return Subscribe manager
-     */
+	/**
+	 * Returns the presence subscribe manager
+	 *
+	 * @return Subscribe manager
+	 */
 	public SubscribeManager getPresenceSubscriber() {
 		return presenceSubscriber;
 	}
 
-    /**
-     * Returns the XDM manager
-     *
-     * @return XDM manager
-     */
-    public XdmManager getXdmManager() {
-        return xdm;
-    }
+	/**
+	 * Returns the XDM manager
+	 *
+	 * @return XDM manager
+	 */
+	public XdmManager getXdmManager() {
+		return xdm;
+	}
 
 	/**
-     * Build boolean status value
-     *
-     * @param state Boolean state
-     * @return String
-     */
+	 * Build boolean status value
+	 *
+	 * @param state
+	 *            Boolean state
+	 * @return String
+	 */
 	private String buildBooleanStatus(boolean state) {
 		if (state) {
 			return "open";
@@ -440,95 +453,91 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 		}
 	}
 
-    /**
-     * Build capabilities document
-     *
-     * @param timestamp Timestamp
-     * @param capabilities Capabilities
-     * @return Document
-     */
-    private String buildCapabilities(String timestamp, Capabilities capabilities) {
-    	return
-    	    "<tuple id=\"t1\">" + SipUtils.CRLF +
-		    "  <status><basic>" + buildBooleanStatus(capabilities.isFileTransferSupported()) + "</basic></status>" + SipUtils.CRLF +
-			"  <op:service-description>" + SipUtils.CRLF +
-			"    <op:service-id>" + PresenceUtils.FEATURE_RCS2_FT + "</op:service-id>" + SipUtils.CRLF +
-			"    <op:version>1.0</op:version>" + SipUtils.CRLF +
-			"  </op:service-description>" + SipUtils.CRLF +
-			"  <contact>" + ImsModule.IMS_USER_PROFILE.getPublicUri() + "</contact>" + SipUtils.CRLF +
-			"  <timestamp>" + timestamp + "</timestamp>" + SipUtils.CRLF +
-			"</tuple>" + SipUtils.CRLF +
-	    	"<tuple id=\"t2\">" + SipUtils.CRLF +
-		    "  <status><basic>" + buildBooleanStatus(capabilities.isImageSharingSupported()) + "</basic></status>" + SipUtils.CRLF +
-			"  <op:service-description>" + SipUtils.CRLF +
-			"    <op:service-id>" + PresenceUtils.FEATURE_RCS2_IMAGE_SHARE + "</op:service-id>" + SipUtils.CRLF +
-			"    <op:version>1.0</op:version>" + SipUtils.CRLF +
-			"  </op:service-description>" + SipUtils.CRLF +
-			"  <contact>" + ImsModule.IMS_USER_PROFILE.getPublicUri() + "</contact>" + SipUtils.CRLF +
-			"  <timestamp>" + timestamp + "</timestamp>" + SipUtils.CRLF +
-			"</tuple>" + SipUtils.CRLF +
-			"<tuple id=\"t3\">" + SipUtils.CRLF +
-		    "  <status><basic>" + buildBooleanStatus(capabilities.isVideoSharingSupported()) + "</basic></status>" + SipUtils.CRLF +
-			"  <op:service-description>" + SipUtils.CRLF +
-			"    <op:service-id>" + PresenceUtils.FEATURE_RCS2_VIDEO_SHARE + "</op:service-id>" + SipUtils.CRLF +
-			"    <op:version>1.0</op:version>" + SipUtils.CRLF +
-			"  </op:service-description>" + SipUtils.CRLF +
-			"  <contact>" + ImsModule.IMS_USER_PROFILE.getPublicUri() + "</contact>" + SipUtils.CRLF +
-			"  <timestamp>" + timestamp + "</timestamp>" + SipUtils.CRLF +
-			"</tuple>" + SipUtils.CRLF +
-			"<tuple id=\"t4\">" + SipUtils.CRLF +
-		    "  <status><basic>" + buildBooleanStatus(capabilities.isImSessionSupported()) + "</basic></status>" + SipUtils.CRLF +
-			"  <op:service-description>" + SipUtils.CRLF +
-			"    <op:service-id>" + PresenceUtils.FEATURE_RCS2_CHAT + "</op:service-id>" + SipUtils.CRLF +
-			"    <op:version>1.0</op:version>" + SipUtils.CRLF +
-			"  </op:service-description>" + SipUtils.CRLF +
-			"  <contact>" + ImsModule.IMS_USER_PROFILE.getPublicUri() + "</contact>" + SipUtils.CRLF +
-			"  <timestamp>" + timestamp + "</timestamp>" + SipUtils.CRLF +
-			"</tuple>" + SipUtils.CRLF +
-			"<tuple id=\"t5\">" + SipUtils.CRLF +
-		    "  <status><basic>" + buildBooleanStatus(capabilities.isCsVideoSupported()) + "</basic></status>" + SipUtils.CRLF +
-			"  <op:service-description>" + SipUtils.CRLF +
-			"    <op:service-id>" + PresenceUtils.FEATURE_RCS2_CS_VIDEO + "</op:service-id>" + SipUtils.CRLF +
-			"    <op:version>1.0</op:version>" + SipUtils.CRLF +
-			"  </op:service-description>" + SipUtils.CRLF +
-			"  <contact>" + ImsModule.IMS_USER_PROFILE.getPublicUri() + "</contact>" + SipUtils.CRLF +
-			"  <timestamp>" + timestamp + "</timestamp>" + SipUtils.CRLF +
-			"</tuple>" + SipUtils.CRLF;
-    }
+	/**
+	 * Build capabilities document
+	 *
+	 * @param timestamp
+	 *            Timestamp
+	 * @param capabilities
+	 *            Capabilities
+	 * @return Document
+	 */
+	private String buildCapabilities(String timestamp, Capabilities capabilities) {
+		return "<tuple id=\"t1\">" + SipUtils.CRLF + "  <status><basic>"
+				+ buildBooleanStatus(capabilities.isFileTransferSupported()) + "</basic></status>"
+				+ SipUtils.CRLF + "  <op:service-description>" + SipUtils.CRLF
+				+ "    <op:service-id>" + PresenceUtils.FEATURE_RCS2_FT + "</op:service-id>"
+				+ SipUtils.CRLF + "    <op:version>1.0</op:version>" + SipUtils.CRLF
+				+ "  </op:service-description>" + SipUtils.CRLF + "  <contact>"
+				+ ImsModule.IMS_USER_PROFILE.getPublicUri() + "</contact>" + SipUtils.CRLF
+				+ "  <timestamp>" + timestamp + "</timestamp>" + SipUtils.CRLF + "</tuple>"
+				+ SipUtils.CRLF + "<tuple id=\"t2\">" + SipUtils.CRLF + "  <status><basic>"
+				+ buildBooleanStatus(capabilities.isImageSharingSupported()) + "</basic></status>"
+				+ SipUtils.CRLF + "  <op:service-description>" + SipUtils.CRLF
+				+ "    <op:service-id>" + PresenceUtils.FEATURE_RCS2_IMAGE_SHARE
+				+ "</op:service-id>" + SipUtils.CRLF + "    <op:version>1.0</op:version>"
+				+ SipUtils.CRLF + "  </op:service-description>" + SipUtils.CRLF + "  <contact>"
+				+ ImsModule.IMS_USER_PROFILE.getPublicUri() + "</contact>" + SipUtils.CRLF
+				+ "  <timestamp>" + timestamp + "</timestamp>" + SipUtils.CRLF + "</tuple>"
+				+ SipUtils.CRLF + "<tuple id=\"t3\">" + SipUtils.CRLF + "  <status><basic>"
+				+ buildBooleanStatus(capabilities.isVideoSharingSupported()) + "</basic></status>"
+				+ SipUtils.CRLF + "  <op:service-description>" + SipUtils.CRLF
+				+ "    <op:service-id>" + PresenceUtils.FEATURE_RCS2_VIDEO_SHARE
+				+ "</op:service-id>" + SipUtils.CRLF + "    <op:version>1.0</op:version>"
+				+ SipUtils.CRLF + "  </op:service-description>" + SipUtils.CRLF + "  <contact>"
+				+ ImsModule.IMS_USER_PROFILE.getPublicUri() + "</contact>" + SipUtils.CRLF
+				+ "  <timestamp>" + timestamp + "</timestamp>" + SipUtils.CRLF + "</tuple>"
+				+ SipUtils.CRLF + "<tuple id=\"t4\">" + SipUtils.CRLF + "  <status><basic>"
+				+ buildBooleanStatus(capabilities.isImSessionSupported()) + "</basic></status>"
+				+ SipUtils.CRLF + "  <op:service-description>" + SipUtils.CRLF
+				+ "    <op:service-id>" + PresenceUtils.FEATURE_RCS2_CHAT + "</op:service-id>"
+				+ SipUtils.CRLF + "    <op:version>1.0</op:version>" + SipUtils.CRLF
+				+ "  </op:service-description>" + SipUtils.CRLF + "  <contact>"
+				+ ImsModule.IMS_USER_PROFILE.getPublicUri() + "</contact>" + SipUtils.CRLF
+				+ "  <timestamp>" + timestamp + "</timestamp>" + SipUtils.CRLF + "</tuple>"
+				+ SipUtils.CRLF + "<tuple id=\"t5\">" + SipUtils.CRLF + "  <status><basic>"
+				+ buildBooleanStatus(capabilities.isCsVideoSupported()) + "</basic></status>"
+				+ SipUtils.CRLF + "  <op:service-description>" + SipUtils.CRLF
+				+ "    <op:service-id>" + PresenceUtils.FEATURE_RCS2_CS_VIDEO + "</op:service-id>"
+				+ SipUtils.CRLF + "    <op:version>1.0</op:version>" + SipUtils.CRLF
+				+ "  </op:service-description>" + SipUtils.CRLF + "  <contact>"
+				+ ImsModule.IMS_USER_PROFILE.getPublicUri() + "</contact>" + SipUtils.CRLF
+				+ "  <timestamp>" + timestamp + "</timestamp>" + SipUtils.CRLF + "</tuple>"
+				+ SipUtils.CRLF;
+	}
 
-    /**
-     * Build geoloc document
-     *
-     * @param timestamp Timestamp
-     * @param geolocInfo Geoloc info
-     * @return Document
-     */
-    private String buildGeoloc(String timestamp, Geoloc geolocInfo) {
-    	String document = "";
-    	if (geolocInfo != null) {
-    		document +=
-    			 "<tuple id=\"g1\">" + SipUtils.CRLF +
-			     "  <status><basic>open</basic></status>" + SipUtils.CRLF +
-			     "   <gp:geopriv>" + SipUtils.CRLF +
-			     "    <gp:location-info><gml:location>" + SipUtils.CRLF +
-			     "        <gml:Point srsDimension=\"3\"><gml:pos>" + geolocInfo.getLatitude() + " " +
-			     				geolocInfo.getLongitude() + " " +
-			     				geolocInfo.getAltitude() + "</gml:pos>" + SipUtils.CRLF +
-			     "        </gml:Point></gml:location>" + SipUtils.CRLF +
-			     "    </gp:location-info>" + SipUtils.CRLF +
-			     "    <gp:method>GPS</gp:method>" + SipUtils.CRLF +
-			     "   </gp:geopriv>"+SipUtils.CRLF +
-				 "  <contact>" + ImsModule.IMS_USER_PROFILE.getPublicUri() + "</contact>" + SipUtils.CRLF +
-				 "  <timestamp>" + timestamp + "</timestamp>" + SipUtils.CRLF +
-			     "</tuple>" + SipUtils.CRLF;
-    	}
-    	return document;
-    }
+	/**
+	 * Build geoloc document
+	 *
+	 * @param timestamp
+	 *            Timestamp
+	 * @param geolocInfo
+	 *            Geoloc info
+	 * @return Document
+	 */
+	private String buildGeoloc(String timestamp, Geoloc geolocInfo) {
+		String document = "";
+		if (geolocInfo != null) {
+			document += "<tuple id=\"g1\">" + SipUtils.CRLF
+					+ "  <status><basic>open</basic></status>" + SipUtils.CRLF + "   <gp:geopriv>"
+					+ SipUtils.CRLF + "    <gp:location-info><gml:location>" + SipUtils.CRLF
+					+ "        <gml:Point srsDimension=\"3\"><gml:pos>" + geolocInfo.getLatitude()
+					+ " " + geolocInfo.getLongitude() + " " + geolocInfo.getAltitude()
+					+ "</gml:pos>" + SipUtils.CRLF + "        </gml:Point></gml:location>"
+					+ SipUtils.CRLF + "    </gp:location-info>" + SipUtils.CRLF
+					+ "    <gp:method>GPS</gp:method>" + SipUtils.CRLF + "   </gp:geopriv>"
+					+ SipUtils.CRLF + "  <contact>" + ImsModule.IMS_USER_PROFILE.getPublicUri()
+					+ "</contact>" + SipUtils.CRLF + "  <timestamp>" + timestamp + "</timestamp>"
+					+ SipUtils.CRLF + "</tuple>" + SipUtils.CRLF;
+		}
+		return document;
+	}
 
 	/**
 	 * Build person info document
 	 *
-	 * @param info Presence info
+	 * @param info
+	 *            Presence info
 	 * @return Document
 	 */
 	private String buildPersonInfo(PresenceInfo info) {
@@ -567,12 +576,13 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 	/**
 	 * Build presence info document (RCS 1.0)
 	 *
-	 * @param info Presence info
+	 * @param info
+	 *            Presence info
 	 * @return Document
 	 */
 	private String buildPresenceInfoDocument(PresenceInfo info) {
-		String document = new StringBuilder("<?xml version=\"1.0\" encoding=\"")
-				.append(UTF8_STR).append("\"?>").append(SipUtils.CRLF)
+		String document = new StringBuilder("<?xml version=\"1.0\" encoding=\"").append(UTF8_STR)
+				.append("\"?>").append(SipUtils.CRLF)
 				.append("<presence xmlns=\"urn:ietf:params:xml:ns:pidf\"")
 				.append(" xmlns:op=\"urn:oma:xml:prs:pidf:oma-pres\"")
 				.append(" xmlns:opd=\"urn:oma:xml:pde:pidf:ext\"")
@@ -584,37 +594,36 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 				.append(" entity=\"").append(ImsModule.IMS_USER_PROFILE.getPublicUri())
 				.append("\">").append(SipUtils.CRLF).toString();
 
-    	// Encode timestamp
-    	String timestamp = DateUtils.encodeDate(info.getTimestamp());
+		// Encode timestamp
+		String timestamp = DateUtils.encodeDate(info.getTimestamp());
 
-    	// Build capabilities
-    	document += buildCapabilities(timestamp, mRcsSettings.getMyCapabilities());
+		// Build capabilities
+		document += buildCapabilities(timestamp, mRcsSettings.getMyCapabilities());
 
 		// Build geoloc
-    	document += buildGeoloc(timestamp, info.getGeoloc());
+		document += buildGeoloc(timestamp, info.getGeoloc());
 
-    	// Build person info
-    	document += "<pdm:person id=\"p1\">" + SipUtils.CRLF +
-					buildPersonInfo(info) +
-    				"  <pdm:timestamp>" + timestamp + "</pdm:timestamp>" + SipUtils.CRLF +
-				    "</pdm:person>" + SipUtils.CRLF;
+		// Build person info
+		document += "<pdm:person id=\"p1\">" + SipUtils.CRLF + buildPersonInfo(info)
+				+ "  <pdm:timestamp>" + timestamp + "</pdm:timestamp>" + SipUtils.CRLF
+				+ "</pdm:person>" + SipUtils.CRLF;
 
-    	// Add last header
-    	document += "</presence>" + SipUtils.CRLF;
+		// Add last header
+		document += "</presence>" + SipUtils.CRLF;
 
-        return document;
-    }
+		return document;
+	}
 
 	/**
-	 * Build partial presence info document (all presence info except permanent
-	 * state info)
+	 * Build partial presence info document (all presence info except permanent state info)
 	 *
-	 * @param info Presence info
+	 * @param info
+	 *            Presence info
 	 * @return Document
 	 */
 	private String buildPartialPresenceInfoDocument(PresenceInfo info) {
-		String document = new StringBuilder("<?xml version=\"1.0\" encoding=\"")
-				.append(UTF8_STR).append("\"?>").append(SipUtils.CRLF)
+		String document = new StringBuilder("<?xml version=\"1.0\" encoding=\"").append(UTF8_STR)
+				.append("\"?>").append(SipUtils.CRLF)
 				.append("<presence xmlns=\"urn:ietf:params:xml:ns:pidf\"")
 				.append(" xmlns:op=\"urn:oma:xml:prs:pidf:oma-pres\"")
 				.append(" xmlns:opd=\"urn:oma:xml:pde:pidf:ext\"")
@@ -626,30 +635,31 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 				.append(" entity=\"").append(ImsModule.IMS_USER_PROFILE.getPublicUri())
 				.append("\">").append(SipUtils.CRLF).toString();
 
-    	// Encode timestamp
-    	String timestamp = DateUtils.encodeDate(info.getTimestamp());
+		// Encode timestamp
+		String timestamp = DateUtils.encodeDate(info.getTimestamp());
 
-    	// Build capabilities
-    	document += buildCapabilities(timestamp, mRcsSettings.getMyCapabilities());
+		// Build capabilities
+		document += buildCapabilities(timestamp, mRcsSettings.getMyCapabilities());
 
 		// Build geoloc
-    	document += buildGeoloc(timestamp, info.getGeoloc());
+		document += buildGeoloc(timestamp, info.getGeoloc());
 
-    	// Add last header
-    	document += "</presence>" + SipUtils.CRLF;
+		// Add last header
+		document += "</presence>" + SipUtils.CRLF;
 
-        return document;
-    }
+		return document;
+	}
 
 	/**
 	 * Build permanent presence info document (RCS R2.0)
 	 *
-	 * @param info Presence info
+	 * @param info
+	 *            Presence info
 	 * @return Document
 	 */
 	private String buildPermanentPresenceInfoDocument(PresenceInfo info) {
-		String document = new StringBuilder("<?xml version=\"1.0\" encoding=\"")
-				.append(UTF8_STR).append("\"?>").append(SipUtils.CRLF)
+		String document = new StringBuilder("<?xml version=\"1.0\" encoding=\"").append(UTF8_STR)
+				.append("\"?>").append(SipUtils.CRLF)
 				.append("<presence xmlns=\"urn:ietf:params:xml:ns:pidf\"")
 				.append(" xmlns:op=\"urn:oma:xml:prs:pidf:oma-pres\"")
 				.append(" xmlns:opd=\"urn:oma:xml:pde:pidf:ext\"")
@@ -659,118 +669,118 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 				.append(ImsModule.IMS_USER_PROFILE.getPublicUri()).append("\">")
 				.append(SipUtils.CRLF).toString();
 
-    	// Encode timestamp
-    	String timestamp = DateUtils.encodeDate(info.getTimestamp());
+		// Encode timestamp
+		String timestamp = DateUtils.encodeDate(info.getTimestamp());
 
-    	// Build person info (freetext, favorite link and photo-icon)
-    	document += "<pdm:person id=\"p1\">" + SipUtils.CRLF +
-					buildPersonInfo(info) +
-    				"  <pdm:timestamp>" + timestamp + "</pdm:timestamp>" + SipUtils.CRLF +
-				    "</pdm:person>" + SipUtils.CRLF;
+		// Build person info (freetext, favorite link and photo-icon)
+		document += "<pdm:person id=\"p1\">" + SipUtils.CRLF + buildPersonInfo(info)
+				+ "  <pdm:timestamp>" + timestamp + "</pdm:timestamp>" + SipUtils.CRLF
+				+ "</pdm:person>" + SipUtils.CRLF;
 
-    	// Add last header
-	    document += "</presence>" + SipUtils.CRLF;
+		// Add last header
+		document += "</presence>" + SipUtils.CRLF;
 
-        return document;
-    }
+		return document;
+	}
 
-    /**
-     * Update photo-icon
-     *
-     * @param photoIcon Photo-icon
-     * @return Boolean result
-     */
-    private boolean updatePhotoIcon(PhotoIcon photoIcon) {
-    	boolean result = false;
+	/**
+	 * Update photo-icon
+	 *
+	 * @param photoIcon
+	 *            Photo-icon
+	 * @return Boolean result
+	 */
+	private boolean updatePhotoIcon(PhotoIcon photoIcon) {
+		boolean result = false;
 
-    	// Photo-icon management
-    	PhotoIcon currentPhoto = presenceInfo.getPhotoIcon();
-    	if ((photoIcon != null) && (photoIcon.getEtag() == null)) {
-    		// Test photo icon size
-    		long maxSize = mRcsSettings.getMaxPhotoIconSize();
-        	if ((maxSize != 0) && (photoIcon.getSize() > maxSize)) {
-    			if (logger.isActivated()) {
-    				logger.debug("Max photo size achieved");
-    			}
-    			return false;
-            }
+		// Photo-icon management
+		PhotoIcon currentPhoto = presenceInfo.getPhotoIcon();
+		if ((photoIcon != null) && (photoIcon.getEtag() == null)) {
+			// Test photo icon size
+			long maxSize = mRcsSettings.getMaxPhotoIconSize();
+			if ((maxSize != 0) && (photoIcon.getSize() > maxSize)) {
+				if (logger.isActivated()) {
+					logger.debug("Max photo size achieved");
+				}
+				return false;
+			}
 
-    		// Upload the new photo-icon
-    		if (logger.isActivated()) {
-    			logger.info("Upload the photo-icon");
-    		}
-    		result = uploadPhotoIcon(photoIcon);
-    	} else
-    	if ((photoIcon == null) && (currentPhoto != null)) {
-    		// Delete the current photo-icon
-    		if (logger.isActivated()) {
-    			logger.info("Delete the photo-icon");
-    		}
-    		result = deletePhotoIcon();
-    	} else {
-    		// Nothing to do
-    		result = true;
-    	}
-
-    	return result;
-    }
-
-    /**
-     * Publish presence info
-     *
-     * @param info Presence info
-     * @return true if the presence info has been publish with success,
-     *          else returns false
-     */
-    public boolean publishPresenceInfo(PresenceInfo info) {
-    	boolean result = false;
-
-    	// Photo-icon management
-    	result = updatePhotoIcon(info.getPhotoIcon());
-    	if (!result) {
-    		// Can't update the photo-icon in the XDM server
-    		return result;
-    	}
-
-    	// Reset timestamp
-    	info.resetTimestamp();
-
-		// Publish presence info
-    	if (permanentState) {
-    		// Permanent state procedure: publish the new presence info via XCAP
-    		if (logger.isActivated()) {
-    			logger.info("Publish presence info via XDM request (permanent state)");
-    		}
-    		String xml = buildPermanentPresenceInfoDocument(info);
-    		HttpResponse response = xdm.setPresenceInfo(xml);
-            if ((response != null) && response.isSuccessfullResponse()) {
-    			result = true;
-    		} else {
-    			result = false;
-    		}
-    	} else {
-    		// SIP procedure: publish the new presence info via SIP
-    		if (logger.isActivated()) {
-    			logger.info("Publish presence info via SIP request");
-    		}
-    		String xml = buildPresenceInfoDocument(info);
-			result = publisher.publish(xml);
-    	}
-
-		// If server updated with success then update contact info cache
-    	if (result) {
-    		presenceInfo = info;
+			// Upload the new photo-icon
+			if (logger.isActivated()) {
+				logger.info("Upload the photo-icon");
+			}
+			result = uploadPhotoIcon(photoIcon);
+		} else if ((photoIcon == null) && (currentPhoto != null)) {
+			// Delete the current photo-icon
+			if (logger.isActivated()) {
+				logger.info("Delete the photo-icon");
+			}
+			result = deletePhotoIcon();
+		} else {
+			// Nothing to do
+			result = true;
 		}
 
-    	return result;
-    }
+		return result;
+	}
 
-    /**
-     * Upload photo icon
-     *
-     * @param photo Photo icon
-     * @return Boolean result
-     */
+	/**
+	 * Publish presence info
+	 *
+	 * @param info
+	 *            Presence info
+	 * @return true if the presence info has been publish with success, else returns false
+	 */
+	public boolean publishPresenceInfo(PresenceInfo info) {
+		boolean result = false;
+
+		// Photo-icon management
+		result = updatePhotoIcon(info.getPhotoIcon());
+		if (!result) {
+			// Can't update the photo-icon in the XDM server
+			return result;
+		}
+
+		// Reset timestamp
+		info.resetTimestamp();
+
+		// Publish presence info
+		if (permanentState) {
+			// Permanent state procedure: publish the new presence info via XCAP
+			if (logger.isActivated()) {
+				logger.info("Publish presence info via XDM request (permanent state)");
+			}
+			String xml = buildPermanentPresenceInfoDocument(info);
+			HttpResponse response = xdm.setPresenceInfo(xml);
+			if ((response != null) && response.isSuccessfullResponse()) {
+				result = true;
+			} else {
+				result = false;
+			}
+		} else {
+			// SIP procedure: publish the new presence info via SIP
+			if (logger.isActivated()) {
+				logger.info("Publish presence info via SIP request");
+			}
+			String xml = buildPresenceInfoDocument(info);
+			result = publisher.publish(xml);
+		}
+
+		// If server updated with success then update contact info cache
+		if (result) {
+			presenceInfo = info;
+		}
+
+		return result;
+	}
+
+	/**
+	 * Upload photo icon
+	 *
+	 * @param photo
+	 *            Photo icon
+	 * @return Boolean result
+	 */
 	public boolean uploadPhotoIcon(PhotoIcon photo) {
 		// Upload the photo to the XDM server
 		HttpResponse response = xdm.uploadEndUserPhoto(photo);
@@ -793,14 +803,16 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 		}
 	}
 
-    /**
-     * Delete photo icon
-     * @return Boolean result
-     */
-	public boolean deletePhotoIcon(){
+	/**
+	 * Delete photo icon
+	 * 
+	 * @return Boolean result
+	 */
+	public boolean deletePhotoIcon() {
 		// Delete the photo from the XDM server
 		HttpResponse response = xdm.deleteEndUserPhoto();
-		if ((response != null) && (response.isSuccessfullResponse() || response.isNotFoundResponse())) {
+		if ((response != null)
+				&& (response.isSuccessfullResponse() || response.isNotFoundResponse())) {
 			return true;
 		} else {
 			return false;
@@ -808,12 +820,13 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 	}
 
 	/**
-     * Invite a contact to share its presence
-     *
-     * @param contact Contact
-     * @return Returns true if XDM request was successful, else false
-     */
-    public boolean inviteContactToSharePresence(ContactId contact) {
+	 * Invite a contact to share its presence
+	 *
+	 * @param contact
+	 *            Contact
+	 * @return Returns true if XDM request was successful, else false
+	 */
+	public boolean inviteContactToSharePresence(ContactId contact) {
 		// Remove contact from the blocked contacts list
 		xdm.removeContactFromBlockedList(contact);
 
@@ -822,20 +835,21 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
 		// Add contact in the granted contacts list
 		HttpResponse response = xdm.addContactToGrantedList(contact);
-        if ((response != null) && response.isSuccessfullResponse()) {
+		if ((response != null) && response.isSuccessfullResponse()) {
 			return true;
 		} else {
 			return false;
 		}
-    }
+	}
 
-    /**
-     * Revoke a shared contact
-     *
-     * @param contact Contact
-     * @return Returns true if XDM request was successful, else false
-     */
-    public boolean revokeSharedContact(ContactId contact){
+	/**
+	 * Revoke a shared contact
+	 *
+	 * @param contact
+	 *            Contact
+	 * @return Returns true if XDM request was successful, else false
+	 */
+	public boolean revokeSharedContact(ContactId contact) {
 		// Add contact in the revoked contacts list
 		HttpResponse response = xdm.addContactToRevokedList(contact);
 		if ((response == null) || (!response.isSuccessfullResponse())) {
@@ -844,42 +858,44 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
 		// Remove contact from the granted contacts list
 		response = xdm.removeContactFromGrantedList(contact);
-        if ((response != null)
-                && (response.isSuccessfullResponse() || response.isNotFoundResponse())) {
-			return true;
-		} else {
-			return false;
-		}
-    }
-
-    /**
-     * Remove a revoked contact
-     *
-     * @param contact Contact
-     * @return Returns true if XDM request was successful, else false
-     */
-	public boolean removeRevokedContact(ContactId contact) {
-		// Remove contact from the revoked contacts list
-		HttpResponse response = xdm.removeContactFromRevokedList(contact);
-        if ((response != null)
-                && (response.isSuccessfullResponse() || response.isNotFoundResponse())) {
+		if ((response != null)
+				&& (response.isSuccessfullResponse() || response.isNotFoundResponse())) {
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-    /**
-     * Remove a blocked contact
-     *
-     * @param contact Contact
-     * @return Returns true if XDM request was successful, else false
-     */
+	/**
+	 * Remove a revoked contact
+	 *
+	 * @param contact
+	 *            Contact
+	 * @return Returns true if XDM request was successful, else false
+	 */
+	public boolean removeRevokedContact(ContactId contact) {
+		// Remove contact from the revoked contacts list
+		HttpResponse response = xdm.removeContactFromRevokedList(contact);
+		if ((response != null)
+				&& (response.isSuccessfullResponse() || response.isNotFoundResponse())) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Remove a blocked contact
+	 *
+	 * @param contact
+	 *            Contact
+	 * @return Returns true if XDM request was successful, else false
+	 */
 	public boolean removeBlockedContact(ContactId contact) {
 		// Remove contact from the blocked contacts list
 		HttpResponse response = xdm.removeContactFromBlockedList(contact);
-        if ((response != null)
-                && (response.isSuccessfullResponse() || response.isNotFoundResponse())) {
+		if ((response != null)
+				&& (response.isSuccessfullResponse() || response.isNotFoundResponse())) {
 			return true;
 		} else {
 			return false;
@@ -890,7 +906,8 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 	 * Address book content has changed
 	 */
 	public void handleAddressBookHasChanged() {
-		// If a contact used to be in a RCS relationship with us but is not in the address book any more, we may have to remove or
+		// If a contact used to be in a RCS relationship with us but is not in the address book any
+		// more, we may have to remove or
 		// unblock it
 		// Get a list of all RCS numbers
 		Set<ContactId> rcsNumbers = mContactsManager.getRcsContactsWithSocialPresence();
@@ -899,7 +916,8 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 			if (!ContactUtils.isNumberInAddressBook(contact)) {
 				// If it is not present in the address book
 				if (logger.isActivated()) {
-					logger.debug("The RCS number " + contact + " was not found in the address book any more.");
+					logger.debug("The RCS number " + contact
+							+ " was not found in the address book any more.");
 				}
 
 				if (mContactsManager.isNumberShared(contact)
@@ -912,12 +930,14 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 					// We revoke it
 					boolean result = revokeSharedContact(contact);
 					if (result) {
-						// The contact should be automatically unrevoked after a given timeout. Here the
+						// The contact should be automatically unrevoked after a given timeout. Here
+						// the
 						// timeout period is 0, so the contact can receive invitations again now
 						result = removeRevokedContact(contact);
 						if (result) {
 							// Remove entry from rich address book provider
-							mContactsManager.modifyRcsContactInProvider(contact, RcsStatus.RCS_CAPABLE);
+							mContactsManager.modifyRcsContactInProvider(contact,
+									RcsStatus.RCS_CAPABLE);
 						} else {
 							if (logger.isActivated()) {
 								logger.error("Something went wrong when revoking shared contact");
@@ -955,7 +975,8 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 								logger.debug("We remove it from rich address book provider");
 							}
 							// Remove entry from rich address book provider
-							mContactsManager.modifyRcsContactInProvider(contact, RcsStatus.RCS_CAPABLE);
+							mContactsManager.modifyRcsContactInProvider(contact,
+									RcsStatus.RCS_CAPABLE);
 						}
 					}
 				}

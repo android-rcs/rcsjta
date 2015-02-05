@@ -31,25 +31,25 @@ import com.orangelabs.rcs.utils.logger.Logger;
  */
 public class MsrpClientConnection extends MsrpConnection {
 	/**
-	 * Remote IP address 
+	 * Remote IP address
 	 */
 	private String remoteAddress;
-	
+
 	/**
 	 * Remote TCP port number
 	 */
 	private int remotePort;
-	
-    /**
-     * Secured connection
-     */
-    private boolean secured = false;
 
-    // Changed by Deutsche Telekom
-    /**
-     * Secured connection
-     */
-    private String announcedFingerprint = null;
+	/**
+	 * Secured connection
+	 */
+	private boolean secured = false;
+
+	// Changed by Deutsche Telekom
+	/**
+	 * Secured connection
+	 */
+	private String announcedFingerprint = null;
 
 	/**
 	 * The logger
@@ -59,48 +59,62 @@ public class MsrpClientConnection extends MsrpConnection {
 	/**
 	 * Constructor
 	 * 
-	 * @param session MSRP session
-	 * @param remoteAddress Remote IP address
-	 * @param remotePort Remote port number
+	 * @param session
+	 *            MSRP session
+	 * @param remoteAddress
+	 *            Remote IP address
+	 * @param remotePort
+	 *            Remote port number
 	 */
 	public MsrpClientConnection(MsrpSession session, String remoteAddress, int remotePort) {
 		super(session);
-		
+
 		this.remoteAddress = remoteAddress;
 		this.remotePort = remotePort;
 	}
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param session MSRP session
-	 * @param remoteAddress Remote IP address
-	 * @param remotePort Remote port number
-	 * @param secured Secured media flag
+	 * @param session
+	 *            MSRP session
+	 * @param remoteAddress
+	 *            Remote IP address
+	 * @param remotePort
+	 *            Remote port number
+	 * @param secured
+	 *            Secured media flag
 	 */
-	public MsrpClientConnection(MsrpSession session, String remoteAddress, int remotePort, boolean secured) {
+	public MsrpClientConnection(MsrpSession session, String remoteAddress, int remotePort,
+			boolean secured) {
 		this(session, remoteAddress, remotePort);
-		
+
 		this.secured = secured;
 	}
-	
+
 	// Changed by Deutsche Telekom
 	/**
 	 * Constructor
 	 * 
-	 * @param session MSRP session
-	 * @param remoteAddress Remote IP address
-	 * @param remotePort Remote port number
-	 * @param secured Secured media flag
-	 * @param fingerprint fingerprint announced in SDP
+	 * @param session
+	 *            MSRP session
+	 * @param remoteAddress
+	 *            Remote IP address
+	 * @param remotePort
+	 *            Remote port number
+	 * @param secured
+	 *            Secured media flag
+	 * @param fingerprint
+	 *            fingerprint announced in SDP
 	 */
-	public MsrpClientConnection(MsrpSession session, String remoteAddress, int remotePort, boolean secured, String fingerprint) {
+	public MsrpClientConnection(MsrpSession session, String remoteAddress, int remotePort,
+			boolean secured, String fingerprint) {
 		this(session, remoteAddress, remotePort);
-		
+
 		this.secured = secured;
 		this.announcedFingerprint = fingerprint;
 	}
-	
+
 	/**
 	 * Is secured connection
 	 * 
@@ -126,7 +140,8 @@ public class MsrpClientConnection extends MsrpConnection {
 			if (this.announcedFingerprint != null) {
 				// follow RFC 4572
 				// use self-signed certificates
-				socket = NetworkFactory.getFactory().createSimpleSecureSocketClientConnection(this.announcedFingerprint);
+				socket = NetworkFactory.getFactory().createSimpleSecureSocketClientConnection(
+						this.announcedFingerprint);
 			} else {
 				socket = NetworkFactory.getFactory().createSecureSocketClientConnection();
 			}
@@ -135,7 +150,8 @@ public class MsrpClientConnection extends MsrpConnection {
 		}
 		socket.open(remoteAddress, remotePort);
 		if (logger.isActivated()) {
-			logger.debug("Socket connected to " + socket.getRemoteAddress() + ":" + socket.getRemotePort());
+			logger.debug("Socket connected to " + socket.getRemoteAddress() + ":"
+					+ socket.getRemotePort());
 		}
 		return socket;
 	}

@@ -26,8 +26,7 @@ public interface IMultimediaStreamingSessionEventBroadcaster {
 
 	public void broadcastPayloadReceived(ContactId contact, String sessionId, byte[] content);
 
-	public void broadcastStateChanged(ContactId contact, String sessionId,
-			int state, int reasonCode);
+	public void broadcastStateChanged(ContactId contact, String sessionId, int state, int reasonCode);
 
 	public void broadcastInvitation(String sessionId, Intent rtpSessionInvite);
 }

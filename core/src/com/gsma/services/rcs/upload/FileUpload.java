@@ -33,54 +33,55 @@ import com.gsma.services.rcs.upload.IFileUpload;
  */
 public class FileUpload {
 
-    /**
-     * File upload state
-     */
-    public static class State {
-    	/**
-    	 * Inactive state
-    	 */
-    	public final static int INACTIVE = 0;
+	/**
+	 * File upload state
+	 */
+	public static class State {
+		/**
+		 * Inactive state
+		 */
+		public final static int INACTIVE = 0;
 
-    	/**
-    	 * Upload is started
-    	 */
-    	public final static int STARTED = 3;
-    	
-    	/**
-    	 * File has been transferred with success 
-    	 */
-    	public final static int TRANSFERRED = 4;
-    	
-    	/**
-    	 * Upload has been aborted 
-    	 */
-    	public final static int ABORTED = 5;
-    	
-    	/**
-    	 * Upload has failed 
-    	 */
-    	public final static int FAILED = 6;
+		/**
+		 * Upload is started
+		 */
+		public final static int STARTED = 3;
 
-        private State() {
-        }    	
-    }
+		/**
+		 * File has been transferred with success
+		 */
+		public final static int TRANSFERRED = 4;
 
-    /**
-     * File upload interface
-     */
-    private IFileUpload uploadInf;
-    
-    /**
-     * Constructor
-     * 
-     * @param uploadInf Upload interface
-     */
-    /* package private */FileUpload(IFileUpload uploadInf) {
-    	this.uploadInf = uploadInf;
-    }
-    	
-    /**
+		/**
+		 * Upload has been aborted
+		 */
+		public final static int ABORTED = 5;
+
+		/**
+		 * Upload has failed
+		 */
+		public final static int FAILED = 6;
+
+		private State() {
+		}
+	}
+
+	/**
+	 * File upload interface
+	 */
+	private IFileUpload uploadInf;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param uploadInf
+	 *            Upload interface
+	 */
+	/* package private */FileUpload(IFileUpload uploadInf) {
+		this.uploadInf = uploadInf;
+	}
+
+	/**
 	 * Returns the upload ID of the upload
 	 * 
 	 * @return Upload ID
@@ -89,11 +90,11 @@ public class FileUpload {
 	public String getUploadId() throws RcsServiceException {
 		try {
 			return uploadInf.getUploadId();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Returns the URI of the file to be uploaded
 	 *
@@ -133,10 +134,10 @@ public class FileUpload {
 	public int getState() throws RcsServiceException {
 		try {
 			return uploadInf.getState();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
-	}		
+	}
 
 	/**
 	 * Aborts the upload
@@ -146,7 +147,7 @@ public class FileUpload {
 	public void abortUpload() throws RcsServiceException {
 		try {
 			uploadInf.abortUpload();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}

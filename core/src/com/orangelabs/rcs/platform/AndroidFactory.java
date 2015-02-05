@@ -47,15 +47,17 @@ public class AndroidFactory {
 	/**
 	 * Load factory
 	 * 
-	 * @param context Context
+	 * @param context
+	 *            Context
 	 */
 	public static void setApplicationContext(Context context) {
 		AndroidFactory.context = context;
 		try {
 			NetworkFactory.loadFactory("com.orangelabs.rcs.platform.network.AndroidNetworkFactory");
-			RegistryFactory.loadFactory("com.orangelabs.rcs.platform.registry.AndroidRegistryFactory");
+			RegistryFactory
+					.loadFactory("com.orangelabs.rcs.platform.registry.AndroidRegistryFactory");
 			FileFactory.loadFactory("com.orangelabs.rcs.platform.file.AndroidFileFactory");
-		} catch(FactoryException e) {
+		} catch (FactoryException e) {
 			e.printStackTrace();
 		}
 	}

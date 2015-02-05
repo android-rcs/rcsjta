@@ -21,11 +21,12 @@ import com.orangelabs.rcs.utils.logger.Logger;
 import android.os.RemoteCallbackList;
 
 /**
- * RcsServiceRegistrationEventBroadcaster maintains the registering and
- * unregistering of IRcsServiceRegistrationListener and also performs broadcast
- * events on these listeners upon the trigger of corresponding callbacks.
+ * RcsServiceRegistrationEventBroadcaster maintains the registering and unregistering of
+ * IRcsServiceRegistrationListener and also performs broadcast events on these listeners upon the
+ * trigger of corresponding callbacks.
  */
-public class RcsServiceRegistrationEventBroadcaster implements IRcsServiceRegistrationEventBroadcaster{
+public class RcsServiceRegistrationEventBroadcaster implements
+		IRcsServiceRegistrationEventBroadcaster {
 
 	private final RemoteCallbackList<IRcsServiceRegistrationListener> mServiceRegistrationListeners = new RemoteCallbackList<IRcsServiceRegistrationListener>();
 

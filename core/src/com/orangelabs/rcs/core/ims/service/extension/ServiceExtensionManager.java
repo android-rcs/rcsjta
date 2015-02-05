@@ -32,36 +32,37 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
- * Service extension manager which adds supported extension after having
- * verified some authorization rules.
+ * Service extension manager which adds supported extension after having verified some authorization
+ * rules.
  * 
  * @author Jean-Marc AUFFRET
  * @author YPLO6403
  *
  */
 public class ServiceExtensionManager {
-	
+
 	/**
 	 * Singleton of ServiceExtensionManager
 	 */
 	private static volatile ServiceExtensionManager instance;
-	
+
 	/**
 	 * Separator of extensions
 	 */
 	private static final String EXTENSION_SEPARATOR = ";";
-	
+
 	/**
-     * The logger
-     */
-    private final static Logger logger = Logger.getLogger(ServiceExtensionManager.class.getSimpleName());
-    
-    /**
+	 * The logger
+	 */
+	private final static Logger logger = Logger.getLogger(ServiceExtensionManager.class
+			.getSimpleName());
+
+	/**
 	 * Empty constructor : prevent caller from creating multiple instances
 	 */
 	private ServiceExtensionManager() {
 	}
-	
+
 	/**
 	 * Get an instance of ServiceExtensionManager.
 	 * 
@@ -77,23 +78,27 @@ public class ServiceExtensionManager {
 		}
 		return instance;
 	}
-	
+
 	/**
 	 * Save supported extensions in database
 	 * 
-	 * @param supportedExts List of supported extensions
+	 * @param supportedExts
+	 *            List of supported extensions
 	 */
 	private void saveSupportedExtensions(Set<String> supportedExts) {
 		// Update supported extensions in database
 		RcsSettings.getInstance().setSupportedRcsExtensions(supportedExts);
 	}
-	
+
 	/**
-	 * Check if the extensions are valid. Each valid extension is saved in the cache.  
+	 * Check if the extensions are valid. Each valid extension is saved in the cache.
 	 * 
-	 * @param context Context
-	 * @param supportedExts Set of supported extensions
-	 * @param newExts Set of new extensions to be checked
+	 * @param context
+	 *            Context
+	 * @param supportedExts
+	 *            Set of supported extensions
+	 * @param newExts
+	 *            Set of new extensions to be checked
 	 */
 	private void checkExtensions(Context context, Set<String> supportedExts, Set<String> newExts) {
 		// Check each new extension
@@ -112,12 +117,13 @@ public class ServiceExtensionManager {
 				}
 			}
 		}
-	}	
-	
+	}
+
 	/**
 	 * Update supported extensions at boot
 	 * 
-	 * @param context Context
+	 * @param context
+	 *            Context
 	 */
 	public void updateSupportedExtensions(Context context) {
 		if (context == null) {
@@ -131,39 +137,41 @@ public class ServiceExtensionManager {
 				logger.debug("Update supported extensions");
 			}
 
-			Set<String> supportedExts = new HashSet<String>(); 
-			
+			Set<String> supportedExts = new HashSet<String>();
+
 			// Intent query on current installed activities
-    		PackageManager pm = context.getPackageManager();
-    		List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-    		for (ApplicationInfo appInfo : apps) {
+			PackageManager pm = context.getPackageManager();
+			List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+			for (ApplicationInfo appInfo : apps) {
 				Bundle appMeta = appInfo.metaData;
 				if (appMeta != null) {
-		    		String exts = appMeta.getString(CapabilityService.INTENT_EXTENSIONS);
-		    		if (!TextUtils.isEmpty(exts)) {
+					String exts = appMeta.getString(CapabilityService.INTENT_EXTENSIONS);
+					if (!TextUtils.isEmpty(exts)) {
 						if (logger.isActivated()) {
 							logger.debug("Update supported extensions " + exts);
 						}
-			    		// Check extensions
-			    		checkExtensions(context, supportedExts, getExtensions(exts));    		
-		    		}
+						// Check extensions
+						checkExtensions(context, supportedExts, getExtensions(exts));
+					}
 				}
 			}
 
 			// Update supported extensions in database
-    		saveSupportedExtensions(supportedExts);
-		} catch(Exception e) {
+			saveSupportedExtensions(supportedExts);
+		} catch (Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Unexpected error", e);
 			}
 		}
-	}	
-	
+	}
+
 	/**
 	 * Is extension authorized
 	 * 
-	 * @param context Context
-	 * @param ext Extension ID
+	 * @param context
+	 *            Context
+	 * @param ext
+	 *            Extension ID
 	 * @return Boolean
 	 */
 	public boolean isExtensionAuthorized(Context context, String ext) {
@@ -178,25 +186,27 @@ public class ServiceExtensionManager {
 		}
 		return true;
 	}
-	
+
 	/**
-	 * Remove supported extensions  
+	 * Remove supported extensions
 	 * 
-	 * @param context Context
+	 * @param context
+	 *            Context
 	 */
 	public void removeSupportedExtensions(Context context) {
 		updateSupportedExtensions(context);
 	}
-	
+
 	/**
-	 * Add supported extensions  
+	 * Add supported extensions
 	 * 
-	 * @param context Context
+	 * @param context
+	 *            Context
 	 */
 	public void addNewSupportedExtensions(Context context) {
 		updateSupportedExtensions(context);
 	}
-	
+
 	/**
 	 * Extract set of extensions from String
 	 *

@@ -26,134 +26,133 @@ import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
- * This class maintains the information related to a multimedia
- * session and offers methods to manage it. This is an abstract
- * class between a messaging session and a streaming session. 
+ * This class maintains the information related to a multimedia session and offers methods to manage
+ * it. This is an abstract class between a messaging session and a streaming session.
  * 
  * @author Jean-Marc AUFFRET
  */
 public abstract class MultimediaSession {
-    /**
-     * Multimedia session state
-     */
-    public static class State {
-    	/**
-    	 * Session invitation received
-    	 */
-    	public final static int INVITED = 0;
-    	
-    	/**
-    	 * Session invitation sent
-    	 */
-    	public final static int INITIATING = 1;
-    	
-    	/**
-    	 * Session is started
-    	 */
-    	public final static int STARTED = 2;
-    	
-    	/**
-    	 * Session has been aborted or 
-    	 */
-    	public final static int ABORTED = 3;
+	/**
+	 * Multimedia session state
+	 */
+	public static class State {
+		/**
+		 * Session invitation received
+		 */
+		public final static int INVITED = 0;
 
-        /**
-    	 * Session has failed 
-    	 */
-    	public final static int FAILED = 4;
+		/**
+		 * Session invitation sent
+		 */
+		public final static int INITIATING = 1;
 
-        /**
-    	 * Session has been rejected.
-    	 */
-    	public final static int REJECTED = 5;
+		/**
+		 * Session is started
+		 */
+		public final static int STARTED = 2;
 
-        /**
-    	 * Call ringing
-    	 */
-    	public final static int RINGING = 6;
+		/**
+		 * Session has been aborted or
+		 */
+		public final static int ABORTED = 3;
 
-    	/**
-    	 * Session has been accepted and is in the process of becoming started
-    	 */
-    	public final static int ACCEPTING = 7;
+		/**
+		 * Session has failed
+		 */
+		public final static int FAILED = 4;
 
-        private State() {
-        }    	
-    }
+		/**
+		 * Session has been rejected.
+		 */
+		public final static int REJECTED = 5;
 
-    /**
-     * Multimedia session reason code
-     */
-    public static class ReasonCode {
+		/**
+		 * Call ringing
+		 */
+		public final static int RINGING = 6;
 
-        /**
-         * No specific reason code specified.
-         */
-        public final static int UNSPECIFIED = 0;
+		/**
+		 * Session has been accepted and is in the process of becoming started
+		 */
+		public final static int ACCEPTING = 7;
 
-        /**
-         * Session invitation was rejected due to time out.
-         */
-        public final static int REJECTED_TIME_OUT = 1;
+		private State() {
+		}
+	}
 
-        /**
-         * Session invitation was rejected by local user.
-         */
-        public final static int REJECTED_BY_USER = 2;
+	/**
+	 * Multimedia session reason code
+	 */
+	public static class ReasonCode {
 
-        /**
-         * Session invitation was rejected by remote.
-         */
-        public final static int REJECTED_BY_REMOTE = 3;
+		/**
+		 * No specific reason code specified.
+		 */
+		public final static int UNSPECIFIED = 0;
 
-        /**
-         * Session failed.
-         */
-        public final static int FAILED_SESSION = 4;
+		/**
+		 * Session invitation was rejected due to time out.
+		 */
+		public final static int REJECTED_TIME_OUT = 1;
 
-        /**
-         * Media failed.
-         */
-        public final static int FAILED_MEDIA = 5;
-    }
-    
-    /**
-     * Session error
-     */
-    public static class Error {
-    	/**
-    	 * Session invitation has been declined by remote
-    	 */
-    	public final static int INVITATION_DECLINED = 0;
+		/**
+		 * Session invitation was rejected by local user.
+		 */
+		public final static int REJECTED_BY_USER = 2;
 
-    	/**
-    	 * Session has failed
-    	 */
-    	public final static int SESSION_FAILED = 1;
+		/**
+		 * Session invitation was rejected by remote.
+		 */
+		public final static int REJECTED_BY_REMOTE = 3;
 
-    	/**
-    	 * Media has failed
-    	 */
-    	public final static int MEDIA_FAILED = 2;
+		/**
+		 * Session failed.
+		 */
+		public final static int FAILED_SESSION = 4;
 
-    	private Error() {
-        }    	
-    }    
-    
-    /**
-     * Constructor
-     */
-    MultimediaSession() {
-    }
-    
-    /**
+		/**
+		 * Media failed.
+		 */
+		public final static int FAILED_MEDIA = 5;
+	}
+
+	/**
+	 * Session error
+	 */
+	public static class Error {
+		/**
+		 * Session invitation has been declined by remote
+		 */
+		public final static int INVITATION_DECLINED = 0;
+
+		/**
+		 * Session has failed
+		 */
+		public final static int SESSION_FAILED = 1;
+
+		/**
+		 * Media has failed
+		 */
+		public final static int MEDIA_FAILED = 2;
+
+		private Error() {
+		}
+	}
+
+	/**
+	 * Constructor
+	 */
+	MultimediaSession() {
+	}
+
+	/**
 	 * Returns the session ID of the multimedia session
 	 * 
 	 * @return Session ID
 	 * @throws RcsServiceException
 	 */
 	public abstract String getSessionId() throws RcsServiceException;
-	
+
 	/**
 	 * Returns the remote contact identifier
 	 * 
@@ -161,7 +160,7 @@ public abstract class MultimediaSession {
 	 * @throws RcsServiceException
 	 */
 	public abstract ContactId getRemoteContact() throws RcsServiceException;
-	
+
 	/**
 	 * Returns the service ID
 	 * 
@@ -169,7 +168,7 @@ public abstract class MultimediaSession {
 	 * @throws RcsServiceException
 	 */
 	public abstract String getServiceId() throws RcsServiceException;
-	
+
 	/**
 	 * Returns the state of the session
 	 * 
@@ -178,7 +177,7 @@ public abstract class MultimediaSession {
 	 * @throws RcsServiceException
 	 */
 	public abstract int getState() throws RcsServiceException;
-	
+
 	/**
 	 * Returns the direction of the session
 	 *
@@ -202,14 +201,14 @@ public abstract class MultimediaSession {
 	 * @throws RcsServiceException
 	 */
 	public abstract void acceptInvitation() throws RcsServiceException;
-	
+
 	/**
 	 * Rejects session invitation
 	 * 
 	 * @throws RcsServiceException
 	 */
 	public abstract void rejectInvitation() throws RcsServiceException;
-	
+
 	/**
 	 * Aborts the session
 	 * 

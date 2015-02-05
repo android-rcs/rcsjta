@@ -28,9 +28,8 @@ import android.content.Intent;
 import android.os.RemoteCallbackList;
 
 /**
- * GroupChatEventBroadcaster maintains the registering and unregistering of
- * IGroupChatListener and also performs broadcast events on these listeners upon the
- * trigger of corresponding callbacks.
+ * GroupChatEventBroadcaster maintains the registering and unregistering of IGroupChatListener and
+ * also performs broadcast events on these listeners upon the trigger of corresponding callbacks.
  */
 public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
 
@@ -49,13 +48,13 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
 		mGroupChatListeners.unregister(listener);
 	}
 
-	public void broadcastMessageStatusChanged(String chatId, String mimeType,
-			String msgId, int status, int reasonCode) {
+	public void broadcastMessageStatusChanged(String chatId, String mimeType, String msgId,
+			int status, int reasonCode) {
 		final int N = mGroupChatListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mGroupChatListeners.getBroadcastItem(i).onMessageStatusChanged(chatId,
-						mimeType, msgId, status, reasonCode);
+				mGroupChatListeners.getBroadcastItem(i).onMessageStatusChanged(chatId, mimeType,
+						msgId, status, reasonCode);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener.", e);
@@ -85,8 +84,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
 		final int N = mGroupChatListeners.beginBroadcast();
 		for (int i = 0; i < N; i++) {
 			try {
-				mGroupChatListeners.getBroadcastItem(i)
-						.onParticipantInfoChanged(chatId, info);
+				mGroupChatListeners.getBroadcastItem(i).onParticipantInfoChanged(chatId, info);
 			} catch (Exception e) {
 				if (logger.isActivated()) {
 					logger.error("Can't notify listener", e);

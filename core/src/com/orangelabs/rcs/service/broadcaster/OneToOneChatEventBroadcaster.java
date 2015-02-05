@@ -27,8 +27,8 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * OneToOneChatEventBroadcaster maintains the registering and unregistering of
- * IOneToOneChatListeners and also performs broadcast events on these listeners upon the
- * trigger of corresponding callbacks.
+ * IOneToOneChatListeners and also performs broadcast events on these listeners upon the trigger of
+ * corresponding callbacks.
  */
 public class OneToOneChatEventBroadcaster implements IOneToOneChatEventBroadcaster {
 
@@ -78,7 +78,8 @@ public class OneToOneChatEventBroadcaster implements IOneToOneChatEventBroadcast
 	}
 
 	public void broadcastMessageReceived(String mimeType, String msgId) {
-		Intent newOneToOneMessage = new Intent(OneToOneChatIntent.ACTION_NEW_ONE_TO_ONE_CHAT_MESSAGE);
+		Intent newOneToOneMessage = new Intent(
+				OneToOneChatIntent.ACTION_NEW_ONE_TO_ONE_CHAT_MESSAGE);
 		IntentUtils.tryToSetExcludeStoppedPackagesFlag(newOneToOneMessage);
 		IntentUtils.tryToSetReceiverForegroundFlag(newOneToOneMessage);
 		newOneToOneMessage.putExtra(OneToOneChatIntent.EXTRA_MIME_TYPE, mimeType);

@@ -34,12 +34,12 @@ public class MsrpServerConnection extends MsrpConnection {
 	/**
 	 * Local TCP port number
 	 */
-	private int localPort; 
+	private int localPort;
 
-    /**
-     * Socket server connection
-     */
-    private SocketServerConnection socketServer = null;
+	/**
+	 * Socket server connection
+	 */
+	private SocketServerConnection socketServer = null;
 
 	/**
 	 * The logger
@@ -49,8 +49,10 @@ public class MsrpServerConnection extends MsrpConnection {
 	/**
 	 * Constructor
 	 *
-	 * @param session MSRP session
-	 * @param localPort Local port number
+	 * @param session
+	 *            MSRP session
+	 * @param localPort
+	 *            Local port number
 	 */
 	public MsrpServerConnection(MsrpSession session, int localPort) {
 		super(session);
@@ -67,7 +69,7 @@ public class MsrpServerConnection extends MsrpConnection {
 		if (logger.isActivated()) {
 			logger.debug("Open server socket at " + localPort);
 		}
-        socketServer = NetworkFactory.getFactory().createSocketServerConnection();
+		socketServer = NetworkFactory.getFactory().createSocketServerConnection();
 		socketServer.open(localPort);
 
 		if (logger.isActivated()) {
@@ -76,23 +78,24 @@ public class MsrpServerConnection extends MsrpConnection {
 
 		SocketConnection socket = socketServer.acceptConnection();
 		if (logger.isActivated()) {
-			logger.debug("Socket connected to " + socket.getRemoteAddress() + ":" + socket.getRemotePort());
+			logger.debug("Socket connected to " + socket.getRemoteAddress() + ":"
+					+ socket.getRemotePort());
 		}
 		return socket;
 	}
 
-    /**
-     * Close the connection
-     */
-    public void close() {
-        super.close();
-        
-        try {
-            if (socketServer != null) {
-                socketServer.close();
-            }
-        } catch (IOException e) {
-            // Nothing to do
-        }
-    }
+	/**
+	 * Close the connection
+	 */
+	public void close() {
+		super.close();
+
+		try {
+			if (socketServer != null) {
+				socketServer.close();
+			}
+		} catch (IOException e) {
+			// Nothing to do
+		}
+	}
 }

@@ -28,29 +28,29 @@ import java.util.Set;
  *
  */
 public class Capabilities {
-	
+
 	public static final long INVALID_TIMESTAMP = -1;
-	
+
 	/**
 	 * Image sharing support
 	 */
 	private boolean imageSharing = false;
-	
+
 	/**
 	 * Video sharing support
 	 */
 	private boolean videoSharing = false;
-	
+
 	/**
 	 * IP voice call support
 	 */
 	private boolean ipVoiceCall = false;
-	
+
 	/**
 	 * IP video call support
 	 */
 	private boolean ipVideoCall = false;
-	
+
 	/**
 	 * IM session support
 	 */
@@ -60,7 +60,7 @@ public class Capabilities {
 	 * File transfer support
 	 */
 	private boolean fileTransfer = false;
-	
+
 	/**
 	 * CS video support
 	 */
@@ -69,53 +69,53 @@ public class Capabilities {
 	/**
 	 * Presence discovery support
 	 */
-	private boolean presenceDiscovery = false;	
-	
+	private boolean presenceDiscovery = false;
+
 	/**
 	 * Social presence support
 	 */
-	private boolean socialPresence = false;	
-
-    /**
-     * File transfer over HTTP support
-     */
-    private boolean fileTransferHttp = false;
-
-    /**
-     * Geolocation push support
-     */
-    private boolean geolocationPush = false;
-    
-    /**
-     * File Transfer Thumbnail support
-     */
-    private boolean fileTransferThumbnail = false;
-
-    /**
-     * File Transfer S&F
-     */
-    private boolean fileTransferStoreForward = false;
-
-    /**
-     * Group chat S&F
-     */
-    private boolean groupChatStoreForward = false;
+	private boolean socialPresence = false;
 
 	/**
-     * SIP automata (@see RFC 3840)
-     */
-    private boolean sipAutomata = false;
+	 * File transfer over HTTP support
+	 */
+	private boolean fileTransferHttp = false;
 
-    /**
+	/**
+	 * Geolocation push support
+	 */
+	private boolean geolocationPush = false;
+
+	/**
+	 * File Transfer Thumbnail support
+	 */
+	private boolean fileTransferThumbnail = false;
+
+	/**
+	 * File Transfer S&F
+	 */
+	private boolean fileTransferStoreForward = false;
+
+	/**
+	 * Group chat S&F
+	 */
+	private boolean groupChatStoreForward = false;
+
+	/**
+	 * SIP automata (@see RFC 3840)
+	 */
+	private boolean sipAutomata = false;
+
+	/**
 	 * Set of supported extensions
 	 */
 	private Set<String> extensions = new HashSet<String>();
-	
+
 	/**
 	 * Last timestamp capabilities was requested
 	 */
 	private long mTimestampOfLastRequest = INVALID_TIMESTAMP;
-	
+
 	/**
 	 * Last timestamp capabilities was refreshed
 	 */
@@ -127,7 +127,7 @@ public class Capabilities {
 	public Capabilities() {
 	}
 
-    /**
+	/**
 	 * Is image sharing supported
 	 * 
 	 * @return Boolean
@@ -139,7 +139,8 @@ public class Capabilities {
 	/**
 	 * Set the image sharing support
 	 * 
-	 * @param supported Supported 
+	 * @param supported
+	 *            Supported
 	 */
 	public void setImageSharingSupport(boolean supported) {
 		this.imageSharing = supported;
@@ -157,7 +158,8 @@ public class Capabilities {
 	/**
 	 * Set the video sharing support
 	 * 
-	 * @param supported Supported 
+	 * @param supported
+	 *            Supported
 	 */
 	public void setVideoSharingSupport(boolean supported) {
 		this.videoSharing = supported;
@@ -184,21 +186,23 @@ public class Capabilities {
 	/**
 	 * Set the IP voice call support
 	 * 
-	 * @param supported Supported 
+	 * @param supported
+	 *            Supported
 	 */
 	public void setIPVoiceCallSupport(boolean supported) {
 		this.ipVoiceCall = supported;
 	}
-	
+
 	/**
 	 * Set the IP video call support
 	 * 
-	 * @param supported Supported 
+	 * @param supported
+	 *            Supported
 	 */
 	public void setIPVideoCallSupport(boolean supported) {
 		this.ipVideoCall = supported;
 	}
-	
+
 	/**
 	 * Is IM session supported
 	 * 
@@ -211,7 +215,8 @@ public class Capabilities {
 	/**
 	 * Set the IM session support
 	 * 
-	 * @param supported Supported 
+	 * @param supported
+	 *            Supported
 	 */
 	public void setImSessionSupport(boolean supported) {
 		this.imSession = supported;
@@ -225,16 +230,17 @@ public class Capabilities {
 	public boolean isFileTransferSupported() {
 		return fileTransfer;
 	}
-	
+
 	/**
 	 * Set the file transfer support
 	 * 
-	 * @param supported Supported 
+	 * @param supported
+	 *            Supported
 	 */
 	public void setFileTransferSupport(boolean supported) {
 		this.fileTransfer = supported;
 	}
-	
+
 	/**
 	 * Is CS video supported
 	 * 
@@ -247,7 +253,8 @@ public class Capabilities {
 	/**
 	 * Set the CS video support
 	 * 
-	 * @param supported Supported 
+	 * @param supported
+	 *            Supported
 	 */
 	public void setCsVideoSupport(boolean supported) {
 		this.csVideo = supported;
@@ -265,7 +272,8 @@ public class Capabilities {
 	/**
 	 * Set the presence discovery support
 	 * 
-	 * @param supported Supported 
+	 * @param supported
+	 *            Supported
 	 */
 	public void setPresenceDiscoverySupport(boolean supported) {
 		this.presenceDiscovery = supported;
@@ -283,47 +291,50 @@ public class Capabilities {
 	/**
 	 * Set the social presence support
 	 * 
-	 * @param supported Supported 
+	 * @param supported
+	 *            Supported
 	 */
 	public void setSocialPresenceSupport(boolean supported) {
 		this.socialPresence = supported;
 	}
 
-    /**
-     * Is file transfer over HTTP supported
-     *
-     * @return Boolean
-     */
-    public boolean isFileTransferHttpSupported() {
-        return fileTransferHttp;
-    }
+	/**
+	 * Is file transfer over HTTP supported
+	 *
+	 * @return Boolean
+	 */
+	public boolean isFileTransferHttpSupported() {
+		return fileTransferHttp;
+	}
 
-    /**
-     * Set the file transfer over HTTP support
-     *
-     * @param supported Supported 
-     */
-    public void setFileTransferHttpSupport(boolean supported) {
-        this.fileTransferHttp = supported;
-    }
+	/**
+	 * Set the file transfer over HTTP support
+	 *
+	 * @param supported
+	 *            Supported
+	 */
+	public void setFileTransferHttpSupport(boolean supported) {
+		this.fileTransferHttp = supported;
+	}
 
-    /**
-     * Is Geolocation Push supported
-     *
-     * @return Boolean
-     */
-    public boolean isGeolocationPushSupported() {
-        return geolocationPush;
-    }
+	/**
+	 * Is Geolocation Push supported
+	 *
+	 * @return Boolean
+	 */
+	public boolean isGeolocationPushSupported() {
+		return geolocationPush;
+	}
 
-    /**
-     * Set the Geolocation Push support
-     *
-     * @param supported Supported 
-     */
-    public void setGeolocationPushSupport(boolean supported) {
-        this.geolocationPush = supported;
-    }
+	/**
+	 * Set the Geolocation Push support
+	 *
+	 * @param supported
+	 *            Supported
+	 */
+	public void setGeolocationPushSupport(boolean supported) {
+		this.geolocationPush = supported;
+	}
 
 	/**
 	 * Is file transfer thumbnail supported
@@ -333,16 +344,17 @@ public class Capabilities {
 	public boolean isFileTransferThumbnailSupported() {
 		return fileTransferThumbnail;
 	}
-	
+
 	/**
 	 * Set the file transfer thumbnail support
 	 * 
-	 * @param supported Supported 
+	 * @param supported
+	 *            Supported
 	 */
 	public void setFileTransferThumbnailSupport(boolean supported) {
 		this.fileTransferThumbnail = supported;
 	}
-    
+
 	/**
 	 * Is file transfer S&F supported
 	 * 
@@ -351,11 +363,12 @@ public class Capabilities {
 	public boolean isFileTransferStoreForwardSupported() {
 		return fileTransferStoreForward;
 	}
-	
+
 	/**
 	 * Set the file transfer S&F support
 	 * 
-	 * @param supported Supported 
+	 * @param supported
+	 *            Supported
 	 */
 	public void setFileTransferStoreForwardSupport(boolean supported) {
 		this.fileTransferStoreForward = supported;
@@ -369,11 +382,12 @@ public class Capabilities {
 	public boolean isGroupChatStoreForwardSupported() {
 		return groupChatStoreForward;
 	}
-	
+
 	/**
 	 * Set the group chat S&F support
 	 * 
-	 * @param supported Supported 
+	 * @param supported
+	 *            Supported
 	 */
 	public void setGroupChatStoreForwardSupport(boolean supported) {
 		this.groupChatStoreForward = supported;
@@ -381,6 +395,7 @@ public class Capabilities {
 
 	/**
 	 * Is device an automata ?
+	 * 
 	 * @return True if automata
 	 */
 	public boolean isSipAutomata() {
@@ -389,6 +404,7 @@ public class Capabilities {
 
 	/**
 	 * Set the SIP automata feature tag
+	 * 
 	 * @param sipAutomata
 	 */
 	public void setSipAutomata(boolean sipAutomata) {
@@ -398,21 +414,23 @@ public class Capabilities {
 	/**
 	 * Set supported extensions
 	 * 
-	 * @param extensions set of supported extensions
+	 * @param extensions
+	 *            set of supported extensions
 	 */
 	public void setSupportedExtensions(Set<String> extensions) {
 		this.extensions = extensions;
 	}
-	
+
 	/**
 	 * Add supported extension
 	 * 
-	 * @param serviceId Service ID
+	 * @param serviceId
+	 *            Service ID
 	 */
 	public void addSupportedExtension(String serviceId) {
 		extensions.add(serviceId);
 	}
-	
+
 	/**
 	 * Get set of supported extensions
 	 * 
@@ -421,7 +439,7 @@ public class Capabilities {
 	public Set<String> getSupportedExtensions() {
 		return extensions;
 	}
-	
+
 	/**
 	 * Get timestamp of last request
 	 * 
@@ -434,29 +452,25 @@ public class Capabilities {
 	/**
 	 * Set timestamp of the last request
 	 * 
-	 * @param timestampOfLastRequest (in milliseconds)
+	 * @param timestampOfLastRequest
+	 *            (in milliseconds)
 	 */
 	public void setTimestampOfLastRequest(long timestampOfLastRequest) {
 		this.mTimestampOfLastRequest = timestampOfLastRequest;
 	}
-	
+
 	/**
 	 * Returns a string representation of the object
 	 * 
 	 * @return String
 	 */
 	public String toString() {
-		return "Image_share=" + imageSharing +
-			", Video_share=" + videoSharing +
-			", IP_voice_call=" + ipVoiceCall +
-			", IP_video_call=" + ipVideoCall +			
-			", File_transfer=" + fileTransfer +
-			", Chat=" + imSession +
-            ", FT_http=" + fileTransferHttp +
-            ", Geolocation_push=" + geolocationPush +
-            ", Automata=" + sipAutomata +
-			", TimestampLastRequest=" + mTimestampOfLastRequest+
-			", TimestampLastRefresh=" + mTimestampOfLastRefresh;
+		return "Image_share=" + imageSharing + ", Video_share=" + videoSharing + ", IP_voice_call="
+				+ ipVoiceCall + ", IP_video_call=" + ipVideoCall + ", File_transfer="
+				+ fileTransfer + ", Chat=" + imSession + ", FT_http=" + fileTransferHttp
+				+ ", Geolocation_push=" + geolocationPush + ", Automata=" + sipAutomata
+				+ ", TimestampLastRequest=" + mTimestampOfLastRequest + ", TimestampLastRefresh="
+				+ mTimestampOfLastRefresh;
 	}
 
 	/**
@@ -481,7 +495,8 @@ public class Capabilities {
 	/**
 	 * Set timestamp of last refresh
 	 * 
-	 * @param timestampOfLastRefresh (in milliseconds)
+	 * @param timestampOfLastRefresh
+	 *            (in milliseconds)
 	 */
 	public void setTimestampOfLastRefresh(long timestampOfLastRefresh) {
 		this.mTimestampOfLastRefresh = timestampOfLastRefresh;

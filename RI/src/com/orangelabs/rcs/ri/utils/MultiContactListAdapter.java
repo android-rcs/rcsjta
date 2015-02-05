@@ -219,6 +219,7 @@ public class MultiContactListAdapter extends CursorAdapter implements Filterable
 
     /**
      * Get the selected phone number
+     * 
      * @param view
      * @return the phone number
      */

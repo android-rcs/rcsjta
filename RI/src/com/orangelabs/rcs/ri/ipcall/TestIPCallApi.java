@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.ipcall;
 
 import android.app.ListActivity;
@@ -34,36 +35,35 @@ import com.orangelabs.rcs.ri.R;
  */
 public class TestIPCallApi extends ListActivity {
 
-	@Override
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         // Set items
         String[] items = {
-    		getString(R.string.menu_initiate_ipcall),
-    		getString(R.string.menu_ipcall_sessions),
-    		getString(R.string.menu_ipcall_log)
-    	};
+                getString(R.string.menu_initiate_ipcall), getString(R.string.menu_ipcall_sessions),
+                getString(R.string.menu_ipcall_log)
+        };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        switch(position) {
-	        case 0:
-            	startActivity(new Intent(this, InitiateIPCall.class));
-	            break;
-	            
-	        case 1:
-            	startActivity(new Intent(this, IPCallSessionsList.class));
-	            break;
-	            
-	        case 2:
-            	startActivity(new Intent(this, IPCallList.class));
-	            break;
+        switch (position) {
+            case 0:
+                startActivity(new Intent(this, InitiateIPCall.class));
+                break;
+
+            case 1:
+                startActivity(new Intent(this, IPCallSessionsList.class));
+                break;
+
+            case 2:
+                startActivity(new Intent(this, IPCallList.class));
+                break;
         }
     }
 }

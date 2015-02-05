@@ -22,7 +22,7 @@ public class Entry {
 	private String uri;
 	private String etag;
 	private long lastModified = -1;
-	
+
 	public Entry(String uri) {
 		this.uri = uri;
 	}

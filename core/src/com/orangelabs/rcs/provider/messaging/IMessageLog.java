@@ -48,7 +48,8 @@ public interface IMessageLog {
 	 * 
 	 * @param msg
 	 *            Chat message
-	 * @param imdnDisplayedRequested IMDN display report requested
+	 * @param imdnDisplayedRequested
+	 *            IMDN display report requested
 	 */
 	public void addIncomingOneToOneChatMessage(ChatMessage msg, boolean imdnDisplayedRequested);
 
@@ -62,8 +63,7 @@ public interface IMessageLog {
 	 * @param reasonCode
 	 *            Status reason code
 	 */
-	public void addOutgoingOneToOneChatMessage(ChatMessage msg, int status,
-			int reasonCode);
+	public void addOutgoingOneToOneChatMessage(ChatMessage msg, int status, int reasonCode);
 
 	/**
 	 * Add a group chat message
@@ -79,8 +79,8 @@ public interface IMessageLog {
 	 * @param reasonCode
 	 *            Status reason code
 	 */
-	public void addGroupChatMessage(String chatId, ChatMessage msg,
-			Direction direction, int status, int reasonCode);
+	public void addGroupChatMessage(String chatId, ChatMessage msg, Direction direction,
+			int status, int reasonCode);
 
 	/**
 	 * Add group chat system message
@@ -136,7 +136,8 @@ public interface IMessageLog {
 	/**
 	 * Check if the message is read by remote contact
 	 * 
-	 * @param msgId message ID
+	 * @param msgId
+	 *            message ID
 	 * @return true is read
 	 */
 	public boolean isMessageRead(String msgId);

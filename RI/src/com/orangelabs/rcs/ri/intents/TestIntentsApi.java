@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.intents;
 
 import android.app.ListActivity;
@@ -34,32 +35,31 @@ import com.orangelabs.rcs.ri.R;
  * @author Jean-Marc AUFFRET
  */
 public class TestIntentsApi extends ListActivity {
-    
-	@Override
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         // Set items
         String[] items = {
-    		getString(R.string.menu_apps),
-    		getString(R.string.menu_settings)
+                getString(R.string.menu_apps), getString(R.string.menu_settings)
         };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        switch(position) {
-	        case 0:
-	        	startActivity(new Intent(this, IntentApps.class));
+        switch (position) {
+            case 0:
+                startActivity(new Intent(this, IntentApps.class));
                 break;
 
-	        case 1:
-	    		Intent intent = new Intent(Intents.Service.ACTION_VIEW_SETTINGS);
-	    		startActivity(intent);
+            case 1:
+                Intent intent = new Intent(Intents.Service.ACTION_VIEW_SETTINGS);
+                startActivity(intent);
                 break;
         }
     }

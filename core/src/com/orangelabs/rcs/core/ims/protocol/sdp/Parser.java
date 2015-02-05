@@ -42,7 +42,8 @@ class Parser {
 	/**
 	 * Unget a token
 	 *
-	 * @param tk Token
+	 * @param tk
+	 *            Token
 	 */
 	public void ungetToken(String tk) {
 		byte token[] = tk.getBytes(UTF8);
@@ -54,8 +55,10 @@ class Parser {
 	/**
 	 * Get a token
 	 *
-	 * @param input Input stream
-	 * @param tk Token
+	 * @param input
+	 *            Input stream
+	 * @param tk
+	 *            Token
 	 * @return Token value
 	 */
 	public boolean getToken(ByteArrayInputStream input, String tk) {
@@ -86,7 +89,8 @@ class Parser {
 	/**
 	 * Get a line
 	 *
-	 * @param input Input stream
+	 * @param input
+	 *            Input stream
 	 * @return Line
 	 */
 	public String getLine(ByteArrayInputStream input) {
@@ -104,7 +108,8 @@ class Parser {
 	/**
 	 * Skip whitespace
 	 *
-	 * @param input Input stream
+	 * @param input
+	 *            Input stream
 	 */
 	private void skipWhitespace(ByteArrayInputStream input) {
 		int ch = readChar(input);
@@ -117,12 +122,13 @@ class Parser {
 	/**
 	 * Read char
 	 *
-	 * @param input Input stream
+	 * @param input
+	 *            Input stream
 	 */
 	private int readChar(ByteArrayInputStream input) {
 		int ch;
 		if (buffer.size() > 0) {
-			ch = ((Integer)buffer.elementAt(0)).intValue();
+			ch = ((Integer) buffer.elementAt(0)).intValue();
 			buffer.removeElementAt(0);
 		} else {
 			ch = input.read();

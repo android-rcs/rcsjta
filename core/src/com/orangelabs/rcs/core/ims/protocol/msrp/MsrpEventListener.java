@@ -30,37 +30,46 @@ public interface MsrpEventListener {
 	/**
 	 * Data has been transfered
 	 * 
-	 * @param msgId Message ID
+	 * @param msgId
+	 *            Message ID
 	 */
 	public void msrpDataTransfered(String msgId);
-	
+
 	/**
 	 * Data has been received
 	 * 
-	 * @param msgId Message ID
-	 * @param data Received data
-	 * @param mimeType Data mime-type 
+	 * @param msgId
+	 *            Message ID
+	 * @param data
+	 *            Received data
+	 * @param mimeType
+	 *            Data mime-type
 	 */
 	public void msrpDataReceived(String msgId, byte[] data, String mimeType);
-	
+
 	/**
 	 * Data transfer in progress
 	 * 
-	 * @param currentSize Current transfered size in bytes
-	 * @param totalSize Total size in bytes
+	 * @param currentSize
+	 *            Current transfered size in bytes
+	 * @param totalSize
+	 *            Total size in bytes
 	 */
-	public void msrpTransferProgress(long currentSize, long totalSize);	
+	public void msrpTransferProgress(long currentSize, long totalSize);
 
-    /**
-     * Data transfer in progress
-     *
-     * @param currentSize Current transfered size in bytes
-     * @param totalSize Total size in bytes
-     * @param data received data chunk
-     * @return true if data are processed and can be delete in cache. If false, so data were stored in
-     *         MsrpSession cache until msrpDataReceived is called.
-     */
-    public boolean msrpTransferProgress(long currentSize, long totalSize, byte[] data);
+	/**
+	 * Data transfer in progress
+	 *
+	 * @param currentSize
+	 *            Current transfered size in bytes
+	 * @param totalSize
+	 *            Total size in bytes
+	 * @param data
+	 *            received data chunk
+	 * @return true if data are processed and can be delete in cache. If false, so data were stored
+	 *         in MsrpSession cache until msrpDataReceived is called.
+	 */
+	public boolean msrpTransferProgress(long currentSize, long totalSize, byte[] data);
 
 	/**
 	 * Data transfer has been aborted
@@ -68,12 +77,15 @@ public interface MsrpEventListener {
 	public void msrpTransferAborted();
 
 	// Changed by Deutsche Telekom
-    /**
-     * Data transfer error
-     *
-     * @param msgId Message ID
-     * @param error Error code
-     * @param typeMsrpChunk Type of MSRP chunk
-     */
-    public void msrpTransferError(String msgId, String error, TypeMsrpChunk typeMsrpChunk);
+	/**
+	 * Data transfer error
+	 *
+	 * @param msgId
+	 *            Message ID
+	 * @param error
+	 *            Error code
+	 * @param typeMsrpChunk
+	 *            Type of MSRP chunk
+	 */
+	public void msrpTransferError(String msgId, String error, TypeMsrpChunk typeMsrpChunk);
 }

@@ -49,185 +49,194 @@ import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
- * List group chats from the content provider 
+ * List group chats from the content provider
  * 
  * @author YPLO6403
- *
  */
 public class GroupChatList extends Activity {
-	/**
-	 * ChatId is the ID since there is a single occurrence in group chat log
-	 */
-	private static final String CHATID_AS_ID = new StringBuilder(ChatLog.GroupChat.CHAT_ID).append(" AS ").append(BaseColumns._ID)
-			.toString();
-
-	// @formatter:off
-	String[] PROJECTION = new String[] {
-			CHATID_AS_ID,
-			ChatLog.GroupChat.SUBJECT,
-			ChatLog.GroupChat.STATE,
-			ChatLog.GroupChat.TIMESTAMP
-	    };
-	 // @formatter:on
-
-	private static final String SORT_ORDER = new StringBuilder(ChatLog.GroupChat.TIMESTAMP).append(" DESC").toString();
-
-	private ListView mListView;
-	
     /**
-	 * A locker to exit only once
-	 */
-	private LockAccess mExitOnce = new LockAccess();
+     * ChatId is the ID since there is a single occurrence in group chat log
+     */
+    private static final String CHATID_AS_ID = new StringBuilder(ChatLog.GroupChat.CHAT_ID)
+            .append(" AS ").append(BaseColumns._ID).toString();
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    // @formatter:off
+    String[] PROJECTION = new String[] {
+            CHATID_AS_ID, ChatLog.GroupChat.SUBJECT, ChatLog.GroupChat.STATE,
+            ChatLog.GroupChat.TIMESTAMP
+    };
 
-		// Set layout
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		setContentView(R.layout.chat_list);
+    // @formatter:on
 
-		// Set list adapter
-		mListView = (ListView) findViewById(android.R.id.list);
-		TextView emptyView = (TextView) findViewById(android.R.id.empty);
-		mListView.setEmptyView(emptyView);
-		mListView.setOnItemClickListener(new OnItemClickListener() {
+    private static final String SORT_ORDER = new StringBuilder(ChatLog.GroupChat.TIMESTAMP).append(
+            " DESC").toString();
 
-			@Override
-			public void onItemClick(AdapterView<?> parent, View v, int pos, long id) {
-				ApiConnectionManager cnxManager = ApiConnectionManager.getInstance(GroupChatList.this);
-				if (cnxManager == null || !cnxManager.isServiceConnected(RcsServiceName.CHAT)) {
-					Utils.showMessage(GroupChatList.this, getString(R.string.label_continue_chat_failed));
-					return;
-					
-				}
-				Cursor cursor = (Cursor) (parent.getAdapter()).getItem(pos);
-				String chatId = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
-				try {
-					// Get group chat
-					GroupChat groupChat = cnxManager.getChatApi().getGroupChat(chatId);
-					if (groupChat != null) {
-						// Session already active on the device: just reload it in the UI
-						GroupChatView.openGroupChat(GroupChatList.this, groupChat.getChatId());
-					} else {
-						// Rejoin or restart the session
-						// TODO CR018
-					}
-				} catch (RcsServiceNotAvailableException e) {
-					Utils.showMessageAndExit(GroupChatList.this, getString(R.string.label_api_disabled), mExitOnce, e);
-				} catch (RcsServiceException e) {
-					Utils.showMessageAndExit(GroupChatList.this, getString(R.string.label_api_failed), mExitOnce, e);
-				}
-			}
-		});
-	}
+    private ListView mListView;
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		// Refresh view
-		mListView.setAdapter(createListAdapter());
-	}
+    /**
+     * A locker to exit only once
+     */
+    private LockAccess mExitOnce = new LockAccess();
 
-	/**
-	 * Create chat list adapter with unique chat ID entries
-	 */
-	private GroupChatListAdapter createListAdapter() {
-		Cursor cursor = getContentResolver().query(ChatLog.GroupChat.CONTENT_URI, PROJECTION, null, null, SORT_ORDER);
-		if (cursor == null) {
-			Utils.showMessageAndExit(this, getString(R.string.label_load_log_failed));
-			return null;
-			
-		}
-		return new GroupChatListAdapter(this, cursor);
-	}
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-	/**
-	 * Group chat list adapter
-	 */
-	private class GroupChatListAdapter extends CursorAdapter {
-		/**
-		 * Constructor
-		 * 
-		 * @param context
-		 *            Context
-		 * @param c
-		 *            Cursor
-		 */
-		public GroupChatListAdapter(Context context, Cursor c) {
-			super(context, c);
-		}
+        // Set layout
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setContentView(R.layout.chat_list);
 
-		@Override
-		public View newView(Context context, Cursor cursor, ViewGroup parent) {
-			LayoutInflater inflater = LayoutInflater.from(context);
-			View view = inflater.inflate(R.layout.chat_list_item, parent, false);
-			GroupChatListItemViewHolder holder = new GroupChatListItemViewHolder(view, cursor);
-			view.setTag(holder);
-			return view;
-		}
+        // Set list adapter
+        mListView = (ListView)findViewById(android.R.id.list);
+        TextView emptyView = (TextView)findViewById(android.R.id.empty);
+        mListView.setEmptyView(emptyView);
+        mListView.setOnItemClickListener(new OnItemClickListener() {
 
-		@Override
-		public void bindView(View view, Context context, Cursor cursor) {
-			GroupChatListItemViewHolder holder = (GroupChatListItemViewHolder) view.getTag();
+            @Override
+            public void onItemClick(AdapterView<?> parent, View v, int pos, long id) {
+                ApiConnectionManager cnxManager = ApiConnectionManager
+                        .getInstance(GroupChatList.this);
+                if (cnxManager == null || !cnxManager.isServiceConnected(RcsServiceName.CHAT)) {
+                    Utils.showMessage(GroupChatList.this,
+                            getString(R.string.label_continue_chat_failed));
+                    return;
 
-			// Set the date/time field by mixing relative and absolute times
-			long date = cursor.getLong(holder.columnDate);
-			holder.dateText.setText(DateUtils.getRelativeTimeSpanString(date, System.currentTimeMillis(),
-					DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE));
+                }
+                Cursor cursor = (Cursor)(parent.getAdapter()).getItem(pos);
+                String chatId = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
+                try {
+                    // Get group chat
+                    GroupChat groupChat = cnxManager.getChatApi().getGroupChat(chatId);
+                    if (groupChat != null) {
+                        // Session already active on the device: just reload it
+                        // in the UI
+                        GroupChatView.openGroupChat(GroupChatList.this, groupChat.getChatId());
+                    } else {
+                        // Rejoin or restart the session
+                        // TODO CR018
+                    }
+                } catch (RcsServiceNotAvailableException e) {
+                    Utils.showMessageAndExit(GroupChatList.this,
+                            getString(R.string.label_api_disabled), mExitOnce, e);
+                } catch (RcsServiceException e) {
+                    Utils.showMessageAndExit(GroupChatList.this,
+                            getString(R.string.label_api_failed), mExitOnce, e);
+                }
+            }
+        });
+    }
 
-			// Set the label
-			holder.titleText.setText(R.string.label_group_chat);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refresh view
+        mListView.setAdapter(createListAdapter());
+    }
 
-			String subject = cursor.getString(holder.columnSubject);
-			if (TextUtils.isEmpty(subject)) {
-				holder.subjectText.setText(context.getString(R.string.label_subject_notif,
-						"<" + context.getString(R.string.label_no_subject) + ">"));
-			} else {
-				holder.subjectText.setText(context.getString(R.string.label_subject_notif, subject));
-			}
-		}
-	}
+    /**
+     * Create chat list adapter with unique chat ID entries
+     */
+    private GroupChatListAdapter createListAdapter() {
+        Cursor cursor = getContentResolver().query(ChatLog.GroupChat.CONTENT_URI, PROJECTION, null,
+                null, SORT_ORDER);
+        if (cursor == null) {
+            Utils.showMessageAndExit(this, getString(R.string.label_load_log_failed));
+            return null;
 
-	/**
-	 * A ViewHolder class keeps references to children views to avoid unnecessary calls to findViewById() or getColumnIndex() on
-	 * each row.
-	 */
-	private class GroupChatListItemViewHolder {
-		TextView titleText;
-		TextView subjectText;
-		TextView dateText;
-		int columnSubject;
-		int columnDate;
+        }
+        return new GroupChatListAdapter(this, cursor);
+    }
 
-		GroupChatListItemViewHolder(View base, Cursor cursor) {
-			columnSubject = cursor.getColumnIndexOrThrow(ChatLog.GroupChat.SUBJECT);
-			columnDate = cursor.getColumnIndexOrThrow(ChatLog.GroupChat.TIMESTAMP);
-			
-			titleText = (TextView) base.findViewById(R.id.line1);
-			subjectText = (TextView) base.findViewById(R.id.line2);
-			dateText = (TextView) base.findViewById(R.id.date);
-			titleText.setVisibility(View.VISIBLE);
-		}
-	}
+    /**
+     * Group chat list adapter
+     */
+    private class GroupChatListAdapter extends CursorAdapter {
+        /**
+         * Constructor
+         * 
+         * @param context Context
+         * @param c Cursor
+         */
+        public GroupChatListAdapter(Context context, Cursor c) {
+            super(context, c);
+        }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = new MenuInflater(getApplicationContext());
-		inflater.inflate(R.menu.menu_log, menu);
-		return true;
-	}
+        @Override
+        public View newView(Context context, Cursor cursor, ViewGroup parent) {
+            LayoutInflater inflater = LayoutInflater.from(context);
+            View view = inflater.inflate(R.layout.chat_list_item, parent, false);
+            GroupChatListItemViewHolder holder = new GroupChatListItemViewHolder(view, cursor);
+            view.setTag(holder);
+            return view;
+        }
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.menu_clear_log:
-			// Delete all: TODO CR005 delete methods
-			getContentResolver().delete(ChatLog.GroupChat.CONTENT_URI, null, null);
-			// Refresh view
-			mListView.setAdapter(createListAdapter());
-			break;
-		}
-		return true;
-	}
+        @Override
+        public void bindView(View view, Context context, Cursor cursor) {
+            GroupChatListItemViewHolder holder = (GroupChatListItemViewHolder)view.getTag();
+
+            // Set the date/time field by mixing relative and absolute times
+            long date = cursor.getLong(holder.columnDate);
+            holder.dateText.setText(DateUtils.getRelativeTimeSpanString(date,
+                    System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS,
+                    DateUtils.FORMAT_ABBREV_RELATIVE));
+
+            // Set the label
+            holder.titleText.setText(R.string.label_group_chat);
+
+            String subject = cursor.getString(holder.columnSubject);
+            if (TextUtils.isEmpty(subject)) {
+                holder.subjectText.setText(context.getString(R.string.label_subject_notif, "<"
+                        + context.getString(R.string.label_no_subject) + ">"));
+            } else {
+                holder.subjectText
+                        .setText(context.getString(R.string.label_subject_notif, subject));
+            }
+        }
+    }
+
+    /**
+     * A ViewHolder class keeps references to children views to avoid
+     * unnecessary calls to findViewById() or getColumnIndex() on each row.
+     */
+    private class GroupChatListItemViewHolder {
+        TextView titleText;
+
+        TextView subjectText;
+
+        TextView dateText;
+
+        int columnSubject;
+
+        int columnDate;
+
+        GroupChatListItemViewHolder(View base, Cursor cursor) {
+            columnSubject = cursor.getColumnIndexOrThrow(ChatLog.GroupChat.SUBJECT);
+            columnDate = cursor.getColumnIndexOrThrow(ChatLog.GroupChat.TIMESTAMP);
+
+            titleText = (TextView)base.findViewById(R.id.line1);
+            subjectText = (TextView)base.findViewById(R.id.line2);
+            dateText = (TextView)base.findViewById(R.id.date);
+            titleText.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = new MenuInflater(getApplicationContext());
+        inflater.inflate(R.menu.menu_log, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_clear_log:
+                // Delete all: TODO CR005 delete methods
+                getContentResolver().delete(ChatLog.GroupChat.CONTENT_URI, null, null);
+                // Refresh view
+                mListView.setAdapter(createListAdapter());
+                break;
+        }
+        return true;
+    }
 }

@@ -36,13 +36,13 @@ public class AboutRI extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.app_about);
-        
+
         // Display release number
-        String appRelease = Utils.getApplicationVersion(this); 
+        String appRelease = Utils.getApplicationVersion(this);
         TextView releaseView = (TextView)findViewById(R.id.release);
         releaseView.setText(getString(R.string.label_about_release, appRelease));
 
@@ -50,28 +50,28 @@ public class AboutRI extends Activity {
         apiView.setText(getString(R.string.label_about_api, getBuildNumber()));
     }
 
-	/**
-	 * Returns the string representation of the current build
-	 * 
-	 * @return String
-	 */
-	private static String getBuildNumber() {
-		return Build.API_CODENAME + " " + getGsmaVersion() + "." + Build.API_INCREMENTAL;
-	}
-    
-	/**
-	 * Returns the string representation of the supported GSMA version
-	 * 
-	 * @return String
-	 */
-	private static String getGsmaVersion() {
-		switch(Build.API_VERSION) {
-			case Build.VERSION_CODES.BASE:
-				return "Albatros 2.0";
-			case Build.VERSION_CODES.BLACKBIRD:
-				return "Blackbird 1.5";
-			default:
-				return "Unknown";
-		}
-	}
+    /**
+     * Returns the string representation of the current build
+     * 
+     * @return String
+     */
+    private static String getBuildNumber() {
+        return Build.API_CODENAME + " " + getGsmaVersion() + "." + Build.API_INCREMENTAL;
+    }
+
+    /**
+     * Returns the string representation of the supported GSMA version
+     * 
+     * @return String
+     */
+    private static String getGsmaVersion() {
+        switch (Build.API_VERSION) {
+            case Build.VERSION_CODES.BASE:
+                return "Albatros 2.0";
+            case Build.VERSION_CODES.BLACKBIRD:
+                return "Blackbird 1.5";
+            default:
+                return "Unknown";
+        }
+    }
 }

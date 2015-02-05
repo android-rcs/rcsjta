@@ -19,12 +19,12 @@ package com.gsma.services.rcs;
 
 /**
  * RCS service not available exception
- *  
+ * 
  * @author Jean-Marc AUFFRET
  */
 public class RcsServiceNotAvailableException extends RcsServiceException {
 	static final long serialVersionUID = 1L;
-	
+
 	/**
 	 * Constructor
 	 */

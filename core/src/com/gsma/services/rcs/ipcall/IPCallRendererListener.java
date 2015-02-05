@@ -17,7 +17,6 @@
  ******************************************************************************/
 package com.gsma.services.rcs.ipcall;
 
-
 /**
  * This class offers callback methods on IP call renderer events
  * 
@@ -47,7 +46,8 @@ public abstract class IPCallRendererListener extends IIPCallRendererListener.Stu
 	/**
 	 * Callback called when the renderer has failed
 	 * 
-	 * @param error Error
+	 * @param error
+	 *            Error
 	 */
 	public abstract void onRendererError(int error);
 }

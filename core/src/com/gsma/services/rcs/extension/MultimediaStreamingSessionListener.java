@@ -28,24 +28,31 @@ import com.gsma.services.rcs.contacts.ContactId;
  * 
  * @author Jean-Marc AUFFRET
  */
-public abstract class MultimediaStreamingSessionListener extends IMultimediaStreamingSessionListener.Stub {
+public abstract class MultimediaStreamingSessionListener extends
+		IMultimediaStreamingSessionListener.Stub {
 	/**
 	 * Callback called when the multimedia messaging session state/reasoncode is changed.
 	 *
-	 * @param contact Contact ID
-	 * @param sessionId Session Id
-	 * @param state State
-	 * @param reasonCode Reason code
+	 * @param contact
+	 *            Contact ID
+	 * @param sessionId
+	 *            Session Id
+	 * @param state
+	 *            State
+	 * @param reasonCode
+	 *            Reason code
 	 */
-	public abstract void onStateChanged(ContactId contact, String sessionId,
-			int state, int reasonCode);
+	public abstract void onStateChanged(ContactId contact, String sessionId, int state,
+			int reasonCode);
 
 	/**
 	 * Callback called when a multimedia message or data is received.
 	 *
-	 * @param contact Contact ID
+	 * @param contact
+	 *            Contact ID
 	 * @param sessionId
-	 * @param content Payload content
+	 * @param content
+	 *            Payload content
 	 */
 	public abstract void onPayloadReceived(ContactId contact, String sessionId, byte[] content);
 }

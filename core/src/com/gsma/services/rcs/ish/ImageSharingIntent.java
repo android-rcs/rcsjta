@@ -27,13 +27,14 @@ package com.gsma.services.rcs.ish;
  * @author Jean-Marc AUFFRET
  */
 public class ImageSharingIntent {
-    /**
-     * Broadcast action: a new image sharing invitation has been received.
-     * <p>Intent includes the following extras:
-     * <ul>
-     * <li> {@link #EXTRA_SHARING_ID} containing the unique ID of the image sharing.
-     * </ul>
-     */
+	/**
+	 * Broadcast action: a new image sharing invitation has been received.
+	 * <p>
+	 * Intent includes the following extras:
+	 * <ul>
+	 * <li> {@link #EXTRA_SHARING_ID} containing the unique ID of the image sharing.
+	 * </ul>
+	 */
 	public final static String ACTION_NEW_INVITATION = "com.gsma.services.rcs.ish.action.NEW_IMAGE_SHARING";
 
 	/**

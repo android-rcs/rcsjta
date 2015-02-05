@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.messaging.geoloc;
 
 import java.util.ArrayList;
@@ -42,144 +43,145 @@ import com.orangelabs.rcs.ri.R;
  * @author vfml3370
  */
 public class SelectGeoloc extends MapActivity implements OnTouchListener {
-	/**
-	 * Intent parameters
-	 */
-	public final static String EXTRA_LATITUDE = "latitude";
-	public final static String EXTRA_LONGITUDE = "longitude";
+    /**
+     * Intent parameters
+     */
+    public final static String EXTRA_LATITUDE = "latitude";
 
-	/**
-	 * MapView
-	 */
-	private MapView mapView;
+    public final static String EXTRA_LONGITUDE = "longitude";
 
-	/**
-	 * GestureDetector
-	 */
-	private GestureDetector gestureDectector;
-	
-	/**
-	 * Geo point
-	 */
-	private GeoPoint geoPoint;
+    /**
+     * MapView
+     */
+    private MapView mapView;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    /**
+     * GestureDetector
+     */
+    private GestureDetector gestureDectector;
 
-		// Set layout
-		setContentView(R.layout.geoloc_select);
+    /**
+     * Geo point
+     */
+    private GeoPoint geoPoint;
 
-		// Set map
-		mapView = (MapView) findViewById(R.id.mapview);
-		mapView.setBuiltInZoomControls(true);
-		mapView.setOnTouchListener(this);
-		mapView.getController().setZoom(4);
-		
-		// Set gesture detector
-		gestureDectector = new GestureDetector(this, new LearnGestureListener());
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-		// Clear the list of overlay
-		mapView.getOverlays().clear();
-		mapView.invalidate();
-		
-		// Set button callback
-		Button selectBtn = (Button)findViewById(R.id.select_btn);
-		selectBtn.setOnClickListener(btnSelectListener);	
-	}
+        // Set layout
+        setContentView(R.layout.geoloc_select);
 
-	/**
-	 * Select button listener
-	 */
-	private OnClickListener btnSelectListener = new OnClickListener() {
-		public void onClick(View v) {
-			Intent intent = new Intent();    		
-			intent.putExtra(EXTRA_LATITUDE, (geoPoint.getLatitudeE6() / 1E6));
-			intent.putExtra(EXTRA_LONGITUDE, (geoPoint.getLongitudeE6() / 1E6));
-			setResult(RESULT_OK, intent);
-			finish();
-		}
-	};
-	
-	@Override
-	protected boolean isRouteDisplayed() {
-		return false;
-	}
+        // Set map
+        mapView = (MapView)findViewById(R.id.mapview);
+        mapView.setBuiltInZoomControls(true);
+        mapView.setOnTouchListener(this);
+        mapView.getController().setZoom(4);
 
-	@Override
-	public boolean onTouch(View arg0, MotionEvent arg1) {
-		gestureDectector.onTouchEvent(arg1);
-		return false;
-	}
+        // Set gesture detector
+        gestureDectector = new GestureDetector(this, new LearnGestureListener());
 
-	/**
-	 * Gesture event listener
-	 */
-	private class LearnGestureListener extends GestureDetector.SimpleOnGestureListener{ 
-		private Drawable drawable = getResources().getDrawable(R.drawable.ri_map_icon);
+        // Clear the list of overlay
+        mapView.getOverlays().clear();
+        mapView.invalidate();
 
-		@Override 
-		public boolean onDoubleTap(MotionEvent ev) { 	     
-			mapView.getController().zoomIn();
-			return true; 
-		} 
+        // Set button callback
+        Button selectBtn = (Button)findViewById(R.id.select_btn);
+        selectBtn.setOnClickListener(btnSelectListener);
+    }
 
-		@Override 
-		public void onLongPress(MotionEvent e) {
-			// Get the latitude and the longitude
-			geoPoint = mapView.getProjection().fromPixels((int) e.getX(),(int) e.getY());
-			
-			// Remove all overlay from the list, only one marker on the map
-			mapView.getOverlays().removeAll(mapView.getOverlays());		
-			
-			// Create an overlay
-			OverlayItem overlay = new OverlayItem(geoPoint, "", "");
-			MyItemizedOverlay itemizedoverlay = new MyItemizedOverlay(drawable);
-			itemizedoverlay.addOverlay(overlay);
-			itemizedoverlay.setGestureDetector(gestureDectector);
-			
-			// Add the overlays to the map
-			mapView.getOverlays().add(itemizedoverlay);			
-		} 
-	}
-	
-	/**
-	 * My overlay item
-	 */
-	private class MyItemizedOverlay extends ItemizedOverlay<OverlayItem>{
+    /**
+     * Select button listener
+     */
+    private OnClickListener btnSelectListener = new OnClickListener() {
+        public void onClick(View v) {
+            Intent intent = new Intent();
+            intent.putExtra(EXTRA_LATITUDE, (geoPoint.getLatitudeE6() / 1E6));
+            intent.putExtra(EXTRA_LONGITUDE, (geoPoint.getLongitudeE6() / 1E6));
+            setResult(RESULT_OK, intent);
+            finish();
+        }
+    };
 
-		private ArrayList<OverlayItem> overlays = new ArrayList<OverlayItem>();
-		
-		private GestureDetector gestureDetector;
+    @Override
+    protected boolean isRouteDisplayed() {
+        return false;
+    }
 
-		public MyItemizedOverlay(Drawable defaultMarker) {
-			super(boundCenterBottom(defaultMarker));
-		}
+    @Override
+    public boolean onTouch(View arg0, MotionEvent arg1) {
+        gestureDectector.onTouchEvent(arg1);
+        return false;
+    }
 
-		@Override
-		protected OverlayItem createItem(int i) {
-			return overlays.get(i);
-		}
+    /**
+     * Gesture event listener
+     */
+    private class LearnGestureListener extends GestureDetector.SimpleOnGestureListener {
+        private Drawable drawable = getResources().getDrawable(R.drawable.ri_map_icon);
 
-		@Override
-		public int size() {
-			return overlays.size();
-		}
+        @Override
+        public boolean onDoubleTap(MotionEvent ev) {
+            mapView.getController().zoomIn();
+            return true;
+        }
 
-		public void addOverlay(OverlayItem overlay) {
-			overlays.add(overlay);
-			populate();
-		}
-		
-		public void setGestureDetector(GestureDetector gestureDetector) {
-			this.gestureDetector = gestureDetector;
-		}
-				
-		public boolean onTouchEvent(MotionEvent e, MapView mapView) {
-			if (gestureDetector.onTouchEvent(e)) {
-				return true;
-			}
-			return false;
-		}
-	}	
+        @Override
+        public void onLongPress(MotionEvent e) {
+            // Get the latitude and the longitude
+            geoPoint = mapView.getProjection().fromPixels((int)e.getX(), (int)e.getY());
+
+            // Remove all overlay from the list, only one marker on the map
+            mapView.getOverlays().removeAll(mapView.getOverlays());
+
+            // Create an overlay
+            OverlayItem overlay = new OverlayItem(geoPoint, "", "");
+            MyItemizedOverlay itemizedoverlay = new MyItemizedOverlay(drawable);
+            itemizedoverlay.addOverlay(overlay);
+            itemizedoverlay.setGestureDetector(gestureDectector);
+
+            // Add the overlays to the map
+            mapView.getOverlays().add(itemizedoverlay);
+        }
+    }
+
+    /**
+     * My overlay item
+     */
+    private class MyItemizedOverlay extends ItemizedOverlay<OverlayItem> {
+
+        private ArrayList<OverlayItem> overlays = new ArrayList<OverlayItem>();
+
+        private GestureDetector gestureDetector;
+
+        public MyItemizedOverlay(Drawable defaultMarker) {
+            super(boundCenterBottom(defaultMarker));
+        }
+
+        @Override
+        protected OverlayItem createItem(int i) {
+            return overlays.get(i);
+        }
+
+        @Override
+        public int size() {
+            return overlays.size();
+        }
+
+        public void addOverlay(OverlayItem overlay) {
+            overlays.add(overlay);
+            populate();
+        }
+
+        public void setGestureDetector(GestureDetector gestureDetector) {
+            this.gestureDetector = gestureDetector;
+        }
+
+        public boolean onTouchEvent(MotionEvent e, MapView mapView) {
+            if (gestureDetector.onTouchEvent(e)) {
+                return true;
+            }
+            return false;
+        }
+    }
 }

@@ -26,5 +26,5 @@ import java.util.Hashtable;
  * @author JM. Auffret
  */
 public class SipTransactionList extends Hashtable<String, SipTransactionContext> {
-	static final long serialVersionUID = 1L;  
+	static final long serialVersionUID = 1L;
 }

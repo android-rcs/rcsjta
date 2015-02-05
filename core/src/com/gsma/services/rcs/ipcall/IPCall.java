@@ -32,152 +32,153 @@ import com.gsma.services.rcs.contacts.ContactId;
  */
 public class IPCall {
 
-    /**
-     * IP call state
-     */
-    public static class State {
-    	/**
-    	 * Call invitation received
-    	 */
-    	public final static int INVITED = 0;
-    	
-    	/**
-    	 * Call invitation sent
-    	 */
-    	public final static int INITIATED = 1;
-    	
-    	/**
-    	 * Call is started
-    	 */
-    	public final static int STARTED = 2;
-    	
-    	/**
-    	 * call has been aborted
-    	 */
-    	public final static int ABORTED = 3;
+	/**
+	 * IP call state
+	 */
+	public static class State {
+		/**
+		 * Call invitation received
+		 */
+		public final static int INVITED = 0;
 
-    	/**
-    	 * Call has failed
-    	 */
-    	public final static int FAILED = 4;
+		/**
+		 * Call invitation sent
+		 */
+		public final static int INITIATED = 1;
 
-    	/**
-    	 * Call rejected
-    	 */
-    	public final static int REJECTED = 5;
+		/**
+		 * Call is started
+		 */
+		public final static int STARTED = 2;
 
-    	/**
-    	 * Call on hold
-    	 */
-    	public final static int HOLD = 6;
+		/**
+		 * call has been aborted
+		 */
+		public final static int ABORTED = 3;
 
-    	/**
-    	 * Call has been accepted and is in the process of becoming started
-    	 */
-    	public final static int ACCEPTING = 7;
+		/**
+		 * Call has failed
+		 */
+		public final static int FAILED = 4;
 
-    	/**
-    	 * Call ringing
-    	 */
-    	public final static int RINGING = 8;
+		/**
+		 * Call rejected
+		 */
+		public final static int REJECTED = 5;
 
-    	private State() {
-        }    	
-    }
-    
-    /**
-     * Reason code associated with the ip call state.
-     */
-    public static class ReasonCode {
-        /**
-         * No specific reason code specified.
-         */
-        public static final int UNSPECIFIED = 0;
+		/**
+		 * Call on hold
+		 */
+		public final static int HOLD = 6;
 
-        /**
-         * IP call share is aborted by local user.
-         */
-        public static final int ABORTED_BY_USER = 1;
+		/**
+		 * Call has been accepted and is in the process of becoming started
+		 */
+		public final static int ACCEPTING = 7;
 
-        /**
-         * IP call share is aborted by remote user.
-         */
-        public static final int ABORTED_BY_REMOTE = 2;
+		/**
+		 * Call ringing
+		 */
+		public final static int RINGING = 8;
 
-        /**
-         * IP call is aborted by system.
-         */
-        public static final int ABORTED_BY_SYSTEM = 3;
+		private State() {
+		}
+	}
 
-        /**
-         * IP call is rejected because already taken by the secondary device.
-         */
-        public static final int REJECTED_BY_SECONDARY_DEVICE = 4;
+	/**
+	 * Reason code associated with the ip call state.
+	 */
+	public static class ReasonCode {
+		/**
+		 * No specific reason code specified.
+		 */
+		public static final int UNSPECIFIED = 0;
 
-        /**
-         * IP call invitation was rejected due to max number of sessions reached.
-         */
-        public static final int REJECTED_MAX_SESSIONS = 5;
+		/**
+		 * IP call share is aborted by local user.
+		 */
+		public static final int ABORTED_BY_USER = 1;
 
-        /**
-         * IP call invitation was rejected by local user.
-         */
-        public static final int REJECTED_BY_USER = 6;
+		/**
+		 * IP call share is aborted by remote user.
+		 */
+		public static final int ABORTED_BY_REMOTE = 2;
 
-        /**
-         * IP call invitation was rejected by remote.
-         */
-        public static final int REJECTED_BY_REMOTE = 7;
+		/**
+		 * IP call is aborted by system.
+		 */
+		public static final int ABORTED_BY_SYSTEM = 3;
 
-        /**
-         * IP call has been rejected due to time out.
-         */
-        public static final int REJECTED_TIME_OUT = 8;
+		/**
+		 * IP call is rejected because already taken by the secondary device.
+		 */
+		public static final int REJECTED_BY_SECONDARY_DEVICE = 4;
 
-        /**
-         * IP call initiation failed.
-         */
-        public static final int FAILED_INITIATION = 9;
+		/**
+		 * IP call invitation was rejected due to max number of sessions reached.
+		 */
+		public static final int REJECTED_MAX_SESSIONS = 5;
 
-        /**
-         * IP call failed.
-         */
-        public static final int FAILED_IPCALL = 10;
-    }
-    
-    /**
-     * Call error
-     */
-    public static class Error {
-    	/**
-    	 * Call has failed
-    	 */
-    	public final static int CALL_FAILED = 0;
-    	
-    	/**
-    	 * Call invitation has been declined by remote
-    	 */
-    	public final static int INVITATION_DECLINED = 1;
-    	
-        private Error() {
-        }    	
-    }
+		/**
+		 * IP call invitation was rejected by local user.
+		 */
+		public static final int REJECTED_BY_USER = 6;
 
-    /**
-     * IP call interface
-     */
-    private IIPCall callInf;
-    
-    /**
-     * Constructor
-     * 
-     * @param callInf IP call interface
-     */
-    /* package private */IPCall(IIPCall callInf) {
-    	this.callInf = callInf;
-    }
-    	
-    /**
+		/**
+		 * IP call invitation was rejected by remote.
+		 */
+		public static final int REJECTED_BY_REMOTE = 7;
+
+		/**
+		 * IP call has been rejected due to time out.
+		 */
+		public static final int REJECTED_TIME_OUT = 8;
+
+		/**
+		 * IP call initiation failed.
+		 */
+		public static final int FAILED_INITIATION = 9;
+
+		/**
+		 * IP call failed.
+		 */
+		public static final int FAILED_IPCALL = 10;
+	}
+
+	/**
+	 * Call error
+	 */
+	public static class Error {
+		/**
+		 * Call has failed
+		 */
+		public final static int CALL_FAILED = 0;
+
+		/**
+		 * Call invitation has been declined by remote
+		 */
+		public final static int INVITATION_DECLINED = 1;
+
+		private Error() {
+		}
+	}
+
+	/**
+	 * IP call interface
+	 */
+	private IIPCall callInf;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param callInf
+	 *            IP call interface
+	 */
+	/* package private */IPCall(IIPCall callInf) {
+		this.callInf = callInf;
+	}
+
+	/**
 	 * Returns the call ID of call
 	 * 
 	 * @return Call ID
@@ -186,11 +187,11 @@ public class IPCall {
 	public String getCallId() throws RcsServiceException {
 		try {
 			return callInf.getCallId();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Returns the remote contact identifier
 	 * 
@@ -200,11 +201,11 @@ public class IPCall {
 	public ContactId getRemoteContact() throws RcsServiceException {
 		try {
 			return callInf.getRemoteContact();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Returns the state of the call
 	 * 
@@ -215,10 +216,10 @@ public class IPCall {
 	public int getState() throws RcsServiceException {
 		try {
 			return callInf.getState();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
-	}		
+	}
 
 	/**
 	 * Returns the reason code of the state of the call
@@ -245,26 +246,29 @@ public class IPCall {
 	public Direction getDirection() throws RcsServiceException {
 		try {
 			return Direction.valueOf(callInf.getDirection());
-		} catch(Exception e) {
-			throw new RcsServiceException(e.getMessage());
-		}
-	}	
-	
-	/**
-	 * Accepts call invitation
-	 * 
-	 * @param player IP call player
-	 * @param renderer IP call renderer
-	 * @throws RcsServiceException
-	 */
-	public void acceptInvitation(IPCallPlayer player, IPCallRenderer renderer) throws RcsServiceException {
-		try {
-			callInf.acceptInvitation(player, renderer);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-	
+
+	/**
+	 * Accepts call invitation
+	 * 
+	 * @param player
+	 *            IP call player
+	 * @param renderer
+	 *            IP call renderer
+	 * @throws RcsServiceException
+	 */
+	public void acceptInvitation(IPCallPlayer player, IPCallRenderer renderer)
+			throws RcsServiceException {
+		try {
+			callInf.acceptInvitation(player, renderer);
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
 	/**
 	 * Rejects call invitation
 	 * 
@@ -273,7 +277,7 @@ public class IPCall {
 	public void rejectInvitation() throws RcsServiceException {
 		try {
 			callInf.rejectInvitation();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
@@ -286,7 +290,7 @@ public class IPCall {
 	public void abortCall() throws RcsServiceException {
 		try {
 			callInf.abortCall();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
@@ -300,7 +304,7 @@ public class IPCall {
 	public boolean isVideo() throws RcsServiceException {
 		try {
 			return callInf.isVideo();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
@@ -313,7 +317,7 @@ public class IPCall {
 	public void addVideo() throws RcsServiceException {
 		try {
 			callInf.addVideo();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
@@ -326,7 +330,7 @@ public class IPCall {
 	public void removeVideo() throws RcsServiceException {
 		try {
 			callInf.removeVideo();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
@@ -340,7 +344,7 @@ public class IPCall {
 	public boolean isOnHold() throws RcsServiceException {
 		try {
 			return callInf.isOnHold();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
@@ -353,7 +357,7 @@ public class IPCall {
 	public void holdCall() throws RcsServiceException {
 		try {
 			callInf.holdCall();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
@@ -366,7 +370,7 @@ public class IPCall {
 	public void continueCall() throws RcsServiceException {
 		try {
 			callInf.continueCall();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}

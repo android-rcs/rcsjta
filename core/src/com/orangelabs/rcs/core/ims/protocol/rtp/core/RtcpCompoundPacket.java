@@ -45,10 +45,8 @@ public class RtcpCompoundPacket extends RtcpPacket {
 	public void assemble(int i, boolean bool) {
 		length = i;
 		offset = 0;
-		ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream(
-				i);
-		DataOutputStream dataoutputstream = new DataOutputStream(
-				bytearrayoutputstream);
+		ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream(i);
+		DataOutputStream dataoutputstream = new DataOutputStream(bytearrayoutputstream);
 		int i_0_;
 		try {
 			if (bool)

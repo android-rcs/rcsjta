@@ -32,11 +32,12 @@ public class LiveAudioContent extends AudioContent {
 	 * Liveaudio URL constant
 	 */
 	public static final String URL = "capture://audio";
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param encoding Encoding
+	 * @param encoding
+	 *            Encoding
 	 */
 	public LiveAudioContent(String encoding) {
 		super(encoding);

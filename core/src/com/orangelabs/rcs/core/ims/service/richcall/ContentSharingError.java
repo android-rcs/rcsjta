@@ -33,17 +33,17 @@ public class ContentSharingError extends ImsSessionBasedServiceError {
 	 * Media player is not initialized
 	 */
 	public final static int MEDIA_PLAYER_NOT_INITIALIZED = RICHCALL_ERROR_CODES + 1;
-	
+
 	/**
 	 * Media transfer has failed (e.g. MSRP failure)
 	 */
 	public final static int MEDIA_TRANSFER_FAILED = RICHCALL_ERROR_CODES + 2;
-	
+
 	/**
 	 * Media player has failed (e.g. video player failure)
 	 */
 	public final static int MEDIA_STREAMING_FAILED = RICHCALL_ERROR_CODES + 3;
-	
+
 	/**
 	 * Unsupported media type (e.g. codec not supported)
 	 */
@@ -54,39 +54,43 @@ public class ContentSharingError extends ImsSessionBasedServiceError {
 	 */
 	public final static int MEDIA_SAVING_FAILED = RICHCALL_ERROR_CODES + 5;
 
-    /**
-     * Media file is too big
-     */
-    public final static int MEDIA_SIZE_TOO_BIG = RICHCALL_ERROR_CODES + 6;
+	/**
+	 * Media file is too big
+	 */
+	public final static int MEDIA_SIZE_TOO_BIG = RICHCALL_ERROR_CODES + 6;
 
 	/**
 	 * Not enough storage space
 	 */
-	public final static int NOT_ENOUGH_STORAGE_SPACE =  RICHCALL_ERROR_CODES + 7;
+	public final static int NOT_ENOUGH_STORAGE_SPACE = RICHCALL_ERROR_CODES + 7;
 
-    /**
-     * Constructor
-     *
-     * @param error Error
-     */
-    public ContentSharingError(ImsServiceError error) {
-        super(error.getErrorCode(), error.getMessage());
-    }
+	/**
+	 * Constructor
+	 *
+	 * @param error
+	 *            Error
+	 */
+	public ContentSharingError(ImsServiceError error) {
+		super(error.getErrorCode(), error.getMessage());
+	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param code Error code
+	 * @param code
+	 *            Error code
 	 */
 	public ContentSharingError(int code) {
 		super(code);
 	}
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param code Error code
-	 * @param msg Detail message 
+	 * @param code
+	 *            Error code
+	 * @param msg
+	 *            Detail message
 	 */
 	public ContentSharingError(int code, String msg) {
 		super(code, msg);

@@ -33,22 +33,22 @@ public class AggregationData {
 	 */
 	static final Uri CONTENT_URI = Uri
 			.parse("content://com.gsma.services.rcs.provider.capability/aggregation");
-	
+
 	/**
 	 * Column name
 	 */
 	static final String KEY_ID = "_id";
-	
+
 	/**
 	 * Column name
 	 */
 	static final String KEY_RCS_NUMBER = "rcs_number";
-	
+
 	/**
 	 * Column name
 	 */
 	static final String KEY_RAW_CONTACT_ID = "raw_contact_id";
-	
+
 	/**
 	 * Column name
 	 */

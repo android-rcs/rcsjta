@@ -27,10 +27,9 @@ import android.database.Cursor;
 import android.net.Uri;
 
 /**
- * ImageSharingPersistedStorageAccessor helps in retrieving persisted data
- * related to a image share from the persisted storage. It can utilize caching
- * for such data that will not be changed after creation of the Image sharing to
- * speed up consecutive access.
+ * ImageSharingPersistedStorageAccessor helps in retrieving persisted data related to a image share
+ * from the persisted storage. It can utilize caching for such data that will not be changed after
+ * creation of the Image sharing to speed up consecutive access.
  */
 public class ImageSharingPersistedStorageAccessor {
 
@@ -57,8 +56,9 @@ public class ImageSharingPersistedStorageAccessor {
 		mRichCallLog = richCallLog;
 	}
 
-	public ImageSharingPersistedStorageAccessor(String sharingId, ContactId contact, Direction direction,
-			Uri file, String fileName, String mimeType, long fileSize, RichCallHistory richCallLog) {
+	public ImageSharingPersistedStorageAccessor(String sharingId, ContactId contact,
+			Direction direction, Uri file, String fileName, String mimeType, long fileSize,
+			RichCallHistory richCallLog) {
 		mSharingId = sharingId;
 		mContact = contact;
 		mDirection = direction;
@@ -73,12 +73,13 @@ public class ImageSharingPersistedStorageAccessor {
 		Cursor cursor = null;
 		try {
 			cursor = mRichCallLog.getCacheableImageTransferData(mSharingId);
-			String contact = cursor.getString(cursor
-					.getColumnIndexOrThrow(ImageSharingLog.CONTACT));
+			String contact = cursor
+					.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.CONTACT));
 			if (contact != null) {
 				mContact = ContactUtils.createContactId(contact);
 			}
-			mDirection = Direction.valueOf(cursor.getInt(cursor.getColumnIndexOrThrow(ImageSharingLog.DIRECTION)));
+			mDirection = Direction.valueOf(cursor.getInt(cursor
+					.getColumnIndexOrThrow(ImageSharingLog.DIRECTION)));
 			mFileName = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILENAME));
 			mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.MIME_TYPE));
 			mFileSize = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.FILESIZE));
@@ -93,9 +94,8 @@ public class ImageSharingPersistedStorageAccessor {
 
 	public ContactId getRemoteContact() {
 		/*
-		 * Utilizing cache here as contact can't be changed in persistent
-		 * storage after entry insertion anyway so no need to query for it
-		 * multiple times.
+		 * Utilizing cache here as contact can't be changed in persistent storage after entry
+		 * insertion anyway so no need to query for it multiple times.
 		 */
 		if (mContact == null) {
 			cacheData();
@@ -105,9 +105,8 @@ public class ImageSharingPersistedStorageAccessor {
 
 	public Uri getFile() {
 		/*
-		 * Utilizing cache here as file can't be changed in persistent storage
-		 * after entry insertion anyway so no need to query for it multiple
-		 * times.
+		 * Utilizing cache here as file can't be changed in persistent storage after entry insertion
+		 * anyway so no need to query for it multiple times.
 		 */
 		if (mFile == null) {
 			cacheData();
@@ -117,9 +116,8 @@ public class ImageSharingPersistedStorageAccessor {
 
 	public String getFileName() {
 		/*
-		 * Utilizing cache here as file name can't be changed in persistent
-		 * storage after entry insertion anyway so no need to query for it
-		 * multiple times.
+		 * Utilizing cache here as file name can't be changed in persistent storage after entry
+		 * insertion anyway so no need to query for it multiple times.
 		 */
 		if (mFileName == null) {
 			cacheData();
@@ -129,9 +127,8 @@ public class ImageSharingPersistedStorageAccessor {
 
 	public long getFileSize() {
 		/*
-		 * Utilizing cache here as file size can't be changed in persistent
-		 * storage after entry insertion anyway so no need to query for it
-		 * multiple times.
+		 * Utilizing cache here as file size can't be changed in persistent storage after entry
+		 * insertion anyway so no need to query for it multiple times.
 		 */
 		if (mFileSize == null) {
 			cacheData();
@@ -141,9 +138,8 @@ public class ImageSharingPersistedStorageAccessor {
 
 	public String getMimeType() {
 		/*
-		 * Utilizing cache here as mime type can't be changed in persistent
-		 * storage after entry insertion anyway so no need to query for it
-		 * multiple times.
+		 * Utilizing cache here as mime type can't be changed in persistent storage after entry
+		 * insertion anyway so no need to query for it multiple times.
 		 */
 		if (mMimeType == null) {
 			cacheData();
@@ -161,9 +157,8 @@ public class ImageSharingPersistedStorageAccessor {
 
 	public Direction getDirection() {
 		/*
-		 * Utilizing cache here as direction can't be changed in persistent
-		 * storage after entry insertion anyway so no need to query for it
-		 * multiple times.
+		 * Utilizing cache here as direction can't be changed in persistent storage after entry
+		 * insertion anyway so no need to query for it multiple times.
 		 */
 		if (mDirection == null) {
 			cacheData();
@@ -173,9 +168,8 @@ public class ImageSharingPersistedStorageAccessor {
 
 	public long getTimestamp() {
 		/*
-		 * Utilizing cache here as timestamp can't be changed in persistent
-		 * storage after it has been set to some value bigger than zero, so no
-		 * need to query for it multiple times.
+		 * Utilizing cache here as timestamp can't be changed in persistent storage after it has
+		 * been set to some value bigger than zero, so no need to query for it multiple times.
 		 */
 		if (mTimestamp == 0) {
 			cacheData();
@@ -191,8 +185,9 @@ public class ImageSharingPersistedStorageAccessor {
 		mRichCallLog.setImageSharingProgress(mSharingId, currentSize);
 	}
 
-	public Uri addImageSharing(ContactId contact, Direction direction, MmContent content, int status,
-			int reasonCode) {
-		return mRichCallLog.addImageSharing(mSharingId, contact, direction, content, status, reasonCode);
+	public Uri addImageSharing(ContactId contact, Direction direction, MmContent content,
+			int status, int reasonCode) {
+		return mRichCallLog.addImageSharing(mSharingId, contact, direction, content, status,
+				reasonCode);
 	}
 }

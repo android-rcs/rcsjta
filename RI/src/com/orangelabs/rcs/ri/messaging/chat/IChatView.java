@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 package com.orangelabs.rcs.ri.messaging.chat;
 
 import com.gsma.services.rcs.RcsServiceException;
@@ -25,60 +26,57 @@ import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager.INotifyComposing;
 
 /**
  * @author YPLO6403
- *
  */
 public interface IChatView {
 
-	/**
-	 * Send text message
-	 * 
-	 * @param message
-	 *            Message to send
-	 * @return Message ID or null if sending failed
-	 */
-	ChatMessage sendMessage(String message);
+    /**
+     * Send text message
+     * 
+     * @param message Message to send
+     * @return Message ID or null if sending failed
+     */
+    ChatMessage sendMessage(String message);
 
-	/**
-	 * Send geoloc message
-	 * 
-	 * @param geoloc
-	 *            Geoloc
-	 * @return Message ID or null if sending failed
-	 */
-	ChatMessage sendMessage(Geoloc geoloc);
+    /**
+     * Send geoloc message
+     * 
+     * @param geoloc Geoloc
+     * @return Message ID or null if sending failed
+     */
+    ChatMessage sendMessage(Geoloc geoloc);
 
-	/**
-	 * Process intent
-	 * 
-	 * @return True if operation is successful
-	 */
-	boolean processIntent();
+    /**
+     * Process intent
+     * 
+     * @return True if operation is successful
+     */
+    boolean processIntent();
 
-	/**
-	 * Add chat listener
-	 * 
-	 * @param chatService
-	 * @throws RcsServiceException 
-	 */
-	void addChatEventListener(ChatService chatService) throws RcsServiceException;
+    /**
+     * Add chat listener
+     * 
+     * @param chatService
+     * @throws RcsServiceException
+     */
+    void addChatEventListener(ChatService chatService) throws RcsServiceException;
 
-	/**
-	 * Remove chat listener
-	 * 
-	 * @param chatService
-	 * @throws RcsServiceException 
-	 */
-	void removeChatEventListener(ChatService chatService) throws RcsServiceException;
+    /**
+     * Remove chat listener
+     * 
+     * @param chatService
+     * @throws RcsServiceException
+     */
+    void removeChatEventListener(ChatService chatService) throws RcsServiceException;
 
-	/**
-	 * Get interface to notify composing
-	 * 
-	 * @return the interface to notify composing
-	 */
-	INotifyComposing getNotifyComposing();
-	
-	/**
-	 * @return True if single chat
-	 */
-	boolean isSingleChat();
+    /**
+     * Get interface to notify composing
+     * 
+     * @return the interface to notify composing
+     */
+    INotifyComposing getNotifyComposing();
+
+    /**
+     * @return True if single chat
+     */
+    boolean isSingleChat();
 }

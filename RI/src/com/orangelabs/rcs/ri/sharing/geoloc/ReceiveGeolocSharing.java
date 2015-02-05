@@ -63,252 +63,269 @@ public class ReceiveGeolocSharing extends Activity {
      * UI handler
      */
     private final Handler handler = new Handler();
-    
+
     /**
      * Sharing ID
      */
     private String mSharingId;
-    
+
     /**
      * Remote Contact
      */
     private ContactId mRemoteContact;
-   
-	/**
+
+    /**
      * Geoloc sharing session
      */
     private GeolocSharing mGeolocSharing;
-    
+
     /**
-	 * A locker to exit only once
-	 */
-	private LockAccess mExitOnce = new LockAccess();
-    
-   	/**
-	 * API connection manager
-	 */
-	private ApiConnectionManager mCnxManager;
-	
-	private Geoloc mGeoloc;
-	
+     * A locker to exit only once
+     */
+    private LockAccess mExitOnce = new LockAccess();
+
     /**
-   	 * The log tag for this class
-   	 */
-   	private static final String LOGTAG = LogUtils.getTag(ReceiveGeolocSharing.class.getSimpleName());
-    
+     * API connection manager
+     */
+    private ApiConnectionManager mCnxManager;
+
+    private Geoloc mGeoloc;
+
+    /**
+     * The log tag for this class
+     */
+    private static final String LOGTAG = LogUtils
+            .getTag(ReceiveGeolocSharing.class.getSimpleName());
+
     /**
      * Geoloc sharing listener
      */
-	private GeolocSharingListener gshListener = new GeolocSharingListener() {
+    private GeolocSharingListener gshListener = new GeolocSharingListener() {
 
-		@Override
-		public void onProgressUpdate(ContactId contact, String sharingId, final long currentSize, final long totalSize) {
-			// Discard event if not for current sharingId
-			if (mSharingId == null || !mSharingId.equals(sharingId)) {
-				return;
-			}
-			handler.post(new Runnable() {
-				public void run() {
-					// Display sharing progress
-					updateProgressBar(currentSize, totalSize);
-				}
-			});
-		}
+        @Override
+        public void onProgressUpdate(ContactId contact, String sharingId, final long currentSize,
+                final long totalSize) {
+            // Discard event if not for current sharingId
+            if (mSharingId == null || !mSharingId.equals(sharingId)) {
+                return;
+            }
+            handler.post(new Runnable() {
+                public void run() {
+                    // Display sharing progress
+                    updateProgressBar(currentSize, totalSize);
+                }
+            });
+        }
 
-		@Override
-		public void onStateChanged(final ContactId contact, final String sharingId, final int state, final int reasonCode) {
-			if (LogUtils.isActive) {
-				Log.d(LOGTAG,
-						new StringBuilder("onStateChanged contact=").append(contact.toString())
-								.append(" sharingId=").append(sharingId).append(" state=")
-								.append(state).append(" reason=").append(reasonCode).toString());
-			}
-			if (state > RiApplication.GSH_STATES.length) {
-				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "onStateChanged unhandled state=".concat(String.valueOf(state)));
-				}
-				return;
-			}
-			// Discard event if not for current sharingId
-			if (mSharingId == null || !mSharingId.equals(sharingId)) {
-				return;
-			}
-			final String _reasonCode = RiApplication.GSH_REASON_CODES[reasonCode];
-			final String _state = RiApplication.GSH_STATES[state];
-			handler.post(new Runnable() {
-				public void run() {
-					TextView statusView = (TextView) findViewById(R.id.progress_status);
-					switch (state) {
-					case GeolocSharing.State.STARTED:
-						// Session is established: display session status
-						statusView.setText("started");
-						break;
+        @Override
+        public void onStateChanged(final ContactId contact, final String sharingId,
+                final int state, final int reasonCode) {
+            if (LogUtils.isActive) {
+                Log.d(LOGTAG,
+                        new StringBuilder("onStateChanged contact=").append(contact.toString())
+                                .append(" sharingId=").append(sharingId).append(" state=")
+                                .append(state).append(" reason=").append(reasonCode).toString());
+            }
+            if (state > RiApplication.GSH_STATES.length) {
+                if (LogUtils.isActive) {
+                    Log.e(LOGTAG, "onStateChanged unhandled state=".concat(String.valueOf(state)));
+                }
+                return;
+            }
+            // Discard event if not for current sharingId
+            if (mSharingId == null || !mSharingId.equals(sharingId)) {
+                return;
+            }
+            final String _reasonCode = RiApplication.GSH_REASON_CODES[reasonCode];
+            final String _state = RiApplication.GSH_STATES[state];
+            handler.post(new Runnable() {
+                public void run() {
+                    TextView statusView = (TextView)findViewById(R.id.progress_status);
+                    switch (state) {
+                        case GeolocSharing.State.STARTED:
+                            // Session is established: display session status
+                            statusView.setText("started");
+                            break;
 
-					case GeolocSharing.State.ABORTED:
-						// Session is aborted: display session status
-						Utils.showMessageAndExit(ReceiveGeolocSharing.this, getString(R.string.label_sharing_aborted, _reasonCode), mExitOnce);
-						break;
+                        case GeolocSharing.State.ABORTED:
+                            // Session is aborted: display session status
+                            Utils.showMessageAndExit(ReceiveGeolocSharing.this,
+                                    getString(R.string.label_sharing_aborted, _reasonCode),
+                                    mExitOnce);
+                            break;
 
-					case GeolocSharing.State.FAILED:
-						// Session is failed: exit
-						Utils.showMessageAndExit(ReceiveGeolocSharing.this, getString(R.string.label_sharing_failed, _reasonCode), mExitOnce);
-						break;
+                        case GeolocSharing.State.FAILED:
+                            // Session is failed: exit
+                            Utils.showMessageAndExit(ReceiveGeolocSharing.this,
+                                    getString(R.string.label_sharing_failed, _reasonCode),
+                                    mExitOnce);
+                            break;
 
-					case GeolocSharing.State.TRANSFERRED:
-						// Display transfer progress
-						statusView.setText(_state);
-						// Make sure progress bar is at the end
-						ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-						progressBar.setProgress(progressBar.getMax());
+                        case GeolocSharing.State.TRANSFERRED:
+                            // Display transfer progress
+                            statusView.setText(_state);
+                            // Make sure progress bar is at the end
+                            ProgressBar progressBar = (ProgressBar)findViewById(R.id.progress_bar);
+                            progressBar.setProgress(progressBar.getMax());
 
-						// Show the shared geoloc
-						Intent intent = new Intent(ReceiveGeolocSharing.this, DisplayGeoloc.class);
-						intent.putExtra(DisplayGeoloc.EXTRA_CONTACT, (Parcelable) contact);
-						
-						try {
-							mGeoloc = mGeolocSharing.getGeoloc();
-							intent.putExtra(DisplayGeoloc.EXTRA_GEOLOC, (Parcelable) mGeoloc);
-							startActivity(intent);
-						} catch (RcsServiceException e) {
-							if (LogUtils.isActive) {
-								Log.d(LOGTAG, "onStateChanged failed to get geoloc for ".concat(sharingId));
-							}
-						}
-						break;
+                            // Show the shared geoloc
+                            Intent intent = new Intent(ReceiveGeolocSharing.this,
+                                    DisplayGeoloc.class);
+                            intent.putExtra(DisplayGeoloc.EXTRA_CONTACT, (Parcelable)contact);
 
-					default:
-						statusView.setText(_state);
-						if (LogUtils.isActive) {
-							Log.d(LOGTAG, "onStateChanged ".concat(getString(R.string.label_gsh_state_changed, _state, _reasonCode)));
-						}
-					}
-				}
-			});
-		}
-	};
-   
-	@Override
+                            try {
+                                mGeoloc = mGeolocSharing.getGeoloc();
+                                intent.putExtra(DisplayGeoloc.EXTRA_GEOLOC, (Parcelable)mGeoloc);
+                                startActivity(intent);
+                            } catch (RcsServiceException e) {
+                                if (LogUtils.isActive) {
+                                    Log.d(LOGTAG, "onStateChanged failed to get geoloc for "
+                                            .concat(sharingId));
+                                }
+                            }
+                            break;
+
+                        default:
+                            statusView.setText(_state);
+                            if (LogUtils.isActive) {
+                                Log.d(LOGTAG, "onStateChanged ".concat(getString(
+                                        R.string.label_gsh_state_changed, _state, _reasonCode)));
+                            }
+                    }
+                }
+            });
+        }
+    };
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.geoloc_sharing_receive);
-        
+
         // Get invitation info
         mSharingId = getIntent().getStringExtra(GeolocSharingIntent.EXTRA_SHARING_ID);
-		mRemoteContact = getIntent().getParcelableExtra(GeolocSharingIntentService.BUNDLE_GSH_ID);
+        mRemoteContact = getIntent().getParcelableExtra(GeolocSharingIntentService.BUNDLE_GSH_ID);
 
-		// Register to API connection manager
-		mCnxManager = ApiConnectionManager.getInstance(this);
-		if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.GEOLOC_SHARING, RcsServiceName.CONTACTS)) {
-			Utils.showMessageAndExit(this, getString(R.string.label_service_not_available), mExitOnce);
-		} else {
-			mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.GEOLOC_SHARING, RcsServiceName.CONTACTS);
-			initiateGeolocSharing();
-		}
+        // Register to API connection manager
+        mCnxManager = ApiConnectionManager.getInstance(this);
+        if (mCnxManager == null
+                || !mCnxManager.isServiceConnected(RcsServiceName.GEOLOC_SHARING,
+                        RcsServiceName.CONTACTS)) {
+            Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
+                    mExitOnce);
+        } else {
+            mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.GEOLOC_SHARING,
+                    RcsServiceName.CONTACTS);
+            initiateGeolocSharing();
+        }
     }
 
     @Override
-	public void onDestroy() {
-		super.onDestroy();
-		if (mCnxManager == null) {
-			return;
-		}
-		mCnxManager.stopMonitorServices(this);
-		if (mCnxManager.isServiceConnected(RcsServiceName.GEOLOC_SHARING)) {
-			// Remove service listener
-			try {
-				mCnxManager.getGeolocSharingApi().removeEventListener(gshListener);
-			} catch (Exception e) {
-				if (LogUtils.isActive) {
-					Log.e(LOGTAG, "Failed to remove listener", e);
-				}
-			}
-		}
-	}
-    
-    private void initiateGeolocSharing() {
-    	GeolocSharingService gshApi = mCnxManager.getGeolocSharingApi();
-		try {
-			// Add service listener
-			gshApi.addEventListener(gshListener);
-			
-			// Get the geoloc sharing
-			mGeolocSharing = gshApi.getGeolocSharing(mSharingId);
-			if (mGeolocSharing == null) {
-				// Session not found or expired
-				Utils.showMessageAndExit(this, getString(R.string.label_session_not_found), mExitOnce);
-				return;
-			}
-			
-	    	// Display sharing infos
-    		TextView fromTextView = (TextView)findViewById(R.id.from);
-			String from = RcsDisplayName.getInstance(this).getDisplayName(mRemoteContact);
-			fromTextView.setText(getString(R.string.label_from_args, from));
-	    	
-			// Display accept/reject dialog
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(R.string.title_geoloc_sharing);
-			builder.setMessage(getString(R.string.label_from_args, from));
-			builder.setCancelable(false);
-			builder.setIcon(R.drawable.ri_notif_gsh_icon);
-			builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
-			builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
-			builder.show();
-	    } catch(RcsServiceNotAvailableException e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), mExitOnce, e);
-	    } catch(RcsServiceException e) {
-			Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
-		}
+    public void onDestroy() {
+        super.onDestroy();
+        if (mCnxManager == null) {
+            return;
+        }
+        mCnxManager.stopMonitorServices(this);
+        if (mCnxManager.isServiceConnected(RcsServiceName.GEOLOC_SHARING)) {
+            // Remove service listener
+            try {
+                mCnxManager.getGeolocSharingApi().removeEventListener(gshListener);
+            } catch (Exception e) {
+                if (LogUtils.isActive) {
+                    Log.e(LOGTAG, "Failed to remove listener", e);
+                }
+            }
+        }
     }
 
-	/**
-	 * Accept invitation
-	 */
-	private void acceptInvitation() {
-    	try {
-    		// Accept the invitation
-    		mGeolocSharing.acceptInvitation();
-    	} catch(Exception e) {
-			Utils.showMessageAndExit(ReceiveGeolocSharing.this, getString(R.string.label_invitation_failed), mExitOnce, e);
-    	}
-	}    
-	/**
-	 * Reject invitation
-	 */
-	private void rejectInvitation() {
-    	try {
-    		// Reject the invitation
-    		mGeolocSharing.rejectInvitation();
-    	} catch(Exception e) {
-    		e.printStackTrace();
-    	}
-	}	
-	
-	/**
+    private void initiateGeolocSharing() {
+        GeolocSharingService gshApi = mCnxManager.getGeolocSharingApi();
+        try {
+            // Add service listener
+            gshApi.addEventListener(gshListener);
+
+            // Get the geoloc sharing
+            mGeolocSharing = gshApi.getGeolocSharing(mSharingId);
+            if (mGeolocSharing == null) {
+                // Session not found or expired
+                Utils.showMessageAndExit(this, getString(R.string.label_session_not_found),
+                        mExitOnce);
+                return;
+            }
+
+            // Display sharing infos
+            TextView fromTextView = (TextView)findViewById(R.id.from);
+            String from = RcsDisplayName.getInstance(this).getDisplayName(mRemoteContact);
+            fromTextView.setText(getString(R.string.label_from_args, from));
+
+            // Display accept/reject dialog
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.title_geoloc_sharing);
+            builder.setMessage(getString(R.string.label_from_args, from));
+            builder.setCancelable(false);
+            builder.setIcon(R.drawable.ri_notif_gsh_icon);
+            builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
+            builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
+            builder.show();
+        } catch (RcsServiceNotAvailableException e) {
+            Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), mExitOnce, e);
+        } catch (RcsServiceException e) {
+            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
+        }
+    }
+
+    /**
+     * Accept invitation
+     */
+    private void acceptInvitation() {
+        try {
+            // Accept the invitation
+            mGeolocSharing.acceptInvitation();
+        } catch (Exception e) {
+            Utils.showMessageAndExit(ReceiveGeolocSharing.this,
+                    getString(R.string.label_invitation_failed), mExitOnce, e);
+        }
+    }
+
+    /**
+     * Reject invitation
+     */
+    private void rejectInvitation() {
+        try {
+            // Reject the invitation
+            mGeolocSharing.rejectInvitation();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Accept button listener
      */
     private OnClickListener acceptBtnListener = new OnClickListener() {
-        public void onClick(DialogInterface dialog, int which) {     
-        	// Accept invitation
-        	acceptInvitation();
+        public void onClick(DialogInterface dialog, int which) {
+            // Accept invitation
+            acceptInvitation();
         }
     };
 
     /**
      * Reject button listener
-     */    
+     */
     private OnClickListener declineBtnListener = new OnClickListener() {
         public void onClick(DialogInterface dialog, int which) {
-        	// Reject invitation
-        	rejectInvitation();
-        	
+            // Reject invitation
+            rejectInvitation();
+
             // Exit activity
-			finish();
+            finish();
         }
-    };  
-    
+    };
+
     /**
      * Show the sharing progress
      * 
@@ -316,69 +333,69 @@ public class ReceiveGeolocSharing extends Activity {
      * @param totalSize Total size to be transferred
      */
     private void updateProgressBar(long currentSize, long totalSize) {
-    	TextView statusView = (TextView)findViewById(R.id.progress_status);
+        TextView statusView = (TextView)findViewById(R.id.progress_status);
         ProgressBar progressBar = (ProgressBar)findViewById(R.id.progress_bar);
-    	
-		String value = "" + (currentSize/1024);
-		if (totalSize != 0) {
-			value += "/" + (totalSize/1024);
-		}
-		value += " Kb";
-		statusView.setText(value);
-	    
-	    if (currentSize != 0) {
-	    	double position = ((double)currentSize / (double)totalSize)*100.0;
-	    	progressBar.setProgress((int)position);
-	    } else {
-	    	progressBar.setProgress(0);
-	    }
-    }    
+
+        String value = "" + (currentSize / 1024);
+        if (totalSize != 0) {
+            value += "/" + (totalSize / 1024);
+        }
+        value += " Kb";
+        statusView.setText(value);
+
+        if (currentSize != 0) {
+            double position = ((double)currentSize / (double)totalSize) * 100.0;
+            progressBar.setProgress((int)position);
+        } else {
+            progressBar.setProgress(0);
+        }
+    }
 
     /**
      * Quit the session
      */
     private void quitSession() {
-		// Stop session
-    	try {
+        // Stop session
+        try {
             if (mGeolocSharing != null) {
-            	mGeolocSharing.abortSharing();
+                mGeolocSharing.abortSharing();
             }
-    	} catch(Exception e) {
-    		e.printStackTrace();
-    	}
-    	mGeolocSharing = null;
-		
-	    // Exit activity
-		finish();
-    }    
-    
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        mGeolocSharing = null;
+
+        // Exit activity
+        finish();
+    }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
-            	// Quit the session
-            	quitSession();
+                // Quit the session
+                quitSession();
                 return true;
         }
 
         return super.onKeyDown(keyCode, event);
     }
-    
+
     @Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater=new MenuInflater(getApplicationContext());
-		inflater.inflate(R.menu.menu_image_sharing, menu);
-		return true;
-	}
-    
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = new MenuInflater(getApplicationContext());
+        inflater.inflate(R.menu.menu_image_sharing, menu);
+        return true;
+    }
+
     @Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-			case R.id.menu_close_session:
-				// Quit the session
-				quitSession();
-				break;
-		}
-		return true;
-	} 
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_close_session:
+                // Quit the session
+                quitSession();
+                break;
+        }
+        return true;
+    }
 }

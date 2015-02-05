@@ -37,53 +37,55 @@ public class WifiNetworkAccess extends NetworkAccess {
 	 * Wi-Fi manager
 	 */
 	private WifiManager wifiManager;
-	
+
 	/**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+	 * The logger
+	 */
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
 	/**
 	 * Constructor
 	 * 
-     * @throws CoreException
+	 * @throws CoreException
 	 */
 	public WifiNetworkAccess() throws CoreException {
 		super();
 
 		// Get Wi-Fi info
-		wifiManager = (WifiManager)AndroidFactory.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+		wifiManager = (WifiManager) AndroidFactory.getApplicationContext().getSystemService(
+				Context.WIFI_SERVICE);
 
 		if (logger.isActivated()) {
-    		logger.info("Wi-Fi access has been created (interface " + getType() + ")");
-    	}
-    }
-			
+			logger.info("Wi-Fi access has been created (interface " + getType() + ")");
+		}
+	}
+
 	/**
-     * Connect to the network access
-     * 
-     * @param ipAddress Local IP address
-     */
-    public void connect(String ipAddress) {
-    	if (logger.isActivated()) {
-    		logger.info("Network access connected (" + ipAddress + ")");
-    	}
+	 * Connect to the network access
+	 * 
+	 * @param ipAddress
+	 *            Local IP address
+	 */
+	public void connect(String ipAddress) {
+		if (logger.isActivated()) {
+			logger.info("Network access connected (" + ipAddress + ")");
+		}
 		this.ipAddress = ipAddress;
-		
+
 		// Changed by Deutsche Telekom
 		KeyStoreManager.updateClientCertificate(ipAddress);
-    }
-    
+	}
+
 	/**
-     * Disconnect from the network access
-     */
-    public void disconnect() {
-    	if (logger.isActivated()) {
-    		logger.info("Network access disconnected");
-    	}
-    	ipAddress = null;
-    }
-    
+	 * Disconnect from the network access
+	 */
+	public void disconnect() {
+		if (logger.isActivated()) {
+			logger.info("Network access disconnected");
+		}
+		ipAddress = null;
+	}
+
 	/**
 	 * Return the type of access
 	 * 
@@ -96,8 +98,8 @@ public class WifiNetworkAccess extends NetworkAccess {
 		} else {
 			return "IEEE-802.11a";
 		}
-	}    
-	
+	}
+
 	/**
 	 * Return the network name
 	 * 
@@ -113,5 +115,5 @@ public class WifiNetworkAccess extends NetworkAccess {
 		}
 		name += ", SSID=" + wifiManager.getConnectionInfo().getSSID();
 		return name;
-	}	
+	}
 }

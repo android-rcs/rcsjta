@@ -30,7 +30,6 @@ import com.orangelabs.rcs.core.ims.service.im.chat.GroupChatInfo;
 
 import android.database.Cursor;
 
-
 /**
  * Interface for the chat table
  * 
@@ -131,14 +130,16 @@ public interface IGroupChatLog {
 	/**
 	 * Set reject the next group chat invitation
 	 * 
-	 * @param chatId Chat ID
+	 * @param chatId
+	 *            Chat ID
 	 */
 	public void setRejectNextGroupChatNextInvitation(String chatId);
 
 	/**
 	 * Convert String to ParticipantInfo
 	 *
-	 * @param participants String
+	 * @param participants
+	 *            String
 	 * @return Set<ParticipantInfo>
 	 */
 	public Set<ParticipantInfo> getParticipants(String participants);
@@ -146,7 +147,8 @@ public interface IGroupChatLog {
 	/**
 	 * Get group chat state from its chat ID
 	 * 
-	 * @param chatId Chat ID of the group chat
+	 * @param chatId
+	 *            Chat ID of the group chat
 	 * @return State
 	 */
 	public int getGroupChatState(String chatId);
@@ -154,7 +156,8 @@ public interface IGroupChatLog {
 	/**
 	 * Get group chat state reason code from its chat ID
 	 * 
-	 * @param chatId Chat ID of the group chat
+	 * @param chatId
+	 *            Chat ID of the group chat
 	 * @return Reason code of the state
 	 */
 	public int getGroupChatReasonCode(String chatId);
@@ -162,7 +165,8 @@ public interface IGroupChatLog {
 	/**
 	 * Get group chat participants from its chat ID
 	 * 
-	 * @param chatId Chat ID of the group chat
+	 * @param chatId
+	 *            Chat ID of the group chat
 	 * @return Set of participants
 	 */
 	public Set<ParticipantInfo> getGroupChatParticipants(String chatId);

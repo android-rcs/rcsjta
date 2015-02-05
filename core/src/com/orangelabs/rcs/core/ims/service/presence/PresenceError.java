@@ -32,26 +32,29 @@ public class PresenceError extends ImsServiceError {
 	 * Subscription has failed (e.g. 404 not found)
 	 */
 	public final static int SUBSCRIBE_FAILED = PRESENCE_ERROR_CODES + 1;
-	
+
 	/**
 	 * Publish has failed (e.g. 408 timeout)
 	 */
 	public final static int PUBLISH_FAILED = PRESENCE_ERROR_CODES + 2;
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param code Error code
+	 * @param code
+	 *            Error code
 	 */
 	public PresenceError(int code) {
 		super(code);
 	}
-	
+
 	/**
 	 * Constructor
 	 * 
-	 * @param code Error code
-	 * @param msg Detail message 
+	 * @param code
+	 *            Error code
+	 * @param msg
+	 *            Detail message
 	 */
 	public PresenceError(int code, String msg) {
 		super(code, msg);

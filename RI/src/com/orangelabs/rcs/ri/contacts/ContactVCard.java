@@ -47,95 +47,96 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public class ContactVCard extends Activity {
 
-	/**
-	 * Spinner for contact selection
-	 */
-	private Spinner mSpinner;
-	
-	/**
-	 * A locker to exit only once
-	 */
-	private LockAccess mExitOnce = new LockAccess();
+    /**
+     * Spinner for contact selection
+     */
+    private Spinner mSpinner;
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    /**
+     * A locker to exit only once
+     */
+    private LockAccess mExitOnce = new LockAccess();
 
-		// Set layout
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		setContentView(R.layout.contacts_vcard);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-		// Set the contact selector
-		mSpinner = (Spinner) findViewById(R.id.contact);
-		mSpinner.setAdapter(ContactListAdapter.createContactListAdapter(this));
-		mSpinner.setOnItemSelectedListener(listenerContact);
+        // Set layout
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setContentView(R.layout.contacts_vcard);
 
-		// Set button callback
-		Button showBtn = (Button) findViewById(R.id.show_btn);
-		showBtn.setOnClickListener(btnShowListener);
-	}
+        // Set the contact selector
+        mSpinner = (Spinner)findViewById(R.id.contact);
+        mSpinner.setAdapter(ContactListAdapter.createContactListAdapter(this));
+        mSpinner.setOnItemSelectedListener(listenerContact);
 
-	/**
-	 * Spinner contact listener
-	 */
-	private OnItemSelectedListener listenerContact = new OnItemSelectedListener() {
-		@Override
-		public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-			// Get selected contact
-			String contact = getSelectedContact();
+        // Set button callback
+        Button showBtn = (Button)findViewById(R.id.show_btn);
+        showBtn.setOnClickListener(btnShowListener);
+    }
 
-			// Update UI
-			displayVisitCard(contact);
-		}
+    /**
+     * Spinner contact listener
+     */
+    private OnItemSelectedListener listenerContact = new OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            // Get selected contact
+            String contact = getSelectedContact();
 
-		@Override
-		public void onNothingSelected(AdapterView<?> arg0) {
-		}
-	};
+            // Update UI
+            displayVisitCard(contact);
+        }
 
-	/**
-	 * Returns the selected contact
-	 * 
-	 * @return Contact
-	 */
-	private String getSelectedContact() {
-		// get selected phone number
-		ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
-		return adapter.getSelectedNumber(mSpinner.getSelectedView());
-	}
+        @Override
+        public void onNothingSelected(AdapterView<?> arg0) {
+        }
+    };
 
-	/**
-	 * Display the visit card
-	 * 
-	 * @param contact
-	 *            Contact
-	 */
-	private void displayVisitCard(String contact) {
-		try {
-			Uri contactUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(contact));
-			String vcard = ContactsService.getVCard(this, contactUri);
-			TextView vcardView = (TextView) findViewById(R.id.vcard);
-			vcardView.setText(vcard);
-		} catch (Exception e) {
-			Utils.showMessageAndExit(ContactVCard.this, getString(R.string.label_api_failed), mExitOnce, e);
-		}
-	}
+    /**
+     * Returns the selected contact
+     * 
+     * @return Contact
+     */
+    private String getSelectedContact() {
+        // get selected phone number
+        ContactListAdapter adapter = (ContactListAdapter)mSpinner.getAdapter();
+        return adapter.getSelectedNumber(mSpinner.getSelectedView());
+    }
 
-	/**
-	 * Show button listener
-	 */
-	private OnClickListener btnShowListener = new OnClickListener() {
-		public void onClick(View v) {
-			// Get filename
-			TextView vcardView = (TextView) findViewById(R.id.vcard);
-			String filename = vcardView.getText().toString();
+    /**
+     * Display the visit card
+     * 
+     * @param contact Contact
+     */
+    private void displayVisitCard(String contact) {
+        try {
+            Uri contactUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
+                    Uri.encode(contact));
+            String vcard = ContactsService.getVCard(this, contactUri);
+            TextView vcardView = (TextView)findViewById(R.id.vcard);
+            vcardView.setText(vcard);
+        } catch (Exception e) {
+            Utils.showMessageAndExit(ContactVCard.this, getString(R.string.label_api_failed),
+                    mExitOnce, e);
+        }
+    }
 
-			// Show the transferred vCard
-			File file = new File(filename);
-			Uri uri = Uri.fromFile(file);
-			Intent intent = new Intent(Intent.ACTION_VIEW);
-			intent.setDataAndType(uri, "text/plain");
-			startActivity(intent);
-		}
-	};
+    /**
+     * Show button listener
+     */
+    private OnClickListener btnShowListener = new OnClickListener() {
+        public void onClick(View v) {
+            // Get filename
+            TextView vcardView = (TextView)findViewById(R.id.vcard);
+            String filename = vcardView.getText().toString();
+
+            // Show the transferred vCard
+            File file = new File(filename);
+            Uri uri = Uri.fromFile(file);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(uri, "text/plain");
+            startActivity(intent);
+        }
+    };
 }

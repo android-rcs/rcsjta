@@ -26,8 +26,8 @@ import com.orangelabs.rcs.utils.ContactUtils;
 import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
- * Delayed Display Notification Dispatcher retrieves those text messages for
- * which requested display reports have not yet been successfully sent.
+ * Delayed Display Notification Dispatcher retrieves those text messages for which requested display
+ * reports have not yet been successfully sent.
  */
 public class DelayedDisplayNotificationDispatcher implements Runnable {
 
@@ -41,7 +41,8 @@ public class DelayedDisplayNotificationDispatcher implements Runnable {
 
 	private static final String ORDER_BY_TIMESTAMP_ASC = ChatLog.Message.TIMESTAMP.concat(" ASC");
 
-	private static Logger logger = Logger.getLogger(DelayedDisplayNotificationDispatcher.class.getName());
+	private static Logger logger = Logger.getLogger(DelayedDisplayNotificationDispatcher.class
+			.getName());
 
 	private ContentResolver mContentResolver;
 
@@ -57,23 +58,30 @@ public class DelayedDisplayNotificationDispatcher implements Runnable {
 	public void run() {
 		Cursor cursor = null;
 		try {
-			String[] projection = new String[] { ChatLog.Message.MESSAGE_ID, ChatLog.Message.CONTACT };
+			String[] projection = new String[] { ChatLog.Message.MESSAGE_ID,
+					ChatLog.Message.CONTACT };
 			cursor = mContentResolver.query(ChatLog.Message.CONTENT_URI, projection,
-					SELECTION_READ_CHAT_MESSAGES_WITH_DISPLAY_REPORT_REQUESTED, null, ORDER_BY_TIMESTAMP_ASC);
+					SELECTION_READ_CHAT_MESSAGES_WITH_DISPLAY_REPORT_REQUESTED, null,
+					ORDER_BY_TIMESTAMP_ASC);
 			while (cursor.moveToNext()) {
-				String msgId = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.MESSAGE_ID));
-				String contactNumber = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTACT));
+				String msgId = cursor.getString(cursor
+						.getColumnIndexOrThrow(ChatLog.Message.MESSAGE_ID));
+				String contactNumber = cursor.getString(cursor
+						.getColumnIndexOrThrow(ChatLog.Message.CONTACT));
 				try {
-					mChatApi.tryToSendOne2OneDisplayedDeliveryReport(msgId, ContactUtils.createContactId(contactNumber));
+					mChatApi.tryToSendOne2OneDisplayedDeliveryReport(msgId,
+							ContactUtils.createContactId(contactNumber));
 				} catch (RcsContactFormatException e) {
-					if (logger.isActivated())  {
-						logger.error( "Cannot parse contact "+contactNumber);
+					if (logger.isActivated()) {
+						logger.error("Cannot parse contact " + contactNumber);
 					}
 				}
 			}
 		} catch (Exception e) {
 			if (logger.isActivated()) {
-				logger.error("Could not retrieve messages for which delayed display notification should be send!", e);
+				logger.error(
+						"Could not retrieve messages for which delayed display notification should be send!",
+						e);
 			}
 		} finally {
 			if (cursor != null) {

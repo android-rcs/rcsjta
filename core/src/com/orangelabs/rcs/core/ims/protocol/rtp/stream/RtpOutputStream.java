@@ -36,35 +36,35 @@ import java.io.IOException;
  * @author jexa7410
  */
 public class RtpOutputStream implements ProcessorOutputStream, RtcpEventListener {
-    /**
-     * RTCP Socket Timeout
-     */
-    public static final int RTCP_SOCKET_TIMEOUT = 20000;
+	/**
+	 * RTCP Socket Timeout
+	 */
+	public static final int RTCP_SOCKET_TIMEOUT = 20000;
 
-    /**
-     * Remote address
-     */
-    private String remoteAddress;
+	/**
+	 * Remote address
+	 */
+	private String remoteAddress;
 
-    /**
-     * Remote port
-     */
-    private int remotePort;
+	/**
+	 * Remote port
+	 */
+	private int remotePort;
 
-    /**
-     * Local port
-     */
-    private int localRtpPort = -1;
+	/**
+	 * Local port
+	 */
+	private int localRtpPort = -1;
 
-    /**
-     * RTP receiver
-     */
-    private RtpPacketReceiver rtpReceiver;
+	/**
+	 * RTP receiver
+	 */
+	private RtpPacketReceiver rtpReceiver;
 
-    /**
-     * RTCP receiver
-     */
-    private RtcpPacketReceiver rtcpReceiver;
+	/**
+	 * RTCP receiver
+	 */
+	private RtcpPacketReceiver rtcpReceiver;
 
 	/**
 	 * RTP transmitter
@@ -76,178 +76,183 @@ public class RtpOutputStream implements ProcessorOutputStream, RtcpEventListener
 	 */
 	private RtcpPacketTransmitter rtcpTransmitter;
 
-    /**
-     * RTCP Session
-     */
-    private RtcpSession rtcpSession;
+	/**
+	 * RTCP Session
+	 */
+	private RtcpSession rtcpSession;
 
-    /**
-     * RTCP socket timeout
-     */
-    private int rtcpSocketTimeout = 0;
+	/**
+	 * RTCP socket timeout
+	 */
+	private int rtcpSocketTimeout = 0;
 
-    /**
-     * RTP stream listener
-     */
-    private RtpStreamListener rtpStreamListener;
+	/**
+	 * RTP stream listener
+	 */
+	private RtpStreamListener rtpStreamListener;
 
-    /**
-     * RTP Input stream
-     */
-    private RtpInputStream rtpInputStream;
+	/**
+	 * RTP Input stream
+	 */
+	private RtpInputStream rtpInputStream;
 
-    /**
-     * The logger
-     */
+	/**
+	 * The logger
+	 */
 	private final static Logger logger = Logger.getLogger(RtpOutputStream.class.getSimpleName());
 
-    /**
-     * Constructor
-     *
-     * @param remoteAddress Remote address
-     * @param remotePort Remote port
-     */
-    public RtpOutputStream(String remoteAddress, int remotePort) {
-        this.remoteAddress = remoteAddress;
-        this.remotePort = remotePort;
-
-        rtcpSession = new RtcpSession(true, 16000);
-    }
-
-    /**
-     * Constructor
-     *
-     * @param remoteAddress Remote address
-     * @param remotePort Remote port
-     * @param rtpInputStream RTP input stream
-     */
-    public RtpOutputStream(String remoteAddress, int remotePort, RtpInputStream rtpInputStream) {
-        this.remoteAddress = remoteAddress;
-        this.remotePort = remotePort;
-        this.rtpInputStream = rtpInputStream;
-
-        rtcpSession = new RtcpSession(true, 16000);
-    }
-
-    /**
-     * Constructor
-     *
-     * @param remoteAddress Remote address
-     * @param remotePort Remote port
-     * @param rtcpTimeout RTCP timeout
-     */
-    public RtpOutputStream(String remoteAddress, int remotePort, int localRtpPort, int rtcpTimeout) {
+	/**
+	 * Constructor
+	 *
+	 * @param remoteAddress
+	 *            Remote address
+	 * @param remotePort
+	 *            Remote port
+	 */
+	public RtpOutputStream(String remoteAddress, int remotePort) {
 		this.remoteAddress = remoteAddress;
 		this.remotePort = remotePort;
-        this.localRtpPort = localRtpPort;
-        this.rtcpSocketTimeout = rtcpTimeout;
 
-        rtcpSession = new RtcpSession(true, 16000);
-    }
+		rtcpSession = new RtcpSession(true, 16000);
+	}
 
-    /**
-     * Open the output stream
-     *
-     * @throws Exception
-     */
-    public void open() throws Exception {
-        if (localRtpPort != -1) {
-            // Create the RTP receiver
-            rtpReceiver = new RtpPacketReceiver(localRtpPort, rtcpSession);
-            rtpReceiver.start();
+	/**
+	 * Constructor
+	 *
+	 * @param remoteAddress
+	 *            Remote address
+	 * @param remotePort
+	 *            Remote port
+	 * @param rtpInputStream
+	 *            RTP input stream
+	 */
+	public RtpOutputStream(String remoteAddress, int remotePort, RtpInputStream rtpInputStream) {
+		this.remoteAddress = remoteAddress;
+		this.remotePort = remotePort;
+		this.rtpInputStream = rtpInputStream;
 
-            // Create the RTCP receiver
-            rtcpReceiver = new RtcpPacketReceiver(localRtpPort + 1, rtcpSession, rtcpSocketTimeout);
-            rtcpReceiver.addRtcpListener(this);
-            rtcpReceiver.start();
+		rtcpSession = new RtcpSession(true, 16000);
+	}
 
-            // Create the RTP transmitter
-            rtpTransmitter = new RtpPacketTransmitter(remoteAddress,
-            		remotePort,
-            		rtcpSession,
-                    rtpReceiver.getConnection());
-            
-            // Create the RTCP transmitter
-            rtcpTransmitter = new RtcpPacketTransmitter(remoteAddress,
-            		remotePort + 1,
-                    rtcpSession,
-                    rtcpReceiver.getConnection());
-            rtcpTransmitter.start();
-        } else if (rtpInputStream != null) { 
-            // Create the RTP transmitter
-            rtpTransmitter = new RtpPacketTransmitter(remoteAddress, remotePort, rtcpSession,
-                    rtpInputStream.getRtpReceiver().getConnection());
-            
-            // Create the RTCP transmitter
-            rtcpTransmitter = new RtcpPacketTransmitter(remoteAddress, remotePort + 1, rtcpSession,
-                    rtpInputStream.getRtcpReceiver().getConnection());
-        } else {
-            // Create the RTP transmitter
-            rtpTransmitter = new RtpPacketTransmitter(remoteAddress, remotePort, rtcpSession);
-            
-            // Create the RTCP transmitter
-            rtcpTransmitter = new RtcpPacketTransmitter(remoteAddress, remotePort + 1, rtcpSession);
-        }
-    }
+	/**
+	 * Constructor
+	 *
+	 * @param remoteAddress
+	 *            Remote address
+	 * @param remotePort
+	 *            Remote port
+	 * @param rtcpTimeout
+	 *            RTCP timeout
+	 */
+	public RtpOutputStream(String remoteAddress, int remotePort, int localRtpPort, int rtcpTimeout) {
+		this.remoteAddress = remoteAddress;
+		this.remotePort = remotePort;
+		this.localRtpPort = localRtpPort;
+		this.rtcpSocketTimeout = rtcpTimeout;
 
-    /**
-     * Close the output stream
-     */
-    public void close() {
+		rtcpSession = new RtcpSession(true, 16000);
+	}
+
+	/**
+	 * Open the output stream
+	 *
+	 * @throws Exception
+	 */
+	public void open() throws Exception {
+		if (localRtpPort != -1) {
+			// Create the RTP receiver
+			rtpReceiver = new RtpPacketReceiver(localRtpPort, rtcpSession);
+			rtpReceiver.start();
+
+			// Create the RTCP receiver
+			rtcpReceiver = new RtcpPacketReceiver(localRtpPort + 1, rtcpSession, rtcpSocketTimeout);
+			rtcpReceiver.addRtcpListener(this);
+			rtcpReceiver.start();
+
+			// Create the RTP transmitter
+			rtpTransmitter = new RtpPacketTransmitter(remoteAddress, remotePort, rtcpSession,
+					rtpReceiver.getConnection());
+
+			// Create the RTCP transmitter
+			rtcpTransmitter = new RtcpPacketTransmitter(remoteAddress, remotePort + 1, rtcpSession,
+					rtcpReceiver.getConnection());
+			rtcpTransmitter.start();
+		} else if (rtpInputStream != null) {
+			// Create the RTP transmitter
+			rtpTransmitter = new RtpPacketTransmitter(remoteAddress, remotePort, rtcpSession,
+					rtpInputStream.getRtpReceiver().getConnection());
+
+			// Create the RTCP transmitter
+			rtcpTransmitter = new RtcpPacketTransmitter(remoteAddress, remotePort + 1, rtcpSession,
+					rtpInputStream.getRtcpReceiver().getConnection());
+		} else {
+			// Create the RTP transmitter
+			rtpTransmitter = new RtpPacketTransmitter(remoteAddress, remotePort, rtcpSession);
+
+			// Create the RTCP transmitter
+			rtcpTransmitter = new RtcpPacketTransmitter(remoteAddress, remotePort + 1, rtcpSession);
+		}
+	}
+
+	/**
+	 * Close the output stream
+	 */
+	public void close() {
 		try {
 			// Close the RTP transmitter
-            if (rtpTransmitter != null)
+			if (rtpTransmitter != null)
 				rtpTransmitter.close();
 
-            // Close the RTCP transmitter
-            if (rtcpTransmitter != null)
-                rtcpTransmitter.close();
+			// Close the RTCP transmitter
+			if (rtcpTransmitter != null)
+				rtcpTransmitter.close();
 
-            // Close the RTP receiver
-            if (rtpReceiver != null)
-                rtpReceiver.close();
+			// Close the RTP receiver
+			if (rtpReceiver != null)
+				rtpReceiver.close();
 
-            // Close the RTCP receiver
-            if (rtcpReceiver != null)
-                rtcpReceiver.close();
+			// Close the RTCP receiver
+			if (rtcpReceiver != null)
+				rtcpReceiver.close();
 
-            // Remove rtpStreamListener
-            rtpStreamListener = null;
-		} catch(Exception e) {
+			// Remove rtpStreamListener
+			rtpStreamListener = null;
+		} catch (Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Can't close correctly RTP ressources", e);
 			}
 		}
 	}
 
-    /**
-     * Write to the stream without blocking
-     *
-     * @param buffer Input buffer
-     * @throws IOException
-     */
-    public void write(Buffer buffer) throws IOException {
+	/**
+	 * Write to the stream without blocking
+	 *
+	 * @param buffer
+	 *            Input buffer
+	 * @throws IOException
+	 */
+	public void write(Buffer buffer) throws IOException {
 		rtpTransmitter.sendRtpPacket(buffer);
-    }
+	}
 
-    @Override
-    public void receiveRtcpEvent(RtcpEvent event) {
-        // Nothing to do 
-    }
+	@Override
+	public void receiveRtcpEvent(RtcpEvent event) {
+		// Nothing to do
+	}
 
-    @Override
-    public void connectionTimeout() {
-        if (rtpStreamListener != null) {
-            rtpStreamListener.rtpStreamAborted();
-        }
-    }
+	@Override
+	public void connectionTimeout() {
+		if (rtpStreamListener != null) {
+			rtpStreamListener.rtpStreamAborted();
+		}
+	}
 
-    /**
-     * Adds the RTP stream listener
-     *
-     * @param rtpStreamListener
-     */
-    public void addRtpStreamListener(RtpStreamListener rtpStreamListener) {
-        this.rtpStreamListener = rtpStreamListener;
-    }
+	/**
+	 * Adds the RTP stream listener
+	 *
+	 * @param rtpStreamListener
+	 */
+	public void addRtpStreamListener(RtpStreamListener rtpStreamListener) {
+		this.rtpStreamListener = rtpStreamListener;
+	}
 }

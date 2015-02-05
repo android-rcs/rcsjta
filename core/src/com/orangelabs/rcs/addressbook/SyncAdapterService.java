@@ -39,85 +39,82 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Service to handle account sync. This is invoked with an intent with action
- * ACTION_AUTHENTICATOR_INTENT. It instantiates the sync adapter and returns its
- * IBinder.
+ * ACTION_AUTHENTICATOR_INTENT. It instantiates the sync adapter and returns its IBinder.
  */
 public class SyncAdapterService extends Service {
 
-    /**
-     * Contacts sync adapter.
-     */
-    private RcsContactsSyncAdapter mSyncAdapter;
-
-    /**
-     * Android content sync adapter
-     */
-    public static final String ANDROID_CONTENT_SYNCADPTER = "android.content.SyncAdapter";
-    
 	/**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
-    
-    /**
-     * Called when the activity is first created.
-     */
-    @Override
-    public void onCreate() {
-        mSyncAdapter = new RcsContactsSyncAdapter(this);
-    }
+	 * Contacts sync adapter.
+	 */
+	private RcsContactsSyncAdapter mSyncAdapter;
 
-    /**
-     * When binding to the service, return an interface to our sync adpater.
-     */
-    @Override
-    public IBinder onBind(Intent intent) {
-        if (intent.getAction().equals(ANDROID_CONTENT_SYNCADPTER)) {
-            return mSyncAdapter.getSyncAdapterBinder();
-        }
-        if (logger.isActivated()){
-        	logger.error("Bound with unknown intent: " + intent);
-        }
-        return null;
-    }
+	/**
+	 * Android content sync adapter
+	 */
+	public static final String ANDROID_CONTENT_SYNCADPTER = "android.content.SyncAdapter";
 
-    /**
-     * Sync adapter that spawns a thread to invoke a sync operation.
-     */
-    private class RcsContactsSyncAdapter extends AbstractThreadedSyncAdapter {
+	/**
+	 * The logger
+	 */
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
-        public RcsContactsSyncAdapter(Context context) {
-            super(context, true /* autoInitialize */);
+	/**
+	 * Called when the activity is first created.
+	 */
+	@Override
+	public void onCreate() {
+		mSyncAdapter = new RcsContactsSyncAdapter(this);
+	}
 
-        }
+	/**
+	 * When binding to the service, return an interface to our sync adpater.
+	 */
+	@Override
+	public IBinder onBind(Intent intent) {
+		if (intent.getAction().equals(ANDROID_CONTENT_SYNCADPTER)) {
+			return mSyncAdapter.getSyncAdapterBinder();
+		}
+		if (logger.isActivated()) {
+			logger.error("Bound with unknown intent: " + intent);
+		}
+		return null;
+	}
 
-        /**
-         * Perform a sync for this account.
-         */
-        @Override
-        public void onPerformSync(Account account, Bundle extras,
-            String authority, ContentProviderClient provider,
-            SyncResult syncResult) {
-	        
-        	if (logger.isActivated()){
-	        	logger.debug("Performing a refresh on contact capabilities");
-	        }
-        	
-        	// Test IMS connection
-        	try {
-        		ServerApiUtils.testIms();
-        	} catch(ServerApiException e) {
-        		if (logger.isActivated()){
-        			logger.debug("IMS connection failed");
-        		}
-        		syncResult.stats.numIoExceptions++;
-        		return;
-        	}
+	/**
+	 * Sync adapter that spawns a thread to invoke a sync operation.
+	 */
+	private class RcsContactsSyncAdapter extends AbstractThreadedSyncAdapter {
 
-        	// Update all contacts capabilities
-    		Set<ContactId> contacts = ContactsManager.getInstance().getAllContacts();
-   			Core.getInstance().getCapabilityService().requestContactCapabilities(contacts);
-        }
-    }
+		public RcsContactsSyncAdapter(Context context) {
+			super(context, true /* autoInitialize */);
+
+		}
+
+		/**
+		 * Perform a sync for this account.
+		 */
+		@Override
+		public void onPerformSync(Account account, Bundle extras, String authority,
+				ContentProviderClient provider, SyncResult syncResult) {
+
+			if (logger.isActivated()) {
+				logger.debug("Performing a refresh on contact capabilities");
+			}
+
+			// Test IMS connection
+			try {
+				ServerApiUtils.testIms();
+			} catch (ServerApiException e) {
+				if (logger.isActivated()) {
+					logger.debug("IMS connection failed");
+				}
+				syncResult.stats.numIoExceptions++;
+				return;
+			}
+
+			// Update all contacts capabilities
+			Set<ContactId> contacts = ContactsManager.getInstance().getAllContacts();
+			Core.getInstance().getCapabilityService().requestContactCapabilities(contacts);
+		}
+	}
 }
-

@@ -30,7 +30,8 @@ public class RtcpSdesEvent extends RtcpEvent {
 	/**
 	 * Constructor
 	 * 
-	 * @param packet RTCP SDES packet
+	 * @param packet
+	 *            RTCP SDES packet
 	 */
 	public RtcpSdesEvent(RtcpSdesPacket packet) {
 		super(packet);

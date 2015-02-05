@@ -31,9 +31,9 @@ import com.orangelabs.rcs.utils.logger.Logger;
 public class HttpAuthenticationAgent {
 
 	/**
-     * The logger
-     */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+	 * The logger
+	 */
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
 	/**
 	 * HTTP Digest MD5 agent
@@ -49,59 +49,59 @@ public class HttpAuthenticationAgent {
 	/**
 	 * Generate the authorization header
 	 * 
-	 * @param method Method used
-	 * @param requestUri Request Uri
-	 * @param body Entity body
+	 * @param method
+	 *            Method used
+	 * @param requestUri
+	 *            Request Uri
+	 * @param body
+	 *            Entity body
 	 * @return authorizationHeader Authorization header
 	 * @throws CoreException
 	 */
-	public String generateAuthorizationHeader(String method, String requestUri, String body) throws CoreException {
+	public String generateAuthorizationHeader(String method, String requestUri, String body)
+			throws CoreException {
 		try {
-	   		// Update nonce parameters
+			// Update nonce parameters
 			digest.updateNonceParameters();
-			
+
 			// Calculate response
 			String user = ImsModule.IMS_USER_PROFILE.getXdmServerLogin();
 			String password = ImsModule.IMS_USER_PROFILE.getXdmServerPassword();
-	   		String response = digest.calculateResponse(user, password,
-	   				method,
-	   				requestUri,
-					digest.buildNonceCounter(),
-					body);				
+			String response = digest.calculateResponse(user, password, method, requestUri,
+					digest.buildNonceCounter(), body);
 
-	   		// Build the Authorization header
-			String auth = "Authorization: Digest username=\"" + ImsModule.IMS_USER_PROFILE.getXdmServerLogin() + "\"" +
-					",realm=\"" + digest.getRealm() + "\"" +
-					",nonce=\"" + digest.getNonce() + "\"" +
-					",uri=\"" + requestUri + "\"";
+			// Build the Authorization header
+			String auth = "Authorization: Digest username=\""
+					+ ImsModule.IMS_USER_PROFILE.getXdmServerLogin() + "\"" + ",realm=\""
+					+ digest.getRealm() + "\"" + ",nonce=\"" + digest.getNonce() + "\"" + ",uri=\""
+					+ requestUri + "\"";
 			String opaque = digest.getOpaque();
 			if (opaque != null) {
 				auth += ",opaque=\"" + opaque + "\"";
 			}
 			String qop = digest.getQop();
-			if ((qop != null) && qop.startsWith("auth")) {	
-				auth += ",qop=\"" + qop + "\"" +
-						",nc=" + digest.buildNonceCounter() +						
-						",cnonce=\"" + digest.getCnonce() + "\""+
-						",response=\"" + response + "\"";
+			if ((qop != null) && qop.startsWith("auth")) {
+				auth += ",qop=\"" + qop + "\"" + ",nc=" + digest.buildNonceCounter() + ",cnonce=\""
+						+ digest.getCnonce() + "\"" + ",response=\"" + response + "\"";
 			}
 			return auth;
-		} catch(Exception e) {
+		} catch (Exception e) {
 			if (logger.isActivated()) {
 				logger.error("Can't create the authorization header", e);
 			}
 			throw new CoreException("Can't create the authorization header");
 		}
-    }
+	}
 
 	/**
 	 * Read the WWW-Authenticate header
 	 * 
-	 * @param header WWW-Authenticate header
+	 * @param header
+	 *            WWW-Authenticate header
 	 */
-	public void readWwwAuthenticateHeader(String header) {		
+	public void readWwwAuthenticateHeader(String header) {
 		if (header != null) {
-	   		// Get domain name
+			// Get domain name
 			String value = null;
 			int end = -1;
 			int begin = header.toLowerCase().indexOf("realm=\"");
@@ -109,10 +109,10 @@ public class HttpAuthenticationAgent {
 				begin += 7;
 				end = header.indexOf("\"", begin);
 				value = header.substring(begin, end);
-			}			
+			}
 			digest.setRealm(value);
 
-	   		// Get opaque parameter
+			// Get opaque parameter
 			value = null;
 			end = -1;
 			begin = header.toLowerCase().indexOf("opaque=\"");
@@ -120,7 +120,7 @@ public class HttpAuthenticationAgent {
 				begin += 8;
 				end = header.indexOf("\"", begin);
 				value = header.substring(begin, end);
-			}			
+			}
 			digest.setOpaque(value);
 
 			// Get qop
@@ -131,7 +131,7 @@ public class HttpAuthenticationAgent {
 				begin += 5;
 				end = header.indexOf("\"", begin);
 				value = header.substring(begin, end);
-			}			
+			}
 			digest.setQop(value);
 
 			// Get nonce to be used
@@ -142,7 +142,7 @@ public class HttpAuthenticationAgent {
 				begin += 7;
 				end = header.indexOf("\"", begin);
 				value = header.substring(begin, end);
-			}			
+			}
 			digest.setNextnonce(value);
 		}
 	}

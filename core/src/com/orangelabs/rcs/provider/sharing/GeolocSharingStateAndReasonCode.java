@@ -17,20 +17,20 @@ package com.orangelabs.rcs.provider.sharing;
 
 public class GeolocSharingStateAndReasonCode {
 
-    private final int mState;
+	private final int mState;
 
-    private final int mReasonCode;
+	private final int mReasonCode;
 
-    public GeolocSharingStateAndReasonCode(int state, int reasonCode) {
-        mState = state;
-        mReasonCode = reasonCode;
-    }
+	public GeolocSharingStateAndReasonCode(int state, int reasonCode) {
+		mState = state;
+		mReasonCode = reasonCode;
+	}
 
-    public int getState() {
-        return mState;
-    }
+	public int getState() {
+		return mState;
+	}
 
-    public int getReasonCode() {
-        return mReasonCode;
-    }
+	public int getReasonCode() {
+		return mReasonCode;
+	}
 }

@@ -27,62 +27,64 @@ import com.orangelabs.rcs.provider.settings.RcsSettings;
  * @author jexa7410
  */
 public class RequestTransaction extends Object {
-    /**
-     * MRSP request transaction timeout (in seconds)
-     */
-    private final static int TIMEOUT = RcsSettings.getInstance().getMsrpTransactionTimeout();
-	
-    /**
-     * Received response
-     */
-    private int receivedResponse = -1;
-    
-    /**
+	/**
+	 * MRSP request transaction timeout (in seconds)
+	 */
+	private final static int TIMEOUT = RcsSettings.getInstance().getMsrpTransactionTimeout();
+
+	/**
+	 * Received response
+	 */
+	private int receivedResponse = -1;
+
+	/**
 	 * Constructor
 	 */
 	public RequestTransaction() {
 	}
-	
+
 	/**
 	 * Notify response
 	 * 
-	 * @param code Response code
-	 * @param headers MSRP headers
+	 * @param code
+	 *            Response code
+	 * @param headers
+	 *            MSRP headers
 	 */
 	public void notifyResponse(int code, Hashtable<String, String> headers) {
-		synchronized(this) {
+		synchronized (this) {
 			// Set response code
 			this.receivedResponse = code;
-			
+
 			// Unblock semaphore
 			super.notify();
 		}
 	}
-	
+
 	/**
 	 * Wait response
 	 */
 	public void waitResponse() {
-		synchronized(this) {
+		synchronized (this) {
 			try {
 				// Wait semaphore
 				super.wait(TIMEOUT * 1000);
-			} catch(InterruptedException e) {
-			    // Nothing to do
+			} catch (InterruptedException e) {
+				// Nothing to do
 			}
 		}
 	}
-	
+
 	/**
 	 * Terminate transaction
 	 */
 	public void terminate() {
-		synchronized(this) {
+		synchronized (this) {
 			// Unblock semaphore
 			super.notify();
 		}
 	}
-	
+
 	/**
 	 * Is response received
 	 * 

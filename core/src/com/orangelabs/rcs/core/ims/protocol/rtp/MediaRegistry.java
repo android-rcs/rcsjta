@@ -52,15 +52,15 @@ public class MediaRegistry {
 	 */
 	public static Vector<VideoFormat> getSupportedVideoFormats() {
 		Vector<VideoFormat> list = new Vector<VideoFormat>();
-    	for (Enumeration<Format> e = SUPPORTED_CODECS.elements() ; e.hasMoreElements() ;) {
-	         Format fmt = (Format)e.nextElement();
-	         if (fmt instanceof VideoFormat) {
-		         list.addElement((VideoFormat)fmt);
-	         }
-	     }
+		for (Enumeration<Format> e = SUPPORTED_CODECS.elements(); e.hasMoreElements();) {
+			Format fmt = (Format) e.nextElement();
+			if (fmt instanceof VideoFormat) {
+				list.addElement((VideoFormat) fmt);
+			}
+		}
 		return list;
 	}
-	
+
 	/**
 	 * Returns the list of the supported audio format
 	 * 
@@ -68,68 +68,68 @@ public class MediaRegistry {
 	 */
 	public static Vector<AudioFormat> getSupportedAudioFormats() {
 		Vector<AudioFormat> list = new Vector<AudioFormat>();
-    	for (Enumeration<Format> e = SUPPORTED_CODECS.elements() ; e.hasMoreElements() ;) {
-	         Format fmt = (Format)e.nextElement();
-	         if (fmt instanceof AudioFormat) {
-		         list.addElement((AudioFormat)fmt);
-	         }
-	     }
+		for (Enumeration<Format> e = SUPPORTED_CODECS.elements(); e.hasMoreElements();) {
+			Format fmt = (Format) e.nextElement();
+			if (fmt instanceof AudioFormat) {
+				list.addElement((AudioFormat) fmt);
+			}
+		}
 		return list;
 	}
 
 	/**
-     * Generate the format associated to the codec name
-     * 
-     * @param codec Codec name
-     * @return Format
-     */
-    public static Format generateFormat(String codec) {
-    	return (Format)SUPPORTED_CODECS.get(codec.toLowerCase());
-    }    
-    
+	 * Generate the format associated to the codec name
+	 * 
+	 * @param codec
+	 *            Codec name
+	 * @return Format
+	 */
+	public static Format generateFormat(String codec) {
+		return (Format) SUPPORTED_CODECS.get(codec.toLowerCase());
+	}
+
 	/**
-     * Is codec supported
-     * 
-     * @param codec Codec name
-     * @return Boolean
-     */
-    public static boolean isCodecSupported(String codec) {
-    	Format format = (Format)SUPPORTED_CODECS.get(codec.toLowerCase());
+	 * Is codec supported
+	 * 
+	 * @param codec
+	 *            Codec name
+	 * @return Boolean
+	 */
+	public static boolean isCodecSupported(String codec) {
+		Format format = (Format) SUPPORTED_CODECS.get(codec.toLowerCase());
 		return (format != null);
-    }    
-    
+	}
+
 	/**
-     * Generate the codec encoding chain
-     * 
-	 * @param encoding Encoding name
-     * @return Codec chain
-     */
-    public static Codec[] generateEncodingCodecChain(String encoding) {
-    	if (encoding.equalsIgnoreCase(H264VideoFormat.ENCODING)) { 
-	        // Java H264 packetizer
-	        Codec[] chain = {
-	            new com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.JavaPacketizer()
-	        };
-	        return chain;
-		} else { 
+	 * Generate the codec encoding chain
+	 * 
+	 * @param encoding
+	 *            Encoding name
+	 * @return Codec chain
+	 */
+	public static Codec[] generateEncodingCodecChain(String encoding) {
+		if (encoding.equalsIgnoreCase(H264VideoFormat.ENCODING)) {
+			// Java H264 packetizer
+			Codec[] chain = { new com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.JavaPacketizer() };
+			return chain;
+		} else {
 			// Codec implemented in the native part
 			return new Codec[0];
 		}
-    }
+	}
 
 	/**
 	 * Generate the decoding codec chain
 	 * 
-	 * @param encoding Encoding name
+	 * @param encoding
+	 *            Encoding name
 	 * @return Codec chain
 	 */
 	public static Codec[] generateDecodingCodecChain(String encoding) {
 		if (encoding.equalsIgnoreCase(H264VideoFormat.ENCODING)) {
-	        // Java H264 depacketizer
-	        Codec[] chain = {
-	            new com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.JavaDepacketizer()
-	        };
-	        return chain;
+			// Java H264 depacketizer
+			Codec[] chain = { new com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.JavaDepacketizer() };
+			return chain;
 		} else {
 			// Codec implemented in the native part
 			return new Codec[0];

@@ -36,7 +36,7 @@ import com.orangelabs.rcs.utils.logger.Logger;
 
 /**
  * Capability discovery manager using options procedure
- *  
+ * 
  * @author jexa7410
  */
 public class OptionsManager implements DiscoveryManager {
@@ -44,104 +44,109 @@ public class OptionsManager implements DiscoveryManager {
 	 * Max number of threads for background processing
 	 */
 	private final static int MAX_PROCESSING_THREADS = 15;
-	
-    /**
-     * IMS module
-     */
-    private ImsModule imsModule;
-    
-    /**
-     * Thread pool to request capabilities in background
-     */
-    private ExecutorService threadPool;
 
-    /**
-     * The logger
-     */
-    private final static Logger logger = Logger.getLogger(OptionsManager.class.getSimpleName());
-
-    /**
-     * Constructor
-     * 
-     * @param parent IMS module
-     */
-    public OptionsManager(ImsModule parent) {
-        this.imsModule = parent;
-    }
-
-    /**
-     * Start the manager
-     */
-    public void start() {
-    	threadPool = Executors.newFixedThreadPool(MAX_PROCESSING_THREADS);
-    }
-
-    /**
-     * Stop the manager
-     */
-    public void stop() {
-        try {
-        	threadPool.shutdown();
-        } catch (SecurityException e) {
-            if (logger.isActivated()) {
-            	logger.error("Could not stop all threads");
-            }
-        }
-    }
-    
 	/**
-     * Request contact capabilities
-     * 
-     * @param contact Remote contact identifier
-     * @return Returns true if success
-     */
-    public boolean requestCapabilities(ContactId contact) {
-    	if (logger.isActivated()) {
-    		logger.debug("Request capabilities in background for " + contact);
-    	}
-    	
-    	// Update capability time of last request
-    	ContactsManager.getInstance().updateCapabilitiesTimeLastRequest(contact);
-    	
-    	// Start request in background
-		try {
-	    	boolean richcall = imsModule.getRichcallService().isCallConnectedWith(contact);
-	    	OptionsRequestTask task = new OptionsRequestTask(imsModule, contact, CapabilityUtils.getSupportedFeatureTags(richcall));
-	    	threadPool.submit(task);
-	    	return true;
-		} catch(Exception e) {
-	    	if (logger.isActivated()) {
-	    		logger.error("Can't submit task", e);
-	    	}
-	    	return false;
-		}
-    }
+	 * IMS module
+	 */
+	private ImsModule imsModule;
 
-    /**
-     * Request capabilities for a set of contacts
-     *
-     * @param contacts Contact set
-     */
-	public void requestCapabilities(Set<ContactId> contacts) {
-        if (logger.isActivated()) {
-            logger.debug("Request capabilities for " + contacts.size() + " contacts");
-        }
+	/**
+	 * Thread pool to request capabilities in background
+	 */
+	private ExecutorService threadPool;
 
-        for (ContactId contact : contacts) {
-			if (!requestCapabilities(contact)) {
-		    	if (logger.isActivated()) {
-		    		logger.debug("Processing has been stopped");
-		    	}
-				break;
-			}
-        }
+	/**
+	 * The logger
+	 */
+	private final static Logger logger = Logger.getLogger(OptionsManager.class.getSimpleName());
+
+	/**
+	 * Constructor
+	 * 
+	 * @param parent
+	 *            IMS module
+	 */
+	public OptionsManager(ImsModule parent) {
+		this.imsModule = parent;
 	}
 
-    /**
-     * Receive a capability request (options procedure)
-     * 
-     * @param options Received options message
-     */
+	/**
+	 * Start the manager
+	 */
+	public void start() {
+		threadPool = Executors.newFixedThreadPool(MAX_PROCESSING_THREADS);
+	}
+
+	/**
+	 * Stop the manager
+	 */
+	public void stop() {
+		try {
+			threadPool.shutdown();
+		} catch (SecurityException e) {
+			if (logger.isActivated()) {
+				logger.error("Could not stop all threads");
+			}
+		}
+	}
+
+	/**
+	 * Request contact capabilities
+	 * 
+	 * @param contact
+	 *            Remote contact identifier
+	 * @return Returns true if success
+	 */
+	public boolean requestCapabilities(ContactId contact) {
+		if (logger.isActivated()) {
+			logger.debug("Request capabilities in background for " + contact);
+		}
+
+		// Update capability time of last request
+		ContactsManager.getInstance().updateCapabilitiesTimeLastRequest(contact);
+
+		// Start request in background
+		try {
+			boolean richcall = imsModule.getRichcallService().isCallConnectedWith(contact);
+			OptionsRequestTask task = new OptionsRequestTask(imsModule, contact,
+					CapabilityUtils.getSupportedFeatureTags(richcall));
+			threadPool.submit(task);
+			return true;
+		} catch (Exception e) {
+			if (logger.isActivated()) {
+				logger.error("Can't submit task", e);
+			}
+			return false;
+		}
+	}
+
+	/**
+	 * Request capabilities for a set of contacts
+	 *
+	 * @param contacts
+	 *            Contact set
+	 */
+	public void requestCapabilities(Set<ContactId> contacts) {
+		if (logger.isActivated()) {
+			logger.debug("Request capabilities for " + contacts.size() + " contacts");
+		}
+
+		for (ContactId contact : contacts) {
+			if (!requestCapabilities(contact)) {
+				if (logger.isActivated()) {
+					logger.debug("Processing has been stopped");
+				}
+				break;
+			}
+		}
+	}
+
+	/**
+	 * Receive a capability request (options procedure)
+	 * 
+	 * @param options
+	 *            Received options message
+	 */
 	public void receiveCapabilityRequest(SipRequest options) {
 		try {
 			ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(options));
@@ -151,10 +156,12 @@ public class OptionsManager implements DiscoveryManager {
 
 			try {
 				// Create 200 OK response
-				String ipAddress = imsModule.getCurrentNetworkInterface().getNetworkAccess().getIpAddress();
+				String ipAddress = imsModule.getCurrentNetworkInterface().getNetworkAccess()
+						.getIpAddress();
 				boolean richcall = imsModule.getRichcallService().isCallConnectedWith(contact);
-				SipResponse resp = SipMessageFactory.create200OkOptionsResponse(options, imsModule.getSipManager().getSipStack()
-						.getContact(), CapabilityUtils.getSupportedFeatureTags(richcall),
+				SipResponse resp = SipMessageFactory.create200OkOptionsResponse(options, imsModule
+						.getSipManager().getSipStack().getContact(),
+						CapabilityUtils.getSupportedFeatureTags(richcall),
 						CapabilityUtils.buildSdp(ipAddress, richcall));
 
 				// Send 200 OK response
@@ -171,12 +178,12 @@ public class OptionsManager implements DiscoveryManager {
 			// Update capabilities in database
 			if (capabilities.isImSessionSupported()) {
 				// RCS-e contact
-				ContactsManager.getInstance().setContactCapabilities(contact, capabilities, RcsStatus.RCS_CAPABLE,
-						RegistrationState.ONLINE);
+				ContactsManager.getInstance().setContactCapabilities(contact, capabilities,
+						RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE);
 			} else {
 				// Not a RCS-e contact
-				ContactsManager.getInstance().setContactCapabilities(contact, capabilities, RcsStatus.NOT_RCS,
-						RegistrationState.UNKNOWN);
+				ContactsManager.getInstance().setContactCapabilities(contact, capabilities,
+						RcsStatus.NOT_RCS, RegistrationState.UNKNOWN);
 			}
 
 			// Notify listener

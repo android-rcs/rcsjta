@@ -28,30 +28,40 @@ import android.content.Intent;
  * 
  * @author jexa7410
  */
-public interface SipSessionListener extends ImsSessionListener  {
-    /**
-     * SIP session error
-     * @param contact Remote contact
-     * @param error Error
-     */
-    public void handleSessionError(ContactId contact, SipSessionError error);
-    
-    /**
-     * Receive data
-     * @param contact Remote contact
-     * @param error Error
-     */
-    public void handleReceiveData(ContactId contact, byte[] data);
-    
-    /**
-     * Destination user agent received INVITE, and is alerting user of call
-     * @param contact Remote contact
-     */
-    public void handle180Ringing(ContactId contact);
+public interface SipSessionListener extends ImsSessionListener {
+	/**
+	 * SIP session error
+	 * 
+	 * @param contact
+	 *            Remote contact
+	 * @param error
+	 *            Error
+	 */
+	public void handleSessionError(ContactId contact, SipSessionError error);
+
+	/**
+	 * Receive data
+	 * 
+	 * @param contact
+	 *            Remote contact
+	 * @param error
+	 *            Error
+	 */
+	public void handleReceiveData(ContactId contact, byte[] data);
+
+	/**
+	 * Destination user agent received INVITE, and is alerting user of call
+	 * 
+	 * @param contact
+	 *            Remote contact
+	 */
+	public void handle180Ringing(ContactId contact);
 
 	/**
 	 * A session invitation has been received
-	 * @param contact Remote contact
+	 * 
+	 * @param contact
+	 *            Remote contact
 	 * @param sessionInvite
 	 */
 	public void handleSessionInvited(ContactId contact, Intent sessionInvite);

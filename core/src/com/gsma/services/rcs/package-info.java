@@ -39,3 +39,4 @@
  * - Tel-URI (e.g. tel:+33xxx).<br>
  */
 package com.gsma.services.rcs;
+

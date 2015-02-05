@@ -30,9 +30,9 @@ public class GibaUserProfileInterface extends UserProfileInterface {
 	 * Constructor
 	 */
 	public GibaUserProfileInterface() {
-		super();	
+		super();
 	}
-	
+
 	/**
 	 * Read the user profile
 	 * 
@@ -41,19 +41,16 @@ public class GibaUserProfileInterface extends UserProfileInterface {
 	public UserProfile read() {
 		// Read profile info from the database settings
 		String xdmServer = RcsSettings.getInstance().getXdmServer();
-		String xdmPassword = RcsSettings.getInstance().getUserProfileImsPassword();		
+		String xdmPassword = RcsSettings.getInstance().getUserProfileImsPassword();
 		String confUri = RcsSettings.getInstance().getImConferenceUri();
-		
+
 		// The user profile will be complete during the registration procedure
-		return new UserProfile(
-				null,  // User name derived from GIBA procedure
-				null,  // Domain derived from GIBA procedure
-				null,  // No private ID with GIBA procedure
-				null,  // No password with GIBA procedure
-				null,  // No realm with GIBA procedure
-				xdmServer,
-				null,  // Login derived from GIBA procedure
-				xdmPassword,
-				confUri);
+		return new UserProfile(null, // User name derived from GIBA procedure
+				null, // Domain derived from GIBA procedure
+				null, // No private ID with GIBA procedure
+				null, // No password with GIBA procedure
+				null, // No realm with GIBA procedure
+				xdmServer, null, // Login derived from GIBA procedure
+				xdmPassword, confUri);
 	}
 }

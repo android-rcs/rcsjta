@@ -17,7 +17,6 @@
  ******************************************************************************/
 package com.gsma.services.rcs.ipcall;
 
-
 /**
  * This class offers callback methods on IP call player events
  * 
@@ -47,7 +46,8 @@ public abstract class IPCallPlayerListener extends IIPCallPlayerListener.Stub {
 	/**
 	 * Callback called when the player has failed
 	 * 
-	 * @param error Error
+	 * @param error
+	 *            Error
 	 */
 	public abstract void onPlayerError(int error);
 }

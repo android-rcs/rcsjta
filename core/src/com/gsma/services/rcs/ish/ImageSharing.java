@@ -34,173 +34,174 @@ import android.net.Uri;
  */
 public class ImageSharing {
 
-    /**
-     * Image sharing state
-     */
-    public static class State {
-    	/**
-    	 * Sharing invitation received
-    	 */
-    	public final static int INVITED = 0;
-    	
-    	/**
-    	 * Sharing invitation sent
-    	 */
-    	public final static int INITIATING = 1;
-    	
-    	/**
-    	 * Sharing is started
-    	 */
-    	public final static int STARTED = 2;
-    	
-    	/**
-    	 * Sharing has been aborted
-    	 */
-    	public final static int ABORTED = 3;
-    	
-    	/**
-    	 * Sharing has failed
-    	 */
-    	public final static int FAILED = 4;
-    	
-    	/**
-    	 * Image has been transferred with success
-    	 */
-    	public final static int TRANSFERRED = 5;
+	/**
+	 * Image sharing state
+	 */
+	public static class State {
+		/**
+		 * Sharing invitation received
+		 */
+		public final static int INVITED = 0;
 
-    	/**
-    	 * Sharing has been rejected
-    	 */
-    	public final static int REJECTED = 6;
+		/**
+		 * Sharing invitation sent
+		 */
+		public final static int INITIATING = 1;
 
-    	/**
-    	 * Ringing
-    	 */
-    	public final static int RINGING = 7;
+		/**
+		 * Sharing is started
+		 */
+		public final static int STARTED = 2;
 
-    	/**
-    	 * Sharing has been accepted and is in the process of becoming started
-    	 */
-    	public final static int ACCEPTING = 8;
+		/**
+		 * Sharing has been aborted
+		 */
+		public final static int ABORTED = 3;
 
-        private State() {
-        }    	
-    }
+		/**
+		 * Sharing has failed
+		 */
+		public final static int FAILED = 4;
 
-    /**
-     * Reason code associated with the image share state.
-     */
-    public static class ReasonCode {
+		/**
+		 * Image has been transferred with success
+		 */
+		public final static int TRANSFERRED = 5;
 
-        /**
-         * No specific reason code specified.
-         */
-        public static final int UNSPECIFIED = 0;
+		/**
+		 * Sharing has been rejected
+		 */
+		public final static int REJECTED = 6;
 
-        /**
-         * Image share is aborted by local user.
-         */
-        public static final int ABORTED_BY_USER = 1;
+		/**
+		 * Ringing
+		 */
+		public final static int RINGING = 7;
 
-        /**
-         * Image share is aborted by remote user.
-         */
-        public static final int ABORTED_BY_REMOTE = 2;
+		/**
+		 * Sharing has been accepted and is in the process of becoming started
+		 */
+		public final static int ACCEPTING = 8;
 
-        /**
-         * Image share is aborted by system.
-         */
-        public static final int ABORTED_BY_SYSTEM = 3;
+		private State() {
+		}
+	}
 
-        /**
-         * Image share is rejected because already taken by the secondary device.
-         */
-        public static final int REJECTED_BY_SECONDARY_DEVICE = 4;
+	/**
+	 * Reason code associated with the image share state.
+	 */
+	public static class ReasonCode {
 
-        /**
-         * Incoming image was rejected due to time out.
-         */
-        public static final int REJECTED_TIME_OUT = 5;
+		/**
+		 * No specific reason code specified.
+		 */
+		public static final int UNSPECIFIED = 0;
 
-        /**
-         * Incoming image was rejected as is cannot be received due to lack of local storage space.
-         */
-        public static final int REJECTED_LOW_SPACE = 6;
+		/**
+		 * Image share is aborted by local user.
+		 */
+		public static final int ABORTED_BY_USER = 1;
 
-        /**
-         * Incoming image was rejected as it was too big to be received.
-         */
-        public static final int REJECTED_MAX_SIZE = 7;
+		/**
+		 * Image share is aborted by remote user.
+		 */
+		public static final int ABORTED_BY_REMOTE = 2;
 
-        /**
-         * Incoming image was rejected because max number of sharing sessions is achieved.
-         */
-        public static final int REJECTED_MAX_SHARING_SESSIONS = 8;
+		/**
+		 * Image share is aborted by system.
+		 */
+		public static final int ABORTED_BY_SYSTEM = 3;
 
-        /**
-         * Incoming image was rejected by local user.
-         */
-        public static final int REJECTED_BY_USER = 9;
+		/**
+		 * Image share is rejected because already taken by the secondary device.
+		 */
+		public static final int REJECTED_BY_SECONDARY_DEVICE = 4;
 
-        /**
-         * Incoming image was rejected by remote.
-         */
-        public static final int REJECTED_BY_REMOTE = 10;
+		/**
+		 * Incoming image was rejected due to time out.
+		 */
+		public static final int REJECTED_TIME_OUT = 5;
 
-        /**
-         * Image share initiation failed;
-         */
-        public static final int FAILED_INITIATION = 11;
+		/**
+		 * Incoming image was rejected as is cannot be received due to lack of local storage space.
+		 */
+		public static final int REJECTED_LOW_SPACE = 6;
 
-        /**
-         * Sharing of the image share has failed.
-         */
-        public static final int FAILED_SHARING = 12;
+		/**
+		 * Incoming image was rejected as it was too big to be received.
+		 */
+		public static final int REJECTED_MAX_SIZE = 7;
 
-        /**
-         * Saving of the image share has failed.
-         */
-        public static final int FAILED_SAVING = 13;
-    }
-    
-    /**
-     * Image sharing error
-     */
-    public static class Error {
-    	/**
-    	 * Sharing has failed
-    	 */
-    	public final static int SHARING_FAILED = 0;
-    	
-    	/**
-    	 * Sharing invitation has been declined by remote
-    	 */
-    	public final static int INVITATION_DECLINED = 1;
+		/**
+		 * Incoming image was rejected because max number of sharing sessions is achieved.
+		 */
+		public static final int REJECTED_MAX_SHARING_SESSIONS = 8;
 
-    	/**
-    	 * Image saving has failed 
-       	 */
-    	public final static int SAVING_FAILED = 2;
-    	
-        private Error() {
-        }    	
-    }
+		/**
+		 * Incoming image was rejected by local user.
+		 */
+		public static final int REJECTED_BY_USER = 9;
 
-    /**
-     * Image sharing interface
-     */
-    private final IImageSharing mSharingInf;
-    
-    /**
-     * Constructor
-     * 
-     * @param sharingInf Image sharing interface
-     */
-    /* package private */ImageSharing(IImageSharing sharingInf) {
-    	mSharingInf = sharingInf;
-    }
-    	
-    /**
+		/**
+		 * Incoming image was rejected by remote.
+		 */
+		public static final int REJECTED_BY_REMOTE = 10;
+
+		/**
+		 * Image share initiation failed;
+		 */
+		public static final int FAILED_INITIATION = 11;
+
+		/**
+		 * Sharing of the image share has failed.
+		 */
+		public static final int FAILED_SHARING = 12;
+
+		/**
+		 * Saving of the image share has failed.
+		 */
+		public static final int FAILED_SAVING = 13;
+	}
+
+	/**
+	 * Image sharing error
+	 */
+	public static class Error {
+		/**
+		 * Sharing has failed
+		 */
+		public final static int SHARING_FAILED = 0;
+
+		/**
+		 * Sharing invitation has been declined by remote
+		 */
+		public final static int INVITATION_DECLINED = 1;
+
+		/**
+		 * Image saving has failed
+		 */
+		public final static int SAVING_FAILED = 2;
+
+		private Error() {
+		}
+	}
+
+	/**
+	 * Image sharing interface
+	 */
+	private final IImageSharing mSharingInf;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param sharingInf
+	 *            Image sharing interface
+	 */
+	/* package private */ImageSharing(IImageSharing sharingInf) {
+		mSharingInf = sharingInf;
+	}
+
+	/**
 	 * Returns the sharing ID of the image sharing
 	 * 
 	 * @return Sharing ID
@@ -209,11 +210,11 @@ public class ImageSharing {
 	public String getSharingId() throws RcsServiceException {
 		try {
 			return mSharingInf.getSharingId();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Returns the remote contact identifier
 	 * 
@@ -223,7 +224,7 @@ public class ImageSharing {
 	public ContactId getRemoteContact() throws RcsServiceException {
 		try {
 			return mSharingInf.getRemoteContact();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
@@ -243,51 +244,51 @@ public class ImageSharing {
 	}
 
 	/**
-     * Returns the complete filename including the path of the file to be transferred
-     *
-     * @return Filename
+	 * Returns the complete filename including the path of the file to be transferred
+	 *
+	 * @return Filename
 	 * @throws RcsServiceException
-     */
+	 */
 	public String getFileName() throws RcsServiceException {
 		try {
 			return mSharingInf.getFileName();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
 
 	/**
-     * Returns the size of the file to be transferred
-     *
-     * @return Size in bytes
+	 * Returns the size of the file to be transferred
+	 *
+	 * @return Size in bytes
 	 * @throws RcsServiceException
-     */
+	 */
 	public long getFileSize() throws RcsServiceException {
 		try {
 			return mSharingInf.getFileSize();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
-	}	
-
-    /**
-     * Returns the MIME type of the file to be transferred
-     * 
-     * @return Type
-	 * @throws RcsServiceException
-     */
-    public String getMimeType() throws RcsServiceException {
-		try {
-			return mSharingInf.getMimeType();
-		} catch(Exception e) {
-			throw new RcsServiceException(e.getMessage());
-		}
-    }
+	}
 
 	/**
-	 * Returns the local timestamp of when the image sharing was initiated for
-	 * outgoing image sharing or the local timestamp of when the image sharing
-	 * invitation was received for incoming image sharings.
+	 * Returns the MIME type of the file to be transferred
+	 * 
+	 * @return Type
+	 * @throws RcsServiceException
+	 */
+	public String getMimeType() throws RcsServiceException {
+		try {
+			return mSharingInf.getMimeType();
+		} catch (Exception e) {
+			throw new RcsServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Returns the local timestamp of when the image sharing was initiated for outgoing image
+	 * sharing or the local timestamp of when the image sharing invitation was received for incoming
+	 * image sharings.
 	 * 
 	 * @return long
 	 * @throws RcsServiceException
@@ -310,10 +311,10 @@ public class ImageSharing {
 	public int getState() throws RcsServiceException {
 		try {
 			return mSharingInf.getState();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
-	}		
+	}
 
 	/**
 	 * Returns the reason code of the state of the sharing
@@ -340,11 +341,11 @@ public class ImageSharing {
 	public Direction getDirection() throws RcsServiceException {
 		try {
 			return Direction.valueOf(mSharingInf.getDirection());
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
-	}	
-	
+	}
+
 	/**
 	 * Accepts image sharing invitation
 	 * 
@@ -353,11 +354,11 @@ public class ImageSharing {
 	public void acceptInvitation() throws RcsServiceException {
 		try {
 			mSharingInf.acceptInvitation();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Rejects image sharing invitation
 	 * 
@@ -366,7 +367,7 @@ public class ImageSharing {
 	public void rejectInvitation() throws RcsServiceException {
 		try {
 			mSharingInf.rejectInvitation();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}
@@ -379,7 +380,7 @@ public class ImageSharing {
 	public void abortSharing() throws RcsServiceException {
 		try {
 			mSharingInf.abortSharing();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RcsServiceException(e.getMessage());
 		}
 	}

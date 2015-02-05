@@ -18,18 +18,17 @@
 
 package com.orangelabs.rcs.core.ims.service.presence;
 
-
 /**
  * Favorite link
  * 
  * @author Jean-Marc AUFFRET
  */
-public class FavoriteLink {	
+public class FavoriteLink {
 	/**
 	 * Link
 	 */
 	private String link = null;
-	
+
 	/**
 	 * Name
 	 */
@@ -38,7 +37,8 @@ public class FavoriteLink {
 	/**
 	 * Constructor
 	 * 
-	 * @param link Web link
+	 * @param link
+	 *            Web link
 	 */
 	public FavoriteLink(String link) {
 		this.link = link;
@@ -47,14 +47,16 @@ public class FavoriteLink {
 	/**
 	 * Constructor
 	 * 
-	 * @param name Name associated to the link
-	 * @param link Web link
+	 * @param name
+	 *            Name associated to the link
+	 * @param link
+	 *            Web link
 	 */
 	public FavoriteLink(String name, String link) {
 		this.name = name;
 		this.link = link;
 	}
-	
+
 	/**
 	 * Returns the name associated to the link
 	 * 
@@ -67,7 +69,8 @@ public class FavoriteLink {
 	/**
 	 * Set the name associated to the link
 	 * 
-	 * @param name Name
+	 * @param name
+	 *            Name
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -85,8 +88,9 @@ public class FavoriteLink {
 	/**
 	 * Set the web link
 	 * 
-	 * @param link Web link
-	 */	
+	 * @param link
+	 *            Web link
+	 */
 	public void setLink(String link) {
 		this.link = link;
 	}

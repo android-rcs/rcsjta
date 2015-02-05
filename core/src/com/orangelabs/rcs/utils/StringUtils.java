@@ -34,37 +34,40 @@ public class StringUtils {
 
 	public static final String UTF8_STR = "utf-8";
 
-    public static final Charset UTF8 = Charset.forName(UTF8_STR);
+	public static final Charset UTF8 = Charset.forName(UTF8_STR);
 
-    /**
-     * Truncate a string to a max length
-     *
-     * @param text String to truncate
-     * @param truncatedLength Max length
-     * @return Truncated string
-     */
-    public static String truncate(String text, int truncatedLength) {
-        if (text == null) {
-            return null;
-        }
+	/**
+	 * Truncate a string to a max length
+	 *
+	 * @param text
+	 *            String to truncate
+	 * @param truncatedLength
+	 *            Max length
+	 * @return Truncated string
+	 */
+	public static String truncate(String text, int truncatedLength) {
+		if (text == null) {
+			return null;
+		}
 
-        if ((truncatedLength < 0) || (truncatedLength > text.length())) {
-            return text;
-        }
-        return text.substring(0, truncatedLength);
-    }
+		if ((truncatedLength < 0) || (truncatedLength > text.length())) {
+			return text;
+		}
+		return text.substring(0, truncatedLength);
+	}
 
 	/**
 	 * Escape characters for text appearing as XML data, between tags.
 	 *
-	 * The following characters are replaced :
-	 * <br> <
-	 * <br> >
-	 * <br> &
-	 * <br> "
-	 * <br> '
+	 * The following characters are replaced : <br>
+	 * < <br>
+	 * > <br>
+	 * & <br>
+	 * " <br>
+	 * '
 	 *
-	 * @param text Input text
+	 * @param text
+	 *            Input text
 	 * @return Encoded string
 	 */
 	public static String encodeXML(String text) {
@@ -72,39 +75,35 @@ public class StringUtils {
 			return null;
 		}
 
-	    final StringBuilder result = new StringBuilder();
-	    final StringCharacterIterator iterator = new StringCharacterIterator(text);
-	    char character =  iterator.current();
-	    while (character != CharacterIterator.DONE ){
-	      if (character == '<') {
-	        result.append("&lt;");
-	      }
-	      else if (character == '>') {
-	        result.append("&gt;");
-	      }
-	      else if (character == '\"') {
-	        result.append("&quot;");
-	      }
-	      else if (character == '\'') {
-	        result.append("&#039;");
-	      }
-	      else if (character == '&') {
-	         result.append("&amp;");
-	      }
-	      else {
-	        //the char is not a special one
-	        //add it to the result as is
-	        result.append(character);
-	      }
-	      character = iterator.next();
-	    }
-	    return result.toString();
+		final StringBuilder result = new StringBuilder();
+		final StringCharacterIterator iterator = new StringCharacterIterator(text);
+		char character = iterator.current();
+		while (character != CharacterIterator.DONE) {
+			if (character == '<') {
+				result.append("&lt;");
+			} else if (character == '>') {
+				result.append("&gt;");
+			} else if (character == '\"') {
+				result.append("&quot;");
+			} else if (character == '\'') {
+				result.append("&#039;");
+			} else if (character == '&') {
+				result.append("&amp;");
+			} else {
+				// the char is not a special one
+				// add it to the result as is
+				result.append(character);
+			}
+			character = iterator.next();
+		}
+		return result.toString();
 	}
 
 	/**
 	 * Decode XML string
 	 *
-	 * @param text Input text
+	 * @param text
+	 *            Input text
 	 * @return Decoded string
 	 */
 	public static String decodeXML(String text) {
@@ -112,24 +111,25 @@ public class StringUtils {
 			return null;
 		}
 
-	    text = text.replaceAll("&lt;", "<");
-	    text = text.replaceAll("&gt;", ">");
-	    text = text.replaceAll("&quot;", "\"");
-	    text = text.replaceAll("&#039;", "\'");
-	    text = text.replaceAll("&amp;", "&");
+		text = text.replaceAll("&lt;", "<");
+		text = text.replaceAll("&gt;", ">");
+		text = text.replaceAll("&quot;", "\"");
+		text = text.replaceAll("&#039;", "\'");
+		text = text.replaceAll("&amp;", "&");
 
-	    return text;
+		return text;
 	}
 
 	/**
 	 * Remove quotes delimiters
 	 *
-	 * @param input Input
+	 * @param input
+	 *            Input
 	 * @return String without quotes
 	 */
 	public static String removeQuotes(String input) {
 		if ((input != null) && input.startsWith("\"") && input.endsWith("\"")) {
-			input = input.substring(1, input.length()-1);
+			input = input.substring(1, input.length() - 1);
 		}
 		return input;
 	}
@@ -137,7 +137,8 @@ public class StringUtils {
 	/**
 	 * Is empty string
 	 *
-	 * @param str String
+	 * @param str
+	 *            String
 	 * @return Boolean
 	 */
 	public static boolean isEmpty(String str) {
@@ -165,11 +166,12 @@ public class StringUtils {
 
 	/**
 	 * compares two strings null-safe
+	 * 
 	 * @param str1
 	 * @param str2
 	 * @return true if equals
 	 */
 	public static boolean equals(String str1, String str2) {
-	    return str1 == null ? str2 == null : str1.equals(str2);
+		return str1 == null ? str2 == null : str1.equals(str2);
 	}
 }
