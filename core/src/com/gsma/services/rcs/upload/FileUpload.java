@@ -22,10 +22,10 @@
 
 package com.gsma.services.rcs.upload;
 
-import android.net.Uri;
-
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.upload.IFileUpload;
+
+import android.net.Uri;
+import android.util.SparseArray;
 
 /**
  * File upload
@@ -37,33 +37,57 @@ public class FileUpload {
     /**
      * File upload state
      */
-    public static class State {
+    public enum State {
+
         /**
          * Inactive state
          */
-        public final static int INACTIVE = 0;
+        INACTIVE(0),
 
         /**
          * Upload is started
          */
-        public final static int STARTED = 3;
-
-        /**
-         * File has been transferred with success
-         */
-        public final static int TRANSFERRED = 4;
+        STARTED(1),
 
         /**
          * Upload has been aborted
          */
-        public final static int ABORTED = 5;
+        ABORTED(2),
 
         /**
          * Upload has failed
          */
-        public final static int FAILED = 6;
+        FAILED(3),
 
-        private State() {
+        /**
+         * File has been transferred with success
+         */
+        TRANSFERRED(4);
+
+        private final int mValue;
+
+        private static SparseArray<State> mValueToEnum = new SparseArray<State>();
+        static {
+            for (State entry : State.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
+
+        private State(int value) {
+            mValue = value;
+        }
+
+        public final int toInt() {
+            return mValue;
+        }
+
+        public static final State valueOf(int value) {
+            State entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(State.class.getName()).append(".").append(value).append("!").toString());
         }
     }
 
@@ -131,9 +155,9 @@ public class FileUpload {
      * @see FileUpload.State
      * @throws RcsServiceException
      */
-    public int getState() throws RcsServiceException {
+    public State getState() throws RcsServiceException {
         try {
-            return uploadInf.getState();
+            return State.valueOf(uploadInf.getState());
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }

@@ -22,10 +22,11 @@
 
 package com.gsma.services.rcs.upload;
 
-import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
 
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -37,11 +38,13 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.os.IInterface;
 
-import com.gsma.services.rcs.RcsService;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceListener;
-import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  * This class offers the main entry point to upload a file to the RCS content server. Several
@@ -65,6 +68,9 @@ public class FileUploadService extends RcsService {
     private IFileUploadService mApi;
 
     private static final String ERROR_CNX = "FileUpload service not connected";
+
+    private final Map<FileUploadListener, WeakReference<IFileUploadListener>> mFileUploadListeners
+    = new WeakHashMap<FileUploadListener, WeakReference<IFileUploadListener>>();
 
     /**
      * Constructor
@@ -298,7 +304,10 @@ public class FileUploadService extends RcsService {
     public void addEventListener(FileUploadListener listener) throws RcsServiceException {
         if (mApi != null) {
             try {
-                mApi.addEventListener(listener);
+                IFileUploadListener fileUploadListener = new FileUploadListenerImpl(listener);
+                mFileUploadListeners.put(listener,
+                        new WeakReference<IFileUploadListener>(fileUploadListener));
+                mApi.addEventListener(fileUploadListener);
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }
@@ -316,7 +325,14 @@ public class FileUploadService extends RcsService {
     public void removeEventListener(FileUploadListener listener) throws RcsServiceException {
         if (mApi != null) {
             try {
-                mApi.removeEventListener(listener);
+                WeakReference<IFileUploadListener> weakRef = mFileUploadListeners.remove(listener);
+                if (weakRef == null) {
+                    return;
+                }
+                IFileUploadListener fileUploadListener = weakRef.get();
+                if (fileUploadListener != null) {
+                    mApi.removeEventListener(fileUploadListener);
+                }
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }

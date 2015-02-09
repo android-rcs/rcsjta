@@ -23,6 +23,7 @@
 package com.gsma.rcs.service.broadcaster;
 
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.upload.FileUpload.State;
 import com.gsma.services.rcs.upload.IFileUploadListener;
 
 import android.os.RemoteCallbackList;
@@ -48,11 +49,12 @@ public class FileUploadEventBroadcaster implements IFileUploadEventBroadcaster {
         mFileUploadListeners.unregister(listener);
     }
 
-    public void broadcastStateChanged(String uploadId, int state) {
+    public void broadcastStateChanged(String uploadId, State state) {
+        int rcsState = state.toInt();
         final int N = mFileUploadListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
-                mFileUploadListeners.getBroadcastItem(i).onStateChanged(uploadId, state);
+                mFileUploadListeners.getBroadcastItem(i).onStateChanged(uploadId, rcsState);
             } catch (Exception e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);

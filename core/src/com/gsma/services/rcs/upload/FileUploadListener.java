@@ -22,21 +22,21 @@
 
 package com.gsma.services.rcs.upload;
 
-import com.gsma.services.rcs.upload.IFileUploadListener;
+import com.gsma.services.rcs.upload.FileUpload.State;
 
 /**
  * File upload event listener
  * 
  * @author Jean-Marc AUFFRET
  */
-public abstract class FileUploadListener extends IFileUploadListener.Stub {
+public abstract class FileUploadListener {
     /**
      * Callback called when the file upload state has been changed.
      * 
      * @param uploadId ID of upload
      * @param state State of upload
      */
-    public abstract void onStateChanged(String uploadId, int state);
+    public abstract void onStateChanged(String uploadId, State state);
 
     /**
      * Callback called during the upload progress
