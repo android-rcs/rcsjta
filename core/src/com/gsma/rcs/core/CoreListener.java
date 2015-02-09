@@ -45,10 +45,10 @@ import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.ipcall.IPCall;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
-import com.gsma.services.rcs.filetransfer.FileTransfer;
-
+import com.gsma.services.rcs.sharing.video.VideoSharing;
 
 import android.content.Intent;
 
@@ -342,7 +342,7 @@ public interface CoreListener {
      * @param reasonCode Rejected reason code
      */
     public void handleVideoSharingInvitationRejected(ContactId contact, VideoContent content,
-            int reasonCode);
+            VideoSharing.ReasonCode reasonCode);
 
     /**
      * Handle the case of rejected geoloc sharing

@@ -16,22 +16,25 @@
 
 package com.gsma.rcs.provider.sharing;
 
+import com.gsma.services.rcs.sharing.video.VideoSharing.ReasonCode;
+import com.gsma.services.rcs.sharing.video.VideoSharing.State;
+
 public class VideoSharingStateAndReasonCode {
 
-    private final int mState;
+    private final State mState;
 
-    private final int mReasonCode;
+    private final ReasonCode mReasonCode;
 
-    public VideoSharingStateAndReasonCode(int state, int reasonCode) {
+    public VideoSharingStateAndReasonCode(State state, ReasonCode reasonCode) {
         mState = state;
         mReasonCode = reasonCode;
     }
 
-    public int getState() {
+    public State getState() {
         return mState;
     }
 
-    public int getReasonCode() {
+    public ReasonCode getReasonCode() {
         return mReasonCode;
     }
 }

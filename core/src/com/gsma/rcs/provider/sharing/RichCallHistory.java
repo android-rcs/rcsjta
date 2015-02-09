@@ -36,6 +36,7 @@ import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingLog;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.image.ImageSharingLog;
+import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharingLog;
 
 import android.content.ContentValues;
@@ -229,7 +230,7 @@ public class RichCallHistory {
      * @return image URI
      */
     public Uri addVideoSharing(String sharingId, ContactId contact, Direction direction,
-            VideoContent content, int state, int reasonCode) {
+            VideoContent content, VideoSharing.State state, VideoSharing.ReasonCode reasonCode) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Add new video sharing for contact ").append(contact)
                     .append(": sharingId=").append(sharingId).append(", state=").append(state)
@@ -240,8 +241,8 @@ public class RichCallHistory {
         values.put(VideoSharingData.KEY_SHARING_ID, sharingId);
         values.put(VideoSharingData.KEY_CONTACT, contact.toString());
         values.put(VideoSharingData.KEY_DIRECTION, direction.toInt());
-        values.put(VideoSharingData.KEY_STATE, state);
-        values.put(VideoSharingData.KEY_REASON_CODE, reasonCode);
+        values.put(VideoSharingData.KEY_STATE, state.toInt());
+        values.put(VideoSharingData.KEY_REASON_CODE, reasonCode.toInt());
         values.put(VideoSharingData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
         values.put(VideoSharingData.KEY_DURATION, 0);
         values.put(VideoSharingData.KEY_VIDEO_ENCODING, content.getEncoding());
@@ -258,16 +259,16 @@ public class RichCallHistory {
      * @param reasonCode Reason Code
      * @param duration
      */
-    public void setVideoSharingStateReasonCodeAndDuration(String sharingId, int state,
-            int reasonCode, long duration) {
+    public void setVideoSharingStateReasonCodeAndDuration(String sharingId,
+            VideoSharing.State state, VideoSharing.ReasonCode reasonCode, long duration) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Update video sharing state of sharing ")
                     .append(sharingId).append(" state=").append(state).append(", reasonCode=")
                     .append(reasonCode).append(" duration=").append(duration).toString());
         }
         ContentValues values = new ContentValues();
-        values.put(VideoSharingData.KEY_STATE, state);
-        values.put(VideoSharingData.KEY_REASON_CODE, reasonCode);
+        values.put(VideoSharingData.KEY_STATE, state.toInt());
+        values.put(VideoSharingData.KEY_REASON_CODE, reasonCode.toInt());
         values.put(VideoSharingData.KEY_DURATION, duration);
 
         mLocalContentResolver.update(Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, sharingId),

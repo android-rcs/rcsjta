@@ -22,13 +22,6 @@
 
 package com.gsma.rcs.service.api;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import android.os.IBinder;
-
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.service.SessionIdGenerator;
@@ -47,13 +40,20 @@ import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.sharing.video.VideoSharing;
-import com.gsma.services.rcs.sharing.video.VideoSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.video.IVideoPlayer;
 import com.gsma.services.rcs.sharing.video.IVideoSharing;
 import com.gsma.services.rcs.sharing.video.IVideoSharingListener;
 import com.gsma.services.rcs.sharing.video.IVideoSharingService;
 import com.gsma.services.rcs.sharing.video.IVideoSharingServiceConfiguration;
+import com.gsma.services.rcs.sharing.video.VideoSharing;
+import com.gsma.services.rcs.sharing.video.VideoSharing.ReasonCode;
+
+import android.os.IBinder;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Rich call API service
@@ -365,7 +365,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @param reasonCode Reason code
      */
     public void addAndBroadcastVideoSharingInvitationRejected(ContactId contact,
-            VideoContent content, int reasonCode) {
+            VideoContent content, ReasonCode reasonCode) {
         String sessionId = SessionIdGenerator.getNewId();
         mRichCallLog.addVideoSharing(sessionId, contact, Direction.INCOMING, content,
                 VideoSharing.State.REJECTED, reasonCode);

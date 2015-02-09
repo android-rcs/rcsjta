@@ -16,15 +16,17 @@
 
 package com.gsma.rcs.service.broadcaster;
 
-import android.content.Intent;
-import android.os.RemoteCallbackList;
-
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.sharing.video.VideoSharingIntent;
 import com.gsma.services.rcs.sharing.video.IVideoSharingListener;
+import com.gsma.services.rcs.sharing.video.VideoSharing.ReasonCode;
+import com.gsma.services.rcs.sharing.video.VideoSharing.State;
+import com.gsma.services.rcs.sharing.video.VideoSharingIntent;
+
+import android.content.Intent;
+import android.os.RemoteCallbackList;
 
 /**
  * VideoSharingEventBroadcaster maintains the registering and unregistering of IVideoSharingListener
@@ -48,12 +50,15 @@ public class VideoSharingEventBroadcaster implements IVideoSharingEventBroadcast
         mVideoSharingListeners.unregister(listener);
     }
 
-    public void broadcastStateChanged(ContactId contact, String sharingId, int state, int reasonCode) {
+    public void broadcastStateChanged(ContactId contact, String sharingId, State state,
+            ReasonCode reasonCode) {
+        int rcsState = state.toInt();
+        int rcsReasonCode = reasonCode.toInt();
         final int N = mVideoSharingListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
                 mVideoSharingListeners.getBroadcastItem(i).onStateChanged(contact, sharingId,
-                        state, reasonCode);
+                        rcsState, rcsReasonCode);
             } catch (Exception e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);

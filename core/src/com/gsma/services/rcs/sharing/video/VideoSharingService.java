@@ -22,9 +22,12 @@
 
 package com.gsma.services.rcs.sharing.video;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.contacts.ContactId;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -33,14 +36,12 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.IInterface;
 
-import com.gsma.services.rcs.RcsService;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceListener;
-import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.sharing.video.IVideoSharing;
-import com.gsma.services.rcs.sharing.video.IVideoSharingService;
+import java.lang.ref.WeakReference;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  * This class offers the main entry point to share live video during a CS call. Several applications
@@ -54,6 +55,8 @@ public class VideoSharingService extends RcsService {
      * API
      */
     private IVideoSharingService mApi;
+
+    private final Map<VideoSharingListener, WeakReference<IVideoSharingListener>> mVideoSharingListeners = new WeakHashMap<VideoSharingListener, WeakReference<IVideoSharingListener>>();
 
     private static final String ERROR_CNX = "VideoSharing service not connected";
 
@@ -212,7 +215,10 @@ public class VideoSharingService extends RcsService {
             throw new RcsServiceNotAvailableException(ERROR_CNX);
         }
         try {
-            mApi.addEventListener2(listener);
+            IVideoSharingListener rcsListener = new VideoSharingListenerImpl(listener);
+            mVideoSharingListeners.put(listener, new WeakReference<IVideoSharingListener>(
+                    rcsListener));
+            mApi.addEventListener2(rcsListener);
         } catch (Exception e) {
             throw new RcsServiceException(e);
         }
@@ -229,7 +235,14 @@ public class VideoSharingService extends RcsService {
             throw new RcsServiceNotAvailableException(ERROR_CNX);
         }
         try {
-            mApi.removeEventListener2(listener);
+            WeakReference<IVideoSharingListener> weakRef = mVideoSharingListeners.remove(listener);
+            if (weakRef == null) {
+                return;
+            }
+            IVideoSharingListener rcsListener = weakRef.get();
+            if (rcsListener != null) {
+                mApi.removeEventListener2(rcsListener);
+            }
         } catch (Exception e) {
             throw new RcsServiceException(e);
         }

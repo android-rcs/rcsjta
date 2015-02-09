@@ -23,14 +23,15 @@
 package com.gsma.services.rcs.sharing.video;
 
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.sharing.video.IVideoSharingListener;
+import com.gsma.services.rcs.sharing.video.VideoSharing.ReasonCode;
+import com.gsma.services.rcs.sharing.video.VideoSharing.State;
 
 /**
  * Video sharing event listener
  * 
  * @author Jean-Marc AUFFRET
  */
-public abstract class VideoSharingListener extends IVideoSharingListener.Stub {
+public abstract class VideoSharingListener {
 
     /**
      * Callback called when the sharing state/reasonCode is changed.
@@ -42,6 +43,6 @@ public abstract class VideoSharingListener extends IVideoSharingListener.Stub {
      * @see VideoSharing.State
      * @see VideoSharing.ReasonCode
      */
-    public abstract void onStateChanged(ContactId contact, String sharingId, int state,
-            int reasonCode);
+    public abstract void onStateChanged(ContactId contact, String sharingId, State state,
+            ReasonCode reasonCode);
 }

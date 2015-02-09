@@ -25,7 +25,8 @@ package com.gsma.services.rcs.sharing.video;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.sharing.video.IVideoSharing;
+
+import android.util.SparseArray;
 
 /**
  * Video sharing
@@ -37,111 +38,162 @@ public class VideoSharing {
     /**
      * Video sharing state
      */
-    public static class State {
+    public enum State {
+
         /**
          * Sharing invitation received
          */
-        public final static int INVITED = 0;
+        INVITED(0),
 
         /**
          * Sharing invitation sent
          */
-        public final static int INITIATING = 1;
+        INITIATING(1),
 
         /**
          * Sharing is started
          */
-        public final static int STARTED = 2;
+        STARTED(2),
 
         /**
          * Sharing has been aborted
          */
-        public final static int ABORTED = 3;
+        ABORTED(3),
 
         /**
          * Sharing has failed
          */
-        public final static int FAILED = 4;
+        FAILED(4),
 
         /**
          * Sharing has been rejected
          */
-        public final static int REJECTED = 5;
+        REJECTED(5),
 
         /**
          * Ringing
          */
-        public final static int RINGING = 6;
+        RINGING(6),
 
         /**
          * Sharing has been accepted and is in the process of becoming started
          */
-        public final static int ACCEPTING = 7;
+        ACCEPTING(7);
 
-        private State() {
+        private final int mValue;
+
+        private static SparseArray<State> mValueToEnum = new SparseArray<State>();
+        static {
+            for (State entry : State.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
+
+        private State(int value) {
+            mValue = value;
+        }
+
+        public final int toInt() {
+            return mValue;
+        }
+
+        public final static State valueOf(int value) {
+            State entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(State.class.getName()).append(".").append(value).append("!").toString());
         }
     }
 
     /**
      * Reason code associated with the video share state.
      */
-    public static class ReasonCode {
+    public enum ReasonCode {
 
         /**
          * No specific reason code specified.
          */
-        public static final int UNSPECIFIED = 0;
+        UNSPECIFIED(0),
 
         /**
          * Video share is aborted by local user.
          */
-        public static final int ABORTED_BY_USER = 1;
+        ABORTED_BY_USER(1),
 
         /**
          * Video share is aborted by remote user.
          */
-        public static final int ABORTED_BY_REMOTE = 2;
+        ABORTED_BY_REMOTE(2),
 
         /**
          * Video share is aborted by system.
          */
-        public static final int ABORTED_BY_SYSTEM = 3;
+        ABORTED_BY_SYSTEM(3),
 
         /**
          * Video share is rejected because already taken by the secondary device.
          */
-        public static final int REJECTED_BY_SECONDARY_DEVICE = 4;
+        REJECTED_BY_SECONDARY_DEVICE(4),
 
         /**
          * Video share invitation was rejected due to max number of sharing sessions already are
          * open.
          */
-        public static final int REJECTED_MAX_SHARING_SESSIONS = 5;
+        REJECTED_MAX_SHARING_SESSIONS(5),
 
         /**
          * Video share invitation was rejected by local user.
          */
-        public static final int REJECTED_BY_USER = 6;
+        REJECTED_BY_USER(6),
 
         /**
          * Video share invitation was rejected by remote.
          */
-        public static final int REJECTED_BY_REMOTE = 7;
+        REJECTED_BY_REMOTE(7),
 
         /**
-         * Video share been rejected due to time out.
+         * Video share been rejected due to inactivity.
          */
-        public static final int REJECTED_TIME_OUT = 8;
+        REJECTED_BY_INACTIVITY(8),
 
         /**
          * Video share initiation failed.
          */
-        public static final int FAILED_INITIATION = 9;
+        FAILED_INITIATION(9),
 
         /**
          * Sharing of the video share has failed.
          */
-        public static final int FAILED_SHARING = 10;
+        FAILED_SHARING(10);
+
+        private final int mValue;
+
+        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<ReasonCode>();
+        static {
+            for (ReasonCode entry : ReasonCode.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
+
+        private ReasonCode(int value) {
+            mValue = value;
+        }
+
+        public final int toInt() {
+            return mValue;
+        }
+
+        public final static ReasonCode valueOf(int value) {
+            ReasonCode entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(ReasonCode.class.getName()).append(".").append(value).append("!")
+                    .toString());
+        }
     }
 
     /**
@@ -203,9 +255,9 @@ public class VideoSharing {
      * @see VideoSharing.State
      * @throws RcsServiceException
      */
-    public int getState() throws RcsServiceException {
+    public State getState() throws RcsServiceException {
         try {
-            return mSharingInf.getState();
+            return State.valueOf(mSharingInf.getState());
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }
@@ -218,9 +270,9 @@ public class VideoSharing {
      * @see VideoSharing.ReasonCode
      * @throws RcsServiceException
      */
-    public int getReasonCode() throws RcsServiceException {
+    public ReasonCode getReasonCode() throws RcsServiceException {
         try {
-            return mSharingInf.getReasonCode();
+            return ReasonCode.valueOf(mSharingInf.getReasonCode());
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }

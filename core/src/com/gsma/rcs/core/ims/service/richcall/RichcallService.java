@@ -53,8 +53,8 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
-import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.IVideoPlayer;
+import com.gsma.services.rcs.sharing.video.VideoSharing;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -73,15 +73,14 @@ public class RichcallService extends ImsService {
      * Video share features tags
      */
     public final static String[] FEATURE_TAGS_VIDEO_SHARE = {
-            FeatureTags.FEATURE_3GPP_VIDEO_SHARE
+        FeatureTags.FEATURE_3GPP_VIDEO_SHARE
     };
 
     /**
      * Image share features tags
      */
     public final static String[] FEATURE_TAGS_IMAGE_SHARE = {
-            FeatureTags.FEATURE_3GPP_VIDEO_SHARE,
-            FeatureTags.FEATURE_3GPP_IMAGE_SHARE
+            FeatureTags.FEATURE_3GPP_VIDEO_SHARE, FeatureTags.FEATURE_3GPP_IMAGE_SHARE
     };
 
     /**
@@ -136,7 +135,8 @@ public class RichcallService extends ImsService {
                 .handleImageSharingInvitationRejected(contact, content, reasonCode);
     }
 
-    private void handleVideoSharingInvitationRejected(SipRequest invite, int reasonCode) {
+    private void handleVideoSharingInvitationRejected(SipRequest invite,
+            VideoSharing.ReasonCode reasonCode) {
         ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
         VideoContent content = ContentManager.createLiveVideoContentFromSdp(invite.getSdpContent()
                 .getBytes(UTF8));

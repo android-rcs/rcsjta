@@ -22,8 +22,6 @@
 
 package com.gsma.rcs.service.api;
 
-import javax2.sip.message.Response;
-
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
@@ -38,13 +36,15 @@ import com.gsma.rcs.service.broadcaster.IVideoSharingEventBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.sharing.video.IVideoPlayer;
+import com.gsma.services.rcs.sharing.video.IVideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoCodec;
 import com.gsma.services.rcs.sharing.video.VideoDescriptor;
 import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.video.VideoSharing.State;
-import com.gsma.services.rcs.sharing.video.IVideoPlayer;
-import com.gsma.services.rcs.sharing.video.IVideoSharing;
+
+import javax2.sip.message.Response;
 
 /**
  * Video sharing session
@@ -93,6 +93,9 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         mVideoSharingService = videoSharingService;
     }
 
+    /*
+     * TODO: Fix reasoncode mapping in the switch.
+     */
     private VideoSharingStateAndReasonCode toStateAndReasonCode(ContentSharingError error) {
         int code = error.getErrorCode();
         switch (code) {
@@ -115,7 +118,10 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         }
     }
 
-    private int imsServiceSessionErrorToReasonCode(int imsServiceSessionError) {
+    /*
+     * TODO: Fix reasoncode mapping in the switch.
+     */
+    private ReasonCode imsServiceSessionErrorToReasonCode(int imsServiceSessionError) {
         switch (imsServiceSessionError) {
             case ImsServiceSession.TERMINATION_BY_SYSTEM:
             case ImsServiceSession.TERMINATION_BY_TIMEOUT:
@@ -128,7 +134,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         }
     }
 
-    private void handleSessionRejected(int reasonCode, ContactId contact) {
+    private void handleSessionRejected(ReasonCode reasonCode, ContactId contact) {
         if (logger.isActivated()) {
             logger.info("Session rejected; reasonCode=".concat(String.valueOf(reasonCode)));
         }
@@ -182,15 +188,15 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         }
         SipDialogPath dialogPath = session.getDialogPath();
         if (dialogPath != null && dialogPath.isSessionEstablished()) {
-            return VideoSharing.State.STARTED;
+            return VideoSharing.State.STARTED.toInt();
 
         } else if (session.isInitiatedByRemote()) {
             if (session.isSessionAccepted()) {
-                return VideoSharing.State.ACCEPTING;
+                return VideoSharing.State.ACCEPTING.toInt();
             }
-            return VideoSharing.State.INVITED;
+            return VideoSharing.State.INVITED.toInt();
         }
-        return VideoSharing.State.INITIATING;
+        return VideoSharing.State.INITIATING.toInt();
     }
 
     /**
@@ -204,7 +210,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         if (session == null) {
             return mPersistentStorage.getReasonCode();
         }
-        return ReasonCode.UNSPECIFIED;
+        return ReasonCode.UNSPECIFIED.toInt();
     }
 
     /**
@@ -406,14 +412,14 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
      * 
      * @param reason Termination reason
      */
-    public void handleSessionAborted(ContactId contact, int reason) {
+    public void handleSessionAborted(ContactId contact, int imsServiceSessionError) {
         if (logger.isActivated()) {
-            logger.info("Session aborted, reason=".concat(String.valueOf(reason)));
+            logger.info("Session aborted, imsServiceSessionError=".concat(String.valueOf(imsServiceSessionError)));
         }
         long currentDuration = getCurrentDuration();
         synchronized (mLock) {
             mVideoSharingService.removeVideoSharing(mSharingId);
-            int reasonCode = imsServiceSessionErrorToReasonCode(reason);
+            ReasonCode reasonCode = imsServiceSessionErrorToReasonCode(imsServiceSessionError);
             mPersistentStorage.setStateReasonCodeAndDuration(VideoSharing.State.ABORTED,
                     reasonCode, currentDuration);
 
@@ -452,8 +458,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
             logger.info("Sharing error ".concat(String.valueOf(error.getErrorCode())));
         }
         VideoSharingStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
-        int state = stateAndReasonCode.getState();
-        int reasonCode = stateAndReasonCode.getReasonCode();
+        State state = stateAndReasonCode.getState();
+        ReasonCode reasonCode = stateAndReasonCode.getReasonCode();
         long currentDuration = getCurrentDuration();
         synchronized (mLock) {
             mVideoSharingService.removeVideoSharing(mSharingId);
@@ -493,9 +499,12 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         handleSessionRejected(ReasonCode.REJECTED_BY_USER, contact);
     }
 
+    /*
+     * TODO: Fix reasoncode mapping between rejected_by_inactivity and rejected_by_timout.
+     */
     @Override
     public void handleSessionRejectedByTimeout(ContactId contact) {
-        handleSessionRejected(ReasonCode.REJECTED_TIME_OUT, contact);
+        handleSessionRejected(ReasonCode.REJECTED_BY_INACTIVITY, contact);
     }
 
     @Override

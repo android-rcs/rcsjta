@@ -16,16 +16,18 @@
 
 package com.gsma.rcs.core.ims.service.richcall.video;
 
-import android.database.Cursor;
-import android.net.Uri;
-
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.sharing.video.VideoDescriptor;
+import com.gsma.services.rcs.sharing.video.VideoSharing.ReasonCode;
+import com.gsma.services.rcs.sharing.video.VideoSharing.State;
 import com.gsma.services.rcs.sharing.video.VideoSharingLog;
+
+import android.database.Cursor;
+import android.net.Uri;
 
 /**
  * VideoSharingPersistedStorageAccessor helps in retrieving persisted data related to a video share
@@ -164,7 +166,7 @@ public class VideoSharingPersistedStorageAccessor {
      * @param reasonCode
      * @param duration
      */
-    public void setStateReasonCodeAndDuration(int state, int reasonCode, long duration) {
+    public void setStateReasonCodeAndDuration(State state, ReasonCode reasonCode, long duration) {
         mRichCallLog.setVideoSharingStateReasonCodeAndDuration(mSharingId, state, reasonCode,
                 duration);
     }
@@ -180,7 +182,7 @@ public class VideoSharingPersistedStorageAccessor {
      * @return the URI of the newly inserted item
      */
     public Uri addVideoSharing(ContactId contact, Direction direction, VideoContent content,
-            int state, int reasonCode) {
+            State state, ReasonCode reasonCode) {
         return mRichCallLog.addVideoSharing(mSharingId, contact, direction, content, state,
                 reasonCode);
     }

@@ -90,6 +90,7 @@ import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingService;
 import com.gsma.services.rcs.sharing.image.IImageSharingService;
 import com.gsma.services.rcs.sharing.video.IVideoSharingService;
+import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.upload.IFileUploadService;
 
 import android.app.Notification;
@@ -907,7 +908,7 @@ public class RcsCoreService extends Service implements CoreListener {
 
     @Override
     public void handleVideoSharingInvitationRejected(ContactId contact, VideoContent content,
-            int reasonCode) {
+            VideoSharing.ReasonCode reasonCode) {
         vshApi.addAndBroadcastVideoSharingInvitationRejected(contact, content, reasonCode);
     }
 

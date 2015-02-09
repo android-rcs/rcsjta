@@ -17,14 +17,16 @@
 package com.gsma.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.sharing.video.VideoSharing.ReasonCode;
+import com.gsma.services.rcs.sharing.video.VideoSharing.State;
 
 /**
  * Interface to perform broadcast events on VideoSharingListeners
  */
 public interface IVideoSharingEventBroadcaster {
 
-    public void broadcastStateChanged(ContactId contact, String sharingId, int status,
-            int reasonCode);
+    public void broadcastStateChanged(ContactId contact, String sharingId, State state,
+            ReasonCode reasonCode);
 
     public void broadcastInvitation(String sharingId);
 }
