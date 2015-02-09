@@ -82,6 +82,7 @@ import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.IContactsService;
 import com.gsma.services.rcs.extension.IMultimediaSessionService;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.IFileTransferService;
 import com.gsma.services.rcs.ipcall.IIPCallService;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
@@ -886,7 +887,7 @@ public class RcsCoreService extends Service implements CoreListener {
 
     @Override
     public void handleFileTransferInvitationRejected(ContactId contact, MmContent content,
-            MmContent fileicon, int reasonCode) {
+            MmContent fileicon, FileTransfer.ReasonCode reasonCode) {
         ftApi.addAndBroadcastFileTransferInvitationRejected(contact, content, fileicon, reasonCode);
     }
 

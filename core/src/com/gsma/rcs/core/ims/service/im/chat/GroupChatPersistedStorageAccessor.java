@@ -28,6 +28,7 @@ import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
 
 import android.database.Cursor;
 
@@ -180,7 +181,7 @@ public class GroupChatPersistedStorageAccessor {
         mMessagingLog.setRejectNextGroupChatNextInvitation(mChatId);
     }
 
-    public void setFileTransferStateAndReasonCode(String fileTransferId, int state, int reasonCode) {
+    public void setFileTransferStateAndReasonCode(String fileTransferId, FileTransfer.State state, FileTransfer.ReasonCode reasonCode) {
         mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, state, reasonCode);
     }
 }

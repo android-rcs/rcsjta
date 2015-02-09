@@ -127,7 +127,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         mCore = core;
     }
 
-    private int imdnToFileTransferFailedReasonCode(ImdnDocument imdn) {
+    private ReasonCode imdnToFileTransferFailedReasonCode(ImdnDocument imdn) {
         String notificationType = imdn.getNotificationType();
         if (ImdnDocument.DELIVERY_NOTIFICATION.equals(notificationType)) {
             return ReasonCode.FAILED_DELIVERY;
@@ -296,14 +296,14 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param state state of the file transfer
      */
     private void addOutgoingFileTransfer(String fileTransferId, ContactId contact,
-            MmContent content, MmContent fileicon, int state) {
+            MmContent content, MmContent fileicon, State state) {
         mMessagingLog.addFileTransfer(fileTransferId, contact, Direction.OUTGOING, content,
                 fileicon, state, ReasonCode.UNSPECIFIED);
         mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId, state,
                 ReasonCode.UNSPECIFIED);
     }
 
-    private void setFileTransferState(String fileTransferId, ContactId contact, int state) {
+    private void setFileTransferState(String fileTransferId, ContactId contact, State state) {
         mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, state,
                 ReasonCode.UNSPECIFIED);
         mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId, state,
@@ -320,7 +320,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param state state of file transfer
      */
     private void addOutgoingGroupFileTransfer(String fileTransferId, String chatId,
-            MmContent content, MmContent fileicon, int state) {
+            MmContent content, MmContent fileicon, State state) {
         mMessagingLog.addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileicon,
                 state, FileTransfer.ReasonCode.UNSPECIFIED);
         mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId, state,
@@ -801,7 +801,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         } else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
                 || ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
                 || ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
-            int reasonCode = imdnToFileTransferFailedReasonCode(imdn);
+            ReasonCode reasonCode = imdnToFileTransferFailedReasonCode(imdn);
 
             mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId,
                     FileTransfer.State.FAILED, reasonCode);
@@ -843,7 +843,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     private void handleGroupFileDeliveryStatusFailed(String chatId, String fileTransferId,
             ContactId contact, int reasonCode) {
-        if (ReasonCode.FAILED_DELIVERY == reasonCode) {
+        if (ReasonCode.FAILED_DELIVERY.toInt() == reasonCode) {
             mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, contact,
                     GroupDeliveryInfoLog.Status.FAILED,
                     GroupDeliveryInfoLog.ReasonCode.FAILED_DELIVERY);
@@ -882,8 +882,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         } else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
                 || ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
                 || ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
-            int reasonCode = imdnToFileTransferFailedReasonCode(imdn);
-            handleGroupFileDeliveryStatusFailed(chatId, msgId, contact, reasonCode);
+            ReasonCode reasonCode = imdnToFileTransferFailedReasonCode(imdn);
+            handleGroupFileDeliveryStatusFailed(chatId, msgId, contact, reasonCode.toInt());
         }
     }
 
@@ -1085,7 +1085,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param reasonCode Reason code
      */
     public void addAndBroadcastFileTransferInvitationRejected(ContactId contact, MmContent content,
-            MmContent fileIcon, int reasonCode) {
+            MmContent fileIcon, ReasonCode reasonCode) {
         String fileTransferId = IdGenerator.generateMessageID();
         mMessagingLog.addFileTransfer(fileTransferId, contact, Direction.INCOMING, content,
                 fileIcon, FileTransfer.State.REJECTED, reasonCode);

@@ -21,6 +21,8 @@ import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
+import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import com.gsma.services.rcs.filetransfer.FileTransferIntent;
 import com.gsma.services.rcs.filetransfer.IOneToOneFileTransferListener;
 
@@ -51,13 +53,15 @@ public class OneToOneFileTransferBroadcaster implements IOneToOneFileTransferBro
         mOneToOneFileTransferListeners.unregister(listener);
     }
 
-    public void broadcastStateChanged(ContactId contact, String transferId, int state,
-            int reasonCode) {
+    public void broadcastStateChanged(ContactId contact, String transferId, State state,
+            ReasonCode  reasonCode) {
         final int N = mOneToOneFileTransferListeners.beginBroadcast();
+        int rcsState = state.toInt();
+        int rcsReasonCode = reasonCode.toInt();
         for (int i = 0; i < N; i++) {
             try {
                 mOneToOneFileTransferListeners.getBroadcastItem(i).onStateChanged(contact,
-                        transferId, state, reasonCode);
+                        transferId, rcsState, rcsReasonCode);
             } catch (Exception e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);

@@ -22,11 +22,14 @@
 
 package com.gsma.services.rcs.filetransfer;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -70,6 +73,10 @@ public class FileTransferService extends RcsService {
     private IFileTransferService mApi;
 
     private static final String ERROR_CNX = "FileTransfer service not connected";
+
+    private final Map<OneToOneFileTransferListener, WeakReference<IOneToOneFileTransferListener>> mOneToOneFileTransferListeners = new WeakHashMap<OneToOneFileTransferListener, WeakReference<IOneToOneFileTransferListener>>();
+
+    private final Map<GroupFileTransferListener, WeakReference<IGroupFileTransferListener>> mGroupFileTransferListeners = new WeakHashMap<GroupFileTransferListener, WeakReference<IGroupFileTransferListener>>();
 
     /**
      * Constructor
@@ -380,7 +387,11 @@ public class FileTransferService extends RcsService {
     public void addEventListener(OneToOneFileTransferListener listener) throws RcsServiceException {
         if (mApi != null) {
             try {
-                mApi.addEventListener2(listener);
+                IOneToOneFileTransferListener rcsListener = new OneToOneFileTransferListenerImpl(
+                        listener);
+                mOneToOneFileTransferListeners.put(listener,
+                        new WeakReference<IOneToOneFileTransferListener>(rcsListener));
+                mApi.addEventListener2(rcsListener);
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }
@@ -399,7 +410,14 @@ public class FileTransferService extends RcsService {
             throws RcsServiceException {
         if (mApi != null) {
             try {
-                mApi.removeEventListener2(listener);
+                WeakReference<IOneToOneFileTransferListener> weakRef = mOneToOneFileTransferListeners.remove(listener);
+                if (weakRef == null) {
+                    return;
+                }
+                IOneToOneFileTransferListener rcsListener = weakRef.get();
+                if (rcsListener != null) {
+                    mApi.removeEventListener2(rcsListener);
+                }
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }
@@ -417,7 +435,11 @@ public class FileTransferService extends RcsService {
     public void addEventListener(GroupFileTransferListener listener) throws RcsServiceException {
         if (mApi != null) {
             try {
-                mApi.addEventListener3(listener);
+                IGroupFileTransferListener rcsListener = new GroupFileTransferListenerImpl(
+                        listener);
+                mGroupFileTransferListeners.put(listener,
+                        new WeakReference<IGroupFileTransferListener>(rcsListener));
+                mApi.addEventListener3(rcsListener);
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }
@@ -435,7 +457,14 @@ public class FileTransferService extends RcsService {
     public void removeEventListener(GroupFileTransferListener listener) throws RcsServiceException {
         if (mApi != null) {
             try {
-                mApi.removeEventListener3(listener);
+                WeakReference<IGroupFileTransferListener> weakRef = mGroupFileTransferListeners.remove(listener);
+                if (weakRef == null) {
+                    return;
+                }
+                IGroupFileTransferListener rcsListener = weakRef.get();
+                if ( rcsListener != null) {
+                    mApi.removeEventListener3(rcsListener);
+                }
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }

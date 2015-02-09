@@ -23,6 +23,7 @@
 package com.gsma.services.rcs.filetransfer;
 
 import android.net.Uri;
+import android.util.SparseArray;
 
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
@@ -38,197 +39,225 @@ public class FileTransfer {
     /**
      * File transfer state
      */
-    public static class State {
+    public enum State {
         /**
          * File transfer invitation received
          */
-        public final static int INVITED = 0;
-
-        /**
-         * File transfer initiating
-         */
-        public final static int INITIATING = 1;
-
-        /**
-         * File transfer is started
-         */
-        public final static int STARTED = 2;
-
-        /**
-         * File transfer has been transferred with success
-         */
-        public final static int TRANSFERRED = 3;
-
-        /**
-         * File transfer has been aborted
-         */
-        public final static int ABORTED = 4;
-
-        /**
-         * File transfer has failed
-         */
-        public final static int FAILED = 5;
-
-        /**
-         * File transfer is paused
-         */
-        public final static int PAUSED = 6;
-
-        /**
-         * File transfer is rejected
-         */
-        public final static int REJECTED = 7;
+        INVITED(0),
 
         /**
          * File transfer has been accepted and is in the process of becoming started
          */
-        public final static int ACCEPTING = 8;
+        ACCEPTING(1),
 
         /**
-         * File transfer has been delivered
+         * File transfer is rejected
          */
-        public final static int DELIVERED = 9;
-
-        /**
-         * File transfer has been displayed or opened
-         */
-        public final static int DISPLAYED = 10;
+        REJECTED(2),
 
         /**
          * File transfer has been queued
          */
-        public final static int QUEUED = 11;
+        QUEUED(3),
 
-        private State() {
+        /**
+         * File transfer initiating
+         */
+        INITIATING(4),
+
+        /**
+         * File transfer is started
+         */
+        STARTED(5),
+
+        /**
+         * File transfer is paused
+         */
+        PAUSED(6),
+
+        /**
+         * File transfer has been aborted
+         */
+        ABORTED(7),
+
+        /**
+         * File transfer has been transferred with success
+         */
+        TRANSFERRED(8),
+
+        /**
+         * File transfer has failed
+         */
+        FAILED(9),
+
+        /**
+         * File transfer has been delivered
+         */
+        DELIVERED(10),
+
+        /**
+         * File transfer has been displayed or opened
+         */
+        DISPLAYED(11);
+
+        private final int mValue;
+
+        private static SparseArray<State> mValueToEnum = new SparseArray<State>();
+        static {
+            for (State entry : State.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
         }
+
+        private State(int value) {
+            mValue = value;
+        }
+
+        public final int toInt() {
+            return mValue;
+        }
+
+        public final static State valueOf(int value) {
+            State entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(State.class.getName()).append(".").append(value).append("!").toString());
+        }
+
     }
 
     /**
      * File transfer reason code
      */
-    public static class ReasonCode {
+    public enum ReasonCode {
         /**
          * No specific reason code specified.
          */
-        public final static int UNSPECIFIED = 0;
+        UNSPECIFIED(0),
 
         /**
          * File transfer is aborted by local user.
          */
-        public final static int ABORTED_BY_USER = 1;
+        ABORTED_BY_USER(1),
 
         /**
          * File transfer is aborted by remote user..
          */
-        public final static int ABORTED_BY_REMOTE = 2;
+        ABORTED_BY_REMOTE(2),
 
         /**
          * File transfer is aborted by system.
          */
-        public final static int ABORTED_BY_SYSTEM = 3;
+        ABORTED_BY_SYSTEM(3),
 
         /**
          * file transfer is rejected because already taken by the secondary device.
          */
-        public final static int REJECTED_BY_SECONDARY_DEVICE = 4;
+        REJECTED_BY_SECONDARY_DEVICE(4),
 
         /**
-         * File transfer has been rejected due to time out.
+         * File transfer has been rejected by inactivity.
          */
-        public final static int REJECTED_TIME_OUT = 5;
+        REJECTED_BY_INACTIVITY(5),
 
         /**
          * Incoming file transfer was rejected as it was detected as spam.
          */
-        public final static int REJECTED_SPAM = 6;
+        REJECTED_SPAM(6),
 
         /**
          * Incoming file transfer was rejected as is cannot be received due to lack of local storage
          * space.
          */
-        public final static int REJECTED_LOW_SPACE = 7;
+        REJECTED_LOW_SPACE(7),
 
         /**
          * Incoming transfer was rejected as it was too big to be received.
          */
-        public final static int REJECTED_MAX_SIZE = 8;
+        REJECTED_MAX_SIZE(8),
 
         /**
          * Incoming file transfer was rejected as there was too many file transfers ongoing.
          */
-        public final static int REJECTED_MAX_FILE_TRANSFERS = 9;
+        REJECTED_MAX_FILE_TRANSFERS(9),
 
         /**
          * File transfer invitation was rejected by local user.
          */
-        public final static int REJECTED_BY_USER = 10;
+        REJECTED_BY_USER(10),
 
         /**
          * File transfer invitation was rejected by remote.
          */
-        public final static int REJECTED_BY_REMOTE = 11;
+        REJECTED_BY_REMOTE(11),
 
         /**
          * File transfer was paused by system.
          */
-        public final static int PAUSED_BY_SYSTEM = 12;
+        PAUSED_BY_SYSTEM(12),
 
         /**
          * File transfer was paused by user.
          */
-        public final static int PAUSED_BY_USER = 13;
+        PAUSED_BY_USER(13),
 
         /**
          * File transfer initiation failed.
          */
-        public final static int FAILED_INITIATION = 14;
+        FAILED_INITIATION(14),
 
         /**
          * The transferring of the file contents (data) from/to remote side failed.
          */
-        public final static int FAILED_DATA_TRANSFER = 15;
+        FAILED_DATA_TRANSFER(15),
 
         /**
          * Saving of the incoming file transfer failed.
          */
-        public final static int FAILED_SAVING = 16;
+        FAILED_SAVING(16),
 
         /**
          * Delivering of the file transfer invitation failed.
          */
-        public final static int FAILED_DELIVERY = 17;
+        FAILED_DELIVERY(17),
 
         /**
          * Displaying of the file transfer invitation failed.
          */
-        public final static int FAILED_DISPLAY = 18;
+        FAILED_DISPLAY(18),
 
         /**
          * File transfer not allowed to be sent.
          */
-        public final static int FAILED_NOT_ALLOWED_TO_SEND = 19;
-    }
+        FAILED_NOT_ALLOWED_TO_SEND(19);
 
-    /**
-     * File transfer error
-     */
-    public static class Error {
-        /**
-         * Transfer has failed
-         */
-        public final static int TRANSFER_FAILED = 0;
+        private final int mValue;
 
-        /**
-         * Transfer invitation has been declined by remote
-         */
-        public final static int INVITATION_DECLINED = 1;
+        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<ReasonCode>();
+        static {
+            for (ReasonCode entry : ReasonCode.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
 
-        /**
-         * File saving has failed
-         */
-        public final static int SAVING_FAILED = 2;
+        private ReasonCode(int value) {
+            mValue = value;
+        }
 
-        private Error() {
+        public final int toInt() {
+            return mValue;
+        }
+
+        public final static ReasonCode valueOf(int value) {
+            ReasonCode entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(ReasonCode.class.getName()).append(".").append(value).append("!")
+                    .toString());
         }
     }
 
@@ -380,9 +409,9 @@ public class FileTransfer {
      * @see FileTransfer.State
      * @throws RcsServiceException
      */
-    public int getState() throws RcsServiceException {
+    public State getState() throws RcsServiceException {
         try {
-            return mTransferInf.getState();
+            return State.valueOf(mTransferInf.getState());
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }
@@ -393,11 +422,12 @@ public class FileTransfer {
      * 
      * @return ReasonCode
      * @see ReasonCode
+     * @see FileTransfer.ReasonCode
      * @throws RcsServiceException
      */
-    public int getReasonCode() throws RcsServiceException {
+    public ReasonCode getReasonCode() throws RcsServiceException {
         try {
-            return mTransferInf.getReasonCode();
+            return ReasonCode.valueOf(mTransferInf.getReasonCode());
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }

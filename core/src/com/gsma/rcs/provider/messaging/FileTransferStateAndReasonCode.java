@@ -16,22 +16,25 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
+import com.gsma.services.rcs.filetransfer.FileTransfer.State;
+
 public class FileTransferStateAndReasonCode {
 
-    private final int mState;
+    private final State mState;
 
-    private final int mReasonCode;
+    private final ReasonCode mReasonCode;
 
-    public FileTransferStateAndReasonCode(int state, int reasonCode) {
+    public FileTransferStateAndReasonCode(State state, ReasonCode reasonCode) {
         mState = state;
         mReasonCode = reasonCode;
     }
 
-    public int getState() {
+    public State getState() {
         return mState;
     }
 
-    public int getReasonCode() {
+    public ReasonCode getReasonCode() {
         return mReasonCode;
     }
 }

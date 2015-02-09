@@ -23,6 +23,8 @@
 package com.gsma.services.rcs.filetransfer;
 
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
+import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import com.gsma.services.rcs.filetransfer.IOneToOneFileTransferListener;
 
 /**
@@ -30,7 +32,7 @@ import com.gsma.services.rcs.filetransfer.IOneToOneFileTransferListener;
  * 
  * @author Jean-Marc AUFFRET
  */
-public abstract class OneToOneFileTransferListener extends IOneToOneFileTransferListener.Stub {
+public abstract class OneToOneFileTransferListener {
 
     /**
      * Callback called when the file transfer state/reasonCode is changed.
@@ -40,8 +42,8 @@ public abstract class OneToOneFileTransferListener extends IOneToOneFileTransfer
      * @param state State of the file transfer
      * @param reasonCode Reason code
      */
-    public abstract void onStateChanged(ContactId contact, String transferId, int state,
-            int reasonCode);
+    public abstract void onStateChanged(ContactId contact, String transferId, State state,
+            ReasonCode reasonCode);
 
     /**
      * Callback called during the file transfer progress.

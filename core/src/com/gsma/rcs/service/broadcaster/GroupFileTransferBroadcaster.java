@@ -21,6 +21,8 @@ import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
+import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import com.gsma.services.rcs.filetransfer.FileTransferIntent;
 import com.gsma.services.rcs.filetransfer.IGroupFileTransferListener;
 
@@ -51,12 +53,14 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
         mGroupFileTransferListeners.unregister(listener);
     }
 
-    public void broadcastStateChanged(String chatId, String transferId, int state, int reasonCode) {
+    public void broadcastStateChanged(String chatId, String transferId, State state, ReasonCode reasonCode) {
         final int N = mGroupFileTransferListeners.beginBroadcast();
+        int rcsState = state.toInt();
+        int rcsReasonCode = reasonCode.toInt();
         for (int i = 0; i < N; i++) {
             try {
                 mGroupFileTransferListeners.getBroadcastItem(i).onStateChanged(chatId, transferId,
-                        state, reasonCode);
+                        rcsState, rcsReasonCode);
             } catch (Exception e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);

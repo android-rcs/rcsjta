@@ -181,7 +181,7 @@ public class InstantMessagingService extends ImsService {
         mMessagingLog = messagingLog;
     }
 
-    private void handleFileTransferInvitationRejected(SipRequest invite, int reasonCode) {
+    private void handleFileTransferInvitationRejected(SipRequest invite, FileTransfer.ReasonCode reasonCode) {
         ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
         MmContent content = ContentManager.createMmContentFromSdp(invite);
         MmContent fileIcon = FileTransferUtils.extractFileIcon(invite);

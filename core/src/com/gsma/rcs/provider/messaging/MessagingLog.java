@@ -37,6 +37,7 @@ import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -276,9 +277,9 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      */
     @Override
     public void addFileTransfer(String fileTransferId, ContactId contact, Direction direction,
-            MmContent content, MmContent fileIcon, int status, int reasonCode) {
+            MmContent content, MmContent fileIcon, FileTransfer.State state, FileTransfer.ReasonCode reasonCode) {
         fileTransferLog.addFileTransfer(fileTransferId, contact, direction, content, fileIcon,
-                status, reasonCode);
+                state, reasonCode);
     }
 
     /*
@@ -289,7 +290,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      */
     @Override
     public void addOutgoingGroupFileTransfer(String fileTransferId, String chatId,
-            MmContent content, MmContent thumbnail, int state, int reasonCode) {
+            MmContent content, MmContent thumbnail, FileTransfer.State state, FileTransfer.ReasonCode reasonCode) {
         fileTransferLog.addOutgoingGroupFileTransfer(fileTransferId, chatId, content, thumbnail,
                 state, reasonCode);
     }
@@ -302,7 +303,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      */
     @Override
     public void addIncomingGroupFileTransfer(String fileTransferId, String chatId,
-            ContactId contact, MmContent content, MmContent fileIcon, int state, int reasonCode) {
+            ContactId contact, MmContent content, MmContent fileIcon, FileTransfer.State state, FileTransfer.ReasonCode reasonCode) {
         fileTransferLog.addIncomingGroupFileTransfer(fileTransferId, chatId, contact, content,
                 fileIcon, state, reasonCode);
     }
@@ -313,7 +314,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      * updateFileTransferStateAndReasonCode(java.lang.String, int, int
      */
     @Override
-    public void setFileTransferStateAndReasonCode(String fileTransferId, int state, int reasonCode) {
+    public void setFileTransferStateAndReasonCode(String fileTransferId, FileTransfer.State state, FileTransfer.ReasonCode reasonCode) {
         fileTransferLog.setFileTransferStateAndReasonCode(fileTransferId, state, reasonCode);
     }
 
@@ -457,12 +458,12 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public int getFileTransferState(String fileTransferId) {
+    public FileTransfer.State getFileTransferState(String fileTransferId) {
         return fileTransferLog.getFileTransferState(fileTransferId);
     }
 
     @Override
-    public int getFileTransferStateReasonCode(String fileTransferId) {
+    public FileTransfer.ReasonCode getFileTransferStateReasonCode(String fileTransferId) {
         return fileTransferLog.getFileTransferStateReasonCode(fileTransferId);
     }
 

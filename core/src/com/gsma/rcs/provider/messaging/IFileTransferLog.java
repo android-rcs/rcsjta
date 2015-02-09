@@ -27,6 +27,8 @@ import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
+import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 
 import android.database.Cursor;
 import android.net.Uri;
@@ -52,7 +54,7 @@ public interface IFileTransferLog {
      * @param reasonCode Reason code
      */
     public void addFileTransfer(String fileTransferId, ContactId contact, Direction direction,
-            MmContent content, MmContent fileIcon, int state, int reasonCode);
+            MmContent content, MmContent fileIcon, State state, ReasonCode reasonCode);
 
     /**
      * Add an outgoing File Transfer supported by Group Chat
@@ -65,7 +67,7 @@ public interface IFileTransferLog {
      * @param reasonCode Reason code
      */
     public void addOutgoingGroupFileTransfer(String fileTransferId, String chatId,
-            MmContent content, MmContent fileIcon, int state, int reasonCode);
+            MmContent content, MmContent fileIcon, State state, ReasonCode reasonCode);
 
     /**
      * Add incoming group file transfer
@@ -79,7 +81,7 @@ public interface IFileTransferLog {
      * @param reasonCode Reason code
      */
     public void addIncomingGroupFileTransfer(String fileTransferId, String chatId,
-            ContactId contact, MmContent content, MmContent fileIcon, int state, int reasonCode);
+            ContactId contact, MmContent content, MmContent fileIcon, State state, ReasonCode reasonCode);
 
     /**
      * Set file transfer state and reason code
@@ -88,7 +90,7 @@ public interface IFileTransferLog {
      * @param state File transfer state
      * @param reasonCode File transfer state reason code
      */
-    public void setFileTransferStateAndReasonCode(String fileTransferId, int state, int reasonCode);
+    public void setFileTransferStateAndReasonCode(String fileTransferId, State state, ReasonCode reasonCode);
 
     /**
      * Update file transfer read status
@@ -155,7 +157,7 @@ public interface IFileTransferLog {
      * @param fileTransferId Unique ID of file transfer
      * @return State
      */
-    public int getFileTransferState(String fileTransferId);
+    public State getFileTransferState(String fileTransferId);
 
     /**
      * Get file transfer reason code from its unique ID
@@ -163,7 +165,7 @@ public interface IFileTransferLog {
      * @param fileTransferId Unique ID of file transfer
      * @return reason code of the state
      */
-    public int getFileTransferStateReasonCode(String fileTransferId);
+    public ReasonCode getFileTransferStateReasonCode(String fileTransferId);
 
     /**
      * Get cacheable file transfer data from its unique ID

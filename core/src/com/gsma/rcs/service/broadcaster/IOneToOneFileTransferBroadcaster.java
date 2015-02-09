@@ -17,14 +17,15 @@
 package com.gsma.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.contacts.ContactId;
-
+import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
+import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 /**
  * Interface to perform broadcast events on FileTransferListeners
  */
 public interface IOneToOneFileTransferBroadcaster {
 
-    public void broadcastStateChanged(ContactId contact, String transferId, int status,
-            int reasonCode);
+    public void broadcastStateChanged(ContactId contact, String transferId, State status,
+            ReasonCode reasonCode);
 
     public void broadcastProgressUpdate(ContactId contact, String transferId, long currentSize,
             long totalSize);

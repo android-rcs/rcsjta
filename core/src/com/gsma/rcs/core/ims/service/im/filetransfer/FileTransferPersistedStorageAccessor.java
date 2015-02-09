@@ -22,6 +22,8 @@ import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
+import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 import android.database.Cursor;
@@ -246,11 +248,11 @@ public class FileTransferPersistedStorageAccessor {
         return mTimestampDisplayed;
     }
 
-    public int getState() {
+    public State getState() {
         return mMessagingLog.getFileTransferState(mFileTransferId);
     }
 
-    public int getReasonCode() {
+    public ReasonCode getReasonCode() {
         return mMessagingLog.getFileTransferStateReasonCode(mFileTransferId);
     }
 
@@ -275,7 +277,7 @@ public class FileTransferPersistedStorageAccessor {
         return mRead;
     }
 
-    public void setStateAndReasonCode(int state, int reasonCode) {
+    public void setStateAndReasonCode(State state, ReasonCode reasonCode) {
         mMessagingLog.setFileTransferStateAndReasonCode(mFileTransferId, state, reasonCode);
     }
 
@@ -288,13 +290,13 @@ public class FileTransferPersistedStorageAccessor {
     }
 
     public void addFileTransfer(ContactId contact, Direction direction, MmContent content,
-            MmContent fileIcon, int status, int reasonCode) {
+            MmContent fileIcon, State status, ReasonCode reasonCode) {
         mMessagingLog.addFileTransfer(mFileTransferId, contact, direction, content, fileIcon,
                 status, reasonCode);
     }
 
     public void addIncomingGroupFileTransfer(String chatId, ContactId contact, MmContent content,
-            MmContent fileicon, int state, int reasonCode) {
+            MmContent fileicon, State state, ReasonCode reasonCode) {
         mMessagingLog.addIncomingGroupFileTransfer(mFileTransferId, chatId, contact, content,
                 fileicon, state, reasonCode);
     }

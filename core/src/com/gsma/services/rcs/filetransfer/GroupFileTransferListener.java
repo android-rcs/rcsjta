@@ -17,12 +17,14 @@
 package com.gsma.services.rcs.filetransfer;
 
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
+import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import com.gsma.services.rcs.filetransfer.IGroupFileTransferListener;
 
 /**
  * Group file transfer event listener
  */
-public abstract class GroupFileTransferListener extends IGroupFileTransferListener.Stub {
+public abstract class GroupFileTransferListener {
 
     /**
      * Callback called when the group file transfer status/reasonCode is changed.
@@ -32,7 +34,7 @@ public abstract class GroupFileTransferListener extends IGroupFileTransferListen
      * @param state State of file transfer after change
      * @param reasonCode Reason code of file transfer after change
      */
-    public abstract void onStateChanged(String chatId, String transferId, int state, int reasonCode);
+    public abstract void onStateChanged(String chatId, String transferId, State state, ReasonCode reasonCode);
 
     /**
      * Callback called when a group file transfer state/reasonCode is changed for a single recipient

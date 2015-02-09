@@ -50,6 +50,8 @@ import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
+
 
 /**
  * Observer of core events
@@ -307,7 +309,7 @@ public interface CoreListener {
      */
 
     public void handleFileTransferInvitationRejected(ContactId contact, MmContent content,
-            MmContent fileIcon, int reasonCode);
+            MmContent fileIcon, FileTransfer.ReasonCode reasonCode);
 
     /**
      * Handle the case of rejected group chat

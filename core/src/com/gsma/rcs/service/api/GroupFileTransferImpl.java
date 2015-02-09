@@ -242,21 +242,21 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
     public int getState() {
         FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
         if (session == null) {
-            return mPersistentStorage.getState();
+            return mPersistentStorage.getState().toInt();
         }
         int state = ((HttpFileTransferSession) session).getSessionState();
         if (HttpTransferState.ESTABLISHED == state) {
             if (isSessionPaused()) {
-                return FileTransfer.State.PAUSED;
+                return State.PAUSED.toInt();
             }
-            return FileTransfer.State.STARTED;
+            return State.STARTED.toInt();
         } else if (session.isInitiatedByRemote()) {
             if (session.isSessionAccepted()) {
-                return FileTransfer.State.ACCEPTING;
+                return State.ACCEPTING.toInt();
             }
-            return FileTransfer.State.INVITED;
+            return State.INVITED.toInt();
         }
-        return FileTransfer.State.INITIATING;
+        return State.INITIATING.toInt();
     }
 
     /**
@@ -267,15 +267,15 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
     public int getReasonCode() {
         FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
         if (session == null) {
-            return mPersistentStorage.getReasonCode();
+            return mPersistentStorage.getReasonCode().toInt();
         }
         if (isSessionPaused()) {
             /*
              * If session is paused and still established it must have been paused by user
              */
-            return ReasonCode.PAUSED_BY_USER;
+            return ReasonCode.PAUSED_BY_USER.toInt();
         }
-        return ReasonCode.UNSPECIFIED;
+        return ReasonCode.UNSPECIFIED.toInt();
     }
 
     /**
@@ -506,15 +506,18 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             logger.info("Session started");
         }
         synchronized (lock) {
-            mPersistentStorage.setStateAndReasonCode(FileTransfer.State.STARTED,
+            mPersistentStorage.setStateAndReasonCode(State.STARTED,
                     ReasonCode.UNSPECIFIED);
 
             mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId,
-                    FileTransfer.State.STARTED, ReasonCode.UNSPECIFIED);
+                    State.STARTED, ReasonCode.UNSPECIFIED);
         }
     }
 
-    private int sessionAbortedToReasonCode(int sessionAbortedReason) {
+    /*
+     * TODO : Fix reasoncode mapping in the switch.
+     */
+    private ReasonCode sessionAbortedToReasonCode(int sessionAbortedReason) {
         switch (sessionAbortedReason) {
             case ImsServiceSession.TERMINATION_BY_TIMEOUT:
             case ImsServiceSession.TERMINATION_BY_SYSTEM:
@@ -528,30 +531,33 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
+    /*
+     * TODO : Fix reasoncode mapping in the switch.
+     */
     private FileTransferStateAndReasonCode toStateAndReasonCode(FileSharingError error) {
         int fileSharingError = error.getErrorCode();
         switch (fileSharingError) {
             case FileSharingError.SESSION_INITIATION_DECLINED:
             case FileSharingError.SESSION_INITIATION_CANCELLED:
-                return new FileTransferStateAndReasonCode(FileTransfer.State.REJECTED,
+                return new FileTransferStateAndReasonCode(State.REJECTED,
                         ReasonCode.REJECTED_BY_REMOTE);
             case FileSharingError.MEDIA_SAVING_FAILED:
-                return new FileTransferStateAndReasonCode(FileTransfer.State.FAILED,
+                return new FileTransferStateAndReasonCode(State.FAILED,
                         ReasonCode.FAILED_SAVING);
             case FileSharingError.MEDIA_SIZE_TOO_BIG:
-                return new FileTransferStateAndReasonCode(FileTransfer.State.REJECTED,
+                return new FileTransferStateAndReasonCode(State.REJECTED,
                         ReasonCode.REJECTED_MAX_SIZE);
             case FileSharingError.MEDIA_TRANSFER_FAILED:
             case FileSharingError.MEDIA_UPLOAD_FAILED:
             case FileSharingError.MEDIA_DOWNLOAD_FAILED:
-                return new FileTransferStateAndReasonCode(FileTransfer.State.FAILED,
+                return new FileTransferStateAndReasonCode(State.FAILED,
                         ReasonCode.FAILED_DATA_TRANSFER);
             case FileSharingError.NO_CHAT_SESSION:
             case FileSharingError.SESSION_INITIATION_FAILED:
-                return new FileTransferStateAndReasonCode(FileTransfer.State.FAILED,
+                return new FileTransferStateAndReasonCode(State.FAILED,
                         ReasonCode.FAILED_INITIATION);
             case FileSharingError.NOT_ENOUGH_STORAGE_SPACE:
-                return new FileTransferStateAndReasonCode(FileTransfer.State.REJECTED,
+                return new FileTransferStateAndReasonCode(State.REJECTED,
                         ReasonCode.REJECTED_LOW_SPACE);
             default:
                 throw new IllegalArgumentException(
@@ -561,17 +567,17 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
     }
 
-    private void handleSessionRejected(int reasonCode, ContactId contact) {
+    private void handleSessionRejected(ReasonCode reasonCode, ContactId contact) {
         if (logger.isActivated()) {
             logger.info("Session rejected; reasonCode=" + reasonCode + ".");
         }
         synchronized (lock) {
             mFileTransferService.removeFileTransfer(mFileTransferId);
 
-            mPersistentStorage.setStateAndReasonCode(FileTransfer.State.REJECTED, reasonCode);
+            mPersistentStorage.setStateAndReasonCode(State.REJECTED, reasonCode);
 
             mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId,
-                    FileTransfer.State.REJECTED, reasonCode);
+                    State.REJECTED, reasonCode);
         }
     }
 
@@ -584,14 +590,14 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         if (logger.isActivated()) {
             logger.info("Session aborted (reason " + reason + ")");
         }
-        int reasonCode = sessionAbortedToReasonCode(reason);
+        ReasonCode reasonCode = sessionAbortedToReasonCode(reason);
         synchronized (lock) {
             mFileTransferService.removeFileTransfer(mFileTransferId);
 
-            mPersistentStorage.setStateAndReasonCode(FileTransfer.State.ABORTED, reasonCode);
+            mPersistentStorage.setStateAndReasonCode(State.ABORTED, reasonCode);
 
             mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId,
-                    FileTransfer.State.ABORTED, reasonCode);
+                    State.ABORTED, reasonCode);
         }
     }
 
@@ -606,13 +612,14 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             mFileTransferService.removeFileTransfer(mFileTransferId);
             /*
              * TODO : Fix sending of SIP BYE by sender once transfer is completed and media session
-             * is closed. Then this check of state can be removed.
+             * is closed. Then this check of state can be removed.  Also need to check if it is
+             * storing and broadcasting right state and reasoncode.
              */
-            if (State.TRANSFERRED != getState()) {
-                mPersistentStorage.setStateAndReasonCode(FileTransfer.State.ABORTED,
+            if (State.TRANSFERRED != mPersistentStorage.getState()) {
+                mPersistentStorage.setStateAndReasonCode(State.ABORTED,
                         ReasonCode.ABORTED_BY_REMOTE);
                 mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId,
-                        FileTransfer.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
+                        State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
             }
         }
     }
@@ -627,8 +634,8 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             logger.info("Sharing error " + error.getErrorCode());
         }
         FileTransferStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
-        int state = stateAndReasonCode.getState();
-        int reasonCode = stateAndReasonCode.getReasonCode();
+        State state = stateAndReasonCode.getState();
+        ReasonCode reasonCode = stateAndReasonCode.getReasonCode();
         synchronized (lock) {
             mFileTransferService.removeFileTransfer(mFileTransferId);
 
@@ -658,10 +665,10 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
     @Override
     public void handleTransferNotAllowedToSend(ContactId contact) {
         synchronized (lock) {
-            mPersistentStorage.setStateAndReasonCode(FileTransfer.State.FAILED,
+            mPersistentStorage.setStateAndReasonCode(State.FAILED,
                     ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
 
-            mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId, FileTransfer.State.FAILED,
+            mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId, State.FAILED,
                     ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
         }
     }
@@ -680,7 +687,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             mPersistentStorage.setTransferred(content);
 
             mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId,
-                    FileTransfer.State.TRANSFERRED, ReasonCode.UNSPECIFIED);
+                    State.TRANSFERRED, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -693,11 +700,11 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             logger.info("Transfer paused by user");
         }
         synchronized (lock) {
-            mPersistentStorage.setStateAndReasonCode(FileTransfer.State.PAUSED,
-                    FileTransfer.ReasonCode.PAUSED_BY_USER);
+            mPersistentStorage.setStateAndReasonCode(State.PAUSED,
+                    ReasonCode.PAUSED_BY_USER);
 
-            mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId, FileTransfer.State.PAUSED,
-                    FileTransfer.ReasonCode.PAUSED_BY_USER);
+            mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId, State.PAUSED,
+                    ReasonCode.PAUSED_BY_USER);
         }
     }
 
@@ -712,11 +719,11 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         synchronized (lock) {
             mFileTransferService.removeFileTransfer(mFileTransferId);
 
-            mPersistentStorage.setStateAndReasonCode(FileTransfer.State.PAUSED,
-                    FileTransfer.ReasonCode.PAUSED_BY_SYSTEM);
+            mPersistentStorage.setStateAndReasonCode(State.PAUSED,
+                    ReasonCode.PAUSED_BY_SYSTEM);
 
-            mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId, FileTransfer.State.PAUSED,
-                    FileTransfer.ReasonCode.PAUSED_BY_SYSTEM);
+            mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId, State.PAUSED,
+                    ReasonCode.PAUSED_BY_SYSTEM);
         }
     }
 
@@ -728,11 +735,11 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             logger.info("Transfer resumed");
         }
         synchronized (lock) {
-            mPersistentStorage.setStateAndReasonCode(FileTransfer.State.STARTED,
+            mPersistentStorage.setStateAndReasonCode(State.STARTED,
                     ReasonCode.UNSPECIFIED);
 
             mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId,
-                    FileTransfer.State.STARTED, ReasonCode.UNSPECIFIED);
+                    State.STARTED, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -742,11 +749,11 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             logger.info("Accepting transfer");
         }
         synchronized (lock) {
-            mPersistentStorage.setStateAndReasonCode(FileTransfer.State.ACCEPTING,
+            mPersistentStorage.setStateAndReasonCode(State.ACCEPTING,
                     ReasonCode.UNSPECIFIED);
 
             mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId,
-                    FileTransfer.State.ACCEPTING, ReasonCode.UNSPECIFIED);
+                    State.ACCEPTING, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -755,9 +762,12 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         handleSessionRejected(ReasonCode.REJECTED_BY_USER, contact);
     }
 
+    /*
+     * TODO: Fix reason code mapping between rejected_by_timeout and rejected_by_inactivity.
+     */
     @Override
     public void handleSessionRejectedByTimeout(ContactId contact) {
-        handleSessionRejected(ReasonCode.REJECTED_TIME_OUT, contact);
+        handleSessionRejected(ReasonCode.REJECTED_BY_INACTIVITY, contact);
     }
 
     @Override
@@ -772,7 +782,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
         synchronized (lock) {
             mPersistentStorage.addIncomingGroupFileTransfer(mChatId, contact, file, fileIcon,
-                    FileTransfer.State.INVITED, ReasonCode.UNSPECIFIED);
+                    State.INVITED, ReasonCode.UNSPECIFIED);
         }
 
         mBroadcaster.broadcastInvitation(mFileTransferId);
@@ -785,7 +795,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
         synchronized (lock) {
             mPersistentStorage.addIncomingGroupFileTransfer(mChatId, contact, file, fileIcon,
-                    FileTransfer.State.ACCEPTING, ReasonCode.UNSPECIFIED);
+                    State.ACCEPTING, ReasonCode.UNSPECIFIED);
         }
 
         mBroadcaster.broadcastInvitation(mFileTransferId);
