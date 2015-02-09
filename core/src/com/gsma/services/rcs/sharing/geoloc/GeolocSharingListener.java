@@ -23,14 +23,15 @@
 package com.gsma.services.rcs.sharing.geoloc;
 
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingListener;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
 
 /**
  * Geoloc sharing event listener
  * 
  * @author Jean-Marc AUFFRET
  */
-public abstract class GeolocSharingListener extends IGeolocSharingListener.Stub {
+public abstract class GeolocSharingListener {
     /**
      * Callback called when the geoloc sharing state changes
      * 
@@ -39,8 +40,8 @@ public abstract class GeolocSharingListener extends IGeolocSharingListener.Stub 
      * @param state State of image sharing
      * @param reasonCode Reason code of geoloc sharing state
      */
-    public abstract void onStateChanged(ContactId contact, String sharingId, int state,
-            int reasonCode);
+    public abstract void onStateChanged(ContactId contact, String sharingId, State state,
+            ReasonCode reasonCode);
 
     /**
      * Callback called during the sharing progress

@@ -94,6 +94,7 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.IContactsService;
 import com.gsma.services.rcs.extension.IMultimediaSessionService;
 import com.gsma.services.rcs.filetransfer.IFileTransferService;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingService;
 import com.gsma.services.rcs.ipcall.IIPCallService;
 import com.gsma.services.rcs.sharing.image.IImageSharingService;
@@ -909,7 +910,7 @@ public class RcsCoreService extends Service implements CoreListener {
 
     @Override
     public void handleGeolocSharingInvitationRejected(ContactId contact, GeolocContent content,
-            int reasonCode) {
+            ReasonCode reasonCode) {
         gshApi.addAndBroadcastGeolocSharingInvitationRejected(contact, content, reasonCode);
     }
 

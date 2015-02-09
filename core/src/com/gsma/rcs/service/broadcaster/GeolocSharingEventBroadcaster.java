@@ -20,6 +20,8 @@ import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingListener;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingIntent;
 
@@ -48,12 +50,15 @@ public class GeolocSharingEventBroadcaster implements IGeolocSharingEventBroadca
         mGeolocSharingListeners.unregister(listener);
     }
 
-    public void broadcastStateChanged(ContactId contact, String sharingId, int state, int reasonCode) {
+    public void broadcastStateChanged(ContactId contact, String sharingId, State state,
+            ReasonCode reasonCode) {
         final int N = mGeolocSharingListeners.beginBroadcast();
+        int rcsState = state.toInt();
+        int rcsReasonCode = reasonCode.toInt();
         for (int i = 0; i < N; i++) {
             try {
                 mGeolocSharingListeners.getBroadcastItem(i).onStateChanged(contact, sharingId,
-                        state, reasonCode);
+                        rcsState, rcsReasonCode);
             } catch (Exception e) {
             }
         }

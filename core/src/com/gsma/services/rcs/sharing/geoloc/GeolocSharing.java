@@ -22,6 +22,8 @@
 
 package com.gsma.services.rcs.sharing.geoloc;
 
+import android.util.SparseArray;
+
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
@@ -41,131 +43,165 @@ public class GeolocSharing {
     /**
      * Geoloc sharing state
      */
-    public static class State {
+    public enum State {
+
         /**
          * Sharing invitation received
          */
-        public final static int INVITED = 0;
+        INVITED(0),
 
         /**
          * Sharing invitation sent
          */
-        public final static int INITIATING = 1;
+        INITIATING(1),
 
         /**
          * Sharing is started
          */
-        public final static int STARTED = 2;
+        STARTED(2),
 
         /**
          * Sharing has been aborted
          */
-        public final static int ABORTED = 3;
+        ABORTED(3),
 
         /**
          * Sharing has failed
          */
-        public final static int FAILED = 4;
+        FAILED(4),
 
         /**
          * Sharing has been transferred
          */
-        public final static int TRANSFERRED = 5;
+        TRANSFERRED(5),
 
         /**
          * Sharing invitation was rejected
          */
-        public final static int REJECTED = 6;
+        REJECTED(6),
 
         /**
          * Call ringing
          */
-        public final static int RINGING = 7;
+        RINGING(7),
 
         /**
          * Sharing has been accepted and is in the process of becoming started
          */
-        public final static int ACCEPTING = 8;
+        ACCEPTING(8);
 
-        private State() {
+        private final int mValue;
+
+        private static SparseArray<State> mValueToEnum = new SparseArray<State>();
+        static {
+            for (State entry : State.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
+
+        private State(int value) {
+            mValue = value;
+        }
+
+        public final int toInt() {
+            return mValue;
+        }
+
+        public final static State valueOf(int value) {
+            State entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(State.class.getName()).append(".").append(value).append("!").toString());
         }
     }
 
     /**
      * Reason code
      */
-    public static class ReasonCode {
+    public enum ReasonCode {
+
         /**
          * No specific reason code specified.
          */
-        public final static int UNSPECIFIED = 0;
+        UNSPECIFIED(0),
 
         /**
          * Geolocation share is aborted by local user.
          */
-        public final static int ABORTED_BY_USER = 1;
+        ABORTED_BY_USER(1),
 
         /**
          * Geolocation share is aborted by remote user.
          */
-        public final static int ABORTED_BY_REMOTE = 2;
+        ABORTED_BY_REMOTE(2),
 
         /**
          * Geolocation share is aborted by system.
          */
-        public final static int ABORTED_BY_SYSTEM = 3;
+        ABORTED_BY_SYSTEM(3),
 
         /**
          * Geolocation share is rejected because already taken by the secondary device.
          */
-        public final static int REJECTED_BY_SECONDARY_DEVICE = 4;
+        REJECTED_BY_SECONDARY_DEVICE(4),
 
         /**
          * Geolocation share invitation was rejected due to to many open sharing sessions.
          */
-        public final static int REJECTED_MAX_SHARING_SESSIONS = 5;
+        REJECTED_MAX_SHARING_SESSIONS(5),
 
         /**
          * Geolocation share invitation was rejected by local user.
          */
-        public final static int REJECTED_BY_USER = 6;
+        REJECTED_BY_USER(6),
 
         /**
          * Geolocation share invitation was rejected by remote.
          */
-        public final static int REJECTED_BY_REMOTE = 7;
+        REJECTED_BY_REMOTE(7),
 
         /**
-         * Geolocation share invitation was rejected due to time out.
+         * Geolocation share invitation was rejected by inactivity.
          */
-        public final static int REJECTED_TIME_OUT = 8;
+        REJECTED_BY_INACTIVITY(8),
 
         /**
          * Geolocation share initiation failed.
          */
-        public final static int FAILED_INITIATION = 9;
+        FAILED_INITIATION(9),
 
         /**
          * Sharing of the geolocation has failed.
          */
-        public final static int FAILED_SHARING = 10;
-    }
+        FAILED_SHARING(10);
 
-    /**
-     * Geoloc sharing error
-     */
-    public static class Error {
-        /**
-         * Sharing has failed
-         */
-        public final static int SHARING_FAILED = 0;
+        private final int mValue;
 
-        /**
-         * Sharing invitation has been declined by remote
-         */
-        public final static int INVITATION_DECLINED = 1;
+        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<ReasonCode>();
+        static {
+            for (ReasonCode entry : ReasonCode.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
 
-        private Error() {
+        private ReasonCode(int value) {
+            mValue = value;
+        }
+
+        public final int toInt() {
+            return mValue;
+        }
+
+        public final static ReasonCode valueOf(int value) {
+            ReasonCode entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(ReasonCode.class.getName()).append(".").append(value).append("!")
+                    .toString());
         }
     }
 
@@ -230,7 +266,7 @@ public class GeolocSharing {
      * Returns the state of the sharing
      * 
      * @return State
-     * @see GeolocSharing.State
+     * @see State
      * @throws RcsServiceException
      */
     public int getState() throws RcsServiceException {
@@ -245,7 +281,7 @@ public class GeolocSharing {
      * Returns the reason code of the state of the sharing
      * 
      * @return ReasonCode
-     * @see GeolocSharing.ReasonCode
+     * @see ReasonCode
      * @throws RcsServiceException
      */
     public int getReasonCode() throws RcsServiceException {

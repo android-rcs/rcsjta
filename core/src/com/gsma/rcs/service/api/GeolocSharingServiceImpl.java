@@ -378,7 +378,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * @param reasonCode Reason code
      */
     public void addAndBroadcastGeolocSharingInvitationRejected(ContactId contact,
-            GeolocContent content, int reasonCode) {
+            GeolocContent content, ReasonCode reasonCode) {
         String sharingId = SessionIdGenerator.getNewId();
         RichCallHistory.getInstance().addIncomingGeolocSharing(contact, sharingId,
                 GeolocSharing.State.REJECTED, reasonCode);

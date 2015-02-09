@@ -48,6 +48,7 @@ import com.gsma.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 
 /**
  * Observer of core events
@@ -347,7 +348,7 @@ public interface CoreListener {
      * @param reasonCode Rejected reason code
      */
     public void handleGeolocSharingInvitationRejected(ContactId contact, GeolocContent content,
-            int reasonCode);
+            ReasonCode reasonCode);
 
     /**
      * Handle the case of rejected ip call

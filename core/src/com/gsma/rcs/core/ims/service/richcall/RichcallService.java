@@ -51,6 +51,7 @@ import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.IVideoPlayer;
@@ -143,7 +144,7 @@ public class RichcallService extends ImsService {
                 .handleVideoSharingInvitationRejected(contact, content, reasonCode);
     }
 
-    private void handleGeolocSharingInvitationRejected(SipRequest invite, int reasonCode) {
+    private void handleGeolocSharingInvitationRejected(SipRequest invite, ReasonCode reasonCode) {
         ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
         GeolocContent content = (GeolocContent) ContentManager.createMmContentFromSdp(invite);
         getImsModule().getCore().getListener()

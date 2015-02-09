@@ -38,6 +38,8 @@ import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingLog;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.image.ImageSharingLog;
@@ -399,15 +401,15 @@ public class RichCallHistory {
      * @param state Geoloc sharing state
      * @param reasonCode Reason code of the state
      */
-    public Uri addIncomingGeolocSharing(ContactId contact, String sharingId, int state,
-            int reasonCode) {
+    public Uri addIncomingGeolocSharing(ContactId contact, String sharingId, State state,
+            ReasonCode reasonCode) {
         ContentValues values = new ContentValues();
         values.put(GeolocSharingData.KEY_SHARING_ID, sharingId);
         values.put(GeolocSharingData.KEY_CONTACT, contact.toString());
         values.put(GeolocSharingData.KEY_MIME_TYPE, MimeType.GEOLOC_MESSAGE);
         values.put(GeolocSharingData.KEY_DIRECTION, Direction.INCOMING.toInt());
-        values.put(GeolocSharingData.KEY_STATE, state);
-        values.put(GeolocSharingData.KEY_REASON_CODE, reasonCode);
+        values.put(GeolocSharingData.KEY_STATE, state.toInt());
+        values.put(GeolocSharingData.KEY_REASON_CODE, reasonCode.toInt());
         values.put(GeolocSharingData.KEY_TIMESTAMP, System.currentTimeMillis());
         return mLocalContentResolver.insert(GeolocSharingData.CONTENT_URI, values);
     }
@@ -444,8 +446,8 @@ public class RichCallHistory {
     public void setGeolocSharingTransferred(String sharingId, Geoloc geoloc) {
         ContentValues values = new ContentValues();
         values.put(GeolocSharingData.KEY_CONTENT, geoloc.toString());
-        values.put(GeolocSharingData.KEY_STATE, GeolocSharing.State.TRANSFERRED);
-        values.put(GeolocSharingData.KEY_REASON_CODE, GeolocSharing.ReasonCode.UNSPECIFIED);
+        values.put(GeolocSharingData.KEY_STATE, GeolocSharing.State.TRANSFERRED.toInt());
+        values.put(GeolocSharingData.KEY_REASON_CODE, GeolocSharing.ReasonCode.UNSPECIFIED.toInt());
         if (mLocalContentResolver.update(
                 Uri.withAppendedPath(GeolocSharingData.CONTENT_URI, sharingId), values, null, null) < 1) {
             /* TODO: Exception throwing should be implemented here in CR037 */
@@ -463,10 +465,11 @@ public class RichCallHistory {
      * @param state Geoloc sharing state
      * @param reasonCode Reason code of the state
      */
-    public void setGeolocSharingStateAndReasonCode(String sharingId, int state, int reasonCode) {
+    public void setGeolocSharingStateAndReasonCode(String sharingId, State state,
+            ReasonCode reasonCode) {
         ContentValues values = new ContentValues();
-        values.put(GeolocSharingData.KEY_STATE, state);
-        values.put(GeolocSharingData.KEY_REASON_CODE, reasonCode);
+        values.put(GeolocSharingData.KEY_STATE, state.toInt());
+        values.put(GeolocSharingData.KEY_REASON_CODE, reasonCode.toInt());
         if (mLocalContentResolver.update(
                 Uri.withAppendedPath(GeolocSharingData.CONTENT_URI, sharingId), values, null, null) < 1) {
             /* TODO: Exception throwing should be implemented here in CR037 */

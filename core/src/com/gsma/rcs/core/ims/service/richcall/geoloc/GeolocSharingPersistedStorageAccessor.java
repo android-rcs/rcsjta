@@ -22,6 +22,8 @@ import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingLog;
 
 import android.database.Cursor;
@@ -139,7 +141,7 @@ public class GeolocSharingPersistedStorageAccessor {
         return mTimestamp;
     }
 
-    public void setStateAndReasonCode(int state, int reasonCode) {
+    public void setStateAndReasonCode(State state, ReasonCode reasonCode) {
         mRichCallLog.setGeolocSharingStateAndReasonCode(mSharingId, state, reasonCode);
     }
 
@@ -147,7 +149,7 @@ public class GeolocSharingPersistedStorageAccessor {
         mRichCallLog.setGeolocSharingTransferred(mSharingId, geoloc);
     }
 
-    public void addIncomingGeolocSharing(ContactId contact, int state, int reasonCode) {
+    public void addIncomingGeolocSharing(ContactId contact, State state, ReasonCode reasonCode) {
         mRichCallLog.addIncomingGeolocSharing(mContact, mSharingId, state, reasonCode);
     }
 }

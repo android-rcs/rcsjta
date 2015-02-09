@@ -22,9 +22,12 @@
 
 package com.gsma.services.rcs.sharing.geoloc;
 
+import java.lang.ref.WeakReference;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -55,6 +58,8 @@ public class GeolocSharingService extends RcsService {
      * API
      */
     private IGeolocSharingService mApi;
+
+    private final Map<GeolocSharingListener, WeakReference<IGeolocSharingListener>> mGeolocSharingListeners = new WeakHashMap<GeolocSharingListener, WeakReference<IGeolocSharingListener>>();
 
     private static final String ERROR_CNX = "GeolocSharing service not connected";
 
@@ -253,7 +258,10 @@ public class GeolocSharingService extends RcsService {
     public void addEventListener(GeolocSharingListener listener) throws RcsServiceException {
         if (mApi != null) {
             try {
-                mApi.addEventListener2(listener);
+                IGeolocSharingListener rcsListener = new GeolocSharingListenerImpl(listener);
+                mGeolocSharingListeners.put(listener, new WeakReference<IGeolocSharingListener>(
+                        rcsListener));
+                mApi.addEventListener2(rcsListener);
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }
@@ -271,7 +279,15 @@ public class GeolocSharingService extends RcsService {
     public void removeEventListener(GeolocSharingListener listener) throws RcsServiceException {
         if (mApi != null) {
             try {
-                mApi.removeEventListener2(listener);
+                WeakReference<IGeolocSharingListener> weakRef = mGeolocSharingListeners
+                        .remove(listener);
+                if (weakRef == null) {
+                    return;
+                }
+                IGeolocSharingListener rcsListener = weakRef.get();
+                if (rcsListener != null) {
+                    mApi.removeEventListener2(rcsListener);
+                }
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }

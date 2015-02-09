@@ -16,22 +16,25 @@
 
 package com.gsma.rcs.provider.sharing;
 
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
+
 public class GeolocSharingStateAndReasonCode {
 
-    private final int mState;
+    private final State mState;
 
-    private final int mReasonCode;
+    private final ReasonCode mReasonCode;
 
-    public GeolocSharingStateAndReasonCode(int state, int reasonCode) {
+    public GeolocSharingStateAndReasonCode(State state, ReasonCode reasonCode) {
         mState = state;
         mReasonCode = reasonCode;
     }
 
-    public int getState() {
+    public State getState() {
         return mState;
     }
 
-    public int getReasonCode() {
+    public ReasonCode getReasonCode() {
         return mReasonCode;
     }
 }
