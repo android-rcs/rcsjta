@@ -31,8 +31,8 @@ import android.os.Parcelable;
 public class ContactId implements Parcelable, Serializable {
 
     /**
-	 * 
-	 */
+     * 
+     */
     private static final long serialVersionUID = 1L;
 
     /**

@@ -32,6 +32,15 @@ function lineending {
 	find ./tests/ -name "*.properties" | xargs dos2unix
 }
 
+function counttabs {
+	grep -r -P --include="*.java" "\t" $WORK/core/src/com/ | wc
+	grep -r -P --include="*.java" "\t" $WORK/core/tests/ | wc
+	grep -r -P --include="*.java" "\t" $WORK/RI/ | wc
+	grep -r -P --include="*.java" "\t" $WORK/samples/ | wc
+	grep -r -P --include="*.java" "\t" $WORK/mediaplayer/ | wc
+	grep -r -P --include="*.java" "\t" $WORK/tests/ | wc
+}
+
 WORK=$(pwd)
 echo "Put new format at (y/n): " $WORK
 read answer
@@ -41,6 +50,7 @@ then
 	echo "Formatting..."
 	formatting
 	lineending
+	counttabs
 	echo "Done!"
 else
 	echo "Exit!"

@@ -1,10 +1,15 @@
 Instructions to format source files according to android rules:
+(Reference: https://android.googlesource.com/platform/development/+/master/ide/eclipse/)
 
-The formatting guidelines are in the file called eclipse-android-formatting-rules.xml in the current directory.
+The formatting guidelines are in the file called android-formatting-rules.xml in the eclipse directory.
+There are also as set of rules of how to order the imports in the file called android.importorder.
 
 1- Import it with Eclipse
 Menu bar -> Window -> Preferences -> Java -> Code Style -> Formatter -> Import
-Point it to the path of the eclipse-android-formatting-rules.xml
+Point it to the eclipse folder and select the android-formatting.xml
+
+Menu bar -> Window -> Preferences -> Java -> Code Style -> Organize Imports -> Import
+Point it to the eclipse folder and select the android.importorder
 
 2- Format source files
 2-1 Command line option
