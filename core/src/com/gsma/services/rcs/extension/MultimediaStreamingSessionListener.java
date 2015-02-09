@@ -23,14 +23,15 @@
 package com.gsma.services.rcs.extension;
 
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.extension.MultimediaSession.ReasonCode;
+import com.gsma.services.rcs.extension.MultimediaSession.State;
 
 /**
  * This class offers callback methods on multimedia streaming session events
  * 
  * @author Jean-Marc AUFFRET
  */
-public abstract class MultimediaStreamingSessionListener extends
-        IMultimediaStreamingSessionListener.Stub {
+public abstract class MultimediaStreamingSessionListener {
     /**
      * Callback called when the multimedia messaging session state/reasoncode is changed.
      * 
@@ -39,8 +40,8 @@ public abstract class MultimediaStreamingSessionListener extends
      * @param state State
      * @param reasonCode Reason code
      */
-    public abstract void onStateChanged(ContactId contact, String sessionId, int state,
-            int reasonCode);
+    public abstract void onStateChanged(ContactId contact, String sessionId, State state,
+            ReasonCode reasonCode);
 
     /**
      * Callback called when a multimedia message or data is received.

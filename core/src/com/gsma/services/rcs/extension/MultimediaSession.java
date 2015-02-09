@@ -26,6 +26,8 @@ import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 
+import android.util.SparseArray;
+
 /**
  * This class maintains the information related to a multimedia session and offers methods to manage
  * it. This is an abstract class between a messaging session and a streaming session.
@@ -36,107 +38,134 @@ public abstract class MultimediaSession {
     /**
      * Multimedia session state
      */
-    public static class State {
+    public enum State {
+
         /**
          * Session invitation received
          */
-        public final static int INVITED = 0;
+        INVITED(0),
 
         /**
          * Session invitation sent
          */
-        public final static int INITIATING = 1;
+        INITIATING(1),
 
         /**
          * Session is started
          */
-        public final static int STARTED = 2;
+        STARTED(2),
 
         /**
-         * Session has been aborted or
+         * Session has been aborted
          */
-        public final static int ABORTED = 3;
+        ABORTED(3),
 
         /**
          * Session has failed
          */
-        public final static int FAILED = 4;
+        FAILED(4),
 
         /**
          * Session has been rejected.
          */
-        public final static int REJECTED = 5;
+        REJECTED(5),
 
         /**
          * Call ringing
          */
-        public final static int RINGING = 6;
+        RINGING(6),
 
         /**
          * Session has been accepted and is in the process of becoming started
          */
-        public final static int ACCEPTING = 7;
+        ACCEPTING(7);
 
-        private State() {
+        private final int mValue;
+
+        private static SparseArray<State> mValueToEnum = new SparseArray<State>();
+        static {
+            for (State entry : State.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
+
+        private State(int value) {
+            mValue = value;
+        }
+
+        public final int toInt() {
+            return mValue;
+        }
+
+        public static final State valueOf(int value) {
+            State entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException("No enum const class " + State.class.getName() + "."
+                    + value);
         }
     }
 
     /**
      * Multimedia session reason code
      */
-    public static class ReasonCode {
+    public enum ReasonCode {
 
         /**
          * No specific reason code specified.
          */
-        public final static int UNSPECIFIED = 0;
+        UNSPECIFIED(0),
 
         /**
-         * Session invitation was rejected due to time out.
+         * Session invitation was rejected due to inactivity.
          */
-        public final static int REJECTED_TIME_OUT = 1;
+        REJECTED_BY_INACTIVITY(1),
 
         /**
          * Session invitation was rejected by local user.
          */
-        public final static int REJECTED_BY_USER = 2;
+        REJECTED_BY_USER(2),
 
         /**
          * Session invitation was rejected by remote.
          */
-        public final static int REJECTED_BY_REMOTE = 3;
+        REJECTED_BY_REMOTE(3),
 
         /**
          * Session failed.
          */
-        public final static int FAILED_SESSION = 4;
+        FAILED_SESSION(4),
 
         /**
          * Media failed.
          */
-        public final static int FAILED_MEDIA = 5;
-    }
+        FAILED_MEDIA(5);
 
-    /**
-     * Session error
-     */
-    public static class Error {
-        /**
-         * Session invitation has been declined by remote
-         */
-        public final static int INVITATION_DECLINED = 0;
+        private final int mValue;
 
-        /**
-         * Session has failed
-         */
-        public final static int SESSION_FAILED = 1;
+        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<ReasonCode>();
+        static {
+            for (ReasonCode entry : ReasonCode.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
 
-        /**
-         * Media has failed
-         */
-        public final static int MEDIA_FAILED = 2;
+        private ReasonCode(int value) {
+            mValue = value;
+        }
 
-        private Error() {
+        public final int toInt() {
+            return mValue;
+        }
+
+        public static final ReasonCode valueOf(int value) {
+            ReasonCode entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException("No enum const class " + ReasonCode.class.getName()
+                    + "." + value);
         }
     }
 
@@ -177,7 +206,7 @@ public abstract class MultimediaSession {
      * @see MultimediaSession.State
      * @throws RcsServiceException
      */
-    public abstract int getState() throws RcsServiceException;
+    public abstract State getState() throws RcsServiceException;
 
     /**
      * Returns the direction of the session
@@ -191,10 +220,11 @@ public abstract class MultimediaSession {
     /**
      * Returns the reason code of the session.
      * 
-     * @return int
+     * @return ReasonCode
+     * @see MultimediaSession.ReasonCode
      * @throws RcsServiceException
      */
-    public abstract int getReasonCode() throws RcsServiceException;
+    public abstract ReasonCode getReasonCode() throws RcsServiceException;
 
     /**
      * Accepts session invitation.

@@ -17,6 +17,8 @@
 package com.gsma.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.extension.MultimediaSession.ReasonCode;
+import com.gsma.services.rcs.extension.MultimediaSession.State;
 
 import android.content.Intent;
 
@@ -27,7 +29,8 @@ public interface IMultimediaMessagingSessionEventBroadcaster {
 
     public void broadcastMessageReceived(ContactId contact, String sessionId, byte[] message);
 
-    public void broadcastStateChanged(ContactId contact, String sessionId, int state, int reasonCode);
+    public void broadcastStateChanged(ContactId contact, String sessionId, State state,
+            ReasonCode reasonCode);
 
     public void broadcastInvitation(String sessionId, Intent msrpSessionInvite);
 }

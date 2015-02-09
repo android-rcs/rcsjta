@@ -22,15 +22,8 @@
 
 package com.gsma.rcs.service.api;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import android.content.Intent;
-import android.os.IBinder;
-
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
+import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.gsma.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
@@ -49,13 +42,21 @@ import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSession;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSessionListener;
-import com.gsma.services.rcs.extension.IMultimediaSessionServiceConfiguration;
 import com.gsma.services.rcs.extension.IMultimediaSessionService;
+import com.gsma.services.rcs.extension.IMultimediaSessionServiceConfiguration;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSession;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSessionListener;
 import com.gsma.services.rcs.extension.MultimediaSession;
 import com.gsma.services.rcs.extension.MultimediaSession.ReasonCode;
 import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
+
+import android.content.Intent;
+import android.os.IBinder;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Multimedia session API service
@@ -174,6 +175,23 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         }
 
         mMultimediaStreamingCache.remove(sessionId);
+    }
+
+    /*
+     * Translate IMS session error to ReasonCode
+     * @param ims session error
+     */
+    /* package private */ReasonCode imsServiceSessionErrorToReasonCode(int imsServiceSessionError) {
+        switch (imsServiceSessionError) {
+            case ImsServiceSession.TERMINATION_BY_SYSTEM:
+            case ImsServiceSession.TERMINATION_BY_TIMEOUT:
+                return ReasonCode.FAILED_SESSION;
+            case ImsServiceSession.TERMINATION_BY_USER:
+                return ReasonCode.REJECTED_BY_USER;
+            default:
+                throw new IllegalArgumentException("Unknown imsServiceSessionError=".concat(String
+                        .valueOf(imsServiceSessionError)));
+        }
     }
 
     /**

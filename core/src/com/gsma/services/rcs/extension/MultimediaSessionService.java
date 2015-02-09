@@ -22,9 +22,12 @@
 
 package com.gsma.services.rcs.extension;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.contacts.ContactId;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -33,12 +36,12 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.IInterface;
 
-import com.gsma.services.rcs.RcsService;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceListener;
-import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.contacts.ContactId;
+import java.lang.ref.WeakReference;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  * This class offers the main entry point to initiate and to manage multimedia sessions. Several
@@ -53,6 +56,10 @@ public class MultimediaSessionService extends RcsService {
     private IMultimediaSessionService mApi;
 
     private static final String ERROR_CNX = "MultimediaSession service not connected";
+
+    private final Map<MultimediaMessagingSessionListener, WeakReference<IMultimediaMessagingSessionListener>> mMultimediaMessagingSessionListeners = new WeakHashMap<MultimediaMessagingSessionListener, WeakReference<IMultimediaMessagingSessionListener>>();
+
+    private final Map<MultimediaStreamingSessionListener, WeakReference<IMultimediaStreamingSessionListener>> mMultimediaStreamingSessionListeners = new WeakHashMap<MultimediaStreamingSessionListener, WeakReference<IMultimediaStreamingSessionListener>>();
 
     /**
      * Constructor
@@ -305,7 +312,12 @@ public class MultimediaSessionService extends RcsService {
             throws RcsServiceException {
         if (mApi != null) {
             try {
-                mApi.addEventListener2(listener);
+                IMultimediaMessagingSessionListener multimediaMessagingSessionListener = new MultimediaMessagingSessionListenerImpl(
+                        listener);
+                mMultimediaMessagingSessionListeners.put(listener,
+                        new WeakReference<IMultimediaMessagingSessionListener>(
+                                multimediaMessagingSessionListener));
+                mApi.addEventListener2(multimediaMessagingSessionListener);
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }
@@ -324,7 +336,16 @@ public class MultimediaSessionService extends RcsService {
             throws RcsServiceException {
         if (mApi != null) {
             try {
-                mApi.removeEventListener2(listener);
+                WeakReference<IMultimediaMessagingSessionListener> weakRef = mMultimediaMessagingSessionListeners
+                        .remove(listener);
+                if (weakRef == null) {
+                    return;
+                }
+                IMultimediaMessagingSessionListener multimediaMessagingSessionListener = weakRef
+                        .get();
+                if (multimediaMessagingSessionListener != null) {
+                    mApi.removeEventListener2(multimediaMessagingSessionListener);
+                }
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }
@@ -343,7 +364,12 @@ public class MultimediaSessionService extends RcsService {
             throws RcsServiceException {
         if (mApi != null) {
             try {
-                mApi.addEventListener3(listener);
+                IMultimediaStreamingSessionListener multimediaStreamingSessionListener = new MultimediaStreamingSessionListenerImpl(
+                        listener);
+                mMultimediaStreamingSessionListeners.put(listener,
+                        new WeakReference<IMultimediaStreamingSessionListener>(
+                                multimediaStreamingSessionListener));
+                mApi.addEventListener3(multimediaStreamingSessionListener);
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }
@@ -362,7 +388,16 @@ public class MultimediaSessionService extends RcsService {
             throws RcsServiceException {
         if (mApi != null) {
             try {
-                mApi.removeEventListener3(listener);
+                WeakReference<IMultimediaStreamingSessionListener> weakRef = mMultimediaStreamingSessionListeners
+                        .remove(listener);
+                if (weakRef == null) {
+                    return;
+                }
+                IMultimediaStreamingSessionListener multimediaStreamingSessionListener = weakRef
+                        .get();
+                if (multimediaStreamingSessionListener != null) {
+                    mApi.removeEventListener3(multimediaStreamingSessionListener);
+                }
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }

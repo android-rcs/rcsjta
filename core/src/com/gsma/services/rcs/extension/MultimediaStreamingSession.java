@@ -98,9 +98,9 @@ public class MultimediaStreamingSession extends MultimediaSession {
      * @see MultimediaSession.State
      * @throws RcsServiceException
      */
-    public int getState() throws RcsServiceException {
+    public State getState() throws RcsServiceException {
         try {
-            return sessionIntf.getState();
+            return State.valueOf(sessionIntf.getState());
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }
@@ -113,9 +113,9 @@ public class MultimediaStreamingSession extends MultimediaSession {
      * @see MultimediaSession.ReasonCode
      * @throws RcsServiceException
      */
-    public int getReasonCode() throws RcsServiceException {
+    public ReasonCode getReasonCode() throws RcsServiceException {
         try {
-            return sessionIntf.getReasonCode();
+            return ReasonCode.valueOf(sessionIntf.getReasonCode());
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }

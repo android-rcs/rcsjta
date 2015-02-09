@@ -22,6 +22,8 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSessionListener;
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
+import com.gsma.services.rcs.extension.MultimediaSession.ReasonCode;
+import com.gsma.services.rcs.extension.MultimediaSession.State;
 
 import android.content.Intent;
 import android.os.RemoteCallbackList;
@@ -64,12 +66,15 @@ public class MultimediaStreamingSessionEventBroadcaster implements
         mMultimediaStreamingListeners.finishBroadcast();
     }
 
-    public void broadcastStateChanged(ContactId contact, String sessionId, int state, int reasonCode) {
+    public void broadcastStateChanged(ContactId contact, String sessionId, State state,
+            ReasonCode reasonCode) {
+        int rcsState = state.toInt();
+        int rcsReasonCode = reasonCode.toInt();
         final int N = mMultimediaStreamingListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
                 mMultimediaStreamingListeners.getBroadcastItem(i).onStateChanged(contact,
-                        sessionId, state, reasonCode);
+                        sessionId, rcsState, rcsReasonCode);
             } catch (Exception e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);
