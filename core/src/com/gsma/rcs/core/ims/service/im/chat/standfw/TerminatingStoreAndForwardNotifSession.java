@@ -24,9 +24,6 @@ package com.gsma.rcs.core.ims.service.im.chat.standfw;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.io.IOException;
-import java.util.Vector;
-
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
@@ -40,7 +37,6 @@ import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatError;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
@@ -56,6 +52,9 @@ import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
+
+import java.io.IOException;
+import java.util.Vector;
 
 /**
  * Terminating Store & Forward session for push notifications
@@ -479,12 +478,12 @@ public class TerminatingStoreAndForwardNotifSession extends OneToOneChatSession 
             }
             if (currentSessionInitiatedByRemote) {
                 if (currentSessionEstablished) {
-                    currentSession.abortSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+                    currentSession.abortSession(TerminationReason.TERMINATION_BY_SYSTEM);
                 } else {
                     currentSession.rejectSession();
                 }
             } else {
-                currentSession.abortSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+                currentSession.abortSession(TerminationReason.TERMINATION_BY_SYSTEM);
             }
             /*
              * Since the current session was already established and we are now replacing that

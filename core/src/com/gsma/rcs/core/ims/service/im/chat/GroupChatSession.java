@@ -24,12 +24,6 @@ package com.gsma.rcs.core.ims.service.im.chat;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.Set;
-
-import javax2.sip.header.ExtensionHeader;
-
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
@@ -61,6 +55,12 @@ import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.Set;
+
+import javax2.sip.header.ExtensionHeader;
 
 /**
  * Abstract Group chat session
@@ -177,7 +177,7 @@ public abstract class GroupChatSession extends ChatSession {
      * 
      * @param reason Reason
      */
-    public void terminateSession(int reason) {
+    public void terminateSession(TerminationReason reason) {
         // Stop conference subscription
         conferenceSubscriber.terminate();
 
@@ -769,7 +769,7 @@ public abstract class GroupChatSession extends ChatSession {
     }
 
     @Override
-    public void abortSession(int abortedReason) {
+    public void abortSession(TerminationReason reason) {
         /*
          * If there is an ongoing group chat session with same chatId, this session has to be
          * silently aborted so after aborting the session we make sure to not call the rest of this
@@ -777,13 +777,13 @@ public abstract class GroupChatSession extends ChatSession {
          * which is of course not the intention here
          */
         if (!isPendingForRemoval()) {
-            super.abortSession(abortedReason);
+            super.abortSession(reason);
             return;
         }
 
         interruptSession();
 
-        terminateSession(abortedReason);
+        terminateSession(reason);
 
         closeMediaSession();
     }

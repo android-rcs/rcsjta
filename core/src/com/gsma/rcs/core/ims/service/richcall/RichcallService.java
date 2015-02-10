@@ -34,7 +34,7 @@ import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.OriginatingGeolocTransferSession;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.TerminatingGeolocTransferSession;
@@ -73,7 +73,7 @@ public class RichcallService extends ImsService {
      * Video share features tags
      */
     public final static String[] FEATURE_TAGS_VIDEO_SHARE = {
-            FeatureTags.FEATURE_3GPP_VIDEO_SHARE
+        FeatureTags.FEATURE_3GPP_VIDEO_SHARE
     };
 
     /**
@@ -840,7 +840,7 @@ public class RichcallService extends ImsService {
         if (logger.isActivated()) {
             logger.debug("Abort all pending sessions");
         }
-        abortAllSessions(ImsServiceSession.TERMINATION_BY_SYSTEM);
+        abortAllSessions(TerminationReason.TERMINATION_BY_SYSTEM);
     }
 
     /**

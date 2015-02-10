@@ -18,8 +18,6 @@
 
 package com.gsma.rcs.core.ims.service;
 
-import javax2.sip.Dialog;
-
 import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
@@ -27,11 +25,14 @@ import com.gsma.rcs.core.ims.protocol.sip.SipMessage;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.PeriodicRefresher;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
+
+import javax2.sip.Dialog;
 
 /**
  * Session timer manager (see RFC 4028)
@@ -276,7 +277,7 @@ public class SessionTimerManager extends PeriodicRefresher {
                 }
 
                 // Close the session
-                session.abortSession(ImsServiceSession.TERMINATION_BY_TIMEOUT);
+                session.abortSession(TerminationReason.TERMINATION_BY_TIMEOUT);
 
                 try {
                     ContactId remote = ContactUtils.createContactId(session.getDialogPath()
@@ -315,7 +316,7 @@ public class SessionTimerManager extends PeriodicRefresher {
                 }
 
                 // Close the session
-                session.abortSession(ImsServiceSession.TERMINATION_BY_TIMEOUT);
+                session.abortSession(TerminationReason.TERMINATION_BY_TIMEOUT);
 
                 try {
                     ContactId remote = ContactUtils.createContactId(session.getDialogPath()
@@ -345,7 +346,7 @@ public class SessionTimerManager extends PeriodicRefresher {
             }
 
             // Close the session
-            session.abortSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+            session.abortSession(TerminationReason.TERMINATION_BY_SYSTEM);
         }
     }
 

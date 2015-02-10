@@ -148,7 +148,7 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
             }
 
             // Terminate session
-            terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+            terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
 
             // Report error
             handleError(new ContentSharingError(ContentSharingError.UNSUPPORTED_MEDIA_TYPE));

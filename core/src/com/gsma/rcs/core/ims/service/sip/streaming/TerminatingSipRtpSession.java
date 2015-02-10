@@ -90,9 +90,9 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                 ((SipSessionListener) listener).handleSessionInvited(contact, mSessionInvite);
             }
 
-            int answer = waitInvitationAnswer();
+            InvitationStatus answer = waitInvitationAnswer();
             switch (answer) {
-                case ImsServiceSession.INVITATION_REJECTED:
+                case INVITATION_REJECTED:
                     if (logger.isActivated()) {
                         logger.debug("Session has been rejected by user");
                     }
@@ -104,7 +104,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                     }
                     return;
 
-                case ImsServiceSession.INVITATION_NOT_ANSWERED:
+                case INVITATION_NOT_ANSWERED:
                     if (logger.isActivated()) {
                         logger.debug("Session has been rejected on timeout");
                     }
@@ -119,7 +119,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                     }
                     return;
 
-                case ImsServiceSession.INVITATION_CANCELED:
+                case INVITATION_CANCELED:
                     if (logger.isActivated()) {
                         logger.debug("Session has been canceled");
                     }
@@ -131,7 +131,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                     }
                     return;
 
-                case ImsServiceSession.INVITATION_ACCEPTED:
+                case INVITATION_ACCEPTED:
                     setSessionAccepted();
 
                     for (ImsSessionListener listener : listeners) {

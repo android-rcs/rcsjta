@@ -179,7 +179,7 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
 
         try {
             // Terminate session
-            terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+            terminateSession(ImsServiceSession.TerminationReason.TERMINATION_BY_SYSTEM);
 
             // Close the media session
             closeMediaSession();

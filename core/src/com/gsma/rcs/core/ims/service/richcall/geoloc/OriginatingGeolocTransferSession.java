@@ -24,11 +24,6 @@ package com.gsma.rcs.core.ims.service.richcall.geoloc;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-
-import android.net.Uri;
-
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
@@ -40,7 +35,6 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.utils.ContactUtils;
@@ -48,6 +42,11 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
+
+import android.net.Uri;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 /**
  * Originating geoloc sharing session (transfer)
@@ -241,7 +240,7 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
         closeMediaSession();
 
         // Terminate session
-        terminateSession(ImsServiceSession.TERMINATION_BY_USER);
+        terminateSession(TerminationReason.TERMINATION_BY_USER);
 
         // Remove the current session
         removeSession();
@@ -317,7 +316,7 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
         closeMediaSession();
 
         // Terminate session
-        terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+        terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
 
         try {
             ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());

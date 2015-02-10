@@ -22,12 +22,6 @@
 
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
-import javax2.sip.header.ContactHeader;
-
-import android.net.Uri;
-
-import java.util.Vector;
-
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
@@ -35,7 +29,6 @@ import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
@@ -49,6 +42,12 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
+
+import android.net.Uri;
+
+import java.util.Vector;
+
+import javax2.sip.header.ContactHeader;
 
 /**
  * Terminating file transfer HTTP session
@@ -213,9 +212,9 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
                             fileIcon);
                 }
 
-                int answer = waitInvitationAnswer();
+                InvitationStatus answer = waitInvitationAnswer();
                 switch (answer) {
-                    case ImsServiceSession.INVITATION_REJECTED:
+                    case INVITATION_REJECTED:
                         if (logger.isActivated()) {
                             logger.debug("Transfer has been rejected by user");
                         }
@@ -227,7 +226,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
                         }
                         return;
 
-                    case ImsServiceSession.INVITATION_NOT_ANSWERED:
+                    case INVITATION_NOT_ANSWERED:
                         if (logger.isActivated()) {
                             logger.debug("Transfer has been rejected on timeout");
                         }
@@ -239,7 +238,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
                         }
                         return;
 
-                    case ImsServiceSession.INVITATION_CANCELED:
+                    case INVITATION_CANCELED:
                         if (logger.isActivated()) {
                             logger.debug("Http transfer has been rejected by remote.");
 
@@ -251,7 +250,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
                         }
                         return;
 
-                    case ImsServiceSession.INVITATION_ACCEPTED:
+                    case INVITATION_ACCEPTED:
                         setSessionAccepted();
 
                         for (ImsSessionListener listener : listeners) {
@@ -336,7 +335,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
         if (logger.isActivated()) {
             logger.debug("Session invitation has been rejected");
         }
-        invitationStatus = INVITATION_REJECTED;
+        mInvitationStatus = InvitationStatus.INVITATION_REJECTED;
 
         // Unblock semaphore
         synchronized (waitUserAnswer) {

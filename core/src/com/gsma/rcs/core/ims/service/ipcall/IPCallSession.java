@@ -24,10 +24,6 @@ package com.gsma.rcs.core.ims.service.ipcall;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.util.Vector;
-
-import android.os.RemoteException;
-
 import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.VideoContent;
@@ -43,6 +39,7 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.ImsSessionBasedServiceError;
+import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.richcall.video.SdpOrientationExtension;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.PhoneUtils;
@@ -55,6 +52,10 @@ import com.gsma.services.rcs.ipcall.IIPCallPlayerListener;
 import com.gsma.services.rcs.ipcall.IIPCallRenderer;
 import com.gsma.services.rcs.ipcall.IIPCallRendererListener;
 import com.gsma.services.rcs.ipcall.VideoCodec;
+
+import android.os.RemoteException;
+
+import java.util.Vector;
 
 /**
  * IP call session
@@ -243,7 +244,7 @@ public abstract class IPCallSession extends ImsServiceSession {
             }
 
             // Terminate session
-            terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+            terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
 
             // Report error
             handleError(new IPCallError(IPCallError.UNSUPPORTED_AUDIO_TYPE));
@@ -261,7 +262,7 @@ public abstract class IPCallSession extends ImsServiceSession {
                 }
 
                 // Terminate session
-                terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+                terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
 
                 // Report error
                 handleError(new IPCallError(IPCallError.UNSUPPORTED_VIDEO_TYPE));
@@ -402,8 +403,7 @@ public abstract class IPCallSession extends ImsServiceSession {
                 case (0): { // Case Add Video
                     // create Video Content and set it on session
                     VideoContent videocontent = ContentManager
-                            .createLiveVideoContentFromSdp(reInvite
-                                    .getContentBytes());
+                            .createLiveVideoContentFromSdp(reInvite.getContentBytes());
                     setVideoContent(videoContent);
 
                     // processes user Answer and SIP response
@@ -533,106 +533,129 @@ public abstract class IPCallSession extends ImsServiceSession {
     /**
      * Handle Sip Response to ReInvite / originating side
      * 
-     * @param int code response code
+     * @param InvitationStatus invitationStatus response code
      * @param response Sip response to sent ReInvite
      * @param requestType Type type of request (addVideo/RemoveVideo/Set on Hold/Set on Resume)
      */
-    public void handleReInviteResponse(int code, SipResponse response, int requestType) {
+    public void handleReInviteResponse(InvitationStatus status, SipResponse response,
+            int requestType) {
         if (logger.isActivated()) {
-            logger.info("handleReInviteResponse: " + code);
+            logger.info("handleReInviteResponse: " + status);
         }
 
         ContactId contact = getRemoteContact();
         // case Add video
-        if (requestType == IPCallSession.ADD_VIDEO) {
-            if (code == 200) { // 200 OK response
-                // prepare Video media session
-                // TODO prepareVideoSession();
+        if (IPCallSession.ADD_VIDEO == requestType) {
+            switch (status) {
+                case INVITATION_ACCEPTED:
+                    // 200 OK response
+                    // prepare Video media session
+                    // TODO prepareVideoSession();
 
-                // Notify listeners
-                for (int i = 0; i < getListeners().size(); i++) {
-                    ((IPCallStreamingSessionListener) getListeners().get(i))
-                            .handleAddVideoAccepted(contact);
-                }
-
-                try {
-                    // TODO startVideoSession(true) ;
-                } catch (Exception e) {
-                    if (logger.isActivated()) {
-                        logger.error("Start Video session has failed", e);
+                    // Notify listeners
+                    for (ImsSessionListener listener : getListeners()) {
+                        ((IPCallStreamingSessionListener) listener).handleAddVideoAccepted(contact);
                     }
-                    handleError(new ImsSessionBasedServiceError(
-                            ImsSessionBasedServiceError.UNEXPECTED_EXCEPTION, e.getMessage()));
-                }
-            } else if ((code == ImsServiceSession.INVITATION_REJECTED)
-                    || (code == ImsServiceSession.TERMINATION_BY_TIMEOUT)) {
-                // Notify listeners
-                for (int i = 0; i < getListeners().size(); i++) {
-                    ((IPCallStreamingSessionListener) getListeners().get(i)).handleAddVideoAborted(
-                            contact, code);
-                }
-            }
 
+                    try {
+                        // TODO startVideoSession(true) ;
+                    } catch (Exception e) {
+                        if (logger.isActivated()) {
+                            logger.error("Start Video session has failed", e);
+                        }
+                        handleError(new ImsSessionBasedServiceError(
+                                ImsSessionBasedServiceError.UNEXPECTED_EXCEPTION, e.getMessage()));
+                    }
+                    break;
+                case INVITATION_REJECTED:
+                case INVITATION_TIMEOUT:
+                    // Notify listeners
+                    for (ImsSessionListener listener : getListeners()) {
+                        ((IPCallStreamingSessionListener) listener).handleAddVideoAborted(contact,
+                                TerminationReason.TERMINATION_BY_TIMEOUT);
+                    }
+                default:
+                    break;
+            }
             // case Remove Video
-        } else if (requestType == IPCallSession.REMOVE_VIDEO) {
-            if (code == 200) { // 200 OK response
-                // close video media session
-                // TODO closeVideoSession();
+        } else if (IPCallSession.REMOVE_VIDEO == requestType) {
+            switch (status) {
+                case INVITATION_ACCEPTED:
+                    // 200 OK response
+                    // close video media session
+                    // TODO closeVideoSession();
 
-                // Remove video on IP call player & renderer
-                // TODO
+                    // Remove video on IP call player & renderer
+                    // TODO
 
-                // Notify listeners
-                for (int i = 0; i < getListeners().size(); i++) {
-                    ((IPCallStreamingSessionListener) getListeners().get(i))
-                            .handleRemoveVideoAccepted(contact);
-                }
-            } else if (code == ImsServiceSession.TERMINATION_BY_TIMEOUT) { // No answer or 408
-                                                                           // TimeOut response
-                // Notify listeners
-                for (int i = 0; i < getListeners().size(); i++) {
-                    ((IPCallStreamingSessionListener) getListeners().get(i))
-                            .handleRemoveVideoAborted(contact, code);
-                }
+                    // Notify listeners
+                    for (ImsSessionListener listener : getListeners()) {
+                        ((IPCallStreamingSessionListener) listener)
+                                .handleRemoveVideoAccepted(contact);
+                    }
+                    break;
+                case INVITATION_NOT_ANSWERED:
+                case INVITATION_TIMEOUT:
+                    // No answer or 408 TimeOut response
+                    // Notify listeners
+                    for (ImsSessionListener listener : getListeners()) {
+                        ((IPCallStreamingSessionListener) listener).handleRemoveVideoAborted(
+                                contact, TerminationReason.TERMINATION_BY_TIMEOUT);
+                    }
+                    break;
+                default:
+                    break;
             }
-        } else if (requestType == IPCallSession.SET_ON_HOLD) {
-            if (code == 200) { // 200 OK response
-                holdMgr.prepareSession();
+        } else if (IPCallSession.SET_ON_HOLD == requestType) {
+            switch (status) {
+                case INVITATION_ACCEPTED:
+                    // 200 OK response
+                    holdMgr.prepareSession();
 
-                // Notify listeners
-                for (int i = 0; i < getListeners().size(); i++) {
-                    ((IPCallStreamingSessionListener) getListeners().get(i))
-                            .handleCallHoldAccepted(contact);
-                }
+                    // Notify listeners
+                    for (ImsSessionListener listener : getListeners()) {
+                        ((IPCallStreamingSessionListener) listener).handleCallHoldAccepted(contact);
+                    }
 
-                // release hold
-                holdMgr = null;
-            } else if (code == ImsServiceSession.TERMINATION_BY_TIMEOUT) { // No answer or 408
-                                                                           // TimeOut response
-                // Notify listeners
-                for (int i = 0; i < getListeners().size(); i++) {
-                    ((IPCallStreamingSessionListener) getListeners().get(i)).handleCallHoldAborted(
-                            contact, code);
-                }
+                    // release hold
+                    holdMgr = null;
+                    break;
+                case INVITATION_NOT_ANSWERED:
+                case INVITATION_TIMEOUT:
+                    // No answer or 408 TimeOut response
+                    // Notify listeners
+                    for (ImsSessionListener listener : getListeners()) {
+                        ((IPCallStreamingSessionListener) listener).handleCallHoldAborted(contact,
+                                TerminationReason.TERMINATION_BY_TIMEOUT);
+                    }
+                    break;
+                default:
+                    break;
             }
-        } else if (requestType == IPCallSession.SET_ON_RESUME) {
-            if (code == 200) { // 200 OK response
-                holdMgr.prepareSession();
+        } else if (IPCallSession.SET_ON_RESUME == requestType) {
+            switch (status) {
+                case INVITATION_ACCEPTED:
+                    // 200 OK response
+                    holdMgr.prepareSession();
 
-                // Notify listeners
-                for (int i = 0; i < getListeners().size(); i++) {
-                    ((IPCallStreamingSessionListener) getListeners().get(i))
-                            .handleCallResumeAccepted(contact);
-                }
-                // release hold
-                holdMgr = null;
-            } else if (code == ImsServiceSession.TERMINATION_BY_TIMEOUT) { // No answer or 408
-                                                                           // TimeOut response
-                // Notify listeners
-                for (int i = 0; i < getListeners().size(); i++) {
-                    ((IPCallStreamingSessionListener) getListeners().get(i))
-                            .handleCallResumeAborted(contact);
-                }
+                    // Notify listeners
+                    for (ImsSessionListener listener : getListeners()) {
+                        ((IPCallStreamingSessionListener) listener)
+                                .handleCallResumeAccepted(contact);
+                    }
+                    // release hold
+                    holdMgr = null;
+                    break;
+                case INVITATION_NOT_ANSWERED:
+                case INVITATION_TIMEOUT:
+                    // No answer or 408 TimeOut response
+                    // Notify listeners
+                    for (ImsSessionListener listener : getListeners()) {
+                        ((IPCallStreamingSessionListener) listener)
+                                .handleCallResumeAborted(contact);
+                    }
+                default:
+                    break;
             }
         }
     }
@@ -640,92 +663,103 @@ public abstract class IPCallSession extends ImsServiceSession {
     /**
      * Handle Sip Response to ReInvite/ terminating side
      * 
-     * @param int code response code
+     * @param InvitationStatus invitationStatus response code
      * @param requestType Type type of request (addVideo/RemoveVideo/Set on Hold/Set on Resume)
      */
-    public void handleReInviteUserAnswer(int code, int requestType) {
+    public void handleReInviteUserAnswer(InvitationStatus status, int requestType) {
         if (logger.isActivated()) {
-            logger.info("handleReInviteUserAnswer: " + code);
+            logger.info("handleReInviteUserAnswer: " + status);
         }
 
-        // case Add video
-        if (requestType == IPCallSession.ADD_VIDEO) {
-            // Invitation accepted
-            if (code == ImsServiceSession.INVITATION_ACCEPTED) {
-                // TODO prepareVideoSession();
-                // Invitation declined or not answered
-            } else if (code == ImsServiceSession.INVITATION_NOT_ANSWERED) {
+        switch (status) {
+            case INVITATION_ACCEPTED:
+                if (IPCallSession.ADD_VIDEO == requestType) {
+                    // TODO prepareVideoSession();
+                }
+                break;
+            case INVITATION_NOT_ANSWERED:
+            case INVITATION_REJECTED:
+            case INVITATION_CANCELED:
+            case INVITATION_TIMEOUT:
+            default:
+                if (IPCallSession.ADD_VIDEO == requestType) {
+                    {
+                        ContactId contact = getRemoteContact();
+                        for (ImsSessionListener listener : getListeners()) {
+                            ((IPCallStreamingSessionListener) listener).handleAddVideoAborted(
+                                    contact, TerminationReason.TERMINATION_BY_TIMEOUT);
+                        }
+                    }
+                }
+                break;
+        }
+    }
+
+    /**
+     * Handle Sip Response to ReInvite/ terminating side
+     * 
+     * @param InvitationStatus invitationStatus response code
+     * @param requestType Type type of request (addVideo/RemoveVideo/Set on Hold/Set on Resume)
+     */
+    public void handleReInviteAck(InvitationStatus status, int requestType) {
+        if (logger.isActivated()) {
+            logger.info("handleReInviteAck: " + status);
+        }
+
+        switch (status) {
+            case INVITATION_ACCEPTED:
+                // case Add video
                 ContactId contact = getRemoteContact();
-                for (int i = 0; i < getListeners().size(); i++) {
-                    ((IPCallStreamingSessionListener) getListeners().get(i)).handleAddVideoAborted(
-                            contact, code);
+                if (IPCallSession.ADD_VIDEO == requestType) {
+                    try {
+                        // TODO startVideoSession(false);
+                    } catch (Exception e) {
+                        if (logger.isActivated()) {
+                            logger.error("Start Video session has failed", e);
+                        }
+                        handleError(new ImsSessionBasedServiceError(
+                                ImsSessionBasedServiceError.UNEXPECTED_EXCEPTION, e.getMessage()));
+                    }
+
+                    // Notify listeners
+                    for (ImsSessionListener listener : getListeners()) {
+                        ((IPCallStreamingSessionListener) listener).handleAddVideoAccepted(contact);
+                    }
+                } else if (IPCallSession.REMOVE_VIDEO == requestType) {// case Remove Video
+                    // close video media session
+                    // TODO closeVideoSession();
+
+                    // Remove video on IP call player & renderer
+                    // TODO
+
+                    // Notify listeners
+                    for (ImsSessionListener listener : getListeners()) {
+                        ((IPCallStreamingSessionListener) listener)
+                                .handleRemoveVideoAccepted(contact);
+                    }
+                } else if (IPCallSession.SET_ON_HOLD == requestType) {// case On Hold
+                    holdMgr.prepareSession();
+
+                    // Notify listeners
+                    for (ImsSessionListener listener : getListeners()) {
+                        ((IPCallStreamingSessionListener) listener).handleCallHoldAccepted(contact);
+                    }
+                    // release hold manager
+                    holdMgr = null;
+                } else if (IPCallSession.SET_ON_RESUME == requestType) {// case On Resume
+                    holdMgr.prepareSession();
+
+                    // Notify listeners
+                    for (ImsSessionListener listener : getListeners()) {
+                        ((IPCallStreamingSessionListener) listener)
+                                .handleCallResumeAccepted(contact);
+                    }
+                    // release hold manager
+                    holdMgr = null;
                 }
-            }
-        }
-    }
-
-    /**
-     * Handle Sip Response to ReInvite/ terminating side
-     * 
-     * @param int code response code
-     * @param requestType Type type of request (addVideo/RemoveVideo/Set on Hold/Set on Resume)
-     */
-    public void handleReInviteAck(int code, int requestType) {
-        if (logger.isActivated()) {
-            logger.info("handleReInviteAckResponse: " + code);
-        }
-
-        // case Add video
-        ContactId contact = getRemoteContact();
-        if ((requestType == IPCallSession.ADD_VIDEO) && (code == 200)) {
-            try {
-                // TODO startVideoSession(false);
-            } catch (Exception e) {
-                if (logger.isActivated()) {
-                    logger.error("Start Video session has failed", e);
-                }
-                handleError(new ImsSessionBasedServiceError(
-                        ImsSessionBasedServiceError.UNEXPECTED_EXCEPTION, e.getMessage()));
-            }
-
-            // Notify listeners
-            for (int i = 0; i < getListeners().size(); i++) {
-                ((IPCallStreamingSessionListener) getListeners().get(i))
-                        .handleAddVideoAccepted(contact);
-            }
-        } else if ((requestType == IPCallSession.REMOVE_VIDEO) && (code == 200)) {// case Remove
-                                                                                  // Video
-            // close video media session
-            // TODO closeVideoSession();
-
-            // Remove video on IP call player & renderer
-            // TODO
-
-            // Notify listeners
-            for (int i = 0; i < getListeners().size(); i++) {
-                ((IPCallStreamingSessionListener) getListeners().get(i))
-                        .handleRemoveVideoAccepted(contact);
-            }
-        } else if ((requestType == IPCallSession.SET_ON_HOLD) && (code == 200)) {// case On Hold
-            holdMgr.prepareSession();
-
-            // Notify listeners
-            for (int i = 0; i < getListeners().size(); i++) {
-                ((IPCallStreamingSessionListener) getListeners().get(i))
-                        .handleCallHoldAccepted(contact);
-            }
-            // release hold manager
-            holdMgr = null;
-        } else if ((requestType == IPCallSession.SET_ON_RESUME) && (code == 200)) {// case On Resume
-            holdMgr.prepareSession();
-
-            // Notify listeners
-            for (int i = 0; i < getListeners().size(); i++) {
-                ((IPCallStreamingSessionListener) getListeners().get(i))
-                        .handleCallResumeAccepted(contact);
-            }
-            // release hold manager
-            holdMgr = null;
+                break;
+            default:
+                break;
         }
     }
 
@@ -757,8 +791,8 @@ public abstract class IPCallSession extends ImsServiceSession {
         }
 
         ContactId contact = getRemoteContact();
-        for (int i = 0; i < getListeners().size(); i++) {
-            ((IPCallStreamingSessionListener) getListeners().get(i)).handle486Busy(contact);
+        for (ImsSessionListener listener : getListeners()) {
+            ((IPCallStreamingSessionListener) listener).handle486Busy(contact);
         }
     }
 
@@ -1179,7 +1213,7 @@ public abstract class IPCallSession extends ImsServiceSession {
             closeMediaSession();
 
             // Terminate session
-            terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+            terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
 
             // Remove the current session
             removeSession();
@@ -1293,7 +1327,7 @@ public abstract class IPCallSession extends ImsServiceSession {
             closeMediaSession();
 
             // Terminate session
-            terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+            terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
 
             // Remove the current session
             removeSession();

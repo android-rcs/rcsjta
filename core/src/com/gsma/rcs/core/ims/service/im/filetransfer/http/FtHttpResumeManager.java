@@ -22,12 +22,9 @@
 
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
@@ -39,6 +36,10 @@ import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * File Transfer HTTP resume manager
@@ -195,7 +196,7 @@ public class FtHttpResumeManager {
             }
 
             @Override
-            public void handleSessionAborted(ContactId contact, int reason) {
+            public void handleSessionAborted(ContactId contact, TerminationReason reason) {
                 if (fired.compareAndSet(false, true)) {
                     processNext();
                 }

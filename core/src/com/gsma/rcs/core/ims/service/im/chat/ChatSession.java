@@ -1050,7 +1050,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         }
 
         // Abort the session
-        abortSession(ImsServiceSession.TERMINATION_BY_TIMEOUT);
+        abortSession(TerminationReason.TERMINATION_BY_TIMEOUT);
     }
 
     /**

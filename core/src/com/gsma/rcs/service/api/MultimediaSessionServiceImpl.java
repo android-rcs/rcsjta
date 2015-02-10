@@ -23,7 +23,7 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.gsma.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
@@ -181,16 +181,16 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * Translate IMS session error to ReasonCode
      * @param ims session error
      */
-    /* package private */ReasonCode imsServiceSessionErrorToReasonCode(int imsServiceSessionError) {
-        switch (imsServiceSessionError) {
-            case ImsServiceSession.TERMINATION_BY_SYSTEM:
-            case ImsServiceSession.TERMINATION_BY_TIMEOUT:
+    /* package private */ReasonCode sessionAbortedReasonToReasonCode(TerminationReason reason) {
+        switch (reason) {
+            case TERMINATION_BY_SYSTEM:
+            case TERMINATION_BY_TIMEOUT:
                 return ReasonCode.FAILED_SESSION;
-            case ImsServiceSession.TERMINATION_BY_USER:
+            case TERMINATION_BY_USER:
                 return ReasonCode.REJECTED_BY_USER;
             default:
-                throw new IllegalArgumentException("Unknown imsServiceSessionError=".concat(String
-                        .valueOf(imsServiceSessionError)));
+                throw new IllegalArgumentException("Unknown TerminationReason=".concat(String
+                        .valueOf(reason)));
         }
     }
 

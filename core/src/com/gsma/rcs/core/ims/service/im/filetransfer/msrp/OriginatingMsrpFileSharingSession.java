@@ -24,16 +24,6 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.msrp;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.Collection;
-
-import javax2.sip.header.ContentDispositionHeader;
-import javax2.sip.header.ContentLengthHeader;
-import javax2.sip.header.ContentTypeHeader;
-
-import android.net.Uri;
-
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
@@ -45,7 +35,6 @@ import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ContributionIdGenerator;
@@ -60,6 +49,16 @@ import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
+
+import android.net.Uri;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.Collection;
+
+import javax2.sip.header.ContentDispositionHeader;
+import javax2.sip.header.ContentLengthHeader;
+import javax2.sip.header.ContentTypeHeader;
 
 /**
  * Originating file transfer session
@@ -98,8 +97,8 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         super(parent, content, contact, fileIcon, fileTransferId);
 
         if (logger.isActivated()) {
-            logger.debug("OriginatingFileSharingSession contact=" + contact + " filename="
-                    + content.getName());
+            logger.debug(new StringBuilder("OriginatingFileSharingSession contact=")
+                    .append(contact).append(" filename=").append(content.getName()).toString());
         }
         // Create dialog path
         createOriginatingDialogPath();
@@ -122,7 +121,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
             // Set setup mode
             String localSetup = createSetupOffer();
             if (logger.isActivated()) {
-                logger.debug("Local setup attribute is " + localSetup);
+                logger.debug("Local setup attribute is ".concat(localSetup));
             }
 
             // Set local port
@@ -306,16 +305,15 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         closeMediaSession();
 
         // Terminate session
-        terminateSession(ImsServiceSession.TERMINATION_BY_USER);
+        terminateSession(TerminationReason.TERMINATION_BY_USER);
 
         // Remove the current session
         removeSession();
 
         ContactId contact = getRemoteContact();
         MmContent content = getContent();
-        for (int j = 0; j < getListeners().size(); j++) {
-            ((FileSharingSessionListener) getListeners().get(j)).handleFileTransfered(content,
-                    contact);
+        for (ImsSessionListener listener : getListeners()) {
+            ((FileSharingSessionListener) listener).handleFileTransfered(content, contact);
         }
         InstantMessagingService imService = ((InstantMessagingService) getImsService());
         String fileTransferId = getFileTransferId();
@@ -344,9 +342,9 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      */
     public void msrpTransferProgress(long currentSize, long totalSize) {
         ContactId contact = getRemoteContact();
-        for (int j = 0; j < getListeners().size(); j++) {
-            ((FileSharingSessionListener) getListeners().get(j)).handleTransferProgress(contact,
-                    currentSize, totalSize);
+        for (ImsSessionListener listener : getListeners()) {
+            ((FileSharingSessionListener) listener).handleTransferProgress(contact, currentSize,
+                    totalSize);
         }
     }
 

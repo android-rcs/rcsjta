@@ -63,7 +63,7 @@ public class MessageLog implements IMessageLog {
     private static final Logger logger = Logger.getLogger(MessageLog.class.getSimpleName());
 
     private static final String[] PROJECTION_MESSAGE_ID = new String[] {
-        MessageData.KEY_MESSAGE_ID
+            MessageData.KEY_MESSAGE_ID
     };
 
     private static final int FIRST_COLUMN_IDX = 0;
@@ -337,7 +337,7 @@ public class MessageLog implements IMessageLog {
 
     private Cursor getMessageData(String columnName, String msgId) throws SQLException {
         String[] projection = new String[] {
-            columnName
+                columnName
         };
         Cursor cursor = null;
         try {

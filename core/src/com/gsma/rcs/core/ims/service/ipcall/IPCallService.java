@@ -33,7 +33,7 @@ import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtils;
@@ -293,7 +293,7 @@ public class IPCallService extends ImsService {
         if (logger.isActivated()) {
             logger.debug("Abort all pending sessions");
         }
-        abortAllSessions(ImsServiceSession.TERMINATION_BY_SYSTEM);
+        abortAllSessions(TerminationReason.TERMINATION_BY_SYSTEM);
     }
 
     /**

@@ -22,15 +22,11 @@
 
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
-import java.util.Collection;
-import java.util.List;
-
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
@@ -39,6 +35,9 @@ import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Abstract file transfer HTTP session
@@ -119,11 +118,11 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
     }
 
     @Override
-    public void abortSession(int reason) {
+    public void abortSession(TerminationReason reason) {
         FtHttpResumeDaoImpl dao = FtHttpResumeDaoImpl.getInstance();
 
         // If reason is TERMINATION_BY_SYSTEM and session already started, then it's a pause
-        if (reason == ImsServiceSession.TERMINATION_BY_SYSTEM) {
+        if (TerminationReason.TERMINATION_BY_SYSTEM == reason) {
             // Check if the session is not in created status. In this status,
             // the thumbnail is not yet sent and the resume is not possible.
             if (dao != null) {

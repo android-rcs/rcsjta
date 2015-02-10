@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.service.api;
 
+import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatError;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
@@ -404,8 +405,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
     }
 
     /**
-     * open the chat conversation. Note: if it   s an incoming pending chat session and the
-     * parameter IM SESSION START is 0 then the session is accepted now.
+     * open the chat conversation. Note: if its an incoming pending chat session and the parameter
+     * IM SESSION START is 0 then the session is accepted now.
      * 
      * @see ImSessionStartMode
      */
@@ -480,10 +481,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 
     /*
      * (non-Javadoc)
-     * @see com.gsma.rcs.core.ims.service.ImsSessionListener#handleSessionAborted (int)
+     * @see com.orangelabs.rcs.core.ims.service.ImsSessionListener#handleSessionAborted
+     * (TerminationReason)
      */
     @Override
-    public void handleSessionAborted(ContactId contact, int reason) {
+    public void handleSessionAborted(ContactId contact, TerminationReason reason) {
         if (logger.isActivated()) {
             logger.info(new StringBuilder("Session aborted (reason ").append(reason).append(")")
                     .toString());

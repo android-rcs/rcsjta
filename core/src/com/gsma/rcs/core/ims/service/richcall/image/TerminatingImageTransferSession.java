@@ -123,9 +123,9 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                 ((ImageTransferSessionListener) listener).handleSessionInvited(contact, content);
             }
 
-            int answer = waitInvitationAnswer();
+            InvitationStatus answer = waitInvitationAnswer();
             switch (answer) {
-                case ImsServiceSession.INVITATION_REJECTED:
+                case INVITATION_REJECTED:
                     if (logger.isActivated()) {
                         logger.debug("Session has been rejected by user");
                     }
@@ -137,7 +137,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                     }
                     return;
 
-                case ImsServiceSession.INVITATION_NOT_ANSWERED:
+                case INVITATION_NOT_ANSWERED:
                     if (logger.isActivated()) {
                         logger.debug("Session has been rejected on timeout");
                     }
@@ -152,7 +152,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                     }
                     return;
 
-                case ImsServiceSession.INVITATION_CANCELED:
+                case INVITATION_CANCELED:
                     if (logger.isActivated()) {
                         logger.debug("Session has been rejected by remote");
                     }
@@ -164,7 +164,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                     }
                     return;
 
-                case ImsServiceSession.INVITATION_ACCEPTED:
+                case INVITATION_ACCEPTED:
                     setSessionAccepted();
 
                     for (ImsSessionListener listener : listeners) {
@@ -517,7 +517,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
 
         try {
             // Terminate session
-            terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+            terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
             // Close the media session
             closeMediaSession();
         } catch (Exception e) {

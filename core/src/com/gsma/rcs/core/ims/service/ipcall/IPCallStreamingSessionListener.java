@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.ipcall;
 
 import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.VideoContent;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -86,9 +87,9 @@ public interface IPCallStreamingSessionListener extends ImsSessionListener {
      * Add Video aborted
      * 
      * @param contact Remote contact
-     * @param errorCode
+     * @param reason
      */
-    public void handleAddVideoAborted(ContactId contact, int errorCode);
+    public void handleAddVideoAborted(ContactId contact, TerminationReason reason);
 
     /**
      * Remove Video accepted (200OK response)
@@ -101,8 +102,9 @@ public interface IPCallStreamingSessionListener extends ImsSessionListener {
      * Remove Video aborted
      * 
      * @param contact Remote contact
+     * @param reason
      */
-    public void handleRemoveVideoAborted(ContactId contact, int code);
+    public void handleRemoveVideoAborted(ContactId contact, TerminationReason reason);
 
     /**
      * Call hold
@@ -129,9 +131,9 @@ public interface IPCallStreamingSessionListener extends ImsSessionListener {
      * Call Hold aborted
      * 
      * @param contact Remote contact
-     * @param errorCode
+     * @param reason
      */
-    public void handleCallHoldAborted(ContactId contact, int errorCode);
+    public void handleCallHoldAborted(ContactId contact, TerminationReason reason);
 
     /**
      * Call resume accepted (200OK response)

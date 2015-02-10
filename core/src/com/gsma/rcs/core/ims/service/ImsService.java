@@ -27,6 +27,7 @@ import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -206,10 +207,10 @@ public abstract class ImsService {
      */
     public abstract void check();
 
-    public void abortAllSessions(int imsAbortionReason) {
+    public void abortAllSessions(TerminationReason reason) {
         synchronized (getImsServiceSessionOperationLock()) {
             for (ImsServiceSession session : mImsServiceSessionCache.values()) {
-                session.abortSession(imsAbortionReason);
+                session.abortSession(reason);
             }
         }
     }

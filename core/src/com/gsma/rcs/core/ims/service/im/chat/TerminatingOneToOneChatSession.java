@@ -169,9 +169,9 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 
                 send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
-                int answer = waitInvitationAnswer();
+                InvitationStatus answer = waitInvitationAnswer();
                 switch (answer) {
-                    case ImsServiceSession.INVITATION_REJECTED:
+                    case INVITATION_REJECTED:
                         if (logActivated) {
                             logger.debug("Session has been rejected by user");
                         }
@@ -183,7 +183,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                         }
                         return;
 
-                    case ImsServiceSession.INVITATION_NOT_ANSWERED:
+                    case INVITATION_NOT_ANSWERED:
                         if (logActivated) {
                             logger.debug("Session has been rejected on timeout");
                         }
@@ -198,7 +198,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                         }
                         return;
 
-                    case ImsServiceSession.INVITATION_CANCELED:
+                    case INVITATION_CANCELED:
                         if (logActivated) {
                             logger.debug("Session has been rejected by remote");
                         }
@@ -210,7 +210,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                         }
                         return;
 
-                    case ImsServiceSession.INVITATION_ACCEPTED:
+                    case INVITATION_ACCEPTED:
                         setSessionAccepted();
 
                         for (ImsSessionListener listener : listeners) {
@@ -430,12 +430,12 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
             }
             if (currentSessionInitiatedByRemote) {
                 if (currentSessionEstablished) {
-                    currentSession.abortSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+                    currentSession.abortSession(TerminationReason.TERMINATION_BY_SYSTEM);
                 } else {
                     currentSession.rejectSession();
                 }
             } else {
-                currentSession.abortSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+                currentSession.abortSession(TerminationReason.TERMINATION_BY_SYSTEM);
             }
             /*
              * Since the current session was already established and we are now replacing that

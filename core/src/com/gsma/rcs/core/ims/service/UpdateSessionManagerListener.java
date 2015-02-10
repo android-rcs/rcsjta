@@ -20,6 +20,7 @@ package com.gsma.rcs.core.ims.service;
 
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.InvitationStatus;
 
 /**
  * Listener of events sent to Update Session Manager
@@ -34,21 +35,21 @@ public interface UpdateSessionManagerListener {
      * @param code Sip response code
      * @param response Sip response request
      */
-    public void handleReInviteResponse(int code, SipResponse response);
+    public void handleReInviteResponse(InvitationStatus status, SipResponse response);
 
     /**
      * User answer received
      * 
      * @param code user response code
      */
-    public void handleReInviteUserAnswer(int code);
+    public void handleReInviteUserAnswer(InvitationStatus status);
 
     /**
      * ReInvite Ack received
      * 
      * @param code Sip response code
      */
-    public void handleReInviteAck(int code);
+    public void handleReInviteAck(InvitationStatus status);
 
     /**
      * Sdp requested for ReInvite Response

@@ -22,12 +22,6 @@
 
 package com.gsma.rcs.core.ims.service;
 
-import java.util.Collection;
-import java.util.Vector;
-
-import javax2.sip.header.ContactHeader;
-import javax2.sip.message.Response;
-
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipManager;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
@@ -44,6 +38,12 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 
+import java.util.Collection;
+import java.util.Vector;
+
+import javax2.sip.header.ContactHeader;
+import javax2.sip.message.Response;
+
 /**
  * IMS service session
  * 
@@ -53,17 +53,17 @@ public abstract class ImsServiceSession extends Thread {
     /**
      * Session invitation status
      */
-    public final static int INVITATION_NOT_ANSWERED = 0;
-    public final static int INVITATION_ACCEPTED = 1;
-    public final static int INVITATION_REJECTED = 2;
-    public final static int INVITATION_CANCELED = 3;
+    public enum InvitationStatus {
+
+        INVITATION_NOT_ANSWERED, INVITATION_ACCEPTED, INVITATION_REJECTED, INVITATION_CANCELED, INVITATION_TIMEOUT;
+    }
 
     /**
      * Session termination reason
      */
-    public final static int TERMINATION_BY_SYSTEM = 0;
-    public final static int TERMINATION_BY_USER = 1;
-    public final static int TERMINATION_BY_TIMEOUT = 2;
+    public enum TerminationReason {
+        TERMINATION_BY_SYSTEM, TERMINATION_BY_USER, TERMINATION_BY_TIMEOUT, TERMINATION_BY_INACTIVITY;
+    }
 
     private final static int SESSION_INTERVAL_TOO_SMALL = 422;
 
@@ -105,7 +105,7 @@ public abstract class ImsServiceSession extends Thread {
     /**
      * Session invitation status
      */
-    protected int invitationStatus = INVITATION_NOT_ANSWERED;
+    protected InvitationStatus mInvitationStatus = InvitationStatus.INVITATION_NOT_ANSWERED;
 
     /**
      * Wait user answer for session invitation
@@ -408,7 +408,7 @@ public abstract class ImsServiceSession extends Thread {
         if (logger.isActivated()) {
             logger.debug("Session invitation has been rejected");
         }
-        invitationStatus = INVITATION_REJECTED;
+        mInvitationStatus = InvitationStatus.INVITATION_REJECTED;
 
         // Unblock semaphore
         synchronized (waitUserAnswer) {
@@ -429,7 +429,7 @@ public abstract class ImsServiceSession extends Thread {
         if (logger.isActivated()) {
             logger.debug("Session invitation has been accepted");
         }
-        invitationStatus = INVITATION_ACCEPTED;
+        mInvitationStatus = InvitationStatus.INVITATION_ACCEPTED;
 
         // Unblock semaphore
         synchronized (waitUserAnswer) {
@@ -442,9 +442,9 @@ public abstract class ImsServiceSession extends Thread {
      * 
      * @return Answer
      */
-    public int waitInvitationAnswer() {
-        if (invitationStatus != INVITATION_NOT_ANSWERED) {
-            return invitationStatus;
+    public InvitationStatus waitInvitationAnswer() {
+        if (InvitationStatus.INVITATION_NOT_ANSWERED != mInvitationStatus) {
+            return mInvitationStatus;
         }
 
         if (logger.isActivated()) {
@@ -460,7 +460,7 @@ public abstract class ImsServiceSession extends Thread {
             sessionInterrupted = true;
         }
 
-        return invitationStatus;
+        return mInvitationStatus;
     }
 
     /**
@@ -497,14 +497,14 @@ public abstract class ImsServiceSession extends Thread {
      * 
      * @param reason Termination reason
      */
-    public void abortSession(int abortedReason) {
+    public void abortSession(TerminationReason reason) {
         if (logger.isActivated()) {
-            logger.info("Abort the session " + abortedReason);
+            logger.info("Abort the session ".concat(reason.toString()));
         }
 
         interruptSession();
 
-        terminateSession(abortedReason);
+        terminateSession(reason);
 
         closeMediaSession();
 
@@ -513,7 +513,7 @@ public abstract class ImsServiceSession extends Thread {
         /* TODO: This will be changed anyway by the implementation of CR018 */
         Collection<ImsSessionListener> listeners = getListeners();
         /* Handles the case of REJECTED_BY_USER on originating session */
-        if (abortedReason == ImsServiceSession.TERMINATION_BY_USER && dialogPath != null
+        if (TerminationReason.TERMINATION_BY_USER == reason && dialogPath != null
                 && !dialogPath.isSigEstablished()) {
             for (ImsSessionListener listener : listeners) {
                 listener.handleSessionRejectedByUser(contact);
@@ -522,7 +522,7 @@ public abstract class ImsServiceSession extends Thread {
         }
 
         for (ImsSessionListener listener : listeners) {
-            listener.handleSessionAborted(contact, abortedReason);
+            listener.handleSessionAborted(contact, reason);
         }
     }
 
@@ -531,9 +531,10 @@ public abstract class ImsServiceSession extends Thread {
      * 
      * @param reason Reason
      */
-    public void terminateSession(int reason) {
+    public void terminateSession(TerminationReason reason) {
         if (logger.isActivated()) {
-            logger.debug("Terminate the session (reason " + reason + ")");
+            logger.debug(new StringBuilder("Terminate the session (reason ").append(reason)
+                    .append(")").toString());
         }
 
         if ((dialogPath == null) || dialogPath.isSessionTerminated()) {
@@ -545,7 +546,7 @@ public abstract class ImsServiceSession extends Thread {
         getSessionTimerManager().stop();
 
         // Update dialog path
-        if (reason == ImsServiceSession.TERMINATION_BY_USER) {
+        if (TerminationReason.TERMINATION_BY_USER == reason) {
             dialogPath.sessionTerminated(200, "Call completed");
         } else {
             dialogPath.sessionTerminated();
@@ -660,7 +661,7 @@ public abstract class ImsServiceSession extends Thread {
         removeSession();
 
         // Set invitation status
-        invitationStatus = ImsServiceSession.INVITATION_CANCELED;
+        mInvitationStatus = InvitationStatus.INVITATION_CANCELED;
 
         // Unblock semaphore
         synchronized (waitUserAnswer) {
@@ -1249,28 +1250,28 @@ public abstract class ImsServiceSession extends Thread {
      * Handle ReInvite Sip Response
      * 
      * @param response Sip response to reInvite
-     * @param int code response code
+     * @param InvitationStatus code response code
      * @param reInvite reInvite SIP request
      */
-    public void handleReInviteResponse(int code, SipResponse response, int requestType) {
+    public void handleReInviteResponse(InvitationStatus code, SipResponse response, int requestType) {
     }
 
     /**
      * Handle User Answer in Response to Session Update notification
      * 
-     * @param int code response code
+     * @param InvitationStatus code response code
      * @param reInvite reInvite SIP request
      */
-    public void handleReInviteUserAnswer(int code, int requestType) {
+    public void handleReInviteUserAnswer(InvitationStatus code, int requestType) {
     }
 
     /**
      * Handle ACK sent in Response to 200Ok ReInvite
      * 
-     * @param int code response code
+     * @param InvitationStatus code response code
      * @param reInvite reInvite SIP request
      */
-    public void handleReInviteAck(int code, int requestType) {
+    public void handleReInviteAck(InvitationStatus code, int requestType) {
     }
 
     /**

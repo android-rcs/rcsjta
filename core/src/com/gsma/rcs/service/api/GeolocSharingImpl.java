@@ -23,7 +23,7 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.GeolocSharingPersistedStorageAccessor;
@@ -247,28 +247,12 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
         // Abort the session
         new Thread() {
             public void run() {
-                session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+                session.abortSession(TerminationReason.TERMINATION_BY_USER);
             }
         }.start();
     }
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
-    /*
-     * TODO : Fix reasoncode mapping in the switch.
-     */
-    private ReasonCode sessionAbortedReasonToReasonCode(int sessionAbortedReason) {
-        switch (sessionAbortedReason) {
-            case ImsServiceSession.TERMINATION_BY_TIMEOUT:
-            case ImsServiceSession.TERMINATION_BY_SYSTEM:
-                return ReasonCode.ABORTED_BY_SYSTEM;
-            case ImsServiceSession.TERMINATION_BY_USER:
-                return ReasonCode.ABORTED_BY_USER;
-            default:
-                throw new IllegalArgumentException(
-                        "Unknown reason in GeolocSharingImpl.sessionAbortedReasonToReasonCode; sessionAbortedReason="
-                                + sessionAbortedReason + "!");
-        }
-    }
 
     /*
      * TODO : Fix reasoncode mapping in the switch.
@@ -327,12 +311,24 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
      * @param contact
      * @param reason Termination reason
      */
-    public void handleSessionAborted(ContactId contact, int reason) {
+    public void handleSessionAborted(ContactId contact, TerminationReason reason) {
         if (logger.isActivated()) {
             logger.info(new StringBuilder("Session aborted; reason=").append(reason).append(".")
                     .toString());
         }
-        ReasonCode reasonCode = sessionAbortedReasonToReasonCode(reason);
+        ReasonCode reasonCode;
+        switch (reason) {
+            case TERMINATION_BY_TIMEOUT:
+            case TERMINATION_BY_SYSTEM:
+                reasonCode = ReasonCode.ABORTED_BY_SYSTEM;
+                break;
+            case TERMINATION_BY_USER:
+                reasonCode = ReasonCode.ABORTED_BY_USER;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown reason ; sessionAbortedReason="
+                        + reason + "!");
+        }
         synchronized (lock) {
             mGeolocSharingService.removeGeolocSharing(mSharingId);
             mPersistentStorage.setStateAndReasonCode(State.ABORTED, reasonCode);

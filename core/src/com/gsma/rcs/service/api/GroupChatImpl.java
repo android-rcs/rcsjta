@@ -23,7 +23,7 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatError;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
@@ -158,21 +158,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
         throw new IllegalArgumentException(new StringBuilder(
                 "Received invalid imdn notification type:'").append(notificationType).append("'")
                 .toString());
-    }
-
-    /* TODO: Fix mapping between int reason and reasonCode. */
-    private ReasonCode sessionAbortedReasonToReasonCode(int reason) {
-        switch (reason) {
-            case ImsServiceSession.TERMINATION_BY_SYSTEM:
-            case ImsServiceSession.TERMINATION_BY_TIMEOUT:
-                return ReasonCode.ABORTED_BY_INACTIVITY;
-            case ImsServiceSession.TERMINATION_BY_USER:
-                return ReasonCode.ABORTED_BY_USER;
-            default:
-                throw new IllegalArgumentException(
-                        "Unknown reason in GroupChatImpl.sessionAbortedReasonToReasonCode; reason="
-                                + reason + "!");
-        }
     }
 
     private void handleSessionRejected(ReasonCode reasonCode) {
@@ -378,7 +363,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
         // Abort the session
         new Thread() {
             public void run() {
-                session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+                session.abortSession(TerminationReason.TERMINATION_BY_USER);
             }
         }.start();
     }
@@ -720,8 +705,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
     }
 
     /**
-     * open the chat conversation. Note: if it   s an incoming pending chat session and the
-     * parameter IM SESSION START is 0 then the session is accepted now.
+     * open the chat conversation. Note: if its an incoming pending chat session and the parameter
+     * IM SESSION START is 0 then the session is accepted now.
      * 
      * @see RcsSettingsData.ImSessionStartMode
      */
@@ -808,7 +793,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * (non-Javadoc)
      * @see com.gsma.rcs.core.ims.service.ImsSessionListener#handleSessionAborted (int)
      */
-    public void handleSessionAborted(ContactId contact, int reason) {
+    public void handleSessionAborted(ContactId contact, TerminationReason reason) {
         GroupChatSession session = mImService.getGroupChatSession(mChatId);
         if (session != null && session.isPendingForRemoval()) {
             /*
@@ -819,20 +804,39 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
              */
             if (logger.isActivated()) {
                 logger.info(new StringBuilder("Session marked pending for removal status ")
-                        .append(State.ABORTED).append(" reason ").append(reason).toString());
+                        .append(State.ABORTED).append(" terminationReason ").append(reason)
+                        .toString());
             }
             return;
         }
         if (logger.isActivated()) {
             logger.info(new StringBuilder("Session status ").append(State.ABORTED)
-                    .append(" reason ").append(reason).toString());
+                    .append(" terminationReason ").append(reason).toString());
         }
         setRejoinedAsPartOfSendOperation(false);
         synchronized (lock) {
             mChatService.removeGroupChat(mChatId);
 
-            ReasonCode reasonCode = sessionAbortedReasonToReasonCode(reason);
-            if (ImsServiceSession.TERMINATION_BY_SYSTEM == reason) {
+            /* TODO: Fix mapping between int reason and reasonCode. */
+
+            ReasonCode reasonCode;
+            switch (reason) {
+                case TERMINATION_BY_SYSTEM:
+                case TERMINATION_BY_TIMEOUT:
+                    reasonCode = ReasonCode.ABORTED_BY_INACTIVITY;
+                    break;
+                case TERMINATION_BY_USER:
+                    reasonCode = ReasonCode.ABORTED_BY_USER;
+                    break;
+                case TERMINATION_BY_INACTIVITY:
+                    reasonCode = ReasonCode.ABORTED_BY_INACTIVITY;
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            "Unknown reason in GroupChatImpl.handleSessionAborted; terminationReason="
+                                    + reason + "!");
+            }
+            if (TerminationReason.TERMINATION_BY_SYSTEM == reason) {
                 /*
                  * This error is caused because of a network drop so the group chat is not set to
                  * ABORTED state in this case as it will be auto-rejoined when network connection is

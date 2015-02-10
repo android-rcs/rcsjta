@@ -24,7 +24,7 @@ package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.richcall.image.ImageSharingPersistedStorageAccessor;
@@ -123,23 +123,6 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
                         new StringBuilder(
                                 "Unknown reason in ImageSharingImpl.toStateAndReasonCode; contentSharingError=")
                                 .append(contentSharingError).append("!").toString());
-        }
-    }
-
-    /*
-     * TODO: Fix reasoncode mapping in the switch.
-     */
-    private ReasonCode imsServiceSessionErrorToReasonCode(int imsServiceSessionErrorCode) {
-        switch (imsServiceSessionErrorCode) {
-            case ImsServiceSession.TERMINATION_BY_SYSTEM:
-            case ImsServiceSession.TERMINATION_BY_TIMEOUT:
-                return ReasonCode.ABORTED_BY_SYSTEM;
-            case ImsServiceSession.TERMINATION_BY_USER:
-                return ReasonCode.ABORTED_BY_USER;
-            default:
-                throw new IllegalArgumentException(
-                        "Unknown reason in ImageSharingImpl.imsServiceSessionErrorToReasonCode; imsServiceSessionErrorCode="
-                                + imsServiceSessionErrorCode + "!");
         }
     }
 
@@ -355,7 +338,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
         // Abort the session
         new Thread() {
             public void run() {
-                session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+                session.abortSession(TerminationReason.TERMINATION_BY_USER);
             }
         }.start();
     }
@@ -383,12 +366,28 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      * 
      * @param reason Termination reason
      */
-    public void handleSessionAborted(ContactId contact, int imsServiceSessionErrorCode) {
+    public void handleSessionAborted(ContactId contact, TerminationReason reason) {
         if (logger.isActivated()) {
-            logger.info("Session aborted (imsServiceSessionErrorCode " + imsServiceSessionErrorCode
-                    + ")");
+            logger.info(new StringBuilder("Session aborted (terminationReason ").append(reason)
+                    .append(")").toString());
         }
-        ReasonCode reasonCode = imsServiceSessionErrorToReasonCode(imsServiceSessionErrorCode);
+        /*
+         * TODO: Fix reasoncode mapping in the switch.
+         */
+        ReasonCode reasonCode;
+        switch (reason) {
+            case TERMINATION_BY_SYSTEM:
+            case TERMINATION_BY_TIMEOUT:
+                reasonCode = ReasonCode.ABORTED_BY_SYSTEM;
+                break;
+            case TERMINATION_BY_USER:
+                reasonCode = ReasonCode.ABORTED_BY_USER;
+                break;
+            default:
+                throw new IllegalArgumentException(
+                        "Unknown reason in ImageSharingImpl.handleSessionAborted; terminationReason="
+                                + reason + "!");
+        }
         synchronized (lock) {
             mImageSharingService.removeImageSharing(mSharingId);
 

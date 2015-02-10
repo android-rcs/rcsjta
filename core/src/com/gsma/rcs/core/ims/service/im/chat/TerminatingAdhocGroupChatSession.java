@@ -207,9 +207,9 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 
                 send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
 
-                int answer = waitInvitationAnswer();
+                InvitationStatus answer = waitInvitationAnswer();
                 switch (answer) {
-                    case ImsServiceSession.INVITATION_REJECTED:
+                    case INVITATION_REJECTED:
                         if (logActivated) {
                             logger.debug("Session has been rejected by user");
                         }
@@ -221,7 +221,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
                         }
                         return;
 
-                    case ImsServiceSession.INVITATION_NOT_ANSWERED:
+                    case INVITATION_NOT_ANSWERED:
                         if (logActivated) {
                             logger.debug("Session has been rejected on timeout");
                         }
@@ -236,7 +236,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
                         }
                         return;
 
-                    case ImsServiceSession.INVITATION_CANCELED:
+                    case INVITATION_CANCELED:
                         if (logActivated) {
                             logger.debug("Session has been rejected by remote");
                         }
@@ -248,7 +248,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
                         }
                         return;
 
-                    case ImsServiceSession.INVITATION_ACCEPTED:
+                    case INVITATION_ACCEPTED:
                         setSessionAccepted();
 
                         for (ImsSessionListener listener : listeners) {

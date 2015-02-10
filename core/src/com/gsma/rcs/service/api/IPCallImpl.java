@@ -25,7 +25,7 @@ package com.gsma.rcs.service.api;
 import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallError;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallPersistedStorageAccessor;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallService;
@@ -103,17 +103,17 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
     /*
      * TODO: Fix reasoncode mapping in the switch.
      */
-    private ReasonCode imsServiceSessionErrorToReasonCode(int imsServiceSessionErrorCodeAsReasonCode) {
-        switch (imsServiceSessionErrorCodeAsReasonCode) {
-            case ImsServiceSession.TERMINATION_BY_SYSTEM:
-            case ImsServiceSession.TERMINATION_BY_TIMEOUT:
+    private ReasonCode sessionAbortedReasonToReasonCode(TerminationReason reason) {
+        switch (reason) {
+            case TERMINATION_BY_SYSTEM:
+            case TERMINATION_BY_TIMEOUT:
                 return ReasonCode.ABORTED_BY_SYSTEM;
-            case ImsServiceSession.TERMINATION_BY_USER:
+            case TERMINATION_BY_USER:
                 return ReasonCode.ABORTED_BY_USER;
             default:
                 throw new IllegalArgumentException(
-                        "Unknown reason in IPCallImpl.imsServiceSessionErrorToReasonCode; imsServiceSessionErrorCodeAsReasonCode="
-                                + imsServiceSessionErrorCodeAsReasonCode + "!");
+                        "Unknown reason in IPCallImpl.sessionAbortedReasonToReasonCode; terminationReason="
+                                + reason + "!");
         }
     }
 
@@ -295,7 +295,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
         // Abort the session
         new Thread() {
             public void run() {
-                session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+                session.abortSession(TerminationReason.TERMINATION_BY_USER);
             }
         }.start();
     }
@@ -545,14 +545,14 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * 
      * @param reason Termination reason
      */
-    public void handleSessionAborted(ContactId contact, int reason) {
+    public void handleSessionAborted(ContactId contact, TerminationReason reason) {
         if (logger.isActivated()) {
-            logger.info("Call aborted (reason " + reason + ")");
+            logger.info(new StringBuilder("Call aborted (reason ").append(reason).append(")")
+                    .toString());
         }
         synchronized (lock) {
-            ReasonCode reasonCode = imsServiceSessionErrorToReasonCode(reason);
+            ReasonCode reasonCode = sessionAbortedReasonToReasonCode(reason);
             mPersistentStorage.setStateAndReasonCode(State.ABORTED, reasonCode);
-
             mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, State.ABORTED, reasonCode);
             mIPCallServiceImpl.removeIPCall(mCallId);
         }
@@ -665,11 +665,12 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * 
      * @param reason Termination reason
      */
-    public void handleAddVideoAborted(ContactId contact, int reason) {
+    public void handleAddVideoAborted(ContactId contact, TerminationReason reason) {
         if (logger.isActivated()) {
-            logger.info("Add video aborted (reason " + reason + ")");
+            logger.info(new StringBuilder("Add video aborted (reason ").append(reason).append(")")
+                    .toString());
         }
-        ReasonCode reasonCode = imsServiceSessionErrorToReasonCode(reason);
+        ReasonCode reasonCode = sessionAbortedReasonToReasonCode(reason);
         synchronized (lock) {
             mPersistentStorage.setStateAndReasonCode(State.ABORTED, reasonCode);
             mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, State.ABORTED, reasonCode);
@@ -681,11 +682,12 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * 
      * @param reason Termination reason
      */
-    public void handleRemoveVideoAborted(ContactId contact, int reason) {
+    public void handleRemoveVideoAborted(ContactId contact, TerminationReason reason) {
         if (logger.isActivated()) {
-            logger.info("Remove video aborted (reason " + reason + ")");
+            logger.info(new StringBuilder("Remove video aborted (reason ").append(reason)
+                    .append(")").toString());
         }
-        ReasonCode reasonCode = imsServiceSessionErrorToReasonCode(reason);
+        ReasonCode reasonCode = sessionAbortedReasonToReasonCode(reason);
         synchronized (lock) {
             mPersistentStorage.setStateAndReasonCode(State.ABORTED, reasonCode);
             mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, State.ABORTED, reasonCode);
@@ -741,11 +743,12 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * 
      * @param reason Termination reason
      */
-    public void handleCallHoldAborted(ContactId contact, int errorCode) {
+    public void handleCallHoldAborted(ContactId contact, TerminationReason reason) {
         if (logger.isActivated()) {
-            logger.info("Call Hold aborted (reason " + errorCode + ")");
+            logger.info(new StringBuilder("Call Hold aborted (reason ").append(reason).append(")")
+                    .toString());
         }
-        ReasonCode reasonCode = imsServiceSessionErrorToReasonCode(errorCode);
+        ReasonCode reasonCode = sessionAbortedReasonToReasonCode(reason);
         synchronized (lock) {
             mBroadcaster.broadcastIPCallStateChanged(contact, mCallId, State.ABORTED, reasonCode);
         }

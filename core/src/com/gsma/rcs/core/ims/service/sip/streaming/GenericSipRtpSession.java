@@ -236,7 +236,7 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
         closeMediaSession();
 
         // Terminate session
-        terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+        terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
 
         // Remove the current session
         removeSession();

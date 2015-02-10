@@ -24,15 +24,6 @@ package com.gsma.rcs.core.ims.service.richcall.image;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-
-import javax2.sip.header.ContentDispositionHeader;
-import javax2.sip.header.ContentLengthHeader;
-import javax2.sip.header.ContentTypeHeader;
-
-import android.net.Uri;
-
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
@@ -45,7 +36,6 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.platform.AndroidFactory;
@@ -56,6 +46,15 @@ import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
+
+import android.net.Uri;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
+import javax2.sip.header.ContentDispositionHeader;
+import javax2.sip.header.ContentLengthHeader;
+import javax2.sip.header.ContentTypeHeader;
 
 /**
  * Originating content sharing session (transfer)
@@ -294,7 +293,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
         closeMediaSession();
 
         // Terminate session
-        terminateSession(ImsServiceSession.TERMINATION_BY_USER);
+        terminateSession(TerminationReason.TERMINATION_BY_USER);
 
         // Remove the current session
         removeSession();
@@ -370,7 +369,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
         }
 
         // Terminate session
-        terminateSession(ImsServiceSession.TERMINATION_BY_SYSTEM);
+        terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
 
         // Close the media session
         closeMediaSession();

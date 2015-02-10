@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.service;
 
+import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.services.rcs.contact.ContactId;
 
 /**
@@ -43,7 +44,7 @@ public interface ImsSessionListener {
      * @param contact Remote contact
      * @param reason Termination reason
      */
-    public void handleSessionAborted(ContactId contact, int reason);
+    public void handleSessionAborted(ContactId contact, TerminationReason reason);
 
     /**
      * Session has been terminated by remote

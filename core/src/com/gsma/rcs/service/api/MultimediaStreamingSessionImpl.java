@@ -23,7 +23,7 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.sip.SipSessionError;
 import com.gsma.rcs.core.ims.service.sip.SipSessionListener;
@@ -296,7 +296,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
         // Abort the session
         new Thread() {
             public void run() {
-                session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+                session.abortSession(TerminationReason.TERMINATION_BY_USER);
             }
         }.start();
     }
@@ -347,12 +347,12 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
      * 
      * @param reason Termination reason
      */
-    public void handleSessionAborted(ContactId contact, int imsServiceSessionError) {
+    public void handleSessionAborted(ContactId contact, TerminationReason reason) {
         if (logger.isActivated()) {
-            logger.info("Session aborted (reason " + imsServiceSessionError + ")");
+            logger.info(new StringBuilder("Session aborted (terminationReason ").append(reason)
+                    .append(")").toString());
         }
-        ReasonCode reasonCode = mMultimediaSessionService
-                .imsServiceSessionErrorToReasonCode(imsServiceSessionError);
+        ReasonCode reasonCode = mMultimediaSessionService.sessionAbortedReasonToReasonCode(reason);
         synchronized (mLock) {
             mMultimediaSessionService.removeMultimediaStreaming(mSessionId);
             mBroadcaster.broadcastStateChanged(contact, mSessionId, State.ABORTED, reasonCode);

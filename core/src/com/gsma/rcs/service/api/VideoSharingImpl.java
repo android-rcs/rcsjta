@@ -25,7 +25,7 @@ package com.gsma.rcs.service.api;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.richcall.video.VideoSharingPersistedStorageAccessor;
@@ -115,22 +115,6 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
             default:
                 throw new IllegalArgumentException(
                         "Unknown errorCode=".concat(String.valueOf(code)));
-        }
-    }
-
-    /*
-     * TODO: Fix reasoncode mapping in the switch.
-     */
-    private ReasonCode imsServiceSessionErrorToReasonCode(int imsServiceSessionError) {
-        switch (imsServiceSessionError) {
-            case ImsServiceSession.TERMINATION_BY_SYSTEM:
-            case ImsServiceSession.TERMINATION_BY_TIMEOUT:
-                return ReasonCode.ABORTED_BY_SYSTEM;
-            case ImsServiceSession.TERMINATION_BY_USER:
-                return ReasonCode.ABORTED_BY_USER;
-            default:
-                throw new IllegalArgumentException("Unknown imsServiceSessionError=".concat(String
-                        .valueOf(imsServiceSessionError)));
         }
     }
 
@@ -296,7 +280,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         // Abort the session
         new Thread() {
             public void run() {
-                session.abortSession(ImsServiceSession.TERMINATION_BY_USER);
+                session.abortSession(TerminationReason.TERMINATION_BY_USER);
             }
         }.start();
     }
@@ -412,15 +396,30 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
      * 
      * @param reason Termination reason
      */
-    public void handleSessionAborted(ContactId contact, int imsServiceSessionError) {
+
+    public void handleSessionAborted(ContactId contact, TerminationReason reason) {
         if (logger.isActivated()) {
-            logger.info("Session aborted, imsServiceSessionError=".concat(String
-                    .valueOf(imsServiceSessionError)));
+            logger.info("Session aborted, reason=".concat(String.valueOf(reason)));
         }
         long currentDuration = getCurrentDuration();
         synchronized (mLock) {
             mVideoSharingService.removeVideoSharing(mSharingId);
-            ReasonCode reasonCode = imsServiceSessionErrorToReasonCode(imsServiceSessionError);
+            /*
+             * TODO: Fix reasoncode mapping in the switch.
+             */
+            ReasonCode reasonCode;
+            switch (reason) {
+                case TERMINATION_BY_SYSTEM:
+                case TERMINATION_BY_TIMEOUT:
+                    reasonCode = ReasonCode.ABORTED_BY_SYSTEM;
+                    break;
+                case TERMINATION_BY_USER:
+                    reasonCode = ReasonCode.ABORTED_BY_USER;
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            "Unknown imsServiceSessionError=".concat(String.valueOf(reason)));
+            }
             mPersistentStorage.setStateReasonCodeAndDuration(VideoSharing.State.ABORTED,
                     reasonCode, currentDuration);
 

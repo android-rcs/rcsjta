@@ -37,7 +37,7 @@ import com.gsma.rcs.core.ims.security.cert.KeyStoreManager;
 import com.gsma.rcs.core.ims.security.cert.KeyStoreManagerException;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceDispatcher;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.core.ims.service.extension.ServiceExtensionManager;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -455,7 +455,7 @@ public class ImsModule implements SipEventListener {
             logger.debug("Abort all pending sessions");
         }
         for (ImsService service : getImsServices()) {
-            service.abortAllSessions(ImsServiceSession.TERMINATION_BY_SYSTEM);
+            service.abortAllSessions(TerminationReason.TERMINATION_BY_SYSTEM);
         }
     }
 
