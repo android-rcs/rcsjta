@@ -4,31 +4,30 @@
     android:layout_height="wrap_content"
     android:padding="2dip" >
 
-   <RelativeLayout
+    <RelativeLayout
         android:id="@+id/msg_item"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:background="@drawable/msg_item_right"
         android:orientation="vertical" >
-        
+
         <TextView
             android:id="@+id/chat_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/label_uninitialized_text"
             android:layout_alignLeft="@+id/contact_text"
+            android:text="@string/label_uninitialized_text"
             android:textColor="#888888" />
-        
-		<TextView
+
+        <TextView
             android:id="@id/contact_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/chat_text"
             android:singleLine="true"
             android:text="@string/label_uninitialized_contact"
-            android:layout_below="@id/chat_text"
             android:textAppearance="?android:attr/textAppearanceSmall" />
-               
     </RelativeLayout>
 
     <RelativeLayout

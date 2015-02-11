@@ -4,8 +4,8 @@ import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.chat.IGroupChatListener;
 import com.gsma.services.rcs.chat.IChatMessage;
 import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.ft.IFileTransfer;
-import com.gsma.services.rcs.ft.IOneToOneFileTransferListener;
+import com.gsma.services.rcs.filetransfer.IFileTransfer;
+import com.gsma.services.rcs.filetransfer.IOneToOneFileTransferListener;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 

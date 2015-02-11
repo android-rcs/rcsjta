@@ -4,10 +4,8 @@
 <!-- for the Account Manager. -->
 
 <account-authenticator xmlns:android="http://schemas.android.com/apk/res/android"
-    android:accountType="com.orangelabs.rcs"
-    android:icon="@drawable/rcs_icon"
-    android:smallIcon="@drawable/rcs_icon"
-    android:label="@string/rcs_core_account_id"
     android:accountPreferences="@xml/rcs_core_account_preferences"
-/>
-
+    android:accountType="com.gsma.rcs"
+    android:icon="@drawable/rcs_icon"
+    android:label="@string/rcs_core_account_id"
+    android:smallIcon="@drawable/rcs_icon" />

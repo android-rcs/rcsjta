@@ -27,7 +27,7 @@ import android.os.Parcelable;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
-import com.gsma.services.rcs.vsh.VideoSharingLog;
+import com.gsma.services.rcs.sharing.video.VideoSharingLog;
 
 /**
  * Video Sharing Data Object

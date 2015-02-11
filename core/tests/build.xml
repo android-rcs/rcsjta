@@ -78,7 +78,7 @@
             <arg value="-w"/>
             <!-- arg value="-d"/ -->
             <!-- arg value="${project.app.package}/android.test.InstrumentationTestRunner"/ -->
-            <arg value="com.orangelabs.rcs.tests/android.test.InstrumentationTestRunner"/>
+            <arg value="com.gsma.rcs.tests/android.test.InstrumentationTestRunner"/>
         </exec>
  
 

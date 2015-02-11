@@ -34,7 +34,7 @@
         switch has been checked and is intentional.
     -->
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h263.encoder.NativeH263Encoder" />
+        <Class name="com.gsma.rcs.core.ims.protocol.rtp.codec.video.h263.encoder.NativeH263Encoder" />
         <Or>
             <Method name="InitEncoder" />
             <Method name="EncodeFrame" />
@@ -43,7 +43,7 @@
         <Bug pattern="NM_METHOD_NAMING_CONVENTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.encoder.NativeH264Encoder" />
+        <Class name="com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.encoder.NativeH264Encoder" />
         <Or>
             <Method name="InitEncoder" />
             <Method name="EncodeFrame" />
@@ -57,7 +57,7 @@
         switch has been checked and is intentional.
     -->
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.protocol.msrp.FifoBuffer" />
+        <Class name="com.gsma.rcs.core.ims.protocol.msrp.FifoBuffer" />
         <Method name="unblockRead" />
         <Bug pattern="NN_NAKED_NOTIFY" />
     </Match>
@@ -67,7 +67,7 @@
         switch has been checked and is intentional.
     -->
     <Match>
-        <Class name="com.orangelabs.rcs.utils.FifoBuffer" />
+        <Class name="com.gsma.rcs.utils.FifoBuffer" />
         <Method name="close" />
         <Bug pattern="NN_NAKED_NOTIFY" />
     </Match>
@@ -77,117 +77,117 @@
         methods.
     -->
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.ExtendOneOneChatSession" />
+        <Class name="com.gsma.rcs.core.ims.service.im.chat.ExtendOneOneChatSession" />
         <Method name="handle200OK" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession" />
+        <Class name="com.gsma.rcs.core.ims.service.im.chat.GroupChatSession" />
         <Method name="addParticipant" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.GroupChatSession" />
+        <Class name="com.gsma.rcs.core.ims.service.im.chat.GroupChatSession" />
         <Method name="addParticipants" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.OriginatingOne2OneChatSession" />
+        <Class name="com.gsma.rcs.core.ims.service.im.chat.OriginatingOne2OneChatSession" />
         <Method name="run" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.OriginatingAdhocGroupChatSession" />
+        <Class name="com.gsma.rcs.core.ims.service.im.chat.OriginatingAdhocGroupChatSession" />
         <Method name="run" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.OriginatingAdhocGroupChatSession" />
+        <Class name="com.gsma.rcs.core.ims.service.im.chat.OriginatingAdhocGroupChatSession" />
         <Method name="handle200OK" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSession" />
+        <Class name="com.gsma.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSession" />
         <Method name="run" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.TerminatingOne2OneChatSession" />
+        <Class name="com.gsma.rcs.core.ims.service.im.chat.TerminatingOne2OneChatSession" />
         <Method name="run" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardMsgSession" />
+        <Class name="com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardMsgSession" />
         <Method name="run" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.RestartGroupChatSession" />
+        <Class name="com.gsma.rcs.core.ims.service.im.chat.RestartGroupChatSession" />
         <Method name="run" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.imdn.ImdnManager" />
+        <Class name="com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager" />
         <Method name="sendSipMessageDeliveryStatus" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.protocol.msrp.ChunkReceiver" />
+        <Class name="com.gsma.rcs.core.ims.protocol.msrp.ChunkReceiver" />
         <Method name="run" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.service.im.filetransfer.OriginatingFileSharingSession" />
+        <Class name="com.gsma.rcs.core.ims.service.im.filetransfer.OriginatingFileSharingSession" />
         <Method name="handle200OK" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.service.im.filetransfer.OriginatingFileSharingSession" />
+        <Class name="com.gsma.rcs.core.ims.service.im.filetransfer.OriginatingFileSharingSession" />
         <Method name="run" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.service.im.filetransfer.TerminatingFileSharingSession" />
+        <Class name="com.gsma.rcs.core.ims.service.im.filetransfer.TerminatingFileSharingSession" />
         <Method name="run" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.service.richcall.image.OriginatingImageTransferSession" />
+        <Class name="com.gsma.rcs.core.ims.service.richcall.image.OriginatingImageTransferSession" />
         <Method name="handle200OK" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.service.richcall.image.TerminatingImageTransferSession" />
+        <Class name="com.gsma.rcs.core.ims.service.richcall.image.TerminatingImageTransferSession" />
         <Method name="run" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.service.richcall.image.OriginatingImageTransferSession" />
+        <Class name="com.gsma.rcs.core.ims.service.richcall.image.OriginatingImageTransferSession" />
         <Method name="run" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.protocol.sip.SipInterface" />
+        <Class name="com.gsma.rcs.core.ims.protocol.sip.SipInterface" />
         <Method name="&lt;init&gt;" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.RejoinGroupChatSession" />
+        <Class name="com.gsma.rcs.core.ims.service.im.chat.RejoinGroupChatSession" />
         <Method name="run" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.RejoinGroupChatSession" />
+        <Class name="com.gsma.rcs.core.ims.service.im.chat.RejoinGroupChatSession" />
         <Method name="handle200OK" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.service.im.chat.ExtendOneOneChatSession" />
+        <Class name="com.gsma.rcs.core.ims.service.im.chat.ExtendOneOneChatSession" />
         <Method name="run" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
-        <Class name="com.orangelabs.rcs.core.ims.service.terms.TermsConditionsService"/>
+        <Class name="com.gsma.rcs.core.ims.service.terms.TermsConditionsService"/>
         <Method name="sendSipMessage" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>

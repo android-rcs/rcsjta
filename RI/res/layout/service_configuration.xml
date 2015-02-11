@@ -10,6 +10,7 @@
         android:stretchColumns="1" >
 
         <TableRow android:paddingTop="5dip" >
+
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -28,8 +29,9 @@
                 android:gravity="left"
                 android:paddingTop="10dip" />
         </TableRow>
-        
+
         <TableRow android:paddingTop="5dip" >
+
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -55,11 +57,11 @@
 
             <TextView
                 android:id="@+id/label_default_messaging_method"
-                android:gravity="right"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dip"
                 android:layout_marginRight="5dip"
+                android:gravity="right"
                 android:paddingTop="10dip"
                 android:text="@string/label_default_messaging_method" />
 
@@ -70,7 +72,6 @@
                 android:layout_alignLeft="@id/label_default_messaging_method"
                 android:layout_marginLeft="5dip"
                 android:layout_marginRight="5dip" />
-
         </TableRow>
 
         <TableRow android:paddingTop="5dip" >
@@ -95,6 +96,7 @@
         </TableRow>
 
         <TableRow android:paddingTop="5dip" >
+
             <TextView
                 android:id="@+id/label_my_display_name"
                 android:layout_width="fill_parent"

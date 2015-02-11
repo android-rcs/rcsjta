@@ -26,9 +26,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dip"
                 android:layout_marginRight="5dip"
-                android:gravity="left"
                 android:clickable="false"
                 android:enabled="false"
+                android:gravity="left"
                 android:paddingTop="10dip" />
         </TableRow>
 
@@ -49,9 +49,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dip"
                 android:layout_marginRight="5dip"
-                android:gravity="left"
                 android:clickable="false"
                 android:enabled="false"
+                android:gravity="left"
                 android:paddingTop="10dip" />
         </TableRow>
 
@@ -96,7 +96,7 @@
                 android:gravity="left"
                 android:paddingTop="10dip" />
         </TableRow>
-        
+
         <TableRow android:paddingTop="5dip" >
 
             <TextView
@@ -114,9 +114,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dip"
                 android:layout_marginRight="5dip"
-                android:gravity="left"
                 android:clickable="false"
                 android:enabled="false"
+                android:gravity="left"
                 android:paddingTop="10dip" />
         </TableRow>
 
@@ -242,9 +242,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dip"
                 android:layout_marginRight="5dip"
-                android:gravity="left"
                 android:clickable="false"
                 android:enabled="false"
+                android:gravity="left"
                 android:paddingTop="10dip" />
         </TableRow>
 
@@ -267,7 +267,6 @@
                 android:layout_marginRight="5dip"
                 android:gravity="left"
                 android:paddingTop="10dip" />
-
         </TableRow>
 
         <TableRow android:paddingTop="5dip" >

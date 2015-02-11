@@ -28,7 +28,7 @@ import android.widget.ListView;
 
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.chat.TestChatApi;
-import com.orangelabs.rcs.ri.messaging.ft.TestFileTransferApi;
+import com.orangelabs.rcs.ri.messaging.filetransfer.TestFileTransferApi;
 
 /**
  * Messaging API

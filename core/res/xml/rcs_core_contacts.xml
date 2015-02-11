@@ -1,31 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<ContactsSource xmlns:android="http://schemas.android.com/apk/res/android">
+<ContactsSource xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <!-- This definition is important for the contact detail plugin -->
-	<ContactsDataKind android:icon="@drawable/rcs_icon"
+    <ContactsDataKind
+        android:detailColumn="data3"
+        android:detailSocialSummary="false"
+        android:icon="@drawable/rcs_icon"
         android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.image-sharing"
-        android:summaryColumn="data2" android:detailColumn="data3"
-        android:detailSocialSummary="false" />   
-	<ContactsDataKind android:icon="@drawable/rcs_icon"
+        android:summaryColumn="data2" />
+    <ContactsDataKind
+        android:detailColumn="data3"
+        android:detailSocialSummary="false"
+        android:icon="@drawable/rcs_icon"
         android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.video-sharing"
-        android:summaryColumn="data2" android:detailColumn="data3"
-        android:detailSocialSummary="false" />
-	<ContactsDataKind android:icon="@drawable/rcs_core_chat_icon"
+        android:summaryColumn="data2" />
+    <ContactsDataKind
+        android:detailColumn="data3"
+        android:detailSocialSummary="false"
+        android:icon="@drawable/rcs_core_chat_icon"
         android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.im-session"
-        android:summaryColumn="data2" android:detailColumn="data3"
-        android:detailSocialSummary="false" />
-	<ContactsDataKind android:icon="@drawable/rcs_core_ft_icon"
+        android:summaryColumn="data2" />
+    <ContactsDataKind
+        android:detailColumn="data3"
+        android:detailSocialSummary="false"
+        android:icon="@drawable/rcs_core_ft_icon"
         android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.file-transfer"
-        android:summaryColumn="data2" android:detailColumn="data3"
-        android:detailSocialSummary="false" />
-	<ContactsDataKind android:icon="@drawable/rcs_core_ipcall_icon"
+        android:summaryColumn="data2" />
+    <ContactsDataKind
+        android:detailColumn="data3"
+        android:detailSocialSummary="false"
+        android:icon="@drawable/rcs_core_ipcall_icon"
         android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.ip-voice-call"
-        android:summaryColumn="data2" android:detailColumn="data3"
-        android:detailSocialSummary="false" />
-	<ContactsDataKind android:icon="@drawable/rcs_core_extension_icon"
+        android:summaryColumn="data2" />
+    <ContactsDataKind
+        android:detailColumn="data3"
+        android:detailSocialSummary="false"
+        android:icon="@drawable/rcs_core_extension_icon"
         android:mimeType="vnd.android.cursor.item/com.gsma.services.rcs.extensions"
-        android:summaryColumn="data2" android:detailColumn="data3"
-        android:detailSocialSummary="false" />        
-</ContactsSource>
+        android:summaryColumn="data2" />
 
+</ContactsSource>

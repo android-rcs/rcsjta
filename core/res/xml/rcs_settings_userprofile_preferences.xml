@@ -1,11 +1,11 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-	<PreferenceCategory android:title="@string/rcs_settings_title_caller_id">
-		<EditTextPreference
-            android:key="edit_displayname"
-            android:summary="@string/rcs_settings_summary_edit_displayname"
+    <PreferenceCategory android:title="@string/rcs_settings_title_caller_id" >
+        <EditTextPreference
             android:dialogTitle="@string/rcs_settings_title_displayname"
-	    	android:maxLength="25"/>
-	</PreferenceCategory>
+            android:key="edit_displayname"
+            android:maxLength="25"
+            android:summary="@string/rcs_settings_summary_edit_displayname" />
+    </PreferenceCategory>
 
 </PreferenceScreen>

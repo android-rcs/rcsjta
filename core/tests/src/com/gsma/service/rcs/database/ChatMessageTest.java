@@ -33,12 +33,12 @@ import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
-import com.orangelabs.rcs.core.ims.ImsModule;
-import com.orangelabs.rcs.core.ims.service.im.chat.ChatMessage;
-import com.orangelabs.rcs.core.ims.service.im.chat.ChatUtils;
-import com.orangelabs.rcs.core.ims.userprofile.UserProfile;
-import com.orangelabs.rcs.provider.LocalContentResolver;
-import com.orangelabs.rcs.provider.messaging.MessagingLog;
+import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
+import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
+import com.gsma.rcs.core.ims.userprofile.UserProfile;
+import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.provider.messaging.MessagingLog;
 
 public class ChatMessageTest extends AndroidTestCase {
     private ContactId mContact;

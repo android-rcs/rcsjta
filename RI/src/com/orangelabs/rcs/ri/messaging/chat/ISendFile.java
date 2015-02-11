@@ -21,7 +21,7 @@ package com.orangelabs.rcs.ri.messaging.chat;
 import android.net.Uri;
 
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.ft.FileTransferService;
+import com.gsma.services.rcs.filetransfer.FileTransferService;
 
 /**
  * @author YPLO6403

@@ -23,8 +23,8 @@ import java.io.IOException;
 import android.hardware.Camera;
 import android.os.SystemClock;
 
-import com.gsma.services.rcs.vsh.VideoCodec;
-import com.gsma.services.rcs.vsh.VideoPlayer;
+import com.gsma.services.rcs.sharing.video.VideoCodec;
+import com.gsma.services.rcs.sharing.video.VideoPlayer;
 import com.orangelabs.rcs.core.ims.protocol.rtp.RtpUtils;
 import com.orangelabs.rcs.core.ims.protocol.rtp.VideoRtpSender;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;

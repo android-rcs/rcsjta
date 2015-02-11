@@ -21,7 +21,7 @@ package com.gsma.services.rcs.ipcall;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
+import com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 
 /**
  * Video codec

@@ -32,9 +32,9 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.gsh.GeolocSharing;
-import com.gsma.services.rcs.gsh.GeolocSharingIntent;
-import com.gsma.services.rcs.gsh.GeolocSharingService;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharingIntent;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharingService;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;

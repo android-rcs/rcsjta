@@ -25,7 +25,7 @@ import java.util.UUID;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
-import com.orangelabs.rcs.core.ims.service.extension.ServiceExtensionManager;
+import com.gsma.rcs.core.ims.service.extension.ServiceExtensionManager;
 
 public class ServiceExtensionManagerTest extends AndroidTestCase {
 

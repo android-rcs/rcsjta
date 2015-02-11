@@ -3,58 +3,66 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:paddingLeft="0dip"
-    android:paddingRight="12dip">
-    
-    <View android:id="@+id/divider"
+    android:paddingRight="12dip" >
+
+    <View
+        android:id="@+id/divider"
         android:layout_width="1dip"
         android:layout_height="fill_parent"
         android:layout_marginRight="11dip" />
-    
-    <TextView android:id="@+id/number"
-		android:paddingTop="5dip"
-        android:text="@string/label_uninitialized_contact"
-	    android:textStyle="bold"
-	    android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:singleLine="true"/>
 
-    <TextView android:id="@+id/filename"
+    <TextView
+        android:id="@+id/number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="5dip"
+        android:singleLine="true"
+        android:text="@string/label_uninitialized_contact"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/filename"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/number"
+        android:paddingBottom="5dip"
         android:text="@string/label_uninitialized_filename"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-		android:paddingBottom="5dip"/>
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
-    <TextView android:id="@+id/filesize"
+    <TextView
+        android:id="@+id/filesize"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/filename"
+        android:paddingBottom="5dip"
         android:text="@string/label_uninitialized_filesize"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-		android:paddingBottom="5dip"/>
-    
-    <TextView android:id="@+id/state"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:id="@+id/state"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/filesize"
+        android:paddingBottom="5dip"
         android:text="@string/label_state_unknown"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-		android:paddingBottom="5dip"/>
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
-    <TextView android:id="@+id/direction"
+    <TextView
+        android:id="@+id/direction"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/state"
+        android:paddingBottom="5dip"
         android:text="@string/label_uninitialized_direction"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-		android:paddingBottom="5dip"/>
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
-    <TextView android:id="@+id/date"
+    <TextView
+        android:id="@+id/date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/direction"
+        android:paddingBottom="5dip"
         android:text="@string/label_uninitialized_date"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-		android:paddingBottom="5dip"/>
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
 </RelativeLayout>

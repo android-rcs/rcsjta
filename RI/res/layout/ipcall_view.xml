@@ -1,57 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent" android:layout_height="fill_parent">
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
 
-	<TableLayout android:layout_width="fill_parent"
-		android:layout_height="fill_parent"
-		android:stretchColumns="1"
-		android:paddingTop="10dip"
-		android:shrinkColumns="1">
-		
-		<TableRow  android:layout_height="wrap_content" 
-			android:paddingTop="5dip" android:layout_width="wrap_content">
-			<TextView android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_marginLeft="5dip"
-				android:gravity="right"
-				android:text="@string/label_remote"/>
-			<TextView android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_marginLeft="5dip"
-				android:layout_marginRight="5dip"
-				android:id="@+id/contact"
-				android:textStyle="bold"/>
-		</TableRow>
-		
-		<TableRow  android:layout_height="wrap_content" 
-			android:paddingTop="5dip" android:layout_width="wrap_content">
-			<ToggleButton android:id="@+id/video"
-			    android:layout_width="wrap_content"
-			    android:layout_height="wrap_content"
-				android:layout_marginLeft="5dip"
-			    android:textOn="@string/label_video"
-			    android:textOff="@string/label_video"/>
-		</TableRow>
-			
-		<TableRow  android:layout_height="wrap_content" 
-			android:paddingTop="5dip" android:layout_width="wrap_content">
-			<ToggleButton android:id="@+id/hold"
-			    android:layout_width="wrap_content"
-			    android:layout_height="wrap_content"
-				android:layout_marginLeft="5dip"
-			    android:textOn="@string/label_hold"
-			    android:textOff="@string/label_hold"/>
-		</TableRow>
-		
-		<Button android:text="@string/label_hangup"
-			 android:layout_marginLeft="5dip"
-			 android:layout_marginRight="5dip"
-			 android:id="@+id/hangup_btn"
-			 android:paddingTop="10dip"
-			 android:layout_width="fill_parent"
-	    	 android:layout_height="wrap_content"/>
-		
-	</TableLayout>
+    <TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:paddingTop="10dip"
+        android:shrinkColumns="1"
+        android:stretchColumns="1" >
 
-</ScrollView>	
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:gravity="right"
+                android:text="@string/label_remote" />
+
+            <TextView
+                android:id="@+id/contact"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:textStyle="bold" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip" >
+
+            <ToggleButton
+                android:id="@+id/video"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:textOff="@string/label_video"
+                android:textOn="@string/label_video" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="5dip" >
+
+            <ToggleButton
+                android:id="@+id/hold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:textOff="@string/label_hold"
+                android:textOn="@string/label_hold" />
+        </TableRow>
+
+        <Button
+            android:id="@+id/hangup_btn"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:paddingTop="10dip"
+            android:text="@string/label_hangup" />
+    </TableLayout>
+
+</ScrollView>

@@ -27,7 +27,7 @@ import android.os.Parcelable;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
-import com.gsma.services.rcs.ish.ImageSharingLog;
+import com.gsma.services.rcs.sharing.image.ImageSharingLog;
 
 /**
  * Image Sharing Data Object

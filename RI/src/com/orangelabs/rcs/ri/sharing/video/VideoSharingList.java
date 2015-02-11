@@ -38,8 +38,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.vsh.VideoSharing;
-import com.gsma.services.rcs.vsh.VideoSharingLog;
+import com.gsma.services.rcs.sharing.video.VideoSharing;
+import com.gsma.services.rcs.sharing.video.VideoSharingLog;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.RcsDisplayName;

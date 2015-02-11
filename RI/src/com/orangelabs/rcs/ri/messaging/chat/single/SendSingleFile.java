@@ -28,9 +28,9 @@ import android.widget.TextView;
 
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.ft.FileTransfer;
-import com.gsma.services.rcs.ft.OneToOneFileTransferListener;
-import com.gsma.services.rcs.ft.FileTransferService;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
+import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.messaging.chat.SendFile;

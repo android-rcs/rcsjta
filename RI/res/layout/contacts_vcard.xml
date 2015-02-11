@@ -1,37 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
 
-	<TableLayout android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"
-	    android:stretchColumns="1"
-	    android:paddingTop="10dip">
-	
-        <Spinner android:id="@+id/contact"
-			android:layout_marginLeft="5dip"
-			android:layout_marginRight="5dip"
+    <TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:paddingTop="10dip"
+        android:stretchColumns="1" >
+
+        <Spinner
+            android:id="@+id/contact"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"/>
-	
-	    <TableRow android:padding="5dip"></TableRow>
-	    
-		<TableRow android:paddingTop="5dip">
-	        <TextView android:text="@string/label_vcard"
- 			 android:layout_marginLeft="5dip"
-	         android:gravity="right"/>
-	        <TextView android:id="@+id/vcard"
-			 android:layout_marginLeft="5dip"
-			 android:layout_marginRight="5dip"
-	         android:textStyle="bold"
-			 />
-		</TableRow>
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip" />
 
-		<Button android:text="@string/label_show_vcard"
-		 android:layout_marginLeft="5dip"
-		 android:layout_marginRight="5dip"
-		 android:id="@+id/show_btn"/>
-	</TableLayout>
-	
-</ScrollView>	
+        <TableRow android:padding="5dip" >
+        </TableRow>
+
+        <TableRow android:paddingTop="5dip" >
+
+            <TextView
+                android:layout_marginLeft="5dip"
+                android:gravity="right"
+                android:text="@string/label_vcard" />
+
+            <TextView
+                android:id="@+id/vcard"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:textStyle="bold" />
+        </TableRow>
+
+        <Button
+            android:id="@+id/show_btn"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:text="@string/label_show_vcard" />
+    </TableLayout>
+
+</ScrollView>

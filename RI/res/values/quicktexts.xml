@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string-array name="select_quicktext">
-		<item>Hello</item>        
+        <item>Hello</item>
         <item>Hello everybody</item>
         <item>How are you</item>
         <item>I\'m fine</item>
@@ -13,5 +14,5 @@
         <item>Have a nice weekend</item>
         <item>Thanks a lot</item>
     </string-array>
+
 </resources>
-    

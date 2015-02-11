@@ -1,33 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
     android:layout_width="fill_parent"
-    android:layout_height="?android:attr/listPreferredItemHeight">
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:orientation="horizontal" >
 
-    <ImageView android:id="@+id/smiley_icon"
-        android:layout_gravity="center_vertical"
-        android:layout_marginLeft="4dip"
+    <ImageView
+        android:id="@+id/smiley_icon"
         android:layout_width="20dip"
-        android:layout_height="20dip" />
-
-    <TextView android:id="@+id/smiley_name"
-        android:singleLine="true"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="?android:attr/textColorPrimaryInverse"
-        android:layout_marginLeft="10dip"
+        android:layout_height="20dip"
         android:layout_gravity="center_vertical"
-        android:layout_weight="1"
+        android:layout_marginLeft="4dip" />
+
+    <TextView
+        android:id="@+id/smiley_name"
         android:layout_width="0dip"
-        android:layout_height="wrap_content" />
-
-    <TextView android:id="@+id/smiley_text"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="10dip"
+        android:layout_weight="1"
         android:singleLine="true"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="?android:attr/textColorPrimaryInverse"
-        android:layout_marginRight="20dip"
-        android:layout_gravity="center_vertical"
+        android:textColor="?android:attr/textColorPrimaryInverse" />
+
+    <TextView
+        android:id="@+id/smiley_text"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginRight="20dip"
+        android:singleLine="true"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="?android:attr/textColorPrimaryInverse" />
 
 </LinearLayout>

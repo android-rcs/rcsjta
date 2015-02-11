@@ -1,35 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
-	<item android:title="@string/menu_insert_smiley"
-		android:id="@+id/menu_insert_smiley"
-		android:icon="@drawable/ri_menu_smiley"/>
+    <item
+        android:id="@+id/menu_insert_smiley"
+        android:icon="@drawable/ri_menu_smiley"
+        android:title="@string/menu_insert_smiley"/>
+    <item
+        android:id="@+id/menu_participants"
+        android:icon="@drawable/ri_menu_participants"
+        android:title="@string/menu_participants"/>
+    <item
+        android:id="@+id/menu_add_participant"
+        android:icon="@drawable/ri_menu_add_participant"
+        android:title="@string/menu_add_participant"/>
+    <item
+        android:id="@+id/menu_quicktext"
+        android:icon="@drawable/ri_menu_quicktext"
+        android:title="@string/menu_quicktext"/>
+    <item
+        android:id="@+id/menu_send_file"
+        android:icon="@drawable/ri_menu_file_transfer"
+        android:title="@string/menu_send_file"/>
+    <item
+        android:id="@+id/menu_send_geoloc"
+        android:icon="@drawable/ri_menu_send_geoloc"
+        android:title="@string/menu_send_geoloc"/>
+    <item
+        android:id="@+id/menu_showus_map"
+        android:icon="@drawable/ri_menu_showus_map"
+        android:title="@string/menu_showus_map"/>
+    <item
+        android:id="@+id/menu_close_session"
+        android:icon="@drawable/ri_menu_close_chat"
+        android:title="@string/menu_close_session"/>
 
-	<item android:id="@+id/menu_participants"
-		android:title="@string/menu_participants"
-		android:icon="@drawable/ri_menu_participants"/>
-	
-	<item android:id="@+id/menu_add_participant"
-		android:title="@string/menu_add_participant"
-		android:icon="@drawable/ri_menu_add_participant"/>
-
-	<item android:id="@+id/menu_quicktext"
-		android:title="@string/menu_quicktext"
-		android:icon="@drawable/ri_menu_quicktext"/>
-	
-	<item android:id="@+id/menu_send_file"
-		android:title="@string/menu_send_file"
-		android:icon="@drawable/ri_menu_file_transfer"/>
-	
-	<item android:id="@+id/menu_send_geoloc"
-		android:title="@string/menu_send_geoloc"
-		android:icon="@drawable/ri_menu_send_geoloc"/>
-		
-	<item android:id="@+id/menu_showus_map"
-		android:title="@string/menu_showus_map"
-		android:icon="@drawable/ri_menu_showus_map"/>
-	
-	<item android:id="@+id/menu_close_session"
-		android:title="@string/menu_close_session"
-		android:icon="@drawable/ri_menu_close_chat"/>
 </menu>

@@ -4,8 +4,6 @@
 <!-- for the SyncAdapter. -->
 
 <sync-adapter xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accountType="com.gsma.rcs"
     android:contentAuthority="com.android.contacts"
-    android:accountType="com.orangelabs.rcs"
-    android:supportsUploading="false"
-/>
-
+    android:supportsUploading="false" />
