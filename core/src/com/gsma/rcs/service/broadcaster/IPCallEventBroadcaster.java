@@ -21,6 +21,8 @@ import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IIPCallListener;
+import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
+import com.gsma.services.rcs.ipcall.IPCall.State;
 import com.gsma.services.rcs.ipcall.IPCallIntent;
 
 import android.content.Intent;
@@ -47,13 +49,15 @@ public class IPCallEventBroadcaster implements IIPCallEventBroadcaster {
         mIpCallListeners.unregister(listener);
     }
 
-    public void broadcastIPCallStateChanged(ContactId contact, String callId, int state,
-            int reasonCode) {
+    public void broadcastIPCallStateChanged(ContactId contact, String callId, State state,
+            ReasonCode reasonCode) {
         final int N = mIpCallListeners.beginBroadcast();
+        int rcsState = state.toInt();
+        int rcsReasonCode = reasonCode.toInt();
         for (int i = 0; i < N; i++) {
             try {
-                mIpCallListeners.getBroadcastItem(i).onIPCallStateChanged(contact, callId, state,
-                        reasonCode);
+                mIpCallListeners.getBroadcastItem(i).onIPCallStateChanged(contact, callId,
+                        rcsState, rcsReasonCode);
             } catch (Exception e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);

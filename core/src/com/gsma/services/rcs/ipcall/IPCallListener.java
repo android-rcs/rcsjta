@@ -23,13 +23,15 @@
 package com.gsma.services.rcs.ipcall;
 
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
+import com.gsma.services.rcs.ipcall.IPCall.State;
 
 /**
  * IP call event listener
  * 
  * @author Jean-Marc AUFFRET
  */
-public abstract class IPCallListener extends IIPCallListener.Stub {
+public abstract class IPCallListener {
     /**
      * Callback called when the call state is changed
      * 
@@ -38,6 +40,6 @@ public abstract class IPCallListener extends IIPCallListener.Stub {
      * @param state State of the call
      * @param reasonCode Reason code for the IP call state
      */
-    public abstract void onIPCallStateChanged(ContactId contact, String callId, int state,
-            int reasonCode);
+    public abstract void onIPCallStateChanged(ContactId contact, String callId, State state,
+            ReasonCode reasonCode);
 }

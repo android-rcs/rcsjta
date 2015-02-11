@@ -22,13 +22,6 @@
 
 package com.gsma.rcs.service.api;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import android.os.IBinder;
-
 import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.service.SessionIdGenerator;
@@ -44,8 +37,8 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
-import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IIPCall;
 import com.gsma.services.rcs.ipcall.IIPCallListener;
@@ -55,6 +48,13 @@ import com.gsma.services.rcs.ipcall.IIPCallService;
 import com.gsma.services.rcs.ipcall.IIPCallServiceConfiguration;
 import com.gsma.services.rcs.ipcall.IPCall;
 import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
+
+import android.os.IBinder;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * IP call service API implementation
@@ -408,7 +408,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * @param reasonCode Reason code
      */
     public void addAndBroadcastIPCallInvitationRejected(ContactId contact,
-            AudioContent audioContent, VideoContent videoContent, int reasonCode) {
+            AudioContent audioContent, VideoContent videoContent, ReasonCode reasonCode) {
         String sessionId = SessionIdGenerator.getNewId();
         mIPCallLog.addCall(sessionId, contact, Direction.INCOMING, audioContent, videoContent,
                 IPCall.State.REJECTED, reasonCode);

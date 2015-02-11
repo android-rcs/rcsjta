@@ -16,22 +16,25 @@
 
 package com.gsma.rcs.provider.ipcall;
 
+import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
+import com.gsma.services.rcs.ipcall.IPCall.State;
+
 public class IPCallStateAndReasonCode {
 
-    private final int mState;
+    private final State mState;
 
-    private final int mReasonCode;
+    private final ReasonCode mReasonCode;
 
-    public IPCallStateAndReasonCode(int state, int reasonCode) {
+    public IPCallStateAndReasonCode(State state, ReasonCode reasonCode) {
         mState = state;
         mReasonCode = reasonCode;
     }
 
-    public int getState() {
+    public State getState() {
         return mState;
     }
 
-    public int getReasonCode() {
+    public ReasonCode getReasonCode() {
         return mReasonCode;
     }
 }

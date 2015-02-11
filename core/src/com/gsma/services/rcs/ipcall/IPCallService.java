@@ -22,9 +22,12 @@
 
 package com.gsma.services.rcs.ipcall;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.contacts.ContactId;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -33,12 +36,12 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.IInterface;
 
-import com.gsma.services.rcs.RcsService;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceListener;
-import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.contacts.ContactId;
+import java.lang.ref.WeakReference;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  * This class offers the main entry point to initiate IP calls. Several applications may
@@ -52,6 +55,8 @@ public class IPCallService extends RcsService {
      * API
      */
     private IIPCallService mApi;
+
+    private final Map<IPCallListener, WeakReference<IIPCallListener>> mIPCallListeners = new WeakHashMap<IPCallListener, WeakReference<IIPCallListener>>();
 
     private static final String ERROR_CNX = "IPCall service not connected";
 
@@ -240,7 +245,9 @@ public class IPCallService extends RcsService {
     public void addEventListener(IPCallListener listener) throws RcsServiceException {
         if (mApi != null) {
             try {
-                mApi.addEventListener2(listener);
+                IIPCallListener rcsListener = new IPCallListenerImpl(listener);
+                mIPCallListeners.put(listener, new WeakReference<IIPCallListener>(rcsListener));
+                mApi.addEventListener2(rcsListener);
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }
@@ -258,7 +265,15 @@ public class IPCallService extends RcsService {
     public void removeEventListener(IPCallListener listener) throws RcsServiceException {
         if (mApi != null) {
             try {
-                mApi.removeEventListener2(listener);
+                WeakReference<IIPCallListener> weakRef = mIPCallListeners.remove(listener);
+                if (weakRef == null) {
+                    return;
+                }
+                IIPCallListener rcsListener = weakRef.get();
+                if (rcsListener != null) {
+                    mApi.removeEventListener2(rcsListener);
+                }
+
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }

@@ -22,6 +22,8 @@ import com.gsma.rcs.provider.ipcall.IPCallHistory;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
+import com.gsma.services.rcs.ipcall.IPCall.State;
 import com.gsma.services.rcs.ipcall.IPCallLog;
 
 import android.database.Cursor;
@@ -102,12 +104,12 @@ public class IPCallPersistedStorageAccessor {
         return mDirection;
     }
 
-    public void setStateAndReasonCode(int state, int reasonCode) {
+    public void setStateAndReasonCode(State state, ReasonCode reasonCode) {
         mIPCallLog.setCallStateAndReasonCode(mCallId, state, reasonCode);
     }
 
     public Uri addCall(ContactId contact, Direction direction, AudioContent audiocontent,
-            VideoContent videocontent, int state, int reasonCode) {
+            VideoContent videocontent, State state, ReasonCode reasonCode) {
         return mIPCallLog.addCall(mCallId, contact, direction, audiocontent, videocontent, state,
                 reasonCode);
     }

@@ -85,6 +85,7 @@ import com.gsma.services.rcs.extension.IMultimediaSessionService;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.IFileTransferService;
 import com.gsma.services.rcs.ipcall.IIPCallService;
+import com.gsma.services.rcs.ipcall.IPCall;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingService;
 import com.gsma.services.rcs.sharing.image.IImageSharingService;
@@ -918,7 +919,7 @@ public class RcsCoreService extends Service implements CoreListener {
 
     @Override
     public void handleIPCallInvitationRejected(ContactId contact, AudioContent audioContent,
-            VideoContent videoContent, int reasonCode) {
+            VideoContent videoContent, IPCall.ReasonCode reasonCode) {
         ipcallApi.addAndBroadcastIPCallInvitationRejected(contact, audioContent, videoContent,
                 reasonCode);
     }

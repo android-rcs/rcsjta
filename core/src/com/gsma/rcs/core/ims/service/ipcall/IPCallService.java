@@ -42,7 +42,7 @@ import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IIPCallPlayer;
 import com.gsma.services.rcs.ipcall.IIPCallRenderer;
-import com.gsma.services.rcs.ipcall.IPCall;
+import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -104,7 +104,7 @@ public class IPCallService extends ImsService {
         mContactsManager = contactsManager;
     }
 
-    private void handleIPCallInvitationRejected(SipRequest invite, int reasonCode) {
+    private void handleIPCallInvitationRejected(SipRequest invite, ReasonCode reasonCode) {
         ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
         byte[] sessionDescriptionProtocol = invite.getSdpContent().getBytes(UTF8);
         AudioContent audioContent = ContentManager
@@ -273,7 +273,7 @@ public class IPCallService extends ImsService {
             if (logger.isActivated()) {
                 logger.debug("The max number of IP call sessions is achieved: reject the invitation");
             }
-            handleIPCallInvitationRejected(invite, IPCall.ReasonCode.REJECTED_MAX_SESSIONS);
+            handleIPCallInvitationRejected(invite, ReasonCode.REJECTED_MAX_SESSIONS);
             sendErrorResponse(invite, 486);
             return;
         }

@@ -35,6 +35,8 @@ import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
+import com.gsma.services.rcs.ipcall.IPCall.State;
 import com.gsma.services.rcs.ipcall.IPCallLog;
 
 /**
@@ -140,7 +142,7 @@ public class IPCallHistory {
      * @param Reason code
      */
     public Uri addCall(String callId, ContactId contact, Direction direction,
-            AudioContent audiocontent, VideoContent videocontent, int state, int reasonCode) {
+            AudioContent audiocontent, VideoContent videocontent, State state, ReasonCode reasonCode) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Add new call entry for contact ").append(contact)
                     .append(": call=").append(callId).append(", state=").append(state)
@@ -152,8 +154,8 @@ public class IPCallHistory {
         values.put(IPCallData.KEY_CONTACT, contact.toString());
         values.put(IPCallData.KEY_DIRECTION, direction.toInt());
         values.put(IPCallData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
-        values.put(IPCallData.KEY_STATE, state);
-        values.put(IPCallData.KEY_REASON_CODE, reasonCode);
+        values.put(IPCallData.KEY_STATE, state.toInt());
+        values.put(IPCallData.KEY_REASON_CODE, reasonCode.toInt());
         if (videocontent != null) {
             values.put(IPCallData.KEY_VIDEO_ENCODING, videocontent.getEncoding());
             values.put(IPCallData.KEY_WIDTH, videocontent.getWidth());
@@ -172,7 +174,7 @@ public class IPCallHistory {
      * @param state New state
      * @param reasonCode Reason code
      */
-    public void setCallStateAndReasonCode(String callId, int state, int reasonCode) {
+    public void setCallStateAndReasonCode(String callId, State state, ReasonCode reasonCode) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Update call state of call ").append(callId)
                     .append(" state=").append(state).append(", reasonCode=").append(reasonCode)
@@ -180,8 +182,8 @@ public class IPCallHistory {
         }
 
         ContentValues values = new ContentValues();
-        values.put(IPCallData.KEY_STATE, state);
-        values.put(IPCallData.KEY_REASON_CODE, reasonCode);
+        values.put(IPCallData.KEY_STATE, state.toInt());
+        values.put(IPCallData.KEY_REASON_CODE, reasonCode.toInt());
         mLocalContentResolver.update(Uri.withAppendedPath(IPCallLog.CONTENT_URI, callId), values,
                 null, null);
     }

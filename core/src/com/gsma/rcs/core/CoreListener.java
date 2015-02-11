@@ -22,10 +22,6 @@
 
 package com.gsma.rcs.core;
 
-import android.content.Intent;
-
-import java.util.Set;
-
 import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.GeolocContent;
 import com.gsma.rcs.core.content.MmContent;
@@ -49,9 +45,14 @@ import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.ipcall.IPCall;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 
+
+import android.content.Intent;
+
+import java.util.Set;
 
 /**
  * Observer of core events
@@ -362,7 +363,7 @@ public interface CoreListener {
      * @param reasonCode Rejected reason code
      */
     public void handleIPCallInvitationRejected(ContactId contact, AudioContent audioContent,
-            VideoContent videoContent, int reasonCode);
+            VideoContent videoContent, IPCall.ReasonCode reasonCode);
 
     /**
      * Handle one-to-one chat session initiation

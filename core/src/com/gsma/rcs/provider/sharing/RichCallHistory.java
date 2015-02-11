@@ -22,13 +22,6 @@
 
 package com.gsma.rcs.provider.sharing;
 
-import java.util.Calendar;
-
-import android.content.ContentValues;
-import android.database.Cursor;
-import android.database.SQLException;
-import android.net.Uri;
-
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.provider.LocalContentResolver;
@@ -44,6 +37,13 @@ import com.gsma.services.rcs.sharing.geoloc.GeolocSharingLog;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.image.ImageSharingLog;
 import com.gsma.services.rcs.sharing.video.VideoSharingLog;
+
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.SQLException;
+import android.net.Uri;
+
+import java.util.Calendar;
 
 /**
  * Rich call history
@@ -74,7 +74,7 @@ public class RichCallHistory {
      */
     private Cursor getImageTransferData(String columnName, String sharingId) {
         String[] projection = new String[] {
-                columnName
+            columnName
         };
         Cursor cursor = null;
         try {
@@ -105,7 +105,7 @@ public class RichCallHistory {
      */
     private Cursor getVideoSharingData(String columnName, String sharingId) {
         String[] projection = new String[] {
-                columnName
+            columnName
         };
         Cursor cursor = null;
         try {
@@ -187,7 +187,7 @@ public class RichCallHistory {
      */
     private Cursor getGeolocSharingData(String columnName, String sharingId) throws SQLException {
         String[] projection = new String[] {
-                columnName
+            columnName
         };
         Cursor cursor = null;
         try {
@@ -361,7 +361,7 @@ public class RichCallHistory {
         Cursor c = null;
         try {
             String[] projection = new String[] {
-                    ImageSharingData.KEY_FILESIZE
+                ImageSharingData.KEY_FILESIZE
             };
             c = mLocalContentResolver.query(
                     Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId), projection, null,

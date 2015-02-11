@@ -17,11 +17,13 @@
 package com.gsma.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
+import com.gsma.services.rcs.ipcall.IPCall.State;
 
 public interface IIPCallEventBroadcaster {
 
-    public void broadcastIPCallStateChanged(ContactId contact, String callId, int status,
-            int reasonCode);
+    public void broadcastIPCallStateChanged(ContactId contact, String callId, State state,
+            ReasonCode reasonCode);
 
     public void broadcastIPCallInvitation(String callId);
 }
