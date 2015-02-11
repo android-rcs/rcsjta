@@ -22,6 +22,7 @@
 
 package com.gsma.services.rcs.chat;
 
+import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.chat.GroupChat.State;
@@ -76,7 +77,8 @@ public abstract class GroupChatListener {
      * @param reasonCode status reason code
      */
     public abstract void onMessageGroupDeliveryInfoChanged(String chatId, ContactId contact,
-            String mimeType, String msgId, int status, int reasonCode);
+            String mimeType, String msgId, GroupDeliveryInfo.Status status,
+            GroupDeliveryInfo.ReasonCode reasonCode);
 
     /**
      * Callback called when a participant status has been changed in a group chat.

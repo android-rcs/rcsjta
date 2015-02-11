@@ -22,6 +22,8 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.services.rcs.GroupDeliveryInfo.ReasonCode;
+import com.gsma.services.rcs.GroupDeliveryInfo.Status;
 import com.gsma.services.rcs.contacts.ContactId;
 
 import android.net.Uri;
@@ -43,7 +45,7 @@ public interface IGroupDeliveryInfoLog {
      * @param reasonCode Delivery info status reason code
      */
     public Uri addGroupChatDeliveryInfoEntry(String chatId, ContactId contact, String msgId,
-            int status, int reasonCode);
+            Status status, ReasonCode reasonCode);
 
     /**
      * Set delivery status for outgoing group chat messages and files
@@ -54,7 +56,7 @@ public interface IGroupDeliveryInfoLog {
      * @param reasonCode Delivery info status reason code
      */
     public void setGroupChatDeliveryInfoStatusAndReasonCode(String msgId, ContactId contact,
-            int status, int reasonCode);
+            Status status, ReasonCode reasonCode);
 
     /**
      * Check if all recipients have received message

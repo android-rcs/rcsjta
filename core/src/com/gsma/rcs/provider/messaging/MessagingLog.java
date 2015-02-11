@@ -28,6 +28,7 @@ import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
+import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message;
@@ -383,25 +384,28 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 
     /*
      * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatDeliveryInfoLog#addGroupChatDeliveryInfoEntry
-     * (java.lang.String, com.gsma.services.rcs.contacts.ContactId, java.lang.String, int, int)
+     * @see
+     * com.orangelabs.rcs.provider.messaging.IGroupChatDeliveryInfoLog#addGroupChatDeliveryInfoEntry
+     * (java.lang.String, com.gsma.services.rcs.contacts.ContactId, java.lang.String,
+     * GroupDeliveryInfoLog.Status, GroupDeliveryInfoLog.ReasonCode)
      */
     @Override
     public Uri addGroupChatDeliveryInfoEntry(String chatId, ContactId contact, String msgId,
-            int status, int reasonCode) {
+            GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
         return groupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId, contact, msgId,
                 status, reasonCode);
     }
 
     /*
      * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatDeliveryInfoLog#
-     * updateGroupChatDeliveryInfoStatusAndReasonCode(java.lang.String,
-     * com.gsma.services.rcs.contacts.ContactId), int, int)
+     * @see com.orangelabs.rcs.provider.messaging.IGroupChatDeliveryInfoLog#
+     * setGroupChatDeliveryInfoStatusAndReasonCode(java.lang.String,
+     * com.gsma.services.rcs.contacts.ContactId, GroupDeliveryInfoLog.Status,
+     * GroupDeliveryInfoLog.ReasonCode)
      */
     @Override
     public void setGroupChatDeliveryInfoStatusAndReasonCode(String msgId, ContactId contact,
-            int status, int reasonCode) {
+            GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
         groupChatDeliveryInfoLog.setGroupChatDeliveryInfoStatusAndReasonCode(msgId, contact,
                 status, reasonCode);
     }

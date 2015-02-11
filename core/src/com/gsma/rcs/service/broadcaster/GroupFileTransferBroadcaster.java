@@ -20,6 +20,7 @@ import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
@@ -87,13 +88,15 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
         mGroupFileTransferListeners.finishBroadcast();
     }
 
-    public void broadcastGroupDeliveryInfoStateChanged(String chatId, ContactId contact,
-            String transferId, int state, int reasonCode) {
+    public void broadcastDeliveryInfoChanged(String chatId, ContactId contact, String transferId,
+            GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
+        int rcsStatus = status.toInt();
+        int rcsReasonCode = reasonCode.toInt();
         final int N = mGroupFileTransferListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
                 mGroupFileTransferListeners.getBroadcastItem(i).onDeliveryInfoChanged(chatId,
-                        contact, transferId, state, reasonCode);
+                        contact, transferId, rcsStatus, rcsReasonCode);
             } catch (Exception e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener per contact", e);

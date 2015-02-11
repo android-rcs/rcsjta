@@ -22,13 +22,15 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.GroupDeliveryInfo.ReasonCode;
+import com.gsma.services.rcs.GroupDeliveryInfo.Status;
+import com.gsma.services.rcs.contacts.ContactId;
+
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
-
-import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contacts.ContactId;
 
 /**
  * Class to interface the deliveryinfo table
@@ -40,19 +42,15 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
             .append(GroupDeliveryInfoData.KEY_CONTACT).append("=?").toString();
 
     private static final String SELECTION_CONTACTS_NOT_RECEIVED_MESSAGE = new StringBuilder(
-            GroupDeliveryInfoData.KEY_DELIVERY_STATUS).append("=")
-            .append(com.gsma.services.rcs.GroupDeliveryInfoLog.Status.NOT_DELIVERED)
+            GroupDeliveryInfoData.KEY_DELIVERY_STATUS).append("=").append(Status.NOT_DELIVERED)
             .append(" OR (").append(GroupDeliveryInfoData.KEY_DELIVERY_STATUS).append("=")
-            .append(com.gsma.services.rcs.GroupDeliveryInfoLog.Status.FAILED).append(" AND ")
-            .append(GroupDeliveryInfoData.KEY_REASON_CODE).append(" IN (")
-            .append(com.gsma.services.rcs.GroupDeliveryInfoLog.ReasonCode.FAILED_DELIVERY)
-            .append(",")
-            .append(com.gsma.services.rcs.GroupDeliveryInfoLog.ReasonCode.FAILED_DISPLAY)
-            .append("))").toString();
+            .append(Status.FAILED).append(" AND ").append(GroupDeliveryInfoData.KEY_REASON_CODE)
+            .append(" IN (").append(ReasonCode.FAILED_DELIVERY).append(",")
+            .append(ReasonCode.FAILED_DISPLAY).append("))").toString();
 
     private static final String SELECTION_DELIVERY_INFO_NOT_DISPLAYED = new StringBuilder(
-            GroupDeliveryInfoData.KEY_DELIVERY_STATUS).append("!=")
-            .append(com.gsma.services.rcs.GroupDeliveryInfoLog.Status.DISPLAYED).toString();
+            GroupDeliveryInfoData.KEY_DELIVERY_STATUS).append("!=").append(Status.DISPLAYED)
+            .toString();
 
     private static final Logger logger = Logger.getLogger(GroupDeliveryInfoLog.class
             .getSimpleName());
@@ -70,13 +68,13 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
 
     @Override
     public Uri addGroupChatDeliveryInfoEntry(String chatId, ContactId contact, String msgId,
-            int status, int reasonCode) {
+            Status status, ReasonCode reasonCode) {
         ContentValues values = new ContentValues();
         values.put(GroupDeliveryInfoData.KEY_CHAT_ID, chatId);
         values.put(GroupDeliveryInfoData.KEY_ID, msgId);
         values.put(GroupDeliveryInfoData.KEY_CONTACT, contact.toString());
-        values.put(GroupDeliveryInfoData.KEY_DELIVERY_STATUS, status);
-        values.put(GroupDeliveryInfoData.KEY_REASON_CODE, reasonCode);
+        values.put(GroupDeliveryInfoData.KEY_DELIVERY_STATUS, status.toInt());
+        values.put(GroupDeliveryInfoData.KEY_REASON_CODE, reasonCode.toInt());
         values.put(GroupDeliveryInfoData.KEY_TIMESTAMP_DELIVERED, 0);
         values.put(GroupDeliveryInfoData.KEY_TIMESTAMP_DISPLAYED, 0);
         return mLocalContentResolver.insert(GroupDeliveryInfoData.CONTENT_URI, values);
@@ -91,11 +89,11 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
      * @param reasonCode Reason code
      */
     public void setGroupChatDeliveryInfoStatusAndReasonCode(String msgId, ContactId contact,
-            int status, int reasonCode) {
+            Status status, ReasonCode reasonCode) {
         ContentValues values = new ContentValues();
-        values.put(GroupDeliveryInfoData.KEY_DELIVERY_STATUS, status);
+        values.put(GroupDeliveryInfoData.KEY_DELIVERY_STATUS, status.toInt());
         values.put(GroupDeliveryInfoData.KEY_TIMESTAMP_DELIVERED, System.currentTimeMillis());
-        values.put(GroupDeliveryInfoData.KEY_REASON_CODE, reasonCode);
+        values.put(GroupDeliveryInfoData.KEY_REASON_CODE, reasonCode.toInt());
         String[] selectionArgs = new String[] {
                 msgId, contact.toString()
         };

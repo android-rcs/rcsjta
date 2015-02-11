@@ -16,6 +16,7 @@
 
 package com.gsma.rcs.service.broadcaster;
 
+import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
@@ -31,8 +32,8 @@ public interface IGroupFileTransferBroadcaster {
     public void broadcastProgressUpdate(String chatId, String transferId, long currentSize,
             long totalSize);
 
-    public void broadcastGroupDeliveryInfoStateChanged(String chatId, ContactId contact,
-            String transferId, int state, int reasonCode);
+    public void broadcastDeliveryInfoChanged(String chatId, ContactId contact, String transferId,
+            GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode);
 
     public void broadcastInvitation(String fileTransferId);
 

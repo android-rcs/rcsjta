@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Sony Mobile Communications Inc.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,6 +16,7 @@
 
 package com.gsma.services.rcs.chat;
 
+import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.contacts.ContactId;
@@ -30,7 +31,7 @@ public class GroupChatListenerImpl extends IGroupChatListener.Stub {
 
     private final GroupChatListener mListener;
 
-    private final static String LOG_TAG = GroupChatListenerImpl.class.getName().toString();
+    private final static String LOG_TAG = GroupChatListenerImpl.class.getName();
 
     GroupChatListenerImpl(GroupChatListener listener) {
         mListener = listener;
@@ -84,8 +85,22 @@ public class GroupChatListenerImpl extends IGroupChatListener.Stub {
     @Override
     public void onMessageGroupDeliveryInfoChanged(String chatId, ContactId contact,
             String mimeType, String msgId, int status, int reasonCode) {
-        mListener.onMessageGroupDeliveryInfoChanged(chatId, contact, mimeType, msgId, status,
-                reasonCode);
+        GroupDeliveryInfo.Status rcsStatus;
+        GroupDeliveryInfo.ReasonCode rcsReasonCode;
+        try {
+            rcsStatus = GroupDeliveryInfo.Status.valueOf(status);
+            rcsReasonCode = GroupDeliveryInfo.ReasonCode.valueOf(reasonCode);
+        } catch (IllegalArgumentException e) {
+            /*
+             * Detected unknown state or reasonCode not part of standard coming from stack which a
+             * client application can of course not handle since it is build only to handle the
+             * possible enum values documented and specified in the api standard.
+             */
+            Log.e(LOG_TAG, e.getMessage());
+            return;
+        }
+        mListener.onMessageGroupDeliveryInfoChanged(chatId, contact, mimeType, msgId, rcsStatus,
+                rcsReasonCode);
     }
 
     @Override

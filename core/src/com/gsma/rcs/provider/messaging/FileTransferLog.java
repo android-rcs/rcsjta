@@ -22,16 +22,6 @@
 
 package com.gsma.rcs.provider.messaging;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Set;
-
-import android.content.ContentValues;
-import android.database.Cursor;
-import android.database.SQLException;
-import android.net.Uri;
-
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.provider.LocalContentResolver;
@@ -40,13 +30,23 @@ import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
+
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.SQLException;
+import android.net.Uri;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Class to interface the ft table
@@ -57,8 +57,8 @@ public class FileTransferLog implements IFileTransferLog {
             FileTransferData.KEY_UPLOAD_TID).append("=?").toString();
 
     private static final String SELECTION_BY_PAUSED_BY_SYSTEM = new StringBuilder(
-            FileTransferData.KEY_STATE).append("=").append(State.PAUSED.toInt())
-            .append(" AND ").append(FileTransferData.KEY_REASON_CODE).append("=")
+            FileTransferData.KEY_STATE).append("=").append(State.PAUSED.toInt()).append(" AND ")
+            .append(FileTransferData.KEY_REASON_CODE).append("=")
             .append(ReasonCode.PAUSED_BY_SYSTEM.toInt()).toString();
 
     private static final String SELECTION_BY_EQUAL_CHAT_ID_AND_CONTACT = new StringBuilder(
@@ -101,8 +101,7 @@ public class FileTransferLog implements IFileTransferLog {
                     .append(", filename=").append(content.getName()).append(", size=")
                     .append(content.getSize()).append(", MIME=").append(content.getEncoding())
                     .append(", state=").append(state.toInt()).append(", reasonCode=")
-                    .append(reasonCode.toInt())
-                    .toString());
+                    .append(reasonCode.toInt()).toString());
         }
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_FT_ID, fileTransferId);
@@ -175,8 +174,8 @@ public class FileTransferLog implements IFileTransferLog {
             for (ParticipantInfo participant : participants) {
                 mGroupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId,
                         participant.getContact(), fileTransferId,
-                        com.gsma.services.rcs.GroupDeliveryInfoLog.Status.NOT_DELIVERED,
-                        com.gsma.services.rcs.GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
+                        GroupDeliveryInfo.Status.NOT_DELIVERED,
+                        GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
             }
         } catch (Exception e) {
             if (logger.isActivated()) {
@@ -489,7 +488,7 @@ public class FileTransferLog implements IFileTransferLog {
     private Cursor getFileTransferData(String columnName, String fileTransferId)
             throws SQLException {
         String[] projection = {
-                columnName
+            columnName
         };
         Cursor cursor = null;
         try {
@@ -590,10 +589,10 @@ public class FileTransferLog implements IFileTransferLog {
      */
     public boolean isGroupFileTransfer(String fileTransferId) {
         String[] projection = new String[] {
-                FileTransferData.KEY_FT_ID
+            FileTransferData.KEY_FT_ID
         };
         String[] selArgs = new String[] {
-                fileTransferId
+            fileTransferId
         };
         Cursor cursor = null;
         try {

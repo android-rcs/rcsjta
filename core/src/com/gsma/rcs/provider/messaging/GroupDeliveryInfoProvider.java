@@ -6,7 +6,7 @@
 package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.utils.DatabaseUtils;
-import com.gsma.services.rcs.GroupDeliveryInfoLog;
+import com.gsma.services.rcs.GroupDeliveryInfo;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -31,10 +31,10 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
 
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     static {
-        sUriMatcher.addURI(GroupDeliveryInfoLog.CONTENT_URI.getAuthority(),
-                GroupDeliveryInfoLog.CONTENT_URI.getPath().substring(1), UriType.DELIVERY);
-        sUriMatcher.addURI(GroupDeliveryInfoLog.CONTENT_URI.getAuthority(),
-                GroupDeliveryInfoLog.CONTENT_URI.getPath().substring(1).concat("/*"),
+        sUriMatcher.addURI(GroupDeliveryInfo.CONTENT_URI.getAuthority(),
+                GroupDeliveryInfo.CONTENT_URI.getPath().substring(1), UriType.DELIVERY);
+        sUriMatcher.addURI(GroupDeliveryInfo.CONTENT_URI.getAuthority(),
+                GroupDeliveryInfo.CONTENT_URI.getPath().substring(1).concat("/*"),
                 UriType.DELIVERY_WITH_ID);
     }
 
@@ -95,7 +95,7 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
 
     private String[] getSelectionArgsWithAppendedId(String[] selectionArgs, String appendedId) {
         String[] appendedIdSelectionArg = new String[] {
-                appendedId
+            appendedId
         };
         if (selectionArgs == null) {
             return appendedIdSelectionArg;
@@ -120,8 +120,7 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -139,8 +138,7 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
                 case UriType.DELIVERY:
                     SQLiteDatabase db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(DATABASE_TABLE, projection, selection, selectionArgs, null,
-                            null,
-                            sort);
+                            null, sort);
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
                     return cursor;
 
@@ -165,15 +163,14 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 String appendedId = initialValues.getAsString(GroupDeliveryInfoData.KEY_ID);
                 db.insert(DATABASE_TABLE, null, initialValues);
-                Uri notificationUri = Uri
-                        .withAppendedPath(GroupDeliveryInfoLog.CONTENT_URI, appendedId);
+                Uri notificationUri = Uri.withAppendedPath(GroupDeliveryInfo.CONTENT_URI,
+                        appendedId);
                 getContext().getContentResolver().notifyChange(notificationUri, null);
                 return notificationUri;
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -195,8 +192,7 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -218,8 +214,7 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 }

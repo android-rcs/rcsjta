@@ -19,6 +19,7 @@ package com.gsma.rcs.core.ims.service.im.chat;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.GroupChat;
 import com.gsma.services.rcs.chat.ChatLog.Message;
@@ -144,8 +145,8 @@ public class GroupChatPersistedStorageAccessor {
         mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode);
     }
 
-    public void setDeliveryInfoStatusAndReasonCode(String msgId, ContactId contact, int status,
-            int reasonCode) {
+    public void setDeliveryInfoStatusAndReasonCode(String msgId, ContactId contact,
+            GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
         mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(msgId, contact, status,
                 reasonCode);
     }

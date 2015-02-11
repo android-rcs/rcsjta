@@ -28,6 +28,7 @@ import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.chat.ChatLog.Message;
@@ -218,16 +219,16 @@ public class MessageLog implements IMessageLog {
 
         if (direction == Direction.OUTGOING) {
             try {
-                int deliveryStatus = com.gsma.services.rcs.GroupDeliveryInfoLog.Status.NOT_DELIVERED;
+                GroupDeliveryInfo.Status deliveryStatus = GroupDeliveryInfo.Status.NOT_DELIVERED;
                 if (RcsSettings.getInstance().isAlbatrosRelease()) {
-                    deliveryStatus = com.gsma.services.rcs.GroupDeliveryInfoLog.Status.UNSUPPORTED;
+                    deliveryStatus = GroupDeliveryInfo.Status.UNSUPPORTED;
                 }
                 Set<ParticipantInfo> participants = groupChatLog
                         .getGroupChatConnectedParticipants(chatId);
                 for (ParticipantInfo participant : participants) {
                     groupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId,
                             participant.getContact(), msgId, deliveryStatus,
-                            com.gsma.services.rcs.GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
+                            GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
                 }
             } catch (Exception e) {
                 mLocalContentResolver.delete(Uri.withAppendedPath(Message.CONTENT_URI, msgId),

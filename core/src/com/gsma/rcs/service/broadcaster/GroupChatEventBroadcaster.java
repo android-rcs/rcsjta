@@ -20,6 +20,7 @@ import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
@@ -55,9 +56,9 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
 
     public void broadcastMessageStatusChanged(String chatId, String mimeType, String msgId,
             Status status, Message.ReasonCode reasonCode) {
-        final int N = mGroupChatListeners.beginBroadcast();
         int rcsStatus = status.toInt();
         int rcsReasonCode = reasonCode.toInt();
+        final int N = mGroupChatListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
                 mGroupChatListeners.getBroadcastItem(i).onMessageStatusChanged(chatId, mimeType,
@@ -72,12 +73,13 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
     }
 
     public void broadcastMessageGroupDeliveryInfoChanged(String chatId, ContactId contact,
-            String apiMimeType, String msgId, int status, int reasonCode) {
+            String apiMimeType, String msgId, GroupDeliveryInfo.Status status,
+            GroupDeliveryInfo.ReasonCode reasonCode) {
         final int N = mGroupChatListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
                 mGroupChatListeners.getBroadcastItem(i).onMessageGroupDeliveryInfoChanged(chatId,
-                        contact, apiMimeType, msgId, status, reasonCode);
+                        contact, apiMimeType, msgId, status.toInt(), reasonCode.toInt());
             } catch (Exception e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener.", e);

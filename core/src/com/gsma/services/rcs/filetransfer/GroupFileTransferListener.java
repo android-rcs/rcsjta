@@ -16,10 +16,8 @@
 
 package com.gsma.services.rcs.filetransfer;
 
+import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
-import com.gsma.services.rcs.filetransfer.FileTransfer.State;
-import com.gsma.services.rcs.filetransfer.IGroupFileTransferListener;
 
 /**
  * Group file transfer event listener
@@ -34,8 +32,8 @@ public abstract class GroupFileTransferListener {
      * @param state State of file transfer after change
      * @param reasonCode Reason code of file transfer after change
      */
-    public abstract void onStateChanged(String chatId, String transferId, State state,
-            ReasonCode reasonCode);
+    public abstract void onStateChanged(String chatId, String transferId, FileTransfer.State state,
+            FileTransfer.ReasonCode reasonCode);
 
     /**
      * Callback called when a group file transfer state/reasonCode is changed for a single recipient
@@ -48,7 +46,7 @@ public abstract class GroupFileTransferListener {
      * @param reasonCode Reason code of state after change
      */
     public abstract void onDeliveryInfoChanged(String chatId, ContactId contact, String transferId,
-            int state, int reasonCode);
+            GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode);
 
     /**
      * Callback called during the transfer progress of group file transfer

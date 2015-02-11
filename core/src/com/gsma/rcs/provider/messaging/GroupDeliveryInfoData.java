@@ -16,7 +16,7 @@
 
 package com.gsma.rcs.provider.messaging;
 
-import com.gsma.services.rcs.GroupDeliveryInfoLog;
+import com.gsma.services.rcs.GroupDeliveryInfo;
 
 import android.net.Uri;
 
@@ -25,19 +25,19 @@ import android.net.Uri;
  */
 public class GroupDeliveryInfoData {
 
-    public static final Uri CONTENT_URI = GroupDeliveryInfoLog.CONTENT_URI;
+    public static final Uri CONTENT_URI = GroupDeliveryInfo.CONTENT_URI;
 
-    public static final String KEY_DELIVERY_STATUS = GroupDeliveryInfoLog.STATUS;
+    public static final String KEY_DELIVERY_STATUS = GroupDeliveryInfo.STATUS;
 
-    public static final String KEY_REASON_CODE = GroupDeliveryInfoLog.REASON_CODE;
+    public static final String KEY_REASON_CODE = GroupDeliveryInfo.REASON_CODE;
 
-    public static final String KEY_ID = GroupDeliveryInfoLog.ID;
+    public static final String KEY_ID = GroupDeliveryInfo.ID;
 
-    public static final String KEY_CHAT_ID = GroupDeliveryInfoLog.CHAT_ID;
+    public static final String KEY_CHAT_ID = GroupDeliveryInfo.CHAT_ID;
 
-    public static final String KEY_CONTACT = GroupDeliveryInfoLog.CONTACT;
+    public static final String KEY_CONTACT = GroupDeliveryInfo.CONTACT;
 
-    public static final String KEY_TIMESTAMP_DELIVERED = GroupDeliveryInfoLog.TIMESTAMP_DELIVERED;
+    public static final String KEY_TIMESTAMP_DELIVERED = GroupDeliveryInfo.TIMESTAMP_DELIVERED;
 
-    public static final String KEY_TIMESTAMP_DISPLAYED = GroupDeliveryInfoLog.TIMESTAMP_DISPLAYED;
+    public static final String KEY_TIMESTAMP_DISPLAYED = GroupDeliveryInfo.TIMESTAMP_DISPLAYED;
 }

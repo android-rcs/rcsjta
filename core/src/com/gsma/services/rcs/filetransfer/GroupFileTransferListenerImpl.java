@@ -16,6 +16,7 @@
 
 package com.gsma.services.rcs.filetransfer;
 
+import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 
 import android.util.Log;
@@ -58,6 +59,21 @@ public class GroupFileTransferListenerImpl extends IGroupFileTransferListener.St
 
     public void onDeliveryInfoChanged(String chatId, ContactId contact, String transferId,
             int status, int reasonCode) {
-        mListener.onDeliveryInfoChanged(chatId, contact, transferId, status, reasonCode);
+        GroupDeliveryInfo.Status rcsStatus;
+        GroupDeliveryInfo.ReasonCode rcsReasonCode;
+        try {
+            rcsStatus = GroupDeliveryInfo.Status.valueOf(status);
+            rcsReasonCode = GroupDeliveryInfo.ReasonCode.valueOf(reasonCode);
+        } catch (IllegalArgumentException e) {
+            /*
+             * Detected unknown state or reasonCode not part of standard coming from stack which a
+             * client application can not handle since it is built only to handle the possible enum
+             * values documented and specified in the api standard.
+             */
+            Log.e(LOG_TAG, e.getMessage());
+            return;
+        }
+
+        mListener.onDeliveryInfoChanged(chatId, contact, transferId, rcsStatus, rcsReasonCode);
     }
 }

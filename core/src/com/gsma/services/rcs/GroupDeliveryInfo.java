@@ -17,11 +17,12 @@
 package com.gsma.services.rcs;
 
 import android.net.Uri;
+import android.util.SparseArray;
 
 /**
  * Delivery info (delivery information on group messages and group file transfers)
  */
-public class GroupDeliveryInfoLog {
+public class GroupDeliveryInfo {
 
     /**
      * Content provider URI for Group Delivery Info
@@ -90,54 +91,106 @@ public class GroupDeliveryInfoLog {
     /**
      * Status of the group delivery info
      */
-    public static class Status {
+    public enum Status {
 
         /**
          * Delivery notifications were unsupported at the time the message or file-transfer was sent
          * and no delivery notification has been requested.
          */
-        public static final int UNSUPPORTED = 0;
+        UNSUPPORTED(0),
         /**
          * The message or file-transfer has not received any delivery report for the specified
          * contact.
          */
-        public static final int NOT_DELIVERED = 1;
+        NOT_DELIVERED(1),
 
         /**
          * The message or file-transfer has received a delivery report for the specified contact
          */
-        public static final int DELIVERED = 2;
+        DELIVERED(2),
 
         /**
          * The message or file-transfer has received a displayed report for the specified contact.
          */
-        public static final int DISPLAYED = 3;
+        DISPLAYED(3),
 
         /**
          * The message or file-transfer has received a delivery report failure for the specified
          * contact.
          */
-        public static final int FAILED = 4;
+        FAILED(4);
+
+        private final int mValue;
+
+        private static SparseArray<Status> mValueToEnum = new SparseArray<Status>();
+        static {
+            for (Status entry : Status.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
+
+        private Status(int value) {
+            mValue = value;
+        }
+
+        public final int toInt() {
+            return mValue;
+        }
+
+        public final static Status valueOf(int value) {
+            Status entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException("No enum const class " + Status.class.getName()
+                    + "." + value);
+        }
     }
 
     /**
      * Group chat delivery status reason
      */
-    public static class ReasonCode {
+    public enum ReasonCode {
 
         /**
          * No specific reason code specified.
          */
-        public static final int UNSPECIFIED = 0;
+        UNSPECIFIED(0),
 
         /**
          * A delivered-error delivery report has been received.
          */
-        public static final int FAILED_DELIVERY = 1;
+        FAILED_DELIVERY(1),
 
         /**
          * A displayed-error delivery report has been received.
          */
-        public static final int FAILED_DISPLAY = 2;
+        FAILED_DISPLAY(2);
+
+        private final int mValue;
+
+        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<ReasonCode>();
+        static {
+            for (ReasonCode entry : ReasonCode.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
+
+        private ReasonCode(int value) {
+            mValue = value;
+        }
+
+        public final int toInt() {
+            return mValue;
+        }
+
+        public final static ReasonCode valueOf(int value) {
+            ReasonCode entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException("No enum const class " + ReasonCode.class.getName()
+                    + "." + value);
+        }
     }
 }

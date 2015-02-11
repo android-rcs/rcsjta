@@ -43,7 +43,7 @@ import com.gsma.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
 import com.gsma.rcs.service.broadcaster.IGroupChatEventBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.GroupDeliveryInfoLog;
+import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
@@ -190,11 +190,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
         String mimeType = mMessagingLog.getMessageMimeType(msgId);
         synchronized (lock) {
             mPersistentStorage.setDeliveryInfoStatusAndReasonCode(msgId, contact,
-                    GroupDeliveryInfoLog.Status.DELIVERED,
-                    GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
+                    GroupDeliveryInfo.Status.DELIVERED, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
             mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId, contact, mimeType,
-                    msgId, GroupDeliveryInfoLog.Status.DELIVERED,
-                    GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
+                    msgId, GroupDeliveryInfo.Status.DELIVERED,
+                    GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
             if (mPersistentStorage.isDeliveredToAllRecipients(msgId)) {
                 mPersistentStorage.setMessageStatusAndReasonCode(msgId, Status.DELIVERED,
                         Message.ReasonCode.UNSPECIFIED);
@@ -208,11 +207,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
         String mimeType = mMessagingLog.getMessageMimeType(msgId);
         synchronized (lock) {
             mPersistentStorage.setDeliveryInfoStatusAndReasonCode(msgId, contact,
-                    GroupDeliveryInfoLog.Status.DISPLAYED,
-                    GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
+                    GroupDeliveryInfo.Status.DISPLAYED, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
             mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId, contact, mimeType,
-                    msgId, GroupDeliveryInfoLog.Status.DISPLAYED,
-                    GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
+                    msgId, GroupDeliveryInfo.Status.DISPLAYED,
+                    GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
             if (mPersistentStorage.isDisplayedByAllRecipients(msgId)) {
                 mPersistentStorage.setMessageStatusAndReasonCode(msgId, Status.DISPLAYED,
                         Message.ReasonCode.UNSPECIFIED);
@@ -228,18 +226,18 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
         synchronized (lock) {
             if (Message.ReasonCode.FAILED_DELIVERY == reasonCode) {
                 mPersistentStorage.setDeliveryInfoStatusAndReasonCode(msgId, contact,
-                        GroupDeliveryInfoLog.Status.FAILED,
-                        GroupDeliveryInfoLog.ReasonCode.FAILED_DELIVERY);
+                        GroupDeliveryInfo.Status.FAILED,
+                        GroupDeliveryInfo.ReasonCode.FAILED_DELIVERY);
                 mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId, contact, mimeType,
-                        msgId, GroupDeliveryInfoLog.Status.FAILED,
-                        GroupDeliveryInfoLog.ReasonCode.FAILED_DELIVERY);
+                        msgId, GroupDeliveryInfo.Status.FAILED,
+                        GroupDeliveryInfo.ReasonCode.FAILED_DELIVERY);
             } else {
                 mPersistentStorage.setDeliveryInfoStatusAndReasonCode(msgId, contact,
-                        GroupDeliveryInfoLog.Status.FAILED,
-                        GroupDeliveryInfoLog.ReasonCode.FAILED_DISPLAY);
+                        GroupDeliveryInfo.Status.FAILED,
+                        GroupDeliveryInfo.ReasonCode.FAILED_DISPLAY);
                 mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId, contact, mimeType,
-                        msgId, GroupDeliveryInfoLog.Status.FAILED,
-                        GroupDeliveryInfoLog.ReasonCode.FAILED_DISPLAY);
+                        msgId, GroupDeliveryInfo.Status.FAILED,
+                        GroupDeliveryInfo.ReasonCode.FAILED_DISPLAY);
             }
         }
     }
