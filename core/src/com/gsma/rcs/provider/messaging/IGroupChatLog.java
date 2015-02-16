@@ -22,14 +22,16 @@
 
 package com.gsma.rcs.provider.messaging;
 
-import java.util.Set;
-
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
+import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 
 import android.database.Cursor;
+
+import java.util.Set;
 
 /**
  * Interface for the chat table
@@ -50,7 +52,8 @@ public interface IGroupChatLog {
      * @param direction Direction
      */
     public void addGroupChat(String chatId, ContactId contact, String subject,
-            Set<ParticipantInfo> participants, int state, int reasonCode, Direction direction);
+            Set<ParticipantInfo> participants, State state, ReasonCode reasonCode,
+            Direction direction);
 
     /**
      * Accept next Group Chat invitation
@@ -66,7 +69,7 @@ public interface IGroupChatLog {
      * @param state Group chat state
      * @param reasonCode Group chat state reason code
      */
-    public void setGroupChatStateAndReasonCode(String chatId, int state, int reasonCode);
+    public void setGroupChatStateAndReasonCode(String chatId, State state, ReasonCode reasonCode);
 
     /**
      * Update group chat set of participants

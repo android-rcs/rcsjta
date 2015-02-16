@@ -35,8 +35,7 @@ public class ChatData {
     /**
      * Database URIs
      */
-    protected static final Uri CONTENT_URI = Uri
-            .parse("content://com.gsma.rcs.chat/groupchat");
+    protected static final Uri CONTENT_URI = Uri.parse("content://com.gsma.rcs.chat/groupchat");
 
     /**
      * Id for chat room
@@ -51,14 +50,14 @@ public class ChatData {
     /**
      * State of chat room.
      * 
-     * @see ChatLog.Message.State for the list of states
+     * @see State
      */
     static final String KEY_STATE = ChatLog.GroupChat.STATE;
 
     /**
      * Reason code associated with the group chat state.
      * 
-     * @see ChatLog.Message.ReasonCode for the list of reason codes
+     * @see ReasonCode
      */
     static final String KEY_REASON_CODE = ChatLog.GroupChat.REASON_CODE;
 

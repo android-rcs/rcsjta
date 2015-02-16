@@ -20,6 +20,10 @@ import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.chat.ChatLog.Message;
+import com.gsma.services.rcs.chat.ChatLog.Message.Status;
+import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
+import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.gsma.services.rcs.chat.IGroupChatListener;
 import com.gsma.services.rcs.chat.ParticipantInfo;
@@ -50,12 +54,14 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
     }
 
     public void broadcastMessageStatusChanged(String chatId, String mimeType, String msgId,
-            int status, int reasonCode) {
+            Status status, Message.ReasonCode reasonCode) {
         final int N = mGroupChatListeners.beginBroadcast();
+        int rcsStatus = status.toInt();
+        int rcsReasonCode = reasonCode.toInt();
         for (int i = 0; i < N; i++) {
             try {
                 mGroupChatListeners.getBroadcastItem(i).onMessageStatusChanged(chatId, mimeType,
-                        msgId, status, reasonCode);
+                        msgId, rcsStatus, rcsReasonCode);
             } catch (Exception e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener.", e);
@@ -95,11 +101,14 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
         mGroupChatListeners.finishBroadcast();
     }
 
-    public void broadcastStateChanged(String chatId, int state, int reasonCode) {
+    public void broadcastStateChanged(String chatId, State state, ReasonCode reasonCode) {
         final int N = mGroupChatListeners.beginBroadcast();
+        int rcsState = state.toInt();
+        int rcsReasonCode = reasonCode.toInt();
         for (int i = 0; i < N; i++) {
             try {
-                mGroupChatListeners.getBroadcastItem(i).onStateChanged(chatId, state, reasonCode);
+                mGroupChatListeners.getBroadcastItem(i).onStateChanged(chatId, rcsState,
+                        rcsReasonCode);
             } catch (Exception e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);

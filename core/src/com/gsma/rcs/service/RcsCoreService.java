@@ -22,19 +22,7 @@
 
 package com.gsma.rcs.service;
 
-import java.util.Set;
-
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Handler;
-import android.os.IBinder;
-
+import com.gsma.rcs.R;
 import com.gsma.rcs.addressbook.AccountChangedReceiver;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.CoreListener;
@@ -88,19 +76,32 @@ import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.capability.ICapabilityService;
+import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.IChatService;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.IContactsService;
 import com.gsma.services.rcs.extension.IMultimediaSessionService;
 import com.gsma.services.rcs.filetransfer.IFileTransferService;
+import com.gsma.services.rcs.ipcall.IIPCallService;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingService;
-import com.gsma.services.rcs.ipcall.IIPCallService;
 import com.gsma.services.rcs.sharing.image.IImageSharingService;
-import com.gsma.services.rcs.upload.IFileUploadService;
 import com.gsma.services.rcs.sharing.video.IVideoSharingService;
-import com.gsma.rcs.R;
+import com.gsma.services.rcs.upload.IFileUploadService;
+
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Handler;
+import android.os.IBinder;
+
+import java.util.Set;
 
 /**
  * RCS core service. This service offers a flat API to any other process (activities) to access to
@@ -891,7 +892,7 @@ public class RcsCoreService extends Service implements CoreListener {
 
     @Override
     public void handleGroupChatInvitationRejected(String chatId, ContactId contact, String subject,
-            Set<ParticipantInfo> participants, int reasonCode) {
+            Set<ParticipantInfo> participants, GroupChat.ReasonCode reasonCode) {
         chatApi.addAndBroadcastGroupChatInvitationRejected(chatId, contact, subject, participants,
                 reasonCode);
     }

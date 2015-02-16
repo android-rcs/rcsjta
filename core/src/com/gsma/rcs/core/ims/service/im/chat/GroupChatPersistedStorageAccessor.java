@@ -21,6 +21,11 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.GroupChat;
+import com.gsma.services.rcs.chat.ChatLog.Message;
+import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
+import com.gsma.services.rcs.chat.ChatLog.Message.Status;
+import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
+import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 
@@ -129,11 +134,12 @@ public class GroupChatPersistedStorageAccessor {
         return RcsSettings.getInstance().getMaxChatParticipants();
     }
 
-    public void setStateAndReasonCode(int state, int reasonCode) {
+    public void setStateAndReasonCode(State state, ReasonCode reasonCode) {
         mMessagingLog.setGroupChatStateAndReasonCode(mChatId, state, reasonCode);
     }
 
-    public void setMessageStatusAndReasonCode(String msgId, int status, int reasonCode) {
+    public void setMessageStatusAndReasonCode(String msgId, Status status,
+            Message.ReasonCode reasonCode) {
         mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode);
     }
 
@@ -156,16 +162,17 @@ public class GroupChatPersistedStorageAccessor {
     }
 
     public void addGroupChat(ContactId contact, String subject, Set<ParticipantInfo> participants,
-            int state, int reasonCode, Direction direction) {
+            State state, ReasonCode reasonCode, Direction direction) {
         mMessagingLog.addGroupChat(mChatId, contact, subject, participants, state, reasonCode,
                 direction);
     }
 
-    public void addGroupChatEvent(String chatId, ContactId contact, int status) {
-        mMessagingLog.addGroupChatEvent(mChatId, contact, status);
+    public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent event) {
+        mMessagingLog.addGroupChatEvent(mChatId, contact, event);
     }
 
-    public void addGroupChatMessage(ChatMessage msg, Direction direction, int status, int reasonCode) {
+    public void addGroupChatMessage(ChatMessage msg, Direction direction, Status status,
+            Message.ReasonCode reasonCode) {
         mMessagingLog.addGroupChatMessage(mChatId, msg, direction, status, reasonCode);
     }
 

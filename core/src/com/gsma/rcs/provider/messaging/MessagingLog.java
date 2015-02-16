@@ -22,9 +22,6 @@
 
 package com.gsma.rcs.provider.messaging;
 
-import java.util.List;
-import java.util.Set;
-
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
@@ -33,12 +30,20 @@ import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatLog.Message;
+import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
+import com.gsma.services.rcs.chat.ChatLog.Message.Status;
+import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
+import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * Class to interface the Instant Messaging tables
@@ -106,8 +111,9 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      */
     @Override
     public void addGroupChat(String chatId, ContactId contact, String subject,
-            Set<ParticipantInfo> participants, int status, int reasonCode, Direction direction) {
-        groupChatLog.addGroupChat(chatId, contact, subject, participants, status, reasonCode,
+            Set<ParticipantInfo> participants, State state, ReasonCode reasonCode,
+            Direction direction) {
+        groupChatLog.addGroupChat(chatId, contact, subject, participants, state, reasonCode,
                 direction);
     }
 
@@ -123,11 +129,11 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 
     /*
      * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog# setGroupChatStateAndReasonCode
-     * (java.lang.String, int, int, GroupChatLog.ActiveStatus)
+     * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog# setGroupChatStateAndReasonCode
+     * setGroupChatStateAndReasonCode (java.lang.String, int, int, GroupChatLog.ActiveStatus)
      */
     @Override
-    public void setGroupChatStateAndReasonCode(String chatId, int state, int reasonCode) {
+    public void setGroupChatStateAndReasonCode(String chatId, State state, ReasonCode reasonCode) {
         groupChatLog.setGroupChatStateAndReasonCode(chatId, state, reasonCode);
     }
 
@@ -192,11 +198,13 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 
     /*
      * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IMessageLog# addOutgoingOneToOneChatMessage
-     * (com.orangelabs .rcs.core.ims.service.im.chat.ChatMessage, int, int)
+     * @see com.orangelabs.rcs.provider.messaging.IMessageLog# addOutgoingOneToOneChatMessage
+     * addOutgoingOneToOneChatMessage (com.orangelabs .rcs.core.ims.service.im.chat.ChatMessage,
+     * int, int)
      */
     @Override
-    public void addOutgoingOneToOneChatMessage(ChatMessage msg, int status, int reasonCode) {
+    public void addOutgoingOneToOneChatMessage(ChatMessage msg, Status status,
+            Message.ReasonCode reasonCode) {
         messageLog.addOutgoingOneToOneChatMessage(msg, status, reasonCode);
     }
 
@@ -207,7 +215,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      */
     @Override
     public void addGroupChatMessage(String chatId, ChatMessage msg, Direction direction,
-            int status, int reasonCode) {
+            Status status, Message.ReasonCode reasonCode) {
         messageLog.addGroupChatMessage(chatId, msg, direction, status, reasonCode);
     }
 
@@ -217,8 +225,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      * java.lang.String, int)
      */
     @Override
-    public void addGroupChatEvent(String chatId, ContactId contact, int status) {
-        messageLog.addGroupChatEvent(chatId, contact, status);
+    public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent event) {
+        messageLog.addGroupChatEvent(chatId, contact, event);
     }
 
     /*
@@ -236,7 +244,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      * (java.lang.String, int, int)
      */
     @Override
-    public void setChatMessageStatusAndReasonCode(String msgId, int status, int reasonCode) {
+    public void setChatMessageStatusAndReasonCode(String msgId, Status status,
+            Message.ReasonCode reasonCode) {
         messageLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode);
     }
 

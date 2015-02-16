@@ -22,15 +22,6 @@
 
 package com.gsma.rcs.service.api;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
-import android.os.RemoteException;
-
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -53,12 +44,12 @@ import com.gsma.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
-import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
-import com.gsma.services.rcs.chat.ChatLog.Message;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
+import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.IChatMessage;
 import com.gsma.services.rcs.chat.IChatService;
@@ -69,6 +60,15 @@ import com.gsma.services.rcs.chat.IOneToOneChat;
 import com.gsma.services.rcs.chat.IOneToOneChatListener;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
+
+import android.os.RemoteException;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * Chat service implementation
@@ -131,7 +131,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         mCore = core;
     }
 
-    private int imdnToFailedReasonCode(ImdnDocument imdn) {
+    private ReasonCode imdnToFailedReasonCode(ImdnDocument imdn) {
         String notificationType = imdn.getNotificationType();
         if (ImdnDocument.DELIVERY_NOTIFICATION.equals(notificationType)) {
             return ReasonCode.FAILED_DELIVERY;
@@ -303,31 +303,30 @@ public class ChatServiceImpl extends IChatService.Stub {
         if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
                 || ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
                 || ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
-            int reasonCode = imdnToFailedReasonCode(imdn);
+            ReasonCode reasonCode = imdnToFailedReasonCode(imdn);
             synchronized (lock) {
-                mMessagingLog.setChatMessageStatusAndReasonCode(msgId,
-                        Message.Status.Content.FAILED, reasonCode);
+                mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.FAILED, reasonCode);
 
                 mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, mimeType,
-                        msgId, Message.Status.Content.FAILED, reasonCode);
+                        msgId, Status.FAILED, reasonCode);
             }
 
         } else if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
             synchronized (lock) {
-                mMessagingLog.setChatMessageStatusAndReasonCode(msgId,
-                        Message.Status.Content.DELIVERED, ReasonCode.UNSPECIFIED);
+                mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.DELIVERED,
+                        ReasonCode.UNSPECIFIED);
 
                 mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, mimeType,
-                        msgId, Message.Status.Content.DELIVERED, ReasonCode.UNSPECIFIED);
+                        msgId, Status.DELIVERED, ReasonCode.UNSPECIFIED);
             }
 
         } else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
             synchronized (lock) {
-                mMessagingLog.setChatMessageStatusAndReasonCode(msgId,
-                        Message.Status.Content.DISPLAYED, ReasonCode.UNSPECIFIED);
+                mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.DISPLAYED,
+                        ReasonCode.UNSPECIFIED);
 
                 mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, mimeType,
-                        msgId, Message.Status.Content.DISPLAYED, ReasonCode.UNSPECIFIED);
+                        msgId, Status.DISPLAYED, ReasonCode.UNSPECIFIED);
             }
         }
     }
@@ -701,7 +700,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param reasonCode Reason code
      */
     public void addAndBroadcastGroupChatInvitationRejected(String chatId, ContactId contact,
-            String subject, Set<ParticipantInfo> participants, int reasonCode) {
+            String subject, Set<ParticipantInfo> participants, GroupChat.ReasonCode reasonCode) {
 
         mMessagingLog.addGroupChat(chatId, contact, subject, participants,
                 GroupChat.State.REJECTED, reasonCode, Direction.INCOMING);

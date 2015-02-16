@@ -84,6 +84,7 @@ import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
@@ -132,14 +133,14 @@ public class InstantMessagingService extends ImsService {
      * Chat features tags
      */
     public final static String[] CHAT_FEATURE_TAGS = {
-            FeatureTags.FEATURE_OMA_IM
+        FeatureTags.FEATURE_OMA_IM
     };
 
     /**
      * File transfer features tags
      */
     public final static String[] FT_FEATURE_TAGS = {
-            FeatureTags.FEATURE_OMA_IM
+        FeatureTags.FEATURE_OMA_IM
     };
 
     /**
@@ -188,7 +189,7 @@ public class InstantMessagingService extends ImsService {
                 .handleFileTransferInvitationRejected(contact, content, fileIcon, reasonCode);
     }
 
-    private void handleGroupChatInvitationRejected(SipRequest invite, int reasonCode) {
+    private void handleGroupChatInvitationRejected(SipRequest invite, ReasonCode reasonCode) {
         String chatId = ChatUtils.getContributionId(invite);
         ContactId contact = ChatUtils.getReferredIdentityAsContactId(invite);
         String subject = ChatUtils.getSubject(invite);

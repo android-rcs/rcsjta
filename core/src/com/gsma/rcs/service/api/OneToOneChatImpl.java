@@ -36,10 +36,9 @@ import com.gsma.rcs.service.broadcaster.IOneToOneChatEventBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
-import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.chat.IChatMessage;
 import com.gsma.services.rcs.chat.IOneToOneChat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
@@ -97,7 +96,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
         mRcsSettings = rcsSettings;
     }
 
-    private int imdnToFailedReasonCode(ImdnDocument imdn) {
+    private ReasonCode imdnToFailedReasonCode(ImdnDocument imdn) {
         String notificationType = imdn.getNotificationType();
         if (ImdnDocument.DELIVERY_NOTIFICATION.equals(notificationType)) {
             return ReasonCode.FAILED_DELIVERY;
@@ -158,7 +157,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
                 if (loggerActivated) {
                     logger.debug("Core session is not yet established: initiate a new session to send the message.");
                 }
-                addOutgoingChatMessage(msg, Message.Status.Content.SENDING);
+                addOutgoingChatMessage(msg, Status.SENDING);
                 sendChatMessageInNewSession(msg);
                 return;
             }
@@ -166,7 +165,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
                 if (logger.isActivated()) {
                     logger.debug("Core session is established: use existing one to send the message");
                 }
-                addOutgoingChatMessage(msg, Message.Status.Content.SENDING);
+                addOutgoingChatMessage(msg, Status.SENDING);
                 sendChatMessageWithinSession(session, msg);
                 return;
             }
@@ -174,7 +173,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
              * TODO : If session is originated by remote, then queue the message and accept the
              * pending session as part of this send operation
              */
-            addOutgoingChatMessage(msg, Message.Status.Content.QUEUED);
+            addOutgoingChatMessage(msg, Status.QUEUED);
             if (session.isInitiatedByRemote()) {
                 acceptPendingSession(session);
             }
@@ -201,7 +200,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
                         logger.debug("Session does not exist. Cannot start new session since to limit of sessions is reached. MessageId="
                                 .concat(msgId));
                     }
-                    setChatMessageStatus(msgId, mimeType, Message.Status.Content.QUEUED);
+                    setChatMessageStatus(msgId, mimeType, Status.QUEUED);
                     return;
                 }
 
@@ -209,7 +208,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
                     logger.debug("Core session is not yet established: initiate a new session to send the message");
                 }
 
-                setChatMessageStatus(msgId, mimeType, Message.Status.Content.SENDING);
+                setChatMessageStatus(msgId, mimeType, Status.SENDING);
                 sendChatMessageInNewSession(msg);
                 return;
             }
@@ -217,7 +216,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
                 if (logger.isActivated()) {
                     logger.debug("Core session is established: use existing one to send the message");
                 }
-                setChatMessageStatus(msgId, mimeType, Message.Status.Content.SENDING);
+                setChatMessageStatus(msgId, mimeType, Status.SENDING);
                 sendChatMessageWithinSession(session, msg);
                 return;
             }
@@ -225,7 +224,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
              * TODO : If session is originated by remote, then queue the message and accept the
              * pending session as part of this re-send operation
              */
-            setChatMessageStatus(msgId, mimeType, Message.Status.Content.QUEUED);
+            setChatMessageStatus(msgId, mimeType, Status.QUEUED);
             if (session.isInitiatedByRemote()) {
                 acceptPendingSession(session);
             }
@@ -257,11 +256,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
      * @param msg InstantMessage
      * @param state state of message
      */
-    private void addOutgoingChatMessage(ChatMessage msg, int state) {
-        mMessagingLog.addOutgoingOneToOneChatMessage(msg, state, ReasonCode.UNSPECIFIED);
+    private void addOutgoingChatMessage(ChatMessage msg, Status status) {
+        mMessagingLog.addOutgoingOneToOneChatMessage(msg, status, ReasonCode.UNSPECIFIED);
         String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
         mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msg.getMessageId(),
-                state, ReasonCode.UNSPECIFIED);
+                status, ReasonCode.UNSPECIFIED);
     }
 
     /**
@@ -271,9 +270,9 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
      * @param mimeType
      * @param state state of message
      */
-    private void setChatMessageStatus(String msgId, String mimeType, int state) {
-        mMessagingLog.setChatMessageStatusAndReasonCode(msgId, state, ReasonCode.UNSPECIFIED);
-        mBroadcaster.broadcastMessageStatusChanged(mContact, mimeType, msgId, state,
+    private void setChatMessageStatus(String msgId, String mimeType, Status status) {
+        mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status, ReasonCode.UNSPECIFIED);
+        mBroadcaster.broadcastMessageStatusChanged(mContact, mimeType, msgId, status,
                 ReasonCode.UNSPECIFIED);
     }
 
@@ -297,7 +296,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
             sendChatMessage(msg);
         } else {
             /* If the IMS is NOT connected at this time then queue message. */
-            addOutgoingChatMessage(msg, Message.Status.Content.QUEUED);
+            addOutgoingChatMessage(msg, Status.QUEUED);
         }
         return new ChatMessageImpl(persistentStorage);
     }
@@ -322,7 +321,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
             sendChatMessage(msg);
         } else {
             /* If the IMS is NOT connected at this time then queue message. */
-            addOutgoingChatMessage(msg, Message.Status.Content.QUEUED);
+            addOutgoingChatMessage(msg, Status.QUEUED);
         }
         return new ChatMessageImpl(persistentStorage);
     }
@@ -367,8 +366,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
     }
 
     /**
-     * Sends an   is-composing   event. The status is set to true when typing a message, else it is
-     * set to false.
+     * Sends an is-composing event. The status is set to true when typing a message, else it is set
+     * to false.
      * 
      * @param status Is-composing status
      * @see ImSessionStartMode
@@ -462,7 +461,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
             resendChatMessage(msg);
         } else {
             /* If the IMS is NOT connected at this time then re-queue message. */
-            setChatMessageStatus(msgId, mimeType, Message.Status.Content.QUEUED);
+            setChatMessageStatus(msgId, mimeType, Status.QUEUED);
         }
     }
 
@@ -539,7 +538,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
         }
         synchronized (lock) {
             mChatService.removeOneToOneChat(mContact);
-
+            /* TODO: Fix mapping between ChatError and reasonCode. */
             switch (error.getErrorCode()) {
                 case ChatError.SESSION_INITIATION_FAILED:
                 case ChatError.SESSION_INITIATION_CANCELLED:
@@ -547,12 +546,12 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
                         String msgId = message.getMessageId();
                         String mimeType = message.getMimeType();
                         String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(mimeType);
-                        mMessagingLog.setChatMessageStatusAndReasonCode(msgId,
-                                Message.Status.Content.FAILED, ReasonCode.FAILED_SEND);
+                        mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.FAILED,
+                                ReasonCode.FAILED_SEND);
                         mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId,
-                                Message.Status.Content.FAILED, ReasonCode.FAILED_SEND);
+                                Status.FAILED, ReasonCode.FAILED_SEND);
+                        break;
                     }
-                    break;
                 default:
                     break;
             }
@@ -585,10 +584,10 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
         }
         String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(networkMimeType);
         synchronized (lock) {
-            mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Message.Status.Content.SENDING,
+            mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.SENDING,
                     ReasonCode.UNSPECIFIED);
             mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId,
-                    ChatLog.Message.Status.Content.SENDING, ReasonCode.UNSPECIFIED);
+                    Status.SENDING, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -605,11 +604,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
         }
         String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(mimeType);
         synchronized (lock) {
-            mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Message.Status.Content.SENT,
+            mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.SENT,
                     ReasonCode.UNSPECIFIED);
 
-            mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId,
-                    Message.Status.Content.SENT, ReasonCode.UNSPECIFIED);
+            mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId, Status.SENT,
+                    ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -626,11 +625,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
                     .toString());
         }
         synchronized (lock) {
-            mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Message.Status.Content.FAILED,
+            mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.FAILED,
                     ReasonCode.FAILED_SEND);
 
-            mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId,
-                    Message.Status.Content.FAILED, ReasonCode.FAILED_SEND);
+            mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId, Status.FAILED,
+                    ReasonCode.FAILED_SEND);
         }
     }
 
@@ -646,31 +645,30 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
         if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
                 || ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
                 || ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
-            int reasonCode = imdnToFailedReasonCode(imdn);
+            ReasonCode reasonCode = imdnToFailedReasonCode(imdn);
             synchronized (lock) {
-                mMessagingLog.setChatMessageStatusAndReasonCode(msgId,
-                        Message.Status.Content.FAILED, reasonCode);
+                mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.FAILED, reasonCode);
 
-                mBroadcaster.broadcastMessageStatusChanged(contact, mimeType, msgId,
-                        Message.Status.Content.FAILED, reasonCode);
+                mBroadcaster.broadcastMessageStatusChanged(contact, mimeType, msgId, Status.FAILED,
+                        reasonCode);
             }
 
         } else if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
             synchronized (lock) {
-                mMessagingLog.setChatMessageStatusAndReasonCode(msgId,
-                        Message.Status.Content.DELIVERED, ReasonCode.UNSPECIFIED);
+                mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.DELIVERED,
+                        ReasonCode.UNSPECIFIED);
 
                 mBroadcaster.broadcastMessageStatusChanged(contact, mimeType, msgId,
-                        Message.Status.Content.DELIVERED, ReasonCode.UNSPECIFIED);
+                        Status.DELIVERED, ReasonCode.UNSPECIFIED);
             }
 
         } else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
             synchronized (lock) {
-                mMessagingLog.setChatMessageStatusAndReasonCode(msgId,
-                        Message.Status.Content.DISPLAYED, ReasonCode.UNSPECIFIED);
+                mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.DISPLAYED,
+                        ReasonCode.UNSPECIFIED);
 
                 mBroadcaster.broadcastMessageStatusChanged(contact, mimeType, msgId,
-                        Message.Status.Content.DISPLAYED, ReasonCode.UNSPECIFIED);
+                        Status.DISPLAYED, ReasonCode.UNSPECIFIED);
             }
         }
     }

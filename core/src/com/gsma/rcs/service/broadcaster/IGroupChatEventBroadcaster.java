@@ -16,6 +16,10 @@
 
 package com.gsma.rcs.service.broadcaster;
 
+import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
+import com.gsma.services.rcs.chat.ChatLog.Message.Status;
+import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 
@@ -25,14 +29,14 @@ import com.gsma.services.rcs.contacts.ContactId;
 public interface IGroupChatEventBroadcaster {
 
     public void broadcastMessageStatusChanged(String chatId, String mimeType, String msgId,
-            int status, int reasonCode);
+            Status status, ReasonCode reasonCode);
 
     public void broadcastMessageGroupDeliveryInfoChanged(String chatId, ContactId contact,
             String mimeType, String msgId, int status, int reasonCode);
 
     public void broadcastParticipantInfoStatusChanged(String chatId, ParticipantInfo info);
 
-    public void broadcastStateChanged(String chatId, int state, int reasonCode);
+    public void broadcastStateChanged(String chatId, State state, GroupChat.ReasonCode reasonCode);
 
     public void broadcastComposingEvent(String chatId, ContactId contact, boolean status);
 

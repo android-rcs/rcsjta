@@ -16,22 +16,25 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
+import com.gsma.services.rcs.chat.GroupChat.State;
+
 public class GroupChatStateAndReasonCode {
 
-    private final int mState;
+    private final State mState;
 
-    private final int mReasonCode;
+    private final ReasonCode mReasonCode;
 
-    public GroupChatStateAndReasonCode(int state, int reasonCode) {
+    public GroupChatStateAndReasonCode(State state, ReasonCode reasonCode) {
         mState = state;
         mReasonCode = reasonCode;
     }
 
-    public int getState() {
+    public State getState() {
         return mState;
     }
 
-    public int getReasonCode() {
+    public ReasonCode getReasonCode() {
         return mReasonCode;
     }
 }

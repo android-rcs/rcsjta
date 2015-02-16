@@ -22,14 +22,6 @@
 
 package com.gsma.rcs.provider.messaging;
 
-import java.util.Calendar;
-import java.util.Set;
-
-import android.content.ContentValues;
-import android.database.Cursor;
-import android.database.SQLException;
-import android.net.Uri;
-
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.provider.LocalContentResolver;
@@ -38,10 +30,21 @@ import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
-import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatLog.Message;
+import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
+import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
+import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
+
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.SQLException;
+import android.net.Uri;
+
+import java.util.Calendar;
+import java.util.Set;
 
 /**
  * Class to interface the message table
@@ -59,7 +62,7 @@ public class MessageLog implements IMessageLog {
     private static final Logger logger = Logger.getLogger(MessageLog.class.getSimpleName());
 
     private static final String[] PROJECTION_MESSAGE_ID = new String[] {
-            MessageData.KEY_MESSAGE_ID
+        MessageData.KEY_MESSAGE_ID
     };
 
     private static final int FIRST_COLUMN_IDX = 0;
@@ -78,7 +81,7 @@ public class MessageLog implements IMessageLog {
         this.groupChatDeliveryInfoLog = groupChatDeliveryInfoLog;
     }
 
-    private void addIncomingOneToOneMessage(ChatMessage msg, int status, int reasonCode) {
+    private void addIncomingOneToOneMessage(ChatMessage msg, Status status, ReasonCode reasonCode) {
         ContactId contact = msg.getRemoteContact();
         String msgId = msg.getMessageId();
         if (logger.isActivated()) {
@@ -102,9 +105,9 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
         values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
 
-        values.put(MessageData.KEY_STATUS, status);
-        values.put(MessageData.KEY_REASON_CODE, reasonCode);
-        mLocalContentResolver.insert(ChatLog.Message.CONTENT_URI, values);
+        values.put(MessageData.KEY_STATUS, status.toInt());
+        values.put(MessageData.KEY_REASON_CODE, reasonCode.toInt());
+        mLocalContentResolver.insert(Message.CONTENT_URI, values);
     }
 
     /**
@@ -115,7 +118,7 @@ public class MessageLog implements IMessageLog {
      * @param reasonCode Reason code
      */
     @Override
-    public void addOutgoingOneToOneChatMessage(ChatMessage msg, int status, int reasonCode) {
+    public void addOutgoingOneToOneChatMessage(ChatMessage msg, Status status, ReasonCode reasonCode) {
         ContactId contact = msg.getRemoteContact();
         String msgId = msg.getMessageId();
         if (logger.isActivated()) {
@@ -138,15 +141,14 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
         values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
 
-        values.put(MessageData.KEY_STATUS, status);
-        values.put(MessageData.KEY_REASON_CODE, reasonCode);
-        mLocalContentResolver.insert(ChatLog.Message.CONTENT_URI, values);
+        values.put(MessageData.KEY_STATUS, status.toInt());
+        values.put(MessageData.KEY_REASON_CODE, reasonCode.toInt());
+        mLocalContentResolver.insert(Message.CONTENT_URI, values);
     }
 
     @Override
     public void addOneToOneSpamMessage(ChatMessage msg) {
-        addIncomingOneToOneMessage(msg, ChatLog.Message.Status.Content.REJECTED,
-                ChatLog.Message.ReasonCode.REJECTED_SPAM);
+        addIncomingOneToOneMessage(msg, Status.REJECTED, Message.ReasonCode.REJECTED_SPAM);
     }
 
     /**
@@ -158,13 +160,10 @@ public class MessageLog implements IMessageLog {
     @Override
     public void addIncomingOneToOneChatMessage(ChatMessage msg, boolean imdnDisplayedRequested) {
         if (imdnDisplayedRequested) {
-            addIncomingOneToOneMessage(msg,
-                    ChatLog.Message.Status.Content.DISPLAY_REPORT_REQUESTED,
-                    ChatLog.Message.ReasonCode.UNSPECIFIED);
+            addIncomingOneToOneMessage(msg, Status.DISPLAY_REPORT_REQUESTED, ReasonCode.UNSPECIFIED);
 
         } else {
-            addIncomingOneToOneMessage(msg, ChatLog.Message.Status.Content.RECEIVED,
-                    ChatLog.Message.ReasonCode.UNSPECIFIED);
+            addIncomingOneToOneMessage(msg, Status.RECEIVED, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -179,7 +178,7 @@ public class MessageLog implements IMessageLog {
      */
     @Override
     public void addGroupChatMessage(String chatId, ChatMessage msg, Direction direction,
-            int status, int reasonCode) {
+            Status status, ReasonCode reasonCode) {
         String msgId = msg.getMessageId();
         ContactId contact = msg.getRemoteContact();
         if (logger.isActivated()) {
@@ -196,8 +195,8 @@ public class MessageLog implements IMessageLog {
         }
         values.put(MessageData.KEY_DIRECTION, direction.toInt());
         values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD.toInt());
-        values.put(MessageData.KEY_STATUS, status);
-        values.put(MessageData.KEY_REASON_CODE, reasonCode);
+        values.put(MessageData.KEY_STATUS, status.toInt());
+        values.put(MessageData.KEY_REASON_CODE, reasonCode.toInt());
         String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
         values.put(MessageData.KEY_MIME_TYPE, apiMimeType);
         values.put(MessageData.KEY_CONTENT, ChatUtils.networkContentToPersistedContent(msg));
@@ -215,7 +214,7 @@ public class MessageLog implements IMessageLog {
             values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
             values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
         }
-        mLocalContentResolver.insert(ChatLog.Message.CONTENT_URI, values);
+        mLocalContentResolver.insert(Message.CONTENT_URI, values);
 
         if (direction == Direction.OUTGOING) {
             try {
@@ -231,8 +230,8 @@ public class MessageLog implements IMessageLog {
                             com.gsma.services.rcs.GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED);
                 }
             } catch (Exception e) {
-                mLocalContentResolver.delete(
-                        Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), null, null);
+                mLocalContentResolver.delete(Uri.withAppendedPath(Message.CONTENT_URI, msgId),
+                        null, null);
                 mLocalContentResolver.delete(
                         Uri.withAppendedPath(GroupDeliveryInfoData.CONTENT_URI, msgId), null, null);
                 /* TODO: Throw exception */
@@ -245,10 +244,10 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
-    public void addGroupChatEvent(String chatId, ContactId contact, int status) {
+    public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent event) {
         if (logger.isActivated()) {
             logger.debug("Add group chat system message: chatID=" + chatId + ", contact=" + contact
-                    + ", status=" + status);
+                    + ", event=" + event);
         }
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_CHAT_ID, chatId);
@@ -257,15 +256,15 @@ public class MessageLog implements IMessageLog {
         }
         values.put(MessageData.KEY_MESSAGE_ID, IdGenerator.generateMessageID());
         values.put(MessageData.KEY_MIME_TYPE, MimeType.GROUPCHAT_EVENT);
-        values.put(MessageData.KEY_STATUS, status);
-        values.put(MessageData.KEY_REASON_CODE, ChatLog.Message.ReasonCode.UNSPECIFIED);
+        values.put(MessageData.KEY_STATUS, event.toInt());
+        values.put(MessageData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
         values.put(MessageData.KEY_DIRECTION, Direction.IRRELEVANT.toInt());
         values.put(ChatData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
         values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD.toInt());
         values.put(MessageData.KEY_TIMESTAMP_SENT, 0);
         values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
         values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
-        mLocalContentResolver.insert(ChatLog.Message.CONTENT_URI, values);
+        mLocalContentResolver.insert(Message.CONTENT_URI, values);
     }
 
     @Override
@@ -278,8 +277,8 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_READ_STATUS, ReadStatus.READ.toInt());
         values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, Calendar.getInstance().getTimeInMillis());
 
-        if (mLocalContentResolver.update(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId),
-                values, null, null) < 1) {
+        if (mLocalContentResolver.update(Uri.withAppendedPath(Message.CONTENT_URI, msgId), values,
+                null, null) < 1) {
             /* TODO: Throw exception */
             if (logger.isActivated()) {
                 logger.warn("There was no message with msgId '" + msgId + "' to mark as read.");
@@ -288,22 +287,22 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
-    public void setChatMessageStatusAndReasonCode(String msgId, int status, int reasonCode) {
+    public void setChatMessageStatusAndReasonCode(String msgId, Status status, ReasonCode reasonCode) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Update chat message: msgID=").append(msgId)
                     .append(", status=").append(status).append(", reasonCode=").append(reasonCode)
                     .toString());
         }
         ContentValues values = new ContentValues();
-        values.put(MessageData.KEY_STATUS, status);
-        values.put(MessageData.KEY_REASON_CODE, reasonCode);
-        if (status == ChatLog.Message.Status.Content.DELIVERED) {
+        values.put(MessageData.KEY_STATUS, status.toInt());
+        values.put(MessageData.KEY_REASON_CODE, reasonCode.toInt());
+        if (status == Message.Status.DELIVERED) {
             values.put(MessageData.KEY_TIMESTAMP_DELIVERED, Calendar.getInstance()
                     .getTimeInMillis());
         }
 
-        if (mLocalContentResolver.update(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId),
-                values, null, null) < 1) {
+        if (mLocalContentResolver.update(Uri.withAppendedPath(Message.CONTENT_URI, msgId), values,
+                null, null) < 1) {
             /* TODO: Throw exception */
             if (logger.isActivated()) {
                 logger.warn("There was no message with msgId '" + msgId + "' to update status for.");
@@ -318,16 +317,14 @@ public class MessageLog implements IMessageLog {
                     "Mark incoming chat message status as received for msgID=").append(msgId)
                     .toString());
         }
-        setChatMessageStatusAndReasonCode(msgId, ChatLog.Message.Status.Content.RECEIVED,
-                ChatLog.Message.ReasonCode.UNSPECIFIED);
+        setChatMessageStatusAndReasonCode(msgId, Message.Status.RECEIVED, ReasonCode.UNSPECIFIED);
     }
 
     @Override
     public boolean isMessagePersisted(String msgId) {
         Cursor cursor = null;
         try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId),
+            cursor = mLocalContentResolver.query(Uri.withAppendedPath(Message.CONTENT_URI, msgId),
                     PROJECTION_MESSAGE_ID, null, null, null);
             return cursor.moveToFirst();
         } finally {
@@ -339,13 +336,12 @@ public class MessageLog implements IMessageLog {
 
     private Cursor getMessageData(String columnName, String msgId) throws SQLException {
         String[] projection = new String[] {
-                columnName
+            columnName
         };
         Cursor cursor = null;
         try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), projection, null,
-                    null, null);
+            cursor = mLocalContentResolver.query(Uri.withAppendedPath(Message.CONTENT_URI, msgId),
+                    projection, null, null, null);
             if (cursor.moveToFirst()) {
                 return cursor;
             }
@@ -447,9 +443,8 @@ public class MessageLog implements IMessageLog {
     public Cursor getCacheableChatMessageData(String msgId) {
         Cursor cursor = null;
         try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, msgId), null, null, null,
-                    null);
+            cursor = mLocalContentResolver.query(Uri.withAppendedPath(Message.CONTENT_URI, msgId),
+                    null, null, null, null);
             if (cursor.moveToFirst()) {
                 return cursor;
             }

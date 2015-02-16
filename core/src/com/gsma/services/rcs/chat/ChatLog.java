@@ -22,14 +22,16 @@
 
 package com.gsma.services.rcs.chat;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.chat.GroupChat.State;
+import com.gsma.services.rcs.contacts.ContactUtils;
 
 import android.content.Context;
 import android.net.Uri;
+import android.util.SparseArray;
 
-import com.gsma.services.rcs.contacts.ContactUtils;
-import com.gsma.services.rcs.chat.GroupChat.State;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Content provider for chat history
@@ -72,7 +74,7 @@ public class ChatLog {
          * Type: INTEGER
          * </P>
          * 
-         * @see ChatLog.Message.ReasonCode
+         * @see ReasonCode
          */
         public static final String REASON_CODE = "reason_code";
 
@@ -195,7 +197,7 @@ public class ChatLog {
          * Type: INTEGER
          * </P>
          * 
-         * @see ChatLog.Message.ReasonCode
+         * @see ReasonCode
          */
         public static final String REASON_CODE = "reason_code";
 
@@ -299,133 +301,181 @@ public class ChatLog {
         /**
          * Status of the message
          */
-        public static class Status {
+        public enum Status {
+
             /**
-             * Status of a content message
+             * The message has been rejected
              */
-            public static class Content {
+            REJECTED(0),
 
-                /**
-                 * The message has been rejected
-                 */
-                public static final int REJECTED = 0;
+            /**
+             * The message is queued to be sent by rcs service when possible
+             */
+            QUEUED(1),
 
-                /**
-                 * The message is queued to be sent by rcs service when possible
-                 */
-                public static final int QUEUED = 1;
+            /**
+             * The message is in progress of sending
+             */
+            SENDING(2),
 
-                /**
-                 * The message is in progress of sending
-                 */
-                public static final int SENDING = 2;
+            /**
+             * The message has been sent
+             */
+            SENT(3),
 
-                /**
-                 * The message has been sent
-                 */
-                public static final int SENT = 3;
+            /**
+             * The message sending has been failed
+             */
+            FAILED(4),
 
-                /**
-                 * The message sending has been failed
-                 */
-                public static final int FAILED = 4;
+            /**
+             * The message has been delivered to the remote.
+             */
+            DELIVERED(5),
 
-                /**
-                 * The message has been delivered to the remote.
-                 */
-                public static final int DELIVERED = 5;
+            /**
+             * The message has been received and a displayed delivery report is requested
+             */
+            DISPLAY_REPORT_REQUESTED(6),
 
-                /**
-                 * The message has been received and a displayed delivery report is requested
-                 */
-                public static final int DISPLAY_REPORT_REQUESTED = 6;
+            /**
+             * The message is delivered and no display delivery report is requested.
+             */
+            RECEIVED(7),
 
-                /**
-                 * The message is delivered and no display delivery report is requested.
-                 */
-                public static final int RECEIVED = 7;
+            /**
+             * The message has been displayed
+             */
+            DISPLAYED(8);
 
-                /**
-                 * The message has been displayed
-                 */
-                public static final int DISPLAYED = 8;
+            private final int mValue;
+
+            private static SparseArray<Status> mValueToEnum = new SparseArray<Status>();
+            static {
+                for (Status entry : Status.values()) {
+                    mValueToEnum.put(entry.toInt(), entry);
+                }
             }
 
-            /**
-             * Status of the system message
-             */
-            public static class System {
-                /**
-                 * Invitation of a participant is pending
-                 */
-                public static final int PENDING = 0;
+            private Status(int value) {
+                mValue = value;
+            }
 
-                /**
-                 * Invitation accepted by a participant
-                 */
-                public static final int ACCEPTED = 1;
+            public final int toInt() {
+                return mValue;
+            }
 
-                /**
-                 * Invitation declined by a participant
-                 */
-                public static final int DECLINED = 2;
-
-                /**
-                 * Invitation of a participant has failed
-                 */
-                public static final int FAILED = 3;
-
-                /**
-                 * Participant has joined the group chat
-                 */
-                public static final int JOINED = 4;
-
-                /**
-                 * Participant has left the group chat (i.e. departed)
-                 */
-                public static final int GONE = 5;
-
-                /**
-                 * Participant has been disconnected from the group chat (i.e. booted)
-                 */
-                public static final int DISCONNECTED = 6;
-
-                /**
-                 * Participant is busy
-                 */
-                public static final int BUSY = 7;
+            public final static Status valueOf(int value) {
+                Status entry = mValueToEnum.get(value);
+                if (entry != null) {
+                    return entry;
+                }
+                throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                        .append(Status.class.getName()).append(".").append(value).append("!")
+                        .toString());
             }
         }
 
         /**
          * Reason code of the message status
          */
-        public static class ReasonCode {
+        public enum ReasonCode {
 
             /**
              * No specific reason code specified.
              */
-            public static final int UNSPECIFIED = 0;
+            UNSPECIFIED(0),
 
             /**
              * Sending of the message failed.
              */
-            public static final int FAILED_SEND = 1;
+            FAILED_SEND(1),
 
             /**
              * Delivering of the message failed.
              */
-            public static final int FAILED_DELIVERY = 2;
+            FAILED_DELIVERY(2),
 
             /**
              * Displaying of the message failed.
              */
-            public static final int FAILED_DISPLAY = 3;
+            FAILED_DISPLAY(3),
 
             /**
              * Incoming one-to-one message was detected as spam.
              */
-            public static final int REJECTED_SPAM = 4;
+            REJECTED_SPAM(4);
+
+            private final int mValue;
+
+            private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<ReasonCode>();
+            static {
+                for (ReasonCode entry : ReasonCode.values()) {
+                    mValueToEnum.put(entry.toInt(), entry);
+                }
+            }
+
+            private ReasonCode(int value) {
+                mValue = value;
+            }
+
+            public final int toInt() {
+                return mValue;
+            }
+
+            public final static ReasonCode valueOf(int value) {
+                ReasonCode entry = mValueToEnum.get(value);
+                if (entry != null) {
+                    return entry;
+                }
+                throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                        .append(ReasonCode.class.getName()).append(".").append(value).append("!")
+                        .toString());
+            }
         }
+
+        /**
+         * Status of group chat event message
+         */
+        public enum GroupChatEvent {
+
+            /**
+             * JOINED.
+             */
+            JOINED(0),
+
+            /**
+             * DEPARTED.
+             */
+            DEPARTED(1);
+
+            private final int mValue;
+
+            private static SparseArray<GroupChatEvent> mValueToEnum = new SparseArray<GroupChatEvent>();
+            static {
+                for (GroupChatEvent entry : GroupChatEvent.values()) {
+                    mValueToEnum.put(entry.toInt(), entry);
+                }
+            }
+
+            private GroupChatEvent(int value) {
+                mValue = value;
+            }
+
+            public final int toInt() {
+                return mValue;
+            }
+
+            public final static GroupChatEvent valueOf(int value) {
+                GroupChatEvent entry = mValueToEnum.get(value);
+                if (entry != null) {
+                    return entry;
+                }
+                throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                        .append(GroupChatEvent.class.getName()).append(".").append(value)
+                        .append("!").toString());
+            }
+        }
+
     }
 }

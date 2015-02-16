@@ -46,6 +46,7 @@ import com.gsma.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.gsma.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.gsma.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 import com.gsma.rcs.service.api.ServerApiException;
+import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
@@ -318,7 +319,7 @@ public interface CoreListener {
      * @param reasonCode Rejected reason code
      */
     public void handleGroupChatInvitationRejected(String chatId, ContactId contact, String subject,
-            Set<ParticipantInfo> participants, int reasonCode);
+            Set<ParticipantInfo> participants, GroupChat.ReasonCode reasonCode);
 
     /**
      * Handles image sharing rejection

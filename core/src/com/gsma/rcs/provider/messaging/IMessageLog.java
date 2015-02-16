@@ -24,6 +24,9 @@ package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
+import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
+import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.contacts.ContactId;
 
 import android.database.Cursor;
@@ -57,7 +60,7 @@ public interface IMessageLog {
      * @param status Message status
      * @param reasonCode Status reason code
      */
-    public void addOutgoingOneToOneChatMessage(ChatMessage msg, int status, int reasonCode);
+    public void addOutgoingOneToOneChatMessage(ChatMessage msg, Status status, ReasonCode reasonCode);
 
     /**
      * Add a group chat message
@@ -69,7 +72,7 @@ public interface IMessageLog {
      * @param reasonCode Status reason code
      */
     public void addGroupChatMessage(String chatId, ChatMessage msg, Direction direction,
-            int status, int reasonCode);
+            Status status, ReasonCode reasonCode);
 
     /**
      * Add group chat system message
@@ -78,7 +81,7 @@ public interface IMessageLog {
      * @param contact Contact ID
      * @param status Status
      */
-    public void addGroupChatEvent(String chatId, ContactId contact, int status);
+    public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent event);
 
     /**
      * Update chat message read status
@@ -95,7 +98,7 @@ public interface IMessageLog {
      * @param status Message status
      * @param reasonCode Message status reason code
      */
-    public void setChatMessageStatusAndReasonCode(String msgId, int status, int reasonCode);
+    public void setChatMessageStatusAndReasonCode(String msgId, Status status, ReasonCode reasonCode);
 
     /**
      * Mark incoming chat message status as received

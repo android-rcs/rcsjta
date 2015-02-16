@@ -22,9 +22,15 @@
 
 package com.gsma.rcs.provider.messaging;
 
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.Set;
+import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
+import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
+import com.gsma.services.rcs.chat.GroupChat.State;
+import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.contacts.ContactId;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -32,14 +38,9 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.util.SparseArray;
 
-import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
-import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.GroupChat;
-import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.contacts.ContactId;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This class interfaces the chat table
@@ -56,13 +57,13 @@ public class GroupChatLog implements IGroupChatLog {
 
     private final static String SELECT_CHAT_ID_STATUS_REJECTED = new StringBuilder(
             ChatData.KEY_CHAT_ID).append("=? AND ").append(ChatData.KEY_STATE).append("=")
-            .append(GroupChat.State.ABORTED).append(" AND ").append(ChatData.KEY_REASON_CODE)
-            .append("=").append(GroupChat.ReasonCode.ABORTED_BY_USER).append(" AND ")
+            .append(State.ABORTED.toInt()).append(" AND ").append(ChatData.KEY_REASON_CODE)
+            .append("=").append(ReasonCode.ABORTED_BY_USER.toInt()).append(" AND ")
             .append(ChatData.KEY_USER_ABORTION).append("=")
             .append(UserAbortion.SERVER_NOT_NOTIFIED.toInt()).toString();
 
     private static final String SELECT_ACTIVE_GROUP_CHATS = new StringBuilder(ChatData.KEY_STATE)
-            .append("=").append(GroupChat.State.STARTED).toString();
+            .append("=").append(State.STARTED.toInt()).toString();
 
     /**
      * The logger
@@ -135,7 +136,8 @@ public class GroupChatLog implements IGroupChatLog {
      * java.lang.String, java.util.Set, int, int)
      */
     public void addGroupChat(String chatId, ContactId contact, String subject,
-            Set<ParticipantInfo> participants, int state, int reasonCode, Direction direction) {
+            Set<ParticipantInfo> participants, State state, ReasonCode reasonCode,
+            Direction direction) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("addGroupChat; chatID=").append(chatId)
                     .append(",subject=").append(subject).append(",state").append(state)
@@ -147,8 +149,8 @@ public class GroupChatLog implements IGroupChatLog {
         if (contact != null) {
             values.put(ChatData.KEY_CONTACT, contact.toString());
         }
-        values.put(ChatData.KEY_STATE, state);
-        values.put(ChatData.KEY_REASON_CODE, reasonCode);
+        values.put(ChatData.KEY_STATE, state.toInt());
+        values.put(ChatData.KEY_REASON_CODE, reasonCode.toInt());
         values.put(ChatData.KEY_SUBJECT, subject);
         values.put(ChatData.KEY_PARTICIPANTS, writeParticipantInfo(participants));
         values.put(ChatData.KEY_DIRECTION, direction.toInt());
@@ -170,7 +172,7 @@ public class GroupChatLog implements IGroupChatLog {
         ContentValues values = new ContentValues();
         values.put(ChatData.KEY_USER_ABORTION, UserAbortion.SERVER_NOTIFIED.toInt());
         String[] selectionArgs = {
-                chatId
+            chatId
         };
         mLocalContentResolver.update(ChatData.CONTENT_URI, values, SELECT_CHAT_ID_STATUS_REJECTED,
                 selectionArgs);
@@ -180,16 +182,16 @@ public class GroupChatLog implements IGroupChatLog {
     }
 
     @Override
-    public void setGroupChatStateAndReasonCode(String chatId, int state, int reasonCode) {
+    public void setGroupChatStateAndReasonCode(String chatId, State state, ReasonCode reasonCode) {
         if (logger.isActivated()) {
             logger.debug("updateGroupChatStatus (chatId=" + chatId + ") (state=" + state
                     + ") (reasonCode=" + reasonCode + ")");
         }
         ContentValues values = new ContentValues();
-        values.put(ChatData.KEY_STATE, state);
-        values.put(ChatData.KEY_REASON_CODE, reasonCode);
+        values.put(ChatData.KEY_STATE, state.toInt());
+        values.put(ChatData.KEY_REASON_CODE, reasonCode.toInt());
         String selectionArgs[] = new String[] {
-                chatId
+            chatId
         };
         mLocalContentResolver.update(ChatData.CONTENT_URI, values, SELECT_CHAT_ID, selectionArgs);
     }
@@ -224,7 +226,7 @@ public class GroupChatLog implements IGroupChatLog {
         }
         ContentValues values = new ContentValues();
         values.put(ChatData.KEY_REJOIN_ID, rejoinId);
-        values.put(ChatData.KEY_STATE, GroupChat.State.STARTED);
+        values.put(ChatData.KEY_STATE, State.STARTED.toInt());
         mLocalContentResolver.update(ChatData.CONTENT_URI, values, ChatData.KEY_CHAT_ID + " = '"
                 + chatId + "'", null);
     }
@@ -243,12 +245,12 @@ public class GroupChatLog implements IGroupChatLog {
 
         // @formatter:off
         String[] projection = new String[] {
-                ChatData.KEY_CHAT_ID, ChatData.KEY_REJOIN_ID,
-                ChatData.KEY_PARTICIPANTS, ChatData.KEY_SUBJECT
+                ChatData.KEY_CHAT_ID, ChatData.KEY_REJOIN_ID, ChatData.KEY_PARTICIPANTS,
+                ChatData.KEY_SUBJECT
         };
         // @formatter:on
         String[] selArgs = new String[] {
-                chatId
+            chatId
         };
         try {
             cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection, SELECT_CHAT_ID,
@@ -280,10 +282,10 @@ public class GroupChatLog implements IGroupChatLog {
         }
         Set<ParticipantInfo> result = new HashSet<ParticipantInfo>();
         String[] projection = new String[] {
-                ChatData.KEY_PARTICIPANTS
+            ChatData.KEY_PARTICIPANTS
         };
         String[] selArgs = new String[] {
-                chatId
+            chatId
         };
         Cursor cursor = null;
         try {
@@ -326,10 +328,10 @@ public class GroupChatLog implements IGroupChatLog {
     @Override
     public boolean isGroupChatNextInviteRejected(String chatId) {
         String[] projection = {
-                ChatData.KEY_CHAT_ID
+            ChatData.KEY_CHAT_ID
         };
         String[] selectionArgs = {
-                chatId
+            chatId
         };
         Cursor cursor = null;
         try {
@@ -356,10 +358,10 @@ public class GroupChatLog implements IGroupChatLog {
             logger.debug("Get group chat info for ".concat(chatId));
         }
         String[] projection = new String[] {
-                columnName
+            columnName
         };
         String[] selArgs = new String[] {
-                chatId
+            chatId
         };
         Cursor cursor = null;
         try {
@@ -466,7 +468,7 @@ public class GroupChatLog implements IGroupChatLog {
      */
     public Set<String> getChatIdsOfActiveGroupChatsForAutoRejoin() {
         String[] projection = new String[] {
-                ChatData.KEY_CHAT_ID
+            ChatData.KEY_CHAT_ID
         };
         Cursor cursor = null;
         try {
@@ -496,7 +498,7 @@ public class GroupChatLog implements IGroupChatLog {
             logger.debug("Get group chat info for ".concat(chatId));
         }
         String[] selArgs = new String[] {
-                chatId
+            chatId
         };
         Cursor cursor = null;
         try {

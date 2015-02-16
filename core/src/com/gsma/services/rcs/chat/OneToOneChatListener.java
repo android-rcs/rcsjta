@@ -22,6 +22,8 @@
 
 package com.gsma.services.rcs.chat;
 
+import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
+import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
@@ -29,7 +31,7 @@ import com.gsma.services.rcs.contacts.ContactId;
  * 
  * @author Jean-Marc AUFFRET
  */
-public abstract class OneToOneChatListener extends IOneToOneChatListener.Stub {
+public abstract class OneToOneChatListener {
 
     /**
      * Callback called when a message status/reasonCode is changed.
@@ -41,7 +43,7 @@ public abstract class OneToOneChatListener extends IOneToOneChatListener.Stub {
      * @param reasonCode Reason code
      */
     public abstract void onMessageStatusChanged(ContactId contact, String mimeType, String msgId,
-            int status, int reasonCode);
+            Status status, ReasonCode reasonCode);
 
     /**
      * Callback called when an Is-composing event has been received. If the remote is typing a

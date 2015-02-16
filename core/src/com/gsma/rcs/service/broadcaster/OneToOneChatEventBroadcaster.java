@@ -16,15 +16,17 @@
 
 package com.gsma.rcs.service.broadcaster;
 
-import android.content.Intent;
-import android.os.RemoteCallbackList;
-
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.chat.OneToOneChatIntent;
+import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
+import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.chat.IOneToOneChatListener;
+import com.gsma.services.rcs.chat.OneToOneChatIntent;
 import com.gsma.services.rcs.contacts.ContactId;
+
+import android.content.Intent;
+import android.os.RemoteCallbackList;
 
 /**
  * OneToOneChatEventBroadcaster maintains the registering and unregistering of
@@ -49,12 +51,14 @@ public class OneToOneChatEventBroadcaster implements IOneToOneChatEventBroadcast
     }
 
     public void broadcastMessageStatusChanged(ContactId contact, String mimeType, String msgId,
-            int status, int reasonCode) {
+            Status status, ReasonCode reasonCode) {
         final int N = mOneToOneChatListeners.beginBroadcast();
+        int rcsStatus = status.toInt();
+        int rcsReasonCode = reasonCode.toInt();
         for (int i = 0; i < N; i++) {
             try {
                 mOneToOneChatListeners.getBroadcastItem(i).onMessageStatusChanged(contact,
-                        mimeType, msgId, status, reasonCode);
+                        mimeType, msgId, rcsStatus, rcsReasonCode);
             } catch (Exception e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener.", e);

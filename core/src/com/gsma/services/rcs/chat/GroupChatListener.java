@@ -22,6 +22,9 @@
 
 package com.gsma.services.rcs.chat;
 
+import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
+import com.gsma.services.rcs.chat.ChatLog.Message.Status;
+import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
@@ -29,7 +32,7 @@ import com.gsma.services.rcs.contacts.ContactId;
  * 
  * @author Jean-Marc AUFFRET
  */
-public abstract class GroupChatListener extends IGroupChatListener.Stub {
+public abstract class GroupChatListener {
     /**
      * Callback called when the group chat state is changed
      * 
@@ -37,7 +40,7 @@ public abstract class GroupChatListener extends IGroupChatListener.Stub {
      * @param state group chat state
      * @param reasonCode reason code
      */
-    public abstract void onStateChanged(String chatId, int state, int reasonCode);
+    public abstract void onStateChanged(String chatId, State state, GroupChat.ReasonCode reasonCode);
 
     /**
      * Callback called when an Is-composing event has been received. If the remote is typing a
@@ -59,7 +62,7 @@ public abstract class GroupChatListener extends IGroupChatListener.Stub {
      * @param reasonCode reason code
      */
     public abstract void onMessageStatusChanged(String chatId, String mimeType, String msgId,
-            int status, int reasonCode);
+            Status status, ReasonCode reasonCode);
 
     /**
      * Callback called when a group delivery info status/reasonCode was changed for a single

@@ -22,7 +22,10 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
+import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 
 /**
  * Message data constants
@@ -65,14 +68,14 @@ public class MessageData {
     static final String KEY_DIRECTION = ChatLog.Message.DIRECTION;
 
     /**
-     * @see ChatLog.Message.Status.Content for the list of status.
+     * @see Status
      */
     static final String KEY_STATUS = ChatLog.Message.STATUS;
 
     /**
      * Reason code associated with the message status.
      * 
-     * @see ChatLog.Message.ReasonCode for the list of reason codes
+     * @see ReasonCode
      */
     static final String KEY_REASON_CODE = ChatLog.Message.REASON_CODE;
 

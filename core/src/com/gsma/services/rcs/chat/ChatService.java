@@ -22,8 +22,12 @@
 
 package com.gsma.services.rcs.chat;
 
-import java.util.ArrayList;
-import java.util.Set;
+import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.contacts.ContactId;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -32,12 +36,11 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.IInterface;
 
-import com.gsma.services.rcs.RcsService;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceListener;
-import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.contacts.ContactId;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  * Chat service offers the main entry point to initiate chat 1-1 and group conversations with
@@ -52,6 +55,9 @@ public class ChatService extends RcsService {
      * API
      */
     private IChatService mApi;
+
+    private final Map<OneToOneChatListener, WeakReference<IOneToOneChatListener>> mOneToOneChatListeners = new WeakHashMap<OneToOneChatListener, WeakReference<IOneToOneChatListener>>();
+    private final Map<GroupChatListener, WeakReference<IGroupChatListener>> mGroupChatListeners = new WeakHashMap<GroupChatListener, WeakReference<IGroupChatListener>>();
 
     private static final String ERROR_CNX = "Chat service not connected";
 
@@ -392,7 +398,10 @@ public class ChatService extends RcsService {
     public void addEventListener(GroupChatListener listener) throws RcsServiceException {
         if (mApi != null) {
             try {
-                mApi.addEventListener3(listener);
+                IGroupChatListener rcsListener = new GroupChatListenerImpl(listener);
+                mGroupChatListeners.put(listener,
+                        new WeakReference<IGroupChatListener>(rcsListener));
+                mApi.addEventListener3(rcsListener);
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }
@@ -410,7 +419,14 @@ public class ChatService extends RcsService {
     public void removeEventListener(GroupChatListener listener) throws RcsServiceException {
         if (mApi != null) {
             try {
-                mApi.removeEventListener3(listener);
+                WeakReference<IGroupChatListener> weakRef = mGroupChatListeners.remove(listener);
+                if (weakRef == null) {
+                    return;
+                }
+                IGroupChatListener rcsListener = weakRef.get();
+                if (rcsListener != null) {
+                    mApi.removeEventListener3(rcsListener);
+                }
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }
@@ -428,7 +444,10 @@ public class ChatService extends RcsService {
     public void addEventListener(OneToOneChatListener listener) throws RcsServiceException {
         if (mApi != null) {
             try {
-                mApi.addEventListener2(listener);
+                IOneToOneChatListener rcsListener = new OneToOneChatListenerImpl(listener);
+                mOneToOneChatListeners.put(listener, new WeakReference<IOneToOneChatListener>(
+                        rcsListener));
+                mApi.addEventListener2(rcsListener);
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }
@@ -446,7 +465,15 @@ public class ChatService extends RcsService {
     public void removeEventListener(OneToOneChatListener listener) throws RcsServiceException {
         if (mApi != null) {
             try {
-                mApi.removeEventListener2(listener);
+                WeakReference<IOneToOneChatListener> weakRef = mOneToOneChatListeners
+                        .remove(listener);
+                if (weakRef == null) {
+                    return;
+                }
+                IOneToOneChatListener rcsListener = weakRef.get();
+                if (rcsListener != null) {
+                    mApi.removeEventListener2(rcsListener);
+                }
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }

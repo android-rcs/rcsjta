@@ -22,14 +22,16 @@
 
 package com.gsma.services.rcs.chat;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
+
+import android.util.SparseArray;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Group chat
@@ -40,128 +42,150 @@ public class GroupChat {
     /**
      * Group chat state
      */
-    public static class State {
+    public enum State {
+
         /**
          * Chat invitation received
          */
-        public final static int INVITED = 0;
+        INVITED(0),
 
         /**
          * Chat invitation sent
          */
-        public final static int INITIATING = 1;
+        INITIATING(1),
 
         /**
          * Chat is started
          */
-        public final static int STARTED = 2;
+        STARTED(2),
 
         /**
          * Chat has been aborted
          */
-        public final static int ABORTED = 3;
+        ABORTED(3),
 
         /**
          * Chat has failed
          */
-        public final static int FAILED = 4;
+        FAILED(4),
 
         /**
          * Chat has been accepted and is in the process of becoming started.
          */
-        public final static int ACCEPTING = 5;
+        ACCEPTING(5),
 
         /**
          * Chat invitation was rejected.
          */
-        public final static int REJECTED = 6;
+        REJECTED(6);
 
-        private State() {
+        private final int mValue;
+
+        private static SparseArray<State> mValueToEnum = new SparseArray<State>();
+        static {
+            for (State entry : State.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
+
+        private State(int value) {
+            mValue = value;
+        }
+
+        public final int toInt() {
+            return mValue;
+        }
+
+        public final static State valueOf(int value) {
+            State entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(State.class.getName()).append(".").append(value).append("!").toString());
         }
     }
 
     /**
      * Group chat state reason code
      */
-    public static class ReasonCode {
+    public enum ReasonCode {
 
         /**
          * No specific reason code specified.
          */
-        public final static int UNSPECIFIED = 0;
+        UNSPECIFIED(0),
 
         /**
          * Group chat is aborted by local user.
          */
-        public final static int ABORTED_BY_USER = 1;
+        ABORTED_BY_USER(1),
 
         /**
          * Group chat is aborted by remote user.
          */
-
-        public final static int ABORTED_BY_REMOTE = 2;
+        ABORTED_BY_REMOTE(2),
 
         /**
-         * Group chat is aborted by system.
+         * Group chat is aborted by inactivity.
          */
-        public final static int ABORTED_BY_SYSTEM = 3;
+        ABORTED_BY_INACTIVITY(3),
 
         /**
          * Group chat is rejected because already taken by the secondary device.
          */
-        public final static int REJECTED_BY_SECONDARY_DEVICE = 4;
+        REJECTED_BY_SECONDARY_DEVICE(4),
 
         /**
          * Group chat invitation was rejected as it was detected as spam.
          */
-        public final static int REJECTED_SPAM = 5;
+        REJECTED_SPAM(5),
 
         /**
          * Group chat invitation was rejected due to max number of chats open already.
          */
-        public final static int REJECTED_MAX_CHATS = 6;
-
-        /**
-         * Group chat invitation was rejected by local user.
-         */
-        public final static int REJECTED_BY_USER = 7;
+        REJECTED_MAX_CHATS(6),
 
         /**
          * Group chat invitation was rejected by remote.
          */
-        public final static int REJECTED_BY_REMOTE = 8;
+        REJECTED_BY_REMOTE(7),
 
         /**
-         * Group chat invitation was rejected due to time out.
+         * Group chat invitation was rejected by inactivity.
          */
-        public final static int REJECTED_TIME_OUT = 9;
+        REJECTED_BY_INACTIVITY(8),
 
         /**
          * Group chat initiation failed.
          */
-        public final static int FAILED_INITIATION = 10;
-    }
+        FAILED_INITIATION(9);
 
-    /**
-     * Group chat error
-     */
-    public static class Error {
-        /**
-         * Group chat has failed
-         */
-        public final static int CHAT_FAILED = 0;
+        private final int mValue;
 
-        /**
-         * Group chat invitation has been declined by remote
-         */
-        public final static int INVITATION_DECLINED = 1;
+        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<ReasonCode>();
+        static {
+            for (ReasonCode entry : ReasonCode.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
 
-        /**
-         * Chat conversation not found
-         */
-        public final static int CHAT_NOT_FOUND = 2;
+        private ReasonCode(int value) {
+            mValue = value;
+        }
 
-        private Error() {
+        public final int toInt() {
+            return mValue;
+        }
+
+        public final static ReasonCode valueOf(int value) {
+            ReasonCode entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(ReasonCode.class.getName()).append(".").append(value).append("!")
+                    .toString());
         }
     }
 
@@ -212,7 +236,7 @@ public class GroupChat {
      * Returns the state of the group chat
      * 
      * @return State
-     * @see GroupChat.State
+     * @see State
      * @throws RcsServiceException
      */
     public int getState() throws RcsServiceException {
@@ -227,7 +251,7 @@ public class GroupChat {
      * Returns the reason code of the state of the group chat
      * 
      * @return ReasonCode
-     * @see GroupChat.ReasonCode
+     * @see ReasonCode
      * @throws RcsServiceException
      */
     public int getReasonCode() throws RcsServiceException {

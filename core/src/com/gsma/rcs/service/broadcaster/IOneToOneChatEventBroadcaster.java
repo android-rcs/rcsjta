@@ -16,6 +16,8 @@
 
 package com.gsma.rcs.service.broadcaster;
 
+import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
+import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
@@ -24,7 +26,7 @@ import com.gsma.services.rcs.contacts.ContactId;
 public interface IOneToOneChatEventBroadcaster {
 
     public void broadcastMessageStatusChanged(ContactId contact, String mimeType, String msgId,
-            int status, int reasonCode);
+            Status status, ReasonCode reasonCode);
 
     public void broadcastComposingEvent(ContactId contact, boolean status);
 
