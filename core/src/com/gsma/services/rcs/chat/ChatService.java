@@ -23,6 +23,7 @@
 package com.gsma.services.rcs.chat;
 
 import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceControl;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceListener;
 import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
@@ -75,7 +76,9 @@ public class ChatService extends RcsService {
      * Connects to the API
      */
     public void connect() {
-        mCtx.bindService(new Intent(IChatService.class.getName()), apiConnection, 0);
+        Intent serviceIntent = new Intent(IChatService.class.getName());
+        serviceIntent.setPackage(RcsServiceControl.RCS_STACK_PACKAGENAME);
+        mCtx.bindService(serviceIntent, apiConnection, 0);
     }
 
     /**
@@ -112,9 +115,18 @@ public class ChatService extends RcsService {
 
         public void onServiceDisconnected(ComponentName className) {
             setApi(null);
-            if (mListener != null) {
-                mListener.onServiceDisconnected(ReasonCode.CONNECTION_LOST);
+            if (mListener == null) {
+                return;
             }
+            ReasonCode reasonCode = ReasonCode.CONNECTION_LOST;
+            try {
+                if (!mRcsServiceControl.isActivated()) {
+                    reasonCode = ReasonCode.SERVICE_DISABLED;
+                }
+            } catch (RcsServiceException e) {
+                // Do nothing
+            }
+            mListener.onServiceDisconnected(reasonCode);
         }
     };
 
@@ -224,7 +236,7 @@ public class ChatService extends RcsService {
      * Returns true if it's possible to initiate a new group chat with the specified contactId right
      * now, else returns false.
      * 
-     * @param ContactId contact
+     * @param contact
      * @return boolean
      * @throws RcsServiceException
      */
@@ -280,7 +292,7 @@ public class ChatService extends RcsService {
      * Deletes a one to one chat with a given contact from history and abort/reject any associated
      * ongoing session if such exists.
      * 
-     * @param ContactId contact
+     * @param contact
      * @throws RcsServiceException
      */
     public void deleteOneToOneChat(ContactId contact) throws RcsServiceException {

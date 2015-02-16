@@ -45,6 +45,7 @@ import com.gsma.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 import com.gsma.rcs.core.ims.service.sip.streaming.OriginatingSipRtpSession;
 import com.gsma.rcs.core.ims.service.sip.streaming.TerminatingSipRtpSession;
 import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -82,17 +83,22 @@ public class SipService extends ImsService {
      */
     private final ContactsManager mContactsManager;
 
+    private final RcsSettings mRcsSettings;
+
     /**
      * Constructor
      * 
      * @param parent IMS module
      * @param contactsManager ContactsManager
+     * @param rcsSettings
      * @throws CoreException
      */
-    public SipService(ImsModule parent, ContactsManager contactsManager) throws CoreException {
+    public SipService(ImsModule parent, ContactsManager contactsManager, RcsSettings rcsSettings)
+            throws CoreException {
         super(parent, true);
 
         mContactsManager = contactsManager;
+        mRcsSettings = rcsSettings;
     }
 
     /**
@@ -136,7 +142,8 @@ public class SipService extends ImsService {
         }
 
         // Create a new session
-        OriginatingSipMsrpSession session = new OriginatingSipMsrpSession(this, contact, featureTag);
+        OriginatingSipMsrpSession session = new OriginatingSipMsrpSession(this, contact,
+                featureTag, mRcsSettings);
 
         return session;
     }
@@ -170,7 +177,7 @@ public class SipService extends ImsService {
 
         // Create a new session
         TerminatingSipMsrpSession session = new TerminatingSipMsrpSession(this, invite,
-                sessionInvite);
+                sessionInvite, mRcsSettings);
 
         getImsModule().getCore().getListener()
                 .handleSipMsrpSessionInvitation(sessionInvite, session);
@@ -191,7 +198,8 @@ public class SipService extends ImsService {
         }
 
         // Create a new session
-        OriginatingSipRtpSession session = new OriginatingSipRtpSession(this, contact, featureTag);
+        OriginatingSipRtpSession session = new OriginatingSipRtpSession(this, contact, featureTag,
+                mRcsSettings);
 
         return session;
     }
@@ -201,6 +209,7 @@ public class SipService extends ImsService {
      * 
      * @param sessionInvite Resolved intent
      * @param invite Initial invite
+     * @throws RcsContactFormatException
      */
     public void receiveRtpSessionInvitation(Intent sessionInvite, SipRequest invite)
             throws RcsContactFormatException {
@@ -225,7 +234,8 @@ public class SipService extends ImsService {
         }
 
         // Create a new session
-        TerminatingSipRtpSession session = new TerminatingSipRtpSession(this, invite, sessionInvite);
+        TerminatingSipRtpSession session = new TerminatingSipRtpSession(this, invite,
+                sessionInvite, mRcsSettings);
 
         getImsModule().getCore().getListener()
                 .handleSipRtpSessionInvitation(sessionInvite, session);
@@ -343,7 +353,8 @@ public class SipService extends ImsService {
             SipDialogPath dialogPath = new SipDialogPath(getImsModule().getSipManager()
                     .getSipStack(), getImsModule().getSipManager().getSipStack().generateCallId(),
                     1, contactUri, ImsModule.IMS_USER_PROFILE.getPublicUri(), contactUri,
-                    getImsModule().getSipManager().getSipStack().getServiceRoutePath());
+                    getImsModule().getSipManager().getSipStack().getServiceRoutePath(),
+                    mRcsSettings);
 
             // Create MESSAGE request
             if (logger.isActivated()) {

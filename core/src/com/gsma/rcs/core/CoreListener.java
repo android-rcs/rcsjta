@@ -43,6 +43,7 @@ import com.gsma.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.gsma.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
@@ -85,8 +86,10 @@ public interface CoreListener {
 
     /**
      * Unregistered from IMS
+     * 
+     * @param reason reason code for registration termmination
      */
-    public void handleRegistrationTerminated();
+    public void handleRegistrationTerminated(RcsServiceRegistration.ReasonCode reason);
 
     /**
      * A new presence sharing notification has been received
@@ -101,7 +104,7 @@ public interface CoreListener {
      * A new presence info notification has been received
      * 
      * @param contact Contact identifier
-     * @param presense Presence info document
+     * @param presence Presence info document
      */
     public void handlePresenceInfoNotification(ContactId contact, PidfDocument presence);
 
@@ -213,7 +216,7 @@ public interface CoreListener {
      * New message delivery status
      * 
      * @param contact Contact identifier
-     * @param ImdnDocument imdn Imdn document
+     * @param imdn Imdn document
      */
     public void handleMessageDeliveryStatus(ContactId contact, ImdnDocument imdn);
 
@@ -221,7 +224,7 @@ public interface CoreListener {
      * New file delivery status
      * 
      * @param contact who notified status
-     * @param ImdnDocument imdn Imdn document
+     * @param imdn Imdn document
      */
     public void handleFileDeliveryStatus(ContactId contact, ImdnDocument imdn);
 
@@ -230,7 +233,7 @@ public interface CoreListener {
      * 
      * @param chatId Chat Id
      * @param contact who notified status
-     * @param ImdnDocument imdn Imdn document
+     * @param imdn Imdn document
      */
     public void handleGroupFileDeliveryStatus(String chatId, ContactId contact, ImdnDocument imdn);
 

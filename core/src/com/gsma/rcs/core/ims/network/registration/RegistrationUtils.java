@@ -35,57 +35,58 @@ public class RegistrationUtils {
     /**
      * Get supported feature tags for registration
      * 
+     * @param rcsSettings
      * @return List of tags
      */
-    public static String[] getSupportedFeatureTags() {
+    public static String[] getSupportedFeatureTags(RcsSettings rcsSettings) {
         List<String> tags = new ArrayList<String>();
         List<String> icsiTags = new ArrayList<String>();
         List<String> iariTags = new ArrayList<String>();
 
         // IM support
-        if (RcsSettings.getInstance().isImSessionSupported()) {
+        if (rcsSettings.isImSessionSupported()) {
             tags.add(FeatureTags.FEATURE_OMA_IM);
         }
 
         // Video share support
-        if (RcsSettings.getInstance().isVideoSharingSupported()) {
+        if (rcsSettings.isVideoSharingSupported()) {
             tags.add(FeatureTags.FEATURE_3GPP_VIDEO_SHARE);
         }
 
         // IP call support
-        if (RcsSettings.getInstance().isIPVoiceCallSupported()) {
+        if (rcsSettings.isIPVoiceCallSupported()) {
             tags.add(FeatureTags.FEATURE_RCSE_IP_VOICE_CALL);
         }
-        if (RcsSettings.getInstance().isIPVideoCallSupported()) {
+        if (rcsSettings.isIPVideoCallSupported()) {
             tags.add(FeatureTags.FEATURE_RCSE_IP_VIDEO_CALL);
         }
-        if (RcsSettings.getInstance().isIPVoiceCallSupported()
-                || RcsSettings.getInstance().isIPVideoCallSupported()) {
+        if (rcsSettings.isIPVoiceCallSupported()
+                || rcsSettings.isIPVideoCallSupported()) {
             icsiTags.add(FeatureTags.FEATURE_3GPP_IP_VOICE_CALL);
         }
 
         // Automata support
-        if (RcsSettings.getInstance().isSipAutomata()) {
+        if (rcsSettings.isSipAutomata()) {
             tags.add(FeatureTags.FEATURE_SIP_AUTOMATA);
         }
 
         // Image share support
-        if (RcsSettings.getInstance().isImageSharingSupported()) {
+        if (rcsSettings.isImageSharingSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_IMAGE_SHARE);
         }
 
         // Geoloc push support
-        if (RcsSettings.getInstance().isGeoLocationPushSupported()) {
+        if (rcsSettings.isGeoLocationPushSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH);
         }
 
         // File transfer HTTP support
-        if (RcsSettings.getInstance().isFileTransferHttpSupported()) {
+        if (rcsSettings.isFileTransferHttpSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_FT_HTTP);
         }
 
         // Extensions
-        if (RcsSettings.getInstance().isExtensionsAllowed()) {
+        if (rcsSettings.isExtensionsAllowed()) {
             icsiTags.add(FeatureTags.FEATURE_3GPP_EXTENSION);
         }
 

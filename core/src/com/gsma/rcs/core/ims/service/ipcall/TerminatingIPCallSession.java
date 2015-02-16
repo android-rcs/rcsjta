@@ -24,11 +24,6 @@ package com.gsma.rcs.core.ims.service.ipcall;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.util.Collection;
-import java.util.Vector;
-
-import android.os.RemoteException;
-
 import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.VideoContent;
@@ -41,13 +36,18 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.gsma.rcs.core.ims.service.ImsService;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.ipcall.AudioCodec;
 import com.gsma.services.rcs.ipcall.VideoCodec;
+
+import android.os.RemoteException;
+
+import java.util.Collection;
+import java.util.Vector;
 
 /**
  * Terminating IP call session
@@ -66,11 +66,14 @@ public class TerminatingIPCallSession extends IPCallSession {
      * 
      * @param parent IMS service
      * @param invite Initial INVITE request
+     * @param contact
+     * @param rcsSettings
      */
-    public TerminatingIPCallSession(ImsService parent, SipRequest invite, ContactId contact) {
+    public TerminatingIPCallSession(ImsService parent, SipRequest invite, ContactId contact,
+            RcsSettings rcsSettings) {
         super(parent, contact, ContentManager.createLiveAudioContentFromSdp(invite
                 .getContentBytes()), ContentManager.createLiveVideoContentFromSdp(invite
-                .getContentBytes()));
+                .getContentBytes()), rcsSettings);
 
         // Create dialog path
         createTerminatingDialogPath(invite);

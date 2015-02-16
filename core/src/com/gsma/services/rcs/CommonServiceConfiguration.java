@@ -150,6 +150,68 @@ public class CommonServiceConfiguration {
     };
 
     /**
+     * The minimum battery level
+     */
+    public enum MinimumBatteryLevel {
+        /**
+         * Discard minimum battery level
+         */
+        NEVER_STOP(0),
+        /**
+         * 5% is the minimum battery level
+         */
+        PERCENT_5(5),
+        /**
+         * 10% is the minimum battery level
+         */
+        PERCENT_10(10),
+        /**
+         * 20% is the minimum battery level
+         */
+        PERCENT_20(20);
+
+        private int mValue;
+
+        private static SparseArray<MinimumBatteryLevel> mValueToEnum = new SparseArray<MinimumBatteryLevel>();
+        static {
+            for (MinimumBatteryLevel entry : MinimumBatteryLevel.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
+
+        private MinimumBatteryLevel(int value) {
+            mValue = value;
+        }
+
+        /**
+         * Gets integer value associated to MinimumBatteryLevel instance
+         * 
+         * @return value
+         */
+        public final int toInt() {
+            return mValue;
+        }
+
+        /**
+         * Returns a MinimumBatteryLevel instance for the specified integer value.
+         * 
+         * @param value
+         * @return instance
+         */
+        public static MinimumBatteryLevel valueOf(int value) {
+            MinimumBatteryLevel entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(MinimumBatteryLevel.class.getName()).append(".").append(value)
+                    .toString());
+
+        }
+
+    };
+
+    /**
      * Constructor
      * 
      * @param iConfig ICommonServiceConfiguration instance
@@ -226,6 +288,37 @@ public class CommonServiceConfiguration {
         try {
             int messagingMode = mIConfig.getMessagingUX();
             return MessagingMode.valueOf(messagingMode);
+        } catch (Exception e) {
+            throw new RcsServiceException(e);
+        }
+    }
+
+    /**
+     * Returns the minimum battery level which can be NEVER_STOP, PERCENT_5, PERCENT_10 or
+     * PERCENT_20.
+     * 
+     * @return the minimum battery level
+     * @throws RcsServiceException
+     */
+    public MinimumBatteryLevel getMinimumBatteryLevel() throws RcsServiceException {
+        try {
+            int minimumBatteryLevel = mIConfig.getMinimumBatteryLevel();
+            return MinimumBatteryLevel.valueOf(minimumBatteryLevel);
+        } catch (Exception e) {
+            throw new RcsServiceException(e);
+        }
+    }
+
+    /**
+     * Sets the minimum battery level.
+     * 
+     * @param level the minimum battery level which can be NEVER_STOP, PERCENT_5, PERCENT_10 or
+     *            PERCENT_20.
+     * @throws RcsServiceException
+     */
+    public void setMinimumBatteryLevel(MinimumBatteryLevel level) throws RcsServiceException {
+        try {
+            mIConfig.setMinimumBatteryLevel(level.toInt());
         } catch (Exception e) {
             throw new RcsServiceException(e);
         }

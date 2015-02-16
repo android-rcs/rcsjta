@@ -40,6 +40,8 @@ import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.RcsServiceRegistration;
+
 import com.gsma.services.rcs.extension.IMultimediaMessagingSession;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSessionListener;
 import com.gsma.services.rcs.extension.IMultimediaSessionService;
@@ -204,8 +206,17 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
     }
 
     /**
-     * Registers a listener on service registration events
+     * Return the reason code for IMS service registration
      * 
+     * @return the reason code for IMS service registration
+     */
+    public int getServiceRegistrationReasonCode() {
+        return ServerApiUtils.getServiceRegistrationReasonCode().toInt();
+    }
+
+    /**
+     * Registers a listener on service registration events
+     *
      * @param listener Service registration listener
      */
     public void addEventListener(IRcsServiceRegistrationListener listener) {
@@ -219,7 +230,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 
     /**
      * Unregisters a listener on service registration events
-     * 
+     *
      * @param listener Service registration listener
      */
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
@@ -232,18 +243,24 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
     }
 
     /**
-     * Receive registration event
-     * 
-     * @param state Registration state
+     * Notifies registration event
      */
-    public void notifyRegistrationEvent(boolean state) {
+    public void notifyRegistration() {
         // Notify listeners
         synchronized (lock) {
-            if (state) {
-                mRcsServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
-            } else {
-                mRcsServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered();
-            }
+            mRcsServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
+        }
+    }
+
+    /**
+     * Notifies unregistration event
+     *
+     * @param reasonCode for unregistration
+     */
+    public void notifyUnRegistration(RcsServiceRegistration.ReasonCode reasonCode) {
+        // Notify listeners
+        synchronized (lock) {
+            mRcsServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered(reasonCode);
         }
     }
 
@@ -257,8 +274,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
             GenericSipMsrpSession session) {
         // Add session in the list
         MultimediaMessagingSessionImpl multimediaMessaging = new MultimediaMessagingSessionImpl(
-                session.getSessionID(), mMultimediaMessagingSessionEventBroadcaster, mSipService,
-                this);
+                session.getSessionID(), mMultimediaMessagingSessionEventBroadcaster,
+                mSipService, this);
         session.addListener(multimediaMessaging);
         addMultimediaMessaging(multimediaMessaging);
 
@@ -275,8 +292,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      */
     public void receiveSipRtpSessionInvitation(Intent rtpSessionInvite, GenericSipRtpSession session) {
         MultimediaStreamingSessionImpl multimediaStreaming = new MultimediaStreamingSessionImpl(
-                session.getSessionID(), mMultimediaStreamingSessionEventBroadcaster, mSipService,
-                this);
+                session.getSessionID(), mMultimediaStreamingSessionEventBroadcaster,
+                mSipService, this);
         session.addListener(multimediaStreaming);
         addMultimediaStreaming(multimediaStreaming);
 
@@ -339,8 +356,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
                     session.getSessionID(), mMultimediaMessagingSessionEventBroadcaster,
                     mSipService, this);
             session.addListener(multiMediaMessaging);
-            mMultimediaMessagingSessionEventBroadcaster.broadcastStateChanged(contact,
-                    session.getSessionID(), MultimediaSession.State.INITIATING,
+            mMultimediaMessagingSessionEventBroadcaster.broadcastStateChanged(
+                    contact, session.getSessionID(), MultimediaSession.State.INITIATING,
                     ReasonCode.UNSPECIFIED);
 
             addMultimediaMessaging(multiMediaMessaging);
@@ -448,8 +465,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
                     session.getSessionID(), mMultimediaStreamingSessionEventBroadcaster,
                     mSipService, this);
             session.addListener(multimediaStreaming);
-            mMultimediaStreamingSessionEventBroadcaster.broadcastStateChanged(contact,
-                    session.getSessionID(), MultimediaSession.State.INITIATING,
+            mMultimediaStreamingSessionEventBroadcaster.broadcastStateChanged(
+                    contact, session.getSessionID(), MultimediaSession.State.INITIATING,
                     ReasonCode.UNSPECIFIED);
 
             addMultimediaStreaming(multimediaStreaming);
@@ -535,7 +552,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 
     /**
      * Adds a listener on multimedia messaging session events
-     * 
+     *
      * @param listener Session event listener
      */
     public void addEventListener2(IMultimediaMessagingSessionListener listener) {
@@ -551,7 +568,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 
     /**
      * Removes a listener on multimedia messaging session events
-     * 
+     *
      * @param listener Session event listener
      */
     public void removeEventListener2(IMultimediaMessagingSessionListener listener) {
@@ -566,7 +583,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 
     /**
      * Adds a listener on multimedia streaming session events
-     * 
+     *
      * @param listener Session event listener
      */
     public void addEventListener3(IMultimediaStreamingSessionListener listener) {
@@ -581,7 +598,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 
     /**
      * Removes a listener on multimedia streaming session events
-     * 
+     *
      * @param listener Session event listener
      */
     public void removeEventListener3(IMultimediaStreamingSessionListener listener) {
@@ -601,6 +618,6 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @return the common service configuration
      */
     public ICommonServiceConfiguration getCommonConfiguration() {
-        return new CommonServiceConfigurationImpl();
+        return new CommonServiceConfigurationImpl(mRcsSettings);
     }
 }

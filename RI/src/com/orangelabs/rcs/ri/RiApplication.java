@@ -176,7 +176,7 @@ public class RiApplication extends Application {
         sDirectionToString.put(Direction.IRRELEVANT,
                 resources.getString(R.string.label_direction_unknown));
 
-        ApiConnectionManager.getInstance(getApplicationContext()).connectApis();
+        ConnectionManager.getInstance(getApplicationContext()).connectApis();
     }
 
 }

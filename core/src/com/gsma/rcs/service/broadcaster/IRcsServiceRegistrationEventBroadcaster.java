@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 Sony Mobile Communications Inc.
+ * Copyright (C) 2010 France Telecom S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,6 +17,8 @@
 
 package com.gsma.rcs.service.broadcaster;
 
+import com.gsma.services.rcs.RcsServiceRegistration.ReasonCode;
+
 /**
  * Interface to perform broadcast events on RcsServiceRegistrationListeners
  */
@@ -23,5 +26,5 @@ public interface IRcsServiceRegistrationEventBroadcaster {
 
     public void broadcastServiceRegistered();
 
-    public void broadcastServiceUnRegistered();
+    public void broadcastServiceUnRegistered(ReasonCode reasonCode);
 }

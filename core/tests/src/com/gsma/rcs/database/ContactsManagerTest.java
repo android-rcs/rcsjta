@@ -42,30 +42,24 @@ import com.gsma.rcs.utils.logger.Logger;
 public class ContactsManagerTest extends AndroidTestCase {
 
     private static final Logger logger = Logger.getLogger(ContactsManagerTest.class.getName());
-
     private ContactsManager cm = null;
-
     private String mNumber = "+33987654321";
-
     private ContactUtil contactUtils;
-
     private ContactId mContact;
-
     private long timestamp = 1354874203;
-
     private Context mContext;
-
     private ContentResolver mContentResolver;
-
     private LocalContentResolver mLocalContentResolver;
+    private RcsSettings mRcsSettings;
 
     protected void setUp() throws Exception {
         super.setUp();
         mContext = getContext();
         mContentResolver = mContext.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(mContentResolver);
-        ContactsManager.createInstance(mContext, mContentResolver, mLocalContentResolver);
-        RcsSettings.createInstance(getContext());
+        mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
+        ContactsManager.createInstance(mContext, mContentResolver, mLocalContentResolver,
+                mRcsSettings);
 
         cm = ContactsManager.getInstance();
         contactUtils = ContactUtil.getInstance(mContext);
@@ -99,7 +93,7 @@ public class ContactsManagerTest extends AndroidTestCase {
         // info.setContact(contact);
         ContactId contactId = contactUtils.formatContact(mNumber);
         info.setContact(contactId);
-        Capabilities capa = new Capabilities();
+        Capabilities capa = new Capabilities(mRcsSettings);
         capa.setCsVideoSupport(false);
         capa.setFileTransferSupport(false);
         capa.setImageSharingSupport(false);
@@ -159,8 +153,7 @@ public class ContactsManagerTest extends AndroidTestCase {
             assertEquals(true, getCapa.isSipAutomata());
             assertEquals(timestamp, getCapa.getTimestampOfLastRefresh());
             assertEquals(timestamp, getCapa.getTimestampOfLastRequest());
-            // Timestamp not tested because it is automatically updated with the
-            // current time
+            // Timestamp not tested because it is automatically updated with the current time
             Set<String> getExtraCapa = getCapa.getSupportedExtensions();
             if (getExtraCapa == null) {
                 assertEquals(true, false);
@@ -206,7 +199,7 @@ public class ContactsManagerTest extends AndroidTestCase {
         info.setRcsStatusTimestamp(timestamp);
         info.setRegistrationState(RegistrationState.ONLINE);
 
-        Capabilities capa = new Capabilities();
+        Capabilities capa = new Capabilities(mRcsSettings);
         capa.setCsVideoSupport(false);
         capa.setFileTransferSupport(false);
         capa.setImageSharingSupport(false);
@@ -243,8 +236,7 @@ public class ContactsManagerTest extends AndroidTestCase {
     }
 
     public void testSetContactInfo() {
-        // create then change a RCSContact into a basic Contact then return it
-        // to be a RCSContact
+        // create then change a RCSContact into a basic Contact then return it to be a RCSContact
         Set<ContactId> rcscontacts = cm.getRcsContacts();
         if (logger.isActivated()) {
             for (ContactId rcs : rcscontacts) {
@@ -258,7 +250,7 @@ public class ContactsManagerTest extends AndroidTestCase {
 
         ContactInfo newInfo = new ContactInfo();
 
-        Capabilities capa = new Capabilities();
+        Capabilities capa = new Capabilities(mRcsSettings);
         capa.setCsVideoSupport(false);
         capa.setFileTransferSupport(false);
         capa.setImageSharingSupport(false);

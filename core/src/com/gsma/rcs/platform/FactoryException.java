@@ -29,9 +29,10 @@ public class FactoryException extends java.lang.Exception {
     /**
      * Constructor
      * 
-     * @param error Error message
+     * @param message Error message
+     * @param throwable
      */
-    public FactoryException(String error) {
-        super(error);
+    public FactoryException(String message, Throwable throwable) {
+        super(message, throwable);
     }
 }

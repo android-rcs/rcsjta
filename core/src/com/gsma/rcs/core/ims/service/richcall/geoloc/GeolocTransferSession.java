@@ -31,6 +31,7 @@ import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingSession;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.contact.ContactId;
@@ -49,7 +50,7 @@ public abstract class GeolocTransferSession extends ContentSharingSession {
     /**
      * Geoloc transfered
      */
-    private boolean geolocTransfered = false;
+    private boolean mGeolocTransferred = false;
 
     /**
      * Geoloc info
@@ -68,9 +69,11 @@ public abstract class GeolocTransferSession extends ContentSharingSession {
      * @param parent IMS service
      * @param content Content to be shared
      * @param contact Remote contact Id
+     * @param rcsSettings
      */
-    public GeolocTransferSession(ImsService parent, MmContent content, ContactId contact) {
-        super(parent, content, contact);
+    public GeolocTransferSession(ImsService parent, MmContent content, ContactId contact,
+            RcsSettings rcsSettings) {
+        super(parent, content, contact, rcsSettings);
     }
 
     /**
@@ -95,16 +98,16 @@ public abstract class GeolocTransferSession extends ContentSharingSession {
      * Geoloc has been transfered
      */
     public void geolocTransfered() {
-        this.geolocTransfered = true;
+        this.mGeolocTransferred = true;
     }
 
     /**
      * Is geoloc transfered
      * 
-     * @retrurn Boolean
+     * @return Boolean
      */
     public boolean isGeolocTransfered() {
-        return geolocTransfered;
+        return mGeolocTransferred;
     }
 
     /**

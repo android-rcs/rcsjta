@@ -30,6 +30,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpUploadManager;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpUploadTransferEventListener;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
 /**
@@ -44,50 +45,54 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
     /**
      * Upload ID
      */
-    private String uploadId;
+    private String mUploadId;
 
     /**
      * File
      */
-    private MmContent file;
+    private MmContent mFile;
 
     /**
      * File icon
      */
-    private boolean fileIcon = false;
+    private boolean mFileIcon = false;
 
     /**
      * HTTP upload manager
      */
-    protected HttpUploadManager uploadManager;
+    protected HttpUploadManager mUploadManager;
 
     /**
      * Upload listener
      */
-    private FileUploadSessionListener listener = null;
+    private FileUploadSessionListener mListener;
 
     /**
      * File info
      */
-    private FileTransferHttpInfoDocument fileInfoDoc = null;
+    private FileTransferHttpInfoDocument mFileInfoDoc;
+
+    private final RcsSettings mRcsSettings;
 
     /**
      * The logger
      */
-    private final static Logger logger = Logger.getLogger(FileUploadSession.class.getSimpleName());
+    private final static Logger sLogger = Logger.getLogger(FileUploadSession.class.getSimpleName());
 
     /**
      * Constructor
      * 
-     * @param content Content of file to upload
+     * @param file Content of file to upload
      * @param fileIcon True if the stack must try to attach file icon
+     * @param rcsSettings
      */
-    public FileUploadSession(MmContent file, boolean fileIcon) {
+    public FileUploadSession(MmContent file, boolean fileIcon, RcsSettings rcsSettings) {
         super();
 
-        this.file = file;
-        this.fileIcon = fileIcon;
-        this.uploadId = UUID.randomUUID().toString();
+        mFile = file;
+        mFileIcon = fileIcon;
+        mUploadId = UUID.randomUUID().toString();
+        mRcsSettings = rcsSettings;
     }
 
     /**
@@ -96,7 +101,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
      * @param listener Listener
      */
     public void addListener(FileUploadSessionListener listener) {
-        this.listener = listener;
+        mListener = listener;
     }
 
     /**
@@ -105,7 +110,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
      * @return ID
      */
     public String getUploadID() {
-        return uploadId;
+        return mUploadId;
     }
 
     /**
@@ -114,7 +119,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
      * @return Content
      */
     public MmContent getContent() {
-        return file;
+        return mFile;
     }
 
     /**
@@ -123,7 +128,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
      * @return XML document
      */
     public FileTransferHttpInfoDocument getFileInfoDocument() {
-        return fileInfoDoc;
+        return mFileInfoDoc;
     }
 
     /**
@@ -131,45 +136,47 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
      */
     public void run() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Initiate a new HTTP upload " + uploadId);
+            if (sLogger.isActivated()) {
+                sLogger.info("Initiate a new HTTP upload " + mUploadId);
             }
 
             // Create fileIcon content is requested
             MmContent fileIconContent = null;
-            if (fileIcon) {
+            if (mFileIcon) {
                 // Create the file icon
                 try {
-                    fileIconContent = FileTransferUtils.createFileicon(file.getUri(), uploadId);
+                    fileIconContent = FileTransferUtils.createFileicon(mFile.getUri(), mUploadId,
+                            mRcsSettings);
                 } catch (SecurityException e) {
                     /*
                      * TODO: This is not the proper way to handle the exception thrown. Will be
                      * taken care of in CR037
                      */
-                    if (logger.isActivated()) {
-                        logger.error(
+                    if (sLogger.isActivated()) {
+                        sLogger.error(
                                 "File icon creation has failed due to that the file is not accessible!",
                                 e);
                     }
                     removeSession();
-                    listener.handleUploadNotAllowedToSend();
+                    mListener.handleUploadNotAllowedToSend();
                     return;
                 }
             }
 
             // Instantiate the upload manager
-            uploadManager = new HttpUploadManager(file, fileIconContent, this, uploadId);
+            mUploadManager = new HttpUploadManager(mFile, fileIconContent, this, mUploadId,
+                    mRcsSettings);
 
             // Upload the file to the HTTP server
-            byte[] result = uploadManager.uploadFile();
+            byte[] result = mUploadManager.uploadFile();
             storeResult(result);
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("File transfer has failed", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("File transfer has failed", e);
             }
             removeSession();
             // Unexpected error
-            listener.handleUploadError(UPLOAD_ERROR_UNSPECIFIED);
+            mListener.handleUploadError(UPLOAD_ERROR_UNSPECIFIED);
         }
     }
 
@@ -180,7 +187,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
      */
     private void storeResult(byte[] result) {
         // Check if upload has been cancelled
-        if (uploadManager.isCancelled()) {
+        if (mUploadManager.isCancelled()) {
             return;
         }
 
@@ -203,24 +210,24 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
         // </file-info>
         // </file>
         if (result != null) {
-            fileInfoDoc = FileTransferUtils.parseFileTransferHttpDocument(result);
+            mFileInfoDoc = FileTransferUtils.parseFileTransferHttpDocument(result);
         }
-        if (fileInfoDoc != null) {
+        if (mFileInfoDoc != null) {
             // File uploaded with success
-            if (logger.isActivated()) {
-                logger.debug("Upload done with success: " + fileInfoDoc.getFileUri().toString());
+            if (sLogger.isActivated()) {
+                sLogger.debug("Upload done with success: " + mFileInfoDoc.getFileUri().toString());
             }
 
             removeSession();
-            listener.handleUploadTerminated(fileInfoDoc);
+            mListener.handleUploadTerminated(mFileInfoDoc);
         } else {
             // Upload error
-            if (logger.isActivated()) {
-                logger.debug("Upload has failed");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Upload has failed");
             }
             removeSession();
             // Notify listener
-            listener.handleUploadError(UPLOAD_ERROR_UNSPECIFIED);
+            mListener.handleUploadError(UPLOAD_ERROR_UNSPECIFIED);
         }
     }
 
@@ -231,11 +238,11 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
         super.interrupt();
 
         // Interrupt the upload
-        uploadManager.interrupt();
+        mUploadManager.interrupt();
 
-        if (fileInfoDoc == null) {
+        if (mFileInfoDoc == null) {
             removeSession();
-            listener.handleUploadAborted();
+            mListener.handleUploadAborted();
         }
     }
 
@@ -252,7 +259,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
      */
     public void httpTransferStarted() {
         // Notify listener
-        listener.handleUploadStarted();
+        mListener.handleUploadStarted();
     }
 
     /**
@@ -272,7 +279,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
          * for file upload
          */
         removeSession();
-        listener.handleUploadError(UPLOAD_ERROR_UNSPECIFIED);
+        mListener.handleUploadError(UPLOAD_ERROR_UNSPECIFIED);
     }
 
     /**
@@ -297,20 +304,26 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
      */
     public void httpTransferProgress(long currentSize, long totalSize) {
         // Notify listener
-        listener.handleUploadProgress(currentSize, totalSize);
+        mListener.handleUploadProgress(currentSize, totalSize);
     }
 
     @Override
     public void httpTransferNotAllowedToSend() {
         removeSession();
-        listener.handleUploadNotAllowedToSend();
+        mListener.handleUploadNotAllowedToSend();
     }
 
+    /**
+     * Start session
+     */
     public void startSession() {
         Core.getInstance().getImService().addSession(this);
         start();
     }
 
+    /**
+     * Remove session
+     */
     public void removeSession() {
         Core.getInstance().getImService().removeSession(this);
     }

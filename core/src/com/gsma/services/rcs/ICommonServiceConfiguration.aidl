@@ -21,4 +21,8 @@ interface ICommonServiceConfiguration {
 	void setDefaultMessagingMethod(in int method);
 	
 	void setMyDisplayName(in String name);
+	
+	int getMinimumBatteryLevel();
+	
+	void setMinimumBatteryLevel( in int level);
 }

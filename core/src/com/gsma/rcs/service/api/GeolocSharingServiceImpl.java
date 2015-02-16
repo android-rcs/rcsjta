@@ -40,6 +40,7 @@ import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.GeolocSharingPersistedStorageAccessor;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
 import com.gsma.rcs.service.broadcaster.GeolocSharingEventBroadcaster;
 import com.gsma.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
@@ -48,16 +49,17 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
-import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingListener;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingService;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 
 /**
  * Geoloc sharing service implementation
@@ -89,20 +91,26 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      */
     private final Object lock = new Object();
 
+    private final RcsSettings mRcsSettings;
+
     /**
      * Constructor
      * 
      * @param richcallService RichcallService
      * @param contactsManager ContactsManager
+     * @param richCallHistory
+     * @param rcsSettings
      */
     public GeolocSharingServiceImpl(RichcallService richcallService,
-            ContactsManager contactsManager, RichCallHistory richCallHistory) {
+            ContactsManager contactsManager, RichCallHistory richCallHistory,
+            RcsSettings rcsSettings) {
         if (logger.isActivated()) {
             logger.info("Geoloc sharing service API is loaded.");
         }
         mRichcallService = richcallService;
         mContactsManager = contactsManager;
         mRichcallLog = richCallHistory;
+        mRcsSettings = rcsSettings;
     }
 
     /**
@@ -155,8 +163,17 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
     }
 
     /**
-     * Registers a listener on service registration events
+     * Return the reason code for IMS service registration
      * 
+     * @return the reason code for IMS service registration
+     */
+    public int getServiceRegistrationReasonCode() {
+        return ServerApiUtils.getServiceRegistrationReasonCode().toInt();
+    }
+
+    /**
+     * Registers a listener on service registration events
+     *
      * @param listener Service registration listener
      */
     public void addEventListener(IRcsServiceRegistrationListener listener) {
@@ -170,7 +187,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 
     /**
      * Unregisters a listener on service registration events
-     * 
+     *
      * @param listener Service registration listener
      */
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
@@ -183,18 +200,24 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
     }
 
     /**
-     * Receive registration event
-     * 
-     * @param state Registration state
+     * Notifies registration event
      */
-    public void notifyRegistrationEvent(boolean state) {
+    public void notifyRegistration() {
         // Notify listeners
         synchronized (lock) {
-            if (state) {
-                mRcsServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
-            } else {
-                mRcsServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered();
-            }
+            mRcsServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
+        }
+    }
+
+    /**
+     * Notifies unregistration event
+     *
+     * @param reasonCode for unregistration
+     */
+    public void notifyUnRegistration(RcsServiceRegistration.ReasonCode reasonCode) {
+        // Notify listeners
+        synchronized (lock) {
+            mRcsServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered(reasonCode);
         }
     }
 
@@ -298,7 +321,8 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
         }
 
         try {
-            List<IBinder> geolocSharings = new ArrayList<IBinder>(mGeolocSharingCache.size());
+            List<IBinder> geolocSharings = new ArrayList<IBinder>(
+                    mGeolocSharingCache.size());
             for (IGeolocSharing geolocSharing : mGeolocSharingCache.values()) {
                 geolocSharings.add(geolocSharing.asBinder());
             }
@@ -350,7 +374,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 
     /**
      * Removes a listener on geoloc sharing events
-     * 
+     *
      * @param listener Listener
      */
     public void removeEventListener2(IGeolocSharingListener listener) {
@@ -394,7 +418,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * @return the common service configuration
      */
     public ICommonServiceConfiguration getCommonConfiguration() {
-        return new CommonServiceConfigurationImpl();
+        return new CommonServiceConfigurationImpl(mRcsSettings);
     }
 
     /**
@@ -408,6 +432,8 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
     /**
      * Deletes geoloc sharing with a given contact from history and abort/reject any associated
      * ongoing session if such exists.
+     * 
+     * @param contact
      */
     public void deleteGeolocSharings2(ContactId contact) {
         throw new UnsupportedOperationException("This method has not been implemented yet!");
@@ -416,6 +442,8 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
     /**
      * Deletes a geoloc sharing by its sharing id from history and abort/reject any associated
      * ongoing session if such exists.
+     * 
+     * @param sharingId
      */
     public void deleteGeolocSharing(String sharingId) {
         throw new UnsupportedOperationException("This method has not been implemented yet!");

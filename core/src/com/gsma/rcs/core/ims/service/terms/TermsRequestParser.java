@@ -59,85 +59,90 @@ public class TermsRequestParser extends DefaultHandler {
     /**
      * Char buffer for parsing text from one element
      */
-    private StringBuffer accumulator;
+    private StringBuffer mAccumulator;
 
     /**
      * Value off attribute 'id' off element 'EndUserConfirmationRequest'
      */
-    private String id = null;
+    private String mId;
 
     /**
      * Value off attribute 'type' off element 'EndUserNotification'
      */
-    private String type;
+    private String mType;
 
     /**
      * Value off attribute 'timeout' off element 'EndUserNotification'
      */
-    private int timeout;
+    private int mTimeout;
 
     /**
      * Value off attribute 'pin' off element 'EndUserConfirmationRequest'
      */
-    private boolean pin = false;
+    private boolean mPin = false;
 
     /**
      * Requested language (given in constructor)
      */
-    private String requestedLanguage = null;
+    private String mRequestedLanguage;
 
     /**
      * Language from the first 'Subject' element
      */
-    private String firstLanguage = null;
+    private String mFirstLanguage;
 
     /**
      * Flag if variable 'firstLanguage' is set
      */
-    private boolean isFirstSubjectParsed = false;
+    private boolean mIsFirstSubjectParsed = false;
 
     /**
      * Value of language attribute of current xml element during parsing
      */
-    private String currentLangAttribute = null;
+    private String mCurrentLangAttribute;
 
     /**
      * HashMap<('ElementName' + 'Language'), text>
      */
-    private HashMap<String, String> elementMap = new HashMap<String, String>();
+    private HashMap<String, String> mElementMap = new HashMap<String, String>();
 
     /**
      * The logger
      */
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
+    private final RcsSettings mRcsSettings;
+
     /**
      * Constructor
      * 
      * @param inputSource Input source
+     * @param requestedLanguage
      * @throws Exception
      */
-    public TermsRequestParser(InputSource inputSource, String requestedLanguage) throws Exception {
-        this.requestedLanguage = requestedLanguage;
+    public TermsRequestParser(InputSource inputSource, String requestedLanguage,
+            RcsSettings rcsSettings) throws Exception {
+        mRequestedLanguage = requestedLanguage;
+        mRcsSettings = rcsSettings;
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser parser = factory.newSAXParser();
         parser.parse(inputSource, this);
     }
 
     public String getId() {
-        return id;
+        return mId;
     }
 
     public String getType() {
-        return type;
+        return mType;
     }
 
     public int getTimeout() {
-        return timeout;
+        return mTimeout;
     }
 
     public boolean getPin() {
-        return pin;
+        return mPin;
     }
 
     public String getSubject() {
@@ -160,64 +165,63 @@ public class TermsRequestParser extends DefaultHandler {
         if (logger.isActivated()) {
             logger.debug("Start document 'EndUserConfirmationRequest'");
         }
-        accumulator = new StringBuffer();
+        mAccumulator = new StringBuffer();
     }
 
     @Override
     public void characters(char buffer[], int start, int length) {
-        accumulator.append(buffer, start, length);
+        mAccumulator.append(buffer, start, length);
     }
 
     @Override
     public void startElement(String namespaceURL, String localName, String qname, Attributes attr) {
-        accumulator.setLength(0);
+        mAccumulator.setLength(0);
 
         if (localName.equals("EndUserConfirmationRequest")) {
-            id = attr.getValue("id").trim();
-            type = attr.getValue("type").trim();
-            if (type.equalsIgnoreCase("Volatile")) {
+            mId = attr.getValue("id").trim();
+            mType = attr.getValue("type").trim();
+            if (mType.equalsIgnoreCase("Volatile")) {
                 try {
-                    timeout = 1000 * Integer.parseInt(attr.getValue("timeout").trim());
+                    mTimeout = 1000 * Integer.parseInt(attr.getValue("timeout").trim());
                 } catch (Exception e) {
                     // If the attribute timeout is not present a default value of 64*T1 seconds
                     // (with T1 as defined in
                     // [RFC3261]) shall be used
-                    RcsSettings rcsSettings = RcsSettings.getInstance();
-                    if (rcsSettings != null) {
-                        timeout = rcsSettings.getSipTimerT1() * 64;
+                    if (mRcsSettings != null) {
+                        mTimeout = mRcsSettings.getSipTimerT1() * 64;
                     } else {
                         // T1 is an estimate of the round-trip time (RTT), and it defaults to 500
                         // ms.
-                        timeout = 500 * 64;
+                        mTimeout = 500 * 64;
                     }
                 }
             } else { // type.equalsIgnoreCase('Persistent')
-                timeout = -1; // means infinite ( no timeout)
+                mTimeout = -1; // means infinite ( no timeout)
             }
 
             // Get optional attribute pin
-            pin = false; // Default value according to RCSe spec 1.2.2
+            mPin = false; // Default value according to RCSe spec 1.2.2
             String pinAttr = attr.getValue("pin");
             if (pinAttr != null) {
-                pin = Boolean.parseBoolean(attr.getValue("pin").trim());
+                mPin = Boolean.parseBoolean(attr.getValue("pin").trim());
             }
 
         } else { // check lang attribute for all sub elements
-            currentLangAttribute = attr.getValue("xml:lang");
-            if (currentLangAttribute == null) {
+            mCurrentLangAttribute = attr.getValue("xml:lang");
+            if (mCurrentLangAttribute == null) {
                 // for xml failure tolerance
-                currentLangAttribute = attr.getValue("lang");
+                mCurrentLangAttribute = attr.getValue("lang");
             }
 
-            if (currentLangAttribute == null) {
+            if (mCurrentLangAttribute == null) {
                 // to avoid null pointer exception
-                currentLangAttribute = "";
+                mCurrentLangAttribute = "";
             }
             // put to lower case for xml failure tolerance
-            currentLangAttribute = currentLangAttribute.trim().toLowerCase();
-            if (!isFirstSubjectParsed) {
-                isFirstSubjectParsed = true;
-                firstLanguage = currentLangAttribute;
+            mCurrentLangAttribute = mCurrentLangAttribute.trim().toLowerCase();
+            if (!mIsFirstSubjectParsed) {
+                mIsFirstSubjectParsed = true;
+                mFirstLanguage = mCurrentLangAttribute;
             }
         }
     }
@@ -228,10 +232,10 @@ public class TermsRequestParser extends DefaultHandler {
             if (logger.isActivated()) {
                 logger.debug("Terms request document is complete");
             }
-        } else if (currentLangAttribute.equals(requestedLanguage)
-                || currentLangAttribute.equals(DEFAULT_LANGUAGE)
-                || currentLangAttribute.equals(firstLanguage) || currentLangAttribute.equals("")) {
-            elementMap.put(qname + currentLangAttribute, accumulator.toString().trim());
+        } else if (mCurrentLangAttribute.equals(mRequestedLanguage)
+                || mCurrentLangAttribute.equals(DEFAULT_LANGUAGE)
+                || mCurrentLangAttribute.equals(mFirstLanguage) || mCurrentLangAttribute.equals("")) {
+            mElementMap.put(qname + mCurrentLangAttribute, mAccumulator.toString().trim());
         }
     }
 
@@ -245,14 +249,14 @@ public class TermsRequestParser extends DefaultHandler {
      * @return
      */
     private String giveTextInBestLanguage(String elementName) {
-        if (elementMap.containsKey(elementName + requestedLanguage)) {
-            return elementMap.get(elementName + requestedLanguage);
-        } else if (elementMap.containsKey(elementName + DEFAULT_LANGUAGE)) {
-            return elementMap.get(elementName + DEFAULT_LANGUAGE);
-        } else if (elementMap.containsKey(elementName + firstLanguage)) {
-            return elementMap.get(elementName + firstLanguage);
+        if (mElementMap.containsKey(elementName + mRequestedLanguage)) {
+            return mElementMap.get(elementName + mRequestedLanguage);
+        } else if (mElementMap.containsKey(elementName + DEFAULT_LANGUAGE)) {
+            return mElementMap.get(elementName + DEFAULT_LANGUAGE);
+        } else if (mElementMap.containsKey(elementName + mFirstLanguage)) {
+            return mElementMap.get(elementName + mFirstLanguage);
         } else {
-            return elementMap.get(elementName);
+            return mElementMap.get(elementName);
         }
     }
 

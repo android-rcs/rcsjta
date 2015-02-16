@@ -25,7 +25,10 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.KeyEvent;
 import android.widget.EditText;
+
+import java.lang.ref.WeakReference;
 
 /**
  * HTTPS provisioning - MSISDN Pop-up activity
@@ -34,18 +37,22 @@ import android.widget.EditText;
  */
 public class HttpsProvisioningAlertDialog extends Activity {
 
+    private AlertDialog mAlertDialog;
+    private AutoDismissRunnable mDialogRunnable;
+    private Handler mDialogHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle(R.string.label_edit_msisdn);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.label_edit_msisdn);
 
         // Set an EditText view to get user input
         final EditText input = new EditText(this);
-        alert.setView(input);
+        builder.setView(input);
 
-        alert.setPositiveButton(R.string.label_ok, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.label_ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 String value = input.getText().toString();
                 HttpsProvionningMSISDNInput.getInstance().responseReceived(value);
@@ -53,20 +60,60 @@ public class HttpsProvisioningAlertDialog extends Activity {
             }
         });
 
-        alert.setNegativeButton(R.string.label_cancel, new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.label_cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 HttpsProvionningMSISDNInput.getInstance().responseReceived(null);
                 finish();
             }
         });
 
-        final AlertDialog dial = alert.show();
-        new Handler().postDelayed(new Runnable() {
-            public void run() {
-                HttpsProvionningMSISDNInput.getInstance().responseReceived(null);
-                dial.dismiss();
-                finish();
+        mAlertDialog = builder.show();
+        mAlertDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+
+            @Override
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    mAlertDialog.dismiss();
+                    finish();
+                    return true;
+                }
+                return false;
             }
-        }, HttpsProvisioningUtils.INPUT_MSISDN_TIMEOUT);
+        });
+        mDialogRunnable = new AutoDismissRunnable(this);
+
+        mDialogHandler = new Handler();
+
+        mDialogHandler.postDelayed(mDialogRunnable, HttpsProvisioningUtils.INPUT_MSISDN_TIMEOUT);
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        mDialogHandler.removeCallbacks(mDialogRunnable);
+
+        mAlertDialog.dismiss();
+
+        super.onDestroy();
+    }
+
+    private class AutoDismissRunnable implements Runnable {
+
+        WeakReference<HttpsProvisioningAlertDialog> activityWeak;
+
+        public AutoDismissRunnable(HttpsProvisioningAlertDialog activity) {
+            activityWeak = new WeakReference<HttpsProvisioningAlertDialog>(activity);
+        }
+
+        public void run() {
+            HttpsProvionningMSISDNInput.getInstance().responseReceived(null);
+
+            HttpsProvisioningAlertDialog activity = activityWeak.get();
+
+            if (activity != null) {
+                activity.mAlertDialog.dismiss();
+                activity.finish();
+            }
+        }
     }
 }

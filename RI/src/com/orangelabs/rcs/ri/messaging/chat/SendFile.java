@@ -28,7 +28,6 @@ import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -44,12 +43,11 @@ import android.widget.Toast;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
-import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.FileUtils;
 import com.orangelabs.rcs.ri.utils.LockAccess;
-import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
@@ -92,17 +90,12 @@ public abstract class SendFile extends Activity implements ISendFile {
     /**
      * API connection manager
      */
-    protected ApiConnectionManager mCnxManager;
+    protected ConnectionManager mCnxManager;
 
     /**
      * File transfer
      */
     protected FileTransfer fileTransfer;
-
-    /**
-     * The log tag for this class
-     */
-    private static final String LOGTAG = LogUtils.getTag(SendFile.class.getSimpleName());
 
     /**
      * Progress dialog
@@ -130,7 +123,7 @@ public abstract class SendFile extends Activity implements ISendFile {
         selectBtn.setOnClickListener(btnSelectListener);
 
         // Register to API connection manager
-        mCnxManager = ApiConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance(this);
         if (mCnxManager == null
                 || !mCnxManager.isServiceConnected(RcsServiceName.CHAT,
                         RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACT)) {

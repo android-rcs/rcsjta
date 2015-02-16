@@ -18,10 +18,16 @@
 
 package com.gsma.rcs.provisioning.local;
 
-import static com.gsma.rcs.provisioning.local.Provisioning.saveCheckBoxParameter;
-import static com.gsma.rcs.provisioning.local.Provisioning.saveEditTextParameter;
-import static com.gsma.rcs.provisioning.local.Provisioning.setCheckBoxParameter;
-import static com.gsma.rcs.provisioning.local.Provisioning.setEditTextParameter;
+import static com.gsma.rcs.provisioning.local.Provisioning.saveCheckBoxParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.saveEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.setCheckBoxParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.setEditTextParam;
+
+import com.gsma.rcs.R;
+import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.settings.RcsSettingsData;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
@@ -30,10 +36,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
-
-import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.provider.settings.RcsSettingsData;
-import com.gsma.rcs.R;
 
 /**
  * End user profile parameters provisioning
@@ -47,7 +49,9 @@ public class LoggerProvisioning extends Activity {
     private static final String[] TRACE_LEVEL = {
             "DEBUG", "INFO", "WARN", "ERROR", "FATAL"
     };
-    private boolean isInFront;
+    private boolean mInFront;
+
+    private RcsSettings mRcsSettings;
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -57,15 +61,16 @@ public class LoggerProvisioning extends Activity {
         // Set buttons callback
         Button btn = (Button) findViewById(R.id.save_btn);
         btn.setOnClickListener(saveBtnListener);
+        mRcsSettings = RcsSettings.createInstance(new LocalContentResolver(this));
         updateView(bundle);
-        isInFront = true;
+        mInFront = true;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (isInFront == false) {
-            isInFront = true;
+        if (mInFront == false) {
+            mInFront = true;
             // Update UI (from DB)
             updateView(null);
         }
@@ -74,7 +79,7 @@ public class LoggerProvisioning extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        isInFront = false;
+        mInFront = false;
     }
 
     /**
@@ -84,12 +89,12 @@ public class LoggerProvisioning extends Activity {
      */
     private void updateView(Bundle bundle) {
         // Display parameters
-        setCheckBoxParameter(this, R.id.TraceActivated, RcsSettingsData.TRACE_ACTIVATED, bundle);
-        setCheckBoxParameter(this, R.id.SipTraceActivated, RcsSettingsData.SIP_TRACE_ACTIVATED,
-                bundle);
-        setCheckBoxParameter(this, R.id.MediaTraceActivated, RcsSettingsData.MEDIA_TRACE_ACTIVATED,
-                bundle);
-        setEditTextParameter(this, R.id.SipTraceFile, RcsSettingsData.SIP_TRACE_FILE, bundle);
+        ProvisioningHelper helper = new ProvisioningHelper(this, mRcsSettings, bundle);
+
+        setCheckBoxParam(R.id.TraceActivated, RcsSettingsData.TRACE_ACTIVATED, helper);
+        setCheckBoxParam(R.id.SipTraceActivated, RcsSettingsData.SIP_TRACE_ACTIVATED, helper);
+        setCheckBoxParam(R.id.MediaTraceActivated, RcsSettingsData.MEDIA_TRACE_ACTIVATED, helper);
+        setEditTextParam(R.id.SipTraceFile, RcsSettingsData.SIP_TRACE_FILE, helper);
 
         Spinner spinner = (Spinner) findViewById(R.id.TraceLevel);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
@@ -100,7 +105,7 @@ public class LoggerProvisioning extends Activity {
         if (bundle != null && bundle.containsKey(RcsSettingsData.TRACE_LEVEL)) {
             parameter = bundle.getInt(RcsSettingsData.TRACE_LEVEL);
         } else {
-            parameter = RcsSettings.getInstance().getTraceLevel();
+            parameter = mRcsSettings.getTraceLevel();
         }
         spinner.setSelection(parameter);
     }
@@ -125,18 +130,17 @@ public class LoggerProvisioning extends Activity {
      * Save parameters either in bundle or in RCS settings
      */
     private void saveInstanceState(Bundle bundle) {
-        saveCheckBoxParameter(this, R.id.TraceActivated, RcsSettingsData.TRACE_ACTIVATED, bundle);
-        saveCheckBoxParameter(this, R.id.SipTraceActivated, RcsSettingsData.SIP_TRACE_ACTIVATED,
-                bundle);
-        saveCheckBoxParameter(this, R.id.MediaTraceActivated,
-                RcsSettingsData.MEDIA_TRACE_ACTIVATED, bundle);
-        saveEditTextParameter(this, R.id.SipTraceFile, RcsSettingsData.SIP_TRACE_FILE, bundle);
+        ProvisioningHelper helper = new ProvisioningHelper(this, mRcsSettings, bundle);
+        saveCheckBoxParam(R.id.TraceActivated, RcsSettingsData.TRACE_ACTIVATED, helper);
+        saveCheckBoxParam(R.id.SipTraceActivated, RcsSettingsData.SIP_TRACE_ACTIVATED, helper);
+        saveCheckBoxParam(R.id.MediaTraceActivated, RcsSettingsData.MEDIA_TRACE_ACTIVATED, helper);
+        saveEditTextParam(R.id.SipTraceFile, RcsSettingsData.SIP_TRACE_FILE, helper);
         Spinner spinner = (Spinner) findViewById(R.id.TraceLevel);
         if (bundle != null) {
             bundle.putInt(RcsSettingsData.TRACE_LEVEL, spinner.getSelectedItemPosition());
         } else {
             Integer value = spinner.getSelectedItemPosition();
-            RcsSettings.getInstance().writeInteger(RcsSettingsData.TRACE_LEVEL, value);
+            mRcsSettings.writeInteger(RcsSettingsData.TRACE_LEVEL, value);
         }
     }
 

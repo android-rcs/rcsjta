@@ -8,6 +8,7 @@ import com.gsma.services.rcs.sharing.image.IImageSharingListener;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.sharing.image.IImageSharingServiceConfiguration;
+import com.gsma.services.rcs.RcsServiceRegistration;
 
 /**
  * Image sharing service API
@@ -16,6 +17,8 @@ interface IImageSharingService {
 
 	boolean isServiceRegistered();
 
+	int getServiceRegistrationReasonCode();
+	
 	void addEventListener(IRcsServiceRegistrationListener listener);
 
 	void removeEventListener(IRcsServiceRegistrationListener listener);

@@ -32,6 +32,7 @@ import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -70,11 +71,12 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
      * @param contact Remote contact identifier
      * @param fileIcon Content of file icon
      * @param filetransferId File transfer Id
+     * @param rcsSettings
      */
     public ImsFileSharingSession(ImsService parent, MmContent content, ContactId contact,
-            MmContent fileIcon, String filetransferId) {
+            MmContent fileIcon, String filetransferId, RcsSettings rcsSettings) {
         super(parent, content, contact, PhoneUtils.formatContactIdToUri(contact), fileIcon,
-                filetransferId);
+                filetransferId, rcsSettings);
     }
 
     /**
@@ -166,6 +168,7 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
      * 
      * @param msgId Message ID
      * @param error Error code
+     * @param typeMsrpChunk
      */
     public void msrpTransferError(String msgId, String error,
             MsrpSession.TypeMsrpChunk typeMsrpChunk) {

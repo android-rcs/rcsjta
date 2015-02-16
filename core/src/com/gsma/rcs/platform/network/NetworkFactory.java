@@ -20,6 +20,7 @@ package com.gsma.rcs.platform.network;
 
 import com.gsma.rcs.core.ims.network.ImsNetworkInterface.DnsResolvedFields;
 import com.gsma.rcs.platform.FactoryException;
+import com.gsma.rcs.provider.settings.RcsSettings;
 
 /**
  * Network factory
@@ -30,23 +31,49 @@ public abstract class NetworkFactory {
     /**
      * Current platform factory
      */
-    private static NetworkFactory factory = null;
+    private static NetworkFactory mFactory;
 
     /**
      * Load the factory
      * 
      * @param classname Factory classname
-     * @throws Exception
+     * @throws FactoryException
      */
     public static void loadFactory(String classname) throws FactoryException {
-        if (factory != null) {
+        if (mFactory != null) {
             return;
         }
 
         try {
-            factory = (NetworkFactory) Class.forName(classname).newInstance();
+            mFactory = (NetworkFactory) Class.forName(classname).newInstance();
         } catch (Exception e) {
-            throw new FactoryException("Can't load the factory " + classname);
+            throw new FactoryException("Can't load the factory ".concat(classname), e);
+        }
+    }
+
+    /**
+     * Load the factory
+     * 
+     * @param classname
+     * @param rcsSettings
+     * @throws FactoryException
+     */
+    public static void loadFactory(String classname, RcsSettings rcsSettings)
+            throws FactoryException {
+        if (mFactory != null) {
+            return;
+        }
+        Class<?>[] rcsSettingsArgsClass = new Class[] {
+                RcsSettings.class
+        };
+        Object[] rcsSettingsArgs = new Object[] {
+                rcsSettings
+        };
+        try {
+            mFactory = (NetworkFactory) Class.forName(classname)
+                    .getConstructor(rcsSettingsArgsClass).newInstance(rcsSettingsArgs);
+        } catch (Exception e) {
+            throw new FactoryException("Can't load the factory ".concat(classname), e);
         }
     }
 
@@ -56,7 +83,7 @@ public abstract class NetworkFactory {
      * @return Factory
      */
     public static NetworkFactory getFactory() {
-        return factory;
+        return mFactory;
     }
 
     /**

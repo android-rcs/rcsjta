@@ -35,7 +35,7 @@ import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.gsma.services.rcs.contact.ContactId;
-import com.orangelabs.rcs.ri.ApiConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.chat.ChatMessageDAO;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -264,7 +264,7 @@ public class GroupChatIntentService extends IntentService {
      */
     private String getGcDisplayNameOfRemoteContact(String chatId) {
         try {
-            GroupChat gc = ApiConnectionManager.getInstance(this).getChatApi().getGroupChat(chatId);
+            GroupChat gc = ConnectionManager.getInstance(this).getChatApi().getGroupChat(chatId);
             if (gc != null) {
                 ContactId contact = gc.getRemoteContact();
                 return RcsDisplayName.getInstance(this).getDisplayName(contact);

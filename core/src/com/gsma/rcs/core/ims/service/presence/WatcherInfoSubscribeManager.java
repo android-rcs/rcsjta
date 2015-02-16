@@ -32,6 +32,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.presence.watcherinfo.Watcher;
 import com.gsma.rcs.core.ims.service.presence.watcherinfo.WatcherInfoDocument;
 import com.gsma.rcs.core.ims.service.presence.watcherinfo.WatcherInfoParser;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
@@ -51,9 +52,10 @@ public class WatcherInfoSubscribeManager extends SubscribeManager {
      * Constructor
      * 
      * @param parent IMS module
+     * @param rcsSettings
      */
-    public WatcherInfoSubscribeManager(ImsModule parent) {
-        super(parent);
+    public WatcherInfoSubscribeManager(ImsModule parent, RcsSettings rcsSettings) {
+        super(parent, rcsSettings);
     }
 
     /**

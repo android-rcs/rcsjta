@@ -326,7 +326,7 @@ public class GroupChatView extends ChatView {
             composingManager = new IsComposingManager(configuration.getIsComposingTimeout() * 1000,
                     getNotifyComposing());
         } catch (RcsServiceNotAvailableException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), mExitOnce);
+            Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce);
         } catch (RcsServiceException e) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
         }
@@ -483,7 +483,7 @@ public class GroupChatView extends ChatView {
 
             }
         } catch (RcsServiceNotAvailableException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), mExitOnce, e);
+            Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce, e);
         } catch (RcsServiceException e) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
         }
@@ -760,7 +760,7 @@ public class GroupChatView extends ChatView {
                     Utils.showList(this, getString(R.string.menu_participants),
                             getSetOfParticipants(mGroupChat.getParticipants()));
                 } catch (RcsServiceNotAvailableException e) {
-                    Utils.showMessageAndExit(this, getString(R.string.label_api_disabled),
+                    Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable),
                             mExitOnce, e);
                 } catch (RcsServiceException e) {
                     Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce,

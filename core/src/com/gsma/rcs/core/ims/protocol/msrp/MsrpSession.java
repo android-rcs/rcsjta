@@ -34,6 +34,7 @@ import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
@@ -117,17 +118,17 @@ public class MsrpSession {
     /**
      * MSRP connection
      */
-    private MsrpConnection connection = null;
+    private MsrpConnection connection;
 
     /**
      * From path
      */
-    private String from = null;
+    private String from;
 
     /**
      * To path
      */
-    private String to = null;
+    private String to;
 
     /**
      * Cancel transfer flag
@@ -147,7 +148,7 @@ public class MsrpSession {
     /**
      * MSRP event listener
      */
-    private MsrpEventListener msrpEventListener = null;
+    private MsrpEventListener msrpEventListener;
 
     /**
      * Random generator
@@ -157,12 +158,12 @@ public class MsrpSession {
     /**
      * Report transaction
      */
-    private ReportTransaction reportTransaction = null;
+    private ReportTransaction reportTransaction;
 
     /**
      * MSRP transaction
      */
-    private MsrpTransaction msrpTransaction = null;
+    private MsrpTransaction msrpTransaction;
 
     /**
      * File transfer progress
@@ -183,13 +184,13 @@ public class MsrpSession {
     /**
      * Transaction info table
      */
-    private ConcurrentHashMap<String, MsrpTransactionInfo> mTransactionInfoMap = null;
+    private ConcurrentHashMap<String, MsrpTransactionInfo> mTransactionInfoMap;
 
     // Changed by Deutsche Telekom
     /**
      * Mapping of messages to transactions
      */
-    private ConcurrentHashMap<String, String> mMessageTransactionMap = null;
+    private ConcurrentHashMap<String, String> mMessageTransactionMap;
 
     // Changed by Deutsche Telekom
     /**
@@ -208,12 +209,17 @@ public class MsrpSession {
      */
     private boolean isEstablished = false;
 
+    private final RcsSettings mRcsSettings;
+
     /**
      * Constructor
+     * 
+     * @param rcsSettings
      */
-    public MsrpSession() {
+    public MsrpSession(RcsSettings rcsSettings) {
         // Changed by Deutsche Telekom
         setMapMsgIdFromTransationId(true);
+        mRcsSettings = rcsSettings;
     }
 
     // Changed by Deutsche Telekom
@@ -676,7 +682,7 @@ public class MsrpSession {
                 msrpTransaction.handleRequest();
                 requestTransaction = null;
             } else {
-                requestTransaction = new RequestTransaction();
+                requestTransaction = new RequestTransaction(mRcsSettings);
             }
             connection.sendChunk(buffer.toByteArray());
             buffer.close();
@@ -734,7 +740,7 @@ public class MsrpSession {
         buffer.write(NEW_LINE);
 
         // Send chunk
-        requestTransaction = new RequestTransaction();
+        requestTransaction = new RequestTransaction(mRcsSettings);
         connection.sendChunkImmediately(buffer.toByteArray());
         buffer.close();
         requestTransaction.waitResponse();
@@ -839,7 +845,7 @@ public class MsrpSession {
         buffer.write(NEW_LINE);
 
         // Send request
-        requestTransaction = new RequestTransaction();
+        requestTransaction = new RequestTransaction(mRcsSettings);
         connection.sendChunk(buffer.toByteArray());
         buffer.close();
     }
@@ -853,6 +859,7 @@ public class MsrpSession {
      * @param data Received data
      * @param totalSize Total size of the content
      * @throws IOException
+     * @throws MsrpException
      */
     public void receiveMsrpSend(String txId, Hashtable<String, String> headers, int flag,
             byte[] data, long totalSize) throws IOException, MsrpException {
@@ -1113,6 +1120,8 @@ public class MsrpSession {
     /**
      * Set the control if is to map the msgId from transactionId if not present on received MSRP
      * messages
+     * 
+     * @param mapMsgIdFromTransationId
      */
     public void setMapMsgIdFromTransationId(boolean mapMsgIdFromTransationId) {
         if (mMapMsgIdFromTransationId != mapMsgIdFromTransationId) {
@@ -1160,6 +1169,8 @@ public class MsrpSession {
     // Changed by Deutsche Telekom
     /**
      * Remove transaction info item from list
+     * 
+     * @param transactionId
      */
     public void removeMsrpTransactionInfo(String transactionId) {
         if (mTransactionInfoMap != null && transactionId != null) {

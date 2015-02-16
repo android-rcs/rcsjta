@@ -18,6 +18,9 @@
 
 package com.orangelabs.rcs.ri.service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
@@ -31,10 +34,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.gsma.services.rcs.CommonServiceConfiguration;
+import com.gsma.services.rcs.RcsServiceControl;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
+import com.gsma.services.rcs.CommonServiceConfiguration.MinimumBatteryLevel;
 import com.gsma.services.rcs.RcsServiceException;
-import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -45,6 +50,9 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * 
  * @author yplo6403
  */
+/**
+ * @author LEMORDANT Philippe
+ */
 public class ServiceConfigurationActivity extends Activity {
 
     /**
@@ -53,15 +61,10 @@ public class ServiceConfigurationActivity extends Activity {
     private static final String LOGTAG = LogUtils.getTag(ServiceConfigurationActivity.class
             .getSimpleName());
 
-    private static final String[] DEF_MSG_METHOD = new String[] {
-            MessagingMethod.AUTOMATIC.name(), MessagingMethod.RCS.name(),
-            MessagingMethod.NON_RCS.name()
-    };
-
     /**
      * API connection manager
      */
-    private ApiConnectionManager mCnxManager;
+    private ConnectionManager mCnxManager;
 
     /**
      * A locker to exit only once
@@ -69,27 +72,49 @@ public class ServiceConfigurationActivity extends Activity {
     private LockAccess mExitOnce = new LockAccess();
 
     private Spinner mSpinnerDefMessaginMethod;
-
+    private Spinner mSpinnerMinBatteryLevel;
     private TextView mTextEditDisplayName;
-
     private CheckBox mCheckBoxIsConfigValid;
-
     private TextView mTextEditMessagingUX;
-
     private TextView mTextEditContactId;
+    private TextView mTextRcsServiceActivation;
 
     private CommonServiceConfiguration mConfiguration;
+
+    private RcsServiceControl mRcsServiceControl;
+
+    private static Map<Integer, MinimumBatteryLevel> sPosToMinimumBatteryLevel = new HashMap<Integer, MinimumBatteryLevel>();
+    private static Map<MinimumBatteryLevel, Integer> sMinimumBatteryLevelToPos = new HashMap<MinimumBatteryLevel, Integer>();
+    static {
+        int order = 0;
+        for (MinimumBatteryLevel entry : MinimumBatteryLevel.values()) {
+            sPosToMinimumBatteryLevel.put(order, entry);
+            sMinimumBatteryLevelToPos.put(entry, order++);
+        }
+    }
+
+    private MinimumBatteryLevel getMinimumBatteryLevelFromSpinnerPosition(
+            int position) {
+        return sPosToMinimumBatteryLevel.get(position);
+    }
+
+    private int getSpinnerPositionFromMinimumBatteryLevel(
+            MinimumBatteryLevel level) {
+        return sMinimumBatteryLevelToPos.get(level);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mRcsServiceControl = RcsServiceControl.getInstance(this);
 
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.service_configuration);
 
         // Register to API connection manager
-        mCnxManager = ApiConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance(this);
         if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
@@ -98,8 +123,8 @@ public class ServiceConfigurationActivity extends Activity {
         }
         try {
             mConfiguration = mCnxManager.getContactApi().getCommonConfiguration();
-        } catch (RcsServiceException e1) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce);
+        } catch (Exception e) {
+            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
             return;
 
         }
@@ -108,10 +133,12 @@ public class ServiceConfigurationActivity extends Activity {
         mTextEditMessagingUX = (TextView) findViewById(R.id.label_messaging_mode);
         mTextEditContactId = (TextView) findViewById(R.id.label_my_contact_id);
         mTextEditDisplayName = (TextView) findViewById(R.id.text_my_display_name);
+        mTextRcsServiceActivation = (TextView) findViewById(R.id.text_service_activation);
 
+        String[] messagingMethods = getResources().getStringArray(R.array.messaging_method);
         mSpinnerDefMessaginMethod = (Spinner) findViewById(R.id.spinner_default_messaging_method);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, DEF_MSG_METHOD);
+                android.R.layout.simple_spinner_item, messagingMethods);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mSpinnerDefMessaginMethod.setAdapter(adapter);
 
@@ -129,6 +156,41 @@ public class ServiceConfigurationActivity extends Activity {
                         if (LogUtils.isActive) {
                             Log.d(LOGTAG,
                                     "onClick DefaultMessagingMethod ".concat(method.toString()));
+                        }
+                    }
+                } catch (RcsServiceException e) {
+                    Utils.showMessageAndExit(ServiceConfigurationActivity.this,
+                            getString(R.string.label_api_failed), mExitOnce, e);
+                }
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+            }
+        });
+
+        String[] batteryLevels = getResources().getStringArray(R.array.minimum_battery_level);
+        mSpinnerMinBatteryLevel = (Spinner) findViewById(R.id.spinner_label_min_battery_level);
+        adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, batteryLevels);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSpinnerMinBatteryLevel.setAdapter(adapter);
+
+        mSpinnerMinBatteryLevel.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView,
+                    int position, long id) {
+                MinimumBatteryLevel level = getMinimumBatteryLevelFromSpinnerPosition(mSpinnerMinBatteryLevel
+                        .getSelectedItemPosition());
+                try {
+                    MinimumBatteryLevel oldLevel = mConfiguration.getMinimumBatteryLevel();
+                    if (!oldLevel.equals(level)) {
+                        mConfiguration.setMinimumBatteryLevel(level);
+                        if (LogUtils.isActive) {
+                            Log.d(LOGTAG,
+                                    "onClick MinimumBatteryLevel ".concat(level.toString()));
                         }
                     }
                 } catch (RcsServiceException e) {
@@ -166,7 +228,9 @@ public class ServiceConfigurationActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        displayServiceConfiguration();
+        if (!mExitOnce.isLocked()) {
+            displayServiceConfiguration();
+        }
     }
 
     private void displayServiceConfiguration() {
@@ -174,9 +238,21 @@ public class ServiceConfigurationActivity extends Activity {
             mCheckBoxIsConfigValid.setChecked(mConfiguration.isConfigValid());
             mSpinnerDefMessaginMethod.setSelection(mConfiguration.getDefaultMessagingMethod()
                     .toInt());
+            mSpinnerMinBatteryLevel
+                    .setSelection(getSpinnerPositionFromMinimumBatteryLevel(mConfiguration
+                            .getMinimumBatteryLevel()));
             mTextEditMessagingUX.setText(mConfiguration.getMessagingUX().name());
             mTextEditDisplayName.setText(mConfiguration.getMyDisplayName());
             mTextEditContactId.setText(mConfiguration.getMyContactId().toString());
+            boolean rcsServiceActivationchangeable = mRcsServiceControl
+                    .isActivationModeChangeable();
+            if (rcsServiceActivationchangeable) {
+                mTextRcsServiceActivation
+                        .setText(getString(R.string.label_service_activate_changeable));
+            } else {
+                mTextRcsServiceActivation
+                        .setText(getString(R.string.label_service_activate_unchangeable));
+            }
         } catch (RcsServiceException e) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
         }

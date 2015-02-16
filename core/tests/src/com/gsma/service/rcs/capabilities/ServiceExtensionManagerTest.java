@@ -18,14 +18,14 @@
 
 package com.gsma.service.rcs.capabilities;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import com.gsma.rcs.core.ims.service.extension.ServiceExtensionManager;
 
 import android.test.AndroidTestCase;
 import android.util.Log;
 
-import com.gsma.rcs.core.ims.service.extension.ServiceExtensionManager;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public class ServiceExtensionManagerTest extends AndroidTestCase {
 
@@ -43,16 +43,14 @@ public class ServiceExtensionManagerTest extends AndroidTestCase {
     }
 
     public void testGetExtensions() {
-        String concatenatedExtensions = ServiceExtensionManager.getInstance().getExtensions(
-                extensions);
+        String concatenatedExtensions = ServiceExtensionManager.getExtensions(extensions);
         Log.d("RCS", "testGetExtensions concatenatedExtensions=" + concatenatedExtensions);
-        Set<String> newExtensions = ServiceExtensionManager.getInstance().getExtensions(
-                concatenatedExtensions);
+        Set<String> newExtensions = ServiceExtensionManager.getExtensions(concatenatedExtensions);
         assertEquals(newExtensions, extensions);
     }
 
     public void testGetExtensionsEmptyTokens() {
-        Set<String> newExtensions = ServiceExtensionManager.getInstance().getExtensions("; ;");
+        Set<String> newExtensions = ServiceExtensionManager.getExtensions("; ;");
         assertTrue(newExtensions.isEmpty());
     }
 

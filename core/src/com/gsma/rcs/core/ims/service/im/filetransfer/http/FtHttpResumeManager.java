@@ -33,6 +33,7 @@ import com.gsma.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.MessagingLog;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
@@ -48,47 +49,51 @@ public class FtHttpResumeManager {
     /**
      * Interface to get access to the FtHttp table
      */
-    private FtHttpResumeDaoImpl dao = FtHttpResumeDaoImpl.getInstance();
+    private FtHttpResumeDaoImpl mDao = FtHttpResumeDaoImpl.getInstance();
 
     /**
      * IMS service
      */
-    private InstantMessagingService imsService;
+    private InstantMessagingService mImsService;
 
     /**
      * List of pending sessions to resume
      */
-    private LinkedList<FtHttpResume> listOfFtHttpResume;
+    private LinkedList<FtHttpResume> mListOfFtHttpResume;
 
     /**
      * FT HTTP session being resumed
      */
-    private FtHttpResume ftHttpResume;
+    private FtHttpResume mFtHttpResume;
 
     /**
      * The logger
      */
-    private static final Logger logger = Logger
+    private static final Logger sLogger = Logger
             .getLogger(FtHttpResumeManager.class.getSimpleName());
 
-    private boolean terminate = false; // TODO
+    private final RcsSettings mRcsSettings;
 
     /**
      * Constructor
      * 
-     * @param imsService IMS service
+     * @param instantMessagingService IMS service
+     * @param rcsSettings
      */
-    public FtHttpResumeManager(InstantMessagingService instantMessagingService) {
-        if (dao == null) {
-            if (logger.isActivated()) {
-                logger.error("Cannot resume FT");
+    public FtHttpResumeManager(InstantMessagingService instantMessagingService,
+            RcsSettings rcsSettings) {
+        mRcsSettings = rcsSettings;
+        if (mDao == null) {
+            if (sLogger.isActivated()) {
+                sLogger.error("Cannot resume FT");
             }
             return;
         }
-        imsService = instantMessagingService;
+        mImsService = instantMessagingService;
+
         try {
             // Retrieve all resumable sessions
-            List<FtHttpResume> listFile2resume = dao.queryAll();
+            List<FtHttpResume> listFile2resume = mDao.queryAll();
             if (listFile2resume.isEmpty() == false) {
                 // Rich Messaging - set all "in progress" File transfer to "paused".
                 // This is necessary in case of the application can't update the
@@ -98,13 +103,13 @@ public class FtHttpResumeManager {
                             ftHttpResume.getFileTransferId(), FileTransfer.State.PAUSED,
                             FileTransfer.ReasonCode.PAUSED_BY_SYSTEM);
                 }
-                listOfFtHttpResume = new LinkedList<FtHttpResume>(listFile2resume);
+                mListOfFtHttpResume = new LinkedList<FtHttpResume>(listFile2resume);
                 processNext();
             }
         } catch (Exception e) {
             // handle exception
-            if (logger.isActivated()) {
-                logger.error("Exception occurred", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Exception occurred", e);
             }
         }
     }
@@ -113,21 +118,21 @@ public class FtHttpResumeManager {
      * resume next pending session
      */
     private void processNext() {
-        if (listOfFtHttpResume.isEmpty())
+        if (mListOfFtHttpResume.isEmpty())
             return;
         // Remove the oldest session from the list
-        ftHttpResume = listOfFtHttpResume.poll();
-        if (logger.isActivated()) {
-            logger.debug("Resume FT HTTP " + ftHttpResume);
+        mFtHttpResume = mListOfFtHttpResume.poll();
+        if (sLogger.isActivated()) {
+            sLogger.debug("Resume FT HTTP " + mFtHttpResume);
         }
-        switch (ftHttpResume.getDirection()) {
+        switch (mFtHttpResume.getDirection()) {
             case INCOMING:
-                FtHttpResumeDownload downloadInfo = (FtHttpResumeDownload) ftHttpResume;
-                MmContent downloadContent = ContentManager.createMmContent(ftHttpResume.getFile(),
+                FtHttpResumeDownload downloadInfo = (FtHttpResumeDownload) mFtHttpResume;
+                MmContent downloadContent = ContentManager.createMmContent(mFtHttpResume.getFile(),
                         downloadInfo.getSize(), downloadInfo.getFileName());
                 // Creates the Resume Download session object
                 final ResumeDownloadFileSharingSession resumeDownload = new ResumeDownloadFileSharingSession(
-                        imsService, downloadContent, downloadInfo);
+                        mImsService, downloadContent, downloadInfo, mRcsSettings);
                 resumeDownload.addListener(getFileSharingSessionListener());
                 // Start the download HTTP FT session object
                 new Thread() {
@@ -136,7 +141,7 @@ public class FtHttpResumeManager {
                     }
                 }.start();
                 // Notify the UI and update rich messaging
-                imsService
+                mImsService
                         .getImsModule()
                         .getCore()
                         .getListener()
@@ -147,8 +152,8 @@ public class FtHttpResumeManager {
                 break;
             case OUTGOING:
                 // TODO : only managed for 1-1 FToHTTP
-                FtHttpResumeUpload uploadInfo = (FtHttpResumeUpload) ftHttpResume;
-                if (!ftHttpResume.isGroupTransfer()) {
+                FtHttpResumeUpload uploadInfo = (FtHttpResumeUpload) mFtHttpResume;
+                if (!mFtHttpResume.isGroupTransfer()) {
                     // Get upload content
                     MmContent uploadContent = ContentManager.createMmContentFromMime(
                             uploadInfo.getFile(), uploadInfo.getMimetype(), uploadInfo.getSize(),
@@ -156,7 +161,7 @@ public class FtHttpResumeManager {
 
                     // Create Resume Upload session
                     final ResumeUploadFileSharingSession resumeUpload = new ResumeUploadFileSharingSession(
-                            imsService, uploadContent, uploadInfo);
+                            mImsService, uploadContent, uploadInfo, mRcsSettings);
                     resumeUpload.addListener(getFileSharingSessionListener());
 
                     // Start Resume Upload session
@@ -167,9 +172,11 @@ public class FtHttpResumeManager {
                     }.start();
 
                     // Notify the UI and update rich messaging
-                    imsService.getImsModule().getCore().getListener()
+                    mImsService.getImsModule().getCore().getListener()
                             .handleOutgoingFileTransferResuming(resumeUpload, false);
                 }
+                break;
+            default:
                 break;
         }
 
@@ -263,7 +270,9 @@ public class FtHttpResumeManager {
         };
     }
 
+    /**
+     * Terminates
+     */
     public void terminate() {
-        this.terminate = true;
     }
 }

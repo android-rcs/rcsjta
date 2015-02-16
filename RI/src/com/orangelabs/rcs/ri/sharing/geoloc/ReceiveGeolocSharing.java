@@ -45,9 +45,8 @@ import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingIntent;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingListener;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingService;
-
-import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
@@ -90,7 +89,7 @@ public class ReceiveGeolocSharing extends Activity {
     /**
      * API connection manager
      */
-    private ApiConnectionManager mCnxManager;
+    private ConnectionManager mCnxManager;
 
     private Geoloc mGeoloc;
 
@@ -218,7 +217,7 @@ public class ReceiveGeolocSharing extends Activity {
         mRemoteContact = getIntent().getParcelableExtra(GeolocSharingIntentService.BUNDLE_GSH_ID);
 
         // Register to API connection manager
-        mCnxManager = ApiConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance(this);
         if (mCnxManager == null
                 || !mCnxManager.isServiceConnected(RcsServiceName.GEOLOC_SHARING,
                         RcsServiceName.CONTACT)) {
@@ -280,7 +279,7 @@ public class ReceiveGeolocSharing extends Activity {
             builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
             builder.show();
         } catch (RcsServiceNotAvailableException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), mExitOnce, e);
+            Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce, e);
         } catch (RcsServiceException e) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
         }

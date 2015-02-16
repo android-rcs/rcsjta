@@ -49,57 +49,59 @@ public class UserProfile {
     /**
      * User name
      */
-    private ContactId contact;
+    private ContactId mContact;
 
     /**
      * Private ID for HTTP digest
      */
-    private String privateID;
+    private String mPrivateID;
 
     /**
      * Password for HTTP digest
      */
-    private String password;
+    private String mPassword;
 
     /**
      * Realm for HTTP digest
      */
-    private String realm;
+    private String mRealm;
 
     /**
      * Home domain
      */
-    private String homeDomain;
+    private String mHomeDomain;
 
     /**
      * XDM server address
      */
-    private String xdmServerAddr;
+    private String mXdmServerAddr;
 
     /**
      * XDM server login
      */
-    private String xdmServerLogin;
+    private String mXdmServerLogin;
 
     /**
      * XDM server password
      */
-    private String xdmServerPassword;
+    private String mXdmServerPassword;
 
     /**
      * IM conference URI
      */
-    private String imConferenceUri;
+    private String mImConferenceUri;
 
     /**
      * Associated URIs
      */
-    private Vector<String> associatedUriList = new Vector<String>();
+    private Vector<String> mAssociatedUriList = new Vector<String>();
 
     /**
      * Preferred URI
      */
-    private String preferredUri = null;
+    private String mPreferredUri;
+
+    private final RcsSettings mRcsSettings;
 
     /**
      * Constructor
@@ -113,23 +115,25 @@ public class UserProfile {
      * @param xdmServerLogin Outbound proxy address
      * @param xdmServerPassword Outbound proxy address
      * @param imConferenceUri IM conference factory URI
+     * @param rcsSettings
      */
     public UserProfile(ContactId contact, String homeDomain, String privateID, String password,
             String realm, String xdmServerAddr, String xdmServerLogin, String xdmServerPassword,
-            String imConferenceUri) {
-        this.contact = contact;
-        this.homeDomain = homeDomain;
-        this.privateID = privateID;
-        this.password = password;
-        this.realm = realm;
-        this.xdmServerAddr = xdmServerAddr;
-        this.xdmServerLogin = xdmServerLogin;
-        this.xdmServerPassword = xdmServerPassword;
-        this.imConferenceUri = imConferenceUri;
+            String imConferenceUri, RcsSettings rcsSettings) {
+        mContact = contact;
+        mHomeDomain = homeDomain;
+        mPrivateID = privateID;
+        mPassword = password;
+        mRealm = realm;
+        mXdmServerAddr = xdmServerAddr;
+        mXdmServerLogin = xdmServerLogin;
+        mXdmServerPassword = xdmServerPassword;
+        mImConferenceUri = imConferenceUri;
+        mRcsSettings = rcsSettings;
         // Changed by Deutsche Telekom
         // Continuation from the changes done by "AS" on "2012-09-01"
         // this.preferredUri = "sip:" + username + "@" + homeDomain;
-        this.preferredUri = getPublicUriForRegistration();
+        mPreferredUri = getPublicUriForRegistration();
     }
 
     /**
@@ -138,7 +142,7 @@ public class UserProfile {
      * @return Username
      */
     public ContactId getUsername() {
-        return contact;
+        return mContact;
     }
 
     /**
@@ -147,7 +151,7 @@ public class UserProfile {
      * @param contact Contact Id
      */
     public void setUsername(ContactId contact) {
-        this.contact = contact;
+        mContact = contact;
     }
 
     /**
@@ -156,7 +160,7 @@ public class UserProfile {
      * @return Preferred URI
      */
     public String getPreferredUri() {
-        return preferredUri;
+        return mPreferredUri;
     }
 
     /**
@@ -165,12 +169,12 @@ public class UserProfile {
      * @return Public URI
      */
     public String getPublicUri() {
-        if (preferredUri == null) {
+        if (mPreferredUri == null) {
             // Changed by Deutsche Telekom
             // Continuation from the changes done by "AS" on "2012-09-01"
             return getPublicUriForRegistration();
         } else {
-            return preferredUri;
+            return mPreferredUri;
         }
     }
 
@@ -180,10 +184,11 @@ public class UserProfile {
      * @return Public URI
      */
     public String getPublicUriForRegistration() {
-        if (RcsSettings.getInstance().isTelUriFormatUsed()) {
-            return new StringBuilder(TEL_URI).append(contact).toString();
+        if (mRcsSettings.isTelUriFormatUsed()) {
+            return new StringBuilder(TEL_URI).append(mContact).toString();
         }
-        return new StringBuilder(SIP_URI).append(contact).append(AT).append(homeDomain).toString();
+        return new StringBuilder(SIP_URI).append(mContact).append(AT).append(mHomeDomain)
+                .toString();
     }
 
     /**
@@ -193,7 +198,7 @@ public class UserProfile {
      */
     public String getPublicAddress() {
         String addr = getPublicUri();
-        String displayName = RcsSettings.getInstance().getUserProfileImsDisplayName();
+        String displayName = mRcsSettings.getUserProfileImsDisplayName();
         if ((displayName != null) && (displayName.length() > 0)) {
             String number = PhoneUtils.extractNumberFromUri(addr);
             if (number != null && number.equals(displayName)) {
@@ -221,7 +226,7 @@ public class UserProfile {
             ExtensionHeader header = (ExtensionHeader) uris.next();
             String value = header.getValue();
             value = SipUtils.extractUriFromAddress(value);
-            associatedUriList.addElement(value);
+            mAssociatedUriList.addElement(value);
 
             if (value.startsWith("sip:")) {
                 sipUri = value;
@@ -231,11 +236,11 @@ public class UserProfile {
         }
 
         if ((sipUri != null) && (telUri != null)) {
-            preferredUri = telUri;
+            mPreferredUri = telUri;
         } else if (telUri != null) {
-            preferredUri = telUri;
+            mPreferredUri = telUri;
         } else if (sipUri != null) {
-            preferredUri = sipUri;
+            mPreferredUri = sipUri;
         }
     }
 
@@ -245,7 +250,7 @@ public class UserProfile {
      * @return Private ID
      */
     public String getPrivateID() {
-        return privateID;
+        return mPrivateID;
     }
 
     /**
@@ -254,7 +259,7 @@ public class UserProfile {
      * @return Password
      */
     public String getPassword() {
-        return password;
+        return mPassword;
     }
 
     /**
@@ -263,7 +268,7 @@ public class UserProfile {
      * @return Realm
      */
     public String getRealm() {
-        return realm;
+        return mRealm;
     }
 
     /**
@@ -272,7 +277,7 @@ public class UserProfile {
      * @return Home domain
      */
     public String getHomeDomain() {
-        return homeDomain;
+        return mHomeDomain;
     }
 
     /**
@@ -281,7 +286,7 @@ public class UserProfile {
      * @param domain Home domain
      */
     public void setHomeDomain(String domain) {
-        this.homeDomain = domain;
+        mHomeDomain = domain;
     }
 
     /**
@@ -290,7 +295,7 @@ public class UserProfile {
      * @param addr Server address
      */
     public void setXdmServerAddr(String addr) {
-        this.xdmServerAddr = addr;
+        mXdmServerAddr = addr;
     }
 
     /**
@@ -299,7 +304,7 @@ public class UserProfile {
      * @return Server address
      */
     public String getXdmServerAddr() {
-        return xdmServerAddr;
+        return mXdmServerAddr;
     }
 
     /**
@@ -308,7 +313,7 @@ public class UserProfile {
      * @param login Login
      */
     public void setXdmServerLogin(String login) {
-        this.xdmServerLogin = login;
+        mXdmServerLogin = login;
     }
 
     /**
@@ -317,7 +322,7 @@ public class UserProfile {
      * @return Login
      */
     public String getXdmServerLogin() {
-        return xdmServerLogin;
+        return mXdmServerLogin;
     }
 
     /**
@@ -326,7 +331,7 @@ public class UserProfile {
      * @param pwd Password
      */
     public void setXdmServerPassword(String pwd) {
-        this.xdmServerPassword = pwd;
+        mXdmServerPassword = pwd;
     }
 
     /**
@@ -335,7 +340,7 @@ public class UserProfile {
      * @return Password
      */
     public String getXdmServerPassword() {
-        return xdmServerPassword;
+        return mXdmServerPassword;
     }
 
     /**
@@ -344,7 +349,7 @@ public class UserProfile {
      * @param uri URI
      */
     public void setImConferenceUri(String uri) {
-        this.imConferenceUri = uri;
+        mImConferenceUri = uri;
     }
 
     /**
@@ -353,7 +358,7 @@ public class UserProfile {
      * @return URI
      */
     public String getImConferenceUri() {
-        return imConferenceUri;
+        return mImConferenceUri;
     }
 
     /**
@@ -362,11 +367,11 @@ public class UserProfile {
      * @return String
      */
     public String toString() {
-        String result = "IMS username=" + contact + ", " + "IMS private ID=" + privateID + ", "
-                + "IMS password=" + password + ", " + "IMS home domain=" + homeDomain + ", "
-                + "XDM server=" + xdmServerAddr + ", " + "XDM login=" + xdmServerLogin + ", "
-                + "XDM password=" + xdmServerPassword + ", " + "IM Conference URI="
-                + imConferenceUri;
+        String result = "IMS username=" + mContact + ", " + "IMS private ID=" + mPrivateID + ", "
+                + "IMS password=" + mPassword + ", " + "IMS home domain=" + mHomeDomain + ", "
+                + "XDM server=" + mXdmServerAddr + ", " + "XDM login=" + mXdmServerLogin + ", "
+                + "XDM password=" + mXdmServerPassword + ", " + "IM Conference URI="
+                + mImConferenceUri;
         return result;
     }
 }

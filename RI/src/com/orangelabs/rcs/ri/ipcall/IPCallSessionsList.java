@@ -32,8 +32,8 @@ import android.widget.ListView;
 
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.ipcall.IPCall;
-import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -53,7 +53,7 @@ public class IPCallSessionsList extends ListActivity {
     /**
      * API connection manager
      */
-    private ApiConnectionManager connectionManager;
+    private ConnectionManager connectionManager;
 
     /**
      * A locker to exit only once
@@ -72,7 +72,7 @@ public class IPCallSessionsList extends ListActivity {
         setTitle(R.string.menu_ipcall_list);
 
         // Register to API connection manager
-        connectionManager = ApiConnectionManager.getInstance(this);
+        connectionManager = ConnectionManager.getInstance(this);
         if (connectionManager == null
                 || !connectionManager.isServiceConnected(RcsServiceName.IP_CALL)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),

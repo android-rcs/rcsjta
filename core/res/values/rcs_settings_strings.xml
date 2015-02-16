@@ -1,100 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="rcs_settings_label_ok">OK</string>
-    <string name="rcs_settings_label_cancel">Cancel</string>
-    <string name="rcs_settings_title_settings">Settings</string>
-    <string name="rcs_settings_title_about">About RCS</string>
-    <string name="rcs_settings_title_userprofile_settings">User profile settings</string>
-    <string name="rcs_settings_title_presence_settings">Presence settings</string>
-    <string name="rcs_settings_title_messaging_settings">Messaging settings</string>
-    <string name="rcs_settings_title_filetransfer_invitation">File transfer invitation settings</string>
-    <string name="rcs_settings_title_chat_invitation">Chat invitation settings</string>
-    <string name="rcs_settings_title_csh_settings">Content sharing settings</string>
-    <string name="rcs_settings_title_csh_invitation">Content sharing invitation settings</string>
-    <string name="rcs_settings_title_csh_available">Content sharing notification</string>
-    <string name="rcs_settings_menu_about">About</string>
-    <string name="rcs_settings_menu_help">More infos</string>
-    <string name="rcs_settings_summary_csh_ringtone">Ringtone for incoming content sharing invitation</string>
-    <string name="rcs_settings_summary_csh_settings">Manage content sharing settings</string>
-    <string name="rcs_settings_summary_csh_vibrate">Vibrate for incoming content sharing invitation</string>
-    <string name="rcs_settings_summary_presence_settings">Manage presence settings</string>
-    <string name="rcs_settings_summary_messaging_settings">Manage messaging settings</string>
-    <string name="rcs_settings_summary_filetransfer_vibrate">Vibrate for incoming file transfer invitation</string>
-    <string name="rcs_settings_summary_chat_vibrate">Vibrate for incoming chat invitation</string>
-    <string name="rcs_settings_summary_filetransfer_ringtone">Ringtone for incoming file transfer invitation</string>
-    <string name="rcs_settings_summary_chat_ringtone">Ringtone for incoming chat invitation</string>
-    <string name="rcs_settings_summary_rcs_service_on">Select to turn off the RCS service</string>
-    <string name="rcs_settings_summary_rcs_service_off">Select to turn on the RCS service</string>
-    <string name="rcs_settings_summary_csh_available">Beep when a content sharing may be initiated during the voice call</string>
-    <string name="rcs_settings_summary_min_battery_level">Stop the RCS service if battery low</string>
-    <string name="rcs_settings_summary_min_storage">Disable File transfer and Image sharing capabilities if memory low</string>
-    <string name="rcs_settings_summary_image_resize_option">Select the resize option for outgoing image transfer</string>
-    <string name="rcs_settings_summary_ft_auto_accept">Auto accept file transfer</string>
-    <string name="rcs_settings_summary_ft_auto_accept_in_roaming">Auto accept file transfer while roaming</string>
-    <string name="rcs_settings_label_beep">Phone beep</string>
-    <string name="rcs_settings_label_vibrate">Phone vibrate</string>
-    <string name="rcs_settings_label_ringtone">Phone ringtone</string>
-    <string name="rcs_settings_summary_chat_displayed_notification">Send displayed notification during a chat</string>
-    <string name="rcs_settings_label_displayed_notification">Displayed notification</string>
-    <string name="rcs_settings_label_rcs_service">RCS service</string>
-    <string name="rcs_settings_label_confirm">Confirmation</string>
-    <string name="rcs_settings_label_rcs_service_shutdown">RCS service will be terminated</string>
-    <string name="rcs_settings_label_about">RCS application</string>
-    <string name="rcs_settings_label_copyrights">Apache License Version 2.0</string>
-    <string name="rcs_settings_label_release">Release</string>
-    <string name="rcs_settings_label_ft_auto_accept">Auto accept</string>
-    <string name="rcs_settings_label_ft_auto_accept_in_roaming">Auto accept in roaming</string>
-    <string name="rcs_settings_label_min_battery_level">Minimum battery level</string>
-
-    <string-array name="rcs_settings_list_battery_level_value">
-        <item>0</item>
-        <item>5</item>
-        <item>10</item>
-        <item>20</item>
-    </string-array>
-    <string-array name="rcs_settings_list_battery_level_label">
-        <item>Never stop</item>
-        <item>5%</item>
-        <item>10%</item>
-        <item>20%</item>
-    </string-array>
-
-    <string name="rcs_settings_label_min_storage">Minimum storage</string>
-
-    <string-array name="rcs_settings_list_storage_value">
-        <item>0</item>
-        <item>10240</item>
-        <item>51200</item>
-        <item>204800</item>
-    </string-array>
-    <string-array name="rcs_settings_list_storage_label">
-        <item>Never block</item>
-        <item>10MB</item>
-        <item>50MB</item>
-        <item>200MB</item>
-    </string-array>
-
-    <string name="rcs_settings_label_default_freetext_1">Hello world !</string>
-    <string name="rcs_settings_label_default_freetext_2">At Home</string>
-    <string name="rcs_settings_label_default_freetext_3">At work</string>
-    <string name="rcs_settings_label_default_freetext_4">On vacation</string>
-    <string name="rcs_settings_summary_userprofile_settings">Manage user profile settings</string>
-    <string name="rcs_settings_title_caller_id">Caller identity</string>
-    <string name="rcs_settings_title_displayname">Display name</string>
-    <string name="rcs_settings_summary_edit_displayname">Display name associated to my phone number in outgoing calls</string>
-    <string name="rcs_settings_label_image_resize_option">Image resize option</string>
-
-    <string-array name="rcs_settings_list_image_resize_option_value">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-    </string-array>
-    <string-array name="rcs_settings_list_image_resize_option_label">
-        <item>Always perform</item>
-        <item>Only above maximum size</item>
-        <item>Ask</item>
-    </string-array>
     <string-array name="provisioning_network_access">
         <item>All networks</item>
         <item>Mobile only</item>
@@ -103,6 +9,11 @@
     <string-array name="provisioning_config_mode">
         <item>Manual</item>
         <item>Automatic</item>
+    </string-array>
+    <string-array name="provisioning_enable_rcs_switch">
+        <item>Only show in roaming</item>
+        <item>Always show</item>
+        <item>Never show</item>
     </string-array>
 
 </resources>

@@ -38,6 +38,7 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.NetworkAccessType;
 import com.gsma.rcs.service.LauncherUtils;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.CommonServiceConfiguration.MinimumBatteryLevel;
 
 /**
  * IMS connection manager
@@ -49,42 +50,42 @@ public class ImsConnectionManager implements Runnable {
     /**
      * IMS module
      */
-    private ImsModule imsModule;
+    private ImsModule mImsModule;
 
     /**
      * Network interfaces
      */
-    private ImsNetworkInterface[] networkInterfaces = new ImsNetworkInterface[2];
+    private ImsNetworkInterface[] mNetworkInterfaces = new ImsNetworkInterface[2];
 
     /**
      * IMS network interface
      */
-    private ImsNetworkInterface currentNetworkInterface;
+    private ImsNetworkInterface mCurrentNetworkInterface;
 
     /**
      * IMS polling thread
      */
-    private Thread imsPollingThread;
+    private Thread mImsPollingThread;
 
     /**
      * IMS polling thread Id
      */
-    private long imsPollingThreadID = -1;
+    private long mImsPollingThreadId = -1;
 
     /**
      * Connectivity manager
      */
-    private ConnectivityManager connectivityMgr;
+    private ConnectivityManager mCnxManager;
 
     /**
      * Network access type
      */
-    private NetworkAccessType network;
+    private NetworkAccessType mNetwork;
 
     /**
      * Operator
      */
-    private String operator;
+    private String mOperator;
 
     /**
      * DNS resolved fields
@@ -94,44 +95,48 @@ public class ImsConnectionManager implements Runnable {
     /**
      * Battery level state
      */
-    private boolean disconnectedByBattery = false;
+    private boolean mDisconnectedByBattery = false;
 
     /**
      * IMS services already started
      */
-    private boolean imsServicesStarted = false;
+    private boolean mImsServicesStarted = false;
 
     /**
      * The logger
      */
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
+    private final RcsSettings mRcsSettings;
+
     /**
      * Constructor
      * 
      * @param imsModule IMS module
+     * @param rcsSettings RcsSettings instance
      * @throws CoreException
      */
-    public ImsConnectionManager(ImsModule imsModule) throws CoreException {
-        this.imsModule = imsModule;
+    public ImsConnectionManager(ImsModule imsModule, RcsSettings rcsSettings) throws CoreException {
+        mImsModule = imsModule;
+        mRcsSettings = rcsSettings;
 
-        RcsSettings rcsSettings = RcsSettings.getInstance();
         // Get network access parameters
-        network = rcsSettings.getNetworkAccess();
+        mNetwork = rcsSettings.getNetworkAccess();
 
         // Get network operator parameters
-        operator = rcsSettings.getNetworkOperator();
+        mOperator = rcsSettings.getNetworkOperator();
 
+        Context appContext = AndroidFactory.getApplicationContext();
         // Set the connectivity manager
-        connectivityMgr = (ConnectivityManager) AndroidFactory.getApplicationContext()
+        mCnxManager = (ConnectivityManager) appContext
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
 
         // Instantiates the IMS network interfaces
-        networkInterfaces[0] = new MobileNetworkInterface(imsModule, rcsSettings);
-        networkInterfaces[1] = new WifiNetworkInterface(imsModule, rcsSettings);
+        mNetworkInterfaces[0] = new MobileNetworkInterface(imsModule, rcsSettings);
+        mNetworkInterfaces[1] = new WifiNetworkInterface(imsModule, rcsSettings);
 
         // Set the mobile network interface by default
-        currentNetworkInterface = getMobileNetworkInterface();
+        mCurrentNetworkInterface = getMobileNetworkInterface();
 
         // Load the user profile
         loadUserProfile();
@@ -139,11 +144,11 @@ public class ImsConnectionManager implements Runnable {
         // Register network state listener
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        AndroidFactory.getApplicationContext().registerReceiver(networkStateListener, intentFilter);
+        appContext.registerReceiver(networkStateListener, intentFilter);
 
         // Battery management
-        AndroidFactory.getApplicationContext().registerReceiver(batteryLevelListener,
-                new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        appContext.registerReceiver(batteryLevelListener, new IntentFilter(
+                Intent.ACTION_BATTERY_CHANGED));
     }
 
     /**
@@ -152,7 +157,7 @@ public class ImsConnectionManager implements Runnable {
      * @return Current network interface
      */
     public ImsNetworkInterface getCurrentNetworkInterface() {
-        return currentNetworkInterface;
+        return mCurrentNetworkInterface;
     }
 
     /**
@@ -161,7 +166,7 @@ public class ImsConnectionManager implements Runnable {
      * @return Mobile network interface
      */
     public ImsNetworkInterface getMobileNetworkInterface() {
-        return networkInterfaces[0];
+        return mNetworkInterfaces[0];
     }
 
     /**
@@ -170,7 +175,7 @@ public class ImsConnectionManager implements Runnable {
      * @return Wi-Fi network interface
      */
     public ImsNetworkInterface getWifiNetworkInterface() {
-        return networkInterfaces[1];
+        return mNetworkInterfaces[1];
     }
 
     /**
@@ -179,11 +184,7 @@ public class ImsConnectionManager implements Runnable {
      * @return Boolean
      */
     public boolean isConnectedToWifi() {
-        if (currentNetworkInterface == getWifiNetworkInterface()) {
-            return true;
-        } else {
-            return false;
-        }
+        return mCurrentNetworkInterface == getWifiNetworkInterface();
     }
 
     /**
@@ -192,11 +193,7 @@ public class ImsConnectionManager implements Runnable {
      * @return Boolean
      */
     public boolean isConnectedToMobile() {
-        if (currentNetworkInterface == getMobileNetworkInterface()) {
-            return true;
-        } else {
-            return false;
-        }
+        return mCurrentNetworkInterface == getMobileNetworkInterface();
     }
 
     /**
@@ -205,14 +202,14 @@ public class ImsConnectionManager implements Runnable {
      * @return Returns true if disconnected by battery, else returns false
      */
     public boolean isDisconnectedByBattery() {
-        return disconnectedByBattery;
+        return mDisconnectedByBattery;
     }
 
     /**
      * Load the user profile associated to the network interface
      */
     private void loadUserProfile() {
-        ImsModule.IMS_USER_PROFILE = currentNetworkInterface.getUserProfile();
+        ImsModule.IMS_USER_PROFILE = mCurrentNetworkInterface.getUserProfile();
         if (logger.isActivated()) {
             logger.debug("User profile has been reloaded");
         }
@@ -244,7 +241,7 @@ public class ImsConnectionManager implements Runnable {
         stopImsConnection();
 
         // Unregister from the IMS
-        currentNetworkInterface.unregister();
+        mCurrentNetworkInterface.unregister();
 
         if (logger.isActivated()) {
             logger.info("IMS connection manager has been terminated");
@@ -272,7 +269,7 @@ public class ImsConnectionManager implements Runnable {
      * @param intent Intent
      */
     private synchronized void connectionEvent(Intent intent) {
-        if (disconnectedByBattery) {
+        if (mDisconnectedByBattery) {
             return;
         }
 
@@ -290,7 +287,7 @@ public class ImsConnectionManager implements Runnable {
         }
 
         // Check received network info
-        NetworkInfo networkInfo = connectivityMgr.getActiveNetworkInfo();
+        NetworkInfo networkInfo = mCnxManager.getActiveNetworkInfo();
         if (networkInfo == null) {
             // Disconnect from IMS network interface
             if (logger.isActivated()) {
@@ -309,7 +306,7 @@ public class ImsConnectionManager implements Runnable {
             if (lastUserAccount != null) {
                 if ((currentUserAccount == null)
                         || !currentUserAccount.equalsIgnoreCase(lastUserAccount)) {
-                    imsModule.getCoreListener().handleSimHasChanged();
+                    mImsModule.getCoreListener().handleSimHasChanged();
                     return;
                 }
             }
@@ -319,7 +316,7 @@ public class ImsConnectionManager implements Runnable {
         String localIpAddr = null;
 
         // Check if the network access type has changed
-        if (networkInfo.getType() != currentNetworkInterface.getType()) {
+        if (networkInfo.getType() != mCurrentNetworkInterface.getType()) {
             // Network interface changed
             if (logger.isActivated()) {
                 logger.info("Data connection state: NETWORK ACCESS CHANGED");
@@ -336,12 +333,12 @@ public class ImsConnectionManager implements Runnable {
                 if (logger.isActivated()) {
                     logger.debug("Change the network interface to mobile");
                 }
-                currentNetworkInterface = getMobileNetworkInterface();
+                mCurrentNetworkInterface = getMobileNetworkInterface();
             } else if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
                 if (logger.isActivated()) {
                     logger.debug("Change the network interface to Wi-Fi");
                 }
-                currentNetworkInterface = getWifiNetworkInterface();
+                mCurrentNetworkInterface = getWifiNetworkInterface();
             }
 
             // Load the user profile for the new network interface
@@ -349,7 +346,7 @@ public class ImsConnectionManager implements Runnable {
 
             // update DNS entry
             try {
-                mDnsResolvedFields = currentNetworkInterface.getDnsResolvedFields();
+                mDnsResolvedFields = mCurrentNetworkInterface.getDnsResolvedFields();
             } catch (Exception e) {
                 if (logger.isActivated()) {
                     logger.error(
@@ -366,7 +363,7 @@ public class ImsConnectionManager implements Runnable {
             // Check if the IP address has changed
             try {
                 if (mDnsResolvedFields == null) {
-                    mDnsResolvedFields = currentNetworkInterface.getDnsResolvedFields();
+                    mDnsResolvedFields = mCurrentNetworkInterface.getDnsResolvedFields();
                 }
             } catch (Exception e) {
                 if (logger.isActivated()) {
@@ -379,7 +376,7 @@ public class ImsConnectionManager implements Runnable {
                     networkInfo.getType());
 
             if (localIpAddr != null) {
-                String lastIpAddr = currentNetworkInterface.getNetworkAccess().getIpAddress();
+                String lastIpAddr = mCurrentNetworkInterface.getNetworkAccess().getIpAddress();
                 if (!localIpAddr.equals(lastIpAddr)) {
                     // Changed by Deutsche Telekom
                     if (lastIpAddr != null) {
@@ -407,7 +404,7 @@ public class ImsConnectionManager implements Runnable {
         if (networkInfo.isConnected() && (localIpAddr != null)) {
             String remoteAddress;
             if (mDnsResolvedFields != null) {
-                remoteAddress = mDnsResolvedFields.ipAddress;
+                remoteAddress = mDnsResolvedFields.mIpAddress;
             } else {
                 remoteAddress = new String("unresolved");
             }
@@ -418,8 +415,8 @@ public class ImsConnectionManager implements Runnable {
             }
 
             // Test network access type
-            if (!NetworkAccessType.ANY.equals(network)
-                    && (network.toInt() != networkInfo.getType())) {
+            if (!NetworkAccessType.ANY.equals(mNetwork)
+                    && (mNetwork.toInt() != networkInfo.getType())) {
                 if (logger.isActivated()) {
                     logger.warn("Network access " + networkInfo.getTypeName()
                             + " is not authorized");
@@ -431,7 +428,7 @@ public class ImsConnectionManager implements Runnable {
             TelephonyManager tm = (TelephonyManager) AndroidFactory.getApplicationContext()
                     .getSystemService(Context.TELEPHONY_SERVICE);
             String currentOpe = tm.getSimOperatorName();
-            if ((operator.length() > 0) && !currentOpe.equalsIgnoreCase(operator)) {
+            if ((mOperator.length() > 0) && !currentOpe.equalsIgnoreCase(mOperator)) {
                 if (logger.isActivated()) {
                     logger.warn("Operator not authorized");
                 }
@@ -439,7 +436,7 @@ public class ImsConnectionManager implements Runnable {
             }
 
             // Test the configuration
-            if (!currentNetworkInterface.isInterfaceConfigured()) {
+            if (!mCurrentNetworkInterface.isInterfaceConfigured()) {
                 if (logger.isActivated()) {
                     logger.warn("IMS network interface not well configured");
                 }
@@ -471,7 +468,7 @@ public class ImsConnectionManager implements Runnable {
      */
     private void connectToIms(String ipAddr) {
         // Connected to the network access
-        currentNetworkInterface.getNetworkAccess().connect(ipAddr);
+        mCurrentNetworkInterface.getNetworkAccess().connect(ipAddr);
 
         // Start the IMS connection
         startImsConnection();
@@ -485,17 +482,17 @@ public class ImsConnectionManager implements Runnable {
         stopImsConnection();
 
         // Registration terminated
-        currentNetworkInterface.registrationTerminated();
+        mCurrentNetworkInterface.registrationTerminated();
 
         // Disconnect from the network access
-        currentNetworkInterface.getNetworkAccess().disconnect();
+        mCurrentNetworkInterface.getNetworkAccess().disconnect();
     }
 
     /**
      * Start the IMS connection
      */
     private synchronized void startImsConnection() {
-        if (imsPollingThreadID >= 0) {
+        if (mImsPollingThreadId >= 0) {
             // Already connected
             return;
         }
@@ -507,9 +504,9 @@ public class ImsConnectionManager implements Runnable {
 
         // Start background polling thread
         try {
-            imsPollingThread = new Thread(this);
-            imsPollingThreadID = imsPollingThread.getId();
-            imsPollingThread.start();
+            mImsPollingThread = new Thread(this);
+            mImsPollingThreadId = mImsPollingThread.getId();
+            mImsPollingThread.start();
         } catch (Exception e) {
             if (logger.isActivated()) {
                 logger.error("Internal exception while starting IMS polling thread", e);
@@ -521,7 +518,7 @@ public class ImsConnectionManager implements Runnable {
      * Stop the IMS connection
      */
     private synchronized void stopImsConnection() {
-        if (imsPollingThreadID == -1) {
+        if (mImsPollingThreadId == -1) {
             // Already disconnected
             return;
         }
@@ -530,12 +527,12 @@ public class ImsConnectionManager implements Runnable {
         if (logger.isActivated()) {
             logger.info("Stop the IMS connection manager");
         }
-        imsPollingThreadID = -1;
+        mImsPollingThreadId = -1;
 
         // Stop background polling thread
         try {
-            imsPollingThread.interrupt();
-            imsPollingThread = null;
+            mImsPollingThread.interrupt();
+            mImsPollingThread = null;
         } catch (Exception e) {
             if (logger.isActivated()) {
                 logger.error("Internal exception while stopping IMS polling thread", e);
@@ -543,9 +540,9 @@ public class ImsConnectionManager implements Runnable {
         }
 
         // Stop IMS services
-        if (imsServicesStarted) {
-            imsModule.stopImsServices();
-            imsServicesStarted = false;
+        if (mImsServicesStarted) {
+            mImsModule.stopImsServices();
+            mImsServicesStarted = false;
         }
     }
 
@@ -557,13 +554,13 @@ public class ImsConnectionManager implements Runnable {
             logger.debug("Start polling of the IMS connection");
         }
 
-        int servicePollingPeriod = RcsSettings.getInstance().getImsServicePollingPeriod();
-        int regBaseTime = RcsSettings.getInstance().getRegisterRetryBaseTime();
-        int regMaxTime = RcsSettings.getInstance().getRegisterRetryMaxTime();
+        int servicePollingPeriod = mRcsSettings.getImsServicePollingPeriod();
+        int regBaseTime = mRcsSettings.getRegisterRetryBaseTime();
+        int regMaxTime = mRcsSettings.getRegisterRetryMaxTime();
         Random random = new Random();
         int nbFailures = 0;
 
-        while (imsPollingThreadID == Thread.currentThread().getId()) {
+        while (mImsPollingThreadId == Thread.currentThread().getId()) {
             if (logger.isActivated()) {
                 logger.debug("Polling: check IMS connection");
             }
@@ -571,16 +568,16 @@ public class ImsConnectionManager implements Runnable {
             // Connection management
             try {
                 // Test IMS registration
-                if (!currentNetworkInterface.isRegistered()) {
+                if (!mCurrentNetworkInterface.isRegistered()) {
                     if (logger.isActivated()) {
                         logger.debug("Not yet registered to IMS: try registration");
                     }
 
                     // Try to register to IMS
-                    if (currentNetworkInterface.register(mDnsResolvedFields)) {
+                    if (mCurrentNetworkInterface.register(mDnsResolvedFields)) {
                         // InterruptedException thrown by stopImsConnection() may be caught by one
                         // of the methods used in currentNetworkInterface.register() above
-                        if (imsPollingThreadID != Thread.currentThread().getId()) {
+                        if (mImsPollingThreadId != Thread.currentThread().getId()) {
                             if (logger.isActivated()) {
                                 logger.debug("IMS connection polling thread race condition");
                             }
@@ -589,9 +586,9 @@ public class ImsConnectionManager implements Runnable {
                             if (logger.isActivated()) {
                                 logger.debug("Registered to the IMS with success: start IMS services");
                             }
-                            if (imsModule.isReady() && !imsServicesStarted) {
-                                imsModule.startImsServices();
-                                imsServicesStarted = true;
+                            if (mImsModule.isInitializationFinished() && !mImsServicesStarted) {
+                                mImsModule.startImsServices();
+                                mImsServicesStarted = true;
                             }
 
                             // Reset number of failures
@@ -609,18 +606,18 @@ public class ImsConnectionManager implements Runnable {
                         mDnsResolvedFields = null;
                     }
                 } else {
-                    if (imsModule.isReady()) {
-                        if (!imsServicesStarted) {
+                    if (mImsModule.isInitializationFinished()) {
+                        if (!mImsServicesStarted) {
                             if (logger.isActivated()) {
                                 logger.debug("Already registered to IMS: start IMS services");
                             }
-                            imsModule.startImsServices();
-                            imsServicesStarted = true;
+                            mImsModule.startImsServices();
+                            mImsServicesStarted = true;
                         } else {
                             if (logger.isActivated()) {
                                 logger.debug("Already registered to IMS: check IMS services");
                             }
-                            imsModule.checkImsServices();
+                            mImsModule.checkImsServices();
                         }
                     } else {
                         if (logger.isActivated()) {
@@ -638,14 +635,14 @@ public class ImsConnectionManager implements Runnable {
 
             // InterruptedException thrown by stopImsConnection() may be caught by one
             // of the methods used in currentNetworkInterface.register() above
-            if (imsPollingThreadID != Thread.currentThread().getId()) {
+            if (mImsPollingThreadId != Thread.currentThread().getId()) {
                 logger.debug("IMS connection polling thread race condition");
                 break;
             }
 
             // Make a pause before the next polling
             try {
-                if (!currentNetworkInterface.isRegistered()) {
+                if (!mCurrentNetworkInterface.isRegistered()) {
                     // Pause before the next register attempt
                     double w = Math.min(regMaxTime, (regBaseTime * Math.pow(2, nbFailures)));
                     double coeff = (random.nextInt(51) + 50) / 100.0; // Coeff between 50% and 100%
@@ -656,7 +653,7 @@ public class ImsConnectionManager implements Runnable {
                                 + ", coeff=" + coeff + ")");
                     }
                     Thread.sleep(retryPeriod * 1000);
-                } else if (!imsServicesStarted) {
+                } else if (!mImsServicesStarted) {
                     int retryPeriod = 5;
                     if (logger.isActivated()) {
                         logger.debug("Wait " + retryPeriod + "s before retry to start services");
@@ -682,30 +679,33 @@ public class ImsConnectionManager implements Runnable {
     private BroadcastReceiver batteryLevelListener = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            int batteryLimit = RcsSettings.getInstance().getMinBatteryLevel();
-            if (batteryLimit > 0) {
-                int batteryLevel = intent.getIntExtra("level", 0);
-                int batteryPlugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 1);
-                if (logger.isActivated()) {
-                    logger.info("Battery level: " + batteryLevel + "% plugged: " + batteryPlugged);
-                }
-                if ((batteryLevel <= batteryLimit) && (batteryPlugged == 0)) {
-                    if (!disconnectedByBattery) {
-                        disconnectedByBattery = true;
+            MinimumBatteryLevel batteryLimit = mRcsSettings.getMinBatteryLevel();
+            if (MinimumBatteryLevel.NEVER_STOP == batteryLimit) {
+                mDisconnectedByBattery = false;
+                return;
 
-                        // Disconnect
-                        disconnectFromIms();
-                    }
-                } else {
-                    if (disconnectedByBattery) {
-                        disconnectedByBattery = false;
+            }
+            int batteryLevel = intent.getIntExtra("level", 0);
+            int batteryPlugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 1);
+            if (logger.isActivated()) {
+                logger.info(new StringBuilder("Battery level: ").append(batteryLevel)
+                        .append("% plugged: ").append(batteryPlugged)
+                        .toString());
+            }
+            if (batteryLevel <= batteryLimit.toInt() && batteryPlugged == 0) {
+                if (!mDisconnectedByBattery) {
+                    mDisconnectedByBattery = true;
 
-                        // Reconnect with a connection event
-                        connectionEvent(new Intent(ConnectivityManager.CONNECTIVITY_ACTION));
-                    }
+                    // Disconnect
+                    disconnectFromIms();
                 }
             } else {
-                disconnectedByBattery = false;
+                if (mDisconnectedByBattery) {
+                    mDisconnectedByBattery = false;
+
+                    // Reconnect with a connection event
+                    connectionEvent(new Intent(ConnectivityManager.CONNECTIVITY_ACTION));
+                }
             }
         }
     };
@@ -714,8 +714,8 @@ public class ImsConnectionManager implements Runnable {
      * @return true is device is in roaming
      */
     public boolean isInRoaming() {
-        if (connectivityMgr != null && connectivityMgr.getActiveNetworkInfo() != null) {
-            return connectivityMgr.getActiveNetworkInfo().isRoaming();
+        if (mCnxManager != null && mCnxManager.getActiveNetworkInfo() != null) {
+            return mCnxManager.getActiveNetworkInfo().isRoaming();
         }
         return false;
     }

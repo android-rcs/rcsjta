@@ -76,7 +76,7 @@ public class IPCallService extends ImsService {
     /**
      * The logger
      */
-    private static final Logger logger = Logger.getLogger(IPCallService.class.getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(IPCallService.class.getSimpleName());
 
     /**
      * IPCallSessionCache with Session ID (Call ID) as key
@@ -145,8 +145,8 @@ public class IPCallService extends ImsService {
 
     public void addSession(IPCallSession session) {
         String callId = session.getSessionID();
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Add IPCallSession with call ID '").append(callId)
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Add IPCallSession with call ID '").append(callId)
                     .append("'").toString());
         }
         synchronized (getImsServiceSessionOperationLock()) {
@@ -157,8 +157,8 @@ public class IPCallService extends ImsService {
 
     public void removeSession(final IPCallSession session) {
         final String callId = session.getSessionID();
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Remove IPCallSession with call ID '").append(callId)
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Remove IPCallSession with call ID '").append(callId)
                     .append("'").toString());
         }
         /*
@@ -177,8 +177,8 @@ public class IPCallService extends ImsService {
     }
 
     public IPCallSession getIPCallSession(String sessionId) {
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Get IPCallSession with call ID '").append(sessionId)
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Get IPCallSession with call ID '").append(sessionId)
                     .append("'").toString());
         }
         synchronized (getImsServiceSessionOperationLock()) {
@@ -216,8 +216,8 @@ public class IPCallService extends ImsService {
      */
     public IPCallSession initiateIPCallSession(ContactId contact, boolean video,
             IIPCallPlayer player, IIPCallRenderer renderer) throws CoreException {
-        if (logger.isActivated()) {
-            logger.info("Initiate an IP call session");
+        if (sLogger.isActivated()) {
+            sLogger.info("Initiate an IP call session");
         }
 
         // Test number of sessions
@@ -232,7 +232,7 @@ public class IPCallService extends ImsService {
 
         // Create a new session
         OriginatingIPCallSession session = new OriginatingIPCallSession(this, contact,
-                audioContent, videoContent, player, renderer);
+                audioContent, videoContent, player, renderer, mRcsSettings);
 
         return session;
     }
@@ -248,8 +248,8 @@ public class IPCallService extends ImsService {
         try {
             contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
         } catch (RcsContactFormatException e) {
-            if (logger.isActivated()) {
-                logger.debug("Cannot parse contact: reject the invitation");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Cannot parse contact: reject the invitation");
             }
             sendErrorResponse(invite, 486);
             return;
@@ -257,8 +257,8 @@ public class IPCallService extends ImsService {
 
         // Test if the contact is blocked
         if (mContactsManager.isBlockedForContact(contact)) {
-            if (logger.isActivated()) {
-                logger.debug("Contact " + contact
+            if (sLogger.isActivated()) {
+                sLogger.debug("Contact " + contact
                         + " is blocked: automatically reject the sharing invitation");
             }
 
@@ -270,8 +270,8 @@ public class IPCallService extends ImsService {
         // Reject if there is already a call in progress
         if (isCurrentSharingUnidirectional()) {
             // Max session
-            if (logger.isActivated()) {
-                logger.debug("The max number of IP call sessions is achieved: reject the invitation");
+            if (sLogger.isActivated()) {
+                sLogger.debug("The max number of IP call sessions is achieved: reject the invitation");
             }
             handleIPCallInvitationRejected(invite, ReasonCode.REJECTED_MAX_SESSIONS);
             sendErrorResponse(invite, 486);
@@ -279,7 +279,7 @@ public class IPCallService extends ImsService {
         }
 
         // Create a new session
-        IPCallSession session = new TerminatingIPCallSession(this, invite, contact);
+        IPCallSession session = new TerminatingIPCallSession(this, invite, contact, mRcsSettings);
 
         getImsModule().getCore().getListener().handleIPCallInvitation(session);
 
@@ -290,8 +290,8 @@ public class IPCallService extends ImsService {
      * Abort all pending sessions
      */
     public void abortAllSessions() {
-        if (logger.isActivated()) {
-            logger.debug("Abort all pending sessions");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Abort all pending sessions");
         }
         abortAllSessions(TerminationReason.TERMINATION_BY_SYSTEM);
     }

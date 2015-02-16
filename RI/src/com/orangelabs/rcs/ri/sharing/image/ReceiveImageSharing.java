@@ -41,9 +41,8 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.image.ImageSharingListener;
 import com.gsma.services.rcs.sharing.image.ImageSharingService;
-
-import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LockAccess;
@@ -81,7 +80,7 @@ public class ReceiveImageSharing extends Activity {
     /**
      * API connection manager
      */
-    private ApiConnectionManager mCnxManager;
+    private ConnectionManager mCnxManager;
 
     /**
      * The log tag for this class
@@ -209,7 +208,7 @@ public class ReceiveImageSharing extends Activity {
         }
 
         // Register to API connection manager
-        mCnxManager = ApiConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance(this);
         if (mCnxManager == null
                 || !mCnxManager.isServiceConnected(RcsServiceName.IMAGE_SHARING,
                         RcsServiceName.CONTACT)) {
@@ -279,7 +278,7 @@ public class ReceiveImageSharing extends Activity {
             builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
             builder.show();
         } catch (RcsServiceNotAvailableException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), mExitOnce, e);
+            Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce, e);
         } catch (RcsServiceException e) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
         }

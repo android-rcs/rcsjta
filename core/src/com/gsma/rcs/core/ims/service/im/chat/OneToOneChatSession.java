@@ -84,7 +84,7 @@ public abstract class OneToOneChatSession extends ChatSession {
                 rcsSettings, messagingLog, firstMsg);
 
         // Set feature tags
-        List<String> featureTags = ChatUtils.getSupportedFeatureTagsForChat();
+        List<String> featureTags = ChatUtils.getSupportedFeatureTagsForChat(rcsSettings);
         setFeatureTags(featureTags);
 
         // Set Accept-Contact header

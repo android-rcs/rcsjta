@@ -32,6 +32,7 @@ import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingSession;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
@@ -55,7 +56,7 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
 
     private final long mTimestamp;
 
-    private final static Logger logger = Logger.getLogger(VideoStreamingSession.class
+    private final static Logger sLogger = Logger.getLogger(VideoStreamingSession.class
             .getSimpleName());
 
     /**
@@ -64,9 +65,11 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
      * @param parent IMS service
      * @param content Content to be shared
      * @param contact Remote contact Id
+     * @param rcsSettings
      */
-    public VideoStreamingSession(ImsService parent, MmContent content, ContactId contact) {
-        super(parent, content, contact);
+    public VideoStreamingSession(ImsService parent, MmContent content, ContactId contact,
+            RcsSettings rcsSettings) {
+        super(parent, content, contact, rcsSettings);
         mTimestamp = System.currentTimeMillis();
     }
 
@@ -145,10 +148,10 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
             return;
         }
 
-        boolean logActivated = logger.isActivated();
+        boolean logActivated = sLogger.isActivated();
         // Error
         if (logActivated) {
-            logger.info(new StringBuilder("Session error: ").append(error.getErrorCode())
+            sLogger.info(new StringBuilder("Session error: ").append(error.getErrorCode())
                     .append(", reason=").append(error.getMessage()).toString());
         }
 
@@ -165,7 +168,7 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
                     .requestContactCapabilities(remote);
         } catch (RcsContactFormatException e) {
             if (logActivated) {
-                logger.warn(new StringBuilder("Cannot parse contact ").append(
+                sLogger.warn(new StringBuilder("Cannot parse contact ").append(
                         getDialogPath().getRemoteParty()).toString());
             }
         }

@@ -22,6 +22,8 @@
 
 package com.gsma.rcs.service.api;
 
+import android.os.Handler;
+
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.provider.eab.ContactsManager;
@@ -33,12 +35,11 @@ import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
+import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.capability.ICapabilitiesListener;
 import com.gsma.services.rcs.capability.ICapabilityService;
 import com.gsma.services.rcs.contact.ContactId;
-
-import android.os.Handler;
 
 /**
  * Capability service API implementation
@@ -51,6 +52,8 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
     private final RcsServiceRegistrationEventBroadcaster mRcsServiceRegistrationEventBroadcaster = new RcsServiceRegistrationEventBroadcaster();
 
     private final CapabilitiesBroadcaster mCapabilitiesBroadcaster = new CapabilitiesBroadcaster();
+
+    private final RcsSettings mRcsSettings;
 
     /**
      * Lock used for synchronization
@@ -110,14 +113,16 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * Constructor
      * 
      * @param contactsManager Contacts manager
+     * @param rcsSettings
      */
-    public CapabilityServiceImpl(ContactsManager contactsManager) {
+    public CapabilityServiceImpl(ContactsManager contactsManager, RcsSettings rcsSettings) {
         if (logger.isActivated()) {
             logger.info("Capability service API is loaded");
         }
 
         mContactsManager = contactsManager;
         mOptionsExchangeRequestHandler = new Handler();
+        mRcsSettings = rcsSettings;
     }
 
     /**
@@ -139,8 +144,17 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
     }
 
     /**
-     * Registers a listener on service registration events
+     * Return the reason code for IMS service registration
      * 
+     * @return the reason code for IMS service registration
+     */
+    public int getServiceRegistrationReasonCode() {
+        return ServerApiUtils.getServiceRegistrationReasonCode().toInt();
+    }
+
+    /**
+     * Registers a listener on service registration events
+     *
      * @param listener Service registration listener
      */
     public void addEventListener(IRcsServiceRegistrationListener listener) {
@@ -154,7 +168,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
     /**
      * Unregisters a listener on service registration events
-     * 
+     *
      * @param listener Service registration listener
      */
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
@@ -167,18 +181,24 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
     }
 
     /**
-     * Receive registration event
-     * 
-     * @param state Registration state
+     * Notifies registration event
      */
-    public void notifyRegistrationEvent(boolean state) {
+    public void notifyRegistration() {
         // Notify listeners
         synchronized (lock) {
-            if (state) {
-                mRcsServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
-            } else {
-                mRcsServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered();
-            }
+            mRcsServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
+        }
+    }
+
+    /**
+     * Notifies unregistration event
+     *
+     * @param reasonCode for unregistration
+     */
+    public void notifyUnRegistration(RcsServiceRegistration.ReasonCode reasonCode) {
+        // Notify listeners
+        synchronized (lock) {
+            mRcsServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered(reasonCode);
         }
     }
 
@@ -189,7 +209,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * @return Capabilities
      */
     public Capabilities getMyCapabilities() {
-        return ContactServiceImpl.getCapabilities(RcsSettings.getInstance().getMyCapabilities());
+        return ContactServiceImpl.getCapabilities(mRcsSettings.getMyCapabilities());
     }
 
     /**
@@ -273,12 +293,13 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
     /**
      * Notify listeners
-     * 
+     *
      * @param contact ContactId
      * @param capabilities Capabilities
      */
     private void notifyListeners(ContactId contact, Capabilities capabilities) {
-        mCapabilitiesBroadcaster.broadcastCapabilitiesReceived(contact, capabilities);
+        mCapabilitiesBroadcaster.broadcastCapabilitiesReceived(contact,
+                capabilities);
     }
 
     /**
@@ -300,8 +321,8 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
         ServerApiUtils.testIms();
 
         try {
-            mOptionsExchangeRequestHandler.post(new AllCapabilitiesRequester(mContactsManager, Core
-                    .getInstance().getCapabilityService()));
+            mOptionsExchangeRequestHandler.post(new AllCapabilitiesRequester(mContactsManager,
+                    Core.getInstance().getCapabilityService()));
         } catch (Exception e) {
             if (logger.isActivated()) {
                 logger.error("Unexpected error", e);
@@ -312,7 +333,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
     /**
      * Registers a capabilities listener on any contact
-     * 
+     *
      * @param listener Capabilities listener
      */
     public void addCapabilitiesListener(ICapabilitiesListener listener) {
@@ -326,7 +347,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
     /**
      * Unregisters a capabilities listener
-     * 
+     *
      * @param listener Capabilities listener
      */
     public void removeCapabilitiesListener(ICapabilitiesListener listener) {
@@ -340,7 +361,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
     /**
      * Registers a listener for receiving capabilities of a given contact
-     * 
+     *
      * @param contact ContactId
      * @param listener Capabilities listener
      */
@@ -355,7 +376,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
     /**
      * Unregisters a listener of capabilities for a given contact
-     * 
+     *
      * @param contact ContactId
      * @param listener Capabilities listener
      */
@@ -385,7 +406,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * @return the common service configuration
      */
     public ICommonServiceConfiguration getCommonConfiguration() {
-        return new CommonServiceConfigurationImpl();
+        return new CommonServiceConfigurationImpl(mRcsSettings);
     }
 
 }

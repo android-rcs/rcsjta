@@ -35,7 +35,7 @@ public class IsComposingManager {
     private ClockHandler handler = new ClockHandler();
 
     // Is composing state
-    public boolean isComposing = false;
+    private boolean isComposing = false;
 
     // Event IDs
     private final static int IS_STARTING_COMPOSING = 1;
@@ -65,7 +65,10 @@ public class IsComposingManager {
      * Interface to notify isComposing status
      */
     public interface INotifyComposing {
-        void setTypingStatus(boolean status);
+        /**
+         * @param status
+         */
+        public void setTypingStatus(boolean status);
     }
 
     // Clock handler class

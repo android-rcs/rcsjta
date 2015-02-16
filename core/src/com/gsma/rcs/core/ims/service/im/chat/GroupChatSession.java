@@ -72,7 +72,7 @@ public abstract class GroupChatSession extends ChatSession {
     /**
      * Conference event subscribe manager
      */
-    private ConferenceEventSubscribeManager conferenceSubscriber;
+    private ConferenceEventSubscribeManager mConferenceSubscriber;
 
     /**
      * Boolean variable indicating that the session is no longer marked as the active one for
@@ -83,7 +83,7 @@ public abstract class GroupChatSession extends ChatSession {
     /**
      * The logger
      */
-    private static final Logger logger = Logger.getLogger(GroupChatSession.class.getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(GroupChatSession.class.getSimpleName());
 
     /**
      * Constructor for originating side
@@ -99,10 +99,10 @@ public abstract class GroupChatSession extends ChatSession {
             Set<ParticipantInfo> participants, RcsSettings rcsSettings, MessagingLog messagingLog) {
         super(parent, contact, conferenceId, participants, rcsSettings, messagingLog, null);
 
-        conferenceSubscriber = new ConferenceEventSubscribeManager(this);
+        mConferenceSubscriber = new ConferenceEventSubscribeManager(this, rcsSettings);
 
         // Set feature tags
-        setFeatureTags(ChatUtils.getSupportedFeatureTagsForGroupChat());
+        setFeatureTags(ChatUtils.getSupportedFeatureTagsForGroupChat(rcsSettings));
 
         // Set Accept-Contact header
         setAcceptContactTags(ChatUtils.getAcceptContactTagsForGroupChat());
@@ -128,7 +128,7 @@ public abstract class GroupChatSession extends ChatSession {
 
     @Override
     public Set<ParticipantInfo> getConnectedParticipants() {
-        return conferenceSubscriber.getParticipants();
+        return mConferenceSubscriber.getParticipants();
     }
 
     /**
@@ -161,7 +161,7 @@ public abstract class GroupChatSession extends ChatSession {
      * @return Subscribe manager
      */
     public ConferenceEventSubscribeManager getConferenceEventSubscriber() {
-        return conferenceSubscriber;
+        return mConferenceSubscriber;
     }
 
     /**
@@ -179,7 +179,7 @@ public abstract class GroupChatSession extends ChatSession {
      */
     public void terminateSession(TerminationReason reason) {
         // Stop conference subscription
-        conferenceSubscriber.terminate();
+        mConferenceSubscriber.terminate();
 
         // Terminate session
         super.terminateSession(reason);
@@ -197,8 +197,8 @@ public abstract class GroupChatSession extends ChatSession {
             getImsService().getImsModule().getCapabilityService()
                     .requestContactCapabilities(remote);
         } catch (RcsContactFormatException e) {
-            if (logger.isActivated()) {
-                logger.debug("Failed to request capabilities: cannot parse contact " + contact);
+            if (sLogger.isActivated()) {
+                sLogger.debug("Failed to request capabilities: cannot parse contact " + contact);
             }
         }
     }
@@ -210,7 +210,7 @@ public abstract class GroupChatSession extends ChatSession {
      */
     public void receiveBye(SipRequest bye) {
         // Stop conference subscription
-        conferenceSubscriber.terminate();
+        mConferenceSubscriber.terminate();
 
         // Receive BYE request
         super.receiveBye(bye);
@@ -226,7 +226,7 @@ public abstract class GroupChatSession extends ChatSession {
      */
     public void receiveCancel(SipRequest cancel) {
         // Stop conference subscription
-        conferenceSubscriber.terminate();
+        mConferenceSubscriber.terminate();
 
         super.receiveCancel(cancel);
 
@@ -305,12 +305,12 @@ public abstract class GroupChatSession extends ChatSession {
             String status) {
         // Do not perform Message Delivery Status in Albatros for group chat
         // Only perform delivery status delivered in GC
-        if (RcsSettings.getInstance().isAlbatrosRelease()
+        if (mRcsSettings.isAlbatrosRelease()
                 || !status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
             return;
         }
-        if (logger.isActivated()) {
-            logger.debug("Send delivery status delivered for message " + msgId);
+        if (sLogger.isActivated()) {
+            sLogger.debug("Send delivery status delivered for message " + msgId);
         }
         // Send status in CPIM + IMDN headers
         String imdn = ChatUtils.buildDeliveryReport(msgId, status);
@@ -329,8 +329,8 @@ public abstract class GroupChatSession extends ChatSession {
      */
     public void addParticipant(ContactId participant) {
         try {
-            if (logger.isActivated()) {
-                logger.debug("Add one participant (" + participant + ") to the session");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Add one participant (" + participant + ") to the session");
             }
 
             // Re-use INVITE dialog path
@@ -340,8 +340,8 @@ public abstract class GroupChatSession extends ChatSession {
             getDialogPath().incrementCseq();
 
             // Send REFER request
-            if (logger.isActivated()) {
-                logger.debug("Send REFER");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Send REFER");
             }
             String contactUri = PhoneUtils.formatContactIdToUri(participant);
             SipRequest refer = SipMessageFactory.createRefer(getDialogPath(), contactUri,
@@ -352,8 +352,8 @@ public abstract class GroupChatSession extends ChatSession {
             // Analyze received message
             if (ctx.getStatusCode() == 407) {
                 // 407 response received
-                if (logger.isActivated()) {
-                    logger.debug("407 response received");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("407 response received");
                 }
 
                 // Set the Proxy-Authorization header
@@ -363,8 +363,8 @@ public abstract class GroupChatSession extends ChatSession {
                 getDialogPath().incrementCseq();
 
                 // Create a second REFER request with the right token
-                if (logger.isActivated()) {
-                    logger.info("Send second REFER");
+                if (sLogger.isActivated()) {
+                    sLogger.info("Send second REFER");
                 }
                 refer = SipMessageFactory.createRefer(getDialogPath(), contactUri, getSubject(),
                         getContributionID());
@@ -379,8 +379,8 @@ public abstract class GroupChatSession extends ChatSession {
                 // Analyze received message
                 if ((ctx.getStatusCode() >= 200) && (ctx.getStatusCode() < 300)) {
                     // 200 OK response
-                    if (logger.isActivated()) {
-                        logger.debug("200 OK response received");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("200 OK response received");
                     }
 
                     // Notify listeners
@@ -390,8 +390,8 @@ public abstract class GroupChatSession extends ChatSession {
                     }
                 } else {
                     // Error
-                    if (logger.isActivated()) {
-                        logger.debug("REFER has failed (" + ctx.getStatusCode() + ")");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("REFER has failed (" + ctx.getStatusCode() + ")");
                     }
 
                     // Notify listeners
@@ -402,8 +402,8 @@ public abstract class GroupChatSession extends ChatSession {
                 }
             } else if ((ctx.getStatusCode() >= 200) && (ctx.getStatusCode() < 300)) {
                 // 200 OK received
-                if (logger.isActivated()) {
-                    logger.debug("200 OK response received");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("200 OK response received");
                 }
 
                 // Notify listeners
@@ -413,8 +413,8 @@ public abstract class GroupChatSession extends ChatSession {
                 }
             } else {
                 // Error responses
-                if (logger.isActivated()) {
-                    logger.debug("No response received");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("No response received");
                 }
 
                 // Notify listeners
@@ -424,8 +424,8 @@ public abstract class GroupChatSession extends ChatSession {
                 }
             }
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("REFER request has failed", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("REFER request has failed", e);
             }
 
             // Notify listeners
@@ -448,8 +448,8 @@ public abstract class GroupChatSession extends ChatSession {
                 return;
             }
 
-            if (logger.isActivated()) {
-                logger.debug("Add " + participants.size() + " participants to the session");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Add " + participants.size() + " participants to the session");
             }
 
             // Re-use INVITE dialog path
@@ -459,8 +459,8 @@ public abstract class GroupChatSession extends ChatSession {
             getDialogPath().incrementCseq();
 
             // Send REFER request
-            if (logger.isActivated()) {
-                logger.debug("Send REFER");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Send REFER");
             }
             SipRequest refer = SipMessageFactory.createRefer(getDialogPath(), participants,
                     getSubject(), getContributionID());
@@ -470,8 +470,8 @@ public abstract class GroupChatSession extends ChatSession {
             // Analyze received message
             if (ctx.getStatusCode() == 407) {
                 // 407 response received
-                if (logger.isActivated()) {
-                    logger.debug("407 response received");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("407 response received");
                 }
 
                 // Set the Proxy-Authorization header
@@ -481,8 +481,8 @@ public abstract class GroupChatSession extends ChatSession {
                 getDialogPath().incrementCseq();
 
                 // Create a second REFER request with the right token
-                if (logger.isActivated()) {
-                    logger.info("Send second REFER");
+                if (sLogger.isActivated()) {
+                    sLogger.info("Send second REFER");
                 }
                 refer = SipMessageFactory.createRefer(getDialogPath(), participants, getSubject(),
                         getContributionID());
@@ -497,8 +497,8 @@ public abstract class GroupChatSession extends ChatSession {
                 // Analyze received message
                 if ((ctx.getStatusCode() >= 200) && (ctx.getStatusCode() < 300)) {
                     // 200 OK response
-                    if (logger.isActivated()) {
-                        logger.debug("20x OK response received");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("20x OK response received");
                     }
 
                     // Notify listeners
@@ -510,8 +510,8 @@ public abstract class GroupChatSession extends ChatSession {
                     }
                 } else {
                     // Error
-                    if (logger.isActivated()) {
-                        logger.debug("REFER has failed (" + ctx.getStatusCode() + ")");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("REFER has failed (" + ctx.getStatusCode() + ")");
                     }
 
                     // Notify listeners
@@ -524,8 +524,8 @@ public abstract class GroupChatSession extends ChatSession {
                 }
             } else if ((ctx.getStatusCode() >= 200) && (ctx.getStatusCode() < 300)) {
                 // 200 OK received
-                if (logger.isActivated()) {
-                    logger.debug("20x OK response received");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("20x OK response received");
                 }
 
                 // Notify listeners
@@ -537,8 +537,8 @@ public abstract class GroupChatSession extends ChatSession {
                 }
             } else {
                 // Error responses
-                if (logger.isActivated()) {
-                    logger.debug("No response received");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("No response received");
                 }
 
                 // Notify listeners
@@ -550,8 +550,8 @@ public abstract class GroupChatSession extends ChatSession {
                 }
             }
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("REFER request has failed", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("REFER request has failed", e);
             }
 
             // Notify listeners
@@ -601,8 +601,8 @@ public abstract class GroupChatSession extends ChatSession {
      */
     @Override
     public void msrpDataReceived(String msgId, byte[] data, String mimeType) {
-        if (logger.isActivated()) {
-            logger.info("Data received (type " + mimeType + ")");
+        if (sLogger.isActivated()) {
+            sLogger.info("Data received (type " + mimeType + ")");
         }
 
         // Update the activity manager
@@ -610,8 +610,8 @@ public abstract class GroupChatSession extends ChatSession {
 
         if (data == null || data.length == 0) {
             // By-pass empty data
-            if (logger.isActivated()) {
-                logger.debug("By-pass received empty data");
+            if (sLogger.isActivated()) {
+                sLogger.debug("By-pass received empty data");
             }
             return;
         }
@@ -630,8 +630,8 @@ public abstract class GroupChatSession extends ChatSession {
 
         } else if (!ChatUtils.isMessageCpimType(mimeType)) {
             // Not supported content
-            if (logger.isActivated()) {
-                logger.debug("Not supported content " + mimeType + " in chat session");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Not supported content " + mimeType + " in chat session");
             }
             return;
         }
@@ -641,8 +641,8 @@ public abstract class GroupChatSession extends ChatSession {
         try {
             cpimParser = new CpimParser(data);
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't parse the CPIM message", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't parse the CPIM message", e);
             }
             return;
         }
@@ -665,12 +665,12 @@ public abstract class GroupChatSession extends ChatSession {
             CpimIdentity cpimIdentity = new CpimIdentity(cpimMsg.getHeader(CpimMessage.HEADER_FROM));
             pseudo = cpimIdentity.getDisplayName();
             remoteId = ContactUtils.createContactId(cpimIdentity.getUri());
-            if (logger.isActivated()) {
-                logger.info("Cpim FROM Identity: " + cpimIdentity);
+            if (sLogger.isActivated()) {
+                sLogger.info("Cpim FROM Identity: " + cpimIdentity);
             }
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.warn("Cannot parse FROM Cpim Identity: "
+            if (sLogger.isActivated()) {
+                sLogger.warn("Cannot parse FROM Cpim Identity: "
                         + cpimMsg.getHeader(CpimMessage.HEADER_FROM));
             }
         }
@@ -679,8 +679,8 @@ public abstract class GroupChatSession extends ChatSession {
         try {
             CpimIdentity cpimIdentity = new CpimIdentity(cpimMsg.getHeader(CpimMessage.HEADER_TO));
             localId = ContactUtils.createContactId(cpimIdentity.getUri());
-            if (logger.isActivated()) {
-                logger.info("Cpim TO Identity: " + cpimIdentity);
+            if (sLogger.isActivated()) {
+                sLogger.info("Cpim TO Identity: " + cpimIdentity);
             }
         } catch (Exception e) {
             // Purposely left blank
@@ -725,8 +725,8 @@ public abstract class GroupChatSession extends ChatSession {
                             if (localId != null && localId.equals(me)) {
                                 receiveMessageDeliveryStatus(remoteId, cpimMsg.getMessageContent());
                             } else {
-                                if (logger.isActivated()) {
-                                    logger.debug("Discard delivery report send to " + localId);
+                                if (sLogger.isActivated()) {
+                                    sLogger.debug("Discard delivery report send to " + localId);
                                 }
                             }
                         } catch (RcsContactFormatException e) {
@@ -763,6 +763,8 @@ public abstract class GroupChatSession extends ChatSession {
 
     /**
      * Returns true if this session is no longer used and it is pending to be removed upon timeout.
+     * 
+     * @return true if this session is no longer used and it is pending to be removed upon timeout.
      */
     public boolean isPendingForRemoval() {
         return mPendingRemoval;

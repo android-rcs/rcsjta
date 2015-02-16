@@ -46,9 +46,9 @@ import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
-import com.orangelabs.rcs.ri.ApiConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager;
 import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -85,7 +85,7 @@ public class FileTransferList extends Activity {
 
     private ListAdapter mAdapter;
 
-    private ApiConnectionManager mCnxManager;
+    private ConnectionManager mCnxManager;
 
     private LockAccess mExitOnce = new LockAccess();
 
@@ -112,9 +112,9 @@ public class FileTransferList extends Activity {
         mListView.setEmptyView(emptyView);
         registerForContextMenu(mListView);
 
-        mCnxManager = ApiConnectionManager.getInstance(FileTransferList.this);
+        mCnxManager = ConnectionManager.getInstance(FileTransferList.this);
         if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
-            Utils.showMessage(FileTransferList.this, getString(R.string.label_api_disabled));
+            Utils.showMessage(FileTransferList.this, getString(R.string.label_api_unavailable));
             return;
 
         }
@@ -327,7 +327,8 @@ public class FileTransferList extends Activity {
                 menu.add(0, MENU_ITEM_RESEND, 1, R.string.menu_resend_message);
             }
         } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(FileTransferList.this, getString(R.string.label_api_disabled),
+            Utils.showMessageAndExit(FileTransferList.this,
+                    getString(R.string.label_api_unavailable),
                     mExitOnce, e);
         }
     }

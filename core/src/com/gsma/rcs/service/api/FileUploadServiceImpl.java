@@ -161,10 +161,10 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
             mImService.assertFileSizeNotExceedingMaxLimit(content.getSize(),
                     "File exceeds max size.");
 
-            final FileUploadSession session = new FileUploadSession(content, fileicon);
+            final FileUploadSession session = new FileUploadSession(content, fileicon, mRcsSettings);
 
-            FileUploadImpl fileUpload = new FileUploadImpl(session.getUploadID(), mBroadcaster,
-                    mImService, this);
+            FileUploadImpl fileUpload = new FileUploadImpl(session.getUploadID(),
+                    mBroadcaster, mImService, this);
             session.addListener(fileUpload);
 
             session.startSession();
@@ -288,6 +288,6 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      * @return the common service configuration
      */
     public ICommonServiceConfiguration getCommonConfiguration() {
-        return new CommonServiceConfigurationImpl();
+        return new CommonServiceConfigurationImpl(mRcsSettings);
     }
 }

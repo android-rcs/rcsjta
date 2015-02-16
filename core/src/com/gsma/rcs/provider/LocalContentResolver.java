@@ -19,6 +19,7 @@ package com.gsma.rcs.provider;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 
@@ -27,23 +28,45 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-/*
- * The purpose of this class is to allow query-/insert-/update-/delete-
- * and stream operations directly on the local providers. The usage
- * of this class allows the local providers to be write protected for
- * external use like from applications accessing the terminal api while
- * still allowing internal write access to the same providers by the
- * service implementations.
+/**
+ * The purpose of this class is to allow query-/insert-/update-/delete- and stream operations
+ * directly on the local providers. The usage of this class allows the local providers to be write
+ * protected for external use like from applications accessing the terminal api while still allowing
+ * internal write access to the same providers by the service implementations.
  */
 
 public class LocalContentResolver {
 
     private final ContentResolver mContentResolver;
 
+    /**
+     * Constructor
+     * 
+     * @param contentResolver
+     */
     public LocalContentResolver(ContentResolver contentResolver) {
         mContentResolver = contentResolver;
     }
 
+    /**
+     * Constructor
+     * 
+     * @param context
+     */
+    public LocalContentResolver(Context context) {
+        this(context.getContentResolver());
+    }
+
+    /**
+     * Handles query requests from clients
+     * 
+     * @param uri
+     * @param projection
+     * @param selection
+     * @param selectionArgs
+     * @param sortOrder
+     * @return a Cursor or null.
+     */
     public final Cursor query(Uri uri, String[] projection, String selection,
             String[] selectionArgs, String sortOrder) {
         ContentProviderClient contentProviderClient = null;
@@ -59,6 +82,13 @@ public class LocalContentResolver {
         }
     }
 
+    /**
+     * Handles requests to insert a new row.
+     * 
+     * @param uri
+     * @param values
+     * @return The URI for the newly inserted item
+     */
     public final Uri insert(Uri uri, ContentValues values) {
         ContentProviderClient contentProviderClient = null;
         try {
@@ -72,6 +102,15 @@ public class LocalContentResolver {
         }
     }
 
+    /**
+     * Handle requests to update one or more rows.
+     * 
+     * @param uri
+     * @param values
+     * @param selection
+     * @param selectionArgs
+     * @return the number of rows affected.
+     */
     public final int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         ContentProviderClient contentProviderClient = null;
         try {
@@ -86,6 +125,14 @@ public class LocalContentResolver {
         }
     }
 
+    /**
+     * Handles requests to delete one or more rows.
+     * 
+     * @param uri
+     * @param selection
+     * @param selectionArgs
+     * @return The number of rows affected.
+     */
     public final int delete(Uri uri, String selection, String[] selectionArgs) {
         ContentProviderClient contentProviderClient = null;
         try {
@@ -100,6 +147,13 @@ public class LocalContentResolver {
         }
     }
 
+    /**
+     * Create and return a new auto-close input stream for this URI
+     * 
+     * @param uri
+     * @return the InputStream
+     * @throws FileNotFoundException
+     */
     public final InputStream openContentInputStream(Uri uri) throws FileNotFoundException {
         ContentProviderClient contentProviderClient = null;
         try {
@@ -116,6 +170,13 @@ public class LocalContentResolver {
         }
     }
 
+    /**
+     * Create and return a new auto-close output stream for this URI
+     * 
+     * @param uri
+     * @return the InputStream
+     * @throws FileNotFoundException
+     */
     public final OutputStream openContentOutputStream(Uri uri) throws FileNotFoundException {
         ContentProviderClient contentProviderClient = null;
         try {

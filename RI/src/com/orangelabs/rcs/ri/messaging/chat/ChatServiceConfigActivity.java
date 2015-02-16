@@ -29,8 +29,8 @@ import android.widget.TextView;
 
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.chat.ChatServiceConfiguration;
-import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -46,7 +46,7 @@ public class ChatServiceConfigActivity extends Activity {
     /**
      * API connection manager
      */
-    private ApiConnectionManager mCnxManager;
+    private ConnectionManager mCnxManager;
 
     private ChatServiceConfiguration mConfig;
 
@@ -72,7 +72,7 @@ public class ChatServiceConfigActivity extends Activity {
         setContentView(R.layout.chat_service_config);
 
         // Register to API connection manager
-        mCnxManager = ApiConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance(this);
         if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CHAT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
@@ -123,6 +123,9 @@ public class ChatServiceConfigActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (mExitOnce.isLocked()) {
+            return;
+        }
         try {
             displayChatServiceConfig();
         } catch (RcsServiceException e) {

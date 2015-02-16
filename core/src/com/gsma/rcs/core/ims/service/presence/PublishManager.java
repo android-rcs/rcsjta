@@ -60,54 +60,58 @@ public class PublishManager extends PeriodicRefresher {
     /**
      * IMS module
      */
-    private ImsModule imsModule;
+    private ImsModule mImsModule;
 
     /**
      * Expire period
      */
-    private int expirePeriod;
+    private int mExpirePeriod;
 
     /**
      * Dialog path
      */
-    private SipDialogPath dialogPath = null;
+    private SipDialogPath mDialogPath;
 
     /**
      * Entity tag
      */
-    private String entityTag = null;
+    private String mEntityTag;
 
     /**
      * Published flag
      */
-    private boolean published = false;
+    private boolean mPublished = false;
 
     /**
      * Authentication agent
      */
-    private SessionAuthenticationAgent authenticationAgent;
+    private SessionAuthenticationAgent mAuthenticationAgent;
 
     /**
      * The logger
      */
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
+    private final RcsSettings mRcsSettings;
+
     /**
      * Constructor
      * 
      * @param parent IMS module
+     * @param rcsSettings
      */
-    public PublishManager(ImsModule parent) {
-        this.imsModule = parent;
-        this.authenticationAgent = new SessionAuthenticationAgent(imsModule);
+    public PublishManager(ImsModule parent, RcsSettings rcsSettings) {
+        mImsModule = parent;
+        mAuthenticationAgent = new SessionAuthenticationAgent(mImsModule);
+        mRcsSettings = rcsSettings;
 
-        int defaultExpirePeriod = RcsSettings.getInstance().getPublishExpirePeriod();
+        int defaultExpirePeriod = rcsSettings.getPublishExpirePeriod();
         int minExpireValue = RegistryFactory.getFactory().readInteger(REGISTRY_MIN_EXPIRE_PERIOD,
                 -1);
         if ((minExpireValue != -1) && (defaultExpirePeriod < minExpireValue)) {
-            this.expirePeriod = minExpireValue;
+            mExpirePeriod = minExpireValue;
         } else {
-            this.expirePeriod = defaultExpirePeriod;
+            mExpirePeriod = defaultExpirePeriod;
         }
 
         // Restore the last SIP-ETag from the registry
@@ -120,7 +124,7 @@ public class PublishManager extends PeriodicRefresher {
      * @return Return True if the terminal has published, else return False
      */
     public boolean isPublished() {
-        return published;
+        return mPublished;
     }
 
     /**
@@ -132,10 +136,10 @@ public class PublishManager extends PeriodicRefresher {
         }
 
         // Do not unpublish for RCS, just stop timer
-        if (published) {
+        if (mPublished) {
             // Stop timer
             stopTimer();
-            published = false;
+            mPublished = false;
         }
 
         if (logger.isActivated()) {
@@ -154,11 +158,11 @@ public class PublishManager extends PeriodicRefresher {
 
         try {
             // Create a new dialog path for each publish
-            dialogPath = createDialogPath();
+            mDialogPath = createDialogPath();
 
             // Create PUBLISH request with no SDP and expire period
-            SipRequest publish = SipMessageFactory.createPublish(createDialogPath(), expirePeriod,
-                    entityTag, null);
+            SipRequest publish = SipMessageFactory.createPublish(createDialogPath(), mExpirePeriod,
+                    mEntityTag, null);
 
             // Send PUBLISH request
             sendPublish(publish);
@@ -179,14 +183,14 @@ public class PublishManager extends PeriodicRefresher {
     public synchronized boolean publish(String info) {
         try {
             // Create a new dialog path for each publish
-            dialogPath = createDialogPath();
+            mDialogPath = createDialogPath();
 
             // Set the local SDP part in the dialog path
-            dialogPath.setLocalContent(info);
+            mDialogPath.setLocalContent(info);
 
             // Create PUBLISH request
-            SipRequest publish = SipMessageFactory.createPublish(dialogPath, expirePeriod,
-                    entityTag, info);
+            SipRequest publish = SipMessageFactory.createPublish(mDialogPath, mExpirePeriod,
+                    mEntityTag, info);
 
             // Send PUBLISH request
             sendPublish(publish);
@@ -196,14 +200,14 @@ public class PublishManager extends PeriodicRefresher {
             }
             handleError(new PresenceError(PresenceError.UNEXPECTED_EXCEPTION, e.getMessage()));
         }
-        return published;
+        return mPublished;
     }
 
     /**
      * Unpublish
      */
     public synchronized void unPublish() {
-        if (!published) {
+        if (!mPublished) {
             // Already unpublished
             return;
         }
@@ -213,16 +217,16 @@ public class PublishManager extends PeriodicRefresher {
             stopTimer();
 
             // Create a new dialog path for each publish
-            dialogPath = createDialogPath();
+            mDialogPath = createDialogPath();
 
             // Create PUBLISH request with no SDP and expire period
-            SipRequest publish = SipMessageFactory.createPublish(dialogPath, 0, entityTag, null);
+            SipRequest publish = SipMessageFactory.createPublish(mDialogPath, 0, mEntityTag, null);
 
             // Send PUBLISH request
             sendPublish(publish);
 
             // Force publish flag to false
-            published = false;
+            mPublished = false;
         } catch (Exception e) {
             if (logger.isActivated()) {
                 logger.error("Publish has failed", e);
@@ -242,13 +246,13 @@ public class PublishManager extends PeriodicRefresher {
             logger.info("Send PUBLISH, expire=" + publish.getExpires());
         }
 
-        if (published) {
+        if (mPublished) {
             // Set the Authorization header
-            authenticationAgent.setProxyAuthorizationHeader(publish);
+            mAuthenticationAgent.setProxyAuthorizationHeader(publish);
         }
 
         // Send PUBLISH request
-        SipTransactionContext ctx = imsModule.getSipManager().sendSipMessageAndWait(publish);
+        SipTransactionContext ctx = mImsModule.getSipManager().sendSipMessageAndWait(publish);
 
         // Analyze the received response
         if (ctx.isSipResponse()) {
@@ -294,12 +298,12 @@ public class PublishManager extends PeriodicRefresher {
         if (logger.isActivated()) {
             logger.info("200 OK response received");
         }
-        published = true;
+        mPublished = true;
 
         SipResponse resp = ctx.getSipResponse();
 
         // Set the Proxy-Authorization header
-        authenticationAgent.readProxyAuthenticateHeader(resp);
+        mAuthenticationAgent.readProxyAuthenticateHeader(resp);
 
         // Retrieve the expire value in the response
         retrieveExpirePeriod(resp);
@@ -308,7 +312,7 @@ public class PublishManager extends PeriodicRefresher {
         saveEntityTag((SIPETagHeader) resp.getHeader(SIPETagHeader.NAME));
 
         // Start the periodic publish
-        startTimer(expirePeriod, 0.5);
+        startTimer(mExpirePeriod, 0.5);
     }
 
     /**
@@ -343,20 +347,20 @@ public class PublishManager extends PeriodicRefresher {
         SipResponse resp = ctx.getSipResponse();
 
         // Set the Proxy-Authorization header
-        authenticationAgent.readProxyAuthenticateHeader(resp);
+        mAuthenticationAgent.readProxyAuthenticateHeader(resp);
 
         // Increment the Cseq number of the dialog path
-        dialogPath.incrementCseq();
+        mDialogPath.incrementCseq();
 
         // Create a second PUBLISH request with the right token
         if (logger.isActivated()) {
             logger.info("Send second PUBLISH");
         }
-        SipRequest publish = SipMessageFactory.createPublish(dialogPath, ctx.getTransaction()
-                .getRequest().getExpires().getExpires(), entityTag, dialogPath.getLocalContent());
+        SipRequest publish = SipMessageFactory.createPublish(mDialogPath, ctx.getTransaction()
+                .getRequest().getExpires().getExpires(), mEntityTag, mDialogPath.getLocalContent());
 
         // Set the Authorization header
-        authenticationAgent.setProxyAuthorizationHeader(publish);
+        mAuthenticationAgent.setProxyAuthorizationHeader(publish);
 
         // Send PUBLISH request
         sendPublish(publish);
@@ -374,14 +378,15 @@ public class PublishManager extends PeriodicRefresher {
         }
 
         // Increment the Cseq number of the dialog path
-        dialogPath.incrementCseq();
+        mDialogPath.incrementCseq();
 
         // Reset Sip-Etag
         saveEntityTag(null);
 
         // Create a PUBLISH request without ETag
-        SipRequest publish = SipMessageFactory.createPublish(dialogPath, expirePeriod, entityTag,
-                dialogPath.getLocalContent());
+        SipRequest publish = SipMessageFactory.createPublish(mDialogPath, mExpirePeriod,
+                mEntityTag,
+                mDialogPath.getLocalContent());
 
         // Send PUBLISH request
         sendPublish(publish);
@@ -402,7 +407,7 @@ public class PublishManager extends PeriodicRefresher {
         SipResponse resp = ctx.getSipResponse();
 
         // Increment the Cseq number of the dialog path
-        dialogPath.incrementCseq();
+        mDialogPath.incrementCseq();
 
         // Extract the Min-Expire value
         int minExpire = SipUtils.getMinExpiresPeriod(resp);
@@ -419,11 +424,12 @@ public class PublishManager extends PeriodicRefresher {
         RegistryFactory.getFactory().writeInteger(REGISTRY_MIN_EXPIRE_PERIOD, minExpire);
 
         // Set the default expire value
-        expirePeriod = minExpire;
+        mExpirePeriod = minExpire;
 
         // Create a new PUBLISH request with the right expire period
-        SipRequest publish = SipMessageFactory.createPublish(dialogPath, expirePeriod, entityTag,
-                dialogPath.getLocalContent());
+        SipRequest publish = SipMessageFactory.createPublish(mDialogPath, mExpirePeriod,
+                mEntityTag,
+                mDialogPath.getLocalContent());
 
         // Send a PUBLISH request
         sendPublish(publish);
@@ -440,7 +446,7 @@ public class PublishManager extends PeriodicRefresher {
             logger.info("Publish has failed: " + error.getErrorCode() + ", reason="
                     + error.getMessage());
         }
-        published = false;
+        mPublished = false;
 
         // Publish has failed, stop the periodic publish
         stopTimer();
@@ -462,7 +468,7 @@ public class PublishManager extends PeriodicRefresher {
         if (expiresHeader != null) {
             int expires = expiresHeader.getExpires();
             if (expires != -1) {
-                expirePeriod = expires;
+                mExpirePeriod = expires;
             }
         }
     }
@@ -474,16 +480,16 @@ public class PublishManager extends PeriodicRefresher {
      */
     private void saveEntityTag(SIPETagHeader etagHeader) {
         if (etagHeader == null) {
-            entityTag = null;
+            mEntityTag = null;
         } else {
-            entityTag = etagHeader.getETag();
+            mEntityTag = etagHeader.getETag();
         }
-        if (entityTag != null) {
-            RegistryFactory.getFactory().writeString(REGISTRY_SIP_ETAG, entityTag);
-            long etagExpiration = System.currentTimeMillis() + (expirePeriod * 1000);
+        if (mEntityTag != null) {
+            RegistryFactory.getFactory().writeString(REGISTRY_SIP_ETAG, mEntityTag);
+            long etagExpiration = System.currentTimeMillis() + (mExpirePeriod * 1000);
             RegistryFactory.getFactory().writeLong(REGISTRY_SIP_ETAG_EXPIRATION, etagExpiration);
             if (logger.isActivated()) {
-                logger.debug("New entity tag: " + entityTag + ", expire at=" + etagExpiration);
+                logger.debug("New entity tag: " + mEntityTag + ", expire at=" + etagExpiration);
             }
         } else {
             RegistryFactory.getFactory().removeParameter(REGISTRY_SIP_ETAG);
@@ -498,11 +504,11 @@ public class PublishManager extends PeriodicRefresher {
      * Read the SIP entity tag
      */
     private void readEntityTag() {
-        entityTag = RegistryFactory.getFactory().readString(REGISTRY_SIP_ETAG, null);
+        mEntityTag = RegistryFactory.getFactory().readString(REGISTRY_SIP_ETAG, null);
         long etagExpiration = RegistryFactory.getFactory().readLong(REGISTRY_SIP_ETAG_EXPIRATION,
                 -1);
         if (logger.isActivated()) {
-            logger.debug("New entity tag: " + entityTag + ", expire at=" + etagExpiration);
+            logger.debug("New entity tag: " + mEntityTag + ", expire at=" + etagExpiration);
         }
     }
 
@@ -513,7 +519,7 @@ public class PublishManager extends PeriodicRefresher {
      */
     private SipDialogPath createDialogPath() {
         // Set Call-Id
-        String callId = imsModule.getSipManager().getSipStack().generateCallId();
+        String callId = mImsModule.getSipManager().getSipStack().generateCallId();
 
         // Set target
         String target = ImsModule.IMS_USER_PROFILE.getPublicUri();
@@ -525,11 +531,11 @@ public class PublishManager extends PeriodicRefresher {
         String remoteParty = ImsModule.IMS_USER_PROFILE.getPublicUri();
 
         // Set the route path
-        Vector<String> route = imsModule.getSipManager().getSipStack().getServiceRoutePath();
+        Vector<String> route = mImsModule.getSipManager().getSipStack().getServiceRoutePath();
 
         // Create a dialog path
-        SipDialogPath dialog = new SipDialogPath(imsModule.getSipManager().getSipStack(), callId,
-                1, target, localParty, remoteParty, route);
+        SipDialogPath dialog = new SipDialogPath(mImsModule.getSipManager().getSipStack(), callId,
+                1, target, localParty, remoteParty, route, mRcsSettings);
         return dialog;
     }
 }

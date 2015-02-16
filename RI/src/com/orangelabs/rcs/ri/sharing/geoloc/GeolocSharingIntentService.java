@@ -35,8 +35,8 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingIntent;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingService;
-import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsDisplayName;
@@ -104,7 +104,7 @@ public class GeolocSharingIntentService extends IntentService {
         }
 
         try {
-            ApiConnectionManager connectionManager = ApiConnectionManager.getInstance(this);
+            ConnectionManager connectionManager = ConnectionManager.getInstance(this);
             if (connectionManager == null
                     || !connectionManager.isServiceConnected(RcsServiceName.GEOLOC_SHARING)) {
                 if (LogUtils.isActive) {

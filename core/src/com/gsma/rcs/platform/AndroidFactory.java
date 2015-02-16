@@ -23,6 +23,7 @@ import android.content.Context;
 import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.platform.network.NetworkFactory;
 import com.gsma.rcs.platform.registry.RegistryFactory;
+import com.gsma.rcs.provider.settings.RcsSettings;
 
 /**
  * Android platform
@@ -33,7 +34,7 @@ public class AndroidFactory {
     /**
      * Android application context
      */
-    private static Context context = null;
+    private static Context mContext;
 
     /**
      * Returns the application context
@@ -41,18 +42,20 @@ public class AndroidFactory {
      * @return Context
      */
     public static Context getApplicationContext() {
-        return context;
+        return mContext;
     }
 
     /**
      * Load factory
      * 
      * @param context Context
+     * @param rcsSettings
      */
-    public static void setApplicationContext(Context context) {
-        AndroidFactory.context = context;
+    public static void setApplicationContext(Context context, RcsSettings rcsSettings) {
+        mContext = context;
         try {
-            NetworkFactory.loadFactory("com.gsma.rcs.platform.network.AndroidNetworkFactory");
+            NetworkFactory.loadFactory("com.gsma.rcs.platform.network.AndroidNetworkFactory",
+                    rcsSettings);
             RegistryFactory
                     .loadFactory("com.gsma.rcs.platform.registry.AndroidRegistryFactory");
             FileFactory.loadFactory("com.gsma.rcs.platform.file.AndroidFileFactory");

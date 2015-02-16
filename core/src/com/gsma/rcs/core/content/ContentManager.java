@@ -55,18 +55,20 @@ public class ContentManager {
      * 
      * @param fileName File name
      * @param mime MIME type
+     * @param rcsSettings
      * @return Uri
      */
-    public static Uri generateUriForReceivedContent(String fileName, String mime) {
+    public static Uri generateUriForReceivedContent(String fileName, String mime,
+            RcsSettings rcsSettings) {
         // Generate a file path
         String path;
         if (MimeManager.isImageType(mime)) {
-            path = RcsSettings.getInstance().getPhotoRootDirectory();
+            path = rcsSettings.getPhotoRootDirectory();
         } else {
             if (MimeManager.isVideoType(mime)) {
-                path = RcsSettings.getInstance().getVideoRootDirectory();
+                path = rcsSettings.getVideoRootDirectory();
             } else {
-                path = RcsSettings.getInstance().getFileRootDirectory();
+                path = rcsSettings.getFileRootDirectory();
             }
         }
 
@@ -340,9 +342,10 @@ public class ContentManager {
      * Create a content object from SDP description of a SIP invite request
      * 
      * @param invite SIP invite request
+     * @param rcsSettings
      * @return Content instance
      */
-    public static MmContent createMmContentFromSdp(SipRequest invite) {
+    public static MmContent createMmContentFromSdp(SipRequest invite, RcsSettings rcsSettings) {
         try {
             String remoteSdp = invite.getSdpContent();
             SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));
@@ -354,7 +357,7 @@ public class ContentManager {
                     "application/octet-stream");
             long size = Long.parseLong(SipUtils.extractParameter(fileSelectorValue, "size:", "-1"));
             String filename = SipUtils.extractParameter(fileSelectorValue, "name:", "");
-            Uri file = ContentManager.generateUriForReceivedContent(filename, mime);
+            Uri file = ContentManager.generateUriForReceivedContent(filename, mime, rcsSettings);
             MmContent mContent = ContentManager.createMmContent(file, size, filename);
             return mContent;
         } catch (Exception e) {

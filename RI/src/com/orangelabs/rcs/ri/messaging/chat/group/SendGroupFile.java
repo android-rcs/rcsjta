@@ -71,9 +71,11 @@ public class SendGroupFile extends SendFile {
         public void onDeliveryInfoChanged(String chatId, ContactId contact, String transferId,
                 GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
-                Log.d(LOGTAG, "onSingleRecipientDeliveryStateChanged chatId=" + chatId
-                        + " contact=" + contact + " trasnferId=" + transferId + " state=" + status
-                        + " reason=" + reasonCode);
+                Log.d(LOGTAG,
+                        new StringBuilder("onDeliveryInfoChanged chatId=").append(chatId)
+                                .append(" contact=").append(contact).append(" trasnferId=")
+                                .append(transferId).append(" state=").append(status).
+                                append(" reason=").append(reasonCode).toString());
             }
         }
 
@@ -97,8 +99,10 @@ public class SendGroupFile extends SendFile {
                 final FileTransfer.State state,
                 FileTransfer.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
-                Log.d(LOGTAG, "onTransferStateChanged chatId=" + chatId + " transferId="
-                        + transferId + " state=" + state + " reason=" + reasonCode);
+                Log.d(LOGTAG,
+                        new StringBuilder("onStateChanged chatId=").append(chatId)
+                                .append(" transferId=").append(transferId).append(" state=")
+                                .append(state).append(" reason=").append(reasonCode).toString());
             }
 
             // Discard event if not for current transferId

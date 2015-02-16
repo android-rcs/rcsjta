@@ -34,9 +34,11 @@ public class ChatServiceConfigurationImpl extends IChatServiceConfiguration.Stub
 
     /**
      * Constructor
+     * 
+     * @param rcsSettings
      */
-    public ChatServiceConfigurationImpl() {
-        mRcsSettings = RcsSettings.getInstance();
+    public ChatServiceConfigurationImpl(RcsSettings rcsSettings) {
+        mRcsSettings = rcsSettings;
     }
 
     @Override

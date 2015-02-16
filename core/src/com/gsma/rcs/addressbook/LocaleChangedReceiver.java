@@ -24,6 +24,7 @@ package com.gsma.rcs.addressbook;
 
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.content.BroadcastReceiver;
@@ -49,8 +50,9 @@ public class LocaleChangedReceiver extends BroadcastReceiver {
 
         // We have to modify the strings that are used in contacts manager
         ContentResolver contentResolver = context.getContentResolver();
-        LocalContentResolver localContentResolver = new LocalContentResolver(contentResolver);
-        ContactsManager.createInstance(context, contentResolver, localContentResolver);
+        LocalContentResolver localContentResolver = new LocalContentResolver(context);
+        RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
+        ContactsManager.createInstance(context, contentResolver, localContentResolver, rcsSettings);
         ContactsManager.getInstance().updateStrings();
     }
 }

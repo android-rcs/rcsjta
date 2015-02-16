@@ -84,8 +84,11 @@ public class SendSingleFile extends SendFile {
                 final FileTransfer.State state,
                 FileTransfer.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
-                Log.d(LOGTAG, "onTransferStateChanged contact=" + contact + " transferId="
-                        + transferId + " state=" + state + " reason=" + reasonCode);
+                Log.d(LOGTAG,
+                        new StringBuilder("onStateChanged contact=").append(contact)
+                                .append(" transferId=").append(transferId).append(" state=")
+                                .append(state).append(" reason=")
+                                .append(reasonCode).toString());
             }
             // Discard event if not for current transferId
             if (mTransferId == null || !mTransferId.equals(transferId)) {

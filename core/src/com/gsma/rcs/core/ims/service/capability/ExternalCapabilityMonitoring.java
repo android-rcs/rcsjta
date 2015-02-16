@@ -18,18 +18,19 @@
 
 package com.gsma.rcs.core.ims.service.capability;
 
+import com.gsma.rcs.core.ims.service.extension.ServiceExtensionManager;
+import com.gsma.rcs.platform.AndroidFactory;
+import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.capability.CapabilityService;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-
-import com.gsma.rcs.core.ims.service.extension.ServiceExtensionManager;
-import com.gsma.rcs.platform.AndroidFactory;
-import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.capability.CapabilityService;
 
 /**
  * External capability monitoring
@@ -47,7 +48,8 @@ public class ExternalCapabilityMonitoring extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         try {
             // Instantiate the settings manager
-            RcsSettings.createInstance(context);
+            LocalContentResolver localContentResolver = new LocalContentResolver(context);
+            RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
 
             // Get Intent parameters
             String action = intent.getAction();
@@ -83,7 +85,7 @@ public class ExternalCapabilityMonitoring extends BroadcastReceiver {
                 }
 
                 // Add the new extension in the supported RCS extensions
-                ServiceExtensionManager.getInstance().addNewSupportedExtensions(
+                ServiceExtensionManager.getInstance(rcsSettings).addNewSupportedExtensions(
                         AndroidFactory.getApplicationContext());
             } else {
                 if (Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
@@ -92,7 +94,7 @@ public class ExternalCapabilityMonitoring extends BroadcastReceiver {
                     }
 
                     // Remove the extensions in the supported RCS extensions
-                    ServiceExtensionManager.getInstance().removeSupportedExtensions(
+                    ServiceExtensionManager.getInstance(rcsSettings).removeSupportedExtensions(
                             AndroidFactory.getApplicationContext());
                 }
             }

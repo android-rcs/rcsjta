@@ -8,6 +8,7 @@ import com.gsma.services.rcs.filetransfer.IOneToOneFileTransferListener;
 import com.gsma.services.rcs.filetransfer.IGroupFileTransferListener;
 import com.gsma.services.rcs.filetransfer.IFileTransferServiceConfiguration;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.RcsServiceRegistration;
 
 /**
  * File transfer service API
@@ -15,6 +16,8 @@ import com.gsma.services.rcs.contact.ContactId;
 interface IFileTransferService {
 
 	boolean isServiceRegistered();
+	
+	int getServiceRegistrationReasonCode();
 
 	void addEventListener(IRcsServiceRegistrationListener listener);
 

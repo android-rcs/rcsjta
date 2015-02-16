@@ -24,10 +24,6 @@ package com.gsma.rcs.core.ims.service.richcall.geoloc;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Vector;
-
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
@@ -42,18 +38,22 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.gsma.rcs.core.ims.service.ImsService;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Vector;
 
 /**
  * Terminating geoloc sharing session (transfer)
@@ -79,9 +79,12 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
      * @param parent IMS service
      * @param invite Initial INVITE request
      * @param contact Contact Id
+     * @param rcsSettings
      */
-    public TerminatingGeolocTransferSession(ImsService parent, SipRequest invite, ContactId contact) {
-        super(parent, ContentManager.createMmContentFromSdp(invite), contact);
+    public TerminatingGeolocTransferSession(ImsService parent, SipRequest invite,
+            ContactId contact, RcsSettings rcsSettings) {
+        super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), contact,
+                rcsSettings);
 
         // Create dialog path
         createTerminatingDialogPath(invite);
@@ -209,13 +212,13 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
             if (localSetup.equals("active")) {
                 localMsrpPort = 9; // See RFC4145, Page 4
             } else {
-                localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort();
+                localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(mRcsSettings);
             }
 
             // Create the MSRP manager
             String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface()
                     .getNetworkAccess().getIpAddress();
-            msrpMgr = new MsrpManager(localIpAddress, localMsrpPort);
+            msrpMgr = new MsrpManager(localIpAddress, localMsrpPort, mRcsSettings);
 
             // Build SDP part
             String ntpTime = SipUtils.constructNTPtime(System.currentTimeMillis());
@@ -408,6 +411,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
      * @param currentSize Current transfered size in bytes
      * @param totalSize Total size in bytes
      * @param data received data chunk
+     * @return True if transfer in progress
      */
     public boolean msrpTransferProgress(long currentSize, long totalSize, byte[] data) {
         // Not used for geolocation sharing

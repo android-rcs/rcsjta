@@ -2,7 +2,6 @@
 <resources>
 
     <string name="rcs_core_application_title">RCS service</string>
-    <string name="rcs_core_rcs_notification_title">RCS service</string>
     <string name="rcs_core_permission">RCS</string>
     <string name="rcs_core_permission_ext">RCS extensions</string>
     <string name="rcs_core_permission_read_chat">RCS chat read</string>
@@ -21,23 +20,13 @@
     <string name="rcs_core_permission_read_capability_desc">Grants permission to read RCS capability information</string>
     <string name="rcs_core_permission_read_ipcall_desc">Grants permission to read ipcall history</string>
     <string name="rcs_core_permission_read_geolocshare_desc">Grants permission to read RCS geoloc history</string>
-    <string name="rcs_core_loaded">RCS service is loaded</string>
-    <string name="rcs_core_failed">RCS service has failed</string>
-    <string name="rcs_core_started">RCS service is started</string>
-    <string name="rcs_core_stopped">RCS service is stopped</string>
-    <string name="rcs_core_ims_connected">Connected to RCS platform</string>
-    <string name="rcs_core_ims_connection_failed">Can\'t connect to RCS platform</string>
-    <string name="rcs_core_ims_disconnected">Disconnected from RCS platform</string>
-    <string name="rcs_core_ims_battery_disconnected">Disconnected from RCS platform (Battery low)</string>
 
     <!-- Strings associated to ContactsContract menus -->
     <string name="rcs_core_my_profile">\u0020My RCS profile</string>
     <string name="rcs_core_contact_file_transfer">Transfer a file</string>
     <string name="rcs_core_contact_im_session">Initiate a chat</string>
-    <string name="rcs_core_contact_cs_video">Video call</string>
     <string name="rcs_core_contact_ip_voice_call">IP voice call</string>
     <string name="rcs_core_contact_ip_video_call">IP video call</string>
-    <string name="rcs_core_contact_extensions">Extensions</string>
 
     <!-- Strings linked to rcs account -->
     <string name="rcs_core_account_id">RCS</string>

@@ -41,12 +41,14 @@ public class WifiNetworkInterface extends ImsNetworkInterface {
      * Constructor
      * 
      * @param imsModule IMS module
+     * @param rcsSettings
      * @throws CoreException
      */
     public WifiNetworkInterface(ImsModule imsModule, RcsSettings rcsSettings) throws CoreException {
         super(imsModule, ConnectivityManager.TYPE_WIFI, new WifiNetworkAccess(), rcsSettings
                 .getImsProxyAddrForWifi(), rcsSettings.getImsProxyPortForWifi(), rcsSettings
-                .getSipDefaultProtocolForWifi(), rcsSettings.getImsAuthenticationProcedureForWifi());
+                .getSipDefaultProtocolForWifi(),
+                rcsSettings.getImsAuthenticationProcedureForWifi(), rcsSettings);
 
         if (logger.isActivated()) {
             logger.info("Wi-Fi network interface has been loaded");

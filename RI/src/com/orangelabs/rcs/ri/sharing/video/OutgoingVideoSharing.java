@@ -63,8 +63,8 @@ import com.gsma.services.rcs.sharing.video.VideoSharingService;
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.CameraOptions;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.Orientation;
-import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.sharing.video.media.OriginatingVideoPlayer;
@@ -159,7 +159,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
     /**
      * API connection manager
      */
-    private ApiConnectionManager mCnxManager;
+    private ConnectionManager mCnxManager;
 
     /**
      * Spinner for contact selection
@@ -334,7 +334,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
         }
 
         // Register to API connection manager
-        mCnxManager = ApiConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance(this);
         if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.VIDEO_SHARING)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
@@ -358,10 +358,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
                 Log.d(LOGTAG, "onCreate video sharing");
             }
         } catch (RcsServiceException e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "Failed to add listener", e);
-            }
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce);
+            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
         }
     }
 

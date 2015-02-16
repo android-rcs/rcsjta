@@ -24,12 +24,6 @@ package com.gsma.rcs.core.ims.service.sip.messaging;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Vector;
-
-import android.content.Intent;
-
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
@@ -40,15 +34,21 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.gsma.rcs.core.ims.service.ImsService;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.sip.SipSessionError;
 import com.gsma.rcs.core.ims.service.sip.SipSessionListener;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
+
+import android.content.Intent;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Vector;
 
 /**
  * Terminating SIP MSRP session
@@ -69,12 +69,15 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
      * 
      * @param parent IMS service
      * @param invite Initial INVITE request
+     * @param sessionInvite
+     * @param rcsSettings
      * @throws RcsContactFormatException
      */
-    public TerminatingSipMsrpSession(ImsService parent, SipRequest invite, Intent sessionInvite)
+    public TerminatingSipMsrpSession(ImsService parent, SipRequest invite, Intent sessionInvite,
+            RcsSettings rcsSettings)
             throws RcsContactFormatException {
         super(parent, ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite)), invite
-                .getFeatureTags().get(0));
+                .getFeatureTags().get(0), rcsSettings);
 
         mSessionInvite = sessionInvite;
 
@@ -304,7 +307,4 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
         return true;
     }
 
-    public Intent getSessionInvite() {
-        return mSessionInvite;
-    }
 }

@@ -20,31 +20,27 @@
  * Modifications are licensed under the License.
  ******************************************************************************/
 
-package com.gsma.rcs.service;
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
-
-import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.services.rcs.Intents;
+package com.gsma.services.rcs;
 
 /**
- * Get status intent receiver
- * 
- * @author Jean-Marc AUFFRET
+ * RCS permission denied exception
  */
-public class GetStatusReceiver extends BroadcastReceiver {
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        if (intent.getAction().endsWith(Intents.Service.ACTION_GET_STATUS)) {
-            RcsSettings.createInstance(context);
-            Bundle results = getResultExtras(true);
-            results.putString(Intents.Service.EXTRA_PACKAGENAME, context.getPackageName());
-            results.putBoolean(Intents.Service.EXTRA_STATUS, RcsSettings.getInstance()
-                    .isServiceActivated());
-            setResultExtras(results);
-        }
+public class RcsPermissionDeniedException extends RcsServiceException {
+    static final long serialVersionUID = 1L;
+
+    /**
+     * Constructor
+     */
+    public RcsPermissionDeniedException() {
+        this("RCS permission denied");
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param error
+     */
+    public RcsPermissionDeniedException(String error) {
+        super(error);
     }
 }

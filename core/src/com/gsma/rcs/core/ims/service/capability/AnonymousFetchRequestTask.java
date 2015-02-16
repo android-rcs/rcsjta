@@ -37,6 +37,7 @@ import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.gsma.rcs.core.ims.service.presence.PresenceError;
 import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
@@ -51,7 +52,7 @@ public class AnonymousFetchRequestTask {
     /**
      * IMS module
      */
-    private ImsModule imsModule;
+    private ImsModule mImsModule;
 
     /**
      * Remote contact
@@ -61,17 +62,19 @@ public class AnonymousFetchRequestTask {
     /**
      * Dialog path
      */
-    private SipDialogPath dialogPath = null;
+    private SipDialogPath mDialogPath;
 
     /**
      * Authentication agent
      */
-    private SessionAuthenticationAgent authenticationAgent;
+    private SessionAuthenticationAgent mAuthenticationAgent;
+
+    private final RcsSettings mRcsSettings;
 
     /**
      * The logger
      */
-    private static final Logger logger = Logger
+    private static final Logger sLogger = Logger
             .getLogger(AnonymousFetchRequestTask.class.getName());
 
     /**
@@ -79,11 +82,13 @@ public class AnonymousFetchRequestTask {
      * 
      * @param parent IMS module
      * @param contact Remote contact identifier
+     * @param rcsSettings
      */
-    public AnonymousFetchRequestTask(ImsModule parent, ContactId contact) {
-        imsModule = parent;
+    public AnonymousFetchRequestTask(ImsModule parent, ContactId contact, RcsSettings rcsSettings) {
+        mImsModule = parent;
         mContact = contact;
-        authenticationAgent = new SessionAuthenticationAgent(imsModule);
+        mAuthenticationAgent = new SessionAuthenticationAgent(mImsModule);
+        mRcsSettings = rcsSettings;
     }
 
     /**
@@ -97,8 +102,8 @@ public class AnonymousFetchRequestTask {
      * Send a SUBSCRIBE request
      */
     private void sendSubscribe() {
-        if (logger.isActivated()) {
-            logger.info("Send SUBSCRIBE request to " + mContact);
+        if (sLogger.isActivated()) {
+            sLogger.info("Send SUBSCRIBE request to " + mContact);
         }
 
         try {
@@ -106,7 +111,7 @@ public class AnonymousFetchRequestTask {
             String contactUri = PhoneUtils.formatContactIdToUri(mContact);
 
             // Set Call-Id
-            String callId = imsModule.getSipManager().getSipStack().generateCallId();
+            String callId = mImsModule.getSipManager().getSipStack().generateCallId();
 
             // Set target
             String target = contactUri;
@@ -118,11 +123,11 @@ public class AnonymousFetchRequestTask {
             String remoteParty = contactUri;
 
             // Set the route path
-            Vector<String> route = imsModule.getSipManager().getSipStack().getServiceRoutePath();
+            Vector<String> route = mImsModule.getSipManager().getSipStack().getServiceRoutePath();
 
             // Create a dialog path
-            dialogPath = new SipDialogPath(imsModule.getSipManager().getSipStack(), callId, 1,
-                    target, localParty, remoteParty, route);
+            mDialogPath = new SipDialogPath(mImsModule.getSipManager().getSipStack(), callId, 1,
+                    target, localParty, remoteParty, route, mRcsSettings);
 
             // Create a SUBSCRIBE request
             SipRequest subscribe = createSubscribe();
@@ -130,8 +135,8 @@ public class AnonymousFetchRequestTask {
             // Send SUBSCRIBE request
             sendSubscribe(subscribe);
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Subscribe has failed", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Subscribe has failed", e);
             }
             handleError(new PresenceError(PresenceError.UNEXPECTED_EXCEPTION, e.getMessage()));
         }
@@ -145,7 +150,7 @@ public class AnonymousFetchRequestTask {
      * @throws CoreException
      */
     private SipRequest createSubscribe() throws SipException, CoreException {
-        SipRequest subscribe = SipMessageFactory.createSubscribe(dialogPath, 0);
+        SipRequest subscribe = SipMessageFactory.createSubscribe(mDialogPath, 0);
 
         // Set the Privacy header
         subscribe.addHeader(SipUtils.HEADER_PRIVACY, "id");
@@ -166,12 +171,12 @@ public class AnonymousFetchRequestTask {
      * @throws Exception
      */
     private void sendSubscribe(SipRequest subscribe) throws Exception {
-        if (logger.isActivated()) {
-            logger.info("Send SUBSCRIBE, expire=" + subscribe.getExpires());
+        if (sLogger.isActivated()) {
+            sLogger.info("Send SUBSCRIBE, expire=" + subscribe.getExpires());
         }
 
         // Send SUBSCRIBE request
-        SipTransactionContext ctx = imsModule.getSipManager().sendSipMessageAndWait(subscribe);
+        SipTransactionContext ctx = mImsModule.getSipManager().sendSipMessageAndWait(subscribe);
 
         // Analyze the received response
         if (ctx.isSipResponse()) {
@@ -191,8 +196,8 @@ public class AnonymousFetchRequestTask {
                         + " " + ctx.getReasonPhrase()));
             }
         } else {
-            if (logger.isActivated()) {
-                logger.debug("No response received for SUBSCRIBE");
+            if (sLogger.isActivated()) {
+                sLogger.debug("No response received for SUBSCRIBE");
             }
 
             // No response received: timeout
@@ -207,8 +212,8 @@ public class AnonymousFetchRequestTask {
      */
     private void handle200OK(SipTransactionContext ctx) {
         // 200 OK response received
-        if (logger.isActivated()) {
-            logger.info("200 OK response received");
+        if (sLogger.isActivated()) {
+            sLogger.info("200 OK response received");
         }
     }
 
@@ -220,26 +225,26 @@ public class AnonymousFetchRequestTask {
      */
     private void handle407Authentication(SipTransactionContext ctx) throws Exception {
         // 407 response received
-        if (logger.isActivated()) {
-            logger.info("407 response received");
+        if (sLogger.isActivated()) {
+            sLogger.info("407 response received");
         }
 
         SipResponse resp = ctx.getSipResponse();
 
         // Set the Proxy-Authorization header
-        authenticationAgent.readProxyAuthenticateHeader(resp);
+        mAuthenticationAgent.readProxyAuthenticateHeader(resp);
 
         // Increment the Cseq number of the dialog path
-        dialogPath.incrementCseq();
+        mDialogPath.incrementCseq();
 
         // Create a second SUBSCRIBE request with the right token
-        if (logger.isActivated()) {
-            logger.info("Send second SUBSCRIBE");
+        if (sLogger.isActivated()) {
+            sLogger.info("Send second SUBSCRIBE");
         }
         SipRequest subscribe = createSubscribe();
 
         // Set the Authorization header
-        authenticationAgent.setProxyAuthorizationHeader(subscribe);
+        mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
 
         // Send SUBSCRIBE request
         sendSubscribe(subscribe);
@@ -252,8 +257,8 @@ public class AnonymousFetchRequestTask {
      */
     private void handleError(PresenceError error) {
         // On error don't modify the existing capabilities
-        if (logger.isActivated()) {
-            logger.info("Subscribe has failed: " + error.getErrorCode() + ", reason="
+        if (sLogger.isActivated()) {
+            sLogger.info("Subscribe has failed: " + error.getErrorCode() + ", reason="
                     + error.getMessage());
         }
 
@@ -267,12 +272,12 @@ public class AnonymousFetchRequestTask {
      * @param ctx SIP transaction context
      */
     private void handleUserNotFound(SipTransactionContext ctx) {
-        if (logger.isActivated()) {
-            logger.info("User not found (" + ctx.getStatusCode() + " error)");
+        if (sLogger.isActivated()) {
+            sLogger.info("User not found (" + ctx.getStatusCode() + " error)");
         }
 
         // We update the database with empty capabilities
-        Capabilities capabilities = new Capabilities();
+        Capabilities capabilities = new Capabilities(mRcsSettings);
         ContactsManager.getInstance().setContactCapabilities(mContact, capabilities,
                 RcsStatus.NOT_RCS, RegistrationState.UNKNOWN);
     }

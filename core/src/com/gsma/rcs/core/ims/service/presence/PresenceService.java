@@ -103,7 +103,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      */
     public PresenceService(ImsModule parent, RcsSettings rcsSettings,
             ContactsManager contactsManager) throws CoreException {
-        super(parent, RcsSettings.getInstance().isSocialPresenceSupported());
+        super(parent, rcsSettings.isSocialPresenceSupported());
         mRcsSettings = rcsSettings;
         mContactsManager = contactsManager;
         // Set presence service options
@@ -113,13 +113,13 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         xdm = new XdmManager(parent);
 
         // Instantiate the publish manager
-        publisher = new PublishManager(parent);
+        publisher = new PublishManager(parent, mRcsSettings);
 
         // Instantiate the subscribe manager for watcher info
-        watcherInfoSubscriber = new WatcherInfoSubscribeManager(parent);
+        watcherInfoSubscriber = new WatcherInfoSubscribeManager(parent, mRcsSettings);
 
         // Instantiate the subscribe manager for presence
-        presenceSubscriber = new PresenceSubscribeManager(parent);
+        presenceSubscriber = new PresenceSubscribeManager(parent, mRcsSettings);
     }
 
     /**

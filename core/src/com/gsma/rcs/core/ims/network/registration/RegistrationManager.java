@@ -42,6 +42,8 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.DeviceUtils;
 import com.gsma.rcs.utils.PeriodicRefresher;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.RcsServiceRegistration;
+import com.gsma.services.rcs.RcsServiceRegistration.ReasonCode;
 
 /**
  * Registration manager (register, re-register, un-register)
@@ -52,52 +54,59 @@ public class RegistrationManager extends PeriodicRefresher {
     /**
      * Expire period
      */
-    private int expirePeriod;
+    private int mExpirePeriod;
 
     /**
      * Dialog path
      */
-    private SipDialogPath dialogPath = null;
+    private SipDialogPath mDialogPath;
 
     /**
      * Supported feature tags
      */
-    private String[] featureTags;
+    private String[] mFeatureTags;
 
     /**
      * IMS network interface
      */
-    private ImsNetworkInterface networkInterface;
+    private ImsNetworkInterface mNetworkInterface;
 
     /**
      * Registration procedure
      */
-    private RegistrationProcedure registrationProcedure;
+    private RegistrationProcedure mRegistrationProcedure;
 
     /**
      * Instance ID
      */
-    private String instanceId = null;
+    private String mInstanceId;
 
     /**
      * Registration flag
      */
-    private boolean registered = false;
+    private boolean mRegistered = false;
+
+    /**
+     * Reason code for un-registration
+     */
+    private RcsServiceRegistration.ReasonCode mReasonCode = RcsServiceRegistration.ReasonCode.UNSPECIFIED;
 
     /**
      * Registration pending flag
      */
-    private boolean registering = false;
+    private boolean mRegistering = false;
 
     /**
      * UnRegistration need flag
      */
-    private boolean needUnregister = false;
+    private boolean mNeedUnregister = false;
 
     /**
      * Number of 401 failures
      */
-    private int nb401Failures = 0;
+    private int mNb401Failures = 0;
+
+    private final RcsSettings mRcsSettings;
 
     /**
      * The logger
@@ -109,16 +118,19 @@ public class RegistrationManager extends PeriodicRefresher {
      * 
      * @param networkInterface IMS network interface
      * @param registrationProcedure Registration procedure
+     * @param rcsSettings
      */
     public RegistrationManager(ImsNetworkInterface networkInterface,
-            RegistrationProcedure registrationProcedure) {
-        this.networkInterface = networkInterface;
-        this.registrationProcedure = registrationProcedure;
-        this.featureTags = RegistrationUtils.getSupportedFeatureTags();
-        this.expirePeriod = RcsSettings.getInstance().getRegisterExpirePeriod();
+            RegistrationProcedure registrationProcedure, RcsSettings rcsSettings) {
+        mNetworkInterface = networkInterface;
+        mRegistrationProcedure = registrationProcedure;
+        mFeatureTags = RegistrationUtils.getSupportedFeatureTags(rcsSettings);
+        mRcsSettings = rcsSettings;
+        mExpirePeriod = mRcsSettings.getRegisterExpirePeriod();
 
-        if (RcsSettings.getInstance().isGruuSupported()) {
-            this.instanceId = DeviceUtils.getInstanceId(AndroidFactory.getApplicationContext());
+        if (mRcsSettings.isGruuSupported()) {
+            mInstanceId = DeviceUtils.getInstanceId(AndroidFactory.getApplicationContext(),
+                    rcsSettings);
         }
     }
 
@@ -134,7 +146,7 @@ public class RegistrationManager extends PeriodicRefresher {
      * @return Registration procedure
      */
     public RegistrationProcedure getRegistrationProcedure() {
-        return registrationProcedure;
+        return mRegistrationProcedure;
     }
 
     /**
@@ -143,14 +155,23 @@ public class RegistrationManager extends PeriodicRefresher {
      * @return Return True if the terminal is registered, else return False
      */
     public boolean isRegistered() {
-        return registered;
+        return mRegistered;
+    }
+
+    /**
+     * Gets reason code for RCS registration
+     * 
+     * @return reason code
+     */
+    public RcsServiceRegistration.ReasonCode getReasonCode() {
+        return mReasonCode;
     }
 
     /**
      * Restart registration procedure
      */
     public void restart() {
-        Thread t = new Thread() {
+        new Thread() {
             /**
              * Processing
              */
@@ -161,8 +182,7 @@ public class RegistrationManager extends PeriodicRefresher {
                 // Start a new registration
                 registration();
             }
-        };
-        t.start();
+        }.start();
     }
 
     /**
@@ -171,43 +191,43 @@ public class RegistrationManager extends PeriodicRefresher {
      * @return Boolean status
      */
     public synchronized boolean registration() {
-        registering = true;
+        mRegistering = true;
         try {
             // Create a dialog path if necessary
-            if (dialogPath == null) {
+            if (mDialogPath == null) {
                 // Reset the registration authentication procedure
-                registrationProcedure.init();
+                mRegistrationProcedure.init();
 
                 // Set Call-Id
-                String callId = networkInterface.getSipManager().getSipStack().generateCallId();
+                String callId = mNetworkInterface.getSipManager().getSipStack().generateCallId();
 
                 // Set target
-                String target = "sip:" + registrationProcedure.getHomeDomain();
+                String target = "sip:" + mRegistrationProcedure.getHomeDomain();
 
                 // Set local party
-                String localParty = registrationProcedure.getPublicUri();
+                String localParty = mRegistrationProcedure.getPublicUri();
 
                 // Set remote party
-                String remoteParty = registrationProcedure.getPublicUri();
+                String remoteParty = mRegistrationProcedure.getPublicUri();
 
                 // Set the route path
-                Vector<String> route = networkInterface.getSipManager().getSipStack()
+                Vector<String> route = mNetworkInterface.getSipManager().getSipStack()
                         .getDefaultRoutePath();
 
                 // Create a dialog path
-                dialogPath = new SipDialogPath(networkInterface.getSipManager().getSipStack(),
-                        callId, 1, target, localParty, remoteParty, route);
+                mDialogPath = new SipDialogPath(mNetworkInterface.getSipManager().getSipStack(),
+                        callId, 1, target, localParty, remoteParty, route, mRcsSettings);
             } else {
                 // Increment the Cseq number of the dialog path
-                dialogPath.incrementCseq();
+                mDialogPath.incrementCseq();
             }
 
             // Reset the number of 401 failures
-            nb401Failures = 0;
+            mNb401Failures = 0;
 
             // Create REGISTER request
-            SipRequest register = SipMessageFactory.createRegister(dialogPath, featureTags,
-                    RcsSettings.getInstance().getRegisterExpirePeriod(), instanceId);
+            SipRequest register = SipMessageFactory.createRegister(mDialogPath, mFeatureTags,
+                    mRcsSettings.getRegisterExpirePeriod(), mInstanceId);
 
             // Send REGISTER request
             sendRegister(register);
@@ -218,15 +238,19 @@ public class RegistrationManager extends PeriodicRefresher {
             }
             handleError(new ImsError(ImsError.UNEXPECTED_EXCEPTION, e.getMessage()));
         }
-        registering = false;
-        return registered;
+        mRegistering = false;
+        return mRegistered;
+    }
+
+    private boolean isBatteryLow() {
+        return mNetworkInterface.getImsModule().getImsConnectionManager().isDisconnectedByBattery();
     }
 
     /**
      * Stop the registration manager without unregistering from IMS
      */
     public synchronized void stopRegistration() {
-        if (!registered) {
+        if (!mRegistered) {
             // Already unregistered
             return;
         }
@@ -235,23 +259,27 @@ public class RegistrationManager extends PeriodicRefresher {
         stopTimer();
 
         // Force registration flag to false
-        registered = false;
+        mRegistered = false;
 
         // Reset dialog path attributes
         resetDialogPath();
 
+        mReasonCode = isBatteryLow() ? RcsServiceRegistration.ReasonCode.BATTERY_LOW
+                : RcsServiceRegistration.ReasonCode.CONNECTION_LOST;
+
         // Notify event listener
-        networkInterface.getImsModule().getCore().getListener().handleRegistrationTerminated();
+        mNetworkInterface.getImsModule().getCore().getListener()
+                .handleRegistrationTerminated(mReasonCode);
     }
 
     /**
      * Unregistration
      */
     public synchronized void unRegistration() {
-        if (registered) {
+        if (mRegistered) {
             doUnRegistration();
-        } else if (registering) {
-            needUnregister = true;
+        } else if (mRegistering) {
+            mNeedUnregister = true;
         }
     }
 
@@ -259,8 +287,8 @@ public class RegistrationManager extends PeriodicRefresher {
      * Unregistration
      */
     private synchronized void doUnRegistration() {
-        needUnregister = false;
-        if (!registered) {
+        mNeedUnregister = false;
+        if (!mRegistered) {
             // Already unregistered
             return;
         }
@@ -270,11 +298,11 @@ public class RegistrationManager extends PeriodicRefresher {
             stopTimer();
 
             // Increment the Cseq number of the dialog path
-            dialogPath.incrementCseq();
+            mDialogPath.incrementCseq();
 
             // Create REGISTER request with expire 0
-            SipRequest register = SipMessageFactory.createRegister(dialogPath, featureTags, 0,
-                    instanceId);
+            SipRequest register = SipMessageFactory.createRegister(mDialogPath, mFeatureTags, 0,
+                    mInstanceId);
 
             // Send REGISTER request
             sendRegister(register);
@@ -286,13 +314,17 @@ public class RegistrationManager extends PeriodicRefresher {
         }
 
         // Force registration flag to false
-        registered = false;
+        mRegistered = false;
 
         // Reset dialog path attributes
         resetDialogPath();
 
+        mReasonCode = isBatteryLow() ? RcsServiceRegistration.ReasonCode.BATTERY_LOW
+                : RcsServiceRegistration.ReasonCode.CONNECTION_LOST;
+
         // Notify event listener
-        networkInterface.getImsModule().getCore().getListener().handleRegistrationTerminated();
+        mNetworkInterface.getImsModule().getCore().getListener()
+                .handleRegistrationTerminated(mReasonCode);
     }
 
     /**
@@ -308,10 +340,10 @@ public class RegistrationManager extends PeriodicRefresher {
         }
 
         // Set the security header
-        registrationProcedure.writeSecurityHeader(register);
+        mRegistrationProcedure.writeSecurityHeader(register);
 
         // Send REGISTER request
-        SipTransactionContext ctx = networkInterface.getSipManager()
+        SipTransactionContext ctx = mNetworkInterface.getSipManager()
                 .sendSipMessageAndWait(register);
 
         // Analyze the received response
@@ -329,10 +361,10 @@ public class RegistrationManager extends PeriodicRefresher {
                 handle302MovedTemporarily(ctx);
             } else if (ctx.getStatusCode() == 401) {
                 // Increment the number of 401 failures
-                nb401Failures++;
+                mNb401Failures++;
 
                 // Check number of failures
-                if (nb401Failures < 3) {
+                if (mNb401Failures < 3) {
                     // 401 Unauthorized
                     handle401Unauthorized(ctx);
                 } else {
@@ -373,33 +405,33 @@ public class RegistrationManager extends PeriodicRefresher {
         ImsModule.IMS_USER_PROFILE.setAssociatedUri(associatedHeader);
 
         // Set the GRUU
-        networkInterface.getSipManager().getSipStack().setInstanceId(instanceId);
+        mNetworkInterface.getSipManager().getSipStack().setInstanceId(mInstanceId);
         ListIterator<Header> contacts = resp.getHeaders(ContactHeader.NAME);
         while (contacts.hasNext()) {
             ContactHeader contact = (ContactHeader) contacts.next();
             String contactInstanceId = contact.getParameter(SipUtils.SIP_INSTANCE_PARAM);
-            if ((contactInstanceId != null) && (instanceId != null)
-                    && (instanceId.contains(contactInstanceId))) {
+            if ((contactInstanceId != null) && (mInstanceId != null)
+                    && (mInstanceId.contains(contactInstanceId))) {
                 String pubGruu = contact.getParameter(SipUtils.PUBLIC_GRUU_PARAM);
-                networkInterface.getSipManager().getSipStack().setPublicGruu(pubGruu);
+                mNetworkInterface.getSipManager().getSipStack().setPublicGruu(pubGruu);
                 String tempGruu = contact.getParameter(SipUtils.TEMP_GRUU_PARAM);
-                networkInterface.getSipManager().getSipStack().setTemporaryGruu(tempGruu);
+                mNetworkInterface.getSipManager().getSipStack().setTemporaryGruu(tempGruu);
             }
         }
 
         // Set the service route path
         ListIterator<Header> routes = resp.getHeaders(SipUtils.HEADER_SERVICE_ROUTE);
-        networkInterface.getSipManager().getSipStack().setServiceRoutePath(routes);
+        mNetworkInterface.getSipManager().getSipStack().setServiceRoutePath(routes);
 
         // If the IP address of the Via header in the 200 OK response to the initial
         // SIP REGISTER request is different than the local IP address then there is a NAT
-        String localIpAddr = networkInterface.getNetworkAccess().getIpAddress();
+        String localIpAddr = mNetworkInterface.getNetworkAccess().getIpAddress();
         ViaHeader respViaHeader = ctx.getSipResponse().getViaHeaders().next();
         String received = respViaHeader.getParameter("received");
         if (!respViaHeader.getHost().equals(localIpAddr)
                 || ((received != null) && !received.equals(localIpAddr))) {
-            networkInterface.setNatTraversal(true);
-            networkInterface.setNatPublicAddress(received);
+            mNetworkInterface.setNatTraversal(true);
+            mNetworkInterface.setNatPublicAddress(received);
             String viaRportStr = respViaHeader.getParameter("rport");
             int viaRport = -1;
             if (viaRportStr != null) {
@@ -411,38 +443,39 @@ public class RegistrationManager extends PeriodicRefresher {
                     }
                 }
             }
-            networkInterface.setNatPublicPort(viaRport);
+            mNetworkInterface.setNatPublicPort(viaRport);
             if (logger.isActivated()) {
                 logger.debug("NAT public interface detected: " + received + ":" + viaRport);
             }
         } else {
-            networkInterface.setNatTraversal(false);
-            networkInterface.setNatPublicAddress(null);
-            networkInterface.setNatPublicPort(-1);
+            mNetworkInterface.setNatTraversal(false);
+            mNetworkInterface.setNatPublicAddress(null);
+            mNetworkInterface.setNatPublicPort(-1);
         }
         if (logger.isActivated()) {
-            logger.debug("NAT traversal detection: " + networkInterface.isBehindNat());
+            logger.debug("NAT traversal detection: " + mNetworkInterface.isBehindNat());
         }
 
         // Read the security header
-        registrationProcedure.readSecurityHeader(resp);
+        mRegistrationProcedure.readSecurityHeader(resp);
 
         // Retrieve the expire value in the response
         retrieveExpirePeriod(resp);
-        registered = true;
+        mRegistered = true;
+        mReasonCode = ReasonCode.UNSPECIFIED;
 
         // Start the periodic registration
-        if (expirePeriod <= 1200) {
-            startTimer(expirePeriod, 0.5);
+        if (mExpirePeriod <= 1200) {
+            startTimer(mExpirePeriod, 0.5);
         } else {
-            startTimer(expirePeriod - 600);
+            startTimer(mExpirePeriod - 600);
         }
 
         // Notify event listener
-        networkInterface.getImsModule().getCore().getListener().handleRegistrationSuccessful();
+        mNetworkInterface.getImsModule().getCore().getListener().handleRegistrationSuccessful();
 
         // Start unregister procedure if necessary
-        if (needUnregister) {
+        if (mNeedUnregister) {
             doUnRegistration();
         }
     }
@@ -460,8 +493,8 @@ public class RegistrationManager extends PeriodicRefresher {
 
         // Reset the NAT parameters as we are not expecting any more messages
         // for this registration
-        networkInterface.setNatPublicAddress(null);
-        networkInterface.setNatPublicPort(-1);
+        mNetworkInterface.setNatPublicAddress(null);
+        mNetworkInterface.setNatPublicPort(-1);
     }
 
     /**
@@ -483,17 +516,17 @@ public class RegistrationManager extends PeriodicRefresher {
         ContactHeader contactHeader = (ContactHeader) resp.getStackMessage().getHeader(
                 ContactHeader.NAME);
         String newUri = contactHeader.getAddress().getURI().toString();
-        dialogPath.setTarget(newUri);
+        mDialogPath.setTarget(newUri);
 
         // Increment the Cseq number of the dialog path
-        dialogPath.incrementCseq();
+        mDialogPath.incrementCseq();
 
         // Create REGISTER request with security token
         if (logger.isActivated()) {
             logger.info("Send REGISTER to new address");
         }
-        SipRequest register = SipMessageFactory.createRegister(dialogPath, featureTags, ctx
-                .getTransaction().getRequest().getExpires().getExpires(), instanceId);
+        SipRequest register = SipMessageFactory.createRegister(mDialogPath, mFeatureTags, ctx
+                .getTransaction().getRequest().getExpires().getExpires(), mInstanceId);
 
         // Send REGISTER request
         sendRegister(register);
@@ -510,23 +543,23 @@ public class RegistrationManager extends PeriodicRefresher {
             CoreException {
         // 401 response received
         if (logger.isActivated()) {
-            logger.info("401 response received, nbFailures=" + nb401Failures);
+            logger.info("401 response received, nbFailures=" + mNb401Failures);
         }
 
         SipResponse resp = ctx.getSipResponse();
 
         // Read the security header
-        registrationProcedure.readSecurityHeader(resp);
+        mRegistrationProcedure.readSecurityHeader(resp);
 
         // Increment the Cseq number of the dialog path
-        dialogPath.incrementCseq();
+        mDialogPath.incrementCseq();
 
         // Create REGISTER request with security token
         if (logger.isActivated()) {
             logger.info("Send REGISTER with security token");
         }
-        SipRequest register = SipMessageFactory.createRegister(dialogPath, featureTags, ctx
-                .getTransaction().getRequest().getExpires().getExpires(), instanceId);
+        SipRequest register = SipMessageFactory.createRegister(mDialogPath, mFeatureTags, ctx
+                .getTransaction().getRequest().getExpires().getExpires(), mInstanceId);
 
         // Send REGISTER request
         sendRegister(register);
@@ -549,7 +582,7 @@ public class RegistrationManager extends PeriodicRefresher {
         SipResponse resp = ctx.getSipResponse();
 
         // Increment the Cseq number of the dialog path
-        dialogPath.incrementCseq();
+        mDialogPath.incrementCseq();
 
         // Extract the Min-Expire value
         int minExpire = SipUtils.getMinExpiresPeriod(resp);
@@ -562,14 +595,14 @@ public class RegistrationManager extends PeriodicRefresher {
         }
 
         // Set the expire value
-        expirePeriod = minExpire;
+        mExpirePeriod = minExpire;
 
         // Create a new REGISTER with the right expire period
         if (logger.isActivated()) {
             logger.info("Send new REGISTER");
         }
-        SipRequest register = SipMessageFactory.createRegister(dialogPath, featureTags,
-                expirePeriod, instanceId);
+        SipRequest register = SipMessageFactory.createRegister(mDialogPath, mFeatureTags,
+                mExpirePeriod, mInstanceId);
 
         // Send REGISTER request
         sendRegister(register);
@@ -586,7 +619,8 @@ public class RegistrationManager extends PeriodicRefresher {
             logger.info("Registration has failed: " + error.getErrorCode() + ", reason="
                     + error.getMessage());
         }
-        registered = false;
+        mRegistered = false;
+        mReasonCode = ReasonCode.CONNECTION_LOST;
 
         // Registration has failed, stop the periodic registration
         stopTimer();
@@ -595,14 +629,14 @@ public class RegistrationManager extends PeriodicRefresher {
         resetDialogPath();
 
         // Notify event listener
-        networkInterface.getImsModule().getCore().getListener().handleRegistrationFailed(error);
+        mNetworkInterface.getImsModule().getCore().getListener().handleRegistrationFailed(error);
     }
 
     /**
      * Reset the dialog path
      */
     private void resetDialogPath() {
-        dialogPath = null;
+        mDialogPath = null;
     }
 
     /**
@@ -617,10 +651,10 @@ public class RegistrationManager extends PeriodicRefresher {
             while (contacts.hasNext()) {
                 ContactHeader contact = (ContactHeader) contacts.next();
                 if (contact.getAddress().getHost()
-                        .equals(networkInterface.getNetworkAccess().getIpAddress())) {
+                        .equals(mNetworkInterface.getNetworkAccess().getIpAddress())) {
                     int expires = contact.getExpires();
                     if (expires != -1) {
-                        expirePeriod = expires;
+                        mExpirePeriod = expires;
                     }
                     return;
                 }
@@ -632,7 +666,7 @@ public class RegistrationManager extends PeriodicRefresher {
         if (expiresHeader != null) {
             int expires = expiresHeader.getExpires();
             if (expires != -1) {
-                expirePeriod = expires;
+                mExpirePeriod = expires;
             }
         }
     }
