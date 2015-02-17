@@ -89,6 +89,7 @@ import com.gsma.services.rcs.ipcall.IPCall;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingService;
 import com.gsma.services.rcs.sharing.image.IImageSharingService;
+import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.video.IVideoSharingService;
 import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.upload.IFileUploadService;
@@ -902,7 +903,7 @@ public class RcsCoreService extends Service implements CoreListener {
 
     @Override
     public void handleImageSharingInvitationRejected(ContactId contact, MmContent content,
-            int reasonCode) {
+            ImageSharing.ReasonCode reasonCode) {
         ishApi.addAndBroadcastImageSharingInvitationRejected(contact, content, reasonCode);
     }
 

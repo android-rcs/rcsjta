@@ -21,6 +21,8 @@ import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.sharing.image.IImageSharingListener;
+import com.gsma.services.rcs.sharing.image.ImageSharing.ReasonCode;
+import com.gsma.services.rcs.sharing.image.ImageSharing.State;
 import com.gsma.services.rcs.sharing.image.ImageSharingIntent;
 
 import android.content.Intent;
@@ -48,12 +50,15 @@ public class ImageSharingEventBroadcaster implements IImageSharingEventBroadcast
         mImageSharingListeners.unregister(listener);
     }
 
-    public void broadcastStateChanged(ContactId contact, String sharingId, int state, int reasonCode) {
+    public void broadcastStateChanged(ContactId contact, String sharingId, State state,
+            ReasonCode reasonCode) {
+        int rcsState = state.toInt();
+        int rcsReasonCode = reasonCode.toInt();
         final int N = mImageSharingListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
                 mImageSharingListeners.getBroadcastItem(i).onStateChanged(contact, sharingId,
-                        state, reasonCode);
+                        rcsState, rcsReasonCode);
             } catch (Exception e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);

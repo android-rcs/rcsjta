@@ -128,7 +128,8 @@ public class RichcallService extends ImsService {
         mContactsManager = contactsManager;
     }
 
-    private void handleImageSharingInvitationRejected(SipRequest invite, int reasonCode) {
+    private void handleImageSharingInvitationRejected(SipRequest invite,
+            ImageSharing.ReasonCode reasonCode) {
         ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
         MmContent content = ContentManager.createMmContentFromSdp(invite);
         getImsModule().getCore().getListener()

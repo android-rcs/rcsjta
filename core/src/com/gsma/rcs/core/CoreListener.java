@@ -48,6 +48,7 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.ipcall.IPCall;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
+import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharing;
 
 import android.content.Intent;
@@ -332,7 +333,7 @@ public interface CoreListener {
      * @param reasonCode Rejected reason code
      */
     public void handleImageSharingInvitationRejected(ContactId contact, MmContent content,
-            int reasonCode);
+            ImageSharing.ReasonCode reasonCode);
 
     /**
      * Handle the case of rejected video sharing

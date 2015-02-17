@@ -25,9 +25,9 @@ package com.gsma.services.rcs.sharing.image;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.sharing.image.IImageSharing;
 
 import android.net.Uri;
+import android.util.SparseArray;
 
 /**
  * Image sharing
@@ -39,130 +39,181 @@ public class ImageSharing {
     /**
      * Image sharing state
      */
-    public static class State {
+    public enum State {
+
         /**
          * Sharing invitation received
          */
-        public final static int INVITED = 0;
+        INVITED(0),
 
         /**
          * Sharing invitation sent
          */
-        public final static int INITIATING = 1;
+        INITIATING(1),
 
         /**
          * Sharing is started
          */
-        public final static int STARTED = 2;
+        STARTED(2),
 
         /**
          * Sharing has been aborted
          */
-        public final static int ABORTED = 3;
+        ABORTED(3),
 
         /**
          * Sharing has failed
          */
-        public final static int FAILED = 4;
+        FAILED(4),
 
         /**
          * Image has been transferred with success
          */
-        public final static int TRANSFERRED = 5;
+        TRANSFERRED(5),
 
         /**
          * Sharing has been rejected
          */
-        public final static int REJECTED = 6;
+        REJECTED(6),
 
         /**
          * Ringing
          */
-        public final static int RINGING = 7;
+        RINGING(7),
 
         /**
          * Sharing has been accepted and is in the process of becoming started
          */
-        public final static int ACCEPTING = 8;
+        ACCEPTING(8);
 
-        private State() {
+        private final int mValue;
+
+        private static SparseArray<State> mValueToEnum = new SparseArray<State>();
+        static {
+            for (State entry : State.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
+
+        private State(int value) {
+            mValue = value;
+        }
+
+        public final int toInt() {
+            return mValue;
+        }
+
+        public final static State valueOf(int value) {
+            State entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(State.class.getName()).append(".").append(value).append("!").toString());
         }
     }
 
     /**
      * Reason code associated with the image share state.
      */
-    public static class ReasonCode {
+    public enum ReasonCode {
 
         /**
          * No specific reason code specified.
          */
-        public static final int UNSPECIFIED = 0;
+        UNSPECIFIED(0),
 
         /**
          * Image share is aborted by local user.
          */
-        public static final int ABORTED_BY_USER = 1;
+        ABORTED_BY_USER(1),
 
         /**
          * Image share is aborted by remote user.
          */
-        public static final int ABORTED_BY_REMOTE = 2;
+        ABORTED_BY_REMOTE(2),
 
         /**
          * Image share is aborted by system.
          */
-        public static final int ABORTED_BY_SYSTEM = 3;
+        ABORTED_BY_SYSTEM(3),
 
         /**
          * Image share is rejected because already taken by the secondary device.
          */
-        public static final int REJECTED_BY_SECONDARY_DEVICE = 4;
+        REJECTED_BY_SECONDARY_DEVICE(4),
 
         /**
-         * Incoming image was rejected due to time out.
+         * Incoming image was rejected by inactivity.
          */
-        public static final int REJECTED_TIME_OUT = 5;
+        REJECTED_BY_INACTIVITY(5),
 
         /**
          * Incoming image was rejected as is cannot be received due to lack of local storage space.
          */
-        public static final int REJECTED_LOW_SPACE = 6;
+        REJECTED_LOW_SPACE(6),
 
         /**
          * Incoming image was rejected as it was too big to be received.
          */
-        public static final int REJECTED_MAX_SIZE = 7;
+        REJECTED_MAX_SIZE(7),
 
         /**
          * Incoming image was rejected because max number of sharing sessions is achieved.
          */
-        public static final int REJECTED_MAX_SHARING_SESSIONS = 8;
+        REJECTED_MAX_SHARING_SESSIONS(8),
 
         /**
          * Incoming image was rejected by local user.
          */
-        public static final int REJECTED_BY_USER = 9;
+        REJECTED_BY_USER(9),
 
         /**
          * Incoming image was rejected by remote.
          */
-        public static final int REJECTED_BY_REMOTE = 10;
+        REJECTED_BY_REMOTE(10),
 
         /**
          * Image share initiation failed;
          */
-        public static final int FAILED_INITIATION = 11;
+        FAILED_INITIATION(11),
 
         /**
          * Sharing of the image share has failed.
          */
-        public static final int FAILED_SHARING = 12;
+        FAILED_SHARING(12),
 
         /**
          * Saving of the image share has failed.
          */
-        public static final int FAILED_SAVING = 13;
+        FAILED_SAVING(13);
+
+        private final int mValue;
+
+        private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<ReasonCode>();
+        static {
+            for (ReasonCode entry : ReasonCode.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
+
+        private ReasonCode(int value) {
+            mValue = value;
+        }
+
+        public final int toInt() {
+            return mValue;
+        }
+
+        public final static ReasonCode valueOf(int value) {
+            ReasonCode entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(ReasonCode.class.getName()).append(".").append(value).append("!")
+                    .toString());
+        }
     }
 
     /**
@@ -309,9 +360,9 @@ public class ImageSharing {
      * @see ImageSharing.State
      * @throws RcsServiceException
      */
-    public int getState() throws RcsServiceException {
+    public State getState() throws RcsServiceException {
         try {
-            return mSharingInf.getState();
+            return State.valueOf(mSharingInf.getState());
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }
@@ -324,9 +375,9 @@ public class ImageSharing {
      * @see ImageSharing.ReasonCode
      * @throws RcsServiceException
      */
-    public int getReasonCode() throws RcsServiceException {
+    public ReasonCode getReasonCode() throws RcsServiceException {
         try {
-            return mSharingInf.getReasonCode();
+            return ReasonCode.valueOf(mSharingInf.getReasonCode());
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }

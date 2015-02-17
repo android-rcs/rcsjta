@@ -22,9 +22,6 @@
 
 package com.gsma.rcs.service.api;
 
-import javax2.sip.message.Response;
-import android.net.Uri;
-
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
@@ -42,6 +39,10 @@ import com.gsma.services.rcs.sharing.image.IImageSharing;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.image.ImageSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.image.ImageSharing.State;
+
+import android.net.Uri;
+
+import javax2.sip.message.Response;
 
 /**
  * Image sharing implementation
@@ -90,6 +91,9 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
         mImageSharingService = imageSharingService;
     }
 
+    /*
+     * TODO: Fix reasoncode mapping in the switch.
+     */
     private ImageSharingStateAndReasonCode toStateAndReasonCode(ContentSharingError error) {
         int contentSharingError = error.getErrorCode();
         switch (contentSharingError) {
@@ -122,7 +126,10 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
         }
     }
 
-    private int imsServiceSessionErrorToReasonCode(int imsServiceSessionErrorCode) {
+    /*
+     * TODO: Fix reasoncode mapping in the switch.
+     */
+    private ReasonCode imsServiceSessionErrorToReasonCode(int imsServiceSessionErrorCode) {
         switch (imsServiceSessionErrorCode) {
             case ImsServiceSession.TERMINATION_BY_SYSTEM:
             case ImsServiceSession.TERMINATION_BY_TIMEOUT:
@@ -136,7 +143,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
         }
     }
 
-    private void handleSessionRejected(int reasonCode, ContactId contact) {
+    private void handleSessionRejected(ReasonCode reasonCode, ContactId contact) {
         if (logger.isActivated()) {
             logger.info("Session rejected; reasonCode=" + reasonCode + ".");
         }
@@ -236,14 +243,14 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
         }
         SipDialogPath dialogPath = session.getDialogPath();
         if (dialogPath != null && dialogPath.isSessionEstablished()) {
-            return ImageSharing.State.STARTED;
+            return ImageSharing.State.STARTED.toInt();
         } else if (session.isInitiatedByRemote()) {
             if (session.isSessionAccepted()) {
-                return ImageSharing.State.ACCEPTING;
+                return ImageSharing.State.ACCEPTING.toInt();
             }
-            return ImageSharing.State.INVITED;
+            return ImageSharing.State.INVITED.toInt();
         }
-        return ImageSharing.State.INITIATING;
+        return ImageSharing.State.INITIATING.toInt();
     }
 
     /**
@@ -256,7 +263,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
         if (session == null) {
             return mPersistentStorage.getReasonCode();
         }
-        return ReasonCode.UNSPECIFIED;
+        return ReasonCode.UNSPECIFIED.toInt();
     }
 
     /**
@@ -376,11 +383,11 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      * 
      * @param reason Termination reason
      */
-    public void handleSessionAborted(ContactId contact, int reason) {
+    public void handleSessionAborted(ContactId contact, int imsServiceSessionErrorCode) {
         if (logger.isActivated()) {
-            logger.info("Session aborted (reason " + reason + ")");
+            logger.info("Session aborted (imsServiceSessionErrorCode " + imsServiceSessionErrorCode + ")");
         }
-        int reasonCode = imsServiceSessionErrorToReasonCode(reason);
+        ReasonCode reasonCode = imsServiceSessionErrorToReasonCode(imsServiceSessionErrorCode);
         synchronized (lock) {
             mImageSharingService.removeImageSharing(mSharingId);
 
@@ -405,7 +412,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
              * TODO : Fix sending of SIP BYE by sender once transfer is completed and media session
              * is closed. Then this check of state can be removed.
              */
-            if (State.TRANSFERRED != getState()) {
+            if (State.TRANSFERRED != State.valueOf(mPersistentStorage.getState())) {
                 mPersistentStorage.setStateAndReasonCode(ImageSharing.State.ABORTED,
                         ReasonCode.ABORTED_BY_REMOTE);
                 mBroadcaster.broadcastStateChanged(contact, mSharingId, ImageSharing.State.ABORTED,
@@ -424,8 +431,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
             logger.info("Sharing error " + error.getErrorCode());
         }
         ImageSharingStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
-        int state = stateAndReasonCode.getState();
-        int reasonCode = stateAndReasonCode.getReasonCode();
+        State state = stateAndReasonCode.getState();
+        ReasonCode reasonCode = stateAndReasonCode.getReasonCode();
         synchronized (lock) {
             mImageSharingService.removeImageSharing(mSharingId);
 
@@ -488,9 +495,12 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
         handleSessionRejected(ReasonCode.REJECTED_BY_USER, contact);
     }
 
+    /*
+     * TODO: Fix reasoncode mapping between rejected_by_timeout and rejected_by_inactivity.
+     */
     @Override
     public void handleSessionRejectedByTimeout(ContactId contact) {
-        handleSessionRejected(ReasonCode.REJECTED_TIME_OUT, contact);
+        handleSessionRejected(ReasonCode.REJECTED_BY_INACTIVITY, contact);
     }
 
     @Override

@@ -306,10 +306,10 @@ public class RichCallHistory {
      * @return uri
      */
     public Uri addImageSharing(String sharingId, ContactId contact, Direction direction,
-            MmContent content, int status, int reasonCode) {
+            MmContent content, ImageSharing.State state, ImageSharing.ReasonCode reasonCode) {
         if (logger.isActivated()) {
             logger.debug("Add new image sharing for contact " + contact + ": sharing =" + sharingId
-                    + ", status=" + status);
+                    + ", state=" + state);
         }
 
         ContentValues values = new ContentValues();
@@ -321,8 +321,8 @@ public class RichCallHistory {
         values.put(ImageSharingData.KEY_MIME_TYPE, content.getEncoding());
         values.put(ImageSharingData.KEY_TRANSFERRED, 0);
         values.put(ImageSharingData.KEY_FILESIZE, content.getSize());
-        values.put(ImageSharingData.KEY_STATE, status);
-        values.put(ImageSharingData.KEY_REASON_CODE, reasonCode);
+        values.put(ImageSharingData.KEY_STATE, state.toInt());
+        values.put(ImageSharingData.KEY_REASON_CODE, reasonCode.toInt());
         values.put(ImageSharingData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
         return mLocalContentResolver.insert(ImageSharingLog.CONTENT_URI, values);
     }
@@ -334,13 +334,14 @@ public class RichCallHistory {
      * @param state New state
      * @param reasonCode Reason Code
      */
-    public void setImageSharingStateAndReasonCode(String sharingId, int state, int reasonCode) {
+    public void setImageSharingStateAndReasonCode(String sharingId, ImageSharing.State state,
+            ImageSharing.ReasonCode reasonCode) {
         if (logger.isActivated()) {
             logger.debug("Update status of image sharing " + sharingId + " to " + state);
         }
         ContentValues values = new ContentValues();
-        values.put(ImageSharingData.KEY_STATE, state);
-        values.put(ImageSharingData.KEY_REASON_CODE, reasonCode);
+        values.put(ImageSharingData.KEY_STATE, state.toInt());
+        values.put(ImageSharingData.KEY_REASON_CODE, reasonCode.toInt());
         if (state == ImageSharing.State.TRANSFERRED) {
             // Update the size of bytes if fully transferred
             long total = getImageSharingTotalSize(sharingId);

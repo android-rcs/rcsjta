@@ -23,14 +23,15 @@
 package com.gsma.services.rcs.sharing.image;
 
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.sharing.image.IImageSharingListener;
+import com.gsma.services.rcs.sharing.image.ImageSharing.ReasonCode;
+import com.gsma.services.rcs.sharing.image.ImageSharing.State;
 
 /**
  * Image sharing event listener
  * 
  * @author Jean-Marc AUFFRET
  */
-public abstract class ImageSharingListener extends IImageSharingListener.Stub {
+public abstract class ImageSharingListener {
     /**
      * Callback called when the image sharing state/reasonCode has been changed.
      * 
@@ -39,8 +40,8 @@ public abstract class ImageSharingListener extends IImageSharingListener.Stub {
      * @param state State of image sharing
      * @param reasonCode Reason code of the image sharing state
      */
-    public abstract void onStateChanged(ContactId contact, String sharingId, int state,
-            int reasonCode);
+    public abstract void onStateChanged(ContactId contact, String sharingId, State state,
+            ReasonCode reasonCode);
 
     /**
      * Callback called during the sharing progress.

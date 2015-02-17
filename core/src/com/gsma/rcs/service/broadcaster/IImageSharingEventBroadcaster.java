@@ -17,14 +17,16 @@
 package com.gsma.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.sharing.image.ImageSharing.ReasonCode;
+import com.gsma.services.rcs.sharing.image.ImageSharing.State;
 
 /**
  * Interface to perform broadcast events on ImageSharingListeners
  */
 public interface IImageSharingEventBroadcaster {
 
-    public void broadcastStateChanged(ContactId contact, String sharingId, int status,
-            int reasonCode);
+    public void broadcastStateChanged(ContactId contact, String sharingId, State state,
+            ReasonCode reasonCode);
 
     public void broadcastProgressUpdate(ContactId contact, String sharingId, long currentSize,
             long totalSize);

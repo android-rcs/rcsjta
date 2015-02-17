@@ -22,10 +22,12 @@
 
 package com.gsma.services.rcs.sharing.image;
 
-import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.contacts.ContactId;
 
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -37,14 +39,13 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.os.IInterface;
 
-import com.gsma.services.rcs.RcsService;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceListener;
-import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.sharing.image.IImageSharing;
-import com.gsma.services.rcs.sharing.image.IImageSharingService;
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  * This class offers the main entry point to transfer image during a CS call. Several applications
@@ -67,6 +68,8 @@ public class ImageSharingService extends RcsService {
      * API
      */
     private IImageSharingService mApi;
+
+    private final Map<ImageSharingListener, WeakReference<IImageSharingListener>> mImageSharingListeners = new WeakHashMap<ImageSharingListener, WeakReference<IImageSharingListener>>();
 
     private static final String ERROR_CNX = "ImageSharing service not connected";
 
@@ -280,7 +283,10 @@ public class ImageSharingService extends RcsService {
     public void addEventListener(ImageSharingListener listener) throws RcsServiceException {
         if (mApi != null) {
             try {
-                mApi.addEventListener2(listener);
+                IImageSharingListener rcsListener = new ImageSharingListenerImpl(listener);
+                mImageSharingListeners.put(listener, new WeakReference<IImageSharingListener>(
+                        rcsListener));
+                mApi.addEventListener2(rcsListener);
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }
@@ -298,7 +304,15 @@ public class ImageSharingService extends RcsService {
     public void removeEventListener(ImageSharingListener listener) throws RcsServiceException {
         if (mApi != null) {
             try {
-                mApi.removeEventListener2(listener);
+                WeakReference<IImageSharingListener> weakRef = mImageSharingListeners
+                        .remove(listener);
+                if (weakRef == null) {
+                    return;
+                }
+                IImageSharingListener rcsListener = weakRef.get();
+                if (rcsListener != null) {
+                    mApi.removeEventListener2(rcsListener);
+                }
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }

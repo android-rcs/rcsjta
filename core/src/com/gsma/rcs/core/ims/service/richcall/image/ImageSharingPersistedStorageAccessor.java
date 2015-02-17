@@ -21,6 +21,8 @@ import com.gsma.rcs.provider.sharing.RichCallHistory;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.sharing.image.ImageSharing.ReasonCode;
+import com.gsma.services.rcs.sharing.image.ImageSharing.State;
 import com.gsma.services.rcs.sharing.image.ImageSharingLog;
 
 import android.database.Cursor;
@@ -177,7 +179,7 @@ public class ImageSharingPersistedStorageAccessor {
         return mTimestamp;
     }
 
-    public void setStateAndReasonCode(int state, int reasonCode) {
+    public void setStateAndReasonCode(State state, ReasonCode reasonCode) {
         mRichCallLog.setImageSharingStateAndReasonCode(mSharingId, state, reasonCode);
     }
 
@@ -186,8 +188,8 @@ public class ImageSharingPersistedStorageAccessor {
     }
 
     public Uri addImageSharing(ContactId contact, Direction direction, MmContent content,
-            int status, int reasonCode) {
-        return mRichCallLog.addImageSharing(mSharingId, contact, direction, content, status,
+            State state, ReasonCode reasonCode) {
+        return mRichCallLog.addImageSharing(mSharingId, contact, direction, content, state,
                 reasonCode);
     }
 }

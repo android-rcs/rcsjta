@@ -22,14 +22,6 @@
 
 package com.gsma.rcs.service.api;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import android.net.Uri;
-import android.os.IBinder;
-
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.service.SessionIdGenerator;
@@ -47,8 +39,8 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
-import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.sharing.image.IImageSharing;
 import com.gsma.services.rcs.sharing.image.IImageSharingListener;
@@ -56,6 +48,14 @@ import com.gsma.services.rcs.sharing.image.IImageSharingService;
 import com.gsma.services.rcs.sharing.image.IImageSharingServiceConfiguration;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.image.ImageSharing.ReasonCode;
+
+import android.net.Uri;
+import android.os.IBinder;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Image sharing service implementation
@@ -348,7 +348,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * @param reasonCode Reason code
      */
     public void addAndBroadcastImageSharingInvitationRejected(ContactId contact, MmContent content,
-            int reasonCode) {
+            ReasonCode reasonCode) {
         String sessionId = SessionIdGenerator.getNewId();
         mRichCallLog.addImageSharing(sessionId, contact, Direction.INCOMING, content,
                 ImageSharing.State.REJECTED, reasonCode);
