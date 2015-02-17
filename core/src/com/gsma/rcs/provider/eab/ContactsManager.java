@@ -1400,7 +1400,7 @@ public final class ContactsManager {
                                     Long.toString(rawContactId),
                                     MIMETYPE_REGISTRATION_STATE, rcsNumber.toString()
                             })
-                    .withValue(Data.DATA2, newRegistrationState).build());
+                    .withValue(Data.DATA2, newRegistrationState.toInt()).build());
         }
 
         if (!StringUtils.equals(newFreeText, oldFreeText) || registrationChanged) {
@@ -1485,7 +1485,7 @@ public final class ContactsManager {
                                     Long.toString(rawContactId),
                                     MIMETYPE_REGISTRATION_STATE, MYSELF
                             })
-                    .withValue(Data.DATA2, newRegistrationState).build());
+                    .withValue(Data.DATA2, newRegistrationState.toInt()).build());
         }
 
         if (!StringUtils.equals(newFreeText, oldFreeText) || registrationChanged) {
