@@ -24,6 +24,8 @@ package com.gsma.services.rcs.chat;
 
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
+import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.contacts.ContactId;
 
 /**
@@ -182,9 +184,9 @@ public class ChatMessage {
      * @return Status
      * @throws RcsServiceException
      */
-    public int getStatus() throws RcsServiceException {
+    public Status getStatus() throws RcsServiceException {
         try {
-            return mChatMessageInf.getStatus();
+            return Status.valueOf(mChatMessageInf.getStatus());
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }
@@ -196,9 +198,9 @@ public class ChatMessage {
      * @return ReasonCode
      * @throws RcsServiceException
      */
-    public int getReasonCode() throws RcsServiceException {
+    public ReasonCode getReasonCode() throws RcsServiceException {
         try {
-            return mChatMessageInf.getReasonCode();
+            return ReasonCode.valueOf(mChatMessageInf.getReasonCode());
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }

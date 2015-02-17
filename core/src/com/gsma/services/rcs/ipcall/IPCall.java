@@ -249,9 +249,9 @@ public class IPCall {
      * @see IPCall.State
      * @throws RcsServiceException
      */
-    public int getState() throws RcsServiceException {
+    public State getState() throws RcsServiceException {
         try {
-            return callInf.getState();
+            return State.valueOf(callInf.getState());
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }
@@ -264,9 +264,9 @@ public class IPCall {
      * @see IPCall.ReasonCode
      * @throws RcsServiceException
      */
-    public int getReasonCode() throws RcsServiceException {
+    public ReasonCode getReasonCode() throws RcsServiceException {
         try {
-            return callInf.getReasonCode();
+            return ReasonCode.valueOf(callInf.getReasonCode());
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }

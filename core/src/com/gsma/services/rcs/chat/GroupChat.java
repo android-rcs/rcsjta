@@ -239,9 +239,9 @@ public class GroupChat {
      * @see State
      * @throws RcsServiceException
      */
-    public int getState() throws RcsServiceException {
+    public State getState() throws RcsServiceException {
         try {
-            return mGroupChatInf.getState();
+            return State.valueOf(mGroupChatInf.getState());
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }
@@ -254,9 +254,9 @@ public class GroupChat {
      * @see ReasonCode
      * @throws RcsServiceException
      */
-    public int getReasonCode() throws RcsServiceException {
+    public ReasonCode getReasonCode() throws RcsServiceException {
         try {
-            return mGroupChatInf.getReasonCode();
+            return ReasonCode.valueOf(mGroupChatInf.getReasonCode());
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }
