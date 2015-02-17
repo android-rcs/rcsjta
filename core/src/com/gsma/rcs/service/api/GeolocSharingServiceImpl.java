@@ -52,6 +52,7 @@ import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingListener;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingService;
@@ -255,7 +256,9 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
             final GeolocTransferSession session = mRichcallService.initiateGeolocSharingSession(
                     contact, content, geoloc);
             String sharingId = session.getSessionID();
-            mBroadcaster.broadcastStateChanged(contact, sharingId, GeolocSharing.State.INITIATING,
+            mRichcallLog.addOutgoingGeolocSharing(contact, sharingId, geoloc, State.INITIATING,
+                    ReasonCode.UNSPECIFIED);
+            mBroadcaster.broadcastStateChanged(contact, sharingId, State.INITIATING,
                     ReasonCode.UNSPECIFIED);
 
             GeolocSharingPersistedStorageAccessor persistedStorage = new GeolocSharingPersistedStorageAccessor(

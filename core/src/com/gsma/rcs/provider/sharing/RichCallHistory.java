@@ -424,15 +424,15 @@ public class RichCallHistory {
      * @param reasonCode Reason code of the state
      */
     public Uri addOutgoingGeolocSharing(ContactId contact, String sharingId, Geoloc geoloc,
-            int state, int reasonCode) {
+            State state, ReasonCode reasonCode) {
         ContentValues values = new ContentValues();
         values.put(GeolocSharingData.KEY_SHARING_ID, sharingId);
         values.put(GeolocSharingData.KEY_CONTACT, contact.toString());
         values.put(GeolocSharingData.KEY_MIME_TYPE, MimeType.GEOLOC_MESSAGE);
         values.put(GeolocSharingData.KEY_CONTENT, geoloc.toString());
         values.put(GeolocSharingData.KEY_DIRECTION, Direction.OUTGOING.toInt());
-        values.put(GeolocSharingData.KEY_STATE, state);
-        values.put(GeolocSharingData.KEY_REASON_CODE, reasonCode);
+        values.put(GeolocSharingData.KEY_STATE, state.toInt());
+        values.put(GeolocSharingData.KEY_REASON_CODE, reasonCode.toInt());
         values.put(GeolocSharingData.KEY_TIMESTAMP, System.currentTimeMillis());
         return mLocalContentResolver.insert(GeolocSharingData.CONTENT_URI, values);
     }
