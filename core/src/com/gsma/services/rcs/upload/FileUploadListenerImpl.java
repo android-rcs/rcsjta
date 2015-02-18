@@ -41,8 +41,8 @@ public class FileUploadListenerImpl extends IFileUploadListener.Stub {
         } catch (IllegalArgumentException e) {
             /*
              * Detected unknown state or reasonCode not part of standard coming from stack which a
-             * client application can not handle since it is built only to handle the
-             * possible enum values documented and specified in the api standard.
+             * client application can not handle since it is built only to handle the possible enum
+             * values documented and specified in the api standard.
              */
             Log.e(LOG_TAG, e.getMessage());
             return;

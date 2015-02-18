@@ -172,7 +172,7 @@ public class GroupChatLog implements IGroupChatLog {
         ContentValues values = new ContentValues();
         values.put(ChatData.KEY_USER_ABORTION, UserAbortion.SERVER_NOTIFIED.toInt());
         String[] selectionArgs = {
-            chatId
+                chatId
         };
         mLocalContentResolver.update(ChatData.CONTENT_URI, values, SELECT_CHAT_ID_STATUS_REJECTED,
                 selectionArgs);
@@ -191,7 +191,7 @@ public class GroupChatLog implements IGroupChatLog {
         values.put(ChatData.KEY_STATE, state.toInt());
         values.put(ChatData.KEY_REASON_CODE, reasonCode.toInt());
         String selectionArgs[] = new String[] {
-            chatId
+                chatId
         };
         mLocalContentResolver.update(ChatData.CONTENT_URI, values, SELECT_CHAT_ID, selectionArgs);
     }
@@ -250,7 +250,7 @@ public class GroupChatLog implements IGroupChatLog {
         };
         // @formatter:on
         String[] selArgs = new String[] {
-            chatId
+                chatId
         };
         try {
             cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection, SELECT_CHAT_ID,
@@ -282,10 +282,10 @@ public class GroupChatLog implements IGroupChatLog {
         }
         Set<ParticipantInfo> result = new HashSet<ParticipantInfo>();
         String[] projection = new String[] {
-            ChatData.KEY_PARTICIPANTS
+                ChatData.KEY_PARTICIPANTS
         };
         String[] selArgs = new String[] {
-            chatId
+                chatId
         };
         Cursor cursor = null;
         try {
@@ -328,10 +328,10 @@ public class GroupChatLog implements IGroupChatLog {
     @Override
     public boolean isGroupChatNextInviteRejected(String chatId) {
         String[] projection = {
-            ChatData.KEY_CHAT_ID
+                ChatData.KEY_CHAT_ID
         };
         String[] selectionArgs = {
-            chatId
+                chatId
         };
         Cursor cursor = null;
         try {
@@ -358,10 +358,10 @@ public class GroupChatLog implements IGroupChatLog {
             logger.debug("Get group chat info for ".concat(chatId));
         }
         String[] projection = new String[] {
-            columnName
+                columnName
         };
         String[] selArgs = new String[] {
-            chatId
+                chatId
         };
         Cursor cursor = null;
         try {
@@ -468,7 +468,7 @@ public class GroupChatLog implements IGroupChatLog {
      */
     public Set<String> getChatIdsOfActiveGroupChatsForAutoRejoin() {
         String[] projection = new String[] {
-            ChatData.KEY_CHAT_ID
+                ChatData.KEY_CHAT_ID
         };
         Cursor cursor = null;
         try {
@@ -498,7 +498,7 @@ public class GroupChatLog implements IGroupChatLog {
             logger.debug("Get group chat info for ".concat(chatId));
         }
         String[] selArgs = new String[] {
-            chatId
+                chatId
         };
         Cursor cursor = null;
         try {

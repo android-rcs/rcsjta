@@ -68,7 +68,7 @@ public class IPCallHistory {
      */
     private Cursor getIPCallData(String columnName, String callId) {
         String[] projection = new String[] {
-            columnName
+                columnName
         };
         Cursor cursor = null;
         try {

@@ -15,7 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.GroupDeliveryInfoLog;
+import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.RcsDisplayName;
@@ -129,10 +129,10 @@ public class GroupDeliveryInfoCursorAdapter extends CursorAdapter {
          */
         ViewHolder(View base, Cursor cursor) {
             columnContact = cursor.getColumnIndex(BaseColumns._ID);
-            columnDeliver = cursor.getColumnIndex(GroupDeliveryInfoLog.TIMESTAMP_DELIVERED);
-            columnDisplay = cursor.getColumnIndex(GroupDeliveryInfoLog.TIMESTAMP_DISPLAYED);
-            columnStatus = cursor.getColumnIndex(GroupDeliveryInfoLog.STATUS);
-            columnReason = cursor.getColumnIndex(GroupDeliveryInfoLog.REASON_CODE);
+            columnDeliver = cursor.getColumnIndex(GroupDeliveryInfo.TIMESTAMP_DELIVERED);
+            columnDisplay = cursor.getColumnIndex(GroupDeliveryInfo.TIMESTAMP_DISPLAYED);
+            columnStatus = cursor.getColumnIndex(GroupDeliveryInfo.STATUS);
+            columnReason = cursor.getColumnIndex(GroupDeliveryInfo.REASON_CODE);
             statusText = (TextView) base.findViewById(R.id.status);
             contactText = (TextView) base.findViewById(R.id.contact);
             deliverText = (TextView) base.findViewById(R.id.deliver);

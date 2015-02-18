@@ -488,7 +488,7 @@ public class FileTransferLog implements IFileTransferLog {
     private Cursor getFileTransferData(String columnName, String fileTransferId)
             throws SQLException {
         String[] projection = {
-            columnName
+                columnName
         };
         Cursor cursor = null;
         try {
@@ -589,10 +589,10 @@ public class FileTransferLog implements IFileTransferLog {
      */
     public boolean isGroupFileTransfer(String fileTransferId) {
         String[] projection = new String[] {
-            FileTransferData.KEY_FT_ID
+                FileTransferData.KEY_FT_ID
         };
         String[] selArgs = new String[] {
-            fileTransferId
+                fileTransferId
         };
         Cursor cursor = null;
         try {

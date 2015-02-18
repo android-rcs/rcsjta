@@ -130,34 +130,23 @@ public class MessagingSessionView extends Activity {
     private MultimediaMessagingSessionListener serviceListener = new MultimediaMessagingSessionListener() {
 
         @Override
-        public void onStateChanged(ContactId contact, String sessionId, final int state,
-                int reasonCode) {
+        public void onStateChanged(ContactId contact, String sessionId,
+                final MultimediaSession.State state,
+                MultimediaSession.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "onStateChanged contact=" + contact + " sessionId=" + sessionId
                         + " state=" + state + " reason=" + reasonCode);
-            }
-            if (state > RiApplication.MMS_STATES.length) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "onStateChanged unhandled state=" + state);
-                }
-                return;
-            }
-            if (reasonCode > RiApplication.MMS_REASON_CODES.length) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "onStateChanged unhandled reason=" + reasonCode);
-                }
-                return;
             }
             // Discard event if not for current sessionId
             if (MessagingSessionView.this.sessionId == null
                     || !MessagingSessionView.this.sessionId.equals(sessionId)) {
                 return;
             }
-            final String _reasonCode = RiApplication.MMS_REASON_CODES[reasonCode];
+            final String _reasonCode = RiApplication.MMS_REASON_CODES[reasonCode.toInt()];
             handler.post(new Runnable() {
                 public void run() {
                     switch (state) {
-                        case MultimediaSession.State.STARTED:
+                        case STARTED:
                             // Session is established: hide progress dialog
                             hideProgressDialog();
                             // Activate button
@@ -165,7 +154,7 @@ public class MessagingSessionView extends Activity {
                             sendBtn.setEnabled(true);
                             break;
 
-                        case MultimediaSession.State.ABORTED:
+                        case ABORTED:
                             // Session is aborted: hide progress dialog then
                             // exit
                             hideProgressDialog();
@@ -174,7 +163,7 @@ public class MessagingSessionView extends Activity {
                                     mExitOnce);
                             break;
 
-                        case MultimediaSession.State.REJECTED:
+                        case REJECTED:
                             // Session is rejected: hide progress dialog then
                             // exit
                             hideProgressDialog();
@@ -183,7 +172,7 @@ public class MessagingSessionView extends Activity {
                                     mExitOnce);
                             break;
 
-                        case MultimediaSession.State.FAILED:
+                        case FAILED:
                             // Session is failed: hide progress dialog then exit
                             hideProgressDialog();
                             Utils.showMessageAndExit(MessagingSessionView.this,
@@ -196,7 +185,7 @@ public class MessagingSessionView extends Activity {
                                 Log.d(LOGTAG,
                                         "onStateChanged "
                                                 + getString(R.string.label_mms_state_changed,
-                                                        RiApplication.MMS_STATES[state],
+                                                        RiApplication.MMS_STATES[state.toInt()],
                                                         _reasonCode));
                             }
                     }

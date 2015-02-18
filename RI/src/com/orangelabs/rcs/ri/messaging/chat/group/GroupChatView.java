@@ -48,6 +48,7 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Toast;
 
 import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
@@ -186,7 +187,8 @@ public class GroupChatView extends ChatView {
 
         @Override
         public void onMessageGroupDeliveryInfoChanged(String chatId, ContactId contact,
-                String mimeType, String msgId, int status, int reasonCode) {
+                String mimeType, String msgId, GroupDeliveryInfo.Status status,
+                GroupDeliveryInfo.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG,
                         new StringBuilder("onMessageGroupDeliveryInfoChanged chatId=")

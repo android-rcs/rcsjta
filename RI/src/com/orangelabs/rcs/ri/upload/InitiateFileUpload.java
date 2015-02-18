@@ -40,7 +40,6 @@ import com.gsma.services.rcs.upload.FileUploadListener;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.FileUtils;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -274,7 +273,7 @@ public class InitiateFileUpload extends Activity {
          * @param state State of upload
          */
         @Override
-        public void onStateChanged(String uploadId, final int state) {
+        public void onStateChanged(String uploadId, final FileUpload.State state) {
             // Discard event if not for current uploadId
             if (InitiateFileUpload.this.uploadId == null
                     || !InitiateFileUpload.this.uploadId.equals(uploadId)) {

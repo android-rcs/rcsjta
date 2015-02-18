@@ -31,7 +31,7 @@ import android.support.v4.content.Loader;
 import android.util.Log;
 import android.widget.ListView;
 
-import com.gsma.services.rcs.GroupDeliveryInfoLog;
+import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 
@@ -58,19 +58,19 @@ public class GroupDeliveryInfoList extends FragmentActivity implements
     /**
      * Contact is the ID since there is a single contact occurrence per message ID
      */
-    private static final String CONTACT_AS_ID = new StringBuilder(GroupDeliveryInfoLog.CONTACT)
+    private static final String CONTACT_AS_ID = new StringBuilder(GroupDeliveryInfo.CONTACT)
             .append(" AS ").append(BaseColumns._ID).toString();
 
     // @formatter:off
     private static final String[] PROJECTION = new String[] {
-            CONTACT_AS_ID, GroupDeliveryInfoLog.TIMESTAMP_DELIVERED,
-            GroupDeliveryInfoLog.TIMESTAMP_DISPLAYED, GroupDeliveryInfoLog.STATUS,
-            GroupDeliveryInfoLog.REASON_CODE
+            CONTACT_AS_ID, GroupDeliveryInfo.TIMESTAMP_DELIVERED,
+            GroupDeliveryInfo.TIMESTAMP_DISPLAYED, GroupDeliveryInfo.STATUS,
+            GroupDeliveryInfo.REASON_CODE
     };
 
     // @formatter:on
 
-    private static final String WHERE_CLAUSE = new StringBuilder(GroupDeliveryInfoLog.ID).append(
+    private static final String WHERE_CLAUSE = new StringBuilder(GroupDeliveryInfo.ID).append(
             "=?").toString();
 
     /**
@@ -122,7 +122,7 @@ public class GroupDeliveryInfoList extends FragmentActivity implements
             Log.d(LOGTAG, "onCreateLoader " + id);
         }
         // Create a new CursorLoader with the following query parameters.
-        CursorLoader loader = new CursorLoader(this, GroupDeliveryInfoLog.CONTENT_URI, PROJECTION,
+        CursorLoader loader = new CursorLoader(this, GroupDeliveryInfo.CONTENT_URI, PROJECTION,
                 WHERE_CLAUSE, new String[] {
                         mMessageId
                 }, null);

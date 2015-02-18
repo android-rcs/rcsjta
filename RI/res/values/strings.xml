@@ -547,7 +547,7 @@
     </string-array>
     <string-array name="mms_states">
         <item>INVITED</item>
-        <item>INITIATED</item>
+        <item>INITIATING</item>
         <item>STARTED</item>
         <item>ABORTED</item>
         <item>FAILED</item>
@@ -557,7 +557,7 @@
     </string-array>
     <string-array name="mms_reason_codes">
         <item></item>
-        <item>REJECTED_TIMEOUT</item>
+        <item>REJECTED_BY_INACTIVITY</item>
         <item>REJECTED_BY_USER</item>
         <item>REJECTED_BY_REMOTE</item>
         <item>FAILED_SESSION</item>

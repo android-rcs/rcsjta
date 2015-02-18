@@ -69,8 +69,7 @@ public class FileUploadService extends RcsService {
 
     private static final String ERROR_CNX = "FileUpload service not connected";
 
-    private final Map<FileUploadListener, WeakReference<IFileUploadListener>> mFileUploadListeners
-    = new WeakHashMap<FileUploadListener, WeakReference<IFileUploadListener>>();
+    private final Map<FileUploadListener, WeakReference<IFileUploadListener>> mFileUploadListeners = new WeakHashMap<FileUploadListener, WeakReference<IFileUploadListener>>();
 
     /**
      * Constructor

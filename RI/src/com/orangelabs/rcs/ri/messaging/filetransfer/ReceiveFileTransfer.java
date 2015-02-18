@@ -42,6 +42,7 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contacts.ContactId;
@@ -112,10 +113,11 @@ public class ReceiveFileTransfer extends Activity {
 
         @Override
         public void onDeliveryInfoChanged(String chatId, ContactId contact, String transferId,
-                int state, int reasonCode) {
+                GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "onSingleRecipientDeliveryStateChanged contact=" + contact
-                        + " transferId=" + transferId + " state=" + state + " reason=" + reasonCode);
+                        + " transferId=" + transferId + " state=" + status + " reason="
+                        + reasonCode);
             }
         }
 

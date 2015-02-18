@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
@@ -65,10 +66,10 @@ public class SendGroupFile extends SendFile {
 
         @Override
         public void onDeliveryInfoChanged(String chatId, ContactId contact, String transferId,
-                int state, int reasonCode) {
+                GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "onSingleRecipientDeliveryStateChanged chatId=" + chatId
-                        + " contact=" + contact + " trasnferId=" + transferId + " state=" + state
+                        + " contact=" + contact + " trasnferId=" + transferId + " state=" + status
                         + " reason=" + reasonCode);
             }
         }
