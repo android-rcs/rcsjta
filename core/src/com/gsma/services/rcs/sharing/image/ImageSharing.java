@@ -217,29 +217,6 @@ public class ImageSharing {
     }
 
     /**
-     * Image sharing error
-     */
-    public static class Error {
-        /**
-         * Sharing has failed
-         */
-        public final static int SHARING_FAILED = 0;
-
-        /**
-         * Sharing invitation has been declined by remote
-         */
-        public final static int INVITATION_DECLINED = 1;
-
-        /**
-         * Image saving has failed
-         */
-        public final static int SAVING_FAILED = 2;
-
-        private Error() {
-        }
-    }
-
-    /**
      * Image sharing interface
      */
     private final IImageSharing mSharingInf;
