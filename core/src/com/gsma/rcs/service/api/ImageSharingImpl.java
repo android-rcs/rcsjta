@@ -239,7 +239,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     public int getState() {
         ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
         if (session == null) {
-            return mPersistentStorage.getState();
+            return mPersistentStorage.getState().toInt();
         }
         SipDialogPath dialogPath = session.getDialogPath();
         if (dialogPath != null && dialogPath.isSessionEstablished()) {
@@ -261,7 +261,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     public int getReasonCode() {
         ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
         if (session == null) {
-            return mPersistentStorage.getReasonCode();
+            return mPersistentStorage.getReasonCode().toInt();
         }
         return ReasonCode.UNSPECIFIED.toInt();
     }
@@ -413,7 +413,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
              * TODO : Fix sending of SIP BYE by sender once transfer is completed and media session
              * is closed. Then this check of state can be removed.
              */
-            if (State.TRANSFERRED != State.valueOf(mPersistentStorage.getState())) {
+            if (State.TRANSFERRED != mPersistentStorage.getState()) {
                 mPersistentStorage.setStateAndReasonCode(ImageSharing.State.ABORTED,
                         ReasonCode.ABORTED_BY_REMOTE);
                 mBroadcaster.broadcastStateChanged(contact, mSharingId, ImageSharing.State.ABORTED,

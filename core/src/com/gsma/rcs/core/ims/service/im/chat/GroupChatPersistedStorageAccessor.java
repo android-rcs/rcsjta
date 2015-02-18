@@ -94,11 +94,11 @@ public class GroupChatPersistedStorageAccessor {
         return mDirection;
     }
 
-    public int getState() {
+    public State getState() {
         return mMessagingLog.getGroupChatState(mChatId);
     }
 
-    public int getReasonCode() {
+    public ReasonCode getReasonCode() {
         return mMessagingLog.getGroupChatReasonCode(mChatId);
     }
 

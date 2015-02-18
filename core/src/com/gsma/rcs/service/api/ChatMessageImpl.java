@@ -69,11 +69,11 @@ public class ChatMessageImpl extends IChatMessage.Stub {
     }
 
     public int getStatus() {
-        return mPersistentStorage.getStatus();
+        return mPersistentStorage.getStatus().toInt();
     }
 
     public int getReasonCode() {
-        return mPersistentStorage.getReasonCode();
+        return mPersistentStorage.getReasonCode().toInt();
     }
 
     public String getChatId() {

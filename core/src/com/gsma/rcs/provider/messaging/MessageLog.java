@@ -63,7 +63,7 @@ public class MessageLog implements IMessageLog {
     private static final Logger logger = Logger.getLogger(MessageLog.class.getSimpleName());
 
     private static final String[] PROJECTION_MESSAGE_ID = new String[] {
-            MessageData.KEY_MESSAGE_ID
+        MessageData.KEY_MESSAGE_ID
     };
 
     private static final int FIRST_COLUMN_IDX = 0;
@@ -337,7 +337,7 @@ public class MessageLog implements IMessageLog {
 
     private Cursor getMessageData(String columnName, String msgId) throws SQLException {
         String[] projection = new String[] {
-                columnName
+            columnName
         };
         Cursor cursor = null;
         try {
@@ -417,19 +417,19 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
-    public int getMessageStatus(String msgId) {
+    public Status getMessageStatus(String msgId) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Get message status for ").append(msgId).toString());
         }
-        return getDataAsInt(getMessageData(MessageData.KEY_STATUS, msgId));
+        return Status.valueOf(getDataAsInt(getMessageData(MessageData.KEY_STATUS, msgId)));
     }
 
     @Override
-    public int getMessageReasonCode(String msgId) {
+    public ReasonCode getMessageReasonCode(String msgId) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Get message reason code for ").append(msgId).toString());
         }
-        return getDataAsInt(getMessageData(MessageData.KEY_REASON_CODE, msgId));
+        return ReasonCode.valueOf(getDataAsInt(getMessageData(MessageData.KEY_REASON_CODE, msgId)));
     }
 
     @Override

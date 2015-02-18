@@ -85,11 +85,11 @@ public class IPCallPersistedStorageAccessor {
         return mContact;
     }
 
-    public int getState() {
+    public State getState() {
         return mIPCallLog.getState(mCallId);
     }
 
-    public int getReasonCode() {
+    public ReasonCode getReasonCode() {
         return mIPCallLog.getReasonCode(mCallId);
     }
 

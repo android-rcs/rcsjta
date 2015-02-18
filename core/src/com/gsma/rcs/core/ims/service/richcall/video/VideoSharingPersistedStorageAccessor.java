@@ -130,7 +130,7 @@ public class VideoSharingPersistedStorageAccessor {
      * 
      * @return state
      */
-    public int getState() {
+    public State getState() {
         return mRichCallLog.getVideoSharingState(mSharingId);
     }
 
@@ -139,7 +139,7 @@ public class VideoSharingPersistedStorageAccessor {
      * 
      * @return reason code
      */
-    public int getReasonCode() {
+    public ReasonCode getReasonCode() {
         return mRichCallLog.getVideoSharingReasonCode(mSharingId);
     }
 

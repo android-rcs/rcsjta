@@ -47,7 +47,7 @@ import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.ipcall.IPCall;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharing;
 
@@ -353,7 +353,7 @@ public interface CoreListener {
      * @param reasonCode Rejected reason code
      */
     public void handleGeolocSharingInvitationRejected(ContactId contact, GeolocContent content,
-            ReasonCode reasonCode);
+            GeolocSharing.ReasonCode reasonCode);
 
     /**
      * Handle the case of rejected ip call

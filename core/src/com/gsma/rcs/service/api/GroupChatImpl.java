@@ -288,7 +288,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
     public int getState() {
         GroupChatSession session = mImService.getGroupChatSession(mChatId);
         if (session == null) {
-            return mPersistentStorage.getState();
+            return mPersistentStorage.getState().toInt();
         }
         SipDialogPath dialogPath = session.getDialogPath();
         if (dialogPath != null && dialogPath.isSessionEstablished()) {
@@ -311,7 +311,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
     public int getReasonCode() {
         GroupChatSession session = mImService.getGroupChatSession(mChatId);
         if (session == null) {
-            return mPersistentStorage.getReasonCode();
+            return mPersistentStorage.getReasonCode().toInt();
         }
         return ReasonCode.UNSPECIFIED.toInt();
     }

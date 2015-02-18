@@ -21,6 +21,8 @@ import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.chat.ChatLog.Message;
+import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
+import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.contacts.ContactId;
 
 import android.database.Cursor;
@@ -182,11 +184,11 @@ public class ChatMessagePersistedStorageAccessor {
         return mTimestampDisplayed;
     }
 
-    public int getStatus() {
+    public Status getStatus() {
         return mMessagingLog.getMessageStatus(mId);
     }
 
-    public int getReasonCode() {
+    public ReasonCode getReasonCode() {
         return mMessagingLog.getMessageReasonCode(mId);
     }
 

@@ -22,13 +22,6 @@
 
 package com.gsma.rcs.provider.ipcall;
 
-import java.util.Calendar;
-
-import android.content.ContentValues;
-import android.database.Cursor;
-import android.database.SQLException;
-import android.net.Uri;
-
 import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.provider.LocalContentResolver;
@@ -38,6 +31,13 @@ import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
 import com.gsma.services.rcs.ipcall.IPCall.State;
 import com.gsma.services.rcs.ipcall.IPCallLog;
+
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.SQLException;
+import android.net.Uri;
+
+import java.util.Calendar;
 
 /**
  * IP call history
@@ -68,7 +68,7 @@ public class IPCallHistory {
      */
     private Cursor getIPCallData(String columnName, String callId) {
         String[] projection = new String[] {
-                columnName
+            columnName
         };
         Cursor cursor = null;
         try {
@@ -201,11 +201,11 @@ public class IPCallHistory {
      * @param callId
      * @return State
      */
-    public int getState(String callId) {
+    public State getState(String callId) {
         if (logger.isActivated()) {
             logger.debug("Get IP call state for callId ".concat(callId));
         }
-        return getDataAsInt(getIPCallData(IPCallData.KEY_STATE, callId));
+        return State.valueOf(getDataAsInt(getIPCallData(IPCallData.KEY_STATE, callId)));
     }
 
     /**
@@ -214,11 +214,11 @@ public class IPCallHistory {
      * @param callId
      * @return Reason code
      */
-    public int getReasonCode(String callId) {
+    public ReasonCode getReasonCode(String callId) {
         if (logger.isActivated()) {
             logger.debug("Get IP call reason code for callId ".concat(callId));
         }
-        return getDataAsInt(getIPCallData(IPCallData.KEY_REASON_CODE, callId));
+        return ReasonCode.valueOf(getDataAsInt(getIPCallData(IPCallData.KEY_REASON_CODE, callId)));
     }
 
     /**

@@ -149,11 +149,11 @@ public class ImageSharingPersistedStorageAccessor {
         return mMimeType;
     }
 
-    public int getState() {
+    public State getState() {
         return mRichCallLog.getImageSharingState(mSharingId);
     }
 
-    public int getReasonCode() {
+    public ReasonCode getReasonCode() {
         return mRichCallLog.getImageSharingReasonCode(mSharingId);
     }
 

@@ -22,8 +22,6 @@
 
 package com.gsma.rcs.service.api;
 
-import javax2.sip.message.Response;
-
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
@@ -38,10 +36,11 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.sharing.geoloc.IGeolocSharing;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
+import com.gsma.services.rcs.sharing.geoloc.IGeolocSharing;
+
+import javax2.sip.message.Response;
 
 /**
  * Geoloc sharing implementation
@@ -132,7 +131,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
     public int getState() {
         GeolocTransferSession session = mRichcallService.getGeolocTransferSession(mSharingId);
         if (session == null) {
-            return mPersistentStorage.getState();
+            return mPersistentStorage.getState().toInt();
         }
         SipDialogPath dialogPath = session.getDialogPath();
         if (dialogPath != null && dialogPath.isSessionEstablished()) {
@@ -154,7 +153,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
     public int getReasonCode() {
         GeolocTransferSession session = mRichcallService.getGeolocTransferSession(mSharingId);
         if (session == null) {
-            return mPersistentStorage.getReasonCode();
+            return mPersistentStorage.getReasonCode().toInt();
         }
         return ReasonCode.UNSPECIFIED.toInt();
     }
@@ -355,7 +354,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
              * is closed. Then this check of state can be removed. Also need to check if it is
              * storing and broadcasting right state and reasoncode.
              */
-            if (State.TRANSFERRED != State.valueOf(mPersistentStorage.getState())) {
+            if (State.TRANSFERRED != mPersistentStorage.getState()) {
                 mPersistentStorage.setStateAndReasonCode(State.ABORTED,
                         ReasonCode.ABORTED_BY_REMOTE);
                 mBroadcaster.broadcastStateChanged(contact, mSharingId, State.ABORTED,

@@ -34,6 +34,7 @@ import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
 import com.gsma.services.rcs.chat.ChatLog.Message.Status;
+import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.ParticipantInfo;
@@ -456,12 +457,12 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public int getGroupChatState(String chatId) {
+    public GroupChat.State getGroupChatState(String chatId) {
         return groupChatLog.getGroupChatState(chatId);
     }
 
     @Override
-    public int getGroupChatReasonCode(String chatId) {
+    public GroupChat.ReasonCode getGroupChatReasonCode(String chatId) {
         return groupChatLog.getGroupChatReasonCode(chatId);
     }
 
@@ -516,12 +517,12 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public int getMessageStatus(String msgId) {
+    public Status getMessageStatus(String msgId) {
         return messageLog.getMessageStatus(msgId);
     }
 
     @Override
-    public int getMessageReasonCode(String msgId) {
+    public Message.ReasonCode getMessageReasonCode(String msgId) {
         return messageLog.getMessageReasonCode(msgId);
     }
 

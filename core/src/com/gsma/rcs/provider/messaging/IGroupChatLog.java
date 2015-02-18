@@ -133,7 +133,7 @@ public interface IGroupChatLog {
      * @param chatId Chat ID of the group chat
      * @return State
      */
-    public int getGroupChatState(String chatId);
+    public State getGroupChatState(String chatId);
 
     /**
      * Get group chat state reason code from its chat ID
@@ -141,7 +141,7 @@ public interface IGroupChatLog {
      * @param chatId Chat ID of the group chat
      * @return Reason code of the state
      */
-    public int getGroupChatReasonCode(String chatId);
+    public ReasonCode getGroupChatReasonCode(String chatId);
 
     /**
      * Get group chat participants from its chat ID

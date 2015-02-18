@@ -111,11 +111,11 @@ public class GeolocSharingPersistedStorageAccessor {
         return MimeType.GEOLOC_MESSAGE;
     }
 
-    public int getState() {
+    public State getState() {
         return mRichCallLog.getGeolocSharingState(mSharingId);
     }
 
-    public int getReasonCode() {
+    public ReasonCode getReasonCode() {
         return mRichCallLog.getGeolocSharingStateReasonCode(mSharingId);
     }
 

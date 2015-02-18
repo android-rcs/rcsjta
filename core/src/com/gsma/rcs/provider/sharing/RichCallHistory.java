@@ -75,7 +75,7 @@ public class RichCallHistory {
      */
     private Cursor getImageTransferData(String columnName, String sharingId) {
         String[] projection = new String[] {
-                columnName
+            columnName
         };
         Cursor cursor = null;
         try {
@@ -106,7 +106,7 @@ public class RichCallHistory {
      */
     private Cursor getVideoSharingData(String columnName, String sharingId) {
         String[] projection = new String[] {
-                columnName
+            columnName
         };
         Cursor cursor = null;
         try {
@@ -188,7 +188,7 @@ public class RichCallHistory {
      */
     private Cursor getGeolocSharingData(String columnName, String sharingId) throws SQLException {
         String[] projection = new String[] {
-                columnName
+            columnName
         };
         Cursor cursor = null;
         try {
@@ -363,7 +363,7 @@ public class RichCallHistory {
         Cursor c = null;
         try {
             String[] projection = new String[] {
-                    ImageSharingData.KEY_FILESIZE
+                ImageSharingData.KEY_FILESIZE
             };
             c = mLocalContentResolver.query(
                     Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId), projection, null,
@@ -487,12 +487,13 @@ public class RichCallHistory {
      * 
      * @param sharingId Sharing ID
      */
-    public int getGeolocSharingState(String sharingId) {
+    public GeolocSharing.State getGeolocSharingState(String sharingId) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Get geoloc sharing state for ").append(sharingId)
                     .append(".").toString());
         }
-        return getDataAsInt(getGeolocSharingData(GeolocSharingData.KEY_STATE, sharingId));
+        return State.valueOf(getDataAsInt(getGeolocSharingData(GeolocSharingData.KEY_STATE,
+                sharingId)));
     }
 
     /**
@@ -500,12 +501,13 @@ public class RichCallHistory {
      * 
      * @param sharingId Sharing ID
      */
-    public int getGeolocSharingStateReasonCode(String sharingId) {
+    public GeolocSharing.ReasonCode getGeolocSharingStateReasonCode(String sharingId) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Get geoloc sharing state reason code for ")
                     .append(sharingId).append(".").toString());
         }
-        return getDataAsInt(getGeolocSharingData(GeolocSharingData.KEY_REASON_CODE, sharingId));
+        return ReasonCode.valueOf(getDataAsInt(getGeolocSharingData(
+                GeolocSharingData.KEY_REASON_CODE, sharingId)));
     }
 
     /**
@@ -550,11 +552,12 @@ public class RichCallHistory {
      * @param sharingId
      * @return State
      */
-    public int getImageSharingState(String sharingId) {
+    public ImageSharing.State getImageSharingState(String sharingId) {
         if (logger.isActivated()) {
             logger.debug("Get image transfer state for sharingId ".concat(sharingId));
         }
-        return getDataAsInt(getImageTransferData(ImageSharingData.KEY_STATE, sharingId));
+        return ImageSharing.State.valueOf(getDataAsInt(getImageTransferData(
+                ImageSharingData.KEY_STATE, sharingId)));
     }
 
     /**
@@ -563,11 +566,12 @@ public class RichCallHistory {
      * @param sharingId
      * @return Reason code
      */
-    public int getImageSharingReasonCode(String sharingId) {
+    public ImageSharing.ReasonCode getImageSharingReasonCode(String sharingId) {
         if (logger.isActivated()) {
             logger.debug("Get image transfer reason code for sharingId ".concat(sharingId));
         }
-        return getDataAsInt(getImageTransferData(ImageSharingData.KEY_REASON_CODE, sharingId));
+        return ImageSharing.ReasonCode.valueOf(getDataAsInt(getImageTransferData(
+                ImageSharingData.KEY_REASON_CODE, sharingId)));
     }
 
     /**
@@ -576,11 +580,12 @@ public class RichCallHistory {
      * @param sharingId
      * @return State
      */
-    public int getVideoSharingState(String sharingId) {
+    public VideoSharing.State getVideoSharingState(String sharingId) {
         if (logger.isActivated()) {
             logger.debug("Get video share state for sharingId ".concat(sharingId));
         }
-        return getDataAsInt(getVideoSharingData(VideoSharingData.KEY_STATE, sharingId));
+        return VideoSharing.State.valueOf(getDataAsInt(getVideoSharingData(
+                VideoSharingData.KEY_STATE, sharingId)));
     }
 
     /**
@@ -589,11 +594,12 @@ public class RichCallHistory {
      * @param sharingId
      * @return Reason code
      */
-    public int getVideoSharingReasonCode(String sharingId) {
+    public VideoSharing.ReasonCode getVideoSharingReasonCode(String sharingId) {
         if (logger.isActivated()) {
             logger.debug("Get video share reason code for sharingId ".concat(sharingId));
         }
-        return getDataAsInt(getVideoSharingData(VideoSharingData.KEY_REASON_CODE, sharingId));
+        return VideoSharing.ReasonCode.valueOf(getDataAsInt(getVideoSharingData(
+                VideoSharingData.KEY_REASON_CODE, sharingId)));
     }
 
     /**

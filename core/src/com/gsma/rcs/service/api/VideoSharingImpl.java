@@ -184,7 +184,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
     public int getState() {
         VideoStreamingSession session = mRichcallService.getVideoSharingSession(mSharingId);
         if (session == null) {
-            return mPersistentStorage.getState();
+            return mPersistentStorage.getState().toInt();
         }
         SipDialogPath dialogPath = session.getDialogPath();
         if (dialogPath != null && dialogPath.isSessionEstablished()) {
@@ -208,7 +208,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
     public int getReasonCode() {
         VideoStreamingSession session = mRichcallService.getVideoSharingSession(mSharingId);
         if (session == null) {
-            return mPersistentStorage.getReasonCode();
+            return mPersistentStorage.getReasonCode().toInt();
         }
         return ReasonCode.UNSPECIFIED.toInt();
     }

@@ -145,7 +145,7 @@ public interface IMessageLog {
      * @param msgId
      * @return State
      */
-    public int getMessageStatus(String msgId);
+    public Status getMessageStatus(String msgId);
 
     /**
      * Get message reason code from its unique ID
@@ -153,7 +153,7 @@ public interface IMessageLog {
      * @param msgId
      * @return reason code of the state
      */
-    public int getMessageReasonCode(String msgId);
+    public ReasonCode getMessageReasonCode(String msgId);
 
     /**
      * Get message MIME-type from its unique ID
