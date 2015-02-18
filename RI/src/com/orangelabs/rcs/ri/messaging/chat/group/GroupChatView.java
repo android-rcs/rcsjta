@@ -155,7 +155,7 @@ public class GroupChatView extends ChatView {
 
         @Override
         public void onMessageStatusChanged(String chatId, String mimeType, String msgId,
-                int status, int reasonCode) {
+                Message.Status status, Message.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.w(LOGTAG, new StringBuilder("onMessageStatusChanged chatId=").append(chatId)
                         .append(" mime-type=").append(mimeType).append(" msgId=").append(msgId)
@@ -197,45 +197,30 @@ public class GroupChatView extends ChatView {
         }
 
         @Override
-        public void onStateChanged(String chatId, final int state, final int reasonCode) {
+        public void onStateChanged(String chatId, final GroupChat.State state,
+                GroupChat.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG,
                         new StringBuilder("onStateChanged chatId=").append(chatId)
                                 .append(" state=").append(state).append(" reason=")
                                 .append(reasonCode).toString());
             }
-            // TODO CR031 enumerated types
-            if (state > RiApplication.GC_STATES.length) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "onStateChanged unhandled status=".concat(String.valueOf(state)));
-                }
-                return;
-
-            }
-            if (reasonCode > RiApplication.GC_REASON_CODES.length) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG,
-                            "onStateChanged unhandled reason=".concat(String.valueOf(reasonCode)));
-                }
-                return;
-
-            }
             // Discard event if not for current chatId
             if (mChatId == null || !mChatId.equals(chatId)) {
                 return;
 
             }
-            final String _reasonCode = RiApplication.GC_REASON_CODES[reasonCode];
+            final String _reasonCode = RiApplication.GC_REASON_CODES[reasonCode.toInt()];
             handler.post(new Runnable() {
                 public void run() {
                     switch (state) {
-                        case GroupChat.State.STARTED:
+                        case STARTED:
                             // Session is well established : hide progress
                             // dialog
                             hideProgressDialog();
                             break;
 
-                        case GroupChat.State.ABORTED:
+                        case ABORTED:
                             // Session is aborted: hide progress dialog then
                             // exit
                             hideProgressDialog();
@@ -243,7 +228,7 @@ public class GroupChatView extends ChatView {
                                     getString(R.string.label_chat_aborted, _reasonCode), mExitOnce);
                             break;
 
-                        case GroupChat.State.REJECTED:
+                        case REJECTED:
                             // Session is rejected: hide progress dialog then
                             // exit
                             hideProgressDialog();
@@ -251,7 +236,7 @@ public class GroupChatView extends ChatView {
                                     getString(R.string.label_chat_rejected, _reasonCode), mExitOnce);
                             break;
 
-                        case GroupChat.State.FAILED:
+                        case FAILED:
                             // Session is failed: hide progress dialog then exit
                             hideProgressDialog();
                             Utils.showMessageAndExit(GroupChatView.this,
@@ -262,7 +247,7 @@ public class GroupChatView extends ChatView {
                     }
                 }
             });
-        };
+        }
 
     };
 

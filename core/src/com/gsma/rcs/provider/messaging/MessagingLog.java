@@ -277,7 +277,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      */
     @Override
     public void addFileTransfer(String fileTransferId, ContactId contact, Direction direction,
-            MmContent content, MmContent fileIcon, FileTransfer.State state, FileTransfer.ReasonCode reasonCode) {
+            MmContent content, MmContent fileIcon, FileTransfer.State state,
+            FileTransfer.ReasonCode reasonCode) {
         fileTransferLog.addFileTransfer(fileTransferId, contact, direction, content, fileIcon,
                 state, reasonCode);
     }
@@ -290,7 +291,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      */
     @Override
     public void addOutgoingGroupFileTransfer(String fileTransferId, String chatId,
-            MmContent content, MmContent thumbnail, FileTransfer.State state, FileTransfer.ReasonCode reasonCode) {
+            MmContent content, MmContent thumbnail, FileTransfer.State state,
+            FileTransfer.ReasonCode reasonCode) {
         fileTransferLog.addOutgoingGroupFileTransfer(fileTransferId, chatId, content, thumbnail,
                 state, reasonCode);
     }
@@ -303,7 +305,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      */
     @Override
     public void addIncomingGroupFileTransfer(String fileTransferId, String chatId,
-            ContactId contact, MmContent content, MmContent fileIcon, FileTransfer.State state, FileTransfer.ReasonCode reasonCode) {
+            ContactId contact, MmContent content, MmContent fileIcon, FileTransfer.State state,
+            FileTransfer.ReasonCode reasonCode) {
         fileTransferLog.addIncomingGroupFileTransfer(fileTransferId, chatId, contact, content,
                 fileIcon, state, reasonCode);
     }
@@ -314,7 +317,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      * updateFileTransferStateAndReasonCode(java.lang.String, int, int
      */
     @Override
-    public void setFileTransferStateAndReasonCode(String fileTransferId, FileTransfer.State state, FileTransfer.ReasonCode reasonCode) {
+    public void setFileTransferStateAndReasonCode(String fileTransferId, FileTransfer.State state,
+            FileTransfer.ReasonCode reasonCode) {
         fileTransferLog.setFileTransferStateAndReasonCode(fileTransferId, state, reasonCode);
     }
 

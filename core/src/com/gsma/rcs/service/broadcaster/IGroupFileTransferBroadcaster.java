@@ -25,7 +25,8 @@ import com.gsma.services.rcs.filetransfer.FileTransfer.State;
  */
 public interface IGroupFileTransferBroadcaster {
 
-    public void broadcastStateChanged(String chatId, String transferId, State status, ReasonCode reasonCode);
+    public void broadcastStateChanged(String chatId, String transferId, State status,
+            ReasonCode reasonCode);
 
     public void broadcastProgressUpdate(String chatId, String transferId, long currentSize,
             long totalSize);

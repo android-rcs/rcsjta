@@ -146,45 +146,32 @@ public class InitiateImageSharing extends Activity {
         }
 
         @Override
-        public void onStateChanged(ContactId contact, String sharingId, final int state,
-                int reasonCode) {
+        public void onStateChanged(ContactId contact, String sharingId,
+                final ImageSharing.State state,
+                ImageSharing.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "onStateChanged contact=" + contact + " sharingId=" + sharingId
                         + " state=" + state + " reason=" + reasonCode);
-            }
-            if (state > RiApplication.ISH_STATES.length) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "onStateChanged unhandled state=" + state);
-                }
-                return;
-
-            }
-            if (reasonCode > RiApplication.ISH_REASON_CODES.length) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "onStateChanged unhandled reason=" + reasonCode);
-                }
-                return;
-
             }
             // Discard event if not for current sharingId
             if (mSharingId == null || !mSharingId.equals(sharingId)) {
                 return;
 
             }
-            final String _reasonCode = RiApplication.ISH_REASON_CODES[reasonCode];
-            final String _state = RiApplication.ISH_STATES[state];
+            final String _reasonCode = RiApplication.ISH_REASON_CODES[reasonCode.toInt()];
+            final String _state = RiApplication.ISH_STATES[state.toInt()];
             handler.post(new Runnable() {
                 public void run() {
                     TextView statusView = (TextView) findViewById(R.id.progress_status);
                     switch (state) {
-                        case ImageSharing.State.STARTED:
+                        case STARTED:
                             // Session is established: hide progress dialog
                             hideProgressDialog();
                             // Display session status
                             statusView.setText(_state);
                             break;
 
-                        case ImageSharing.State.ABORTED:
+                        case ABORTED:
                             // Session is aborted: hide progress dialog then
                             // exit
                             hideProgressDialog();
@@ -193,7 +180,7 @@ public class InitiateImageSharing extends Activity {
                                     mExitOnce);
                             break;
 
-                        case ImageSharing.State.REJECTED:
+                        case REJECTED:
                             // Session is rejected: hide progress dialog then
                             // exit
                             hideProgressDialog();
@@ -202,7 +189,7 @@ public class InitiateImageSharing extends Activity {
                                     mExitOnce);
                             break;
 
-                        case ImageSharing.State.FAILED:
+                        case FAILED:
                             // Session failed: hide progress dialog then exit
                             hideProgressDialog();
                             Utils.showMessageAndExit(InitiateImageSharing.this,
@@ -210,7 +197,7 @@ public class InitiateImageSharing extends Activity {
                                     mExitOnce);
                             break;
 
-                        case ImageSharing.State.TRANSFERRED:
+                        case TRANSFERRED:
                             // Hide progress dialog
                             hideProgressDialog();
                             // Display transfer progress

@@ -130,7 +130,8 @@ public class ReceiveFileTransfer extends Activity {
         }
 
         @Override
-        public void onStateChanged(String chatId, String transferId, int state, int reasonCode) {
+        public void onStateChanged(String chatId, String transferId, FileTransfer.State state,
+                FileTransfer.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "onTransferStateChanged chatId=" + chatId + " transferId="
                         + transferId + " state=" + state + " reason=" + reasonCode);
@@ -160,8 +161,9 @@ public class ReceiveFileTransfer extends Activity {
         }
 
         @Override
-        public void onStateChanged(ContactId contact, String transferId, final int state,
-                int reasonCode) {
+        public void onStateChanged(ContactId contact, String transferId,
+                final FileTransfer.State state,
+                FileTransfer.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "onTransferStateChanged contact=" + contact + " transferId="
                         + transferId + " state=" + state + " reason=" + reasonCode);
@@ -261,12 +263,13 @@ public class ReceiveFileTransfer extends Activity {
                 try {
                     // Fetch state from the provider
                     ftDao = new FileTransferDAO(this, ftDao.getTransferId());
-                    if (ftDao.getState() == FileTransfer.State.TRANSFERRED) {
+                    if (FileTransfer.State.TRANSFERRED == ftDao.getState()) {
                         displayTransferredFile();
                         return;
 
                     } else {
-                        String reasonCode = RiApplication.FT_REASON_CODES[ftDao.getReasonCode()];
+                        String reasonCode = RiApplication.FT_REASON_CODES[ftDao.getReasonCode()
+                                .toInt()];
                         if (LogUtils.isActive) {
                             Log.e(LOGTAG, "Transfer failed state: " + ftDao.getState()
                                     + " reason: " + reasonCode);
@@ -324,7 +327,7 @@ public class ReceiveFileTransfer extends Activity {
                 // Reevaluate the File Transfer state from provider
                 try {
                     ftDao = new FileTransferDAO(this, ftDao.getTransferId());
-                    if (ftDao.getState() == FileTransfer.State.TRANSFERRED) {
+                    if (FileTransfer.State.TRANSFERRED == ftDao.getState()) {
                         displayTransferredFile();
                     }
                 } catch (Exception e) {
@@ -667,48 +670,39 @@ public class ReceiveFileTransfer extends Activity {
      * 
      * @param state new FT state
      */
-    private void onTransferStateChangedUpdateUI(final int state, final int reasonCode) {
-        if (state > RiApplication.FT_STATES.length) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "onTransferStateChanged unhandled state=" + state);
-            }
-            return;
-        }
-        if (reasonCode > RiApplication.FT_REASON_CODES.length) {
-            Log.e(LOGTAG, "onTransferStateChanged unhandled reason=" + reasonCode);
-            return;
-        }
-        final String _reasonCode = RiApplication.FT_REASON_CODES[reasonCode];
-        final String _state = RiApplication.FT_STATES[state];
+    private void onTransferStateChangedUpdateUI(final FileTransfer.State state,
+            FileTransfer.ReasonCode reasonCode) {
+        final String _reasonCode = RiApplication.FT_REASON_CODES[reasonCode.toInt()];
+        final String _state = RiApplication.FT_STATES[state.toInt()];
         handler.post(new Runnable() {
 
             public void run() {
                 TextView statusView = (TextView) findViewById(R.id.progress_status);
                 switch (state) {
-                    case FileTransfer.State.STARTED:
+                    case STARTED:
                         // Session is well established display session status
                         statusView.setText(_state);
                         break;
 
-                    case FileTransfer.State.ABORTED:
+                    case ABORTED:
                         // Session is aborted: display message then exit
                         Utils.showMessageAndExit(ReceiveFileTransfer.this,
                                 getString(R.string.label_transfer_aborted, _reasonCode), exitOnce);
                         break;
 
-                    case FileTransfer.State.FAILED:
+                    case FAILED:
                         // Session is failed: ReceiveFileTransfer
                         Utils.showMessageAndExit(ReceiveFileTransfer.this,
                                 getString(R.string.label_transfer_failed, _reasonCode), exitOnce);
                         break;
 
-                    case FileTransfer.State.REJECTED:
+                    case REJECTED:
                         // Session is rejected: display message then exit
                         Utils.showMessageAndExit(ReceiveFileTransfer.this,
                                 getString(R.string.label_transfer_rejected, _reasonCode), exitOnce);
                         break;
 
-                    case FileTransfer.State.TRANSFERRED:
+                    case TRANSFERRED:
                         displayTransferredFile();
                         break;
 
@@ -721,7 +715,7 @@ public class ReceiveFileTransfer extends Activity {
 
     private void displayTransferredFile() {
         TextView statusView = (TextView) findViewById(R.id.progress_status);
-        statusView.setText(RiApplication.FT_STATES[FileTransfer.State.TRANSFERRED]);
+        statusView.setText(RiApplication.FT_STATES[FileTransfer.State.TRANSFERRED.toInt()]);
         // Make sure progress bar is at the end
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         progressBar.setProgress(progressBar.getMax());

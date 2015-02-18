@@ -54,7 +54,7 @@ public class OneToOneFileTransferBroadcaster implements IOneToOneFileTransferBro
     }
 
     public void broadcastStateChanged(ContactId contact, String transferId, State state,
-            ReasonCode  reasonCode) {
+            ReasonCode reasonCode) {
         final int N = mOneToOneFileTransferListeners.beginBroadcast();
         int rcsState = state.toInt();
         int rcsReasonCode = reasonCode.toInt();

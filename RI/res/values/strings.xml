@@ -376,17 +376,17 @@
 
     <string-array name="file_transfer_states">
         <item>INVITED</item>
+        <item>ACCEPTING</item>
+        <item>REJECTED</item>
+        <item>QUEUED</item>
         <item>INITIATING</item>
         <item>STARTED</item>
-        <item>TRANSFERRED</item>
-        <item>ABORTED</item>
-        <item>FAILED</item>
         <item>PAUSED</item>
-        <item>REJECTED</item>
-        <item>ACCEPTING</item>
+        <item>ABORTED</item>
+        <item>TRANSFERRED</item>
+        <item>FAILED</item>
         <item>DELIVERED</item>
         <item>DISPLAYED</item>
-        <item>QUEUED</item>
     </string-array>
     <string-array name="file_transfer_reason_codes">
         <item></item>
@@ -394,7 +394,7 @@
         <item>ABORTED_BY_REMOTE</item>
         <item>ABORTED_BY_SYSTEM</item>
         <item>ABORTED_BY_SECONDARY_DEVICE</item>
-        <item>ABORTED_BY_TIMED_OUT</item>
+        <item>REJECTED_BY_INACTIVITY</item>
         <item>REJECTED_SPAM</item>
         <item>REJECTED_LOW_SPACE</item>
         <item>REJECTED_MAX_SIZE</item>
@@ -434,7 +434,7 @@
     </string-array>
     <string-array name="group_chat_states">
         <item>INVITED</item>
-        <item>INITIATED</item>
+        <item>INITIATING</item>
         <item>STARTED</item>
         <item>ABORTED</item>
         <item>FAILED</item>
@@ -445,13 +445,12 @@
         <item></item>
         <item>ABORTED_BY_USER</item>
         <item>ABORTED_BY_REMOTE</item>
-        <item>ABORTED_BY_SYSTEM</item>
+        <item>ABORTED_BY_INACTIVITY</item>
         <item>ABORTED_BY_SECONDARY_DEVICE</item>
         <item>REJECTED_SPAM</item>
         <item>REJECTED_MAX_CHATS</item>
-        <item>REJECTED_BY_USER</item>
         <item>REJECTED_BY_REMOTE</item>
-        <item>REJECTED_TIME_OUT</item>
+        <item>REJECTED_BY_INACTIVITY</item>
         <item>FAILED_INITIATION</item>
     </string-array>
     <string-array name="message_statuses">
@@ -474,7 +473,7 @@
     </string-array>
     <string-array name="ish_states">
         <item>INVITED</item>
-        <item>INITIATED</item>
+        <item>INITIATING</item>
         <item>STARTED</item>
         <item>ABORTED</item>
         <item>FAILED</item>
@@ -489,7 +488,7 @@
         <item>ABORTED_BY_REMOTE</item>
         <item>ABORTED_BY_SYSTEM</item>
         <item>ABORTED_BY_SECONDARY_DEVICE</item>
-        <item>REJECTED_TIME_OUT</item>
+        <item>REJECTED_BY_INACTIVITY</item>
         <item>REJECTED_LOW_SPACE</item>
         <item>REJECTED_ MAX_SIZE</item>
         <item>REJECTED_MAX_SESSIONS</item>
@@ -501,7 +500,7 @@
     </string-array>
     <string-array name="vsh_states">
         <item>INVITED</item>
-        <item>INITIATED</item>
+        <item>INITIATING</item>
         <item>STARTED</item>
         <item>ABORTED</item>
         <item>FAILED</item>
@@ -518,13 +517,13 @@
         <item>REJECTED_MAX_SESSIONS</item>
         <item>REJECTED_BY_USER</item>
         <item>REJECTED_BY_REMOTE</item>
-        <item>REJECTED_TIME_OUT</item>
+        <item>REJECTED_BY_INACTIVITY</item>
         <item>FAILED_INITIATION</item>
         <item>FAILED_SHARING</item>
     </string-array>
     <string-array name="gsh_states">
         <item>INVITED</item>
-        <item>INITIATED</item>
+        <item>INITIATING</item>
         <item>STARTED</item>
         <item>ABORTED</item>
         <item>FAILED</item>
@@ -542,7 +541,7 @@
         <item>REJECTED_MAX_SESSIONS</item>
         <item>REJECTED_BY_USER</item>
         <item>REJECTED_BY_REMOTE</item>
-        <item>REJECTED_TIME_OUT</item>
+        <item>REJECTED_BY_INACTIVITY</item>
         <item>FAILED_INITIATION</item>
         <item>FAILED_SHARING</item>
     </string-array>

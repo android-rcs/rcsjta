@@ -126,7 +126,8 @@ public class IPCallList extends Activity {
 
             CallItemCache cache = new CallItemCache();
             cache.number = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
-            cache.state = cursor.getInt(cursor.getColumnIndex(IPCallLog.STATE));
+            cache.state = IPCall.State
+                    .valueOf(cursor.getInt(cursor.getColumnIndex(IPCallLog.STATE)));
             cache.direction = Direction.valueOf(cursor.getInt(cursor
                     .getColumnIndex(IPCallLog.DIRECTION)));
             cache.date = cursor.getLong(cursor.getColumnIndex(IPCallLog.TIMESTAMP));
@@ -158,7 +159,7 @@ public class IPCallList extends Activity {
 
         public Direction direction;
 
-        public int state;
+        public IPCall.State state;
 
         public long date;
     }
@@ -169,25 +170,25 @@ public class IPCallList extends Activity {
      * @param state State
      * @return String
      */
-    private String decodeState(int state) {
+    private String decodeState(IPCall.State state) {
         switch (state) {
-            case IPCall.State.INVITED:
+            case INVITED:
                 return getString(R.string.label_state_invited);
-            case IPCall.State.INITIATED:
+            case INITIATED:
                 return getString(R.string.label_state_initiating);
-            case IPCall.State.STARTED:
+            case STARTED:
                 return getString(R.string.label_state_started);
-            case IPCall.State.ABORTED:
+            case ABORTED:
                 return getString(R.string.label_state_aborted);
-            case IPCall.State.FAILED:
+            case FAILED:
                 return getString(R.string.label_state_failed);
-            case IPCall.State.REJECTED:
+            case REJECTED:
                 return getString(R.string.label_state_rejected);
-            case IPCall.State.HOLD:
+            case HOLD:
                 return getString(R.string.label_state_hold);
-            case IPCall.State.ACCEPTING:
+            case ACCEPTING:
                 return getString(R.string.label_state_accepting);
-            case IPCall.State.RINGING:
+            case RINGING:
                 return getString(R.string.label_state_ringing);
             default:
                 return getString(R.string.label_state_unknown);

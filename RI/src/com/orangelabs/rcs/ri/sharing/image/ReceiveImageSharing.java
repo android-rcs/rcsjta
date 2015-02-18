@@ -106,65 +106,53 @@ public class ReceiveImageSharing extends Activity {
         }
 
         @Override
-        public void onStateChanged(ContactId contact, String sharingId, final int state,
-                int reasonCode) {
+        public void onStateChanged(ContactId contact, String sharingId,
+                final ImageSharing.State state,
+                ImageSharing.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG,
                         new StringBuilder("onStateChanged contact=").append(contact.toString())
                                 .append(" sharingId=").append(sharingId).append(" state=")
                                 .append(state).append(" reason=").append(reasonCode).toString());
             }
-            if (state > RiApplication.ISH_STATES.length) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "onStateChanged unhandled state=".concat(String.valueOf(state)));
-                }
-                return;
-            }
-            if (reasonCode > RiApplication.ISH_REASON_CODES.length) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG,
-                            "onStateChanged unhandled reason=".concat(String.valueOf(reasonCode)));
-                }
-                return;
-            }
             // Discard event if not for current sharingId
             if (mIshDao == null || !mIshDao.getSharingId().equals(sharingId)) {
                 return;
             }
-            final String _reasonCode = RiApplication.ISH_REASON_CODES[reasonCode];
-            final String _state = RiApplication.ISH_STATES[state];
+            final String _reasonCode = RiApplication.ISH_REASON_CODES[reasonCode.toInt()];
+            final String _state = RiApplication.ISH_STATES[state.toInt()];
             handler.post(new Runnable() {
                 public void run() {
 
                     TextView statusView = (TextView) findViewById(R.id.progress_status);
                     switch (state) {
-                        case ImageSharing.State.STARTED:
+                        case STARTED:
                             // Display session status
                             statusView.setText(_state);
                             break;
 
-                        case ImageSharing.State.ABORTED:
+                        case ABORTED:
                             // Session is aborted: exit
                             Utils.showMessageAndExit(ReceiveImageSharing.this,
                                     getString(R.string.label_sharing_aborted, _reasonCode),
                                     mExitOnce);
                             break;
 
-                        case ImageSharing.State.FAILED:
+                        case FAILED:
                             // Session is failed: exit
                             Utils.showMessageAndExit(ReceiveImageSharing.this,
                                     getString(R.string.label_sharing_failed, _reasonCode),
                                     mExitOnce);
                             break;
 
-                        case ImageSharing.State.REJECTED:
+                        case REJECTED:
                             // Session is failed: exit
                             Utils.showMessageAndExit(ReceiveImageSharing.this,
                                     getString(R.string.label_sharing_rejected, _reasonCode),
                                     mExitOnce);
                             break;
 
-                        case ImageSharing.State.TRANSFERRED:
+                        case TRANSFERRED:
                             // Display transfer progress
                             statusView.setText(_state);
                             // Make sure progress bar is at the end

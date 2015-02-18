@@ -34,7 +34,8 @@ public abstract class GroupFileTransferListener {
      * @param state State of file transfer after change
      * @param reasonCode Reason code of file transfer after change
      */
-    public abstract void onStateChanged(String chatId, String transferId, State state, ReasonCode reasonCode);
+    public abstract void onStateChanged(String chatId, String transferId, State state,
+            ReasonCode reasonCode);
 
     /**
      * Callback called when a group file transfer state/reasonCode is changed for a single recipient

@@ -19,6 +19,7 @@ package com.gsma.rcs.service.broadcaster;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
+
 /**
  * Interface to perform broadcast events on FileTransferListeners
  */

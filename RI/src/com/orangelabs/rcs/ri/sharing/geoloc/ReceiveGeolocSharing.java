@@ -119,49 +119,43 @@ public class ReceiveGeolocSharing extends Activity {
 
         @Override
         public void onStateChanged(final ContactId contact, final String sharingId,
-                final int state, final int reasonCode) {
+                final GeolocSharing.State state, GeolocSharing.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG,
                         new StringBuilder("onStateChanged contact=").append(contact.toString())
                                 .append(" sharingId=").append(sharingId).append(" state=")
                                 .append(state).append(" reason=").append(reasonCode).toString());
             }
-            if (state > RiApplication.GSH_STATES.length) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "onStateChanged unhandled state=".concat(String.valueOf(state)));
-                }
-                return;
-            }
             // Discard event if not for current sharingId
             if (mSharingId == null || !mSharingId.equals(sharingId)) {
                 return;
             }
-            final String _reasonCode = RiApplication.GSH_REASON_CODES[reasonCode];
-            final String _state = RiApplication.GSH_STATES[state];
+            final String _reasonCode = RiApplication.GSH_REASON_CODES[reasonCode.toInt()];
+            final String _state = RiApplication.GSH_STATES[state.toInt()];
             handler.post(new Runnable() {
                 public void run() {
                     TextView statusView = (TextView) findViewById(R.id.progress_status);
                     switch (state) {
-                        case GeolocSharing.State.STARTED:
+                        case STARTED:
                             // Session is established: display session status
                             statusView.setText("started");
                             break;
 
-                        case GeolocSharing.State.ABORTED:
+                        case ABORTED:
                             // Session is aborted: display session status
                             Utils.showMessageAndExit(ReceiveGeolocSharing.this,
                                     getString(R.string.label_sharing_aborted, _reasonCode),
                                     mExitOnce);
                             break;
 
-                        case GeolocSharing.State.FAILED:
+                        case FAILED:
                             // Session is failed: exit
                             Utils.showMessageAndExit(ReceiveGeolocSharing.this,
                                     getString(R.string.label_sharing_failed, _reasonCode),
                                     mExitOnce);
                             break;
 
-                        case GeolocSharing.State.TRANSFERRED:
+                        case TRANSFERRED:
                             // Display transfer progress
                             statusView.setText(_state);
                             // Make sure progress bar is at the end

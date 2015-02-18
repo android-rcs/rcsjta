@@ -46,7 +46,6 @@ import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.chat.ChatLog.Message;
-import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.ChatServiceConfiguration;
@@ -141,7 +140,7 @@ public class SingleChatView extends ChatView {
 
         @Override
         public void onMessageStatusChanged(ContactId contact, String mimeType, String msgId,
-                int status, int reasonCode) {
+                Message.Status status, Message.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG,
                         new StringBuilder("onMessageStatusChanged contact=")
@@ -267,17 +266,18 @@ public class SingleChatView extends ChatView {
             return;
 
         }
-        int status = cursor.getInt(cursor.getColumnIndex(Message.STATUS));
+        Message.Status status = Message.Status.valueOf(cursor.getInt(cursor
+                .getColumnIndex(Message.STATUS)));
         switch (status) {
-            case Status.Content.FAILED:
+            case FAILED:
                 menu.add(0, CHAT_MENU_ITEM_RESEND, CHAT_MENU_ITEM_RESEND,
                         R.string.menu_resend_message);
                 break;
-            case Status.Content.DISPLAY_REPORT_REQUESTED:
-            case Status.Content.DELIVERED:
-            case Status.Content.SENT:
-            case Status.Content.SENDING:
-            case Status.Content.QUEUED:
+            case DISPLAY_REPORT_REQUESTED:
+            case DELIVERED:
+            case SENT:
+            case SENDING:
+            case QUEUED:
                 menu.add(0, CHAT_MENU_ITEM_REVOKE, CHAT_MENU_ITEM_REVOKE,
                         R.string.menu_revoke_message);
                 break;

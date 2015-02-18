@@ -400,40 +400,25 @@ public class IncomingVideoSharing extends Activity implements VideoPlayerListene
     private VideoSharingListener vshListener = new VideoSharingListener() {
 
         @Override
-        public void onStateChanged(ContactId contact, String sharingId, final int state,
-                int reasonCode) {
-            String _state = Integer.valueOf(state).toString();
-            String _reason = Integer.valueOf(reasonCode).toString();
+        public void onStateChanged(ContactId contact, String sharingId,
+                final VideoSharing.State state,
+                VideoSharing.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG,
                         new StringBuilder("onStateChanged contact=").append(contact)
                                 .append(" sharingId=").append(sharingId).append(" state=")
-                                .append(_state).append(" reason=").append(_reason).toString());
-            }
-            if (state > RiApplication.VSH_STATES.length) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "onStateChanged unhandled state=".concat(_state));
-                }
-                return;
-
-            }
-            if (reasonCode > RiApplication.VSH_REASON_CODES.length) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "onStateChanged unhandled reason=".concat(_reason));
-                }
-                return;
-
+                                .append(state).append(" reason=").append(reasonCode).toString());
             }
             // Discard event if not for current sharingId
             if (mVshDao == null || !mVshDao.getSharingId().equals(sharingId)) {
                 return;
 
             }
-            final String _reasonCode = RiApplication.VSH_REASON_CODES[reasonCode];
+            final String _reasonCode = RiApplication.VSH_REASON_CODES[reasonCode.toInt()];
             handler.post(new Runnable() {
                 public void run() {
                     switch (state) {
-                        case VideoSharing.State.STARTED:
+                        case STARTED:
                             displayVideoFormat();
 
                             // Start the renderer
@@ -441,7 +426,7 @@ public class IncomingVideoSharing extends Activity implements VideoPlayerListene
                             mVideoRenderer.start();
                             break;
 
-                        case VideoSharing.State.ABORTED:
+                        case ABORTED:
                             // Stop the renderer
                             mVideoRenderer.stop();
                             mVideoRenderer.close();
@@ -452,7 +437,7 @@ public class IncomingVideoSharing extends Activity implements VideoPlayerListene
                                     exitOnce);
                             break;
 
-                        case VideoSharing.State.FAILED:
+                        case FAILED:
                             // Stop the renderer
                             mVideoRenderer.stop();
                             mVideoRenderer.close();
@@ -462,7 +447,7 @@ public class IncomingVideoSharing extends Activity implements VideoPlayerListene
                                     getString(R.string.label_sharing_failed, _reasonCode), exitOnce);
                             break;
 
-                        case VideoSharing.State.REJECTED:
+                        case REJECTED:
                             // Stop the renderer
                             mVideoRenderer.stop();
                             mVideoRenderer.close();
@@ -477,7 +462,7 @@ public class IncomingVideoSharing extends Activity implements VideoPlayerListene
                             if (LogUtils.isActive) {
                                 Log.d(LOGTAG, "onStateChanged ".concat(getString(
                                         R.string.label_vsh_state_changed,
-                                        RiApplication.VSH_STATES[state], _reasonCode)));
+                                        RiApplication.VSH_STATES[state.toInt()], _reasonCode)));
                             }
                     }
                 }

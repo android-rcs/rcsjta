@@ -916,10 +916,9 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
      */
     private VideoSharingListener vshListener = new VideoSharingListener() {
         @Override
-        public void onStateChanged(ContactId contact, String sharingId, final int state,
-                final int reasonCode) {
-            String _reason = Integer.valueOf(reasonCode).toString();
-            String _state = Integer.valueOf(state).toString();
+        public void onStateChanged(ContactId contact, String sharingId,
+                final VideoSharing.State state,
+                VideoSharing.ReasonCode reasonCode) {
             // Discard event if not for current sharingId
             if (mSharingId == null || !mSharingId.equals(sharingId)) {
                 return;
@@ -929,27 +928,13 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
                 Log.d(LOGTAG,
                         new StringBuilder("onStateChanged contact=").append(contact)
                                 .append(" sharingId=").append(sharingId).append(" state=")
-                                .append(_state).append(" reason=").append(_reason).toString());
+                                .append(state).append(" reason=").append(reasonCode).toString());
             }
-            if (state > RiApplication.VSH_STATES.length) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "onStateChanged unhandled state=".concat(_state));
-                }
-                return;
-
-            }
-            if (reasonCode > RiApplication.VSH_REASON_CODES.length) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "onStateChanged unhandled reason=".concat(_reason));
-                }
-                return;
-
-            }
-            final String _reasonCode = RiApplication.VSH_REASON_CODES[reasonCode];
+            final String _reasonCode = RiApplication.VSH_REASON_CODES[reasonCode.toInt()];
             handler.post(new Runnable() {
                 public void run() {
                     switch (state) {
-                        case VideoSharing.State.STARTED:
+                        case STARTED:
                             mStarted = true;
                             displayVideoFormat();
 
@@ -965,7 +950,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
                             hideProgressDialog();
                             break;
 
-                        case VideoSharing.State.ABORTED:
+                        case ABORTED:
                             // Stop the player
                             mVideoPlayer.stop();
                             mVideoPlayer.close();
@@ -982,7 +967,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
                                     mExitOnce);
                             break;
 
-                        case VideoSharing.State.REJECTED:
+                        case REJECTED:
                             // Release the camera
                             closeCamera();
 
@@ -993,7 +978,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
                                     mExitOnce);
                             break;
 
-                        case VideoSharing.State.FAILED:
+                        case FAILED:
                             // Stop the player
                             mVideoPlayer.stop();
                             mVideoPlayer.close();
@@ -1014,7 +999,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
                             if (LogUtils.isActive) {
                                 Log.d(LOGTAG, "onStateChanged ".concat(getString(
                                         R.string.label_vsh_state_changed,
-                                        RiApplication.VSH_STATES[state], reasonCode)));
+                                        RiApplication.VSH_STATES[state.toInt()], _reasonCode)));
                             }
                     }
                 }

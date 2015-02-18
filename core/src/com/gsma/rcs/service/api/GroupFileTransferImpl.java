@@ -612,7 +612,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             mFileTransferService.removeFileTransfer(mFileTransferId);
             /*
              * TODO : Fix sending of SIP BYE by sender once transfer is completed and media session
-             * is closed. Then this check of state can be removed.  Also need to check if it is
+             * is closed. Then this check of state can be removed. Also need to check if it is
              * storing and broadcasting right state and reasoncode.
              */
             if (State.TRANSFERRED != mPersistentStorage.getState()) {

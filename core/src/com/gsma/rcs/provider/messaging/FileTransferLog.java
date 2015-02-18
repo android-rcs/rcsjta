@@ -100,7 +100,8 @@ public class FileTransferLog implements IFileTransferLog {
                     .append(fileTransferId).append(", contact=").append(contact)
                     .append(", filename=").append(content.getName()).append(", size=")
                     .append(content.getSize()).append(", MIME=").append(content.getEncoding())
-                    .append(", state=").append(state.toInt()).append(", reasonCode=").append(reasonCode.toInt())
+                    .append(", state=").append(state.toInt()).append(", reasonCode=")
+                    .append(reasonCode.toInt())
                     .toString());
         }
         ContentValues values = new ContentValues();
@@ -193,7 +194,8 @@ public class FileTransferLog implements IFileTransferLog {
 
     @Override
     public void addIncomingGroupFileTransfer(String fileTransferId, String chatId,
-            ContactId contact, MmContent content, MmContent fileIcon, State state, ReasonCode reasonCode) {
+            ContactId contact, MmContent content, MmContent fileIcon, State state,
+            ReasonCode reasonCode) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Add incoming file transfer entry: fileTransferId=")
                     .append(fileTransferId).append(", chatId=").append(chatId).append(", contact=")
@@ -229,7 +231,8 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
-    public void setFileTransferStateAndReasonCode(String fileTransferId, State state, ReasonCode reasonCode) {
+    public void setFileTransferStateAndReasonCode(String fileTransferId, State state,
+            ReasonCode reasonCode) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("updateFileTransferStatus: fileTransferId=")
                     .append(fileTransferId).append(", state=").append(state.toInt())
@@ -539,7 +542,8 @@ public class FileTransferLog implements IFileTransferLog {
         if (logger.isActivated()) {
             logger.debug("Get file transfer state for ".concat(fileTransferId));
         }
-        return State.valueOf(getDataAsInt(getFileTransferData(FileTransferData.KEY_STATE, fileTransferId)));
+        return State.valueOf(getDataAsInt(getFileTransferData(FileTransferData.KEY_STATE,
+                fileTransferId)));
     }
 
     /*
@@ -551,7 +555,8 @@ public class FileTransferLog implements IFileTransferLog {
         if (logger.isActivated()) {
             logger.debug("Get file transfer reason code for ".concat(fileTransferId));
         }
-        return ReasonCode.valueOf(getDataAsInt(getFileTransferData(FileTransferData.KEY_REASON_CODE, fileTransferId)));
+        return ReasonCode.valueOf(getDataAsInt(getFileTransferData(
+                FileTransferData.KEY_REASON_CODE, fileTransferId)));
     }
 
     /*

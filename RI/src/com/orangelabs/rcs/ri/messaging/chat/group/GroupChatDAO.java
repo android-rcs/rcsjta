@@ -26,6 +26,7 @@ import android.os.Parcelable;
 
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.GroupChat;
 
 /**
  * Group CHAT Data Object
@@ -40,17 +41,17 @@ public class GroupChatDAO implements Parcelable {
 
     private String mParticipants;
 
-    private int mState;
+    private GroupChat.State mState;
 
     private String mSubject;
 
     private long mTimestamp;
 
-    private int mReasonCode;
+    private GroupChat.ReasonCode mReasonCode;
 
     private static final String WHERE_CLAUSE = ChatLog.GroupChat.CHAT_ID.concat("=?");
 
-    public int getState() {
+    public GroupChat.State getState() {
         return mState;
     }
 
@@ -74,7 +75,7 @@ public class GroupChatDAO implements Parcelable {
         return mTimestamp;
     }
 
-    public int getReasonCode() {
+    public GroupChat.ReasonCode getReasonCode() {
         return mReasonCode;
     }
 
@@ -85,23 +86,23 @@ public class GroupChatDAO implements Parcelable {
      */
     public GroupChatDAO(Parcel source) {
         mChatId = source.readString();
-        mState = source.readInt();
+        mState = GroupChat.State.valueOf(source.readInt());
         mDirection = Direction.valueOf(source.readInt());
         mTimestamp = source.readLong();
         mSubject = source.readString();
         mParticipants = source.readString();
-        mReasonCode = source.readInt();
+        mReasonCode = GroupChat.ReasonCode.valueOf(source.readInt());
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mChatId);
-        dest.writeInt(mState);
+        dest.writeInt(mState.toInt());
         dest.writeInt(mDirection.toInt());
         dest.writeLong(mTimestamp);
         dest.writeString(mSubject);
         dest.writeString(mParticipants);
-        dest.writeInt(mReasonCode);
+        dest.writeInt(mReasonCode.toInt());
     };
 
     /**
@@ -126,14 +127,15 @@ public class GroupChatDAO implements Parcelable {
             }
             this.mChatId = chatId;
             mSubject = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.SUBJECT));
-            mState = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.STATE));
+            mState = GroupChat.State.valueOf(cursor.getInt(cursor
+                    .getColumnIndexOrThrow(ChatLog.GroupChat.STATE)));
             mDirection = Direction.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(ChatLog.GroupChat.DIRECTION)));
             mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.TIMESTAMP));
             mParticipants = cursor.getString(cursor
                     .getColumnIndexOrThrow(ChatLog.GroupChat.PARTICIPANTS));
-            mReasonCode = cursor
-                    .getInt(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.REASON_CODE));
+            mReasonCode = GroupChat.ReasonCode.valueOf(cursor
+                    .getInt(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.REASON_CODE)));
         } catch (Exception e) {
             throw e;
         } finally {

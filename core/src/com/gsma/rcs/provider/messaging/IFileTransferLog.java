@@ -81,7 +81,8 @@ public interface IFileTransferLog {
      * @param reasonCode Reason code
      */
     public void addIncomingGroupFileTransfer(String fileTransferId, String chatId,
-            ContactId contact, MmContent content, MmContent fileIcon, State state, ReasonCode reasonCode);
+            ContactId contact, MmContent content, MmContent fileIcon, State state,
+            ReasonCode reasonCode);
 
     /**
      * Set file transfer state and reason code
@@ -90,7 +91,8 @@ public interface IFileTransferLog {
      * @param state File transfer state
      * @param reasonCode File transfer state reason code
      */
-    public void setFileTransferStateAndReasonCode(String fileTransferId, State state, ReasonCode reasonCode);
+    public void setFileTransferStateAndReasonCode(String fileTransferId, State state,
+            ReasonCode reasonCode);
 
     /**
      * Update file transfer read status

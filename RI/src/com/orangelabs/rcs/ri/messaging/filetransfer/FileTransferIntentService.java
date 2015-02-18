@@ -111,7 +111,7 @@ public class FileTransferIntentService extends IntentService {
             }
 
             // Check if it's a spam
-            if (ftDao.getReasonCode() == FileTransfer.ReasonCode.REJECTED_SPAM) {
+            if (FileTransfer.ReasonCode.REJECTED_SPAM == ftDao.getReasonCode()) {
                 if (LogUtils.isActive) {
                     Log.e(LOGTAG, "Do nothing on a spam");
                 }

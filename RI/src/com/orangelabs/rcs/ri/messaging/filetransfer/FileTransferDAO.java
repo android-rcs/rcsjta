@@ -28,6 +28,7 @@ import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 /**
@@ -49,7 +50,7 @@ public class FileTransferDAO implements Parcelable {
 
     private String mMimeType;
 
-    private int mState;
+    private FileTransfer.State mState;
 
     private ReadStatus mReadStatus;
 
@@ -69,12 +70,12 @@ public class FileTransferDAO implements Parcelable {
 
     private Uri mThumbnail;
 
-    private int mReasonCode;
+    private FileTransfer.ReasonCode mReasonCode;
 
     private static final String WHERE_CLAUSE = new StringBuilder(FileTransferLog.FT_ID)
             .append("=?").toString();
 
-    public int getState() {
+    public FileTransfer.State getState() {
         return mState;
     }
 
@@ -138,6 +139,10 @@ public class FileTransferDAO implements Parcelable {
         return mThumbnail;
     }
 
+    public FileTransfer.ReasonCode getReasonCode() {
+        return mReasonCode;
+    }
+
     /**
      * Constructor
      * 
@@ -160,7 +165,7 @@ public class FileTransferDAO implements Parcelable {
         mFilename = source.readString();
         mChatId = source.readString();
         mMimeType = source.readString();
-        mState = source.readInt();
+        mState = FileTransfer.State.valueOf(source.readInt());
         mReadStatus = ReadStatus.valueOf(source.readInt());
         mDirection = Direction.valueOf(source.readInt());
         mTimestamp = source.readLong();
@@ -175,7 +180,7 @@ public class FileTransferDAO implements Parcelable {
         } else {
             mThumbnail = null;
         }
-        mReasonCode = source.readInt();
+        mReasonCode = FileTransfer.ReasonCode.valueOf(source.readInt());
     }
 
     /**
@@ -209,7 +214,8 @@ public class FileTransferDAO implements Parcelable {
             mFile = Uri.parse(cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FILE)));
             mFilename = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FILENAME));
             mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.MIME_TYPE));
-            mState = cursor.getInt(cursor.getColumnIndexOrThrow(FileTransferLog.STATE));
+            mState = FileTransfer.State.valueOf(cursor.getInt(cursor
+                    .getColumnIndexOrThrow(FileTransferLog.STATE)));
             mReadStatus = ReadStatus.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(FileTransferLog.READ_STATUS)));
             mDirection = Direction.valueOf(cursor.getInt(cursor
@@ -229,7 +235,8 @@ public class FileTransferDAO implements Parcelable {
             if (fileicon != null) {
                 mThumbnail = Uri.parse(fileicon);
             }
-            mReasonCode = cursor.getInt(cursor.getColumnIndexOrThrow(FileTransferLog.REASON_CODE));
+            mReasonCode = FileTransfer.ReasonCode.valueOf(cursor.getInt(cursor
+                    .getColumnIndexOrThrow(FileTransferLog.REASON_CODE)));
         } catch (Exception e) {
             throw e;
         } finally {
@@ -269,7 +276,7 @@ public class FileTransferDAO implements Parcelable {
         dest.writeString(mFilename);
         dest.writeString(mChatId);
         dest.writeString(mMimeType);
-        dest.writeInt(mState);
+        dest.writeInt(mState.toInt());
         dest.writeInt(mReadStatus.toInt());
         dest.writeInt(mDirection.toInt());
         dest.writeLong(mTimestamp);
@@ -284,7 +291,7 @@ public class FileTransferDAO implements Parcelable {
         } else {
             dest.writeInt(0);
         }
-        dest.writeInt(mReasonCode);
+        dest.writeInt(mReasonCode.toInt());
     };
 
     public static final Parcelable.Creator<FileTransferDAO> CREATOR = new Parcelable.Creator<FileTransferDAO>() {
@@ -299,7 +306,4 @@ public class FileTransferDAO implements Parcelable {
         }
     };
 
-    public int getReasonCode() {
-        return mReasonCode;
-    }
 }

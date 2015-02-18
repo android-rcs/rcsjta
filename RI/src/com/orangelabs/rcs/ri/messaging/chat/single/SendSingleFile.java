@@ -29,8 +29,8 @@ import android.widget.TextView;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
-import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
+import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.messaging.chat.SendFile;
@@ -77,43 +77,32 @@ public class SendSingleFile extends SendFile {
         }
 
         @Override
-        public void onStateChanged(ContactId contact, String transferId, final int state,
-                final int reasonCode) {
+        public void onStateChanged(ContactId contact, String transferId,
+                final FileTransfer.State state,
+                FileTransfer.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "onTransferStateChanged contact=" + contact + " transferId="
                         + transferId + " state=" + state + " reason=" + reasonCode);
-            }
-            if (state > RiApplication.FT_STATES.length) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "onTransferStateChanged unhandled state=" + state);
-                }
-                return;
-            }
-            if (reasonCode > RiApplication.FT_REASON_CODES.length) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "onTransferStateChanged unhandled reason=" + reasonCode);
-                }
-                return;
             }
             // Discard event if not for current transferId
             if (mTransferId == null || !mTransferId.equals(transferId)) {
                 return;
             }
-            final String _reasonCode = RiApplication.FT_REASON_CODES[reasonCode];
-            final String _state = RiApplication.FT_STATES[state];
+            final String _reasonCode = RiApplication.FT_REASON_CODES[reasonCode.toInt()];
+            final String _state = RiApplication.FT_STATES[state.toInt()];
             handler.post(new Runnable() {
                 public void run() {
                     TextView statusView = (TextView) findViewById(R.id.progress_status);
                     switch (state) {
-                        case FileTransfer.State.STARTED:
-                        case FileTransfer.State.TRANSFERRED:
+                        case STARTED:
+                        case TRANSFERRED:
                             // hide progress dialog
                             hideProgressDialog();
                             // Display transfer state started
                             statusView.setText(_state);
                             break;
 
-                        case FileTransfer.State.ABORTED:
+                        case ABORTED:
                             // Transfer is aborted: hide progress dialog then
                             // exit
                             hideProgressDialog();
@@ -122,7 +111,7 @@ public class SendSingleFile extends SendFile {
                                     mExitOnce);
                             break;
 
-                        case FileTransfer.State.REJECTED:
+                        case REJECTED:
                             // Transfer is rejected: hide progress dialog then
                             // exit
                             hideProgressDialog();
@@ -131,7 +120,7 @@ public class SendSingleFile extends SendFile {
                                     mExitOnce);
                             break;
 
-                        case FileTransfer.State.FAILED:
+                        case FAILED:
                             // Transfer failed: hide progress dialog then exit
                             hideProgressDialog();
                             Utils.showMessageAndExit(SendSingleFile.this,

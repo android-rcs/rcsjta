@@ -410,7 +410,8 @@ public class FileTransferService extends RcsService {
             throws RcsServiceException {
         if (mApi != null) {
             try {
-                WeakReference<IOneToOneFileTransferListener> weakRef = mOneToOneFileTransferListeners.remove(listener);
+                WeakReference<IOneToOneFileTransferListener> weakRef = mOneToOneFileTransferListeners
+                        .remove(listener);
                 if (weakRef == null) {
                     return;
                 }
@@ -457,12 +458,13 @@ public class FileTransferService extends RcsService {
     public void removeEventListener(GroupFileTransferListener listener) throws RcsServiceException {
         if (mApi != null) {
             try {
-                WeakReference<IGroupFileTransferListener> weakRef = mGroupFileTransferListeners.remove(listener);
+                WeakReference<IGroupFileTransferListener> weakRef = mGroupFileTransferListeners
+                        .remove(listener);
                 if (weakRef == null) {
                     return;
                 }
                 IGroupFileTransferListener rcsListener = weakRef.get();
-                if ( rcsListener != null) {
+                if (rcsListener != null) {
                     mApi.removeEventListener3(rcsListener);
                 }
             } catch (Exception e) {

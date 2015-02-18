@@ -133,14 +133,14 @@ public class InstantMessagingService extends ImsService {
      * Chat features tags
      */
     public final static String[] CHAT_FEATURE_TAGS = {
-        FeatureTags.FEATURE_OMA_IM
+            FeatureTags.FEATURE_OMA_IM
     };
 
     /**
      * File transfer features tags
      */
     public final static String[] FT_FEATURE_TAGS = {
-        FeatureTags.FEATURE_OMA_IM
+            FeatureTags.FEATURE_OMA_IM
     };
 
     /**
@@ -181,7 +181,8 @@ public class InstantMessagingService extends ImsService {
         mMessagingLog = messagingLog;
     }
 
-    private void handleFileTransferInvitationRejected(SipRequest invite, FileTransfer.ReasonCode reasonCode) {
+    private void handleFileTransferInvitationRejected(SipRequest invite,
+            FileTransfer.ReasonCode reasonCode) {
         ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
         MmContent content = ContentManager.createMmContentFromSdp(invite);
         MmContent fileIcon = FileTransferUtils.extractFileIcon(invite);

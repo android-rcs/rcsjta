@@ -385,7 +385,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      */
     public void handleSessionAborted(ContactId contact, int imsServiceSessionErrorCode) {
         if (logger.isActivated()) {
-            logger.info("Session aborted (imsServiceSessionErrorCode " + imsServiceSessionErrorCode + ")");
+            logger.info("Session aborted (imsServiceSessionErrorCode " + imsServiceSessionErrorCode
+                    + ")");
         }
         ReasonCode reasonCode = imsServiceSessionErrorToReasonCode(imsServiceSessionErrorCode);
         synchronized (lock) {

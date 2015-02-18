@@ -150,7 +150,8 @@ public class ImageSharingList extends Activity {
             Long filesize = cursor.getLong(holder.columnFilesize);
             holder.filesizeText.setText(getString(R.string.label_filesize, filesize));
 
-            int state = cursor.getInt(holder.columnState);
+            ImageSharing.State state = ImageSharing.State
+                    .valueOf(cursor.getInt(holder.columnState));
             holder.stateText.setText(getString(R.string.label_session_state, decodeState(state)));
 
             Direction direction = Direction.valueOf(cursor.getInt(holder.columnDirection));
@@ -213,25 +214,25 @@ public class ImageSharingList extends Activity {
      * @param state State
      * @return String
      */
-    private String decodeState(int state) {
+    private String decodeState(ImageSharing.State state) {
         switch (state) {
-            case ImageSharing.State.INVITED:
+            case INVITED:
                 return getString(R.string.label_state_invited);
-            case ImageSharing.State.INITIATING:
+            case INITIATING:
                 return getString(R.string.label_state_initiating);
-            case ImageSharing.State.STARTED:
+            case STARTED:
                 return getString(R.string.label_state_started);
-            case ImageSharing.State.ABORTED:
+            case ABORTED:
                 return getString(R.string.label_state_aborted);
-            case ImageSharing.State.FAILED:
+            case FAILED:
                 return getString(R.string.label_state_failed);
-            case ImageSharing.State.TRANSFERRED:
+            case TRANSFERRED:
                 return getString(R.string.label_state_transferred);
-            case ImageSharing.State.REJECTED:
+            case REJECTED:
                 return getString(R.string.label_state_rejected);
-            case ImageSharing.State.RINGING:
+            case RINGING:
                 return getString(R.string.label_state_ringing);
-            case ImageSharing.State.ACCEPTING:
+            case ACCEPTING:
                 return getString(R.string.label_state_accepting);
             default:
                 return getString(R.string.label_state_unknown);

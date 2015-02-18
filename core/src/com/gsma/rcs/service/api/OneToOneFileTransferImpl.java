@@ -516,15 +516,18 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                         return true;
                     default:
                         if (logger.isActivated()) {
-                            logger.debug(new StringBuilder("Cannot resend transfer with fileTransferId ")
-                                .append(mFileTransferId).append(" as reasonCode=").append(rcsReasonCode).toString());
+                            logger.debug(new StringBuilder(
+                                    "Cannot resend transfer with fileTransferId ")
+                                    .append(mFileTransferId).append(" as reasonCode=")
+                                    .append(rcsReasonCode).toString());
                         }
                         return false;
-                    }
+                }
             default:
                 if (logger.isActivated()) {
                     logger.debug(new StringBuilder("Cannot resend transfer with fileTransferId ")
-                            .append(mFileTransferId).append(" as state=").append(rcsState).toString());
+                            .append(mFileTransferId).append(" as state=").append(rcsState)
+                            .toString());
                 }
                 return false;
         }

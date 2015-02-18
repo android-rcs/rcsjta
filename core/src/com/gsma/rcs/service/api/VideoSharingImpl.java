@@ -414,7 +414,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
      */
     public void handleSessionAborted(ContactId contact, int imsServiceSessionError) {
         if (logger.isActivated()) {
-            logger.info("Session aborted, imsServiceSessionError=".concat(String.valueOf(imsServiceSessionError)));
+            logger.info("Session aborted, imsServiceSessionError=".concat(String
+                    .valueOf(imsServiceSessionError)));
         }
         long currentDuration = getCurrentDuration();
         synchronized (mLock) {

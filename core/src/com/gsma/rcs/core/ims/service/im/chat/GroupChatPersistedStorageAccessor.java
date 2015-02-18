@@ -181,7 +181,8 @@ public class GroupChatPersistedStorageAccessor {
         mMessagingLog.setRejectNextGroupChatNextInvitation(mChatId);
     }
 
-    public void setFileTransferStateAndReasonCode(String fileTransferId, FileTransfer.State state, FileTransfer.ReasonCode reasonCode) {
+    public void setFileTransferStateAndReasonCode(String fileTransferId, FileTransfer.State state,
+            FileTransfer.ReasonCode reasonCode) {
         mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, state, reasonCode);
     }
 }

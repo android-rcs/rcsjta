@@ -157,36 +157,25 @@ public class InitiateFileTransfer extends Activity {
         }
 
         @Override
-        public void onStateChanged(ContactId contact, String transferId, final int state,
-                final int reasonCode) {
+        public void onStateChanged(ContactId contact, String transferId,
+                final FileTransfer.State state,
+                final FileTransfer.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "onTransferStateChanged contact=" + contact + " transferId="
                         + transferId + " state=" + state + " reason=" + reasonCode);
-            }
-            if (state > RiApplication.FT_STATES.length) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "onTransferStateChanged unhandled state=" + state);
-                }
-                return;
-            }
-            if (reasonCode > RiApplication.FT_REASON_CODES.length) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "onTransferStateChanged unhandled reason=" + reasonCode);
-                }
-                return;
             }
             // Discard event if not for current transferId
             if (InitiateFileTransfer.this.ftId == null
                     || !InitiateFileTransfer.this.ftId.equals(transferId)) {
                 return;
             }
-            final String _reasonCode = RiApplication.FT_REASON_CODES[reasonCode];
-            final String _state = RiApplication.FT_STATES[state];
+            final String _reasonCode = RiApplication.FT_REASON_CODES[reasonCode.toInt()];
+            final String _state = RiApplication.FT_STATES[state.toInt()];
             handler.post(new Runnable() {
                 public void run() {
                     TextView statusView = (TextView) findViewById(R.id.progress_status);
                     switch (state) {
-                        case FileTransfer.State.STARTED:
+                        case STARTED:
                             // Session is well established : hide progress
                             // dialog
                             hideProgressDialog();
@@ -194,7 +183,7 @@ public class InitiateFileTransfer extends Activity {
                             statusView.setText(_state);
                             break;
 
-                        case FileTransfer.State.ABORTED:
+                        case ABORTED:
                             // Session is aborted: hide progress dialog then
                             // exit
                             hideProgressDialog();
@@ -203,7 +192,7 @@ public class InitiateFileTransfer extends Activity {
                                     mExitOnce);
                             break;
 
-                        case FileTransfer.State.REJECTED:
+                        case REJECTED:
                             // Session is rejected: hide progress dialog then
                             // exit
                             hideProgressDialog();
@@ -212,7 +201,7 @@ public class InitiateFileTransfer extends Activity {
                                     mExitOnce);
                             break;
 
-                        case FileTransfer.State.FAILED:
+                        case FAILED:
                             // Session failed: hide progress dialog then exit
                             hideProgressDialog();
                             Utils.showMessageAndExit(InitiateFileTransfer.this,
@@ -220,7 +209,7 @@ public class InitiateFileTransfer extends Activity {
                                     mExitOnce);
                             break;
 
-                        case FileTransfer.State.TRANSFERRED:
+                        case TRANSFERRED:
                             // Hide progress dialog
                             hideProgressDialog();
                             // Display transfer progress

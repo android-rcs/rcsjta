@@ -141,47 +141,35 @@ public class IPCallView extends Activity {
     private IPCallListener callListener = new IPCallListener() {
 
         @Override
-        public void onIPCallStateChanged(ContactId contact, String callId, final int state,
-                int reasonCode) {
+        public void onIPCallStateChanged(ContactId contact, String callId,
+                final IPCall.State state,
+                IPCall.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "onIPCallStateChanged contact=" + contact + " callId=" + callId
                         + " state=" + state + " reason=" + reasonCode);
-            }
-            // TODO : remove controls (CR031 enum)
-            if (state > RiApplication.IPCALL_STATES.length) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "onIPCallStateChanged unhandled state=" + state);
-                }
-                return;
-            }
-            if (reasonCode > RiApplication.IPCALL_REASON_CODES.length) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "onIPCallStateChanged unhandled reason=" + reasonCode);
-                }
-                return;
             }
             // Discard event if not for current callId
             if (IPCallView.this.callId == null || !IPCallView.this.callId.equals(callId)) {
                 return;
             }
-            final String _reasonCode = RiApplication.IPCALL_REASON_CODES[reasonCode];
+            final String _reasonCode = RiApplication.IPCALL_REASON_CODES[reasonCode.toInt()];
             handler.post(new Runnable() {
                 public void run() {
 
                     ToggleButton holdBtn = (ToggleButton) findViewById(R.id.hold);
                     switch (state) {
-                        case IPCall.State.STARTED:
+                        case STARTED:
                             // Session is established: hide progress dialog
                             hideProgressDialog();
                             holdBtn.setChecked(false);
                             break;
 
-                        case IPCall.State.HOLD:
+                        case HOLD:
                             // Update UI
                             holdBtn.setChecked(true);
                             break;
 
-                        case IPCall.State.ABORTED:
+                        case ABORTED:
                             // Session is aborted: hide progress dialog then
                             // exit
                             hideProgressDialog();
@@ -190,7 +178,7 @@ public class IPCallView extends Activity {
                                     mExitOnce);
                             break;
 
-                        case IPCall.State.REJECTED:
+                        case REJECTED:
                             // Session is rejected: hide progress dialog then
                             // exit
                             hideProgressDialog();
@@ -199,7 +187,7 @@ public class IPCallView extends Activity {
                                     mExitOnce);
                             break;
 
-                        case IPCall.State.FAILED:
+                        case FAILED:
                             // Session is failed: hide progress dialog then exit
                             hideProgressDialog();
                             Utils.showMessageAndExit(IPCallView.this,
@@ -211,7 +199,7 @@ public class IPCallView extends Activity {
                                 Log.d(LOGTAG,
                                         "onIPCallStateChanged "
                                                 + getString(R.string.label_ipcall_state_changed,
-                                                        RiApplication.IPCALL_STATES[state],
+                                                        RiApplication.IPCALL_STATES[state.toInt()],
                                                         _reasonCode));
                             }
                     }

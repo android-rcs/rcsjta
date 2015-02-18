@@ -143,7 +143,8 @@ public class VideoSharingList extends Activity {
             Long duration = cursor.getLong(holder.columnDuration);
             holder.durationText.setText(getString(R.string.label_video_duration, duration));
 
-            int state = cursor.getInt(holder.columnState);
+            VideoSharing.State state = VideoSharing.State
+                    .valueOf(cursor.getInt(holder.columnState));
             holder.stateText.setText(getString(R.string.label_session_state, decodeState(state)));
 
             Direction direction = Direction.valueOf(cursor.getInt(holder.columnDirection));
@@ -200,23 +201,23 @@ public class VideoSharingList extends Activity {
      * @param state State
      * @return String
      */
-    private String decodeState(int state) {
+    private String decodeState(VideoSharing.State state) {
         switch (state) {
-            case VideoSharing.State.INVITED:
+            case INVITED:
                 return getString(R.string.label_state_invited);
-            case VideoSharing.State.INITIATING:
+            case INITIATING:
                 return getString(R.string.label_state_initiating);
-            case VideoSharing.State.STARTED:
+            case STARTED:
                 return getString(R.string.label_state_started);
-            case VideoSharing.State.ABORTED:
+            case ABORTED:
                 return getString(R.string.label_state_aborted);
-            case VideoSharing.State.FAILED:
+            case FAILED:
                 return getString(R.string.label_state_failed);
-            case VideoSharing.State.REJECTED:
+            case REJECTED:
                 return getString(R.string.label_state_rejected);
-            case VideoSharing.State.RINGING:
+            case RINGING:
                 return getString(R.string.label_state_ringing);
-            case VideoSharing.State.ACCEPTING:
+            case ACCEPTING:
                 return getString(R.string.label_state_accepting);
             default:
                 return getString(R.string.label_state_unknown);

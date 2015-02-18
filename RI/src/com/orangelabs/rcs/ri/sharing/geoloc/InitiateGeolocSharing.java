@@ -41,9 +41,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.contacts.ContactId;
 import com.gsma.services.rcs.contacts.ContactUtils;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
@@ -143,8 +143,9 @@ public class InitiateGeolocSharing extends Activity {
         }
 
         @Override
-        public void onStateChanged(final ContactId contact, String sharingId, final int state,
-                int reasonCode) {
+        public void onStateChanged(final ContactId contact, String sharingId,
+                final GeolocSharing.State state,
+                GeolocSharing.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "onStateChanged contact=" + contact + " sharingId=" + sharingId
                         + " state=" + state + " reason=" + reasonCode);
@@ -154,33 +155,20 @@ public class InitiateGeolocSharing extends Activity {
                     || !InitiateGeolocSharing.this.sharingId.equals(sharingId)) {
                 return;
             }
-            if (state > RiApplication.GSH_STATES.length) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "onStateChanged unhandled state=" + state);
-                }
-                return;
-            }
-            if (reasonCode > RiApplication.GSH_REASON_CODES.length) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "onStateChanged unhandled reason=" + reasonCode);
-                }
-                return;
-            }
-            final String _state = RiApplication.GSH_STATES[state];
-            final String _reasonCode = RiApplication.GSH_REASON_CODES[reasonCode];
-
+            final String _state = RiApplication.GSH_STATES[state.toInt()];
+            final String _reasonCode = RiApplication.GSH_REASON_CODES[reasonCode.toInt()];
             handler.post(new Runnable() {
                 public void run() {
                     TextView statusView = (TextView) findViewById(R.id.progress_status);
                     switch (state) {
-                        case GeolocSharing.State.STARTED:
+                        case STARTED:
                             // Session is established: hide progress dialog
                             hideProgressDialog();
                             // Display session status
                             statusView.setText(_state);
                             break;
 
-                        case GeolocSharing.State.ABORTED:
+                        case ABORTED:
                             // sharing aborted: hide progress dialog then exit
                             hideProgressDialog();
                             // Display session status
@@ -189,7 +177,7 @@ public class InitiateGeolocSharing extends Activity {
                                     mExitOnce);
                             break;
 
-                        case GeolocSharing.State.REJECTED:
+                        case REJECTED:
                             // sharing rejected: hide progress dialog then exit
                             hideProgressDialog();
                             Utils.showMessageAndExit(InitiateGeolocSharing.this,
@@ -197,7 +185,7 @@ public class InitiateGeolocSharing extends Activity {
                                     mExitOnce);
                             break;
 
-                        case GeolocSharing.State.FAILED:
+                        case FAILED:
                             // sharing failed: hide progress dialog then exit
                             hideProgressDialog();
                             Utils.showMessageAndExit(InitiateGeolocSharing.this,
@@ -205,7 +193,7 @@ public class InitiateGeolocSharing extends Activity {
                                     mExitOnce);
                             break;
 
-                        case GeolocSharing.State.TRANSFERRED:
+                        case TRANSFERRED:
                             // Hide progress dialog
                             hideProgressDialog();
                             // Display transfer progress
@@ -229,6 +217,7 @@ public class InitiateGeolocSharing extends Activity {
                 }
             });
         }
+
     };
 
     @Override

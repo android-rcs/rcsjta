@@ -179,7 +179,8 @@ public class FileTransferList extends Activity {
             Long filesize = cursor.getLong(holder.columnFilesize);
             holder.filesizeText.setText(getString(R.string.label_filesize, filesize));
 
-            int state = cursor.getInt(holder.columnState);
+            FileTransfer.State state = FileTransfer.State
+                    .valueOf(cursor.getInt(holder.columnState));
             holder.stateText.setText(getString(R.string.label_session_state, decodeState(state)));
 
             Direction direction = Direction.valueOf(cursor.getInt(holder.columnDirection));
@@ -244,31 +245,31 @@ public class FileTransferList extends Activity {
      * @param state State
      * @return String
      */
-    private String decodeState(int state) {
+    private String decodeState(FileTransfer.State state) {
         switch (state) {
-            case FileTransfer.State.INVITED:
+            case INVITED:
                 return getString(R.string.label_state_invited);
-            case FileTransfer.State.INITIATING:
+            case INITIATING:
                 return getString(R.string.label_state_initiating);
-            case FileTransfer.State.STARTED:
+            case STARTED:
                 return getString(R.string.label_state_started);
-            case FileTransfer.State.TRANSFERRED:
+            case TRANSFERRED:
                 return getString(R.string.label_state_transferred);
-            case FileTransfer.State.ABORTED:
+            case ABORTED:
                 return getString(R.string.label_state_aborted);
-            case FileTransfer.State.FAILED:
+            case FAILED:
                 return getString(R.string.label_state_failed);
-            case FileTransfer.State.PAUSED:
+            case PAUSED:
                 return getString(R.string.label_state_paused);
-            case FileTransfer.State.REJECTED:
+            case REJECTED:
                 return getString(R.string.label_state_rejected);
-            case FileTransfer.State.ACCEPTING:
+            case ACCEPTING:
                 return getString(R.string.label_state_accepting);
-            case FileTransfer.State.DELIVERED:
+            case DELIVERED:
                 return getString(R.string.label_state_delivered);
-            case FileTransfer.State.DISPLAYED:
+            case DISPLAYED:
                 return getString(R.string.label_state_displayed);
-            case FileTransfer.State.QUEUED:
+            case QUEUED:
                 return getString(R.string.label_state_queued);
             default:
                 return getString(R.string.label_state_unknown);
