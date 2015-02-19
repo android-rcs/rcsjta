@@ -341,6 +341,15 @@ public class RcsSettings {
     }
 
     /**
+     * Get UUID(Universally Unique Identifier) format: 8-4-4-4-12 hex digits
+     *
+     * @return uuid value
+     */
+    public String getUUID() {
+        return readString(RcsSettingsData.UUID);
+    }
+
+    /**
      * Get user profile IMS display name associated to IMPU
      *
      * @return String

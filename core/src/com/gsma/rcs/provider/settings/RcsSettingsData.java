@@ -675,6 +675,12 @@ public class RcsSettingsData {
     public static final String MSISDN = "MSISDN";
     /* package private */static final String DEFAULT_MSISDN = "";
 
+    /**
+     * UUID value for populating SIP instance
+     */
+    public static final String UUID = "UUID";
+    /* package private */static final String DEFAULT_UUID = "";
+
     // ---------------------------------------------------------------------------
     // Stack settings
     // ---------------------------------------------------------------------------

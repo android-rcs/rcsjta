@@ -2,7 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- * Copyright (C) 2014 Sony Mobile Communications AB.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * NOTE: This file has been modified by Sony Mobile Communications AB.
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
  * Modifications are licensed under the License.
  ******************************************************************************/
 
@@ -73,7 +73,7 @@ public class RcsSettingsProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 109;
+        private static final int DATABASE_VERSION = 110;
 
         /**
          * Add a parameter in the db
@@ -194,6 +194,7 @@ public class RcsSettingsProvider extends ContentProvider {
             addParameter(db, RcsSettingsData.ENDUSER_CONFIRMATION_URI,
                     RcsSettingsData.DEFAULT_ENDUSER_CONFIRMATION_URI);
             addParameter(db, RcsSettingsData.MSISDN, RcsSettingsData.DEFAULT_MSISDN);
+            addParameter(db, RcsSettingsData.UUID, RcsSettingsData.DEFAULT_UUID);
             addParameter(db, RcsSettingsData.CAPABILITY_CS_VIDEO,
                     RcsSettingsData.DEFAULT_CAPABILITY_CS_VIDEO);
             addParameter(db, RcsSettingsData.CAPABILITY_IMAGE_SHARING,

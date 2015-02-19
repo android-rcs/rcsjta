@@ -24,26 +24,27 @@ package com.gsma.rcs.provisioning;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.io.ByteArrayInputStream;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import javax2.sip.ListeningPoint;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData;
 import com.gsma.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
 import com.gsma.rcs.provider.settings.RcsSettingsData.EnableRcseSwitch;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
+import com.gsma.rcs.utils.DeviceUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
+import com.gsma.services.rcs.RcsServiceException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+
+import java.io.ByteArrayInputStream;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax2.sip.ListeningPoint;
 
 /**
  * Provisioning parser
@@ -62,6 +63,8 @@ public class ProvisioningParser {
     private static final int TYPE_INT = 1;
 
     private static final long SECONDS_TO_MILILSECONDS_CONVERSION_RATE = 1000;
+
+    private static final String UUID_VALUE = "uuid_Value";
 
     /**
      * Provisioning info
@@ -1288,6 +1291,7 @@ public class ProvisioningParser {
     private void parseOther(Node node) {
         String endUserConfReqId = null;
         String deviceID = null;
+        String uuidValue = null;
         String aaIPCallBreakOut = null;
         String csIPCallBreakOut = null;
         String rcsIPVideoCallUpgradeFromCS = null;
@@ -1324,6 +1328,13 @@ public class ProvisioningParser {
                     if ((deviceID = getValueByParamName("deviceID", childnode, TYPE_INT)) != null) {
                         mRcsSettings.writeBoolean(RcsSettingsData.USE_IMEI_AS_DEVICE_ID,
                                 deviceID.equals("0"));
+                        continue;
+                    }
+                }
+
+                if (uuidValue == null) {
+                    if ((uuidValue = getValueByParamName(UUID_VALUE, childnode, TYPE_TXT)) != null) {
+                        mRcsSettings.writeParameter(RcsSettingsData.UUID, uuidValue);
                         continue;
                     }
                 }
@@ -1386,6 +1397,24 @@ public class ProvisioningParser {
                 // Not supported: "WarnSizeImageShare"
 
             } while ((childnode = childnode.getNextSibling()) != null);
+
+            /**
+             * Check if UUID value is still null at this point. If NULL,then generate it as per
+             * RFC4122, section 4.2.
+             */
+            if (uuidValue == null) {
+                try {
+                    mRcsSettings.writeParameter(RcsSettingsData.UUID, DeviceUtils.generateUUID()
+                            .toString());
+                } catch (RcsServiceException e) {
+                    if (logger.isActivated()) {
+                        logger.error(new StringBuilder(
+                                "Exception caught in ProvisioningParser.parseOther() while fetching uuid value;"
+                                        + " exception-msg=").append(e.getMessage()).append("!")
+                                .toString());
+                    }
+                }
+            }
         }
     }
 

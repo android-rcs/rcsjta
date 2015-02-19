@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +15,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core;
-
-import android.content.Context;
 
 import com.gsma.rcs.addressbook.AddressBookManager;
 import com.gsma.rcs.core.ims.ImsModule;
@@ -30,12 +32,15 @@ import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.terms.TermsConditionsService;
 import com.gsma.rcs.platform.AndroidFactory;
+import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.DeviceUtils;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.rcs.provider.messaging.MessagingLog;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.services.rcs.RcsServiceException;
+
+import android.content.Context;
 
 /**
  * Core (singleton pattern)
@@ -145,8 +150,14 @@ public class Core {
         Context context = AndroidFactory.getApplicationContext();
         // Get UUID
         if (logActivated) {
-            logger.info("My device UUID is ".concat(String.valueOf(DeviceUtils
-                    .getDeviceUUID(context))));
+            try {
+                logger.info("My device UUID is ".concat(String.valueOf(DeviceUtils
+                        .getDeviceUUID(context))));
+            } catch (RcsServiceException e) {
+                logger.error(new StringBuilder(
+                        "Exception caught while logging for device UUID; exception-msg=")
+                        .append(e.getMessage()).append("!").toString());
+            }
         }
 
         // Initialize the phone utils

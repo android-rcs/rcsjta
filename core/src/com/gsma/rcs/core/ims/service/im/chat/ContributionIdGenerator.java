@@ -31,6 +31,8 @@ import javax.crypto.spec.SecretKeySpec;
 
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.utils.DeviceUtils;
+import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.RcsServiceException;
 
 /**
  * Contribution ID generator based on RFC draft-kaplan-dispatch-session-id-03
@@ -39,33 +41,45 @@ import com.gsma.rcs.utils.DeviceUtils;
  */
 public class ContributionIdGenerator {
     /**
-     * Secret key
+     * The logger
      */
-    private static byte[] secretKey = generateSecretKey();
+    private static Logger logger = Logger.getLogger(ContributionIdGenerator.class.getName());
 
     /**
      * Secret Key generator.
      */
     private static byte[] generateSecretKey() {
-        // Get device ID
-        UUID uuid = DeviceUtils.getDeviceUUID(AndroidFactory.getApplicationContext());
-        byte[] key;
-        if (uuid != null) {
-            key = uuid.toString().getBytes(UTF8);
-        } else {
-            key = String.valueOf(System.currentTimeMillis()).getBytes(UTF8);
-        }
-
-        // Keep only 128 bits
+        final byte[] rawKey = generateRawKey();
+        /**
+         * Keep only 128 bits
+         */
         byte[] secretKey = new byte[16];
         for (int i = 0; i < 16; i++) {
-            if (key != null && key.length >= 16) {
-                secretKey[i] = key[i];
+            if (rawKey != null && rawKey.length >= 16) {
+                secretKey[i] = rawKey[i];
             } else {
                 secretKey[i] = '0';
             }
         }
         return secretKey;
+    }
+
+    /**
+     * Raw Key generator.
+     */
+    private static byte[] generateRawKey() {
+        try {
+            // Get device ID
+            final UUID uuid = DeviceUtils.getDeviceUUID(AndroidFactory.getApplicationContext());
+            return uuid.toString().getBytes(UTF8);
+        } catch (RcsServiceException e) {
+            if (logger.isActivated()) {
+                logger.error(new StringBuilder(
+                        "Exception caught in ContributionIdGenerator while generating Raw secret key; exception-msg=")
+                        .append(e.getMessage()).append("!").toString());
+            }
+            return String.valueOf(System.currentTimeMillis()).getBytes(UTF8);
+        }
     }
 
     /**
@@ -77,7 +91,7 @@ public class ContributionIdGenerator {
     public synchronized static String getContributionId(String callId) {
         try {
             // HMAC-SHA1 operation
-            SecretKeySpec sks = new SecretKeySpec(secretKey, "HmacSHA1");
+            SecretKeySpec sks = new SecretKeySpec(generateSecretKey(), "HmacSHA1");
             Mac mac = Mac.getInstance("HmacSHA1");
             mac.init(sks);
             byte[] contributionId = mac.doFinal(callId.getBytes(UTF8));
