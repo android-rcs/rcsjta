@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.network.registration;
@@ -51,6 +55,12 @@ import com.gsma.services.rcs.RcsServiceRegistration.ReasonCode;
  * @author JM. Auffret
  */
 public class RegistrationManager extends PeriodicRefresher {
+
+    /**
+     * First C Sequence
+     */
+    private static final int CSEQ_ONE = 1;
+
     /**
      * Expire period
      */
@@ -132,6 +142,18 @@ public class RegistrationManager extends PeriodicRefresher {
             mInstanceId = DeviceUtils.getInstanceId(AndroidFactory.getApplicationContext(),
                     rcsSettings);
         }
+    }
+
+    /**
+     * Get the expiry value duration for the next SIP register
+     *
+     * @return value of the expiry period
+     */
+    private int getExpiryValue() {
+        if (CSEQ_ONE == mDialogPath.getCseq()) {
+            return mRcsSettings.getRegisterExpirePeriod();
+        }
+        return mExpirePeriod;
     }
 
     /**
@@ -227,7 +249,7 @@ public class RegistrationManager extends PeriodicRefresher {
 
             // Create REGISTER request
             SipRequest register = SipMessageFactory.createRegister(mDialogPath, mFeatureTags,
-                    mRcsSettings.getRegisterExpirePeriod(), mInstanceId);
+                    getExpiryValue(), mInstanceId);
 
             // Send REGISTER request
             sendRegister(register);
