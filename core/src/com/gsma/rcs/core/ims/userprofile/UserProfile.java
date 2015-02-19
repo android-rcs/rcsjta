@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.userprofile;
@@ -35,6 +39,12 @@ import javax2.sip.header.Header;
  * @author JM. Auffret
  */
 public class UserProfile {
+
+    private static final String TEL_URI = "tel:";
+
+    private static final String SIP_URI = "sip:";
+
+    private static final char AT = '@';
 
     /**
      * User name
@@ -170,7 +180,10 @@ public class UserProfile {
      * @return Public URI
      */
     public String getPublicUriForRegistration() {
-        return "sip:" + contact + "@" + homeDomain;
+        if (RcsSettings.getInstance().isTelUriFormatUsed()) {
+            return new StringBuilder(TEL_URI).append(contact).toString();
+        }
+        return new StringBuilder(SIP_URI).append(contact).append(AT).append(homeDomain).toString();
     }
 
     /**
