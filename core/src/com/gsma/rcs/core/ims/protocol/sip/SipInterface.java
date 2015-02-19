@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.protocol.sip;
@@ -242,6 +246,9 @@ public class SipInterface implements SipListener {
             Properties properties = new Properties();
             properties.setProperty("javax2.sip.STACK_NAME", localIpAddress);
             properties.setProperty("gov2.nist.javax2.sip.THREAD_POOL_SIZE", "1");
+            final String outboundProxy = new StringBuilder().append(outboundProxyAddr).append(':')
+                    .append(outboundProxyPort).append('/').append(defaultProtocol).toString();
+            properties.setProperty("javax2.sip.OUTBOUND_PROXY", outboundProxy);
             if (sipTraceEnabled) {
                 // Activate SIP stack traces
                 boolean cleanLog = true;
