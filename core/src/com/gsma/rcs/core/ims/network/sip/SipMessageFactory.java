@@ -149,14 +149,6 @@ public class SipMessageFactory {
             // Set Allow header
             SipUtils.buildAllowHeader(register);
 
-            // Set the Route header
-            Vector<String> route = dialog.getSipStack().getDefaultRoutePath();
-            for (int i = 0; i < route.size(); i++) {
-                Header routeHeader = SipUtils.HEADER_FACTORY.createHeader(RouteHeader.NAME,
-                        route.elementAt(i));
-                register.addHeader(routeHeader);
-            }
-
             // Set the Expires header
             ExpiresHeader expHeader = SipUtils.HEADER_FACTORY.createExpiresHeader(expirePeriod);
             register.addHeader(expHeader);
