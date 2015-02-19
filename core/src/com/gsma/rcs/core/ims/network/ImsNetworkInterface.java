@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.network;
@@ -64,6 +68,16 @@ public abstract class ImsNetworkInterface {
 
     // Changed by Deutsche Telekom
     private static final String REGEX_IPV4 = "\\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\.|$)){4}\\b";
+
+    private static final char DOT = '.';
+
+    private static final String TRANSPORT_PROTOCOL_SERVICE_TLS = "SIPS+D2T";
+
+    private static final String SIP_SERVICE = "_sip._";
+
+    private static final String SIP_SERVICE_SECURE = "_sips._";
+
+    private static final String TRANSMISSION_CONTROL_PROTOCOL = "tcp";
 
     // Changed by Deutsche Telekom
     /**
@@ -459,6 +473,21 @@ public abstract class ImsNetworkInterface {
         return result;
     }
 
+    /**
+     * Get the SRV Query
+     *
+     * @return constructed srv query
+     */
+    private String getSrvQuery(String sipService) {
+        if (TRANSPORT_PROTOCOL_SERVICE_TLS.equalsIgnoreCase(sipService)) {
+            return new StringBuilder(SIP_SERVICE_SECURE)
+                    .append(TRANSMISSION_CONTROL_PROTOCOL).append(DOT).append(imsProxyAddr)
+                    .toString();
+        }
+        return new StringBuilder(SIP_SERVICE)
+                .append(imsProxyProtocol.toLowerCase()).append(DOT).append(imsProxyAddr).toString();
+    }
+
     // Changed by Deutsche Telekom
     /**
      * Get the DNS resolved fields.
@@ -537,13 +566,14 @@ public abstract class ImsNetworkInterface {
                 if (logger.isActivated()) {
                     logger.debug("No NAPTR record found: use DNS SRV instead");
                 }
-                String query;
-                if (imsProxyAddr.startsWith("_sip.")) {
-                    query = imsProxyAddr;
+                String srvQuery;
+                if (imsProxyAddr.startsWith(SIP_SERVICE)
+                        || imsProxyAddr.startsWith(SIP_SERVICE_SECURE)) {
+                    srvQuery = imsProxyAddr;
                 } else {
-                    query = "_sip._" + imsProxyProtocol.toLowerCase() + "." + imsProxyAddr;
+                    srvQuery = getSrvQuery(service);
                 }
-                Record[] srvRecords = getDnsRequest(query, resolver, Type.SRV);
+                Record[] srvRecords = getDnsRequest(srvQuery, resolver, Type.SRV);
                 if ((srvRecords != null) && (srvRecords.length > 0)) {
                     SRVRecord srvRecord = getBestDnsSRV(srvRecords);
                     dnsResolvedFields.ipAddress = getDnsA(srvRecord.getTarget().toString());
