@@ -31,22 +31,22 @@ import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.capability.Capabilities;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.IContactsService;
-import com.gsma.services.rcs.contacts.RcsContact;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.RcsContact;
+import com.gsma.services.rcs.contact.IContactService;
 
 /**
- * Contacts service API implementation
+ * Contact service API implementation
  * 
  * @author Jean-Marc AUFFRET
  * @author Philippe LEMORDANT
  */
-public class ContactsServiceImpl extends IContactsService.Stub {
+public class ContactServiceImpl extends IContactService.Stub {
     /**
      * The logger
      */
     private static final Logger logger = Logger
-            .getLogger(ContactsServiceImpl.class.getSimpleName());
+            .getLogger(ContactServiceImpl.class.getSimpleName());
 
     /**
      * Contacts manager
@@ -58,7 +58,7 @@ public class ContactsServiceImpl extends IContactsService.Stub {
      * 
      * @param contactsManager Contacts manager
      */
-    public ContactsServiceImpl(ContactsManager contactsManager) {
+    public ContactServiceImpl(ContactsManager contactsManager) {
         if (logger.isActivated()) {
             logger.info("Contacts service API is loaded");
         }

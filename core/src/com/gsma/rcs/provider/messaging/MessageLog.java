@@ -37,7 +37,7 @@ import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.ContentValues;
 import android.database.Cursor;

@@ -2,7 +2,7 @@ package com.gsma.services.rcs.filetransfer;
 
 import android.net.Uri;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * File transfer interface

@@ -25,7 +25,7 @@ package com.gsma.rcs.core.ims.service.ipcall;
 import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * IP call streaming session listener

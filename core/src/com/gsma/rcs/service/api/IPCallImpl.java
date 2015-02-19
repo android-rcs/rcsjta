@@ -35,7 +35,7 @@ import com.gsma.rcs.provider.ipcall.IPCallStateAndReasonCode;
 import com.gsma.rcs.service.broadcaster.IIPCallEventBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.ipcall.AudioCodec;
 import com.gsma.services.rcs.ipcall.IIPCall;
 import com.gsma.services.rcs.ipcall.IIPCallPlayer;

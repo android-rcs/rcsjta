@@ -52,8 +52,8 @@ import android.widget.Toast;
 
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.sharing.video.VideoDescriptor;
 import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharingListener;
@@ -442,9 +442,9 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
             ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
 
-            ContactUtils contactUtils = ContactUtils.getInstance(OutgoingVideoSharing.this);
+            ContactUtil contactUtil = ContactUtil.getInstance(OutgoingVideoSharing.this);
             try {
-                mContact = contactUtils.formatContact(phoneNumber);
+                mContact = contactUtil.formatContact(phoneNumber);
             } catch (RcsContactFormatException e1) {
                 Utils.showMessage(OutgoingVideoSharing.this,
                         getString(R.string.label_invalid_contact, phoneNumber));

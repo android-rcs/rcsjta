@@ -17,7 +17,7 @@
 package com.gsma.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.capability.Capabilities;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Interface to perform broadcast events on CapabilitiesListeners

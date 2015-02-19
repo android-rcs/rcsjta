@@ -7,7 +7,7 @@ import com.gsma.services.rcs.filetransfer.IFileTransfer;
 import com.gsma.services.rcs.filetransfer.IOneToOneFileTransferListener;
 import com.gsma.services.rcs.filetransfer.IGroupFileTransferListener;
 import com.gsma.services.rcs.filetransfer.IFileTransferServiceConfiguration;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * File transfer service API

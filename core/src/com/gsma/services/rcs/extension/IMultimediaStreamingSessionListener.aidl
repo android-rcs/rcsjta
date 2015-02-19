@@ -1,6 +1,6 @@
 package com.gsma.services.rcs.extension;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Callback methods for multimedia streaming session events

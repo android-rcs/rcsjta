@@ -27,8 +27,8 @@ import android.os.Parcelable;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
 
 /**
  * CHAT Message Data Object
@@ -168,8 +168,8 @@ public class ChatMessageDAO implements Parcelable {
             String contact = cursor
                     .getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTACT));
             if (contact != null) {
-                ContactUtils contactUtils = ContactUtils.getInstance(context);
-                mContact = contactUtils.formatContact(contact);
+                ContactUtil contactUtil = ContactUtil.getInstance(context);
+                mContact = contactUtil.formatContact(contact);
             }
             mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.MIME_TYPE));
             mContent = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTENT));

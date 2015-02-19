@@ -21,7 +21,7 @@ import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingLog;

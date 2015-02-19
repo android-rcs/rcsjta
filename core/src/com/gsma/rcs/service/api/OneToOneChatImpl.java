@@ -42,7 +42,7 @@ import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.chat.IChatMessage;
 import com.gsma.services.rcs.chat.IOneToOneChat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import java.util.Set;
 

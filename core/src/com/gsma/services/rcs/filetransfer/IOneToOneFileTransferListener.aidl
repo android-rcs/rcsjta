@@ -1,6 +1,6 @@
 package com.gsma.services.rcs.filetransfer;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Callback methods for one-to-one file transfer events

@@ -7,7 +7,7 @@ import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.filetransfer.IFileTransfer;
 import com.gsma.services.rcs.filetransfer.IOneToOneFileTransferListener;
 import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Group chat interface

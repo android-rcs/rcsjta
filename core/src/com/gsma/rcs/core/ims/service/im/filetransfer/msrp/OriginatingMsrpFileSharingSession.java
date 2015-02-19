@@ -31,6 +31,7 @@ import java.util.Collection;
 import javax2.sip.header.ContentDispositionHeader;
 import javax2.sip.header.ContentLengthHeader;
 import javax2.sip.header.ContentTypeHeader;
+
 import android.net.Uri;
 
 import com.gsma.rcs.core.content.MmContent;
@@ -58,7 +59,7 @@ import com.gsma.rcs.utils.Base64;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Originating file transfer session

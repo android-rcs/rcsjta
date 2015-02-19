@@ -20,7 +20,7 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.image.ImageSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.image.ImageSharing.State;
 import com.gsma.services.rcs.sharing.image.ImageSharingLog;

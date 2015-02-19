@@ -22,7 +22,7 @@
 
 package com.gsma.services.rcs.sharing.image;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.image.ImageSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.image.ImageSharing.State;
 

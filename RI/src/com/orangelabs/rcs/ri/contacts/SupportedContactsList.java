@@ -33,7 +33,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.gsma.services.rcs.contacts.RcsContact;
+import com.gsma.services.rcs.contact.RcsContact;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
@@ -81,12 +81,12 @@ public class SupportedContactsList extends Activity {
         // Register to API connection manager
         connectionManager = ApiConnectionManager.getInstance(this);
         if (connectionManager == null
-                || !connectionManager.isServiceConnected(RcsServiceName.CONTACTS)) {
+                || !connectionManager.isServiceConnected(RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     exitOnce);
             return;
         }
-        connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.CONTACTS);
+        connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.CONTACT);
     }
 
     @Override
@@ -114,7 +114,7 @@ public class SupportedContactsList extends Activity {
             String tag = tagEdit.getText().toString();
 
             // Get list of RCS contacts supporting a given tag
-            Set<RcsContact> supportedContacts = connectionManager.getContactsApi()
+            Set<RcsContact> supportedContacts = connectionManager.getContactApi()
                     .getRcsContactsSupporting(tag);
             List<RcsContact> contacts = new ArrayList<RcsContact>(supportedContacts);
             ListView listView = (ListView) findViewById(R.id.contacts);

@@ -35,7 +35,7 @@ import com.gsma.rcs.provider.sharing.VideoSharingStateAndReasonCode;
 import com.gsma.rcs.service.broadcaster.IVideoSharingEventBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.IVideoPlayer;
 import com.gsma.services.rcs.sharing.video.IVideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoCodec;

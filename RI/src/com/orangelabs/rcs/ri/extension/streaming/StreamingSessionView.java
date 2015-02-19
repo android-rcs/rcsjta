@@ -38,7 +38,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.extension.MultimediaSession;
 import com.gsma.services.rcs.extension.MultimediaSessionService;
 import com.gsma.services.rcs.extension.MultimediaStreamingSession;
@@ -232,13 +232,13 @@ public class StreamingSessionView extends Activity {
         connectionManager = ApiConnectionManager.getInstance(this);
         if (connectionManager == null
                 || !connectionManager.isServiceConnected(RcsServiceName.MULTIMEDIA,
-                        RcsServiceName.CONTACTS)) {
+                        RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     exitOnce);
             return;
         }
         connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.MULTIMEDIA,
-                RcsServiceName.CONTACTS);
+                RcsServiceName.CONTACT);
         try {
             // Add service listener
             connectionManager.getMultimediaSessionApi().addEventListener(serviceListener);

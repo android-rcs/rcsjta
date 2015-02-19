@@ -17,7 +17,7 @@
 package com.gsma.services.rcs.filetransfer;
 
 import com.gsma.services.rcs.GroupDeliveryInfo;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Group file transfer event listener

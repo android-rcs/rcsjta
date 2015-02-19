@@ -47,7 +47,7 @@ import com.gsma.rcs.core.ims.service.presence.rlmi.RlmiDocument;
 import com.gsma.rcs.core.ims.service.presence.rlmi.RlmiParser;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Subscribe manager for presence event

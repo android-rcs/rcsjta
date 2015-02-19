@@ -22,7 +22,7 @@
 
 package com.gsma.rcs.core.ims.service.im.chat;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import java.util.Date;
 

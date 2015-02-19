@@ -39,7 +39,7 @@ import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.ipcall.IIPCall;
 import com.gsma.services.rcs.ipcall.IIPCallListener;
 import com.gsma.services.rcs.ipcall.IIPCallPlayer;

@@ -90,14 +90,14 @@ public class ServiceConfigurationActivity extends Activity {
 
         // Register to API connection manager
         mCnxManager = ApiConnectionManager.getInstance(this);
-        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CONTACTS)) {
+        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
             return;
 
         }
         try {
-            mConfiguration = mCnxManager.getContactsApi().getCommonConfiguration();
+            mConfiguration = mCnxManager.getContactApi().getCommonConfiguration();
         } catch (RcsServiceException e1) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce);
             return;
@@ -143,7 +143,7 @@ public class ServiceConfigurationActivity extends Activity {
             }
         });
 
-        mCnxManager.startMonitorServices(this, null, RcsServiceName.CONTACTS);
+        mCnxManager.startMonitorServices(this, null, RcsServiceName.CONTACT);
 
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "onCreate");

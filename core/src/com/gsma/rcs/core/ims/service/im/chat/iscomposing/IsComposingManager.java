@@ -21,7 +21,7 @@ package com.gsma.rcs.core.ims.service.im.chat.iscomposing;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import org.xml.sax.InputSource;
 

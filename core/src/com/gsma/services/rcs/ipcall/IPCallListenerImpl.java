@@ -16,14 +16,16 @@
 
 package com.gsma.services.rcs.ipcall;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
 import com.gsma.services.rcs.ipcall.IPCall.State;
 
 import android.util.Log;
 
 /**
- * Chat event listener implementation
+ * IPCall event listener implementation
+ * 
+ * @hide
  */
 public class IPCallListenerImpl extends IIPCallListener.Stub {
 

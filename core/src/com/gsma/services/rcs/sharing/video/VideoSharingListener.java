@@ -22,7 +22,7 @@
 
 package com.gsma.services.rcs.sharing.video;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.VideoSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.video.VideoSharing.State;
 

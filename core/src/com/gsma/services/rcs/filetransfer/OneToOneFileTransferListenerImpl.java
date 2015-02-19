@@ -16,7 +16,7 @@
 
 package com.gsma.services.rcs.filetransfer;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
@@ -26,6 +26,8 @@ import android.util.Log;
 
 /**
  * File transfer event listener
+ * 
+ * @hide
  */
 public class OneToOneFileTransferListenerImpl extends IOneToOneFileTransferListener.Stub {
 

@@ -1,6 +1,6 @@
 package com.gsma.services.rcs.sharing.geoloc;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Callback methods for geoloc sharing events

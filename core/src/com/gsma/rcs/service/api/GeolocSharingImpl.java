@@ -35,7 +35,7 @@ import com.gsma.rcs.service.broadcaster.IGeolocSharingEventBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharing;

@@ -22,7 +22,7 @@
 
 package com.gsma.services.rcs.extension;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.extension.MultimediaSession.ReasonCode;
 import com.gsma.services.rcs.extension.MultimediaSession.State;
 

@@ -33,7 +33,7 @@ import com.gsma.rcs.core.ims.service.richcall.ContentSharingSession;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Geoloc sharing transfer session

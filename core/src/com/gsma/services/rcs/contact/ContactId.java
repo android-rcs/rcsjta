@@ -16,7 +16,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.gsma.services.rcs.contacts;
+package com.gsma.services.rcs.contact;
 
 import java.io.Serializable;
 

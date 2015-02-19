@@ -24,7 +24,7 @@ package com.gsma.services.rcs.sharing.image;
 
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
 import android.util.SparseArray;

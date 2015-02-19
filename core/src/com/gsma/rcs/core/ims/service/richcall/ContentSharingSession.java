@@ -30,7 +30,7 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.PhoneUtils;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Content sharing session

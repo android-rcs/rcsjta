@@ -1,6 +1,6 @@
 package com.gsma.services.rcs.chat;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * One-to-One Chat event listener

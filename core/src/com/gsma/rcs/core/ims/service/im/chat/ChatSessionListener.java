@@ -25,7 +25,7 @@ package com.gsma.rcs.core.ims.service.im.chat;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import java.util.Set;
 

@@ -27,7 +27,7 @@ import android.util.SparseArray;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharing;
 
 /**

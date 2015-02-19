@@ -41,7 +41,7 @@ import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.image.IImageSharing;
 import com.gsma.services.rcs.sharing.image.IImageSharingListener;
 import com.gsma.services.rcs.sharing.image.IImageSharingService;

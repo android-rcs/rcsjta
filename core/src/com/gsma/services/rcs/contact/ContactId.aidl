@@ -1,4 +1,4 @@
-package com.gsma.services.rcs.contacts;
+package com.gsma.services.rcs.contact;
 
 /**
  * contactId object

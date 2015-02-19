@@ -20,7 +20,7 @@ package com.gsma.rcs.core.ims.service.richcall.video;
 
 import com.gsma.rcs.core.content.LiveVideoContent;
 import com.gsma.rcs.core.ims.service.ImsService;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.IVideoPlayer;
 
 /**

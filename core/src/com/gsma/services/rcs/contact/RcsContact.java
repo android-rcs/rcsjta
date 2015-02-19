@@ -16,7 +16,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.gsma.services.rcs.contacts;
+package com.gsma.services.rcs.contact;
 
 import com.gsma.services.rcs.capability.Capabilities;
 
@@ -24,7 +24,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Rcs contact
+ * RCS contact
  * 
  * @author Jean-Marc AUFFRET
  * @author YPLO6403
@@ -74,11 +74,11 @@ public class RcsContact implements Parcelable {
     public RcsContact(ContactId contact, boolean registered, Capabilities capabilities,
             String displayName, boolean blocked, long blockingTs) {
         mContact = contact;
-        this.mRegistered = registered;
-        this.mCapabilities = capabilities;
-        this.mDisplayName = displayName;
-        this.mBlocked = blocked;
-        this.mBlockingTimestamp = blockingTs;
+        mRegistered = registered;
+        mCapabilities = capabilities;
+        mDisplayName = displayName;
+        mBlocked = blocked;
+        mBlockingTimestamp = blockingTs;
     }
 
     /**
@@ -97,9 +97,9 @@ public class RcsContact implements Parcelable {
         mRegistered = source.readInt() != 0;
         boolean containsCapabilities = source.readInt() != 0;
         if (containsCapabilities) {
-            this.mCapabilities = Capabilities.CREATOR.createFromParcel(source);
+            mCapabilities = Capabilities.CREATOR.createFromParcel(source);
         } else {
-            this.mCapabilities = null;
+            mCapabilities = null;
         }
         mDisplayName = source.readString();
         mBlocked = source.readInt() != 0;

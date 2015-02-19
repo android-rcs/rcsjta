@@ -34,7 +34,7 @@ import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Originating one-to-one chat session

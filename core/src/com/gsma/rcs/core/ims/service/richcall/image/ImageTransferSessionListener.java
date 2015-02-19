@@ -25,7 +25,7 @@ package com.gsma.rcs.core.ims.service.richcall.image;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
 

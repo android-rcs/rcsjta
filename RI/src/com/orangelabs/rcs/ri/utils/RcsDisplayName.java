@@ -22,10 +22,10 @@ import android.content.Context;
 import android.util.Log;
 
 import com.gsma.services.rcs.RcsContactFormatException;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
-import com.gsma.services.rcs.contacts.ContactsService;
-import com.gsma.services.rcs.contacts.RcsContact;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
+import com.gsma.services.rcs.contact.ContactService;
+import com.gsma.services.rcs.contact.RcsContact;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.R;
 
@@ -45,9 +45,9 @@ public class RcsDisplayName {
 
     private Context mContext;
 
-    private ContactsService mService;
+    private ContactService mService;
 
-    private ContactUtils mContactUtils;
+    private ContactUtil mContactUtil;
 
     /**
      * The default display name
@@ -61,8 +61,8 @@ public class RcsDisplayName {
      */
     private RcsDisplayName(Context context) {
         mContext = context;
-        mService = ApiConnectionManager.getInstance(mContext).getContactsApi();
-        mContactUtils = ContactUtils.getInstance(mContext);
+        mService = ApiConnectionManager.getInstance(mContext).getContactApi();
+        mContactUtil = ContactUtil.getInstance(mContext);
         DefaultDisplayName = context.getString(R.string.label_no_contact);
     }
 
@@ -98,7 +98,7 @@ public class RcsDisplayName {
         }
         try {
             if (mService == null) {
-                mService = ApiConnectionManager.getInstance(mContext).getContactsApi();
+                mService = ApiConnectionManager.getInstance(mContext).getContactApi();
             }
             RcsContact rcsContact = mService.getRcsContact(contact);
             String displayName = rcsContact.getDisplayName();
@@ -126,7 +126,7 @@ public class RcsDisplayName {
             return DefaultDisplayName;
         }
         try {
-            ContactId contact = mContactUtils.formatContact(number);
+            ContactId contact = mContactUtil.formatContact(number);
             return getDisplayName(contact);
         } catch (RcsContactFormatException e) {
             return number;

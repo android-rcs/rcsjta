@@ -27,7 +27,7 @@ import android.net.Uri;
 import java.util.Date;
 
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * @author YPLO6403 FtHttpResume is the abstract base class for all FT HTTP resume classes

@@ -21,7 +21,7 @@ package com.gsma.services.rcs.chat;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Participant information

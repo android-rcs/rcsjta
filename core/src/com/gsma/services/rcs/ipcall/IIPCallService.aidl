@@ -6,7 +6,7 @@ import com.gsma.services.rcs.ipcall.IIPCallListener;
 import com.gsma.services.rcs.ipcall.IIPCallPlayer;
 import com.gsma.services.rcs.ipcall.IIPCallRenderer;
 import com.gsma.services.rcs.ipcall.IIPCallServiceConfiguration;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 
 /**

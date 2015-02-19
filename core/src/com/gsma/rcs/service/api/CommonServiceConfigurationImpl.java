@@ -24,7 +24,7 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * A class that implements interface to allow access to common service configuration from APIs

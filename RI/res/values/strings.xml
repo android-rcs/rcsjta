@@ -121,7 +121,8 @@
     <string name="label_automata">Automata:</string>
     <string name="label_capabilities_timestamp">Last refresh:</string>
     <string name="label_capabilities_valid">Valid:</string>
-
+    <string name="label_no_capabilities">No capabilities for %s</string>
+    
     <!-- Messaging menu -->
     <string name="menu_messaging">Messaging</string>
     <string name="menu_file_transfer">File transfer</string>

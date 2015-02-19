@@ -25,7 +25,7 @@ package com.gsma.rcs.provider.fthttp;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
 

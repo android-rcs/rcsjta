@@ -21,7 +21,7 @@ package com.orangelabs.rcs.ri.extension.streaming;
 import android.content.Intent;
 import android.os.Parcelable;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.orangelabs.rcs.ri.extension.InitiateMultimediaSession;
 
 /**

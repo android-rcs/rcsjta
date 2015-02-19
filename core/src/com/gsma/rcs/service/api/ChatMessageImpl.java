@@ -17,7 +17,7 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.services.rcs.chat.IChatMessage;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 public class ChatMessageImpl extends IChatMessage.Stub {
 

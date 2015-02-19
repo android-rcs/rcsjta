@@ -44,7 +44,7 @@ import com.gsma.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.ipcall.IPCall;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;

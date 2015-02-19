@@ -35,7 +35,7 @@ import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Service to handle account sync. This is invoked with an intent with action

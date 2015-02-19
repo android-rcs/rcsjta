@@ -59,7 +59,7 @@ import com.gsma.services.rcs.chat.IGroupChatListener;
 import com.gsma.services.rcs.chat.IOneToOneChat;
 import com.gsma.services.rcs.chat.IOneToOneChatListener;
 import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.os.RemoteException;
 

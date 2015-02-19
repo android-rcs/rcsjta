@@ -26,7 +26,7 @@ import android.content.Context;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.services.rcs.RcsContactFormatException;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Phone utility functions

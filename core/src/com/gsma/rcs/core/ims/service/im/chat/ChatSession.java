@@ -65,7 +65,7 @@ import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Chat session

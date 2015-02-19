@@ -27,7 +27,7 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 
-import com.gsma.services.rcs.contacts.RcsContact;
+import com.gsma.services.rcs.contact.RcsContact;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
@@ -61,12 +61,12 @@ public class OnlineContactsList extends ListActivity {
         // Register to API connection manager
         connectionManager = ApiConnectionManager.getInstance(this);
         if (connectionManager == null
-                || !connectionManager.isServiceConnected(RcsServiceName.CONTACTS)) {
+                || !connectionManager.isServiceConnected(RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     exitOnce);
             return;
         }
-        connectionManager.startMonitorServices(this, null, RcsServiceName.CONTACTS);
+        connectionManager.startMonitorServices(this, null, RcsServiceName.CONTACT);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class OnlineContactsList extends ListActivity {
     private void updateList() {
         try {
             // Get list of RCS contacts who are online
-            Set<RcsContact> onlineContacts = connectionManager.getContactsApi()
+            Set<RcsContact> onlineContacts = connectionManager.getContactApi()
                     .getRcsContactsOnline();
             List<RcsContact> contacts = new ArrayList<RcsContact>(onlineContacts);
             if (contacts.size() > 0) {

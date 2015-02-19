@@ -19,7 +19,7 @@
 package com.gsma.services.rcs.capability;
 
 import com.gsma.services.rcs.capability.ICapabilitiesListener;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * New capabilities event listener

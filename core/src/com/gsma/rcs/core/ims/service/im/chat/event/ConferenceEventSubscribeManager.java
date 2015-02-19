@@ -55,7 +55,7 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.chat.ParticipantInfo.Status;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Conference event subscribe manager

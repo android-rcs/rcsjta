@@ -34,7 +34,7 @@ import com.gsma.rcs.provider.sharing.ImageSharingStateAndReasonCode;
 import com.gsma.rcs.service.broadcaster.IImageSharingEventBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.image.IImageSharing;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.image.ImageSharing.ReasonCode;

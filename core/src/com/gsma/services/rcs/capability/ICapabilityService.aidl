@@ -3,7 +3,7 @@ package com.gsma.services.rcs.capability;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.capability.ICapabilitiesListener;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 
 /**

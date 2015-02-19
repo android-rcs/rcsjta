@@ -19,13 +19,15 @@ package com.gsma.services.rcs.chat;
 import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.Status;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.os.RemoteException;
 import android.util.Log;
 
 /**
  * Group chat event listener implementation
+ * 
+ * @hide
  */
 public class GroupChatListenerImpl extends IGroupChatListener.Stub {
 

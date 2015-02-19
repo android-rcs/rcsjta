@@ -16,14 +16,16 @@
 
 package com.gsma.services.rcs.sharing.video;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.VideoSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.video.VideoSharing.State;
 
 import android.util.Log;
 
 /**
- * Chat event listener implementation
+ * Video sharing event listener implementation
+ * 
+ * @hide
  */
 public class VideoSharingListenerImpl extends IVideoSharingListener.Stub {
 

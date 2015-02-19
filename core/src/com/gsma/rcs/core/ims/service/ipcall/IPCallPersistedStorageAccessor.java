@@ -21,7 +21,7 @@ import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.provider.ipcall.IPCallHistory;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
 import com.gsma.services.rcs.ipcall.IPCall.State;
 import com.gsma.services.rcs.ipcall.IPCallLog;

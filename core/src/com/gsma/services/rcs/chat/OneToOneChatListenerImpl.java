@@ -18,13 +18,15 @@ package com.gsma.services.rcs.chat;
 
 import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Status;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.os.RemoteException;
 import android.util.Log;
 
 /**
  * Chat event listener implementation
+ * 
+ * @hide
  */
 public class OneToOneChatListenerImpl extends IOneToOneChatListener.Stub {
 

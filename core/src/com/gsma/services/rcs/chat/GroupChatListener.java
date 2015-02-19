@@ -26,7 +26,7 @@ import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.chat.GroupChat.State;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Group chat event listener

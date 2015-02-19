@@ -38,7 +38,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.extension.MultimediaMessagingSession;
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionListener;
@@ -233,13 +233,13 @@ public class MessagingSessionView extends Activity {
         mCnxManager = ApiConnectionManager.getInstance(this);
         if (mCnxManager == null
                 || !mCnxManager.isServiceConnected(RcsServiceName.MULTIMEDIA,
-                        RcsServiceName.CONTACTS)) {
+                        RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
             return;
         }
         mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.MULTIMEDIA,
-                RcsServiceName.CONTACTS);
+                RcsServiceName.CONTACT);
         try {
             // Add service listener
             mCnxManager.getMultimediaSessionApi().addEventListener(serviceListener);

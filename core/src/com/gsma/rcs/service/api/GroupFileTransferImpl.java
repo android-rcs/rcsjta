@@ -17,6 +17,7 @@
 package com.gsma.rcs.service.api;
 
 import javax2.sip.message.Response;
+
 import android.net.Uri;
 
 import com.gsma.rcs.core.content.MmContent;
@@ -32,7 +33,7 @@ import com.gsma.rcs.provider.messaging.FileTransferStateAndReasonCode;
 import com.gsma.rcs.service.broadcaster.IGroupFileTransferBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;

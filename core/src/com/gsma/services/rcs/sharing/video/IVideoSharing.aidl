@@ -1,7 +1,7 @@
 package com.gsma.services.rcs.sharing.video;
 
 import com.gsma.services.rcs.sharing.video.IVideoPlayer;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.VideoDescriptor;
 
 /**

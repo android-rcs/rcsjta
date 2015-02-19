@@ -27,9 +27,9 @@ import android.test.AndroidTestCase;
 
 import com.gsma.service.rcs.capabilities.CapabilitiesTest;
 import com.gsma.services.rcs.capability.Capabilities;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
-import com.gsma.services.rcs.contacts.RcsContact;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
+import com.gsma.services.rcs.contact.RcsContact;
 
 public class RcsContactTest extends AndroidTestCase {
 
@@ -83,7 +83,7 @@ public class RcsContactTest extends AndroidTestCase {
         capabilities = new Capabilities(imageSharing, videoSharing, imSession, fileTransfer,
                 geolocPush, ipVoiceCall, ipVideoCall, extensions, automata, timestamp, valid);
         registered = random.nextBoolean();
-        ContactUtils contactUtils = ContactUtils.getInstance(getContext());
+        ContactUtil contactUtils = ContactUtil.getInstance(getContext());
         contactId = contactUtils.formatContact("+33123456789");
         displayName = "displayName";
     }

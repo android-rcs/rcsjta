@@ -76,12 +76,12 @@ import com.gsma.rcs.utils.StringUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.capability.CapabilitiesLog;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactsProvider;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactProvider;
 import com.gsma.rcs.R;
 
 /**
- * Contains utility methods for interfacing with the Android SDK ContactsProvider and the Rich
+ * Contains utility methods for interfacing with the Android SDK ContactProvider and the Rich
  * Address book provider.
  * 
  * @author Jean-Marc AUFFRET
@@ -115,7 +115,7 @@ public final class ContactsManager {
     /**
      * MIME type for contact number
      */
-    private static final String MIMETYPE_NUMBER = ContactsProvider.MIME_TYPE_PHONE_NUMBER;
+    private static final String MIMETYPE_NUMBER = ContactProvider.MIME_TYPE_PHONE_NUMBER;
 
     /**
      * MIME type for RCS status
@@ -125,52 +125,52 @@ public final class ContactsManager {
     /**
      * MIME type for RCS registration state
      */
-    private static final String MIMETYPE_REGISTRATION_STATE = ContactsProvider.MIME_TYPE_REGISTRATION_STATE;
+    private static final String MIMETYPE_REGISTRATION_STATE = ContactProvider.MIME_TYPE_REGISTRATION_STATE;
 
     /**
      * MIME type for blocking state
      */
-    private static final String MIMETYPE_BLOCKING_STATE = ContactsProvider.MIME_TYPE_BLOCKING_STATE;
+    private static final String MIMETYPE_BLOCKING_STATE = ContactProvider.MIME_TYPE_BLOCKING_STATE;
 
     /**
      * MIME type for GSMA_CS_IMAGE (image sharing) capability
      */
-    private static final String MIMETYPE_CAPABILITY_IMAGE_SHARING = ContactsProvider.MIME_TYPE_IMAGE_SHARING;
+    private static final String MIMETYPE_CAPABILITY_IMAGE_SHARING = ContactProvider.MIME_TYPE_IMAGE_SHARING;
 
     /**
      * MIME type for 3GPP_CS_VOICE (video sharing) capability
      */
-    private static final String MIMETYPE_CAPABILITY_VIDEO_SHARING = ContactsProvider.MIME_TYPE_VIDEO_SHARING;
+    private static final String MIMETYPE_CAPABILITY_VIDEO_SHARING = ContactProvider.MIME_TYPE_VIDEO_SHARING;
 
     /**
      * MIME type for RCS_IM (IM session) capability
      */
-    private static final String MIMETYPE_CAPABILITY_IM_SESSION = ContactsProvider.MIME_TYPE_IM_SESSION;
+    private static final String MIMETYPE_CAPABILITY_IM_SESSION = ContactProvider.MIME_TYPE_IM_SESSION;
 
     /**
      * MIME type for RCS_FT (file transfer) capability
      */
-    private static final String MIMETYPE_CAPABILITY_FILE_TRANSFER = ContactsProvider.MIME_TYPE_FILE_TRANSFER;
+    private static final String MIMETYPE_CAPABILITY_FILE_TRANSFER = ContactProvider.MIME_TYPE_FILE_TRANSFER;
 
     /**
      * MIME type for geoloc psuh capability
      */
-    private static final String MIMETYPE_CAPABILITY_GEOLOCATION_PUSH = ContactsProvider.MIME_TYPE_GEOLOC_PUSH;
+    private static final String MIMETYPE_CAPABILITY_GEOLOCATION_PUSH = ContactProvider.MIME_TYPE_GEOLOC_PUSH;
 
     /**
      * MIME type for RCS extensions
      */
-    private static final String MIMETYPE_CAPABILITY_EXTENSIONS = ContactsProvider.MIME_TYPE_EXTENSIONS;
+    private static final String MIMETYPE_CAPABILITY_EXTENSIONS = ContactProvider.MIME_TYPE_EXTENSIONS;
 
     /**
      * MIME type for RCS IP Voice Call capability
      */
-    private static final String MIMETYPE_CAPABILITY_IP_VOICE_CALL = ContactsProvider.MIME_TYPE_IP_VOICE_CALL;
+    private static final String MIMETYPE_CAPABILITY_IP_VOICE_CALL = ContactProvider.MIME_TYPE_IP_VOICE_CALL;
 
     /**
      * MIME type for RCS IP Video Call capability
      */
-    private static final String MIMETYPE_CAPABILITY_IP_VIDEO_CALL = ContactsProvider.MIME_TYPE_IP_VIDEO_CALL;
+    private static final String MIMETYPE_CAPABILITY_IP_VIDEO_CALL = ContactProvider.MIME_TYPE_IP_VIDEO_CALL;
 
     /**
      * ONLINE available status

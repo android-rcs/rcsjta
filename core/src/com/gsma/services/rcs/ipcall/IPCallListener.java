@@ -22,7 +22,7 @@
 
 package com.gsma.services.rcs.ipcall;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
 import com.gsma.services.rcs.ipcall.IPCall.State;
 

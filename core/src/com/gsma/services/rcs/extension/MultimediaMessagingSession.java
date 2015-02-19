@@ -24,7 +24,7 @@ package com.gsma.services.rcs.extension;
 
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * This class maintains the information related to a multimedia session for a real time messaging

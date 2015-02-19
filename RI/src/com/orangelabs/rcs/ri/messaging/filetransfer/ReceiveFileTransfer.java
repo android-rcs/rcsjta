@@ -45,7 +45,7 @@ import android.widget.TextView;
 import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration;
@@ -220,12 +220,12 @@ public class ReceiveFileTransfer extends Activity {
         connectionManager = ApiConnectionManager.getInstance(this);
         if (connectionManager == null
                 || !connectionManager.isServiceConnected(RcsServiceName.FILE_TRANSFER,
-                        RcsServiceName.CONTACTS)) {
+                        RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     exitOnce);
         } else {
             connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.FILE_TRANSFER,
-                    RcsServiceName.CONTACTS);
+                    RcsServiceName.CONTACT);
             initiateFileTransfer();
         }
     }

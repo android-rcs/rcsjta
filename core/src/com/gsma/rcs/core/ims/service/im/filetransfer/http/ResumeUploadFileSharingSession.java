@@ -30,7 +30,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Resuming session of OriginatingHttpFileSharingSession

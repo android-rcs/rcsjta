@@ -16,7 +16,7 @@
 
 package com.gsma.rcs.service.broadcaster;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.VideoSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.video.VideoSharing.State;
 

@@ -31,7 +31,7 @@ import com.gsma.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 import com.gsma.rcs.service.broadcaster.IMultimediaStreamingSessionEventBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSession;
 import com.gsma.services.rcs.extension.MultimediaSession.ReasonCode;
 import com.gsma.services.rcs.extension.MultimediaSession.State;

@@ -21,7 +21,7 @@ import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.GroupDeliveryInfo;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import com.gsma.services.rcs.filetransfer.FileTransferIntent;

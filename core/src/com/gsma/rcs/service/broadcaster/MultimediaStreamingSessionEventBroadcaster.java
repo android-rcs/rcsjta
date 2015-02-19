@@ -19,7 +19,7 @@ package com.gsma.rcs.service.broadcaster;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSessionListener;
 import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
 import com.gsma.services.rcs.extension.MultimediaSession.ReasonCode;

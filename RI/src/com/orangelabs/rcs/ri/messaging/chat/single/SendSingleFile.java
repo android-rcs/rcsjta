@@ -27,7 +27,7 @@ import android.util.Log;
 import android.widget.TextView;
 
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;

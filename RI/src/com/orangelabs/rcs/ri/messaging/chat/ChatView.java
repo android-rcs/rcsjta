@@ -49,7 +49,7 @@ import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatMessage;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
@@ -202,14 +202,14 @@ public abstract class ChatView extends FragmentActivity implements
         mCnxManager = ApiConnectionManager.getInstance(this);
 
         if (mCnxManager == null
-                || !mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACTS)) {
+                || !mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
             return;
 
         }
         mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.CHAT,
-                RcsServiceName.CONTACTS);
+                RcsServiceName.CONTACT);
         processIntent();
     }
 
@@ -260,7 +260,7 @@ public abstract class ChatView extends FragmentActivity implements
         // Replace the value of intent
         setIntent(intent);
 
-        if (mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACTS)) {
+        if (mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACT)) {
             processIntent();
         }
     }

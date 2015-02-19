@@ -7,7 +7,7 @@ import com.gsma.services.rcs.extension.IMultimediaStreamingSession;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSessionListener;
 import com.gsma.services.rcs.extension.IMultimediaSessionServiceConfiguration;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 
 /**

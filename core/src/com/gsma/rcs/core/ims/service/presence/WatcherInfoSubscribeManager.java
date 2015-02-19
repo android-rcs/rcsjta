@@ -34,7 +34,7 @@ import com.gsma.rcs.core.ims.service.presence.watcherinfo.WatcherInfoDocument;
 import com.gsma.rcs.core.ims.service.presence.watcherinfo.WatcherInfoParser;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Subscribe manager for presence watcher info event

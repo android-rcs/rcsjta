@@ -44,7 +44,7 @@ import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.VideoCodec;
 import com.gsma.services.rcs.sharing.video.IVideoPlayer;
 

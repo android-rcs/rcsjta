@@ -46,8 +46,8 @@ import android.widget.Toast;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
@@ -405,10 +405,10 @@ public class InitiateFileTransfer extends Activity {
         // get selected phone number
         ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
         String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
-        ContactUtils contactUtils = ContactUtils.getInstance(this);
+        ContactUtil contactUtil = ContactUtil.getInstance(this);
         ContactId remote;
         try {
-            remote = contactUtils.formatContact(phoneNumber);
+            remote = contactUtil.formatContact(phoneNumber);
         } catch (RcsContactFormatException e1) {
             Utils.showMessage(this, getString(R.string.label_invalid_contact, phoneNumber));
             return;

@@ -33,7 +33,7 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.StorageUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Abstract file sharing session

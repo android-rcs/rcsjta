@@ -28,8 +28,8 @@ import android.widget.Button;
 import android.widget.Spinner;
 
 import com.gsma.services.rcs.RcsContactFormatException;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -84,7 +84,7 @@ public class InitiateSingleChat extends Activity {
             ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
             // Format phone number to contactId
-            ContactUtils contactUtils = ContactUtils.getInstance(InitiateSingleChat.this);
+            ContactUtil contactUtils = ContactUtil.getInstance(InitiateSingleChat.this);
             try {
                 ContactId contact = contactUtils.formatContact(phoneNumber);
                 // start chat view activity

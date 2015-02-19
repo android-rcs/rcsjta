@@ -42,7 +42,7 @@ import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Originating file transfer HTTP session

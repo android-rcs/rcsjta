@@ -30,7 +30,7 @@ import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.ContentValues;
 import android.content.Context;

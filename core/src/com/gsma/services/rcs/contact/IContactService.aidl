@@ -1,13 +1,13 @@
-package com.gsma.services.rcs.contacts;
+package com.gsma.services.rcs.contact;
 
-import com.gsma.services.rcs.contacts.RcsContact;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.RcsContact;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 
 /**
  * Contacts service API
  */
-interface IContactsService {
+interface IContactService {
 
 	RcsContact getRcsContact(in ContactId contact);
 

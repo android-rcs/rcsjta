@@ -16,7 +16,7 @@
 
 package com.gsma.services.rcs.sharing.geoloc;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
 
@@ -24,7 +24,9 @@ import android.os.RemoteException;
 import android.util.Log;
 
 /**
- * Group chat event listener implementation
+ * Geoloc sharing event listener implementation
+ * 
+ * @hide
  */
 public class GeolocSharingListenerImpl extends IGeolocSharingListener.Stub {
 

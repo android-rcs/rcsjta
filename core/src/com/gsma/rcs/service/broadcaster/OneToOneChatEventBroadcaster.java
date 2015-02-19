@@ -23,7 +23,7 @@ import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.chat.IOneToOneChatListener;
 import com.gsma.services.rcs.chat.OneToOneChatIntent;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.Intent;
 import android.os.RemoteCallbackList;

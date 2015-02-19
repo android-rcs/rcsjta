@@ -24,9 +24,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.test.AndroidTestCase;
 
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
-//import com.gsma.services.rcs.capability.Capabilities;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.rcs.core.ims.service.ContactInfo;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
@@ -48,7 +47,7 @@ public class ContactsManagerTest extends AndroidTestCase {
 
     private String mNumber = "+33987654321";
 
-    private ContactUtils contactUtils;
+    private ContactUtil contactUtils;
 
     private ContactId mContact;
 
@@ -69,7 +68,7 @@ public class ContactsManagerTest extends AndroidTestCase {
         RcsSettings.createInstance(getContext());
 
         cm = ContactsManager.getInstance();
-        contactUtils = ContactUtils.getInstance(mContext);
+        contactUtils = ContactUtil.getInstance(mContext);
         // info.setContact(contact);
         mContact = contactUtils.formatContact("+33633139785");
     }

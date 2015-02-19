@@ -38,7 +38,7 @@ import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 
 import android.content.Context;
@@ -110,7 +110,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     /*
      * (non-Javadoc)
      * @see com.gsma.rcs.provider.messaging.IGroupChatLog#addGroupChat(java .lang.String,
-     * com.gsma.services.rcs.contacts.ContactId, java.lang.String, java.util.Set, int, int, int)
+     * com.gsma.services.rcs.contact.ContactId, java.lang.String, java.util.Set, int, int, int)
      */
     @Override
     public void addGroupChat(String chatId, ContactId contact, String subject,
@@ -387,7 +387,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      * (non-Javadoc)
      * @see
      * com.orangelabs.rcs.provider.messaging.IGroupChatDeliveryInfoLog#addGroupChatDeliveryInfoEntry
-     * (java.lang.String, com.gsma.services.rcs.contacts.ContactId, java.lang.String,
+     * (java.lang.String, com.gsma.services.rcs.contact.ContactId, java.lang.String,
      * GroupDeliveryInfoLog.Status, GroupDeliveryInfoLog.ReasonCode)
      */
     @Override
@@ -401,7 +401,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      * (non-Javadoc)
      * @see com.orangelabs.rcs.provider.messaging.IGroupChatDeliveryInfoLog#
      * setGroupChatDeliveryInfoStatusAndReasonCode(java.lang.String,
-     * com.gsma.services.rcs.contacts.ContactId, GroupDeliveryInfoLog.Status,
+     * com.gsma.services.rcs.contact.ContactId, GroupDeliveryInfoLog.Status,
      * GroupDeliveryInfoLog.ReasonCode)
      */
     @Override

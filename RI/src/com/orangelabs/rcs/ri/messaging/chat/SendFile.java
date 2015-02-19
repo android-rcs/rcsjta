@@ -133,12 +133,12 @@ public abstract class SendFile extends Activity implements ISendFile {
         mCnxManager = ApiConnectionManager.getInstance(this);
         if (mCnxManager == null
                 || !mCnxManager.isServiceConnected(RcsServiceName.CHAT,
-                        RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACTS)) {
+                        RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
         } else {
             mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.CHAT,
-                    RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACTS);
+                    RcsServiceName.FILE_TRANSFER, RcsServiceName.CONTACT);
             FileTransferService ftApi = mCnxManager.getFileTransferApi();
             try {
                 addFileTransferEventListener(ftApi);

@@ -39,7 +39,7 @@ import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSession;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSessionListener;
 import com.gsma.services.rcs.extension.IMultimediaSessionService;

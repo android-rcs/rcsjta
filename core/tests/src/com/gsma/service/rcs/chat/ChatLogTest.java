@@ -25,20 +25,20 @@ import android.test.AndroidTestCase;
 
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
 
 public class ChatLogTest extends AndroidTestCase {
 
     private Context mContext;
 
-    private ContactUtils mContactUtils;
+    private ContactUtil mContactUtils;
 
     protected void setUp() throws Exception {
         super.setUp();
 
         mContext = getContext();
-        mContactUtils = ContactUtils.getInstance(mContext);
+        mContactUtils = ContactUtil.getInstance(mContext);
     }
 
     protected void tearDown() throws Exception {

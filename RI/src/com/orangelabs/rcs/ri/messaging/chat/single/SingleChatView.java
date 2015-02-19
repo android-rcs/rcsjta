@@ -51,7 +51,7 @@ import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.ChatServiceConfiguration;
 import com.gsma.services.rcs.chat.OneToOneChat;
 import com.gsma.services.rcs.chat.OneToOneChatListener;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.chat.ChatView;
 import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager;

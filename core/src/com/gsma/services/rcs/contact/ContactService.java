@@ -16,12 +16,13 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.gsma.services.rcs.contacts;
+package com.gsma.services.rcs.contact;
 
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceListener;
 import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
+import com.gsma.services.rcs.contact.IContactService;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 
 import android.content.ComponentName;
@@ -45,17 +46,17 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Contacts service offers additional methods to manage RCS info in the local address book. The
+ * Contact service offers additional methods to manage RCS info in the local address book. The
  * parameter contact in the API supports the following formats: MSISDN in national or international
  * format, SIP address, SIP-URI or Tel-URI.
  * 
  * @author Jean-Marc AUFFRET
  */
-public class ContactsService extends RcsService {
+public class ContactService extends RcsService {
     /**
      * API
      */
-    private IContactsService mApi;
+    private IContactService mApi;
 
     private static final String ERROR_CNX = "Contacts service not connected";
 
@@ -65,7 +66,7 @@ public class ContactsService extends RcsService {
      * @param ctx Application context
      * @param listener Service listener
      */
-    public ContactsService(Context ctx, RcsServiceListener listener) {
+    public ContactService(Context ctx, RcsServiceListener listener) {
         super(ctx, listener);
     }
 
@@ -73,7 +74,7 @@ public class ContactsService extends RcsService {
      * Connects to the API
      */
     public void connect() {
-        mCtx.bindService(new Intent(IContactsService.class.getName()), apiConnection, 0);
+        mCtx.bindService(new Intent(IContactService.class.getName()), apiConnection, 0);
     }
 
     /**
@@ -94,7 +95,7 @@ public class ContactsService extends RcsService {
      */
     protected void setApi(IInterface api) {
         super.setApi(api);
-        mApi = (IContactsService) api;
+        mApi = (IContactService) api;
     }
 
     /**
@@ -102,7 +103,7 @@ public class ContactsService extends RcsService {
      */
     private ServiceConnection apiConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
-            setApi(IContactsService.Stub.asInterface(service));
+            setApi(IContactService.Stub.asInterface(service));
             if (mListener != null) {
                 mListener.onServiceConnected();
             }

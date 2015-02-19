@@ -38,8 +38,8 @@ import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.capability.CapabilitiesListener;
 import com.gsma.services.rcs.capability.CapabilityService;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
@@ -81,7 +81,7 @@ public class RequestCapabilities extends Activity {
      */
     private static final String LOGTAG = LogUtils.getTag(RequestCapabilities.class.getSimpleName());
 
-    private ContactUtils mContactUtils;
+    private ContactUtil mContactUtil;
 
     /**
      * Spinner for contact selection
@@ -113,7 +113,7 @@ public class RequestCapabilities extends Activity {
             refreshBtn.setEnabled(true);
         }
 
-        mContactUtils = ContactUtils.getInstance(this);
+        mContactUtil = ContactUtil.getInstance(this);
 
         // Register to API connection manager
         mCnxManager = ApiConnectionManager.getInstance(this);
@@ -198,9 +198,12 @@ public class RequestCapabilities extends Activity {
 
                 // Get current capabilities
                 Capabilities currentCapabilities = capabilityApi.getContactCapabilities(contactId);
-
                 // Display default capabilities
                 displayCapabilities(currentCapabilities);
+                if (currentCapabilities == null) {
+                    Utils.displayLongToast(RequestCapabilities.this,
+                            getString(R.string.label_no_capabilities, contactId.toString()));
+                }
             } catch (RcsServiceNotAvailableException e) {
                 Utils.showMessageAndExit(RequestCapabilities.this,
                         getString(R.string.label_api_disabled), mExitOnce, e);
@@ -223,7 +226,7 @@ public class RequestCapabilities extends Activity {
     private ContactId getSelectedContact() {
         // get selected phone number
         ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
-        return mContactUtils.formatContact(adapter.getSelectedNumber(mSpinner.getSelectedView()));
+        return mContactUtil.formatContact(adapter.getSelectedNumber(mSpinner.getSelectedView()));
     }
 
     /**

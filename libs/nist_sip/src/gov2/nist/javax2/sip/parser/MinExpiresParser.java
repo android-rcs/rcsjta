@@ -80,6 +80,8 @@ public class MinExpiresParser extends HeaderParser {
                 minExpires.setExpires(Integer.parseInt(number));
             } catch (InvalidArgumentException ex) {
                 throw createParseException(ex.getMessage());
+            } catch (NumberFormatException ex) {
+                throw createParseException(ex.getMessage());
             }
             this.lexer.SPorHT();
 

@@ -26,7 +26,7 @@ import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.GroupDeliveryInfo.ReasonCode;
 import com.gsma.services.rcs.GroupDeliveryInfo.Status;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.ContentValues;
 import android.database.Cursor;

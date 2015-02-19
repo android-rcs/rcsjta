@@ -36,7 +36,7 @@ import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
 

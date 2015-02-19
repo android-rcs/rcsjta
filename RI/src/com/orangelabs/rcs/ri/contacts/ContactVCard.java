@@ -34,7 +34,7 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.contacts.ContactsService;
+import com.gsma.services.rcs.contact.ContactService;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
 import com.orangelabs.rcs.ri.utils.LockAccess;
@@ -113,7 +113,7 @@ public class ContactVCard extends Activity {
         try {
             Uri contactUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
                     Uri.encode(contact));
-            String vcard = ContactsService.getVCard(this, contactUri);
+            String vcard = ContactService.getVCard(this, contactUri);
             TextView vcardView = (TextView) findViewById(R.id.vcard);
             vcardView.setText(vcard);
         } catch (Exception e) {

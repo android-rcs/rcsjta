@@ -35,7 +35,7 @@ import android.widget.TextView;
 
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.image.ImageSharingListener;
 import com.gsma.services.rcs.sharing.image.ImageSharingService;
@@ -199,12 +199,12 @@ public class ReceiveImageSharing extends Activity {
         mCnxManager = ApiConnectionManager.getInstance(this);
         if (mCnxManager == null
                 || !mCnxManager.isServiceConnected(RcsServiceName.IMAGE_SHARING,
-                        RcsServiceName.CONTACTS)) {
+                        RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
         } else {
             mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.IMAGE_SHARING,
-                    RcsServiceName.CONTACTS);
+                    RcsServiceName.CONTACT);
             initiateImageSharing();
         }
     }

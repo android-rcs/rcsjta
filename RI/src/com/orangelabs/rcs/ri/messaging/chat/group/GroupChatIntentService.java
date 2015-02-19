@@ -34,7 +34,7 @@ import android.util.Log;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChatIntent;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.chat.ChatMessageDAO;

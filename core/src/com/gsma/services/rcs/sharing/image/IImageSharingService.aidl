@@ -5,7 +5,7 @@ import android.net.Uri;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.sharing.image.IImageSharing;
 import com.gsma.services.rcs.sharing.image.IImageSharingListener;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.sharing.image.IImageSharingServiceConfiguration;
 

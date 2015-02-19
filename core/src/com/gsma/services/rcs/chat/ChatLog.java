@@ -24,7 +24,7 @@ package com.gsma.services.rcs.chat;
 
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.GroupChat.State;
-import com.gsma.services.rcs.contacts.ContactUtils;
+import com.gsma.services.rcs.contact.ContactUtil;
 
 import android.content.Context;
 import android.net.Uri;
@@ -135,7 +135,7 @@ public class ChatLog {
             if (participants == null) {
                 return null;
             }
-            ContactUtils contactUtils = ContactUtils.getInstance(context);
+            ContactUtil contactUtils = ContactUtil.getInstance(context);
             if (contactUtils == null) {
                 throw new IllegalStateException("Cannot read contact from provider");
             }

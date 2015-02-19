@@ -24,8 +24,8 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.ipcall.IPCallLog;
 
 /**
@@ -135,8 +135,8 @@ public class IPCallDAO implements Parcelable {
                 this.callId = callId;
                 String _contact = cursor.getString(cursor.getColumnIndexOrThrow(IPCallLog.CONTACT));
                 if (_contact != null) {
-                    ContactUtils contactUtils = ContactUtils.getInstance(context);
-                    contact = contactUtils.formatContact(_contact);
+                    ContactUtil contactUtil = ContactUtil.getInstance(context);
+                    contact = contactUtil.formatContact(_contact);
                 }
                 state = cursor.getInt(cursor.getColumnIndexOrThrow(IPCallLog.STATE));
                 direction = cursor.getInt(cursor.getColumnIndexOrThrow(IPCallLog.DIRECTION));

@@ -71,7 +71,7 @@ import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Chat utility functions

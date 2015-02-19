@@ -4,7 +4,7 @@ import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingListener;
 import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 
 /**

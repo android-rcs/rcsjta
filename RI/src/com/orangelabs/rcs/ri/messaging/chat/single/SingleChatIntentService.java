@@ -32,7 +32,7 @@ import android.util.Log;
 
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.OneToOneChatIntent;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.chat.ChatMessageDAO;
 import com.orangelabs.rcs.ri.utils.LogUtils;

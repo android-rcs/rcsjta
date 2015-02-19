@@ -18,7 +18,7 @@
 
 package com.gsma.rcs.core.ims.service.capability;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Discovery manager interface

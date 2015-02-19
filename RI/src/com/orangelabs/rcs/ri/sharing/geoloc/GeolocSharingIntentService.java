@@ -31,7 +31,7 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingIntent;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingService;

@@ -31,8 +31,8 @@ import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
@@ -53,7 +53,7 @@ public class ChatMessageTest extends AndroidTestCase {
         mContentResolver = mContext.getContentResolver();
         LocalContentResolver localContentResolver = new LocalContentResolver(mContentResolver);
         MessagingLog.createInstance(mContext, localContentResolver);
-        ContactUtils contactUtils = ContactUtils.getInstance(mContext);
+        ContactUtil contactUtils = ContactUtil.getInstance(mContext);
         try {
             mContact = contactUtils.formatContact("+339000000");
         } catch (RcsContactFormatException e) {

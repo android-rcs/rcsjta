@@ -27,7 +27,7 @@ import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.database.Cursor;
 

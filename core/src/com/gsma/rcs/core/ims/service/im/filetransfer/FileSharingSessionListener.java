@@ -24,7 +24,7 @@ package com.gsma.rcs.core.ims.service.im.filetransfer;
 
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * File transfer session listener

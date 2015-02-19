@@ -7,7 +7,7 @@ import com.gsma.services.rcs.chat.IOneToOneChat;
 import com.gsma.services.rcs.chat.IGroupChatListener;
 import com.gsma.services.rcs.chat.IGroupChat;
 import com.gsma.services.rcs.chat.IChatServiceConfiguration;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 
 /**

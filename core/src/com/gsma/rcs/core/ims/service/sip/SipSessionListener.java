@@ -19,7 +19,7 @@
 package com.gsma.rcs.core.ims.service.sip;
 
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.Intent;
 

@@ -30,6 +30,7 @@ import java.io.InputStream;
 import javax2.sip.header.ContentDispositionHeader;
 import javax2.sip.header.ContentLengthHeader;
 import javax2.sip.header.ContentTypeHeader;
+
 import android.net.Uri;
 
 import com.gsma.rcs.core.content.MmContent;
@@ -54,7 +55,7 @@ import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Originating content sharing session (transfer)

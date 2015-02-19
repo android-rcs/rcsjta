@@ -25,7 +25,7 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
 import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.Utils;
 

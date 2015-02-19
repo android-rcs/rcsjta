@@ -24,8 +24,8 @@ import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -44,7 +44,7 @@ public class ChatCursorAdapter extends CursorAdapter {
 
     private final static SimpleDateFormat df = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
 
-    private ContactUtils mContactUtils;
+    private ContactUtil mContactUtils;
 
     /**
      * A map between contact and display name to minimize queries of RCS settings provider
@@ -75,7 +75,7 @@ public class ChatCursorAdapter extends CursorAdapter {
         super(context, cursor, flags);
         mInflater = LayoutInflater.from(context);
         mIsSingleChat = isSingleChat;
-        mContactUtils = ContactUtils.getInstance(context);
+        mContactUtils = ContactUtil.getInstance(context);
         // Smiley resources
         mSmileyResources = new Smileys(context);
         mContext = context;

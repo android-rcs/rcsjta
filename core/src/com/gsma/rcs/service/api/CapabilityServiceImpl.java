@@ -36,7 +36,7 @@ import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.capability.ICapabilitiesListener;
 import com.gsma.services.rcs.capability.ICapabilityService;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.os.Handler;
 
@@ -189,7 +189,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * @return Capabilities
      */
     public Capabilities getMyCapabilities() {
-        return ContactsServiceImpl.getCapabilities(RcsSettings.getInstance().getMyCapabilities());
+        return ContactServiceImpl.getCapabilities(RcsSettings.getInstance().getMyCapabilities());
     }
 
     /**
@@ -205,8 +205,16 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
         if (logger.isActivated()) {
             logger.info("Get capabilities for contact " + contact);
         }
+        com.gsma.rcs.core.ims.service.capability.Capabilities caps = mContactsManager
+                .getContactCapabilities(contact);
+        // TODO update code so not to insert default capabilities in provider
+        if (caps == null
+                || caps.getTimestampOfLastRefresh() == com.gsma.rcs.core.ims.service.capability.Capabilities.INVALID_TIMESTAMP) {
+            // no capabilities are known, returns null as per 1.5.1 specification
+            return null;
+        }
         // Read capabilities in the local database
-        return ContactsServiceImpl
+        return ContactServiceImpl
                 .getCapabilities(mContactsManager.getContactCapabilities(contact));
     }
 
@@ -256,7 +264,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
             }
 
             // Create capabilities instance
-            Capabilities c = ContactsServiceImpl.getCapabilities(capabilities);
+            Capabilities c = ContactServiceImpl.getCapabilities(capabilities);
 
             // Notify capabilities listeners
             notifyListeners(contact, c);

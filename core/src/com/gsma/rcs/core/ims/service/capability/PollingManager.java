@@ -24,7 +24,7 @@ import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PeriodicRefresher;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Polling manager which updates capabilities periodically

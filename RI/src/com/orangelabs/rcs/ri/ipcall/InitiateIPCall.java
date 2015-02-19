@@ -30,8 +30,8 @@ import android.widget.CheckBox;
 import android.widget.Spinner;
 
 import com.gsma.services.rcs.RcsContactFormatException;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -84,12 +84,12 @@ public class InitiateIPCall extends Activity {
     private OnClickListener btnInitiateListener = new OnClickListener() {
         public void onClick(View v) {
             // Get remote contact
-            ContactUtils contactUtils = ContactUtils.getInstance(InitiateIPCall.this);
+            ContactUtil contactUtil = ContactUtil.getInstance(InitiateIPCall.this);
             // get selected phone number
             ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
             try {
-                ContactId contact = contactUtils.formatContact(phoneNumber);
+                ContactId contact = contactUtil.formatContact(phoneNumber);
                 // Get video option
                 CheckBox videoCheck = (CheckBox) findViewById(R.id.video);
 

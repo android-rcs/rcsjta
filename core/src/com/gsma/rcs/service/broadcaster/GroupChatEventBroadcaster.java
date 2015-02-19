@@ -28,7 +28,7 @@ import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.gsma.services.rcs.chat.IGroupChatListener;
 import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.Intent;
 import android.os.RemoteCallbackList;

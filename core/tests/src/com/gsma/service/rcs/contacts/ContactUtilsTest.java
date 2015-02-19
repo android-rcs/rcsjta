@@ -22,16 +22,16 @@ import android.test.AndroidTestCase;
 import android.text.TextUtils;
 
 import com.gsma.services.rcs.RcsContactFormatException;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
 
 public class ContactUtilsTest extends AndroidTestCase {
 
-    private ContactUtils mContactUtils;
+    private ContactUtil mContactUtils;
 
     protected void setUp() throws Exception {
         super.setUp();
-        mContactUtils = ContactUtils.getInstance(getContext());
+        mContactUtils = ContactUtil.getInstance(getContext());
     }
 
     protected void tearDown() throws Exception {

@@ -19,7 +19,7 @@ package com.gsma.rcs.service.broadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.capability.ICapabilitiesListener;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.os.RemoteCallbackList;
 

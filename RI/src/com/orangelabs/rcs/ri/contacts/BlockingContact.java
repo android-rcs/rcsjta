@@ -13,9 +13,9 @@ import android.widget.ToggleButton;
 
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
-import com.gsma.services.rcs.contacts.RcsContact;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
+import com.gsma.services.rcs.contact.RcsContact;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
@@ -52,7 +52,7 @@ public class BlockingContact extends Activity {
     /**
      * Contact utils
      */
-    private ContactUtils mContactUtils;
+    private ContactUtil mContactUtil;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -65,15 +65,15 @@ public class BlockingContact extends Activity {
         // Register to API connection manager
         connectionManager = ApiConnectionManager.getInstance(this);
         if (connectionManager == null
-                || !connectionManager.isServiceConnected(RcsServiceName.CONTACTS)) {
+                || !connectionManager.isServiceConnected(RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     exitOnce);
             return;
         }
-        connectionManager.startMonitorServices(this, null, RcsServiceName.CONTACTS);
+        connectionManager.startMonitorServices(this, null, RcsServiceName.CONTACT);
 
         // Set contact utils instance
-        mContactUtils = ContactUtils.getInstance(this);
+        mContactUtil = ContactUtil.getInstance(this);
 
         // Set the contact selector
         mSpinner = (Spinner) findViewById(R.id.contact);
@@ -104,7 +104,7 @@ public class BlockingContact extends Activity {
 
     private void updateBlockingState(ContactId contactId) {
         try {
-            RcsContact contact = connectionManager.getContactsApi().getRcsContact(contactId);
+            RcsContact contact = connectionManager.getContactApi().getRcsContact(contactId);
             toggleBtn.setChecked(contact.isBlocked());
         } catch (RcsServiceNotAvailableException e) {
             e.printStackTrace();
@@ -140,7 +140,7 @@ public class BlockingContact extends Activity {
     private ContactId getSelectedContact() {
         // get selected phone number
         ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
-        return mContactUtils.formatContact(adapter.getSelectedNumber(mSpinner.getSelectedView()));
+        return mContactUtil.formatContact(adapter.getSelectedNumber(mSpinner.getSelectedView()));
     }
 
     /**
@@ -152,12 +152,12 @@ public class BlockingContact extends Activity {
                 ContactId contact = getSelectedContact();
                 if (toggleBtn.isChecked()) {
                     // Block the contact
-                    connectionManager.getContactsApi().blockContact(contact);
+                    connectionManager.getContactApi().blockContact(contact);
                     Utils.displayToast(BlockingContact.this,
                             getString(R.string.label_contact_blocked, contact.toString()));
                 } else {
                     // Unblock the contact
-                    connectionManager.getContactsApi().unblockContact(contact);
+                    connectionManager.getContactApi().unblockContact(contact);
                     Utils.displayToast(BlockingContact.this,
                             getString(R.string.label_contact_unblocked, contact.toString()));
                 }

@@ -38,7 +38,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Abstract file transfer HTTP session

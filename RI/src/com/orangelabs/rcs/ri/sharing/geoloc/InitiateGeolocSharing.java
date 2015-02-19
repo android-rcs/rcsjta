@@ -44,8 +44,8 @@ import android.widget.Toast;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingListener;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
@@ -324,9 +324,9 @@ public class InitiateGeolocSharing extends Activity {
             ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
 
-            ContactUtils contactUtils = ContactUtils.getInstance(InitiateGeolocSharing.this);
+            ContactUtil contactUtil = ContactUtil.getInstance(InitiateGeolocSharing.this);
             try {
-                contact = contactUtils.formatContact(phoneNumber);
+                contact = contactUtil.formatContact(phoneNumber);
             } catch (RcsContactFormatException e1) {
                 Utils.showMessage(InitiateGeolocSharing.this,
                         getString(R.string.label_invalid_contact, phoneNumber));

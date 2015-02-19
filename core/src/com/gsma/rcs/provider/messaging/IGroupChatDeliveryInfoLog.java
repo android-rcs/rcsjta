@@ -22,7 +22,7 @@
 
 package com.gsma.rcs.provider.messaging;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
 

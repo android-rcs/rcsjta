@@ -67,7 +67,7 @@ import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * SIP message factory

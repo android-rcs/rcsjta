@@ -37,7 +37,7 @@ import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 
 /**

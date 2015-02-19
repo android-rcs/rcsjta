@@ -16,14 +16,14 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.gsma.services.rcs.contacts;
+package com.gsma.services.rcs.contact;
 
 /**
- * Contacts provider for rcs info integrated in the native address book
+ * Contact provider for RCS info integrated in the native address book
  * 
  * @author Jean-Marc AUFFRET
  */
-public class ContactsProvider {
+public class ContactProvider {
     /**
      * RCS phone number
      */

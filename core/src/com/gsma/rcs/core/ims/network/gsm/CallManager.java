@@ -31,7 +31,7 @@ import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Call manager. Note: for outgoing call the capability request is initiated only when we receive

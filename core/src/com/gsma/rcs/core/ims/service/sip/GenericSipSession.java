@@ -37,7 +37,7 @@ import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.capability.CapabilityUtils;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Abstract generic SIP session

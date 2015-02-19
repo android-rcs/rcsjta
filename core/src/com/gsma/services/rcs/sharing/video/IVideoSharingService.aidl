@@ -5,7 +5,7 @@ import com.gsma.services.rcs.sharing.video.IVideoSharing;
 import com.gsma.services.rcs.sharing.video.IVideoSharingListener;
 import com.gsma.services.rcs.sharing.video.IVideoPlayer;
 import com.gsma.services.rcs.sharing.video.IVideoSharingServiceConfiguration;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 
 /**

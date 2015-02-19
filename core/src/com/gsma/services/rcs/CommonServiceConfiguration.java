@@ -20,7 +20,7 @@ package com.gsma.services.rcs;
 
 import android.util.SparseArray;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * This class represents the common configuration of RCS Services

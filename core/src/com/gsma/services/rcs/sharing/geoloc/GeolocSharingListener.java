@@ -22,7 +22,7 @@
 
 package com.gsma.services.rcs.sharing.geoloc;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
 

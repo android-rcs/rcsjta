@@ -25,8 +25,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.sharing.image.ImageSharingLog;
 
 /**
@@ -234,8 +234,8 @@ public class ImageSharingDAO implements Parcelable {
             String _contact = cursor.getString(cursor
                     .getColumnIndexOrThrow(ImageSharingLog.CONTACT));
             if (_contact != null) {
-                ContactUtils contactUtils = ContactUtils.getInstance(context);
-                mContact = contactUtils.formatContact(_contact);
+                ContactUtil contactUtil = ContactUtil.getInstance(context);
+                mContact = contactUtil.formatContact(_contact);
             }
             mFile = Uri.parse(cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILE)));
             mFilename = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILENAME));

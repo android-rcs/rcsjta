@@ -36,10 +36,10 @@ import android.widget.CursorAdapter;
 import android.widget.Filterable;
 
 import com.gsma.services.rcs.RcsContactFormatException;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
-import com.gsma.services.rcs.contacts.ContactsService;
-import com.gsma.services.rcs.contacts.RcsContact;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
+import com.gsma.services.rcs.contact.ContactService;
+import com.gsma.services.rcs.contact.RcsContact;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 
 /**
@@ -70,9 +70,9 @@ public class MultiContactListAdapter extends CursorAdapter implements Filterable
         ContentResolver content = context.getContentResolver();
         Cursor cursor = null;
         ApiConnectionManager apiConnectionManager = ApiConnectionManager.getInstance(context);
-        ContactUtils contactUtils = ContactUtils.getInstance(context);
+        ContactUtil contactUtil = ContactUtil.getInstance(context);
         MatrixCursor matrix = new MatrixCursor(PROJECTION);
-        ContactsService contactsApi = apiConnectionManager.getContactsApi();
+        ContactService contactsApi = apiConnectionManager.getContactApi();
         try {
             // Get the set of RCS contacts
             Set<RcsContact> rcsContacts = contactsApi.getRcsContacts();
@@ -91,7 +91,7 @@ public class MultiContactListAdapter extends CursorAdapter implements Filterable
                     // Keep a trace of already treated row
                     String phoneNumber = cursor.getString(cursor.getColumnIndex(Phone.NUMBER));
                     try {
-                        ContactId contact = contactUtils.formatContact(phoneNumber);
+                        ContactId contact = contactUtil.formatContact(phoneNumber);
                         // If this number is RCS and not already in the list,
                         // take it
                         if (rcsContactIds.contains(contact) && !treatedContactIDs.contains(contact)) {

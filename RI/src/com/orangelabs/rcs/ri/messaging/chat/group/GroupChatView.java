@@ -62,9 +62,9 @@ import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.gsma.services.rcs.chat.GroupChatListener;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.chat.ParticipantInfo.Status;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
-import com.gsma.services.rcs.contacts.RcsContact;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
+import com.gsma.services.rcs.contact.RcsContact;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.messaging.GroupDeliveryInfoList;
@@ -348,7 +348,7 @@ public class GroupChatView extends ChatView {
                     updateGroupChatViewTitle(mSubject);
 
                     // Get participants
-                    ContactUtils contactUtils = ContactUtils.getInstance(this);
+                    ContactUtil contactUtil = ContactUtil.getInstance(this);
                     List<String> contacts = getIntent().getStringArrayListExtra(
                             GroupChatView.EXTRA_PARTICIPANTS);
                     if (contacts == null || contacts.isEmpty()) {
@@ -360,7 +360,7 @@ public class GroupChatView extends ChatView {
 
                     for (String contact : contacts) {
                         try {
-                            mParticipants.add(contactUtils.formatContact(contact));
+                            mParticipants.add(contactUtil.formatContact(contact));
                         } catch (RcsContactFormatException e) {
                             if (LogUtils.isActive) {
                                 Log.e(LOGTAG, "processIntent invalid participant ".concat(contact));
@@ -627,7 +627,7 @@ public class GroupChatView extends ChatView {
         Set<ContactId> availableParticipants = new HashSet<ContactId>();
         try {
             Set<ParticipantInfo> currentContacts = mGroupChat.getParticipants();
-            Set<RcsContact> contacts = mCnxManager.getContactsApi().getRcsContacts();
+            Set<RcsContact> contacts = mCnxManager.getContactApi().getRcsContacts();
             for (RcsContact c1 : contacts) {
                 ContactId contact = c1.getContactId();
                 boolean found = false;
@@ -695,7 +695,7 @@ public class GroupChatView extends ChatView {
                                     getString(R.string.label_command_in_progress));
 
                             Set<ContactId> contacts = new HashSet<ContactId>();
-                            ContactUtils contactUtils = ContactUtils
+                            ContactUtil contactUtils = ContactUtil
                                     .getInstance(GroupChatView.this);
                             for (String participant : selectedParticipants) {
                                 contacts.add(contactUtils.formatContact(participant));

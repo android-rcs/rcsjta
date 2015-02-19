@@ -28,7 +28,7 @@ import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 
 import android.database.Cursor;

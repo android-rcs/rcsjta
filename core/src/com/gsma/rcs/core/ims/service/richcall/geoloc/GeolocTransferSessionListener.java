@@ -21,7 +21,7 @@ package com.gsma.rcs.core.ims.service.richcall.geoloc;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Geoloc sharing transfer session listener

@@ -1,6 +1,6 @@
 package com.gsma.services.rcs;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Common service configuration interface

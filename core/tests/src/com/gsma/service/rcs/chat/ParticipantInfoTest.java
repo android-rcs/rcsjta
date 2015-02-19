@@ -22,8 +22,8 @@ import android.os.Parcel;
 import android.test.AndroidTestCase;
 
 import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
 
 public class ParticipantInfoTest extends AndroidTestCase {
 
@@ -31,7 +31,7 @@ public class ParticipantInfoTest extends AndroidTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        ContactUtils contactUtils = ContactUtils.getInstance(getContext());
+        ContactUtil contactUtils = ContactUtil.getInstance(getContext());
         contact = contactUtils.formatContact("+33123456789");
 
     }

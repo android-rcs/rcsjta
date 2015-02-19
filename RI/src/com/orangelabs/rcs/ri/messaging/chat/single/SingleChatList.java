@@ -41,8 +41,8 @@ import android.widget.TextView;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ChatLog.Message;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
@@ -88,7 +88,7 @@ public class SingleChatList extends Activity {
      */
     private ListView mListView;
 
-    private ContactUtils mContactUtils;
+    private ContactUtil mContactUtil;
 
     /**
      * The log tag for this class
@@ -103,7 +103,7 @@ public class SingleChatList extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.chat_list);
 
-        mContactUtils = ContactUtils.getInstance(this);
+        mContactUtil = ContactUtil.getInstance(this);
 
         // Set list adapter
         mListView = (ListView) findViewById(android.R.id.list);
@@ -129,7 +129,7 @@ public class SingleChatList extends Activity {
 
                 ContactId contact;
                 try {
-                    contact = mContactUtils.formatContact(number);
+                    contact = mContactUtil.formatContact(number);
                     // Open chat
                     startActivity(SingleChatView.forgeIntentToStart(SingleChatList.this, contact));
                 } catch (RcsContactFormatException e) {

@@ -61,7 +61,7 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
 import com.gsma.rcs.service.api.CapabilityServiceImpl;
 import com.gsma.rcs.service.api.ChatServiceImpl;
-import com.gsma.rcs.service.api.ContactsServiceImpl;
+import com.gsma.rcs.service.api.ContactServiceImpl;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.rcs.service.api.FileUploadServiceImpl;
 import com.gsma.rcs.service.api.GeolocSharingServiceImpl;
@@ -79,8 +79,8 @@ import com.gsma.services.rcs.capability.ICapabilityService;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.IChatService;
 import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.IContactsService;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.IContactService;
 import com.gsma.services.rcs.extension.IMultimediaSessionService;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.IFileTransferService;
@@ -134,7 +134,7 @@ public class RcsCoreService extends Service implements CoreListener {
     /**
      * Contacts API
      */
-    private ContactsServiceImpl contactsApi = null;
+    private ContactServiceImpl contactsApi = null;
 
     /**
      * Capability API
@@ -239,7 +239,7 @@ public class RcsCoreService extends Service implements CoreListener {
             RcsSettings.createInstance(ctx);
 
             // Instantiate the contactUtils instance (CountryCode is already set)
-            com.gsma.services.rcs.contacts.ContactUtils.getInstance(this);
+            com.gsma.services.rcs.contact.ContactUtil.getInstance(this);
 
             ContentResolver contentResolver = ctx.getContentResolver();
             LocalContentResolver localContentResolver = new LocalContentResolver(contentResolver);
@@ -262,7 +262,7 @@ public class RcsCoreService extends Service implements CoreListener {
             RichCallHistory richcallLog = RichCallHistory.getInstance();
             RcsSettings rcsSettings = RcsSettings.getInstance();
             ContactsManager contactsManager = ContactsManager.getInstance();
-            contactsApi = new ContactsServiceImpl(contactsManager);
+            contactsApi = new ContactServiceImpl(contactsManager);
             capabilityApi = new CapabilityServiceImpl(contactsManager);
             chatApi = new ChatServiceImpl(imService, messgaingLog, rcsSettings, contactsManager,
                     core);
@@ -373,9 +373,9 @@ public class RcsCoreService extends Service implements CoreListener {
 
     @Override
     public IBinder onBind(Intent intent) {
-        if (IContactsService.class.getName().equals(intent.getAction())) {
+        if (IContactService.class.getName().equals(intent.getAction())) {
             if (logger.isActivated()) {
-                logger.debug("Contacts service API binding");
+                logger.debug("Contact service API binding");
             }
             return contactsApi;
         } else if (ICapabilityService.class.getName().equals(intent.getAction())) {

@@ -42,7 +42,7 @@ import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceListener;
 import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingService;
 

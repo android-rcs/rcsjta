@@ -24,7 +24,7 @@ import java.util.Vector;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import javax2.sip.header.ExtensionHeader;
 import javax2.sip.header.Header;

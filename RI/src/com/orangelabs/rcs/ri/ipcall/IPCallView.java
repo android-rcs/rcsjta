@@ -38,7 +38,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.ipcall.IPCall;
 import com.gsma.services.rcs.ipcall.IPCallIntent;
 import com.gsma.services.rcs.ipcall.IPCallListener;
@@ -227,12 +227,12 @@ public class IPCallView extends Activity {
         // Register to API connection manager
         mCnxManager = ApiConnectionManager.getInstance(this);
         if (mCnxManager == null
-                || !mCnxManager.isServiceConnected(RcsServiceName.IP_CALL, RcsServiceName.CONTACTS)) {
+                || !mCnxManager.isServiceConnected(RcsServiceName.IP_CALL, RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
         } else {
             mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.IMAGE_SHARING,
-                    RcsServiceName.CONTACTS);
+                    RcsServiceName.CONTACT);
             initiateIpCall();
         }
     }

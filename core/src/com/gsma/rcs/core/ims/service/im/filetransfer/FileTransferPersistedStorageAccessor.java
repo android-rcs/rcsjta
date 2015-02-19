@@ -21,7 +21,7 @@ import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;

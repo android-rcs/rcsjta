@@ -28,7 +28,7 @@ import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 public class ResumeDownloadFileSharingSession extends TerminatingHttpFileSharingSession {
 

@@ -22,7 +22,7 @@
 
 package com.gsma.rcs.core.ims.service;
 
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Listener of events sent during an IMS session

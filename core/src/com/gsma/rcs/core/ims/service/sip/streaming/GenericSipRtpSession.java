@@ -40,7 +40,7 @@ import com.gsma.rcs.core.ims.service.sip.SipSessionError;
 import com.gsma.rcs.core.ims.service.sip.SipSessionListener;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Generic SIP RTP session

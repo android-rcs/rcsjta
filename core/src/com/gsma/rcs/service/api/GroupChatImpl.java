@@ -54,7 +54,7 @@ import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.IChatMessage;
 import com.gsma.services.rcs.chat.IGroupChat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 import java.util.ArrayList;
 import java.util.HashSet;

@@ -45,7 +45,7 @@ import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.ipcall.AudioCodec;
 import com.gsma.services.rcs.ipcall.VideoCodec;
 

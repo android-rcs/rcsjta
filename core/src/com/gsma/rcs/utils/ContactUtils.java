@@ -40,7 +40,7 @@ import android.provider.ContactsContract.RawContacts;
 
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.services.rcs.RcsContactFormatException;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Contacts utility functions
@@ -251,7 +251,7 @@ public class ContactUtils {
      * @throws RcsContactFormatException
      */
     public static ContactId createContactId(String phoneNumber) throws RcsContactFormatException {
-        com.gsma.services.rcs.contacts.ContactUtils contactUtils = com.gsma.services.rcs.contacts.ContactUtils
+        com.gsma.services.rcs.contact.ContactUtil contactUtils = com.gsma.services.rcs.contact.ContactUtil
                 .getInstance(AndroidFactory.getApplicationContext());
         if (contactUtils != null) {
             return contactUtils.formatContact(PhoneUtils

@@ -35,7 +35,7 @@ import com.gsma.services.rcs.RcsServiceListener;
 import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
 import com.gsma.services.rcs.capability.CapabilityService;
 import com.gsma.services.rcs.chat.ChatService;
-import com.gsma.services.rcs.contacts.ContactsService;
+import com.gsma.services.rcs.contact.ContactService;
 import com.gsma.services.rcs.extension.MultimediaSessionService;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingService;
@@ -61,7 +61,7 @@ public class ApiConnectionManager {
      */
     @SuppressWarnings("javadoc")
     public enum RcsServiceName {
-        CAPABILITY, CONTACTS, CHAT, FILE_TRANSFER, IMAGE_SHARING, VIDEO_SHARING, GEOLOC_SHARING, FILE_UPLOAD, IP_CALL, MULTIMEDIA;
+        CAPABILITY, CONTACT, CHAT, FILE_TRANSFER, IMAGE_SHARING, VIDEO_SHARING, GEOLOC_SHARING, FILE_UPLOAD, IP_CALL, MULTIMEDIA;
     };
 
     /**
@@ -210,8 +210,8 @@ public class ApiConnectionManager {
                 newRcsServiceListener(RcsServiceName.CAPABILITY)));
         mApis.put(RcsServiceName.CHAT, new ChatService(context,
                 newRcsServiceListener(RcsServiceName.CHAT)));
-        mApis.put(RcsServiceName.CONTACTS, new ContactsService(context,
-                newRcsServiceListener(RcsServiceName.CONTACTS)));
+        mApis.put(RcsServiceName.CONTACT, new ContactService(context,
+                newRcsServiceListener(RcsServiceName.CONTACT)));
         mApis.put(RcsServiceName.FILE_TRANSFER, new FileTransferService(context,
                 newRcsServiceListener(RcsServiceName.FILE_TRANSFER)));
         mApis.put(RcsServiceName.IMAGE_SHARING, new ImageSharingService(context,
@@ -324,8 +324,8 @@ public class ApiConnectionManager {
      * 
      * @return the instance
      */
-    public ContactsService getContactsApi() {
-        return (ContactsService) mApis.get(RcsServiceName.CONTACTS);
+    public ContactService getContactApi() {
+        return (ContactService) mApis.get(RcsServiceName.CONTACT);
     }
 
     /**

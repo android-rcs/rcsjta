@@ -16,7 +16,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.gsma.services.rcs.contacts;
+package com.gsma.services.rcs.contact;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,16 +30,16 @@ import android.text.TextUtils;
 import com.gsma.services.rcs.RcsContactFormatException;
 
 /**
- * ContactUtils class for validation and unique formatting of phone numbers
+ * ContactUtil class for validation and unique formatting of phone numbers
  * 
  * @author YPLO6403
  */
-public class ContactUtils {
+public class ContactUtil {
 
     /**
-     * Singleton of ContactUtils
+     * Singleton of ContactUtil
      */
-    private static volatile ContactUtils sInstance;
+    private static volatile ContactUtil sInstance;
 
     /**
      * The country code of the device (read from settings provider: is null before first
@@ -799,7 +799,7 @@ public class ContactUtils {
      * @param context
      * @param countryCode
      */
-    private ContactUtils(Context context) {
+    private ContactUtil(Context context) {
         // Get ISO country code from telephony manager
         TelephonyManager mgr = (TelephonyManager) context
                 .getSystemService(Context.TELEPHONY_SERVICE);
@@ -828,23 +828,23 @@ public class ContactUtils {
     }
 
     /**
-     * Get an instance of ContactUtils.
+     * Get an instance of ContactUtil.
      * 
      * @param context the context
      * @return the singleton instance. May be null if country code cannot be read from provider.
      */
-    public static ContactUtils getInstance(Context context) {
+    public static ContactUtil getInstance(Context context) {
         if (sInstance != null) {
             return sInstance;
 
         }
-        synchronized (ContactUtils.class) {
+        synchronized (ContactUtil.class) {
             if (sInstance == null) {
                 if (context == null) {
                     throw new IllegalArgumentException("Context is null");
 
                 }
-                sInstance = new ContactUtils(context);
+                sInstance = new ContactUtil(context);
             }
         }
         return sInstance;

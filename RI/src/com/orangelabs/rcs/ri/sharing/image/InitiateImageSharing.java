@@ -42,8 +42,8 @@ import android.widget.Toast;
 
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.image.ImageSharingListener;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
@@ -327,10 +327,10 @@ public class InitiateImageSharing extends Activity {
             // Get the remote contact
             ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
-            ContactUtils contactUtils = ContactUtils.getInstance(InitiateImageSharing.this);
+            ContactUtil contactUtil = ContactUtil.getInstance(InitiateImageSharing.this);
             final ContactId remote;
             try {
-                remote = contactUtils.formatContact(phoneNumber);
+                remote = contactUtil.formatContact(phoneNumber);
             } catch (RcsContactFormatException e1) {
                 Utils.showMessage(InitiateImageSharing.this,
                         getString(R.string.label_invalid_contact, phoneNumber));

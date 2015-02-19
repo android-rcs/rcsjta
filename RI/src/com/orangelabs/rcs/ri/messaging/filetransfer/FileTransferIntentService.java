@@ -32,7 +32,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.contacts.ContactId;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferIntent;
 import com.orangelabs.rcs.ri.R;
