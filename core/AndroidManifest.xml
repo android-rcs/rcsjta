@@ -89,7 +89,7 @@
         <service android:name="com.gsma.rcs.service.RcsCoreService" >
             <intent-filter>
                 <action android:name="com.gsma.rcs.SERVICE" />
-                <action android:name="com.gsma.services.rcs.contact.IContactsService" />
+                <action android:name="com.gsma.services.rcs.contact.IContactService" />
                 <action android:name="com.gsma.services.rcs.capability.ICapabilityService" />
                 <action android:name="com.gsma.services.rcs.chat.IChatService" />
                 <action android:name="com.gsma.services.rcs.filetransfer.IFileTransferService" />
