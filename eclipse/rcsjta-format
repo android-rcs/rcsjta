@@ -1,44 +1,132 @@
 #!/bin/bash
 
-ECLIPSE="$HOME/my_repos/android_eclipse/eclipse"
-
-function formatting {
-	$ECLIPSE -application org.eclipse.jdt.core.JavaCodeFormatter -config ~/org.eclipse.jdt.core.prefs $WORK/core/src/com/
-	$ECLIPSE -application org.eclipse.jdt.core.JavaCodeFormatter -config ~/org.eclipse.jdt.core.prefs $WORK/core/tests/
-	$ECLIPSE -application org.eclipse.jdt.core.JavaCodeFormatter -config ~/org.eclipse.jdt.core.prefs $WORK/RI/
-	$ECLIPSE -application org.eclipse.jdt.core.JavaCodeFormatter -config ~/org.eclipse.jdt.core.prefs $WORK/samples/
-	$ECLIPSE -application org.eclipse.jdt.core.JavaCodeFormatter -config ~/org.eclipse.jdt.core.prefs $WORK/mediaplayer/
-	$ECLIPSE -application org.eclipse.jdt.core.JavaCodeFormatter -config ~/org.eclipse.jdt.core.prefs $WORK/tests/
+function formatting_Core {
+	echo "Formatting Core..."
+	"$ECLIPSE" -application org.eclipse.jdt.core.JavaCodeFormatter -config $WORK/eclipse/org.eclipse.jdt.core.prefs $WORK/core/src/
 }
 
-function lineending {
-	find ./core/src/com/ -name "*.java" | xargs dos2unix
-	find ./core/src/com/ -name "*.xml" | xargs dos2unix
-	find ./core/src/com/ -name "*.properties" | xargs dos2unix
-	find ./core/tests/ -name "*.java" | xargs dos2unix
-	find ./core/tests/ -name "*.xml" | xargs dos2unix
-	find ./core/tests/ -name "*.properties" | xargs dos2unix
-	find ./RI/ -name "*.java" | xargs dos2unix
-	find ./RI/ -name "*.xml" | xargs dos2unix
-	find ./RI/ -name "*.properties" | xargs dos2unix
-	find ./samples/ -name "*.java" | xargs dos2unix
-	find ./samples/ -name "*.xml" | xargs dos2unix
-	find ./samples/ -name "*.properties" | xargs dos2unix
-	find ./mediaplayer/ -name "*.java" | xargs dos2unix
-	find ./mediaplayer/ -name "*.xml" | xargs dos2unix
-	find ./mediaplayer/ -name "*.properties" | xargs dos2unix
-	find ./tests/ -name "*.java" | xargs dos2unix
-	find ./tests/ -name "*.xml" | xargs dos2unix
-	find ./tests/ -name "*.properties" | xargs dos2unix
+function formatting_RI {
+	echo "Formatting RI..."
+	"$ECLIPSE" -application org.eclipse.jdt.core.JavaCodeFormatter -config $WORK/eclipse/org.eclipse.jdt.core.prefs $WORK/RI/src/
 }
 
-function counttabs {
-	grep -r -P --include="*.java" "\t" $WORK/core/src/com/ | wc
-	grep -r -P --include="*.java" "\t" $WORK/core/tests/ | wc
-	grep -r -P --include="*.java" "\t" $WORK/RI/ | wc
-	grep -r -P --include="*.java" "\t" $WORK/samples/ | wc
-	grep -r -P --include="*.java" "\t" $WORK/mediaplayer/ | wc
-	grep -r -P --include="*.java" "\t" $WORK/tests/ | wc
+function formatting_Core_tests {
+	echo "Formatting Core tests..."
+	"$ECLIPSE" -application org.eclipse.jdt.core.JavaCodeFormatter -config $WORK/eclipse/org.eclipse.jdt.core.prefs $WORK/core/tests/src/
+}
+
+function formatting_mediaplayer {
+	echo "Formatting Media Player..."
+	"$ECLIPSE" -application org.eclipse.jdt.core.JavaCodeFormatter -config $WORK/eclipse/org.eclipse.jdt.core.prefs $WORK/mediaplayer/src/
+}
+
+function formatting_CTS {
+	echo "Formatting CTS..."
+	"$ECLIPSE" -application org.eclipse.jdt.core.JavaCodeFormatter -config $WORK/eclipse/org.eclipse.jdt.core.prefs $WORK/tests/cts/signature/src/
+	"$ECLIPSE" -application org.eclipse.jdt.core.JavaCodeFormatter -config $WORK/eclipse/org.eclipse.jdt.core.prefs $WORK/tests/cts/provider/src/
+}
+
+function formatting_samples {
+	echo "Formatting samples.."
+	"$ECLIPSE" -application org.eclipse.jdt.core.JavaCodeFormatter -config $WORK/eclipse/org.eclipse.jdt.core.prefs $WORK/samples/tts/src/
+	"$ECLIPSE" -application org.eclipse.jdt.core.JavaCodeFormatter -config $WORK/eclipse/org.eclipse.jdt.core.prefs $WORK/samples/extension/src/
+	"$ECLIPSE" -application org.eclipse.jdt.core.JavaCodeFormatter -config $WORK/eclipse/org.eclipse.jdt.core.prefs $WORK/samples/session/src/
+}
+
+function lineending_Core {
+	echo "Unix line ending Core..."
+	find $WORK/core/src -name "*.java" | xargs dos2unix -q
+	find $WORK/core/src -name "*.aidl" | xargs dos2unix -q
+	find $WORK/core -maxdepth 1 -name "*.xml" | xargs dos2unix -q
+	find $WORK/core/res -name "*.xml" | xargs dos2unix -q
+	find $WORK/core -maxdepth 1 -name "*.properties" | xargs dos2unix -q
+}
+
+function lineending_RI {
+	echo "Unix line ending RI..."
+	find $WORK/RI/src -name "*.java" | xargs dos2unix -q
+	find $WORK/RI/res -name "*.xml" | xargs dos2unix -q
+	find $WORK/RI -maxdepth 1 -name "*.xml" | xargs dos2unix -q
+	find $WORK/RI -maxdepth 1 -name "*.properties" | xargs dos2unix -q
+}
+
+function lineending_Core_tests {
+	echo "Unix line ending Core tests..."
+	find $WORK/core/tests/src -name "*.java" | xargs dos2unix -q
+	find $WORK/core/tests/res -name "*.xml" | xargs dos2unix -q
+	find $WORK/core/tests -maxdepth 1 -name "*.xml" | xargs dos2unix -q
+	find $WORK/core/tests -maxdepth 1 -name "*.properties" | xargs dos2unix -q
+}
+
+function lineending_mediaplayer {
+	echo "Unix line ending Media player..."
+	find $WORK/mediaplayer/src -name "*.java" | xargs dos2unix -q
+	find $WORK/mediaplayer/res -name "*.xml" | xargs dos2unix -q
+	find $WORK/mediaplayer -maxdepth 1 -name "*.xml" | xargs dos2unix -q
+	find $WORK/mediaplayer -maxdepth 1 -name "*.properties" | xargs dos2unix -q
+}
+
+function lineending_CTS {
+	echo "Unix line ending CTS..."
+	find $WORK/tests/cts/signature/src -name "*.java" | xargs dos2unix -q
+	find $WORK/tests/cts/signature/res -name "*.xml" | xargs dos2unix -q
+	find $WORK/tests/cts/signature -maxdepth 1 -name "*.xml" | xargs dos2unix -q
+	find $WORK/tests/cts/signature -maxdepth 1 -name "*.properties" | xargs dos2unix -q
+	find $WORK/tests/cts/provider/src -name "*.java" | xargs dos2unix -q
+	find $WORK/tests/cts/provider/res -name "*.xml" | xargs dos2unix -q
+	find $WORK/tests/cts/provider -maxdepth 1 -name "*.xml" | xargs dos2unix -q
+	find $WORK/tests/cts/provider -maxdepth 1 -name "*.properties" | xargs dos2unix -q
+}
+
+function lineending_samples {
+	echo "Unix line ending samples tts..."
+	find $WORK/samples/tts/src -name "*.java" | xargs dos2unix -q
+	find $WORK/samples/tts/res -name "*.xml" | xargs dos2unix -q
+	find $WORK/samples/tts -maxdepth 1 -name "*.xml" | xargs dos2unix -q
+	find $WORK/samples/tts -maxdepth 1 -name "*.properties" | xargs dos2unix -q
+	echo "Unix line ending samples session..."
+	find $WORK/samples/session -name "*.java" | xargs dos2unix -q
+	find $WORK/samples/session/res -name "*.xml" | xargs dos2unix -q
+	find $WORK/samples/session -maxdepth 1 -name "*.xml" | xargs dos2unix -q
+	find $WORK/samples/session -maxdepth 1 -name "*.properties" | xargs dos2unix -q
+	echo "Unix line ending samples extension..."
+	find $WORK/samples/extension -name "*.java" | xargs dos2unix -q
+	find $WORK/samples/extension/res -name "*.xml" | xargs dos2unix -q
+	find $WORK/samples/extension -maxdepth 1 -name "*.xml" | xargs dos2unix -q
+	find $WORK/samples/extension -maxdepth 1 -name "*.properties" | xargs dos2unix -q
+}
+
+function counttabs_Core {
+	echo "Count tabulations Core..."
+	find $WORK/core/src/ -name "*.java" | xargs grep $'\t' | wc
+}
+
+function counttabs_RI {
+	echo "Count tabulations RI..."
+	find $WORK/RI/src/ -name "*.java" | xargs grep $'\t' | wc
+}
+
+function counttabs_Core_tests {
+	echo "Count tabulations Core tests..."
+	find $WORK/core/tests/src/ -name "*.java" | xargs grep $'\t' | wc
+}
+
+function counttabs_mediaplayer {
+	echo "Count tabulations Media player..."
+	find $WORK/mediaplayer/src/ -name "*.java" | xargs grep $'\t' | wc
+}
+
+function counttabs_CTS {
+	echo "Count tabulations..."
+	find $WORK/tests/cts/signature/src/ -name "*.java" | xargs grep $'\t' | wc
+	find $WORK/tests/cts/provider/src/ -name "*.java" | xargs grep $'\t' | wc
+}
+
+function counttabs_samples {
+	echo "Count tabulations..."
+	find $WORK/samples/tts/src/ -name "*.java" | xargs grep $'\t' | wc
+	find $WORK/samples/session/src/ -name "*.java" | xargs grep $'\t' | wc
+	find $WORK/samples/extension/src/ -name "*.java" | xargs grep $'\t' | wc
 }
 
 WORK=$(pwd)
@@ -47,13 +135,75 @@ read answer
 
 if [ "$answer" = "y" ];
 then
-	echo "Formatting..."
-	formatting
-	lineending
-	counttabs
-	echo "Done!"
-else
-	echo "Exit!"
+
+PS3='Please enter your choice: '
+options=("Core" "RI" "Core unitary tests" "Media player" "CTS" "Samples" "All" "Quit")
+select opt in "${options[@]}"
+do
+    case $opt in
+        "Core")
+            echo "you chose Core"
+			formatting_Core
+			lineending_Core
+			counttabs_Core
+            ;;
+        "RI")
+            echo "you chose RI"
+			formatting_RI
+			lineending_RI
+			counttabs_RI
+            ;;
+        "Core unitary tests")
+            echo "you chose Core unitary tests"
+			formatting_Core_tests
+			lineending_Core_tests
+			counttabs_Core_tests
+            ;;
+		"Media player")
+            echo "you chose Media player"
+			formatting_mediaplayer
+			lineending_mediaplayer
+			counttabs_mediaplayer
+            ;;
+		"CTS")
+            echo "you chose CTS"
+			formatting_CTS
+			lineending_CTS
+			counttabs_CTS
+            ;;
+		"Samples")
+            echo "you chose samples"
+			formatting_samples
+			lineending_samples
+			counttabs_samples
+            ;;
+		"All")
+            echo "you chose All"
+			formatting_Core
+			lineending_Core
+			counttabs_Core
+			formatting_RI
+			lineending_RI
+			counttabs_RI
+			formatting_Core_tests
+			lineending_Core_tests
+			counttabs_Core_tests
+			formatting_mediaplayer
+			lineending_mediaplayer
+			counttabs_mediaplayer
+			formatting_CTS
+			lineending_CTS
+			counttabs_CTS
+			formatting_samples
+			lineending_samples
+			counttabs_samples
+            ;;
+        "Quit")
+            break
+            ;;
+        *) echo invalid option;;
+    esac
+done
 fi
 
 exit

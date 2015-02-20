@@ -13,14 +13,15 @@ Point it to the eclipse folder and select the android.importorder
 
 2- Format source files
 2-1 Command line option
-prompt> eclipse -application org.eclipse.jdt.core.JavaCodeFormatter -config <path to org.eclipse.jdt.core.prefs > <path to source code >
+Define the ECLIPSE environment variable to the excutable path then enter the below command:
+prompt> ./eclipse/rcsjta-format
 
 2-2 Eclipse GUI option
 Right click on the source folder then select "Source -> Format"
 
 Once formatted, a source file should not be changed if you reformat it manually using the <CTRL>+A (Select all) then <CTRL>+F (Format) sequences.
 
-3. Ensure that XML, AIDL and java files are converted to UNIX text file format (Line delimiter: LF)
+Ensure that XML, AIDL and java files are converted to UNIX text file format (Line delimiter: LF)
 find <source directory> -name "*.java" -exec dos2unix {} \;
 find <source directory> -name "*.aidl" -exec dos2unix {} \;
 find <resource directory> -name "*.xml" -exec dos2unix {} \;
