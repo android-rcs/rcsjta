@@ -5,6 +5,7 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.rcs.provider.ContentProviderBaseIdCreator;
 import com.gsma.rcs.utils.DatabaseUtils;
 import com.gsma.services.rcs.GroupDeliveryInfo;
 
@@ -27,7 +28,7 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
 
     private static final String SELECTION_WITH_ID_ONLY = GroupDeliveryInfoData.KEY_ID.concat("=?");
 
-    private static final String DATABASE_NAME = "groupdeliveryinfo.db";
+    public static final String DATABASE_NAME = "groupdeliveryinfo.db";
 
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     static {
@@ -54,7 +55,7 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
 
-        private static final int DATABASE_VERSION = 3;
+        private static final int DATABASE_VERSION = 4;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -64,7 +65,8 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
         public void onCreate(SQLiteDatabase db) {
             db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(DATABASE_TABLE)
                     .append("(").append(GroupDeliveryInfoData.KEY_CHAT_ID)
-                    .append(" TEXT NOT NULL,").append(GroupDeliveryInfoData.KEY_ID)
+                    .append(" TEXT NOT NULL,").append(GroupDeliveryInfoData.KEY_BASECOLUMN_ID)
+                    .append(" INTEGER NOT NULL,").append(GroupDeliveryInfoData.KEY_ID)
                     .append(" TEXT NOT NULL,").append(GroupDeliveryInfoData.KEY_CONTACT)
                     .append(" TEXT NOT NULL,").append(GroupDeliveryInfoData.KEY_DELIVERY_STATUS)
                     .append(" INTEGER NOT NULL,").append(GroupDeliveryInfoData.KEY_REASON_CODE)
@@ -74,6 +76,10 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
                     .append(GroupDeliveryInfoData.KEY_TIMESTAMP_DISPLAYED)
                     .append(" INTEGER NOT NULL, PRIMARY KEY(").append(GroupDeliveryInfoData.KEY_ID)
                     .append(",").append(GroupDeliveryInfoData.KEY_CONTACT).append("));").toString());
+            db.execSQL(new StringBuilder("CREATE INDEX ")
+                    .append(GroupDeliveryInfoData.KEY_BASECOLUMN_ID).append("_idx").append(" ON ")
+                    .append(DATABASE_TABLE).append("(")
+                    .append(GroupDeliveryInfoData.KEY_BASECOLUMN_ID).append(")").toString());
         }
 
         @Override
@@ -162,6 +168,9 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
             case UriType.DELIVERY_WITH_ID:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 String appendedId = initialValues.getAsString(GroupDeliveryInfoData.KEY_ID);
+                initialValues.put(GroupDeliveryInfoData.KEY_BASECOLUMN_ID,
+                        ContentProviderBaseIdCreator.createUniqueId(getContext(),
+                                GroupDeliveryInfoData.CONTENT_URI));
                 db.insert(DATABASE_TABLE, null, initialValues);
                 Uri notificationUri = Uri.withAppendedPath(GroupDeliveryInfo.CONTENT_URI,
                         appendedId);

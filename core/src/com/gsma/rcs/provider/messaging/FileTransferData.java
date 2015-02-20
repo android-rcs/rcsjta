@@ -32,11 +32,22 @@ import com.gsma.services.rcs.filetransfer.FileTransferLog;
  * @author Jean-Marc AUFFRET
  */
 public class FileTransferData {
+
     /**
      * Database URI
      */
     protected static final Uri CONTENT_URI = Uri
             .parse("content://com.gsma.rcs.filetransfer/filetransfer");
+
+    /**
+     * History log member id
+     */
+    public static final int HISTORYLOG_MEMBER_ID = 2;
+
+    /**
+     * Unique history log id
+     */
+    static final String KEY_BASECOLUMN_ID = FileTransferLog.BASECOLUMN_ID;
 
     /**
      * Unique file transfer identifier

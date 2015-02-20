@@ -74,7 +74,10 @@
     <permission
         android:name="com.gsma.rcs.permission.RCS_INTERNAL_ACCESS_ONLY"
         android:protectionLevel="signature" />
-
+    <permission android:name="com.gsma.services.rcs.RCS_READ_HISTORY"
+        android:label="@string/rcs_core_permission_read_history"
+        android:description="@string/rcs_core_permission_read_history"
+        android:protectionLevel="normal" />
     <application
         android:icon="@drawable/rcs_icon"
         android:label="@string/rcs_core_application_title" >
@@ -91,6 +94,7 @@
                 <action android:name="com.gsma.services.rcs.sharing.video.IVideoSharingService" />
                 <action android:name="com.gsma.services.rcs.sharing.image.IImageSharingService" />
                 <action android:name="com.gsma.services.rcs.sharing.geoloc.IGeolocSharingService" />
+                <action android:name="com.gsma.services.rcs.history.IHistoryService"/>
                 <action android:name="com.gsma.services.rcs.extension.IMultimediaSessionService" />
                 <action android:name="com.gsma.services.rcs.upload.IFileUploadService" />
             </intent-filter>
@@ -192,6 +196,12 @@
             android:exported="true"
             android:readPermission="com.gsma.services.rcs.RCS_READ_GEOLOCSHARE"
             android:writePermission="com.gsma.rcs.permission.RCS_INTERNAL_ACCESS_ONLY" />
+        <provider
+            android:name="com.gsma.rcs.provider.history.HistoryProvider"
+            android:authorities="com.gsma.services.rcs.provider.history"
+            android:exported="true"
+            android:readPermission="com.gsma.services.rcs.RCS_READ_HISTORY"
+            android:writePermission="com.gsma.rcs.permission.RCS_INTERNAL_ACCESS_ONLY"/>
 
         <!-- Device events receiver -->
 

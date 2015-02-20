@@ -17,6 +17,7 @@
 package com.gsma.services.rcs.sharing.geoloc;
 
 import android.net.Uri;
+import android.provider.BaseColumns;
 
 /**
  * Content provider for geoloc sharing history
@@ -28,6 +29,14 @@ public class GeolocSharingLog {
      */
     public static final Uri CONTENT_URI = Uri
             .parse("content://com.gsma.services.rcs.provider.geolocshare/geolocshare");
+
+    /**
+     * The name of the column containing the unique id across provider tables.
+     * <P>
+     * Type: INTEGER
+     * </P>
+     */
+    public static final String BASECOLUMN_ID = BaseColumns._ID;
 
     /**
      * The name of the column containing the unique sharing ID.

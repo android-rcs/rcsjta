@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.provider.sharing;
 
+import com.gsma.rcs.provider.history.HistoryMemberBaseIdCreator;
 import com.gsma.rcs.utils.DatabaseUtils;
 import com.gsma.services.rcs.sharing.image.ImageSharingLog;
 
@@ -42,12 +43,12 @@ import android.text.TextUtils;
  */
 public class ImageSharingProvider extends ContentProvider {
 
-    private static final String TABLE = "imageshare";
+    public static final String TABLE = "imageshare";
 
     private static final String SELECTION_WITH_SHARING_ID_ONLY = ImageSharingData.KEY_SHARING_ID
             .concat("=?");
 
-    private static final String DATABASE_NAME = "imageshare.db";
+    public static final String DATABASE_NAME = "imageshare.db";
 
     private static final UriMatcher sUriMatcher;
     static {
@@ -82,6 +83,7 @@ public class ImageSharingProvider extends ContentProvider {
         @Override
         public void onCreate(SQLiteDatabase db) {
             db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append("(")
+                    .append(ImageSharingData.KEY_BASECOLUMN_ID).append(" INTEGER NOT NULL,")
                     .append(ImageSharingData.KEY_SHARING_ID).append(" TEXT NOT NULL PRIMARY KEY,")
                     .append(ImageSharingData.KEY_CONTACT).append(" TEXT NOT NULL,")
                     .append(ImageSharingData.KEY_FILE).append(" TEXT NOT NULL,")
@@ -93,6 +95,9 @@ public class ImageSharingProvider extends ContentProvider {
                     .append(ImageSharingData.KEY_TIMESTAMP).append(" INTEGER NOT NULL,")
                     .append(ImageSharingData.KEY_TRANSFERRED).append(" INTEGER NOT NULL,")
                     .append(ImageSharingData.KEY_FILESIZE).append(" INTEGER NOT NULL)").toString());
+            db.execSQL(new StringBuilder("CREATE INDEX ").append(ImageSharingData.KEY_BASECOLUMN_ID)
+                    .append("_idx").append(" ON ").append(TABLE).append("(")
+                    .append(ImageSharingData.KEY_BASECOLUMN_ID).append(")").toString());
             db.execSQL(new StringBuilder("CREATE INDEX ").append(ImageSharingData.KEY_CONTACT)
                     .append("_idx").append(" ON ").append(TABLE).append("(")
                     .append(ImageSharingData.KEY_CONTACT).append(")").toString());
@@ -209,6 +214,8 @@ public class ImageSharingProvider extends ContentProvider {
             case UriType.IMAGE_SHARING_WITH_ID:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 String sharingId = initialValues.getAsString(ImageSharingData.KEY_SHARING_ID);
+                initialValues.put(ImageSharingData.KEY_BASECOLUMN_ID,
+                        HistoryMemberBaseIdCreator.createUniqueId(getContext(), ImageSharingData.HISTORYLOG_MEMBER_ID));
                 db.insert(TABLE, null, initialValues);
                 Uri notificationUri = Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId);
                 getContext().getContentResolver().notifyChange(notificationUri, null);
@@ -241,4 +248,5 @@ public class ImageSharingProvider extends ContentProvider {
                         .append(uri).append("!").toString());
         }
     }
+
 }

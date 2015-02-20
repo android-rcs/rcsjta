@@ -23,6 +23,7 @@
 package com.gsma.services.rcs.capability;
 
 import android.net.Uri;
+import android.provider.BaseColumns;
 
 /**
  * Content provider for last received capabilities
@@ -45,6 +46,14 @@ public class CapabilitiesLog {
      * Capability is supported
      */
     public static final int SUPPORTED = 1;
+
+    /**
+     * The name of the column containing the unique id across provider tables.
+     * <P>
+     * Type: INTEGER
+     * </P>
+     */
+    public static final String BASECOLUMN_ID = BaseColumns._ID;
 
     /**
      * The name of the column containing the MSISDN of the remote contact associated to the

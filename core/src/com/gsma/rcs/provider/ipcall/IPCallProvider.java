@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.provider.ipcall;
 
+import com.gsma.rcs.provider.ContentProviderBaseIdCreator;
 import com.gsma.rcs.service.ipcalldraft.IPCallLog;
 import com.gsma.rcs.utils.DatabaseUtils;
 
@@ -46,7 +47,7 @@ public class IPCallProvider extends ContentProvider {
 
     private static final String SELECTION_WITH_CALLID_ONLY = IPCallData.KEY_CALL_ID.concat("=?");
 
-    private static final String DATABASE_NAME = "ipcall.db";
+    public static final String DATABASE_NAME = "ipcall.db";
 
     private static final UriMatcher sUriMatcher;
     static {
@@ -72,7 +73,7 @@ public class IPCallProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 5;
+        private static final int DATABASE_VERSION = 6;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -82,6 +83,7 @@ public class IPCallProvider extends ContentProvider {
         public void onCreate(SQLiteDatabase db) {
             db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append("(")
                     .append(IPCallData.KEY_CALL_ID).append(" TEXT NOT NULL PRIMARY KEY,")
+                    .append(IPCallData.KEY_BASECOLUMN_ID).append(" INTEGER NOT NULL,")
                     .append(IPCallData.KEY_CONTACT).append(" TEXT NOT NULL,")
                     .append(IPCallData.KEY_STATE).append(" INTEGER NOT NULL,")
                     .append(IPCallData.KEY_REASON_CODE).append(" INTEGER NOT NULL,")
@@ -94,6 +96,9 @@ public class IPCallProvider extends ContentProvider {
             db.execSQL(new StringBuilder("CREATE INDEX ").append(IPCallData.KEY_CONTACT)
                     .append("_idx").append(" ON ").append(TABLE).append("(")
                     .append(IPCallData.KEY_CONTACT).append(")").toString());
+            db.execSQL(new StringBuilder("CREATE INDEX ").append(IPCallData.KEY_BASECOLUMN_ID)
+                    .append("_idx").append(" ON ").append(TABLE).append("(")
+                    .append(IPCallData.KEY_BASECOLUMN_ID).append(")").toString());
             db.execSQL(new StringBuilder("CREATE INDEX ").append(IPCallData.KEY_TIMESTAMP)
                     .append("_idx").append(" ON ").append(TABLE).append("(")
                     .append(IPCallData.KEY_TIMESTAMP).append(")").toString());
@@ -207,6 +212,8 @@ public class IPCallProvider extends ContentProvider {
             case UriType.IPCALL_WITH_CALLID:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 String callId = initialValues.getAsString(IPCallData.KEY_CALL_ID);
+                initialValues.put(IPCallData.KEY_BASECOLUMN_ID, ContentProviderBaseIdCreator
+                        .createUniqueId(getContext(), IPCallLog.CONTENT_URI));
                 db.insert(TABLE, null, initialValues);
                 Uri notificationUri = Uri.withAppendedPath(IPCallLog.CONTENT_URI, callId);
                 getContext().getContentResolver().notifyChange(notificationUri, null);

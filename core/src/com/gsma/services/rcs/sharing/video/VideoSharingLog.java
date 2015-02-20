@@ -23,6 +23,7 @@
 package com.gsma.services.rcs.sharing.video;
 
 import android.net.Uri;
+import android.provider.BaseColumns;
 
 import com.gsma.services.rcs.RcsService.Direction;
 
@@ -37,6 +38,14 @@ public class VideoSharingLog {
      */
     public static final Uri CONTENT_URI = Uri
             .parse("content://com.gsma.services.rcs.provider.videoshare/videoshare");
+
+    /**
+     * The name of the column containing the unique id across provider tables.
+     * <P>
+     * Type: INTEGER
+     * </P>
+     */
+    public static final String BASECOLUMN_ID = BaseColumns._ID;
 
     /**
      * The name of the column containing the unique ID of the video sharing.

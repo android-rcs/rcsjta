@@ -25,7 +25,14 @@ import android.net.Uri;
  */
 public class GeolocSharingData {
 
-    protected static final Uri CONTENT_URI = GeolocSharingLog.CONTENT_URI;
+    public static final Uri CONTENT_URI = GeolocSharingLog.CONTENT_URI;
+
+    /**
+     * History log member id
+     */
+    public static final int HISTORYLOG_MEMBER_ID = 5;
+
+    static final String KEY_BASECOLUMN_ID = GeolocSharingLog.BASECOLUMN_ID;
 
     static final String KEY_SHARING_ID = GeolocSharingLog.SHARING_ID;
 

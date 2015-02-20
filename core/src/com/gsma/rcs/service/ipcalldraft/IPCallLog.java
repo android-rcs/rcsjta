@@ -25,6 +25,7 @@ package com.gsma.rcs.service.ipcalldraft;
 import com.gsma.services.rcs.RcsService.Direction;
 
 import android.net.Uri;
+import android.provider.BaseColumns;
 
 /**
  * Content provider for IP call history
@@ -37,6 +38,14 @@ public class IPCallLog {
      */
     public static final Uri CONTENT_URI = Uri
             .parse("content://com.gsma.services.rcs.provider.ipcall/ipcall");
+
+    /**
+     * The name of the column containing the unique base column id.
+     * <P>
+     * Type: INTEGER
+     * </P>
+     */
+    public static final String BASECOLUMN_ID = BaseColumns._ID;
 
     /**
      * The name of the column containing the unique ID of the call.

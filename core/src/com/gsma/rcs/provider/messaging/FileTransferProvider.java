@@ -22,7 +22,7 @@
 
 package com.gsma.rcs.provider.messaging;
 
-import com.gsma.rcs.provider.messaging.FileTransferData;
+import com.gsma.rcs.provider.history.HistoryMemberBaseIdCreator;
 import com.gsma.rcs.utils.DatabaseUtils;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
@@ -47,11 +47,11 @@ import java.util.Set;
  */
 public class FileTransferProvider extends ContentProvider {
 
-    private static final String TABLE = "filetransfer";
+    public static final String TABLE = "filetransfer";
 
     private static final String SELECTION_WITH_FT_ID_ONLY = FileTransferData.KEY_FT_ID.concat("=?");
 
-    private static final String DATABASE_NAME = "filetransfer.db";
+    public static final String DATABASE_NAME = "filetransfer.db";
 
     private static final class UriType {
 
@@ -125,6 +125,7 @@ public class FileTransferProvider extends ContentProvider {
         public void onCreate(SQLiteDatabase db) {
             db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append("(")
                     .append(FileTransferData.KEY_FT_ID).append(" TEXT NOT NULL PRIMARY KEY,")
+                    .append(FileTransferData.KEY_BASECOLUMN_ID).append(" INTEGER NOT NULL,")
                     .append(FileTransferData.KEY_CONTACT).append(" TEXT,")
                     .append(FileTransferData.KEY_FILE).append(" TEXT NOT NULL,")
                     .append(FileTransferData.KEY_FILENAME).append(" TEXT NOT NULL,")
@@ -144,6 +145,9 @@ public class FileTransferProvider extends ContentProvider {
                     .append(FileTransferData.KEY_UPLOAD_TID).append(" TEXT,")
                     .append(FileTransferData.KEY_DOWNLOAD_URI).append(" TEXT,")
                     .append(FileTransferData.KEY_FILEICON_MIME_TYPE).append(" TEXT)").toString());
+            db.execSQL(new StringBuilder("CREATE INDEX ").append(FileTransferData.KEY_BASECOLUMN_ID)
+                    .append("_idx").append(" ON ").append(TABLE).append("(")
+                    .append(FileTransferData.KEY_BASECOLUMN_ID).append(")").toString());
             db.execSQL(new StringBuilder("CREATE INDEX ").append(FileTransferData.KEY_CHAT_ID)
                     .append("_idx").append(" ON ").append(TABLE).append("(")
                     .append(FileTransferData.KEY_CHAT_ID).append(")").toString());
@@ -307,6 +311,8 @@ public class FileTransferProvider extends ContentProvider {
             case UriType.InternalFileTransfer.FILE_TRANSFER_WITH_ID:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 String ftId = initialValues.getAsString(FileTransferData.KEY_FT_ID);
+                initialValues.put(FileTransferLog.BASECOLUMN_ID,
+                        HistoryMemberBaseIdCreator.createUniqueId(getContext(), FileTransferData.HISTORYLOG_MEMBER_ID));
                 db.insert(TABLE, null, initialValues);
                 Uri notificationUri = Uri.withAppendedPath(FileTransferLog.CONTENT_URI, ftId);
                 getContext().getContentResolver().notifyChange(notificationUri, null);
@@ -353,4 +359,5 @@ public class FileTransferProvider extends ContentProvider {
                         .append(uri).append("!").toString());
         }
     }
+
 }

@@ -25,6 +25,7 @@ package com.gsma.services.rcs.filetransfer;
 import com.gsma.services.rcs.RcsService.Direction;
 
 import android.net.Uri;
+import android.provider.BaseColumns;
 
 /**
  * Content provider for file transfer history
@@ -37,6 +38,14 @@ public class FileTransferLog {
      */
     public static final Uri CONTENT_URI = Uri
             .parse("content://com.gsma.services.rcs.provider.filetransfer/filetransfer");
+
+    /**
+     * The name of the column containing the unique id across provider tables.
+     * <P>
+     * Type: INTEGER
+     * </P>
+     */
+    public static final String BASECOLUMN_ID = BaseColumns._ID;
 
     /**
      * The name of the column containing the unique ID of the file transfer.

@@ -64,11 +64,13 @@ import com.gsma.rcs.service.api.ContactServiceImpl;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.rcs.service.api.FileUploadServiceImpl;
 import com.gsma.rcs.service.api.GeolocSharingServiceImpl;
+import com.gsma.rcs.service.api.HistoryServiceImpl;
 import com.gsma.rcs.service.api.IPCallServiceImpl;
 import com.gsma.rcs.service.api.ImageSharingServiceImpl;
 import com.gsma.rcs.service.api.MultimediaSessionServiceImpl;
 import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.rcs.service.api.VideoSharingServiceImpl;
+import com.gsma.rcs.service.ipcalldraft.IIPCallService;
 import com.gsma.rcs.service.ipcalldraft.IPCall;
 import com.gsma.rcs.utils.AppUtils;
 import com.gsma.rcs.utils.IntentUtils;
@@ -84,7 +86,7 @@ import com.gsma.services.rcs.contact.IContactService;
 import com.gsma.services.rcs.extension.IMultimediaSessionService;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.IFileTransferService;
-import com.gsma.rcs.service.ipcalldraft.IIPCallService;
+import com.gsma.services.rcs.history.IHistoryService;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingService;
 import com.gsma.services.rcs.sharing.image.IImageSharingService;
@@ -156,6 +158,11 @@ public class RcsCoreService extends Service implements CoreListener {
      * Geoloc sharing API
      */
     private GeolocSharingServiceImpl mGshApi;
+
+    /**
+     * History Service API
+     */
+    private HistoryServiceImpl mHistoryApi;
 
     /**
      * IP call API
@@ -300,6 +307,7 @@ public class RcsCoreService extends Service implements CoreListener {
                     contactsManager);
             mGshApi = new GeolocSharingServiceImpl(richCallService, contactsManager, richcallLog,
                     mRcsSettings);
+            mHistoryApi = new HistoryServiceImpl(getApplicationContext());
             mIpcallApi = new IPCallServiceImpl(ipCallService, IPCallHistory.getInstance(),
                     contactsManager, mRcsSettings);
             mSessionApi = new MultimediaSessionServiceImpl(sipService, mRcsSettings,
@@ -406,7 +414,9 @@ public class RcsCoreService extends Service implements CoreListener {
             mVshApi.close();
             mVshApi = null;
         }
-
+        if (mHistoryApi != null) {
+            mHistoryApi = null;
+        }
         // Terminate the core in background
         Core.terminateCore();
 
@@ -458,6 +468,11 @@ public class RcsCoreService extends Service implements CoreListener {
                 sLogger.debug("Geoloc sharing service API binding");
             }
             return mGshApi;
+        } else if (IHistoryService.class.getName().equals(intent.getAction())) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("History service API binding");
+            }
+            return mHistoryApi;
         } else if (IIPCallService.class.getName().equals(intent.getAction())) {
             if (sLogger.isActivated()) {
                 sLogger.debug("IP call service API binding");

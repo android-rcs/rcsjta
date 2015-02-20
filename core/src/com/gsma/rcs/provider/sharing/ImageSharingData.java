@@ -31,6 +31,17 @@ import com.gsma.services.rcs.sharing.image.ImageSharingLog;
  */
 public class ImageSharingData {
 
+
+    /**
+     * History log member id
+     */
+    public static final int HISTORYLOG_MEMBER_ID = 3;
+
+    /**
+     * Unique history log id
+     */
+    static final String KEY_BASECOLUMN_ID = ImageSharingLog.BASECOLUMN_ID;
+
     /**
      * Unique sharing identifier
      */

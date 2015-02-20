@@ -34,6 +34,11 @@ public class IPCallData {
     /**
      * Column name
      */
+    static final String KEY_BASECOLUMN_ID = IPCallLog.CONTACT;
+
+    /**
+     * Column name
+     */
     static final String KEY_CONTACT = IPCallLog.CONTACT;
 
     /**

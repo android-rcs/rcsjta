@@ -35,6 +35,11 @@ import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 public class MessageData {
 
     /**
+     * Unique history ID
+     */
+    static final String KEY_BASECOLUMN_ID = ChatLog.Message.BASECOLUMN_ID;
+
+    /**
      * Id of chat room
      */
     static final String KEY_CHAT_ID = ChatLog.Message.CHAT_ID;

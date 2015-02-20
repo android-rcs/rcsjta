@@ -17,6 +17,7 @@
 package com.gsma.services.rcs;
 
 import android.net.Uri;
+import android.provider.BaseColumns;
 import android.util.SparseArray;
 
 /**
@@ -29,6 +30,14 @@ public class GroupDeliveryInfo {
      */
     public static final Uri CONTENT_URI = Uri
             .parse("content://com.gsma.services.rcs.provider.groupdeliveryinfo/groupdeliveryinfo");
+
+    /**
+     * The name of the column containing the unique id across provider tables.
+     * <P>
+     * Type: INTEGER
+     * </P>
+     */
+    public static final String BASECOLUMN_ID = BaseColumns._ID;
 
     /**
      * The name of the column containing the status of a group delivery info.

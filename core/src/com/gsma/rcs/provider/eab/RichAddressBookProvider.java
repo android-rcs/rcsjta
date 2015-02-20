@@ -41,6 +41,7 @@ import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
 
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
+import com.gsma.rcs.provider.ContentProviderBaseIdCreator;
 import com.gsma.rcs.utils.DatabaseUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.capability.CapabilitiesLog;
@@ -57,6 +58,8 @@ public class RichAddressBookProvider extends ContentProvider {
     private static final String CAPABILITY_TABLE = "capability";
 
     private static final String AGGREGATION_TABLE = "aggregation";
+
+    public static final String DATABASE_NAME = "capability.db";
 
     private static final String RICH_ADDRESS_BOOK_SELECTION_WITH_CONTACT_ONLY = RichAddressBookData.KEY_CONTACT
             .concat("=?");
@@ -189,14 +192,14 @@ public class RichAddressBookProvider extends ContentProvider {
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
 
-        private static final String DATABASE_NAME = "capability.db";
 
-        private static final int DATABASE_VERSION = 26;
+        private static final int DATABASE_VERSION = 27;
 
         private void createDb(SQLiteDatabase db) {
             db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(CAPABILITY_TABLE)
-                    .append("(").append(RichAddressBookData.KEY_CONTACT)
-                    .append(" TEXT NOT NULL PRIMARY KEY,")
+                    .append("(")
+                    .append(RichAddressBookData.KEY_CONTACT).append(" TEXT PRIMARY KEY,")
+                    .append(RichAddressBookData.KEY_BASECOLUMN_ID).append(" INTEGER NOT NULL,")
                     .append(RichAddressBookData.KEY_DISPLAY_NAME).append(" TEXT,")
                     .append(RichAddressBookData.KEY_RCS_STATUS).append(" TEXT,")
                     .append(RichAddressBookData.KEY_RCS_STATUS_TIMESTAMP).append(" INTEGER,")
@@ -239,6 +242,9 @@ public class RichAddressBookProvider extends ContentProvider {
                     .append(RichAddressBookData.KEY_AUTOMATA).append(" TEXT,")
                     .append(RichAddressBookData.KEY_CAPABILITY_TIME_LAST_REFRESH)
                     .append(" INTEGER)").toString());
+            db.execSQL(new StringBuilder("CREATE INDEX ").append(RichAddressBookData.KEY_BASECOLUMN_ID)
+                    .append("_idx").append(" ON ").append(CAPABILITY_TABLE).append("(")
+                    .append(RichAddressBookData.KEY_BASECOLUMN_ID).append(")").toString());
             db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(AGGREGATION_TABLE)
                     .append("(").append(AggregationData.KEY_ID)
                     .append(" INTEGER PRIMARY KEY AUTOINCREMENT,")
@@ -392,6 +398,9 @@ public class RichAddressBookProvider extends ContentProvider {
                 Context context = getContext();
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 String contact = initialValues.getAsString(RichAddressBookData.KEY_CONTACT);
+                initialValues.put(RichAddressBookData.KEY_BASECOLUMN_ID,
+                        ContentProviderBaseIdCreator.createUniqueId(getContext(),
+                                RichAddressBookData.CONTENT_URI));
                 db.insert(CAPABILITY_TABLE, null, initialValues);
                 if (!initialValues.containsKey(RichAddressBookData.KEY_PRESENCE_PHOTO_DATA)) {
                     try {

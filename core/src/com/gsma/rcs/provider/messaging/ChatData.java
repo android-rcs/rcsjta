@@ -38,6 +38,11 @@ public class ChatData {
     protected static final Uri CONTENT_URI = Uri.parse("content://com.gsma.rcs.chat/groupchat");
 
     /**
+     * Base column unique id
+     */
+    static final String KEY_BASECOLUMN_ID = ChatLog.GroupChat.BASECOLUMN_ID;
+
+    /**
      * Id for chat room
      */
     static final String KEY_CHAT_ID = ChatLog.GroupChat.CHAT_ID;

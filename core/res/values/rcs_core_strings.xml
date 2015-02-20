@@ -11,6 +11,7 @@
     <string name="rcs_core_permission_read_capability">RCS capability read</string>
     <string name="rcs_core_permission_read_ipcall">RCS ipcall read</string>
     <string name="rcs_core_permission_read_geolocshare">RCS geoloc read</string>
+    <string name="rcs_core_permission_read_history">RCS history log read</string>
     <string name="rcs_core_permission_desc">RCS</string>
     <string name="rcs_core_permission_ext_desc">RCS extensions</string>
     <string name="rcs_core_permission_read_chat_desc">Grants permission to read RCS chat history</string>

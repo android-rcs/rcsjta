@@ -32,6 +32,16 @@ import com.gsma.services.rcs.sharing.video.VideoSharingLog;
 public class VideoSharingData {
 
     /**
+     * History log member id
+     */
+    public static final int HISTORYLOG_MEMBER_ID = 4;
+
+    /**
+     * Unique history log id
+     */
+    static final String KEY_BASECOLUMN_ID = VideoSharingLog.BASECOLUMN_ID;
+
+    /**
      * Unique sharing identifier
      */
     static final String KEY_SHARING_ID = VideoSharingLog.SHARING_ID;

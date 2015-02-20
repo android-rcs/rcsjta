@@ -29,6 +29,8 @@ public class GroupDeliveryInfoData {
 
     public static final String KEY_DELIVERY_STATUS = GroupDeliveryInfo.STATUS;
 
+    public static final String KEY_BASECOLUMN_ID = GroupDeliveryInfo.BASECOLUMN_ID;
+
     public static final String KEY_REASON_CODE = GroupDeliveryInfo.REASON_CODE;
 
     public static final String KEY_ID = GroupDeliveryInfo.ID;

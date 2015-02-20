@@ -29,6 +29,7 @@ import com.gsma.services.rcs.contact.ContactUtil;
 
 import android.content.Context;
 import android.net.Uri;
+import android.provider.BaseColumns;
 import android.util.SparseArray;
 
 import java.util.HashSet;
@@ -50,6 +51,14 @@ public class ChatLog {
          */
         public static final Uri CONTENT_URI = Uri
                 .parse("content://com.gsma.services.rcs.provider.chat/groupchat");
+
+        /**
+         * The name of the column containing the unique id across provider tables.
+         * <P>
+         * Type: INTEGER
+         * </P>
+         */
+        public static final String BASECOLUMN_ID = BaseColumns._ID;
 
         /**
          * The name of the column containing the unique ID of the group chat.
@@ -167,6 +176,19 @@ public class ChatLog {
          */
         public static final Uri CONTENT_URI = Uri
                 .parse("content://com.gsma.services.rcs.provider.chat/chatmessage");
+
+        /**
+         * History log member id
+         */
+        public static final int HISTORYLOG_MEMBER_ID = 1;
+
+        /**
+         * The name of the column containing the unique id across provider tables.
+         * <P>
+         * Type: INTEGER
+         * </P>
+         */
+        public static final String BASECOLUMN_ID = BaseColumns._ID;
 
         /**
          * The name of the column containing the chat ID.
