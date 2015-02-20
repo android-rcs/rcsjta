@@ -138,35 +138,40 @@ public class VideoSharing {
         REJECTED_BY_SECONDARY_DEVICE(4),
 
         /**
+         * Video share invitation was rejected because it is spam.
+         */
+        REJECTED_SPAM(5),
+
+        /**
          * Video share invitation was rejected due to max number of sharing sessions already are
          * open.
          */
-        REJECTED_MAX_SHARING_SESSIONS(5),
+        REJECTED_MAX_SHARING_SESSIONS(6),
 
         /**
          * Video share invitation was rejected by local user.
          */
-        REJECTED_BY_USER(6),
+        REJECTED_BY_USER(7),
 
         /**
          * Video share invitation was rejected by remote.
          */
-        REJECTED_BY_REMOTE(7),
+        REJECTED_BY_REMOTE(8),
 
         /**
          * Video share been rejected due to inactivity.
          */
-        REJECTED_BY_INACTIVITY(8),
+        REJECTED_BY_INACTIVITY(9),
 
         /**
          * Video share initiation failed.
          */
-        FAILED_INITIATION(9),
+        FAILED_INITIATION(10),
 
         /**
          * Sharing of the video share has failed.
          */
-        FAILED_SHARING(10);
+        FAILED_SHARING(11);
 
         private final int mValue;
 

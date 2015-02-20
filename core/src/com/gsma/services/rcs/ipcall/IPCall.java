@@ -143,29 +143,34 @@ public class IPCall {
         REJECTED_BY_SECONDARY_DEVICE(4),
 
         /**
+         * IP call invitation was rejected because it is spam.
+         */
+        REJECTED_SPAM(5),
+
+        /**
          * IP call invitation was rejected due to max number of sessions reached.
          */
-        REJECTED_MAX_SESSIONS(5),
+        REJECTED_MAX_SESSIONS(6),
 
         /**
          * IP call invitation was rejected by local user.
          */
-        REJECTED_BY_USER(6),
+        REJECTED_BY_USER(7),
 
         /**
          * IP call invitation was rejected by remote.
          */
-        REJECTED_BY_REMOTE(7),
+        REJECTED_BY_REMOTE(8),
 
         /**
          * IP call has been rejected due to time out.
          */
-        REJECTED_TIME_OUT(8),
+        REJECTED_TIME_OUT(9),
 
         /**
          * IP call initiation failed.
          */
-        FAILED_INITIATION(9),
+        FAILED_INITIATION(10),
 
         /**
          * IP call failed.

@@ -45,10 +45,10 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.chat.ChatLog.Message;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
-import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.IChatMessage;
@@ -147,13 +147,13 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
         }
     }
 
-    private Message.ReasonCode imdnToMessageFailedReasonCode(ImdnDocument imdn) {
+    private Content.ReasonCode imdnToMessageFailedReasonCode(ImdnDocument imdn) {
         String notificationType = imdn.getNotificationType();
         if (ImdnDocument.DELIVERY_NOTIFICATION.equals(notificationType)) {
-            return Message.ReasonCode.FAILED_DELIVERY;
+            return Content.ReasonCode.FAILED_DELIVERY;
 
         } else if (ImdnDocument.DISPLAY_NOTIFICATION.equals(notificationType)) {
-            return Message.ReasonCode.FAILED_DISPLAY;
+            return Content.ReasonCode.FAILED_DISPLAY;
         }
         throw new IllegalArgumentException(new StringBuilder(
                 "Received invalid imdn notification type:'").append(notificationType).append("'")
@@ -196,9 +196,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
                     GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
             if (mPersistentStorage.isDeliveredToAllRecipients(msgId)) {
                 mPersistentStorage.setMessageStatusAndReasonCode(msgId, Status.DELIVERED,
-                        Message.ReasonCode.UNSPECIFIED);
+                        Content.ReasonCode.UNSPECIFIED);
                 mBroadcaster.broadcastMessageStatusChanged(mChatId, mimeType, msgId,
-                        Status.DELIVERED, Message.ReasonCode.UNSPECIFIED);
+                        Status.DELIVERED, Content.ReasonCode.UNSPECIFIED);
             }
         }
     }
@@ -213,18 +213,18 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
                     GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
             if (mPersistentStorage.isDisplayedByAllRecipients(msgId)) {
                 mPersistentStorage.setMessageStatusAndReasonCode(msgId, Status.DISPLAYED,
-                        Message.ReasonCode.UNSPECIFIED);
+                        Content.ReasonCode.UNSPECIFIED);
                 mBroadcaster.broadcastMessageStatusChanged(mChatId, mimeType, msgId,
-                        Status.DISPLAYED, Message.ReasonCode.UNSPECIFIED);
+                        Status.DISPLAYED, Content.ReasonCode.UNSPECIFIED);
             }
         }
     }
 
     private void handleMessageDeliveryStatusFailed(ContactId contact, String msgId,
-            Message.ReasonCode reasonCode) {
+            Content.ReasonCode reasonCode) {
         String mimeType = mMessagingLog.getMessageMimeType(msgId);
         synchronized (lock) {
-            if (Message.ReasonCode.FAILED_DELIVERY == reasonCode) {
+            if (Content.ReasonCode.FAILED_DELIVERY == reasonCode) {
                 mPersistentStorage.setDeliveryInfoStatusAndReasonCode(msgId, contact,
                         GroupDeliveryInfo.Status.FAILED,
                         GroupDeliveryInfo.ReasonCode.FAILED_DELIVERY);
@@ -504,10 +504,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      */
     private void addOutgoingGroupChatMessage(ChatMessage msg, Status status) {
         mPersistentStorage.addGroupChatMessage(msg, Direction.OUTGOING, status,
-                Message.ReasonCode.UNSPECIFIED);
+                Content.ReasonCode.UNSPECIFIED);
         String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
         mBroadcaster.broadcastMessageStatusChanged(mChatId, apiMimeType, msg.getMessageId(),
-                status, Message.ReasonCode.UNSPECIFIED);
+                status, Content.ReasonCode.UNSPECIFIED);
     }
 
     /**
@@ -522,7 +522,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
              * If groupChatSession is not established, queue message and try to rejoin group chat
              * session
              */
-            addOutgoingGroupChatMessage(msg, Message.Status.QUEUED);
+            addOutgoingGroupChatMessage(msg, Content.Status.QUEUED);
             try {
                 setRejoinedAsPartOfSendOperation(true);
                 rejoinGroupChat();
@@ -543,11 +543,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
         }
         SipDialogPath chatSessionDialogPath = groupChatSession.getDialogPath();
         if (chatSessionDialogPath.isSessionEstablished()) {
-            addOutgoingGroupChatMessage(msg, Message.Status.SENDING);
+            addOutgoingGroupChatMessage(msg, Content.Status.SENDING);
             groupChatSession.sendChatMessage(msg);
             return;
         }
-        addOutgoingGroupChatMessage(msg, Message.Status.QUEUED);
+        addOutgoingGroupChatMessage(msg, Content.Status.QUEUED);
         if (!groupChatSession.isInitiatedByRemote()) {
             return;
         }
@@ -588,7 +588,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
             sendChatMessage(msg);
         } else {
             /* If the IMS is NOT connected at this time then queue message. */
-            addOutgoingGroupChatMessage(msg, Message.Status.QUEUED);
+            addOutgoingGroupChatMessage(msg, Content.Status.QUEUED);
         }
         return new ChatMessageImpl(persistentStorage);
     }
@@ -610,7 +610,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
             sendChatMessage(geolocMsg);
         } else {
             /* If the IMS is NOT connected at this time then queue message. */
-            addOutgoingGroupChatMessage(geolocMsg, Message.Status.QUEUED);
+            addOutgoingGroupChatMessage(geolocMsg, Content.Status.QUEUED);
         }
         return new ChatMessageImpl(persistentStorage);
     }
@@ -893,7 +893,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
         }
         synchronized (lock) {
             mPersistentStorage.addGroupChatMessage(msg, Direction.INCOMING,
-                    Message.Status.RECEIVED, Message.ReasonCode.UNSPECIFIED);
+                    Content.Status.RECEIVED, Content.ReasonCode.UNSPECIFIED);
             mContactsManager.setContactDisplayName(msg.getRemoteContact(), msg.getDisplayName());
 
             String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
@@ -981,10 +981,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
         String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(networkMimeType);
         synchronized (lock) {
             mPersistentStorage.setMessageStatusAndReasonCode(msgId, Status.SENDING,
-                    Message.ReasonCode.UNSPECIFIED);
+                    Content.ReasonCode.UNSPECIFIED);
 
             mBroadcaster.broadcastMessageStatusChanged(mChatId, apiMimeType, msgId, Status.SENDING,
-                    Message.ReasonCode.UNSPECIFIED);
+                    Content.ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -1002,10 +1002,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 
         synchronized (lock) {
             mPersistentStorage.setMessageStatusAndReasonCode(msgId, Status.FAILED,
-                    Message.ReasonCode.FAILED_SEND);
+                    Content.ReasonCode.FAILED_SEND);
 
             mBroadcaster.broadcastMessageStatusChanged(getChatId(), mimeType, msgId, Status.FAILED,
-                    Message.ReasonCode.FAILED_SEND);
+                    Content.ReasonCode.FAILED_SEND);
         }
     }
 
@@ -1023,10 +1023,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 
         synchronized (lock) {
             mPersistentStorage.setMessageStatusAndReasonCode(msgId, Status.SENT,
-                    Message.ReasonCode.UNSPECIFIED);
+                    Content.ReasonCode.UNSPECIFIED);
 
             mBroadcaster.broadcastMessageStatusChanged(getChatId(), mimeType, msgId, Status.SENT,
-                    Message.ReasonCode.UNSPECIFIED);
+                    Content.ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -1037,12 +1037,14 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
         }
         synchronized (lock) {
             if (User.STATE_CONNECTED.equals(state)) {
-                mPersistentStorage.addGroupChatEvent(mChatId, contact, GroupChatEvent.JOINED);
+                mPersistentStorage
+                        .addGroupChatEvent(mChatId, contact, GroupChatEvent.Status.JOINED);
                 mBroadcaster.broadcastParticipantInfoStatusChanged(mChatId, new ParticipantInfo(
                         contact, ParticipantInfo.Status.CONNECTED));
 
             } else if (User.STATE_DEPARTED.equals(state)) {
-                mPersistentStorage.addGroupChatEvent(mChatId, contact, GroupChatEvent.DEPARTED);
+                mPersistentStorage.addGroupChatEvent(mChatId, contact,
+                        GroupChatEvent.Status.DEPARTED);
 
                 mBroadcaster.broadcastParticipantInfoStatusChanged(mChatId, new ParticipantInfo(
                         contact, ParticipantInfo.Status.DEPARTED));
@@ -1067,7 +1069,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
         } else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
                 || ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
                 || ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
-            Message.ReasonCode reasonCode = imdnToMessageFailedReasonCode(imdn);
+            Content.ReasonCode reasonCode = imdnToMessageFailedReasonCode(imdn);
             handleMessageDeliveryStatusFailed(contact, msgId, reasonCode);
         }
     }

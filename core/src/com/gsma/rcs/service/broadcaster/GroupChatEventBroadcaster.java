@@ -21,8 +21,8 @@ import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.GroupDeliveryInfo;
-import com.gsma.services.rcs.chat.ChatLog.Message;
-import com.gsma.services.rcs.chat.ChatLog.Message.Status;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.GroupChatIntent;
@@ -55,7 +55,7 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
     }
 
     public void broadcastMessageStatusChanged(String chatId, String mimeType, String msgId,
-            Status status, Message.ReasonCode reasonCode) {
+            Status status, Content.ReasonCode reasonCode) {
         int rcsStatus = status.toInt();
         int rcsReasonCode = reasonCode.toInt();
         final int N = mGroupChatListeners.beginBroadcast();

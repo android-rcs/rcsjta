@@ -31,9 +31,9 @@ import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.ChatLog.Message;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
-import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat.State;
@@ -207,7 +207,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      */
     @Override
     public void addOutgoingOneToOneChatMessage(ChatMessage msg, Status status,
-            Message.ReasonCode reasonCode) {
+            Content.ReasonCode reasonCode) {
         messageLog.addOutgoingOneToOneChatMessage(msg, status, reasonCode);
     }
 
@@ -218,7 +218,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      */
     @Override
     public void addGroupChatMessage(String chatId, ChatMessage msg, Direction direction,
-            Status status, Message.ReasonCode reasonCode) {
+            Status status, Content.ReasonCode reasonCode) {
         messageLog.addGroupChatMessage(chatId, msg, direction, status, reasonCode);
     }
 
@@ -228,8 +228,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      * java.lang.String, int)
      */
     @Override
-    public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent event) {
-        messageLog.addGroupChatEvent(chatId, contact, event);
+    public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent.Status status) {
+        messageLog.addGroupChatEvent(chatId, contact, status);
     }
 
     /*
@@ -248,7 +248,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      */
     @Override
     public void setChatMessageStatusAndReasonCode(String msgId, Status status,
-            Message.ReasonCode reasonCode) {
+            Content.ReasonCode reasonCode) {
         messageLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode);
     }
 
@@ -522,7 +522,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public Message.ReasonCode getMessageReasonCode(String msgId) {
+    public Content.ReasonCode getMessageReasonCode(String msgId) {
         return messageLog.getMessageReasonCode(msgId);
     }
 

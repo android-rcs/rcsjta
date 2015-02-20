@@ -144,49 +144,54 @@ public class ImageSharing {
         REJECTED_BY_SECONDARY_DEVICE(4),
 
         /**
+         * Incoming image was rejected because it is spam.
+         */
+        REJECTED_SPAM(5),
+
+        /**
          * Incoming image was rejected by inactivity.
          */
-        REJECTED_BY_INACTIVITY(5),
+        REJECTED_BY_INACTIVITY(6),
 
         /**
          * Incoming image was rejected as is cannot be received due to lack of local storage space.
          */
-        REJECTED_LOW_SPACE(6),
+        REJECTED_LOW_SPACE(7),
 
         /**
          * Incoming image was rejected as it was too big to be received.
          */
-        REJECTED_MAX_SIZE(7),
+        REJECTED_MAX_SIZE(8),
 
         /**
          * Incoming image was rejected because max number of sharing sessions is achieved.
          */
-        REJECTED_MAX_SHARING_SESSIONS(8),
+        REJECTED_MAX_SHARING_SESSIONS(9),
 
         /**
          * Incoming image was rejected by local user.
          */
-        REJECTED_BY_USER(9),
+        REJECTED_BY_USER(10),
 
         /**
          * Incoming image was rejected by remote.
          */
-        REJECTED_BY_REMOTE(10),
+        REJECTED_BY_REMOTE(11),
 
         /**
          * Image share initiation failed;
          */
-        FAILED_INITIATION(11),
+        FAILED_INITIATION(12),
 
         /**
          * Sharing of the image share has failed.
          */
-        FAILED_SHARING(12),
+        FAILED_SHARING(13),
 
         /**
          * Saving of the image share has failed.
          */
-        FAILED_SAVING(13);
+        FAILED_SAVING(14);
 
         private final int mValue;
 

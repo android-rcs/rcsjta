@@ -18,10 +18,37 @@
 
 package com.orangelabs.rcs.ri.messaging.chat.group;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.GroupDeliveryInfo;
+import com.gsma.services.rcs.RcsContactFormatException;
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.chat.ChatLog.Message;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content;
+import com.gsma.services.rcs.chat.ChatMessage;
+import com.gsma.services.rcs.chat.ChatService;
+import com.gsma.services.rcs.chat.ChatServiceConfiguration;
+import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.chat.GroupChatIntent;
+import com.gsma.services.rcs.chat.GroupChatListener;
+import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.chat.ParticipantInfo.Status;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
+import com.gsma.services.rcs.contact.RcsContact;
+
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.messaging.GroupDeliveryInfoList;
+import com.orangelabs.rcs.ri.messaging.chat.ChatMessageDAO;
+import com.orangelabs.rcs.ri.messaging.chat.ChatView;
+import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager;
+import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager.INotifyComposing;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.Smileys;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -47,35 +74,10 @@ import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Toast;
 
-import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.GroupDeliveryInfo;
-import com.gsma.services.rcs.RcsContactFormatException;
-import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.chat.ChatLog.Message;
-import com.gsma.services.rcs.chat.ChatMessage;
-import com.gsma.services.rcs.chat.ChatService;
-import com.gsma.services.rcs.chat.ChatServiceConfiguration;
-import com.gsma.services.rcs.chat.GroupChat;
-import com.gsma.services.rcs.chat.GroupChatIntent;
-import com.gsma.services.rcs.chat.GroupChatListener;
-import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.chat.ParticipantInfo.Status;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactUtil;
-import com.gsma.services.rcs.contact.RcsContact;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.messaging.GroupDeliveryInfoList;
-import com.orangelabs.rcs.ri.messaging.chat.ChatMessageDAO;
-import com.orangelabs.rcs.ri.messaging.chat.ChatView;
-import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager;
-import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager.INotifyComposing;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
-import com.orangelabs.rcs.ri.utils.Smileys;
-import com.orangelabs.rcs.ri.utils.Utils;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Group chat view
@@ -156,7 +158,7 @@ public class GroupChatView extends ChatView {
 
         @Override
         public void onMessageStatusChanged(String chatId, String mimeType, String msgId,
-                Message.Status status, Message.ReasonCode reasonCode) {
+                Content.Status status, Content.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.w(LOGTAG, new StringBuilder("onMessageStatusChanged chatId=").append(chatId)
                         .append(" mime-type=").append(mimeType).append(" msgId=").append(msgId)

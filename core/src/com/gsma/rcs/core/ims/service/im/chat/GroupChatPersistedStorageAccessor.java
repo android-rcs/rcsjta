@@ -22,9 +22,9 @@ import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.GroupChat;
-import com.gsma.services.rcs.chat.ChatLog.Message;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
-import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.ParticipantInfo;
@@ -141,7 +141,7 @@ public class GroupChatPersistedStorageAccessor {
     }
 
     public void setMessageStatusAndReasonCode(String msgId, Status status,
-            Message.ReasonCode reasonCode) {
+            Content.ReasonCode reasonCode) {
         mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode);
     }
 
@@ -169,12 +169,12 @@ public class GroupChatPersistedStorageAccessor {
                 direction);
     }
 
-    public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent event) {
-        mMessagingLog.addGroupChatEvent(mChatId, contact, event);
+    public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent.Status status) {
+        mMessagingLog.addGroupChatEvent(mChatId, contact, status);
     }
 
     public void addGroupChatMessage(ChatMessage msg, Direction direction, Status status,
-            Message.ReasonCode reasonCode) {
+            Content.ReasonCode reasonCode) {
         mMessagingLog.addGroupChatMessage(mChatId, msg, direction, status, reasonCode);
     }
 

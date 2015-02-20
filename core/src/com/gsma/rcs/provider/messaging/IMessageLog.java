@@ -24,9 +24,9 @@ package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
-import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
-import com.gsma.services.rcs.chat.ChatLog.Message.Status;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.database.Cursor;
@@ -81,7 +81,7 @@ public interface IMessageLog {
      * @param contact Contact ID
      * @param status Status
      */
-    public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent event);
+    public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent.Status status);
 
     /**
      * Update chat message read status

@@ -17,8 +17,8 @@
 package com.gsma.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.GroupDeliveryInfo;
-import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
-import com.gsma.services.rcs.chat.ChatLog.Message.Status;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.ParticipantInfo;

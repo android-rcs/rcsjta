@@ -22,13 +22,12 @@
 
 package com.gsma.services.rcs.sharing.geoloc;
 
-import android.util.SparseArray;
-
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.sharing.geoloc.IGeolocSharing;
+
+import android.util.SparseArray;
 
 /**
  * Geoloc sharing
@@ -148,34 +147,39 @@ public class GeolocSharing {
         REJECTED_BY_SECONDARY_DEVICE(4),
 
         /**
+         * Geolocation share invitation was rejected because it is spam.
+         */
+        REJECTED_SPAM(5),
+
+        /**
          * Geolocation share invitation was rejected due to to many open sharing sessions.
          */
-        REJECTED_MAX_SHARING_SESSIONS(5),
+        REJECTED_MAX_SHARING_SESSIONS(6),
 
         /**
          * Geolocation share invitation was rejected by local user.
          */
-        REJECTED_BY_USER(6),
+        REJECTED_BY_USER(7),
 
         /**
          * Geolocation share invitation was rejected by remote.
          */
-        REJECTED_BY_REMOTE(7),
+        REJECTED_BY_REMOTE(8),
 
         /**
          * Geolocation share invitation was rejected by inactivity.
          */
-        REJECTED_BY_INACTIVITY(8),
+        REJECTED_BY_INACTIVITY(9),
 
         /**
          * Geolocation share initiation failed.
          */
-        FAILED_INITIATION(9),
+        FAILED_INITIATION(10),
 
         /**
          * Sharing of the geolocation has failed.
          */
-        FAILED_SHARING(10);
+        FAILED_SHARING(11);
 
         private final int mValue;
 

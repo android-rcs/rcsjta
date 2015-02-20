@@ -18,8 +18,28 @@
 
 package com.orangelabs.rcs.ri.messaging.chat.single;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.RcsService.ReadStatus;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.chat.ChatLog.Message;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content;
+import com.gsma.services.rcs.chat.ChatMessage;
+import com.gsma.services.rcs.chat.ChatService;
+import com.gsma.services.rcs.chat.ChatServiceConfiguration;
+import com.gsma.services.rcs.chat.OneToOneChat;
+import com.gsma.services.rcs.chat.OneToOneChatListener;
+import com.gsma.services.rcs.contact.ContactId;
+
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.messaging.chat.ChatView;
+import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager;
+import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager.INotifyComposing;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.Smileys;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.content.Context;
 import android.content.Intent;
@@ -40,26 +60,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
-import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.RcsService.ReadStatus;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.chat.ChatLog.Message;
-import com.gsma.services.rcs.chat.ChatMessage;
-import com.gsma.services.rcs.chat.ChatService;
-import com.gsma.services.rcs.chat.ChatServiceConfiguration;
-import com.gsma.services.rcs.chat.OneToOneChat;
-import com.gsma.services.rcs.chat.OneToOneChatListener;
-import com.gsma.services.rcs.contact.ContactId;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.messaging.chat.ChatView;
-import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager;
-import com.orangelabs.rcs.ri.messaging.chat.IsComposingManager.INotifyComposing;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
-import com.orangelabs.rcs.ri.utils.Smileys;
-import com.orangelabs.rcs.ri.utils.Utils;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Single chat view
@@ -115,7 +117,7 @@ public class SingleChatView extends ChatView {
             .append("')").toString();
 
     private final static String[] PROJECTION_MSG_ID = new String[] {
-            Message.MESSAGE_ID
+        Message.MESSAGE_ID
     };
 
     /**
@@ -140,7 +142,7 @@ public class SingleChatView extends ChatView {
 
         @Override
         public void onMessageStatusChanged(ContactId contact, String mimeType, String msgId,
-                Message.Status status, Message.ReasonCode reasonCode) {
+                Content.Status status, Content.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG,
                         new StringBuilder("onMessageStatusChanged contact=")
@@ -248,7 +250,7 @@ public class SingleChatView extends ChatView {
         // Create a new CursorLoader with the following query parameters.
         Uri uri = Message.CONTENT_URI;
         return new CursorLoader(this, uri, PROJECTION, WHERE_CLAUSE, new String[] {
-                mContact.toString()
+            mContact.toString()
         }, QUERY_SORT_ORDER);
     }
 
@@ -266,7 +268,7 @@ public class SingleChatView extends ChatView {
             return;
 
         }
-        Message.Status status = Message.Status.valueOf(cursor.getInt(cursor
+        Content.Status status = Content.Status.valueOf(cursor.getInt(cursor
                 .getColumnIndex(Message.STATUS)));
         switch (status) {
             case FAILED:
@@ -332,7 +334,7 @@ public class SingleChatView extends ChatView {
     private Set<String> getUnreadMessageIds(ContactId contact) {
         Set<String> unReadMessageIDs = new HashSet<String>();
         String[] where_args = new String[] {
-                contact.toString()
+            contact.toString()
         };
 
         Cursor cursor = null;

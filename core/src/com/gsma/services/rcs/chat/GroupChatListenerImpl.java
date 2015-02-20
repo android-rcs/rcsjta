@@ -17,8 +17,8 @@
 package com.gsma.services.rcs.chat;
 
 import com.gsma.services.rcs.GroupDeliveryInfo;
-import com.gsma.services.rcs.chat.ChatLog.Message;
-import com.gsma.services.rcs.chat.ChatLog.Message.Status;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.os.RemoteException;
@@ -68,10 +68,10 @@ public class GroupChatListenerImpl extends IGroupChatListener.Stub {
     public void onMessageStatusChanged(String chatId, String mimeType, String msgId, int status,
             int reasonCode) {
         Status rcsStatus;
-        Message.ReasonCode rcsReasonCode;
+        Content.ReasonCode rcsReasonCode;
         try {
             rcsStatus = Status.valueOf(status);
-            rcsReasonCode = Message.ReasonCode.valueOf(reasonCode);
+            rcsReasonCode = Content.ReasonCode.valueOf(reasonCode);
         } catch (IllegalArgumentException e) {
             /*
              * Detected unknown state or reasonCode not part of standard coming from stack which a

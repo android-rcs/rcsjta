@@ -21,6 +21,7 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.chat.ChatLog.Message;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 
 import android.content.ContentResolver;
@@ -37,7 +38,7 @@ public class DelayedDisplayNotificationDispatcher implements Runnable {
             .append(Message.MIME_TYPE).append(" IN('").append(MimeType.TEXT_MESSAGE).append("','")
             .append(MimeType.GEOLOC_MESSAGE).append("') AND ").append(Message.READ_STATUS)
             .append("=").append(ReadStatus.READ.toInt()).append(" AND ").append(Message.STATUS)
-            .append("=").append(Message.Status.DISPLAY_REPORT_REQUESTED.toInt()).toString();
+            .append("=").append(Status.DISPLAY_REPORT_REQUESTED.toInt()).toString();
 
     private static final String ORDER_BY_TIMESTAMP_ASC = Message.TIMESTAMP.concat(" ASC");
 

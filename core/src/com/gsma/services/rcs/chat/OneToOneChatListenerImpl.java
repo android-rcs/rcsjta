@@ -16,8 +16,8 @@
 
 package com.gsma.services.rcs.chat;
 
-import com.gsma.services.rcs.chat.ChatLog.Message.ReasonCode;
-import com.gsma.services.rcs.chat.ChatLog.Message.Status;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
+import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.os.RemoteException;
