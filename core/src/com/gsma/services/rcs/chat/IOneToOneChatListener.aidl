@@ -11,4 +11,6 @@ interface IOneToOneChatListener {
 			in int status, in int reasonCode);
 
 	void onComposingEvent(in ContactId contact, in boolean status);
+
+	void onMessagesDeleted(in ContactId contact, in List<String> msgIds);
 }

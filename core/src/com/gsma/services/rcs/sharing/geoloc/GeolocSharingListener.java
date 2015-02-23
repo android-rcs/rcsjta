@@ -26,6 +26,8 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
 
+import java.util.Set;
+
 /**
  * Geoloc sharing event listener
  * 
@@ -53,4 +55,14 @@ public abstract class GeolocSharingListener {
      */
     public abstract void onProgressUpdate(ContactId contact, String sharingId, long currentSize,
             long totalSize);
+
+    /**
+     * Callback called when a delete operation completed that resulted in that one or several geoloc
+     * sharings was deleted specified by the sharingIds parameter corresponding to a specific
+     * contact.
+     *
+     * @param contact Contact ID
+     * @param sharingIds ids of those deleted geoloc sharing
+     */
+    public abstract void onDeleted(ContactId contact, Set<String> sharingIds);
 }

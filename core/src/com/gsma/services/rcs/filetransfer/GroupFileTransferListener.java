@@ -19,6 +19,9 @@ package com.gsma.services.rcs.filetransfer;
 import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.contact.ContactId;
 
+import java.util.List;
+import java.util.Set;
+
 /**
  * Group file transfer event listener
  */
@@ -58,4 +61,14 @@ public abstract class GroupFileTransferListener {
      */
     public abstract void onProgressUpdate(String chatId, String transferId, long currentSize,
             long totalSize);
+
+    /**
+     * Callback called when a delete operation completed that resulted in that one or several group
+     * file transfers was deleted specified by the transferIds parameter corresponding to a specific
+     * group chat.
+     *
+     * @param chatId id of the chat
+     * @param transferIds ids of those deleted file transfers
+     */
+    public abstract void onDeleted(String chatId, Set<String> transferIds);
 }

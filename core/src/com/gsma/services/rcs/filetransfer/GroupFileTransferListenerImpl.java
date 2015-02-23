@@ -19,7 +19,11 @@ package com.gsma.services.rcs.filetransfer;
 import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.os.RemoteException;
 import android.util.Log;
+
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * Group file transfer event listener implementation
@@ -77,5 +81,13 @@ public class GroupFileTransferListenerImpl extends IGroupFileTransferListener.St
         }
 
         mListener.onDeliveryInfoChanged(chatId, contact, transferId, rcsStatus, rcsReasonCode);
+    }
+
+    /**
+     * This feature to be implemented in CR005
+     */
+    @Override
+    public void onDeleted(String chatId, List<String> transferIds) throws RemoteException {
+        mListener.onDeleted(chatId, new HashSet<String>(transferIds));
     }
 }

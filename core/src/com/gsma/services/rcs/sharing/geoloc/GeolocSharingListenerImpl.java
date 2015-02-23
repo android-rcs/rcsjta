@@ -23,6 +23,9 @@ import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.util.HashSet;
+import java.util.List;
+
 /**
  * Geoloc sharing event listener implementation
  * 
@@ -60,5 +63,13 @@ public class GeolocSharingListenerImpl extends IGeolocSharingListener.Stub {
     public void onProgressUpdate(ContactId contact, String sharingId, long currentSize,
             long totalSize) throws RemoteException {
         mListener.onProgressUpdate(contact, sharingId, currentSize, totalSize);
+    }
+
+    /**
+     * This feature to be implemented in CR005
+     */
+    @Override
+    public void onDeleted(ContactId contact, List<String> sharingIds) throws RemoteException {
+        mListener.onDeleted(contact, new HashSet<String>(sharingIds));
     }
 }

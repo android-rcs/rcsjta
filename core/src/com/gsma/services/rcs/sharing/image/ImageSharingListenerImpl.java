@@ -23,6 +23,9 @@ import com.gsma.services.rcs.sharing.image.ImageSharing.State;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.util.HashSet;
+import java.util.List;
+
 /**
  * ImageSharing event listener implementation
  * 
@@ -61,5 +64,13 @@ public class ImageSharingListenerImpl extends IImageSharingListener.Stub {
             long totalSize) throws RemoteException {
         mListener.onProgressUpdate(contact, sharingId, currentSize, totalSize);
 
+    }
+
+    /**
+     * This feature to be implemented in CR005
+     */
+    @Override
+    public void onDeleted(ContactId contact, List<String> sharingIds) throws RemoteException {
+        mListener.onDeleted(contact, new HashSet<String>(sharingIds));
     }
 }

@@ -22,7 +22,11 @@ import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.utils.logger.Logger;
 
+import android.os.RemoteException;
 import android.util.Log;
+
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * File transfer event listener
@@ -60,5 +64,13 @@ public class OneToOneFileTransferListenerImpl extends IOneToOneFileTransferListe
     public void onProgressUpdate(ContactId contact, String transferId, long currentSize,
             long totalSize) {
         mListener.onProgressUpdate(contact, transferId, currentSize, totalSize);
+    }
+
+    /**
+     * This feature to be implemented in CR005
+     */
+    @Override
+    public void onDeleted(ContactId contact, List<String> transferIds) throws RemoteException {
+        mListener.onDeleted(contact, new HashSet<String>(transferIds));
     }
 }

@@ -25,7 +25,8 @@ package com.gsma.services.rcs.filetransfer;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
-import com.gsma.services.rcs.filetransfer.IOneToOneFileTransferListener;
+
+import java.util.Set;
 
 /**
  * One-To-One File transfer event listener
@@ -55,4 +56,14 @@ public abstract class OneToOneFileTransferListener {
      */
     public abstract void onProgressUpdate(ContactId contact, String transferId, long currentSize,
             long totalSize);
+
+    /**
+     * Callback called when a delete operation completed that resulted in that one or several one to
+     * one file transfers was deleted specified by the transferIds parameter corresponding to a
+     * specific contact.
+     *
+     * @param contact Contact ID
+     * @param transferIds ids of those deleted file transfers
+     */
+    public abstract void onDeleted(ContactId contact, Set<String> transferIds);
 }

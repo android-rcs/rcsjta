@@ -24,6 +24,9 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.util.HashSet;
+import java.util.List;
+
 /**
  * Group chat event listener implementation
  * 
@@ -109,5 +112,21 @@ public class GroupChatListenerImpl extends IGroupChatListener.Stub {
     public void onParticipantInfoChanged(String chatId, ParticipantInfo info)
             throws RemoteException {
         mListener.onParticipantInfoChanged(chatId, info);
+    }
+
+    /**
+     * This feature to be implemented in CR005
+     */
+    @Override
+    public void onDeleted(List<String> chatIds) throws RemoteException {
+        mListener.onDeleted(new HashSet<String>(chatIds));
+    }
+
+    /**
+     * This feature to be implemented in CR005
+     */
+    @Override
+    public void onMessagesDeleted(String chatId, List<String> msgIds) throws RemoteException {
+        mListener.onMessagesDeleted(chatId, new HashSet<String>(msgIds));
     }
 }

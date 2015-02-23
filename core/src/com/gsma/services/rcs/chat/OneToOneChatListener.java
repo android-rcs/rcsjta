@@ -26,6 +26,8 @@ import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.contact.ContactId;
 
+import java.util.Set;
+
 /**
  * One-to-One Chat event listener
  * 
@@ -53,4 +55,14 @@ public abstract class OneToOneChatListener {
      * @param status Is-composing status
      */
     public abstract void onComposingEvent(ContactId contact, boolean status);
+
+    /**
+     * Callback called when a delete operation completed that resulted in that one or several one to
+     * one chat messages was deleted specified by the msgIds parameter corresponding to a specific
+     * contact.
+     *
+     * @param chatId chat id of those deleted messages
+     * @param msgIds message ids of those deleted messages
+     */
+    public abstract void onMessagesDeleted(ContactId contact, Set<String> msgIds);
 }

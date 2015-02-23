@@ -23,6 +23,9 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.util.HashSet;
+import java.util.List;
+
 /**
  * Chat event listener implementation
  * 
@@ -61,5 +64,13 @@ public class OneToOneChatListenerImpl extends IOneToOneChatListener.Stub {
     @Override
     public void onComposingEvent(ContactId contact, boolean status) throws RemoteException {
         mListener.onComposingEvent(contact, status);
+    }
+
+    /**
+     * This feature to be implemented in CR005
+     */
+    @Override
+    public void onMessagesDeleted(ContactId contact, List<String> msgIds) throws RemoteException {
+        mListener.onMessagesDeleted(contact, new HashSet<String>(msgIds));
     }
 }

@@ -20,7 +20,11 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.VideoSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.video.VideoSharing.State;
 
+import android.os.RemoteException;
 import android.util.Log;
+
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * Video sharing event listener implementation
@@ -53,5 +57,13 @@ public class VideoSharingListenerImpl extends IVideoSharingListener.Stub {
             return;
         }
         mListener.onStateChanged(contact, sharingId, rcsStatus, rcsReasonCode);
+    }
+
+    /**
+     * This feature to be implemented in CR005
+     */
+    @Override
+    public void onDeleted(ContactId contact, List<String> sharingIds) throws RemoteException {
+        mListener.onDeleted(contact, new HashSet<String>(sharingIds));
     }
 }
