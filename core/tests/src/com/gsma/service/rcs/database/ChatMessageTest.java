@@ -76,8 +76,8 @@ public class ChatMessageTest extends AndroidTestCase {
                 "display");
 
         // Add entry
-        MessagingLog.getInstance().addOutgoingOneToOneChatMessage(msg, Message.Status.SENT,
-                Message.ReasonCode.UNSPECIFIED);
+        MessagingLog.getInstance().addOutgoingOneToOneChatMessage(msg, Message.Content.Status.SENT,
+                Message.Content.ReasonCode.UNSPECIFIED);
 
         // Read entry
         Uri uri = Uri.withAppendedPath(Message.CONTENT_URI, msgId);
@@ -112,7 +112,7 @@ public class ChatMessageTest extends AndroidTestCase {
         String msgId = chatMsg.getMessageId();
         // Add entry
         MessagingLog.getInstance().addOutgoingOneToOneChatMessage(chatMsg,
-                Message.Status.SENT, Message.ReasonCode.UNSPECIFIED);
+                Message.Content.Status.SENT, Message.Content.ReasonCode.UNSPECIFIED);
 
         // Read entry
         Uri uri = Uri.withAppendedPath(Message.CONTENT_URI, msgId);
