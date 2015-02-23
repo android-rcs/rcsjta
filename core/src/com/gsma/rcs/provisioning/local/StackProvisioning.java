@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 
 import android.app.Activity;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
@@ -270,10 +271,6 @@ public class StackProvisioning extends Activity {
             rcsSettings.setFtProtocol(protocol);
         }
 
-        spinner = (Spinner) findViewById(R.id.client_vendor);
-        String value = (String) spinner.getSelectedItem();
-        rcsSettings.writeParameter(RcsSettingsData.VENDOR_NAME, value);
-
         saveEditTextParameter(this, R.id.SecondaryProvisioningAddress,
                 RcsSettingsData.SECONDARY_PROVISIONING_ADDRESS, bundle);
         saveCheckBoxParameter(this, R.id.SecondaryProvisioningAddressOnly,
@@ -361,23 +358,14 @@ public class StackProvisioning extends Activity {
         spinner.setSelection(ConfigurationMode.AUTO.equals(mode) ? 1 : 0);
 
         spinner = (Spinner) findViewById(R.id.client_vendor);
-        ArrayAdapter<CharSequence> adapterVendor = ArrayAdapter.createFromResource(this,
-                R.array.vendors, android.R.layout.simple_spinner_item);
+        final String[] vendorArray = new String[] {
+            Build.MANUFACTURER
+        };
+        ArrayAdapter<CharSequence> adapterVendor = new ArrayAdapter(this,
+                android.R.layout.simple_spinner_item, vendorArray);
         adapterVendor.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapterVendor);
-
-        String[] vendorArray = getResources().getStringArray(R.array.vendors);
-        String vendorInDB = rcsSettings.getVendor();
-
-        if (vendorInDB != null && vendorInDB.length() > 0) {
-            if (vendorInDB.equals(vendorArray[0])) {
-                spinner.setSelection(0);
-            } else if (vendorInDB.equals(vendorArray[1])) {
-                spinner.setSelection(1);
-            }
-        } else {
-            spinner.setSelection(0);
-        }
+        spinner.setSelection(0);
 
         spinner = (Spinner) findViewById(R.id.EnableRcsSwitch);
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,

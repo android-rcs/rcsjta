@@ -63,6 +63,8 @@ public class HttpsProvisioningService extends Service {
      */
     private PendingIntent retryIntent = null;
 
+    private RcsSettings mRcsSettings;
+
     /**
      * Provisioning manager
      */
@@ -88,6 +90,7 @@ public class HttpsProvisioningService extends Service {
         Context ctx = getApplicationContext();
         mLocalContentResolver = new LocalContentResolver(ctx.getContentResolver());
         RcsSettings.createInstance(ctx);
+        mRcsSettings = RcsSettings.getInstance();
         this.retryIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(
                 ACTION_RETRY), 0);
     }
@@ -104,7 +107,7 @@ public class HttpsProvisioningService extends Service {
             first = intent.getBooleanExtra(FIRST_KEY, false);
             user = intent.getBooleanExtra(USER_KEY, false);
         }
-        String version = RcsSettings.getInstance().getProvisioningVersion();
+        String version = mRcsSettings.getProvisioningVersion();
         // It makes no sense to start service if version is 0 (unconfigured)
         // if version = 0, then (re)set first to true
         try {
@@ -118,7 +121,7 @@ public class HttpsProvisioningService extends Service {
         registerReceiver(retryReceiver, new IntentFilter(ACTION_RETRY));
 
         httpsProvisioningMng = new HttpsProvisioningManager(getApplicationContext(),
-                mLocalContentResolver, retryIntent, first, user);
+                mLocalContentResolver, retryIntent, first, user, mRcsSettings);
         if (logger.isActivated()) {
             logger.debug("Provisioning parameter: boot=" + first + ", user=" + user + ", version="
                     + version);

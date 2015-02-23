@@ -22,17 +22,7 @@
 
 package com.gsma.rcs.provisioning.https;
 
-import java.lang.reflect.Method;
 import java.util.Locale;
-import java.util.StringTokenizer;
-
-import android.content.Context;
-import android.content.pm.PackageInfo;
-
-import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.HttpUtils;
-import com.gsma.rcs.utils.StringUtils;
-import com.gsma.rcs.R;
 
 /**
  * HTTPS provisioning - utils
@@ -111,114 +101,5 @@ public class HttpsProvisioningUtils {
      */
     protected static String getRcsProfile() {
         return "joyn_blackbird";
-    }
-
-    /**
-     * Returns the client vendor
-     * 
-     * @return String(4)
-     */
-    protected static String getClientVendorFromContext(Context context) {
-        String result = HttpsProvisioningUtils.UNKNOWN;
-        String vendor = RcsSettings.getInstance().getVendor();
-
-        if (vendor != null && vendor.length() > 0) {
-            result = vendor;
-        } else {
-            vendor = context.getString(R.string.rcs_client_vendor);
-            if (vendor != null && vendor.length() > 0) {
-                result = vendor;
-            }
-
-        }
-        return StringUtils.truncate(result, 4);
-    }
-
-    /**
-     * Returns the client version see RCS-e implementation guideline v3.1 at ID_2_4 (page 12)
-     * 
-     * @return String(15)
-     */
-    protected static String getClientVersionFromContext(Context context) {
-        String result = HttpsProvisioningUtils.UNKNOWN;
-        String vendor = RcsSettings.getInstance().getVendor();
-
-        if (vendor != null && vendor.length() > 0) {
-            if (vendor.equals(context.getString(R.string.rcs_client_vendor))) {
-                try {
-                    PackageInfo pinfo = context.getPackageManager().getPackageInfo(
-                            context.getPackageName(), 0);
-                    result = new StringTokenizer(pinfo.versionName, " ").nextToken();
-                } catch (android.content.pm.PackageManager.NameNotFoundException e) {
-                    result = HttpsProvisioningUtils.UNKNOWN;
-                } catch (java.util.NoSuchElementException e) {
-                    result = HttpsProvisioningUtils.UNKNOWN;
-                }
-            } else if (vendor.equals(context.getString(R.string.sony_client_vendor))) {
-                result = context.getString(R.string.sony_client_version);
-            }
-
-        }
-        return HttpUtils.encodeURL(StringUtils.truncate(result, 15));
-    }
-
-    /**
-     * Returns the terminal vendor
-     * 
-     * @return String(4)
-     */
-    protected static String getTerminalVendor() {
-        String result = HttpsProvisioningUtils.UNKNOWN;
-        String productmanufacturer = getSystemProperties("ro.product.manufacturer");
-        if (productmanufacturer != null && productmanufacturer.length() > 0) {
-            result = productmanufacturer;
-        }
-        return StringUtils.truncate(result, 4);
-    }
-
-    /**
-     * Returns the terminal model
-     * 
-     * @return String(10)
-     */
-    protected static String getTerminalModel() {
-        String result = HttpsProvisioningUtils.UNKNOWN;
-        String devicename = getSystemProperties("ro.product.device");
-        if (devicename != null && devicename.length() > 0) {
-            result = devicename;
-        }
-        return StringUtils.truncate(result, 10);
-    }
-
-    /**
-     * Returns the terminal software version
-     * 
-     * @return String(10)
-     */
-    protected static String getTerminalSoftwareVersion() {
-        String result = HttpsProvisioningUtils.UNKNOWN;
-        String productversion = getSystemProperties("ro.product.version");
-        if (productversion != null && productversion.length() > 0) {
-            result = productversion;
-        }
-        return StringUtils.truncate(result, 10);
-    }
-
-    /**
-     * Returns a system parameter
-     * 
-     * @param key Key parameter
-     * @return Parameter value
-     */
-    protected static String getSystemProperties(String key) {
-        String value = null;
-        try {
-            Class<?> c = Class.forName("android.os.SystemProperties");
-            Method get = c.getMethod("get", String.class);
-            value = (String) get.invoke(c, key);
-            return value;
-        } catch (Exception e) {
-            return HttpsProvisioningUtils.UNKNOWN;
-        }
     }
 }

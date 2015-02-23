@@ -1253,12 +1253,6 @@ public class RcsSettingsData {
     /* package private */static final Boolean DEFAULT_TCP_FALLBACK = false;
 
     /**
-     * Vendor name of the Client.
-     */
-    public static final String VENDOR_NAME = "VendorName";
-    /* package private */static final String DEFAULT_VENDOR_NAME = "OrangeLabs";
-
-    /**
      * Control RCS extensions
      */
     public static final String CONTROL_EXTENSIONS = "ControlRcsExtensions";

@@ -2191,15 +2191,6 @@ public class RcsSettings {
     }
 
     /**
-     * Get vendor name of the client
-     * 
-     * @return Vendor
-     */
-    public String getVendor() {
-        return readString(RcsSettingsData.VENDOR_NAME);
-    }
-
-    /**
      * Is RCS extensions controlled
      * 
      * @return Boolean
