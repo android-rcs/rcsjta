@@ -100,8 +100,8 @@ public class FileTransferLog implements IFileTransferLog {
                     .append(fileTransferId).append(", contact=").append(contact)
                     .append(", filename=").append(content.getName()).append(", size=")
                     .append(content.getSize()).append(", MIME=").append(content.getEncoding())
-                    .append(", state=").append(state.toInt()).append(", reasonCode=")
-                    .append(reasonCode.toInt()).toString());
+                    .append(", state=").append(state).append(", reasonCode=")
+                    .append(reasonCode).toString());
         }
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_FT_ID, fileTransferId);
@@ -200,8 +200,8 @@ public class FileTransferLog implements IFileTransferLog {
                     .append(fileTransferId).append(", chatId=").append(chatId).append(", contact=")
                     .append(contact).append(", filename=").append(content.getName())
                     .append(", size=").append(content.getSize()).append(", MIME=")
-                    .append(content.getEncoding()).append(", state=").append(state.toInt())
-                    .append(", reasonCode=").append(reasonCode.toInt()).toString());
+                    .append(content.getEncoding()).append(", state=").append(state)
+                    .append(", reasonCode=").append(reasonCode).toString());
         }
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_FT_ID, fileTransferId);
@@ -234,8 +234,8 @@ public class FileTransferLog implements IFileTransferLog {
             ReasonCode reasonCode) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("updateFileTransferStatus: fileTransferId=")
-                    .append(fileTransferId).append(", state=").append(state.toInt())
-                    .append(", reasonCode=").append(reasonCode.toInt()).toString());
+                    .append(fileTransferId).append(", state=").append(state)
+                    .append(", reasonCode=").append(reasonCode).toString());
         }
 
         ContentValues values = new ContentValues();

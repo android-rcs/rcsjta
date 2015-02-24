@@ -140,8 +140,8 @@ public class GroupChatLog implements IGroupChatLog {
             Direction direction) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("addGroupChat; chatID=").append(chatId)
-                    .append(",subject=").append(subject).append(",state").append(state)
-                    .append("reasonCode=").append(reasonCode).append(",direction=")
+                    .append(", subject=").append(subject).append(", state=").append(state)
+                    .append(" reasonCode=").append(reasonCode).append(", direction=")
                     .append(direction).toString());
         }
         ContentValues values = new ContentValues();
