@@ -37,6 +37,8 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.Set;
+
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contact.ContactId;
@@ -44,6 +46,7 @@ import com.gsma.services.rcs.sharing.video.VideoDescriptor;
 import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharingListener;
 import com.gsma.services.rcs.sharing.video.VideoSharingService;
+
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
@@ -468,6 +471,17 @@ public class IncomingVideoSharing extends Activity implements VideoPlayerListene
                 }
             });
         }
+
+        @Override
+        public void onDeleted(ContactId contact, Set<String> sharingIds) {
+            if (LogUtils.isActive) {
+                Log.w(LOGTAG,
+                        new StringBuilder("onDeleted contact=").append(contact)
+                                .append(" sharingIds=")
+                                .append(sharingIds).toString());
+            }
+        }
+
     };
 
     /**

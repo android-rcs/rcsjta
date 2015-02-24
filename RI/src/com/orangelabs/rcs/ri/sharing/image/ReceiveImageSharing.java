@@ -33,12 +33,15 @@ import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.util.Set;
+
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.image.ImageSharingListener;
 import com.gsma.services.rcs.sharing.image.ImageSharingService;
+
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
@@ -173,6 +176,16 @@ public class ReceiveImageSharing extends Activity {
                     }
                 }
             });
+        }
+
+        @Override
+        public void onDeleted(ContactId contact, Set<String> sharingIds) {
+            if (LogUtils.isActive) {
+                Log.w(LOGTAG,
+                        new StringBuilder("onDeleted contact=").append(contact)
+                                .append(" sharingIds=")
+                                .append(sharingIds).toString());
+            }
         }
     };
 

@@ -25,12 +25,15 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
+import java.util.Set;
+
 import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.filetransfer.GroupFileTransferListener;
+
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.messaging.chat.SendFile;
@@ -147,6 +150,15 @@ public class SendGroupFile extends SendFile {
                     }
                 }
             });
+        }
+
+        @Override
+        public void onDeleted(String chatId, Set<String> transferIds) {
+            if (LogUtils.isActive) {
+                Log.w(LOGTAG,
+                        new StringBuilder("onDeleted chatId=").append(chatId)
+                                .append(" transferIds=").append(transferIds).toString());
+            }
         }
 
     };

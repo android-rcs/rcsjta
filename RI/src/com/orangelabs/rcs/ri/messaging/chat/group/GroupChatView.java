@@ -253,6 +253,22 @@ public class GroupChatView extends ChatView {
             });
         }
 
+        @Override
+        public void onDeleted(Set<String> chatIds) {
+            if (LogUtils.isActive) {
+                Log.w(LOGTAG, new StringBuilder("onDeleted chatIds=").append(chatIds).toString());
+            }
+        }
+
+        @Override
+        public void onMessagesDeleted(String chatId, Set<String> msgIds) {
+            if (LogUtils.isActive) {
+                Log.w(LOGTAG,
+                        new StringBuilder("onMessagesDeleted chatId=").append(chatId)
+                                .append(" msgIds=").append(msgIds).toString());
+            }
+        }
+
     };
 
     @Override

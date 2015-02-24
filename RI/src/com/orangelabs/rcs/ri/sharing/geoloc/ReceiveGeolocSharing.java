@@ -35,6 +35,8 @@ import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.util.Set;
+
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
@@ -43,6 +45,7 @@ import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingIntent;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingListener;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingService;
+
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
@@ -189,6 +192,17 @@ public class ReceiveGeolocSharing extends Activity {
                 }
             });
         }
+
+        @Override
+        public void onDeleted(ContactId contact, Set<String> sharingIds) {
+            if (LogUtils.isActive) {
+                Log.w(LOGTAG,
+                        new StringBuilder("onDeleted contact=").append(contact)
+                                .append(" sharingIds=")
+                                .append(sharingIds).toString());
+            }
+        }
+
     };
 
     @Override

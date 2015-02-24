@@ -43,6 +43,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Set;
+
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
@@ -50,6 +52,7 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
+
 import com.orangelabs.rcs.ri.ApiConnectionManager;
 import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
@@ -232,6 +235,16 @@ public class InitiateFileTransfer extends Activity {
                     }
                 }
             });
+        }
+
+        @Override
+        public void onDeleted(ContactId contact, Set<String> transferIds) {
+            if (LogUtils.isActive) {
+                Log.w(LOGTAG,
+                        new StringBuilder("onDeleted contact=").append(contact)
+                                .append(" transferIds=")
+                                .append(transferIds).toString());
+            }
         }
     };
 

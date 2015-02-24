@@ -20,6 +20,7 @@ package com.orangelabs.rcs.ri.sharing.video;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Set;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -58,6 +59,7 @@ import com.gsma.services.rcs.sharing.video.VideoDescriptor;
 import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharingListener;
 import com.gsma.services.rcs.sharing.video.VideoSharingService;
+
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.CameraOptions;
 import com.orangelabs.rcs.core.ims.protocol.rtp.format.video.Orientation;
@@ -1004,6 +1006,16 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
                     }
                 }
             });
+        }
+
+        @Override
+        public void onDeleted(ContactId contact, Set<String> sharingIds) {
+            if (LogUtils.isActive) {
+                Log.w(LOGTAG,
+                        new StringBuilder("onDeleted contact=").append(contact)
+                                .append(" sharingIds=")
+                                .append(sharingIds).toString());
+            }
         }
     };
 
