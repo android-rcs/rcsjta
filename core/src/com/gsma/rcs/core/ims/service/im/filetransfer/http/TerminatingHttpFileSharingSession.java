@@ -154,12 +154,22 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
     }
 
     /**
-     * Check is session should be auto accepted depending on settings and roaming conditions This
+     * Check if session should be auto accepted depending on settings and roaming conditions This
      * method should only be called once per session
      * 
      * @return true if file transfer should be auto accepted
      */
     private boolean shouldBeAutoAccepted() {
+        long ftWarnSize = mRcsSettings.getWarningMaxFileTransferSize();
+
+        if (ftWarnSize > 0 && getContent().getSize() > ftWarnSize) {
+            /*
+             * User should be warned about the potential charges associated to the transfer of a
+             * large file. Hence do not auto accept if file size is above the warning limit.
+             */
+            return false;
+        }
+
         if (getImsService().getImsModule().isInRoaming()) {
             return mRcsSettings.isFileTransferAutoAcceptedInRoaming();
         }
