@@ -86,10 +86,11 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
      * @param content Content to be shared
      * @param contact Remote contact Id
      * @param thumbnail Thumbnail content option
+     * @param rcsSettings
      */
     public OriginatingImageTransferSession(ImsService parent, MmContent content, ContactId contact,
-            MmContent thumbnail) {
-        super(parent, content, contact, thumbnail);
+            MmContent thumbnail, RcsSettings rcsSettings) {
+        super(parent, content, contact, thumbnail, rcsSettings);
 
         // Create dialog path
         createOriginatingDialogPath();
@@ -115,21 +116,21 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
             if ("active".equals(localSetup)) {
                 localMsrpPort = 9; // See RFC4145, Page 4
             } else {
-                localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort();
+                localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(mRcsSettings);
             }
 
             // Create the MSRP manager
             String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface()
                     .getNetworkAccess().getIpAddress();
-            msrpMgr = new MsrpManager(localIpAddress, localMsrpPort, getImsService());
+            msrpMgr = new MsrpManager(localIpAddress, localMsrpPort, getImsService(), mRcsSettings);
             if (getImsService().getImsModule().isConnectedToWifiAccess()) {
-                msrpMgr.setSecured(RcsSettings.getInstance().isSecureMsrpOverWifi());
+                msrpMgr.setSecured(mRcsSettings.isSecureMsrpOverWifi());
             }
 
             // Build SDP part
             String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
             String encoding = getContent().getEncoding();
-            long maxSize = ImageTransferSession.getMaxImageSharingSize();
+            long maxSize = ImageTransferSession.getMaxImageSharingSize(mRcsSettings);
             // Set File-selector attribute
             String selector = getFileSelectorAttribute();
             String sdp = SdpUtils.buildFileSDP(ipAddress, localMsrpPort,

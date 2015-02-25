@@ -31,17 +31,17 @@ public class ChatActivityManager extends PeriodicRefresher {
     /**
      * Last activity timestamp
      */
-    private long activityTimesamp = 0L;
+    private long mActivityTimesamp = 0L;
 
     /**
      * Session timeout (in seconds)
      */
-    private int timeout;
+    private int mTimeout;
 
     /**
      * IM session
      */
-    private ChatSession session;
+    private ChatSession mSession;
 
     /**
      * The logger
@@ -52,17 +52,18 @@ public class ChatActivityManager extends PeriodicRefresher {
      * Constructor
      * 
      * @param session IM session
+     * @param rcsSettings
      */
-    public ChatActivityManager(ChatSession session) {
-        this.session = session;
-        this.timeout = RcsSettings.getInstance().getChatIdleDuration();
+    public ChatActivityManager(ChatSession session, RcsSettings rcsSettings) {
+        mSession = session;
+        mTimeout = rcsSettings.getChatIdleDuration();
     }
 
     /**
      * Update the session activity
      */
     public void updateActivity() {
-        activityTimesamp = System.currentTimeMillis();
+        mActivityTimesamp = System.currentTimeMillis();
     }
 
     /**
@@ -70,14 +71,14 @@ public class ChatActivityManager extends PeriodicRefresher {
      */
     public void start() {
         if (logger.isActivated()) {
-            logger.info("Start the activity manager for " + timeout + "s");
+            logger.info("Start the activity manager for " + mTimeout + "s");
         }
 
         // Reset the inactivity timestamp
         updateActivity();
 
         // Start a timer to check if the inactivity period has been reach or not each 10seconds
-        startTimer(timeout, 1.0);
+        startTimer(mTimeout, 1.0);
     }
 
     /**
@@ -97,19 +98,19 @@ public class ChatActivityManager extends PeriodicRefresher {
      */
     public void periodicProcessing() {
         long currentTime = System.currentTimeMillis();
-        int inactivityPeriod = (int) ((currentTime - activityTimesamp) / 1000) + 1;
-        int remainingPeriod = timeout - inactivityPeriod;
+        int inactivityPeriod = (int) ((currentTime - mActivityTimesamp) / 1000) + 1;
+        int remainingPeriod = mTimeout - inactivityPeriod;
         if (logger.isActivated()) {
             logger.debug("Check inactivity period: inactivity=" + inactivityPeriod + ", remaining="
                     + remainingPeriod);
         }
 
-        if (inactivityPeriod >= timeout) {
+        if (inactivityPeriod >= mTimeout) {
             if (logger.isActivated()) {
-                logger.debug("No activity on the session during " + timeout
+                logger.debug("No activity on the session during " + mTimeout
                         + "s: abort the session");
             }
-            session.handleChatInactivityEvent();
+            mSession.handleChatInactivityEvent();
         } else {
             // Restart timer
             startTimer(remainingPeriod, 1.0);

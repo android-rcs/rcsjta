@@ -18,6 +18,8 @@
 
 package com.gsma.rcs.core;
 
+import android.content.Context;
+
 import com.gsma.rcs.addressbook.AddressBookManager;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.service.capability.CapabilityService;
@@ -28,9 +30,12 @@ import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.terms.TermsConditionsService;
 import com.gsma.rcs.platform.AndroidFactory;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.DeviceUtils;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.rcs.provider.messaging.MessagingLog;
+import com.gsma.rcs.provider.eab.ContactsManager;
 
 /**
  * Core (singleton pattern)
@@ -41,32 +46,39 @@ public class Core {
     /**
      * Singleton instance
      */
-    private static Core instance = null;
+    private static volatile Core sInstance;
 
     /**
      * Core listener
      */
-    private CoreListener listener;
+    private CoreListener mListener;
 
     /**
      * Core status
      */
-    private boolean started = false;
+    private boolean mStarted = false;
 
     /**
      * IMS module
      */
-    private ImsModule imsModule;
+    private ImsModule mImsModule;
 
     /**
      * Address book manager
      */
-    private AddressBookManager addressBookManager;
+    private AddressBookManager mAddressBookManager;
 
     /**
      * The logger
      */
     private Logger logger = Logger.getLogger(this.getClass().getName());
+
+    private final RcsSettings mRcsSettings;
+
+    /**
+     * Boolean to check is the Core is stopping
+     */
+    private boolean mStopping = false;
 
     /**
      * Returns the singleton instance
@@ -74,63 +86,81 @@ public class Core {
      * @return Core instance
      */
     public static Core getInstance() {
-        return instance;
+        return sInstance;
     }
 
     /**
-     * Instanciate the core
+     * Instantiate the core
      * 
      * @param listener Listener
+     * @param rcsSettings RcsSettings instance
+     * @param messagingLog
+     * @param contactsManager
      * @return Core instance
      * @throws CoreException
      */
-    public synchronized static Core createCore(CoreListener listener) throws CoreException {
-        if (instance == null) {
-            instance = new Core(listener);
+    public static Core createCore(CoreListener listener, RcsSettings rcsSettings,
+            ContactsManager contactsManager,
+            MessagingLog messagingLog) throws CoreException {
+        if (sInstance != null) {
+            return sInstance;
         }
-        return instance;
+        synchronized (Core.class) {
+            if (sInstance == null) {
+                sInstance = new Core(listener, rcsSettings, contactsManager, messagingLog);
+            }
+        }
+        return sInstance;
     }
 
     /**
      * Terminate the core
      */
     public synchronized static void terminateCore() {
-        if (instance != null) {
-            instance.stopCore();
+        if (sInstance == null) {
+            return;
         }
-        instance = null;
+        sInstance.stopCore();
+        sInstance = null;
     }
 
     /**
      * Constructor
      * 
      * @param listener Listener
+     * @param messagingLog
+     * @param contactsManager
      * @throws CoreException
      */
-    private Core(CoreListener listener) throws CoreException {
-        if (logger.isActivated()) {
+    private Core(CoreListener listener, RcsSettings rcsSettings, ContactsManager contactsManager,
+            MessagingLog messagingLog)
+            throws CoreException {
+        boolean logActivated = logger.isActivated();
+        if (logActivated) {
             logger.info("Terminal core initialization");
         }
 
         // Set core event listener
-        this.listener = listener;
+        mListener = listener;
+        mRcsSettings = rcsSettings;
 
+        Context context = AndroidFactory.getApplicationContext();
         // Get UUID
-        if (logger.isActivated()) {
-            logger.info("My device UUID is "
-                    + DeviceUtils.getDeviceUUID(AndroidFactory.getApplicationContext()));
+        if (logActivated) {
+            logger.info("My device UUID is ".concat(String.valueOf(DeviceUtils
+                    .getDeviceUUID(context))));
         }
 
         // Initialize the phone utils
-        PhoneUtils.initialize(AndroidFactory.getApplicationContext());
+        PhoneUtils.initialize(context, mRcsSettings);
 
         // Create the address book manager
-        addressBookManager = new AddressBookManager();
+        mAddressBookManager = new AddressBookManager();
 
         // Create the IMS module
-        imsModule = new ImsModule(this);
+        mImsModule = new ImsModule(this, mRcsSettings, contactsManager, messagingLog);
 
-        if (logger.isActivated()) {
+        if (logActivated) {
             logger.info("Terminal core is created with success");
         }
     }
@@ -141,7 +171,7 @@ public class Core {
      * @return Listener
      */
     public CoreListener getListener() {
-        return listener;
+        return mListener;
     }
 
     /**
@@ -150,14 +180,16 @@ public class Core {
      * @return IMS module
      */
     public ImsModule getImsModule() {
-        return imsModule;
+        return mImsModule;
     }
 
     /**
      * Returns the address book manager
+     * 
+     * @return AddressBookManager
      */
     public AddressBookManager getAddressBookManager() {
-        return addressBookManager;
+        return mAddressBookManager;
     }
 
     /**
@@ -165,8 +197,8 @@ public class Core {
      * 
      * @return Boolean
      */
-    public boolean isCoreStarted() {
-        return started;
+    public boolean isStarted() {
+        return mStarted;
     }
 
     /**
@@ -175,21 +207,21 @@ public class Core {
      * @throws CoreException
      */
     public synchronized void startCore() throws CoreException {
-        if (started) {
+        if (mStarted) {
             // Already started
             return;
         }
 
         // Start the IMS module
-        imsModule.start();
+        mImsModule.start();
 
         // Start the address book monitoring
-        addressBookManager.startAddressBookMonitoring();
+        mAddressBookManager.startAddressBookMonitoring();
 
         // Notify event listener
-        listener.handleCoreLayerStarted();
+        mListener.handleCoreLayerStarted();
 
-        started = true;
+        mStarted = true;
         if (logger.isActivated()) {
             logger.info("RCS core service has been started with success");
         }
@@ -198,35 +230,38 @@ public class Core {
     /**
      * Stop the terminal core
      */
-    public synchronized void stopCore() {
-        if (!started) {
+    private void stopCore() {
+        if (!mStarted) {
             // Already stopped
             return;
         }
 
-        if (logger.isActivated()) {
+        mStopping = true;
+        boolean logActivated = logger.isActivated();
+        if (logActivated) {
             logger.info("Stop the RCS core service");
         }
 
         // Stop the address book monitoring
-        addressBookManager.stopAddressBookMonitoring();
+        mAddressBookManager.stopAddressBookMonitoring();
 
         try {
             // Stop the IMS module
-            imsModule.stop();
+            mImsModule.stop();
         } catch (Exception e) {
-            if (logger.isActivated()) {
+            if (logActivated) {
                 logger.error("Error during core shutdown", e);
             }
         }
 
-        // Notify event listener
-        listener.handleCoreLayerStopped();
-
-        started = false;
-        if (logger.isActivated()) {
+        mStopping = false;
+        mStarted = false;
+        if (logActivated) {
             logger.info("RCS core service has been stopped with success");
         }
+        sInstance = null;
+        // Notify event listener
+        mListener.handleCoreLayerStopped();
     }
 
     /**
@@ -248,7 +283,7 @@ public class Core {
     }
 
     /**
-     * Returns the capabity service
+     * Returns the capability service
      * 
      * @return Capability service
      */
@@ -290,5 +325,23 @@ public class Core {
      */
     public SipService getSipService() {
         return getImsModule().getSipService();
+    }
+
+    /**
+     * Returns True if Core is stopping
+     * 
+     * @return True if Core is stopping
+     */
+    public boolean isStopping() {
+        return mStopping;
+    }
+
+    /**
+     * Sets the listener
+     * 
+     * @param listener
+     */
+    public void setListener(CoreListener listener) {
+        mListener = listener;
     }
 }

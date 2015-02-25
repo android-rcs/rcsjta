@@ -18,6 +18,8 @@
 
 package com.gsma.rcs.service;
 
+import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.content.BroadcastReceiver;
@@ -36,6 +38,8 @@ public class DeviceBoot extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (logger.isActivated())
             logger.debug("Start RCS service after boot");
-        LauncherUtils.launchRcsService(context, true, false);
+        LocalContentResolver localContentResolver = new LocalContentResolver(context);
+        RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
+        LauncherUtils.launchRcsService(context, true, false, rcsSettings);
     }
 }

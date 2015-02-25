@@ -22,7 +22,6 @@
 
 package com.gsma.rcs.service;
 
-import com.gsma.rcs.R;
 import com.gsma.rcs.addressbook.AccountChangedReceiver;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.CoreListener;
@@ -70,11 +69,11 @@ import com.gsma.rcs.service.api.ImageSharingServiceImpl;
 import com.gsma.rcs.service.api.MultimediaSessionServiceImpl;
 import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.rcs.service.api.VideoSharingServiceImpl;
-import com.gsma.rcs.settings.SettingsDisplay;
 import com.gsma.rcs.utils.AppUtils;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.capability.ICapabilityService;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.IChatService;
@@ -94,9 +93,6 @@ import com.gsma.services.rcs.sharing.video.IVideoSharingService;
 import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.upload.IFileUploadService;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -115,84 +111,105 @@ import java.util.Set;
  */
 public class RcsCoreService extends Service implements CoreListener {
     /**
-     * Notification ID
-     */
-    private final static int SERVICE_NOTIFICATION = 1000;
-
-    /**
      * CPU manager
      */
-    private CpuManager cpuManager = new CpuManager();
+    private CpuManager mCpuManager;
 
     /**
      * Account changed broadcast receiver
      */
-    private AccountChangedReceiver accountChangedReceiver = null;
+    private AccountChangedReceiver mAccountChangedReceiver;
 
     // --------------------- RCSJTA API -------------------------
 
     /**
      * Contacts API
      */
-    private ContactServiceImpl contactsApi = null;
+    private ContactServiceImpl mContactApi;
 
     /**
      * Capability API
      */
-    private CapabilityServiceImpl capabilityApi = null;
+    private CapabilityServiceImpl mCapabilityApi;
 
     /**
      * Chat API
      */
-    private ChatServiceImpl chatApi = null;
+    private ChatServiceImpl mChatApi;
 
     /**
      * File transfer API
      */
-    private FileTransferServiceImpl ftApi = null;
+    private FileTransferServiceImpl mFtApi;
 
     /**
      * Video sharing API
      */
-    private VideoSharingServiceImpl vshApi = null;
+    private VideoSharingServiceImpl mVshApi;
 
     /**
      * Image sharing API
      */
-    private ImageSharingServiceImpl ishApi = null;
+    private ImageSharingServiceImpl mIshApi;
 
     /**
      * Geoloc sharing API
      */
-    private GeolocSharingServiceImpl gshApi = null;
+    private GeolocSharingServiceImpl mGshApi;
 
     /**
      * IP call API
      */
-    private IPCallServiceImpl ipcallApi = null;
+    private IPCallServiceImpl mIpcallApi;
 
     /**
      * Multimedia session API
      */
-    private MultimediaSessionServiceImpl sessionApi = null;
+    private MultimediaSessionServiceImpl mSessionApi;
 
     /**
      * File upload API
      */
-    private FileUploadServiceImpl uploadApi = null;
+    private FileUploadServiceImpl mUploadApi;
+
+    /**
+     * Need to start the core after stop if a StartService is called before the end of stopCore
+     */
+    private boolean mRestartCoreRequested = false;
+
+    /**
+     * Handler to restart core
+     */
+    private Handler mHandler;
+
+    private Context mContext;
+
+    private RcsSettings mRcsSettings;
+
+    private ContentResolver mContentResolver;
+    private LocalContentResolver mLocalContentResolver;
 
     /**
      * The logger
      */
-    private final static Logger logger = Logger.getLogger(RcsCoreService.class.getSimpleName());
+    private final static Logger sLogger = Logger.getLogger(RcsCoreService.class.getSimpleName());
 
     @Override
     public void onCreate() {
+        mContext = getApplicationContext();
+
+        mContentResolver = mContext.getContentResolver();
+        mLocalContentResolver = new LocalContentResolver(mContentResolver);
+
+        mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
+
         // Set application context
-        AndroidFactory.setApplicationContext(getApplicationContext());
+        AndroidFactory.setApplicationContext(mContext, mRcsSettings);
 
         // Set the terminal version
         TerminalInfo.setProductVersion(AppUtils.getApplicationVersion(this));
+
+        mHandler = new Handler();
 
         // Start the core
         startCore();
@@ -201,106 +218,118 @@ public class RcsCoreService extends Service implements CoreListener {
     @Override
     public void onDestroy() {
         // Unregister account changed broadcast receiver
-        if (accountChangedReceiver != null) {
+        if (mAccountChangedReceiver != null) {
             try {
-                unregisterReceiver(accountChangedReceiver);
+                unregisterReceiver(mAccountChangedReceiver);
             } catch (IllegalArgumentException e) {
                 // Nothing to do
             }
         }
 
         // Stop the core
-        Thread t = new Thread() {
+        new Thread() {
             /**
              * Processing
              */
             public void run() {
                 stopCore();
             }
-        };
-        t.start();
+        }.start();
     }
 
     /**
      * Start core
      */
-    public synchronized void startCore() {
-        if (Core.getInstance() != null) {
-            // Already started
-            return;
+    private synchronized void startCore() {
+        Core core = Core.getInstance();
+        boolean logActivated = sLogger.isActivated();
+        if (core != null) {
+            if (core.isStopping()) {
+                if (logActivated) {
+                    sLogger.debug("The core is stopping, we will restart it when core is stopped");
+                }
+                core.setListener(this);
+                mRestartCoreRequested = true;
+            }
+            if (core.isStarted()) {
+                // Already started
+                return;
+            }
         }
 
+        mRestartCoreRequested = false;
         try {
-            if (logger.isActivated()) {
-                logger.debug("Start RCS core service");
+            if (logActivated) {
+                sLogger.debug("Start RCS core service");
             }
-
-            Context ctx = getApplicationContext();
-            RcsSettings.createInstance(ctx);
 
             // Instantiate the contactUtils instance (CountryCode is already set)
             com.gsma.services.rcs.contact.ContactUtil.getInstance(this);
 
-            ContentResolver contentResolver = ctx.getContentResolver();
-            LocalContentResolver localContentResolver = new LocalContentResolver(contentResolver);
-            ContactsManager.createInstance(ctx, contentResolver, localContentResolver);
-            MessagingLog.createInstance(ctx, localContentResolver);
-            RichCallHistory.createInstance(localContentResolver);
-            IPCallHistory.createInstance(localContentResolver);
-            FtHttpResumeDaoImpl.createInstance(ctx);
+            ContactsManager.createInstance(mContext, mContentResolver, mLocalContentResolver,
+                    mRcsSettings);
+            MessagingLog.createInstance(mContext, mLocalContentResolver, mRcsSettings);
+            RichCallHistory.createInstance(mLocalContentResolver);
+            IPCallHistory.createInstance(mLocalContentResolver);
+            FtHttpResumeDaoImpl.createInstance(mContext);
+
+            ContactsManager contactsManager = ContactsManager.getInstance();
+            MessagingLog messagingLog = MessagingLog.getInstance();
 
             // Create the core
-            Core.createCore(this);
+            Core.createCore(this, mRcsSettings, contactsManager, messagingLog);
 
             // Instantiate API
-            Core core = Core.getInstance();
+            mContactApi = new ContactServiceImpl(contactsManager, mRcsSettings);
+            mCapabilityApi = new CapabilityServiceImpl(contactsManager, mRcsSettings);
+            core = Core.getInstance();
             InstantMessagingService imService = core.getImService();
             RichcallService richCallService = core.getRichcallService();
             IPCallService ipCallService = core.getIPCallService();
             SipService sipService = core.getSipService();
-            MessagingLog messgaingLog = MessagingLog.getInstance();
+
             RichCallHistory richcallLog = RichCallHistory.getInstance();
-            RcsSettings rcsSettings = RcsSettings.getInstance();
-            ContactsManager contactsManager = ContactsManager.getInstance();
-            contactsApi = new ContactServiceImpl(contactsManager);
-            capabilityApi = new CapabilityServiceImpl(contactsManager);
-            chatApi = new ChatServiceImpl(imService, messgaingLog, rcsSettings, contactsManager,
+
+            mChatApi = new ChatServiceImpl(imService, messagingLog, mRcsSettings, contactsManager,
                     core);
-            ftApi = new FileTransferServiceImpl(imService, messgaingLog, rcsSettings,
+            mFtApi = new FileTransferServiceImpl(imService, messagingLog, mRcsSettings,
                     contactsManager, core);
-            vshApi = new VideoSharingServiceImpl(richCallService, richcallLog, rcsSettings,
+            mVshApi = new VideoSharingServiceImpl(richCallService, richcallLog, mRcsSettings,
                     contactsManager, core);
-            ishApi = new ImageSharingServiceImpl(richCallService, richcallLog, rcsSettings,
+            mIshApi = new ImageSharingServiceImpl(richCallService, richcallLog, mRcsSettings,
                     contactsManager);
-            gshApi = new GeolocSharingServiceImpl(richCallService, contactsManager, richcallLog);
-            ipcallApi = new IPCallServiceImpl(ipCallService, IPCallHistory.getInstance(),
-                    contactsManager, rcsSettings);
-            sessionApi = new MultimediaSessionServiceImpl(sipService, rcsSettings, contactsManager);
-            uploadApi = new FileUploadServiceImpl(imService, rcsSettings);
+            mGshApi = new GeolocSharingServiceImpl(richCallService, contactsManager, richcallLog,
+                    mRcsSettings);
+            mIpcallApi = new IPCallServiceImpl(ipCallService, IPCallHistory.getInstance(),
+                    contactsManager, mRcsSettings);
+            mSessionApi = new MultimediaSessionServiceImpl(sipService, mRcsSettings,
+                    contactsManager);
+            mUploadApi = new FileUploadServiceImpl(imService, mRcsSettings);
 
             // Set the logger properties
-            Logger.activationFlag = RcsSettings.getInstance().isTraceActivated();
-            Logger.traceLevel = RcsSettings.getInstance().getTraceLevel();
+            Logger.activationFlag = mRcsSettings.isTraceActivated();
+            Logger.traceLevel = mRcsSettings.getTraceLevel();
 
             // Terminal version
-            if (logger.isActivated()) {
-                logger.info("RCS stack release is " + TerminalInfo.getProductVersion());
+            if (logActivated) {
+                sLogger.info("RCS stack release is ".concat(TerminalInfo.getProductVersion()));
             }
 
             // Start the core
             Core.getInstance().startCore();
 
             // Create multimedia directory on sdcard
-            FileFactory.createDirectory(RcsSettings.getInstance().getPhotoRootDirectory());
-            FileFactory.createDirectory(RcsSettings.getInstance().getVideoRootDirectory());
-            FileFactory.createDirectory(RcsSettings.getInstance().getFileRootDirectory());
+            FileFactory.createDirectory(mRcsSettings.getPhotoRootDirectory());
+            FileFactory.createDirectory(mRcsSettings.getVideoRootDirectory());
+            FileFactory.createDirectory(mRcsSettings.getFileRootDirectory());
 
             // Init CPU manager
-            cpuManager.init();
+            mCpuManager = new CpuManager(mRcsSettings);
+            mCpuManager.init();
 
             // Register account changed event receiver
-            if (accountChangedReceiver == null) {
-                accountChangedReceiver = new AccountChangedReceiver();
+            if (mAccountChangedReceiver == null) {
+                mAccountChangedReceiver = new AccountChangedReceiver();
 
                 // Register account changed broadcast receiver after a timeout of 2s (This is not
                 // done immediately, as we do not want to catch
@@ -309,28 +338,24 @@ public class RcsCoreService extends Service implements CoreListener {
                 // RCS account deletion will be done by user during this amount of time, as he just
                 // started his service.
                 Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    public void run() {
-                        registerReceiver(accountChangedReceiver, new IntentFilter(
-                                "android.accounts.LOGIN_ACCOUNTS_CHANGED"));
-                    }
-                }, 2000);
+                handler.postDelayed(
+                        new Runnable() {
+                            public void run() {
+                                registerReceiver(mAccountChangedReceiver, new IntentFilter(
+                                        "android.accounts.LOGIN_ACCOUNTS_CHANGED"));
+                            }
+                        },
+                        2000);
             }
 
-            // Show a first notification
-            addRcsServiceNotification(false, getString(R.string.rcs_core_loaded));
-
-            if (logger.isActivated()) {
-                logger.info("RCS core service started with success");
+            if (logActivated) {
+                sLogger.info("RCS core service started with success");
             }
         } catch (Exception e) {
             // Unexpected error
-            if (logger.isActivated()) {
-                logger.error("Can't instanciate the RCS core service", e);
+            if (logActivated) {
+                sLogger.error("Can't instanciate the RCS core service", e);
             }
-
-            // Show error in notification bar
-            addRcsServiceNotification(false, getString(R.string.rcs_core_failed));
 
             // Exit service
             stopSelf();
@@ -340,602 +365,547 @@ public class RcsCoreService extends Service implements CoreListener {
     /**
      * Stop core
      */
-    public synchronized void stopCore() {
+    private synchronized void stopCore() {
         if (Core.getInstance() == null) {
             // Already stopped
             return;
         }
 
-        if (logger.isActivated()) {
-            logger.debug("Stop RCS core service");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Stop RCS core service");
         }
 
         // Close APIs
-        contactsApi.close();
-        capabilityApi.close();
-        ftApi.close();
-        chatApi.close();
-        ishApi.close();
-        gshApi.close();
-        ipcallApi.close();
-        vshApi.close();
+        if (mContactApi != null) {
+            mContactApi.close();
+            mContactApi = null;
+        }
+        if (mCapabilityApi != null) {
+            mCapabilityApi.close();
+            mCapabilityApi = null;
+        }
+        if (mFtApi != null) {
+            mFtApi.close();
+            mFtApi = null;
+        }
+        if (mChatApi != null) {
+            mChatApi.close();
+            mChatApi = null;
+        }
+        if (mIshApi != null) {
+            mIshApi.close();
+            mIshApi = null;
+        }
+        if (mGshApi != null) {
+            mGshApi.close();
+            mGshApi = null;
+        }
+        if (mIpcallApi != null) {
+            mIpcallApi.close();
+            mIpcallApi = null;
+        }
+        if (mVshApi != null) {
+            mVshApi.close();
+            mVshApi = null;
+        }
 
         // Terminate the core in background
         Core.terminateCore();
 
         // Close CPU manager
-        cpuManager.close();
+        if (mCpuManager != null) {
+            mCpuManager.close();
+            mCpuManager = null;
+        }
 
-        if (logger.isActivated()) {
-            logger.info("RCS core service stopped with success");
+        if (sLogger.isActivated()) {
+            sLogger.info("RCS core service stopped with success");
         }
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         if (IContactService.class.getName().equals(intent.getAction())) {
-            if (logger.isActivated()) {
-                logger.debug("Contact service API binding");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Contact service API binding");
             }
-            return contactsApi;
+            return mContactApi;
         } else if (ICapabilityService.class.getName().equals(intent.getAction())) {
-            if (logger.isActivated()) {
-                logger.debug("Capability service API binding");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Capability service API binding");
             }
-            return capabilityApi;
+            return mCapabilityApi;
         } else if (IFileTransferService.class.getName().equals(intent.getAction())) {
-            if (logger.isActivated()) {
-                logger.debug("File transfer service API binding");
+            if (sLogger.isActivated()) {
+                sLogger.debug("File transfer service API binding");
             }
-            return ftApi;
+            return mFtApi;
         } else if (IChatService.class.getName().equals(intent.getAction())) {
-            if (logger.isActivated()) {
-                logger.debug("Chat service API binding");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Chat service API binding");
             }
-            return chatApi;
+            return mChatApi;
         } else if (IVideoSharingService.class.getName().equals(intent.getAction())) {
-            if (logger.isActivated()) {
-                logger.debug("Video sharing service API binding");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Video sharing service API binding");
             }
-            return vshApi;
+            return mVshApi;
         } else if (IImageSharingService.class.getName().equals(intent.getAction())) {
-            if (logger.isActivated()) {
-                logger.debug("Image sharing service API binding");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Image sharing service API binding");
             }
-            return ishApi;
+            return mIshApi;
         } else if (IGeolocSharingService.class.getName().equals(intent.getAction())) {
-            if (logger.isActivated()) {
-                logger.debug("Geoloc sharing service API binding");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Geoloc sharing service API binding");
             }
-            return gshApi;
+            return mGshApi;
         } else if (IIPCallService.class.getName().equals(intent.getAction())) {
-            if (logger.isActivated()) {
-                logger.debug("IP call service API binding");
+            if (sLogger.isActivated()) {
+                sLogger.debug("IP call service API binding");
             }
-            return ipcallApi;
+            return mIpcallApi;
         } else if (IMultimediaSessionService.class.getName().equals(intent.getAction())) {
-            if (logger.isActivated()) {
-                logger.debug("Multimedia session API binding");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Multimedia session API binding");
             }
-            return sessionApi;
+            return mSessionApi;
         } else if (IFileUploadService.class.getName().equals(intent.getAction())) {
-            if (logger.isActivated()) {
-                logger.debug("File upload service API binding");
+            if (sLogger.isActivated()) {
+                sLogger.debug("File upload service API binding");
             }
-            return uploadApi;
+            return mUploadApi;
         } else {
             return null;
         }
     }
 
-    /**
-     * Add RCS service notification
-     * 
-     * @param state Service state (ON|OFF)
-     * @param label Label
-     */
-    public static void addRcsServiceNotification(boolean state, String label) {
-        // Create notification
-        Intent intent = new Intent(AndroidFactory.getApplicationContext(), SettingsDisplay.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent contentIntent = PendingIntent.getActivity(
-                AndroidFactory.getApplicationContext(), 0, intent, 0);
-        int iconId;
-        if (state) {
-            iconId = R.drawable.rcs_core_notif_on_icon;
-        } else {
-            iconId = R.drawable.rcs_core_notif_off_icon;
-        }
-        Notification notif = new Notification(iconId, "", System.currentTimeMillis());
-        notif.flags = Notification.FLAG_NO_CLEAR | Notification.FLAG_FOREGROUND_SERVICE;
-        notif.setLatestEventInfo(AndroidFactory.getApplicationContext(), AndroidFactory
-                .getApplicationContext().getString(R.string.rcs_core_rcs_notification_title),
-                label, contentIntent);
-
-        // Send notification
-        NotificationManager notificationManager = (NotificationManager) AndroidFactory
-                .getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(SERVICE_NOTIFICATION, notif);
-    }
-
     /*---------------------------- CORE EVENTS ---------------------------*/
 
     /**
-     * Notify registration status to API
-     * 
-     * @param status Status
+     * Notify registration to API
      */
-    private void notifyRegistrationStatusToApi(boolean status) {
-        if (capabilityApi != null) {
-            capabilityApi.notifyRegistrationEvent(status);
+    private void notifyRegistrationToApi() {
+        if (mCapabilityApi != null) {
+            mCapabilityApi.notifyRegistration();
         }
-        if (chatApi != null) {
-            chatApi.notifyRegistrationEvent(status);
+        if (mChatApi != null) {
+            mChatApi.notifyRegistration();
         }
-        if (ftApi != null) {
-            ftApi.notifyRegistrationEvent(status);
+        if (mFtApi != null) {
+            mFtApi.notifyRegistration();
         }
-        if (vshApi != null) {
-            vshApi.notifyRegistrationEvent(status);
+        if (mVshApi != null) {
+            mVshApi.notifyRegistration();
         }
-        if (ishApi != null) {
-            ishApi.notifyRegistrationEvent(status);
+        if (mIshApi != null) {
+            mIshApi.notifyRegistration();
         }
-        if (gshApi != null) {
-            gshApi.notifyRegistrationEvent(status);
+        if (mGshApi != null) {
+            mGshApi.notifyRegistration();
         }
-        if (ipcallApi != null) {
-            ipcallApi.notifyRegistrationEvent(status);
+        if (mIpcallApi != null) {
+            mIpcallApi.notifyRegistration();
         }
-        if (sessionApi != null) {
-            sessionApi.notifyRegistrationEvent(status);
+        if (mSessionApi != null) {
+            mSessionApi.notifyRegistration();
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.CoreListener#handleCoreLayerStarted()
+    /**
+     * Notify unregistration to API
+     * 
+     * @param reasonCode
      */
-    public void handleCoreLayerStarted() {
-        if (logger.isActivated()) {
-            logger.debug("Handle event core started");
+    private void notifyUnRegistrationToApi(RcsServiceRegistration.ReasonCode reason) {
+        if (mCapabilityApi != null) {
+            mCapabilityApi.notifyUnRegistration(reason);
         }
+        if (mChatApi != null) {
+            mChatApi.notifyUnRegistration(reason);
+        }
+        if (mFtApi != null) {
+            mFtApi.notifyUnRegistration(reason);
+        }
+        if (mVshApi != null) {
+            mVshApi.notifyUnRegistration(reason);
+        }
+        if (mIshApi != null) {
+            mIshApi.notifyUnRegistration(reason);
+        }
+        if (mGshApi != null) {
+            mGshApi.notifyUnRegistration(reason);
+        }
+        if (mIpcallApi != null) {
+            mIpcallApi.notifyUnRegistration(reason);
+        }
+        if (mSessionApi != null) {
+            mSessionApi.notifyUnRegistration(reason);
+        }
+    }
 
-        // Display a notification
-        addRcsServiceNotification(false, getString(R.string.rcs_core_started));
-
+    @Override
+    public void handleCoreLayerStarted() {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event core started");
+        }
         // Send service up intent
         Intent serviceUp = new Intent(RcsService.ACTION_SERVICE_UP);
         IntentUtils.tryToSetReceiverForegroundFlag(serviceUp);
-        getApplicationContext().sendBroadcast(serviceUp);
+        mContext.sendBroadcast(serviceUp);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.CoreListener#handleCoreLayerStopped()
-     */
+    @Override
     public void handleCoreLayerStopped() {
+        boolean logActivated = sLogger.isActivated();
         // Display a notification
-        if (logger.isActivated()) {
-            logger.debug("Handle event core terminated");
+        if (logActivated) {
+            sLogger.debug("Handle event core terminated");
         }
-        addRcsServiceNotification(false, getString(R.string.rcs_core_stopped));
+        if (!mRestartCoreRequested) {
+            return;
+        }
+        if (logActivated) {
+            sLogger.debug("Start the core after previous instance is stopped");
+        }
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                startCore();
+            }
+        });
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.CoreListener#handleRegistrationSuccessful()
-     */
+    @Override
     public void handleRegistrationSuccessful() {
-        if (logger.isActivated()) {
-            logger.debug("Handle event registration ok");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event registration ok");
         }
 
-        // Display a notification
-        addRcsServiceNotification(true, getString(R.string.rcs_core_ims_connected));
-
         // Notify APIs
-        notifyRegistrationStatusToApi(true);
+        notifyRegistrationToApi();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.CoreListener#handleRegistrationFailed(com.gsma.rcs.core.ims .ImsError)
-     */
+    @Override
     public void handleRegistrationFailed(ImsError error) {
-        if (logger.isActivated()) {
-            logger.debug("Handle event registration failed");
-        }
-
-        // Display a notification
-        addRcsServiceNotification(false, getString(R.string.rcs_core_ims_connection_failed));
-
-        // Notify APIs
-        notifyRegistrationStatusToApi(false);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.CoreListener#handleRegistrationTerminated()
-     */
-    public void handleRegistrationTerminated() {
-        if (logger.isActivated()) {
-            logger.debug("Handle event registration terminated");
-        }
-
-        if (Core.getInstance().getImsModule().getImsConnectionManager().isDisconnectedByBattery()) {
-            // Display a notification
-            addRcsServiceNotification(false, getString(R.string.rcs_core_ims_battery_disconnected));
-        } else {
-            // Display a notification
-            addRcsServiceNotification(false, getString(R.string.rcs_core_ims_disconnected));
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event registration failed");
         }
 
         // Notify APIs
-        notifyRegistrationStatusToApi(false);
+        notifyUnRegistrationToApi(RcsServiceRegistration.ReasonCode.CONNECTION_LOST);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.CoreListener#handlePresenceSharingNotification(java.lang.String,
-     * java.lang.String, java.lang.String)
-     */
+    @Override
+    public void handleRegistrationTerminated(RcsServiceRegistration.ReasonCode reason) {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event registration terminated: ".concat(reason.name()));
+        }
+
+        // Notify APIs
+        notifyUnRegistrationToApi(reason);
+    }
+
+    @Override
     public void handlePresenceSharingNotification(ContactId contact, String status, String reason) {
-        if (logger.isActivated()) {
-            logger.debug("Handle event presence sharing notification for " + contact + " ("
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event presence sharing notification for " + contact + " ("
                     + status + ":" + reason + ")");
         }
         // Not used
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.CoreListener#handlePresenceInfoNotification(java.lang.String,
-     * com.gsma.rcs.core.ims.service.presence.pidf.PidfDocument)
-     */
+    @Override
     public void handlePresenceInfoNotification(ContactId contact, PidfDocument presence) {
-        if (logger.isActivated()) {
-            logger.debug("Handle event presence info notification for " + contact);
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event presence info notification for " + contact);
         }
         // Not used
     }
 
+    @Override
     public void handleCapabilitiesNotification(ContactId contact, Capabilities capabilities) {
-        if (logger.isActivated()) {
-            logger.debug("Handle capabilities update notification for " + contact + " ("
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle capabilities update notification for " + contact + " ("
                     + capabilities.toString() + ")");
         }
 
         // Notify API
-        capabilityApi.receiveCapabilities(contact, capabilities);
+        mCapabilityApi.receiveCapabilities(contact, capabilities);
     }
 
+    @Override
     public void handlePresenceSharingInvitation(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.debug("Handle event presence sharing invitation");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event presence sharing invitation");
         }
         // Not used
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.CoreListener#handleContentSharingTransferInvitation(com.orangelabs
-     * .rcs.core.ims.service.richcall.image.ImageTransferSession)
-     */
+    @Override
     public void handleContentSharingTransferInvitation(ImageTransferSession session) {
-        if (logger.isActivated()) {
-            logger.debug("Handle event content sharing transfer invitation");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event content sharing transfer invitation");
         }
 
         // Broadcast the invitation
-        ishApi.receiveImageSharingInvitation(session);
+        mIshApi.receiveImageSharingInvitation(session);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.CoreListener#handleContentSharingTransferInvitation(com.orangelabs
-     * .rcs.core.ims.service.richcall.geoloc.GeolocTransferSession)
-     */
+    @Override
     public void handleContentSharingTransferInvitation(GeolocTransferSession session) {
-        if (logger.isActivated()) {
-            logger.debug("Handle event content sharing transfer invitation");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event content sharing transfer invitation");
         }
 
         // Broadcast the invitation
-        gshApi.receiveGeolocSharingInvitation(session);
+        mGshApi.receiveGeolocSharingInvitation(session);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.CoreListener#handleContentSharingStreamingInvitation(com.orangelabs
-     * .rcs.core.ims.service.richcall.video.VideoStreamingSession)
-     */
+    @Override
     public void handleContentSharingStreamingInvitation(VideoStreamingSession session) {
-        if (logger.isActivated()) {
-            logger.debug("Handle event content sharing streaming invitation");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event content sharing streaming invitation");
         }
 
         // Broadcast the invitation
-        vshApi.receiveVideoSharingInvitation(session);
+        mVshApi.receiveVideoSharingInvitation(session);
     }
 
     @Override
     public void handleFileTransferInvitation(FileSharingSession fileSharingSession,
-            boolean isGroup, ContactId contact, String displayName) {
-        if (logger.isActivated()) {
-            logger.debug("Handle event file transfer invitation");
+            boolean isGroup, ContactId contact,
+            String displayName) {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event file transfer invitation");
         }
 
         // Broadcast the invitation
-        ftApi.receiveFileTransferInvitation(fileSharingSession, isGroup, contact, displayName);
+        mFtApi.receiveFileTransferInvitation(fileSharingSession, isGroup, contact, displayName);
     }
 
     @Override
     public void handleOneToOneFileTransferInvitation(FileSharingSession fileSharingSession,
             OneToOneChatSession oneToOneChatSession) {
-        if (logger.isActivated()) {
-            logger.debug("Handle event file transfer invitation");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event file transfer invitation");
         }
 
         // Broadcast the invitation
-        ftApi.receiveFileTransferInvitation(fileSharingSession, false,
-                oneToOneChatSession.getRemoteContact(), oneToOneChatSession.getRemoteDisplayName());
+        mFtApi.receiveFileTransferInvitation(fileSharingSession, false,
+                oneToOneChatSession.getRemoteContact(),
+                oneToOneChatSession.getRemoteDisplayName());
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.CoreListener#handleIncomingFileTransferResuming(com.orangelabs.rcs
-     * .core.ims.service.im.filetransfer.FileSharingSession, boolean, java.lang.String,
-     * java.lang.String)
-     */
+    @Override
     public void handleIncomingFileTransferResuming(FileSharingSession session, boolean isGroup,
             String chatSessionId, String chatId) {
-        if (logger.isActivated()) {
-            logger.debug("Handle event incoming file transfer resuming");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event incoming file transfer resuming");
         }
 
         // Broadcast the invitation
-        ftApi.resumeIncomingFileTransfer(session, isGroup, chatSessionId, chatId);
+        mFtApi.resumeIncomingFileTransfer(session, isGroup, chatSessionId, chatId);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.CoreListener#handleOutgoingFileTransferResuming(com.orangelabs.rcs
-     * .core.ims.service.im.filetransfer.FileSharingSession, boolean)
-     */
+    @Override
     public void handleOutgoingFileTransferResuming(FileSharingSession session, boolean isGroup) {
-        if (logger.isActivated()) {
-            logger.debug("Handle event outgoing file transfer resuming");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event outgoing file transfer resuming");
         }
 
         // Broadcast the invitation
-        ftApi.resumeOutgoingFileTransfer(session, isGroup);
+        mFtApi.resumeOutgoingFileTransfer(session, isGroup);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.CoreListener#handleOneOneChatSessionInvitation(com.orangelabs.rcs
-     * .core.ims.service.im.chat.TerminatingOne2OneChatSession)
-     */
+    @Override
     public void handleOneOneChatSessionInvitation(TerminatingOneToOneChatSession session) {
-        if (logger.isActivated()) {
-            logger.debug("Handle event receive 1-1 chat session invitation");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event receive 1-1 chat session invitation");
         }
 
         // Broadcast the invitation
-        chatApi.receiveOneOneChatInvitation(session);
+        mChatApi.receiveOneOneChatInvitation(session);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.CoreListener#handleAdhocGroupChatSessionInvitation(com.orangelabs
-     * .rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSession)
-     */
+    @Override
     public void handleAdhocGroupChatSessionInvitation(TerminatingAdhocGroupChatSession session) {
-        if (logger.isActivated()) {
-            logger.debug("Handle event receive ad-hoc group chat session invitation");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event receive ad-hoc group chat session invitation");
         }
 
         // Broadcast the invitation
-        chatApi.receiveGroupChatInvitation(session);
+        mChatApi.receiveGroupChatInvitation(session);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.CoreListener#handleStoreAndForwardMsgSessionInvitation(com.orangelabs
-     * .rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardMsgSession)
-     */
+    @Override
     public void handleStoreAndForwardMsgSessionInvitation(
             TerminatingStoreAndForwardMsgSession session) {
-        if (logger.isActivated()) {
-            logger.debug("Handle event S&F messages session invitation");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event S&F messages session invitation");
         }
 
         // Broadcast the invitation
-        chatApi.receiveOneOneChatInvitation(session);
+        mChatApi.receiveOneOneChatInvitation(session);
     }
 
+    @Override
     public void handleMessageDeliveryStatus(ContactId contact, ImdnDocument imdn) {
-        if (logger.isActivated()) {
-            logger.debug("Handle message delivery status");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle message delivery status");
         }
 
-        chatApi.receiveMessageDeliveryStatus(contact, imdn);
+        mChatApi.receiveMessageDeliveryStatus(contact, imdn);
     }
 
+    @Override
     public void handleFileDeliveryStatus(ContactId contact, ImdnDocument imdn) {
-        if (logger.isActivated()) {
-            logger.debug("Handle file delivery status: fileTransferId=" + imdn.getMsgId()
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle file delivery status: fileTransferId=" + imdn.getMsgId()
                     + " notification_type=" + imdn.getNotificationType() + " status="
                     + imdn.getStatus() + " contact=" + contact);
         }
 
-        ftApi.handleFileDeliveryStatus(imdn, contact);
+        mFtApi.handleFileDeliveryStatus(imdn, contact);
     }
 
+    @Override
     public void handleGroupFileDeliveryStatus(String chatId, ContactId contact, ImdnDocument imdn) {
-        if (logger.isActivated()) {
-            logger.debug("Handle group file delivery status: fileTransferId=" + imdn.getMsgId()
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle group file delivery status: fileTransferId=" + imdn.getMsgId()
                     + " notification_type=" + imdn.getNotificationType() + " status="
                     + imdn.getStatus() + " contact=" + contact);
         }
 
-        ftApi.handleGroupFileDeliveryStatus(chatId, imdn, contact);
+        mFtApi.handleGroupFileDeliveryStatus(chatId, imdn, contact);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.CoreListener#handleSipSessionInvitation(android.content.Intent,
-     * com.gsma.rcs.core.ims.service.sip.GenericSipSession)
-     */
+    @Override
     public void handleSipMsrpSessionInvitation(Intent intent, GenericSipMsrpSession session) {
-        if (logger.isActivated()) {
-            logger.debug("Handle event receive SIP MSRP session invitation");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event receive SIP MSRP session invitation");
         }
 
         // Broadcast the invitation
-        sessionApi.receiveSipMsrpSessionInvitation(intent, session);
+        mSessionApi.receiveSipMsrpSessionInvitation(intent, session);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.CoreListener#handleSipSessionInvitation(android.content.Intent,
-     * com.gsma.rcs.core.ims.service.sip.GenericSipSession)
-     */
+    @Override
     public void handleSipRtpSessionInvitation(Intent intent, GenericSipRtpSession session) {
-        if (logger.isActivated()) {
-            logger.debug("Handle event receive SIP RTP session invitation");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event receive SIP RTP session invitation");
         }
 
         // Broadcast the invitation
-        sessionApi.receiveSipRtpSessionInvitation(intent, session);
+        mSessionApi.receiveSipRtpSessionInvitation(intent, session);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.CoreListener#handleUserConfirmationRequest(java.lang.String,
-     * java.lang.String, java.lang.String, boolean, java.lang.String, java.lang.String,
-     * java.lang.String, java.lang.String, int)
-     */
-    public void handleUserConfirmationRequest(ContactId remote, String id, String type,
-            boolean pin, String subject, String text, String acceptButtonLabel,
-            String rejectButtonLabel, int timeout) {
-        if (logger.isActivated()) {
-            logger.debug("Handle event user terms confirmation request");
+    @Override
+    public void handleUserConfirmationRequest(ContactId remote, String id,
+            String type, boolean pin, String subject, String text,
+            String acceptButtonLabel, String rejectButtonLabel, int timeout) {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event user terms confirmation request");
         }
 
         // Nothing to do here
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.CoreListener#handleUserConfirmationAck(java.lang.String,
-     * java.lang.String, java.lang.String, java.lang.String, java.lang.String)
-     */
+    @Override
     public void handleUserConfirmationAck(ContactId remote, String id, String status,
             String subject, String text) {
-        if (logger.isActivated()) {
-            logger.debug("Handle event user terms confirmation ack");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event user terms confirmation ack");
         }
 
         // Nothing to do here
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.CoreListener#handleUserNotification(java.lang.String,
-     * java.lang.String, java.lang.String, java.lang.String, java.lang.String)
-     */
+    @Override
     public void handleUserNotification(ContactId remote, String id, String subject, String text,
             String okButtonLabel) {
-        if (logger.isActivated()) {
-            logger.debug("Handle event user terms notification");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event user terms notification");
         }
 
         // Nothing to do here
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.CoreListener#handleSimHasChanged()
-     */
+    @Override
     public void handleSimHasChanged() {
-        if (logger.isActivated()) {
-            logger.debug("Handle SIM has changed");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle SIM has changed");
         }
 
         // Restart the RCS service
-        LauncherUtils.stopRcsService(getApplicationContext());
-        LauncherUtils.launchRcsService(getApplicationContext(), true, false);
+        LauncherUtils.stopRcsService(mContext);
+        LauncherUtils.launchRcsService(mContext, true, false, mRcsSettings);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.CoreListener#handleIPCallInvitation(com.gsma.rcs.core.ims.service
-     * .ipcall.IPCallSession)
-     */
+    @Override
     public void handleIPCallInvitation(IPCallSession session) {
-        if (logger.isActivated()) {
-            logger.debug("Handle event IP call invitation");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Handle event IP call invitation");
         }
 
         // Broadcast the invitation
-        ipcallApi.receiveIPCallInvitation(session);
+        mIpcallApi.receiveIPCallInvitation(session);
     }
 
     @Override
     public void tryToDispatchAllPendingDisplayNotifications() {
-        chatApi.tryToDispatchAllPendingDisplayNotifications();
+        mChatApi.tryToDispatchAllPendingDisplayNotifications();
     }
 
     @Override
     public void handleFileTransferInvitationRejected(ContactId contact, MmContent content,
             MmContent fileicon, FileTransfer.ReasonCode reasonCode) {
-        ftApi.addAndBroadcastFileTransferInvitationRejected(contact, content, fileicon, reasonCode);
+        mFtApi.addAndBroadcastFileTransferInvitationRejected(contact, content, fileicon, reasonCode);
     }
 
     @Override
     public void handleGroupChatInvitationRejected(String chatId, ContactId contact, String subject,
             Set<ParticipantInfo> participants, GroupChat.ReasonCode reasonCode) {
-        chatApi.addAndBroadcastGroupChatInvitationRejected(chatId, contact, subject, participants,
+        mChatApi.addAndBroadcastGroupChatInvitationRejected(chatId, contact, subject, participants,
                 reasonCode);
     }
 
     @Override
     public void handleImageSharingInvitationRejected(ContactId contact, MmContent content,
             ImageSharing.ReasonCode reasonCode) {
-        ishApi.addAndBroadcastImageSharingInvitationRejected(contact, content, reasonCode);
+        mIshApi.addAndBroadcastImageSharingInvitationRejected(contact, content, reasonCode);
     }
 
     @Override
     public void handleVideoSharingInvitationRejected(ContactId contact, VideoContent content,
             VideoSharing.ReasonCode reasonCode) {
-        vshApi.addAndBroadcastVideoSharingInvitationRejected(contact, content, reasonCode);
+        mVshApi.addAndBroadcastVideoSharingInvitationRejected(contact, content, reasonCode);
     }
 
     @Override
     public void handleGeolocSharingInvitationRejected(ContactId contact, GeolocContent content,
             GeolocSharing.ReasonCode reasonCode) {
-        gshApi.addAndBroadcastGeolocSharingInvitationRejected(contact, content, reasonCode);
+        mGshApi.addAndBroadcastGeolocSharingInvitationRejected(contact, content, reasonCode);
     }
 
     @Override
     public void handleIPCallInvitationRejected(ContactId contact, AudioContent audioContent,
             VideoContent videoContent, IPCall.ReasonCode reasonCode) {
-        ipcallApi.addAndBroadcastIPCallInvitationRejected(contact, audioContent, videoContent,
+        mIpcallApi.addAndBroadcastIPCallInvitationRejected(contact, audioContent, videoContent,
                 reasonCode);
     }
 
     public void handleOneOneChatSessionInitiation(OneToOneChatSession session) {
-        chatApi.handleOneToOneChatSessionInitiation(session);
+        mChatApi.handleOneToOneChatSessionInitiation(session);
     }
 
     @Override
     public void handleRejoinGroupChatAsPartOfSendOperation(String chatId) throws ServerApiException {
-        chatApi.handleRejoinGroupChatAsPartOfSendOperation(chatId);
+        mChatApi.handleRejoinGroupChatAsPartOfSendOperation(chatId);
     }
 
+    @Override
     public void handleAutoRejoinGroupChat(String chatId) throws ServerApiException {
-        chatApi.handleAutoRejoinGroupChat(chatId);
+        mChatApi.handleAutoRejoinGroupChat(chatId);
     }
 }

@@ -29,23 +29,23 @@ public abstract class RegistryFactory {
     /**
      * Current platform factory
      */
-    private static RegistryFactory factory = null;
+    private static RegistryFactory mFactory;
 
     /**
      * Load the factory
      * 
      * @param classname Factory classname
-     * @throws Exception
+     * @throws FactoryException
      */
     public static void loadFactory(String classname) throws FactoryException {
-        if (factory != null) {
+        if (mFactory != null) {
             return;
         }
 
         try {
-            factory = (RegistryFactory) Class.forName(classname).newInstance();
+            mFactory = (RegistryFactory) Class.forName(classname).newInstance();
         } catch (Exception e) {
-            throw new FactoryException("Can't load the factory " + classname);
+            throw new FactoryException("Can't load the factory " + classname, e);
         }
     }
 
@@ -55,7 +55,7 @@ public abstract class RegistryFactory {
      * @return Factory
      */
     public static RegistryFactory getFactory() {
-        return factory;
+        return mFactory;
     }
 
     /**

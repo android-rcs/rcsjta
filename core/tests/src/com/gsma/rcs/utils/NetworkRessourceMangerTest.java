@@ -6,6 +6,7 @@ import android.test.AndroidTestCase;
 import com.gsma.rcs.platform.network.NetworkFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.NetworkRessourceManager;
+import com.gsma.rcs.provider.LocalContentResolver;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -17,10 +18,14 @@ import java.net.SocketException;
  */
 public class NetworkRessourceMangerTest extends AndroidTestCase {
 
+    private RcsSettings mRcsSettings;
+
     protected void setUp() throws Exception {
         super.setUp();
-        RcsSettings.createInstance(getContext());
-        NetworkFactory.loadFactory("com.gsma.rcs.platform.network.AndroidNetworkFactory");
+        LocalContentResolver localContentResolver = new LocalContentResolver(getContext());
+        mRcsSettings = RcsSettings.createInstance(localContentResolver);
+        NetworkFactory.loadFactory("com.gsma.rcs.platform.network.AndroidNetworkFactory",
+                mRcsSettings);
     }
 
     protected void tearDown() throws Exception {
@@ -28,7 +33,7 @@ public class NetworkRessourceMangerTest extends AndroidTestCase {
     }
 
     public void testPortSelection() {
-        int updPort = NetworkRessourceManager.generateLocalSipPort();
+        int updPort = NetworkRessourceManager.generateLocalSipPort(mRcsSettings);
         DatagramSocket udpSocket1 = null;
         try {
             udpSocket1 = new DatagramSocket(updPort);
@@ -37,7 +42,7 @@ public class NetworkRessourceMangerTest extends AndroidTestCase {
         }
         assertNotNull("No UPD socket created at " + updPort, udpSocket1);
 
-        int tcpPort = NetworkRessourceManager.generateLocalSipPort();
+        int tcpPort = NetworkRessourceManager.generateLocalSipPort(mRcsSettings);
         ServerSocket tcpSocket1 = null;
         try {
             tcpSocket1 = new ServerSocket(tcpPort);
@@ -46,7 +51,7 @@ public class NetworkRessourceMangerTest extends AndroidTestCase {
         }
         assertNotNull("No TCP socket created at " + tcpPort, tcpSocket1);
 
-        int udpTcpPort = NetworkRessourceManager.generateLocalSipPort();
+        int udpTcpPort = NetworkRessourceManager.generateLocalSipPort(mRcsSettings);
         DatagramSocket udpSocket2 = null;
         try {
             udpSocket2 = new DatagramSocket(udpTcpPort);

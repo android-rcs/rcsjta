@@ -35,7 +35,6 @@ import android.net.Uri;
 import android.text.TextUtils;
 
 import com.gsma.rcs.utils.DatabaseUtils;
-import com.gsma.rcs.R;
 
 /**
  * RCS settings provider
@@ -76,8 +75,6 @@ public class RcsSettingsProvider extends ContentProvider {
     private static class DatabaseHelper extends SQLiteOpenHelper {
         private static final int DATABASE_VERSION = 108;
 
-        private Context mContext;
-
         /**
          * Add a parameter in the db
          * 
@@ -106,8 +103,6 @@ public class RcsSettingsProvider extends ContentProvider {
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
-
-            mContext = ctx;
         }
 
         @Override
@@ -119,34 +114,8 @@ public class RcsSettingsProvider extends ContentProvider {
             /* Insert default values for parameters */
             addParameter(db, RcsSettingsData.SERVICE_ACTIVATED,
                     RcsSettingsData.DEFAULT_SERVICE_ACTIVATED);
-            addParameter(db, RcsSettingsData.PRESENCE_INVITATION_RINGTONE,
-                    RcsSettingsData.DEFAULT_PRESENCE_INVITATION_RINGTONE);
-            addParameter(db, RcsSettingsData.PRESENCE_INVITATION_VIBRATE,
-                    RcsSettingsData.DEFAULT_PRESENCE_INVITATION_VIBRATE);
-            addParameter(db, RcsSettingsData.CSH_INVITATION_RINGTONE,
-                    RcsSettingsData.DEFAULT_CSH_INVITATION_RINGTONE);
-            addParameter(db, RcsSettingsData.CSH_INVITATION_VIBRATE,
-                    RcsSettingsData.DEFAULT_CSH_INVITATION_VIBRATE);
-            addParameter(db, RcsSettingsData.CSH_AVAILABLE_BEEP,
-                    RcsSettingsData.DEFAULT_CSH_AVAILABLE_BEEP);
-            addParameter(db, RcsSettingsData.FILETRANSFER_INVITATION_RINGTONE,
-                    RcsSettingsData.DEFAULT_FT_INVITATION_RINGTONE);
-            addParameter(db, RcsSettingsData.FILETRANSFER_INVITATION_VIBRATE,
-                    RcsSettingsData.DEFAULT_FT_INVITATION_VIBRATE);
-            addParameter(db, RcsSettingsData.CHAT_INVITATION_RINGTONE,
-                    RcsSettingsData.DEFAULT_CHAT_INVITATION_RINGTONE);
-            addParameter(db, RcsSettingsData.CHAT_INVITATION_VIBRATE,
-                    RcsSettingsData.DEFAULT_CHAT_INVITATION_VIBRATE);
             addParameter(db, RcsSettingsData.CHAT_RESPOND_TO_DISPLAY_REPORTS,
                     RcsSettingsData.DEFAULT_CHAT_RESPOND_TO_DISPLAY_REPORTS);
-            addParameter(db, RcsSettingsData.FREETEXT1,
-                    mContext.getString(R.string.rcs_settings_label_default_freetext_1));
-            addParameter(db, RcsSettingsData.FREETEXT2,
-                    mContext.getString(R.string.rcs_settings_label_default_freetext_2));
-            addParameter(db, RcsSettingsData.FREETEXT3,
-                    mContext.getString(R.string.rcs_settings_label_default_freetext_3));
-            addParameter(db, RcsSettingsData.FREETEXT4,
-                    mContext.getString(R.string.rcs_settings_label_default_freetext_4));
             addParameter(db, RcsSettingsData.MIN_BATTERY_LEVEL,
                     RcsSettingsData.DEFAULT_MIN_BATTERY_LEVEL);
             addParameter(db, RcsSettingsData.MAX_PHOTO_ICON_SIZE,
@@ -157,8 +126,6 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_MAX_GEOLOC_LABEL_LENGTH);
             addParameter(db, RcsSettingsData.GEOLOC_EXPIRATION_TIME,
                     RcsSettingsData.DEFAULT_GEOLOC_EXPIRATION_TIME);
-            addParameter(db, RcsSettingsData.MIN_STORAGE_CAPACITY,
-                    RcsSettingsData.DEFAULT_MIN_STORAGE_CAPACITY);
             addParameter(db, RcsSettingsData.MAX_CHAT_PARTICIPANTS,
                     RcsSettingsData.DEFAULT_MAX_CHAT_PARTICIPANTS);
             addParameter(db, RcsSettingsData.MAX_CHAT_MSG_LENGTH,

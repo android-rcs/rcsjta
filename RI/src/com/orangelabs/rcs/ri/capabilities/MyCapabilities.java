@@ -27,8 +27,8 @@ import android.widget.TextView;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.capability.Capabilities;
-import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -41,12 +41,12 @@ public class MyCapabilities extends Activity {
     /**
      * API connection manager
      */
-    private ApiConnectionManager connectionManager;
+    private ConnectionManager mCnxManager;
 
     /**
      * A locker to exit only once
      */
-    private LockAccess exitOnce = new LockAccess();
+    private LockAccess mExitOnce = new LockAccess();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,21 +57,21 @@ public class MyCapabilities extends Activity {
         setContentView(R.layout.capabilities_mine);
 
         // Register to API connection manager
-        connectionManager = ApiConnectionManager.getInstance(this);
-        if (connectionManager == null
-                || !connectionManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
+        mCnxManager = ConnectionManager.getInstance(this);
+        if (mCnxManager == null
+                || !mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
-                    exitOnce);
+                    mExitOnce);
             return;
         }
-        connectionManager.startMonitorServices(this, null, RcsServiceName.CAPABILITY);
+        mCnxManager.startMonitorServices(this, null, RcsServiceName.CAPABILITY);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (connectionManager != null) {
-            connectionManager.stopMonitorServices(this);
+        if (mCnxManager != null) {
+            mCnxManager.stopMonitorServices(this);
         }
     }
 
@@ -80,7 +80,7 @@ public class MyCapabilities extends Activity {
         super.onResume();
         try {
             // Get the current capabilities from the RCS contacts API
-            Capabilities capabilities = connectionManager.getCapabilityApi().getMyCapabilities();
+            Capabilities capabilities = mCnxManager.getCapabilityApi().getMyCapabilities();
 
             // Set capabilities
             CheckBox imageCSh = (CheckBox) findViewById(R.id.image_sharing);
@@ -105,10 +105,11 @@ public class MyCapabilities extends Activity {
             // Set automata
             CheckBox automata = (CheckBox) findViewById(R.id.automata);
             automata.setChecked(capabilities.isAutomata());
+
         } catch (RcsServiceNotAvailableException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce, e);
+            Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce, e);
         } catch (RcsServiceException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce, e);
+            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
         }
     }
 

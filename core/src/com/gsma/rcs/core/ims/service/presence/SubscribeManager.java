@@ -49,49 +49,53 @@ public abstract class SubscribeManager extends PeriodicRefresher {
     /**
      * IMS module
      */
-    private ImsModule imsModule;
+    private ImsModule mImsModule;
 
     /**
      * Dialog path
      */
-    private SipDialogPath dialogPath = null;
+    private SipDialogPath mDialogPath;
 
     /**
      * Expire period
      */
-    private int expirePeriod;
+    private int mExpirePeriod;
 
     /**
      * Subscription flag
      */
-    private boolean subscribed = false;
+    private boolean mSubscribed = false;
 
     /**
      * Authentication agent
      */
-    private SessionAuthenticationAgent authenticationAgent;
+    private SessionAuthenticationAgent mAuthenticationAgent;
 
     /**
      * The logger
      */
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
+    private final RcsSettings mRcsSettings;
+
     /**
      * Constructor
      * 
      * @param parent IMS module
+     * @param rcsSettings
      */
-    public SubscribeManager(ImsModule parent) {
-        this.imsModule = parent;
-        authenticationAgent = new SessionAuthenticationAgent(imsModule);
+    public SubscribeManager(ImsModule parent, RcsSettings rcsSettings) {
+        mImsModule = parent;
+        mAuthenticationAgent = new SessionAuthenticationAgent(mImsModule);
+        mRcsSettings = rcsSettings;
 
-        int defaultExpirePeriod = RcsSettings.getInstance().getSubscribeExpirePeriod();
+        int defaultExpirePeriod = rcsSettings.getSubscribeExpirePeriod();
         int minExpireValue = RegistryFactory.getFactory().readInteger(REGISTRY_MIN_EXPIRE_PERIOD,
                 -1);
         if ((minExpireValue != -1) && (defaultExpirePeriod < minExpireValue)) {
-            this.expirePeriod = minExpireValue;
+            mExpirePeriod = minExpireValue;
         } else {
-            this.expirePeriod = defaultExpirePeriod;
+            mExpirePeriod = defaultExpirePeriod;
         }
     }
 
@@ -101,7 +105,7 @@ public abstract class SubscribeManager extends PeriodicRefresher {
      * @return IMS module
      */
     public ImsModule getImsModule() {
-        return imsModule;
+        return mImsModule;
     }
 
     /**
@@ -110,7 +114,7 @@ public abstract class SubscribeManager extends PeriodicRefresher {
      * @return Boolean
      */
     public boolean isSubscribed() {
-        return subscribed;
+        return mSubscribed;
     }
 
     /**
@@ -130,12 +134,12 @@ public abstract class SubscribeManager extends PeriodicRefresher {
     /**
      * Check if the received notification if for this subscriber
      * 
-     * @param SipRequest notify
+     * @param notify
      * @return Boolean
      */
     public boolean isNotifyForThisSubscriber(SipRequest notify) {
         boolean result = false;
-        if ((dialogPath != null) && notify.getCallId().equals(dialogPath.getCallId())) {
+        if ((mDialogPath != null) && notify.getCallId().equals(mDialogPath.getCallId())) {
             result = true;
         }
         return result;
@@ -145,7 +149,7 @@ public abstract class SubscribeManager extends PeriodicRefresher {
      * Subscription has been terminated by server
      */
     public void terminatedByServer() {
-        if (!subscribed) {
+        if (!mSubscribed) {
             // Already unsubscribed
             return;
         }
@@ -161,7 +165,7 @@ public abstract class SubscribeManager extends PeriodicRefresher {
         resetDialogPath();
 
         // Force subscription flag to false
-        subscribed = false;
+        mSubscribed = false;
     }
 
     /**
@@ -176,8 +180,8 @@ public abstract class SubscribeManager extends PeriodicRefresher {
         stopTimer();
 
         // Unsubscribe before to quit
-        if ((imsModule.getCurrentNetworkInterface() != null)
-                && imsModule.getCurrentNetworkInterface().isRegistered()) {
+        if ((mImsModule.getCurrentNetworkInterface() != null)
+                && mImsModule.getCurrentNetworkInterface().isRegistered()) {
             unSubscribe();
         }
 
@@ -222,9 +226,9 @@ public abstract class SubscribeManager extends PeriodicRefresher {
 
         try {
             // Create a dialog path if necessary
-            if (dialogPath == null) {
+            if (mDialogPath == null) {
                 // Set Call-Id
-                String callId = imsModule.getSipManager().getSipStack().generateCallId();
+                String callId = mImsModule.getSipManager().getSipStack().generateCallId();
 
                 // Set target
                 String target = getPresentity();
@@ -236,19 +240,20 @@ public abstract class SubscribeManager extends PeriodicRefresher {
                 String remoteParty = getPresentity();
 
                 // Set the route path
-                Vector<String> route = imsModule.getSipManager().getSipStack()
+                Vector<String> route = mImsModule.getSipManager().getSipStack()
                         .getServiceRoutePath();
 
                 // Create a dialog path
-                dialogPath = new SipDialogPath(imsModule.getSipManager().getSipStack(), callId, 1,
-                        target, localParty, remoteParty, route);
+                mDialogPath = new SipDialogPath(mImsModule.getSipManager().getSipStack(), callId,
+                        1,
+                        target, localParty, remoteParty, route, mRcsSettings);
             } else {
                 // Increment the Cseq number of the dialog path
-                dialogPath.incrementCseq();
+                mDialogPath.incrementCseq();
             }
 
             // Create a SUBSCRIBE request
-            SipRequest subscribe = createSubscribe(dialogPath, expirePeriod);
+            SipRequest subscribe = createSubscribe(mDialogPath, mExpirePeriod);
 
             // Send SUBSCRIBE request
             sendSubscribe(subscribe);
@@ -259,14 +264,14 @@ public abstract class SubscribeManager extends PeriodicRefresher {
             }
             handleError(new PresenceError(PresenceError.UNEXPECTED_EXCEPTION, e.getMessage()));
         }
-        return subscribed;
+        return mSubscribed;
     }
 
     /**
      * Unsubscribe
      */
     public synchronized void unSubscribe() {
-        if (!subscribed) {
+        if (!mSubscribed) {
             // Already unsubscribed
             return;
         }
@@ -281,10 +286,10 @@ public abstract class SubscribeManager extends PeriodicRefresher {
 
             // Increment the Cseq number of the dialog path
 
-            dialogPath.incrementCseq();
+            mDialogPath.incrementCseq();
 
             // Create a SUBSCRIBE with expire 0
-            SipRequest subscribe = createSubscribe(dialogPath, 0);
+            SipRequest subscribe = createSubscribe(mDialogPath, 0);
 
             // Send SUBSCRIBE request
             sendSubscribe(subscribe);
@@ -296,7 +301,7 @@ public abstract class SubscribeManager extends PeriodicRefresher {
         }
 
         // Force subscription flag to false
-        subscribed = false;
+        mSubscribed = false;
 
         // Reset dialog path attributes
         resetDialogPath();
@@ -306,7 +311,7 @@ public abstract class SubscribeManager extends PeriodicRefresher {
      * Reset the dialog path
      */
     private void resetDialogPath() {
-        dialogPath = null;
+        mDialogPath = null;
     }
 
     /**
@@ -320,7 +325,7 @@ public abstract class SubscribeManager extends PeriodicRefresher {
         if (expiresHeader != null) {
             int expires = expiresHeader.getExpires();
             if (expires != -1) {
-                expirePeriod = expires;
+                mExpirePeriod = expires;
             }
         }
     }
@@ -336,13 +341,13 @@ public abstract class SubscribeManager extends PeriodicRefresher {
             logger.info("Send SUBSCRIBE, expire=" + subscribe.getExpires());
         }
 
-        if (subscribed) {
+        if (mSubscribed) {
             // Set the Authorization header
-            authenticationAgent.setProxyAuthorizationHeader(subscribe);
+            mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
         }
 
         // Send SUBSCRIBE request
-        SipTransactionContext ctx = imsModule.getSipManager().sendSipMessageAndWait(subscribe);
+        SipTransactionContext ctx = mImsModule.getSipManager().sendSipMessageAndWait(subscribe);
 
         // Analyze the received response
         if (ctx.isSipResponse()) {
@@ -387,24 +392,24 @@ public abstract class SubscribeManager extends PeriodicRefresher {
         if (logger.isActivated()) {
             logger.info("200 OK response received");
         }
-        subscribed = true;
+        mSubscribed = true;
 
         SipResponse resp = ctx.getSipResponse();
 
         // Set the remote tag
-        dialogPath.setRemoteTag(resp.getToTag());
+        mDialogPath.setRemoteTag(resp.getToTag());
 
         // Set the target
-        dialogPath.setTarget(resp.getContactURI());
+        mDialogPath.setTarget(resp.getContactURI());
 
         // Set the Proxy-Authorization header
-        authenticationAgent.readProxyAuthenticateHeader(resp);
+        mAuthenticationAgent.readProxyAuthenticateHeader(resp);
 
         // Retrieve the expire value in the response
         retrieveExpirePeriod(resp);
 
         // Start the periodic subscribe
-        startTimer(expirePeriod, 0.5);
+        startTimer(mExpirePeriod, 0.5);
     }
 
     /**
@@ -434,20 +439,20 @@ public abstract class SubscribeManager extends PeriodicRefresher {
         SipResponse resp = ctx.getSipResponse();
 
         // Set the Proxy-Authorization header
-        authenticationAgent.readProxyAuthenticateHeader(resp);
+        mAuthenticationAgent.readProxyAuthenticateHeader(resp);
 
         // Increment the Cseq number of the dialog path
-        dialogPath.incrementCseq();
+        mDialogPath.incrementCseq();
 
         // Create a second SUBSCRIBE request with the right token
         if (logger.isActivated()) {
             logger.info("Send second SUBSCRIBE");
         }
-        SipRequest subscribe = createSubscribe(dialogPath, ctx.getTransaction().getRequest()
+        SipRequest subscribe = createSubscribe(mDialogPath, ctx.getTransaction().getRequest()
                 .getExpires().getExpires());
 
         // Set the Authorization header
-        authenticationAgent.setProxyAuthorizationHeader(subscribe);
+        mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
 
         // Send SUBSCRIBE request
         sendSubscribe(subscribe);
@@ -468,7 +473,7 @@ public abstract class SubscribeManager extends PeriodicRefresher {
         SipResponse resp = ctx.getSipResponse();
 
         // Increment the Cseq number of the dialog path
-        dialogPath.incrementCseq();
+        mDialogPath.incrementCseq();
 
         // Extract the Min-Expire value
         int minExpire = SipUtils.getMinExpiresPeriod(resp);
@@ -485,13 +490,13 @@ public abstract class SubscribeManager extends PeriodicRefresher {
         RegistryFactory.getFactory().writeInteger(REGISTRY_MIN_EXPIRE_PERIOD, minExpire);
 
         // Set the default expire value
-        expirePeriod = minExpire;
+        mExpirePeriod = minExpire;
 
         // Create a new SUBSCRIBE request with the right expire period
-        SipRequest subscribe = createSubscribe(dialogPath, expirePeriod);
+        SipRequest subscribe = createSubscribe(mDialogPath, mExpirePeriod);
 
         // Set the Authorization header
-        authenticationAgent.setProxyAuthorizationHeader(subscribe);
+        mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
 
         // Send SUBSCRIBE request
         sendSubscribe(subscribe);
@@ -508,7 +513,7 @@ public abstract class SubscribeManager extends PeriodicRefresher {
             logger.info("Subscribe has failed: " + error.getErrorCode() + ", reason="
                     + error.getMessage());
         }
-        subscribed = false;
+        mSubscribed = false;
 
         // Subscribe has failed, stop the periodic subscribe
         stopTimer();

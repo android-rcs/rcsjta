@@ -22,6 +22,11 @@
 
 package com.gsma.rcs.provisioning;
 
+import com.gsma.rcs.R;
+import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.LauncherUtils;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -32,11 +37,6 @@ import android.text.TextUtils;
 import android.text.util.Linkify;
 import android.widget.TextView;
 
-import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.service.LauncherUtils;
-import com.gsma.rcs.R;
-
 /**
  * Show the request for terms and conditions
  * 
@@ -45,81 +45,91 @@ import com.gsma.rcs.R;
 public class TermsAndConditionsRequest extends Activity {
 
     /**
-     * Intent keys
+     * Intent extra: message
      */
-    public static final String MESSAGE_KEY = "message";
-    public static final String TITLE_KEY = "title";
-    public static final String ACCEPT_BTN_KEY = "accept_btn";
-    public static final String REJECT_BTN_KEY = "reject_btn";
-
-    private LocalContentResolver mLocalContentResolver;
+    public static final String EXTRA_MESSAGE = "message";
+    /**
+     * Intent extra: title
+     */
+    public static final String EXTRA_TITLE = "title";
+    /**
+     * Intent extra: accept button
+     */
+    public static final String EXTRA_ACCEPT_BTN = "accept_btn";
+    /**
+     * Intent extra: reject button
+     */
+    public static final String EXTRA_REJECT_BTN = "reject_btn";
 
     @Override
     public void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);
         final Context ctx = getApplicationContext();
-        mLocalContentResolver = new LocalContentResolver(ctx.getContentResolver());
+        final LocalContentResolver localContentResolver = new LocalContentResolver(ctx);
+
+        final RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
+
         Intent intent = getIntent();
-        if (intent != null) {
-            String title = intent.getStringExtra(TITLE_KEY);
-            String message = intent.getStringExtra(MESSAGE_KEY);
-            boolean accept_btn = intent.getBooleanExtra(ACCEPT_BTN_KEY, false);
-            boolean reject_btn = intent.getBooleanExtra(REJECT_BTN_KEY, false);
-
-            if (!TextUtils.isEmpty(message)) {
-                // Add text
-                TextView textView = new TextView(this);
-                textView.setAutoLinkMask(Linkify.ALL);
-                textView.setText(message);
-                textView.setPadding(10, 10, 10, 10);
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle(title).setView(textView);
-
-                // If accept and reject is enabled, then create Alert dialog
-                // with two buttons else with neutral button
-                if (accept_btn && reject_btn) {
-                    builder.setPositiveButton(R.string.rcs_core_terms_accept,
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    // Set terms and conditions accepted
-                                    RcsSettings.createInstance(ctx);
-                                    RcsSettings.getInstance().setProvisioningTermsAccepted(true);
-                                    finish();
-                                }
-                            });
-
-                    builder.setNegativeButton(R.string.rcs_core_terms_decline,
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    // If the user declines the terms, the RCS service is stopped
-                                    // and the RCS config is reset
-                                    LauncherUtils.stopRcsService(ctx);
-                                    LauncherUtils.resetRcsConfig(ctx, mLocalContentResolver);
-                                    RcsSettings.getInstance().setProvisioningVersion("0");
-                                    finish();
-                                }
-                            });
-                } else {
-                    builder.setNeutralButton(R.string.rcs_core_terms_ok,
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    // Set terms and conditions accepted
-                                    RcsSettings.createInstance(getApplicationContext());
-                                    RcsSettings.getInstance().setProvisioningTermsAccepted(true);
-                                    finish();
-                                }
-                            });
-                }
-
-                AlertDialog alert = builder.create();
-                alert.setCanceledOnTouchOutside(false);
-                alert.setCancelable(false);
-                alert.show();
-            } else {
-                finish();
-            }
-        } else {
+        if (intent == null) {
             finish();
+            return;
         }
+        String message = intent.getStringExtra(EXTRA_MESSAGE);
+        if (TextUtils.isEmpty(message)) {
+            finish();
+            return;
+        }
+        String title = intent.getStringExtra(EXTRA_TITLE);
+        boolean accept_btn = intent.getBooleanExtra(EXTRA_ACCEPT_BTN, false);
+        boolean reject_btn = intent.getBooleanExtra(EXTRA_REJECT_BTN, false);
+
+        // Add text
+        TextView textView = new TextView(this);
+        textView.setAutoLinkMask(Linkify.ALL);
+        textView.setText(message);
+        textView.setPadding(10, 10, 10, 10);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title).setView(textView);
+
+        // If accept and reject is enabled, then create Alert dialog
+        // with two buttons else with neutral button
+        if (accept_btn && reject_btn) {
+            builder.setPositiveButton(R.string.rcs_core_terms_accept,
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Set terms and conditions accepted
+                            rcsSettings.setProvisioningTermsAccepted(true);
+                            LauncherUtils.launchRcsCoreService(ctx, rcsSettings);
+                            finish();
+                        }
+                    });
+
+            builder.setNegativeButton(R.string.rcs_core_terms_decline,
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // If the user declines the terms, the RCS service is stopped
+                            // and the RCS config is reset
+                            LauncherUtils.stopRcsService(ctx);
+                            LauncherUtils.resetRcsConfig(ctx, localContentResolver, rcsSettings);
+                            rcsSettings.setProvisioningVersion("0");
+                            finish();
+                        }
+                    });
+        } else {
+            builder.setNeutralButton(R.string.rcs_core_terms_ok,
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Set terms and conditions accepted
+                            rcsSettings.setProvisioningTermsAccepted(true);
+                            LauncherUtils.launchRcsCoreService(ctx, rcsSettings);
+                            finish();
+                        }
+                    });
+        }
+
+        AlertDialog alert = builder.create();
+        alert.setCanceledOnTouchOutside(false);
+        alert.setCancelable(false);
+        alert.show();
     }
 }

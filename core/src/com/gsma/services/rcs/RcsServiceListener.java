@@ -21,7 +21,7 @@ package com.gsma.services.rcs;
 import android.util.SparseArray;
 
 /**
- * Rcs service event listener
+ * RCS service event listener
  * 
  * @author Jean-Marc AUFFRET
  */
@@ -59,10 +59,21 @@ public interface RcsServiceListener {
             mValue = value;
         }
 
+        /**
+         * Gets integer value associated to ReasonCode instance
+         * 
+         * @return value
+         */
         public final int toInt() {
             return mValue;
         }
 
+        /**
+         * Returns a ReasonCode instance for the specified integer value.
+         * 
+         * @param value
+         * @return instance
+         */
         public final static ReasonCode valueOf(int value) {
             ReasonCode entry = mValueToEnum.get(value);
             if (entry != null) {
@@ -72,11 +83,12 @@ public interface RcsServiceListener {
                     .append(ReasonCode.class.getName()).append(".").append(value).append("!")
                     .toString());
         }
+
     }
 
     /**
      * Callback called when service is connected. This method is called when the service is well
-     * connected to the RCS service (binding procedure successfull): this means the methods of the
+     * connected to the RCS service (binding procedure successful): this means the methods of the
      * API may be used.
      */
     public void onServiceConnected();
@@ -85,7 +97,7 @@ public interface RcsServiceListener {
      * Callback called when service has been disconnected. This method is called when the service is
      * disconnected from the RCS service (e.g. service deactivated).
      * 
-     * @param ReasonCode reasonCode
+     * @param reasonCode
      * @see ReasonCode
      */
     public void onServiceDisconnected(ReasonCode reasonCode);

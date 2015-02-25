@@ -45,6 +45,7 @@ import com.gsma.rcs.core.ims.service.presence.pidf.PidfParser;
 import com.gsma.rcs.core.ims.service.presence.rlmi.ResourceInstance;
 import com.gsma.rcs.core.ims.service.presence.rlmi.RlmiDocument;
 import com.gsma.rcs.core.ims.service.presence.rlmi.RlmiParser;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
@@ -64,9 +65,10 @@ public class PresenceSubscribeManager extends SubscribeManager {
      * Constructor
      * 
      * @param parent IMS module
+     * @param rcsSettings
      */
-    public PresenceSubscribeManager(ImsModule parent) {
-        super(parent);
+    public PresenceSubscribeManager(ImsModule parent, RcsSettings rcsSettings) {
+        super(parent, rcsSettings);
     }
 
     /**

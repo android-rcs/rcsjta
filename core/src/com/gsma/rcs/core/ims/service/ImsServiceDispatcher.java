@@ -74,7 +74,7 @@ public class ImsServiceDispatcher extends Thread {
      */
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    private RcsSettings mRcsSettings;
+    private final RcsSettings mRcsSettings;
 
     /**
      * Constructor

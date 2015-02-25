@@ -76,12 +76,12 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     /**
      * Subject
      */
-    private String subject;
+    private String mSubject;
 
     /**
      * List of participants
      */
-    private Set<ParticipantInfo> participants = new HashSet<ParticipantInfo>();
+    private Set<ParticipantInfo> mParticipants = new HashSet<ParticipantInfo>();
 
     /**
      * MSRP manager
@@ -96,54 +96,52 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     /**
      * Chat activity manager
      */
-    private final ChatActivityManager mActivityMgr = new ChatActivityManager(this);
+    private final ChatActivityManager mActivityMgr;
 
     /**
      * Max number of participants in the session
      */
-    private int maxParticipants = RcsSettings.getInstance().getMaxChatParticipants();
+    private int mMaxParticipants;
 
     /**
      * Contribution ID
      */
-    private String contributionId;
+    private String mContributionId;
 
     /**
      * Feature tags
      */
-    private List<String> featureTags = new ArrayList<String>();
+    private List<String> mFeatureTags = new ArrayList<String>();
 
     /**
      * Feature tags
      */
-    private List<String> acceptContactTags = new ArrayList<String>();
+    private List<String> mAcceptContactTags = new ArrayList<String>();
 
     /**
      * Accept types
      */
-    private String acceptTypes;
+    private String mAcceptTypes;
 
     /**
      * Wrapped types
      */
-    private String wrappedTypes;
+    private String mWrappedTypes;
 
     /**
      * Geolocation push supported by remote
      */
-    private boolean geolocSupportedByRemote = false;
+    private boolean mGeolocSupportedByRemote = false;
 
     /**
      * File transfer supported by remote
      */
-    private boolean ftSupportedByRemote = false;
+    private boolean mFtSupportedByRemote = false;
 
     /**
      * The logger
      */
-    private static final Logger logger = Logger.getLogger(ChatSession.class.getSimpleName());
-
-    protected final RcsSettings mRcsSettings;
+    private static final Logger sLogger = Logger.getLogger(ChatSession.class.getSimpleName());
 
     private final MessagingLog mMessagingLog;
 
@@ -183,20 +181,22 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     public ChatSession(ImsService parent, ContactId contact, String remoteUri,
             Set<ParticipantInfo> participants, RcsSettings rcsSettings, MessagingLog messagingLog,
             ChatMessage firstMsg) {
-        super(parent, contact, remoteUri);
+        super(parent, contact, remoteUri, rcsSettings);
 
-        mRcsSettings = rcsSettings;
         mMessagingLog = messagingLog;
+        mMaxParticipants = rcsSettings.getMaxChatParticipants();
+        mActivityMgr = new ChatActivityManager(this, rcsSettings);
+
         // Set the session participants
-        this.participants = participants;
+        mParticipants = participants;
 
         // Create the MSRP manager
-        int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort();
+        int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(rcsSettings);
         String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface()
                 .getNetworkAccess().getIpAddress();
-        mMsrpMgr = new MsrpManager(localIpAddress, localMsrpPort, parent);
+        mMsrpMgr = new MsrpManager(localIpAddress, localMsrpPort, parent, rcsSettings);
         if (parent.getImsModule().isConnectedToWifiAccess()) {
-            mMsrpMgr.setSecured(RcsSettings.getInstance().isSecureMsrpOverWifi());
+            mMsrpMgr.setSecured(rcsSettings.isSecureMsrpOverWifi());
         }
         mFirstMsg = firstMsg;
     }
@@ -207,7 +207,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @return Feature tags
      */
     public String[] getFeatureTags() {
-        return featureTags.toArray(new String[featureTags.size()]);
+        return mFeatureTags.toArray(new String[mFeatureTags.size()]);
     }
 
     /**
@@ -216,7 +216,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @return Feature tags
      */
     public String[] getAcceptContactTags() {
-        return acceptContactTags.toArray(new String[acceptContactTags.size()]);
+        return mAcceptContactTags.toArray(new String[mAcceptContactTags.size()]);
     }
 
     /**
@@ -225,7 +225,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param tags Feature tags
      */
     public void setFeatureTags(List<String> tags) {
-        this.featureTags = tags;
+        this.mFeatureTags = tags;
     }
 
     /**
@@ -234,7 +234,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param tags Feature tags
      */
     public void setAcceptContactTags(List<String> tags) {
-        this.acceptContactTags = tags;
+        this.mAcceptContactTags = tags;
     }
 
     /**
@@ -243,7 +243,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @return Accept types
      */
     public String getAcceptTypes() {
-        return acceptTypes;
+        return mAcceptTypes;
     }
 
     /**
@@ -252,7 +252,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param types Accept types
      */
     public void setAcceptTypes(String types) {
-        this.acceptTypes = types;
+        this.mAcceptTypes = types;
     }
 
     /**
@@ -261,7 +261,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @return Wrapped types
      */
     public String getWrappedTypes() {
-        return wrappedTypes;
+        return mWrappedTypes;
     }
 
     /**
@@ -270,7 +270,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param types Wrapped types
      */
     public void setWrappedTypes(String types) {
-        this.wrappedTypes = types;
+        this.mWrappedTypes = types;
     }
 
     /**
@@ -279,7 +279,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @return String
      */
     public String getSubject() {
-        return subject;
+        return mSubject;
     }
 
     /**
@@ -288,7 +288,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param subject Subject
      */
     public void setSubject(String subject) {
-        this.subject = subject;
+        this.mSubject = subject;
     }
 
     /**
@@ -315,7 +315,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @return Contribution ID
      */
     public String getContributionID() {
-        return contributionId;
+        return mContributionId;
     }
 
     /**
@@ -324,7 +324,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param id Contribution ID
      */
     public void setContributionID(String id) {
-        this.contributionId = id;
+        this.mContributionId = id;
     }
 
     /**
@@ -333,7 +333,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @return List of participants
      */
     public Set<ParticipantInfo> getParticipants() {
-        return participants;
+        return mParticipants;
     }
 
     /**
@@ -371,7 +371,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @return Boolean
      */
     public boolean isGeolocSupportedByRemote() {
-        return geolocSupportedByRemote;
+        return mGeolocSupportedByRemote;
     }
 
     /**
@@ -380,7 +380,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param supported Supported
      */
     public void setGeolocSupportedByRemote(boolean supported) {
-        this.geolocSupportedByRemote = supported;
+        this.mGeolocSupportedByRemote = supported;
     }
 
     /**
@@ -389,7 +389,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @return Boolean
      */
     public boolean isFileTransferSupportedByRemote() {
-        return ftSupportedByRemote;
+        return mFtSupportedByRemote;
     }
 
     /**
@@ -398,13 +398,13 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param supported Supported
      */
     public void setFileTransferSupportedByRemote(boolean supported) {
-        this.ftSupportedByRemote = supported;
+        this.mFtSupportedByRemote = supported;
     }
 
     /**
      * Get first message.
      * 
-     * @param ChatMessage First chat message
+     * @return first message
      */
     public ChatMessage getFirstMessage() {
         return mFirstMsg;
@@ -416,8 +416,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     public void closeMsrpSession() {
         if (getMsrpMgr() != null) {
             getMsrpMgr().closeSession();
-            if (logger.isActivated()) {
-                logger.debug("MSRP session has been closed");
+            if (sLogger.isActivated()) {
+                sLogger.debug("MSRP session has been closed");
             }
         }
     }
@@ -433,8 +433,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         }
 
         // Error
-        if (logger.isActivated()) {
-            logger.info("Session error: " + error.getErrorCode() + ", reason=" + error.getMessage());
+        if (sLogger.isActivated()) {
+            sLogger.info("Session error: " + error.getErrorCode() + ", reason="
+                    + error.getMessage());
         }
 
         // Close media session
@@ -482,8 +483,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param msgId Message ID
      */
     public void msrpDataTransfered(String msgId) {
-        if (logger.isActivated()) {
-            logger.info("Data transfered");
+        if (sLogger.isActivated()) {
+            sLogger.info("Data transfered");
         }
 
         // Update the activity manager
@@ -498,8 +499,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param mimeType Data mime-type
      */
     public void msrpDataReceived(String msgId, byte[] data, String mimeType) {
-        if (logger.isActivated()) {
-            logger.info("Data received (type " + mimeType + ")");
+        if (sLogger.isActivated()) {
+            sLogger.info("Data received (type " + mimeType + ")");
         }
 
         // Update the activity manager
@@ -507,8 +508,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 
         if ((data == null) || (data.length == 0)) {
             // By-pass empty data
-            if (logger.isActivated()) {
-                logger.debug("By-pass received empty data");
+            if (sLogger.isActivated()) {
+                sLogger.debug("By-pass received empty data");
             }
             return;
         }
@@ -554,7 +555,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                         if (dispositionNotification != null
                                 && dispositionNotification.contains(ImdnDocument.DISPLAY)) {
                             // Check if respond to displayed delivery report is enabled
-                            if (RcsSettings.getInstance().isRespondToDisplayReports()) {
+                            if (mRcsSettings.isRespondToDisplayReports()) {
                                 imdnDisplayedRequested = true;
                             }
                         }
@@ -611,14 +612,14 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                     }
                 }
             } catch (Exception e) {
-                if (logger.isActivated()) {
-                    logger.error("Can't parse the CPIM message", e);
+                if (sLogger.isActivated()) {
+                    sLogger.error("Can't parse the CPIM message", e);
                 }
             }
         } else {
             // Not supported content
-            if (logger.isActivated()) {
-                logger.debug("Not supported content " + mimeType + " in chat session");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Not supported content " + mimeType + " in chat session");
             }
         }
     }
@@ -663,16 +664,16 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         if (isSessionInterrupted()) {
             return;
         }
-        if (logger.isActivated()) {
-            logger.info("Data transfer error " + error + " for message " + msgId
+        if (sLogger.isActivated()) {
+            sLogger.info("Data transfer error " + error + " for message " + msgId
                     + " (MSRP chunk type: " + typeMsrpChunk + ")");
         }
 
         // Changed by Deutsche Telekom
         // first: handle affected message
         if (TypeMsrpChunk.MessageDeliveredReport.equals(typeMsrpChunk)) {
-            if (logger.isActivated()) {
-                logger.info("Failed to send delivered message via MSRP, so try to send via SIP message to "
+            if (sLogger.isActivated()) {
+                sLogger.info("Failed to send delivered message via MSRP, so try to send via SIP message to "
                         + getRemoteContact() + ". (msgId = " + msgId + ")");
             }
 
@@ -680,8 +681,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             getImdnManager().sendMessageDeliveryStatus(getRemoteContact(), msgId,
                     ImdnDocument.DELIVERY_STATUS_DELIVERED);
         } else if (TypeMsrpChunk.MessageDisplayedReport.equals(typeMsrpChunk)) {
-            if (logger.isActivated()) {
-                logger.info("Failed to send displayed message via MSRP, so try to send via SIP message to "
+            if (sLogger.isActivated()) {
+                sLogger.info("Failed to send displayed message via MSRP, so try to send via SIP message to "
                         + getRemoteContact() + ". (msgId = " + msgId + ")");
             }
 
@@ -698,8 +699,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             }
         } else {
             // do nothing
-            if (logger.isActivated()) {
-                logger.debug("MSRP transfer error not handled!");
+            if (sLogger.isActivated()) {
+                sLogger.debug("MSRP transfer error not handled!");
             }
         }
 
@@ -754,8 +755,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         try {
             mMsrpMgr.sendEmptyChunk();
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Problem while sending empty data chunk", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Problem while sending empty data chunk", e);
             }
         }
     }
@@ -772,8 +773,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             FileTransferHttpInfoDocument fileTransferInfo, String msgId) {
         // Test if the contact is blocked
         if (ContactsManager.getInstance().isBlockedForContact(contact)) {
-            if (logger.isActivated()) {
-                logger.debug("Contact " + contact
+            if (sLogger.isActivated()) {
+                sLogger.debug("Contact " + contact
                         + " is blocked, automatically reject the HTTP File transfer");
             }
             // TODO : reject (SIP MESSAGE ?)
@@ -783,8 +784,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         // Auto reject if file too big
         long maxSize = mRcsSettings.getMaxFileTransferSize();
         if (maxSize > 0 && fileTransferInfo.getFileSize() > maxSize) {
-            if (logger.isActivated()) {
-                logger.debug("File is too big, reject the HTTP File transfer");
+            if (sLogger.isActivated()) {
+                sLogger.debug("File is too big, reject the HTTP File transfer");
             }
 
             // TODO : reject (SIP MESSAGE ?)
@@ -794,8 +795,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         // Auto reject if number max of FT reached
         if (!getImsService().getImsModule().getInstantMessagingService()
                 .isFileTransferSessionAvailable()) {
-            if (logger.isActivated()) {
-                logger.debug("Max number of File Tranfer reached, rejecting the HTTP File transfer");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Max number of File Tranfer reached, rejecting the HTTP File transfer");
             }
 
             // TODO : reject (SIP MESSAGE ?)
@@ -804,7 +805,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 
         // Create a new session
         FileSharingSession session = new TerminatingHttpFileSharingSession(getImsService(), this,
-                fileTransferInfo, msgId, contact, displayName);
+                fileTransferInfo, msgId, contact, displayName, mRcsSettings);
 
         getImsService().getImsModule().getCoreListener()
                 .handleFileTransferInvitation(session, isGroupChat(), contact, displayName);
@@ -830,8 +831,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             return true;
         } catch (Exception e) {
             // Error
-            if (logger.isActivated()) {
-                logger.error("Problem while sending data chunks", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Problem while sending data chunks", e);
             }
             return false;
         }
@@ -910,8 +911,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      */
     public void sendMsrpMessageDeliveryStatus(String fromUri, String toUri, String msgId,
             String status) {
-        if (logger.isActivated()) {
-            logger.debug("Send delivery status " + status + " for message " + msgId);
+        if (sLogger.isActivated()) {
+            sLogger.debug("Send delivery status " + status + " for message " + msgId);
         }
         // Send status in CPIM + IMDN headers
         String imdn = ChatUtils.buildDeliveryReport(msgId, status);
@@ -969,7 +970,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             if (isFileTransfer) {
                 if (isGroupChat()) {
                     ((InstantMessagingService) getImsService()).receiveGroupFileDeliveryStatus(
-                            contributionId, contact, imdn);
+                            mContributionId, contact, imdn);
                 } else {
                     ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(contact,
                             imdn);
@@ -981,8 +982,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                 }
             }
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't parse IMDN document", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't parse IMDN document", e);
             }
         }
     }
@@ -993,7 +994,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @return Integer
      */
     public int getMaxParticipants() {
-        return maxParticipants;
+        return mMaxParticipants;
     }
 
     /**
@@ -1002,7 +1003,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param maxParticipants Max number
      */
     public void setMaxParticipants(int maxParticipants) {
-        this.maxParticipants = maxParticipants;
+        mMaxParticipants = maxParticipants;
     }
 
     /**
@@ -1045,8 +1046,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * Chat inactivity event
      */
     public void handleChatInactivityEvent() {
-        if (logger.isActivated()) {
-            logger.debug("Chat inactivity event");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Chat inactivity event");
         }
 
         // Abort the session

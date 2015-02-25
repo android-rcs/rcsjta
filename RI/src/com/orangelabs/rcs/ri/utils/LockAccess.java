@@ -40,4 +40,13 @@ public class LockAccess {
     public boolean tryLock() {
         return locker.compareAndSet(false, true);
     }
+
+    /**
+     * Checks if access is locked
+     * 
+     * @return True if access is locked
+     */
+    public boolean isLocked() {
+        return locker.get();
+    }
 }

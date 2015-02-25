@@ -24,8 +24,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 
-import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -40,7 +40,7 @@ public abstract class MultimediaSessionList extends ListActivity {
     /**
      * API connection manager
      */
-    protected ApiConnectionManager mCnxManager;
+    protected ConnectionManager mCnxManager;
 
     /**
      * A locker to exit only once
@@ -56,7 +56,7 @@ public abstract class MultimediaSessionList extends ListActivity {
         setContentView(R.layout.extension_session_list);
 
         // Register to API connection manager
-        mCnxManager = ApiConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance(this);
         if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.MULTIMEDIA)) {
             Utils.showMessageAndExit(MultimediaSessionList.this,
                     getString(R.string.label_service_not_available), mExitOnce);
@@ -68,9 +68,10 @@ public abstract class MultimediaSessionList extends ListActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-        // Update the list of sessions
-        updateList();
+        if (!mExitOnce.isLocked()) {
+            // Update the list of sessions
+            updateList();
+        }
     }
 
     @Override

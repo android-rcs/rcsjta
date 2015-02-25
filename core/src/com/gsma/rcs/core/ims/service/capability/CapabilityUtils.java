@@ -18,13 +18,6 @@
 
 package com.gsma.rcs.core.ims.service.capability;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
-
-import android.text.TextUtils;
-
 import com.gsma.rcs.core.content.GeolocContent;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
@@ -41,6 +34,13 @@ import com.gsma.rcs.utils.MimeManager;
 import com.gsma.rcs.utils.NetworkUtils;
 import com.gsma.rcs.utils.StringUtils;
 
+import android.text.TextUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.Vector;
+
 /**
  * Capability utility functions
  * 
@@ -52,89 +52,90 @@ public class CapabilityUtils {
      * Get supported feature tags for capability exchange
      * 
      * @param richcall Rich call supported
+     * @param rcsSettings
      * @return List of tags
      */
-    public static String[] getSupportedFeatureTags(boolean richcall) {
+    public static String[] getSupportedFeatureTags(boolean richcall, RcsSettings rcsSettings) {
         List<String> tags = new ArrayList<String>();
         List<String> icsiTags = new ArrayList<String>();
         List<String> iariTags = new ArrayList<String>();
 
         // Video share support
-        if (RcsSettings.getInstance().isVideoSharingSupported() && richcall
+        if (rcsSettings.isVideoSharingSupported() && richcall
                 && (NetworkUtils.getNetworkAccessType() >= NetworkUtils.NETWORK_ACCESS_3G)) {
             tags.add(FeatureTags.FEATURE_3GPP_VIDEO_SHARE);
         }
 
         // Chat support
-        if (RcsSettings.getInstance().isImSessionSupported()) {
+        if (rcsSettings.isImSessionSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_CHAT);
         }
 
         // FT support
-        if (RcsSettings.getInstance().isFileTransferSupported()) {
+        if (rcsSettings.isFileTransferSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_FT);
         }
 
         // FT over HTTP support
-        if (RcsSettings.getInstance().isFileTransferHttpSupported()) {
+        if (rcsSettings.isFileTransferHttpSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_FT_HTTP);
         }
 
         // Image share support
-        if (RcsSettings.getInstance().isImageSharingSupported() && richcall) {
+        if (rcsSettings.isImageSharingSupported() && richcall) {
             iariTags.add(FeatureTags.FEATURE_RCSE_IMAGE_SHARE);
         }
 
         // Presence discovery support
-        if (RcsSettings.getInstance().isPresenceDiscoverySupported()) {
+        if (rcsSettings.isPresenceDiscoverySupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_PRESENCE_DISCOVERY);
         }
 
         // Social presence support
-        if (RcsSettings.getInstance().isSocialPresenceSupported()) {
+        if (rcsSettings.isSocialPresenceSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_SOCIAL_PRESENCE);
         }
 
         // Geolocation push support
-        if (RcsSettings.getInstance().isGeoLocationPushSupported()) {
+        if (rcsSettings.isGeoLocationPushSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH);
         }
 
         // FT thumbnail support
-        if (RcsSettings.getInstance().isFileTransferThumbnailSupported()) {
+        if (rcsSettings.isFileTransferThumbnailSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_FT_THUMBNAIL);
         }
 
         // FT S&F support
-        if (RcsSettings.getInstance().isFileTransferStoreForwardSupported()) {
+        if (rcsSettings.isFileTransferStoreForwardSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_FT_SF);
         }
 
         // Group chat S&F support
-        if (RcsSettings.getInstance().isGroupChatStoreForwardSupported()) {
+        if (rcsSettings.isGroupChatStoreForwardSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_GC_SF);
         }
 
         // IP call support
-        if (RcsSettings.getInstance().isIPVoiceCallSupported()) {
+        if (rcsSettings.isIPVoiceCallSupported()) {
             tags.add(FeatureTags.FEATURE_RCSE_IP_VOICE_CALL);
         }
-        if (RcsSettings.getInstance().isIPVideoCallSupported()) {
+        if (rcsSettings.isIPVideoCallSupported()) {
             tags.add(FeatureTags.FEATURE_RCSE_IP_VIDEO_CALL);
         }
-        if (RcsSettings.getInstance().isIPVoiceCallSupported()
-                || RcsSettings.getInstance().isIPVideoCallSupported()) {
+        if (rcsSettings.isIPVoiceCallSupported()
+                || rcsSettings.isIPVideoCallSupported()) {
             icsiTags.add(FeatureTags.FEATURE_3GPP_IP_VOICE_CALL);
         }
 
         // Automata flag
-        if (RcsSettings.getInstance().isSipAutomata()) {
+        if (rcsSettings.isSipAutomata()) {
             tags.add(FeatureTags.FEATURE_SIP_AUTOMATA);
         }
 
         // Extensions
-        if (RcsSettings.getInstance().isExtensionsAllowed()) {
-            for (String extension : RcsSettings.getInstance().getSupportedRcsExtensions()) {
+        if (rcsSettings.isExtensionsAllowed()) {
+            for (String extension : rcsSettings.getSupportedRcsExtensions()) {
                 StringBuilder sb = new StringBuilder(FeatureTags.FEATURE_RCSE_EXTENSION)
                         .append(".").append(extension);
                 iariTags.add(sb.toString());
@@ -159,12 +160,13 @@ public class CapabilityUtils {
      * Extract features tags
      * 
      * @param msg Message
+     * @param rcsSettings
      * @return Capabilities
      */
-    public static Capabilities extractCapabilities(SipMessage msg) {
+    public static Capabilities extractCapabilities(SipMessage msg, RcsSettings rcsSettings) {
 
         // Analyze feature tags
-        Capabilities capabilities = new Capabilities();
+        Capabilities capabilities = new Capabilities(rcsSettings);
         ArrayList<String> tags = msg.getFeatureTags();
         boolean ipCall_RCSE = false;
         boolean ipCall_3GPP = false;
@@ -300,15 +302,16 @@ public class CapabilityUtils {
      * 
      * @param ipAddress Local IP address
      * @param richcall Rich call supported
+     * @param rcsSettings
      * @return SDP
      */
-    public static String buildSdp(String ipAddress, boolean richcall) {
+    public static String buildSdp(String ipAddress, boolean richcall, RcsSettings rcsSettings) {
         String sdp = null;
         if (richcall) {
-            boolean video = RcsSettings.getInstance().isVideoSharingSupported()
+            boolean video = rcsSettings.isVideoSharingSupported()
                     && NetworkUtils.getNetworkAccessType() >= NetworkUtils.NETWORK_ACCESS_3G;
-            boolean image = RcsSettings.getInstance().isImageSharingSupported();
-            boolean geoloc = RcsSettings.getInstance().isGeoLocationPushSupported();
+            boolean image = rcsSettings.isImageSharingSupported();
+            boolean geoloc = rcsSettings.isGeoLocationPushSupported();
             if (video | image) {
                 // Changed by Deutsche Telekom
                 String mimeTypes = null;
@@ -354,7 +357,7 @@ public class CapabilityUtils {
                     mimeTypes = supportedTransferFormats.toString().trim();
                     protocol = SdpUtils.MSRP_PROTOCOL;
                     selector = "";
-                    maxSize = ImageTransferSession.getMaxImageSharingSize();
+                    maxSize = ImageTransferSession.getMaxImageSharingSize(rcsSettings);
                 }
 
                 // Changed by Deutsche Telekom

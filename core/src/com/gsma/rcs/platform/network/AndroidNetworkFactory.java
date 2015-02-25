@@ -25,6 +25,7 @@ import java.net.NetworkInterface;
 import java.util.Enumeration;
 
 import com.gsma.rcs.core.ims.network.ImsNetworkInterface.DnsResolvedFields;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.IpAddressUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -42,6 +43,18 @@ public class AndroidNetworkFactory extends NetworkFactory {
      */
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
+    private final RcsSettings mRcsSettings;
+
+    /**
+     * Constructor
+     * 
+     * @param rcsSettings
+     */
+    public AndroidNetworkFactory(RcsSettings rcsSettings) {
+        super();
+        mRcsSettings = rcsSettings;
+    }
+
     /**
      * Returns the local IP address of a given network interface
      * 
@@ -56,7 +69,7 @@ public class AndroidNetworkFactory extends NetworkFactory {
         String ipAddress = null;
         try {
             // What kind of remote address (P-CSCF) are we trying to reach?
-            boolean isIpv4 = dnsEntry != null ? InetAddressUtils.isIPv4Address(dnsEntry.ipAddress)
+            boolean isIpv4 = dnsEntry != null ? InetAddressUtils.isIPv4Address(dnsEntry.mIpAddress)
                     : true;
 
             // check all available interfaces
@@ -124,7 +137,7 @@ public class AndroidNetworkFactory extends NetworkFactory {
      * @return Socket connection
      */
     public SocketConnection createSecureSocketClientConnection() {
-        return new AndroidSecureSocketConnection();
+        return new AndroidSecureSocketConnection(mRcsSettings);
     }
 
     // Changed by Deutsche Telekom
@@ -135,7 +148,7 @@ public class AndroidNetworkFactory extends NetworkFactory {
      * @return Socket connection
      */
     public SocketConnection createSimpleSecureSocketClientConnection(String fingerprint) {
-        return new AndroidSecureSocketConnection(fingerprint);
+        return new AndroidSecureSocketConnection(fingerprint, mRcsSettings);
     }
 
     /**

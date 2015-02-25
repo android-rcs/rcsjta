@@ -22,18 +22,24 @@ import android.app.ListActivity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.gsma.services.rcs.RcsServiceControl;
+import com.gsma.services.rcs.RcsServiceException;
 import com.orangelabs.rcs.ri.capabilities.TestCapabilitiesApi;
 import com.orangelabs.rcs.ri.contacts.TestContactsApi;
 import com.orangelabs.rcs.ri.extension.TestMultimediaSessionApi;
-import com.orangelabs.rcs.ri.intents.TestIntentsApi;
+import com.orangelabs.rcs.ri.intents.TestIntentApps;
 import com.orangelabs.rcs.ri.messaging.TestMessagingApi;
+import com.orangelabs.rcs.ri.service.ServiceActivation;
 import com.orangelabs.rcs.ri.service.TestServiceApi;
 import com.orangelabs.rcs.ri.sharing.TestSharingApi;
 import com.orangelabs.rcs.ri.upload.InitiateFileUpload;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
 
 /**
  * RI application
@@ -41,6 +47,17 @@ import com.orangelabs.rcs.ri.upload.InitiateFileUpload;
  * @author Jean-Marc AUFFRET
  */
 public class RI extends ListActivity {
+
+    /**
+     * A locker to exit only once
+     */
+    protected LockAccess mExitOnce = new LockAccess();
+
+    /**
+     * The log tag for this class
+     */
+    private static final String LOGTAG = LogUtils.getTag(RI.class.getSimpleName());
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,15 +67,43 @@ public class RI extends ListActivity {
 
         // Set items
         String[] items = {
-                getString(R.string.menu_contacts), getString(R.string.menu_capabilities),
-                getString(R.string.menu_messaging), getString(R.string.menu_sharing),
-                getString(R.string.menu_mm_session), getString(R.string.menu_intents),
-                getString(R.string.menu_service), getString(R.string.menu_upload),
+                getString(R.string.menu_contacts),
+                getString(R.string.menu_capabilities),
+                getString(R.string.menu_messaging),
+                getString(R.string.menu_sharing),
+                getString(R.string.menu_mm_session),
+                getString(R.string.menu_intents),
+                getString(R.string.menu_service),
+                getString(R.string.menu_upload),
                 getString(R.string.menu_about)
         };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
         // Create the API connection manager
-        ApiConnectionManager.getInstance(this);
+        ConnectionManager.getInstance(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Check if RCS stack is installed
+        RcsServiceControl rcsServiceControl = RcsServiceControl.getInstance(this);
+
+        // Check if RCS stack is activated
+        boolean stackActivated = false;
+        try {
+            stackActivated = rcsServiceControl.isActivated();
+        } catch (RcsServiceException e) {
+            if (LogUtils.isActive) {
+                Log.e(LOGTAG, "RCS stack is not available", e);
+            }
+        }
+
+        if (!rcsServiceControl.isAvailable() || !stackActivated) {
+            if (LogUtils.isActive) {
+                Log.d(LOGTAG, "RCS stack is not available or deactivated");
+            }
+            startActivity(new Intent(this, ServiceActivation.class));
+        }
     }
 
     @Override
@@ -85,7 +130,7 @@ public class RI extends ListActivity {
                 break;
 
             case 5:
-                startActivity(new Intent(this, TestIntentsApi.class));
+                startActivity(new Intent(this, TestIntentApps.class));
                 break;
 
             case 6:

@@ -39,6 +39,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.MessagingLog;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -74,23 +75,24 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
      * @param parent IMS service
      * @param content Content of file to share
      * @param contact Remote contact identifier
-     * @param fileIconContent Content of fileicon
+     * @param fileIcon Content of fileicon
      * @param tId TID of the upload
      * @param core Core
      * @param messagingLog MessagingLog
+     * @param rcsSettings
      */
     public OriginatingHttpFileSharingSession(String fileTransferId, ImsService parent,
             MmContent content, ContactId contact, MmContent fileIcon, String tId, Core core,
-            MessagingLog messagingLog) {
+            MessagingLog messagingLog, RcsSettings rcsSettings) {
         super(parent, content, contact, PhoneUtils.formatContactIdToUri(contact), fileIcon, null,
-                null, fileTransferId);
+                null, fileTransferId, rcsSettings);
         mCore = core;
         mMessagingLog = messagingLog;
         if (logger.isActivated()) {
             logger.debug("OriginatingHttpFileSharingSession contact=" + contact);
         }
 
-        uploadManager = new HttpUploadManager(getContent(), fileIcon, this, tId);
+        uploadManager = new HttpUploadManager(getContent(), fileIcon, this, tId, rcsSettings);
     }
 
     /**
@@ -245,6 +247,11 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
         mMessagingLog.setFileUploadTId(getFileTransferId(), uploadManager.getTId());
     }
 
+    /**
+     * Gets upload manager
+     * 
+     * @return upload manager
+     */
     public HttpUploadManager getUploadManager() {
         return uploadManager;
     }

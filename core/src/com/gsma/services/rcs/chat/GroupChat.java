@@ -92,10 +92,21 @@ public class GroupChat {
             mValue = value;
         }
 
+        /**
+         * Gets integer value associated to State instance
+         * 
+         * @return value
+         */
         public final int toInt() {
             return mValue;
         }
 
+        /**
+         * Returns a State instance for the specified integer value.
+         * 
+         * @param value
+         * @return instance
+         */
         public final static State valueOf(int value) {
             State entry = mValueToEnum.get(value);
             if (entry != null) {
@@ -174,10 +185,21 @@ public class GroupChat {
             mValue = value;
         }
 
+        /**
+         * Gets integer value associated to ReasonCode instance
+         * 
+         * @return value
+         */
         public final int toInt() {
             return mValue;
         }
 
+        /**
+         * Returns a ReasonCode instance for the specified integer value.
+         * 
+         * @param value
+         * @return instance
+         */
         public final static ReasonCode valueOf(int value) {
             ReasonCode entry = mValueToEnum.get(value);
             if (entry != null) {
@@ -384,7 +406,7 @@ public class GroupChat {
      * Returns true if it is possible to invite the specified participant to the group chat right
      * now, else returns false.
      * 
-     * @param ContactId participant
+     * @param participant
      * @return boolean
      * @throws RcsServiceException
      */

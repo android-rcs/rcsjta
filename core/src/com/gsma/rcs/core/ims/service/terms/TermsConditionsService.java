@@ -162,7 +162,7 @@ public class TermsConditionsService extends ImsService {
                 // Parse terms request
                 InputSource input = new InputSource(new ByteArrayInputStream(
                         message.getContentBytes()));
-                TermsRequestParser parser = new TermsRequestParser(input, lang);
+                TermsRequestParser parser = new TermsRequestParser(input, lang, mRcsSettings);
 
                 // Notify listener
                 getImsModule()
@@ -297,7 +297,7 @@ public class TermsConditionsService extends ImsService {
             SipDialogPath dialogPath = new SipDialogPath(getImsModule().getSipManager()
                     .getSipStack(), getImsModule().getSipManager().getSipStack().generateCallId(),
                     1, remote, ImsModule.IMS_USER_PROFILE.getPublicUri(), remote, getImsModule()
-                            .getSipManager().getSipStack().getServiceRoutePath());
+                            .getSipManager().getSipStack().getServiceRoutePath(), mRcsSettings);
 
             // Create MESSAGE request
             if (logger.isActivated()) {

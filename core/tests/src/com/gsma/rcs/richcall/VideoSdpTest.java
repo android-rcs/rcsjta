@@ -33,68 +33,98 @@ import com.gsma.rcs.core.ims.service.richcall.video.VideoCodecManager;
 import com.gsma.rcs.core.ims.service.richcall.video.VideoSdpBuilder;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.services.rcs.sharing.video.VideoCodec;
+import com.gsma.rcs.provider.LocalContentResolver;
 
 public class VideoSdpTest extends AndroidTestCase {
     private static int RTP_PORT = 12345;
 
     // @formatter:off
-    private static String videoSdp = "v=tester" + SipUtils.CRLF
-            + "m=video 12345 RTP/AVP 99 98 97 96" + SipUtils.CRLF + "a=framerate:15"
-            + SipUtils.CRLF + "a=rtpmap:99 H264/90000" + SipUtils.CRLF + "a=framesize:99 352-288"
-            + SipUtils.CRLF + "a=fmtp:99 profile-level-id=42800c;packetization-mode=1"
-            + SipUtils.CRLF + "a=rtpmap:98 H264/90000" + SipUtils.CRLF + "a=framesize:98 352-288"
-            + SipUtils.CRLF + "a=fmtp:98 profile-level-id=42800c;packetization-mode=1"
-            + SipUtils.CRLF + "a=rtpmap:97 H264/90000" + SipUtils.CRLF + "a=framesize:97 320-240"
-            + SipUtils.CRLF + "a=fmtp:97 profile-level-id=42800c;packetization-mode=1"
-            + SipUtils.CRLF + "a=rtpmap:96 H264/90000" + SipUtils.CRLF + "a=framesize:96 176-144"
-            + SipUtils.CRLF + "a=fmtp:96 profile-level-id=42900b;packetization-mode=1"
-            + SipUtils.CRLF;
-
-    private static String videoSdp2 = "v=tester" + SipUtils.CRLF
-            + "m=video 12345 RTP/AVP 99 98 97 96" + SipUtils.CRLF + "b=AS:128" + SipUtils.CRLF
-            + "b=RS:256" + SipUtils.CRLF + "b=RR:1024" + SipUtils.CRLF + "a=rtpmap:99 H264/90000"
-            + SipUtils.CRLF + "a=framesize:99 352-288" + SipUtils.CRLF + "a=framerate:99 15"
-            + SipUtils.CRLF + "a=fmtp:99 profile-level-id=42800c;packetization-mode=1"
-            + SipUtils.CRLF + "a=rtpmap:98 H264/90000" + SipUtils.CRLF + "a=framesize:98 352-288"
-            + SipUtils.CRLF + "a=framerate:98 12" + SipUtils.CRLF
-            + "a=fmtp:98 profile-level-id=42800c;packetization-mode=1" + SipUtils.CRLF
-            + "a=rtpmap:97 H264/90000" + SipUtils.CRLF + "a=framesize:97 320-240" + SipUtils.CRLF
-            + "a=framerate:97 12" + SipUtils.CRLF
-            + "a=fmtp:97 profile-level-id=42800c;packetization-mode=1" + SipUtils.CRLF
-            + "a=rtpmap:96 H264/90000" + SipUtils.CRLF + "a=framesize:96 176-144" + SipUtils.CRLF
-            + "a=framerate:96 10" + SipUtils.CRLF
-            + "a=fmtp:96 profile-level-id=42900b;packetization-mode=1" + SipUtils.CRLF;
-
+    private static String videoSdp =
+            "v=tester" + SipUtils.CRLF +
+                    "m=video 12345 RTP/AVP 99 98 97 96" + SipUtils.CRLF +
+                    "a=framerate:15" + SipUtils.CRLF +
+                    "a=rtpmap:99 H264/90000" + SipUtils.CRLF +
+                    "a=framesize:99 352-288" + SipUtils.CRLF +
+                    "a=fmtp:99 profile-level-id=42800c;packetization-mode=1" + SipUtils.CRLF +
+                    "a=rtpmap:98 H264/90000" + SipUtils.CRLF +
+                    "a=framesize:98 352-288" + SipUtils.CRLF +
+                    "a=fmtp:98 profile-level-id=42800c;packetization-mode=1" + SipUtils.CRLF +
+                    "a=rtpmap:97 H264/90000" + SipUtils.CRLF +
+                    "a=framesize:97 320-240" + SipUtils.CRLF +
+                    "a=fmtp:97 profile-level-id=42800c;packetization-mode=1" + SipUtils.CRLF +
+                    "a=rtpmap:96 H264/90000" + SipUtils.CRLF +
+                    "a=framesize:96 176-144" + SipUtils.CRLF +
+                    "a=fmtp:96 profile-level-id=42900b;packetization-mode=1" + SipUtils.CRLF;
+    private static String videoSdp2 =
+            "v=tester" + SipUtils.CRLF +
+                    "m=video 12345 RTP/AVP 99 98 97 96" + SipUtils.CRLF +
+                    "b=AS:128" + SipUtils.CRLF +
+                    "b=RS:256" + SipUtils.CRLF +
+                    "b=RR:1024" + SipUtils.CRLF +
+                    "a=rtpmap:99 H264/90000" + SipUtils.CRLF +
+                    "a=framesize:99 352-288" + SipUtils.CRLF +
+                    "a=framerate:99 15" + SipUtils.CRLF +
+                    "a=fmtp:99 profile-level-id=42800c;packetization-mode=1" + SipUtils.CRLF +
+                    "a=rtpmap:98 H264/90000" + SipUtils.CRLF +
+                    "a=framesize:98 352-288" + SipUtils.CRLF +
+                    "a=framerate:98 12" + SipUtils.CRLF +
+                    "a=fmtp:98 profile-level-id=42800c;packetization-mode=1" + SipUtils.CRLF +
+                    "a=rtpmap:97 H264/90000" + SipUtils.CRLF +
+                    "a=framesize:97 320-240" + SipUtils.CRLF +
+                    "a=framerate:97 12" + SipUtils.CRLF +
+                    "a=fmtp:97 profile-level-id=42800c;packetization-mode=1" + SipUtils.CRLF +
+                    "a=rtpmap:96 H264/90000" + SipUtils.CRLF +
+                    "a=framesize:96 176-144" + SipUtils.CRLF +
+                    "a=framerate:96 10" + SipUtils.CRLF +
+                    "a=fmtp:96 profile-level-id=42900b;packetization-mode=1" + SipUtils.CRLF;
     // @formatter:on
     private VideoCodec[] codecs;
 
     protected void setUp() throws Exception {
         super.setUp();
-
-        RcsSettings.createInstance(getContext());
+        LocalContentResolver localContentResolver = new LocalContentResolver(getContext());
+        RcsSettings.createInstance(localContentResolver);
 
         // @formatter:off
         // Create list of codecs
         codecs = new VideoCodec[4];
         int payload_count = 95;
-        codecs[3] = new VideoCodec(H264Config.CODEC_NAME, ++payload_count, H264Config.CLOCK_RATE,
-                10, 96000, H264Config.QCIF_WIDTH, H264Config.QCIF_HEIGHT,
+        codecs[3] = new VideoCodec(H264Config.CODEC_NAME,
+                ++payload_count,
+                H264Config.CLOCK_RATE,
+                10,
+                96000,
+                H264Config.QCIF_WIDTH,
+                H264Config.QCIF_HEIGHT,
                 H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1b.BASELINE_PROFILE_ID + ";"
                         + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=1");
-        codecs[2] = new VideoCodec(H264Config.CODEC_NAME, ++payload_count, H264Config.CLOCK_RATE,
-                12, 256, H264Config.QVGA_WIDTH, H264Config.QVGA_HEIGHT,
-                // H264Config.CODEC_PARAM_PROFILEID + "=" +
-                // H264Profile1_2.BASELINE_PROFILE_ID + ";"
-                // + H264Config.CODEC_PARAM_PACKETIZATIONMODE +
-                // "=1").getMediaCodec();
+        codecs[2] = new VideoCodec(H264Config.CODEC_NAME,
+                ++payload_count,
+                H264Config.CLOCK_RATE,
+                12,
+                256,
+                H264Config.QVGA_WIDTH,
+                H264Config.QVGA_HEIGHT,
+                // H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1_2.BASELINE_PROFILE_ID + ";"
+                // + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=1").getMediaCodec();
                 H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1_2.BASELINE_PROFILE_ID + ";"
                         + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=1");
-        codecs[1] = new VideoCodec(H264Config.CODEC_NAME, ++payload_count, H264Config.CLOCK_RATE,
-                12, 256, H264Config.CIF_WIDTH, H264Config.CIF_HEIGHT,
+        codecs[1] = new VideoCodec(H264Config.CODEC_NAME,
+                ++payload_count,
+                H264Config.CLOCK_RATE,
+                12,
+                256,
+                H264Config.CIF_WIDTH,
+                H264Config.CIF_HEIGHT,
                 H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1_2.BASELINE_PROFILE_ID + ";"
                         + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=1");
-        codecs[0] = new VideoCodec(H264Config.CODEC_NAME, ++payload_count, H264Config.CLOCK_RATE,
-                15, 396, H264Config.CIF_WIDTH, H264Config.CIF_HEIGHT,
+        codecs[0] = new VideoCodec(H264Config.CODEC_NAME,
+                ++payload_count,
+                H264Config.CLOCK_RATE,
+                15,
+                396,
+                H264Config.CIF_WIDTH,
+                H264Config.CIF_HEIGHT,
                 H264Config.CODEC_PARAM_PROFILEID + "=" + H264Profile1_2.BASELINE_PROFILE_ID + ";"
                         + H264Config.CODEC_PARAM_PACKETIZATIONMODE + "=1");
         // @formatter:on

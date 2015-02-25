@@ -54,9 +54,11 @@ public class MessageLog implements IMessageLog {
 
     private LocalContentResolver mLocalContentResolver;
 
-    private GroupChatLog groupChatLog;
+    private GroupChatLog mGroupChatLog;
 
-    private GroupDeliveryInfoLog groupChatDeliveryInfoLog;
+    private GroupDeliveryInfoLog mGroupChatDeliveryInfoLog;
+
+    private final RcsSettings mRcsSettings;
     /**
      * The logger
      */
@@ -70,25 +72,29 @@ public class MessageLog implements IMessageLog {
 
     /**
      * Constructor
-     * 
+     *
      * @param localContentResolver Local content resolver
      * @param groupChatLog
      * @param groupChatDeliveryInfoLog
+     * @param rcsSettings
      */
     /* package private */MessageLog(LocalContentResolver localContentResolver,
-            GroupChatLog groupChatLog, GroupDeliveryInfoLog groupChatDeliveryInfoLog) {
+            GroupChatLog groupChatLog,
+            GroupDeliveryInfoLog groupChatDeliveryInfoLog, RcsSettings rcsSettings) {
         mLocalContentResolver = localContentResolver;
-        this.groupChatLog = groupChatLog;
-        this.groupChatDeliveryInfoLog = groupChatDeliveryInfoLog;
+        mGroupChatLog = groupChatLog;
+        mGroupChatDeliveryInfoLog = groupChatDeliveryInfoLog;
+        mRcsSettings = rcsSettings;
     }
 
     private void addIncomingOneToOneMessage(ChatMessage msg, Status status, ReasonCode reasonCode) {
         ContactId contact = msg.getRemoteContact();
         String msgId = msg.getMessageId();
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Add incoming chat message: contact=").append(contact)
-                    .append(", msg=").append(msgId).append(", status=").append(status)
-                    .append(", reasonCode=").append(reasonCode).append(".").toString());
+            logger.debug(new StringBuilder("Add incoming chat message: contact=")
+                    .append(contact).append(", msg=").append(msgId).append(", status=")
+                    .append(status).append(", reasonCode=").append(reasonCode).append(".")
+                    .toString());
         }
 
         ContentValues values = new ContentValues();
@@ -113,7 +119,7 @@ public class MessageLog implements IMessageLog {
 
     /**
      * Add outgoing one-to-one chat message
-     * 
+     *
      * @param msg Chat message
      * @param status Status
      * @param reasonCode Reason code
@@ -123,9 +129,10 @@ public class MessageLog implements IMessageLog {
         ContactId contact = msg.getRemoteContact();
         String msgId = msg.getMessageId();
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Add outgoing chat message: contact=").append(contact)
-                    .append(", msg=").append(msgId).append(", status=").append(status)
-                    .append(", reasonCode=").append(reasonCode).append(".").toString());
+            logger.debug(new StringBuilder("Add outgoing chat message: contact=")
+                    .append(contact).append(", msg=").append(msgId).append(", status=")
+                    .append(status).append(", reasonCode=").append(reasonCode).append(".")
+                    .toString());
         }
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_CHAT_ID, contact.toString());
@@ -135,7 +142,8 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD.toInt());
         String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
         values.put(MessageData.KEY_MIME_TYPE, apiMimeType);
-        values.put(MessageData.KEY_CONTENT, ChatUtils.networkContentToPersistedContent(msg));
+        values.put(MessageData.KEY_CONTENT,
+                ChatUtils.networkContentToPersistedContent(msg));
 
         values.put(MessageData.KEY_TIMESTAMP, msg.getDate().getTime());
         values.put(MessageData.KEY_TIMESTAMP_SENT, msg.getDate().getTime());
@@ -154,7 +162,7 @@ public class MessageLog implements IMessageLog {
 
     /**
      * Add incoming one-to-one chat message
-     * 
+     *
      * @param msg Chat message
      * @param imdnDisplayedRequested Indicates whether IMDN display was requested
      */
@@ -170,10 +178,10 @@ public class MessageLog implements IMessageLog {
 
     /**
      * Add group chat message
-     * 
+     *
      * @param chatId Chat ID
      * @param msg Chat message
-     * @param msg direction Direction
+     * @param direction Direction
      * @param status Status
      * @param reasonCode Reason code
      */
@@ -200,7 +208,8 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_REASON_CODE, reasonCode.toInt());
         String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
         values.put(MessageData.KEY_MIME_TYPE, apiMimeType);
-        values.put(MessageData.KEY_CONTENT, ChatUtils.networkContentToPersistedContent(msg));
+        values.put(MessageData.KEY_CONTENT,
+                ChatUtils.networkContentToPersistedContent(msg));
 
         if (direction == Direction.INCOMING) {
             // Receive message
@@ -220,13 +229,13 @@ public class MessageLog implements IMessageLog {
         if (direction == Direction.OUTGOING) {
             try {
                 GroupDeliveryInfo.Status deliveryStatus = GroupDeliveryInfo.Status.NOT_DELIVERED;
-                if (RcsSettings.getInstance().isAlbatrosRelease()) {
+                if (mRcsSettings.isAlbatrosRelease()) {
                     deliveryStatus = GroupDeliveryInfo.Status.UNSUPPORTED;
                 }
-                Set<ParticipantInfo> participants = groupChatLog
+                Set<ParticipantInfo> participants = mGroupChatLog
                         .getGroupChatConnectedParticipants(chatId);
                 for (ParticipantInfo participant : participants) {
-                    groupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId,
+                    mGroupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId,
                             participant.getContact(), msgId, deliveryStatus,
                             GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
                 }

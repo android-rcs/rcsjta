@@ -40,8 +40,8 @@ import com.gsma.services.rcs.capability.CapabilitiesListener;
 import com.gsma.services.rcs.capability.CapabilityService;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
-import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
 import com.orangelabs.rcs.ri.utils.LockAccess;
@@ -67,7 +67,7 @@ public class RequestCapabilities extends Activity {
     /**
      * API connection manager
      */
-    private ApiConnectionManager mCnxManager;
+    private ConnectionManager mCnxManager;
 
     /**
      * Capabilities listener
@@ -116,7 +116,7 @@ public class RequestCapabilities extends Activity {
         mContactUtil = ContactUtil.getInstance(this);
 
         // Register to API connection manager
-        mCnxManager = ApiConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance(this);
         if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
@@ -206,7 +206,7 @@ public class RequestCapabilities extends Activity {
                 }
             } catch (RcsServiceNotAvailableException e) {
                 Utils.showMessageAndExit(RequestCapabilities.this,
-                        getString(R.string.label_api_disabled), mExitOnce, e);
+                        getString(R.string.label_api_unavailable), mExitOnce, e);
             } catch (RcsServiceException e) {
                 Utils.showMessageAndExit(RequestCapabilities.this,
                         getString(R.string.label_api_failed), mExitOnce, e);
@@ -240,7 +240,7 @@ public class RequestCapabilities extends Activity {
                 registered = mCnxManager.getCapabilityApi().isServiceRegistered();
             } catch (Exception e) {
                 Utils.showMessageAndExit(RequestCapabilities.this,
-                        getString(R.string.label_api_disabled), mExitOnce, e);
+                        getString(R.string.label_api_unavailable), mExitOnce, e);
                 return;
             }
             if (!registered) {
@@ -270,7 +270,7 @@ public class RequestCapabilities extends Activity {
             // Request new capabilities
             mCnxManager.getCapabilityApi().requestContactCapabilities(contact);
         } catch (RcsServiceNotAvailableException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), mExitOnce, e);
+            Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce, e);
         } catch (RcsServiceException e) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
         }

@@ -77,8 +77,6 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      */
     private MsrpManager msrpMgr;
 
-    private RcsSettings mRcsSettings;
-
     private static final Logger logger = Logger.getLogger(OriginatingMsrpFileSharingSession.class
             .getSimpleName());
 
@@ -94,7 +92,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      */
     public OriginatingMsrpFileSharingSession(String fileTransferId, ImsService parent,
             MmContent content, ContactId contact, MmContent fileIcon, RcsSettings rcsSettings) {
-        super(parent, content, contact, fileIcon, fileTransferId);
+        super(parent, content, contact, fileIcon, fileTransferId, rcsSettings);
 
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("OriginatingFileSharingSession contact=")
@@ -106,7 +104,6 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         // Set contribution ID
         String id = ContributionIdGenerator.getContributionId(getDialogPath().getCallId());
         setContributionID(id);
-        mRcsSettings = rcsSettings;
     }
 
     /**
@@ -129,15 +126,15 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
             if ("active".equals(localSetup)) {
                 localMsrpPort = 9; // See RFC4145, Page 4
             } else {
-                localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort();
+                localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(mRcsSettings);
             }
 
             // Create the MSRP manager
             String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface()
                     .getNetworkAccess().getIpAddress();
-            msrpMgr = new MsrpManager(localIpAddress, localMsrpPort, getImsService());
+            msrpMgr = new MsrpManager(localIpAddress, localMsrpPort, getImsService(), mRcsSettings);
             if (getImsService().getImsModule().isConnectedToWifiAccess()) {
-                msrpMgr.setSecured(RcsSettings.getInstance().isSecureMsrpOverWifi());
+                msrpMgr.setSecured(mRcsSettings.isSecureMsrpOverWifi());
             }
 
             // Build SDP part

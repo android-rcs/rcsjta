@@ -35,7 +35,7 @@ import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration.Image
 
 /**
  * RCS settings data constants
- * 
+ *
  * @author jexa7410
  * @author yplo6403
  */
@@ -131,8 +131,9 @@ public class RcsSettingsData {
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException("No enum const class "
-                    + ImSessionStartMode.class.getName() + "." + value);
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(ImSessionStartMode.class.getName()).append(".").append(value)
+                    .toString());
         }
 
     }
@@ -183,9 +184,8 @@ public class RcsSettingsData {
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException("No enum const class "
-                    + NetworkAccessType.class.getName() + "." + value);
-
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(NetworkAccessType.class.getName()).append(".").append(value).toString());
         }
 
     };
@@ -197,11 +197,11 @@ public class RcsSettingsData {
         /**
          * the switch is shown permanently
          */
-        ALWAYS_SHOW(0),
+        ALWAYS_SHOW(1),
         /**
          * the switch is only shown during roaming
          */
-        ONLY_SHOW_IN_ROAMING(1),
+        ONLY_SHOW_IN_ROAMING(0),
         /**
          * the switch is never shown
          */
@@ -236,9 +236,8 @@ public class RcsSettingsData {
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException("No enum const class "
-                    + EnableRcseSwitch.class.getName() + "." + value);
-
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(EnableRcseSwitch.class.getName()).append(".").append(value).toString());
         }
 
     };
@@ -285,9 +284,8 @@ public class RcsSettingsData {
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException("No enum const class "
-                    + ConfigurationMode.class.getName() + "." + value);
-
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(ConfigurationMode.class.getName()).append(".").append(value).toString());
         }
     };
 
@@ -351,9 +349,8 @@ public class RcsSettingsData {
             if (entry != null) {
                 return entry;
             }
-            throw new IllegalArgumentException("No enum const class " + GsmaRelease.class.getName()
-                    + "." + value);
-
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(GsmaRelease.class.getName()).append(".").append(value).toString());
         }
 
     }
@@ -369,84 +366,10 @@ public class RcsSettingsData {
     /* package private */static final Boolean DEFAULT_SERVICE_ACTIVATED = false;
 
     /**
-     * Ringtone which is played when a social presence sharing invitation is received
-     */
-    public static final String PRESENCE_INVITATION_RINGTONE = "PresenceInvitationRingtone";
-    /* package private */static final String DEFAULT_PRESENCE_INVITATION_RINGTONE = "";
-
-    /**
-     * Vibrate or not when a social presence sharing invitation is received
-     */
-    public static final String PRESENCE_INVITATION_VIBRATE = "PresenceInvitationVibrate";
-    /* package private */static final Boolean DEFAULT_PRESENCE_INVITATION_VIBRATE = true;
-
-    /**
-     * Ringtone which is played when a content sharing invitation is received
-     */
-    public static final String CSH_INVITATION_RINGTONE = "CShInvitationRingtone";
-    /* package private */static final String DEFAULT_CSH_INVITATION_RINGTONE = "";
-
-    /**
-     * Vibrate or not when a content sharing invitation is received
-     */
-    public static final String CSH_INVITATION_VIBRATE = "CShInvitationVibrate";
-    /* package private */static final Boolean DEFAULT_CSH_INVITATION_VIBRATE = true;
-
-    /**
-     * Make a beep or not when content sharing is available during a call
-     */
-    public static final String CSH_AVAILABLE_BEEP = "CShAvailableBeep";
-    /* package private */static final Boolean DEFAULT_CSH_AVAILABLE_BEEP = true;
-
-    /**
-     * Ringtone which is played when a file transfer invitation is received
-     */
-    public static final String FILETRANSFER_INVITATION_RINGTONE = "FileTransferInvitationRingtone";
-    /* package private */static final String DEFAULT_FT_INVITATION_RINGTONE = "";
-
-    /**
-     * Vibrate or not when a file transfer invitation is received
-     */
-    public static final String FILETRANSFER_INVITATION_VIBRATE = "FileTransferInvitationVibrate";
-    /* package private */static final Boolean DEFAULT_FT_INVITATION_VIBRATE = true;
-
-    /**
-     * Ringtone which is played when a chat invitation is received
-     */
-    public static final String CHAT_INVITATION_RINGTONE = "ChatInvitationRingtone";
-    /* package private */static final String DEFAULT_CHAT_INVITATION_RINGTONE = "";
-
-    /**
-     * Vibrate or not when a chat invitation is received
-     */
-    public static final String CHAT_INVITATION_VIBRATE = "ChatInvitationVibrate";
-    /* package private */static final Boolean DEFAULT_CHAT_INVITATION_VIBRATE = true;
-
-    /**
      * Send or not the displayed notification
      */
     public static final String CHAT_RESPOND_TO_DISPLAY_REPORTS = "ChatRespondToDisplayReports";
     /* package private */static final Boolean DEFAULT_CHAT_RESPOND_TO_DISPLAY_REPORTS = true;
-
-    /**
-     * Predefined freetext
-     */
-    /* package private */static final String FREETEXT1 = "Freetext1";
-
-    /**
-     * Predefined freetext
-     */
-    /* package private */static final String FREETEXT2 = "Freetext2";
-
-    /**
-     * Predefined freetext
-     */
-    /* package private */static final String FREETEXT3 = "Freetext3";
-
-    /**
-     * Predefined freetext
-     */
-    /* package private */static final String FREETEXT4 = "Freetext4";
 
     /**
      * Battery level minimum
@@ -613,12 +536,6 @@ public class RcsSettingsData {
      */
     public static final String GEOLOC_EXPIRATION_TIME = "GeolocExpirationTime";
     /* package private */static final Integer DEFAULT_GEOLOC_EXPIRATION_TIME = 3600;
-
-    /**
-     * Minimum storage capacity
-     */
-    public static final String MIN_STORAGE_CAPACITY = "MinStorageCapacity";
-    /* package private */static final Long DEFAULT_MIN_STORAGE_CAPACITY = 10240L * 1024L;
 
     /**
      * Convergent messaging UX option
@@ -1180,21 +1097,24 @@ public class RcsSettingsData {
      */
     public static final String DIRECTORY_PATH_PHOTOS = "DirectoryPathPhotos";
     /* package private */static final String DEFAULT_DIRECTORY_PATH_PHOTOS = Environment
-            .getExternalStorageDirectory() + "/rcs/photos/";
+            .getExternalStorageDirectory()
+            + "/rcs/photos/";
 
     /**
      * Directory path for videos
      */
     public static final String DIRECTORY_PATH_VIDEOS = "DirectoryPathVideos";
     /* package private */static final String DEFAULT_DIRECTORY_PATH_VIDEOS = Environment
-            .getExternalStorageDirectory() + "/rcs/videos/";
+            .getExternalStorageDirectory()
+            + "/rcs/videos/";
 
     /**
      * Directory path for files
      */
     public static final String DIRECTORY_PATH_FILES = "DirectoryPathFiles";
     /* package private */static final String DEFAULT_DIRECTORY_PATH_FILES = Environment
-            .getExternalStorageDirectory() + "/rcs/files/";
+            .getExternalStorageDirectory()
+            + "/rcs/files/";
 
     /**
      * Secure MSRP over Wi-Fi

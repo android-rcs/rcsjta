@@ -24,6 +24,7 @@ import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.ipcall.IIPCallPlayer;
@@ -37,9 +38,9 @@ import com.gsma.services.rcs.ipcall.IIPCallRenderer;
 public class OriginatingIPCallSession extends IPCallSession {
 
     /**
-     * The logger
+     * The sLogger
      */
-    private static final Logger logger = Logger.getLogger(OriginatingIPCallSession.class
+    private static final Logger sLogger = Logger.getLogger(OriginatingIPCallSession.class
             .getSimpleName());
 
     /**
@@ -51,11 +52,12 @@ public class OriginatingIPCallSession extends IPCallSession {
      * @param videoContent Video content
      * @param player IP call player
      * @param renderer IP call renderer
+     * @param rcsSettings
      */
     public OriginatingIPCallSession(ImsService parent, ContactId contact,
             AudioContent audioContent, VideoContent videoContent, IIPCallPlayer player,
-            IIPCallRenderer renderer) {
-        super(parent, contact, audioContent, videoContent);
+            IIPCallRenderer renderer, RcsSettings rcsSettings) {
+        super(parent, contact, audioContent, videoContent, rcsSettings);
 
         // Set the player
         setPlayer(player);
@@ -72,8 +74,8 @@ public class OriginatingIPCallSession extends IPCallSession {
      */
     public void run() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Initiate a new IP call session as originating");
+            if (sLogger.isActivated()) {
+                sLogger.info("Initiate a new IP call session as originating");
             }
 
             // Check audio parameters
@@ -90,8 +92,8 @@ public class OriginatingIPCallSession extends IPCallSession {
             getDialogPath().setLocalContent(sdp);
 
             // Create an INVITE request
-            if (logger.isActivated()) {
-                logger.info("Send INVITE");
+            if (sLogger.isActivated()) {
+                sLogger.info("Send INVITE");
             }
             SipRequest invite;
             if (getVideoContent() == null) {
@@ -114,8 +116,8 @@ public class OriginatingIPCallSession extends IPCallSession {
             sendInvite(invite);
 
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Session initiation has failed", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Session initiation has failed", e);
             }
 
             // Unexpected error

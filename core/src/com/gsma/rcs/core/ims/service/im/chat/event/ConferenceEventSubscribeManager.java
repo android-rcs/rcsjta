@@ -71,63 +71,67 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
     /**
      * IMS module
      */
-    private ImsModule imsModule;
+    private ImsModule mImsModule;
 
     /**
      * Group chat session
      */
-    private GroupChatSession session;
+    private GroupChatSession mSession;
 
     /**
      * Dialog path
      */
-    private SipDialogPath dialogPath;
+    private SipDialogPath mDialogPath;
 
     /**
      * Expire period
      */
-    private int expirePeriod;
+    private int mExpirePeriod;
 
     /**
      * Subscription flag
      */
-    private boolean subscribed = false;
+    private boolean mSubscribed = false;
 
     /**
      * Authentication agent
      */
-    private SessionAuthenticationAgent authenticationAgent;
+    private SessionAuthenticationAgent mAuthenticationAgent;
 
     /**
      * List of connected participants
      */
-    private Set<ParticipantInfo> participants;
+    private Set<ParticipantInfo> mParticipants;
+
+    private final RcsSettings mRcsSettings;
 
     /**
      * The logger
      */
-    private final static Logger logger = Logger.getLogger(ConferenceEventSubscribeManager.class
+    private final static Logger sLogger = Logger.getLogger(ConferenceEventSubscribeManager.class
             .getSimpleName());
 
     /**
      * Constructor
      * 
      * @param session Group chat session
+     * @param rcsSettings
      */
-    public ConferenceEventSubscribeManager(GroupChatSession session) {
-        this.session = session;
-        this.imsModule = session.getImsService().getImsModule();
-        this.authenticationAgent = new SessionAuthenticationAgent(imsModule);
+    public ConferenceEventSubscribeManager(GroupChatSession session, RcsSettings rcsSettings) {
+        mSession = session;
+        mImsModule = session.getImsService().getImsModule();
+        mAuthenticationAgent = new SessionAuthenticationAgent(mImsModule);
         // Initiate list of participants with list of invited with status UNKNOWN
-        participants = new HashSet<ParticipantInfo>(session.getParticipants());
+        mParticipants = new HashSet<ParticipantInfo>(session.getParticipants());
+        mRcsSettings = rcsSettings;
 
-        int defaultExpirePeriod = RcsSettings.getInstance().getSubscribeExpirePeriod();
+        int defaultExpirePeriod = mRcsSettings.getSubscribeExpirePeriod();
         int minExpireValue = RegistryFactory.getFactory().readInteger(REGISTRY_MIN_EXPIRE_PERIOD,
                 -1);
         if ((minExpireValue != -1) && (defaultExpirePeriod < minExpireValue)) {
-            this.expirePeriod = minExpireValue;
+            mExpirePeriod = minExpireValue;
         } else {
-            this.expirePeriod = defaultExpirePeriod;
+            mExpirePeriod = defaultExpirePeriod;
         }
     }
 
@@ -137,7 +141,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * @return Boolean
      */
     public boolean isSubscribed() {
-        return subscribed;
+        return mSubscribed;
     }
 
     /**
@@ -146,7 +150,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * @return Presentity
      */
     public String getPresentity() {
-        return session.getImSessionIdentity();
+        return mSession.getImSessionIdentity();
     }
 
     /**
@@ -155,7 +159,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * @return List of participants
      */
     public Set<ParticipantInfo> getParticipants() {
-        return participants;
+        return mParticipants;
     }
 
     /**
@@ -164,7 +168,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * @return SipDialogPath
      */
     public SipDialogPath getDialogPath() {
-        return dialogPath;
+        return mDialogPath;
     }
 
     /**
@@ -173,8 +177,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * @param notify Received notify
      */
     public void receiveNotification(SipRequest notify) {
-        if (logger.isActivated()) {
-            logger.debug("New conference event notification received");
+        if (sLogger.isActivated()) {
+            sLogger.debug("New conference event notification received");
         }
 
         // Parse XML part
@@ -187,14 +191,14 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
                 if (conference != null) {
                     int maxParticipants = conference.getMaxUserCount();
                     if (maxParticipants > 0) {
-                        if (logger.isActivated()) {
-                            logger.debug("Set max number of participants to " + maxParticipants);
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("Set max number of participants to " + maxParticipants);
                         }
-                        session.setMaxParticipants(maxParticipants);
+                        mSession.setMaxParticipants(maxParticipants);
                     }
                     Set<ParticipantInfo> newSet = new HashSet<ParticipantInfo>();
                     if (!ConferenceInfoDocument.STATE_FULL.equalsIgnoreCase(conference.getState())) {
-                        newSet = new HashSet<ParticipantInfo>(participants);
+                        newSet = new HashSet<ParticipantInfo>(mParticipants);
                     }
                     Vector<User> users = conference.getUsers();
                     for (User user : users) {
@@ -206,8 +210,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
                             continue;
                         }
 
-                        if (logger.isActivated()) {
-                            logger.debug("Conference info notification for " + contact);
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("Conference info notification for " + contact);
                         }
 
                         if (user.isMe() || contact.equals(ImsModule.IMS_USER_PROFILE.getUsername())) {
@@ -218,8 +222,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
                         // Get state
                         String state = user.getState();
                         String method = user.getDisconnectionMethod();
-                        if (logger.isActivated()) {
-                            logger.debug("User conference info: " + user);
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("User conference info: " + user);
                         }
                         if (method != null) {
                             // If there is a method then use it as a specific state
@@ -250,23 +254,24 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
                         // Update the set of participants
                         ParticipantInfoUtils.addParticipant(newSet, item2add);
                         // Check if original set has changed
-                        if (participants.contains(item2add) == false) {
+                        if (mParticipants.contains(item2add) == false) {
                             // Notify session listeners
-                            for (int j = 0; j < session.getListeners().size(); j++) {
-                                ((ChatSessionListener) session.getListeners().get(j))
+                            for (int j = 0; j < mSession.getListeners().size(); j++) {
+                                ((ChatSessionListener) mSession.getListeners().get(j))
                                         .handleConferenceEvent(contact, user.getDisplayName(),
                                                 state);
                             }
                         }
                     }
-                    if (session instanceof GroupChatSession && newSet.equals(participants) == false) {
+                    if (mSession instanceof GroupChatSession
+                            && newSet.equals(mParticipants) == false) {
                         // Update the set of participants of the terminating group chat session
                         UpdateSessionParticipantSet(newSet);
                     }
                 }
             } catch (Exception e) {
-                if (logger.isActivated()) {
-                    logger.error("Can't parse XML notification", e);
+                if (sLogger.isActivated()) {
+                    sLogger.error("Can't parse XML notification", e);
                 }
             }
         }
@@ -275,8 +280,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
         SubscriptionStateHeader stateHeader = (SubscriptionStateHeader) notify
                 .getHeader(SubscriptionStateHeader.NAME);
         if ((stateHeader != null) && stateHeader.getState().equalsIgnoreCase("terminated")) {
-            if (logger.isActivated()) {
-                logger.info("Conference event subscription has been terminated by server");
+            if (sLogger.isActivated()) {
+                sLogger.info("Conference event subscription has been terminated by server");
             }
             terminatedByServer();
         }
@@ -290,18 +295,18 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      */
     private void UpdateSessionParticipantSet(final Set<ParticipantInfo> newSet) {
         // Save old set of participants
-        Set<ParticipantInfo> oldSet = participants;
-        participants = newSet;
+        Set<ParticipantInfo> oldSet = mParticipants;
+        mParticipants = newSet;
         // Update provider
-        MessagingLog.getInstance().updateGroupChatParticipant(session.getContributionID(),
-                participants);
+        MessagingLog.getInstance().updateGroupChatParticipant(mSession.getContributionID(),
+                mParticipants);
         // Notify participant status change. Make a copy of new set.
         Set<ParticipantInfo> workSet = new HashSet<ParticipantInfo>(newSet);
         // Notify status change for the new set
         workSet.removeAll(oldSet);
         for (ParticipantInfo item : workSet) {
-            for (int i = 0; i < session.getListeners().size(); i++) {
-                ((ChatSessionListener) session.getListeners().get(i))
+            for (int i = 0; i < mSession.getListeners().size(); i++) {
+                ((ChatSessionListener) mSession.getListeners().get(i))
                         .handleParticipantStatusChanged(item);
             }
         }
@@ -310,12 +315,12 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
     /**
      * Check if the received notification if for this subscriber
      * 
-     * @param SipRequest notify
+     * @param notify
      * @return Boolean
      */
     public boolean isNotifyForThisSubscriber(SipRequest notify) {
         boolean result = false;
-        if ((dialogPath != null) && notify.getCallId().equals(dialogPath.getCallId())) {
+        if ((mDialogPath != null) && notify.getCallId().equals(mDialogPath.getCallId())) {
             result = true;
         }
         return result;
@@ -325,13 +330,13 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * Subscription has been terminated by server
      */
     public synchronized void terminatedByServer() {
-        if (!subscribed) {
+        if (!mSubscribed) {
             // Already unsubscribed
             return;
         }
 
-        if (logger.isActivated()) {
-            logger.info("Subscription has been terminated by server");
+        if (sLogger.isActivated()) {
+            sLogger.info("Subscription has been terminated by server");
         }
 
         // Stop periodic subscription
@@ -341,28 +346,28 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
         resetDialogPath();
 
         // Force subscription flag to false
-        subscribed = false;
+        mSubscribed = false;
     }
 
     /**
      * Terminate manager
      */
     public void terminate() {
-        if (logger.isActivated()) {
-            logger.info("Terminate the subscribe manager");
+        if (sLogger.isActivated()) {
+            sLogger.info("Terminate the subscribe manager");
         }
 
         // Stop periodic subscription
         stopTimer();
 
         // Unsubscribe before to quit
-        if ((imsModule.getCurrentNetworkInterface() != null)
-                && imsModule.getCurrentNetworkInterface().isRegistered() && subscribed) {
+        if ((mImsModule.getCurrentNetworkInterface() != null)
+                && mImsModule.getCurrentNetworkInterface().isRegistered() && mSubscribed) {
             unSubscribe();
         }
 
-        if (logger.isActivated()) {
-            logger.info("Subscribe manager is terminated");
+        if (sLogger.isActivated()) {
+            sLogger.info("Subscribe manager is terminated");
         }
     }
 
@@ -395,8 +400,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      */
     public void periodicProcessing() {
         // Make a subscribe
-        if (logger.isActivated()) {
-            logger.info("Execute re-subscribe");
+        if (sLogger.isActivated()) {
+            sLogger.info("Execute re-subscribe");
         }
 
         // Send SUBSCRIBE request
@@ -409,15 +414,15 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
     public synchronized void subscribe() {
         new Thread() {
             public void run() {
-                if (logger.isActivated()) {
-                    logger.info("Subscribe to " + getPresentity());
+                if (sLogger.isActivated()) {
+                    sLogger.info("Subscribe to " + getPresentity());
                 }
 
                 try {
                     // Create a dialog path if necessary
-                    if (dialogPath == null) {
+                    if (mDialogPath == null) {
                         // Set Call-Id
-                        String callId = imsModule.getSipManager().getSipStack().generateCallId();
+                        String callId = mImsModule.getSipManager().getSipStack().generateCallId();
 
                         // Set target
                         String target = getPresentity();
@@ -429,26 +434,26 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
                         String remoteParty = getPresentity();
 
                         // Set the route path
-                        Vector<String> route = imsModule.getSipManager().getSipStack()
+                        Vector<String> route = mImsModule.getSipManager().getSipStack()
                                 .getServiceRoutePath();
 
                         // Create a dialog path
-                        dialogPath = new SipDialogPath(imsModule.getSipManager().getSipStack(),
-                                callId, 1, target, localParty, remoteParty, route);
+                        mDialogPath = new SipDialogPath(mImsModule.getSipManager().getSipStack(),
+                                callId, 1, target, localParty, remoteParty, route, mRcsSettings);
                     } else {
                         // Increment the Cseq number of the dialog path
-                        dialogPath.incrementCseq();
+                        mDialogPath.incrementCseq();
                     }
 
                     // Create a SUBSCRIBE request
-                    SipRequest subscribe = createSubscribe(dialogPath, expirePeriod);
+                    SipRequest subscribe = createSubscribe(mDialogPath, mExpirePeriod);
 
                     // Send SUBSCRIBE request
                     sendSubscribe(subscribe);
 
                 } catch (Exception e) {
-                    if (logger.isActivated()) {
-                        logger.error("Subscribe has failed", e);
+                    if (sLogger.isActivated()) {
+                        sLogger.error("Subscribe has failed", e);
                     }
                     handleError(new ChatError(ChatError.UNEXPECTED_EXCEPTION, e.getMessage()));
                 }
@@ -460,13 +465,13 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * Unsubscribe
      */
     public synchronized void unSubscribe() {
-        if (!subscribed) {
+        if (!mSubscribed) {
             // Already unsubscribed
             return;
         }
 
-        if (logger.isActivated()) {
-            logger.info("Unsubscribe to " + getPresentity());
+        if (sLogger.isActivated()) {
+            sLogger.info("Unsubscribe to " + getPresentity());
         }
 
         try {
@@ -475,22 +480,22 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 
             // Increment the Cseq number of the dialog path
 
-            dialogPath.incrementCseq();
+            mDialogPath.incrementCseq();
 
             // Create a SUBSCRIBE with expire 0
-            SipRequest subscribe = createSubscribe(dialogPath, 0);
+            SipRequest subscribe = createSubscribe(mDialogPath, 0);
 
             // Send SUBSCRIBE request
             sendSubscribe(subscribe);
 
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("UnSubscribe has failed", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("UnSubscribe has failed", e);
             }
         }
 
         // Force subscription flag to false
-        subscribed = false;
+        mSubscribed = false;
 
         // Reset dialog path attributes
         resetDialogPath();
@@ -500,10 +505,10 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * Reset the dialog path
      */
     private void resetDialogPath() {
-        if (dialogPath != null) {
+        if (mDialogPath != null) {
             Core.getInstance().getImService()
-                    .removeGroupChatConferenceSubscriber(dialogPath.getCallId());
-            dialogPath = null;
+                    .removeGroupChatConferenceSubscriber(mDialogPath.getCallId());
+            mDialogPath = null;
         }
     }
 
@@ -518,7 +523,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
         if (expiresHeader != null) {
             int expires = expiresHeader.getExpires();
             if (expires != -1) {
-                expirePeriod = expires;
+                mExpirePeriod = expires;
             }
         }
     }
@@ -530,17 +535,17 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * @throws Exception
      */
     private void sendSubscribe(SipRequest subscribe) throws Exception {
-        if (logger.isActivated()) {
-            logger.info("Send SUBSCRIBE, expire=" + subscribe.getExpires());
+        if (sLogger.isActivated()) {
+            sLogger.info("Send SUBSCRIBE, expire=" + subscribe.getExpires());
         }
 
-        if (subscribed) {
+        if (mSubscribed) {
             // Set the Authorization header
-            authenticationAgent.setProxyAuthorizationHeader(subscribe);
+            mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
         }
 
         // Send SUBSCRIBE request
-        SipTransactionContext ctx = imsModule.getSipManager().sendSipMessageAndWait(subscribe);
+        SipTransactionContext ctx = mImsModule.getSipManager().sendSipMessageAndWait(subscribe);
 
         // Analyze the received response
         if (ctx.isSipResponse()) {
@@ -566,8 +571,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
                         ctx.getStatusCode() + " " + ctx.getReasonPhrase()));
             }
         } else {
-            if (logger.isActivated()) {
-                logger.debug("No response received for SUBSCRIBE");
+            if (sLogger.isActivated()) {
+                sLogger.debug("No response received for SUBSCRIBE");
             }
 
             // No response received: timeout
@@ -582,34 +587,34 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      */
     private void handle200OK(SipTransactionContext ctx) {
         // 200 OK response received
-        if (logger.isActivated()) {
-            logger.info("200 OK response received");
+        if (sLogger.isActivated()) {
+            sLogger.info("200 OK response received");
         }
-        subscribed = true;
+        mSubscribed = true;
 
         SipResponse resp = ctx.getSipResponse();
 
         // Set the route path with the Record-Route header
         Vector<String> newRoute = SipUtils.routeProcessing(resp, true);
-        dialogPath.setRoute(newRoute);
+        mDialogPath.setRoute(newRoute);
 
         // Set the remote tag
-        dialogPath.setRemoteTag(resp.getToTag());
+        mDialogPath.setRemoteTag(resp.getToTag());
 
         // Set the target
-        dialogPath.setTarget(resp.getContactURI());
+        mDialogPath.setTarget(resp.getContactURI());
 
         // Set the Proxy-Authorization header
-        authenticationAgent.readProxyAuthenticateHeader(resp);
+        mAuthenticationAgent.readProxyAuthenticateHeader(resp);
 
         // Retrieve the expire value in the response
         retrieveExpirePeriod(resp);
 
         // Start the periodic subscribe
-        startTimer(expirePeriod, 0.5);
+        startTimer(mExpirePeriod, 0.5);
 
         Core.getInstance().getImService()
-                .addGroupChatConferenceSubscriber(dialogPath.getCallId(), session);
+                .addGroupChatConferenceSubscriber(mDialogPath.getCallId(), mSession);
     }
 
     /**
@@ -619,8 +624,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      */
     private void handle200OkUnsubscribe(SipTransactionContext ctx) {
         // 200 OK response received
-        if (logger.isActivated()) {
-            logger.info("200 OK response received");
+        if (sLogger.isActivated()) {
+            sLogger.info("200 OK response received");
         }
     }
 
@@ -632,27 +637,27 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      */
     private void handle407Authentication(SipTransactionContext ctx) throws Exception {
         // 407 response received
-        if (logger.isActivated()) {
-            logger.info("407 response received");
+        if (sLogger.isActivated()) {
+            sLogger.info("407 response received");
         }
 
         SipResponse resp = ctx.getSipResponse();
 
         // Set the Proxy-Authorization header
-        authenticationAgent.readProxyAuthenticateHeader(resp);
+        mAuthenticationAgent.readProxyAuthenticateHeader(resp);
 
         // Increment the Cseq number of the dialog path
-        dialogPath.incrementCseq();
+        mDialogPath.incrementCseq();
 
         // Create a second SUBSCRIBE request with the right token
-        if (logger.isActivated()) {
-            logger.info("Send second SUBSCRIBE");
+        if (sLogger.isActivated()) {
+            sLogger.info("Send second SUBSCRIBE");
         }
-        SipRequest subscribe = createSubscribe(dialogPath, ctx.getTransaction().getRequest()
+        SipRequest subscribe = createSubscribe(mDialogPath, ctx.getTransaction().getRequest()
                 .getExpires().getExpires());
 
         // Set the Authorization header
-        authenticationAgent.setProxyAuthorizationHeader(subscribe);
+        mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
 
         // Send SUBSCRIBE request
         sendSubscribe(subscribe);
@@ -666,20 +671,20 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      */
     private void handle423IntervalTooBrief(SipTransactionContext ctx) throws Exception {
         // 423 response received
-        if (logger.isActivated()) {
-            logger.info("423 interval too brief response received");
+        if (sLogger.isActivated()) {
+            sLogger.info("423 interval too brief response received");
         }
 
         SipResponse resp = ctx.getSipResponse();
 
         // Increment the Cseq number of the dialog path
-        dialogPath.incrementCseq();
+        mDialogPath.incrementCseq();
 
         // Extract the Min-Expire value
         int minExpire = SipUtils.getMinExpiresPeriod(resp);
         if (minExpire == -1) {
-            if (logger.isActivated()) {
-                logger.error("Can't read the Min-Expires value");
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't read the Min-Expires value");
             }
             handleError(new ChatError(ChatError.SUBSCRIBE_CONFERENCE_FAILED,
                     "No Min-Expires value found"));
@@ -690,13 +695,13 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
         RegistryFactory.getFactory().writeInteger(REGISTRY_MIN_EXPIRE_PERIOD, minExpire);
 
         // Set the default expire value
-        expirePeriod = minExpire;
+        mExpirePeriod = minExpire;
 
         // Create a new SUBSCRIBE request with the right expire period
-        SipRequest subscribe = createSubscribe(dialogPath, expirePeriod);
+        SipRequest subscribe = createSubscribe(mDialogPath, mExpirePeriod);
 
         // Set the Authorization header
-        authenticationAgent.setProxyAuthorizationHeader(subscribe);
+        mAuthenticationAgent.setProxyAuthorizationHeader(subscribe);
 
         // Send SUBSCRIBE request
         sendSubscribe(subscribe);
@@ -709,11 +714,11 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      */
     private void handleError(ChatError error) {
         // Error
-        if (logger.isActivated()) {
-            logger.info("Subscribe has failed: " + error.getErrorCode() + ", reason="
+        if (sLogger.isActivated()) {
+            sLogger.info("Subscribe has failed: " + error.getErrorCode() + ", reason="
                     + error.getMessage());
         }
-        subscribed = false;
+        mSubscribed = false;
 
         // Subscribe has failed, stop the periodic subscribe
         stopTimer();

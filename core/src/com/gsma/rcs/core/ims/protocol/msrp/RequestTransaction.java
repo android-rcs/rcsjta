@@ -31,7 +31,7 @@ public class RequestTransaction extends Object {
     /**
      * MRSP request transaction timeout (in seconds)
      */
-    private final static int TIMEOUT = RcsSettings.getInstance().getMsrpTransactionTimeout();
+    private final int mTimeout;
 
     /**
      * Received response
@@ -40,8 +40,11 @@ public class RequestTransaction extends Object {
 
     /**
      * Constructor
+     * 
+     * @param rcsSettings
      */
-    public RequestTransaction() {
+    public RequestTransaction(RcsSettings rcsSettings) {
+        mTimeout = rcsSettings.getMsrpTransactionTimeout();
     }
 
     /**
@@ -67,7 +70,7 @@ public class RequestTransaction extends Object {
         synchronized (this) {
             try {
                 // Wait semaphore
-                super.wait(TIMEOUT * 1000);
+                super.wait(mTimeout * 1000);
             } catch (InterruptedException e) {
                 // Nothing to do
             }

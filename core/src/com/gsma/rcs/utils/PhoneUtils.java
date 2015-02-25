@@ -57,10 +57,10 @@ public class PhoneUtils {
      * Set the country code
      * 
      * @param context Context
+     * @param mRcsSettings
      */
-    public static synchronized void initialize(Context context) {
-        RcsSettings.createInstance(context);
-        TEL_URI_SUPPORTED = RcsSettings.getInstance().isTelUriFormatUsed();
+    public static synchronized void initialize(Context context, RcsSettings mRcsSettings) {
+        TEL_URI_SUPPORTED = mRcsSettings.isTelUriFormatUsed();
     }
 
     /**
@@ -123,8 +123,8 @@ public class PhoneUtils {
         } else {
             // SIP-URI format
             return new StringBuilder(SIP_URI_HEADER).append(contactId).append("@")
-                    .append(ImsModule.IMS_USER_PROFILE.getHomeDomain()).append(";user=phone")
-                    .toString();
+                    .append(ImsModule.IMS_USER_PROFILE.getHomeDomain())
+                    .append(";user=phone").toString();
 
         }
     }

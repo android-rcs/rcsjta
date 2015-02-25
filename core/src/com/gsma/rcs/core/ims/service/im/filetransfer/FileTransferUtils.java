@@ -48,6 +48,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoPa
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.file.FileDescription;
 import com.gsma.rcs.platform.file.FileFactory;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.Base64;
 import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.FileUtils;
@@ -82,9 +83,10 @@ public class FileTransferUtils {
      * 
      * @param file Uri of the image
      * @param fileIconId the identifier of the file icon
+     * @param rcsSettings
      * @return the content of the file icon
      */
-    public static MmContent createFileicon(Uri file, String fileIconId) {
+    public static MmContent createFileicon(Uri file, String fileIconId, RcsSettings rcsSettings) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         InputStream in = null;
         try {
@@ -126,7 +128,7 @@ public class FileTransferUtils {
 
             // Generate fileIcon content
             Uri fileIconUri = ContentManager.generateUriForReceivedContent(fileIconName,
-                    "image/jpeg");
+                    "image/jpeg", rcsSettings);
             MmContent fileIcon = ContentManager.createMmContent(fileIconUri, fileIconData.length,
                     fileIconName);
             // Save the fileIcon data
@@ -171,9 +173,10 @@ public class FileTransferUtils {
      * Extract file icon from incoming INVITE request
      * 
      * @param request Request
+     * @param rcsSettings
      * @return fileIcon the file icon content persisted on disk
      */
-    public static MmContent extractFileIcon(SipRequest request) {
+    public static MmContent extractFileIcon(SipRequest request, RcsSettings rcsSettings) {
         try {
             // Extract message from content/CPIM
             String content = request.getContent();
@@ -194,7 +197,7 @@ public class FileTransferUtils {
                             mimeType);
                     // Generate URL
                     Uri fileIconUri = ContentManager.generateUriForReceivedContent(iconName,
-                            mimeType);
+                            mimeType, rcsSettings);
                     // Get binary data
                     byte[] fileIconData = Base64.decodeBase64(mimeType.getBytes(UTF8));
                     // Generate fileIcon content

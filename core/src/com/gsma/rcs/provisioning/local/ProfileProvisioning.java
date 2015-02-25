@@ -18,17 +18,22 @@
 
 package com.gsma.rcs.provisioning.local;
 
-import static com.gsma.rcs.provisioning.local.Provisioning.saveCheckBoxParameter;
-import static com.gsma.rcs.provisioning.local.Provisioning.saveEditTextParameter;
-import static com.gsma.rcs.provisioning.local.Provisioning.setCheckBoxParameter;
-import static com.gsma.rcs.provisioning.local.Provisioning.setEditTextParameter;
+import static com.gsma.rcs.provisioning.local.Provisioning.saveCheckBoxParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.saveEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.setCheckBoxParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.setEditTextParam;
 import static com.gsma.rcs.provisioning.local.Provisioning.setSpinnerParameter;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FilenameFilter;
-import java.io.IOException;
+import com.gsma.rcs.R;
+import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.settings.RcsSettingsData;
+import com.gsma.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
+import com.gsma.rcs.provider.settings.RcsSettingsData.ConfigurationMode;
+import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
+import com.gsma.rcs.provisioning.ProvisioningParser;
+import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -46,15 +51,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.provider.settings.RcsSettingsData;
-import com.gsma.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
-import com.gsma.rcs.provider.settings.RcsSettingsData.ConfigurationMode;
-import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
-import com.gsma.rcs.provisioning.ProvisioningParser;
-import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
-import com.gsma.rcs.R;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FilenameFilter;
+import java.io.IOException;
 
 /**
  * End user profile parameters provisioning
@@ -80,10 +81,13 @@ public class ProfileProvisioning extends Activity {
     private static Logger logger = Logger.getLogger(ProfileProvisioning.class.getSimpleName());
 
     private static final String PROVISIONING_EXTENSION = ".xml";
-    private String mInputedUserPhoneNumber = null;
-    private String mSelectedProvisioningFile = null;
+    private String mInputedUserPhoneNumber;
+    private String mSelectedProvisioningFile;
 
-    private boolean isInFront;
+    private boolean mInFront;
+
+    private RcsSettings mRcsSettings;
+
     /**
      * Folder path for provisioning file
      */
@@ -103,15 +107,17 @@ public class ProfileProvisioning extends Activity {
         btn = (Button) findViewById(R.id.gen_btn);
         btn.setOnClickListener(genBtnListener);
 
+        mRcsSettings = RcsSettings.createInstance(new LocalContentResolver(this));
+
         updateProfileProvisioningUI(savedInstanceState);
-        isInFront = true;
+        mInFront = true;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (isInFront == false) {
-            isInFront = true;
+        if (mInFront == false) {
+            mInFront = true;
             // Update UI (from DB)
             updateProfileProvisioningUI(null);
         }
@@ -120,7 +126,7 @@ public class ProfileProvisioning extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        isInFront = false;
+        mInFront = false;
     }
 
     /**
@@ -129,14 +135,16 @@ public class ProfileProvisioning extends Activity {
      * @param bundle bundle to save parameters
      */
     private void updateProfileProvisioningUI(Bundle bundle) {
+        ProvisioningHelper helper = new ProvisioningHelper(this, mRcsSettings, bundle);
+
         // Display parameters
         Spinner spinner = (Spinner) findViewById(R.id.ImsAuthenticationProcedureForMobile);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(ProfileProvisioning.this,
                 android.R.layout.simple_spinner_item, MOBILE_IMS_AUTHENT);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-        setSpinnerParameter(spinner, RcsSettingsData.IMS_AUTHENT_PROCEDURE_MOBILE, bundle,
-                MOBILE_IMS_AUTHENT);
+        setSpinnerParameter(spinner, RcsSettingsData.IMS_AUTHENT_PROCEDURE_MOBILE,
+                MOBILE_IMS_AUTHENT, helper);
 
         spinner = (Spinner) findViewById(R.id.ImsAuthenticationProcedureForWifi);
         adapter = new ArrayAdapter<String>(ProfileProvisioning.this,
@@ -145,69 +153,51 @@ public class ProfileProvisioning extends Activity {
         spinner.setAdapter(adapter);
         spinner.setSelection(0);
 
-        setEditTextParameter(this, R.id.ImsUsername, RcsSettingsData.USERPROFILE_IMS_USERNAME,
-                bundle);
-        setEditTextParameter(this, R.id.ImsDisplayName,
-                RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, bundle);
-        setEditTextParameter(this, R.id.ImsHomeDomain, RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN,
-                bundle);
-        setEditTextParameter(this, R.id.ImsPrivateId, RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID,
-                bundle);
-        setEditTextParameter(this, R.id.ImsPassword, RcsSettingsData.USERPROFILE_IMS_PASSWORD,
-                bundle);
-        setEditTextParameter(this, R.id.ImsRealm, RcsSettingsData.USERPROFILE_IMS_REALM, bundle);
-        setEditTextParameter(this, R.id.ImsOutboundProxyAddrForMobile,
-                RcsSettingsData.IMS_PROXY_ADDR_MOBILE, bundle);
-        setEditTextParameter(this, R.id.ImsOutboundProxyPortForMobile,
-                RcsSettingsData.IMS_PROXY_PORT_MOBILE, bundle);
-        setEditTextParameter(this, R.id.ImsOutboundProxyAddrForWifi,
-                RcsSettingsData.IMS_PROXY_ADDR_WIFI, bundle);
-        setEditTextParameter(this, R.id.ImsOutboundProxyPortForWifi,
-                RcsSettingsData.IMS_PROXY_PORT_WIFI, bundle);
-        setEditTextParameter(this, R.id.XdmServerAddr, RcsSettingsData.XDM_SERVER, bundle);
-        setEditTextParameter(this, R.id.XdmServerLogin, RcsSettingsData.XDM_LOGIN, bundle);
-        setEditTextParameter(this, R.id.XdmServerPassword, RcsSettingsData.XDM_PASSWORD, bundle);
-        setEditTextParameter(this, R.id.FtHttpServerAddr, RcsSettingsData.FT_HTTP_SERVER, bundle);
-        setEditTextParameter(this, R.id.FtHttpServerLogin, RcsSettingsData.FT_HTTP_LOGIN, bundle);
-        setEditTextParameter(this, R.id.FtHttpServerPassword, RcsSettingsData.FT_HTTP_PASSWORD,
-                bundle);
-        setEditTextParameter(this, R.id.ImConferenceUri, RcsSettingsData.IM_CONF_URI, bundle);
-        setEditTextParameter(this, R.id.EndUserConfReqUri,
-                RcsSettingsData.ENDUSER_CONFIRMATION_URI, bundle);
-        setEditTextParameter(this, R.id.RcsApn, RcsSettingsData.RCS_APN, bundle);
+        setEditTextParam(R.id.ImsUsername, RcsSettingsData.USERPROFILE_IMS_USERNAME, helper);
+        setEditTextParam(R.id.ImsDisplayName, RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, helper);
+        setEditTextParam(R.id.ImsHomeDomain, RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN, helper);
+        setEditTextParam(R.id.ImsPrivateId, RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID, helper);
+        setEditTextParam(R.id.ImsPassword, RcsSettingsData.USERPROFILE_IMS_PASSWORD, helper);
+        setEditTextParam(R.id.ImsRealm, RcsSettingsData.USERPROFILE_IMS_REALM, helper);
+        setEditTextParam(R.id.ImsOutboundProxyAddrForMobile, RcsSettingsData.IMS_PROXY_ADDR_MOBILE,
+                helper);
+        setEditTextParam(R.id.ImsOutboundProxyPortForMobile, RcsSettingsData.IMS_PROXY_PORT_MOBILE,
+                helper);
+        setEditTextParam(R.id.ImsOutboundProxyAddrForWifi, RcsSettingsData.IMS_PROXY_ADDR_WIFI,
+                helper);
+        setEditTextParam(R.id.ImsOutboundProxyPortForWifi, RcsSettingsData.IMS_PROXY_PORT_WIFI,
+                helper);
+        setEditTextParam(R.id.XdmServerAddr, RcsSettingsData.XDM_SERVER, helper);
+        setEditTextParam(R.id.XdmServerLogin, RcsSettingsData.XDM_LOGIN, helper);
+        setEditTextParam(R.id.XdmServerPassword, RcsSettingsData.XDM_PASSWORD, helper);
+        setEditTextParam(R.id.FtHttpServerAddr, RcsSettingsData.FT_HTTP_SERVER, helper);
+        setEditTextParam(R.id.FtHttpServerLogin, RcsSettingsData.FT_HTTP_LOGIN, helper);
+        setEditTextParam(R.id.FtHttpServerPassword, RcsSettingsData.FT_HTTP_PASSWORD, helper);
+        setEditTextParam(R.id.ImConferenceUri, RcsSettingsData.IM_CONF_URI, helper);
+        setEditTextParam(R.id.EndUserConfReqUri, RcsSettingsData.ENDUSER_CONFIRMATION_URI, helper);
+        setEditTextParam(R.id.RcsApn, RcsSettingsData.RCS_APN, helper);
 
-        setCheckBoxParameter(this, R.id.image_sharing, RcsSettingsData.CAPABILITY_IMAGE_SHARING,
-                bundle);
-        setCheckBoxParameter(this, R.id.video_sharing, RcsSettingsData.CAPABILITY_VIDEO_SHARING,
-                bundle);
-        setCheckBoxParameter(this, R.id.file_transfer, RcsSettingsData.CAPABILITY_FILE_TRANSFER,
-                bundle);
-        setCheckBoxParameter(this, R.id.file_transfer_http,
-                RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP, bundle);
-        setCheckBoxParameter(this, R.id.im, RcsSettingsData.CAPABILITY_IM_SESSION, bundle);
-        setCheckBoxParameter(this, R.id.im_group, RcsSettingsData.CAPABILITY_IM_GROUP_SESSION,
-                bundle);
-        setCheckBoxParameter(this, R.id.ipvoicecall, RcsSettingsData.CAPABILITY_IP_VOICE_CALL,
-                bundle);
-        setCheckBoxParameter(this, R.id.ipvideocall, RcsSettingsData.CAPABILITY_IP_VIDEO_CALL,
-                bundle);
-        setCheckBoxParameter(this, R.id.cs_video, RcsSettingsData.CAPABILITY_CS_VIDEO, bundle);
-        setCheckBoxParameter(this, R.id.presence_discovery,
-                RcsSettingsData.CAPABILITY_PRESENCE_DISCOVERY, bundle);
-        setCheckBoxParameter(this, R.id.social_presence,
-                RcsSettingsData.CAPABILITY_SOCIAL_PRESENCE, bundle);
-        setCheckBoxParameter(this, R.id.geolocation_push,
-                RcsSettingsData.CAPABILITY_GEOLOCATION_PUSH, bundle);
-        setCheckBoxParameter(this, R.id.file_transfer_thumbnail,
-                RcsSettingsData.CAPABILITY_FILE_TRANSFER_THUMBNAIL, bundle);
-        setCheckBoxParameter(this, R.id.file_transfer_sf,
-                RcsSettingsData.CAPABILITY_FILE_TRANSFER_SF, bundle);
-        setCheckBoxParameter(this, R.id.group_chat_sf, RcsSettingsData.CAPABILITY_GROUP_CHAT_SF,
-                bundle);
-        setCheckBoxParameter(this, R.id.sip_automata, RcsSettingsData.CAPABILITY_SIP_AUTOMATA,
-                bundle);
+        setCheckBoxParam(R.id.image_sharing, RcsSettingsData.CAPABILITY_IMAGE_SHARING, helper);
+        setCheckBoxParam(R.id.video_sharing, RcsSettingsData.CAPABILITY_VIDEO_SHARING, helper);
+        setCheckBoxParam(R.id.file_transfer, RcsSettingsData.CAPABILITY_FILE_TRANSFER, helper);
+        setCheckBoxParam(R.id.file_transfer_http, RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP,
+                helper);
+        setCheckBoxParam(R.id.im, RcsSettingsData.CAPABILITY_IM_SESSION, helper);
+        setCheckBoxParam(R.id.im_group, RcsSettingsData.CAPABILITY_IM_GROUP_SESSION, helper);
+        setCheckBoxParam(R.id.ipvoicecall, RcsSettingsData.CAPABILITY_IP_VOICE_CALL, helper);
+        setCheckBoxParam(R.id.ipvideocall, RcsSettingsData.CAPABILITY_IP_VIDEO_CALL, helper);
+        setCheckBoxParam(R.id.cs_video, RcsSettingsData.CAPABILITY_CS_VIDEO, helper);
+        setCheckBoxParam(R.id.presence_discovery, RcsSettingsData.CAPABILITY_PRESENCE_DISCOVERY,
+                helper);
+        setCheckBoxParam(R.id.social_presence, RcsSettingsData.CAPABILITY_SOCIAL_PRESENCE, helper);
+        setCheckBoxParam(R.id.geolocation_push, RcsSettingsData.CAPABILITY_GEOLOCATION_PUSH, helper);
+        setCheckBoxParam(R.id.file_transfer_thumbnail,
+                RcsSettingsData.CAPABILITY_FILE_TRANSFER_THUMBNAIL, helper);
+        setCheckBoxParam(R.id.file_transfer_sf, RcsSettingsData.CAPABILITY_FILE_TRANSFER_SF, helper);
+        setCheckBoxParam(R.id.group_chat_sf, RcsSettingsData.CAPABILITY_GROUP_CHAT_SF, helper);
+        setCheckBoxParam(R.id.sip_automata, RcsSettingsData.CAPABILITY_SIP_AUTOMATA, helper);
         TextView txt = (TextView) findViewById(R.id.release);
-        txt.setText(RcsSettings.getInstance().getGsmaRelease().name());
+        txt.setText(mRcsSettings.getGsmaRelease().name());
     }
 
     /**
@@ -232,6 +222,8 @@ public class ProfileProvisioning extends Activity {
      * Save parameters either in bundle or in RCS settings
      */
     private void saveInstanceState(Bundle bundle) {
+        ProvisioningHelper helper = new ProvisioningHelper(this, mRcsSettings, bundle);
+
         Spinner spinner = (Spinner) findViewById(R.id.ImsAuthenticationProcedureForMobile);
         if (bundle != null) {
             bundle.putInt(RcsSettingsData.IMS_AUTHENT_PROCEDURE_MOBILE,
@@ -239,7 +231,7 @@ public class ProfileProvisioning extends Activity {
         } else {
             AuthenticationProcedure procedure = AuthenticationProcedure.valueOf((String) spinner
                     .getSelectedItem());
-            RcsSettings.getInstance().setImsAuthenticationProcedureForMobile(procedure);
+            mRcsSettings.setImsAuthenticationProcedureForMobile(procedure);
         }
 
         spinner = (Spinner) findViewById(R.id.ImsAuthenticationProcedureForWifi);
@@ -249,71 +241,55 @@ public class ProfileProvisioning extends Activity {
         } else {
             AuthenticationProcedure procedure = AuthenticationProcedure.valueOf((String) spinner
                     .getSelectedItem());
-            RcsSettings.getInstance().setImsAuhtenticationProcedureForWifi(procedure);
+            mRcsSettings.setImsAuhtenticationProcedureForWifi(procedure);
         }
 
-        saveEditTextParameter(this, R.id.ImsUsername, RcsSettingsData.USERPROFILE_IMS_USERNAME,
-                bundle);
-        saveEditTextParameter(this, R.id.ImsDisplayName,
-                RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, bundle);
-        saveEditTextParameter(this, R.id.ImsHomeDomain,
-                RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN, bundle);
-        saveEditTextParameter(this, R.id.ImsPrivateId, RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID,
-                bundle);
-        saveEditTextParameter(this, R.id.ImsPassword, RcsSettingsData.USERPROFILE_IMS_PASSWORD,
-                bundle);
-        saveEditTextParameter(this, R.id.ImsRealm, RcsSettingsData.USERPROFILE_IMS_REALM, bundle);
-        saveEditTextParameter(this, R.id.ImsOutboundProxyAddrForMobile,
-                RcsSettingsData.IMS_PROXY_ADDR_MOBILE, bundle);
-        saveEditTextParameter(this, R.id.ImsOutboundProxyPortForMobile,
-                RcsSettingsData.IMS_PROXY_PORT_MOBILE, bundle);
-        saveEditTextParameter(this, R.id.ImsOutboundProxyAddrForWifi,
-                RcsSettingsData.IMS_PROXY_ADDR_WIFI, bundle);
-        saveEditTextParameter(this, R.id.ImsOutboundProxyPortForWifi,
-                RcsSettingsData.IMS_PROXY_PORT_WIFI, bundle);
-        saveEditTextParameter(this, R.id.XdmServerAddr, RcsSettingsData.XDM_SERVER, bundle);
-        saveEditTextParameter(this, R.id.XdmServerLogin, RcsSettingsData.XDM_LOGIN, bundle);
-        saveEditTextParameter(this, R.id.XdmServerPassword, RcsSettingsData.XDM_PASSWORD, bundle);
-        saveEditTextParameter(this, R.id.FtHttpServerAddr, RcsSettingsData.FT_HTTP_SERVER, bundle);
-        saveEditTextParameter(this, R.id.FtHttpServerLogin, RcsSettingsData.FT_HTTP_LOGIN, bundle);
-        saveEditTextParameter(this, R.id.FtHttpServerPassword, RcsSettingsData.FT_HTTP_PASSWORD,
-                bundle);
-        saveEditTextParameter(this, R.id.ImConferenceUri, RcsSettingsData.IM_CONF_URI, bundle);
-        saveEditTextParameter(this, R.id.EndUserConfReqUri,
-                RcsSettingsData.ENDUSER_CONFIRMATION_URI, bundle);
-        saveEditTextParameter(this, R.id.RcsApn, RcsSettingsData.RCS_APN, bundle);
+        saveEditTextParam(R.id.ImsUsername, RcsSettingsData.USERPROFILE_IMS_USERNAME, helper);
+        saveEditTextParam(R.id.ImsDisplayName, RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME, helper);
+        saveEditTextParam(R.id.ImsHomeDomain, RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN, helper);
+        saveEditTextParam(R.id.ImsPrivateId, RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID, helper);
+        saveEditTextParam(R.id.ImsPassword, RcsSettingsData.USERPROFILE_IMS_PASSWORD, helper);
+        saveEditTextParam(R.id.ImsRealm, RcsSettingsData.USERPROFILE_IMS_REALM, helper);
+        saveEditTextParam(R.id.ImsOutboundProxyAddrForMobile,
+                RcsSettingsData.IMS_PROXY_ADDR_MOBILE, helper);
+        saveEditTextParam(R.id.ImsOutboundProxyPortForMobile,
+                RcsSettingsData.IMS_PROXY_PORT_MOBILE, helper);
+        saveEditTextParam(R.id.ImsOutboundProxyAddrForWifi, RcsSettingsData.IMS_PROXY_ADDR_WIFI,
+                helper);
+        saveEditTextParam(R.id.ImsOutboundProxyPortForWifi, RcsSettingsData.IMS_PROXY_PORT_WIFI,
+                helper);
+        saveEditTextParam(R.id.XdmServerAddr, RcsSettingsData.XDM_SERVER, helper);
+        saveEditTextParam(R.id.XdmServerLogin, RcsSettingsData.XDM_LOGIN, helper);
+        saveEditTextParam(R.id.XdmServerPassword, RcsSettingsData.XDM_PASSWORD, helper);
+        saveEditTextParam(R.id.FtHttpServerAddr, RcsSettingsData.FT_HTTP_SERVER, helper);
+        saveEditTextParam(R.id.FtHttpServerLogin, RcsSettingsData.FT_HTTP_LOGIN, helper);
+        saveEditTextParam(R.id.FtHttpServerPassword, RcsSettingsData.FT_HTTP_PASSWORD, helper);
+        saveEditTextParam(R.id.ImConferenceUri, RcsSettingsData.IM_CONF_URI, helper);
+        saveEditTextParam(R.id.EndUserConfReqUri, RcsSettingsData.ENDUSER_CONFIRMATION_URI, helper);
+        saveEditTextParam(R.id.RcsApn, RcsSettingsData.RCS_APN, helper);
 
         // Save capabilities
-        saveCheckBoxParameter(this, R.id.image_sharing, RcsSettingsData.CAPABILITY_IMAGE_SHARING,
-                bundle);
-        saveCheckBoxParameter(this, R.id.video_sharing, RcsSettingsData.CAPABILITY_VIDEO_SHARING,
-                bundle);
-        saveCheckBoxParameter(this, R.id.file_transfer, RcsSettingsData.CAPABILITY_FILE_TRANSFER,
-                bundle);
-        saveCheckBoxParameter(this, R.id.file_transfer_http,
-                RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP, bundle);
-        saveCheckBoxParameter(this, R.id.im, RcsSettingsData.CAPABILITY_IM_SESSION, bundle);
-        saveCheckBoxParameter(this, R.id.im_group, RcsSettingsData.CAPABILITY_IM_GROUP_SESSION,
-                bundle);
-        saveCheckBoxParameter(this, R.id.ipvoicecall, RcsSettingsData.CAPABILITY_IP_VOICE_CALL,
-                bundle);
-        saveCheckBoxParameter(this, R.id.ipvideocall, RcsSettingsData.CAPABILITY_IP_VIDEO_CALL,
-                bundle);
-        saveCheckBoxParameter(this, R.id.cs_video, RcsSettingsData.CAPABILITY_CS_VIDEO, bundle);
-        saveCheckBoxParameter(this, R.id.presence_discovery,
-                RcsSettingsData.CAPABILITY_PRESENCE_DISCOVERY, bundle);
-        saveCheckBoxParameter(this, R.id.social_presence,
-                RcsSettingsData.CAPABILITY_SOCIAL_PRESENCE, bundle);
-        saveCheckBoxParameter(this, R.id.geolocation_push,
-                RcsSettingsData.CAPABILITY_GEOLOCATION_PUSH, bundle);
-        saveCheckBoxParameter(this, R.id.file_transfer_thumbnail,
-                RcsSettingsData.CAPABILITY_FILE_TRANSFER_THUMBNAIL, bundle);
-        saveCheckBoxParameter(this, R.id.file_transfer_sf,
-                RcsSettingsData.CAPABILITY_FILE_TRANSFER_SF, bundle);
-        saveCheckBoxParameter(this, R.id.group_chat_sf, RcsSettingsData.CAPABILITY_GROUP_CHAT_SF,
-                bundle);
-        saveCheckBoxParameter(this, R.id.sip_automata, RcsSettingsData.CAPABILITY_SIP_AUTOMATA,
-                bundle);
+        saveCheckBoxParam(R.id.image_sharing, RcsSettingsData.CAPABILITY_IMAGE_SHARING, helper);
+        saveCheckBoxParam(R.id.video_sharing, RcsSettingsData.CAPABILITY_VIDEO_SHARING, helper);
+        saveCheckBoxParam(R.id.file_transfer, RcsSettingsData.CAPABILITY_FILE_TRANSFER, helper);
+        saveCheckBoxParam(R.id.file_transfer_http, RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP,
+                helper);
+        saveCheckBoxParam(R.id.im, RcsSettingsData.CAPABILITY_IM_SESSION, helper);
+        saveCheckBoxParam(R.id.im_group, RcsSettingsData.CAPABILITY_IM_GROUP_SESSION, helper);
+        saveCheckBoxParam(R.id.ipvoicecall, RcsSettingsData.CAPABILITY_IP_VOICE_CALL, helper);
+        saveCheckBoxParam(R.id.ipvideocall, RcsSettingsData.CAPABILITY_IP_VIDEO_CALL, helper);
+        saveCheckBoxParam(R.id.cs_video, RcsSettingsData.CAPABILITY_CS_VIDEO, helper);
+        saveCheckBoxParam(R.id.presence_discovery, RcsSettingsData.CAPABILITY_PRESENCE_DISCOVERY,
+                helper);
+        saveCheckBoxParam(R.id.social_presence, RcsSettingsData.CAPABILITY_SOCIAL_PRESENCE, helper);
+        saveCheckBoxParam(R.id.geolocation_push, RcsSettingsData.CAPABILITY_GEOLOCATION_PUSH,
+                helper);
+        saveCheckBoxParam(R.id.file_transfer_thumbnail,
+                RcsSettingsData.CAPABILITY_FILE_TRANSFER_THUMBNAIL, helper);
+        saveCheckBoxParam(R.id.file_transfer_sf, RcsSettingsData.CAPABILITY_FILE_TRANSFER_SF,
+                helper);
+        saveCheckBoxParam(R.id.group_chat_sf, RcsSettingsData.CAPABILITY_GROUP_CHAT_SF, helper);
+        saveCheckBoxParam(R.id.sip_automata, RcsSettingsData.CAPABILITY_SIP_AUTOMATA, helper);
     }
 
     /**
@@ -333,7 +309,7 @@ public class ProfileProvisioning extends Activity {
         LayoutInflater factory = LayoutInflater.from(this);
         final View view = factory.inflate(R.layout.rcs_provisioning_generate_profile, null);
         final EditText textEdit = (EditText) view.findViewById(R.id.msisdn);
-        textEdit.setText(RcsSettings.getInstance().getUserProfileImsUserName());
+        textEdit.setText(mRcsSettings.getUserProfileImsUserName());
 
         String[] xmlFiles = getProvisioningFiles();
         final Spinner spinner = (Spinner) view.findViewById(R.id.XmlProvisioningFile);
@@ -442,38 +418,37 @@ public class ProfileProvisioning extends Activity {
          * @return true if loading the provisioning is successful
          */
         private boolean createProvisioning(String mXMLFileContent, String userPhoneNumber) {
-            RcsSettings rcsSettings = RcsSettings.getInstance();
-            ProvisioningParser parser = new ProvisioningParser(mXMLFileContent, rcsSettings);
+            ProvisioningParser parser = new ProvisioningParser(mXMLFileContent, mRcsSettings);
             // Save GSMA release set into the provider
-            GsmaRelease release = rcsSettings.getGsmaRelease();
+            GsmaRelease release = mRcsSettings.getGsmaRelease();
             // Save client Messaging Mode set into the provider
-            MessagingMode messagingMode = rcsSettings.getMessagingMode();
+            MessagingMode messagingMode = mRcsSettings.getMessagingMode();
 
             // Before parsing the provisioning, the GSMA release is set to Albatros
-            rcsSettings.setGsmaRelease(GsmaRelease.ALBATROS);
+            mRcsSettings.setGsmaRelease(GsmaRelease.ALBATROS);
             // Before parsing the provisioning, the client Messaging mode is set to NONE
-            rcsSettings.setMessagingMode(MessagingMode.NONE);
+            mRcsSettings.setMessagingMode(MessagingMode.NONE);
 
             if (parser.parse(release, true)) {
                 // Customize provisioning data with user phone number
-                rcsSettings.writeParameter(RcsSettingsData.USERPROFILE_IMS_USERNAME,
+                mRcsSettings.writeParameter(RcsSettingsData.USERPROFILE_IMS_USERNAME,
                         userPhoneNumber);
-                rcsSettings.writeParameter(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME,
+                mRcsSettings.writeParameter(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME,
                         userPhoneNumber);
-                String homeDomain = rcsSettings
+                String homeDomain = mRcsSettings
                         .readParameter(RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN);
                 String sipUri = userPhoneNumber + "@" + homeDomain;
-                rcsSettings.writeParameter(RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID, sipUri);
-                rcsSettings.writeParameter(RcsSettingsData.FT_HTTP_LOGIN, sipUri);
+                mRcsSettings.writeParameter(RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID, sipUri);
+                mRcsSettings.writeParameter(RcsSettingsData.FT_HTTP_LOGIN, sipUri);
                 return true;
             } else {
                 if (logger.isActivated()) {
                     logger.error("Can't parse provisioning document");
                 }
                 // Restore GSMA release saved before parsing of the provisioning
-                rcsSettings.setGsmaRelease(release);
+                mRcsSettings.setGsmaRelease(release);
                 // Restore the client messaging mode saved before parsing of the provisioning
-                rcsSettings.setMessagingMode(messagingMode);
+                mRcsSettings.setMessagingMode(messagingMode);
                 return false;
             }
         }
@@ -483,7 +458,7 @@ public class ProfileProvisioning extends Activity {
             super.onPostExecute(result);
             updateProfileProvisioningUI(null);
             // set configuration mode to manual
-            RcsSettings.getInstance().setConfigurationMode(ConfigurationMode.MANUAL);
+            mRcsSettings.setConfigurationMode(ConfigurationMode.MANUAL);
             if (result)
                 Toast.makeText(ProfileProvisioning.this, getString(R.string.label_reboot_service),
                         Toast.LENGTH_LONG).show();

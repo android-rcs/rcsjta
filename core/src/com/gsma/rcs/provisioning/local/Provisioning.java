@@ -18,7 +18,9 @@
 
 package com.gsma.rcs.provisioning.local;
 
-import android.app.Activity;
+import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.provider.settings.RcsSettings;
+
 import android.app.TabActivity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -26,8 +28,6 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TabHost;
-
-import com.gsma.rcs.provider.settings.RcsSettings;
 
 /**
  * Main
@@ -41,7 +41,9 @@ public class Provisioning extends TabActivity {
         super.onCreate(savedInstanceState);
 
         // Instantiate the settings manager
-        RcsSettings.createInstance(getApplicationContext());
+        LocalContentResolver localContentResolver = new LocalContentResolver(
+                getApplicationContext());
+        RcsSettings.createInstance(localContentResolver);
 
         // Set tabs
         final TabHost tabHost = getTabHost();
@@ -58,41 +60,40 @@ public class Provisioning extends TabActivity {
     /**
      * Set edit text either from bundle or from RCS settings if bundle is null
      * 
-     * @param activity the activity
      * @param viewID the view ID for the text edit
-     * @param rcsSettingsKey the key of the RCS parameter
-     * @param bundle the bundle to save parameter
+     * @param settingsKey the key of the RCS parameter
+     * @param helper
      */
-    public static void setEditTextParameter(final Activity activity, int viewID,
-            String rcsSettingsKey, final Bundle bundle) {
+    /* package private */static void setEditTextParam(int viewID,
+            String settingsKey, ProvisioningHelper helper) {
         String parameter = null;
-        if (bundle != null && bundle.containsKey(rcsSettingsKey)) {
-            parameter = bundle.getString(rcsSettingsKey);
+        Bundle bundle = helper.getBundle();
+        if (bundle != null && bundle.containsKey(settingsKey)) {
+            parameter = bundle.getString(settingsKey);
         } else {
-            parameter = RcsSettings.getInstance().readParameter(rcsSettingsKey);
+            parameter = helper.getRcsSettings().readParameter(settingsKey);
         }
-        EditText editText = (EditText) activity.findViewById(viewID);
+        EditText editText = (EditText) helper.getActivity().findViewById(viewID);
         editText.setText(parameter);
     }
 
     /**
      * Set check box either from bundle or from RCS settings if bundle is null
      * 
-     * @param activity the activity
      * @param viewID the view ID for the check box
-     * @param rcsSettingsKey the key of the RCS parameter
-     * @param bundle the bundle to save parameter
+     * @param settingsKey the key of the RCS parameter
+     * @param helper
      */
-    public static void setCheckBoxParameter(final Activity activity, int viewID,
-            String rcsSettingsKey, final Bundle bundle) {
+    /* package private */static void setCheckBoxParam(int viewID, String settingsKey,
+            ProvisioningHelper helper) {
         Boolean parameter = null;
-        if (bundle != null && bundle.containsKey(rcsSettingsKey)) {
-            parameter = bundle.getBoolean(rcsSettingsKey);
+        Bundle bundle = helper.getBundle();
+        if (bundle != null && bundle.containsKey(settingsKey)) {
+            parameter = bundle.getBoolean(settingsKey);
         } else {
-            parameter = Boolean.parseBoolean(RcsSettings.getInstance()
-                    .readParameter(rcsSettingsKey));
+            parameter = Boolean.parseBoolean(helper.getRcsSettings().readParameter(settingsKey));
         }
-        CheckBox box = (CheckBox) activity.findViewById(viewID);
+        CheckBox box = (CheckBox) helper.getActivity().findViewById(viewID);
         box.setChecked(parameter);
     }
 
@@ -100,18 +101,19 @@ public class Provisioning extends TabActivity {
      * Set spinner selection from bundle or from RCS settings if bundle is null
      * 
      * @param spinner the spinner
-     * @param rcsSettingsKey the key of the RCS parameter
-     * @param bundle the bundle to save parameter
+     * @param settingsKey the key of the RCS parameter
      * @param selection table of string representing choice selection
+     * @param helper
      * @return the index of the spinner selection
      */
-    public static int setSpinnerParameter(final Spinner spinner, String rcsSettingsKey,
-            final Bundle bundle, final String[] selection) {
+    /* package private */static int setSpinnerParameter(final Spinner spinner, String settingsKey,
+            final String[] selection, ProvisioningHelper helper) {
         Integer parameter = null;
-        if (bundle != null && bundle.containsKey(rcsSettingsKey)) {
-            parameter = bundle.getInt(rcsSettingsKey);
+        Bundle bundle = helper.getBundle();
+        if (bundle != null && bundle.containsKey(settingsKey)) {
+            parameter = bundle.getInt(settingsKey);
         } else {
-            String selected = RcsSettings.getInstance().readParameter(rcsSettingsKey);
+            String selected = helper.getRcsSettings().readParameter(settingsKey);
             parameter = java.util.Arrays.asList(selection).indexOf(selected);
         }
         spinner.setSelection(parameter % selection.length);
@@ -121,36 +123,36 @@ public class Provisioning extends TabActivity {
     /**
      * Save string either in bundle or in RCS settings if bundle is null
      * 
-     * @param activity the activity
      * @param viewID the view ID
-     * @param rcsSettingsKey the key of the RCS parameter
-     * @param bundle the bundle to save parameter
+     * @param settingsKey the key of the RCS parameter
+     * @param helper
      */
-    public static void saveEditTextParameter(Activity activity, int viewID, String rcsSettingsKey,
-            Bundle bundle) {
-        EditText txt = (EditText) activity.findViewById(viewID);
+    /* package private */static void saveEditTextParam(int viewID, String settingsKey,
+            ProvisioningHelper helper) {
+        EditText txt = (EditText) helper.getActivity().findViewById(viewID);
+        Bundle bundle = helper.getBundle();
         if (bundle != null) {
-            bundle.putString(rcsSettingsKey, txt.getText().toString());
+            bundle.putString(settingsKey, txt.getText().toString());
         } else {
-            RcsSettings.getInstance().writeParameter(rcsSettingsKey, txt.getText().toString());
+            helper.getRcsSettings().writeParameter(settingsKey, txt.getText().toString());
         }
     }
 
     /**
      * Save boolean either in bundle or in RCS settings if bundle is null
      * 
-     * @param activity the activity
      * @param viewID the view ID
-     * @param rcsSettingsKey the key of the RCS parameter
-     * @param bundle the bundle to save parameter
+     * @param settingsKey the key of the RCS parameter
+     * @param helper
      */
-    public static void saveCheckBoxParameter(Activity activity, int viewID, String rcsSettingsKey,
-            Bundle bundle) {
-        CheckBox box = (CheckBox) activity.findViewById(viewID);
+    /* package private */static void saveCheckBoxParam(int viewID, String settingsKey,
+            ProvisioningHelper helper) {
+        CheckBox box = (CheckBox) helper.getActivity().findViewById(viewID);
+        Bundle bundle = helper.getBundle();
         if (bundle != null) {
-            bundle.putBoolean(rcsSettingsKey, box.isChecked());
+            bundle.putBoolean(settingsKey, box.isChecked());
         } else {
-            RcsSettings.getInstance().writeBoolean(rcsSettingsKey, box.isChecked());
+            helper.getRcsSettings().writeBoolean(settingsKey, box.isChecked());
         }
     }
 }

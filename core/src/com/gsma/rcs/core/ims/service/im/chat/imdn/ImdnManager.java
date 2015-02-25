@@ -50,41 +50,45 @@ public class ImdnManager extends Thread {
     /**
      * IMS service
      */
-    private ImsService imsService;
+    private ImsService mImsService;
 
     /**
      * Buffer
      */
-    private FifoBuffer buffer = new FifoBuffer();
+    private FifoBuffer mBuffer = new FifoBuffer();
 
     /**
      * Activation flag
      */
-    private boolean activated;
+    private boolean mActivated;
+
+    private final RcsSettings mRcsSettings;
 
     /**
      * The logger
      */
-    private final static Logger logger = Logger.getLogger(ImdnManager.class.getSimpleName());
+    private final static Logger sLogger = Logger.getLogger(ImdnManager.class.getSimpleName());
 
     /**
      * Constructor
      * 
      * @param imsService IMS service
+     * @param rcsSettings
      */
-    public ImdnManager(ImsService imsService) {
-        this.imsService = imsService;
-        this.activated = RcsSettings.getInstance().isImReportsActivated();
+    public ImdnManager(ImsService imsService, RcsSettings rcsSettings) {
+        mImsService = imsService;
+        mActivated = rcsSettings.isImReportsActivated();
+        mRcsSettings = rcsSettings;
     }
 
     /**
      * Terminate manager
      */
     public void terminate() {
-        if (logger.isActivated()) {
-            logger.info("Terminate the IMDN manager");
+        if (sLogger.isActivated()) {
+            sLogger.info("Terminate the IMDN manager");
         }
-        buffer.close();
+        mBuffer.close();
     }
 
     /**
@@ -93,18 +97,18 @@ public class ImdnManager extends Thread {
      * @return Boolean
      */
     public boolean isImdnActivated() {
-        return activated;
+        return mActivated;
     }
 
     /**
      * Background processing
      */
     public void run() {
-        if (logger.isActivated()) {
-            logger.info("Start background processing");
+        if (sLogger.isActivated()) {
+            sLogger.info("Start background processing");
         }
         DeliveryStatus delivery = null;
-        while ((delivery = (DeliveryStatus) buffer.getObject()) != null) {
+        while ((delivery = (DeliveryStatus) mBuffer.getObject()) != null) {
             try {
                 // Send SIP MESSAGE
                 sendSipMessageDeliveryStatus(delivery, null); // TODO: add sip.instance
@@ -116,13 +120,13 @@ public class ImdnManager extends Thread {
                     MessagingLog.getInstance().markIncomingChatMessageAsReceived(
                             delivery.getMsgId());
             } catch (Exception e) {
-                if (logger.isActivated()) {
-                    logger.error("Unexpected exception", e);
+                if (sLogger.isActivated()) {
+                    sLogger.error("Unexpected exception", e);
                 }
             }
         }
-        if (logger.isActivated()) {
-            logger.info("End of background processing");
+        if (sLogger.isActivated()) {
+            sLogger.info("End of background processing");
         }
     }
 
@@ -136,7 +140,7 @@ public class ImdnManager extends Thread {
     public void sendMessageDeliveryStatus(ContactId contact, String msgId, String status) {
         // Add request in the buffer for background processing
         DeliveryStatus delivery = new DeliveryStatus(contact, msgId, status);
-        buffer.addObject(delivery);
+        mBuffer.addObject(delivery);
     }
 
     /**
@@ -145,6 +149,7 @@ public class ImdnManager extends Thread {
      * @param contact Contact identifier
      * @param msgId Message ID
      * @param status Delivery status
+     * @param remoteInstanceId
      */
     public void sendMessageDeliveryStatusImmediately(ContactId contact, String msgId,
             String status, final String remoteInstanceId) {
@@ -166,13 +171,14 @@ public class ImdnManager extends Thread {
      */
     private void sendSipMessageDeliveryStatus(DeliveryStatus deliveryStatus, String remoteInstanceId) {
         try {
-            if (!RcsSettings.getInstance().isRespondToDisplayReports()
+            if (!mRcsSettings.isRespondToDisplayReports()
                     && ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(deliveryStatus.getStatus())) {
                 return;
             }
 
-            if (logger.isActivated()) {
-                logger.debug("Send delivery status " + deliveryStatus.getStatus() + " for message "
+            if (sLogger.isActivated()) {
+                sLogger.debug("Send delivery status " + deliveryStatus.getStatus()
+                        + " for message "
                         + deliveryStatus.getMsgId());
             }
 
@@ -185,32 +191,33 @@ public class ImdnManager extends Thread {
 
             // Create authentication agent
             SessionAuthenticationAgent authenticationAgent = new SessionAuthenticationAgent(
-                    imsService.getImsModule());
+                    mImsService.getImsModule());
 
             String toUri = PhoneUtils.formatContactIdToUri(deliveryStatus.getContact());
             // Create a dialog path
-            SipDialogPath dialogPath = new SipDialogPath(imsService.getImsModule().getSipManager()
-                    .getSipStack(), imsService.getImsModule().getSipManager().getSipStack()
+            SipDialogPath dialogPath = new SipDialogPath(mImsService.getImsModule().getSipManager()
+                    .getSipStack(), mImsService.getImsModule().getSipManager().getSipStack()
                     .generateCallId(), 1, toUri, ImsModule.IMS_USER_PROFILE.getPublicUri(), toUri,
-                    imsService.getImsModule().getSipManager().getSipStack().getServiceRoutePath());
+                    mImsService.getImsModule().getSipManager().getSipStack().getServiceRoutePath(),
+                    mRcsSettings);
             dialogPath.setRemoteSipInstance(remoteInstanceId);
 
             // Create MESSAGE request
-            if (logger.isActivated()) {
-                logger.info("Send first MESSAGE.");
+            if (sLogger.isActivated()) {
+                sLogger.info("Send first MESSAGE.");
             }
             SipRequest msg = SipMessageFactory.createMessage(dialogPath,
                     FeatureTags.FEATURE_OMA_IM, CpimMessage.MIME_TYPE, cpim.getBytes(UTF8));
 
             // Send MESSAGE request
-            SipTransactionContext ctx = imsService.getImsModule().getSipManager()
+            SipTransactionContext ctx = mImsService.getImsModule().getSipManager()
                     .sendSipMessageAndWait(msg);
 
             // Analyze received message
             if (ctx.getStatusCode() == 407) {
                 // 407 response received
-                if (logger.isActivated()) {
-                    logger.info("407 response received");
+                if (sLogger.isActivated()) {
+                    sLogger.info("407 response received");
                 }
 
                 // Set the Proxy-Authorization header
@@ -220,8 +227,8 @@ public class ImdnManager extends Thread {
                 dialogPath.incrementCseq();
 
                 // Create a second MESSAGE request with the right token
-                if (logger.isActivated()) {
-                    logger.info("Send second MESSAGE.");
+                if (sLogger.isActivated()) {
+                    sLogger.info("Send second MESSAGE.");
                 }
                 msg = SipMessageFactory.createMessage(dialogPath, FeatureTags.FEATURE_OMA_IM,
                         CpimMessage.MIME_TYPE, cpim.getBytes(UTF8));
@@ -230,36 +237,36 @@ public class ImdnManager extends Thread {
                 authenticationAgent.setProxyAuthorizationHeader(msg);
 
                 // Send MESSAGE request
-                ctx = imsService.getImsModule().getSipManager().sendSipMessageAndWait(msg);
+                ctx = mImsService.getImsModule().getSipManager().sendSipMessageAndWait(msg);
 
                 // Analyze received message
                 if ((ctx.getStatusCode() == 200) || (ctx.getStatusCode() == 202)) {
                     // 200 OK response
-                    if (logger.isActivated()) {
-                        logger.info("20x OK response received");
+                    if (sLogger.isActivated()) {
+                        sLogger.info("20x OK response received");
                     }
                 } else {
                     // Error
-                    if (logger.isActivated()) {
-                        logger.info("Delivery report has failed: " + ctx.getStatusCode()
+                    if (sLogger.isActivated()) {
+                        sLogger.info("Delivery report has failed: " + ctx.getStatusCode()
                                 + " response received");
                     }
                 }
             } else if ((ctx.getStatusCode() == 200) || (ctx.getStatusCode() == 202)) {
                 // 200 OK received
-                if (logger.isActivated()) {
-                    logger.info("20x OK response received");
+                if (sLogger.isActivated()) {
+                    sLogger.info("20x OK response received");
                 }
             } else {
                 // Error responses
-                if (logger.isActivated()) {
-                    logger.info("Delivery report has failed: " + ctx.getStatusCode()
+                if (sLogger.isActivated()) {
+                    sLogger.info("Delivery report has failed: " + ctx.getStatusCode()
                             + " response received");
                 }
             }
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Delivery report has failed", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Delivery report has failed", e);
             }
         }
     }

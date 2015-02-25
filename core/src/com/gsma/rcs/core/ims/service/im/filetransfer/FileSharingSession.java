@@ -79,7 +79,8 @@ public abstract class FileSharingSession extends ImsServiceSession {
     /**
      * The logger
      */
-    private static final Logger logger = Logger.getLogger(FileSharingSession.class.getSimpleName());
+    private static final Logger sLogger = Logger
+            .getLogger(FileSharingSession.class.getSimpleName());
 
     /**
      * Constructor
@@ -90,10 +91,11 @@ public abstract class FileSharingSession extends ImsServiceSession {
      * @param remoteUri the remote URI
      * @param fileIcon File icon
      * @param filetransferId
+     * @param rcsSettings
      */
     public FileSharingSession(ImsService parent, MmContent content, ContactId contact,
-            String remoteUri, MmContent fileIcon, String filetransferId) {
-        super(parent, contact, remoteUri);
+            String remoteUri, MmContent fileIcon, String filetransferId, RcsSettings rcsSettings) {
+        super(parent, contact, remoteUri, rcsSettings);
 
         mContent = content;
         mFileIcon = fileIcon;
@@ -216,23 +218,24 @@ public abstract class FileSharingSession extends ImsServiceSession {
      * Check if file capacity is acceptable
      * 
      * @param fileSize File size in bytes
+     * @param rcsSettings
      * @return Error or null if file capacity is acceptable
      */
-    public static FileSharingError isFileCapacityAcceptable(long fileSize) {
-        long maxFileSharingSize = RcsSettings.getInstance().getMaxFileTransferSize();
+    public static FileSharingError isFileCapacityAcceptable(long fileSize, RcsSettings rcsSettings) {
+        long maxFileSharingSize = rcsSettings.getMaxFileTransferSize();
         boolean fileIsToBig = (maxFileSharingSize > 0) ? fileSize > maxFileSharingSize : false;
         boolean storageIsTooSmall = (StorageUtils.getExternalStorageFreeSpace() > 0) ? fileSize > StorageUtils
                 .getExternalStorageFreeSpace()
                 : false;
         if (fileIsToBig) {
-            if (logger.isActivated()) {
-                logger.warn("File is too big, reject the file transfer");
+            if (sLogger.isActivated()) {
+                sLogger.warn("File is too big, reject the file transfer");
             }
             return new FileSharingError(FileSharingError.MEDIA_SIZE_TOO_BIG);
         } else {
             if (storageIsTooSmall) {
-                if (logger.isActivated()) {
-                    logger.warn("Not enough storage capacity, reject the file transfer");
+                if (sLogger.isActivated()) {
+                    sLogger.warn("Not enough storage capacity, reject the file transfer");
                 }
                 return new FileSharingError(FileSharingError.NOT_ENOUGH_STORAGE_SPACE);
             }

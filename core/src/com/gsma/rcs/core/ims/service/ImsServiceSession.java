@@ -70,37 +70,37 @@ public abstract class ImsServiceSession extends Thread {
     /**
      * IMS service
      */
-    private ImsService imsService;
+    private ImsService mImsService;
 
     /**
      * Session ID
      */
-    private String sessionId = SessionIdGenerator.getNewId();
+    private String mSessionId = SessionIdGenerator.getNewId();
 
     /**
      * Remote contactId
      */
-    private ContactId contact;
+    private ContactId mContact;
 
     /**
      * Remote contactUri
      */
-    private String remoteUri;
+    private String mRemoteUri;
 
     /**
      * Remote display name
      */
-    private String remoteDisplayName;
+    private String mRemoteDisplayName;
 
     /**
      * Dialog path
      */
-    private SipDialogPath dialogPath;
+    private SipDialogPath mDialogPath;
 
     /**
      * Authentication agent
      */
-    private SessionAuthenticationAgent authenticationAgent;
+    private SessionAuthenticationAgent mAuthenticationAgent;
 
     /**
      * Session invitation status
@@ -110,47 +110,49 @@ public abstract class ImsServiceSession extends Thread {
     /**
      * Wait user answer for session invitation
      */
-    protected Object waitUserAnswer = new Object();
+    protected Object mWaitUserAnswer = new Object();
 
     /**
      * Session listeners
      */
-    private Vector<ImsSessionListener> listeners = new Vector<ImsSessionListener>();
+    private Vector<ImsSessionListener> mListeners = new Vector<ImsSessionListener>();
 
     /**
      * Session timer manager
      */
-    private SessionTimerManager sessionTimer = new SessionTimerManager(this);
+    private SessionTimerManager mSessionTimer = new SessionTimerManager(this);
 
     /**
      * Update session manager
      */
-    protected UpdateSessionManager updateMgr;
+    protected UpdateSessionManager mUpdateMgr;
 
     /**
      * Ringing period (in seconds)
      */
-    private int ringingPeriod = RcsSettings.getInstance().getRingingPeriod();
+    private final int mRingingPeriod;
 
     /**
      * Session interrupted flag
      */
-    private boolean sessionInterrupted = false;
+    private boolean mSessionInterrupted = false;
 
     /**
      * Session terminated by remote flag
      */
-    private boolean sessionTerminatedByRemote = false;
+    private boolean mSessionTerminatedByRemote = false;
 
     /**
      * Session accepting flag
      */
     private boolean mSessionAccepted = false;
 
+    protected final RcsSettings mRcsSettings;
+
     /**
      * The logger
      */
-    private static final Logger logger = Logger.getLogger(ImsServiceSession.class.getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(ImsServiceSession.class.getSimpleName());
 
     /**
      * Constructor
@@ -158,13 +160,17 @@ public abstract class ImsServiceSession extends Thread {
      * @param imsService IMS service
      * @param contact Remote contact Identifier
      * @param remoteUri Remote URI
+     * @param rcsSettings
      */
-    public ImsServiceSession(ImsService imsService, ContactId contact, String remoteUri) {
-        this.imsService = imsService;
-        this.contact = contact;
-        this.remoteUri = remoteUri;
-        this.authenticationAgent = new SessionAuthenticationAgent(imsService.getImsModule());
-        this.updateMgr = new UpdateSessionManager(this);
+    public ImsServiceSession(ImsService imsService, ContactId contact, String remoteUri,
+            RcsSettings rcsSettings) {
+        mImsService = imsService;
+        mContact = contact;
+        mRemoteUri = remoteUri;
+        mAuthenticationAgent = new SessionAuthenticationAgent(imsService.getImsModule());
+        mUpdateMgr = new UpdateSessionManager(this, rcsSettings);
+        mRcsSettings = rcsSettings;
+        mRingingPeriod = mRcsSettings.getRingingPeriod();
     }
 
     /**
@@ -180,16 +186,17 @@ public abstract class ImsServiceSession extends Thread {
                 .getServiceRoutePath();
 
         // Create a dialog path
-        dialogPath = new SipDialogPath(
-                getImsService().getImsModule().getSipManager().getSipStack(), callId, 1, remoteUri,
-                ImsModule.IMS_USER_PROFILE.getPublicAddress(), remoteUri, route);
+        mDialogPath = new SipDialogPath(
+                getImsService().getImsModule().getSipManager().getSipStack(), callId, 1,
+                mRemoteUri,
+                ImsModule.IMS_USER_PROFILE.getPublicAddress(), mRemoteUri, route, mRcsSettings);
 
         // Set the authentication agent in the dialog path
-        dialogPath.setAuthenticationAgent(getAuthenticationAgent());
+        mDialogPath.setAuthenticationAgent(getAuthenticationAgent());
 
-        if (contact != null) {
+        if (mContact != null) {
             try {
-                remoteDisplayName = ContactsManager.getInstance().getContactDisplayName(contact);
+                mRemoteDisplayName = ContactsManager.getInstance().getContactDisplayName(mContact);
             } catch (Exception e) {
                 // RCS account does not exist
             }
@@ -221,23 +228,23 @@ public abstract class ImsServiceSession extends Thread {
         Vector<String> route = SipUtils.routeProcessing(invite, false);
 
         // Create a dialog path
-        dialogPath = new SipDialogPath(
+        mDialogPath = new SipDialogPath(
                 getImsService().getImsModule().getSipManager().getSipStack(), callId, cseq, target,
-                localParty, remoteParty, route);
+                localParty, remoteParty, route, mRcsSettings);
 
         // Set the INVITE request
-        dialogPath.setInvite(invite);
+        mDialogPath.setInvite(invite);
 
         // Set the remote tag
-        dialogPath.setRemoteTag(invite.getFromTag());
+        mDialogPath.setRemoteTag(invite.getFromTag());
 
         // Set the remote content part
-        dialogPath.setRemoteContent(invite.getContent());
+        mDialogPath.setRemoteContent(invite.getContent());
 
         // Set the session timer expire
-        dialogPath.setSessionExpireTime(invite.getSessionTimerExpire());
+        mDialogPath.setSessionExpireTime(invite.getSessionTimerExpire());
 
-        remoteDisplayName = SipUtils.getDisplayNameFromUri(remoteParty);
+        mRemoteDisplayName = SipUtils.getDisplayNameFromUri(remoteParty);
     }
 
     /**
@@ -246,21 +253,23 @@ public abstract class ImsServiceSession extends Thread {
      * @param listener Listener
      */
     public void addListener(ImsSessionListener listener) {
-        listeners.add(listener);
+        mListeners.add(listener);
     }
 
     /**
      * Remove a listener
+     * 
+     * @param listener
      */
     public void removeListener(ImsSessionListener listener) {
-        listeners.remove(listener);
+        mListeners.remove(listener);
     }
 
     /**
      * Remove all listeners
      */
     public void removeListeners() {
-        listeners.removeAllElements();
+        mListeners.removeAllElements();
     }
 
     /**
@@ -269,7 +278,7 @@ public abstract class ImsServiceSession extends Thread {
      * @return Listeners
      */
     public Vector<ImsSessionListener> getListeners() {
-        return listeners;
+        return mListeners;
     }
 
     /**
@@ -278,7 +287,7 @@ public abstract class ImsServiceSession extends Thread {
      * @return Session timer manager
      */
     public SessionTimerManager getSessionTimerManager() {
-        return sessionTimer;
+        return mSessionTimer;
     }
 
     /**
@@ -287,7 +296,7 @@ public abstract class ImsServiceSession extends Thread {
      * @return UpdateSessionManager
      */
     public UpdateSessionManager getUpdateSessionManager() {
-        return updateMgr;
+        return mUpdateMgr;
     }
 
     /**
@@ -304,6 +313,9 @@ public abstract class ImsServiceSession extends Thread {
      */
     public abstract void startSession();
 
+    /**
+     * Removes the session
+     */
     public abstract void removeSession();
 
     /**
@@ -312,7 +324,7 @@ public abstract class ImsServiceSession extends Thread {
      * @return IMS service
      */
     public ImsService getImsService() {
-        return imsService;
+        return mImsService;
     }
 
     /**
@@ -321,7 +333,7 @@ public abstract class ImsServiceSession extends Thread {
      * @return Session ID
      */
     public String getSessionID() {
-        return sessionId;
+        return mSessionId;
     }
 
     /**
@@ -333,7 +345,7 @@ public abstract class ImsServiceSession extends Thread {
      *            </p>
      */
     public void setSessionID(String sessionId) {
-        this.sessionId = sessionId;
+        this.mSessionId = sessionId;
     }
 
     /**
@@ -342,7 +354,7 @@ public abstract class ImsServiceSession extends Thread {
      * @return ContactId
      */
     public ContactId getRemoteContact() {
-        return contact;
+        return mContact;
     }
 
     /**
@@ -351,7 +363,7 @@ public abstract class ImsServiceSession extends Thread {
      * @return remoteUri
      */
     public String getRemoteUri() {
-        return remoteUri;
+        return mRemoteUri;
     }
 
     /**
@@ -360,16 +372,16 @@ public abstract class ImsServiceSession extends Thread {
      * @return String
      */
     public String getRemoteDisplayName() {
-        return remoteDisplayName;
+        return mRemoteDisplayName;
     }
 
     /**
      * Set display name of the remote contact
      * 
-     * @param String
+     * @param remoteDisplayName
      */
     public void setRemoteDisplayName(String remoteDisplayName) {
-        this.remoteDisplayName = remoteDisplayName;
+        this.mRemoteDisplayName = remoteDisplayName;
     }
 
     /**
@@ -378,7 +390,7 @@ public abstract class ImsServiceSession extends Thread {
      * @return Dialog path object
      */
     public SipDialogPath getDialogPath() {
-        return dialogPath;
+        return mDialogPath;
     }
 
     /**
@@ -387,7 +399,7 @@ public abstract class ImsServiceSession extends Thread {
      * @param dialog Dialog path
      */
     public void setDialogPath(SipDialogPath dialog) {
-        dialogPath = dialog;
+        mDialogPath = dialog;
     }
 
     /**
@@ -396,7 +408,7 @@ public abstract class ImsServiceSession extends Thread {
      * @return Authentication agent
      */
     public SessionAuthenticationAgent getAuthenticationAgent() {
-        return authenticationAgent;
+        return mAuthenticationAgent;
     }
 
     /**
@@ -405,14 +417,14 @@ public abstract class ImsServiceSession extends Thread {
      * @param code Error code
      */
     public void rejectSession(int code) {
-        if (logger.isActivated()) {
-            logger.debug("Session invitation has been rejected");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Session invitation has been rejected");
         }
         mInvitationStatus = InvitationStatus.INVITATION_REJECTED;
 
         // Unblock semaphore
-        synchronized (waitUserAnswer) {
-            waitUserAnswer.notifyAll();
+        synchronized (mWaitUserAnswer) {
+            mWaitUserAnswer.notifyAll();
         }
 
         // Decline the invitation
@@ -426,14 +438,14 @@ public abstract class ImsServiceSession extends Thread {
      * Accept the session invitation
      */
     public void acceptSession() {
-        if (logger.isActivated()) {
-            logger.debug("Session invitation has been accepted");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Session invitation has been accepted");
         }
         mInvitationStatus = InvitationStatus.INVITATION_ACCEPTED;
 
         // Unblock semaphore
-        synchronized (waitUserAnswer) {
-            waitUserAnswer.notifyAll();
+        synchronized (mWaitUserAnswer) {
+            mWaitUserAnswer.notifyAll();
         }
     }
 
@@ -447,17 +459,17 @@ public abstract class ImsServiceSession extends Thread {
             return mInvitationStatus;
         }
 
-        if (logger.isActivated()) {
-            logger.debug("Wait session invitation answer");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Wait session invitation answer");
         }
 
         // Wait until received response or received timeout
         try {
-            synchronized (waitUserAnswer) {
-                waitUserAnswer.wait(ringingPeriod * 1000);
+            synchronized (mWaitUserAnswer) {
+                mWaitUserAnswer.wait(mRingingPeriod * 1000);
             }
         } catch (InterruptedException e) {
-            sessionInterrupted = true;
+            mSessionInterrupted = true;
         }
 
         return mInvitationStatus;
@@ -467,28 +479,28 @@ public abstract class ImsServiceSession extends Thread {
      * Interrupt session
      */
     public void interruptSession() {
-        if (logger.isActivated()) {
-            logger.debug("Interrupt the session");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Interrupt the session");
         }
 
         try {
             // Unblock semaphore
-            synchronized (waitUserAnswer) {
-                waitUserAnswer.notifyAll();
+            synchronized (mWaitUserAnswer) {
+                mWaitUserAnswer.notifyAll();
             }
 
             if (!isSessionInterrupted()) {
                 // Interrupt thread
-                sessionInterrupted = true;
+                mSessionInterrupted = true;
                 interrupt();
             }
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't interrupt the session correctly", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't interrupt the session correctly", e);
             }
         }
-        if (logger.isActivated()) {
-            logger.debug("Session has been interrupted");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Session has been interrupted");
         }
     }
 
@@ -498,8 +510,8 @@ public abstract class ImsServiceSession extends Thread {
      * @param reason Termination reason
      */
     public void abortSession(TerminationReason reason) {
-        if (logger.isActivated()) {
-            logger.info("Abort the session ".concat(reason.toString()));
+        if (sLogger.isActivated()) {
+            sLogger.info("Abort the session ".concat(reason.toString()));
         }
 
         interruptSession();
@@ -513,16 +525,16 @@ public abstract class ImsServiceSession extends Thread {
         /* TODO: This will be changed anyway by the implementation of CR018 */
         Collection<ImsSessionListener> listeners = getListeners();
         /* Handles the case of REJECTED_BY_USER on originating session */
-        if (TerminationReason.TERMINATION_BY_USER == reason && dialogPath != null
-                && !dialogPath.isSigEstablished()) {
+        if (TerminationReason.TERMINATION_BY_USER == reason && mDialogPath != null
+                && !mDialogPath.isSigEstablished()) {
             for (ImsSessionListener listener : listeners) {
-                listener.handleSessionRejectedByUser(contact);
+                listener.handleSessionRejectedByUser(mContact);
             }
             return;
         }
 
         for (ImsSessionListener listener : listeners) {
-            listener.handleSessionAborted(contact, reason);
+            listener.handleSessionAborted(mContact, reason);
         }
     }
 
@@ -532,12 +544,12 @@ public abstract class ImsServiceSession extends Thread {
      * @param reason Reason
      */
     public void terminateSession(TerminationReason reason) {
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Terminate the session (reason ").append(reason)
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Terminate the session (reason ").append(reason)
                     .append(")").toString());
         }
 
-        if ((dialogPath == null) || dialogPath.isSessionTerminated()) {
+        if ((mDialogPath == null) || mDialogPath.isSessionTerminated()) {
             // Already terminated
             return;
         }
@@ -547,19 +559,19 @@ public abstract class ImsServiceSession extends Thread {
 
         // Update dialog path
         if (TerminationReason.TERMINATION_BY_USER == reason) {
-            dialogPath.sessionTerminated(200, "Call completed");
+            mDialogPath.sessionTerminated(200, "Call completed");
         } else {
-            dialogPath.sessionTerminated();
+            mDialogPath.sessionTerminated();
         }
 
         // Unblock semaphore (used for terminating side only)
-        synchronized (waitUserAnswer) {
-            waitUserAnswer.notifyAll();
+        synchronized (mWaitUserAnswer) {
+            mWaitUserAnswer.notifyAll();
         }
 
         try {
             // Terminate the session
-            if (dialogPath.isSigEstablished()) {
+            if (mDialogPath.isSigEstablished()) {
                 // Increment the Cseq number of the dialog path
                 getDialogPath().incrementCseq();
 
@@ -570,12 +582,12 @@ public abstract class ImsServiceSession extends Thread {
                 getImsService().getImsModule().getSipManager().sendSipCancel(getDialogPath());
             }
 
-            if (logger.isActivated()) {
-                logger.debug("SIP session has been terminated");
+            if (sLogger.isActivated()) {
+                sLogger.debug("SIP session has been terminated");
             }
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Session termination has failed", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Session termination has failed", e);
             }
         }
     }
@@ -586,8 +598,8 @@ public abstract class ImsServiceSession extends Thread {
      * @param bye BYE request
      */
     public void receiveBye(SipRequest bye) {
-        if (logger.isActivated()) {
-            logger.info("Receive a BYE message from the remote");
+        if (sLogger.isActivated()) {
+            sLogger.info("Receive a BYE message from the remote");
         }
 
         // Close media session
@@ -595,7 +607,7 @@ public abstract class ImsServiceSession extends Thread {
 
         // Update the dialog path status
         getDialogPath().sessionTerminated();
-        sessionTerminatedByRemote = true;
+        mSessionTerminatedByRemote = true;
 
         // Remove the current session
         removeSession();
@@ -605,7 +617,7 @@ public abstract class ImsServiceSession extends Thread {
 
         // Notify listeners
         for (int i = 0; i < getListeners().size(); i++) {
-            getListeners().get(i).handleSessionTerminatedByRemote(contact);
+            getListeners().get(i).handleSessionTerminatedByRemote(mContact);
         }
 
         try {
@@ -614,8 +626,8 @@ public abstract class ImsServiceSession extends Thread {
             getImsService().getImsModule().getCapabilityService()
                     .requestContactCapabilities(remote);
         } catch (RcsContactFormatException e) {
-            if (logger.isActivated()) {
-                logger.debug("Cannot parse contact " + getDialogPath().getRemoteParty());
+            if (sLogger.isActivated()) {
+                sLogger.debug("Cannot parse contact " + getDialogPath().getRemoteParty());
             }
         }
     }
@@ -626,13 +638,13 @@ public abstract class ImsServiceSession extends Thread {
      * @param cancel CANCEL request
      */
     public void receiveCancel(SipRequest cancel) {
-        if (logger.isActivated()) {
-            logger.info("Receive a CANCEL message from the remote");
+        if (sLogger.isActivated()) {
+            sLogger.info("Receive a CANCEL message from the remote");
         }
 
         if (getDialogPath().isSigEstablished()) {
-            if (logger.isActivated()) {
-                logger.info("Ignore the received CANCEL message from the remote (session already established)");
+            if (sLogger.isActivated()) {
+                sLogger.info("Ignore the received CANCEL message from the remote (session already established)");
             }
             return;
         }
@@ -645,15 +657,15 @@ public abstract class ImsServiceSession extends Thread {
 
         // Send a 487 Request terminated
         try {
-            if (logger.isActivated()) {
-                logger.info("Send 487 Request terminated");
+            if (sLogger.isActivated()) {
+                sLogger.info("Send 487 Request terminated");
             }
             SipResponse terminatedResp = SipMessageFactory.createResponse(getDialogPath()
                     .getInvite(), getDialogPath().getLocalTag(), 487);
             getImsService().getImsModule().getSipManager().sendSipResponse(terminatedResp);
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't send 487 error response", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't send 487 error response", e);
             }
         }
 
@@ -664,8 +676,8 @@ public abstract class ImsServiceSession extends Thread {
         mInvitationStatus = InvitationStatus.INVITATION_CANCELED;
 
         // Unblock semaphore
-        synchronized (waitUserAnswer) {
-            waitUserAnswer.notifyAll();
+        synchronized (mWaitUserAnswer) {
+            mWaitUserAnswer.notifyAll();
         }
     }
 
@@ -676,7 +688,7 @@ public abstract class ImsServiceSession extends Thread {
      */
     public void receiveReInvite(SipRequest reInvite) {
         // Session refresh management
-        sessionTimer.receiveReInvite(reInvite);
+        mSessionTimer.receiveReInvite(reInvite);
     }
 
     /**
@@ -685,7 +697,7 @@ public abstract class ImsServiceSession extends Thread {
      * @param update UPDATE request
      */
     public void receiveUpdate(SipRequest update) {
-        sessionTimer.receiveUpdate(update);
+        mSessionTimer.receiveUpdate(update);
     }
 
     /**
@@ -725,8 +737,8 @@ public abstract class ImsServiceSession extends Thread {
             SipResponse progress = SipMessageFactory.createResponse(request, localTag, 180);
             getImsService().getImsModule().getSipManager().sendSipResponse(progress);
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't send a 180 Ringing response");
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't send a 180 Ringing response");
             }
         }
     }
@@ -741,14 +753,14 @@ public abstract class ImsServiceSession extends Thread {
     public void sendErrorResponse(SipRequest request, String localTag, int code) {
         try {
             // Send error
-            if (logger.isActivated()) {
-                logger.info("Send " + code + " error response");
+            if (sLogger.isActivated()) {
+                sLogger.info("Send " + code + " error response");
             }
             SipResponse resp = SipMessageFactory.createResponse(request, localTag, code);
             getImsService().getImsModule().getSipManager().sendSipResponse(resp);
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't send error response", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't send error response", e);
             }
         }
     }
@@ -762,14 +774,14 @@ public abstract class ImsServiceSession extends Thread {
     public void send603Decline(SipRequest request, String localTag) {
         try {
             // Send a 603 Decline error
-            if (logger.isActivated()) {
-                logger.info("Send 603 Decline");
+            if (sLogger.isActivated()) {
+                sLogger.info("Send 603 Decline");
             }
             SipResponse resp = SipMessageFactory.createResponse(request, localTag, 603);
             getImsService().getImsModule().getSipManager().sendSipResponse(resp);
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't send 603 Decline response", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't send 603 Decline response", e);
             }
         }
     }
@@ -784,14 +796,14 @@ public abstract class ImsServiceSession extends Thread {
     public void send403Forbidden(SipRequest request, String localTag, String warning) {
         try {
             // Send a 403 Forbidden
-            if (logger.isActivated()) {
-                logger.info("Send 403 Forbidden (warning=" + warning + ")");
+            if (sLogger.isActivated()) {
+                sLogger.info("Send 403 Forbidden (warning=" + warning + ")");
             }
             SipResponse resp = SipMessageFactory.createResponse(request, localTag, 403, warning);
             getImsService().getImsModule().getSipManager().sendSipResponse(resp);
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't send 403 Forbidden response", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't send 403 Forbidden response", e);
             }
         }
     }
@@ -805,14 +817,14 @@ public abstract class ImsServiceSession extends Thread {
     public void send486Busy(SipRequest request, String localTag) {
         try {
             // Send a 486 Busy error
-            if (logger.isActivated()) {
-                logger.info("Send 486 Busy");
+            if (sLogger.isActivated()) {
+                sLogger.info("Send 486 Busy");
             }
             SipResponse resp = SipMessageFactory.createResponse(request, localTag, 486);
             getImsService().getImsModule().getSipManager().sendSipResponse(resp);
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't send 486 Busy response", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't send 486 Busy response", e);
             }
         }
     }
@@ -824,15 +836,15 @@ public abstract class ImsServiceSession extends Thread {
      */
     public void send415Error(SipRequest request) {
         try {
-            if (logger.isActivated()) {
-                logger.info("Send 415 Unsupported Media Type");
+            if (sLogger.isActivated()) {
+                sLogger.info("Send 415 Unsupported Media Type");
             }
             SipResponse resp = SipMessageFactory.createResponse(request, 415);
             // TODO: set Accept-Encoding header
             getImsService().getImsModule().getSipManager().sendSipResponse(resp);
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't send 415 error response", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't send 415 error response", e);
             }
         }
     }
@@ -891,7 +903,7 @@ public abstract class ImsServiceSession extends Thread {
      * @return Timeout
      */
     public int getResponseTimeout() {
-        return ringingPeriod + SipManager.TIMEOUT;
+        return mRingingPeriod + SipManager.TIMEOUT;
     }
 
     /**
@@ -900,7 +912,7 @@ public abstract class ImsServiceSession extends Thread {
      * @return Boolean
      */
     public boolean isSessionInterrupted() {
-        return sessionInterrupted || isInterrupted()
+        return mSessionInterrupted || isInterrupted()
                 || (getDialogPath() != null && getDialogPath().isSessionTerminated());
     }
 
@@ -910,7 +922,7 @@ public abstract class ImsServiceSession extends Thread {
      * @return Boolean
      */
     public boolean isSessionTerminatedByRemote() {
-        return sessionTerminatedByRemote;
+        return mSessionTerminatedByRemote;
     }
 
     /**
@@ -1009,8 +1021,8 @@ public abstract class ImsServiceSession extends Thread {
     public void handle200OK(SipResponse resp) {
         try {
             // 200 OK received
-            if (logger.isActivated()) {
-                logger.info("200 OK response received");
+            if (sLogger.isActivated()) {
+                sLogger.info("200 OK response received");
             }
 
             // The signaling is established
@@ -1040,8 +1052,8 @@ public abstract class ImsServiceSession extends Thread {
             prepareMediaSession();
 
             // Send ACK request
-            if (logger.isActivated()) {
-                logger.info("Send ACK");
+            if (sLogger.isActivated()) {
+                sLogger.info("Send ACK");
             }
             getImsService().getImsModule().getSipManager().sendSipAck(getDialogPath());
 
@@ -1053,7 +1065,7 @@ public abstract class ImsServiceSession extends Thread {
 
             // Notify listeners
             for (int i = 0; i < getListeners().size(); i++) {
-                getListeners().get(i).handleSessionStarted(contact);
+                getListeners().get(i).handleSessionStarted(mContact);
             }
 
             // Start session timer
@@ -1063,8 +1075,8 @@ public abstract class ImsServiceSession extends Thread {
             }
         } catch (Exception e) {
             // Unexpected error
-            if (logger.isActivated()) {
-                logger.error("Session initiation has failed", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Session initiation has failed", e);
             }
             handleError(new ImsServiceError(ImsServiceError.UNEXPECTED_EXCEPTION, e.getMessage()));
         }
@@ -1107,8 +1119,8 @@ public abstract class ImsServiceSession extends Thread {
      */
     public void handle407Authentication(SipResponse resp) {
         try {
-            if (logger.isActivated()) {
-                logger.info("407 response received");
+            if (sLogger.isActivated()) {
+                sLogger.info("407 response received");
             }
 
             // Set the remote tag
@@ -1133,8 +1145,8 @@ public abstract class ImsServiceSession extends Thread {
             sendInvite(invite);
 
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Session initiation has failed", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Session initiation has failed", e);
             }
 
             // Unexpected error
@@ -1150,15 +1162,15 @@ public abstract class ImsServiceSession extends Thread {
     public void handle422SessionTooSmall(SipResponse resp) {
         try {
             // 422 response received
-            if (logger.isActivated()) {
-                logger.info("422 response received");
+            if (sLogger.isActivated()) {
+                sLogger.info("422 response received");
             }
 
             // Extract the Min-SE value
             int minExpire = SipUtils.getMinSessionExpirePeriod(resp);
             if (minExpire == -1) {
-                if (logger.isActivated()) {
-                    logger.error("Can't read the Min-SE value");
+                if (sLogger.isActivated()) {
+                    sLogger.error("Can't read the Min-SE value");
                 }
                 handleError(new ImsSessionBasedServiceError(
                         ImsSessionBasedServiceError.UNEXPECTED_EXCEPTION, "No Min-SE value found"));
@@ -1175,8 +1187,8 @@ public abstract class ImsServiceSession extends Thread {
             getDialogPath().incrementCseq();
 
             // Create a new INVITE with the right expire period
-            if (logger.isActivated()) {
-                logger.info("Send new INVITE");
+            if (sLogger.isActivated()) {
+                sLogger.info("Send new INVITE");
             }
             SipRequest invite = createInvite();
 
@@ -1189,8 +1201,8 @@ public abstract class ImsServiceSession extends Thread {
             // Send INVITE request
             sendInvite(invite);
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Session initiation has failed", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Session initiation has failed", e);
             }
 
             // Unexpected error
@@ -1250,8 +1262,8 @@ public abstract class ImsServiceSession extends Thread {
      * Handle ReInvite Sip Response
      * 
      * @param response Sip response to reInvite
-     * @param InvitationStatus code response code
-     * @param reInvite reInvite SIP request
+     * @param code InvitationStatus
+     * @param requestType
      */
     public void handleReInviteResponse(InvitationStatus code, SipResponse response, int requestType) {
     }
@@ -1259,8 +1271,8 @@ public abstract class ImsServiceSession extends Thread {
     /**
      * Handle User Answer in Response to Session Update notification
      * 
-     * @param InvitationStatus code response code
-     * @param reInvite reInvite SIP request
+     * @param code InvitationStatus
+     * @param requestType reInvite SIP request
      */
     public void handleReInviteUserAnswer(InvitationStatus code, int requestType) {
     }
@@ -1268,8 +1280,8 @@ public abstract class ImsServiceSession extends Thread {
     /**
      * Handle ACK sent in Response to 200Ok ReInvite
      * 
-     * @param InvitationStatus code response code
-     * @param reInvite reInvite SIP request
+     * @param code InvitationStatus
+     * @param requestType reInvite SIP request
      */
     public void handleReInviteAck(InvitationStatus code, int requestType) {
     }
@@ -1278,11 +1290,16 @@ public abstract class ImsServiceSession extends Thread {
      * Handle 407 Proxy Authent error ReInvite Response
      * 
      * @param response reInvite SIP response
-     * @param int requestType service context of reInvite
+     * @param serviceContext context of reInvite
      */
     public void handleReInvite407ProxyAuthent(SipResponse response, int serviceContext) {
     }
 
+    /**
+     * @param ReInvite
+     * @param serviceContext
+     * @return SDP built
+     */
     public String buildReInviteSdpResponse(SipRequest ReInvite, int serviceContext) {
         return null;
     }

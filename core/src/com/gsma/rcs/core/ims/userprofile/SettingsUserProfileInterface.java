@@ -34,14 +34,19 @@ public class SettingsUserProfileInterface extends UserProfileInterface {
     /**
      * The logger
      */
-    private static final Logger logger = Logger.getLogger(SettingsUserProfileInterface.class
+    private static final Logger sLogger = Logger.getLogger(SettingsUserProfileInterface.class
             .getSimpleName());
+
+    private final RcsSettings mRcsSettings;
 
     /**
      * Constructor
+     * 
+     * @param rcsSettings
      */
-    public SettingsUserProfileInterface() {
+    public SettingsUserProfileInterface(RcsSettings rcsSettings) {
         super();
+        mRcsSettings = rcsSettings;
     }
 
     /**
@@ -52,23 +57,23 @@ public class SettingsUserProfileInterface extends UserProfileInterface {
     public UserProfile read() {
         // Read profile info from the database settings
         try {
-            ContactId contact = ContactUtils.createContactId(RcsSettings.getInstance()
+            ContactId contact = ContactUtils.createContactId(mRcsSettings
                     .getUserProfileImsUserName());
-            String homeDomain = RcsSettings.getInstance().getUserProfileImsDomain();
-            String privateID = RcsSettings.getInstance().getUserProfileImsPrivateId();
-            String password = RcsSettings.getInstance().getUserProfileImsPassword();
-            String realm = RcsSettings.getInstance().getUserProfileImsRealm();
-            String xdmServer = RcsSettings.getInstance().getXdmServer();
-            String xdmLogin = RcsSettings.getInstance().getXdmLogin();
-            String xdmPassword = RcsSettings.getInstance().getXdmPassword();
-            String imConfUri = RcsSettings.getInstance().getImConferenceUri();
+            String homeDomain = mRcsSettings.getUserProfileImsDomain();
+            String privateID = mRcsSettings.getUserProfileImsPrivateId();
+            String password = mRcsSettings.getUserProfileImsPassword();
+            String realm = mRcsSettings.getUserProfileImsRealm();
+            String xdmServer = mRcsSettings.getXdmServer();
+            String xdmLogin = mRcsSettings.getXdmLogin();
+            String xdmPassword = mRcsSettings.getXdmPassword();
+            String imConfUri = mRcsSettings.getImConferenceUri();
 
             return new UserProfile(contact, homeDomain, privateID, password, realm, xdmServer,
-                    xdmLogin, xdmPassword, imConfUri);
+                    xdmLogin, xdmPassword, imConfUri, mRcsSettings);
         } catch (RcsContactFormatException e) {
-            if (logger.isActivated()) {
-                logger.error("cannot parse UserProfileImsUserName "
-                        + RcsSettings.getInstance().getUserProfileImsUserName());
+            if (sLogger.isActivated()) {
+                sLogger.error("cannot parse UserProfileImsUserName "
+                        + mRcsSettings.getUserProfileImsUserName());
             }
             return null;
         }

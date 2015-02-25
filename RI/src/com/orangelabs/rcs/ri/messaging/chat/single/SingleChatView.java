@@ -117,7 +117,7 @@ public class SingleChatView extends ChatView {
             .append("')").toString();
 
     private final static String[] PROJECTION_MSG_ID = new String[] {
-        Message.MESSAGE_ID
+            Message.MESSAGE_ID
     };
 
     /**
@@ -152,6 +152,15 @@ public class SingleChatView extends ChatView {
             }
         }
 
+        @Override
+        public void onMessagesDeleted(ContactId contact, Set<String> msgIds) {
+            if (LogUtils.isActive) {
+                Log.w(LOGTAG,
+                        new StringBuilder("onDeleted contact=").append(contact).append(" msgIds=")
+                                .append(msgIds).toString());
+            }
+        }
+
     };
 
     @Override
@@ -173,7 +182,7 @@ public class SingleChatView extends ChatView {
             composingManager = new IsComposingManager(configuration.getIsComposingTimeout() * 1000,
                     getNotifyComposing());
         } catch (RcsServiceNotAvailableException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), mExitOnce, e);
+            Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce, e);
         } catch (RcsServiceException e) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
         }
@@ -238,7 +247,7 @@ public class SingleChatView extends ChatView {
             return true;
 
         } catch (RcsServiceNotAvailableException e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), mExitOnce, e);
+            Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce, e);
         } catch (RcsServiceException e) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
         }
@@ -250,7 +259,7 @@ public class SingleChatView extends ChatView {
         // Create a new CursorLoader with the following query parameters.
         Uri uri = Message.CONTENT_URI;
         return new CursorLoader(this, uri, PROJECTION, WHERE_CLAUSE, new String[] {
-            mContact.toString()
+                mContact.toString()
         }, QUERY_SORT_ORDER);
     }
 
@@ -334,7 +343,7 @@ public class SingleChatView extends ChatView {
     private Set<String> getUnreadMessageIds(ContactId contact) {
         Set<String> unReadMessageIDs = new HashSet<String>();
         String[] where_args = new String[] {
-            contact.toString()
+                contact.toString()
         };
 
         Cursor cursor = null;

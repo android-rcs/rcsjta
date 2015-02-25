@@ -32,28 +32,11 @@ import java.util.Random;
  * @author jexa7410
  */
 public class NetworkRessourceManager {
-    /**
-     * Default SIP port base
-     */
-    public static final int DEFAULT_LOCAL_SIP_PORT_RANGE_MIN = RcsSettings.getInstance()
-            .getSipListeningPort();
 
     /**
      * Default SIP port max
      */
-    public static final int DEFAULT_LOCAL_SIP_PORT_RANGE_MAX = 65000;
-
-    /**
-     * Default RTP port base
-     */
-    public static final int DEFAULT_LOCAL_RTP_PORT_BASE = RcsSettings.getInstance()
-            .getDefaultRtpPort();
-
-    /**
-     * Default MSRP port base
-     */
-    public static final int DEFAULT_LOCAL_MSRP_PORT_BASE = RcsSettings.getInstance()
-            .getDefaultMsrpPort();
+    private static final int DEFAULT_LOCAL_SIP_PORT_RANGE_MAX = 65000;
 
     /**
      * Generate a default free SIP port number <br>
@@ -62,14 +45,16 @@ public class NetworkRessourceManager {
      * binds to it before you do. <br>
      * Minimize this chance by using those ports as soon as possible
      * 
+     * @param rcsSettings
      * @return Local SIP port
      */
-    public static synchronized int generateLocalSipPort() {
-        int candidatePort = getDefaultNumber(DEFAULT_LOCAL_SIP_PORT_RANGE_MIN,
+    public static synchronized int generateLocalSipPort(RcsSettings rcsSettings) {
+        int defaultLocalSipPortRangeMin = rcsSettings.getSipListeningPort();
+        int candidatePort = getDefaultNumber(defaultLocalSipPortRangeMin,
                 DEFAULT_LOCAL_SIP_PORT_RANGE_MAX);
         while (!isLocalUdpPortFree(candidatePort) && !isLocalTcpPortFree(candidatePort)) {
             // Loop until candidate port is free in UDP and in TCP
-            candidatePort = getDefaultNumber(DEFAULT_LOCAL_SIP_PORT_RANGE_MIN,
+            candidatePort = getDefaultNumber(defaultLocalSipPortRangeMin,
                     DEFAULT_LOCAL_SIP_PORT_RANGE_MAX);
         }
         return candidatePort;
@@ -90,19 +75,21 @@ public class NetworkRessourceManager {
     /**
      * Generate a default free RTP port number
      * 
+     * @param rcsSettings
      * @return Local RTP port
      */
-    public static synchronized int generateLocalRtpPort() {
-        return generateLocalUdpPort(DEFAULT_LOCAL_RTP_PORT_BASE);
+    public static synchronized int generateLocalRtpPort(RcsSettings rcsSettings) {
+        return generateLocalUdpPort(rcsSettings.getDefaultRtpPort());
     }
 
     /**
      * Generate a default free MSRP port number
      * 
+     * @param rcsSettings
      * @return Local MSRP port
      */
-    public static synchronized int generateLocalMsrpPort() {
-        return generateLocalTcpPort(DEFAULT_LOCAL_MSRP_PORT_BASE);
+    public static synchronized int generateLocalMsrpPort(RcsSettings rcsSettings) {
+        return generateLocalTcpPort(rcsSettings.getDefaultMsrpPort());
     }
 
     /**

@@ -25,8 +25,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
-import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -41,7 +41,7 @@ public class RequestAllCapabilities extends Activity {
     /**
      * API connection manager
      */
-    private ApiConnectionManager mCnxManager;
+    private ConnectionManager mCnxManager;
 
     /**
      * A locker to exit only once
@@ -61,7 +61,7 @@ public class RequestAllCapabilities extends Activity {
         refreshBtn.setOnClickListener(btnSyncListener);
 
         // Register to API connection manager
-        mCnxManager = ApiConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance(this);
         if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
@@ -89,7 +89,7 @@ public class RequestAllCapabilities extends Activity {
                 registered = mCnxManager.getCapabilityApi().isServiceRegistered();
             } catch (Exception e) {
                 Utils.showMessageAndExit(RequestAllCapabilities.this,
-                        getString(R.string.label_api_disabled), mExitOnce, e);
+                        getString(R.string.label_api_unavailable), mExitOnce, e);
                 return;
             }
             if (!registered) {

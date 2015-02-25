@@ -15,7 +15,9 @@
     <string name="label_command_in_progress">Command in progress...</string>
     <string name="label_session_not_found">Session not found</string>
     <string name="label_api_failed">Call API method has failed</string>
-    <string name="label_api_disabled">RCS service is not available</string>
+    <string name="label_api_unavailable">RCS service not available</string>
+    <string name="label_api_disconnected">RCS service disconnected</string>
+    <string name="label_api_disabled_">RCS service disabled</string>
     <string name="label_ok">OK</string>
     <string name="label_cancel">Cancel</string>
     <string name="title_msg">Information</string>
@@ -323,7 +325,6 @@
     <!-- Intents menu -->
     <string name="menu_intents">Intents</string>
     <string name="menu_apps">Applications</string>
-    <string name="label_no_clients">No other client detected on the device</string>
     <string name="label_load_chat">Load a chat</string>
     <string name="label_initiate_chat">Start a chat</string>
     <string name="label_load_group_chat">Load a group chat</string>
@@ -333,22 +334,36 @@
     <string name="label_intent_failed">Intent not found</string>
     <string name="label_load_ipcall">Load an IP call</string>
     <string name="label_initiate_ipcall">Start an IP call</string>
-    <string name="menu_settings">Settings</string>
 
     <!-- Service menu -->
     <string name="menu_service">Service</string>
+    <string name="menu_service_activation">Service activation</string>
+    <string name="label_service_activate">Select to turn on the RCS service</string>
+    <string name="label_service_deactivate">Select to turn off the RCS service</string>
+    <string name="label_rcs_stack_available">RCS stack available</string>
+    <string name="label_rcs_stack_not_available">RCS stack not installed or disabled</string>
+    <string name="label_rcs_stack_activation">RCS stack activation</string>
     <string name="menu_service_status">Service status</string>
+    <string name="notification_title_rcs_service">RCS service</string>
     <string name="menu_registration_status">Registration status</string>
     <string name="label_service_status">Service enabled:</string>
     <string name="label_registration_status">Service registered:</string>
-    <string name="menu_others">Other services</string>
     <string name="menu_service_configuration">Service configuration</string>
     <string name="label_service_configuration_valid">Configuration valid:</string>
     <string name="label_default_messaging_method">Messaging method:</string>
     <string name="label_messaging_mode">Messaging mode:</string>
     <string name="label_my_display_name">My display name:</string>
     <string name="label_my_contact_id">My contact identifier:</string>
-    <string name="label_configuration_refresh">update</string>
+    <string name="label_min_battery_level">Min battery level:</string>
+    <string name="label_service_is_up">RCS service is up and running</string>
+    <string name="label_service_activatation">RCS stack activation:</string>
+    <string name="label_service_activate_unchangeable">Unchangeable</string>
+    <string name="label_service_activate_changeable">Changeable</string>
+    <string name="text_service_activate_unchangeable">RCS activation cannot be changed</string>
+    
+    <string name="ims_connected">Connected to RCS platform</string>
+	<string name="ims_disconnected">Disconnected from RCS platform</string>
+    <string name="ims_battery_disconnected">Disconnected from RCS platform (Battery low)</string>
 
     <!-- File upload menu -->
     <string name="menu_upload">File upload</string>
@@ -597,6 +612,17 @@
         <item>GONE</item>
         <item>DISCONNECTED</item>
         <item>BUSY</item>
+    </string-array>
+    <string-array name="messaging_method">
+        <item>Automatic</item>
+        <item>RCS</item>
+        <item>Non RCS</item>
+    </string-array>
+    <string-array name="minimum_battery_level">
+        <item>Never stop</item>
+        <item>5 %</item>
+        <item>10 %</item>
+        <item>20 %</item>
     </string-array>
 
 </resources>

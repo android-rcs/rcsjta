@@ -35,8 +35,8 @@ import android.widget.EditText;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.chat.ChatServiceConfiguration;
 import com.gsma.services.rcs.Geoloc;
-import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 
 /**
@@ -102,7 +102,7 @@ public class EditGeoloc extends Activity {
         setMyLocation();
 
         // Register to API connection manager
-        ApiConnectionManager connectionManager = ApiConnectionManager.getInstance(this);
+        ConnectionManager connectionManager = ConnectionManager.getInstance(this);
         if (connectionManager != null && connectionManager.isServiceConnected(RcsServiceName.CHAT)) {
             try {
                 ChatServiceConfiguration configuration = connectionManager.getChatApi()

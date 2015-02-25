@@ -28,10 +28,20 @@ public class CoreException extends java.lang.Exception {
 
     /**
      * Constructor
-     * 
+     *
      * @param error Error message
      */
     public CoreException(String error) {
         super(error);
+    }
+
+    /**
+     * Constructor
+     *
+     * @param error Error message
+     * @param exception the cause of this exception
+     */
+    public CoreException(String error, Exception exception) {
+        super(error, exception);
     }
 }

@@ -39,6 +39,7 @@ import android.provider.ContactsContract.Groups;
 
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
 /**
@@ -90,11 +91,13 @@ public class AuthenticationService extends Service {
      * @param localContentResolver Local content resolver
      * @param username The username
      * @param enableSync true to enable synchronization
-     * @param showUngroupedContacts true to show ungrouped contacts
+     * @param rcsSettings
      */
     public static void createRcsAccount(Context context, LocalContentResolver localContentResolver,
-            String username, boolean enableSync) {
-        ContactsManager.createInstance(context, context.getContentResolver(), localContentResolver);
+            String username,
+            boolean enableSync, RcsSettings rcsSettings) {
+        ContactsManager.createInstance(context, context.getContentResolver(), localContentResolver,
+                rcsSettings);
 
         // Save the account info into the AccountManager if needed
         Account mAccount = getAccount(context, username);
@@ -132,6 +135,7 @@ public class AuthenticationService extends Service {
      * 
      * @param context The context
      * @param username The username
+     * @return True if sync is enabled
      */
     public static boolean isSyncEnabled(Context context, String username) {
         Account mAccount = getAccount(context, username);

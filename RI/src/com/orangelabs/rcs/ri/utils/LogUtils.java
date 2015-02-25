@@ -18,6 +18,9 @@
 
 package com.orangelabs.rcs.ri.utils;
 
+/**
+ * @author yplo6403
+ */
 public class LogUtils {
 
     /**

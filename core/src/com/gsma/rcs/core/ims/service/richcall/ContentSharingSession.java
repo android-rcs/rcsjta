@@ -28,6 +28,7 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.services.rcs.contact.ContactId;
@@ -41,7 +42,7 @@ public abstract class ContentSharingSession extends ImsServiceSession {
     /**
      * Content to be shared
      */
-    private MmContent content;
+    private MmContent mContent;
 
     /**
      * Constructor
@@ -49,11 +50,13 @@ public abstract class ContentSharingSession extends ImsServiceSession {
      * @param parent IMS service
      * @param content Content to be shared
      * @param contact Remote contactId
+     * @param rcsSettings
      */
-    public ContentSharingSession(ImsService parent, MmContent content, ContactId contact) {
-        super(parent, contact, PhoneUtils.formatContactIdToUri(contact));
+    public ContentSharingSession(ImsService parent, MmContent content, ContactId contact,
+            RcsSettings rcsSettings) {
+        super(parent, contact, PhoneUtils.formatContactIdToUri(contact), rcsSettings);
 
-        this.content = content;
+        mContent = content;
     }
 
     /**
@@ -62,7 +65,7 @@ public abstract class ContentSharingSession extends ImsServiceSession {
      * @return Content
      */
     public MmContent getContent() {
-        return content;
+        return mContent;
     }
 
     /**
@@ -71,7 +74,7 @@ public abstract class ContentSharingSession extends ImsServiceSession {
      * @param content Content
      */
     public void setContent(MmContent content) {
-        this.content = content;
+        this.mContent = content;
     }
 
     /**
@@ -80,8 +83,8 @@ public abstract class ContentSharingSession extends ImsServiceSession {
      * @return String
      */
     public String getFileSelectorAttribute() {
-        return "name:\"" + content.getName() + "\"" + " type:" + content.getEncoding() + " size:"
-                + content.getSize();
+        return "name:\"" + mContent.getName() + "\"" + " type:" + mContent.getEncoding() + " size:"
+                + mContent.getSize();
     }
 
     /**
@@ -90,7 +93,7 @@ public abstract class ContentSharingSession extends ImsServiceSession {
      * @return Uri
      */
     public Uri getFileLocationAttribute() {
-        Uri file = content.getUri();
+        Uri file = mContent.getUri();
         if ((file != null) && file.getScheme().startsWith("http")) {
             return file;
         } else {

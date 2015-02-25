@@ -63,10 +63,7 @@
         <!-- Intents API -->
 
         <activity
-            android:name=".intents.TestIntentsApi"
-            android:label="@string/menu_intents" />
-        <activity
-            android:name=".intents.IntentApps"
+            android:name=".intents.TestIntentApps"
             android:label="@string/menu_apps" />
 
         <!-- Service API -->
@@ -76,11 +73,11 @@
             android:name=".service.ServiceStatus"
             android:label="@string/menu_service" />
         <activity
+            android:name=".service.ServiceActivation"
+            android:label="@string/menu_service" />
+        <activity
             android:name=".service.RegistrationStatus"
             android:label="@string/menu_registration_status" />
-        <activity
-            android:name=".service.OtherServices"
-            android:label="@string/menu_others" />
         <activity
             android:name=".service.ServiceConfigurationActivity"
             android:label="@string/menu_service_configuration" />
@@ -136,6 +133,7 @@
         </activity>
         <activity
             android:name="com.orangelabs.rcs.ri.messaging.filetransfer.InitiateFileTransfer"
+            android:exported="true"
             android:icon="@drawable/ri_quick_ft_icon"
             android:label="@string/menu_transfer_file" >
             <intent-filter>
@@ -166,6 +164,7 @@
 
         <activity
             android:name="com.orangelabs.rcs.ri.messaging.filetransfer.ReceiveFileTransfer"
+            android:exported="true"
             android:label="@string/title_file_transfer" />
         <activity
             android:name="com.orangelabs.rcs.ri.messaging.filetransfer.FileTransferList"
@@ -323,6 +322,7 @@
 
         <activity
             android:name=".sharing.image.ReceiveImageSharing"
+            android:exported="true"
             android:label="@string/title_image_sharing" />
         <activity
             android:name=".sharing.image.ImageSharingList"
@@ -349,6 +349,7 @@
 
         <activity
             android:name=".sharing.geoloc.ReceiveGeolocSharing"
+            android:exported="true"
             android:label="@string/title_geoloc_sharing" />
 
         <service

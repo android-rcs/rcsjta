@@ -5,12 +5,16 @@ import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.capability.ICapabilitiesListener;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
+import com.gsma.services.rcs.RcsServiceRegistration;
 
 /**
  * Capability service API
  */
 interface ICapabilityService {
+
 	boolean isServiceRegistered();
+	
+	int getServiceRegistrationReasonCode();
 
 	void addEventListener(IRcsServiceRegistrationListener listener);
 

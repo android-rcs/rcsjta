@@ -18,7 +18,10 @@
 
 package com.gsma.services.rcs;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import android.content.Context;
 import android.os.IInterface;
@@ -41,6 +44,10 @@ public abstract class RcsService {
     public static final String ACTION_SERVICE_PROVISIONED = "com.gsma.services.rcs.action.SERVICE_PROVISIONED";
 
     private static final String ERROR_CNX = "Service not connected";
+
+    protected final RcsServiceControl mRcsServiceControl;
+
+    private final Map<RcsServiceRegistrationListener, WeakReference<IRcsServiceRegistrationListener>> mRegistrationListeners = new WeakHashMap<RcsServiceRegistrationListener, WeakReference<IRcsServiceRegistrationListener>>();
 
     /**
      * Information about the current build
@@ -116,10 +123,21 @@ public abstract class RcsService {
             mValue = value;
         }
 
+        /**
+         * Gets integer value associated to Direction instance
+         * 
+         * @return value
+         */
         public final int toInt() {
             return mValue;
         }
 
+        /**
+         * Returns a Direction instance for the specified integer value.
+         * 
+         * @param value
+         * @return instance
+         */
         public final static Direction valueOf(int value) {
             Direction entry = mValueToEnum.get(value);
             if (entry != null) {
@@ -157,10 +175,21 @@ public abstract class RcsService {
             mValue = value;
         }
 
+        /**
+         * Gets integer value associated to ReadStatus instance
+         * 
+         * @return value
+         */
         public final int toInt() {
             return mValue;
         }
 
+        /**
+         * Returns a ReadStatus instance for the specified integer value.
+         * 
+         * @param value
+         * @return instance
+         */
         public final static ReadStatus valueOf(int value) {
             ReadStatus entry = mValueToEnum.get(value);
             if (entry != null) {
@@ -190,7 +219,7 @@ public abstract class RcsService {
     /**
      * Service version
      */
-    private Integer version;
+    private Integer mVersion;
 
     /**
      * Constructor
@@ -201,6 +230,7 @@ public abstract class RcsService {
     public RcsService(Context ctx, RcsServiceListener listener) {
         mCtx = ctx;
         mListener = listener;
+        mRcsServiceControl = RcsServiceControl.getInstance(ctx);
     }
 
     /**
@@ -267,17 +297,17 @@ public abstract class RcsService {
      * @throws RcsServiceException
      */
     public int getServiceVersion() throws RcsServiceException {
-        if (mApi != null) {
-            if (version == null) {
-                try {
-                    version = (Integer) callApiMethod("getServiceVersion", null, null);
-                } catch (Exception e) {
-                    throw new RcsServiceException(e.getMessage());
-                }
-            }
-            return version;
-        } else {
+        if (mApi == null) {
             throw new RcsServiceNotAvailableException();
+        }
+        if (mVersion != null) {
+            return mVersion;
+        }
+        try {
+            mVersion = (Integer) callApiMethod("getServiceVersion", null, null);
+            return mVersion;
+        } catch (Exception e) {
+            throw new RcsServiceException(e.getMessage());
         }
     }
 
@@ -288,10 +318,32 @@ public abstract class RcsService {
      * @throws RcsServiceException
      */
     public boolean isServiceRegistered() throws RcsServiceException {
-        if (mApi != null) {
-            return (Boolean) callApiMethod("isServiceRegistered", null, null);
-        } else {
+        if (mApi == null) {
             throw new RcsServiceNotAvailableException(ERROR_CNX);
+        }
+        try {
+            return (Boolean) callApiMethod("isServiceRegistered", null, null);
+        } catch (Exception e) {
+            throw new RcsServiceException(e);
+        }
+    }
+
+    /**
+     * Returns the reason code for the service registration
+     * 
+     * @return RcsServiceRegistration.ReasonCode
+     * @throws RcsServiceException
+     */
+    public RcsServiceRegistration.ReasonCode getServiceRegistrationReasonCode()
+            throws RcsServiceException {
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        }
+        try {
+            int reasonCode = (Integer) callApiMethod("getServiceRegistrationReasonCode", null, null);
+            return RcsServiceRegistration.ReasonCode.valueOf(reasonCode);
+        } catch (Exception e) {
+            throw new RcsServiceException(e);
         }
     }
 
@@ -303,10 +355,17 @@ public abstract class RcsService {
      */
     public void addEventListener(RcsServiceRegistrationListener listener)
             throws RcsServiceException {
-        if (mApi != null) {
-            callApiMethod("addEventListener", listener, IRcsServiceRegistrationListener.class);
-        } else {
+        if (mApi == null) {
             throw new RcsServiceNotAvailableException(ERROR_CNX);
+        }
+        try {
+            IRcsServiceRegistrationListener rcsListener = new RcsServiceRegistrationListenerImpl(
+                    listener);
+            mRegistrationListeners.put(listener,
+                    new WeakReference<IRcsServiceRegistrationListener>(rcsListener));
+            callApiMethod("addEventListener", rcsListener, IRcsServiceRegistrationListener.class);
+        } catch (Exception e) {
+            throw new RcsServiceException(e);
         }
     }
 
@@ -318,10 +377,22 @@ public abstract class RcsService {
      */
     public void removeEventListener(RcsServiceRegistrationListener listener)
             throws RcsServiceException {
-        if (mApi != null) {
-            callApiMethod("removeEventListener", listener, IRcsServiceRegistrationListener.class);
-        } else {
+        if (mApi == null) {
             throw new RcsServiceNotAvailableException(ERROR_CNX);
+        }
+        try {
+            WeakReference<IRcsServiceRegistrationListener> weakRef = mRegistrationListeners
+                    .remove(listener);
+            if (weakRef == null) {
+                return;
+            }
+            IRcsServiceRegistrationListener rcsListener = weakRef.get();
+            if (rcsListener != null) {
+                callApiMethod("removeEventListener", rcsListener,
+                        IRcsServiceRegistrationListener.class);
+            }
+        } catch (Exception e) {
+            throw new RcsServiceException(e);
         }
     }
 
@@ -332,12 +403,15 @@ public abstract class RcsService {
      * @throws RcsServiceException
      */
     public CommonServiceConfiguration getCommonConfiguration() throws RcsServiceException {
-        if (mApi != null) {
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        }
+        try {
             ICommonServiceConfiguration configuration = (ICommonServiceConfiguration) callApiMethod(
                     "getCommonConfiguration", null, null);
             return new CommonServiceConfiguration(configuration);
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        } catch (Exception e) {
+            throw new RcsServiceException(e);
         }
     }
 }

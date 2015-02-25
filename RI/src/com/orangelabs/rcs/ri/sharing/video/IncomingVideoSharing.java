@@ -37,6 +37,8 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.Set;
+
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contact.ContactId;
@@ -44,9 +46,10 @@ import com.gsma.services.rcs.sharing.video.VideoDescriptor;
 import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharingListener;
 import com.gsma.services.rcs.sharing.video.VideoSharingService;
+
 import com.orangelabs.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
-import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.sharing.video.media.TerminatingVideoPlayer;
@@ -109,7 +112,7 @@ public class IncomingVideoSharing extends Activity implements VideoPlayerListene
     /**
      * API connection manager
      */
-    private ApiConnectionManager mCnxManager;
+    private ConnectionManager mCnxManager;
 
     private static final String SAVE_VIDEO_SHARING_DAO = "videoSharingDao";
 
@@ -178,7 +181,7 @@ public class IncomingVideoSharing extends Activity implements VideoPlayerListene
         }
 
         // Register to API connection manager
-        mCnxManager = ApiConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance(this);
         if (mCnxManager == null
                 || !mCnxManager.isServiceConnected(RcsServiceName.VIDEO_SHARING,
                         RcsServiceName.CONTACT)) {
@@ -198,7 +201,12 @@ public class IncomingVideoSharing extends Activity implements VideoPlayerListene
             mAcceptDeclineDialog.cancel();
             mAcceptDeclineDialog = null;
         }
-
+        if (isFinishing()) {
+            if (LogUtils.isActive) {
+                Log.d(LOGTAG, "onDestroy reset video renderer");
+            }
+            mVideoRenderer = null;
+        }
         if (mCnxManager == null) {
             return;
 
@@ -258,7 +266,7 @@ public class IncomingVideoSharing extends Activity implements VideoPlayerListene
             if (LogUtils.isActive) {
                 Log.e(LOGTAG, e.getMessage(), e);
             }
-            Utils.showMessageAndExit(this, getString(R.string.label_api_disabled), exitOnce);
+            Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), exitOnce);
         } catch (RcsServiceException e) {
             if (LogUtils.isActive) {
                 Log.e(LOGTAG, e.getMessage(), e);
@@ -468,6 +476,17 @@ public class IncomingVideoSharing extends Activity implements VideoPlayerListene
                 }
             });
         }
+
+        @Override
+        public void onDeleted(ContactId contact, Set<String> sharingIds) {
+            if (LogUtils.isActive) {
+                Log.w(LOGTAG,
+                        new StringBuilder("onDeleted contact=").append(contact)
+                                .append(" sharingIds=")
+                                .append(sharingIds).toString());
+            }
+        }
+
     };
 
     /**

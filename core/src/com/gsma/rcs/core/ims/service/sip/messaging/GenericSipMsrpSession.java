@@ -61,12 +61,12 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
     /**
      * MSRP manager
      */
-    private MsrpManager msrpMgr;
+    private MsrpManager mMsrpMgr;
 
     /**
      * Max message size
      */
-    private int maxMsgSize = RcsSettings.getInstance().getMaxMsrpLengthForExtensions();
+    private int mMaxMsgSize;
 
     /**
      * The logger
@@ -80,15 +80,19 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
      * @param parent IMS service
      * @param contact Remote contact Id
      * @param featureTag Feature tag
+     * @param rcsSettings
      */
-    public GenericSipMsrpSession(ImsService parent, ContactId contact, String featureTag) {
-        super(parent, contact, featureTag);
+    public GenericSipMsrpSession(ImsService parent, ContactId contact, String featureTag,
+            RcsSettings rcsSettings) {
+        super(parent, contact, featureTag, rcsSettings);
+
+        mMaxMsgSize = rcsSettings.getMaxMsrpLengthForExtensions();
 
         // Create the MSRP manager
-        int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort();
+        int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(rcsSettings);
         String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface()
                 .getNetworkAccess().getIpAddress();
-        msrpMgr = new MsrpManager(localIpAddress, localMsrpPort);
+        mMsrpMgr = new MsrpManager(localIpAddress, localMsrpPort, rcsSettings);
     }
 
     /**
@@ -97,7 +101,7 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
      * @return Max message size
      */
     public int getMaxMessageSize() {
-        return this.maxMsgSize;
+        return this.mMaxMsgSize;
     }
 
     /**
@@ -106,13 +110,14 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
      * @return MSRP manager
      */
     public MsrpManager getMsrpMgr() {
-        return msrpMgr;
+        return mMsrpMgr;
     }
 
     /**
      * Generate SDP
      * 
      * @param setup Setup mode
+     * @return SDP built
      */
     public String generateSdp(String setup) {
         int msrpPort;
@@ -171,8 +176,8 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
      * Close media session
      */
     public void closeMediaSession() {
-        if (msrpMgr != null) {
-            msrpMgr.closeSession();
+        if (mMsrpMgr != null) {
+            mMsrpMgr.closeSession();
             if (logger.isActivated()) {
                 logger.debug("MSRP session has been closed");
             }
@@ -189,7 +194,7 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
         try {
             ByteArrayInputStream stream = new ByteArrayInputStream(content);
             String msgId = IdGenerator.getIdentifier().replace('_', '-');
-            msrpMgr.sendChunks(stream, msgId, SipService.MIME_TYPE, content.length,
+            mMsrpMgr.sendChunks(stream, msgId, SipService.MIME_TYPE, content.length,
                     TypeMsrpChunk.Unknown);
             return true;
         } catch (Exception e) {

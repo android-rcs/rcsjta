@@ -52,28 +52,32 @@ public class SipManager {
     /**
      * IMS network interface
      */
-    private ImsNetworkInterface networkInterface;
+    private ImsNetworkInterface mNetworkInterface;
 
     /**
      * SIP stack
      */
     private SipInterface sipstack;
 
+    private final RcsSettings mRcsSettings;
+
     /**
      * The logger
      */
-    private static Logger logger = Logger.getLogger(SipManager.class.getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(SipManager.class.getSimpleName());
 
     /**
      * Constructor
      * 
      * @param parent IMS network interface
+     * @param rcsSettings
      */
-    public SipManager(ImsNetworkInterface parent) {
-        this.networkInterface = parent;
+    public SipManager(ImsNetworkInterface parent, RcsSettings rcsSettings) {
+        mNetworkInterface = parent;
+        mRcsSettings = rcsSettings;
 
-        if (logger.isActivated()) {
-            logger.info("SIP manager started");
+        if (sLogger.isActivated()) {
+            sLogger.info("SIP manager started");
         }
     }
 
@@ -83,7 +87,7 @@ public class SipManager {
      * @return Network interface
      */
     public ImsNetworkInterface getNetworkInterface() {
-        return networkInterface;
+        return mNetworkInterface;
     }
 
     /**
@@ -99,8 +103,8 @@ public class SipManager {
      * Terminate the manager
      */
     public void terminate() {
-        if (logger.isActivated()) {
-            logger.info("Terminate the SIP manager");
+        if (sLogger.isActivated()) {
+            sLogger.info("Terminate the SIP manager");
         }
 
         // Close the SIP stack
@@ -108,8 +112,8 @@ public class SipManager {
             closeStack();
         }
 
-        if (logger.isActivated()) {
-            logger.info("SIP manager has been terminated");
+        if (sLogger.isActivated()) {
+            sLogger.info("SIP manager has been terminated");
         }
     }
 
@@ -119,10 +123,9 @@ public class SipManager {
      * @param localAddr Local IP address
      * @param proxyAddr Outbound proxy address
      * @param proxyPort Outbound proxy port
-     * @param isSecure Need secure connection or not
+     * @param protocol
      * @param tcpFallback TCP fallback according to RFC3261 chapter 18.1.1
      * @param networkType type of network
-     * @return SIP stack
      * @throws SipException
      */
     public synchronized void initStack(String localAddr, String proxyAddr, int proxyPort,
@@ -132,7 +135,7 @@ public class SipManager {
 
         // Create the SIP stack
         sipstack = new SipInterface(localAddr, proxyAddr, proxyPort, protocol, tcpFallback,
-                networkType);
+                networkType, mRcsSettings);
     }
 
     /**
@@ -149,8 +152,8 @@ public class SipManager {
             sipstack.close();
             sipstack = null;
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't close SIP stack properly", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't close SIP stack properly", e);
             }
         }
     }
@@ -202,7 +205,7 @@ public class SipManager {
             WarningHeader warn = (WarningHeader) response.getHeader(WarningHeader.NAME);
             if (Response.FORBIDDEN == ctx.getStatusCode() && warn == null) {
                 // Launch new registration
-                networkInterface.getRegistrationManager().restart();
+                mNetworkInterface.getRegistrationManager().restart();
 
                 if (callback == null) {
                     throw new SipException("Not registered");
@@ -215,7 +218,7 @@ public class SipManager {
 
         }
 
-        KeepAliveManager keepAliveManager = networkInterface.getSipManager().getSipStack()
+        KeepAliveManager keepAliveManager = mNetworkInterface.getSipManager().getSipStack()
                 .getKeepAliveManager();
         if (keepAliveManager == null) {
             return ctx;
@@ -224,17 +227,16 @@ public class SipManager {
 
         // Message is a response to INVITE or REGISTER: analyze "keep" flag of "Via" header
         int viaKeep = -1;
-        RcsSettings rcsSettings = RcsSettings.getInstance();
         ListIterator<ViaHeader> iterator = response.getViaHeaders();
         if (!iterator.hasNext()) {
-            keepAliveManager.setPeriod(rcsSettings.getSipKeepAlivePeriod());
+            keepAliveManager.setPeriod(mRcsSettings.getSipKeepAlivePeriod());
             return ctx;
 
         }
         ViaHeader respViaHeader = iterator.next();
         String keepStr = respViaHeader.getParameter("keep");
         if (keepStr == null) {
-            keepAliveManager.setPeriod(rcsSettings.getSipKeepAlivePeriod());
+            keepAliveManager.setPeriod(mRcsSettings.getSipKeepAlivePeriod());
             return ctx;
 
         }
@@ -244,16 +246,16 @@ public class SipManager {
                 // If "keep" value is valid, set keep alive period
                 keepAliveManager.setPeriod(viaKeep);
             } else {
-                if (logger.isActivated())
-                    logger.warn("Non positive keep value \"" + keepStr + "\"");
+                if (sLogger.isActivated())
+                    sLogger.warn("Non positive keep value \"" + keepStr + "\"");
             }
         } catch (NumberFormatException e) {
-            if (logger.isActivated())
-                logger.warn("Non-numeric keep value \"" + keepStr + "\"");
+            if (sLogger.isActivated())
+                sLogger.warn("Non-numeric keep value \"" + keepStr + "\"");
         }
         // If "keep" value is invalid or not present, set keep alive period to default value
         if (viaKeep <= 0) {
-            keepAliveManager.setPeriod(rcsSettings.getSipKeepAlivePeriod());
+            keepAliveManager.setPeriod(mRcsSettings.getSipKeepAlivePeriod());
         }
 
         // Return the transaction context
@@ -334,6 +336,7 @@ public class SipManager {
      * 
      * @param dialog Dialog path
      * @param request Request
+     * @return SipTransactionContext
      * @throws SipException
      */
     public SipTransactionContext sendSubsequentRequest(SipDialogPath dialog, SipRequest request)
@@ -347,6 +350,7 @@ public class SipManager {
      * @param dialog Dialog path
      * @param request Request
      * @param timeout SIP timeout
+     * @return SipTransactionContext
      * @throws SipException
      */
     public SipTransactionContext sendSubsequentRequest(SipDialogPath dialog, SipRequest request,
@@ -365,7 +369,7 @@ public class SipManager {
                         WarningHeader.NAME);
                 if ((code == 403) && (warn == null)) {
                     // Launch new registration
-                    networkInterface.getRegistrationManager().restart();
+                    mNetworkInterface.getRegistrationManager().restart();
 
                     // Throw not registered exception
                     throw new SipException("Not registered");

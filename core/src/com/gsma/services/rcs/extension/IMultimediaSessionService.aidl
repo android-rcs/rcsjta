@@ -9,6 +9,7 @@ import com.gsma.services.rcs.extension.IMultimediaSessionServiceConfiguration;
 
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
+import com.gsma.services.rcs.RcsServiceRegistration;
 
 /**
  * Multimedia session service API for extended services
@@ -16,6 +17,8 @@ import com.gsma.services.rcs.ICommonServiceConfiguration;
 interface IMultimediaSessionService {
 
 	boolean isServiceRegistered();
+	
+	int getServiceRegistrationReasonCode();
 
 	void addEventListener(IRcsServiceRegistrationListener listener);
 

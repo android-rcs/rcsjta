@@ -34,6 +34,7 @@ import javax.net.ssl.KeyManager;
 
 import com.gsma.rcs.core.ims.security.cert.KeyStoreManager;
 import com.gsma.rcs.core.ims.security.cert.X509KeyManagerWrapper;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provisioning.https.EasyX509TrustManager;
 import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -55,7 +56,7 @@ public class AndroidSecureSocketConnection extends AndroidSocketConnection {
      */
     // Changed by Deutsche Telekom
     // TODO: check why this was static before
-    private SSLSocketFactory mSslSocketFactory = null;
+    private SSLSocketFactory mSslSocketFactory;
 
     // Changed by Deutsche Telekom
     /**
@@ -67,13 +68,18 @@ public class AndroidSecureSocketConnection extends AndroidSocketConnection {
     /**
      * announced fingerprint
      */
-    private String mFingerprint = null;
+    private String mFingerprint;
+
+    private final RcsSettings mRcsSettings;
 
     /**
      * Constructor
+     * 
+     * @param rcsSettings
      */
-    public AndroidSecureSocketConnection() {
+    public AndroidSecureSocketConnection(RcsSettings rcsSettings) {
         super();
+        mRcsSettings = rcsSettings;
     }
 
     // Changed by Deutsche Telekom
@@ -81,20 +87,24 @@ public class AndroidSecureSocketConnection extends AndroidSocketConnection {
      * Constructor
      * 
      * @param fingerprint
+     * @param rcsSettings
      */
-    public AndroidSecureSocketConnection(String fingerprint) {
+    public AndroidSecureSocketConnection(String fingerprint, RcsSettings rcsSettings) {
         super();
         mCheckCertificate = false;
         mFingerprint = fingerprint;
+        mRcsSettings = rcsSettings;
     }
 
     /**
      * Constructor
      * 
      * @param socket SSL socket
+     * @param rcsSettings
      */
-    public AndroidSecureSocketConnection(SSLSocket socket) {
+    public AndroidSecureSocketConnection(SSLSocket socket, RcsSettings rcsSettings) {
         super(socket);
+        mRcsSettings = rcsSettings;
     }
 
     /**
@@ -151,6 +161,7 @@ public class AndroidSecureSocketConnection extends AndroidSocketConnection {
      * Get the certificate fingerprint
      * 
      * @param algorithm hash algorithm to be used
+     * @param socket
      * @return String
      */
     // Changed by Deutsche Telekom
@@ -224,7 +235,7 @@ public class AndroidSecureSocketConnection extends AndroidSocketConnection {
                     // only use trusted certificates terminating on a well-known root CA
                     TrustManagerFactory tmFactory = TrustManagerFactory.getInstance(algorithm);
 
-                    if (KeyStoreManager.isOwnCertificateUsed()) {
+                    if (KeyStoreManager.isOwnCertificateUsed(mRcsSettings)) {
                         KeyStore trustStore = KeyStore.getInstance(keyStoreType);
                         // Changed by Deutsche Telekom
                         tsFileInputStream = new FileInputStream(trustStoreFile);

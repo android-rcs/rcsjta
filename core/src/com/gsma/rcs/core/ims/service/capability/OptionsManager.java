@@ -30,6 +30,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
@@ -49,32 +50,36 @@ public class OptionsManager implements DiscoveryManager {
     /**
      * IMS module
      */
-    private ImsModule imsModule;
+    private ImsModule mImsModule;
 
     /**
      * Thread pool to request capabilities in background
      */
-    private ExecutorService threadPool;
+    private ExecutorService mThreadPool;
+
+    private final RcsSettings mRcsSettings;
 
     /**
      * The logger
      */
-    private final static Logger logger = Logger.getLogger(OptionsManager.class.getSimpleName());
+    private final static Logger sLogger = Logger.getLogger(OptionsManager.class.getSimpleName());
 
     /**
      * Constructor
      * 
      * @param parent IMS module
+     * @param rcsSettings
      */
-    public OptionsManager(ImsModule parent) {
-        this.imsModule = parent;
+    public OptionsManager(ImsModule parent, RcsSettings rcsSettings) {
+        mImsModule = parent;
+        mRcsSettings = rcsSettings;
     }
 
     /**
      * Start the manager
      */
     public void start() {
-        threadPool = Executors.newFixedThreadPool(MAX_PROCESSING_THREADS);
+        mThreadPool = Executors.newFixedThreadPool(MAX_PROCESSING_THREADS);
     }
 
     /**
@@ -82,10 +87,10 @@ public class OptionsManager implements DiscoveryManager {
      */
     public void stop() {
         try {
-            threadPool.shutdown();
+            mThreadPool.shutdown();
         } catch (SecurityException e) {
-            if (logger.isActivated()) {
-                logger.error("Could not stop all threads");
+            if (sLogger.isActivated()) {
+                sLogger.error("Could not stop all threads");
             }
         }
     }
@@ -97,8 +102,8 @@ public class OptionsManager implements DiscoveryManager {
      * @return Returns true if success
      */
     public boolean requestCapabilities(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.debug("Request capabilities in background for " + contact);
+        if (sLogger.isActivated()) {
+            sLogger.debug("Request capabilities in background for " + contact);
         }
 
         // Update capability time of last request
@@ -106,14 +111,14 @@ public class OptionsManager implements DiscoveryManager {
 
         // Start request in background
         try {
-            boolean richcall = imsModule.getRichcallService().isCallConnectedWith(contact);
-            OptionsRequestTask task = new OptionsRequestTask(imsModule, contact,
-                    CapabilityUtils.getSupportedFeatureTags(richcall));
-            threadPool.submit(task);
+            boolean richcall = mImsModule.getRichcallService().isCallConnectedWith(contact);
+            OptionsRequestTask task = new OptionsRequestTask(mImsModule, contact,
+                    CapabilityUtils.getSupportedFeatureTags(richcall, mRcsSettings), mRcsSettings);
+            mThreadPool.submit(task);
             return true;
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't submit task", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't submit task", e);
             }
             return false;
         }
@@ -125,14 +130,14 @@ public class OptionsManager implements DiscoveryManager {
      * @param contacts Contact set
      */
     public void requestCapabilities(Set<ContactId> contacts) {
-        if (logger.isActivated()) {
-            logger.debug("Request capabilities for " + contacts.size() + " contacts");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Request capabilities for " + contacts.size() + " contacts");
         }
 
         for (ContactId contact : contacts) {
             if (!requestCapabilities(contact)) {
-                if (logger.isActivated()) {
-                    logger.debug("Processing has been stopped");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Processing has been stopped");
                 }
                 break;
             }
@@ -147,30 +152,30 @@ public class OptionsManager implements DiscoveryManager {
     public void receiveCapabilityRequest(SipRequest options) {
         try {
             ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(options));
-            if (logger.isActivated()) {
-                logger.debug("OPTIONS request received from " + contact);
+            if (sLogger.isActivated()) {
+                sLogger.debug("OPTIONS request received from " + contact);
             }
 
             try {
                 // Create 200 OK response
-                String ipAddress = imsModule.getCurrentNetworkInterface().getNetworkAccess()
+                String ipAddress = mImsModule.getCurrentNetworkInterface().getNetworkAccess()
                         .getIpAddress();
-                boolean richcall = imsModule.getRichcallService().isCallConnectedWith(contact);
-                SipResponse resp = SipMessageFactory.create200OkOptionsResponse(options, imsModule
+                boolean richcall = mImsModule.getRichcallService().isCallConnectedWith(contact);
+                SipResponse resp = SipMessageFactory.create200OkOptionsResponse(options, mImsModule
                         .getSipManager().getSipStack().getContact(),
-                        CapabilityUtils.getSupportedFeatureTags(richcall),
-                        CapabilityUtils.buildSdp(ipAddress, richcall));
+                        CapabilityUtils.getSupportedFeatureTags(richcall, mRcsSettings),
+                        CapabilityUtils.buildSdp(ipAddress, richcall, mRcsSettings));
 
                 // Send 200 OK response
-                imsModule.getSipManager().sendSipResponse(resp);
+                mImsModule.getSipManager().sendSipResponse(resp);
             } catch (Exception e) {
-                if (logger.isActivated()) {
-                    logger.error("Can't send 200 OK for OPTIONS", e);
+                if (sLogger.isActivated()) {
+                    sLogger.error("Can't send 200 OK for OPTIONS", e);
                 }
             }
 
             // Read features tag in the request
-            Capabilities capabilities = CapabilityUtils.extractCapabilities(options);
+            Capabilities capabilities = CapabilityUtils.extractCapabilities(options, mRcsSettings);
 
             // Update capabilities in database
             if (capabilities.isImSessionSupported()) {
@@ -184,10 +189,11 @@ public class OptionsManager implements DiscoveryManager {
             }
 
             // Notify listener
-            imsModule.getCore().getListener().handleCapabilitiesNotification(contact, capabilities);
+            mImsModule.getCore().getListener()
+                    .handleCapabilitiesNotification(contact, capabilities);
         } catch (RcsContactFormatException e1) {
-            if (logger.isActivated()) {
-                logger.warn("Cannot parse contact from capability request");
+            if (sLogger.isActivated()) {
+                sLogger.warn("Cannot parse contact from capability request");
             }
         }
     }

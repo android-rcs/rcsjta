@@ -19,6 +19,8 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.Core;
+import com.gsma.rcs.core.ims.network.ImsNetworkInterface;
+import com.gsma.services.rcs.RcsServiceRegistration;
 
 /**
  * Server API utils
@@ -54,9 +56,32 @@ public class ServerApiUtils {
      * @return Boolean
      */
     public static boolean isImsConnected() {
-        return ((Core.getInstance() != null)
-                && (Core.getInstance().getImsModule().getCurrentNetworkInterface() != null) && (Core
-                .getInstance().getImsModule().getCurrentNetworkInterface().isRegistered()));
+        Core core = Core.getInstance();
+        if (core == null) {
+            return false;
+        }
+        ImsNetworkInterface networkInterface = core.getImsModule().getCurrentNetworkInterface();
+        if (networkInterface == null) {
+            return false;
+        }
+        return networkInterface.isRegistered();
+    }
+
+    /**
+     * Gets the reason code for IMS service registration
+     * 
+     * @return reason code
+     */
+    public static RcsServiceRegistration.ReasonCode getServiceRegistrationReasonCode() {
+        Core core = Core.getInstance();
+        if (core == null) {
+            return RcsServiceRegistration.ReasonCode.UNSPECIFIED;
+        }
+        ImsNetworkInterface networkInterface = core.getImsModule().getCurrentNetworkInterface();
+        if (networkInterface == null) {
+            return RcsServiceRegistration.ReasonCode.UNSPECIFIED;
+        }
+        return networkInterface.getRegistrationReasonCode();
     }
 
     /**

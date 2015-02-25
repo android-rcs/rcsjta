@@ -35,7 +35,7 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class IntentApps extends Activity {
+public class TestIntentApps extends Activity {
 
     /**
      * A locker to exit only once
@@ -81,52 +81,57 @@ public class IntentApps extends Activity {
                             com.gsma.services.rcs.Intents.Chat.ACTION_VIEW_ONE_TO_ONE_CHAT);
                     startActivity(intent);
                 } catch (Exception e) {
-                    Utils.showMessageAndExit(IntentApps.this,
+                    Utils.showMessageAndExit(TestIntentApps.this,
                             getString(R.string.label_intent_failed), mExitOnce, e);
                 }
-            } else if (v.getId() == R.id.initiate_chat) {
+            } else
+            if (v.getId() == R.id.initiate_chat) {
                 try {
                     Intent intent = new Intent(
                             com.gsma.services.rcs.Intents.Chat.ACTION_SEND_ONE_TO_ONE_CHAT_MESSAGE);
                     startActivity(intent);
                 } catch (Exception e) {
-                    Utils.showMessageAndExit(IntentApps.this,
+                    Utils.showMessageAndExit(TestIntentApps.this,
                             getString(R.string.label_intent_failed), mExitOnce, e);
                 }
-            } else if (v.getId() == R.id.load_group_chat) {
+            } else
+            if (v.getId() == R.id.load_group_chat) {
                 try {
                     Intent intent = new Intent(
                             com.gsma.services.rcs.Intents.Chat.ACTION_VIEW_GROUP_CHAT);
                     startActivity(intent);
                 } catch (Exception e) {
-                    Utils.showMessageAndExit(IntentApps.this,
+                    Utils.showMessageAndExit(TestIntentApps.this,
                             getString(R.string.label_intent_failed), mExitOnce, e);
                 }
-            } else if (v.getId() == R.id.initiate_group_chat) {
+            } else
+            if (v.getId() == R.id.initiate_group_chat) {
                 try {
                     Intent intent = new Intent(
                             com.gsma.services.rcs.Intents.Chat.ACTION_INITIATE_GROUP_CHAT);
                     startActivity(intent);
                 } catch (Exception e) {
-                    Utils.showMessageAndExit(IntentApps.this,
+                    Utils.showMessageAndExit(TestIntentApps.this,
                             getString(R.string.label_intent_failed), mExitOnce, e);
                 }
-            } else if (v.getId() == R.id.load_ft) {
+            } else
+            if (v.getId() == R.id.load_ft) {
                 try {
                     Intent intent = new Intent(
                             com.gsma.services.rcs.Intents.FileTransfer.ACTION_VIEW_FILE_TRANSFER);
                     startActivity(intent);
                 } catch (Exception e) {
-                    Utils.showMessageAndExit(IntentApps.this,
+                    Utils.showMessageAndExit(TestIntentApps.this,
                             getString(R.string.label_intent_failed), mExitOnce, e);
                 }
-            } else if (v.getId() == R.id.initiate_ft) {
+            } else
+            if (v.getId() == R.id.initiate_ft) {
                 try {
                     Intent intent = new Intent(
                             com.gsma.services.rcs.Intents.FileTransfer.ACTION_INITIATE_ONE_TO_ONE_FILE_TRANSFER);
                     startActivity(intent);
                 } catch (Exception e) {
-                    Utils.showMessageAndExit(IntentApps.this,
+                    Utils.showMessageAndExit(TestIntentApps.this,
                             getString(R.string.label_intent_failed), mExitOnce, e);
                 }
             }

@@ -24,6 +24,7 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.sip.SipSessionError;
 import com.gsma.rcs.core.ims.service.sip.SipSessionListener;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -36,7 +37,7 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
     /**
      * The logger
      */
-    private final static Logger logger = Logger.getLogger(OriginatingSipMsrpSession.class
+    private final static Logger sLogger = Logger.getLogger(OriginatingSipMsrpSession.class
             .getSimpleName());
 
     /**
@@ -45,9 +46,11 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
      * @param parent IMS service
      * @param contact Remote contact Id
      * @param featureTag Feature tag
+     * @param rcsSettings
      */
-    public OriginatingSipMsrpSession(ImsService parent, ContactId contact, String featureTag) {
-        super(parent, contact, featureTag);
+    public OriginatingSipMsrpSession(ImsService parent, ContactId contact, String featureTag,
+            RcsSettings rcsSettings) {
+        super(parent, contact, featureTag, rcsSettings);
 
         // Create dialog path
         createOriginatingDialogPath();
@@ -58,14 +61,14 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
      */
     public void run() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Initiate a new MSRP session as originating");
+            if (sLogger.isActivated()) {
+                sLogger.info("Initiate a new MSRP session as originating");
             }
 
             // Set setup mode
             String localSetup = createMobileToMobileSetupOffer();
-            if (logger.isActivated()) {
-                logger.debug("Local setup attribute is " + localSetup);
+            if (sLogger.isActivated()) {
+                sLogger.debug("Local setup attribute is " + localSetup);
             }
 
             // Build SDP offer
@@ -75,8 +78,8 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
             getDialogPath().setLocalContent(sdp);
 
             // Create an INVITE request
-            if (logger.isActivated()) {
-                logger.info("Send INVITE");
+            if (sLogger.isActivated()) {
+                sLogger.info("Send INVITE");
             }
             SipRequest invite = createInvite();
 
@@ -89,8 +92,8 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
             // Send INVITE request
             sendInvite(invite);
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Session initiation has failed", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Session initiation has failed", e);
             }
 
             // Unexpected error
@@ -105,8 +108,8 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
 
     @Override
     public void handle180Ringing(SipResponse response) {
-        if (logger.isActivated()) {
-            logger.debug("handle180Ringing");
+        if (sLogger.isActivated()) {
+            sLogger.debug("handle180Ringing");
         }
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {

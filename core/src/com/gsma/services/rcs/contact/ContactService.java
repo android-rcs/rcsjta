@@ -19,6 +19,7 @@
 package com.gsma.services.rcs.contact;
 
 import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceControl;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceListener;
 import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
@@ -74,7 +75,9 @@ public class ContactService extends RcsService {
      * Connects to the API
      */
     public void connect() {
-        mCtx.bindService(new Intent(IContactService.class.getName()), apiConnection, 0);
+        Intent serviceIntent = new Intent(IContactService.class.getName());
+        serviceIntent.setPackage(RcsServiceControl.RCS_STACK_PACKAGENAME);
+        mCtx.bindService(serviceIntent, apiConnection, 0);
     }
 
     /**
@@ -111,9 +114,18 @@ public class ContactService extends RcsService {
 
         public void onServiceDisconnected(ComponentName className) {
             setApi(null);
-            if (mListener != null) {
-                mListener.onServiceDisconnected(ReasonCode.CONNECTION_LOST);
+            if (mListener == null) {
+                return;
             }
+            ReasonCode reasonCode = ReasonCode.CONNECTION_LOST;
+            try {
+                if (!mRcsServiceControl.isActivated()) {
+                    reasonCode = ReasonCode.SERVICE_DISABLED;
+                }
+            } catch (RcsServiceException e) {
+                // Do nothing
+            }
+            mListener.onServiceDisconnected(reasonCode);
         }
     };
 

@@ -104,39 +104,7 @@
 
         <!-- RCS settings application -->
 
-        <activity
-            android:name="com.gsma.rcs.settings.SettingsDisplay"
-            android:clearTaskOnLaunch="true"
-            android:icon="@drawable/rcs_icon"
-            android:label="@string/rcs_settings_title_settings"
-            android:launchMode="singleInstance"
-            android:process=":settings" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter>
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <action android:name="com.gsma.services.rcs.action.VIEW_SETTINGS" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name="com.gsma.rcs.settings.AboutDisplay"
-            android:process=":settings" />
         <activity android:name="com.gsma.rcs.provisioning.https.HttpsProvisioningAlertDialog" />
-        <activity
-            android:name="com.gsma.rcs.settings.UserprofileSettingsDisplay"
-            android:process=":settings" />
-        <activity
-            android:name="com.gsma.rcs.settings.CShSettingsDisplay"
-            android:process=":settings" />
-        <activity
-            android:name="com.gsma.rcs.settings.MessagingSettingsDisplay"
-            android:process=":settings" />
 
         <!-- RCS account: authenticator service for user's account information -->
 
@@ -224,8 +192,7 @@
             android:writePermission="com.gsma.rcs.permission.RCS_INTERNAL_ACCESS_ONLY" />
         <provider
             android:name="com.gsma.rcs.provider.settings.RcsSettingsProvider"
-            android:authorities="com.gsma.rcs.setting"
-            android:exported="true" />
+            android:authorities="com.gsma.rcs.setting" />
         <provider
             android:name="com.gsma.rcs.provider.sharing.GeolocSharingProvider"
             android:authorities="com.gsma.services.rcs.provider.geolocshare"
@@ -295,9 +262,11 @@
 
         <!-- RCS API -->
 
-        <receiver android:name="com.gsma.rcs.service.GetStatusReceiver" >
+        <receiver android:name="com.gsma.rcs.service.RcsServiceControlReceiver" >
             <intent-filter>
-                <action android:name="com.gsma.rcs.service.action.GET_STATUS" />
+                <action android:name="com.gsma.services.rcs.action.GET_ACTIVATION_MODE_CHANGEABLE" />
+                <action android:name="com.gsma.services.rcs.action.GET_ACTIVATION_MODE" />
+                <action android:name="com.gsma.services.rcs.action.SET_ACTIVATION_MODE" />
             </intent-filter>
         </receiver>
 

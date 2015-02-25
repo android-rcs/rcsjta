@@ -41,7 +41,7 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
     /**
      * Service API
      */
-    private RcsService serviceApi;
+    private RcsService mApi;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -60,10 +60,10 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
         registerReceiver(serviceUpListener, intentFilter);
 
         // Instantiate API
-        serviceApi = new CapabilityService(getApplicationContext(), this);
+        mApi = new CapabilityService(getApplicationContext(), this);
 
         // Connect API
-        serviceApi.connect();
+        mApi.connect();
     }
 
     @Override
@@ -78,12 +78,12 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
         }
 
         // Disconnect API
-        serviceApi.disconnect();
+        mApi.disconnect();
     }
 
     /**
      * Callback called when service is connected. This method is called when the service is well
-     * connected to the RCS service (binding procedure successfull): this means the methods of the
+     * connected to the RCS service (binding procedure successful): this means the methods of the
      * API may be used.
      */
     public void onServiceConnected() {
@@ -110,7 +110,7 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
      */
     private void displayServiceStatus(boolean status) {
         TextView statusTxt = (TextView) findViewById(R.id.service_status);
-        statusTxt.setText("" + status);
+        statusTxt.setText(String.valueOf(status));
     }
 
     /**
@@ -120,7 +120,7 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
         @Override
         public void onReceive(Context context, final Intent intent) {
             // Retry a connection to the service
-            serviceApi.connect();
+            mApi.connect();
         }
     };
 }

@@ -25,25 +25,6 @@ package com.gsma.rcs.core.ims.service.im.chat;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 import static com.gsma.rcs.utils.StringUtils.UTF8_STR;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import javax2.sip.header.ContactHeader;
-import javax2.sip.header.ExtensionHeader;
-
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import android.text.TextUtils;
-
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
@@ -72,6 +53,23 @@ import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
+
+import android.text.TextUtils;
+
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax2.sip.header.ContactHeader;
+import javax2.sip.header.ExtensionHeader;
 
 /**
  * Chat utility functions
@@ -102,23 +100,24 @@ public class ChatUtils {
     /**
      * Get supported feature tags for a group chat
      * 
+     * @param rcsSettings
      * @return List of tags
      */
-    public static List<String> getSupportedFeatureTagsForGroupChat() {
+    public static List<String> getSupportedFeatureTagsForGroupChat(RcsSettings rcsSettings) {
         List<String> tags = new ArrayList<String>();
         tags.add(FeatureTags.FEATURE_OMA_IM);
 
         List<String> additionalRcseTags = new ArrayList<String>();
-        if (RcsSettings.getInstance().isGeoLocationPushSupported()) {
+        if (rcsSettings.isGeoLocationPushSupported()) {
             additionalRcseTags.add(FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH);
         }
-        if (RcsSettings.getInstance().isFileTransferSupported()) {
+        if (rcsSettings.isFileTransferSupported()) {
             additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT);
         }
-        if (RcsSettings.getInstance().isFileTransferHttpSupported()) {
+        if (rcsSettings.isFileTransferHttpSupported()) {
             additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT_HTTP);
         }
-        if (RcsSettings.getInstance().isFileTransferStoreForwardSupported()) {
+        if (rcsSettings.isFileTransferStoreForwardSupported()) {
             additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT_SF);
         }
         if (!additionalRcseTags.isEmpty()) {
@@ -143,23 +142,24 @@ public class ChatUtils {
     /**
      * Get supported feature tags for a chat
      * 
+     * @param rcsSettings
      * @return List of tags
      */
-    public static List<String> getSupportedFeatureTagsForChat() {
+    public static List<String> getSupportedFeatureTagsForChat(RcsSettings rcsSettings) {
         List<String> tags = new ArrayList<String>();
         tags.add(FeatureTags.FEATURE_OMA_IM);
 
         List<String> additionalRcseTags = new ArrayList<String>();
-        if (RcsSettings.getInstance().isGeoLocationPushSupported()) {
+        if (rcsSettings.isGeoLocationPushSupported()) {
             additionalRcseTags.add(FeatureTags.FEATURE_RCSE_GEOLOCATION_PUSH);
         }
-        if (RcsSettings.getInstance().isFileTransferSupported()) {
+        if (rcsSettings.isFileTransferSupported()) {
             additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT);
         }
-        if (RcsSettings.getInstance().isFileTransferHttpSupported()) {
+        if (rcsSettings.isFileTransferHttpSupported()) {
             additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT_HTTP);
         }
-        if (RcsSettings.getInstance().isFileTransferStoreForwardSupported()) {
+        if (rcsSettings.isFileTransferStoreForwardSupported()) {
             additionalRcseTags.add(FeatureTags.FEATURE_RCSE_FT_SF);
         }
         if (!additionalRcseTags.isEmpty()) {
@@ -173,6 +173,7 @@ public class ChatUtils {
     /**
      * Get contribution ID
      * 
+     * @param request
      * @return String
      */
     public static String getContributionId(SipRequest request) {
@@ -842,7 +843,7 @@ public class ChatUtils {
      * 'remote' as participant.
      * 
      * @param request Request
-     * @return {@link Set<ParticipantInfo>} participant list
+     * @return set of participants
      */
     public static Set<ParticipantInfo> getListOfParticipants(SipRequest request) {
         Set<ParticipantInfo> participants = new HashSet<ParticipantInfo>();
@@ -885,7 +886,7 @@ public class ChatUtils {
     /**
      * Generate persisted MIME-type from network pay-load
      * 
-     * @param Network pay-load MIME-type
+     * @param networkMimeType Network pay-load MIME-type
      * @return API MIME-type
      */
     public static String networkMimeTypeToApiMimeType(String networkMimeType) {

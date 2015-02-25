@@ -43,8 +43,8 @@ import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
-import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsDisplayName;
@@ -114,7 +114,7 @@ public class SingleChatList extends Activity {
             @Override
             public void onItemClick(AdapterView<?> parent, View v, int pos, long id) {
                 // TODO: if not connected offers possibility to show history
-                ApiConnectionManager apiConnectionManager = ApiConnectionManager
+                ConnectionManager apiConnectionManager = ConnectionManager
                         .getInstance(SingleChatList.this);
                 if (apiConnectionManager == null
                         || !apiConnectionManager.isServiceConnected(RcsServiceName.CHAT)) {

@@ -34,8 +34,8 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.gsma.services.rcs.contact.RcsContact;
-import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -55,12 +55,12 @@ public class SupportedContactsList extends Activity {
     /**
      * API connection manager
      */
-    private ApiConnectionManager connectionManager;
+    private ConnectionManager mCnxManager;
 
     /**
      * A locker to exit only once
      */
-    private LockAccess exitOnce = new LockAccess();
+    private LockAccess mExitOnce = new LockAccess();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -79,29 +79,31 @@ public class SupportedContactsList extends Activity {
         refreshBtn.setOnClickListener(btnRefreshListener);
 
         // Register to API connection manager
-        connectionManager = ApiConnectionManager.getInstance(this);
-        if (connectionManager == null
-                || !connectionManager.isServiceConnected(RcsServiceName.CONTACT)) {
+        mCnxManager = ConnectionManager.getInstance(this);
+        if (mCnxManager == null
+                || !mCnxManager.isServiceConnected(RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
-                    exitOnce);
+                    mExitOnce);
             return;
         }
-        connectionManager.startMonitorServices(this, exitOnce, RcsServiceName.CONTACT);
+        mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.CONTACT);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (connectionManager != null) {
-            connectionManager.stopMonitorServices(this);
+        if (mCnxManager != null) {
+            mCnxManager.stopMonitorServices(this);
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // Update the list of RCS contacts
-        updateList();
+        if (!mExitOnce.isLocked()) {
+            // Update the list of RCS contacts
+            updateList();
+        }
     }
 
     /**
@@ -114,7 +116,7 @@ public class SupportedContactsList extends Activity {
             String tag = tagEdit.getText().toString();
 
             // Get list of RCS contacts supporting a given tag
-            Set<RcsContact> supportedContacts = connectionManager.getContactApi()
+            Set<RcsContact> supportedContacts = mCnxManager.getContactApi()
                     .getRcsContactsSupporting(tag);
             List<RcsContact> contacts = new ArrayList<RcsContact>(supportedContacts);
             ListView listView = (ListView) findViewById(R.id.contacts);
@@ -137,7 +139,7 @@ public class SupportedContactsList extends Activity {
                 listView.setAdapter(null);
             }
         } catch (Exception e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), exitOnce, e);
+            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
         }
     }
 

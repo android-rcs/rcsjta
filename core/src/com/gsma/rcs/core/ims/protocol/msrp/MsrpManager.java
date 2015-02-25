@@ -41,57 +41,63 @@ public class MsrpManager {
     /**
      * Local MSRP address
      */
-    private String localMsrpAddress;
+    private String mLocalMsrpAddress;
 
     /**
      * Local MSRP port
      */
-    private int localMsrpPort;
+    private int mLocalMsrpPort;
 
     /**
      * MSRP session
      */
-    private MsrpSession msrpSession = null;
+    private MsrpSession mMsrpSession;
 
     /**
      * Session Id
      */
-    private long sessionId;
+    private long mSessionId;
 
     /**
      * Secured connection
      */
-    private boolean secured = false;
+    private boolean mSecured = false;
 
     /**
      * The logger
      */
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
+    private final RcsSettings mRcsSettings;
+
     /**
      * Constructor
      * 
-     * @param localIpAddress Local MSRP address
+     * @param localMsrpAddress Local MSRP address
      * @param localMsrpPort Local MSRP port
+     * @param rcsSettings
      */
-    public MsrpManager(String localMsrpAddress, int localMsrpPort) {
-        this.localMsrpAddress = localMsrpAddress;
-        this.localMsrpPort = localMsrpPort;
-        this.sessionId = System.currentTimeMillis();
+    public MsrpManager(String localMsrpAddress, int localMsrpPort, RcsSettings rcsSettings) {
+        mLocalMsrpAddress = localMsrpAddress;
+        mLocalMsrpPort = localMsrpPort;
+        mSessionId = System.currentTimeMillis();
+        mRcsSettings = rcsSettings;
     }
 
     // Changed by Deutsche Telekom
     /**
      * Constructor
      * 
-     * @param localIpAddress Local MSRP address
+     * @param localMsrpAddress Local MSRP address
      * @param localMsrpPort Local MSRP port
      * @param service ImsService
+     * @param rcsSettings
      */
-    public MsrpManager(String localMsrpAddress, int localMsrpPort, ImsService service) {
-        this(localMsrpAddress, localMsrpPort);
+    public MsrpManager(String localMsrpAddress, int localMsrpPort, ImsService service,
+            RcsSettings rcsSettings) {
+        this(localMsrpAddress, localMsrpPort, rcsSettings);
         if (service.getImsModule().isConnectedToWifiAccess()) {
-            this.secured = RcsSettings.getInstance().isSecureMsrpOverWifi();
+            mSecured = rcsSettings.isSecureMsrpOverWifi();
         }
     }
 
@@ -101,7 +107,7 @@ public class MsrpManager {
      * @return Port number
      */
     public int getLocalMsrpPort() {
-        return localMsrpPort;
+        return mLocalMsrpPort;
     }
 
     /**
@@ -110,7 +116,7 @@ public class MsrpManager {
      * @return Protocol
      */
     public String getLocalSocketProtocol() {
-        if (secured) {
+        if (mSecured) {
             return MsrpConstants.SOCKET_MSRP_SECURED_PROTOCOL;
         } else {
             return MsrpConstants.SOCKET_MSRP_PROTOCOL;
@@ -123,12 +129,12 @@ public class MsrpManager {
      * @return MSRP path
      */
     public String getLocalMsrpPath() {
-        if (IpAddressUtils.isIPv6(localMsrpAddress)) {
-            return getMsrpProtocol() + "://[" + localMsrpAddress + "]:" + localMsrpPort + "/"
-                    + sessionId + ";tcp";
+        if (IpAddressUtils.isIPv6(mLocalMsrpAddress)) {
+            return getMsrpProtocol() + "://[" + mLocalMsrpAddress + "]:" + mLocalMsrpPort + "/"
+                    + mSessionId + ";tcp";
         } else {
-            return getMsrpProtocol() + "://" + localMsrpAddress + ":" + localMsrpPort + "/"
-                    + sessionId + ";tcp";
+            return getMsrpProtocol() + "://" + mLocalMsrpAddress + ":" + mLocalMsrpPort + "/"
+                    + mSessionId + ";tcp";
         }
     }
 
@@ -138,7 +144,7 @@ public class MsrpManager {
      * @return MSRP protocol
      */
     public String getMsrpProtocol() {
-        if (secured) {
+        if (mSecured) {
             return MsrpConstants.MSRP_SECURED_PROTOCOL;
         } else {
             return MsrpConstants.MSRP_PROTOCOL;
@@ -151,7 +157,7 @@ public class MsrpManager {
      * @return MSRP session
      */
     public MsrpSession getMsrpSession() {
-        return msrpSession;
+        return mMsrpSession;
     }
 
     /**
@@ -160,7 +166,7 @@ public class MsrpManager {
      * @return Boolean
      */
     public boolean isSecured() {
-        return secured;
+        return mSecured;
     }
 
     /**
@@ -169,7 +175,7 @@ public class MsrpManager {
      * @param flag Boolean flag
      */
     public void setSecured(boolean flag) {
-        this.secured = flag;
+        mSecured = flag;
     }
 
     /**
@@ -178,11 +184,11 @@ public class MsrpManager {
      * @throws IOException
      */
     public void openMsrpSession() throws IOException {
-        if ((msrpSession == null) || (msrpSession.getConnection() == null)) {
+        if ((mMsrpSession == null) || (mMsrpSession.getConnection() == null)) {
             throw new IOException("Session not yet created");
         }
 
-        msrpSession.getConnection().open();
+        mMsrpSession.getConnection().open();
     }
 
     /**
@@ -192,11 +198,11 @@ public class MsrpManager {
      * @throws IOException
      */
     public void openMsrpSession(int timeout) throws IOException {
-        if ((msrpSession == null) || (msrpSession.getConnection() == null)) {
+        if ((mMsrpSession == null) || (mMsrpSession.getConnection() == null)) {
             throw new IOException("Session not yet created");
         }
 
-        msrpSession.getConnection().open(timeout);
+        mMsrpSession.getConnection().open(timeout);
     }
 
     /**
@@ -254,6 +260,7 @@ public class MsrpManager {
      * @param remotePort Remote port
      * @param remoteMsrpPath Remote MSRP path
      * @param listener Event listener
+     * @param fingerprint
      * @return Created session
      * @throws MsrpException
      */
@@ -266,23 +273,23 @@ public class MsrpManager {
             }
 
             // Create a new MSRP session
-            msrpSession = new MsrpSession();
-            msrpSession.setFrom(getLocalMsrpPath());
-            msrpSession.setTo(remoteMsrpPath);
+            mMsrpSession = new MsrpSession(mRcsSettings);
+            mMsrpSession.setFrom(getLocalMsrpPath());
+            mMsrpSession.setTo(remoteMsrpPath);
 
             // Create a MSRP client connection
             // Changed by Deutsche Telekom
-            MsrpConnection connection = new MsrpClientConnection(msrpSession, remoteHost,
-                    remotePort, secured, fingerprint);
+            MsrpConnection connection = new MsrpClientConnection(mMsrpSession, remoteHost,
+                    remotePort, mSecured, fingerprint);
 
             // Associate the connection to the session
-            msrpSession.setConnection(connection);
+            mMsrpSession.setConnection(connection);
 
             // Add event listener
-            msrpSession.addMsrpEventListener(listener);
+            mMsrpSession.addMsrpEventListener(listener);
 
             // Return the created session
-            return msrpSession;
+            return mMsrpSession;
         } catch (Exception e) {
             if (logger.isActivated()) {
                 logger.error("Can't create the MSRP client session", e);
@@ -302,25 +309,25 @@ public class MsrpManager {
     public MsrpSession createMsrpServerSession(String remoteMsrpPath, MsrpEventListener listener)
             throws MsrpException {
         if (logger.isActivated()) {
-            logger.info("Create MSRP server end point at " + localMsrpPort);
+            logger.info("Create MSRP server end point at " + mLocalMsrpPort);
         }
 
         // Create a MSRP session
-        msrpSession = new MsrpSession();
-        msrpSession.setFrom(getLocalMsrpPath());
-        msrpSession.setTo(remoteMsrpPath);
+        mMsrpSession = new MsrpSession(mRcsSettings);
+        mMsrpSession.setFrom(getLocalMsrpPath());
+        mMsrpSession.setTo(remoteMsrpPath);
 
         // Create a MSRP server connection
-        MsrpConnection connection = new MsrpServerConnection(msrpSession, localMsrpPort);
+        MsrpConnection connection = new MsrpServerConnection(mMsrpSession, mLocalMsrpPort);
 
         // Associate the connection to the session
-        msrpSession.setConnection(connection);
+        mMsrpSession.setConnection(connection);
 
         // Add event listener
-        msrpSession.addMsrpEventListener(listener);
+        mMsrpSession.addMsrpEventListener(listener);
 
         // Return the created session
-        return msrpSession;
+        return mMsrpSession;
     }
 
     // Changed by Deutsche Telekom
@@ -336,11 +343,11 @@ public class MsrpManager {
      */
     public void sendChunks(InputStream inputStream, String msgId, String contentType,
             long contentSize, TypeMsrpChunk typeMsrpChunk) throws MsrpException {
-        if (msrpSession == null) {
+        if (mMsrpSession == null) {
             throw new MsrpException("MSRP session is null");
         }
 
-        msrpSession.sendChunks(inputStream, msgId, contentType, contentSize, typeMsrpChunk);
+        mMsrpSession.sendChunks(inputStream, msgId, contentType, contentSize, typeMsrpChunk);
     }
 
     /**
@@ -349,27 +356,27 @@ public class MsrpManager {
      * @throws MsrpException
      */
     public void sendEmptyChunk() throws MsrpException {
-        if (msrpSession == null) {
+        if (mMsrpSession == null) {
             throw new MsrpException("MSRP session is null");
         }
 
-        msrpSession.sendEmptyChunk();
+        mMsrpSession.sendEmptyChunk();
     }
 
     /**
      * Close the MSRP session
      */
     public synchronized void closeSession() {
-        if (msrpSession != null) {
+        if (mMsrpSession != null) {
             if (logger.isActivated()) {
                 logger.info("Close the MSRP session");
             }
             try {
-                msrpSession.close();
+                mMsrpSession.close();
             } catch (Exception e) {
                 // Intentionally blank
             }
-            msrpSession = null;
+            mMsrpSession = null;
         }
     }
 
@@ -379,10 +386,10 @@ public class MsrpManager {
      * @return true If the empty packet was sent successfully
      */
     public boolean isEstablished() {
-        if (msrpSession == null) {
+        if (mMsrpSession == null) {
             return false;
         }
-        return msrpSession.isEstablished();
+        return mMsrpSession.isEstablished();
     }
 
 }

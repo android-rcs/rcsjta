@@ -45,8 +45,8 @@ import com.gsma.services.rcs.extension.MultimediaMessagingSessionListener;
 import com.gsma.services.rcs.extension.MultimediaSession;
 import com.gsma.services.rcs.extension.MultimediaSessionService;
 import com.gsma.services.rcs.extension.MultimediaSessionServiceConfiguration;
-import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LockAccess;
@@ -61,21 +61,33 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public class MessagingSessionView extends Activity {
     /**
-     * View modes
+     * View mode: incoming session
      */
     public final static int MODE_INCOMING = 0;
 
+    /**
+     * View mode: outgoing session
+     */
     public final static int MODE_OUTGOING = 1;
 
+    /**
+     * View mode: open session history
+     */
     public final static int MODE_OPEN = 2;
 
     /**
-     * Intent parameters
+     * Intent parameter: view mode
      */
     public final static String EXTRA_MODE = "mode";
 
+    /**
+     * Intent parameter: session ID
+     */
     public final static String EXTRA_SESSION_ID = "session_id";
 
+    /**
+     * Intent parameter: contact
+     */
     public final static String EXTRA_CONTACT = "contact";
 
     /**
@@ -116,7 +128,7 @@ public class MessagingSessionView extends Activity {
     /**
      * API connection manager
      */
-    private ApiConnectionManager mCnxManager;
+    private ConnectionManager mCnxManager;
 
     /**
      * The log tag for this class
@@ -230,7 +242,7 @@ public class MessagingSessionView extends Activity {
         sendBtn.setEnabled(false);
 
         // Register to API connection manager
-        mCnxManager = ApiConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance(this);
         if (mCnxManager == null
                 || !mCnxManager.isServiceConnected(RcsServiceName.MULTIMEDIA,
                         RcsServiceName.CONTACT)) {

@@ -85,15 +85,16 @@ public class DeviceUtils {
      * Returns instance ID
      * 
      * @param context application context
+     * @param rcsSettings
      * @return instance Id
      */
-    public static String getInstanceId(Context context) {
+    public static String getInstanceId(Context context, RcsSettings rcsSettings) {
         if (context == null) {
             return null;
         }
 
         String instanceId = null;
-        if (RcsSettings.getInstance().isImeiUsedAsDeviceId()) {
+        if (rcsSettings.isImeiUsedAsDeviceId()) {
             String imei = getImei(context);
             if (imei != null) {
                 instanceId = "\"<urn:gsma:imei:" + imei + ">\"";

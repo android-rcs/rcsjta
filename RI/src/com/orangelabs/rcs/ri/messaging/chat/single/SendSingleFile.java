@@ -26,11 +26,14 @@ import android.os.Parcelable;
 import android.util.Log;
 import android.widget.TextView;
 
+import java.util.Set;
+
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
+
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.messaging.chat.SendFile;
@@ -81,8 +84,11 @@ public class SendSingleFile extends SendFile {
                 final FileTransfer.State state,
                 FileTransfer.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
-                Log.d(LOGTAG, "onTransferStateChanged contact=" + contact + " transferId="
-                        + transferId + " state=" + state + " reason=" + reasonCode);
+                Log.d(LOGTAG,
+                        new StringBuilder("onStateChanged contact=").append(contact)
+                                .append(" transferId=").append(transferId).append(" state=")
+                                .append(state).append(" reason=")
+                                .append(reasonCode).toString());
             }
             // Discard event if not for current transferId
             if (mTransferId == null || !mTransferId.equals(transferId)) {
@@ -133,6 +139,16 @@ public class SendSingleFile extends SendFile {
                     }
                 }
             });
+        }
+
+        @Override
+        public void onDeleted(ContactId contact, Set<String> transferIds) {
+            if (LogUtils.isActive) {
+                Log.w(LOGTAG,
+                        new StringBuilder("onDeleted contact=").append(contact)
+                                .append(" transferIds=")
+                                .append(transferIds).toString());
+            }
         }
 
     };

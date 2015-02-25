@@ -63,37 +63,37 @@ public class ImsModule implements SipEventListener {
     /**
      * Core
      */
-    private Core core;
+    private Core mCore;
 
     /**
      * IMS user profile
      */
-    public static UserProfile IMS_USER_PROFILE = null;
+    public static UserProfile IMS_USER_PROFILE;
 
     /**
      * IMS connection manager
      */
-    private ImsConnectionManager connectionManager;
+    private ImsConnectionManager mCnxManager;
 
     /**
      * IMS services
      */
-    private ImsService services[];
+    private ImsService mServices[];
 
     /**
      * Service dispatcher
      */
-    private ImsServiceDispatcher serviceDispatcher;
+    private ImsServiceDispatcher mServiceDispatcher;
 
     /**
      * Call manager
      */
-    private CallManager callManager;
+    private CallManager mCallManager;
 
     /**
      * flag to indicate whether instantiation is finished
      */
-    private boolean isReady = false;
+    private boolean mInitializationFinished = false;
 
     /**
      * The logger
@@ -104,85 +104,79 @@ public class ImsModule implements SipEventListener {
      * Constructor
      * 
      * @param core Core
+     * @param rcsSettings RCSsettings instance
+     * @param contactsManager
+     * @param messagingLog
      * @throws CoreException
      */
-    public ImsModule(Core core) throws CoreException {
-        this.core = core;
+    public ImsModule(Core core, RcsSettings rcsSettings, ContactsManager contactsManager,
+            MessagingLog messagingLog)
+            throws CoreException {
+        mCore = core;
 
         if (logger.isActivated()) {
             logger.info("IMS module initialization");
         }
 
         // Get capability extensions
-        ServiceExtensionManager.getInstance().updateSupportedExtensions(
+        ServiceExtensionManager.getInstance(rcsSettings).updateSupportedExtensions(
                 AndroidFactory.getApplicationContext());
 
         // Create the IMS connection manager
         try {
-            connectionManager = new ImsConnectionManager(this);
+            mCnxManager = new ImsConnectionManager(this, rcsSettings);
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("IMS connection manager initialization has failed", e);
-            }
-            throw new CoreException("Can't instanciate the IMS connection manager");
+            throw new CoreException("IMS connection manager initialization has failed", e);
         }
 
         // Set general parameters
-        SipManager.TIMEOUT = RcsSettings.getInstance().getSipTransactionTimeout();
+        SipManager.TIMEOUT = rcsSettings.getSipTransactionTimeout();
         RtpSource.CNAME = ImsModule.IMS_USER_PROFILE.getPublicUri();
-        MsrpConnection.MSRP_TRACE_ENABLED = RcsSettings.getInstance().isMediaTraceActivated();
-        HttpTransferManager.HTTP_TRACE_ENABLED = RcsSettings.getInstance().isMediaTraceActivated();
+        MsrpConnection.MSRP_TRACE_ENABLED = rcsSettings.isMediaTraceActivated();
+        HttpTransferManager.HTTP_TRACE_ENABLED = rcsSettings.isMediaTraceActivated();
 
         // Load keystore for certificates
         try {
-            KeyStoreManager.loadKeyStore();
+            KeyStoreManager.loadKeyStore(rcsSettings);
         } catch (KeyStoreManagerException e) {
-            if (logger.isActivated()) {
-                logger.error("Can't load keystore manager", e);
-            }
-            throw new CoreException("Keystore manager exeception");
+            throw new CoreException("Can't load keystore manager", e);
         }
 
-        RcsSettings rcsSettings = RcsSettings.getInstance();
-
-        ContactsManager contactsManager = ContactsManager.getInstance();
-
-        MessagingLog messagingLog = MessagingLog.getInstance();
-
-        // Instanciates the IMS services
-        services = new ImsService[7];
+        // Instantiates the IMS services
+        mServices = new ImsService[7];
 
         // Create terms & conditions service
-        services[ImsService.TERMS_SERVICE] = new TermsConditionsService(this, rcsSettings);
+        mServices[ImsService.TERMS_SERVICE] = new TermsConditionsService(this, rcsSettings);
 
         // Create capability discovery service
-        services[ImsService.CAPABILITY_SERVICE] = new CapabilityService(this, rcsSettings,
+        mServices[ImsService.CAPABILITY_SERVICE] = new CapabilityService(this, rcsSettings,
                 contactsManager);
 
         // Create IM service (mandatory)
-        services[ImsService.IM_SERVICE] = new InstantMessagingService(this, core, rcsSettings,
+        mServices[ImsService.IM_SERVICE] = new InstantMessagingService(this, core, rcsSettings,
                 contactsManager, messagingLog);
 
         // Create IP call service (optional)
-        services[ImsService.IPCALL_SERVICE] = new IPCallService(this, rcsSettings, contactsManager);
+        mServices[ImsService.IPCALL_SERVICE] = new IPCallService(this, rcsSettings, contactsManager);
 
         // Create richcall service (optional)
-        services[ImsService.RICHCALL_SERVICE] = new RichcallService(this, contactsManager);
+        mServices[ImsService.RICHCALL_SERVICE] = new RichcallService(this, contactsManager,
+                rcsSettings);
 
         // Create presence service (optional)
-        services[ImsService.PRESENCE_SERVICE] = new PresenceService(this, rcsSettings,
+        mServices[ImsService.PRESENCE_SERVICE] = new PresenceService(this, rcsSettings,
                 contactsManager);
 
         // Create generic SIP service
-        services[ImsService.SIP_SERVICE] = new SipService(this, contactsManager);
+        mServices[ImsService.SIP_SERVICE] = new SipService(this, contactsManager, rcsSettings);
 
         // Create the service dispatcher
-        serviceDispatcher = new ImsServiceDispatcher(this, rcsSettings);
+        mServiceDispatcher = new ImsServiceDispatcher(this, rcsSettings);
 
         // Create the call manager
-        callManager = new CallManager(this);
+        mCallManager = new CallManager(this);
 
-        isReady = true;
+        mInitializationFinished = true;
 
         if (logger.isActivated()) {
             logger.info("IMS module has been created");
@@ -204,7 +198,7 @@ public class ImsModule implements SipEventListener {
      * @return Network interface
      */
     public ImsNetworkInterface getCurrentNetworkInterface() {
-        return connectionManager.getCurrentNetworkInterface();
+        return mCnxManager.getCurrentNetworkInterface();
     }
 
     /**
@@ -213,7 +207,7 @@ public class ImsModule implements SipEventListener {
      * @return Boolean
      */
     public boolean isConnectedToWifiAccess() {
-        return connectionManager.isConnectedToWifi();
+        return mCnxManager.isConnectedToWifi();
     }
 
     /**
@@ -222,7 +216,7 @@ public class ImsModule implements SipEventListener {
      * @return Boolean
      */
     public boolean isConnectedToMobileAccess() {
-        return connectionManager.isConnectedToMobile();
+        return mCnxManager.isConnectedToMobile();
     }
 
     /**
@@ -231,7 +225,7 @@ public class ImsModule implements SipEventListener {
      * @return ImsConnectionManager
      */
     public ImsConnectionManager getImsConnectionManager() {
-        return connectionManager;
+        return mCnxManager;
     }
 
     /**
@@ -243,10 +237,10 @@ public class ImsModule implements SipEventListener {
         }
 
         // Start the service dispatcher
-        serviceDispatcher.start();
+        mServiceDispatcher.start();
 
         // Start call monitoring
-        callManager.startCallMonitoring();
+        mCallManager.startCallMonitoring();
 
         if (logger.isActivated()) {
             logger.info("IMS module is started");
@@ -262,13 +256,13 @@ public class ImsModule implements SipEventListener {
         }
 
         // Stop call monitoring
-        callManager.stopCallMonitoring();
+        mCallManager.stopCallMonitoring();
 
         // Terminate the connection manager
-        connectionManager.terminate();
+        mCnxManager.terminate();
 
         // Terminate the service dispatcher
-        serviceDispatcher.terminate();
+        mServiceDispatcher.terminate();
 
         if (logger.isActivated()) {
             logger.info("IMS module has been stopped");
@@ -280,15 +274,14 @@ public class ImsModule implements SipEventListener {
      */
     public void startImsServices() {
         // Start each services
-        for (int i = 0; i < services.length; i++) {
-            if (services[i].isActivated()) {
+        for (ImsService imsService : mServices) {
+            if (imsService.isActivated()) {
                 if (logger.isActivated()) {
-                    logger.info("Start IMS service: " + services[i].getClass().getName());
+                    logger.info("Start IMS service: ".concat(imsService.getClass().getName()));
                 }
-                services[i].start();
+                imsService.start();
             }
         }
-
         // Send call manager event
         getCallManager().connectionEvent(true);
     }
@@ -301,15 +294,14 @@ public class ImsModule implements SipEventListener {
         abortAllSessions();
 
         // Stop each services
-        for (int i = 0; i < services.length; i++) {
-            if (services[i].isActivated()) {
+        for (ImsService imsService : mServices) {
+            if (imsService.isActivated()) {
                 if (logger.isActivated()) {
-                    logger.info("Stop IMS service: " + services[i].getClass().getName());
+                    logger.info("Stop IMS service: ".concat(imsService.getClass().getName()));
                 }
-                services[i].stop();
+                imsService.stop();
             }
         }
-
         // Send call manager event
         getCallManager().connectionEvent(false);
     }
@@ -318,12 +310,12 @@ public class ImsModule implements SipEventListener {
      * Check IMS services
      */
     public void checkImsServices() {
-        for (int i = 0; i < services.length; i++) {
-            if (services[i].isActivated()) {
+        for (ImsService imsService : mServices) {
+            if (imsService.isActivated()) {
                 if (logger.isActivated()) {
-                    logger.info("Check IMS service: " + services[i].getClass().getName());
+                    logger.info("Check IMS service: ".concat(imsService.getClass().getName()));
                 }
-                services[i].check();
+                imsService.check();
             }
         }
     }
@@ -334,7 +326,7 @@ public class ImsModule implements SipEventListener {
      * @return Call manager
      */
     public CallManager getCallManager() {
-        return callManager;
+        return mCallManager;
     }
 
     /**
@@ -344,7 +336,7 @@ public class ImsModule implements SipEventListener {
      * @return IMS service
      */
     public ImsService getImsService(int id) {
-        return services[id];
+        return mServices[id];
     }
 
     /**
@@ -353,7 +345,7 @@ public class ImsModule implements SipEventListener {
      * @return Table of IMS service
      */
     public ImsService[] getImsServices() {
-        return services;
+        return mServices;
     }
 
     /**
@@ -362,7 +354,7 @@ public class ImsModule implements SipEventListener {
      * @return Terms & conditions service
      */
     public TermsConditionsService getTermsConditionsService() {
-        return (TermsConditionsService) services[ImsService.TERMS_SERVICE];
+        return (TermsConditionsService) mServices[ImsService.TERMS_SERVICE];
     }
 
     /**
@@ -371,7 +363,7 @@ public class ImsModule implements SipEventListener {
      * @return Capability service
      */
     public CapabilityService getCapabilityService() {
-        return (CapabilityService) services[ImsService.CAPABILITY_SERVICE];
+        return (CapabilityService) mServices[ImsService.CAPABILITY_SERVICE];
     }
 
     /**
@@ -380,7 +372,7 @@ public class ImsModule implements SipEventListener {
      * @return IP call service
      */
     public IPCallService getIPCallService() {
-        return (IPCallService) services[ImsService.IPCALL_SERVICE];
+        return (IPCallService) mServices[ImsService.IPCALL_SERVICE];
     }
 
     /**
@@ -389,7 +381,7 @@ public class ImsModule implements SipEventListener {
      * @return Richcall service
      */
     public RichcallService getRichcallService() {
-        return (RichcallService) services[ImsService.RICHCALL_SERVICE];
+        return (RichcallService) mServices[ImsService.RICHCALL_SERVICE];
     }
 
     /**
@@ -398,7 +390,7 @@ public class ImsModule implements SipEventListener {
      * @return Presence service
      */
     public PresenceService getPresenceService() {
-        return (PresenceService) services[ImsService.PRESENCE_SERVICE];
+        return (PresenceService) mServices[ImsService.PRESENCE_SERVICE];
     }
 
     /**
@@ -407,7 +399,7 @@ public class ImsModule implements SipEventListener {
      * @return Instant Messaging service
      */
     public InstantMessagingService getInstantMessagingService() {
-        return (InstantMessagingService) services[ImsService.IM_SERVICE];
+        return (InstantMessagingService) mServices[ImsService.IM_SERVICE];
     }
 
     /**
@@ -416,7 +408,7 @@ public class ImsModule implements SipEventListener {
      * @return SIP service
      */
     public SipService getSipService() {
-        return (SipService) services[ImsService.SIP_SERVICE];
+        return (SipService) mServices[ImsService.SIP_SERVICE];
     }
 
     /**
@@ -425,7 +417,7 @@ public class ImsModule implements SipEventListener {
      * @return Core instance
      */
     public Core getCore() {
-        return core;
+        return mCore;
     }
 
     /**
@@ -434,7 +426,7 @@ public class ImsModule implements SipEventListener {
      * @return Core listener
      */
     public CoreListener getCoreListener() {
-        return core.getListener();
+        return mCore.getListener();
     }
 
     /**
@@ -444,7 +436,7 @@ public class ImsModule implements SipEventListener {
      */
     public void receiveSipRequest(SipRequest request) {
         // Post the incoming request to the service dispatcher
-        serviceDispatcher.postSipRequest(request);
+        mServiceDispatcher.postSipRequest(request);
     }
 
     /**
@@ -464,14 +456,14 @@ public class ImsModule implements SipEventListener {
      * 
      * @return true if ImsModule is completely initialized
      */
-    public boolean isReady() {
-        return isReady;
+    public boolean isInitializationFinished() {
+        return mInitializationFinished;
     }
 
     /**
      * @return true is device is in roaming
      */
     public boolean isInRoaming() {
-        return connectionManager.isInRoaming();
+        return mCnxManager.isInRoaming();
     }
 }

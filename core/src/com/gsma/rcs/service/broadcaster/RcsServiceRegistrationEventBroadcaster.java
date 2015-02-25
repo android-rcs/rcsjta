@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2014 Sony Mobile Communications Inc.
+ * Copyright (C) 2010 France Telecom S.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,10 +17,11 @@
 
 package com.gsma.rcs.service.broadcaster;
 
+import android.os.RemoteCallbackList;
+
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
-
-import android.os.RemoteCallbackList;
+import com.gsma.services.rcs.RcsServiceRegistration;
 
 /**
  * RcsServiceRegistrationEventBroadcaster maintains the registering and unregistering of
@@ -58,11 +60,12 @@ public class RcsServiceRegistrationEventBroadcaster implements
         mServiceRegistrationListeners.finishBroadcast();
     }
 
-    public void broadcastServiceUnRegistered() {
+    public void broadcastServiceUnRegistered(RcsServiceRegistration.ReasonCode reason) {
         final int N = mServiceRegistrationListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
-                mServiceRegistrationListeners.getBroadcastItem(i).onServiceUnregistered();
+                mServiceRegistrationListeners.getBroadcastItem(i).onServiceUnregistered(
+                        reason.toInt());
             } catch (Exception e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);

@@ -1,11 +1,13 @@
 package com.gsma.services.rcs;
 
+import com.gsma.services.rcs.RcsServiceRegistration;
+
 /**
- * Rcs service registration events listener
+ * RCS service registration events listener
  */
 interface IRcsServiceRegistrationListener {
 
 	void onServiceRegistered();
 
-	void onServiceUnregistered();
+	void onServiceUnregistered(in int reasonCode);
 }

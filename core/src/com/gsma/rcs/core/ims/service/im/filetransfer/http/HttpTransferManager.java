@@ -79,63 +79,69 @@ public abstract class HttpTransferManager {
     /**
      * HTTP server address
      */
-    private Uri serverAddr = Uri.parse(RcsSettings.getInstance().getFtHttpServer());
+    private final Uri mServerAddr;
 
     /**
      * HTTP server login
      */
-    private String serverLogin = RcsSettings.getInstance().getFtHttpLogin();
+    private final String mServerLogin;
 
     /**
      * HTTP server password
      */
-    private String serverPwd = RcsSettings.getInstance().getFtHttpPassword();
+    private final String mServerPwd;
 
     /**
      * HTTP transfer event listener
      */
-    private HttpTransferEventListener listener;
+    private HttpTransferEventListener mListener;
 
     /**
      * HTTP context
      */
-    private HttpContext httpContext = null;
+    private HttpContext mHttpContext;
 
     /**
      * HTTP response
      */
-    private HttpResponse response = null;
+    private HttpResponse mResponse;
 
     /**
      * HTTP client
      */
-    private DefaultHttpClient httpClient = null;
+    private DefaultHttpClient mHttpClient;
 
     /**
      * Cancellation flag
      */
-    private boolean isCancelled = false;
+    private boolean mIsCancelled = false;
 
     /**
      * Pause flag
      */
-    private boolean isPaused = false;
+    private boolean mIsPaused = false;
+
+    protected final RcsSettings mRcsSettings;
 
     /**
      * The logger
      */
-    private static final Logger logger = Logger
+    private static final Logger sLogger = Logger
             .getLogger(HttpTransferManager.class.getSimpleName());
 
     /**
      * Constructor
      * 
      * @param listener HTTP event listener
+     * @param rcsSettings
      */
-    public HttpTransferManager(HttpTransferEventListener listener) {
-        this.listener = listener;
-
-        initServerAddress(serverAddr);
+    public HttpTransferManager(HttpTransferEventListener listener, RcsSettings rcsSettings) {
+        mListener = listener;
+        mServerAddr = Uri.parse(rcsSettings.getFtHttpServer());
+        mServerLogin = rcsSettings.getFtHttpLogin();
+        mServerPwd = rcsSettings.getFtHttpPassword();
+        mRcsSettings = rcsSettings;
+        initServerAddress(mServerAddr);
     }
 
     /**
@@ -143,10 +149,15 @@ public abstract class HttpTransferManager {
      * 
      * @param listener HTTP event listener
      * @param address HTTP server address
+     * @param rcsSettings
      */
-    public HttpTransferManager(HttpTransferEventListener listener, Uri address) {
-        this.listener = listener;
-        this.serverAddr = address;
+    public HttpTransferManager(HttpTransferEventListener listener, Uri address,
+            RcsSettings rcsSettings) {
+        mListener = listener;
+        mServerAddr = address;
+        mServerLogin = rcsSettings.getFtHttpLogin();
+        mServerPwd = rcsSettings.getFtHttpPassword();
+        mRcsSettings = rcsSettings;
         initServerAddress(address);
     }
 
@@ -197,12 +208,12 @@ public abstract class HttpTransferManager {
             }
             HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
             ClientConnectionManager cm = new SingleClientConnManager(params, schemeRegistry);
-            httpClient = new DefaultHttpClient(cm, params);
+            mHttpClient = new DefaultHttpClient(cm, params);
 
             // Create local HTTP context
             CookieStore cookieStore = (CookieStore) new BasicCookieStore();
-            httpContext = new BasicHttpContext();
-            httpContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
+            mHttpContext = new BasicHttpContext();
+            mHttpContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
         } catch (MalformedURLException e) {
             // Nothing to do
         }
@@ -214,7 +225,7 @@ public abstract class HttpTransferManager {
      * @return Listener
      */
     public HttpTransferEventListener getListener() {
-        return listener;
+        return mListener;
     }
 
     /**
@@ -223,7 +234,7 @@ public abstract class HttpTransferManager {
      * @return Address
      */
     public Uri getHttpServerAddr() {
-        return serverAddr;
+        return mServerAddr;
     }
 
     /**
@@ -232,7 +243,7 @@ public abstract class HttpTransferManager {
      * @return Login
      */
     public String getHttpServerLogin() {
-        return serverLogin;
+        return mServerLogin;
     }
 
     /**
@@ -241,7 +252,7 @@ public abstract class HttpTransferManager {
      * @return Password
      */
     public String getHttpServerPwd() {
-        return serverPwd;
+        return mServerPwd;
     }
 
     /**
@@ -254,21 +265,21 @@ public abstract class HttpTransferManager {
      */
     public HttpResponse executeRequest(HttpRequestBase request) throws ClientProtocolException,
             IOException {
-        if (response != null) {
-            response.getEntity().consumeContent();
+        if (mResponse != null) {
+            mResponse.getEntity().consumeContent();
         }
-        if (httpClient != null) {
-            response = httpClient.execute(request, httpContext);
+        if (mHttpClient != null) {
+            mResponse = mHttpClient.execute(request, mHttpContext);
             if (HTTP_TRACE_ENABLED) {
                 String trace = "<<< Receive HTTP response:";
-                trace += "\n" + response.getStatusLine().toString();
-                Header[] headers = response.getAllHeaders();
+                trace += "\n" + mResponse.getStatusLine().toString();
+                Header[] headers = mResponse.getAllHeaders();
                 for (Header header : headers) {
                     trace += "\n" + header.getName() + " " + header.getValue();
                 }
                 System.out.println(trace);
             }
-            return response;
+            return mResponse;
         } else {
             throw new IOException("HTTP client not found");
         }
@@ -280,27 +291,27 @@ public abstract class HttpTransferManager {
      * @return HTTP client
      */
     public DefaultHttpClient getHttpClient() {
-        return httpClient;
+        return mHttpClient;
     }
 
     /**
      * Interrupts file transfer
      */
     public void interrupt() {
-        if (logger.isActivated()) {
-            logger.warn("interrupting transfer");
+        if (sLogger.isActivated()) {
+            sLogger.warn("interrupting transfer");
         }
-        isCancelled = true;
+        mIsCancelled = true;
     }
 
     /**
      * Interrupts file transfer
      */
     public void pauseTransferByUser() {
-        if (logger.isActivated()) {
-            logger.warn("User is pausing transfer");
+        if (sLogger.isActivated()) {
+            sLogger.warn("User is pausing transfer");
         }
-        isPaused = true;
+        mIsPaused = true;
         getListener().httpTransferPausedByUser();
     }
 
@@ -308,10 +319,10 @@ public abstract class HttpTransferManager {
      * Interrupts file transfer
      */
     public void pauseTransferBySystem() {
-        if (logger.isActivated()) {
-            logger.warn("System is pausing transfer");
+        if (sLogger.isActivated()) {
+            sLogger.warn("System is pausing transfer");
         }
-        isPaused = true;
+        mIsPaused = true;
         getListener().httpTransferPausedBySystem();
     }
 
@@ -319,8 +330,8 @@ public abstract class HttpTransferManager {
      * Resuming upload so resetting cancelled boolean
      */
     public void resetParamForResume() {
-        isCancelled = false;
-        isPaused = false;
+        mIsCancelled = false;
+        mIsPaused = false;
     }
 
     /**
@@ -329,7 +340,7 @@ public abstract class HttpTransferManager {
      * @return Boolean
      */
     public boolean isCancelled() {
-        return this.isCancelled;
+        return mIsCancelled;
     }
 
     /**
@@ -338,6 +349,6 @@ public abstract class HttpTransferManager {
      * @return Boolean
      */
     public boolean isPaused() {
-        return this.isPaused;
+        return mIsPaused;
     }
 }

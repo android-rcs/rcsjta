@@ -42,8 +42,8 @@ import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.GroupChat;
-import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -94,7 +94,7 @@ public class GroupChatList extends Activity {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View v, int pos, long id) {
-                ApiConnectionManager cnxManager = ApiConnectionManager
+                ConnectionManager cnxManager = ConnectionManager
                         .getInstance(GroupChatList.this);
                 if (cnxManager == null || !cnxManager.isServiceConnected(RcsServiceName.CHAT)) {
                     Utils.showMessage(GroupChatList.this,
@@ -117,7 +117,7 @@ public class GroupChatList extends Activity {
                     }
                 } catch (RcsServiceNotAvailableException e) {
                     Utils.showMessageAndExit(GroupChatList.this,
-                            getString(R.string.label_api_disabled), mExitOnce, e);
+                            getString(R.string.label_api_unavailable), mExitOnce, e);
                 } catch (RcsServiceException e) {
                     Utils.showMessageAndExit(GroupChatList.this,
                             getString(R.string.label_api_failed), mExitOnce, e);

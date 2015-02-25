@@ -42,12 +42,9 @@ public class TerminalInfo {
     private static String productVersion = "v2.2";
 
     /**
-     * RCS client version.
-     *
-     * Client Version Value = Platform "-" VersionMajor "." VersionMinor
-     * Platform = Alphanumeric (max 9)
-     * VersionMajor = Number (2 char max)
-     * VersionMinor = Number (2 char max)
+     * RCS client version. Client Version Value = Platform "-" VersionMajor "." VersionMinor
+     * Platform = Alphanumeric (max 9) VersionMajor = Number (2 char max) VersionMinor = Number (2
+     * char max)
      */
     private static final String CLIENT_VERSION = "RCSAndr-1.5";
 

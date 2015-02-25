@@ -44,107 +44,107 @@ public class SipDialogPath {
     /**
      * SIP stack interface
      */
-    private SipInterface stack = null;
+    private SipInterface mStack;
 
     /**
      * Call-Id
      */
-    private String callId = null;
+    private String mCallId;
 
     /**
      * CSeq number
      */
-    private long cseq = 1;
+    private long mCseq = 1;
 
     /**
      * Local tag
      */
-    private String localTag = IdGenerator.getIdentifier();
+    private String mLocalTag = IdGenerator.getIdentifier();
 
     /**
      * Remote tag
      */
-    private String remoteTag = null;
+    private String mRemoteTag;
 
     /**
      * Target
      */
-    private String target = null;
+    private String mTarget;
 
     /**
      * Local party
      */
-    private String localParty = null;
+    private String mLocalParty;
 
     /**
      * Remote party
      */
-    private String remoteParty = null;
+    private String mRemoteParty;
 
     /**
      * Initial INVITE request
      */
-    private SipRequest invite = null;
+    private SipRequest mInvite;
 
     /**
      * Local content
      */
-    private String localContent = null;
+    private String mLocalContent;
 
     /**
      * Remote content
      */
-    private String remoteContent = null;
+    private String mRemoteContent;
 
     /**
      * Remote sip instance
      */
-    private String remoteSipInstance = null;
+    private String mRemoteSipInstance;
 
     /**
      * Route path
      */
-    private Vector<String> route = null;
+    private Vector<String> mRoute;
 
     /**
      * Authentication agent
      */
-    private SessionAuthenticationAgent authenticationAgent = null;
+    private SessionAuthenticationAgent mAuthenticationAgent;
 
     /**
      * Session expire time
      */
-    private int sessionExpireTime;
+    private int mSessionExpireTime;
 
     /**
      * Flag that indicates if the signalisation is established or not
      */
-    private boolean sigEstablished = false;
+    private boolean mSigEstablished = false;
 
     /**
      * Flag that indicates if the session (sig + media) is established or not
      */
-    private boolean sessionEstablished = false;
+    private boolean mSessionEstablished = false;
 
     /**
      * Flag that indicates if the session has been cancelled by the end-user
      */
-    private boolean sessionCancelled = false;
+    private boolean mSessionCancelled = false;
 
     /**
      * Flag that indicates if the session has been terminated by the server
      */
-    private boolean sessionTerminated = false;
+    private boolean mSessionTerminated = false;
 
     /**
      * Session termination reason code
      */
-    private int sessionTerminationReasonCode = -1;
+    private int mSessionTerminationReasonCode = -1;
 
     /**
      * Session termination reason phrase
      */
-    private String sessionTerminationReasonPhrase = null;
+    private String mSessionTerminationReasonPhrase;
 
     /**
      * Constructor
@@ -156,25 +156,26 @@ public class SipDialogPath {
      * @param localParty Local party
      * @param remoteParty Remote party
      * @param route Route path
+     * @param rcsSettings
      */
     public SipDialogPath(SipInterface stack, String callId, long cseq, String target,
-            String localParty, String remoteParty, Vector<String> route) {
-        this.stack = stack;
-        this.callId = callId;
-        this.cseq = cseq;
-        this.target = SipUtils.extractUriFromAddress(target);
-        this.localParty = localParty;
-        this.remoteParty = remoteParty;
-        this.route = route;
+            String localParty, String remoteParty, Vector<String> route, RcsSettings rcsSettings) {
+        mStack = stack;
+        mCallId = callId;
+        mCseq = cseq;
+        mTarget = SipUtils.extractUriFromAddress(target);
+        mLocalParty = localParty;
+        mRemoteParty = remoteParty;
+        mRoute = route;
 
-        int defaultExpireTime = RcsSettings.getInstance().getSessionRefreshExpirePeriod();
+        int defaultExpireTime = rcsSettings.getSessionRefreshExpirePeriod();
         int minExpireValue = RegistryFactory.getFactory().readInteger(
                 REGISTRY_MIN_SESSION_EXPIRE_PERIOD, -1);
         if ((defaultExpireTime > SessionTimerManager.MIN_EXPIRE_PERIOD) && (minExpireValue != -1)
                 && (defaultExpireTime < minExpireValue)) {
-            this.sessionExpireTime = minExpireValue;
+            mSessionExpireTime = minExpireValue;
         } else {
-            this.sessionExpireTime = defaultExpireTime;
+            mSessionExpireTime = defaultExpireTime;
         }
     }
 
@@ -185,27 +186,27 @@ public class SipDialogPath {
      * @param dialogPath
      */
     public SipDialogPath(SipDialogPath dialogPath) {
-        stack = dialogPath.getSipStack();
-        callId = dialogPath.getCallId();
-        cseq = dialogPath.getCseq();
-        localTag = dialogPath.getLocalTag();
-        remoteTag = dialogPath.getRemoteTag();
-        target = dialogPath.getTarget();
-        localParty = dialogPath.getLocalParty();
-        remoteParty = dialogPath.getRemoteParty();
-        invite = dialogPath.getInvite();
-        localContent = dialogPath.getLocalContent();
-        remoteContent = dialogPath.getRemoteContent();
-        remoteSipInstance = dialogPath.getRemoteSipInstance();
-        route = dialogPath.getRoute();
-        authenticationAgent = dialogPath.getAuthenticationAgent();
-        sessionExpireTime = dialogPath.getSessionExpireTime();
-        sigEstablished = dialogPath.isSigEstablished();
-        sessionEstablished = dialogPath.isSessionEstablished();
-        sessionCancelled = dialogPath.isSessionCancelled();
-        sessionTerminated = dialogPath.isSessionTerminated();
-        sessionTerminationReasonCode = dialogPath.getSessionTerminationReasonCode();
-        sessionTerminationReasonPhrase = dialogPath.getSessionTerminationReasonPhrase();
+        mStack = dialogPath.getSipStack();
+        mCallId = dialogPath.getCallId();
+        mCseq = dialogPath.getCseq();
+        mLocalTag = dialogPath.getLocalTag();
+        mRemoteTag = dialogPath.getRemoteTag();
+        mTarget = dialogPath.getTarget();
+        mLocalParty = dialogPath.getLocalParty();
+        mRemoteParty = dialogPath.getRemoteParty();
+        mInvite = dialogPath.getInvite();
+        mLocalContent = dialogPath.getLocalContent();
+        mRemoteContent = dialogPath.getRemoteContent();
+        mRemoteSipInstance = dialogPath.getRemoteSipInstance();
+        mRoute = dialogPath.getRoute();
+        mAuthenticationAgent = dialogPath.getAuthenticationAgent();
+        mSessionExpireTime = dialogPath.getSessionExpireTime();
+        mSigEstablished = dialogPath.isSigEstablished();
+        mSessionEstablished = dialogPath.isSessionEstablished();
+        mSessionCancelled = dialogPath.isSessionCancelled();
+        mSessionTerminated = dialogPath.isSessionTerminated();
+        mSessionTerminationReasonCode = dialogPath.getSessionTerminationReasonCode();
+        mSessionTerminationReasonPhrase = dialogPath.getSessionTerminationReasonPhrase();
     }
 
     /**
@@ -214,7 +215,7 @@ public class SipDialogPath {
      * @return SIP stack interface
      */
     public SipInterface getSipStack() {
-        return stack;
+        return mStack;
     }
 
     /**
@@ -223,7 +224,7 @@ public class SipDialogPath {
      * @return String
      */
     public String getTarget() {
-        return target;
+        return mTarget;
     }
 
     /**
@@ -232,7 +233,7 @@ public class SipDialogPath {
      * @param tg Target address
      */
     public void setTarget(String tg) {
-        target = tg;
+        mTarget = tg;
     }
 
     /**
@@ -241,7 +242,7 @@ public class SipDialogPath {
      * @return String
      */
     public String getLocalParty() {
-        return localParty;
+        return mLocalParty;
     }
 
     /**
@@ -250,7 +251,7 @@ public class SipDialogPath {
      * @return String
      */
     public String getRemoteParty() {
-        return remoteParty;
+        return mRemoteParty;
     }
 
     /**
@@ -259,7 +260,7 @@ public class SipDialogPath {
      * @return String
      */
     public String getLocalTag() {
-        return localTag;
+        return mLocalTag;
     }
 
     /**
@@ -268,7 +269,7 @@ public class SipDialogPath {
      * @return String
      */
     public String getRemoteTag() {
-        return remoteTag;
+        return mRemoteTag;
     }
 
     /**
@@ -277,7 +278,7 @@ public class SipDialogPath {
      * @param tag Remote tag
      */
     public void setRemoteTag(String tag) {
-        remoteTag = tag;
+        mRemoteTag = tag;
     }
 
     /**
@@ -286,16 +287,16 @@ public class SipDialogPath {
      * @return String
      */
     public String getCallId() {
-        return callId;
+        return mCallId;
     }
 
     /**
      * Set the call-id of the dialog path
      * 
-     * @return String
+     * @param callId
      */
     public void setCallId(String callId) {
-        this.callId = callId;
+        mCallId = callId;
     }
 
     /**
@@ -304,14 +305,14 @@ public class SipDialogPath {
      * @return Cseq number
      */
     public long getCseq() {
-        return cseq;
+        return mCseq;
     }
 
     /**
      * Increment the Cseq number of the dialog path
      */
     public void incrementCseq() {
-        cseq++;
+        mCseq++;
 
         // Increment internal stack CSeq if terminating side (NIST stack issue?)
         Dialog dlg = getStackDialog();
@@ -326,7 +327,7 @@ public class SipDialogPath {
      * @return String
      */
     public SipRequest getInvite() {
-        return invite;
+        return mInvite;
     }
 
     /**
@@ -335,7 +336,7 @@ public class SipDialogPath {
      * @param invite INVITE request
      */
     public void setInvite(SipRequest invite) {
-        this.invite = invite;
+        mInvite = invite;
     }
 
     /**
@@ -344,7 +345,7 @@ public class SipDialogPath {
      * @return String
      */
     public String getLocalContent() {
-        return localContent;
+        return mLocalContent;
     }
 
     /**
@@ -353,7 +354,7 @@ public class SipDialogPath {
      * @return String
      */
     public String getRemoteContent() {
-        return remoteContent;
+        return mRemoteContent;
     }
 
     /**
@@ -362,7 +363,7 @@ public class SipDialogPath {
      * @param local Local content
      */
     public void setLocalContent(String local) {
-        this.localContent = local;
+        mLocalContent = local;
     }
 
     /**
@@ -371,7 +372,7 @@ public class SipDialogPath {
      * @return String
      */
     public String getRemoteSipInstance() {
-        return remoteSipInstance;
+        return mRemoteSipInstance;
     }
 
     /**
@@ -380,7 +381,7 @@ public class SipDialogPath {
      * @param instanceId SIP instance ID
      */
     public void setRemoteSipInstance(String instanceId) {
-        this.remoteSipInstance = instanceId;
+        mRemoteSipInstance = instanceId;
     }
 
     /**
@@ -389,7 +390,7 @@ public class SipDialogPath {
      * @param remote Remote content
      */
     public void setRemoteContent(String remote) {
-        this.remoteContent = remote;
+        mRemoteContent = remote;
     }
 
     /**
@@ -398,7 +399,7 @@ public class SipDialogPath {
      * @return Vector of string
      */
     public Vector<String> getRoute() {
-        return route;
+        return mRoute;
     }
 
     /**
@@ -407,7 +408,7 @@ public class SipDialogPath {
      * @param route New route path
      */
     public void setRoute(Vector<String> route) {
-        this.route = route;
+        mRoute = route;
     }
 
     /**
@@ -416,14 +417,14 @@ public class SipDialogPath {
      * @return Boolean
      */
     public boolean isSessionCancelled() {
-        return sessionCancelled;
+        return mSessionCancelled;
     }
 
     /**
      * The session has been cancelled
      */
     public synchronized void sessionCancelled() {
-        this.sessionCancelled = true;
+        mSessionCancelled = true;
     }
 
     /**
@@ -432,14 +433,14 @@ public class SipDialogPath {
      * @return Boolean
      */
     public boolean isSessionEstablished() {
-        return sessionEstablished;
+        return mSessionEstablished;
     }
 
     /**
      * Session is established
      */
     public synchronized void sessionEstablished() {
-        this.sessionEstablished = true;
+        mSessionEstablished = true;
     }
 
     /**
@@ -448,28 +449,28 @@ public class SipDialogPath {
      * @return Boolean
      */
     public boolean isSessionTerminated() {
-        return sessionTerminated;
+        return mSessionTerminated;
     }
 
     /**
      * Session is terminated
      */
     public synchronized void sessionTerminated() {
-        this.sessionTerminated = true;
-        this.sessionTerminationReasonCode = -1;
-        this.sessionTerminationReasonPhrase = null;
+        mSessionTerminated = true;
+        mSessionTerminationReasonCode = -1;
+        mSessionTerminationReasonPhrase = null;
     }
 
     /**
      * Session is terminated with a specific reason code
      * 
-     * @param reason Reason code
+     * @param code Reason code
      * @param phrase Reason phrase
      */
     public synchronized void sessionTerminated(int code, String phrase) {
-        this.sessionTerminated = true;
-        this.sessionTerminationReasonCode = code;
-        this.sessionTerminationReasonPhrase = phrase;
+        mSessionTerminated = true;
+        mSessionTerminationReasonCode = code;
+        mSessionTerminationReasonPhrase = phrase;
     }
 
     /**
@@ -478,7 +479,7 @@ public class SipDialogPath {
      * @return Reason code
      */
     public int getSessionTerminationReasonCode() {
-        return sessionTerminationReasonCode;
+        return mSessionTerminationReasonCode;
     }
 
     /**
@@ -487,7 +488,7 @@ public class SipDialogPath {
      * @return Reason phrase
      */
     public String getSessionTerminationReasonPhrase() {
-        return sessionTerminationReasonPhrase;
+        return mSessionTerminationReasonPhrase;
     }
 
     /**
@@ -496,14 +497,14 @@ public class SipDialogPath {
      * @return Boolean
      */
     public boolean isSigEstablished() {
-        return sigEstablished;
+        return mSigEstablished;
     }
 
     /**
      * Signalisation is established with success
      */
     public synchronized void sigEstablished() {
-        this.sigEstablished = true;
+        mSigEstablished = true;
     }
 
     /**
@@ -512,7 +513,7 @@ public class SipDialogPath {
      * @param agent Authentication agent
      */
     public void setAuthenticationAgent(SessionAuthenticationAgent agent) {
-        this.authenticationAgent = agent;
+        mAuthenticationAgent = agent;
     }
 
     /**
@@ -521,7 +522,7 @@ public class SipDialogPath {
      * @return Authentication agent
      */
     public SessionAuthenticationAgent getAuthenticationAgent() {
-        return authenticationAgent;
+        return mAuthenticationAgent;
     }
 
     /**
@@ -530,7 +531,7 @@ public class SipDialogPath {
      * @return Session expire time in seconds
      */
     public int getSessionExpireTime() {
-        return sessionExpireTime;
+        return mSessionExpireTime;
     }
 
     /**
@@ -539,7 +540,7 @@ public class SipDialogPath {
      * @param sessionExpireTime Session expire time in seconds
      */
     public void setSessionExpireTime(int sessionExpireTime) {
-        this.sessionExpireTime = sessionExpireTime;
+        mSessionExpireTime = sessionExpireTime;
     }
 
     /**
@@ -558,8 +559,8 @@ public class SipDialogPath {
      * @return Dialog or null
      */
     public Dialog getStackDialog() {
-        if (invite != null) {
-            return invite.getStackTransaction().getDialog();
+        if (mInvite != null) {
+            return mInvite.getStackTransaction().getDialog();
         } else {
             return null;
         }

@@ -50,8 +50,8 @@ import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.contact.ContactId;
-import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.geoloc.EditGeoloc;
 import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
@@ -103,7 +103,7 @@ public abstract class ChatView extends FragmentActivity implements
     /**
      * API connection manager
      */
-    protected ApiConnectionManager mCnxManager;
+    protected ConnectionManager mCnxManager;
 
     /**
      * UI handler
@@ -199,7 +199,7 @@ public abstract class ChatView extends FragmentActivity implements
         registerForContextMenu(listView);
 
         // Register to API connection manager
-        mCnxManager = ApiConnectionManager.getInstance(this);
+        mCnxManager = ConnectionManager.getInstance(this);
 
         if (mCnxManager == null
                 || !mCnxManager.isServiceConnected(RcsServiceName.CHAT, RcsServiceName.CONTACT)) {
@@ -335,7 +335,7 @@ public abstract class ChatView extends FragmentActivity implements
         // Check if the service is available
         boolean registered = false;
         try {
-            registered = ApiConnectionManager.getInstance(ChatView.this).getChatApi()
+            registered = ConnectionManager.getInstance(ChatView.this).getChatApi()
                     .isServiceRegistered();
         } catch (Exception e) {
             if (LogUtils.isActive) {

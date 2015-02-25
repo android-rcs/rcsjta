@@ -27,9 +27,13 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
+/**
+ * @author yplo6403
+ */
 public class ResumeDownloadFileSharingSession extends TerminatingHttpFileSharingSession {
 
     /**
@@ -44,10 +48,11 @@ public class ResumeDownloadFileSharingSession extends TerminatingHttpFileSharing
      * @param parent IMS service
      * @param content the content (url, mime-type and size)
      * @param resumeDownload the data object in DB
+     * @param rcsSettings
      */
     public ResumeDownloadFileSharingSession(ImsService parent, MmContent content,
-            FtHttpResumeDownload resumeDownload) {
-        super(parent, content, resumeDownload);
+            FtHttpResumeDownload resumeDownload, RcsSettings rcsSettings) {
+        super(parent, content, resumeDownload, rcsSettings);
     }
 
     /**
@@ -64,9 +69,9 @@ public class ResumeDownloadFileSharingSession extends TerminatingHttpFileSharing
             }
 
             // Resume download file from the HTTP server
-            if (downloadManager.streamForFile != null && downloadManager.resumeDownload()) {
+            if (downloadManager.mStreamForFile != null && downloadManager.resumeDownload()) {
                 if (logger.isActivated()) {
-                    logger.debug("Resume download success for " + resumeFT);
+                    logger.debug("Resume download success for " + mResumeFT);
                 }
                 // Set file URL
                 getContent().setUri(downloadManager.getDownloadedFileUri());

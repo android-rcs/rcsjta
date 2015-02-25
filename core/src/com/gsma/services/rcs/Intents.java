@@ -33,29 +33,37 @@ public class Intents {
      */
     public static class Service {
         /**
-         * Intent to load the settings activity to enable or disable the service
+         * Intent to check if stack deactivation/activation is allowed by the client
          */
-        public static final String ACTION_VIEW_SETTINGS = "com.gsma.services.rcs.action.VIEW_SETTINGS";
+        public static final String ACTION_GET_ACTIVATION_MODE_CHANGEABLE = "com.gsma.services.rcs.action.GET_ACTIVATION_MODE_CHANGEABLE";
 
         /**
-         * Intent to request the service status. The result is received via an Intent having the
-         * following extras:
-         * <ul>
-         * <li> {@link #EXTRA_PACKAGENAME} containing the service package name.
-         * <li> {@link #EXTRA_STATUS} containing the boolean status of the service. True means that
-         * the service is activated, else the service is not activated.
+         * Used as an boolean extra field in ACTION_GET_ACTIVATION_MODE_CHANGEABLE intents to
+         * request the activation mode changeable.
          */
-        public static final String ACTION_GET_STATUS = ".service.action.GET_STATUS";
+        public static final String EXTRA_GET_ACTIVATION_MODE_CHANGEABLE = "get_activation_mode_changeable";
 
         /**
-         * Service package name
+         * Intent to check if RCS stack is activated
          */
-        public final static String EXTRA_PACKAGENAME = "packageName";
+        public static final String ACTION_GET_ACTIVATION_MODE = "com.gsma.services.rcs.action.GET_ACTIVATION_MODE";
 
         /**
-         * Service status
+         * Used as an boolean extra field in ACTION_GET_ACTIVATION_MODE intents to request the
+         * activation mode.
          */
-        public final static String EXTRA_STATUS = "status";
+        public static final String EXTRA_GET_ACTIVATION_MODE = "get_activation_mode";
+
+        /**
+         * Intent to set the activation mode of the RCS stack
+         */
+        public static final String ACTION_SET_ACTIVATION_MODE = "com.gsma.services.rcs.action.SET_ACTIVATION_MODE";
+
+        /**
+         * Used as an boolean extra field in ACTION_SET_ACTIVATION_MODE intents to set the
+         * activation mode.
+         */
+        public static final String EXTRA_SET_ACTIVATION_MODE = "set_activation_mode";
 
         private Service() {
         }

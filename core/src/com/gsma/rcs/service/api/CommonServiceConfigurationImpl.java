@@ -23,6 +23,7 @@ import android.os.RemoteException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
+import com.gsma.services.rcs.CommonServiceConfiguration.MinimumBatteryLevel;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -37,9 +38,11 @@ public class CommonServiceConfigurationImpl extends ICommonServiceConfiguration.
 
     /**
      * Constructor
+     * 
+     * @param rcsSettings
      */
-    public CommonServiceConfigurationImpl() {
-        mRcsSettings = RcsSettings.getInstance();
+    public CommonServiceConfigurationImpl(RcsSettings rcsSettings) {
+        mRcsSettings = rcsSettings;
     }
 
     @Override
@@ -77,6 +80,17 @@ public class CommonServiceConfigurationImpl extends ICommonServiceConfiguration.
     @Override
     public void setMyDisplayName(String name) throws RemoteException {
         mRcsSettings.setUserProfileImsDisplayName(name);
+    }
+
+    @Override
+    public int getMinimumBatteryLevel() throws RemoteException {
+        return mRcsSettings.getMinBatteryLevel().toInt();
+    }
+
+    @Override
+    public void setMinimumBatteryLevel(int level) throws RemoteException {
+        MinimumBatteryLevel minimumBatteryLevel = MinimumBatteryLevel.valueOf(level);
+        mRcsSettings.setMinBatteryLevel(minimumBatteryLevel);
     }
 
 }

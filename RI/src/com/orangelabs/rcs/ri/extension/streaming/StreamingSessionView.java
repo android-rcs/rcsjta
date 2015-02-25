@@ -44,8 +44,8 @@ import com.gsma.services.rcs.extension.MultimediaSessionService;
 import com.gsma.services.rcs.extension.MultimediaStreamingSession;
 import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
 import com.gsma.services.rcs.extension.MultimediaStreamingSessionListener;
-import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.utils.LockAccess;
@@ -59,22 +59,35 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author Jean-Marc AUFFRET
  */
 public class StreamingSessionView extends Activity {
+
     /**
-     * View modes
+     * View mode: incoming session
      */
     public final static int MODE_INCOMING = 0;
 
+    /**
+     * View mode: outgoing session
+     */
     public final static int MODE_OUTGOING = 1;
 
+    /**
+     * View mode: open session history
+     */
     public final static int MODE_OPEN = 2;
 
     /**
-     * Intent parameters
+     * Intent parameter: view mode
      */
     public final static String EXTRA_MODE = "mode";
 
+    /**
+     * Intent parameter: session ID
+     */
     public final static String EXTRA_SESSION_ID = "session_id";
 
+    /**
+     * Intent parameter: contact
+     */
     public final static String EXTRA_CONTACT = "contact";
 
     /**
@@ -115,7 +128,7 @@ public class StreamingSessionView extends Activity {
     /**
      * API connection manager
      */
-    private ApiConnectionManager connectionManager;
+    private ConnectionManager connectionManager;
 
     /**
      * The log tag for this class
@@ -229,7 +242,7 @@ public class StreamingSessionView extends Activity {
         sendBtn.setEnabled(false);
 
         // Register to API connection manager
-        connectionManager = ApiConnectionManager.getInstance(this);
+        connectionManager = ConnectionManager.getInstance(this);
         if (connectionManager == null
                 || !connectionManager.isServiceConnected(RcsServiceName.MULTIMEDIA,
                         RcsServiceName.CONTACT)) {
@@ -294,7 +307,7 @@ public class StreamingSessionView extends Activity {
         }
     }
 
-    public void initialiseStreamingSession() {
+    private void initialiseStreamingSession() {
         MultimediaSessionService sessionApi = connectionManager.getMultimediaSessionApi();
         try {
             int mode = getIntent().getIntExtra(StreamingSessionView.EXTRA_MODE, -1);

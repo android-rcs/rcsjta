@@ -24,9 +24,6 @@ package com.gsma.rcs.core.ims.service.richcall.video;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.util.Collection;
-import java.util.Vector;
-
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
@@ -38,15 +35,18 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.gsma.rcs.core.ims.service.ImsService;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.sharing.video.VideoCodec;
 import com.gsma.services.rcs.sharing.video.IVideoPlayer;
+import com.gsma.services.rcs.sharing.video.VideoCodec;
+
+import java.util.Collection;
+import java.util.Vector;
 
 /**
  * Terminating live video content sharing session (streaming)
@@ -66,10 +66,12 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
      * @param parent IMS service
      * @param invite Initial INVITE request
      * @param contact Contact Id
+     * @param rcsSettings
      */
-    public TerminatingVideoStreamingSession(ImsService parent, SipRequest invite, ContactId contact) {
+    public TerminatingVideoStreamingSession(ImsService parent, SipRequest invite,
+            ContactId contact, RcsSettings rcsSettings) {
         super(parent, ContentManager.createLiveVideoContentFromSdp(invite.getContentBytes()),
-                contact);
+                contact, rcsSettings);
 
         // Create dialog path
         createTerminatingDialogPath(invite);

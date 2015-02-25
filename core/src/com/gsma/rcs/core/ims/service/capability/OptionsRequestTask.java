@@ -29,6 +29,7 @@ import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
@@ -42,7 +43,7 @@ public class OptionsRequestTask implements Runnable {
     /**
      * IMS module
      */
-    private ImsModule imsModule;
+    private ImsModule mImsModule;
 
     /**
      * Remote contact
@@ -52,22 +53,24 @@ public class OptionsRequestTask implements Runnable {
     /**
      * Feature tags
      */
-    private String[] featureTags;
+    private String[] mFeatureTags;
 
     /**
      * Dialog path
      */
-    private SipDialogPath dialogPath;
+    private SipDialogPath mDialogPath;
 
     /**
      * Authentication agent
      */
-    private SessionAuthenticationAgent authenticationAgent;
+    private SessionAuthenticationAgent mAuthenticationAgent;
 
     /**
      * The logger
      */
     private Logger logger = Logger.getLogger(this.getClass().getName());
+
+    private final RcsSettings mRcsSettings;
 
     /**
      * Constructor
@@ -75,12 +78,15 @@ public class OptionsRequestTask implements Runnable {
      * @param parent IMS module
      * @param contact Remote contact identifier
      * @param featureTags Feature tags
+     * @param rcsSettings
      */
-    public OptionsRequestTask(ImsModule parent, ContactId contact, String[] featureTags) {
-        this.imsModule = parent;
-        this.mContact = contact;
-        this.featureTags = featureTags;
-        this.authenticationAgent = new SessionAuthenticationAgent(imsModule);
+    public OptionsRequestTask(ImsModule parent, ContactId contact, String[] featureTags,
+            RcsSettings rcsSettings) {
+        mImsModule = parent;
+        mContact = contact;
+        mFeatureTags = featureTags;
+        mAuthenticationAgent = new SessionAuthenticationAgent(mImsModule);
+        mRcsSettings = rcsSettings;
     }
 
     /**
@@ -99,7 +105,7 @@ public class OptionsRequestTask implements Runnable {
         }
 
         try {
-            if (!imsModule.getCurrentNetworkInterface().isRegistered()) {
+            if (!mImsModule.getCurrentNetworkInterface().isRegistered()) {
                 if (logger.isActivated()) {
                     logger.debug("IMS not registered, do nothing");
                 }
@@ -108,16 +114,16 @@ public class OptionsRequestTask implements Runnable {
 
             // Create a dialog path
             String contactUri = PhoneUtils.formatContactIdToUri(mContact);
-            dialogPath = new SipDialogPath(imsModule.getSipManager().getSipStack(), imsModule
+            mDialogPath = new SipDialogPath(mImsModule.getSipManager().getSipStack(), mImsModule
                     .getSipManager().getSipStack().generateCallId(), 1, contactUri,
-                    ImsModule.IMS_USER_PROFILE.getPublicUri(), contactUri, imsModule
-                            .getSipManager().getSipStack().getServiceRoutePath());
+                    ImsModule.IMS_USER_PROFILE.getPublicUri(), contactUri, mImsModule
+                            .getSipManager().getSipStack().getServiceRoutePath(), mRcsSettings);
 
             // Create OPTIONS request
             if (logger.isActivated()) {
                 logger.debug("Send first OPTIONS");
             }
-            SipRequest options = SipMessageFactory.createOptions(dialogPath, featureTags);
+            SipRequest options = SipMessageFactory.createOptions(mDialogPath, mFeatureTags);
 
             // Send OPTIONS request
             sendOptions(options);
@@ -141,7 +147,7 @@ public class OptionsRequestTask implements Runnable {
         }
 
         // Send OPTIONS request
-        SipTransactionContext ctx = imsModule.getSipManager().sendSipMessageAndWait(options);
+        SipTransactionContext ctx = mImsModule.getSipManager().sendSipMessageAndWait(options);
 
         // Analyze the received response
         if (ctx.isSipResponse()) {
@@ -189,7 +195,7 @@ public class OptionsRequestTask implements Runnable {
         if (RcsStatus.NO_INFO.equals(info.getRcsStatus())) {
             // If we do not have already some info on this contact
             // We update the database with empty capabilities
-            Capabilities capabilities = new Capabilities();
+            Capabilities capabilities = new Capabilities(mRcsSettings);
             contactManager.setContactCapabilities(mContact, capabilities, RcsStatus.NO_INFO,
                     RegistrationState.OFFLINE);
         } else {
@@ -200,7 +206,7 @@ public class OptionsRequestTask implements Runnable {
                     info.getRcsStatus(), RegistrationState.OFFLINE);
 
             // Notify listener
-            imsModule.getCore().getListener()
+            mImsModule.getCore().getListener()
                     .handleCapabilitiesNotification(mContact, info.getCapabilities());
         }
     }
@@ -217,12 +223,12 @@ public class OptionsRequestTask implements Runnable {
         }
 
         // The contact is not RCS
-        Capabilities capabilities = new Capabilities();
+        Capabilities capabilities = new Capabilities(mRcsSettings);
         ContactsManager.getInstance().setContactCapabilities(mContact, capabilities,
                 RcsStatus.NOT_RCS, RegistrationState.UNKNOWN);
 
         // Notify listener
-        imsModule.getCore().getListener().handleCapabilitiesNotification(mContact, capabilities);
+        mImsModule.getCore().getListener().handleCapabilitiesNotification(mContact, capabilities);
     }
 
     /**
@@ -238,7 +244,7 @@ public class OptionsRequestTask implements Runnable {
 
         // Read capabilities
         SipResponse resp = ctx.getSipResponse();
-        Capabilities capabilities = CapabilityUtils.extractCapabilities(resp);
+        Capabilities capabilities = CapabilityUtils.extractCapabilities(resp, mRcsSettings);
 
         // Update capability time of last refresh
         ContactsManager contactManager = ContactsManager.getInstance();
@@ -265,7 +271,7 @@ public class OptionsRequestTask implements Runnable {
         }
 
         // Notify listener
-        imsModule.getCore().getListener().handleCapabilitiesNotification(mContact, capabilities);
+        mImsModule.getCore().getListener().handleCapabilitiesNotification(mContact, capabilities);
     }
 
     /**
@@ -283,19 +289,19 @@ public class OptionsRequestTask implements Runnable {
         SipResponse resp = ctx.getSipResponse();
 
         // Set the Proxy-Authorization header
-        authenticationAgent.readProxyAuthenticateHeader(resp);
+        mAuthenticationAgent.readProxyAuthenticateHeader(resp);
 
         // Increment the Cseq number of the dialog path
-        dialogPath.incrementCseq();
+        mDialogPath.incrementCseq();
 
         // Create a second OPTIONS request with the right token
         if (logger.isActivated()) {
             logger.info("Send second OPTIONS");
         }
-        SipRequest options = SipMessageFactory.createOptions(dialogPath, featureTags);
+        SipRequest options = SipMessageFactory.createOptions(mDialogPath, mFeatureTags);
 
         // Set the Authorization header
-        authenticationAgent.setProxyAuthorizationHeader(options);
+        mAuthenticationAgent.setProxyAuthorizationHeader(options);
 
         // Send OPTIONS request
         sendOptions(options);

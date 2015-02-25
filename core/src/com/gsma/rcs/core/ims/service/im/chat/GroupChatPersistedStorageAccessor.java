@@ -52,17 +52,22 @@ public class GroupChatPersistedStorageAccessor {
 
     private ContactId mContact;
 
-    public GroupChatPersistedStorageAccessor(String chatId, MessagingLog messagingLog) {
+    private final RcsSettings mRcsSettings;
+
+    public GroupChatPersistedStorageAccessor(String chatId, MessagingLog messagingLog,
+            RcsSettings rcsSettings) {
         mChatId = chatId;
         mMessagingLog = messagingLog;
+        mRcsSettings = rcsSettings;
     }
 
     public GroupChatPersistedStorageAccessor(String chatId, String subject, Direction direction,
-            MessagingLog messagingLog) {
+            MessagingLog messagingLog, RcsSettings rcsSettings) {
         mChatId = chatId;
         mSubject = subject;
         mDirection = direction;
         mMessagingLog = messagingLog;
+        mRcsSettings = rcsSettings;
     }
 
     private void cacheData() {
@@ -133,7 +138,7 @@ public class GroupChatPersistedStorageAccessor {
     }
 
     public int getMaxParticipants() {
-        return RcsSettings.getInstance().getMaxChatParticipants();
+        return mRcsSettings.getMaxChatParticipants();
     }
 
     public void setStateAndReasonCode(State state, ReasonCode reasonCode) {

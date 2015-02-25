@@ -16,8 +16,8 @@ import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.contact.RcsContact;
-import com.orangelabs.rcs.ri.ApiConnectionManager;
-import com.orangelabs.rcs.ri.ApiConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
 import com.orangelabs.rcs.ri.utils.LockAccess;
@@ -32,7 +32,7 @@ public class BlockingContact extends Activity {
     /**
      * API connection manager
      */
-    private ApiConnectionManager connectionManager;
+    private ConnectionManager connectionManager;
 
     /**
      * A locker to exit only once
@@ -63,7 +63,7 @@ public class BlockingContact extends Activity {
         setContentView(R.layout.contacts_blocking);
 
         // Register to API connection manager
-        connectionManager = ApiConnectionManager.getInstance(this);
+        connectionManager = ConnectionManager.getInstance(this);
         if (connectionManager == null
                 || !connectionManager.isServiceConnected(RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
@@ -108,7 +108,8 @@ public class BlockingContact extends Activity {
             toggleBtn.setChecked(contact.isBlocked());
         } catch (RcsServiceNotAvailableException e) {
             e.printStackTrace();
-            Utils.showMessageAndExit(BlockingContact.this, getString(R.string.label_api_disabled),
+            Utils.showMessageAndExit(BlockingContact.this,
+                    getString(R.string.label_api_unavailable),
                     exitOnce);
         } catch (RcsServiceException e) {
             e.printStackTrace();
@@ -164,7 +165,7 @@ public class BlockingContact extends Activity {
             } catch (RcsServiceNotAvailableException e) {
                 e.printStackTrace();
                 Utils.showMessageAndExit(BlockingContact.this,
-                        getString(R.string.label_api_disabled), exitOnce);
+                        getString(R.string.label_api_unavailable), exitOnce);
             } catch (RcsServiceException e) {
                 Utils.showMessageAndExit(BlockingContact.this,
                         getString(R.string.label_api_failed), exitOnce);

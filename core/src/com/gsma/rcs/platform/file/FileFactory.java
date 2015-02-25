@@ -38,23 +38,23 @@ public abstract class FileFactory {
     /**
      * Current platform factory
      */
-    private static FileFactory factory = null;
+    private static FileFactory mFactory;
 
     /**
      * Load the factory
      * 
      * @param classname Factory classname
-     * @throws Exception
+     * @throws FactoryException
      */
     public static void loadFactory(String classname) throws FactoryException {
-        if (factory != null) {
+        if (mFactory != null) {
             return;
         }
 
         try {
-            factory = (FileFactory) Class.forName(classname).newInstance();
+            mFactory = (FileFactory) Class.forName(classname).newInstance();
         } catch (Exception e) {
-            throw new FactoryException("Can't load the factory " + classname);
+            throw new FactoryException("Can't load the factory " + classname, e);
         }
     }
 
@@ -64,7 +64,7 @@ public abstract class FileFactory {
      * @return Factory
      */
     public static FileFactory getFactory() {
-        return factory;
+        return mFactory;
     }
 
     /**

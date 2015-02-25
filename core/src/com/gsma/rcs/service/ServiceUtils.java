@@ -22,28 +22,15 @@ import java.util.List;
 
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.Intent;
 
 /**
- * Client API utils
+ * Service utilities
  * 
  * @author Jean-Marc AUFFRET
  */
 public class ServiceUtils {
-    /**
-     * RCS service name
-     */
-    public static final String RCS_SERVICE_NAME = "com.orangelabs.rcs.SERVICE";
 
-    /**
-     * Startup service name
-     */
-    public static final String STARTUP_SERVICE_NAME = "com.orangelabs.rcs.STARTUP";
-
-    /**
-     * Provisioning service name
-     */
-    public static final String PROVISIONING_SERVICE_NAME = "com.orangelabs.rcs.PROVISIONING";
+    private static String CORE_SERVICE_CLASSNAME = "com.gsma.rcs.service.RcsCoreService";
 
     /**
      * Is service started
@@ -56,41 +43,24 @@ public class ServiceUtils {
                 .getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningServiceInfo> serviceList = activityManager
                 .getRunningServices(Integer.MAX_VALUE);
-        if (serviceList != null) {
-            for (int i = 0; i < serviceList.size(); i++) {
-                ActivityManager.RunningServiceInfo serviceInfo = serviceList.get(i);
-                if (serviceInfo != null
-                        && serviceInfo.service != null
-                        && "com.gsma.rcs.service.RcsCoreService".equals(serviceInfo.service
-                                .getClassName())) {
-                    if (serviceInfo.pid != 0) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
+        if (serviceList == null) {
+            return false;
+        }
+        for (ActivityManager.RunningServiceInfo serviceInfo : serviceList) {
+            if (serviceInfo == null) {
+                continue;
+
+            }
+            if (serviceInfo.service == null) {
+                continue;
+
+            }
+            if (CORE_SERVICE_CLASSNAME.equals(serviceInfo.service.getClassName())) {
+                return serviceInfo.pid != 0;
+
             }
         }
         return false;
     }
 
-    /**
-     * Start RCS service
-     * 
-     * @param ctx Context
-     */
-    public static void startRcsService(Context ctx) {
-        ctx.startService(new Intent(STARTUP_SERVICE_NAME));
-    }
-
-    /**
-     * Stop RCS service
-     * 
-     * @param ctx Context
-     */
-    public static void stopRcsService(Context ctx) {
-        ctx.stopService(new Intent(STARTUP_SERVICE_NAME));
-        ctx.stopService(new Intent(PROVISIONING_SERVICE_NAME));
-        ctx.stopService(new Intent(RCS_SERVICE_NAME));
-    }
 }

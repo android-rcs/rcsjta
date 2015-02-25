@@ -40,6 +40,7 @@ import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.rcs.provider.settings.RcsSettings;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -58,28 +59,34 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     /**
      * Current instance
      */
-    private static MessagingLog instance;
+    private static volatile MessagingLog sInstance;
 
     private LocalContentResolver mLocalContentResolver;
 
-    private GroupChatLog groupChatLog;
+    private GroupChatLog mGroupChatLog;
 
-    private MessageLog messageLog;
+    private MessageLog mMessageLog;
 
-    private FileTransferLog fileTransferLog;
+    private FileTransferLog mFileTransferLog;
 
-    private GroupDeliveryInfoLog groupChatDeliveryInfoLog;
+    private GroupDeliveryInfoLog mGroupChatDeliveryInfoLog;
 
     /**
      * Create instance
      * 
      * @param context Context
      * @param localContentResolver Local content resolver
+     * @param rcsSettings
      */
-    public static synchronized void createInstance(Context context,
-            LocalContentResolver localContentResolver) {
-        if (instance == null) {
-            instance = new MessagingLog(context, localContentResolver);
+    public static void createInstance(Context context, LocalContentResolver localContentResolver,
+            RcsSettings rcsSettings) {
+        if (sInstance != null) {
+            return;
+        }
+        synchronized (MessagingLog.class) {
+            if (sInstance == null) {
+                sInstance = new MessagingLog(context, localContentResolver, rcsSettings);
+            }
         }
     }
 
@@ -89,7 +96,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      * @return Instance
      */
     public static MessagingLog getInstance() {
-        return instance;
+        return sInstance;
     }
 
     /**
@@ -97,280 +104,159 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      * 
      * @param context Application context
      * @param localContentResolver Local content provider
+     * @param rcsSettings
      */
-    private MessagingLog(Context context, LocalContentResolver localContentResolver) {
+    private MessagingLog(Context context, LocalContentResolver localContentResolver,
+            RcsSettings rcsSettings) {
         mLocalContentResolver = localContentResolver;
-        groupChatLog = new GroupChatLog(context, localContentResolver);
-        groupChatDeliveryInfoLog = new GroupDeliveryInfoLog(localContentResolver);
-        messageLog = new MessageLog(mLocalContentResolver, groupChatLog, groupChatDeliveryInfoLog);
-        fileTransferLog = new FileTransferLog(localContentResolver, groupChatLog,
-                groupChatDeliveryInfoLog);
+        mGroupChatLog = new GroupChatLog(context, localContentResolver);
+        mGroupChatDeliveryInfoLog = new GroupDeliveryInfoLog(localContentResolver);
+        mMessageLog = new MessageLog(mLocalContentResolver, mGroupChatLog,
+                mGroupChatDeliveryInfoLog,
+                rcsSettings);
+        mFileTransferLog = new FileTransferLog(localContentResolver, mGroupChatLog,
+                mGroupChatDeliveryInfoLog);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog#addGroupChat(java .lang.String,
-     * com.gsma.services.rcs.contact.ContactId, java.lang.String, java.util.Set, int, int, int)
-     */
     @Override
     public void addGroupChat(String chatId, ContactId contact, String subject,
             Set<ParticipantInfo> participants, State state, ReasonCode reasonCode,
             Direction direction) {
-        groupChatLog.addGroupChat(chatId, contact, subject, participants, state, reasonCode,
+        mGroupChatLog.addGroupChat(chatId, contact, subject, participants, state, reasonCode,
                 direction);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog#acceptGroupChatNextInvitation(java.lang
-     * .String)
-     */
     @Override
     public void acceptGroupChatNextInvitation(String chatId) {
-        groupChatLog.acceptGroupChatNextInvitation(chatId);
+        mGroupChatLog.acceptGroupChatNextInvitation(chatId);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.orangelabs.rcs.provider.messaging.IGroupChatLog# setGroupChatStateAndReasonCode
-     * setGroupChatStateAndReasonCode (java.lang.String, int, int, GroupChatLog.ActiveStatus)
-     */
     @Override
     public void setGroupChatStateAndReasonCode(String chatId, State state, ReasonCode reasonCode) {
-        groupChatLog.setGroupChatStateAndReasonCode(chatId, state, reasonCode);
+        mGroupChatLog.setGroupChatStateAndReasonCode(chatId, state, reasonCode);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog#updateGroupChatParticipant(java.lang.
-     * String, java.util.Set)
-     */
     @Override
     public void updateGroupChatParticipant(String chatId, Set<ParticipantInfo> participants) {
-        groupChatLog.updateGroupChatParticipant(chatId, participants);
+        mGroupChatLog.updateGroupChatParticipant(chatId, participants);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog#setGroupChatRejoinId(java.lang.String,
-     * java.lang.String)
-     */
     @Override
     public void setGroupChatRejoinId(String chatId, String rejoinId) {
-        groupChatLog.setGroupChatRejoinId(chatId, rejoinId);
+        mGroupChatLog.setGroupChatRejoinId(chatId, rejoinId);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog#getGroupChatInfo(java.lang.String)
-     */
     @Override
     public GroupChatInfo getGroupChatInfo(String chatId) {
-        return groupChatLog.getGroupChatInfo(chatId);
+        return mGroupChatLog.getGroupChatInfo(chatId);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog#getGroupChatConnectedParticipants(java
-     * .lang.String)
-     */
     @Override
     public Set<ParticipantInfo> getGroupChatConnectedParticipants(String chatId) {
-        return groupChatLog.getGroupChatConnectedParticipants(chatId);
+        return mGroupChatLog.getGroupChatConnectedParticipants(chatId);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IMessageLog#addOneToOneSpamMessage(
-     * orangelabs.rcs.core.ims.service.im.chat.ChatMessage))
-     */
     @Override
     public void addOneToOneSpamMessage(ChatMessage msg) {
-        messageLog.addOneToOneSpamMessage(msg);
+        mMessageLog.addOneToOneSpamMessage(msg);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IMessageLog# addIncomingOneToOneChatMessage
-     * (com.gsma.rcs.core.ims.service.im.chat.ChatMessage, boolean)
-     */
     @Override
     public void addIncomingOneToOneChatMessage(ChatMessage msg, boolean imdnDisplayedRequested) {
-        messageLog.addIncomingOneToOneChatMessage(msg, imdnDisplayedRequested);
+        mMessageLog.addIncomingOneToOneChatMessage(msg, imdnDisplayedRequested);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.orangelabs.rcs.provider.messaging.IMessageLog# addOutgoingOneToOneChatMessage
-     * addOutgoingOneToOneChatMessage (com.orangelabs .rcs.core.ims.service.im.chat.ChatMessage,
-     * int, int)
-     */
     @Override
     public void addOutgoingOneToOneChatMessage(ChatMessage msg, Status status,
             Content.ReasonCode reasonCode) {
-        messageLog.addOutgoingOneToOneChatMessage(msg, status, reasonCode);
+        mMessageLog.addOutgoingOneToOneChatMessage(msg, status, reasonCode);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IMessageLog#addGroupChatMessage (java.lang.String,
-     * com.gsma.rcs.core.ims.service.im.chat.ChatMessage, int, int, int)
-     */
     @Override
     public void addGroupChatMessage(String chatId, ChatMessage msg, Direction direction,
             Status status, Content.ReasonCode reasonCode) {
-        messageLog.addGroupChatMessage(chatId, msg, direction, status, reasonCode);
+        mMessageLog.addGroupChatMessage(chatId, msg, direction, status, reasonCode);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IMessageLog#addGroupChatEvent(java.lang.String,
-     * java.lang.String, int)
-     */
     @Override
     public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent.Status status) {
-        messageLog.addGroupChatEvent(chatId, contact, status);
+        mMessageLog.addGroupChatEvent(chatId, contact, status);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IMessageLog#markMessageAsRead(java.lang.String)
-     */
     @Override
     public void markMessageAsRead(String msgId) {
-        messageLog.markMessageAsRead(msgId);
+        mMessageLog.markMessageAsRead(msgId);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IMessageLog# updateChatMessageStatusAndReasonCode
-     * (java.lang.String, int, int)
-     */
     @Override
     public void setChatMessageStatusAndReasonCode(String msgId, Status status,
             Content.ReasonCode reasonCode) {
-        messageLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode);
+        mMessageLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IMessageLog#markIncomingChatMessageAsReceived(java.
-     * lang.String)
-     */
     @Override
     public void markIncomingChatMessageAsReceived(String msgId) {
-        messageLog.markIncomingChatMessageAsReceived(msgId);
+        mMessageLog.markIncomingChatMessageAsReceived(msgId);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IMessageLog#isMessagePersisted(java.lang.String)
-     */
     @Override
     public boolean isMessagePersisted(String msgId) {
-        return messageLog.isMessagePersisted(msgId);
+        return mMessageLog.isMessagePersisted(msgId);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IFileTransferLog#addFileTransfer(java.lang.String,
-     * java.lang.String, int, com.gsma.rcs.core.content.MmContent,
-     * com.gsma.rcs.core.content.MmContent, int, int)
-     */
     @Override
     public void addFileTransfer(String fileTransferId, ContactId contact, Direction direction,
             MmContent content, MmContent fileIcon, FileTransfer.State state,
             FileTransfer.ReasonCode reasonCode) {
-        fileTransferLog.addFileTransfer(fileTransferId, contact, direction, content, fileIcon,
+        mFileTransferLog.addFileTransfer(fileTransferId, contact, direction, content, fileIcon,
                 state, reasonCode);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IFileTransferLog#addOutgoingGroupFileTransfer(java.
-     * lang.String, java.lang.String, com.gsma.rcs.core.content.MmContent,
-     * com.gsma.rcs.core.content.MmContent, int, int)
-     */
     @Override
     public void addOutgoingGroupFileTransfer(String fileTransferId, String chatId,
             MmContent content, MmContent thumbnail, FileTransfer.State state,
             FileTransfer.ReasonCode reasonCode) {
-        fileTransferLog.addOutgoingGroupFileTransfer(fileTransferId, chatId, content, thumbnail,
+        mFileTransferLog.addOutgoingGroupFileTransfer(fileTransferId, chatId, content, thumbnail,
                 state, reasonCode);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IFileTransferLog#addIncomingGroupFileTransfer(java.
-     * lang.String, java.lang.String, java.lang.String, com.gsma.rcs.core.content.MmContent,
-     * com.gsma.rcs.core.content.MmContent, int, int)
-     */
     @Override
     public void addIncomingGroupFileTransfer(String fileTransferId, String chatId,
             ContactId contact, MmContent content, MmContent fileIcon, FileTransfer.State state,
             FileTransfer.ReasonCode reasonCode) {
-        fileTransferLog.addIncomingGroupFileTransfer(fileTransferId, chatId, contact, content,
+        mFileTransferLog.addIncomingGroupFileTransfer(fileTransferId, chatId, contact, content,
                 fileIcon, state, reasonCode);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IFileTransferLog#
-     * updateFileTransferStateAndReasonCode(java.lang.String, int, int
-     */
     @Override
     public void setFileTransferStateAndReasonCode(String fileTransferId, FileTransfer.State state,
             FileTransfer.ReasonCode reasonCode) {
-        fileTransferLog.setFileTransferStateAndReasonCode(fileTransferId, state, reasonCode);
+        mFileTransferLog.setFileTransferStateAndReasonCode(fileTransferId, state, reasonCode);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IFileTransferLog#markFileTransferAsRead(java.lang.String
-     * )
-     */
     @Override
     public void markFileTransferAsRead(String fileTransferId) {
-        fileTransferLog.markFileTransferAsRead(fileTransferId);
+        mFileTransferLog.markFileTransferAsRead(fileTransferId);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IFileTransferLog#updateFileTransferProgress(java.lang
-     * .String, long)
-     */
     @Override
     public void setFileTransferProgress(String fileTransferId, long currentSize) {
-        fileTransferLog.setFileTransferProgress(fileTransferId, currentSize);
+        mFileTransferLog.setFileTransferProgress(fileTransferId, currentSize);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IFileTransferLog#updateFileTransferred(java.lang.String
-     * , com.gsma.rcs.core.content.MmContent)
-     */
     @Override
     public void setFileTransferred(String fileTransferId, MmContent content) {
-        fileTransferLog.setFileTransferred(fileTransferId, content);
+        mFileTransferLog.setFileTransferred(fileTransferId, content);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IFileTransferLog#isFileTransfer(java.lang.String)
-     */
     @Override
     public boolean isFileTransfer(String fileTransferId) {
-        return fileTransferLog.isFileTransfer(fileTransferId);
+        return mFileTransferLog.isFileTransfer(fileTransferId);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog#isGroupChatNextInviteRejected(java.lang
-     * .String)
-     */
     @Override
     public boolean isGroupChatNextInviteRejected(String chatId) {
-        return groupChatLog.isGroupChatNextInviteRejected(chatId);
+        return mGroupChatLog.isGroupChatNextInviteRejected(chatId);
     }
 
     /**
@@ -383,176 +269,152 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
         mLocalContentResolver.delete(GroupDeliveryInfoData.CONTENT_URI, null, null);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see
-     * com.orangelabs.rcs.provider.messaging.IGroupChatDeliveryInfoLog#addGroupChatDeliveryInfoEntry
-     * (java.lang.String, com.gsma.services.rcs.contact.ContactId, java.lang.String,
-     * GroupDeliveryInfoLog.Status, GroupDeliveryInfoLog.ReasonCode)
-     */
     @Override
     public Uri addGroupChatDeliveryInfoEntry(String chatId, ContactId contact, String msgId,
             GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
-        return groupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId, contact, msgId,
+        return mGroupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId, contact, msgId,
                 status, reasonCode);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.orangelabs.rcs.provider.messaging.IGroupChatDeliveryInfoLog#
-     * setGroupChatDeliveryInfoStatusAndReasonCode(java.lang.String,
-     * com.gsma.services.rcs.contact.ContactId, GroupDeliveryInfoLog.Status,
-     * GroupDeliveryInfoLog.ReasonCode)
-     */
     @Override
     public void setGroupChatDeliveryInfoStatusAndReasonCode(String msgId, ContactId contact,
             GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
-        groupChatDeliveryInfoLog.setGroupChatDeliveryInfoStatusAndReasonCode(msgId, contact,
+        mGroupChatDeliveryInfoLog.setGroupChatDeliveryInfoStatusAndReasonCode(msgId, contact,
                 status, reasonCode);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatDeliveryInfoLog#isDeliveredToAllRecipients
-     * (java.lang.String)
-     */
     @Override
     public boolean isDeliveredToAllRecipients(String msgId) {
-        return groupChatDeliveryInfoLog.isDeliveredToAllRecipients(msgId);
+        return mGroupChatDeliveryInfoLog.isDeliveredToAllRecipients(msgId);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatDeliveryInfoLog#isDisplayedByAllRecipients
-     * (java.lang.String)
-     */
     @Override
     public boolean isDisplayedByAllRecipients(String msgId) {
-        return groupChatDeliveryInfoLog.isDisplayedByAllRecipients(msgId);
+        return mGroupChatDeliveryInfoLog.isDisplayedByAllRecipients(msgId);
     }
 
     @Override
     public void setFileUploadTId(String fileTransferId, String tId) {
-        fileTransferLog.setFileUploadTId(fileTransferId, tId);
+        mFileTransferLog.setFileUploadTId(fileTransferId, tId);
     }
 
     @Override
     public void setFileDownloadAddress(String fileTransferId, Uri downloadAddress) {
-        fileTransferLog.setFileDownloadAddress(fileTransferId, downloadAddress);
+        mFileTransferLog.setFileDownloadAddress(fileTransferId, downloadAddress);
     }
 
     @Override
     public List<FtHttpResume> retrieveFileTransfersPausedBySystem() {
-        return fileTransferLog.retrieveFileTransfersPausedBySystem();
+        return mFileTransferLog.retrieveFileTransfersPausedBySystem();
     }
 
     @Override
     public FtHttpResumeUpload retrieveFtHttpResumeUpload(String tId) {
-        return fileTransferLog.retrieveFtHttpResumeUpload(tId);
+        return mFileTransferLog.retrieveFtHttpResumeUpload(tId);
     }
 
     @Override
     public Set<ParticipantInfo> getParticipants(String participants) {
-        return groupChatLog.getParticipants(participants);
+        return mGroupChatLog.getParticipants(participants);
     }
 
     @Override
     public GroupChat.State getGroupChatState(String chatId) {
-        return groupChatLog.getGroupChatState(chatId);
+        return mGroupChatLog.getGroupChatState(chatId);
     }
 
     @Override
     public GroupChat.ReasonCode getGroupChatReasonCode(String chatId) {
-        return groupChatLog.getGroupChatReasonCode(chatId);
+        return mGroupChatLog.getGroupChatReasonCode(chatId);
     }
 
     @Override
     public FileTransfer.State getFileTransferState(String fileTransferId) {
-        return fileTransferLog.getFileTransferState(fileTransferId);
+        return mFileTransferLog.getFileTransferState(fileTransferId);
     }
 
     @Override
     public FileTransfer.ReasonCode getFileTransferStateReasonCode(String fileTransferId) {
-        return fileTransferLog.getFileTransferStateReasonCode(fileTransferId);
+        return mFileTransferLog.getFileTransferStateReasonCode(fileTransferId);
     }
 
     @Override
     public long getFileTransferSentTimestamp(String fileTransferId) {
-        return fileTransferLog.getFileTransferSentTimestamp(fileTransferId);
+        return mFileTransferLog.getFileTransferSentTimestamp(fileTransferId);
     }
 
     @Override
     public long getFileTransferTimestamp(String fileTransferId) {
-        return fileTransferLog.getFileTransferTimestamp(fileTransferId);
+        return mFileTransferLog.getFileTransferTimestamp(fileTransferId);
     }
 
     @Override
     public Set<ParticipantInfo> getGroupChatParticipants(String chatId) {
-        return groupChatLog.getGroupChatParticipants(chatId);
+        return mGroupChatLog.getGroupChatParticipants(chatId);
     }
 
     @Override
     public boolean isGroupFileTransfer(String fileTransferId) {
-        return fileTransferLog.isGroupFileTransfer(fileTransferId);
+        return mFileTransferLog.isGroupFileTransfer(fileTransferId);
     }
 
     @Override
     public void setRejectNextGroupChatNextInvitation(String chatId) {
-        groupChatLog.setRejectNextGroupChatNextInvitation(chatId);
+        mGroupChatLog.setRejectNextGroupChatNextInvitation(chatId);
     }
 
     @Override
     public long getMessageSentTimestamp(String msgId) {
-        return messageLog.getMessageSentTimestamp(msgId);
+        return mMessageLog.getMessageSentTimestamp(msgId);
     }
 
     @Override
     public boolean isMessageRead(String msgId) {
-        return messageLog.isMessageRead(msgId);
+        return mMessageLog.isMessageRead(msgId);
     }
 
     @Override
     public long getMessageTimestamp(String msgId) {
-        return messageLog.getMessageTimestamp(msgId);
+        return mMessageLog.getMessageTimestamp(msgId);
     }
 
     @Override
     public Status getMessageStatus(String msgId) {
-        return messageLog.getMessageStatus(msgId);
+        return mMessageLog.getMessageStatus(msgId);
     }
 
     @Override
     public Content.ReasonCode getMessageReasonCode(String msgId) {
-        return messageLog.getMessageReasonCode(msgId);
+        return mMessageLog.getMessageReasonCode(msgId);
     }
 
     @Override
     public String getMessageMimeType(String msgId) {
-        return messageLog.getMessageMimeType(msgId);
+        return mMessageLog.getMessageMimeType(msgId);
     }
 
     @Override
     public Set<String> getChatIdsOfActiveGroupChatsForAutoRejoin() {
-        return groupChatLog.getChatIdsOfActiveGroupChatsForAutoRejoin();
+        return mGroupChatLog.getChatIdsOfActiveGroupChatsForAutoRejoin();
     }
 
     @Override
     public Cursor getCacheableFileTransferData(String fileTransferId) {
-        return fileTransferLog.getCacheableFileTransferData(fileTransferId);
+        return mFileTransferLog.getCacheableFileTransferData(fileTransferId);
     }
 
     @Override
     public Cursor getCacheableGroupChatData(String chatId) {
-        return groupChatLog.getCacheableGroupChatData(chatId);
+        return mGroupChatLog.getCacheableGroupChatData(chatId);
     }
 
     @Override
     public Cursor getCacheableChatMessageData(String msgId) {
-        return messageLog.getCacheableChatMessageData(msgId);
+        return mMessageLog.getCacheableChatMessageData(msgId);
     }
 
     @Override
     public String getChatMessageContent(String msgId) {
-        return messageLog.getChatMessageContent(msgId);
+        return mMessageLog.getChatMessageContent(msgId);
     }
 }

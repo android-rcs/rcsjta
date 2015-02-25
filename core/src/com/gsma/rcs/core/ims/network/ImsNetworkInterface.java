@@ -53,6 +53,7 @@ import com.gsma.rcs.core.ims.userprofile.UserProfileInterface;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.RcsServiceRegistration;
 
 /**
  * Abstract IMS network interface
@@ -84,84 +85,98 @@ public abstract class ImsNetworkInterface {
      * Class containing the resolved fields
      */
     public class DnsResolvedFields {
-        public String ipAddress = null;
-        public int port = -1;
+        /**
+         * DNS resoled IP address
+         */
+        public String mIpAddress;
+        /**
+         * DNS resolved port
+         */
+        public int mPort = -1;
 
+        /**
+         * Constructor
+         * 
+         * @param ipAddress
+         * @param port
+         */
         public DnsResolvedFields(String ipAddress, int port) {
-            this.ipAddress = ipAddress;
-            this.port = port;
+            mIpAddress = ipAddress;
+            mPort = port;
         }
     }
 
     /**
      * IMS module
      */
-    private ImsModule imsModule;
+    private ImsModule mImsModule;
 
     /**
      * Network interface type
      */
-    private int type;
+    private int mType;
 
     /**
      * Network access
      */
-    private NetworkAccess access;
+    private NetworkAccess mAccess;
 
     /**
      * SIP manager
      */
-    private SipManager sip;
+    private SipManager mSip;
 
     /**
      * IMS authentication mode associated to the network interface
      */
-    protected AuthenticationProcedure imsAuthentMode;
+    protected AuthenticationProcedure mImsAuthentMode;
 
     /**
      * IMS proxy protocol
      */
-    protected String imsProxyProtocol;
+    protected String mImsProxyProtocol;
 
     /**
      * IMS proxy address
      */
-    private String imsProxyAddr;
+    private String mImsProxyAddr;
 
     /**
      * IMS proxy port
      */
-    private int imsProxyPort;
+    private int mImsProxyPort;
 
     /**
      * Registration procedure associated to the network interface
      */
-    protected RegistrationProcedure registrationProcedure;
+    protected RegistrationProcedure mRegistrationProcedure;
 
     /**
      * Registration manager
      */
-    private RegistrationManager registration;
+    private RegistrationManager mRegistration;
 
     /**
      * NAT traversal
      */
-    private boolean natTraversal = false;
+    private boolean mNatTraversal = false;
 
     /**
      * NAT public IP address for last registration
      */
-    private String natPublicAddress = null;
+    private String mNatPublicAddress;
 
     /**
      * NAT public UDP port
      */
-    private int natPublicPort = -1;
+    private int mNatPublicPort = -1;
 
     /**
      * TCP fallback according to RFC3261 chapter 18.1.1
      */
-    private boolean tcpFallback = false;
+    private boolean mTcpFallback = false;
+
+    private final RcsSettings mRcsSettings;
 
     /**
      * The logger
@@ -178,28 +193,30 @@ public abstract class ImsNetworkInterface {
      * @param proxyPort IMS proxy port
      * @param proxyProtocol IMS proxy protocol
      * @param authentMode IMS authentication mode
+     * @param rcsSettings
      */
     public ImsNetworkInterface(ImsModule imsModule, int type, NetworkAccess access,
             String proxyAddr, int proxyPort, String proxyProtocol,
-            AuthenticationProcedure authentMode) {
-        this.imsModule = imsModule;
-        this.type = type;
-        this.access = access;
-        this.imsProxyAddr = proxyAddr;
-        this.imsProxyPort = proxyPort;
-        this.imsProxyProtocol = proxyProtocol;
-        this.imsAuthentMode = authentMode;
+            AuthenticationProcedure authentMode, RcsSettings rcsSettings) {
+        mImsModule = imsModule;
+        mType = type;
+        mAccess = access;
+        mImsProxyAddr = proxyAddr;
+        mImsProxyPort = proxyPort;
+        mImsProxyProtocol = proxyProtocol;
+        mImsAuthentMode = authentMode;
+        mRcsSettings = rcsSettings;
         if (proxyProtocol.equalsIgnoreCase(ListeningPoint.UDP))
-            this.tcpFallback = RcsSettings.getInstance().isTcpFallback();
+            mTcpFallback = mRcsSettings.isTcpFallback();
 
         // Instantiates the SIP manager
-        sip = new SipManager(this);
+        mSip = new SipManager(this, mRcsSettings);
 
         // Load the registration procedure
         loadRegistrationProcedure();
 
         // Instantiates the registration manager
-        registration = new RegistrationManager(this, registrationProcedure);
+        mRegistration = new RegistrationManager(this, mRegistrationProcedure, mRcsSettings);
     }
 
     /**
@@ -208,16 +225,16 @@ public abstract class ImsNetworkInterface {
      * @return Boolean
      */
     public boolean isBehindNat() {
-        return natTraversal;
+        return mNatTraversal;
     }
 
     /**
      * Set NAT traversal flag
      * 
-     * @return Boolean
+     * @param flag
      */
     public void setNatTraversal(boolean flag) {
-        natTraversal = flag;
+        mNatTraversal = flag;
     }
 
     /**
@@ -227,7 +244,7 @@ public abstract class ImsNetworkInterface {
      * @return Last known NAT public address discovered by UAC or null if UAC is not registered
      */
     public String getNatPublicAddress() {
-        return natPublicAddress;
+        return mNatPublicAddress;
     }
 
     /**
@@ -237,7 +254,7 @@ public abstract class ImsNetworkInterface {
      * @param publicAddress Public address
      */
     public void setNatPublicAddress(String publicAddress) {
-        this.natPublicAddress = publicAddress;
+        mNatPublicAddress = publicAddress;
     }
 
     /**
@@ -247,7 +264,7 @@ public abstract class ImsNetworkInterface {
      * @return Last known NAT public UDP port discovered by UAC or -1 if UAC is not registered
      */
     public int getNatPublicPort() {
-        return natPublicPort;
+        return mNatPublicPort;
     }
 
     /**
@@ -257,7 +274,7 @@ public abstract class ImsNetworkInterface {
      * @param publicPort Public port
      */
     public void setNatPublicPort(int publicPort) {
-        this.natPublicPort = publicPort;
+        mNatPublicPort = publicPort;
     }
 
     /**
@@ -266,7 +283,7 @@ public abstract class ImsNetworkInterface {
      * @return Boolean
      */
     public boolean isInterfaceConfigured() {
-        return (imsProxyAddr != null) && (imsProxyAddr.length() > 0);
+        return (mImsProxyAddr != null) && (mImsProxyAddr.length() > 0);
     }
 
     /**
@@ -275,7 +292,7 @@ public abstract class ImsNetworkInterface {
      * @return Authentication mode
      */
     public AuthenticationProcedure getAuthenticationMode() {
-        return imsAuthentMode;
+        return mImsAuthentMode;
     }
 
     /**
@@ -284,25 +301,25 @@ public abstract class ImsNetworkInterface {
      * @return Registration manager
      */
     public RegistrationManager getRegistrationManager() {
-        return registration;
+        return mRegistration;
     }
 
     /**
      * Load the registration procedure associated to the network access
      */
     public void loadRegistrationProcedure() {
-        switch (imsAuthentMode) {
+        switch (mImsAuthentMode) {
             case GIBA:
                 if (logger.isActivated()) {
                     logger.debug("Load GIBA authentication procedure");
                 }
-                this.registrationProcedure = new GibaRegistrationProcedure();
+                mRegistrationProcedure = new GibaRegistrationProcedure();
                 break;
             case DIGEST:
                 if (logger.isActivated()) {
                     logger.debug("Load HTTP Digest authentication procedure");
                 }
-                this.registrationProcedure = new HttpDigestRegistrationProcedure();
+                mRegistrationProcedure = new HttpDigestRegistrationProcedure();
                 break;
         }
     }
@@ -314,19 +331,19 @@ public abstract class ImsNetworkInterface {
      */
     public UserProfile getUserProfile() {
         UserProfileInterface intf;
-        switch (imsAuthentMode) {
+        switch (mImsAuthentMode) {
             case GIBA:
                 if (logger.isActivated()) {
                     logger.debug("Load user profile derived from IMSI (GIBA)");
                 }
-                intf = new GibaUserProfileInterface();
+                intf = new GibaUserProfileInterface(mRcsSettings);
                 break;
             case DIGEST:
             default:
                 if (logger.isActivated()) {
                     logger.debug("Load user profile from RCS settings database");
                 }
-                intf = new SettingsUserProfileInterface();
+                intf = new SettingsUserProfileInterface(mRcsSettings);
                 break;
         }
         return intf.read();
@@ -338,7 +355,7 @@ public abstract class ImsNetworkInterface {
      * @return IMS module
      */
     public ImsModule getImsModule() {
-        return imsModule;
+        return mImsModule;
     }
 
     /**
@@ -347,7 +364,7 @@ public abstract class ImsNetworkInterface {
      * @return Type (see ConnectivityManager class)
      */
     public int getType() {
-        return type;
+        return mType;
     }
 
     /**
@@ -356,7 +373,7 @@ public abstract class ImsNetworkInterface {
      * @return Network access
      */
     public NetworkAccess getNetworkAccess() {
-        return access;
+        return mAccess;
     }
 
     /**
@@ -365,7 +382,7 @@ public abstract class ImsNetworkInterface {
      * @return SIP manager
      */
     public SipManager getSipManager() {
-        return sip;
+        return mSip;
     }
 
     /**
@@ -374,7 +391,16 @@ public abstract class ImsNetworkInterface {
      * @return Return True if the terminal is registered, else return False
      */
     public boolean isRegistered() {
-        return registration.isRegistered();
+        return mRegistration.isRegistered();
+    }
+
+    /**
+     * Gets reason code for RCS registration
+     * 
+     * @return reason code
+     */
+    public RcsServiceRegistration.ReasonCode getRegistrationReasonCode() {
+        return mRegistration.getReasonCode();
     }
 
     /**
@@ -481,11 +507,12 @@ public abstract class ImsNetworkInterface {
     private String getSrvQuery(String sipService) {
         if (TRANSPORT_PROTOCOL_SERVICE_TLS.equalsIgnoreCase(sipService)) {
             return new StringBuilder(SIP_SERVICE_SECURE)
-                    .append(TRANSMISSION_CONTROL_PROTOCOL).append(DOT).append(imsProxyAddr)
+                    .append(TRANSMISSION_CONTROL_PROTOCOL).append(DOT).append(mImsProxyAddr)
                     .toString();
         }
         return new StringBuilder(SIP_SERVICE)
-                .append(imsProxyProtocol.toLowerCase()).append(DOT).append(imsProxyAddr).toString();
+                .append(mImsProxyProtocol.toLowerCase()).append(DOT).append(mImsProxyAddr)
+                .toString();
     }
 
     // Changed by Deutsche Telekom
@@ -498,15 +525,15 @@ public abstract class ImsNetworkInterface {
         // Changed by Deutsche Telekom
         DnsResolvedFields dnsResolvedFields;
         boolean useDns = true;
-        if (imsProxyAddr.matches(REGEX_IPV4)) {
+        if (mImsProxyAddr.matches(REGEX_IPV4)) {
             useDns = false;
-            dnsResolvedFields = new DnsResolvedFields(imsProxyAddr, imsProxyPort);
+            dnsResolvedFields = new DnsResolvedFields(mImsProxyAddr, mImsProxyPort);
 
             if (logger.isActivated()) {
                 logger.warn("IP address found instead of FQDN!");
             }
         } else {
-            dnsResolvedFields = new DnsResolvedFields(null, imsProxyPort);
+            dnsResolvedFields = new DnsResolvedFields(null, mImsProxyPort);
         }
 
         if (useDns) {
@@ -517,23 +544,23 @@ public abstract class ImsNetworkInterface {
             // Resolve the IMS proxy configuration: first try to resolve via
             // a NAPTR query, then a SRV query and finally via A query
             if (logger.isActivated()) {
-                logger.debug("Resolve IMS proxy address " + imsProxyAddr);
+                logger.debug("Resolve IMS proxy address " + mImsProxyAddr);
             }
 
             // DNS NAPTR lookup
             String service;
-            if (imsProxyProtocol.equalsIgnoreCase(ListeningPoint.UDP)) {
+            if (mImsProxyProtocol.equalsIgnoreCase(ListeningPoint.UDP)) {
                 service = "SIP+D2U";
-            } else if (imsProxyProtocol.equalsIgnoreCase(ListeningPoint.TCP)) {
+            } else if (mImsProxyProtocol.equalsIgnoreCase(ListeningPoint.TCP)) {
                 service = "SIP+D2T";
-            } else if (imsProxyProtocol.equalsIgnoreCase(ListeningPoint.TLS)) {
+            } else if (mImsProxyProtocol.equalsIgnoreCase(ListeningPoint.TLS)) {
                 service = "SIPS+D2T";
             } else {
                 throw new SipException("Unkown SIP protocol");
             }
 
             boolean resolved = false;
-            Record[] naptrRecords = getDnsRequest(imsProxyAddr, resolver, Type.NAPTR);
+            Record[] naptrRecords = getDnsRequest(mImsProxyAddr, resolver, Type.NAPTR);
             if ((naptrRecords != null) && (naptrRecords.length > 0)) {
                 // First try with NAPTR
                 if (logger.isActivated()) {
@@ -550,11 +577,11 @@ public abstract class ImsNetworkInterface {
                                 resolver, Type.SRV);
                         if ((srvRecords != null) && (srvRecords.length > 0)) {
                             SRVRecord srvRecord = getBestDnsSRV(srvRecords);
-                            dnsResolvedFields.ipAddress = getDnsA(srvRecord.getTarget().toString());
-                            dnsResolvedFields.port = srvRecord.getPort();
+                            dnsResolvedFields.mIpAddress = getDnsA(srvRecord.getTarget().toString());
+                            dnsResolvedFields.mPort = srvRecord.getPort();
                         } else {
                             // Direct DNS A lookup
-                            dnsResolvedFields.ipAddress = getDnsA(imsProxyAddr);
+                            dnsResolvedFields.mIpAddress = getDnsA(mImsProxyAddr);
                         }
                         resolved = true;
                     }
@@ -567,17 +594,17 @@ public abstract class ImsNetworkInterface {
                     logger.debug("No NAPTR record found: use DNS SRV instead");
                 }
                 String srvQuery;
-                if (imsProxyAddr.startsWith(SIP_SERVICE)
-                        || imsProxyAddr.startsWith(SIP_SERVICE_SECURE)) {
-                    srvQuery = imsProxyAddr;
+                if (mImsProxyAddr.startsWith(SIP_SERVICE)
+                        || mImsProxyAddr.startsWith(SIP_SERVICE_SECURE)) {
+                    srvQuery = mImsProxyAddr;
                 } else {
                     srvQuery = getSrvQuery(service);
                 }
                 Record[] srvRecords = getDnsRequest(srvQuery, resolver, Type.SRV);
                 if ((srvRecords != null) && (srvRecords.length > 0)) {
                     SRVRecord srvRecord = getBestDnsSRV(srvRecords);
-                    dnsResolvedFields.ipAddress = getDnsA(srvRecord.getTarget().toString());
-                    dnsResolvedFields.port = srvRecord.getPort();
+                    dnsResolvedFields.mIpAddress = getDnsA(srvRecord.getTarget().toString());
+                    dnsResolvedFields.mPort = srvRecord.getPort();
                     resolved = true;
                 }
 
@@ -586,25 +613,25 @@ public abstract class ImsNetworkInterface {
                     if (logger.isActivated()) {
                         logger.debug("No SRV record found: use DNS A instead");
                     }
-                    dnsResolvedFields.ipAddress = getDnsA(imsProxyAddr);
+                    dnsResolvedFields.mIpAddress = getDnsA(mImsProxyAddr);
                 }
             }
         }
 
-        if (dnsResolvedFields.ipAddress == null) {
+        if (dnsResolvedFields.mIpAddress == null) {
             // Changed by Deutsche Telekom
             // Try to use IMS proxy address as a fallback
-            String imsProxyAddrResolved = getDnsA(imsProxyAddr);
+            String imsProxyAddrResolved = getDnsA(mImsProxyAddr);
             if (imsProxyAddrResolved != null) {
-                dnsResolvedFields = new DnsResolvedFields(imsProxyAddrResolved, imsProxyPort);
+                dnsResolvedFields = new DnsResolvedFields(imsProxyAddrResolved, mImsProxyPort);
             } else {
                 throw new SipException("Proxy IP address not found");
             }
         }
 
         if (logger.isActivated()) {
-            logger.debug("SIP outbound proxy configuration: " + dnsResolvedFields.ipAddress + ":"
-                    + dnsResolvedFields.port + ";" + imsProxyProtocol);
+            logger.debug("SIP outbound proxy configuration: " + dnsResolvedFields.mIpAddress + ":"
+                    + dnsResolvedFields.mPort + ";" + mImsProxyProtocol);
         }
 
         return dnsResolvedFields;
@@ -631,9 +658,9 @@ public abstract class ImsNetworkInterface {
 
             // Initialize the SIP stack
             // Changed by Deutsche Telekom
-            sip.initStack(access.getIpAddress(), dnsResolvedFields.ipAddress,
-                    dnsResolvedFields.port, imsProxyProtocol, tcpFallback, getType());
-            sip.getSipStack().addSipEventListener(imsModule);
+            mSip.initStack(mAccess.getIpAddress(), dnsResolvedFields.mIpAddress,
+                    dnsResolvedFields.mPort, mImsProxyProtocol, mTcpFallback, getType());
+            mSip.getSipStack().addSipEventListener(mImsModule);
         } catch (Exception e) {
             if (logger.isActivated()) {
                 logger.error("Can't instanciate the SIP stack", e);
@@ -642,15 +669,15 @@ public abstract class ImsNetworkInterface {
         }
 
         // Register to IMS
-        boolean registered = registration.registration();
+        boolean registered = mRegistration.registration();
         if (registered) {
             if (logger.isActivated()) {
                 logger.debug("IMS registration successful");
             }
 
             // Start keep-alive for NAT if activated
-            if (isBehindNat() && RcsSettings.getInstance().isSipKeepAliveEnabled()) {
-                sip.getSipStack().getKeepAliveManager().start();
+            if (isBehindNat() && mRcsSettings.isSipKeepAliveEnabled()) {
+                mSip.getSipStack().getKeepAliveManager().start();
             }
         } else {
             if (logger.isActivated()) {
@@ -678,28 +705,29 @@ public abstract class ImsNetworkInterface {
      * 
      * @return The {@link DnsResolvedFields} object containing the new DNS resolved fields,
      *         otherwise <code>null</code>.
+     * @throws Exception
      */
     public DnsResolvedFields checkDnsResolvedFieldsChanged() throws Exception {
         // Check DNS resolved fields
         DnsResolvedFields dnsResolvedFields = getDnsResolvedFields();
 
-        if (sip.getSipStack() == null) {
+        if (mSip.getSipStack() == null) {
             if (logger.isActivated()) {
                 logger.debug("Registration state has changed: sip stack not initialized yet.");
             }
             return dnsResolvedFields;
-        } else if (!sip.getSipStack().getOutboundProxyAddr().equals(dnsResolvedFields.ipAddress)) {
+        } else if (!mSip.getSipStack().getOutboundProxyAddr().equals(dnsResolvedFields.mIpAddress)) {
             if (logger.isActivated()) {
                 logger.debug("Registration state has changed: proxy ip address has changed (old: "
-                        + sip.getSipStack().getOutboundProxyAddr() + " - new: "
-                        + dnsResolvedFields.ipAddress + ").");
+                        + mSip.getSipStack().getOutboundProxyAddr() + " - new: "
+                        + dnsResolvedFields.mIpAddress + ").");
             }
             return dnsResolvedFields;
-        } else if (sip.getSipStack().getOutboundProxyPort() != dnsResolvedFields.port) {
+        } else if (mSip.getSipStack().getOutboundProxyPort() != dnsResolvedFields.mPort) {
             if (logger.isActivated()) {
                 logger.debug("Registration state has changed: proxy port has changed (old: "
-                        + sip.getSipStack().getOutboundProxyPort() + " - new: "
-                        + dnsResolvedFields.port + ").");
+                        + mSip.getSipStack().getOutboundProxyPort() + " - new: "
+                        + dnsResolvedFields.mPort + ").");
             }
             return dnsResolvedFields;
         }
@@ -716,10 +744,10 @@ public abstract class ImsNetworkInterface {
         }
 
         // Unregister from IMS
-        registration.unRegistration();
+        mRegistration.unRegistration();
 
         // Close the SIP stack
-        sip.closeStack();
+        mSip.closeStack();
     }
 
     /**
@@ -731,10 +759,10 @@ public abstract class ImsNetworkInterface {
         }
 
         // Stop registration
-        registration.stopRegistration();
+        mRegistration.stopRegistration();
 
         // Close the SIP stack
-        sip.closeStack();
+        mSip.closeStack();
     }
 
     /**

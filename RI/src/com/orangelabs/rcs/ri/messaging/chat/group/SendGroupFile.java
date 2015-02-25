@@ -25,12 +25,15 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
+import java.util.Set;
+
 import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
 import com.gsma.services.rcs.filetransfer.GroupFileTransferListener;
+
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.messaging.chat.SendFile;
@@ -68,9 +71,11 @@ public class SendGroupFile extends SendFile {
         public void onDeliveryInfoChanged(String chatId, ContactId contact, String transferId,
                 GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
-                Log.d(LOGTAG, "onSingleRecipientDeliveryStateChanged chatId=" + chatId
-                        + " contact=" + contact + " trasnferId=" + transferId + " state=" + status
-                        + " reason=" + reasonCode);
+                Log.d(LOGTAG,
+                        new StringBuilder("onDeliveryInfoChanged chatId=").append(chatId)
+                                .append(" contact=").append(contact).append(" trasnferId=")
+                                .append(transferId).append(" state=").append(status).
+                                append(" reason=").append(reasonCode).toString());
             }
         }
 
@@ -94,8 +99,10 @@ public class SendGroupFile extends SendFile {
                 final FileTransfer.State state,
                 FileTransfer.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
-                Log.d(LOGTAG, "onTransferStateChanged chatId=" + chatId + " transferId="
-                        + transferId + " state=" + state + " reason=" + reasonCode);
+                Log.d(LOGTAG,
+                        new StringBuilder("onStateChanged chatId=").append(chatId)
+                                .append(" transferId=").append(transferId).append(" state=")
+                                .append(state).append(" reason=").append(reasonCode).toString());
             }
 
             // Discard event if not for current transferId
@@ -147,6 +154,15 @@ public class SendGroupFile extends SendFile {
                     }
                 }
             });
+        }
+
+        @Override
+        public void onDeleted(String chatId, Set<String> transferIds) {
+            if (LogUtils.isActive) {
+                Log.w(LOGTAG,
+                        new StringBuilder("onDeleted chatId=").append(chatId)
+                                .append(" transferIds=").append(transferIds).toString());
+            }
         }
 
     };

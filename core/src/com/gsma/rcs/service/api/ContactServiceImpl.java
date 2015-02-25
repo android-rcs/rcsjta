@@ -26,6 +26,7 @@ import com.gsma.rcs.core.ims.service.ContactInfo;
 import com.gsma.rcs.core.ims.service.ContactInfo.BlockingState;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.RcsService;
@@ -48,6 +49,8 @@ public class ContactServiceImpl extends IContactService.Stub {
     private static final Logger logger = Logger
             .getLogger(ContactServiceImpl.class.getSimpleName());
 
+    private final RcsSettings mRcsSettings;
+
     /**
      * Contacts manager
      */
@@ -57,13 +60,15 @@ public class ContactServiceImpl extends IContactService.Stub {
      * Constructor
      * 
      * @param contactsManager Contacts manager
+     * @param rcsSettings
      */
-    public ContactServiceImpl(ContactsManager contactsManager) {
+    public ContactServiceImpl(ContactsManager contactsManager, RcsSettings rcsSettings) {
         if (logger.isActivated()) {
             logger.info("Contacts service API is loaded");
         }
 
         mContactsManager = contactsManager;
+        mRcsSettings = rcsSettings;
     }
 
     /**
@@ -103,11 +108,12 @@ public class ContactServiceImpl extends IContactService.Stub {
             return null;
         }
         return new Capabilities(capabilities.isImageSharingSupported(),
-                capabilities.isVideoSharingSupported(), capabilities.isImSessionSupported(),
-                capabilities.isFileTransferSupported()
+                capabilities.isVideoSharingSupported(),
+                capabilities.isImSessionSupported(), capabilities.isFileTransferSupported()
                         || capabilities.isFileTransferHttpSupported(),
-                capabilities.isGeolocationPushSupported(), capabilities.isIPVoiceCallSupported(),
-                capabilities.isIPVideoCallSupported(), capabilities.getSupportedExtensions(),
+                capabilities.isGeolocationPushSupported(),
+                capabilities.isIPVoiceCallSupported(), capabilities.isIPVideoCallSupported(),
+                capabilities.getSupportedExtensions(),
                 capabilities.isSipAutomata(), capabilities.getTimestampOfLastRefresh(),
                 capabilities.isValid());
     }
@@ -127,7 +133,8 @@ public class ContactServiceImpl extends IContactService.Stub {
         boolean registered = RegistrationState.ONLINE.equals(contactInfo.getRegistrationState());
         boolean blocked = (contactInfo.getBlockingState() == BlockingState.BLOCKED);
         return new RcsContact(contactInfo.getContact(), registered, capaApi,
-                contactInfo.getDisplayName(), blocked, contactInfo.getBlockingTimestamp());
+                contactInfo.getDisplayName(),
+                blocked, contactInfo.getBlockingTimestamp());
     }
 
     /**
@@ -255,7 +262,7 @@ public class ContactServiceImpl extends IContactService.Stub {
         if (logger.isActivated()) {
             logger.debug("getCommonConfiguration");
         }
-        return new CommonServiceConfigurationImpl();
+        return new CommonServiceConfigurationImpl(mRcsSettings);
     }
 
     /**

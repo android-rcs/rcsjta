@@ -29,6 +29,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.MessagingLog;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -42,7 +43,7 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
     /**
      * The logger
      */
-    private final static Logger logger = Logger.getLogger(ResumeUploadFileSharingSession.class
+    private final static Logger sLogger = Logger.getLogger(ResumeUploadFileSharingSession.class
             .getSimpleName());
 
     /**
@@ -51,14 +52,15 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
      * @param parent IMS service
      * @param content the content (url, mime-type and size)
      * @param resumeUpload the data object in DB
+     * @param rcsSettings
      */
     public ResumeUploadFileSharingSession(ImsService parent, MmContent content,
-            FtHttpResumeUpload resumeUpload) {
+            FtHttpResumeUpload resumeUpload, RcsSettings rcsSettings) {
         super(resumeUpload.getFileTransferId(), parent, content, resumeUpload.getContact(),
                 resumeUpload.getFileicon() != null ? FileTransferUtils.createMmContent(resumeUpload
                         .getFileicon()) : null, resumeUpload.getTId(), Core.getInstance(),
-                MessagingLog.getInstance());
-        this.resumeFT = resumeUpload;
+                MessagingLog.getInstance(), rcsSettings);
+        mResumeFT = resumeUpload;
     }
 
     /**
@@ -66,8 +68,8 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
      */
     public void run() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Resume a HTTP file transfer session as originating");
+            if (sLogger.isActivated()) {
+                sLogger.info("Resume a HTTP file transfer session as originating");
             }
             ContactId contact = getRemoteContact();
             for (int j = 0; j < getListeners().size(); j++) {
@@ -78,8 +80,8 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
             byte[] result = uploadManager.resumeUpload();
             sendResultToContact(result);
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Transfer has failed", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Transfer has failed", e);
             }
             // Unexpected error
             handleError(new FileSharingError(FileSharingError.UNEXPECTED_EXCEPTION, e.getMessage()));

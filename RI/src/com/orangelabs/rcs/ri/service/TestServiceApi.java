@@ -44,8 +44,9 @@ public class TestServiceApi extends ListActivity {
 
         // Set items
         String[] items = {
+                getString(R.string.menu_service_activation),
                 getString(R.string.menu_service_status),
-                getString(R.string.menu_registration_status), getString(R.string.menu_others),
+                getString(R.string.menu_registration_status),
                 getString(R.string.menu_service_configuration)
         };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
@@ -55,15 +56,15 @@ public class TestServiceApi extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         switch (position) {
             case 0:
-                startActivity(new Intent(this, ServiceStatus.class));
+                startActivity(new Intent(this, ServiceActivation.class));
                 break;
 
             case 1:
-                startActivity(new Intent(this, RegistrationStatus.class));
+                startActivity(new Intent(this, ServiceStatus.class));
                 break;
 
             case 2:
-                startActivity(new Intent(this, OtherServices.class));
+                startActivity(new Intent(this, RegistrationStatus.class));
                 break;
 
             case 3:

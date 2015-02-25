@@ -24,11 +24,6 @@ package com.gsma.rcs.core.ims.service.im.chat;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Set;
-import java.util.Vector;
-
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
@@ -41,7 +36,6 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.gsma.rcs.core.ims.service.ImsService;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -55,6 +49,11 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Set;
+import java.util.Vector;
 
 /**
  * Terminating one-to-one chat session
@@ -109,7 +108,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
             return true;
         }
 
-        return RcsSettings.getInstance().isChatAutoAccepted();
+        return mRcsSettings.isChatAutoAccepted();
     }
 
     /**

@@ -31,12 +31,12 @@ public class KeepAliveManager extends PeriodicRefresher {
     /**
      * Keep-alive period (in seconds)
      */
-    private int period;
+    private int mPeriod;
 
     /**
      * SIP interface
      */
-    private SipInterface sip;
+    private SipInterface mSip;
 
     /**
      * The logger
@@ -45,10 +45,13 @@ public class KeepAliveManager extends PeriodicRefresher {
 
     /**
      * Constructor
+     * 
+     * @param sip
+     * @param rcsSettings
      */
-    public KeepAliveManager(SipInterface sip) {
-        this.sip = sip;
-        this.period = RcsSettings.getInstance().getSipKeepAlivePeriod();
+    public KeepAliveManager(SipInterface sip, RcsSettings rcsSettings) {
+        mSip = sip;
+        mPeriod = rcsSettings.getSipKeepAlivePeriod();
     }
 
     /**
@@ -58,7 +61,7 @@ public class KeepAliveManager extends PeriodicRefresher {
         if (logger.isActivated()) {
             logger.debug("Start keep-alive");
         }
-        startTimer(period, 1);
+        startTimer(mPeriod, 1);
     }
 
     /**
@@ -81,11 +84,11 @@ public class KeepAliveManager extends PeriodicRefresher {
             }
 
             // Send a double-CRLF
-            sip.getDefaultSipProvider().getListeningPoints()[0].sendHeartbeat(
-                    sip.getOutboundProxyAddr(), sip.getOutboundProxyPort());
+            mSip.getDefaultSipProvider().getListeningPoints()[0].sendHeartbeat(
+                    mSip.getOutboundProxyAddr(), mSip.getOutboundProxyPort());
 
             // Start timer
-            startTimer(period, 1);
+            startTimer(mPeriod, 1);
         } catch (Exception e) {
             if (logger.isActivated()) {
                 logger.error("SIP heartbeat has failed", e);
@@ -97,7 +100,7 @@ public class KeepAliveManager extends PeriodicRefresher {
      * @param period the keep alive period in seconds
      */
     public void setPeriod(int period) {
-        this.period = period;
+        mPeriod = period;
         if (logger.isActivated()) {
             logger.debug("Set keep-alive period \"" + period + "\"");
         }

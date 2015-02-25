@@ -24,10 +24,6 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.msrp;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Vector;
-
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
@@ -44,7 +40,6 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.gsma.rcs.core.ims.service.ImsService;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -62,6 +57,10 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Vector;
+
 /**
  * Terminating file transfer session
  * 
@@ -73,8 +72,6 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * MSRP manager
      */
     private MsrpManager msrpMgr;
-
-    private RcsSettings mRcsSettings;
 
     /**
      * The logger
@@ -92,9 +89,9 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      */
     public TerminatingMsrpFileSharingSession(ImsService parent, SipRequest invite,
             RcsSettings rcsSettings) throws RcsContactFormatException {
-        super(parent, ContentManager.createMmContentFromSdp(invite), ContactUtils
+        super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), ContactUtils
                 .createContactId(SipUtils.getAssertedIdentity(invite)), FileTransferUtils
-                .extractFileIcon(invite), IdGenerator.generateMessageID());
+                .extractFileIcon(invite, rcsSettings), IdGenerator.generateMessageID(), rcsSettings);
 
         // Create dialog path
         createTerminatingDialogPath(invite);
@@ -106,7 +103,6 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
         if (shouldBeAutoAccepted()) {
             setSessionAccepted();
         }
-        mRcsSettings = rcsSettings;
     }
 
     /**
@@ -117,10 +113,10 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      */
     private boolean shouldBeAutoAccepted() {
         if (getImsService().getImsModule().isInRoaming()) {
-            return RcsSettings.getInstance().isFileTransferAutoAcceptedInRoaming();
+            return mRcsSettings.isFileTransferAutoAcceptedInRoaming();
         }
 
-        return RcsSettings.getInstance().isFileTransferAutoAccepted();
+        return mRcsSettings.isFileTransferAutoAccepted();
     }
 
     /**
@@ -222,7 +218,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
             // This control should be done at UI level. However if user accepts invitation, the
             // stack replies 403 Forbidden.
             FileSharingError error = FileSharingSession.isFileCapacityAcceptable(getContent()
-                    .getSize());
+                    .getSize(), mRcsSettings);
             if (error != null) {
                 // Extract of GSMA specification:
                 // If the file is bigger than FT MAX SIZE, a warning message is displayed when
@@ -284,13 +280,13 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
             if (localSetup.equals("active")) {
                 localMsrpPort = 9; // See RFC4145, Page 4
             } else {
-                localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort();
+                localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(mRcsSettings);
             }
 
             // Create the MSRP manager
             String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface()
                     .getNetworkAccess().getIpAddress();
-            msrpMgr = new MsrpManager(localIpAddress, localMsrpPort, getImsService());
+            msrpMgr = new MsrpManager(localIpAddress, localMsrpPort, getImsService(), mRcsSettings);
             msrpMgr.setSecured(isSecured);
 
             // Build SDP part

@@ -24,10 +24,6 @@ package com.gsma.rcs.core.ims.service.richcall.image;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Vector;
-
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
@@ -44,12 +40,12 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.gsma.rcs.core.ims.service.ImsService;
-import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
@@ -57,6 +53,10 @@ import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Vector;
 
 /**
  * Terminating content sharing session (transfer)
@@ -82,10 +82,13 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
      * @param parent IMS service
      * @param invite Initial INVITE request
      * @param contact Contact ID
+     * @param rcsSettings
      */
-    public TerminatingImageTransferSession(ImsService parent, SipRequest invite, ContactId contact) {
-        super(parent, ContentManager.createMmContentFromSdp(invite), contact, FileTransferUtils
-                .extractFileIcon(invite));
+    public TerminatingImageTransferSession(ImsService parent, SipRequest invite, ContactId contact,
+            RcsSettings rcsSettings) {
+        super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), contact,
+                FileTransferUtils
+                        .extractFileIcon(invite, rcsSettings), rcsSettings);
 
         // Create dialog path
         createTerminatingDialogPath(invite);
@@ -181,7 +184,8 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
             }
 
             // Auto reject if file too big or if storage capacity is too small
-            ContentSharingError error = isImageCapacityAcceptable(getContent().getSize());
+            ContentSharingError error = isImageCapacityAcceptable(getContent().getSize(),
+                    mRcsSettings);
             if (error != null) {
                 if (logger.isActivated()) {
                     logger.debug("Auto reject image sharing invitation");
@@ -238,18 +242,18 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
             if (localSetup.equals("active")) {
                 localMsrpPort = 9; // See RFC4145, Page 4
             } else {
-                localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort();
+                localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(mRcsSettings);
             }
 
             // Create the MSRP manager
             String localIpAddress = getImsService().getImsModule().getCurrentNetworkInterface()
                     .getNetworkAccess().getIpAddress();
-            msrpMgr = new MsrpManager(localIpAddress, localMsrpPort, getImsService());
+            msrpMgr = new MsrpManager(localIpAddress, localMsrpPort, getImsService(), mRcsSettings);
             msrpMgr.setSecured(isSecured);
 
             // Build SDP part
             String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
-            long maxSize = ImageTransferSession.getMaxImageSharingSize();
+            long maxSize = ImageTransferSession.getMaxImageSharingSize(mRcsSettings);
             String sdp = SdpUtils.buildFileSDP(ipAddress, localMsrpPort,
                     msrpMgr.getLocalSocketProtocol(), getContent().getEncoding(), fileTransferId,
                     fileSelector, null, localSetup, msrpMgr.getLocalMsrpPath(),

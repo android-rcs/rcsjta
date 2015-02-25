@@ -26,11 +26,17 @@ import com.gsma.rcs.provider.settings.RcsSettings;
  * @author JM. Auffret
  */
 public class GibaUserProfileInterface extends UserProfileInterface {
+
+    private final RcsSettings mRcsSettings;
+
     /**
      * Constructor
+     * 
+     * @param rcsSettings
      */
-    public GibaUserProfileInterface() {
+    public GibaUserProfileInterface(RcsSettings rcsSettings) {
         super();
+        mRcsSettings = rcsSettings;
     }
 
     /**
@@ -40,9 +46,9 @@ public class GibaUserProfileInterface extends UserProfileInterface {
      */
     public UserProfile read() {
         // Read profile info from the database settings
-        String xdmServer = RcsSettings.getInstance().getXdmServer();
-        String xdmPassword = RcsSettings.getInstance().getUserProfileImsPassword();
-        String confUri = RcsSettings.getInstance().getImConferenceUri();
+        String xdmServer = mRcsSettings.getXdmServer();
+        String xdmPassword = mRcsSettings.getUserProfileImsPassword();
+        String confUri = mRcsSettings.getImConferenceUri();
 
         // The user profile will be complete during the registration procedure
         return new UserProfile(null, // User name derived from GIBA procedure
@@ -51,6 +57,6 @@ public class GibaUserProfileInterface extends UserProfileInterface {
                 null, // No password with GIBA procedure
                 null, // No realm with GIBA procedure
                 xdmServer, null, // Login derived from GIBA procedure
-                xdmPassword, confUri);
+                xdmPassword, confUri, mRcsSettings);
     }
 }

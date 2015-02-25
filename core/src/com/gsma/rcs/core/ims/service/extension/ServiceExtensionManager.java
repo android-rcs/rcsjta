@@ -44,7 +44,7 @@ public class ServiceExtensionManager {
     /**
      * Singleton of ServiceExtensionManager
      */
-    private static volatile ServiceExtensionManager instance;
+    private static volatile ServiceExtensionManager mInstance;
 
     /**
      * Separator of extensions
@@ -54,29 +54,35 @@ public class ServiceExtensionManager {
     /**
      * The logger
      */
-    private final static Logger logger = Logger.getLogger(ServiceExtensionManager.class
+    private final static Logger sLogger = Logger.getLogger(ServiceExtensionManager.class
             .getSimpleName());
+
+    private RcsSettings mRcsSettings;
 
     /**
      * Empty constructor : prevent caller from creating multiple instances
+     * 
+     * @param rcsSettings
      */
-    private ServiceExtensionManager() {
+    private ServiceExtensionManager(RcsSettings rcsSettings) {
+        mRcsSettings = rcsSettings;
     }
 
     /**
      * Get an instance of ServiceExtensionManager.
      * 
+     * @param rcsSettings
      * @return the singleton instance.
      */
-    public static ServiceExtensionManager getInstance() {
-        if (instance == null) {
+    public static ServiceExtensionManager getInstance(RcsSettings rcsSettings) {
+        if (mInstance == null) {
             synchronized (ServiceExtensionManager.class) {
-                if (instance == null) {
-                    instance = new ServiceExtensionManager();
+                if (mInstance == null) {
+                    mInstance = new ServiceExtensionManager(rcsSettings);
                 }
             }
         }
-        return instance;
+        return mInstance;
     }
 
     /**
@@ -86,7 +92,7 @@ public class ServiceExtensionManager {
      */
     private void saveSupportedExtensions(Set<String> supportedExts) {
         // Update supported extensions in database
-        RcsSettings.getInstance().setSupportedRcsExtensions(supportedExts);
+        mRcsSettings.setSupportedRcsExtensions(supportedExts);
     }
 
     /**
@@ -101,14 +107,14 @@ public class ServiceExtensionManager {
         for (String extension : newExts) {
             if (isExtensionAuthorized(context, extension)) {
                 if (supportedExts.contains(extension)) {
-                    if (logger.isActivated()) {
-                        logger.debug("Extension " + extension + " is already in the list");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Extension " + extension + " is already in the list");
                     }
                 } else {
                     // Add the extension in the supported list if authorized and not yet in the list
                     supportedExts.add(extension);
-                    if (logger.isActivated()) {
-                        logger.debug("Extension " + extension + " is added to the list");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Extension " + extension + " is added to the list");
                     }
                 }
             }
@@ -122,14 +128,14 @@ public class ServiceExtensionManager {
      */
     public void updateSupportedExtensions(Context context) {
         if (context == null) {
-            if (logger.isActivated()) {
-                logger.warn("Cannot update supported extension: context is null");
+            if (sLogger.isActivated()) {
+                sLogger.warn("Cannot update supported extension: context is null");
             }
             return;
         }
         try {
-            if (logger.isActivated()) {
-                logger.debug("Update supported extensions");
+            if (sLogger.isActivated()) {
+                sLogger.debug("Update supported extensions");
             }
 
             Set<String> supportedExts = new HashSet<String>();
@@ -142,8 +148,8 @@ public class ServiceExtensionManager {
                 if (appMeta != null) {
                     String exts = appMeta.getString(CapabilityService.INTENT_EXTENSIONS);
                     if (!TextUtils.isEmpty(exts)) {
-                        if (logger.isActivated()) {
-                            logger.debug("Update supported extensions " + exts);
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("Update supported extensions " + exts);
                         }
                         // Check extensions
                         checkExtensions(context, supportedExts, getExtensions(exts));
@@ -154,8 +160,8 @@ public class ServiceExtensionManager {
             // Update supported extensions in database
             saveSupportedExtensions(supportedExts);
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Unexpected error", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Unexpected error", e);
             }
         }
     }
@@ -168,14 +174,14 @@ public class ServiceExtensionManager {
      * @return Boolean
      */
     public boolean isExtensionAuthorized(Context context, String ext) {
-        if (!RcsSettings.getInstance().isExtensionsAllowed()) {
-            if (logger.isActivated()) {
-                logger.debug("Extensions are not allowed");
+        if (!mRcsSettings.isExtensionsAllowed()) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Extensions are not allowed");
             }
             return false;
         }
-        if (logger.isActivated()) {
-            logger.debug("No control on extensions");
+        if (sLogger.isActivated()) {
+            sLogger.debug("No control on extensions");
         }
         return true;
     }

@@ -24,6 +24,7 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.sip.SipSessionError;
 import com.gsma.rcs.core.ims.service.sip.SipSessionListener;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -36,7 +37,7 @@ public class OriginatingSipRtpSession extends GenericSipRtpSession {
     /**
      * The logger
      */
-    private final static Logger logger = Logger.getLogger(OriginatingSipRtpSession.class
+    private final static Logger sLogger = Logger.getLogger(OriginatingSipRtpSession.class
             .getSimpleName());
 
     /**
@@ -45,9 +46,11 @@ public class OriginatingSipRtpSession extends GenericSipRtpSession {
      * @param parent IMS service
      * @param contact Remote contact Id
      * @param featureTag Feature tag
+     * @param rcsSettings
      */
-    public OriginatingSipRtpSession(ImsService parent, ContactId contact, String featureTag) {
-        super(parent, contact, featureTag);
+    public OriginatingSipRtpSession(ImsService parent, ContactId contact, String featureTag,
+            RcsSettings rcsSettings) {
+        super(parent, contact, featureTag, rcsSettings);
 
         // Create dialog path
         createOriginatingDialogPath();
@@ -58,8 +61,8 @@ public class OriginatingSipRtpSession extends GenericSipRtpSession {
      */
     public void run() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Initiate a new RTP session as originating");
+            if (sLogger.isActivated()) {
+                sLogger.info("Initiate a new RTP session as originating");
             }
 
             // Build SDP part
@@ -69,8 +72,8 @@ public class OriginatingSipRtpSession extends GenericSipRtpSession {
             getDialogPath().setLocalContent(sdp);
 
             // Create an INVITE request
-            if (logger.isActivated()) {
-                logger.info("Send INVITE");
+            if (sLogger.isActivated()) {
+                sLogger.info("Send INVITE");
             }
             SipRequest invite = createInvite();
 
@@ -83,8 +86,8 @@ public class OriginatingSipRtpSession extends GenericSipRtpSession {
             // Send INVITE request
             sendInvite(invite);
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Session initiation has failed", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Session initiation has failed", e);
             }
 
             // Unexpected error
@@ -99,8 +102,8 @@ public class OriginatingSipRtpSession extends GenericSipRtpSession {
 
     @Override
     public void handle180Ringing(SipResponse response) {
-        if (logger.isActivated()) {
-            logger.debug("handle180Ringing");
+        if (sLogger.isActivated()) {
+            sLogger.debug("handle180Ringing");
         }
         ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {

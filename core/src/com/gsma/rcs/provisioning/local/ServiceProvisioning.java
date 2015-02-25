@@ -22,10 +22,16 @@
 
 package com.gsma.rcs.provisioning.local;
 
-import static com.gsma.rcs.provisioning.local.Provisioning.saveCheckBoxParameter;
-import static com.gsma.rcs.provisioning.local.Provisioning.saveEditTextParameter;
-import static com.gsma.rcs.provisioning.local.Provisioning.setCheckBoxParameter;
-import static com.gsma.rcs.provisioning.local.Provisioning.setEditTextParameter;
+import static com.gsma.rcs.provisioning.local.Provisioning.saveCheckBoxParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.saveEditTextParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.setCheckBoxParam;
+import static com.gsma.rcs.provisioning.local.Provisioning.setEditTextParam;
+
+import com.gsma.rcs.R;
+import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.settings.RcsSettingsData;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
@@ -33,10 +39,6 @@ import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
-
-import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.provider.settings.RcsSettingsData;
-import com.gsma.rcs.R;
 
 /**
  * Service parameters provisioning
@@ -51,7 +53,9 @@ public class ServiceProvisioning extends Activity {
             "0", "1", "2"
     };
 
-    private boolean isInFront;
+    private boolean mInFront;
+
+    private RcsSettings mRcsSettings;
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -62,15 +66,16 @@ public class ServiceProvisioning extends Activity {
         // Set buttons callback
         Button btn = (Button) findViewById(R.id.save_btn);
         btn.setOnClickListener(saveBtnListener);
+        mRcsSettings = RcsSettings.createInstance(new LocalContentResolver(this));
         updateView(bundle);
-        isInFront = true;
+        mInFront = true;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (isInFront == false) {
-            isInFront = true;
+        if (mInFront == false) {
+            mInFront = true;
             // Update UI (from DB)
             updateView(null);
         }
@@ -79,7 +84,7 @@ public class ServiceProvisioning extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        isInFront = false;
+        mInFront = false;
     }
 
     /**
@@ -88,68 +93,51 @@ public class ServiceProvisioning extends Activity {
      * @param bundle
      */
     private void updateView(Bundle bundle) {
+        ProvisioningHelper helper = new ProvisioningHelper(this, mRcsSettings, bundle);
+
         // Display UI parameters
-        setEditTextParameter(this, R.id.MaxPhotoIconSize, RcsSettingsData.MAX_PHOTO_ICON_SIZE,
-                bundle);
-        setEditTextParameter(this, R.id.MaxFreetextLength, RcsSettingsData.MAX_FREETXT_LENGTH,
-                bundle);
-        setEditTextParameter(this, R.id.MaxChatParticipants, RcsSettingsData.MAX_CHAT_PARTICIPANTS,
-                bundle);
-        setEditTextParameter(this, R.id.MaxChatMessageLength, RcsSettingsData.MAX_CHAT_MSG_LENGTH,
-                bundle);
-        setEditTextParameter(this, R.id.MaxGroupChatMessageLength,
-                RcsSettingsData.MAX_GROUPCHAT_MSG_LENGTH, bundle);
-        setEditTextParameter(this, R.id.ChatIdleDuration, RcsSettingsData.CHAT_IDLE_DURATION,
-                bundle);
-        setEditTextParameter(this, R.id.MaxFileTransferSize,
-                RcsSettingsData.MAX_FILE_TRANSFER_SIZE, bundle);
-        setEditTextParameter(this, R.id.WarnFileTransferSize,
-                RcsSettingsData.WARN_FILE_TRANSFER_SIZE, bundle);
-        setEditTextParameter(this, R.id.MaxImageShareSize, RcsSettingsData.MAX_IMAGE_SHARE_SIZE,
-                bundle);
-        setEditTextParameter(this, R.id.MaxVideoShareDuration,
-                RcsSettingsData.MAX_VIDEO_SHARE_DURATION, bundle);
-        setEditTextParameter(this, R.id.MaxChatSessions, RcsSettingsData.MAX_CHAT_SESSIONS, bundle);
-        setEditTextParameter(this, R.id.MaxFileTransferSessions,
-                RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS, bundle);
-        setEditTextParameter(this, R.id.MaxConcurrentOutgoingFileTransferSessions,
-                RcsSettingsData.MAX_CONCURRENT_OUTGOING_FILE_TRANSFERS, bundle);
-        setEditTextParameter(this, R.id.MaxIpCallSessions, RcsSettingsData.MAX_IP_CALL_SESSIONS,
-                bundle);
-        setEditTextParameter(this, R.id.MaxChatLogEntries, RcsSettingsData.MAX_CHAT_LOG_ENTRIES,
-                bundle);
-        setEditTextParameter(this, R.id.MaxRichcallLogEntries,
-                RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES, bundle);
-        setEditTextParameter(this, R.id.MaxIpcallLogEntries,
-                RcsSettingsData.MAX_IPCALL_LOG_ENTRIES, bundle);
-        setEditTextParameter(this, R.id.DirectoryPathPhotos, RcsSettingsData.DIRECTORY_PATH_PHOTOS,
-                bundle);
-        setEditTextParameter(this, R.id.DirectoryPathVideos, RcsSettingsData.DIRECTORY_PATH_VIDEOS,
-                bundle);
-        setEditTextParameter(this, R.id.DirectoryPathFiles, RcsSettingsData.DIRECTORY_PATH_FILES,
-                bundle);
-        setEditTextParameter(this, R.id.MaxGeolocLabelLength,
-                RcsSettingsData.MAX_GEOLOC_LABEL_LENGTH, bundle);
-        setEditTextParameter(this, R.id.GeolocExpirationTime,
-                RcsSettingsData.GEOLOC_EXPIRATION_TIME, bundle);
+        setEditTextParam(R.id.MaxPhotoIconSize, RcsSettingsData.MAX_PHOTO_ICON_SIZE, helper);
+        setEditTextParam(R.id.MaxFreetextLength, RcsSettingsData.MAX_FREETXT_LENGTH, helper);
+        setEditTextParam(R.id.MaxChatParticipants, RcsSettingsData.MAX_CHAT_PARTICIPANTS, helper);
+        setEditTextParam(R.id.MaxChatMessageLength, RcsSettingsData.MAX_CHAT_MSG_LENGTH, helper);
+        setEditTextParam(R.id.MaxGroupChatMessageLength, RcsSettingsData.MAX_GROUPCHAT_MSG_LENGTH,
+                helper);
+        setEditTextParam(R.id.ChatIdleDuration, RcsSettingsData.CHAT_IDLE_DURATION, helper);
+        setEditTextParam(R.id.MaxFileTransferSize, RcsSettingsData.MAX_FILE_TRANSFER_SIZE, helper);
+        setEditTextParam(R.id.WarnFileTransferSize, RcsSettingsData.WARN_FILE_TRANSFER_SIZE, helper);
+        setEditTextParam(R.id.MaxImageShareSize, RcsSettingsData.MAX_IMAGE_SHARE_SIZE, helper);
+        setEditTextParam(R.id.MaxVideoShareDuration, RcsSettingsData.MAX_VIDEO_SHARE_DURATION,
+                helper);
+        setEditTextParam(R.id.MaxChatSessions, RcsSettingsData.MAX_CHAT_SESSIONS, helper);
+        setEditTextParam(R.id.MaxFileTransferSessions, RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS,
+                helper);
+        setEditTextParam(R.id.MaxConcurrentOutgoingFileTransferSessions,
+                RcsSettingsData.MAX_CONCURRENT_OUTGOING_FILE_TRANSFERS, helper);
+        setEditTextParam(R.id.MaxIpCallSessions, RcsSettingsData.MAX_IP_CALL_SESSIONS, helper);
+        setEditTextParam(R.id.MaxChatLogEntries, RcsSettingsData.MAX_CHAT_LOG_ENTRIES, helper);
+        setEditTextParam(R.id.MaxRichcallLogEntries, RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES,
+                helper);
+        setEditTextParam(R.id.MaxIpcallLogEntries, RcsSettingsData.MAX_IPCALL_LOG_ENTRIES, helper);
+        setEditTextParam(R.id.DirectoryPathPhotos, RcsSettingsData.DIRECTORY_PATH_PHOTOS, helper);
+        setEditTextParam(R.id.DirectoryPathVideos, RcsSettingsData.DIRECTORY_PATH_VIDEOS, helper);
+        setEditTextParam(R.id.DirectoryPathFiles, RcsSettingsData.DIRECTORY_PATH_FILES, helper);
+        setEditTextParam(R.id.MaxGeolocLabelLength, RcsSettingsData.MAX_GEOLOC_LABEL_LENGTH, helper);
+        setEditTextParam(R.id.GeolocExpirationTime, RcsSettingsData.GEOLOC_EXPIRATION_TIME, helper);
 
         Spinner spinner = (Spinner) findViewById(R.id.ImSessionStart);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, IM_SESSION_START_MODES);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-        Provisioning.setSpinnerParameter(spinner, RcsSettingsData.IM_SESSION_START, bundle,
-                IM_SESSION_START_MODES);
+        Provisioning.setSpinnerParameter(spinner, RcsSettingsData.IM_SESSION_START,
+                IM_SESSION_START_MODES, helper);
 
-        setCheckBoxParameter(this, R.id.SmsFallbackService, RcsSettingsData.SMS_FALLBACK_SERVICE,
-                bundle);
-        setCheckBoxParameter(this, R.id.StoreForwardServiceWarning,
-                RcsSettingsData.WARN_SF_SERVICE, bundle);
-        setCheckBoxParameter(this, R.id.AutoAcceptFileTransfer,
-                RcsSettingsData.AUTO_ACCEPT_FILE_TRANSFER, bundle);
-        setCheckBoxParameter(this, R.id.AutoAcceptChat, RcsSettingsData.AUTO_ACCEPT_CHAT, bundle);
-        setCheckBoxParameter(this, R.id.AutoAcceptGroupChat,
-                RcsSettingsData.AUTO_ACCEPT_GROUP_CHAT, bundle);
+        setCheckBoxParam(R.id.SmsFallbackService, RcsSettingsData.SMS_FALLBACK_SERVICE, helper);
+        setCheckBoxParam(R.id.StoreForwardServiceWarning, RcsSettingsData.WARN_SF_SERVICE, helper);
+        setCheckBoxParam(R.id.AutoAcceptFileTransfer, RcsSettingsData.AUTO_ACCEPT_FILE_TRANSFER,
+                helper);
+        setCheckBoxParam(R.id.AutoAcceptChat, RcsSettingsData.AUTO_ACCEPT_CHAT, helper);
+        setCheckBoxParam(R.id.AutoAcceptGroupChat, RcsSettingsData.AUTO_ACCEPT_GROUP_CHAT, helper);
     }
 
     @Override
@@ -162,67 +150,52 @@ public class ServiceProvisioning extends Activity {
      * Save parameters either in bundle or in RCS settings
      */
     private void saveInstanceState(Bundle bundle) {
-        saveEditTextParameter(this, R.id.MaxPhotoIconSize, RcsSettingsData.MAX_PHOTO_ICON_SIZE,
-                bundle);
-        saveEditTextParameter(this, R.id.MaxFreetextLength, RcsSettingsData.MAX_FREETXT_LENGTH,
-                bundle);
-        saveEditTextParameter(this, R.id.MaxChatParticipants,
-                RcsSettingsData.MAX_CHAT_PARTICIPANTS, bundle);
-        saveEditTextParameter(this, R.id.MaxChatMessageLength, RcsSettingsData.MAX_CHAT_MSG_LENGTH,
-                bundle);
-        saveEditTextParameter(this, R.id.MaxGroupChatMessageLength,
-                RcsSettingsData.MAX_GROUPCHAT_MSG_LENGTH, bundle);
-        saveEditTextParameter(this, R.id.ChatIdleDuration, RcsSettingsData.CHAT_IDLE_DURATION,
-                bundle);
-        saveEditTextParameter(this, R.id.MaxFileTransferSize,
-                RcsSettingsData.MAX_FILE_TRANSFER_SIZE, bundle);
-        saveEditTextParameter(this, R.id.WarnFileTransferSize,
-                RcsSettingsData.WARN_FILE_TRANSFER_SIZE, bundle);
-        saveEditTextParameter(this, R.id.MaxImageShareSize, RcsSettingsData.MAX_IMAGE_SHARE_SIZE,
-                bundle);
-        saveEditTextParameter(this, R.id.MaxVideoShareDuration,
-                RcsSettingsData.MAX_VIDEO_SHARE_DURATION, bundle);
-        saveEditTextParameter(this, R.id.MaxChatSessions, RcsSettingsData.MAX_CHAT_SESSIONS, bundle);
-        saveEditTextParameter(this, R.id.MaxFileTransferSessions,
-                RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS, bundle);
-        saveEditTextParameter(this, R.id.MaxConcurrentOutgoingFileTransferSessions,
-                RcsSettingsData.MAX_CONCURRENT_OUTGOING_FILE_TRANSFERS, bundle);
-        saveEditTextParameter(this, R.id.MaxIpCallSessions, RcsSettingsData.MAX_IP_CALL_SESSIONS,
-                bundle);
-        saveEditTextParameter(this, R.id.MaxChatLogEntries, RcsSettingsData.MAX_CHAT_LOG_ENTRIES,
-                bundle);
-        saveEditTextParameter(this, R.id.MaxRichcallLogEntries,
-                RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES, bundle);
-        saveEditTextParameter(this, R.id.MaxIpcallLogEntries,
-                RcsSettingsData.MAX_IPCALL_LOG_ENTRIES, bundle);
-        saveEditTextParameter(this, R.id.MaxGeolocLabelLength,
-                RcsSettingsData.MAX_GEOLOC_LABEL_LENGTH, bundle);
-        saveEditTextParameter(this, R.id.GeolocExpirationTime,
-                RcsSettingsData.GEOLOC_EXPIRATION_TIME, bundle);
-        saveEditTextParameter(this, R.id.DirectoryPathPhotos,
-                RcsSettingsData.DIRECTORY_PATH_PHOTOS, bundle);
-        saveEditTextParameter(this, R.id.DirectoryPathVideos,
-                RcsSettingsData.DIRECTORY_PATH_VIDEOS, bundle);
-        saveEditTextParameter(this, R.id.DirectoryPathFiles, RcsSettingsData.DIRECTORY_PATH_FILES,
-                bundle);
+        ProvisioningHelper helper = new ProvisioningHelper(this, mRcsSettings, bundle);
+
+        saveEditTextParam(R.id.MaxPhotoIconSize, RcsSettingsData.MAX_PHOTO_ICON_SIZE, helper);
+        saveEditTextParam(R.id.MaxFreetextLength, RcsSettingsData.MAX_FREETXT_LENGTH, helper);
+        saveEditTextParam(R.id.MaxChatParticipants, RcsSettingsData.MAX_CHAT_PARTICIPANTS, helper);
+        saveEditTextParam(R.id.MaxChatMessageLength, RcsSettingsData.MAX_CHAT_MSG_LENGTH, helper);
+        saveEditTextParam(R.id.MaxGroupChatMessageLength, RcsSettingsData.MAX_GROUPCHAT_MSG_LENGTH,
+                helper);
+        saveEditTextParam(R.id.ChatIdleDuration, RcsSettingsData.CHAT_IDLE_DURATION, helper);
+        saveEditTextParam(R.id.MaxFileTransferSize, RcsSettingsData.MAX_FILE_TRANSFER_SIZE, helper);
+        saveEditTextParam(R.id.WarnFileTransferSize, RcsSettingsData.WARN_FILE_TRANSFER_SIZE,
+                helper);
+        saveEditTextParam(R.id.MaxImageShareSize, RcsSettingsData.MAX_IMAGE_SHARE_SIZE, helper);
+        saveEditTextParam(R.id.MaxVideoShareDuration, RcsSettingsData.MAX_VIDEO_SHARE_DURATION,
+                helper);
+        saveEditTextParam(R.id.MaxChatSessions, RcsSettingsData.MAX_CHAT_SESSIONS, helper);
+        saveEditTextParam(R.id.MaxFileTransferSessions, RcsSettingsData.MAX_FILE_TRANSFER_SESSIONS,
+                helper);
+        saveEditTextParam(R.id.MaxConcurrentOutgoingFileTransferSessions,
+                RcsSettingsData.MAX_CONCURRENT_OUTGOING_FILE_TRANSFERS, helper);
+        saveEditTextParam(R.id.MaxIpCallSessions, RcsSettingsData.MAX_IP_CALL_SESSIONS, helper);
+        saveEditTextParam(R.id.MaxChatLogEntries, RcsSettingsData.MAX_CHAT_LOG_ENTRIES, helper);
+        saveEditTextParam(R.id.MaxRichcallLogEntries, RcsSettingsData.MAX_RICHCALL_LOG_ENTRIES,
+                helper);
+        saveEditTextParam(R.id.MaxIpcallLogEntries, RcsSettingsData.MAX_IPCALL_LOG_ENTRIES, helper);
+        saveEditTextParam(R.id.MaxGeolocLabelLength, RcsSettingsData.MAX_GEOLOC_LABEL_LENGTH,
+                helper);
+        saveEditTextParam(R.id.GeolocExpirationTime, RcsSettingsData.GEOLOC_EXPIRATION_TIME, helper);
+        saveEditTextParam(R.id.DirectoryPathPhotos, RcsSettingsData.DIRECTORY_PATH_PHOTOS, helper);
+        saveEditTextParam(R.id.DirectoryPathVideos, RcsSettingsData.DIRECTORY_PATH_VIDEOS, helper);
+        saveEditTextParam(R.id.DirectoryPathFiles, RcsSettingsData.DIRECTORY_PATH_FILES, helper);
 
         Spinner spinner = (Spinner) findViewById(R.id.ImSessionStart);
         if (bundle != null) {
             bundle.putInt(RcsSettingsData.IM_SESSION_START, spinner.getSelectedItemPosition());
         } else {
-            RcsSettings.getInstance().writeInteger(RcsSettingsData.IM_SESSION_START,
+            mRcsSettings.writeInteger(RcsSettingsData.IM_SESSION_START,
                     spinner.getSelectedItemPosition());
         }
 
-        saveCheckBoxParameter(this, R.id.SmsFallbackService, RcsSettingsData.SMS_FALLBACK_SERVICE,
-                bundle);
-        saveCheckBoxParameter(this, R.id.StoreForwardServiceWarning,
-                RcsSettingsData.WARN_SF_SERVICE, bundle);
-        saveCheckBoxParameter(this, R.id.AutoAcceptFileTransfer,
-                RcsSettingsData.AUTO_ACCEPT_FILE_TRANSFER, bundle);
-        saveCheckBoxParameter(this, R.id.AutoAcceptChat, RcsSettingsData.AUTO_ACCEPT_CHAT, bundle);
-        saveCheckBoxParameter(this, R.id.AutoAcceptGroupChat,
-                RcsSettingsData.AUTO_ACCEPT_GROUP_CHAT, bundle);
+        saveCheckBoxParam(R.id.SmsFallbackService, RcsSettingsData.SMS_FALLBACK_SERVICE, helper);
+        saveCheckBoxParam(R.id.StoreForwardServiceWarning, RcsSettingsData.WARN_SF_SERVICE, helper);
+        saveCheckBoxParam(R.id.AutoAcceptFileTransfer, RcsSettingsData.AUTO_ACCEPT_FILE_TRANSFER,
+                helper);
+        saveCheckBoxParam(R.id.AutoAcceptChat, RcsSettingsData.AUTO_ACCEPT_CHAT, helper);
+        saveCheckBoxParam(R.id.AutoAcceptGroupChat, RcsSettingsData.AUTO_ACCEPT_GROUP_CHAT, helper);
     }
 
     /**
