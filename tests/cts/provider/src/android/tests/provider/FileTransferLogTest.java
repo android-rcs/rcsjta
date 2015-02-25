@@ -18,28 +18,35 @@
 
 package android.tests.provider;
 
+import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.FileTransferLog;
+
 import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.test.InstrumentationTestCase;
 
-import com.gsma.services.rcs.RcsCommon;
-import com.gsma.services.rcs.ft.FileTransfer;
-import com.gsma.services.rcs.ft.FileTransferLog;
-
 public class FileTransferLogTest extends InstrumentationTestCase {
 
     private final String[] FILE_TRANSFER_LOG_PROJECTION = new String[] {
             FileTransferLog.FT_ID,
-            FileTransferLog.CHAT_ID, FileTransferLog.CONTACT, FileTransferLog.FILE,
+            FileTransferLog.CHAT_ID,
+            FileTransferLog.CONTACT,
+            FileTransferLog.FILE,
             FileTransferLog.FILENAME,
-            FileTransferLog.MIME_TYPE, FileTransferLog.FILEICON,
+            FileTransferLog.MIME_TYPE,
+            FileTransferLog.FILEICON,
             FileTransferLog.FILEICON_MIME_TYPE,
-            FileTransferLog.DIRECTION, FileTransferLog.FILESIZE, FileTransferLog.TRANSFERRED,
-            FileTransferLog.TIMESTAMP, FileTransferLog.TIMESTAMP_SENT,
+            FileTransferLog.DIRECTION,
+            FileTransferLog.FILESIZE,
+            FileTransferLog.TRANSFERRED,
+            FileTransferLog.TIMESTAMP,
+            FileTransferLog.TIMESTAMP_SENT,
             FileTransferLog.TIMESTAMP_DELIVERED,
-            FileTransferLog.TIMESTAMP_DISPLAYED, FileTransferLog.STATE,
+            FileTransferLog.TIMESTAMP_DISPLAYED,
+            FileTransferLog.STATE,
             FileTransferLog.REASON_CODE,
             FileTransferLog.READ_STATUS
     };
@@ -123,12 +130,12 @@ public class FileTransferLogTest extends InstrumentationTestCase {
         values.put(FileTransferLog.FILESIZE, 10000);
         values.put(FileTransferLog.FILE, "uri");
         values.put(FileTransferLog.FILENAME, "filename");
-        values.put(FileTransferLog.DIRECTION, RcsCommon.Direction.INCOMING);
+        values.put(FileTransferLog.DIRECTION, RcsService.Direction.INCOMING.toInt());
         values.put(FileTransferLog.FT_ID, "0123456789");
         values.put(FileTransferLog.MIME_TYPE, "image/jpeg");
-        values.put(FileTransferLog.STATE, FileTransfer.State.INVITED);
-        values.put(FileTransferLog.REASON_CODE, FileTransfer.ReasonCode.UNSPECIFIED);
-        values.put(FileTransferLog.READ_STATUS, RcsCommon.ReadStatus.UNREAD);
+        values.put(FileTransferLog.STATE, FileTransfer.State.INVITED.toInt());
+        values.put(FileTransferLog.REASON_CODE, FileTransfer.ReasonCode.UNSPECIFIED.toInt());
+        values.put(FileTransferLog.READ_STATUS, RcsService.ReadStatus.UNREAD.toInt());
         values.put(FileTransferLog.TIMESTAMP, System.currentTimeMillis());
         values.put(FileTransferLog.TIMESTAMP_DELIVERED, 0);
         values.put(FileTransferLog.TIMESTAMP_SENT, 0);
@@ -161,10 +168,10 @@ public class FileTransferLogTest extends InstrumentationTestCase {
         values.put(FileTransferLog.FILESIZE, 10000L);
         values.put(FileTransferLog.FILENAME, "filename");
         values.put(FileTransferLog.CONTACT, "+3360102030405");
-        values.put(FileTransferLog.DIRECTION, RcsCommon.Direction.INCOMING);
+        values.put(FileTransferLog.DIRECTION, RcsService.Direction.INCOMING.toInt());
         values.put(FileTransferLog.FT_ID, "ft_id");
         values.put(FileTransferLog.MIME_TYPE, "image/jpeg");
-        values.put(FileTransferLog.STATE, FileTransfer.State.INVITED);
+        values.put(FileTransferLog.STATE, FileTransfer.State.INVITED.toInt());
         values.put(FileTransferLog.TIMESTAMP, System.currentTimeMillis());
         values.put(FileTransferLog.TRANSFERRED, 0L);
         // Check that provider does not support update operation

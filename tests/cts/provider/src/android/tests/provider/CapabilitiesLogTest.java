@@ -31,9 +31,12 @@ public class CapabilitiesLogTest extends InstrumentationTestCase {
 
     private static final String[] CAPABILITIES_LOG_PROJECTION = new String[] {
             CapabilitiesLog.CONTACT,
-            CapabilitiesLog.CAPABILITY_IMAGE_SHARE, CapabilitiesLog.CAPABILITY_VIDEO_SHARE,
-            CapabilitiesLog.CAPABILITY_IM_SESSION, CapabilitiesLog.CAPABILITY_FILE_TRANSFER,
-            CapabilitiesLog.CAPABILITY_GEOLOC_PUSH, CapabilitiesLog.CAPABILITY_EXTENSIONS,
+            CapabilitiesLog.CAPABILITY_IMAGE_SHARE,
+            CapabilitiesLog.CAPABILITY_VIDEO_SHARE,
+            CapabilitiesLog.CAPABILITY_IM_SESSION,
+            CapabilitiesLog.CAPABILITY_FILE_TRANSFER,
+            CapabilitiesLog.CAPABILITY_GEOLOC_PUSH,
+            CapabilitiesLog.CAPABILITY_EXTENSIONS,
             CapabilitiesLog.AUTOMATA,
             CapabilitiesLog.TIMESTAMP
     };

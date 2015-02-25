@@ -18,24 +18,31 @@
 
 package android.tests.provider;
 
+import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.chat.ChatLog;
+
 import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.test.InstrumentationTestCase;
 
-import com.gsma.services.rcs.RcsCommon;
-import com.gsma.services.rcs.chat.ChatLog;
-
 public class ChatLogMessageTest extends InstrumentationTestCase {
 
     private static final String[] CHAT_LOG_MESSAGE_PROJECTION = new String[] {
             ChatLog.Message.CHAT_ID,
-            ChatLog.Message.CONTENT, ChatLog.Message.CONTACT, ChatLog.Message.DIRECTION,
+            ChatLog.Message.CONTENT,
+            ChatLog.Message.CONTACT,
+            ChatLog.Message.DIRECTION,
             ChatLog.Message.READ_STATUS,
-            ChatLog.Message.MESSAGE_ID, ChatLog.Message.MIME_TYPE, ChatLog.Message.TIMESTAMP,
-            ChatLog.Message.REASON_CODE, ChatLog.Message.STATUS, ChatLog.Message.TIMESTAMP_SENT,
-            ChatLog.Message.TIMESTAMP_DELIVERED, ChatLog.Message.TIMESTAMP_DISPLAYED
+            ChatLog.Message.MESSAGE_ID,
+            ChatLog.Message.MIME_TYPE,
+            ChatLog.Message.TIMESTAMP,
+            ChatLog.Message.REASON_CODE,
+            ChatLog.Message.STATUS,
+            ChatLog.Message.TIMESTAMP_SENT,
+            ChatLog.Message.TIMESTAMP_DELIVERED,
+            ChatLog.Message.TIMESTAMP_DISPLAYED
     };
 
     private ContentProviderClient mProvider;
@@ -119,12 +126,12 @@ public class ChatLogMessageTest extends InstrumentationTestCase {
         values.put(ChatLog.Message.CHAT_ID, "0123456789");
         values.put(ChatLog.Message.CONTENT, "body");
         values.put(ChatLog.Message.CONTACT, "+3360102030405");
-        values.put(ChatLog.Message.DIRECTION, RcsCommon.Direction.INCOMING);
-        values.put(ChatLog.Message.READ_STATUS, RcsCommon.ReadStatus.UNREAD);
+        values.put(ChatLog.Message.DIRECTION, RcsService.Direction.INCOMING.toInt());
+        values.put(ChatLog.Message.READ_STATUS, RcsService.ReadStatus.UNREAD.toInt());
         values.put(ChatLog.Message.MESSAGE_ID, "012345789");
         values.put(ChatLog.Message.MIME_TYPE, ChatLog.Message.MimeType.TEXT_MESSAGE);
-        values.put(ChatLog.Message.STATUS, ChatLog.Message.Status.Content.RECEIVED);
-        values.put(ChatLog.Message.REASON_CODE, ChatLog.Message.ReasonCode.UNSPECIFIED);
+        values.put(ChatLog.Message.STATUS, ChatLog.Message.Content.Status.RECEIVED.toInt());
+        values.put(ChatLog.Message.REASON_CODE, ChatLog.Message.Content.ReasonCode.UNSPECIFIED.toInt());
         values.put(ChatLog.Message.TIMESTAMP, System.currentTimeMillis());
         values.put(ChatLog.Message.TIMESTAMP_DELIVERED, 0);
         values.put(ChatLog.Message.TIMESTAMP_DISPLAYED, 0);

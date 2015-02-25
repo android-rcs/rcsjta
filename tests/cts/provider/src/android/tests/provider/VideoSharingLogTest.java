@@ -18,25 +18,29 @@
 
 package android.tests.provider;
 
+import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.sharing.video.VideoSharing;
+import com.gsma.services.rcs.sharing.video.VideoSharingLog;
+
 import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.test.InstrumentationTestCase;
 
-import com.gsma.services.rcs.RcsCommon;
-import com.gsma.services.rcs.vsh.VideoSharing;
-import com.gsma.services.rcs.vsh.VideoSharingLog;
-
 public class VideoSharingLogTest extends InstrumentationTestCase {
 
     private final String[] VIDEO_SHARING_LOG_PROJECTION = new String[] {
             VideoSharingLog.CONTACT,
-            VideoSharingLog.DIRECTION, VideoSharingLog.DURATION, VideoSharingLog.SHARING_ID,
+            VideoSharingLog.DIRECTION,
+            VideoSharingLog.DURATION,
             VideoSharingLog.HEIGHT,
-            VideoSharingLog.ORIENTATION, VideoSharingLog.REASON_CODE, VideoSharingLog.STATE,
+            VideoSharingLog.REASON_CODE,
+            VideoSharingLog.SHARING_ID,
+            VideoSharingLog.STATE,
             VideoSharingLog.TIMESTAMP,
-            VideoSharingLog.VIDEO_ENCODING, VideoSharingLog.WIDTH
+            VideoSharingLog.VIDEO_ENCODING,
+            VideoSharingLog.WIDTH
     };
 
     private ContentProviderClient mProvider;
@@ -115,14 +119,13 @@ public class VideoSharingLogTest extends InstrumentationTestCase {
         // // Check that provider does not support insert operation
         ContentValues values = new ContentValues();
         values.put(VideoSharingLog.CONTACT, "+3360102030405");
-        values.put(VideoSharingLog.DIRECTION, RcsCommon.Direction.INCOMING);
+        values.put(VideoSharingLog.DIRECTION, RcsService.Direction.INCOMING.toInt());
         values.put(VideoSharingLog.SHARING_ID, "123456789");
-        values.put(VideoSharingLog.STATE, VideoSharing.State.INVITED);
+        values.put(VideoSharingLog.STATE, VideoSharing.State.INVITED.toInt());
         values.put(VideoSharingLog.TIMESTAMP, System.currentTimeMillis());
         values.put(VideoSharingLog.DURATION, 60);
         values.put(VideoSharingLog.HEIGHT, 10);
-        values.put(VideoSharingLog.ORIENTATION, 0);
-        values.put(VideoSharingLog.REASON_CODE, VideoSharing.ReasonCode.UNSPECIFIED);
+        values.put(VideoSharingLog.REASON_CODE, VideoSharing.ReasonCode.UNSPECIFIED.toInt());
         values.put(VideoSharingLog.VIDEO_ENCODING, VideoSharing.Encoding.H264);
         values.put(VideoSharingLog.WIDTH, 0);
         try {

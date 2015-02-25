@@ -18,22 +18,26 @@
 
 package android.tests.provider;
 
+import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.GroupChat;
+
 import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.test.InstrumentationTestCase;
 
-import com.gsma.services.rcs.RcsCommon;
-import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.GroupChat;
-
 public class ChatLogGroupChatTest extends InstrumentationTestCase {
 
     private final String[] CHAT_LOG_GROUPCHAT_PROJECTION = new String[] {
             ChatLog.GroupChat.CHAT_ID,
-            ChatLog.GroupChat.CONTACT, ChatLog.GroupChat.DIRECTION, ChatLog.GroupChat.PARTICIPANTS,
-            ChatLog.GroupChat.REASON_CODE, ChatLog.GroupChat.STATE, ChatLog.GroupChat.SUBJECT,
+            ChatLog.GroupChat.CONTACT,
+            ChatLog.GroupChat.DIRECTION,
+            ChatLog.GroupChat.PARTICIPANTS,
+            ChatLog.GroupChat.REASON_CODE,
+            ChatLog.GroupChat.STATE,
+            ChatLog.GroupChat.SUBJECT,
             ChatLog.GroupChat.TIMESTAMP
     };
 
@@ -113,13 +117,13 @@ public class ChatLogGroupChatTest extends InstrumentationTestCase {
         // Check that provider does not support insert operation
         ContentValues values = new ContentValues();
         values.put(ChatLog.GroupChat.CHAT_ID, "123456789");
-        values.put(ChatLog.GroupChat.DIRECTION, RcsCommon.Direction.INCOMING);
-        values.put(ChatLog.GroupChat.STATE, GroupChat.State.INVITED);
+        values.put(ChatLog.GroupChat.DIRECTION, RcsService.Direction.INCOMING.toInt());
+        values.put(ChatLog.GroupChat.STATE, GroupChat.State.INVITED.toString());
         values.put(ChatLog.GroupChat.SUBJECT, "subject");
         values.put(ChatLog.GroupChat.TIMESTAMP, System.currentTimeMillis());
         values.put(ChatLog.GroupChat.CONTACT, "+33612345678");
         values.put(ChatLog.GroupChat.PARTICIPANTS, "participant1,participant2");
-        values.put(ChatLog.GroupChat.REASON_CODE, GroupChat.ReasonCode.UNSPECIFIED);
+        values.put(ChatLog.GroupChat.REASON_CODE, GroupChat.ReasonCode.UNSPECIFIED.toInt());
         try {
             mProvider.insert(ChatLog.GroupChat.CONTENT_URI, values);
             fail("ChatLog is read only");

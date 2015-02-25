@@ -18,25 +18,30 @@
 
 package android.tests.provider;
 
+import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.sharing.image.ImageSharing;
+import com.gsma.services.rcs.sharing.image.ImageSharingLog;
+
 import android.content.ContentProviderClient;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.test.InstrumentationTestCase;
 
-import com.gsma.services.rcs.RcsCommon;
-import com.gsma.services.rcs.ish.ImageSharing;
-import com.gsma.services.rcs.ish.ImageSharingLog;
-
 public class ImageSharingLogTest extends InstrumentationTestCase {
 
     private final String[] IMAGE_SHARING_LOG_PROJECTION = new String[] {
             ImageSharingLog.CONTACT,
-            ImageSharingLog.DIRECTION, ImageSharingLog.FILE, ImageSharingLog.FILENAME,
+            ImageSharingLog.DIRECTION,
+            ImageSharingLog.FILE,
+            ImageSharingLog.FILENAME,
             ImageSharingLog.FILESIZE,
-            ImageSharingLog.SHARING_ID, ImageSharingLog.MIME_TYPE, ImageSharingLog.STATE,
+            ImageSharingLog.SHARING_ID,
+            ImageSharingLog.MIME_TYPE,
+            ImageSharingLog.STATE,
             ImageSharingLog.REASON_CODE,
-            ImageSharingLog.TIMESTAMP, ImageSharingLog.TRANSFERRED
+            ImageSharingLog.TIMESTAMP,
+            ImageSharingLog.TRANSFERRED
     };
 
     private ContentProviderClient mProvider;
@@ -118,11 +123,11 @@ public class ImageSharingLogTest extends InstrumentationTestCase {
         values.put(ImageSharingLog.FILESIZE, 10000L);
         values.put(ImageSharingLog.FILENAME, "filename");
         values.put(ImageSharingLog.CONTACT, "+3360102030405");
-        values.put(ImageSharingLog.DIRECTION, RcsCommon.Direction.INCOMING);
+        values.put(ImageSharingLog.DIRECTION, RcsService.Direction.INCOMING.toInt());
         values.put(ImageSharingLog.SHARING_ID, "0123456789");
         values.put(ImageSharingLog.MIME_TYPE, "image/jpeg");
-        values.put(ImageSharingLog.STATE, ImageSharing.State.INVITED);
-        values.put(ImageSharingLog.REASON_CODE, ImageSharing.ReasonCode.UNSPECIFIED);
+        values.put(ImageSharingLog.STATE, ImageSharing.State.INVITED.toInt());
+        values.put(ImageSharingLog.REASON_CODE, ImageSharing.ReasonCode.UNSPECIFIED.toInt());
         values.put(ImageSharingLog.TIMESTAMP, System.currentTimeMillis());
         values.put(ImageSharingLog.TRANSFERRED, 0L);
         try {
@@ -152,9 +157,9 @@ public class ImageSharingLogTest extends InstrumentationTestCase {
         values.put(ImageSharingLog.FILESIZE, 10000L);
         values.put(ImageSharingLog.FILENAME, "filename");
         values.put(ImageSharingLog.CONTACT, "+3360102030405");
-        values.put(ImageSharingLog.DIRECTION, RcsCommon.Direction.INCOMING);
+        values.put(ImageSharingLog.DIRECTION, RcsService.Direction.INCOMING.toInt());
         values.put(ImageSharingLog.MIME_TYPE, "image/jpeg");
-        values.put(ImageSharingLog.STATE, ImageSharing.State.INVITED);
+        values.put(ImageSharingLog.STATE, ImageSharing.State.INVITED.toInt());
         values.put(ImageSharingLog.TIMESTAMP, System.currentTimeMillis());
         values.put(ImageSharingLog.TRANSFERRED, 0L);
         try {
