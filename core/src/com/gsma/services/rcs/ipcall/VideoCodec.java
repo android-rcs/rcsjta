@@ -21,8 +21,6 @@ package com.gsma.services.rcs.ipcall;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
-
 /**
  * Video codec
  * 
@@ -226,32 +224,5 @@ public class VideoCodec implements Parcelable {
      */
     public String getParameters() {
         return parameters;
-    }
-
-    /**
-     * Compare codec
-     * 
-     * @param codec Codec to compare
-     * @return Returns True if codecs are equals, else returns False
-     */
-    public boolean compare(VideoCodec codec) {
-        boolean ret = false;
-        if (getEncoding().equalsIgnoreCase(codec.getEncoding())
-                && (getVideoWidth() == codec.getVideoWidth() || getVideoWidth() == 0 || codec
-                        .getVideoWidth() == 0)
-                && (getVideoHeight() == codec.getVideoHeight() || getVideoHeight() == 0 || codec
-                        .getVideoHeight() == 0)) {
-            if (getEncoding().equalsIgnoreCase(H264Config.CODEC_NAME)) {
-                if (H264Config.getCodecProfileLevelId(getParameters()).compareToIgnoreCase(
-                        H264Config.getCodecProfileLevelId(codec.getParameters())) == 0) {
-                    ret = true;
-                }
-            } else {
-                if (getParameters().equalsIgnoreCase(codec.getParameters())) {
-                    ret = true;
-                }
-            }
-        }
-        return ret;
     }
 }

@@ -90,7 +90,7 @@ public class VideoCodecManager {
      * @param codec2 Video codec 2
      * @return boolean
      */
-    public static boolean compareVideoCodec(VideoCodec codec1, VideoCodec codec2) {
+    private static boolean compareVideoCodec(VideoCodec codec1, VideoCodec codec2) {
         if (codec1.getEncoding().equalsIgnoreCase(codec2.getEncoding())
                 && (codec1.getWidth() == codec2.getWidth() || codec1.getWidth() == 0 || codec2
                         .getWidth() == 0)

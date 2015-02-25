@@ -49,7 +49,7 @@ public class VideoCodecManager {
                 VideoCodec videoCodec = supportedCodecs[j];
                 int videoCodecPref = supportedCodecs.length - 1 - j;
                 // Compare codec
-                if (proposedCodec.compare(videoCodec)) {
+                if (compareVideoCodec(proposedCodec, videoCodec)) {
                     if (videoCodecPref > pref) {
                         pref = videoCodecPref;
                         selectedCodec = new VideoCodec(proposedCodec.getEncoding(),
@@ -73,6 +73,33 @@ public class VideoCodecManager {
         }
         return selectedCodec;
     }
+    
+    /**
+     * Compare two video codecs
+     * 
+     * @param codec1 Video codec 1
+     * @param codec2 Video codec 2
+     * @return boolean
+     */
+    private static boolean compareVideoCodec(VideoCodec codec1, VideoCodec codec2) {
+        if (codec1.getEncoding().equalsIgnoreCase(codec2.getEncoding())
+                && (codec1.getVideoWidth() == codec2.getVideoWidth() || codec1.getVideoWidth() == 0 || codec2
+                        .getVideoWidth() == 0)
+                && (codec1.getVideoHeight() == codec2.getVideoHeight() || codec1.getVideoHeight() == 0 || codec2
+                        .getVideoHeight() == 0)) {
+            if (codec1.getEncoding().equalsIgnoreCase(H264Config.CODEC_NAME)) {
+                if (H264Config.getCodecProfileLevelId(codec1.getParameters()).compareToIgnoreCase(
+                        H264Config.getCodecProfileLevelId(codec2.getParameters())) == 0) {
+                    return true;
+                }
+            } else {
+                if (codec1.getParameters().equalsIgnoreCase(codec2.getParameters())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }    
 
     /**
      * Create a video codec from its SDP description
