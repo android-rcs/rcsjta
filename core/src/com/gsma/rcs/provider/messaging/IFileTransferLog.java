@@ -200,4 +200,12 @@ public interface IFileTransferLog {
      * @return sent time stamp
      */
     public long getFileTransferSentTimestamp(String fileTransferId);
+
+    /**
+     * Get file transfer resume info from its corresponding filetransferId
+     * 
+     * @param fileTransferId
+     * @return FtHttpResume
+     */
+    public FtHttpResume getFileTransferResumeInfo(String fileTransferId);
 }
