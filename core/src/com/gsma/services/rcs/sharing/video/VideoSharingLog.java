@@ -102,7 +102,7 @@ public class VideoSharingLog {
     public static final String REASON_CODE = "reason_code";
 
     /**
-     * The name of the column containing the encoding type of video
+     * The name of the column containing the encoding type of video.
      * <P>
      * Type: INTEGER
      * </P>
@@ -112,7 +112,7 @@ public class VideoSharingLog {
     public static final String VIDEO_ENCODING = "video_encoding";
 
     /**
-     * The name of the column containing the width of video
+     * The name of the column containing the width of video.
      * <P>
      * Type: INTEGER
      * </P>
@@ -120,7 +120,7 @@ public class VideoSharingLog {
     public static final String WIDTH = "width";
 
     /**
-     * The name of the column containing the height of video
+     * The name of the column containing the height of video.
      * <P>
      * Type: INTEGER
      * </P>

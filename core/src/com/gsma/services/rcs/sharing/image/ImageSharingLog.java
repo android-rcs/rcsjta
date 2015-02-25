@@ -55,7 +55,7 @@ public class ImageSharingLog {
     public static final String CONTACT = "contact";
 
     /**
-     * The name of the column containing the URI of the file
+     * The name of the column containing the URI of the file.
      * <P>
      * Type: TEXT
      * </P>
