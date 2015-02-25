@@ -69,6 +69,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.ImsFileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FtHttpResumeManager;
+import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpFileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpGroupFileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.TerminatingHttpFileSharingSession;
@@ -440,11 +441,15 @@ public class InstantMessagingService extends ImsService {
         synchronized (getImsServiceSessionOperationLock()) {
             mFileTransferSessionCache.put(fileTransferId, session);
             /*
-             * Only FileSharingSessions of type ImsFileSharingSession has a dialog path. Hence add
-             * only those type of sessions to the ImsServiceSession cache.
+             * Only FileSharingSessions of type ImsFileSharingSession has a
+             * dialog path. Hence add only those type of sessions to the
+             * ImsServiceSession cache and add HttpFileTransferSession to
+             * ImsServiceSessionWithoutDialogPath cache.
              */
             if (session instanceof ImsFileSharingSession) {
                 addImsServiceSession(session);
+            } else if (session instanceof HttpFileTransferSession) {
+                addImsServiceSessionWithoutDialogPath(session);
             }
         }
     }
@@ -465,12 +470,16 @@ public class InstantMessagingService extends ImsService {
                 synchronized (getImsServiceSessionOperationLock()) {
                     mFileTransferSessionCache.remove(fileTransferId);
                     /*
-                     * Only FileSharingSessions of type ImsFileSharingSession has a dialog path.
-                     * Hence it is possible to remove only those type of sessions to the
-                     * ImsServiceSession cache.
+                     * Only FileSharingSessions of type ImsFileSharingSession
+                     * has a dialog path. Hence it is possible to remove only
+                     * those type of sessions from the ImsServiceSession cache
+                     * and remove HttpFileTransferSession from
+                     * ImsServiceSessionWithoutDialogPath cache.
                      */
                     if (session instanceof ImsFileSharingSession) {
                         removeImsServiceSession(session);
+                    } else if (session instanceof HttpFileTransferSession) {
+                        removeImsServiceSessionWithoutDialogPath(session);
                     }
                 }
             }

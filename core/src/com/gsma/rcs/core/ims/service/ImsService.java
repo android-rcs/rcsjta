@@ -96,6 +96,11 @@ public abstract class ImsService {
     private Map<String, ImsServiceSession> mImsServiceSessionCache = new HashMap<String, ImsServiceSession>();
 
     /**
+     * ImsServiceSessionWithoutDialogPathCache with session Id as key
+     */
+    private Map<String, ImsServiceSession> mImsServiceSessionWithoutDialogPathCache = new HashMap<String, ImsServiceSession>();
+
+    /**
      * The logger
      */
     private static final Logger logger = Logger.getLogger(ImsService.class.getSimpleName());
@@ -170,6 +175,26 @@ public abstract class ImsService {
         }
     }
 
+    /*
+     * This method is by choice not synchronized here since the class extending
+     * this base-class will need to handle the synchronization over a larger
+     * scope when calling this method anyway and we would like to avoid double
+     * locks.
+     */
+    protected void addImsServiceSessionWithoutDialogPath(ImsServiceSession session) {
+        mImsServiceSessionWithoutDialogPathCache.put(session.getSessionID(), session);
+    }
+
+    /*
+     * This method is by choice not synchronized here since the class extending
+     * this base-class will need to handle the synchronization over a larger
+     * scope when calling this method anyway and we would like to avoid double
+     * locks.
+     */
+    protected void removeImsServiceSessionWithoutDialogPath(ImsServiceSession session) {
+        mImsServiceSessionWithoutDialogPathCache.remove(session.getSessionID());
+    }
+
     protected Object getImsServiceSessionOperationLock() {
         return mImsServiceSessionCache;
     }
@@ -210,6 +235,9 @@ public abstract class ImsService {
     public void abortAllSessions(TerminationReason reason) {
         synchronized (getImsServiceSessionOperationLock()) {
             for (ImsServiceSession session : mImsServiceSessionCache.values()) {
+                session.abortSession(reason);
+            }
+            for (ImsServiceSession session : mImsServiceSessionWithoutDialogPathCache.values()) {
                 session.abortSession(reason);
             }
         }
