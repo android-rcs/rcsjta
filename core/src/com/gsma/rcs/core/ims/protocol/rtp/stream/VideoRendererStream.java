@@ -44,7 +44,7 @@ public class VideoRendererStream extends MediaRendererStream {
      * @throws Exception
      */
     public void write(Buffer buffer) throws Exception {
-        VideoSample sample = new VideoSample((byte[]) buffer.getData(), buffer.getTimeStamp(),
+        VideoSample sample = new VideoSample((byte[]) buffer.getData(), buffer.getTimestamp(),
                 buffer.getSequenceNumber(), buffer.getVideoOrientation());
         getRenderer().writeSample(sample);
     }

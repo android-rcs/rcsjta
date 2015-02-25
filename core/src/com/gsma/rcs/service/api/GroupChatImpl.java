@@ -455,6 +455,22 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     }
 
     /**
+     * Returns the local timestamp of when the group chat invitation was initiated for outgoing
+     * group chats or the local timestamp of when the group chat invitation was received for
+     * incoming group chat invitations.
+     * 
+     * @return Timestamp
+     */
+    public long getTimestamp() {
+        GroupChatSession session = mImService.getGroupChatSession(mChatId);
+        if (session == null) {
+            return mPersistentStorage.getTimestamp();
+        }
+        return session.getTimestamp();
+
+    }
+
+    /**
      * Is Store & Forward
      * 
      * @return Boolean
@@ -846,7 +862,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
              */
             throw new IllegalArgumentException("Not allowed to send message.");
         }
-        ChatMessage msg = ChatUtils.createTextMessage(null, text);
+        long timestamp = System.currentTimeMillis();
+        /* For outgoing message, timestampSent = timestamp */
+        ChatMessage msg = ChatUtils.createTextMessage(null, text, timestamp, timestamp);
         ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
                 mMessagingLog, msg.getMessageId(), msg.getRemoteContact(), text,
                 MimeType.TEXT_MESSAGE, mChatId, Direction.OUTGOING);
@@ -874,7 +892,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
              */
             throw new IllegalArgumentException("Not allowed to send message.");
         }
-        ChatMessage geolocMsg = ChatUtils.createGeolocMessage(null, geoloc);
+        long timestamp = System.currentTimeMillis();
+        /** For outgoing message, timestampSent = timestamp */
+        ChatMessage geolocMsg = ChatUtils.createGeolocMessage(null, geoloc, timestamp, timestamp);
         ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
                 mMessagingLog, geolocMsg.getMessageId(), geolocMsg.getRemoteContact(),
                 geolocMsg.toString(), MimeType.GEOLOC_MESSAGE, mChatId, Direction.OUTGOING);
@@ -1322,17 +1342,17 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     }
 
     @Override
-    public void handleConferenceEvent(ContactId contact, ParticipantStatus status) {
+    public void handleConferenceEvent(ContactId contact, ParticipantStatus status, long timestamp) {
         if (logger.isActivated()) {
             logger.info("New conference event " + status.toString() + " for " + contact);
         }
         synchronized (lock) {
             if (ParticipantStatus.CONNECTED.equals(status)) {
-                mPersistentStorage
-                        .addGroupChatEvent(mChatId, contact, GroupChatEvent.Status.JOINED);
+                mPersistentStorage.addGroupChatEvent(mChatId, contact,
+                        GroupChatEvent.Status.JOINED, timestamp);
             } else if (ParticipantStatus.DEPARTED.equals(status)) {
                 mPersistentStorage.addGroupChatEvent(mChatId, contact,
-                        GroupChatEvent.Status.DEPARTED);
+                        GroupChatEvent.Status.DEPARTED, timestamp);
             }
         }
     }
@@ -1413,13 +1433,13 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     @Override
     public void handleSessionInvited(ContactId contact, String subject,
-            Map<ContactId, ParticipantStatus> participants) {
+            Map<ContactId, ParticipantStatus> participants, long timestamp) {
         if (logger.isActivated()) {
             logger.info("Invited to group chat session");
         }
         synchronized (lock) {
             mPersistentStorage.addGroupChat(contact, subject, participants, State.INVITED,
-                    ReasonCode.UNSPECIFIED, Direction.INCOMING);
+                    ReasonCode.UNSPECIFIED, Direction.INCOMING, timestamp);
         }
 
         mBroadcaster.broadcastInvitation(mChatId);
@@ -1427,13 +1447,13 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     @Override
     public void handleSessionAutoAccepted(ContactId contact, String subject,
-            Map<ContactId, ParticipantStatus> participants) {
+            Map<ContactId, ParticipantStatus> participants, long timestamp) {
         if (logger.isActivated()) {
             logger.info("Session auto accepted");
         }
         synchronized (lock) {
             mPersistentStorage.addGroupChat(contact, subject, participants, State.ACCEPTING,
-                    ReasonCode.UNSPECIFIED, Direction.INCOMING);
+                    ReasonCode.UNSPECIFIED, Direction.INCOMING, timestamp);
         }
 
         mBroadcaster.broadcastInvitation(mChatId);

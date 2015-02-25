@@ -155,6 +155,8 @@ public interface IPCallStreamingSessionListener extends ImsSessionListener {
      * @param contact Remote contact
      * @param audio Audio content
      * @param video Video content
+     * @param timestamp Local timestamp when got invitation
      */
-    public void handleSessionInvited(ContactId contact, AudioContent audio, VideoContent video);
+    public void handleSessionInvited(ContactId contact, AudioContent audio, VideoContent video,
+            long timestamp);
 }

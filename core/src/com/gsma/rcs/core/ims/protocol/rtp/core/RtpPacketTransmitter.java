@@ -178,7 +178,7 @@ public class RtpPacketTransmitter {
 
         rtppacket.payloadType = buffer.getFormat().getPayload();
         rtppacket.seqnum = seqNumber++;
-        rtppacket.timestamp = buffer.getTimeStamp();
+        rtppacket.timestamp = buffer.getTimestamp();
         rtppacket.ssrc = rtcpSession.SSRC;
         rtppacket.payloadoffset = buffer.getOffset();
         rtppacket.payloadlength = buffer.getLength();

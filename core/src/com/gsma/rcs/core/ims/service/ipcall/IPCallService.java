@@ -36,13 +36,13 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.ipcalldraft.IIPCallPlayer;
+import com.gsma.rcs.service.ipcalldraft.IIPCallRenderer;
 import com.gsma.rcs.service.ipcalldraft.IPCall.ReasonCode;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.rcs.service.ipcalldraft.IIPCallPlayer;
-import com.gsma.rcs.service.ipcalldraft.IIPCallRenderer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -104,15 +104,19 @@ public class IPCallService extends ImsService {
         mContactsManager = contactsManager;
     }
 
-    private void handleIPCallInvitationRejected(SipRequest invite, ReasonCode reasonCode) {
+    private void handleIPCallInvitationRejected(SipRequest invite, ReasonCode reasonCode,
+            long timestamp) {
         ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
         byte[] sessionDescriptionProtocol = invite.getSdpContent().getBytes(UTF8);
         AudioContent audioContent = ContentManager
                 .createLiveAudioContentFromSdp(sessionDescriptionProtocol);
         VideoContent videoContent = ContentManager
                 .createLiveVideoContentFromSdp(sessionDescriptionProtocol);
-        getImsModule().getCore().getListener()
-                .handleIPCallInvitationRejected(contact, audioContent, videoContent, reasonCode);
+        getImsModule()
+                .getCore()
+                .getListener()
+                .handleIPCallInvitationRejected(contact, audioContent, videoContent, reasonCode,
+                        timestamp);
     }
 
     /**
@@ -211,11 +215,12 @@ public class IPCallService extends ImsService {
      * @param video Video
      * @param player Player
      * @param renderer Renderer
+     * @param timestamp Local timestamp when initiating the IPCall
      * @return IP call session
      * @throws CoreException
      */
     public IPCallSession initiateIPCallSession(ContactId contact, boolean video,
-            IIPCallPlayer player, IIPCallRenderer renderer) throws CoreException {
+            IIPCallPlayer player, IIPCallRenderer renderer, long timestamp) throws CoreException {
         if (sLogger.isActivated()) {
             sLogger.info("Initiate an IP call session");
         }
@@ -232,7 +237,7 @@ public class IPCallService extends ImsService {
 
         // Create a new session
         OriginatingIPCallSession session = new OriginatingIPCallSession(this, contact,
-                audioContent, videoContent, player, renderer, mRcsSettings);
+                audioContent, videoContent, player, renderer, mRcsSettings, timestamp);
 
         return session;
     }
@@ -245,6 +250,7 @@ public class IPCallService extends ImsService {
     public void receiveIPCallInvitation(SipRequest invite, boolean audio, boolean video) {
         // Parse contact
         ContactId contact = null;
+        long timestamp = System.currentTimeMillis();
         try {
             contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
         } catch (RcsContactFormatException e) {
@@ -273,13 +279,14 @@ public class IPCallService extends ImsService {
             if (sLogger.isActivated()) {
                 sLogger.debug("The max number of IP call sessions is achieved: reject the invitation");
             }
-            handleIPCallInvitationRejected(invite, ReasonCode.REJECTED_MAX_SESSIONS);
+            handleIPCallInvitationRejected(invite, ReasonCode.REJECTED_MAX_SESSIONS, timestamp);
             sendErrorResponse(invite, 486);
             return;
         }
 
         // Create a new session
-        IPCallSession session = new TerminatingIPCallSession(this, invite, contact, mRcsSettings);
+        IPCallSession session = new TerminatingIPCallSession(this, invite, contact, mRcsSettings,
+                timestamp);
 
         getImsModule().getCore().getListener().handleIPCallInvitation(session);
 

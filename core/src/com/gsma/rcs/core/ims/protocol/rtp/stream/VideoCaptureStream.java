@@ -60,7 +60,7 @@ public class VideoCaptureStream extends MediaCaptureStream {
         if (sample.isMarker()) {
             buffer.setFlags(Buffer.FLAG_RTP_MARKER);
         }
-        buffer.setTimeStamp(sample.getTimeStamp());
+        buffer.setTimestamp(sample.getTimestamp());
         buffer.setVideoOrientation(sample.getVideoOrientation());
         return buffer;
     }

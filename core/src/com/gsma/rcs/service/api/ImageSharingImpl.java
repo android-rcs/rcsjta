@@ -269,7 +269,11 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     }
 
     public long getTimestamp() {
-        return mPersistentStorage.getTimestamp();
+        ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
+        if (session == null) {
+            return mPersistentStorage.getTimestamp();
+        }
+        return session.getTimestamp();
     }
 
     /**
@@ -495,13 +499,13 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     }
 
     @Override
-    public void handleSessionInvited(ContactId contact, MmContent content) {
+    public void handleSessionInvited(ContactId contact, MmContent content, long timestamp) {
         if (logger.isActivated()) {
             logger.info("Invited to image sharing session");
         }
         synchronized (lock) {
             mPersistentStorage.addImageSharing(contact, Direction.INCOMING, content,
-                    ImageSharing.State.INVITED, ReasonCode.UNSPECIFIED);
+                    ImageSharing.State.INVITED, ReasonCode.UNSPECIFIED, timestamp);
         }
 
         mBroadcaster.broadcastInvitation(mSharingId);

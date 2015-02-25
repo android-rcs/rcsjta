@@ -34,15 +34,15 @@ import com.gsma.rcs.core.ims.service.ipcall.IPCallStreamingSessionListener;
 import com.gsma.rcs.provider.ipcall.IPCallStateAndReasonCode;
 import com.gsma.rcs.service.broadcaster.IIPCallEventBroadcaster;
 import com.gsma.rcs.service.ipcalldraft.AudioCodec;
-import com.gsma.rcs.service.ipcalldraft.VideoCodec;
-import com.gsma.rcs.service.ipcalldraft.IPCall.ReasonCode;
-import com.gsma.rcs.service.ipcalldraft.IPCall.State;
-import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.rcs.service.ipcalldraft.IIPCall;
 import com.gsma.rcs.service.ipcalldraft.IIPCallPlayer;
 import com.gsma.rcs.service.ipcalldraft.IIPCallRenderer;
+import com.gsma.rcs.service.ipcalldraft.IPCall.ReasonCode;
+import com.gsma.rcs.service.ipcalldraft.IPCall.State;
+import com.gsma.rcs.service.ipcalldraft.VideoCodec;
+import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.os.RemoteException;
 
@@ -222,6 +222,20 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
             return Direction.INCOMING.toInt();
         }
         return Direction.OUTGOING.toInt();
+    }
+
+    /**
+     * Returns the timestamp of the call (incoming or outgoing)
+     *
+     * @return timestamp
+     */
+    public long getTimestamp() {
+
+        IPCallSession session = mIPCallService.getIPCallSession(mCallId);
+        if (session == null) {
+            return mPersistentStorage.getTimestamp();
+        }
+        return session.getTimestamp();
     }
 
     /**
@@ -845,13 +859,14 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
     }
 
     @Override
-    public void handleSessionInvited(ContactId contact, AudioContent audio, VideoContent video) {
+    public void handleSessionInvited(ContactId contact, AudioContent audio, VideoContent video,
+            long timestamp) {
         if (logger.isActivated()) {
             logger.info("Invited to ipcall session");
         }
         synchronized (lock) {
             mPersistentStorage.addCall(contact, Direction.INCOMING, audio, video, State.INVITED,
-                    ReasonCode.UNSPECIFIED);
+                    ReasonCode.UNSPECIFIED, timestamp);
         }
 
         mBroadcaster.broadcastIPCallInvitation(mCallId);

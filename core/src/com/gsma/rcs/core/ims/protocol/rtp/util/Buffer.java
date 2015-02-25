@@ -43,12 +43,12 @@ public class Buffer {
     public final static int FLAG_RTP_MARKER = (1 << 11);
 
     /**
-     * Indicates that the buffer carries a time stamp that's in RTP (NTP) time units
+     * Indicates that the buffer carries a timestamp that's in RTP (NTP) time units
      */
     public final static int FLAG_RTP_TIME = (1 << 12);
 
     /**
-     * Default value if the time stamp of the media is not known
+     * Default value if the timestamp of the media is not known
      */
     public final static long TIME_UNKNOWN = -1L;
 
@@ -58,9 +58,9 @@ public class Buffer {
     public final static long SEQUENCE_UNKNOWN = Long.MAX_VALUE - 1;
 
     /**
-     * The time stamp of the data in nanoseconds
+     * The timestamp of the data in nanoseconds
      */
-    protected long timeStamp = TIME_UNKNOWN;
+    protected long mTimestamp = TIME_UNKNOWN;
 
     /**
      * The format of the data chunk
@@ -266,21 +266,21 @@ public class Buffer {
     }
 
     /**
-     * Get the time stamp
+     * Get the timestamp
      * 
-     * @return Time stamp in nanoseconds.
+     * @return Timestamp in nanoseconds.
      */
-    public long getTimeStamp() {
-        return timeStamp;
+    public long getTimestamp() {
+        return mTimestamp;
     }
 
     /**
-     * Set the time stamp
+     * Set the timestamp
      * 
-     * @param timeStamp Time stamp in nanoseconds
+     * @param timestamp Timestamp in nanoseconds
      */
-    public void setTimeStamp(long timeStamp) {
-        this.timeStamp = timeStamp;
+    public void setTimestamp(long timestamp) {
+        mTimestamp = timestamp;
     }
 
     /**

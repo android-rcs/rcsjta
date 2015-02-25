@@ -75,10 +75,11 @@ public abstract class OneToOneChatSession extends ChatSession {
      * @param firstMsg First chat message
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
+     * @param timestamp Local timestamp for the session
      */
     public OneToOneChatSession(ImsService parent, ContactId contact, String remoteUri,
-            ChatMessage firstMsg, RcsSettings rcsSettings, MessagingLog messagingLog) {
-        super(parent, contact, remoteUri, rcsSettings, messagingLog, firstMsg);
+            ChatMessage firstMsg, RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp) {
+        super(parent, contact, remoteUri, rcsSettings, messagingLog, firstMsg, timestamp);
 
         List<String> featureTags = ChatUtils.getSupportedFeatureTagsForChat(rcsSettings);
         setFeatureTags(featureTags);
@@ -153,10 +154,11 @@ public abstract class OneToOneChatSession extends ChatSession {
         String mimeType = msg.getMimeType();
         if (useImdn) {
             networkContent = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, msg.getContent(),
-                    mimeType);
+                    mimeType, msg.getTimestampSent());
 
         } else {
-            networkContent = ChatUtils.buildCpimMessage(from, to, msg.getContent(), mimeType);
+            networkContent = ChatUtils.buildCpimMessage(from, to, msg.getContent(), mimeType,
+                    msg.getTimestampSent());
         }
 
         Collection<ImsSessionListener> listeners = getListeners();

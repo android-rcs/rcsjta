@@ -20,7 +20,9 @@ interface IIPCall {
 	int getReasonCode();
 
 	int getDirection();
-	
+
+	long getTimestamp();
+
 	void acceptInvitation(IIPCallPlayer player, IIPCallRenderer renderer);
 
 	void rejectInvitation();

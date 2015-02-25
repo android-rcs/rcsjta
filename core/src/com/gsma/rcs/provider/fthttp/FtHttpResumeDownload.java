@@ -48,11 +48,15 @@ public final class FtHttpResumeDownload extends FtHttpResume {
      * @param filetransferId the {@code filetransferId} value.
      * @param fileIcon the {@code fileIcon} value.
      * @param isGroup the {@code isGroup} value.
+     * @param timestamp the {@code timestamp} value.
+     * @param timestampSent the {@code timestampSent} value.
      */
     public FtHttpResumeDownload(HttpFileTransferSession session, Uri downloadServerAddress,
-            Uri file, String filetransferId, Uri fileIcon, boolean isGroup) {
+            Uri file, String filetransferId, Uri fileIcon, boolean isGroup, long timestamp,
+            long timestampSent) {
         this(downloadServerAddress, file, fileIcon, session.getContent(), session
-                .getRemoteContact(), session.getContributionID(), filetransferId, isGroup);
+                .getRemoteContact(), session.getContributionID(), filetransferId, isGroup,
+                timestamp, timestampSent);
     }
 
     /**
@@ -66,12 +70,15 @@ public final class FtHttpResumeDownload extends FtHttpResume {
      * @param chatId the {@code chatId} value.
      * @param filetransferId the {@code filetransferId} value.
      * @param isGroup the {@code isGroup} value.
+     * @param timestamp the {@code timestamp} value.
+     * @param timestampSent the {@code timestampSent} value.
      */
     public FtHttpResumeDownload(Uri downloadServerAddress, Uri file, Uri fileIcon,
             MmContent content, ContactId contact, String chatId, String filetransferId,
-            boolean isGroup) {
+            boolean isGroup, long timestamp, long timestampSent) {
         super(Direction.INCOMING, file, content.getName(), content.getEncoding(),
-                content.getSize(), fileIcon, contact, chatId, filetransferId, isGroup);
+                content.getSize(), fileIcon, contact, chatId, filetransferId, isGroup, timestamp,
+                timestampSent);
         mDownloadServerAddress = downloadServerAddress;
         if (downloadServerAddress == null || filetransferId == null)
             throw new IllegalArgumentException("Invalid argument");

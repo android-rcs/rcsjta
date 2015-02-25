@@ -291,15 +291,21 @@ public class FileTransferPersistedStorageAccessor {
     }
 
     public void addFileTransfer(ContactId contact, Direction direction, MmContent content,
-            MmContent fileIcon, State status, ReasonCode reasonCode) {
+            MmContent fileIcon, State status, ReasonCode reasonCode, long timestamp,
+            long timestampSent) {
+        mContact = contact;
+        mDirection = direction;
         mMessagingLog.addFileTransfer(mFileTransferId, contact, direction, content, fileIcon,
-                status, reasonCode);
+                status, reasonCode, timestamp, timestampSent);
     }
 
     public void addIncomingGroupFileTransfer(String chatId, ContactId contact, MmContent content,
-            MmContent fileicon, State state, ReasonCode reasonCode) {
+            MmContent fileicon, State state, ReasonCode reasonCode, long timestamp,
+            long timestampSent) {
+        mChatId = chatId;
+        mContact = contact;
         mMessagingLog.addIncomingGroupFileTransfer(mFileTransferId, chatId, contact, content,
-                fileicon, state, reasonCode);
+                fileicon, state, reasonCode, timestamp, timestampSent);
     }
 
     public FtHttpResume getFileTransferResumeInfo() {

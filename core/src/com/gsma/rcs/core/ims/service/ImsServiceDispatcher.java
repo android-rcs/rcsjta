@@ -22,13 +22,6 @@
 
 package com.gsma.rcs.core.ims.service;
 
-import javax2.sip.address.SipURI;
-import javax2.sip.header.ContactHeader;
-import javax2.sip.header.EventHeader;
-import javax2.sip.message.Request;
-import javax2.sip.message.Response;
-import android.content.Intent;
-
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.ImsNetworkInterface;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
@@ -47,6 +40,14 @@ import com.gsma.rcs.utils.FifoBuffer;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
+
+import android.content.Intent;
+
+import javax2.sip.address.SipURI;
+import javax2.sip.header.ContactHeader;
+import javax2.sip.header.EventHeader;
+import javax2.sip.message.Request;
+import javax2.sip.message.Response;
 
 /**
  * IMS service dispatcher
@@ -122,7 +123,7 @@ public class ImsServiceDispatcher extends Thread {
         while ((request = (SipRequest) mBuffer.getObject()) != null) {
             try {
                 // Dispatch the received SIP request
-                dispatch(request);
+                dispatch(request, System.currentTimeMillis());
             } catch (Exception e) {
                 if (logger.isActivated()) {
                     logger.error("Unexpected exception", e);
@@ -138,8 +139,9 @@ public class ImsServiceDispatcher extends Thread {
      * Dispatch the received SIP request
      * 
      * @param request SIP request
+     * @param timestamp Local timestamp when got SipRequest
      */
-    private void dispatch(SipRequest request) {
+    private void dispatch(SipRequest request, long timestamp) {
         if (logger.isActivated()) {
             logger.debug("Receive " + request.getMethod() + " request");
         }
@@ -263,7 +265,8 @@ public class ImsServiceDispatcher extends Thread {
                     if (logger.isActivated()) {
                         logger.debug("Image content sharing transfer invitation");
                     }
-                    mImsModule.getRichcallService().receiveImageSharingInvitation(request);
+                    mImsModule.getRichcallService().receiveImageSharingInvitation(request,
+                            timestamp);
                 } else {
                     // Service not supported: reject the invitation with a 603 Decline
                     if (logger.isActivated()) {
@@ -279,7 +282,8 @@ public class ImsServiceDispatcher extends Thread {
                     if (logger.isActivated()) {
                         logger.debug("File transfer invitation");
                     }
-                    mImsModule.getInstantMessagingService().receiveFileTransferInvitation(request);
+                    mImsModule.getInstantMessagingService().receiveMsrpFileTransferInvitation(
+                            request, timestamp);
                 } else {
                     // Service not supported: reject the invitation with a 603 Decline
                     if (logger.isActivated()) {
@@ -310,13 +314,14 @@ public class ImsServiceDispatcher extends Thread {
                             }
                             mImsModule.getInstantMessagingService()
                                     .receiveStoredAndForwardOneToOneHttpFileTranferInvitation(
-                                            request, ftHttpInfo);
+                                            request, ftHttpInfo, timestamp);
                         } else {
                             if (logger.isActivated()) {
                                 logger.debug("Single file transfer over HTTP invitation");
                             }
                             mImsModule.getInstantMessagingService()
-                                    .receiveOneToOneHttpFileTranferInvitation(request, ftHttpInfo);
+                                    .receiveOneToOneHttpFileTranferInvitation(request, ftHttpInfo,
+                                            timestamp);
                         }
                     } else {
                         // TODO : else return error to Originating side
@@ -335,27 +340,28 @@ public class ImsServiceDispatcher extends Thread {
                             logger.debug("Store & Forward push notifications");
                         }
                         mImsModule.getInstantMessagingService()
-                                .receiveStoredAndForwardPushNotifications(request);
+                                .receiveStoredAndForwardPushNotifications(request, timestamp);
                     } else if (ChatUtils.isGroupChatInvitation(request)) {
                         // Ad-hoc group chat session
                         if (logger.isActivated()) {
                             logger.debug("Ad-hoc group chat session invitation");
                         }
                         mImsModule.getInstantMessagingService().receiveAdhocGroupChatSession(
-                                request);
+                                request, timestamp);
                     } else if (SipUtils.getReferredByHeader(request) != null) {
                         // Store & Forward push messages session
                         if (logger.isActivated()) {
                             logger.debug("Store & Forward push messages session");
                         }
                         mImsModule.getInstantMessagingService()
-                                .receiveStoredAndForwardPushMessages(request);
+                                .receiveStoredAndForwardPushMessages(request, timestamp);
                     } else {
                         // 1-1 chat session
                         if (logger.isActivated()) {
                             logger.debug("1-1 chat session invitation");
                         }
-                        mImsModule.getInstantMessagingService().receiveOne2OneChatSession(request);
+                        mImsModule.getInstantMessagingService().receiveOne2OneChatSession(request,
+                                timestamp);
                     }
                 }
             } else if (isTagPresent(sdp, "rtp")
@@ -365,7 +371,8 @@ public class ImsServiceDispatcher extends Thread {
                     if (logger.isActivated()) {
                         logger.debug("Video content sharing streaming invitation");
                     }
-                    mImsModule.getRichcallService().receiveVideoSharingInvitation(request);
+                    mImsModule.getRichcallService().receiveVideoSharingInvitation(request,
+                            timestamp);
                 } else {
                     // Service not supported: reject the invitation with a 603 Decline
                     if (logger.isActivated()) {
@@ -382,7 +389,8 @@ public class ImsServiceDispatcher extends Thread {
                     if (logger.isActivated()) {
                         logger.debug("Geoloc content sharing transfer invitation");
                     }
-                    mImsModule.getRichcallService().receiveGeolocSharingInvitation(request);
+                    mImsModule.getRichcallService().receiveGeolocSharingInvitation(request,
+                            timestamp);
                 } else {
                     // Service not supported: reject the invitation with a 603 Decline
                     if (logger.isActivated()) {
@@ -425,8 +433,8 @@ public class ImsServiceDispatcher extends Thread {
                             logger.debug("Generic SIP session invitation with MSRP media");
                         }
                         try {
-                            mImsModule.getSipService()
-                                    .receiveMsrpSessionInvitation(intent, request);
+                            mImsModule.getSipService().receiveMsrpSessionInvitation(intent,
+                                    request, timestamp);
                         } catch (RcsContactFormatException e) {
                             if (logger.isActivated()) {
                                 logger.warn("Cannot parse contact");
@@ -437,7 +445,8 @@ public class ImsServiceDispatcher extends Thread {
                             logger.debug("Generic SIP session invitation with RTP media");
                         }
                         try {
-                            mImsModule.getSipService().receiveRtpSessionInvitation(intent, request);
+                            mImsModule.getSipService().receiveRtpSessionInvitation(intent, request,
+                                    timestamp);
                         } catch (RcsContactFormatException e) {
                             if (logger.isActivated()) {
                                 logger.warn("Cannot parse contact");
@@ -474,7 +483,7 @@ public class ImsServiceDispatcher extends Thread {
             }
         } else if (request.getMethod().equals(Request.NOTIFY)) {
             // NOTIFY received
-            dispatchNotify(request);
+            dispatchNotify(request, timestamp);
         } else if (request.getMethod().equals(Request.BYE)) {
             // BYE received
 
@@ -533,8 +542,9 @@ public class ImsServiceDispatcher extends Thread {
      * Dispatch the received SIP NOTIFY
      * 
      * @param notify SIP request
+     * @param timestamp Local timestamp when got SipRequest
      */
-    private void dispatchNotify(SipRequest notify) {
+    private void dispatchNotify(SipRequest notify, long timestamp) {
         try {
             // Create 200 OK response
             SipResponse resp = SipMessageFactory.createResponse(notify, 200);
@@ -574,7 +584,8 @@ public class ImsServiceDispatcher extends Thread {
             }
         } else if (eventHeader.getEventType().equalsIgnoreCase("conference")) {
             // IM service
-            mImsModule.getInstantMessagingService().receiveConferenceNotification(notify);
+            mImsModule.getInstantMessagingService()
+                    .receiveConferenceNotification(notify, timestamp);
         } else {
             // Not supported service
             if (logger.isActivated()) {

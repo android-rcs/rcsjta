@@ -60,7 +60,7 @@ public class ImageSharingPersistedStorageAccessor {
 
     public ImageSharingPersistedStorageAccessor(String sharingId, ContactId contact,
             Direction direction, Uri file, String fileName, String mimeType, long fileSize,
-            RichCallHistory richCallLog) {
+            RichCallHistory richCallLog, long timestamp) {
         mSharingId = sharingId;
         mContact = contact;
         mDirection = direction;
@@ -69,6 +69,7 @@ public class ImageSharingPersistedStorageAccessor {
         mFileSize = fileSize;
         mMimeType = mimeType;
         mRichCallLog = richCallLog;
+        mTimestamp = timestamp;
     }
 
     private void cacheData() {
@@ -188,8 +189,11 @@ public class ImageSharingPersistedStorageAccessor {
     }
 
     public Uri addImageSharing(ContactId contact, Direction direction, MmContent content,
-            State state, ReasonCode reasonCode) {
+            State state, ReasonCode reasonCode, long timestamp) {
+        mContact = contact;
+        mDirection = direction;
+        mTimestamp = timestamp;
         return mRichCallLog.addImageSharing(mSharingId, contact, direction, content, state,
-                reasonCode);
+                reasonCode, timestamp);
     }
 }

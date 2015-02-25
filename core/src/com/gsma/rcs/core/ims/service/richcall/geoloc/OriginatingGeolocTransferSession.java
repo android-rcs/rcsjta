@@ -75,10 +75,11 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
      * @param contact Remote contact Id
      * @param geoloc Geoloc info
      * @param rcsSettings
+     * @param timestamp Local timestamp for the session
      */
     public OriginatingGeolocTransferSession(ImsService parent, MmContent content,
-            ContactId contact, Geoloc geoloc, RcsSettings rcsSettings) {
-        super(parent, content, contact, rcsSettings);
+            ContactId contact, Geoloc geoloc, RcsSettings rcsSettings, long timestamp) {
+        super(parent, content, contact, rcsSettings, timestamp);
 
         // Create dialog path
         createOriginatingDialogPath();

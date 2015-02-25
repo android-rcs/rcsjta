@@ -73,6 +73,14 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      */
     private MsrpManager msrpMgr;
 
+
+    /**
+     * Since in MSRP communication we do not have a timestampSent to be extracted from the
+     * payload then we need to fake that by using the local timestamp even if this is not
+     * the real proper timestamp from the remote side in this case.
+     */
+    private long mTimestampSent;
+
     /**
      * The logger
      */
@@ -85,13 +93,18 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * @param parent IMS service
      * @param invite Initial INVITE request
      * @param rcsSettings RCS settings
+     * @param timestamp Local timestamp for the session
+     * @param timestampSent the remote timestamp sent in payload for the file sharing
      * @throws RcsContactFormatException
      */
     public TerminatingMsrpFileSharingSession(ImsService parent, SipRequest invite,
-            RcsSettings rcsSettings) throws RcsContactFormatException {
+            RcsSettings rcsSettings, long timestamp, long timestampSent)
+            throws RcsContactFormatException {
         super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), ContactUtils
                 .createContactId(SipUtils.getAssertedIdentity(invite)), FileTransferUtils
-                .extractFileIcon(invite, rcsSettings), IdGenerator.generateMessageID(), rcsSettings);
+                .extractFileIcon(invite, rcsSettings), IdGenerator.generateMessageID(),
+                rcsSettings, timestamp);
+        mTimestampSent = timestampSent;
 
         // Create dialog path
         createTerminatingDialogPath(invite);
@@ -142,6 +155,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
             ContactId contact = getRemoteContact();
             MmContent file = getContent();
             MmContent fileIcon = getFileicon();
+            long timestamp = getTimestamp();
             /* Check if session should be auto-accepted once */
             if (isSessionAccepted()) {
                 if (logger.isActivated()) {
@@ -149,8 +163,9 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                 }
 
                 for (ImsSessionListener listener : listeners) {
+
                     ((FileSharingSessionListener) listener).handleSessionAutoAccepted(contact,
-                            file, fileIcon);
+                            file, fileIcon, timestamp, mTimestampSent);
                 }
 
             } else {
@@ -160,7 +175,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 
                 for (ImsSessionListener listener : listeners) {
                     ((FileSharingSessionListener) listener).handleSessionInvited(contact, file,
-                            fileIcon);
+                            fileIcon, timestamp, mTimestampSent);
                 }
 
                 send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());

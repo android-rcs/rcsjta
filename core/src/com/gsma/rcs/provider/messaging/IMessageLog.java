@@ -80,8 +80,10 @@ public interface IMessageLog {
      * @param chatId Chat ID
      * @param contact Contact ID
      * @param status Status
+     * @param timestamp Local timestamp when got group chat notification
      */
-    public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent.Status status);
+    public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent.Status status,
+            long timestamp);
 
     /**
      * Update chat message read status
@@ -99,6 +101,15 @@ public interface IMessageLog {
      * @param reasonCode Message status reason code
      */
     public void setChatMessageStatusAndReasonCode(String msgId, Status status, ReasonCode reasonCode);
+
+    /**
+     * Set chat message timestamp and timestampSent
+     * 
+     * @param msgId Message ID
+     * @param timestamp New local timestamp
+     * @param timestampSent New timestamp sent in payload
+     */
+    public void setChatMessageTimestamp(String msgId, long timestamp, long timestampSent);
 
     /**
      * Mark incoming chat message status as received
@@ -180,8 +191,8 @@ public interface IMessageLog {
     public String getChatMessageContent(String msgId);
 
     /**
-     * Get all one-to-one and group chat messages that are in queued state in
-     * ascending order of timestamp
+     * Get all one-to-one and group chat messages that are in queued state in ascending order of
+     * timestamp
      * 
      * @param contact
      * @return Cursor

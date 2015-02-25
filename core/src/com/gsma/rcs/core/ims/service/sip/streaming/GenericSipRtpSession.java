@@ -96,10 +96,11 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
      * @param contact Remote contact Id
      * @param featureTag Feature tag
      * @param rcsSettings
+     * @param timestamp Local timestamp for the session
      */
     public GenericSipRtpSession(ImsService parent, ContactId contact, String featureTag,
-            RcsSettings rcsSettings) {
-        super(parent, contact, featureTag, rcsSettings);
+            RcsSettings rcsSettings, long timestamp) {
+        super(parent, contact, featureTag, rcsSettings, timestamp);
 
         // Get local port
         localRtpPort = NetworkRessourceManager.generateLocalRtpPort(rcsSettings);

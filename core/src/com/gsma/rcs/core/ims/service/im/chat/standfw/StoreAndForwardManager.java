@@ -66,16 +66,16 @@ public class StoreAndForwardManager {
      * @param contact Contact identifier
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
+     * @param timestamp Local timestamp when got SipRequest
      * @throws RcsContactFormatException
      */
     public void receiveStoredMessages(SipRequest invite, ContactId contact,
-            RcsSettings rcsSettings, MessagingLog messagingLog) {
+            RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp) {
         if (logger.isActivated()) {
             logger.debug("Receive stored messages");
         }
-
         TerminatingStoreAndForwardOneToOneChatMessageSession session = new TerminatingStoreAndForwardOneToOneChatMessageSession(
-                imsService, invite, contact, rcsSettings, messagingLog);
+                imsService, invite, contact, rcsSettings, messagingLog, timestamp);
 
         imsService.getImsModule().getCore().getListener()
                 .handleStoreAndForwardMsgSessionInvitation(session);
@@ -90,16 +90,16 @@ public class StoreAndForwardManager {
      * @param contact Contact identifier
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
+     * @param timestamp Local timestamp when got SipRequest
      * @throws RcsContactFormatException
      */
     public void receiveStoredNotifications(SipRequest invite, ContactId contact,
-            RcsSettings rcsSettings, MessagingLog messagingLog) {
+            RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp) {
         if (logger.isActivated()) {
             logger.debug("Receive stored notifications");
         }
-
         TerminatingStoreAndForwardOneToOneChatNotificationSession session = new TerminatingStoreAndForwardOneToOneChatNotificationSession(
-                imsService, invite, contact, rcsSettings, messagingLog);
+                imsService, invite, contact, rcsSettings, messagingLog, timestamp);
 
         // Start the session
         session.startSession();

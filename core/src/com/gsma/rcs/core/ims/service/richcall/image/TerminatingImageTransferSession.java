@@ -83,11 +83,12 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
      * @param invite Initial INVITE request
      * @param contact Contact ID
      * @param rcsSettings
+     * @param timestamp Local timestamp for the session
      */
     public TerminatingImageTransferSession(ImsService parent, SipRequest invite, ContactId contact,
-            RcsSettings rcsSettings) {
+            RcsSettings rcsSettings, long timestamp) {
         super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), contact,
-                FileTransferUtils.extractFileIcon(invite, rcsSettings), rcsSettings);
+                FileTransferUtils.extractFileIcon(invite, rcsSettings), rcsSettings, timestamp);
 
         // Create dialog path
         createTerminatingDialogPath(invite);
@@ -121,8 +122,10 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
             Collection<ImsSessionListener> listeners = getListeners();
             ContactId contact = getRemoteContact();
             MmContent content = getContent();
+            long timestamp = getTimestamp();
             for (ImsSessionListener listener : listeners) {
-                ((ImageTransferSessionListener) listener).handleSessionInvited(contact, content);
+                ((ImageTransferSessionListener) listener).handleSessionInvited(contact, content,
+                        timestamp);
             }
 
             InvitationStatus answer = waitInvitationAnswer();

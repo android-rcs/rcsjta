@@ -295,8 +295,9 @@ public class CapabilityUtils {
                 capabilities.setImageSharingSupport(false);
             }
         }
-        capabilities.setTimestampOfLastRefresh(System.currentTimeMillis());
-        capabilities.setTimestampOfLastRequest(System.currentTimeMillis());
+        long timestamp = System.currentTimeMillis();
+        capabilities.setTimestampOfLastRefresh(timestamp);
+        capabilities.setTimestampOfLastRequest(timestamp);
         return capabilities;
     }
 

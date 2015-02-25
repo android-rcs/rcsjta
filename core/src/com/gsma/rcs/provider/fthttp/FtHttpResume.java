@@ -22,22 +22,15 @@
 
 package com.gsma.rcs.provider.fthttp;
 
-import android.net.Uri;
-
-import java.util.Date;
-
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
+
+import android.net.Uri;
 
 /**
  * @author YPLO6403 FtHttpResume is the abstract base class for all FT HTTP resume classes
  */
 public abstract class FtHttpResume {
-
-    /**
-     * The date of creation
-     */
-    final private Date mDate;
 
     /**
      * The direction of transfer
@@ -75,12 +68,12 @@ public abstract class FtHttpResume {
     final private ContactId mContact;
 
     /**
-     * the Chat Id
+     * The Chat Id
      */
     final private String mChatId;
 
     /**
-     * the file transfer Id
+     * The file transfer Id
      */
     final private String mFileTransferId;
 
@@ -90,18 +83,14 @@ public abstract class FtHttpResume {
     final private boolean mGroupTransfer;
 
     /**
-     * Works just like
-     * FtHttpResume(int,Uri,String,String,long,Uri,ContactId,String,String,String,String
-     * ,boolean,Date) except the date is always null
-     * 
-     * @see #FtHttpResume(int,Uri,String,String,long,Uri,ContactId,String,String,String,String,boolean,Date)
+     * The local timestamp
      */
-    public FtHttpResume(Direction direction, Uri file, String fileName, String mimeType, long size,
-            Uri fileIcon, ContactId contact, String chatId, String fileTransferId,
-            boolean groupTransfer) {
-        this(direction, file, fileName, mimeType, size, fileIcon, contact, chatId, fileTransferId,
-                groupTransfer, null);
-    }
+    final private long mTimestamp;
+
+    /**
+     * The timestamp sent in payload
+     */
+    final private long mTimestampSent;
 
     /**
      * Creates an instance of FtHttpResume Data Object
@@ -116,14 +105,14 @@ public abstract class FtHttpResume {
      * @param chatId the {@code chatId} value.
      * @param fileTransferId the {@code fileTransferId} value.
      * @param groupTransfer the {@code groupTransfer} value.
-     * @param date the {@code date} value.
+     * @param timestamp the {@code timestamp} value
+     * @param timestampSent the {@code timestampSent} value
      */
     public FtHttpResume(Direction direction, Uri file, String fileName, String mimeType, long size,
             Uri fileIcon, ContactId contact, String chatId, String fileTransferId,
-            boolean groupTransfer, Date date) {
+            boolean groupTransfer, long timestamp, long timestampSent) {
         if (size <= 0 || mimeType == null || file == null || fileName == null)
             throw new IllegalArgumentException("Null argument");
-        mDate = date;
         mDirection = direction;
         mFile = file;
         mFileName = fileName;
@@ -134,10 +123,16 @@ public abstract class FtHttpResume {
         mChatId = chatId;
         mFileTransferId = fileTransferId;
         mGroupTransfer = groupTransfer;
+        mTimestamp = timestamp;
+        mTimestampSent = timestampSent;
     }
 
-    public Date getDate() {
-        return mDate;
+    public long getTimestamp() {
+        return mTimestamp;
+    }
+
+    public long getTimestampSent() {
+        return mTimestampSent;
     }
 
     public Direction getDirection() {
@@ -182,8 +177,9 @@ public abstract class FtHttpResume {
 
     @Override
     public String toString() {
-        return "FtHttpResume [date=" + mDate + ", dir=" + mDirection + ", file=" + mFile
-                + ", fileName=" + mFileName + ",fileIcon=" + mFileIcon + "]";
+        return "FtHttpResume [timestamp=" + mTimestamp + ", timestampSent=" + mTimestampSent
+                + ", dir=" + mDirection + ", file=" + mFile + ", fileName=" + mFileName
+                + ",fileIcon=" + mFileIcon + "]";
     }
 
 }

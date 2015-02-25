@@ -52,9 +52,14 @@ public interface IFileTransferLog {
      * @param fileIcon Fileicon content
      * @param state File transfer state
      * @param reasonCode Reason code
+     * @param timestamp Local timestamp for both incoming and outgoing file transfer for one-one
+     *            chat
+     * @param timestampSent Timestamp sent in payload for both incoming and outgoing file transfer
+     *            for one-one chat
      */
     public void addFileTransfer(String fileTransferId, ContactId contact, Direction direction,
-            MmContent content, MmContent fileIcon, State state, ReasonCode reasonCode);
+            MmContent content, MmContent fileIcon, State state, ReasonCode reasonCode,
+            long timestamp, long timestampSent);
 
     /**
      * Add an outgoing File Transfer supported by Group Chat
@@ -65,9 +70,12 @@ public interface IFileTransferLog {
      * @param Fileicon the fileIcon content
      * @param state File transfer state
      * @param reasonCode Reason code
+     * @param timestamp Local timestamp for outgoing file transfer for a group chat
+     * @param timestampSent Timestamp sent in payload for outgoing file transfer for a group chat
      */
     public void addOutgoingGroupFileTransfer(String fileTransferId, String chatId,
-            MmContent content, MmContent fileIcon, State state, ReasonCode reasonCode);
+            MmContent content, MmContent fileIcon, State state, ReasonCode reasonCode,
+            long timestamp, long timestampSent);
 
     /**
      * Add incoming group file transfer
@@ -79,10 +87,12 @@ public interface IFileTransferLog {
      * @param fileIcon Fileicon contentID
      * @param state File transfer state
      * @param reasonCode Reason code
+     * @param timestamp Local timestamp for incoming file transfer for a group chat
+     * @param timestampSent Timestamp sent in payload for incoming file transfer for a group chat
      */
     public void addIncomingGroupFileTransfer(String fileTransferId, String chatId,
             ContactId contact, MmContent content, MmContent fileIcon, State state,
-            ReasonCode reasonCode);
+            ReasonCode reasonCode, long timestamp, long timestampSent);
 
     /**
      * Set file transfer state and reason code
@@ -93,6 +103,18 @@ public interface IFileTransferLog {
      */
     public void setFileTransferStateAndReasonCode(String fileTransferId, State state,
             ReasonCode reasonCode);
+
+    /**
+     * Set file transfer state, reason code, timestamp and timestampSent
+     * 
+     * @param fileTransferId File transfer ID
+     * @param state New file transfer state
+     * @param reasonCode New file transfer reason code
+     * @param timestamp New local timestamp for the file transfer
+     * @param timestampSent New timestamp sent in payload for the file transfer
+     */
+    public void setFileTransferStateAndTimestamps(String fileTransferId, State state, ReasonCode reasonCode,
+            long timestamp, long timestampSent);
 
     /**
      * Update file transfer read status
@@ -186,18 +208,18 @@ public interface IFileTransferLog {
     public boolean isGroupFileTransfer(String fileTransferId);
 
     /**
-     * Get file transfer time stamp from file transfer Id
+     * Get file transfer timestamp from file transfer Id
      * 
      * @param fileTransferId
-     * @return time stamp
+     * @return timestamp
      */
     public long getFileTransferTimestamp(String fileTransferId);
 
     /**
-     * Get file transfer sent time stamp from file transfer Id
+     * Get file transfer sent timestamp from file transfer Id
      * 
      * @param fileTransferId
-     * @return sent time stamp
+     * @return sent timestamp
      */
     public long getFileTransferSentTimestamp(String fileTransferId);
 

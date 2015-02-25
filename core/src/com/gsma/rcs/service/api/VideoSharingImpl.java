@@ -506,13 +506,14 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
     }
 
     @Override
-    public void handleSessionInvited(ContactId contact, MmContent content) {
+    public void handleSessionInvited(ContactId contact, MmContent content, long timestamp) {
         if (logger.isActivated()) {
             logger.info("Invited to video sharing session");
         }
         synchronized (mLock) {
             mPersistentStorage.addVideoSharing(getRemoteContact(), Direction.INCOMING,
-                    (VideoContent) content, VideoSharing.State.INVITED, ReasonCode.UNSPECIFIED);
+                    (VideoContent) content, VideoSharing.State.INVITED, ReasonCode.UNSPECIFIED,
+                    timestamp);
         }
         mBroadcaster.broadcastInvitation(mSharingId);
     }

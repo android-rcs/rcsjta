@@ -62,7 +62,6 @@ import org.xml.sax.SAXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -453,14 +452,16 @@ public class ChatUtils {
      * @param to To
      * @param content Content
      * @param contentType Content type
+     * @param timestampSent Timestamp sent in payload for CPIM DateTimes
      * @return String
      */
-    public static String buildCpimMessage(String from, String to, String content, String contentType) {
+    public static String buildCpimMessage(String from, String to, String content,
+            String contentType, long timestampSent) {
         return new StringBuilder(CpimMessage.HEADER_FROM).append(": ")
                 .append(ChatUtils.formatCpimSipUri(from)).append(CRLF)
                 .append(CpimMessage.HEADER_TO).append(": ").append(ChatUtils.formatCpimSipUri(to))
                 .append(CRLF).append(CpimMessage.HEADER_DATETIME).append(": ")
-                .append(DateUtils.encodeDate(System.currentTimeMillis())).append(CRLF).append(CRLF)
+                .append(DateUtils.encodeDate(timestampSent)).append(CRLF).append(CRLF)
                 .append(CpimMessage.HEADER_CONTENT_TYPE).append(": ").append(contentType)
                 .append(";charset=").append(UTF8_STR).append(CRLF).append(CRLF).append(content)
                 .toString();
@@ -474,10 +475,11 @@ public class ChatUtils {
      * @param messageId Message ID
      * @param content Content
      * @param contentType Content type
+     * @param timestampSent Timestamp sent in payload for CPIM DateTime
      * @return String
      */
     public static String buildCpimMessageWithImdn(String from, String to, String messageId,
-            String content, String contentType) {
+            String content, String contentType, long timestampSent) {
         return new StringBuilder(CpimMessage.HEADER_FROM).append(": ")
                 .append(ChatUtils.formatCpimSipUri(from)).append(CRLF)
                 .append(CpimMessage.HEADER_TO).append(": ").append(ChatUtils.formatCpimSipUri(to))
@@ -485,7 +487,7 @@ public class ChatUtils {
                 .append(ImdnDocument.IMDN_NAMESPACE).append(CRLF)
                 .append(ImdnUtils.HEADER_IMDN_MSG_ID).append(": ").append(messageId).append(CRLF)
                 .append(CpimMessage.HEADER_DATETIME).append(": ")
-                .append(DateUtils.encodeDate(System.currentTimeMillis())).append(CRLF)
+                .append(DateUtils.encodeDate(timestampSent)).append(CRLF)
                 .append(ImdnUtils.HEADER_IMDN_DISPO_NOTIF).append(": ")
                 .append(ImdnDocument.POSITIVE_DELIVERY).append(", ").append(ImdnDocument.DISPLAY)
                 .append(CRLF).append(CRLF).append(CpimMessage.HEADER_CONTENT_TYPE).append(": ")
@@ -503,10 +505,11 @@ public class ChatUtils {
      * @param messageId Message ID
      * @param content Content
      * @param contentType Content type
+     * @param timestampSent Timestamp sent in payload for CPIM DateTime
      * @return String
      */
     public static String buildCpimMessageWithDeliveredImdn(String from, String to,
-            String messageId, String content, String contentType) {
+            String messageId, String content, String contentType, long timestampSent) {
         return new StringBuilder(CpimMessage.HEADER_FROM).append(": ")
                 .append(ChatUtils.formatCpimSipUri(from)).append(CRLF)
                 .append(CpimMessage.HEADER_TO).append(": ").append(ChatUtils.formatCpimSipUri(to))
@@ -514,7 +517,7 @@ public class ChatUtils {
                 .append(ImdnDocument.IMDN_NAMESPACE).append(CRLF)
                 .append(ImdnUtils.HEADER_IMDN_MSG_ID).append(": ").append(messageId).append(CRLF)
                 .append(CpimMessage.HEADER_DATETIME).append(": ")
-                .append(DateUtils.encodeDate(System.currentTimeMillis())).append(CRLF)
+                .append(DateUtils.encodeDate(timestampSent)).append(CRLF)
                 .append(ImdnUtils.HEADER_IMDN_DISPO_NOTIF).append(": ")
                 .append(ImdnDocument.POSITIVE_DELIVERY).append(CRLF).append(CRLF)
                 .append(CpimMessage.HEADER_CONTENT_TYPE).append(": ").append(contentType)
@@ -530,9 +533,11 @@ public class ChatUtils {
      * @param from From
      * @param to To
      * @param imdn IMDN report
+     * @param timestampSent Timestamp sent in payload for CPIM DateTime
      * @return String
      */
-    public static String buildCpimDeliveryReport(String from, String to, String imdn) {
+    public static String buildCpimDeliveryReport(String from, String to, String imdn,
+            long timestampSent) {
         return new StringBuilder(CpimMessage.HEADER_FROM).append(": ")
                 .append(ChatUtils.formatCpimSipUri(from)).append(CRLF)
                 .append(CpimMessage.HEADER_TO).append(": ").append(ChatUtils.formatCpimSipUri(to))
@@ -541,7 +546,7 @@ public class ChatUtils {
                 .append(ImdnUtils.HEADER_IMDN_MSG_ID).append(": ")
                 .append(IdGenerator.generateMessageID()).append(CRLF)
                 .append(CpimMessage.HEADER_DATETIME).append(": ")
-                .append(DateUtils.encodeDate(System.currentTimeMillis())).append(CRLF).append(CRLF)
+                .append(DateUtils.encodeDate(timestampSent)).append(CRLF).append(CRLF)
                 .append(CpimMessage.HEADER_CONTENT_TYPE).append(": ")
                 .append(ImdnDocument.MIME_TYPE).append(CRLF)
                 .append(CpimMessage.HEADER_CONTENT_DISPOSITION).append(": ")
@@ -595,9 +600,10 @@ public class ChatUtils {
      * 
      * @param msgId Message ID
      * @param status Status
+     * @param timestamp Timestamp sent in payload for IMDN datetime
      * @return XML document
      */
-    public static String buildDeliveryReport(String msgId, String status) {
+    public static String buildImdnDeliveryReport(String msgId, String status, long timestamp) {
         String method;
         if (status.equals(ImdnDocument.DELIVERY_STATUS_DISPLAYED)) {
             method = "display-notification";
@@ -610,11 +616,10 @@ public class ChatUtils {
         return new StringBuilder("<?xml version=\"1.0\" encoding=\"").append(UTF8_STR)
                 .append("\"?>").append(CRLF).append("<imdn xmlns=\"urn:ietf:params:xml:ns:imdn\">")
                 .append(CRLF).append("<message-id>").append(msgId).append("</message-id>")
-                .append(CRLF).append("<datetime>")
-                .append(DateUtils.encodeDate(System.currentTimeMillis())).append("</datetime>")
-                .append(CRLF).append("<").append(method).append("><status><").append(status)
-                .append("/></status></").append(method).append(">").append(CRLF).append("</imdn>")
-                .toString();
+                .append(CRLF).append("<datetime>").append(DateUtils.encodeDate(timestamp))
+                .append("</datetime>").append(CRLF).append("<").append(method).append("><status><")
+                .append(status).append("/></status></").append(method).append(">").append(CRLF)
+                .append("</imdn>").toString();
     }
 
     /**
@@ -623,9 +628,11 @@ public class ChatUtils {
      * @param geoloc Geolocation
      * @param contact Contact
      * @param msgId Message ID
+     * @param timestamp Local timestamp
      * @return XML document
      */
-    public static String buildGeolocDocument(Geoloc geoloc, String contact, String msgId) {
+    public static String buildGeolocDocument(Geoloc geoloc, String contact, String msgId,
+            long timestamp) {
         String expire = DateUtils.encodeDate(geoloc.getExpiration());
         return new StringBuilder("<?xml version=\"1.0\" encoding=\"").append(UTF8_STR)
                 .append("\"?>").append(CRLF)
@@ -650,7 +657,7 @@ public class ChatUtils {
                 .append("<gp:usage-rules>").append(CRLF).append("<gp:retention-expiry>")
                 .append(expire).append("</gp:retention-expiry>").append(CRLF)
                 .append("</gp:usage-rules>").append(CRLF).append("</gp:geopriv>").append(CRLF)
-                .append("<timestamp>").append(DateUtils.encodeDate(System.currentTimeMillis()))
+                .append("<timestamp>").append(DateUtils.encodeDate(timestamp))
                 .append("</timestamp>").append(CRLF).append("</rcspushlocation>").append(CRLF)
                 .append("</rcsenvelope>").append(CRLF).toString();
     }
@@ -705,11 +712,15 @@ public class ChatUtils {
      * 
      * @param remote Remote contact identifier
      * @param msg Text message
+     * @param timestamp Local timestamp
+     * @param timestampSent Timestamp sent in payload
      * @return Text message
      */
-    public static ChatMessage createTextMessage(ContactId remote, String msg) {
+    public static ChatMessage createTextMessage(ContactId remote, String msg, long timestamp,
+            long timestampSent) {
         String msgId = IdGenerator.generateMessageID();
-        return new ChatMessage(msgId, remote, msg, MimeType.TEXT_MESSAGE, null, null);
+        return new ChatMessage(msgId, remote, msg, MimeType.TEXT_MESSAGE, timestamp, timestampSent,
+                null);
     }
 
     /**
@@ -719,12 +730,14 @@ public class ChatUtils {
      * @param fileInfo File XML description
      * @param imdn IMDN flag
      * @param msgId Message ID
+     * @param timestamp The local timestamp for the file transfer
+     * @param timestampSent The timestamp sent in payload for the file transfer
      * @return File message
      */
     public static ChatMessage createFileTransferMessage(ContactId remote, String fileInfo,
-            boolean imdn, String msgId) {
+            boolean imdn, String msgId, long timestamp, long timestampSent) {
         return new ChatMessage(msgId, remote, fileInfo, FileTransferHttpInfoDocument.MIME_TYPE,
-                null, null);
+                timestamp, timestampSent, null);
     }
 
     /**
@@ -732,28 +745,32 @@ public class ChatUtils {
      * 
      * @param remote Remote contact
      * @param geoloc Geolocation
+     * @param timestamp Local timestamp
+     * @param timestampSent Timestamp sent in payload
      * @return Geolocation message
      */
-    public static ChatMessage createGeolocMessage(ContactId remote, Geoloc geoloc) {
+    public static ChatMessage createGeolocMessage(ContactId remote, Geoloc geoloc, long timestamp,
+            long timestampSent) {
         String msgId = IdGenerator.generateMessageID();
         String geolocContent = ChatUtils.buildGeolocDocument(geoloc,
-                ImsModule.IMS_USER_PROFILE.getPublicUri(), msgId);
-        return new ChatMessage(msgId, remote, geolocContent, GeolocInfoDocument.MIME_TYPE, null,
-                null);
+                ImsModule.IMS_USER_PROFILE.getPublicUri(), msgId, timestamp);
+        return new ChatMessage(msgId, remote, geolocContent, GeolocInfoDocument.MIME_TYPE,
+                timestamp, timestampSent, null);
     }
 
     /**
      * Get the first message
      * 
      * @param invite Request
+     * @param timestamp Local timestamp
      * @return First message
      */
-    public static ChatMessage getFirstMessage(SipRequest invite) {
-        ChatMessage msg = getFirstMessageFromCpim(invite);
+    public static ChatMessage getFirstMessage(SipRequest invite, long timestamp) {
+        ChatMessage msg = getFirstMessageFromCpim(invite, timestamp);
         if (msg != null) {
             return msg;
         } else {
-            return getFirstMessageFromSubject(invite);
+            return getFirstMessageFromSubject(invite, timestamp);
         }
     }
 
@@ -771,9 +788,10 @@ public class ChatUtils {
      * Get the first message from CPIM content
      * 
      * @param invite Request
+     * @param timestamp Local timestamp
      * @return First message
      */
-    private static ChatMessage getFirstMessageFromCpim(SipRequest invite) {
+    private static ChatMessage getFirstMessageFromCpim(SipRequest invite, long timestamp) {
         CpimMessage cpimMsg = ChatUtils.extractCpimMessage(invite);
         if (cpimMsg == null) {
             return null;
@@ -789,18 +807,20 @@ public class ChatUtils {
         }
         String msgId = ChatUtils.getMessageId(invite);
         String content = cpimMsg.getMessageContent();
-        Date date = cpimMsg.getMessageDate();
+        long timestampSent = cpimMsg.getTimestampSent();
         String mime = cpimMsg.getContentType();
         if (msgId == null || content == null || mime == null) {
             return null;
         }
         if (ChatUtils.isGeolocType(mime)) {
-            return new ChatMessage(msgId, remote, content, GeolocInfoDocument.MIME_TYPE, date, null);
+            return new ChatMessage(msgId, remote, content, GeolocInfoDocument.MIME_TYPE, timestamp,
+                    timestampSent, null);
         } else if (FileTransferUtils.isFileTransferHttpType(mime)) {
             return new ChatMessage(msgId, remote, content, FileTransferHttpInfoDocument.MIME_TYPE,
-                    date, null);
+                    timestamp, timestampSent, null);
         } else if (ChatUtils.isTextPlainType(mime)) {
-            return new ChatMessage(msgId, remote, content, MimeType.TEXT_MESSAGE, date, null);
+            return new ChatMessage(msgId, remote, content, MimeType.TEXT_MESSAGE, timestamp,
+                    timestampSent, null);
         }
         logger.warn(new StringBuilder("Unknown MIME-type in first message; msgId=").append(msgId)
                 .append(", mime='").append(mime).append("'.").toString());
@@ -811,9 +831,10 @@ public class ChatUtils {
      * Get the first message from the Subject header
      * 
      * @param invite Request
+     * @param timestamp Local timestamp
      * @return First message
      */
-    private static ChatMessage getFirstMessageFromSubject(SipRequest invite) {
+    private static ChatMessage getFirstMessageFromSubject(SipRequest invite, long timestamp) {
         String subject = invite.getSubject();
         if (TextUtils.isEmpty(subject)) {
             return null;
@@ -827,8 +848,14 @@ public class ChatUtils {
             }
             return null;
         }
+
+        /**
+         * Since in subject, there is no DateTime or datetime included, then we need to fake that by
+         * using the local timestamp even if this is not the real proper timestamp from the remote
+         * side in this case.
+         */
         return new ChatMessage(IdGenerator.generateMessageID(), remote, subject,
-                MimeType.TEXT_MESSAGE, new Date(), null);
+                MimeType.TEXT_MESSAGE, timestamp, timestamp, null);
     }
 
     /**
@@ -943,13 +970,13 @@ public class ChatUtils {
     }
 
     public static ChatMessage createChatMessage(String msgId, String apiMimeType, String content,
-            ContactId contact, String displayName) {
+            ContactId contact, String displayName, long timestamp, long timestampSent) {
         if (MimeType.TEXT_MESSAGE.equals(apiMimeType)) {
-            return new ChatMessage(msgId, contact, content, MimeType.TEXT_MESSAGE, null,
-                    displayName);
+            return new ChatMessage(msgId, contact, content, MimeType.TEXT_MESSAGE, timestamp,
+                    timestampSent, displayName);
         } else if (MimeType.GEOLOC_MESSAGE.equals(apiMimeType)) {
-            return new ChatMessage(msgId, contact, content, GeolocInfoDocument.MIME_TYPE, null,
-                    displayName);
+            return new ChatMessage(msgId, contact, content, GeolocInfoDocument.MIME_TYPE,
+                    timestamp, timestampSent, displayName);
         }
         throw new IllegalArgumentException(
                 "Unable to create message, Invalid mimetype ".concat(apiMimeType));

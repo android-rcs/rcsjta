@@ -89,10 +89,12 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * @param contact Remote contact identifier
      * @param fileIcon Content of fileicon
      * @param rcsSettings RCS settings
+     * @param timestamp Local timestamp for the session
      */
     public OriginatingMsrpFileSharingSession(String fileTransferId, ImsService parent,
-            MmContent content, ContactId contact, MmContent fileIcon, RcsSettings rcsSettings) {
-        super(parent, content, contact, fileIcon, fileTransferId, rcsSettings);
+            MmContent content, ContactId contact, MmContent fileIcon, RcsSettings rcsSettings,
+            long timestamp) {
+        super(parent, content, contact, fileIcon, fileTransferId, rcsSettings, timestamp);
 
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("OriginatingFileSharingSession contact=")

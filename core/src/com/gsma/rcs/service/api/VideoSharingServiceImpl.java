@@ -39,9 +39,8 @@ import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.RcsServiceRegistration;
-
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.IVideoPlayer;
 import com.gsma.services.rcs.sharing.video.IVideoSharing;
 import com.gsma.services.rcs.sharing.video.IVideoSharingListener;
@@ -299,19 +298,20 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
         }
 
         try {
+            long timestamp = System.currentTimeMillis();
             final VideoStreamingSession session = mRichcallService.initiateLiveVideoSharingSession(
-                    contact, player);
+                    contact, player, timestamp);
 
             String sharingId = session.getSessionID();
             VideoContent content = (VideoContent) session.getContent();
             mRichCallLog.addVideoSharing(sharingId, contact, Direction.OUTGOING, content,
-                    VideoSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
+                    VideoSharing.State.INITIATING, ReasonCode.UNSPECIFIED, timestamp);
             mBroadcaster.broadcastStateChanged(contact, sharingId, VideoSharing.State.INITIATING,
                     ReasonCode.UNSPECIFIED);
 
             VideoSharingPersistedStorageAccessor storageAccessor = new VideoSharingPersistedStorageAccessor(
                     sharingId, contact, Direction.OUTGOING, mRichCallLog, content.getEncoding(),
-                    content.getHeight(), content.getWidth(), session.getTimestamp());
+                    content.getHeight(), content.getWidth(), timestamp);
             VideoSharingImpl videoSharing = new VideoSharingImpl(sharingId, mRichcallService,
                     mBroadcaster, storageAccessor, this);
             addVideoSharing(videoSharing);
@@ -376,16 +376,17 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
     /**
      * Add and broadcast video sharing invitation rejections
-     *
+     * 
      * @param contact Contact ID
      * @param content Video content
      * @param reasonCode Reason code
+     * @param timestamp Local timestamp when got invitation
      */
     public void addAndBroadcastVideoSharingInvitationRejected(ContactId contact,
-            VideoContent content, ReasonCode reasonCode) {
+            VideoContent content, ReasonCode reasonCode, long timestamp) {
         String sessionId = SessionIdGenerator.getNewId();
         mRichCallLog.addVideoSharing(sessionId, contact, Direction.INCOMING, content,
-                VideoSharing.State.REJECTED, reasonCode);
+                VideoSharing.State.REJECTED, reasonCode, timestamp);
         mBroadcaster.broadcastInvitation(sessionId);
     }
 

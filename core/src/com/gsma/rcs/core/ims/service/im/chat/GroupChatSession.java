@@ -47,7 +47,6 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.PhoneUtils;
@@ -58,7 +57,6 @@ import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -109,11 +107,12 @@ public abstract class GroupChatSession extends ChatSession {
      * @param participants Initial set of participants
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
+     * @param timestamp Local timestamp for the session
      */
     public GroupChatSession(ImsService parent, ContactId contact, String conferenceId,
             Map<ContactId, ParticipantStatus> participants, RcsSettings rcsSettings,
-            MessagingLog messagingLog) {
-        super(parent, contact, conferenceId, rcsSettings, messagingLog, null);
+            MessagingLog messagingLog, long timestamp) {
+        super(parent, contact, conferenceId, rcsSettings, messagingLog, null, timestamp);
 
         mMaxParticipants = rcsSettings.getMaxChatParticipants();
 
@@ -356,10 +355,11 @@ public abstract class GroupChatSession extends ChatSession {
         boolean useImdn = getImdnManager().isImdnActivated() && !mRcsSettings.isAlbatrosRelease();
         if (useImdn) {
             networkContent = ChatUtils.buildCpimMessageWithDeliveredImdn(from, to, msgId,
-                    msg.getContent(), mimeType);
+                    msg.getContent(), mimeType, msg.getTimestampSent());
 
         } else {
-            networkContent = ChatUtils.buildCpimMessage(from, to, msg.getContent(), mimeType);
+            networkContent = ChatUtils.buildCpimMessage(from, to, msg.getContent(), mimeType,
+                    msg.getTimestampSent());
         }
 
         Collection<ImsSessionListener> listeners = getListeners();
@@ -396,20 +396,22 @@ public abstract class GroupChatSession extends ChatSession {
         String to = ChatUtils.ANOMYNOUS_URI;
         String msgId = IdGenerator.generateMessageID();
         String content = ChatUtils.buildCpimMessage(from, to,
-                IsComposingInfo.buildIsComposingInfo(status), IsComposingInfo.MIME_TYPE);
+                IsComposingInfo.buildIsComposingInfo(status), IsComposingInfo.MIME_TYPE,
+                System.currentTimeMillis());
         sendDataChunks(msgId, content, CpimMessage.MIME_TYPE, TypeMsrpChunk.IsComposing);
     }
 
     @Override
-    public void sendMsrpMessageDeliveryStatus(ContactId remote, String msgId, String status) {
+    public void sendMsrpMessageDeliveryStatus(ContactId remote, String msgId, String status,
+            long timestamp) {
         // Send status in CPIM + IMDN headers
         String to = (remote != null) ? remote.toString() : ChatUtils.ANOMYNOUS_URI;
-        sendMsrpMessageDeliveryStatus(null, to, msgId, status);
+        sendMsrpMessageDeliveryStatus(null, to, msgId, status, timestamp);
     }
 
     @Override
     public void sendMsrpMessageDeliveryStatus(String fromUri, String toUri, String msgId,
-            String status) {
+            String status, long timestamp) {
         // Do not perform Message Delivery Status in Albatros for group chat
         // Only perform delivery status delivered in GC
         if (mRcsSettings.isAlbatrosRelease()
@@ -420,9 +422,11 @@ public abstract class GroupChatSession extends ChatSession {
             sLogger.debug("Send delivery status delivered for message " + msgId);
         }
         // Send status in CPIM + IMDN headers
-        String imdn = ChatUtils.buildDeliveryReport(msgId, status);
+        /* Timestamp for IMDN datetime */
+        String imdn = ChatUtils.buildImdnDeliveryReport(msgId, status, timestamp);
+        /* Timestamp for CPIM DateTime */
         String content = ChatUtils.buildCpimDeliveryReport(
-                ImsModule.IMS_USER_PROFILE.getPublicUri(), toUri, imdn);
+                ImsModule.IMS_USER_PROFILE.getPublicUri(), toUri, imdn, System.currentTimeMillis());
 
         // Send data
         sendDataChunks(IdGenerator.generateMessageID(), content, CpimMessage.MIME_TYPE,
@@ -628,8 +632,14 @@ public abstract class GroupChatSession extends ChatSession {
             return;
 
         } else if (ChatUtils.isTextPlainType(mimeType)) {
+            long timestamp = getTimestamp();
+            /**
+             * Since legacy server can send non CPIM data (like plain text without timestamp) in the
+             * payload, we need to fake timesampSent by using the local timestamp even if this is
+             * not the real proper timestamp from the remote side in this case.
+             */
             ChatMessage msg = new ChatMessage(msgId, getRemoteContact(), new String(data, UTF8),
-                    MimeType.TEXT_MESSAGE, new Date(), null);
+                    MimeType.TEXT_MESSAGE, timestamp, timestamp, null);
             boolean imdnDisplayedRequested = false;
             receive(msg, imdnDisplayedRequested);
             return;
@@ -656,7 +666,7 @@ public abstract class GroupChatSession extends ChatSession {
         if (cpimMsg == null) {
             return;
         }
-        Date date = cpimMsg.getMessageDate();
+
         String cpimMsgId = cpimMsg.getHeader(ImdnUtils.HEADER_IMDN_MSG_ID);
         if (cpimMsgId == null) {
             cpimMsgId = msgId;
@@ -696,6 +706,12 @@ public abstract class GroupChatSession extends ChatSession {
         String dispositionNotification = cpimMsg.getHeader(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
 
         boolean isFToHTTP = FileTransferUtils.isFileTransferHttpType(contentType);
+        /**
+         * Set message's timestamp to the System.currentTimeMillis, not the session's itself
+         * timestamp
+         */
+        long timestamp = System.currentTimeMillis();
+        long timestampSent = cpimMsg.getTimestampSent();
 
         // Analyze received message thanks to the MIME type
         if (isFToHTTP) {
@@ -704,17 +720,18 @@ public abstract class GroupChatSession extends ChatSession {
             FileTransferHttpInfoDocument fileInfo = FileTransferUtils
                     .parseFileTransferHttpDocument(cpimMsg.getMessageContent().getBytes(UTF8));
             if (fileInfo != null) {
-                receiveHttpFileTransfer(remoteId, pseudo, fileInfo, cpimMsgId);
+                receiveHttpFileTransfer(remoteId, pseudo, fileInfo, cpimMsgId, timestamp,
+                        timestampSent);
             } else {
                 // TODO : else return error to Originating side
             }
             // Process delivery request
             sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId,
-                    ImdnDocument.DELIVERY_STATUS_DELIVERED);
+                    ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
         } else {
             if (ChatUtils.isTextPlainType(contentType)) {
                 ChatMessage msg = new ChatMessage(cpimMsgId, remoteId, cpimMsg.getMessageContent(),
-                        MimeType.TEXT_MESSAGE, date, pseudo);
+                        MimeType.TEXT_MESSAGE, timestamp, timestampSent, pseudo);
                 boolean imdnDisplayedRequested = false;
                 receive(msg, imdnDisplayedRequested);
             } else {
@@ -742,7 +759,7 @@ public abstract class GroupChatSession extends ChatSession {
                         if (ChatUtils.isGeolocType(contentType)) {
                             ChatMessage msg = new ChatMessage(cpimMsgId, remoteId,
                                     cpimMsg.getMessageContent(), GeolocInfoDocument.MIME_TYPE,
-                                    date, pseudo);
+                                    timestamp, timestampSent, pseudo);
                             boolean imdnDisplayedRequested = false;
                             receive(msg, imdnDisplayedRequested);
                         }
@@ -754,7 +771,7 @@ public abstract class GroupChatSession extends ChatSession {
                 if (dispositionNotification.contains(ImdnDocument.POSITIVE_DELIVERY)) {
                     // Positive delivery requested, send MSRP message with status "delivered"
                     sendMsrpMessageDeliveryStatus(remoteId, cpimMsgId,
-                            ImdnDocument.DELIVERY_STATUS_DELIVERED);
+                            ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp);
                 }
             }
         }

@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.sip.messaging;
@@ -47,10 +51,11 @@ public class OriginatingSipMsrpSession extends GenericSipMsrpSession {
      * @param contact Remote contact Id
      * @param featureTag Feature tag
      * @param rcsSettings
+     * @param timestamp Local timestamp for the session
      */
     public OriginatingSipMsrpSession(ImsService parent, ContactId contact, String featureTag,
-            RcsSettings rcsSettings) {
-        super(parent, contact, featureTag, rcsSettings);
+            RcsSettings rcsSettings, long timestamp) {
+        super(parent, contact, featureTag, rcsSettings, timestamp);
 
         // Create dialog path
         createOriginatingDialogPath();

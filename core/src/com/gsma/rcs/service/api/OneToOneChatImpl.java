@@ -211,6 +211,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                         logger.debug("Session does not exist. Cannot start new session since to limit of sessions is reached. MessageId="
                                 .concat(msgId));
                     }
+                    updateChatMessageTimestamp(msgId, msg.getTimestamp(), msg.getTimestampSent());
                     setChatMessageStatus(msgId, mimeType, Status.QUEUED);
                     return;
                 }
@@ -218,7 +219,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                 if (logger.isActivated()) {
                     logger.debug("Core session is not yet established: initiate a new session to send the message");
                 }
-
+                updateChatMessageTimestamp(msgId, msg.getTimestamp(), msg.getTimestampSent());
                 setChatMessageStatus(msgId, mimeType, Status.SENDING);
                 sendChatMessageInNewSession(msg);
                 return;
@@ -227,6 +228,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                 if (logger.isActivated()) {
                     logger.debug("Core session is established: use existing one to send the message");
                 }
+                updateChatMessageTimestamp(msgId, msg.getTimestamp(), msg.getTimestampSent());
                 setChatMessageStatus(msgId, mimeType, Status.SENDING);
                 sendChatMessageWithinSession(session, msg);
                 return;
@@ -333,6 +335,17 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     }
 
     /**
+     * Update chat message timestamp
+     * 
+     * @param msgId
+     * @param timestamp New local timestamp
+     * @param timestampSent New timestamp sent in payload
+     */
+    private void updateChatMessageTimestamp(String msgId, long timestamp, long timestampSent) {
+        mMessagingLog.setChatMessageTimestamp(msgId, timestamp, timestampSent);
+    }
+
+    /**
      * Sends a plain text message
      * 
      * @param message Text message
@@ -342,7 +355,9 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         if (logger.isActivated()) {
             logger.debug("Send text message.");
         }
-        ChatMessage msg = ChatUtils.createTextMessage(mContact, message);
+        long timestamp = System.currentTimeMillis();
+        /* For outgoing message, timestampSent = timestamp */
+        ChatMessage msg = ChatUtils.createTextMessage(mContact, message, timestamp, timestamp);
         ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
                 mMessagingLog, msg.getMessageId(), msg.getRemoteContact(), message,
                 MimeType.TEXT_MESSAGE, mContact.toString(), Direction.OUTGOING);
@@ -367,7 +382,9 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         if (logger.isActivated()) {
             logger.debug("Send geolocation message.");
         }
-        ChatMessage msg = ChatUtils.createGeolocMessage(mContact, geoloc);
+        long timestamp = System.currentTimeMillis();
+        /** For outgoing message, timestampSent = timestamp */
+        ChatMessage msg = ChatUtils.createGeolocMessage(mContact, geoloc, timestamp, timestamp);
         ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
                 mMessagingLog, msg.getMessageId(), msg.getRemoteContact(), msg.toString(),
                 MimeType.GEOLOC_MESSAGE, mContact.toString(), Direction.OUTGOING);
@@ -417,9 +434,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * 
      * @param contact Contact ID
      * @param msgId Message ID
+     * @param timestamp Timestamp sent in payload for IMDN datetime
      */
     /* package private */void sendDisplayedDeliveryReport(final ContactId contact,
-            final String msgId) {
+            final String msgId, final long timestamp) {
+
         try {
             if (logger.isActivated()) {
                 logger.debug("Set displayed delivery report for " + msgId);
@@ -436,7 +455,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                 new Thread() {
                     public void run() {
                         session.sendMsrpMessageDeliveryStatus(contact, msgId,
-                                ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+                                ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp);
                     }
                 }.start();
             } else {
@@ -445,7 +464,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                             + msgId + " : use SIP message");
                 }
                 mImService.getImdnManager().sendMessageDeliveryStatus(contact, msgId,
-                        ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+                        ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp);
             }
         } catch (Exception e) {
             if (logger.isActivated()) {
@@ -544,8 +563,12 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      */
     public void resendMessage(String msgId) {
         String mimeType = mMessagingLog.getMessageMimeType(msgId);
+        /* Set new timestamp for resend message */
+        long timestamp = System.currentTimeMillis();
+        /* For outgoing message, timestampSent = timestamp */
         ChatMessage msg = new ChatMessage(msgId, mContact,
-                mMessagingLog.getChatMessageContent(msgId), mimeType, null, null);
+                mMessagingLog.getChatMessageContent(msgId), mimeType, timestamp, timestamp,
+                null);
         if (ServerApiUtils.isImsConnected()) {
             resendChatMessage(msg);
         } else {

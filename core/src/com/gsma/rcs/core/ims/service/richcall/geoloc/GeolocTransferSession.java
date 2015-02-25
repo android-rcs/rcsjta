@@ -70,10 +70,11 @@ public abstract class GeolocTransferSession extends ContentSharingSession {
      * @param content Content to be shared
      * @param contact Remote contact Id
      * @param rcsSettings
+     * @param timestamp Local timestamp for the session
      */
     public GeolocTransferSession(ImsService parent, MmContent content, ContactId contact,
-            RcsSettings rcsSettings) {
-        super(parent, content, contact, rcsSettings);
+            RcsSettings rcsSettings, long timestamp) {
+        super(parent, content, contact, rcsSettings, timestamp);
     }
 
     /**

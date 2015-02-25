@@ -67,6 +67,12 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
             .getSimpleName());
 
     /**
+     * The timestamp to be sent in payload when the file sharing was initiated for outgoing file
+     * sharing
+     */
+    private long mTimestampSent;
+
+    /**
      * Constructor
      * 
      * @param fileTransferId File transfer Id
@@ -78,13 +84,16 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
      * @param core Core
      * @param messagingLog MessagingLog
      * @param rcsSettings
+     * @param timestamp Local timestamp for the session
+     * @param timestampSent the timestamp sent in payload for the file sharing
      */
     public OriginatingHttpFileSharingSession(String fileTransferId, ImsService parent,
             MmContent content, ContactId contact, MmContent fileIcon, String tId, Core core,
-            MessagingLog messagingLog, RcsSettings rcsSettings) {
+            MessagingLog messagingLog, RcsSettings rcsSettings, long timestamp, long timestampSent) {
         super(parent, content, contact, PhoneUtils.formatContactIdToUri(contact), fileIcon, null,
-                null, fileTransferId, rcsSettings, messagingLog);
+                null, fileTransferId, rcsSettings, messagingLog, timestamp);
         mCore = core;
+        mTimestampSent = timestampSent;
         if (logger.isActivated()) {
             logger.debug("OriginatingHttpFileSharingSession contact=" + contact);
         }
@@ -142,15 +151,16 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
                 String from = ChatUtils.ANOMYNOUS_URI;
                 String to = ChatUtils.ANOMYNOUS_URI;
                 String content = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, fileInfo,
-                        FileTransferHttpInfoDocument.MIME_TYPE);
+                        FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
                 chatSession.sendDataChunks(IdGenerator.generateMessageID(), content, mime,
                         MsrpSession.TypeMsrpChunk.HttpFileSharing);
             } else {
                 if (logger.isActivated()) {
                     logger.debug("Send file transfer info via a new chat session.");
                 }
+                long timestamp = getTimestamp();
                 ChatMessage firstMsg = ChatUtils.createFileTransferMessage(getRemoteContact(),
-                        fileInfo, false, msgId);
+                        fileInfo, false, msgId, timestamp, mTimestampSent);
                 try {
                     chatSession = mCore.getImService().initiateOneToOneChatSession(
                             getRemoteContact(), firstMsg);

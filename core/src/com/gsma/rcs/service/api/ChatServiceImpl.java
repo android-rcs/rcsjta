@@ -143,16 +143,18 @@ public class ChatServiceImpl extends IChatService.Stub {
      * 
      * @param msgId Message ID
      * @param contact Contact ID
+     * @param timestamp Timestamp sent in payload for IMDN datetime
      */
-    public void tryToSendOne2OneDisplayedDeliveryReport(String msgId, ContactId contact) {
+    public void tryToSendOne2OneDisplayedDeliveryReport(String msgId, ContactId contact,
+            long timestamp) {
         try {
             OneToOneChatImpl chatImpl = mOneToOneChatCache.get(contact);
             if (chatImpl != null) {
-                chatImpl.sendDisplayedDeliveryReport(contact, msgId);
+                chatImpl.sendDisplayedDeliveryReport(contact, msgId, timestamp);
                 return;
             }
             mImService.getImdnManager().sendMessageDeliveryStatus(contact, msgId,
-                    ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+                    ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp);
         } catch (Exception ignore) {
             /*
              * Purposely ignoring exception since this method only makes an attempt to send report
@@ -455,20 +457,20 @@ public class ChatServiceImpl extends IChatService.Stub {
         }
         try {
             Set<ContactId> contactToInvite = new HashSet<ContactId>(contacts);
-
+            long timestamp = System.currentTimeMillis();
             final GroupChatSession session = mImService.initiateAdhocGroupChatSession(
-                    contactToInvite, subject);
-
+                    contactToInvite, subject, timestamp);
             String chatId = session.getContributionID();
             GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
-                    chatId, subject, Direction.OUTGOING, mMessagingLog, mRcsSettings);
+                    chatId, subject, Direction.OUTGOING, mMessagingLog, mRcsSettings, timestamp);
             GroupChatImpl groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster,
-                    mImService, storageAccessor, mRcsSettings, mContactManager, this, mMessagingLog, mCore);
+                    mImService, storageAccessor, mRcsSettings, mContactManager, this,
+                    mMessagingLog, mCore);
             session.addListener(groupChat);
 
             mMessagingLog.addGroupChat(session.getContributionID(), session.getRemoteContact(),
                     session.getSubject(), session.getParticipants(), GroupChat.State.INITIATING,
-                    GroupChat.ReasonCode.UNSPECIFIED, Direction.OUTGOING);
+                    GroupChat.ReasonCode.UNSPECIFIED, Direction.OUTGOING, timestamp);
 
             addGroupChat(groupChat);
             new Thread() {
@@ -477,7 +479,6 @@ public class ChatServiceImpl extends IChatService.Stub {
                 }
             }.start();
             return groupChat;
-
         } catch (Exception e) {
             if (sLogger.isActivated()) {
                 sLogger.error("Unexpected error", e);
@@ -734,13 +735,14 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param subject Subject
      * @param participants Participants
      * @param reasonCode Reason code
+     * @param timestamp Local timestamp when got invitation
      */
     public void addAndBroadcastGroupChatInvitationRejected(String chatId, ContactId contact,
             String subject, Map<ContactId, ParticipantStatus> participants,
-            GroupChat.ReasonCode reasonCode) {
+            GroupChat.ReasonCode reasonCode, long timestamp) {
 
         mMessagingLog.addGroupChat(chatId, contact, subject, participants,
-                GroupChat.State.REJECTED, reasonCode, Direction.INCOMING);
+                GroupChat.State.REJECTED, reasonCode, Direction.INCOMING, timestamp);
 
         mGroupChatEventBroadcaster.broadcastInvitation(chatId);
     }

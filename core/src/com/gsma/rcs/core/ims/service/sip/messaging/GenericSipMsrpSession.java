@@ -24,9 +24,6 @@ package com.gsma.rcs.core.ims.service.sip.messaging;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.io.ByteArrayInputStream;
-import java.util.Vector;
-
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
@@ -46,6 +43,9 @@ import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
+
+import java.io.ByteArrayInputStream;
+import java.util.Vector;
 
 /**
  * Generic SIP MSRP session
@@ -81,10 +81,11 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
      * @param contact Remote contact Id
      * @param featureTag Feature tag
      * @param rcsSettings
+     * @param timestamp Local timestamp for the session
      */
     public GenericSipMsrpSession(ImsService parent, ContactId contact, String featureTag,
-            RcsSettings rcsSettings) {
-        super(parent, contact, featureTag, rcsSettings);
+            RcsSettings rcsSettings, long timestamp) {
+        super(parent, contact, featureTag, rcsSettings, timestamp);
 
         mMaxMsgSize = rcsSettings.getMaxMsrpLengthForExtensions();
 

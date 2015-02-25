@@ -118,7 +118,7 @@ public class JavaPacketizer extends VideoCodec {
                     output.setData(fullFrameData);
                     output.setLength(bufferDataLength);
                     output.setOffset(0);
-                    output.setTimeStamp(input.getTimeStamp());
+                    output.setTimestamp(input.getTimestamp());
                     output.setFlags(Buffer.FLAG_RTP_MARKER | Buffer.FLAG_RTP_TIME);
                     output.setVideoOrientation(null);
                     if (isToAddOrientationHeader(bufferData, input.getVideoOrientation())) {
@@ -180,7 +180,7 @@ public class JavaPacketizer extends VideoCodec {
                 buffer.setData(packetsData[numberOfRtpPkts]);
                 buffer.setLength(H264_MAX_PACKET_FRAME_SIZE); // Max packet frame size
                 buffer.setOffset(0);
-                buffer.setTimeStamp(input.getTimeStamp());
+                buffer.setTimestamp(input.getTimestamp());
                 buffer.setFlags(Buffer.FLAG_RTP_TIME);
                 buffer.setVideoOrientation(null);
 
@@ -237,7 +237,7 @@ public class JavaPacketizer extends VideoCodec {
             buffer.setLength(h264FU.length + available); // H264FU header length + remaining frame
                                                          // chunk size
             buffer.setOffset(0);
-            buffer.setTimeStamp(input.getTimeStamp());
+            buffer.setTimestamp(input.getTimestamp());
             buffer.setFlags(Buffer.FLAG_RTP_MARKER | Buffer.FLAG_RTP_TIME);
             buffer.setVideoOrientation(null);
             if (isToAddOrientationHeader(packetsData[numberOfRtpPkts], input.getVideoOrientation())) {

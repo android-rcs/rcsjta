@@ -68,6 +68,12 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
     private ChatSession mChatSession;
 
     /**
+     * The timestamp to be sent in payload when the file sharing was initiated for outgoing group
+     * file sharing
+     */
+    private long mTimestampSent;
+
+    /**
      * The logger
      */
     private static final Logger logger = Logger
@@ -87,13 +93,17 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      * @param core Core
      * @param rcsSettings
      * @param messagingLog
+     * @param timestamp Local timestamp for the session
+     * @param timestampSent the timestamp sent in payload for the group file sharing
      */
     public OriginatingHttpGroupFileSharingSession(String fileTransferId, ImsService parent,
             MmContent content, MmContent fileIcon, String conferenceId, String chatSessionId,
-            String chatContributionId, String tId, Core core, RcsSettings rcsSettings, MessagingLog messagingLog) {
+            String chatContributionId, String tId, Core core, RcsSettings rcsSettings,
+            MessagingLog messagingLog, long timestamp, long timestampSent) {
         super(parent, content, null, conferenceId, fileIcon, chatSessionId, chatContributionId,
-                fileTransferId, rcsSettings, messagingLog);
+                fileTransferId, rcsSettings, messagingLog, timestamp);
         mCore = core;
+        mTimestampSent = timestampSent;
 
         // Instantiate the upload manager
         uploadManager = new HttpUploadManager(getContent(), fileIcon, this, tId, rcsSettings);
@@ -148,7 +158,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
         String msgId = getFileTransferId();
 
         String content = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, mFileInfo,
-                FileTransferHttpInfoDocument.MIME_TYPE);
+                FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
 
         mChatSession.sendDataChunks(IdGenerator.generateMessageID(), content, mime,
                 TypeMsrpChunk.FileSharing);

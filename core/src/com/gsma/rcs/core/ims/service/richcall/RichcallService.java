@@ -135,28 +135,29 @@ public class RichcallService extends ImsService {
     }
 
     private void handleImageSharingInvitationRejected(SipRequest invite,
-            ImageSharing.ReasonCode reasonCode) {
+            ImageSharing.ReasonCode reasonCode, long timestamp) {
         ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
         MmContent content = ContentManager.createMmContentFromSdp(invite, mRcsSettings);
         getImsModule().getCore().getListener()
-                .handleImageSharingInvitationRejected(contact, content, reasonCode);
+                .handleImageSharingInvitationRejected(contact, content, reasonCode, timestamp);
     }
 
     private void handleVideoSharingInvitationRejected(SipRequest invite,
-            VideoSharing.ReasonCode reasonCode) {
+            VideoSharing.ReasonCode reasonCode, long timestamp) {
         ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
         VideoContent content = ContentManager.createLiveVideoContentFromSdp(invite.getSdpContent()
                 .getBytes(UTF8));
         getImsModule().getCore().getListener()
-                .handleVideoSharingInvitationRejected(contact, content, reasonCode);
+                .handleVideoSharingInvitationRejected(contact, content, reasonCode, timestamp);
     }
 
-    private void handleGeolocSharingInvitationRejected(SipRequest invite, ReasonCode reasonCode) {
+    private void handleGeolocSharingInvitationRejected(SipRequest invite, ReasonCode reasonCode,
+            long timestamp) {
         ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
         GeolocContent content = (GeolocContent) ContentManager.createMmContentFromSdp(invite,
                 mRcsSettings);
         getImsModule().getCore().getListener()
-                .handleGeolocSharingInvitationRejected(contact, content, reasonCode);
+                .handleGeolocSharingInvitationRejected(contact, content, reasonCode, timestamp);
     }
 
     /**
@@ -414,11 +415,12 @@ public class RichcallService extends ImsService {
      * @param contact Remote contact identifier
      * @param content The file content to share
      * @param thumbnail The thumbnail content
+     * @param timestamp Local timestamp
      * @return CSh session
      * @throws CoreException
      */
     public ImageTransferSession initiateImageSharingSession(ContactId contact, MmContent content,
-            MmContent thumbnail) throws CoreException {
+            MmContent thumbnail, long timestamp) throws CoreException {
         if (sLogger.isActivated()) {
             sLogger.info("Initiate image sharing session with contact " + contact + ", file "
                     + content.toString());
@@ -471,7 +473,7 @@ public class RichcallService extends ImsService {
 
         // Create a new session
         OriginatingImageTransferSession session = new OriginatingImageTransferSession(this,
-                content, contact, thumbnail, mRcsSettings);
+                content, contact, thumbnail, mRcsSettings, timestamp);
 
         return session;
     }
@@ -480,8 +482,9 @@ public class RichcallService extends ImsService {
      * Receive an image sharing invitation
      * 
      * @param invite Initial invite
+     * @param timestamp Local timestamp when got SipRequest
      */
-    public void receiveImageSharingInvitation(SipRequest invite) {
+    public void receiveImageSharingInvitation(SipRequest invite, long timestamp) {
         if (sLogger.isActivated()) {
             sLogger.info("Receive an image sharing session invitation");
         }
@@ -527,7 +530,7 @@ public class RichcallService extends ImsService {
             }
             rejectInvitation = true;
             handleImageSharingInvitationRejected(invite,
-                    ImageSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS);
+                    ImageSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
         } else if (isCurrentlyImageSharingUniDirectional()) {
             ImageTransferSession currentSession = getUnidirectionalImageSharingSession();
             if (isSessionTerminating(currentSession)) {
@@ -543,7 +546,7 @@ public class RichcallService extends ImsService {
                 }
                 rejectInvitation = true;
                 handleImageSharingInvitationRejected(invite,
-                        ImageSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS);
+                        ImageSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
             }
         }
         if (rejectInvitation) {
@@ -556,7 +559,7 @@ public class RichcallService extends ImsService {
 
         // Create a new session
         ImageTransferSession session = new TerminatingImageTransferSession(this, invite, contact,
-                mRcsSettings);
+                mRcsSettings, timestamp);
 
         getImsModule().getCore().getListener().handleContentSharingTransferInvitation(session);
 
@@ -567,13 +570,14 @@ public class RichcallService extends ImsService {
      * Initiate a live video sharing session
      * 
      * @param contact Remote contact Id
-     * @param content Video content to share
      * @param player Media player
+     * @param content Video content to share
+     * @param timestamp Local timestamp
      * @return CSh session
      * @throws CoreException
      */
     public VideoStreamingSession initiateLiveVideoSharingSession(ContactId contact,
-            IVideoPlayer player) throws CoreException {
+            IVideoPlayer player, long timestamp) throws CoreException {
         if (sLogger.isActivated()) {
             sLogger.info("Initiate a live video sharing session");
         }
@@ -627,7 +631,8 @@ public class RichcallService extends ImsService {
 
         // Create a new session
         OriginatingVideoStreamingSession session = new OriginatingVideoStreamingSession(this,
-                player, ContentManager.createGenericLiveVideoContent(), contact, mRcsSettings);
+                player, ContentManager.createGenericLiveVideoContent(), contact, mRcsSettings,
+                timestamp);
 
         return session;
     }
@@ -636,8 +641,9 @@ public class RichcallService extends ImsService {
      * Receive a video sharing invitation
      * 
      * @param invite Initial invite
+     * @param timestamp Local timestamp when got SipRequest
      */
-    public void receiveVideoSharingInvitation(SipRequest invite) {
+    public void receiveVideoSharingInvitation(SipRequest invite, long timestamp) {
         if (sLogger.isActivated()) {
             sLogger.info("Receive a video sharing invitation");
         }
@@ -683,7 +689,7 @@ public class RichcallService extends ImsService {
             }
             rejectInvitation = true;
             handleVideoSharingInvitationRejected(invite,
-                    VideoSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS);
+                    VideoSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
         } else if (isCurrentlyVideoSharingUniDirectional()) {
             VideoStreamingSession currentSession = getUnidirectionalVideoSharingSession();
             if (isSessionTerminating(currentSession)) {
@@ -693,7 +699,7 @@ public class RichcallService extends ImsService {
                 }
                 rejectInvitation = true;
                 handleVideoSharingInvitationRejected(invite,
-                        VideoSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS);
+                        VideoSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
             } else if (contact == null || !contact.equals(currentSession.getRemoteContact())) {
                 // Not the same contact
                 if (sLogger.isActivated()) {
@@ -701,7 +707,7 @@ public class RichcallService extends ImsService {
                 }
                 rejectInvitation = true;
                 handleVideoSharingInvitationRejected(invite,
-                        VideoSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS);
+                        VideoSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
             }
         }
         if (rejectInvitation) {
@@ -714,7 +720,7 @@ public class RichcallService extends ImsService {
 
         // Create a new session
         VideoStreamingSession session = new TerminatingVideoStreamingSession(this, invite, contact,
-                mRcsSettings);
+                mRcsSettings, timestamp);
 
         getImsModule().getCore().getListener().handleContentSharingStreamingInvitation(session);
 
@@ -727,11 +733,12 @@ public class RichcallService extends ImsService {
      * @param contact Remote contact
      * @param content Content to be shared
      * @param geoloc Geolocation
+     * @param timestamp Local timesatmp
      * @return GeolocTransferSession
      * @throws CoreException
      */
     public GeolocTransferSession initiateGeolocSharingSession(ContactId contact, MmContent content,
-            Geoloc geoloc) throws CoreException {
+            Geoloc geoloc, long timestamp) throws CoreException {
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Initiate geoloc sharing session with contact ")
                     .append(contact).append(".").toString());
@@ -749,7 +756,7 @@ public class RichcallService extends ImsService {
 
         // Create a new session
         OriginatingGeolocTransferSession session = new OriginatingGeolocTransferSession(this,
-                content, contact, geoloc, mRcsSettings);
+                content, contact, geoloc, mRcsSettings, timestamp);
 
         return session;
     }
@@ -758,8 +765,9 @@ public class RichcallService extends ImsService {
      * Receive a geoloc sharing invitation
      * 
      * @param invite Initial invite
+     * @param timestamp Local timestamp when got SipRequest
      */
-    public void receiveGeolocSharingInvitation(SipRequest invite) {
+    public void receiveGeolocSharingInvitation(SipRequest invite, long timestamp) {
         if (sLogger.isActivated()) {
             sLogger.info("Receive a geoloc sharing session invitation");
         }
@@ -804,7 +812,7 @@ public class RichcallService extends ImsService {
                 sLogger.debug("Max sessions reached");
             }
             handleGeolocSharingInvitationRejected(invite,
-                    GeolocSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS);
+                    GeolocSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
             rejectInvitation = true;
         } else if (isCurrentlyGeolocSharingUniDirectional()) {
             GeolocTransferSession currentSession = getUnidirectionalGeolocSharingSession();
@@ -814,7 +822,7 @@ public class RichcallService extends ImsService {
                     sLogger.debug("Max terminating sessions reached");
                 }
                 handleGeolocSharingInvitationRejected(invite,
-                        GeolocSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS);
+                        GeolocSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
                 rejectInvitation = true;
             } else if (contact == null || !contact.equals(currentSession.getRemoteContact())) {
                 // Not the same contact
@@ -822,7 +830,7 @@ public class RichcallService extends ImsService {
                     sLogger.debug("Only bidirectional session with same contact authorized");
                 }
                 handleGeolocSharingInvitationRejected(invite,
-                        GeolocSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS);
+                        GeolocSharing.ReasonCode.REJECTED_MAX_SHARING_SESSIONS, timestamp);
                 rejectInvitation = true;
             }
         }
@@ -836,7 +844,7 @@ public class RichcallService extends ImsService {
 
         // Create a new session
         GeolocTransferSession session = new TerminatingGeolocTransferSession(this, invite, contact,
-                mRcsSettings);
+                mRcsSettings, timestamp);
 
         getImsModule().getCore().getListener().handleContentSharingTransferInvitation(session);
 

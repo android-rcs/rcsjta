@@ -29,11 +29,11 @@ public class SystemTimeBase {
     private static long offset = System.currentTimeMillis() * 1000000L;
 
     /**
-     * Returns a time base value in nanoseconds
+     * Returns a timestamp base value in nanoseconds
      * 
-     * @return Time
+     * @return Timestamp
      */
-    public long getTime() {
+    public long getTimestamp() {
         return (System.currentTimeMillis() * 1000000L) - offset;
     }
 }

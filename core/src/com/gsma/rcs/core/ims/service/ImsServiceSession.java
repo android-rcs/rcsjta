@@ -150,6 +150,11 @@ public abstract class ImsServiceSession extends Thread {
     protected final RcsSettings mRcsSettings;
 
     /**
+     * Session timestamp
+     */
+    private long mTimestamp;
+
+    /**
      * The logger
      */
     private static final Logger sLogger = Logger.getLogger(ImsServiceSession.class.getSimpleName());
@@ -161,9 +166,10 @@ public abstract class ImsServiceSession extends Thread {
      * @param contact Remote contact Identifier
      * @param remoteUri Remote URI
      * @param rcsSettings
+     * @param timestamp Local timestamp for the session
      */
     public ImsServiceSession(ImsService imsService, ContactId contact, String remoteUri,
-            RcsSettings rcsSettings) {
+            RcsSettings rcsSettings, long timestamp) {
         mImsService = imsService;
         mContact = contact;
         mRemoteUri = remoteUri;
@@ -171,6 +177,7 @@ public abstract class ImsServiceSession extends Thread {
         mUpdateMgr = new UpdateSessionManager(this, rcsSettings);
         mRcsSettings = rcsSettings;
         mRingingPeriod = mRcsSettings.getRingingPeriod();
+        mTimestamp = timestamp;
     }
 
     /**
@@ -323,6 +330,15 @@ public abstract class ImsServiceSession extends Thread {
      */
     public ImsService getImsService() {
         return mImsService;
+    }
+
+    /**
+     * Returns the timestamp of the session
+     * 
+     * @return timestamp
+     */
+    public long getTimestamp() {
+        return mTimestamp;
     }
 
     /**

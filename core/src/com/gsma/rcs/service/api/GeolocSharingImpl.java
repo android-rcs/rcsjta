@@ -176,7 +176,11 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
     }
 
     public long getTimestamp() {
-        return mPersistentStorage.getTimestamp();
+        GeolocTransferSession session = mRichcallService.getGeolocTransferSession(mSharingId);
+        if (session == null) {
+            return mPersistentStorage.getTimestamp();
+        }
+        return session.getTimestamp();
     }
 
     /**
@@ -436,10 +440,10 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
     }
 
     @Override
-    public void handleSessionInvited(ContactId contact) {
+    public void handleSessionInvited(ContactId contact, long timestamp) {
         synchronized (lock) {
             mPersistentStorage.addIncomingGeolocSharing(contact, State.INVITED,
-                    ReasonCode.UNSPECIFIED);
+                    ReasonCode.UNSPECIFIED, timestamp);
             mBroadcaster.broadcastInvitation(mSharingId);
         }
     }

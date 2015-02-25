@@ -76,10 +76,11 @@ public abstract class ImageTransferSession extends ContentSharingSession {
      * @param contact Remote contact Id
      * @param thumbnail The thumbnail content
      * @param rcsSettings
+     * @param timestamp Local timestamp for the session
      */
     public ImageTransferSession(ImsService parent, MmContent content, ContactId contact,
-            MmContent thumbnail, RcsSettings rcsSettings) {
-        super(parent, content, contact, rcsSettings);
+            MmContent thumbnail, RcsSettings rcsSettings, long timestamp) {
+        super(parent, content, contact, rcsSettings, timestamp);
 
         mThumbnail = thumbnail;
     }
@@ -88,7 +89,7 @@ public abstract class ImageTransferSession extends ContentSharingSession {
      * Image has been transfered
      */
     public void imageTransfered() {
-        this.mImageTransfered = true;
+        mImageTransfered = true;
     }
 
     /**

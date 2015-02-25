@@ -45,7 +45,6 @@ import android.database.SQLException;
 import android.net.Uri;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -84,7 +83,8 @@ public class FileTransferLog implements IFileTransferLog {
             .append(FileTransferData.KEY_TRANSFERRED).append("<>")
             .append(FileTransferData.KEY_FILESIZE).toString();
 
-    private static final String ORDER_BY_TIMESTAMP_ASC = FileTransferData.KEY_TIMESTAMP.concat(" ASC");
+    private static final String ORDER_BY_TIMESTAMP_ASC = FileTransferData.KEY_TIMESTAMP
+            .concat(" ASC");
 
     private static final int FIRST_COLUMN_IDX = 0;
 
@@ -113,14 +113,16 @@ public class FileTransferLog implements IFileTransferLog {
 
     @Override
     public void addFileTransfer(String fileTransferId, ContactId contact, Direction direction,
-            MmContent content, MmContent fileIcon, State state, ReasonCode reasonCode) {
+            MmContent content, MmContent fileIcon, State state, ReasonCode reasonCode,
+            long timestamp, long timestampSent) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Add file transfer entry: fileTransferId=")
                     .append(fileTransferId).append(", contact=").append(contact)
                     .append(", filename=").append(content.getName()).append(", size=")
                     .append(content.getSize()).append(", MIME=").append(content.getEncoding())
                     .append(", state=").append(state).append(", reasonCode=").append(reasonCode)
-                    .toString());
+                    .append(", timestamp=").append(timestamp).append(", timestampSent=")
+                    .append(timestampSent).toString());
         }
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_FT_ID, fileTransferId);
@@ -135,30 +137,20 @@ public class FileTransferLog implements IFileTransferLog {
         if (fileIcon != null) {
             values.put(FileTransferData.KEY_FILEICON, fileIcon.getUri().toString());
         }
-
-        long date = Calendar.getInstance().getTimeInMillis();
         values.put(FileTransferData.KEY_READ_STATUS, ReadStatus.UNREAD.toInt());
         values.put(FileTransferData.KEY_STATE, state.toInt());
         values.put(FileTransferData.KEY_REASON_CODE, reasonCode.toInt());
-        if (direction == Direction.INCOMING) {
-            // Receive file
-            values.put(FileTransferData.KEY_TIMESTAMP, date);
-            values.put(FileTransferData.KEY_TIMESTAMP_SENT, 0);
-            values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, 0);
-            values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, 0);
-        } else {
-            // Send file
-            values.put(FileTransferData.KEY_TIMESTAMP, date);
-            values.put(FileTransferData.KEY_TIMESTAMP_SENT, date);
-            values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, 0);
-            values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, 0);
-        }
+        values.put(FileTransferData.KEY_TIMESTAMP, timestamp);
+        values.put(FileTransferData.KEY_TIMESTAMP_SENT, timestampSent);
+        values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, 0);
+        values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, 0);
         mLocalContentResolver.insert(FileTransferData.CONTENT_URI, values);
     }
 
     @Override
     public void addOutgoingGroupFileTransfer(String fileTransferId, String chatId,
-            MmContent content, MmContent thumbnail, State state, ReasonCode reasonCode) {
+            MmContent content, MmContent thumbnail, State state, ReasonCode reasonCode,
+            long timestamp, long timestampSent) {
         if (logger.isActivated()) {
             logger.debug("addOutgoingGroupFileTransfer: fileTransferId=" + fileTransferId
                     + ", chatId=" + chatId + " filename=" + content.getName() + ", size="
@@ -173,11 +165,9 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_DIRECTION, Direction.OUTGOING.toInt());
         values.put(FileTransferData.KEY_TRANSFERRED, 0);
         values.put(FileTransferData.KEY_FILESIZE, content.getSize());
-        long date = Calendar.getInstance().getTimeInMillis();
-        values.put(FileTransferData.KEY_READ_STATUS, ReadStatus.UNREAD.toInt());
-        // Send file
-        values.put(FileTransferData.KEY_TIMESTAMP, date);
-        values.put(FileTransferData.KEY_TIMESTAMP_SENT, date);
+        values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD.toInt());
+        values.put(FileTransferData.KEY_TIMESTAMP, timestamp);
+        values.put(FileTransferData.KEY_TIMESTAMP_SENT, timestampSent);
         values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, 0);
         values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, 0);
         values.put(FileTransferData.KEY_STATE, state.toInt());
@@ -226,14 +216,15 @@ public class FileTransferLog implements IFileTransferLog {
     @Override
     public void addIncomingGroupFileTransfer(String fileTransferId, String chatId,
             ContactId contact, MmContent content, MmContent fileIcon, State state,
-            ReasonCode reasonCode) {
+            ReasonCode reasonCode, long timestamp, long timestampSent) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Add incoming file transfer entry: fileTransferId=")
                     .append(fileTransferId).append(", chatId=").append(chatId).append(", contact=")
                     .append(contact).append(", filename=").append(content.getName())
                     .append(", size=").append(content.getSize()).append(", MIME=")
                     .append(content.getEncoding()).append(", state=").append(state)
-                    .append(", reasonCode=").append(reasonCode).toString());
+                    .append(", reasonCode=").append(reasonCode).append(", timestamp=")
+                    .append(timestamp).append(", timestampSent=").append(timestampSent).toString());
         }
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_FT_ID, fileTransferId);
@@ -248,10 +239,8 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_READ_STATUS, ReadStatus.UNREAD.toInt());
         values.put(FileTransferData.KEY_STATE, state.toInt());
         values.put(FileTransferData.KEY_REASON_CODE, reasonCode.toInt());
-
-        long date = Calendar.getInstance().getTimeInMillis();
-        values.put(FileTransferData.KEY_TIMESTAMP, date);
-        values.put(FileTransferData.KEY_TIMESTAMP_SENT, 0);
+        values.put(FileTransferData.KEY_TIMESTAMP, timestamp);
+        values.put(FileTransferData.KEY_TIMESTAMP_SENT, timestampSent);
         values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, 0);
         values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, 0);
         if (fileIcon != null) {
@@ -274,11 +263,9 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_STATE, state.toInt());
         values.put(FileTransferData.KEY_REASON_CODE, reasonCode.toInt());
         if (state == State.DELIVERED) {
-            values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, Calendar.getInstance()
-                    .getTimeInMillis());
+            values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, System.currentTimeMillis());
         } else if (state == State.DISPLAYED) {
-            values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, Calendar.getInstance()
-                    .getTimeInMillis());
+            values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, System.currentTimeMillis());
         }
         mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
@@ -396,6 +383,9 @@ public class FileTransferLog implements IFileTransferLog {
             int directionColumnIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_DIRECTION);
             int fileTransferIdColumnIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FT_ID);
             int fileIconColumnIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILEICON);
+            int timestampColumnIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_TIMESTAMP);
+            int timestampSentColumnIdx = cursor
+                    .getColumnIndexOrThrow(FileTransferData.KEY_TIMESTAMP_SENT);
             int downloadServerAddressColumnIdx = cursor
                     .getColumnIndexOrThrow(FileTransferData.KEY_DOWNLOAD_URI);
             int tIdColumnIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_UPLOAD_TID);
@@ -421,6 +411,8 @@ public class FileTransferLog implements IFileTransferLog {
                 String fileName = cursor.getString(fileNameColumnIdx);
                 Direction direction = Direction.valueOf(cursor.getInt(directionColumnIdx));
                 String fileIcon = cursor.getString(fileIconColumnIdx);
+                long timestamp = cursor.getLong(timestampColumnIdx);
+                long timestampSent = cursor.getLong(timestampSentColumnIdx);
                 boolean isGroup = !contact.toString().equals(chatId);
                 if (direction == Direction.INCOMING) {
                     String downloadServerAddress = cursor.getString(downloadServerAddressColumnIdx);
@@ -429,14 +421,14 @@ public class FileTransferLog implements IFileTransferLog {
                     Uri fileIconUri = fileIcon != null ? Uri.parse(fileIcon) : null;
                     fileTransfers.add(new FtHttpResumeDownload(Uri.parse(downloadServerAddress),
                             Uri.parse(file), fileIconUri, content, contact, chatId, fileTransferId,
-                            isGroup));
+                            isGroup, timestamp, timestampSent));
                 } else {
                     String tId = cursor.getString(tIdColumnIdx);
                     MmContent content = ContentManager.createMmContentFromMime(Uri.parse(file),
                             mimeType, size, fileName);
                     Uri fileIconUri = fileIcon != null ? Uri.parse(fileIcon) : null;
                     fileTransfers.add(new FtHttpResumeUpload(content, fileIconUri, tId, contact,
-                            chatId, fileTransferId, isGroup));
+                            chatId, fileTransferId, isGroup, timestamp, timestampSent));
                 }
             } while (cursor.moveToNext());
             return fileTransfers;
@@ -477,6 +469,10 @@ public class FileTransferLog implements IFileTransferLog {
             ContactId contact = null;
             String phoneNumber = cursor.getString(cursor
                     .getColumnIndexOrThrow(FileTransferData.KEY_CONTACT));
+            long timestamp = cursor.getLong(cursor
+                    .getColumnIndexOrThrow(FileTransferData.KEY_TIMESTAMP));
+            long timestampSent = cursor.getLong(cursor
+                    .getColumnIndexOrThrow(FileTransferData.KEY_TIMESTAMP_SENT));
             try {
                 contact = ContactUtils.createContactId(phoneNumber);
             } catch (Exception e) {
@@ -497,7 +493,7 @@ public class FileTransferLog implements IFileTransferLog {
                     size, fileName);
             Uri fileIconUri = fileIcon != null ? Uri.parse(fileIcon) : null;
             return new FtHttpResumeUpload(content, fileIconUri, tId, contact, chatId,
-                    fileTransferId, isGroup);
+                    fileTransferId, isGroup, timestamp, timestampSent);
 
         } catch (SQLException e) {
             if (logger.isActivated()) {
@@ -604,7 +600,7 @@ public class FileTransferLog implements IFileTransferLog {
     /*
      * (non-Javadoc)
      * @see com.gsma.rcs.provider.messaging.IFileTransferLog#
-     * getfileTransferTimeStamp(java.lang.String)
+     * getfileTransferTimestamp(java.lang.String)
      */
     public long getFileTransferTimestamp(String fileTransferId) {
         if (logger.isActivated()) {
@@ -616,7 +612,7 @@ public class FileTransferLog implements IFileTransferLog {
     /*
      * (non-Javadoc)
      * @see com.gsma.rcs.provider.messaging.IFileTransferLog#
-     * getFileTransferSentTimeStamp(java.lang.String)
+     * getFileTransferSentTimestamp(java.lang.String)
      */
     public long getFileTransferSentTimestamp(String fileTransferId) {
         if (logger.isActivated()) {
@@ -704,6 +700,10 @@ public class FileTransferLog implements IFileTransferLog {
                     .getColumnIndexOrThrow(FileTransferData.KEY_DIRECTION)));
             String fileIcon = cursor.getString(cursor
                     .getColumnIndexOrThrow(FileTransferData.KEY_FILEICON));
+            long timestamp = cursor.getLong(cursor
+                    .getColumnIndexOrThrow(FileTransferData.KEY_TIMESTAMP));
+            long timestampSent = cursor.getLong(cursor
+                    .getColumnIndexOrThrow(FileTransferData.KEY_TIMESTAMP_SENT));
             boolean isGroup = chatId.equals(phoneNumber);
             Uri file = Uri.parse(fileUri);
             MmContent content = FileTransferUtils.createMmContent(file);
@@ -712,12 +712,13 @@ public class FileTransferLog implements IFileTransferLog {
                 String downloadServerAddress = cursor.getString(cursor
                         .getColumnIndexOrThrow(FileTransferData.KEY_DOWNLOAD_URI));
                 return new FtHttpResumeDownload(Uri.parse(downloadServerAddress), file,
-                        fileIconUri, content, contact, chatId, fileTransferId, isGroup);
+                        fileIconUri, content, contact, chatId, fileTransferId, isGroup, timestamp,
+                        timestampSent);
             } else {
                 String tId = cursor.getString(cursor
                         .getColumnIndexOrThrow(FileTransferData.KEY_UPLOAD_TID));
                 return new FtHttpResumeUpload(content, fileIconUri, tId, contact, chatId,
-                        fileTransferId, isGroup);
+                        fileTransferId, isGroup, timestamp, timestampSent);
             }
         } finally {
             if (cursor != null) {
@@ -728,8 +729,7 @@ public class FileTransferLog implements IFileTransferLog {
 
     /*
      * Get both queued one-to-one and group file transfers. (non-Javadoc)
-     * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
-     * getQueuedFileTransfers()
+     * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog# getQueuedFileTransfers()
      */
     @Override
     public Cursor getQueuedFileTransfers() {
@@ -781,5 +781,24 @@ public class FileTransferLog implements IFileTransferLog {
     public Cursor getInterruptedFileTransfers() {
         return mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
                 SELECTION_BY_INTERRUPTED_FILE_TRANSFERS, null, ORDER_BY_TIMESTAMP_ASC);
+    }
+
+    public void setFileTransferStateAndTimestamps(String fileTransferId, State state,
+            ReasonCode reasonCode, long timestamp, long timestampSent) {
+        if (logger.isActivated()) {
+            logger.debug(new StringBuilder("updateFileTransfer: fileTransferId=")
+                    .append(fileTransferId).append(", state=").append(state)
+                    .append(", reasonCode=").append(reasonCode).append(", timestamp=")
+                    .append(timestamp).append(", timestampSent=").append(timestampSent).toString());
+        }
+
+        ContentValues values = new ContentValues();
+        values.put(FileTransferData.KEY_STATE, state.toInt());
+        values.put(FileTransferData.KEY_REASON_CODE, reasonCode.toInt());
+        values.put(FileTransferData.KEY_TIMESTAMP, timestamp);
+        values.put(FileTransferData.KEY_TIMESTAMP_SENT, timestampSent);
+        mLocalContentResolver.update(
+                Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
+                null);
     }
 }

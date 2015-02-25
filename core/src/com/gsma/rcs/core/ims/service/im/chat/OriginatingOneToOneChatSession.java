@@ -60,11 +60,12 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
      * @param msg First message of the session
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
+     * @param timestamp Local timestamp for the session
      */
     public OriginatingOneToOneChatSession(ImsService parent, ContactId contact, ChatMessage msg,
-            RcsSettings rcsSettings, MessagingLog messagingLog) {
+            RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp) {
         super(parent, contact, PhoneUtils.formatContactIdToUri(contact), msg, rcsSettings,
-                messagingLog);
+                messagingLog, timestamp);
         // Create dialog path
         createOriginatingDialogPath();
         // Set contribution ID
@@ -116,11 +117,12 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
                 if (useImdn) {
                     // Send message in CPIM + IMDN
                     cpim = ChatUtils.buildCpimMessageWithImdn(from, to, chatMessage.getMessageId(),
-                            chatMessage.getContent(), chatMessage.getMimeType());
+                            chatMessage.getContent(), chatMessage.getMimeType(),
+                            chatMessage.getTimestampSent());
                 } else {
                     // Send message in CPIM
                     cpim = ChatUtils.buildCpimMessage(from, to, chatMessage.getContent(),
-                            chatMessage.getMimeType());
+                            chatMessage.getMimeType(), chatMessage.getTimestampSent());
                 }
 
                 String multipart = new StringBuilder(Multipart.BOUNDARY_DELIMITER)

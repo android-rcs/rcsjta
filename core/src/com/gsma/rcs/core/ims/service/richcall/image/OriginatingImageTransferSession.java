@@ -87,10 +87,11 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
      * @param contact Remote contact Id
      * @param thumbnail Thumbnail content option
      * @param rcsSettings
+     * @param timestamp Local timestamp for the session
      */
     public OriginatingImageTransferSession(ImsService parent, MmContent content, ContactId contact,
-            MmContent thumbnail, RcsSettings rcsSettings) {
-        super(parent, content, contact, thumbnail, rcsSettings);
+            MmContent thumbnail, RcsSettings rcsSettings, long timestamp) {
+        super(parent, content, contact, thumbnail, rcsSettings, timestamp);
 
         // Create dialog path
         createOriginatingDialogPath();

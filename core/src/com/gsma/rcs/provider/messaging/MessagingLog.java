@@ -121,9 +121,9 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     @Override
     public void addGroupChat(String chatId, ContactId contact, String subject,
             Map<ContactId, ParticipantStatus> participants, State state, ReasonCode reasonCode,
-            Direction direction) {
+            Direction direction, long timestamp) {
         mGroupChatLog.addGroupChat(chatId, contact, subject, participants, state, reasonCode,
-                direction);
+                direction, timestamp);
     }
 
     @Override
@@ -175,8 +175,9 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent.Status status) {
-        mMessageLog.addGroupChatEvent(chatId, contact, status);
+    public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent.Status status,
+            long timestamp) {
+        mMessageLog.addGroupChatEvent(chatId, contact, status, timestamp);
     }
 
     @Override
@@ -203,31 +204,39 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     @Override
     public void addFileTransfer(String fileTransferId, ContactId contact, Direction direction,
             MmContent content, MmContent fileIcon, FileTransfer.State state,
-            FileTransfer.ReasonCode reasonCode) {
+            FileTransfer.ReasonCode reasonCode, long timestamp, long timestampSent) {
         mFileTransferLog.addFileTransfer(fileTransferId, contact, direction, content, fileIcon,
-                state, reasonCode);
+                state, reasonCode, timestamp, timestampSent);
     }
 
     @Override
     public void addOutgoingGroupFileTransfer(String fileTransferId, String chatId,
             MmContent content, MmContent thumbnail, FileTransfer.State state,
-            FileTransfer.ReasonCode reasonCode) {
+            FileTransfer.ReasonCode reasonCode, long timestamp, long timestampSent) {
         mFileTransferLog.addOutgoingGroupFileTransfer(fileTransferId, chatId, content, thumbnail,
-                state, reasonCode);
+                state, reasonCode, timestamp, timestampSent);
     }
 
     @Override
     public void addIncomingGroupFileTransfer(String fileTransferId, String chatId,
             ContactId contact, MmContent content, MmContent fileIcon, FileTransfer.State state,
-            FileTransfer.ReasonCode reasonCode) {
+            FileTransfer.ReasonCode reasonCode, long timestamp, long timestampSent) {
         mFileTransferLog.addIncomingGroupFileTransfer(fileTransferId, chatId, contact, content,
-                fileIcon, state, reasonCode);
+                fileIcon, state, reasonCode, timestamp, timestampSent);
     }
 
     @Override
     public void setFileTransferStateAndReasonCode(String fileTransferId, FileTransfer.State state,
             FileTransfer.ReasonCode reasonCode) {
         mFileTransferLog.setFileTransferStateAndReasonCode(fileTransferId, state, reasonCode);
+    }
+
+    @Override
+    public void setFileTransferStateAndTimestamps(String fileTransferId, FileTransfer.State state,
+            FileTransfer.ReasonCode reasonCode, long timestamp, long timestampSent) {
+        mFileTransferLog.setFileTransferStateAndTimestamps(fileTransferId, state, reasonCode,
+                timestamp, timestampSent);
+
     }
 
     @Override
@@ -461,5 +470,9 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     @Override
     public Cursor getInterruptedFileTransfers() {
         return mFileTransferLog.getInterruptedFileTransfers();
+    }
+
+    public void setChatMessageTimestamp(String msgId, long timestamp, long timestampSent) {
+        mMessageLog.setChatMessageTimestamp(msgId, timestamp, timestampSent);
     }
 }

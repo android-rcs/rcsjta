@@ -18,6 +18,30 @@
 
 package com.gsma.rcs.core.ims.security.cert;
 
+import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.platform.AndroidFactory;
+import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.settings.RcsSettingsData;
+import com.gsma.rcs.utils.CloseableUtils;
+import com.gsma.rcs.utils.logger.Logger;
+
+import com.telekom.bouncycastle.wrapper.SimpleContentSignerBuilder;
+
+import local.org.bouncycastle.asn1.ASN1Encodable;
+import local.org.bouncycastle.asn1.x500.X500Name;
+import local.org.bouncycastle.asn1.x509.BasicConstraints;
+import local.org.bouncycastle.asn1.x509.ExtendedKeyUsage;
+import local.org.bouncycastle.asn1.x509.GeneralName;
+import local.org.bouncycastle.asn1.x509.GeneralNames;
+import local.org.bouncycastle.asn1.x509.KeyPurposeId;
+import local.org.bouncycastle.asn1.x509.KeyUsage;
+import local.org.bouncycastle.asn1.x509.X509Extension;
+import local.org.bouncycastle.cert.X509v3CertificateBuilder;
+import local.org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import local.org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
+import local.org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import local.org.bouncycastle.operator.ContentSigner;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -38,29 +62,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Date;
-
-import local.org.bouncycastle.asn1.ASN1Encodable;
-import local.org.bouncycastle.asn1.x500.X500Name;
-import local.org.bouncycastle.asn1.x509.BasicConstraints;
-import local.org.bouncycastle.asn1.x509.ExtendedKeyUsage;
-import local.org.bouncycastle.asn1.x509.GeneralName;
-import local.org.bouncycastle.asn1.x509.GeneralNames;
-import local.org.bouncycastle.asn1.x509.KeyPurposeId;
-import local.org.bouncycastle.asn1.x509.KeyUsage;
-import local.org.bouncycastle.asn1.x509.X509Extension;
-import local.org.bouncycastle.cert.X509v3CertificateBuilder;
-import local.org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import local.org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
-import local.org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
-import local.org.bouncycastle.operator.ContentSigner;
-
-import com.gsma.rcs.core.ims.ImsModule;
-import com.gsma.rcs.platform.AndroidFactory;
-import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.provider.settings.RcsSettingsData;
-import com.gsma.rcs.utils.CloseableUtils;
-import com.gsma.rcs.utils.logger.Logger;
-import com.telekom.bouncycastle.wrapper.SimpleContentSignerBuilder;
 
 /**
  * Keystore manager for certificates
@@ -314,9 +315,10 @@ public class KeyStoreManager {
             // X500Name subjectName = new X500Name("CN="
             // + OemCustomization.customizeString("com.gsma.rcs.client"));
             X500Name subjectName = new X500Name("CN=com.gsma.rcs.client");
-            Date startDate = new Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000);
+            long timestamp = System.currentTimeMillis();
+            Date startDate = new Date(timestamp - 24 * 60 * 60 * 1000);
             // validity of 1 year
-            Date endDate = new Date(System.currentTimeMillis() + 365L * 26 * 60 * 60 * 1000);
+            Date endDate = new Date(timestamp + 365L * 26 * 60 * 60 * 1000);
             X509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(subjectName,
                     BigInteger.ONE, startDate, endDate, subjectName, pubKey);
             JcaX509ExtensionUtils x509ExtUtils = new JcaX509ExtensionUtils();

@@ -83,11 +83,13 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
      * @param contact the remote ContactId
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
+     * @param timestamp Local timestamp for the session
      */
     public TerminatingStoreAndForwardOneToOneChatNotificationSession(ImsService parent,
-            SipRequest invite, ContactId contact, RcsSettings rcsSettings, MessagingLog messagingLog) {
+            SipRequest invite, ContactId contact, RcsSettings rcsSettings,
+            MessagingLog messagingLog, long timestamp) {
         super(parent, contact, PhoneUtils.formatContactIdToUri(contact), null, rcsSettings,
-                messagingLog);
+                messagingLog, timestamp);
 
         // Create the MSRP manager
         int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(rcsSettings);

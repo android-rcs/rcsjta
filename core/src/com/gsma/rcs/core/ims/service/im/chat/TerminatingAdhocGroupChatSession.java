@@ -78,11 +78,13 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
      * @param remoteUri the remote Uri
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
+     * @param timestamp Local timestamp for the session
      */
     public TerminatingAdhocGroupChatSession(ImsService parent, SipRequest invite,
             ContactId contact, Map<ContactId, ParticipantStatus> participantsFromInvite,
-            String remoteUri, RcsSettings rcsSettings, MessagingLog messagingLog) {
-        super(parent, contact, remoteUri, participantsFromInvite, rcsSettings, messagingLog);
+            String remoteUri, RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp) {
+        super(parent, contact, remoteUri, participantsFromInvite, rcsSettings, messagingLog,
+                timestamp);
 
         mMessagingLog = messagingLog;
 
@@ -179,13 +181,14 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
             }
 
             /* Check if session should be auto-accepted once */
+            long timestamp = getTimestamp();
             if (isSessionAccepted()) {
                 if (logActivated) {
                     logger.debug("Received group chat invitation marked for auto-accept");
                 }
                 for (ImsSessionListener listener : listeners) {
                     ((GroupChatSessionListener) listener).handleSessionAutoAccepted(contact,
-                            subject, participants);
+                            subject, participants, timestamp);
                 }
             } else {
                 if (logActivated) {
@@ -194,7 +197,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 
                 for (ImsSessionListener listener : listeners) {
                     ((GroupChatSessionListener) listener).handleSessionInvited(contact, subject,
-                            participants);
+                            participants, timestamp);
                 }
 
                 send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());

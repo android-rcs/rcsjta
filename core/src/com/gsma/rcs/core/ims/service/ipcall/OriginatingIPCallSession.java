@@ -2,7 +2,8 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
- *
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.ipcall;
@@ -25,10 +29,10 @@ import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.rcs.service.ipcalldraft.IIPCallPlayer;
 import com.gsma.rcs.service.ipcalldraft.IIPCallRenderer;
+import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * Originating IP call session
@@ -53,11 +57,12 @@ public class OriginatingIPCallSession extends IPCallSession {
      * @param player IP call player
      * @param renderer IP call renderer
      * @param rcsSettings
+     * @param timestamp Local timestamp for the session
      */
     public OriginatingIPCallSession(ImsService parent, ContactId contact,
             AudioContent audioContent, VideoContent videoContent, IIPCallPlayer player,
-            IIPCallRenderer renderer, RcsSettings rcsSettings) {
-        super(parent, contact, audioContent, videoContent, rcsSettings);
+            IIPCallRenderer renderer, RcsSettings rcsSettings, long timestamp) {
+        super(parent, contact, audioContent, videoContent, rcsSettings, timestamp);
 
         // Set the player
         setPlayer(player);

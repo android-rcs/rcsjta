@@ -22,13 +22,6 @@
 
 package com.gsma.rcs.core.ims.service.sip;
 
-import android.content.Intent;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import javax2.sip.message.Response;
-
 import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
@@ -51,6 +44,13 @@ import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
+
+import android.content.Intent;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax2.sip.message.Response;
 
 /**
  * SIP service
@@ -142,8 +142,9 @@ public class SipService extends ImsService {
         }
 
         // Create a new session
+        long timestamp = System.currentTimeMillis();
         OriginatingSipMsrpSession session = new OriginatingSipMsrpSession(this, contact,
-                featureTag, mRcsSettings);
+                featureTag, mRcsSettings, timestamp);
 
         return session;
     }
@@ -153,8 +154,9 @@ public class SipService extends ImsService {
      * 
      * @param sessionInvite Resolved intent
      * @param invite Initial invite
+     * @param timestamp Local timestamp when got SipRequest
      */
-    public void receiveMsrpSessionInvitation(Intent sessionInvite, SipRequest invite) {
+    public void receiveMsrpSessionInvitation(Intent sessionInvite, SipRequest invite, long timestamp) {
         try {
             // Test if the contact is blocked
             ContactId remote = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
@@ -177,7 +179,7 @@ public class SipService extends ImsService {
 
         // Create a new session
         TerminatingSipMsrpSession session = new TerminatingSipMsrpSession(this, invite,
-                sessionInvite, mRcsSettings);
+                sessionInvite, mRcsSettings, timestamp);
 
         getImsModule().getCore().getListener()
                 .handleSipMsrpSessionInvitation(sessionInvite, session);
@@ -198,8 +200,9 @@ public class SipService extends ImsService {
         }
 
         // Create a new session
+        long timestamp = System.currentTimeMillis();
         OriginatingSipRtpSession session = new OriginatingSipRtpSession(this, contact, featureTag,
-                mRcsSettings);
+                mRcsSettings, timestamp);
 
         return session;
     }
@@ -209,9 +212,10 @@ public class SipService extends ImsService {
      * 
      * @param sessionInvite Resolved intent
      * @param invite Initial invite
+     * @param timestamp Local timestamp when got SipRequest
      * @throws RcsContactFormatException
      */
-    public void receiveRtpSessionInvitation(Intent sessionInvite, SipRequest invite)
+    public void receiveRtpSessionInvitation(Intent sessionInvite, SipRequest invite, long timestamp)
             throws RcsContactFormatException {
         try {
             // Test if the contact is blocked
@@ -235,7 +239,7 @@ public class SipService extends ImsService {
 
         // Create a new session
         TerminatingSipRtpSession session = new TerminatingSipRtpSession(this, invite,
-                sessionInvite, mRcsSettings);
+                sessionInvite, mRcsSettings, timestamp);
 
         getImsModule().getCore().getListener()
                 .handleSipRtpSessionInvitation(sessionInvite, session);

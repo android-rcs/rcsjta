@@ -54,8 +54,6 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
 
     private IVideoPlayer mPlayer;
 
-    private final long mTimestamp;
-
     private final static Logger sLogger = Logger.getLogger(VideoStreamingSession.class
             .getSimpleName());
 
@@ -66,11 +64,11 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
      * @param content Content to be shared
      * @param contact Remote contact Id
      * @param rcsSettings
+     * @param timestamp Local timestamp for the session
      */
     public VideoStreamingSession(ImsService parent, MmContent content, ContactId contact,
-            RcsSettings rcsSettings) {
-        super(parent, content, contact, rcsSettings);
-        mTimestamp = System.currentTimeMillis();
+            RcsSettings rcsSettings, long timestamp) {
+        super(parent, content, contact, rcsSettings, timestamp);
     }
 
     /**
@@ -189,16 +187,5 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
     @Override
     public void removeSession() {
         getImsService().getImsModule().getRichcallService().removeSession(this);
-    }
-
-    /**
-     * Returns the local timestamp of when the video sharing was initiated for outgoing video
-     * sharing or the local timestamp of when the video sharing invitation was received for incoming
-     * video sharings.
-     * 
-     * @return timestamp
-     */
-    public long getTimestamp() {
-        return mTimestamp;
     }
 }

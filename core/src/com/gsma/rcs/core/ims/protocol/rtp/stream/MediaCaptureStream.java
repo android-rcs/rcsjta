@@ -134,7 +134,7 @@ public class MediaCaptureStream implements ProcessorInputStream {
         if (sample.isMarker()) {
             buffer.setFlags(Buffer.FLAG_RTP_MARKER);
         }
-        buffer.setTimeStamp(sample.getTimeStamp());
+        buffer.setTimestamp(sample.getTimestamp());
         return buffer;
     }
 }

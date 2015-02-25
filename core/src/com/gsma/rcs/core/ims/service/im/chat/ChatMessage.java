@@ -24,8 +24,6 @@ package com.gsma.rcs.core.ims.service.im.chat;
 
 import com.gsma.services.rcs.contact.ContactId;
 
-import java.util.Date;
-
 public class ChatMessage {
 
     private final ContactId mRemote;
@@ -37,14 +35,14 @@ public class ChatMessage {
     private final String mMimeType;
 
     /**
-     * Receipt date of the message
+     * Local timestamp for both incoming and outgoing message
      */
-    private final Date mReceiptAt;
+    private final long mTimestamp;
 
     /**
-     * Receipt date of the message on the server (i.e. CPIM date)
+     * Timestamp sent in payload for both incoming and outgoing chat message
      */
-    private final Date mServerReceiptAt;
+    private final long mTimestampSent;
 
     private final String mMsgId;
 
@@ -56,16 +54,18 @@ public class ChatMessage {
      * @param content Text message
      * @param mimeType MIME type
      * @param serverReceiptAt Receipt date of the message on the server
+     * @param timestamp Local timestamp for both incoming and outgoing chat message
+     * @param timestampSent Timestamp sent in payload for both incoming and outgoing chat message
      * @param displayName the name to display
      */
     public ChatMessage(String msgId, ContactId remote, String content, String mimeType,
-            Date serverReceiptAt, String displayName) {
+            long timestamp, long timestampSent, String displayName) {
         mMsgId = msgId;
         mRemote = remote;
         mContent = content;
         mMimeType = mimeType;
-        mReceiptAt = new Date();
-        mServerReceiptAt = (serverReceiptAt != null ? serverReceiptAt : mReceiptAt);
+        mTimestamp = timestamp;
+        mTimestampSent = timestampSent;
         mDisplayName = displayName;
     }
 
@@ -106,21 +106,23 @@ public class ChatMessage {
     }
 
     /**
-     * Gets the receipt date of the message
+     * Gets the local timestamp of when the chat message was sent and/or queued for outgoing
+     * messages or the local timestamp of when the chat message was received for incoming messages..
      * 
-     * @return receipt date
+     * @return timestamp
      */
-    public Date getDate() {
-        return mReceiptAt;
+    public long getTimestamp() {
+        return mTimestamp;
     }
 
     /**
-     * Gets the receipt date of the message on the server
+     * Get the local timestamp of when the chat message was sent and/or queued for outgoing messages
+     * or the remote timestamp of when the chat message was sent for incoming messages.
      * 
-     * @return server receipt date
+     * @return timestamp sent in payload
      */
-    public Date getServerDate() {
-        return mServerReceiptAt;
+    public long getTimestampSent() {
+        return mTimestampSent;
     }
 
     /**

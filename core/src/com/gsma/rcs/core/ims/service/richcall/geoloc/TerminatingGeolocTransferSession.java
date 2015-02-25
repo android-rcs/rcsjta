@@ -80,11 +80,12 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
      * @param invite Initial INVITE request
      * @param contact Contact Id
      * @param rcsSettings
+     * @param timestamp Local timestamp for the session
      */
     public TerminatingGeolocTransferSession(ImsService parent, SipRequest invite,
-            ContactId contact, RcsSettings rcsSettings) {
+            ContactId contact, RcsSettings rcsSettings, long timestamp) {
         super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), contact,
-                rcsSettings);
+                rcsSettings, timestamp);
 
         // Create dialog path
         createTerminatingDialogPath(invite);
@@ -117,8 +118,9 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
 
             Collection<ImsSessionListener> listeners = getListeners();
             ContactId contact = getRemoteContact();
+            long timestamp = getTimestamp();
             for (ImsSessionListener listener : listeners) {
-                ((GeolocTransferSessionListener) listener).handleSessionInvited(contact);
+                ((GeolocTransferSessionListener) listener).handleSessionInvited(contact, timestamp);
             }
 
             InvitationStatus answer = waitInvitationAnswer();

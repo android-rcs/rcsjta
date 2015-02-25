@@ -74,11 +74,12 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
      * @param contact the remote contactId
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
+     * @param timestamp Local timestamp for the session
      */
     public TerminatingOneToOneChatSession(ImsService parent, SipRequest invite, ContactId contact,
-            RcsSettings rcsSettings, MessagingLog messagingLog) {
-        super(parent, contact, PhoneUtils.formatContactIdToUri(contact), ChatUtils
-                .getFirstMessage(invite), rcsSettings, messagingLog);
+            RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp) {
+        super(parent, contact, PhoneUtils.formatContactIdToUri(contact), ChatUtils.getFirstMessage(
+                invite, timestamp), rcsSettings, messagingLog, timestamp);
 
         // Create dialog path
         createTerminatingDialogPath(invite);
@@ -131,7 +132,8 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                         // Send message delivery status via a SIP MESSAGE
                         getImdnManager().sendMessageDeliveryStatusImmediately(remote, msgId,
                                 ImdnDocument.DELIVERY_STATUS_DELIVERED,
-                                SipUtils.getRemoteInstanceID(getDialogPath().getInvite()));
+                                SipUtils.getRemoteInstanceID(getDialogPath().getInvite()),
+                                getTimestamp());
                     } catch (RcsContactFormatException e) {
                         if (logActivated) {
                             logger.warn("Cannot parse contact " + getDialogPath().getRemoteParty());

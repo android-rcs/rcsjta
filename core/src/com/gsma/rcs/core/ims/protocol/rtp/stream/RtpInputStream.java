@@ -239,7 +239,7 @@ public class RtpInputStream implements ProcessorInputStream {
             buffer.setFormat(inputFormat);
             buffer.setSequenceNumber(packet.seqnum);
             buffer.setRTPMarker(packet.marker != 0);
-            buffer.setTimeStamp(packet.timestamp);
+            buffer.setTimestamp(packet.timestamp);
 
             if (packet.extensionHeader != null) {
                 ExtensionElement element = packet.extensionHeader.getElementById(extensionHeaderId);

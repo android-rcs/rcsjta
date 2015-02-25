@@ -74,7 +74,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * File transfer service implementation
@@ -315,19 +314,32 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param contact ContactId
      * @param content Content of file
      * @param fileicon Content of fileicon
-     * @param state state of the file transfer
+     * @param state State of the file transfer
+     * @param timestamp Local timestamp of the file transfer
+     * @param timestampSent Timestamp sent in payload of the file transfer
      */
     private void addOutgoingFileTransfer(String fileTransferId, ContactId contact,
-            MmContent content, MmContent fileicon, State state) {
+            MmContent content, MmContent fileicon, State state, long timestamp, long timestampSent) {
         mMessagingLog.addFileTransfer(fileTransferId, contact, Direction.OUTGOING, content,
-                fileicon, state, ReasonCode.UNSPECIFIED);
+                fileicon, state, ReasonCode.UNSPECIFIED, timestamp, timestampSent);
         mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId, state,
                 ReasonCode.UNSPECIFIED);
     }
 
-    private void setFileTransferState(String fileTransferId, ContactId contact, State state) {
-        mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, state,
-                ReasonCode.UNSPECIFIED);
+    /**
+     * Update new file transfer state, reason code, timestamp and timestamtSent
+     * 
+     * @param fileTransferId File transfer ID
+     * @param contact ContactId
+     * @param state New state of the file transfer
+     * @param timestamp New local timestamp for the file transfer
+     * @param timestampSent New timestamp sent in payload for the file transfer
+     */
+
+    private void setFileTransferStateAndTimestamps(String fileTransferId, ContactId contact,
+            State state, long timestamp, long timestampSent) {
+        mMessagingLog.setFileTransferStateAndTimestamps(fileTransferId, state,
+                ReasonCode.UNSPECIFIED, timestamp, timestampSent);
         mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId, state,
                 ReasonCode.UNSPECIFIED);
     }
@@ -340,11 +352,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param content Content of file
      * @param fileicon Content of fileicon
      * @param state state of file transfer
+     * @param timestamp Local timestamp of the file transfer
+     * @param timestampSent Timestamp sent in payload of the file transfer
      */
     private void addOutgoingGroupFileTransfer(String fileTransferId, String chatId,
-            MmContent content, MmContent fileicon, State state) {
+            MmContent content, MmContent fileicon, State state, long timestamp, long timestampSent) {
         mMessagingLog.addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileicon,
-                state, FileTransfer.ReasonCode.UNSPECIFIED);
+                state, FileTransfer.ReasonCode.UNSPECIFIED, timestamp, timestampSent);
         mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId, state,
                 ReasonCode.UNSPECIFIED);
     }
@@ -356,10 +370,12 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param file
      * @param fileIcon
      * @param fileTransferId return IFileTransfer OneToOneFileTransferImpl
+     * @param timestamp Local timestamp of the file transfer
+     * @param timestampSent Timestamp sent in payload of the file transfer
      * @throws ServerApiException
      */
     private IFileTransfer sendOneToOneFile(ContactId contact, MmContent file, MmContent fileIcon,
-            String fileTransferId) throws ServerApiException {
+            String fileTransferId, long timestamp, long timestampSent) throws ServerApiException {
         try {
             mImService.assertFileSizeNotExceedingMaxLimit(file.getSize(), "File exceeds max size");
 
@@ -373,15 +389,15 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                     sLogger.debug("The max number of file transfer sessions is achieved: queue the file transfer.");
                 }
                 addOutgoingFileTransfer(fileTransferId, contact, file, fileIcon,
-                        FileTransfer.State.QUEUED);
+                        FileTransfer.State.QUEUED, timestamp, timestampSent);
                 return new OneToOneFileTransferImpl(fileTransferId,
                         mOneToOneFileTransferBroadcaster, mImService, storageAccessor, this,
                         mRcsSettings, mCore, mMessagingLog);
             }
             addOutgoingFileTransfer(fileTransferId, contact, file, fileIcon,
-                    FileTransfer.State.INITIATING);
+                    FileTransfer.State.INITIATING, timestamp, timestampSent);
             final FileSharingSession session = mImService.initiateFileTransferSession(
-                    fileTransferId, contact, file, fileIcon);
+                    fileTransferId, contact, file, fileIcon, timestamp, timestampSent);
 
             OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
                     fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
@@ -424,7 +440,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
                 State.INITIATING, ReasonCode.UNSPECIFIED);
         final FileSharingSession session = mImService.initiateFileTransferSession(fileTransferId,
-                contact, file, fileIcon);
+                contact, file, fileIcon, timestamp, timestampSent);
 
         OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
                 fileTransferId, mOneToOneFileTransferBroadcaster, mImService,
@@ -445,12 +461,17 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      */
     /* package private */void resendOneToOneFile(ContactId contact, MmContent file,
             MmContent fileIcon, String fileTransferId) {
+        /* Set new timestamp for the resend file */
+        long timestamp = System.currentTimeMillis();
+        /* For outgoing file transfer, timestampSent = timestamp */
+        long timestampSent = timestamp;
         try {
             if (!ServerApiUtils.isImsConnected()) {
                 /*
                  * If the IMS is NOT connected at this time then re-queue transfer.
                  */
-                setFileTransferState(fileTransferId, contact, FileTransfer.State.QUEUED);
+                setOneToOneFileTransferStateAndReasonCode(fileTransferId, contact,
+                        FileTransfer.State.QUEUED, FileTransfer.ReasonCode.UNSPECIFIED);
                 return;
             }
             if (!mImService.isFileTransferSessionAvailable()
@@ -459,12 +480,16 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                     sLogger.debug("The max number of file transfer sessions is achieved: re-queue the file transfer with fileTransferId "
                             .concat(fileTransferId));
                 }
-                setFileTransferState(fileTransferId, contact, FileTransfer.State.QUEUED);
+                setOneToOneFileTransferStateAndReasonCode(fileTransferId, contact,
+                        FileTransfer.State.QUEUED, FileTransfer.ReasonCode.UNSPECIFIED);
                 return;
             }
-            setFileTransferState(fileTransferId, contact, FileTransfer.State.INITIATING);
+
+            setFileTransferStateAndTimestamps(fileTransferId, contact,
+                    FileTransfer.State.INITIATING, timestamp, timestampSent);
+
             final FileSharingSession session = mImService.initiateFileTransferSession(
-                    fileTransferId, contact, file, fileIcon);
+                    fileTransferId, contact, file, fileIcon, timestamp, timestampSent);
 
             FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
                     fileTransferId, contact, Direction.OUTGOING, contact.toString(), file,
@@ -586,14 +611,17 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 fileIconContent = FileTransferUtils.createFileicon(file, fileTransferId,
                         mRcsSettings);
             }
-
+            long timestamp = System.currentTimeMillis();
+            /* For outgoing file transfer, timestampSent = timestamp */
+            long timestampSent = timestamp;
             /* If the IMS is connected at this time then send this one to one file. */
             if (ServerApiUtils.isImsConnected()) {
-                return sendOneToOneFile(contact, content, fileIconContent, fileTransferId);
+                return sendOneToOneFile(contact, content, fileIconContent, fileTransferId,
+                        timestamp, timestampSent);
             }
             /* If the IMS is NOT connected at this time then queue this one to one file. */
             addOutgoingFileTransfer(fileTransferId, contact, content, fileIconContent,
-                    FileTransfer.State.QUEUED);
+                    FileTransfer.State.QUEUED, timestamp, timestampSent);
             FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
                     fileTransferId, contact, Direction.OUTGOING, contact.toString(), content,
                     fileIconContent, mMessagingLog);
@@ -703,6 +731,9 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             String fileTransferId) throws ServerApiException {
         try {
             long fileSize = content.getSize();
+            long timestamp = System.currentTimeMillis();
+            /* For outgoing file transfer, timestampSent = timestamp */
+            long timestampSent = timestamp;
             mImService.assertFileSizeNotExceedingMaxLimit(fileSize, "File exceeds max size.");
 
             FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
@@ -715,7 +746,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                     sLogger.debug("The max number of file transfer sessions is achieved: queue the file transfer.");
                 }
                 addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileIcon,
-                        State.QUEUED);
+                        State.QUEUED, timestamp, timestampSent);
                 return new GroupFileTransferImpl(fileTransferId, chatId,
                         mGroupFileTransferBroadcaster, mImService, storageAccessor, this,
                         mRcsSettings, mCore, mMessagingLog);
@@ -726,9 +757,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             /* If groupChatSession is established send this group file transfer. */
             if (chatSessionId != null && groupChatSession.isMediaEstablished()) {
                 addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileIcon,
-                        State.INITIATING);
+                        State.INITIATING, timestamp, timestampSent);
                 final FileSharingSession session = mImService.initiateGroupFileTransferSession(
-                        fileTransferId, content, fileIcon, chatId, chatSessionId);
+                        fileTransferId, content, fileIcon, chatId, chatSessionId, timestamp,
+                        timestampSent);
 
                 GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(
                         session.getFileTransferId(), chatId, mGroupFileTransferBroadcaster,
@@ -747,7 +779,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
              * If groupChatSession is NOT established then queue this file transfer and try to
              * rejoin group chat.
              */
-            addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileIcon, State.QUEUED);
+            addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileIcon, State.QUEUED,
+                    timestamp, timestampSent);
             if (groupChatSession != null) {
                 if (groupChatSession.isInitiatedByRemote()) {
                     if (sLogger.isActivated()) {
@@ -803,7 +836,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 State.INITIATING, ReasonCode.UNSPECIFIED);
         GroupChatSession groupChatSession = mImService.getGroupChatSession(chatId);
         final FileSharingSession session = mImService.initiateGroupFileTransferSession(
-                fileTransferId, content, fileIcon, chatId, groupChatSession.getSessionID());
+                fileTransferId, content, fileIcon, chatId, groupChatSession.getSessionID(),
+                timestamp, timestampSent);
 
         GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(fileTransferId, chatId,
                 mGroupFileTransferBroadcaster, mImService,
@@ -853,8 +887,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 return sendGroupFile(content, fileIconContent, chatId, fileTransferId);
             }
             /* If the IMS is NOT connected at this time then queue this group file. */
+            long timestamp = System.currentTimeMillis();
+            /* For outgoing file transfer, timestampSent = timestamp */
             addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileIconContent,
-                    State.QUEUED);
+                    State.QUEUED, timestamp, timestamp);
             FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
                     fileTransferId, null, Direction.OUTGOING, chatId, content, fileIconContent,
                     mMessagingLog);
@@ -1240,12 +1276,14 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param content File content
      * @param fileIcon File content
      * @param reasonCode Reason code
+     * @param timestamp Local timestamp when got invitation
+     * @param timestampSent Timestamp sent in payload for the file transfer
      */
     public void addAndBroadcastFileTransferInvitationRejected(ContactId contact, MmContent content,
-            MmContent fileIcon, ReasonCode reasonCode) {
+            MmContent fileIcon, ReasonCode reasonCode, long timestamp, long timestampSent) {
         String fileTransferId = IdGenerator.generateMessageID();
         mMessagingLog.addFileTransfer(fileTransferId, contact, Direction.INCOMING, content,
-                fileIcon, FileTransfer.State.REJECTED, reasonCode);
+                fileIcon, FileTransfer.State.REJECTED, reasonCode, timestamp, timestampSent);
 
         mOneToOneFileTransferBroadcaster.broadcastInvitation(fileTransferId);
     }

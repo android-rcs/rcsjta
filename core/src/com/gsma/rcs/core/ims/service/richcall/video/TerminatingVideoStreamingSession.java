@@ -54,6 +54,7 @@ import java.util.Vector;
  * @author Jean-Marc AUFFRET
  */
 public class TerminatingVideoStreamingSession extends VideoStreamingSession {
+
     /**
      * The logger
      */
@@ -67,12 +68,12 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
      * @param invite Initial INVITE request
      * @param contact Contact Id
      * @param rcsSettings
+     * @param timestamp Local timestamp for the session
      */
     public TerminatingVideoStreamingSession(ImsService parent, SipRequest invite,
-            ContactId contact, RcsSettings rcsSettings) {
+            ContactId contact, RcsSettings rcsSettings, long timestamp) {
         super(parent, ContentManager.createLiveVideoContentFromSdp(invite.getContentBytes()),
-                contact, rcsSettings);
-
+                contact, rcsSettings, timestamp);
         // Create dialog path
         createTerminatingDialogPath(invite);
     }
@@ -103,8 +104,10 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
             Collection<ImsSessionListener> listeners = getListeners();
             ContactId contact = getRemoteContact();
             MmContent content = getContent();
+            long timestamp = getTimestamp();
             for (ImsSessionListener listener : listeners) {
-                ((VideoStreamingSessionListener) listener).handleSessionInvited(contact, content);
+                ((VideoStreamingSessionListener) listener).handleSessionInvited(contact, content,
+                        timestamp);
             }
 
             // Wait invitation answer

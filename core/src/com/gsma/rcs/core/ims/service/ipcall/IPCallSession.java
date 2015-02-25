@@ -43,16 +43,16 @@ import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.richcall.video.SdpOrientationExtension;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.ipcalldraft.AudioCodec;
+import com.gsma.rcs.service.ipcalldraft.IIPCallPlayer;
+import com.gsma.rcs.service.ipcalldraft.IIPCallPlayerListener;
+import com.gsma.rcs.service.ipcalldraft.IIPCallRenderer;
+import com.gsma.rcs.service.ipcalldraft.IIPCallRendererListener;
 import com.gsma.rcs.service.ipcalldraft.VideoCodec;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.rcs.service.ipcalldraft.IIPCallPlayer;
-import com.gsma.rcs.service.ipcalldraft.IIPCallPlayerListener;
-import com.gsma.rcs.service.ipcalldraft.IIPCallRenderer;
-import com.gsma.rcs.service.ipcalldraft.IIPCallRendererListener;
 
 import android.os.RemoteException;
 
@@ -117,10 +117,11 @@ public abstract class IPCallSession extends ImsServiceSession {
      * @param audioContent Audio content
      * @param videoContent Video content
      * @param rcsSettings
+     * @param timestamp Local timestamp for the session
      */
     public IPCallSession(ImsService imsService, ContactId contact, AudioContent audioContent,
-            VideoContent videoContent, RcsSettings rcsSettings) {
-        super(imsService, contact, PhoneUtils.formatContactIdToUri(contact), rcsSettings);
+            VideoContent videoContent, RcsSettings rcsSettings, long timestamp) {
+        super(imsService, contact, PhoneUtils.formatContactIdToUri(contact), rcsSettings, timestamp);
 
         mAudioContent = audioContent;
         mVideoContent = videoContent;

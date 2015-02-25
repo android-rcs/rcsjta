@@ -38,8 +38,9 @@ public interface GroupChatSessionListener extends ChatSessionListener {
      * 
      * @param contact Contact identifier
      * @param state ParticipantStatus for the contact
+     * @param timestamp Local timestamp when got notification
      */
-    public void handleConferenceEvent(ContactId contact, ParticipantStatus status);
+    public void handleConferenceEvent(ContactId contact, ParticipantStatus status, long timestamp);
 
     /**
      * A session invitation has been received
@@ -47,9 +48,10 @@ public interface GroupChatSessionListener extends ChatSessionListener {
      * @param contact Remote contact
      * @param subject
      * @param participants Participants
+     * @param timestamp Local timestamp when got invitation
      */
     public void handleSessionInvited(ContactId contact, String subject,
-            Map<ContactId, GroupChat.ParticipantStatus> participants);
+            Map<ContactId, GroupChat.ParticipantStatus> participants, long timestamp);
 
     /**
      * Chat is auto-accepted and the session is in the process of being started
@@ -57,9 +59,10 @@ public interface GroupChatSessionListener extends ChatSessionListener {
      * @param contact Remote contact
      * @param subject
      * @param participants Participants
+     * @param timestamp Local timestamp when got invitation
      */
     public void handleSessionAutoAccepted(ContactId contact, String subject,
-            Map<ContactId, GroupChat.ParticipantStatus> participants);
+            Map<ContactId, GroupChat.ParticipantStatus> participants, long timestamp);
 
     /**
      * One or several participants has been updated

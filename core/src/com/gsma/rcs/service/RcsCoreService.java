@@ -882,40 +882,45 @@ public class RcsCoreService extends Service implements CoreListener {
 
     @Override
     public void handleFileTransferInvitationRejected(ContactId contact, MmContent content,
-            MmContent fileicon, FileTransfer.ReasonCode reasonCode) {
-        mFtApi.addAndBroadcastFileTransferInvitationRejected(contact, content, fileicon, reasonCode);
+            MmContent fileicon, FileTransfer.ReasonCode reasonCode, long timestamp,
+            long timestampSent) {
+        mFtApi.addAndBroadcastFileTransferInvitationRejected(contact, content, fileicon,
+                reasonCode, timestamp, timestampSent);
     }
 
     @Override
     public void handleGroupChatInvitationRejected(String chatId, ContactId contact, String subject,
-            Map<ContactId, ParticipantStatus> participants, GroupChat.ReasonCode reasonCode) {
+            Map<ContactId, ParticipantStatus> participants, GroupChat.ReasonCode reasonCode, long timestamp) {
         mChatApi.addAndBroadcastGroupChatInvitationRejected(chatId, contact, subject, participants,
-                reasonCode);
+                reasonCode, timestamp);
     }
 
     @Override
     public void handleImageSharingInvitationRejected(ContactId contact, MmContent content,
-            ImageSharing.ReasonCode reasonCode) {
-        mIshApi.addAndBroadcastImageSharingInvitationRejected(contact, content, reasonCode);
+            ImageSharing.ReasonCode reasonCode, long timestamp) {
+        mIshApi.addAndBroadcastImageSharingInvitationRejected(contact, content, reasonCode,
+                timestamp);
     }
 
     @Override
     public void handleVideoSharingInvitationRejected(ContactId contact, VideoContent content,
-            VideoSharing.ReasonCode reasonCode) {
-        mVshApi.addAndBroadcastVideoSharingInvitationRejected(contact, content, reasonCode);
+            VideoSharing.ReasonCode reasonCode, long timestamp) {
+        mVshApi.addAndBroadcastVideoSharingInvitationRejected(contact, content, reasonCode,
+                timestamp);
     }
 
     @Override
     public void handleGeolocSharingInvitationRejected(ContactId contact, GeolocContent content,
-            GeolocSharing.ReasonCode reasonCode) {
-        mGshApi.addAndBroadcastGeolocSharingInvitationRejected(contact, content, reasonCode);
+            GeolocSharing.ReasonCode reasonCode, long timestamp) {
+        mGshApi.addAndBroadcastGeolocSharingInvitationRejected(contact, content, reasonCode,
+                timestamp);
     }
 
     @Override
     public void handleIPCallInvitationRejected(ContactId contact, AudioContent audioContent,
-            VideoContent videoContent, IPCall.ReasonCode reasonCode) {
+            VideoContent videoContent, IPCall.ReasonCode reasonCode, long timestamp) {
         mIpcallApi.addAndBroadcastIPCallInvitationRejected(contact, audioContent, videoContent,
-                reasonCode);
+                reasonCode, timestamp);
     }
 
     public void handleOneOneChatSessionInitiation(OneToOneChatSession session) {

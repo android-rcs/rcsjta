@@ -52,6 +52,8 @@ public class GroupChatPersistedStorageAccessor {
 
     private ContactId mContact;
 
+    private long mTimestamp;
+
     private final RcsSettings mRcsSettings;
 
     public GroupChatPersistedStorageAccessor(String chatId, MessagingLog messagingLog,
@@ -62,12 +64,13 @@ public class GroupChatPersistedStorageAccessor {
     }
 
     public GroupChatPersistedStorageAccessor(String chatId, String subject, Direction direction,
-            MessagingLog messagingLog, RcsSettings rcsSettings) {
+            MessagingLog messagingLog, RcsSettings rcsSettings, long timestamp) {
         mChatId = chatId;
         mSubject = subject;
         mDirection = direction;
         mMessagingLog = messagingLog;
         mRcsSettings = rcsSettings;
+        mTimestamp = timestamp;
     }
 
     private void cacheData() {
@@ -81,6 +84,7 @@ public class GroupChatPersistedStorageAccessor {
             if (contact != null) {
                 mContact = ContactUtils.createContactId(contact);
             }
+            mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(GroupChat.TIMESTAMP));
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -116,6 +120,17 @@ public class GroupChatPersistedStorageAccessor {
             cacheData();
         }
         return mSubject;
+    }
+
+    public long getTimestamp() {
+        /*
+         * Utilizing cache here as timestamp can't be changed in persistent storage after entry
+         * insertion anyway so no need to query for it multiple times.
+         */
+        if (mTimestamp == 0) {
+            cacheData();
+        }
+        return mTimestamp;
     }
 
     public ContactId getRemoteContact() {
@@ -170,13 +185,20 @@ public class GroupChatPersistedStorageAccessor {
 
     public void addGroupChat(ContactId contact, String subject,
             Map<ContactId, ParticipantStatus> participants, State state, ReasonCode reasonCode,
-            Direction direction) {
+            Direction direction, long timestamp) {
+        mContact = contact;
+        mSubject = subject;
+        mDirection = direction;
+        mTimestamp = timestamp;
         mMessagingLog.addGroupChat(mChatId, contact, subject, participants, state, reasonCode,
-                direction);
+                direction, timestamp);
     }
 
-    public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent.Status status) {
-        mMessagingLog.addGroupChatEvent(mChatId, contact, status);
+    public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent.Status status,
+            long timestamp) {
+        mContact = contact;
+        mTimestamp = timestamp;
+        mMessagingLog.addGroupChatEvent(mChatId, contact, status, timestamp);
     }
 
     public void addGroupChatMessage(ChatMessage msg, Direction direction, Status status,

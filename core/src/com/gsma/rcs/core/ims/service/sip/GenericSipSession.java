@@ -22,9 +22,6 @@
 
 package com.gsma.rcs.core.ims.service.sip;
 
-import gov2.nist.javax2.sip.header.ims.PPreferredServiceHeader;
-import javax2.sip.header.ExtensionHeader;
-
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
@@ -39,6 +36,10 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
+
+import gov2.nist.javax2.sip.header.ims.PPreferredServiceHeader;
+
+import javax2.sip.header.ExtensionHeader;
 
 /**
  * Abstract generic SIP session
@@ -63,10 +64,11 @@ public abstract class GenericSipSession extends ImsServiceSession {
      * @param contact Remote contactId
      * @param featureTag Feature tag
      * @param rcsSettings
+     * @param timestamp Local timestamp for the session
      */
     public GenericSipSession(ImsService parent, ContactId contact, String featureTag,
-            RcsSettings rcsSettings) {
-        super(parent, contact, PhoneUtils.formatContactIdToUri(contact), rcsSettings);
+            RcsSettings rcsSettings, long timestamp) {
+        super(parent, contact, PhoneUtils.formatContactIdToUri(contact), rcsSettings, timestamp);
 
         // Set the service feature tag
         mFeatureTag = featureTag;

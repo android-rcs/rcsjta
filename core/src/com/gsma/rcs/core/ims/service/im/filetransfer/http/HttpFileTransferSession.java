@@ -32,17 +32,13 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
-import com.gsma.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 
-import android.text.TextUtils;
-
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Abstract file transfer HTTP session
@@ -87,11 +83,13 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * @param fileTransferId File transfer Id
      * @param rcsSettings
      * @param messagingLog
+     * @param timestamp Local timestamp for the session
      */
     public HttpFileTransferSession(ImsService parent, MmContent content, ContactId contact,
             String remoteUri, MmContent fileIcon, String chatSessionId, String chatContributionId,
-            String fileTransferId, RcsSettings rcsSettings, MessagingLog messagingLog) {
-        super(parent, content, contact, remoteUri, fileIcon, fileTransferId, rcsSettings);
+            String fileTransferId, RcsSettings rcsSettings, MessagingLog messagingLog,
+            long timestamp) {
+        super(parent, content, contact, remoteUri, fileIcon, fileTransferId, rcsSettings, timestamp);
         mChatSessionId = chatSessionId;
         setContributionID(chatContributionId);
         mSessionState = HttpTransferState.PENDING;

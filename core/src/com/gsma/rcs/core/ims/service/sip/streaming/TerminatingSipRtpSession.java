@@ -63,12 +63,13 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
      * @param invite Initial INVITE request
      * @param sessionInvite
      * @param rcsSettings
+     * @param timestamp Local timestamp for the session
      * @throws RcsContactFormatException
      */
     public TerminatingSipRtpSession(ImsService parent, SipRequest invite, Intent sessionInvite,
-            RcsSettings rcsSettings) throws RcsContactFormatException {
+            RcsSettings rcsSettings, long timestamp) throws RcsContactFormatException {
         super(parent, ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite)), invite
-                .getFeatureTags().get(0), rcsSettings);
+                .getFeatureTags().get(0), rcsSettings, timestamp);
 
         mSessionInvite = sessionInvite;
         // Create dialog path

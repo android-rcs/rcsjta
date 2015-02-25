@@ -25,7 +25,6 @@ package com.gsma.rcs.provider.messaging;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.messaging.MessageData;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
@@ -45,7 +44,6 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
 
-import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -119,8 +117,8 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_MIME_TYPE, apiMimeType);
         values.put(MessageData.KEY_CONTENT, ChatUtils.networkContentToPersistedContent(msg));
 
-        values.put(MessageData.KEY_TIMESTAMP, msg.getDate().getTime());
-        values.put(MessageData.KEY_TIMESTAMP_SENT, 0);
+        values.put(MessageData.KEY_TIMESTAMP, msg.getTimestamp());
+        values.put(MessageData.KEY_TIMESTAMP_SENT, msg.getTimestampSent());
         values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
         values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
 
@@ -155,8 +153,8 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_MIME_TYPE, apiMimeType);
         values.put(MessageData.KEY_CONTENT, ChatUtils.networkContentToPersistedContent(msg));
 
-        values.put(MessageData.KEY_TIMESTAMP, msg.getDate().getTime());
-        values.put(MessageData.KEY_TIMESTAMP_SENT, msg.getDate().getTime());
+        values.put(MessageData.KEY_TIMESTAMP, msg.getTimestamp());
+        values.put(MessageData.KEY_TIMESTAMP_SENT, msg.getTimestampSent());
         values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
         values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
 
@@ -219,20 +217,10 @@ public class MessageLog implements IMessageLog {
         String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
         values.put(MessageData.KEY_MIME_TYPE, apiMimeType);
         values.put(MessageData.KEY_CONTENT, ChatUtils.networkContentToPersistedContent(msg));
-
-        if (direction == Direction.INCOMING) {
-            // Receive message
-            values.put(MessageData.KEY_TIMESTAMP, msg.getDate().getTime());
-            values.put(MessageData.KEY_TIMESTAMP_SENT, 0);
-            values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
-            values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
-        } else {
-            // Send message
-            values.put(MessageData.KEY_TIMESTAMP, msg.getDate().getTime());
-            values.put(MessageData.KEY_TIMESTAMP_SENT, msg.getDate().getTime());
-            values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
-            values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
-        }
+        values.put(MessageData.KEY_TIMESTAMP, msg.getTimestamp());
+        values.put(MessageData.KEY_TIMESTAMP_SENT, msg.getTimestampSent());
+        values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
+        values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
         mLocalContentResolver.insert(Message.CONTENT_URI, values);
 
         if (direction == Direction.OUTGOING) {
@@ -277,7 +265,8 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
-    public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent.Status status) {
+    public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent.Status status,
+            long timestamp) {
         if (logger.isActivated()) {
             logger.debug("Add group chat system message: chatID=" + chatId + ", contact=" + contact
                     + ", status=" + status);
@@ -292,9 +281,9 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_STATUS, status.toInt());
         values.put(MessageData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
         values.put(MessageData.KEY_DIRECTION, Direction.IRRELEVANT.toInt());
-        values.put(ChatData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
         values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD.toInt());
-        values.put(MessageData.KEY_TIMESTAMP_SENT, 0);
+        values.put(MessageData.KEY_TIMESTAMP, timestamp);
+        values.put(MessageData.KEY_TIMESTAMP_SENT, timestamp);
         values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
         values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
         mLocalContentResolver.insert(Message.CONTENT_URI, values);
@@ -308,7 +297,6 @@ public class MessageLog implements IMessageLog {
         }
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_READ_STATUS, ReadStatus.READ.toInt());
-        values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, Calendar.getInstance().getTimeInMillis());
 
         if (mLocalContentResolver.update(Uri.withAppendedPath(Message.CONTENT_URI, msgId), values,
                 null, null) < 1) {
@@ -330,8 +318,7 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_STATUS, status.toInt());
         values.put(MessageData.KEY_REASON_CODE, reasonCode.toInt());
         if (Status.DELIVERED == status) {
-            values.put(MessageData.KEY_TIMESTAMP_DELIVERED, Calendar.getInstance()
-                    .getTimeInMillis());
+            values.put(MessageData.KEY_TIMESTAMP_DELIVERED, System.currentTimeMillis());
         }
 
         if (mLocalContentResolver.update(Uri.withAppendedPath(Message.CONTENT_URI, msgId), values,
@@ -445,7 +432,7 @@ public class MessageLog implements IMessageLog {
         if (logger.isActivated()) {
             logger.debug("Get message timestamp for ".concat(msgId));
         }
-        return getDataAsLong(getMessageData(MessageData.KEY_TIMESTAMP_DELIVERED, msgId));
+        return getDataAsLong(getMessageData(MessageData.KEY_TIMESTAMP, msgId));
     }
 
     @Override
@@ -500,13 +487,12 @@ public class MessageLog implements IMessageLog {
 
     /*
      * (non-Javadoc)
-     * @see com.orangelabs.rcs.provider.messaging.IMessageLog#
-     * getQueuedChatMessages(ContactId)
+     * @see com.orangelabs.rcs.provider.messaging.IMessageLog# getQueuedChatMessages(ContactId)
      */
     @Override
     public Cursor getQueuedOneToOneChatMessages(ContactId contact) {
         String[] selectionArgs = new String[] {
-                contact.toString()
+            contact.toString()
         };
         return mLocalContentResolver.query(Message.CONTENT_URI, null,
                 SELECTION_QUEUED_ONETOONE_CHAT_MESSAGES, selectionArgs, ORDER_BY_TIMESTAMP_ASC);
@@ -518,12 +504,8 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_STATUS, Status.SENDING.toInt());
         values.put(MessageData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
         /* Reset the timestamp as this message was originally queued and is sent only now. */
-        /*
-         * TODO: Change to message.getTimestamp() and message.getTimestampSent() respectively once
-         * these methods have been introduced in ChatMessage
-         */
-        values.put(MessageData.KEY_TIMESTAMP, message.getDate().getTime());
-        values.put(MessageData.KEY_TIMESTAMP_SENT, message.getServerDate().getTime());
+        values.put(MessageData.KEY_TIMESTAMP, message.getTimestamp());
+        values.put(MessageData.KEY_TIMESTAMP_SENT, message.getTimestampSent());
         mLocalContentResolver.update(
                 Uri.withAppendedPath(Message.CONTENT_URI, message.getMessageId()), values, null,
                 null);
@@ -536,5 +518,20 @@ public class MessageLog implements IMessageLog {
         };
         return mLocalContentResolver.query(Message.CONTENT_URI, null,
                 SELECTION_QUEUED_GROUP_CHAT_MESSAGES, selectionArgs, ORDER_BY_TIMESTAMP_ASC);
+    }
+
+    @Override
+    public void setChatMessageTimestamp(String msgId, long timestamp, long timestampSent) {
+        if (logger.isActivated()) {
+            logger.debug(new StringBuilder("Update chat message: msgID=").append(msgId)
+                    .append(", timestamp=").append(timestamp).append(", timestampSent=")
+                    .append(timestampSent).toString());
+        }
+        ContentValues values = new ContentValues();
+        values.put(MessageData.KEY_TIMESTAMP, timestamp);
+        values.put(MessageData.KEY_TIMESTAMP_SENT, timestampSent);
+
+        mLocalContentResolver.update(Uri.withAppendedPath(Message.CONTENT_URI, msgId), values,
+                null, null);
     }
 }

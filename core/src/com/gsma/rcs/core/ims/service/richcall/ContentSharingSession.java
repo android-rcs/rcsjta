@@ -22,8 +22,6 @@
 
 package com.gsma.rcs.core.ims.service.richcall;
 
-import android.net.Uri;
-
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
@@ -32,6 +30,8 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.services.rcs.contact.ContactId;
+
+import android.net.Uri;
 
 /**
  * Content sharing session
@@ -51,10 +51,11 @@ public abstract class ContentSharingSession extends ImsServiceSession {
      * @param content Content to be shared
      * @param contact Remote contactId
      * @param rcsSettings
+     * @param timestamp Local timestamp for the session
      */
     public ContentSharingSession(ImsService parent, MmContent content, ContactId contact,
-            RcsSettings rcsSettings) {
-        super(parent, contact, PhoneUtils.formatContactIdToUri(contact), rcsSettings);
+            RcsSettings rcsSettings, long timestamp) {
+        super(parent, contact, PhoneUtils.formatContactIdToUri(contact), rcsSettings, timestamp);
 
         mContent = content;
     }

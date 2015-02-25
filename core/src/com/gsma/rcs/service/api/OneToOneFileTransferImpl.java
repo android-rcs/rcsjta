@@ -105,7 +105,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
     public OneToOneFileTransferImpl(String transferId,
             IOneToOneFileTransferBroadcaster broadcaster, InstantMessagingService imService,
             FileTransferPersistedStorageAccessor persistentStorage,
-            FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings, Core core, MessagingLog messagingLog) {
+            FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings, Core core,
+            MessagingLog messagingLog) {
         mFileTransferId = transferId;
         mBroadcaster = broadcaster;
         mImService = imService;
@@ -601,6 +602,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                 session = new ResumeDownloadFileSharingSession(mImService,
                         FileTransferUtils.createMmContent(resume.getFile()),
                         (FtHttpResumeDownload) resume, mRcsSettings, mMessagingLog);
+
             }
             session.addListener(this);
             session.startSession();
@@ -958,26 +960,28 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
     }
 
     @Override
-    public void handleSessionInvited(ContactId contact, MmContent file, MmContent fileIcon) {
+    public void handleSessionInvited(ContactId contact, MmContent file, MmContent fileIcon,
+            long timestamp, long timestampSent) {
         if (logger.isActivated()) {
             logger.info("Invited to one-to-one file transfer session");
         }
         synchronized (lock) {
             mPersistentStorage.addFileTransfer(contact, Direction.INCOMING, file, fileIcon,
-                    State.INVITED, ReasonCode.UNSPECIFIED);
+                    State.INVITED, ReasonCode.UNSPECIFIED, timestamp, timestampSent);
         }
 
         mBroadcaster.broadcastInvitation(mFileTransferId);
     }
 
     @Override
-    public void handleSessionAutoAccepted(ContactId contact, MmContent file, MmContent fileIcon) {
+    public void handleSessionAutoAccepted(ContactId contact, MmContent file, MmContent fileIcon,
+            long timestamp, long timestampSent) {
         if (logger.isActivated()) {
             logger.info("Session auto accepted");
         }
         synchronized (lock) {
             mPersistentStorage.addFileTransfer(contact, Direction.INCOMING, file, fileIcon,
-                    State.ACCEPTING, ReasonCode.UNSPECIFIED);
+                    State.ACCEPTING, ReasonCode.UNSPECIFIED, timestamp, timestampSent);
         }
 
         mBroadcaster.broadcastInvitation(mFileTransferId);

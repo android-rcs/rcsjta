@@ -18,10 +18,9 @@
 
 package com.gsma.rcs.core.ims.service.im.chat.cpim;
 
-import java.util.Date;
-import java.util.Hashtable;
-
 import com.gsma.rcs.utils.DateUtils;
+
+import java.util.Hashtable;
 
 /**
  * CPIM message
@@ -158,16 +157,16 @@ public class CpimMessage {
     }
 
     /**
-     * Returns message date
+     * Returns message timestamp sent
      * 
-     * @return Date
+     * @return timestamp sent in payload
      */
-    public Date getMessageDate() {
+    public long getTimestampSent() {
         String header = getHeader(CpimMessage.HEADER_DATETIME);
         if (header != null) {
-            return new Date(DateUtils.decodeDate(header));
+            return DateUtils.decodeDate(header);
         } else {
-            return null;
+            return 0;
         }
     }
 }

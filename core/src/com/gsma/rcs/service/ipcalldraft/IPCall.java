@@ -25,7 +25,6 @@ package com.gsma.rcs.service.ipcalldraft;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.rcs.service.ipcalldraft.IIPCall;
 
 import android.util.SparseArray;
 
@@ -288,6 +287,19 @@ public class IPCall {
     public Direction getDirection() throws RcsServiceException {
         try {
             return Direction.valueOf(callInf.getDirection());
+        } catch (Exception e) {
+            throw new RcsServiceException(e.getMessage());
+        }
+    }
+
+    /**
+     * Returns the timestamp of the call
+     *
+     * @return timestamp
+     */
+    public long getTimestamp() throws RcsServiceException {
+        try {
+            return callInf.getTimestamp();
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }

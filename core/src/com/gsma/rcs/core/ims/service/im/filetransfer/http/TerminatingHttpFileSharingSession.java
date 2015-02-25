@@ -79,6 +79,11 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
     protected final boolean mGroupFileTransfer;
 
     /**
+     * The remote timestamp sent in payload for incoming file sharing
+     */
+    private long mTimestampSent;
+
+    /**
      * Constructor
      * 
      * @param parent IMS service
@@ -89,16 +94,20 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
      * @param displayName the display name of the remote contact
      * @param rcsSettings
      * @param messagingLog
+     * @param timestamp Local timestamp for the session
+     * @param timestampSent the remote timestamp sent in payload for the file sharing
      */
     public TerminatingHttpFileSharingSession(ImsService parent, ChatSession chatSession,
             FileTransferHttpInfoDocument fileTransferInfo, String fileTransferId,
-            ContactId contact, String displayName, RcsSettings rcsSettings, MessagingLog messagingLog) {
+            ContactId contact, String displayName, RcsSettings rcsSettings,
+            MessagingLog messagingLog, long timestamp, long timestampSent) {
         super(parent, ContentManager.createMmContent(ContentManager.generateUriForReceivedContent(
                 fileTransferInfo.getFilename(), fileTransferInfo.getFileType(), rcsSettings),
                 fileTransferInfo.getFileSize(), fileTransferInfo.getFilename()), contact,
                 PhoneUtils.formatContactIdToUri(contact), null, chatSession.getSessionID(),
-                chatSession.getContributionID(), fileTransferId, rcsSettings, messagingLog);
-
+                chatSession.getContributionID(), fileTransferId, rcsSettings, messagingLog,
+                timestamp);
+        mTimestampSent = timestampSent;
         setRemoteDisplayName(displayName);
         // Build a new dialogPath with this of chatSession and an empty CallId
         setDialogPath(new SipDialogPath(chatSession.getDialogPath()));
@@ -143,9 +152,10 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
         super(parent, content, resume.getContact(), PhoneUtils.formatContactIdToUri(resume
                 .getContact()), resume.getFileicon() != null ? FileTransferUtils
                 .createMmContent(resume.getFileicon()) : null, null, resume.getChatId(), resume
-                .getFileTransferId(), rcsSettings, messagingLog);
+                .getFileTransferId(), rcsSettings, messagingLog, resume.getTimestamp());
         mGroupFileTransfer = resume.isGroupTransfer();
         mResumeFT = resume;
+        mTimestampSent = resume.getTimestampSent();
         // Instantiate the download manager
         downloadManager = new HttpDownloadManager(getContent(), this,
                 resume.getDownloadServerAddress(), rcsSettings);
@@ -207,15 +217,15 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
             ContactId contact = getRemoteContact();
             MmContent content = getContent();
             MmContent fileIcon = getFileicon();
+            long timestamp = getTimestamp();
             /* Check if session should be auto-accepted once */
             if (isSessionAccepted()) {
                 if (logger.isActivated()) {
                     logger.debug("Received http file transfer invitation marked for auto-accept");
                 }
-
                 for (ImsSessionListener listener : listeners) {
                     ((FileSharingSessionListener) listener).handleSessionAutoAccepted(contact,
-                            content, fileIcon);
+                            content, fileIcon, timestamp, mTimestampSent);
                 }
             } else {
                 if (logger.isActivated()) {
@@ -224,7 +234,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
 
                 for (ImsSessionListener listener : listeners) {
                     ((FileSharingSessionListener) listener).handleSessionInvited(contact, content,
-                            fileIcon);
+                            fileIcon, timestamp, mTimestampSent);
                 }
 
                 InvitationStatus answer = waitInvitationAnswer();
@@ -319,7 +329,8 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
                 // Send delivery report "displayed"
                 // According to BB PDD section 6.1.4 there should be no display for GC messages.
                 if (!mGroupFileTransfer) {
-                    sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+                    sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
+                            System.currentTimeMillis());
                 }
             } else {
                 // Don't call handleError in case of Pause or Cancel
@@ -375,8 +386,9 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
      * Send delivery report
      * 
      * @param status Report status
+     * @param timestamp Local timestamp
      */
-    protected void sendDeliveryReport(String status) {
+    protected void sendDeliveryReport(String status, long timestamp) {
         String msgId = getFileTransferId();
         if (logger.isActivated()) {
             logger.debug("Send delivery report " + status);
@@ -391,11 +403,11 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
         }
         if (chatSession != null && chatSession.isMediaEstablished()) {
             // Send message delivery status via a MSRP
-            chatSession.sendMsrpMessageDeliveryStatus(contact, msgId, status);
+            chatSession.sendMsrpMessageDeliveryStatus(contact, msgId, status, timestamp);
         } else {
             // Send message delivery status via a SIP MESSAGE
             imService.getImdnManager().sendMessageDeliveryStatusImmediately(contact, msgId, status,
-                    remoteInstanceId);
+                    remoteInstanceId, timestamp);
         }
     }
 
@@ -422,7 +434,8 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
                     handleFileTransfered();
 
                     // Send delivery report "displayed"
-                    sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+                    sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
+                            System.currentTimeMillis());
                 } else {
                     // Don't call handleError in case of Pause or Cancel
                     if (downloadManager.isCancelled() || downloadManager.isPaused()) {

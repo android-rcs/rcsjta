@@ -24,13 +24,6 @@ package com.gsma.rcs.service.api;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import android.os.IBinder;
-
 import com.gsma.rcs.core.content.GeolocContent;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.ImsModule;
@@ -54,12 +47,19 @@ import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingListener;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingService;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
+
+import android.os.IBinder;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Geoloc sharing service implementation
@@ -241,7 +241,8 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 
         String sharingId = session.getSessionID();
         GeolocSharingPersistedStorageAccessor persistedStorage = new GeolocSharingPersistedStorageAccessor(
-                sharingId, contact, session.getGeoloc(), Direction.INCOMING, mRichcallLog);
+                sharingId, contact, session.getGeoloc(), Direction.INCOMING, mRichcallLog,
+                session.getTimestamp());
         GeolocSharingImpl geolocSharing = new GeolocSharingImpl(sharingId, mBroadcaster,
                 mRichcallService, this, persistedStorage);
         addGeolocSharing(geolocSharing);
@@ -270,22 +271,23 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
         try {
             // Create a geoloc content
             String msgId = IdGenerator.generateMessageID();
+            long timestamp = System.currentTimeMillis();
             String geolocDoc = ChatUtils.buildGeolocDocument(geoloc,
-                    ImsModule.IMS_USER_PROFILE.getPublicUri(), msgId);
+                    ImsModule.IMS_USER_PROFILE.getPublicUri(), msgId, timestamp);
             byte[] data = geolocDoc.getBytes(UTF8);
             MmContent content = new GeolocContent("geoloc.xml", data.length, data);
 
             // Initiate a sharing session
             final GeolocTransferSession session = mRichcallService.initiateGeolocSharingSession(
-                    contact, content, geoloc);
+                    contact, content, geoloc, timestamp);
             String sharingId = session.getSessionID();
             mRichcallLog.addOutgoingGeolocSharing(contact, sharingId, geoloc, State.INITIATING,
-                    ReasonCode.UNSPECIFIED);
+                    ReasonCode.UNSPECIFIED, timestamp);
             mBroadcaster.broadcastStateChanged(contact, sharingId, State.INITIATING,
                     ReasonCode.UNSPECIFIED);
 
             GeolocSharingPersistedStorageAccessor persistedStorage = new GeolocSharingPersistedStorageAccessor(
-                    sharingId, contact, geoloc, Direction.OUTGOING, mRichcallLog);
+                    sharingId, contact, geoloc, Direction.OUTGOING, mRichcallLog, timestamp);
             GeolocSharingImpl geolocSharing = new GeolocSharingImpl(sharingId, mBroadcaster,
                     mRichcallService, this, persistedStorage);
 
@@ -402,12 +404,13 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * @param contact Contact ID
      * @param content Geolocation content
      * @param reasonCode Reason code
+     * @param timestamp Local timestamp when got invitation
      */
     public void addAndBroadcastGeolocSharingInvitationRejected(ContactId contact,
-            GeolocContent content, ReasonCode reasonCode) {
+            GeolocContent content, ReasonCode reasonCode, long timestamp) {
         String sharingId = SessionIdGenerator.getNewId();
         RichCallHistory.getInstance().addIncomingGeolocSharing(contact, sharingId,
-                GeolocSharing.State.REJECTED, reasonCode);
+                GeolocSharing.State.REJECTED, reasonCode, timestamp);
         mBroadcaster.broadcastInvitation(sharingId);
     }
 

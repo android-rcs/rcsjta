@@ -44,8 +44,6 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
 
-import java.util.Calendar;
-
 /**
  * Rich call history
  * 
@@ -75,7 +73,7 @@ public class RichCallHistory {
      */
     private Cursor getImageTransferData(String columnName, String sharingId) {
         String[] projection = new String[] {
-            columnName
+                columnName
         };
         Cursor cursor = null;
         try {
@@ -106,7 +104,7 @@ public class RichCallHistory {
      */
     private Cursor getVideoSharingData(String columnName, String sharingId) {
         String[] projection = new String[] {
-            columnName
+                columnName
         };
         Cursor cursor = null;
         try {
@@ -188,7 +186,7 @@ public class RichCallHistory {
      */
     private Cursor getGeolocSharingData(String columnName, String sharingId) throws SQLException {
         String[] projection = new String[] {
-            columnName
+                columnName
         };
         Cursor cursor = null;
         try {
@@ -227,10 +225,12 @@ public class RichCallHistory {
      * @param content Shared content
      * @param state Call state
      * @param reasonCode Reason Code
+     * @param timestamp Local timestamp for both incoming and outgoing video sharing
      * @return image URI
      */
     public Uri addVideoSharing(String sharingId, ContactId contact, Direction direction,
-            VideoContent content, VideoSharing.State state, VideoSharing.ReasonCode reasonCode) {
+            VideoContent content, VideoSharing.State state, VideoSharing.ReasonCode reasonCode,
+            long timestamp) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Add new video sharing for contact ").append(contact)
                     .append(": sharingId=").append(sharingId).append(", state=").append(state)
@@ -243,7 +243,7 @@ public class RichCallHistory {
         values.put(VideoSharingData.KEY_DIRECTION, direction.toInt());
         values.put(VideoSharingData.KEY_STATE, state.toInt());
         values.put(VideoSharingData.KEY_REASON_CODE, reasonCode.toInt());
-        values.put(VideoSharingData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
+        values.put(VideoSharingData.KEY_TIMESTAMP, timestamp);
         values.put(VideoSharingData.KEY_DURATION, 0);
         values.put(VideoSharingData.KEY_VIDEO_ENCODING, content.getEncoding());
         values.put(VideoSharingData.KEY_WIDTH, content.getWidth());
@@ -301,12 +301,14 @@ public class RichCallHistory {
      * @param contact Remote contact ID
      * @param direction Call event direction
      * @param content Shared content
-     * @param status Call status
+     * @param state Call state
      * @param reasonCode Reason Code
+     * @param timestamp Local timestamp for both incoming and outgoing image sharing
      * @return uri
      */
     public Uri addImageSharing(String sharingId, ContactId contact, Direction direction,
-            MmContent content, ImageSharing.State state, ImageSharing.ReasonCode reasonCode) {
+            MmContent content, ImageSharing.State state, ImageSharing.ReasonCode reasonCode,
+            long timestamp) {
         if (logger.isActivated()) {
             logger.debug("Add new image sharing for contact " + contact + ": sharing =" + sharingId
                     + ", state=" + state);
@@ -323,7 +325,7 @@ public class RichCallHistory {
         values.put(ImageSharingData.KEY_FILESIZE, content.getSize());
         values.put(ImageSharingData.KEY_STATE, state.toInt());
         values.put(ImageSharingData.KEY_REASON_CODE, reasonCode.toInt());
-        values.put(ImageSharingData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
+        values.put(ImageSharingData.KEY_TIMESTAMP, timestamp);
         return mLocalContentResolver.insert(ImageSharingLog.CONTENT_URI, values);
     }
 
@@ -363,7 +365,7 @@ public class RichCallHistory {
         Cursor c = null;
         try {
             String[] projection = new String[] {
-                ImageSharingData.KEY_FILESIZE
+                    ImageSharingData.KEY_FILESIZE
             };
             c = mLocalContentResolver.query(
                     Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId), projection, null,
@@ -402,9 +404,10 @@ public class RichCallHistory {
      * @param sharingId Sharing ID
      * @param state Geoloc sharing state
      * @param reasonCode Reason code of the state
+     * @param timestamp Local timestamp for incoming geoloc sharing
      */
     public Uri addIncomingGeolocSharing(ContactId contact, String sharingId, State state,
-            ReasonCode reasonCode) {
+            ReasonCode reasonCode, long timestamp) {
         ContentValues values = new ContentValues();
         values.put(GeolocSharingData.KEY_SHARING_ID, sharingId);
         values.put(GeolocSharingData.KEY_CONTACT, contact.toString());
@@ -412,7 +415,7 @@ public class RichCallHistory {
         values.put(GeolocSharingData.KEY_DIRECTION, Direction.INCOMING.toInt());
         values.put(GeolocSharingData.KEY_STATE, state.toInt());
         values.put(GeolocSharingData.KEY_REASON_CODE, reasonCode.toInt());
-        values.put(GeolocSharingData.KEY_TIMESTAMP, System.currentTimeMillis());
+        values.put(GeolocSharingData.KEY_TIMESTAMP, timestamp);
         return mLocalContentResolver.insert(GeolocSharingData.CONTENT_URI, values);
     }
 
@@ -424,9 +427,10 @@ public class RichCallHistory {
      * @param geoloc Geolocation
      * @param state Geoloc sharing state
      * @param reasonCode Reason code of the state
+     * @param timestamp Local timestamp for outgoing geoloc sharing
      */
     public Uri addOutgoingGeolocSharing(ContactId contact, String sharingId, Geoloc geoloc,
-            State state, ReasonCode reasonCode) {
+            State state, ReasonCode reasonCode, long timestamp) {
         ContentValues values = new ContentValues();
         values.put(GeolocSharingData.KEY_SHARING_ID, sharingId);
         values.put(GeolocSharingData.KEY_CONTACT, contact.toString());
@@ -435,7 +439,7 @@ public class RichCallHistory {
         values.put(GeolocSharingData.KEY_DIRECTION, Direction.OUTGOING.toInt());
         values.put(GeolocSharingData.KEY_STATE, state.toInt());
         values.put(GeolocSharingData.KEY_REASON_CODE, reasonCode.toInt());
-        values.put(GeolocSharingData.KEY_TIMESTAMP, System.currentTimeMillis());
+        values.put(GeolocSharingData.KEY_TIMESTAMP, timestamp);
         return mLocalContentResolver.insert(GeolocSharingData.CONTENT_URI, values);
     }
 

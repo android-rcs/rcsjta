@@ -136,7 +136,7 @@ public class JavaDepacketizer extends VideoCodec {
         output.setData(data);
         output.setLength(data.length);
         output.setOffset(0);
-        output.setTimeStamp(input.getTimeStamp());
+        output.setTimestamp(input.getTimestamp());
         output.setSequenceNumber(input.getSequenceNumber());
         output.setVideoOrientation(input.getVideoOrientation());
         output.setFormat(input.getFormat());
@@ -181,7 +181,7 @@ public class JavaDepacketizer extends VideoCodec {
             output.setData(data);
             output.setLength(data.length);
             output.setOffset(0);
-            output.setTimeStamp(input.getTimeStamp());
+            output.setTimestamp(input.getTimestamp());
             output.setSequenceNumber(input.getSequenceNumber());
             output.setVideoOrientation(input.getVideoOrientation());
             output.setFormat(input.getFormat());
@@ -205,7 +205,7 @@ public class JavaDepacketizer extends VideoCodec {
             assemblersCollection.put(input);
             if (assemblersCollection.getLastActiveAssembler().complete()) {
                 assemblersCollection.getLastActiveAssembler().copyToBuffer(output);
-                assemblersCollection.removeOldestThan(input.getTimeStamp());
+                assemblersCollection.removeOldestThan(input.getTimestamp());
                 return BUFFER_PROCESSED_OK;
             } else {
                 output.setDiscard(true);
@@ -229,7 +229,7 @@ public class JavaDepacketizer extends VideoCodec {
         private int reassembledDataPosSeqStart = Integer.MAX_VALUE; // Pos seq start
         private int reassembledDataPosSeqEnd = Integer.MIN_VALUE; // Pos seq end
         private byte reassembledDataNALHeader = 0; // Final frame NAL header
-        private long timeStamp = -1;
+        private long timestamp = -1;
         private Format format = null;
         private long seqNumber = -1;
         private VideoOrientation videoOrientation;
@@ -257,7 +257,7 @@ public class JavaDepacketizer extends VideoCodec {
 
             if (reassembledData == null) {
                 // First packet
-                timeStamp = buffer.getTimeStamp();
+                timestamp = buffer.getTimestamp();
                 format = buffer.getFormat();
                 seqNumber = buffer.getSequenceNumber();
 
@@ -375,7 +375,7 @@ public class JavaDepacketizer extends VideoCodec {
                 bDest.setData(finalData);
                 bDest.setLength(reassembledDataSize[reassembledDataPosSeqEnd]);
                 bDest.setOffset(0);
-                bDest.setTimeStamp(timeStamp);
+                bDest.setTimestamp(timestamp);
                 bDest.setFormat(format);
                 bDest.setFlags(Buffer.FLAG_RTP_MARKER | Buffer.FLAG_RTP_TIME);
                 bDest.setVideoOrientation(videoOrientation);
@@ -400,17 +400,17 @@ public class JavaDepacketizer extends VideoCodec {
             reassembledDataPosSeqStart = Integer.MAX_VALUE;
             reassembledDataPosSeqEnd = Integer.MIN_VALUE;
             reassembledDataNALHeader = 0;
-            timeStamp = -1;
+            timestamp = -1;
             format = null;
         }
 
         /**
          * Get timestamp
          * 
-         * @return long
+         * @return timestamp
          */
-        public long getTimeStamp() {
-            return timeStamp;
+        public long getTimestamp() {
+            return timestamp;
         }
     }
 
@@ -430,7 +430,7 @@ public class JavaDepacketizer extends VideoCodec {
          * @param buffer
          */
         public void put(Buffer buffer) {
-            activeAssembler = getAssembler(buffer.getTimeStamp());
+            activeAssembler = getAssembler(buffer.getTimestamp());
             assemblers[activeAssembler].put(buffer);
         }
 
@@ -444,18 +444,18 @@ public class JavaDepacketizer extends VideoCodec {
         }
 
         /**
-         * Create a new frame assembler for given timeStamp
+         * Create a new frame assembler for given timestamp
          * 
-         * @param timeStamp
+         * @param timestamp
          * @return assembler number Position of the assembler in the collection
          */
-        public int createNewAssembler(long timeStamp) {
+        public int createNewAssembler(long timestamp) {
             int spot = -1;
             if (numberOfAssemblers < NUMBER_OF_ASSEMBLERS) {
                 // If there's enough space left to create a new assembler
                 // We search its spot
                 for (int i = 0; i < numberOfAssemblers; i++) {
-                    if (timeStamp < assemblers[i].getTimeStamp()) {
+                    if (timestamp < assemblers[i].getTimestamp()) {
                         spot = i;
                     }
                 }
@@ -467,7 +467,7 @@ public class JavaDepacketizer extends VideoCodec {
                 // Store the assembler that will be "discarded" and can be reused
                 FrameAssembler oldAssembler = assemblers[numberOfAssemblers - 1];
 
-                // Decale all assemblers with newest timeStamp to the right
+                // Decale all assemblers with newest timestamp to the right
                 for (int i = numberOfAssemblers - 1; i > spot; i--) {
                     assemblers[i] = assemblers[i - 1];
                 }
@@ -502,38 +502,38 @@ public class JavaDepacketizer extends VideoCodec {
         /**
          * Get the assembler used for given timestamp
          * 
-         * @param timeStamp
-         * @return FrameAssembler associated to timeStamp
+         * @param timestamp
+         * @return FrameAssembler associated to timestamp
          */
-        public int getAssembler(long timeStamp) {
+        public int getAssembler(long timestamp) {
             int assemblerNumber = -1;
             for (int i = 0; i < numberOfAssemblers; i++) {
-                if (assemblers[i].getTimeStamp() == timeStamp) {
+                if (assemblers[i].getTimestamp() == timestamp) {
                     assemblerNumber = i;
                 }
             }
             if (assemblerNumber == -1) {
                 // Given timestamp never used, we create a new assembler
-                assemblerNumber = createNewAssembler(timeStamp);
+                assemblerNumber = createNewAssembler(timestamp);
             }
             return assemblerNumber;
         }
 
         /**
-         * Remove oldest FrameAssembler than given timeStamp (if given timeStamp has been rendered,
-         * then oldest ones are no more of no use) This also removes given timeStamp
+         * Remove oldest FrameAssembler than given timestamp (if given timestamp has been rendered,
+         * then oldest ones are no more of no use) This also removes given timestamp
          * 
-         * @param timeStamp
+         * @param timestamp
          */
-        public void removeOldestThan(long timeStamp) {
+        public void removeOldestThan(long timestamp) {
             // Find spot from which to remove
             int spot = numberOfAssemblers - 1;
             for (int i = 0; i < numberOfAssemblers; i++) {
-                if (timeStamp <= assemblers[i].getTimeStamp()) {
+                if (timestamp <= assemblers[i].getTimestamp()) {
                     spot = i;
                 }
             }
-            // remove all assemblers with oldest timeStamp to the left
+            // remove all assemblers with oldest timestamp to the left
             for (int i = numberOfAssemblers - 1; i > spot; i--) {
                 assemblers[i - 1] = assemblers[i];
             }

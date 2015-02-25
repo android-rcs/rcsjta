@@ -72,7 +72,7 @@ public class ChatMessageTest extends AndroidTestCase {
     public void testTextMessage() {
         String msgId = "" + System.currentTimeMillis();
         String txt = "Hello";
-        Date now = new Date();
+        long now = System.currentTimeMillis();
         ChatMessage msg = new ChatMessage(msgId, mContact, txt, MimeType.TEXT_MESSAGE, now,
                 "display");
 

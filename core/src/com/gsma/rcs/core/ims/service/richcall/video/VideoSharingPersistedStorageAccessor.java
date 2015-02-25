@@ -48,7 +48,7 @@ public class VideoSharingPersistedStorageAccessor {
 
     private VideoDescriptor mVideoDescriptor;
 
-    private Long mTimestamp;
+    private long mTimestamp;
 
     /**
      * Constructor
@@ -179,12 +179,16 @@ public class VideoSharingPersistedStorageAccessor {
      * @param content
      * @param state
      * @param reasonCode
+     * @param timestamp Local timestamp of the video sharing
      * @return the URI of the newly inserted item
      */
     public Uri addVideoSharing(ContactId contact, Direction direction, VideoContent content,
-            State state, ReasonCode reasonCode) {
+            State state, ReasonCode reasonCode, long timestamp) {
+        mContact = contact;
+        mDirection = direction;
+        mTimestamp = timestamp;
         return mRichCallLog.addVideoSharing(mSharingId, contact, direction, content, state,
-                reasonCode);
+                reasonCode, timestamp);
     }
 
     /**
@@ -228,10 +232,10 @@ public class VideoSharingPersistedStorageAccessor {
      */
     public long getTimestamp() {
         /*
-         * Utilizing cache here as direction can't be changed in persistent storage after entry
+         * Utilizing cache here as timestamp can't be changed in persistent storage after entry
          * insertion anyway so no need to query for it multiple times.
          */
-        if (mTimestamp == null) {
+        if (mTimestamp == 0) {
             cacheData();
         }
         return mTimestamp;

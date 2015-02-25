@@ -24,19 +24,6 @@ package com.gsma.rcs.core.ims.service.im.filetransfer;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import org.xml.sax.InputSource;
-
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.net.Uri;
-
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
@@ -54,6 +41,19 @@ import com.gsma.rcs.utils.CloseableUtils;
 import com.gsma.rcs.utils.FileUtils;
 import com.gsma.rcs.utils.MimeManager;
 import com.gsma.rcs.utils.logger.Logger;
+
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.net.Uri;
+
+import org.xml.sax.InputSource;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Utility class to manage File Transfer
@@ -241,7 +241,9 @@ public class FileTransferUtils {
      * @return FT HTTP info
      */
     public static FileTransferHttpInfoDocument getHttpFTInfo(SipRequest request) {
-        ChatMessage message = ChatUtils.getFirstMessage(request);
+        /* Not a valid timestamp here as the message is just for temp use */
+        long timestamp = -1;
+        ChatMessage message = ChatUtils.getFirstMessage(request, timestamp);
         if (message == null || !FileTransferUtils.isFileTransferHttpType(message.getMimeType())) {
             return null;
         }

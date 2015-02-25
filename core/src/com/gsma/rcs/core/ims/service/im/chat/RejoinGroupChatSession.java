@@ -55,11 +55,12 @@ public class RejoinGroupChatSession extends GroupChatSession {
      * @param groupChatInfo Group Chat information
      * @param rcsSettings Rcs settings
      * @param messagingLog Messaging log
+     * @param timestamp Local timestamp for the session
      */
     public RejoinGroupChatSession(ImsService parent, GroupChatInfo groupChatInfo,
-            RcsSettings rcsSettings, MessagingLog messagingLog) {
+            RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp) {
         super(parent, null, groupChatInfo.getRejoinId(), groupChatInfo.getParticipants(),
-                rcsSettings, messagingLog);
+                rcsSettings, messagingLog, timestamp);
 
         if (!TextUtils.isEmpty(groupChatInfo.getSubject())) {
             setSubject(groupChatInfo.getSubject());

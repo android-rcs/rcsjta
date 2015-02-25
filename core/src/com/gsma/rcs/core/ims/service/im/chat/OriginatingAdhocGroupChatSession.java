@@ -68,11 +68,12 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
      * @param contacts List of invited contacts
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
+     * @param timestamp Local timestamp for the session
      */
     public OriginatingAdhocGroupChatSession(ImsService parent, String conferenceId, String subject,
             Map<ContactId, ParticipantStatus> participantsToInvite, RcsSettings rcsSettings,
-            MessagingLog messagingLog) {
-        super(parent, null, conferenceId, participantsToInvite, rcsSettings, messagingLog);
+            MessagingLog messagingLog, long timestamp) {
+        super(parent, null, conferenceId, participantsToInvite, rcsSettings, messagingLog, timestamp);
 
         if ((subject != null) && (subject.length() > 0)) {
             setSubject(subject);

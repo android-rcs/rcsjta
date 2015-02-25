@@ -53,12 +53,13 @@ public class GeolocSharingPersistedStorageAccessor {
     }
 
     public GeolocSharingPersistedStorageAccessor(String sharingId, ContactId contact,
-            Geoloc geoloc, Direction direction, RichCallHistory richCallHistory) {
+            Geoloc geoloc, Direction direction, RichCallHistory richCallHistory, long timestamp) {
         mSharingId = sharingId;
         mContact = contact;
         mGeoloc = geoloc;
         mDirection = direction;
         mRichCallLog = richCallHistory;
+        mTimestamp = timestamp;
     }
 
     private void cacheData() {
@@ -146,10 +147,14 @@ public class GeolocSharingPersistedStorageAccessor {
     }
 
     public void setTransferred(Geoloc geoloc) {
+        mGeoloc = geoloc;
         mRichCallLog.setGeolocSharingTransferred(mSharingId, geoloc);
     }
 
-    public void addIncomingGeolocSharing(ContactId contact, State state, ReasonCode reasonCode) {
-        mRichCallLog.addIncomingGeolocSharing(mContact, mSharingId, state, reasonCode);
+    public void addIncomingGeolocSharing(ContactId contact, State state, ReasonCode reasonCode,
+            long timestamp) {
+        mContact = contact;
+        mTimestamp = timestamp;
+        mRichCallLog.addIncomingGeolocSharing(mContact, mSharingId, state, reasonCode, timestamp);
     }
 }

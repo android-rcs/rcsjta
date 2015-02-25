@@ -36,11 +36,11 @@ public class VideoSample extends MediaSample {
      * Constructor
      * 
      * @param data Data
-     * @param time Time stamp
+     * @param timestamp Timestamp
      * @param videoOrientation Video orientation
      */
-    public VideoSample(byte[] data, long time, VideoOrientation videoOrientation) {
-        super(data, time);
+    public VideoSample(byte[] data, long timestamp, VideoOrientation videoOrientation) {
+        super(data, timestamp);
         this.videoOrientation = videoOrientation;
     }
 
@@ -48,13 +48,13 @@ public class VideoSample extends MediaSample {
      * Constructor
      * 
      * @param data Data
-     * @param time Time stamp
+     * @param timestamp Timestamp
      * @Param sequenceNumber Packet sequence number
      * @param videoOrientation Video orientation
      */
-    public VideoSample(byte[] data, long time, long sequenceNumber,
+    public VideoSample(byte[] data, long timestamp, long sequenceNumber,
             VideoOrientation videoOrientation) {
-        super(data, time, sequenceNumber);
+        super(data, timestamp, sequenceNumber);
         this.videoOrientation = videoOrientation;
     }
 

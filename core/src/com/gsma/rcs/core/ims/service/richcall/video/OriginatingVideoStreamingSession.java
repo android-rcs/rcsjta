@@ -64,10 +64,11 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
      * @param content Content to be shared
      * @param contact Remote contact Id
      * @param rcsSettings
+     * @param timestamp Local timestamp for the session
      */
     public OriginatingVideoStreamingSession(ImsService parent, IVideoPlayer player,
-            MmContent content, ContactId contact, RcsSettings rcsSettings) {
-        super(parent, content, contact, rcsSettings);
+            MmContent content, ContactId contact, RcsSettings rcsSettings, long timestamp) {
+        super(parent, content, contact, rcsSettings, timestamp);
 
         // Create dialog path
         createOriginatingDialogPath();

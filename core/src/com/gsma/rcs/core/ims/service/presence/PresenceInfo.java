@@ -18,8 +18,6 @@
 
 package com.gsma.rcs.core.ims.service.presence;
 
-import java.util.Calendar;
-
 /**
  * Presence info
  * 
@@ -76,7 +74,7 @@ public class PresenceInfo {
     /**
      * Presence timestamp
      */
-    private long timestamp = Calendar.getInstance().getTimeInMillis();
+    private long timestamp = System.currentTimeMillis();
 
     /**
      * Presence status
@@ -140,7 +138,7 @@ public class PresenceInfo {
      * @return Timestamp
      */
     public static long getNewTimestamp() {
-        return Calendar.getInstance().getTimeInMillis();
+        return System.currentTimeMillis();
     }
 
     /**

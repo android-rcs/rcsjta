@@ -93,8 +93,11 @@ public interface FileSharingSessionListener extends ImsSessionListener {
      * @param contact Remote contact
      * @param file
      * @param fileIcon
+     * @param timestamp Local timestamp when got file sharing
+     * @param timestampSent Remote timestamp sent in payload for the file sharing
      */
-    public void handleSessionInvited(ContactId contact, MmContent file, MmContent fileIcon);
+    public void handleSessionInvited(ContactId contact, MmContent file, MmContent fileIcon,
+            long timestamp, long timestampSent);
 
     /**
      * Session is auto-accepted and the session is in the process of being started
@@ -102,6 +105,9 @@ public interface FileSharingSessionListener extends ImsSessionListener {
      * @param contact Remote contact
      * @param file
      * @param fileIcon
+     * @param timestamp Local timestamp when got file sharing
+     * @param timestampSent Remote timestamp sent in payload for the file sharing
      */
-    public void handleSessionAutoAccepted(ContactId contact, MmContent file, MmContent fileIcon);
+    public void handleSessionAutoAccepted(ContactId contact, MmContent file, MmContent fileIcon,
+            long timestamp, long timestampSent);
 }

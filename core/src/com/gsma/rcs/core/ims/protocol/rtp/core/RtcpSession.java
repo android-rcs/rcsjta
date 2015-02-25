@@ -245,12 +245,13 @@ public class RtcpSession {
     }
 
     /**
-     * Returns current time from the Date().getTime() function.
+     * Returns current time from the System.currentTimeMillis function.
      * 
      * @return The current time.
      */
     public long currentTime() {
-        tc = System.currentTimeMillis();
-        return (long) tc;
+        long timestamp = System.currentTimeMillis();
+        tc = timestamp;
+        return timestamp;
     }
 }

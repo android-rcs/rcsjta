@@ -268,9 +268,9 @@ public class RtcpPacketTransmitter extends Thread {
         byte V_P_RC = (byte) ((RtcpPacket.VERSION << 6) | (RtcpPacket.PADDING << 5) | (0x00));
         byte ss[] = RtcpPacketUtils.longToBytes(rtcpSession.SSRC, 4);
         byte PT[] = RtcpPacketUtils.longToBytes((long) RtcpPacket.RTCP_SR, 1);
-        byte NTP_TimeStamp[] = RtcpPacketUtils.longToBytes(rtcpSession.currentTime(), 8);
+        byte NTP_Timestamp[] = RtcpPacketUtils.longToBytes(rtcpSession.currentTime(), 8);
         short randomOffset = (short) Math.abs(rand.nextInt() & 0x000000FF);
-        byte RTP_TimeStamp[] = RtcpPacketUtils.longToBytes((long) rtcpSession.tc + randomOffset, 4);
+        byte RTP_Timestamp[] = RtcpPacketUtils.longToBytes((long) rtcpSession.tc + randomOffset, 4);
         byte SenderPacketCount[] = RtcpPacketUtils.longToBytes(rtcpSession.packetCount, 4);
         byte SenderOctetCount[] = RtcpPacketUtils.longToBytes(rtcpSession.octetCount, 4);
 
@@ -283,7 +283,7 @@ public class RtcpPacketTransmitter extends Thread {
 
         // Length is 32 bit words contained in the packet -1
         byte length[] = RtcpPacketUtils.longToBytes((FIXED_HEADER_SIZE + ss.length
-                + NTP_TimeStamp.length + RTP_TimeStamp.length + SenderPacketCount.length
+                + NTP_Timestamp.length + RTP_Timestamp.length + SenderPacketCount.length
                 + SenderOctetCount.length + receptionReportBlocks.length) / 4 - 1, 2);
 
         // Build RTCP SR Packet
@@ -292,8 +292,8 @@ public class RtcpPacketTransmitter extends Thread {
         rtcpSRPacket = RtcpPacketUtils.append(rtcpSRPacket, PT);
         rtcpSRPacket = RtcpPacketUtils.append(rtcpSRPacket, length);
         rtcpSRPacket = RtcpPacketUtils.append(rtcpSRPacket, ss);
-        rtcpSRPacket = RtcpPacketUtils.append(rtcpSRPacket, NTP_TimeStamp);
-        rtcpSRPacket = RtcpPacketUtils.append(rtcpSRPacket, RTP_TimeStamp);
+        rtcpSRPacket = RtcpPacketUtils.append(rtcpSRPacket, NTP_Timestamp);
+        rtcpSRPacket = RtcpPacketUtils.append(rtcpSRPacket, RTP_Timestamp);
         rtcpSRPacket = RtcpPacketUtils.append(rtcpSRPacket, SenderPacketCount);
         rtcpSRPacket = RtcpPacketUtils.append(rtcpSRPacket, SenderOctetCount);
         rtcpSRPacket = RtcpPacketUtils.append(rtcpSRPacket, receptionReportBlocks);

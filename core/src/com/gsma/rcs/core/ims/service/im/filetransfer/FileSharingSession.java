@@ -93,10 +93,12 @@ public abstract class FileSharingSession extends ImsServiceSession {
      * @param fileIcon File icon
      * @param filetransferId
      * @param rcsSettings
+     * @param timestamp Local timestamp for the session
      */
     public FileSharingSession(ImsService parent, MmContent content, ContactId contact,
-            String remoteUri, MmContent fileIcon, String filetransferId, RcsSettings rcsSettings) {
-        super(parent, contact, remoteUri, rcsSettings);
+            String remoteUri, MmContent fileIcon, String filetransferId, RcsSettings rcsSettings,
+            long timestamp) {
+        super(parent, contact, remoteUri, rcsSettings, timestamp);
 
         mContent = content;
         mFileIcon = fileIcon;

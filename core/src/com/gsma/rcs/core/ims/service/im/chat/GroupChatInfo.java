@@ -58,21 +58,28 @@ public class GroupChatInfo {
     private String mSubject;
 
     /**
+     * Local timestamp
+     */
+    private long mTimestamp;
+
+    /**
      * Constructor
      * 
      * @param sessionId Session ID
      * @param rejoindId Rejoin ID
-     * @param contributionId Rejoin ID
+     * @param contributionId Contribution ID
      * @param particpants Participants
      * @param subject Subject
+     * @param timestamp Local timestamp
      */
     public GroupChatInfo(String sessionId, String rejoinId, String contributionId,
-            Map<ContactId, ParticipantStatus> participants, String subject) {
+            Map<ContactId, ParticipantStatus> participants, String subject, long timestamp) {
         mSessionId = sessionId;
         mRejoinId = rejoinId;
         mContributionId = contributionId;
         mParticipants = participants;
         mSubject = subject;
+        mTimestamp = timestamp;
     }
 
     /**
@@ -121,12 +128,22 @@ public class GroupChatInfo {
     }
 
     /**
+     * Returns the timestamp
+     * 
+     * @return Timestamp
+     */
+    public long getTimestamp() {
+        return mTimestamp;
+    }
+
+    /**
      * Returns a string representation of the object
      * 
      * @return String
      */
     public String toString() {
         return "Session ID=" + mSessionId + ", Contribution ID=" + mContributionId + ", Rejoin ID="
-                + mRejoinId + ", Subject=" + mSubject + ", Participants=" + mParticipants.size();
+                + mRejoinId + ", Subject=" + mSubject + ", Participants=" + mParticipants.size()
+                + ", Timestamp=" + mTimestamp;
     }
 }

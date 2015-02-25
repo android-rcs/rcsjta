@@ -46,11 +46,13 @@ public class FtHttpResumeUpload extends FtHttpResume {
      * @param tId the {@code tId} value.
      * @param fileIcon the {@code fileIcon} value.
      * @param isGroup the {@code isGroup} value.
+     * @param timestamp the {@code timestamp} value.
+     * @param timestampSent the {@code timestampSent} value.
      */
     public FtHttpResumeUpload(HttpFileTransferSession session, String tId, Uri fileIcon,
-            boolean isGroup) {
+            boolean isGroup, long timestamp, long timestampSent) {
         this(session.getContent(), fileIcon, tId, (isGroup) ? null : session.getRemoteContact(),
-                session.getContributionID(), session.getFileTransferId(), isGroup);
+                session.getContributionID(), session.getFileTransferId(), isGroup, timestamp, timestampSent);
     }
 
     /**
@@ -63,11 +65,15 @@ public class FtHttpResumeUpload extends FtHttpResume {
      * @param chatId the {@code chatId} value.
      * @param fileTransferId the {@code fileTransferId} value.
      * @param isGroup the {@code isGroup} value.
+     * @param timestamp the {@code timestamp} value.
+     * @param timestampSent the {@code timestampSent} value.
      */
     public FtHttpResumeUpload(MmContent file, Uri fileIcon, String tId, ContactId contact,
-            String chatId, String fileTransferId, boolean isGroup) {
+            String chatId, String fileTransferId, boolean isGroup, long timestamp,
+            long timestampSent) {
         super(Direction.OUTGOING, file.getUri(), file.getName(), file.getEncoding(),
-                file.getSize(), fileIcon, contact, chatId, fileTransferId, isGroup);
+                file.getSize(), fileIcon, contact, chatId, fileTransferId, isGroup, timestamp,
+                timestampSent);
         if (tId == null)
             throw new IllegalArgumentException("Null tId");
         mTId = tId;

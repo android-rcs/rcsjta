@@ -53,7 +53,8 @@ public class ResumeDownloadFileSharingSession extends TerminatingHttpFileSharing
      * @param messagingLog
      */
     public ResumeDownloadFileSharingSession(ImsService parent, MmContent content,
-            FtHttpResumeDownload resumeDownload, RcsSettings rcsSettings, MessagingLog messagingLog) {
+            FtHttpResumeDownload resumeDownload, RcsSettings rcsSettings,
+            MessagingLog messagingLog) {
         super(parent, content, resumeDownload, rcsSettings, messagingLog);
     }
 
@@ -81,7 +82,8 @@ public class ResumeDownloadFileSharingSession extends TerminatingHttpFileSharing
                 // File transfered
                 handleFileTransfered();
                 // Send delivery report "displayed"
-                sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED);
+                sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
+                        System.currentTimeMillis());
             } else {
                 // Don't call handleError in case of Pause or Cancel
                 if (downloadManager.isCancelled() || downloadManager.isPaused()) {

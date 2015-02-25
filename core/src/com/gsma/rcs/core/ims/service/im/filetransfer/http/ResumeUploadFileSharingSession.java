@@ -59,7 +59,8 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
         super(resumeUpload.getFileTransferId(), parent, content, resumeUpload.getContact(),
                 resumeUpload.getFileicon() != null ? FileTransferUtils.createMmContent(resumeUpload
                         .getFileicon()) : null, resumeUpload.getTId(), Core.getInstance(),
-                MessagingLog.getInstance(), rcsSettings);
+                MessagingLog.getInstance(), rcsSettings, resumeUpload.getTimestamp(), resumeUpload
+                        .getTimestampSent());
         mResumeFT = resumeUpload;
     }
 

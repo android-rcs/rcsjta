@@ -33,6 +33,12 @@ import com.gsma.rcs.provider.ipcall.IPCallHistory;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.broadcaster.IPCallEventBroadcaster;
 import com.gsma.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
+import com.gsma.rcs.service.ipcalldraft.IIPCall;
+import com.gsma.rcs.service.ipcalldraft.IIPCallListener;
+import com.gsma.rcs.service.ipcalldraft.IIPCallPlayer;
+import com.gsma.rcs.service.ipcalldraft.IIPCallRenderer;
+import com.gsma.rcs.service.ipcalldraft.IIPCallService;
+import com.gsma.rcs.service.ipcalldraft.IIPCallServiceConfiguration;
 import com.gsma.rcs.service.ipcalldraft.IPCall;
 import com.gsma.rcs.service.ipcalldraft.IPCall.ReasonCode;
 import com.gsma.rcs.utils.logger.Logger;
@@ -41,14 +47,8 @@ import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.RcsServiceRegistration;
-import com.gsma.rcs.service.ipcalldraft.IIPCall;
-import com.gsma.rcs.service.ipcalldraft.IIPCallListener;
-import com.gsma.rcs.service.ipcalldraft.IIPCallPlayer;
-import com.gsma.rcs.service.ipcalldraft.IIPCallRenderer;
-import com.gsma.rcs.service.ipcalldraft.IIPCallService;
-import com.gsma.rcs.service.ipcalldraft.IIPCallServiceConfiguration;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.os.IBinder;
 
@@ -262,20 +262,22 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
         if ((player == null) || (renderer == null)) {
             throw new ServerApiException("Missing audio player or renderer");
         }
-
+        long timestamp = System.currentTimeMillis();
         try {
             // Initiate a new session
+
             final IPCallSession session = mIPCallService.initiateIPCallSession(contact, false,
-                    player, renderer);
+                    player, renderer, timestamp);
 
             String callId = session.getSessionID();
             mIPCallLog.addCall(callId, contact, Direction.OUTGOING, session.getAudioContent(),
-                    session.getVideoContent(), IPCall.State.INITIATED, ReasonCode.UNSPECIFIED);
+                    session.getVideoContent(), IPCall.State.INITIATED, ReasonCode.UNSPECIFIED,
+                    timestamp);
             mBroadcaster.broadcastIPCallStateChanged(contact, callId, IPCall.State.INITIATED,
                     ReasonCode.UNSPECIFIED);
 
             IPCallPersistedStorageAccessor storageAccessor = new IPCallPersistedStorageAccessor(
-                    callId, contact, Direction.OUTGOING, mIPCallLog);
+                    callId, contact, Direction.OUTGOING, mIPCallLog, timestamp);
             IPCallImpl ipCall = new IPCallImpl(callId, mBroadcaster, mIPCallService,
                     storageAccessor, this);
 
@@ -293,7 +295,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 
         } catch (Exception e) {
             mIPCallLog.addCall(SessionIdGenerator.getNewId(), contact, Direction.OUTGOING, null,
-                    null, IPCall.State.FAILED, ReasonCode.FAILED_INITIATION);
+                    null, IPCall.State.FAILED, ReasonCode.FAILED_INITIATION, timestamp);
             ;
             throw new ServerApiException(e.getMessage());
         }
@@ -324,19 +326,21 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
             throw new ServerApiException("Missing audio player or renderer");
         }
 
+        long timestamp = System.currentTimeMillis();
         try {
             // Initiate a new session
             final IPCallSession session = mIPCallService.initiateIPCallSession(contact, true,
-                    player, renderer);
+                    player, renderer, timestamp);
 
             String callId = session.getSessionID();
             mIPCallLog.addCall(callId, contact, Direction.OUTGOING, session.getAudioContent(),
-                    session.getVideoContent(), IPCall.State.INITIATED, ReasonCode.UNSPECIFIED);
+                    session.getVideoContent(), IPCall.State.INITIATED, ReasonCode.UNSPECIFIED,
+                    session.getTimestamp());
             mBroadcaster.broadcastIPCallStateChanged(contact, callId, IPCall.State.INITIATED,
                     ReasonCode.UNSPECIFIED);
 
             IPCallPersistedStorageAccessor storageAccessor = new IPCallPersistedStorageAccessor(
-                    callId, contact, Direction.OUTGOING, mIPCallLog);
+                    callId, contact, Direction.OUTGOING, mIPCallLog, session.getTimestamp());
             IPCallImpl ipCall = new IPCallImpl(callId, mBroadcaster, mIPCallService,
                     storageAccessor, this);
 
@@ -354,7 +358,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 
         } catch (Exception e) {
             mIPCallLog.addCall(SessionIdGenerator.getNewId(), contact, Direction.OUTGOING, null,
-                    null, IPCall.State.FAILED, ReasonCode.FAILED_INITIATION);
+                    null, IPCall.State.FAILED, ReasonCode.FAILED_INITIATION, timestamp);
             throw new ServerApiException(e.getMessage());
         }
     }
@@ -416,18 +420,20 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
     }
 
     /**
-     * Add and broadcast video sharing invitation rejections
-     *
+     * Add and broadcast IP call invitation rejections
+     * 
      * @param contact Contact ID
      * @param audioContent Audio content
      * @param videoContent Video content
      * @param reasonCode Reason code
+     * @param timestamp Local timestamp when got invitation
      */
     public void addAndBroadcastIPCallInvitationRejected(ContactId contact,
-            AudioContent audioContent, VideoContent videoContent, ReasonCode reasonCode) {
+            AudioContent audioContent, VideoContent videoContent, ReasonCode reasonCode,
+            long timestamp) {
         String sessionId = SessionIdGenerator.getNewId();
         mIPCallLog.addCall(sessionId, contact, Direction.INCOMING, audioContent, videoContent,
-                IPCall.State.REJECTED, reasonCode);
+                IPCall.State.REJECTED, reasonCode, timestamp);
         mBroadcaster.broadcastIPCallInvitation(sessionId);
     }
 

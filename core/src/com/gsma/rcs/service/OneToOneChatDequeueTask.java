@@ -83,8 +83,10 @@ import android.net.Uri;
                                 String msgId = cursor.getString(idIdx);
                                 String content = cursor.getString(contentIdx);
                                 String mimeType = cursor.getString(mimeTypeIdx);
+                                long timestamp = System.currentTimeMillis();
+                                /* For outgoing message, timestampSent = timestamp */
                                 ChatMessage message = ChatUtils.createChatMessage(msgId, mimeType,
-                                        content, contact, null);
+                                        content, contact, null, timestamp, timestamp);
                                 OneToOneChatImpl oneToOneChat = mChatService
                                         .getOrCreateOneToOneChat(contact);
                                 if (isAllowedToDequeueOneToOneChatMessage(contact)) {

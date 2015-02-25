@@ -136,10 +136,12 @@ public class ImdnManager extends Thread {
      * @param contact Contact identifier
      * @param msgId Message ID
      * @param status Delivery status
+     * @param timestamp Timestamp sent in payload for IMDN datetime
      */
-    public void sendMessageDeliveryStatus(ContactId contact, String msgId, String status) {
+    public void sendMessageDeliveryStatus(ContactId contact, String msgId, String status,
+            long timestamp) {
         // Add request in the buffer for background processing
-        DeliveryStatus delivery = new DeliveryStatus(contact, msgId, status);
+        DeliveryStatus delivery = new DeliveryStatus(contact, msgId, status, timestamp);
         mBuffer.addObject(delivery);
     }
 
@@ -150,11 +152,12 @@ public class ImdnManager extends Thread {
      * @param msgId Message ID
      * @param status Delivery status
      * @param remoteInstanceId
+     * @param timestamp Timestamp sent in payload for IMDN datetime
      */
     public void sendMessageDeliveryStatusImmediately(ContactId contact, String msgId,
-            String status, final String remoteInstanceId) {
+            String status, final String remoteInstanceId, long timestamp) {
         // Execute request in background
-        final DeliveryStatus delivery = new DeliveryStatus(contact, msgId, status);
+        final DeliveryStatus delivery = new DeliveryStatus(contact, msgId, status, timestamp);
         new Thread() {
             public void run() {
                 // Send SIP MESSAGE
@@ -184,9 +187,12 @@ public class ImdnManager extends Thread {
             // Create CPIM/IDMN document
             String from = ChatUtils.ANOMYNOUS_URI;
             String to = ChatUtils.ANOMYNOUS_URI;
-            String imdn = ChatUtils.buildDeliveryReport(deliveryStatus.getMsgId(),
-                    deliveryStatus.getStatus());
-            String cpim = ChatUtils.buildCpimDeliveryReport(from, to, imdn);
+            /* Timestamp for IMDN datetime */
+            String imdn = ChatUtils.buildImdnDeliveryReport(deliveryStatus.getMsgId(),
+                    deliveryStatus.getStatus(), deliveryStatus.getTimestamp());
+            /* Timestamp for CPIM DateTime */
+            String cpim = ChatUtils.buildCpimDeliveryReport(from, to, imdn,
+                    System.currentTimeMillis());
 
             // Create authentication agent
             SessionAuthenticationAgent authenticationAgent = new SessionAuthenticationAgent(
@@ -277,11 +283,13 @@ public class ImdnManager extends Thread {
         private ContactId contact;
         private String msgId;
         private String status;
+        private long timestamp;
 
-        public DeliveryStatus(ContactId contact, String msgId, String status) {
+        public DeliveryStatus(ContactId contact, String msgId, String status, long timestamp) {
             this.contact = contact;
             this.msgId = msgId;
             this.status = status;
+            this.timestamp = timestamp;
         }
 
         public ContactId getContact() {
@@ -294,6 +302,10 @@ public class ImdnManager extends Thread {
 
         public String getStatus() {
             return status;
+        }
+
+        public long getTimestamp() {
+            return timestamp;
         }
     }
 }

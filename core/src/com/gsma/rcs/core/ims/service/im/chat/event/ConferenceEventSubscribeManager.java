@@ -157,8 +157,9 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * Receive a notification
      * 
      * @param notify Received notify
+     * @param timestamp Local timestamp when got SipRequest
      */
-    public void receiveNotification(SipRequest notify) {
+    public void receiveNotification(SipRequest notify, long timestamp) {
         if (sLogger.isActivated()) {
             sLogger.debug("New conference event notification received");
         }
@@ -246,7 +247,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
                                 .entrySet()) {
                             for (ImsSessionListener listener : mSession.getListeners()) {
                                 ((GroupChatSessionListener) listener).handleConferenceEvent(
-                                        participant.getKey(), participant.getValue());
+                                        participant.getKey(), participant.getValue(), timestamp);
                             }
                         }
                     }

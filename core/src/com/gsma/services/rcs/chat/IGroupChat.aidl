@@ -27,6 +27,8 @@ interface IGroupChat {
 
 	Map getParticipants();
 
+	long getTimestamp();
+
 	IChatMessage sendMessage(in String text);
 
 	void sendIsComposingEvent(in boolean status);

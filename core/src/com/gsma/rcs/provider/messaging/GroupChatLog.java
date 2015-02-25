@@ -38,7 +38,6 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.util.SparseArray;
 
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -135,12 +134,12 @@ public class GroupChatLog implements IGroupChatLog {
      */
     public void addGroupChat(String chatId, ContactId contact, String subject,
             Map<ContactId, ParticipantStatus> participants, State state, ReasonCode reasonCode,
-            Direction direction) {
+            Direction direction, long timestamp) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("addGroupChat; chatID=").append(chatId)
                     .append(", subject=").append(subject).append(", state=").append(state)
                     .append(" reasonCode=").append(reasonCode).append(", direction=")
-                    .append(direction).toString());
+                    .append(direction).append(", timestamp=").append(timestamp).toString());
         }
         ContentValues values = new ContentValues();
         values.put(ChatData.KEY_CHAT_ID, chatId);
@@ -153,7 +152,7 @@ public class GroupChatLog implements IGroupChatLog {
 
         values.put(ChatData.KEY_PARTICIPANTS, convert(participants));
         values.put(ChatData.KEY_DIRECTION, direction.toInt());
-        values.put(ChatData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
+        values.put(ChatData.KEY_TIMESTAMP, timestamp);
         values.put(ChatData.KEY_USER_ABORTION, UserAbortion.SERVER_NOTIFIED.toInt());
         mLocalContentResolver.insert(ChatData.CONTENT_URI, values);
     }
@@ -246,7 +245,7 @@ public class GroupChatLog implements IGroupChatLog {
         // @formatter:off
         String[] projection = new String[] {
                 ChatData.KEY_CHAT_ID, ChatData.KEY_REJOIN_ID, ChatData.KEY_PARTICIPANTS,
-                ChatData.KEY_SUBJECT
+                ChatData.KEY_SUBJECT, ChatData.KEY_TIMESTAMP
         };
         // @formatter:on
         String[] selArgs = new String[] {
@@ -259,7 +258,7 @@ public class GroupChatLog implements IGroupChatLog {
                 Map<ContactId, ParticipantStatus> participants = GroupChat.getParticipants(mCtx,
                         cursor.getString(2));
                 result = new GroupChatInfo(cursor.getString(0), cursor.getString(1), chatId,
-                        participants, cursor.getString(3));
+                        participants, cursor.getString(3), cursor.getLong(4));
             }
         } finally {
             if (cursor != null) {
@@ -365,6 +364,17 @@ public class GroupChatLog implements IGroupChatLog {
     private int getDataAsInt(Cursor cursor) {
         try {
             return cursor.getInt(FIRST_COLUMN_IDX);
+
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    private long getDataAsLong(Cursor cursor) {
+        try {
+            return cursor.getLong(FIRST_COLUMN_IDX);
 
         } finally {
             if (cursor != null) {
@@ -480,3 +490,4 @@ public class GroupChatLog implements IGroupChatLog {
         return participantsToBeInvited;
     }
 }
+

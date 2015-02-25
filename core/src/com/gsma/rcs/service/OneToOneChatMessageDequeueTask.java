@@ -62,8 +62,10 @@ import android.database.Cursor;
                     String msgId = cursor.getString(msgIdIdx);
                     String content = cursor.getString(contentIdx);
                     String mimeType = cursor.getString(mimeTypeIdx);
+                    long timestamp = System.currentTimeMillis();
+                    /* For outgoing message, timestampSent = timestamp */
                     ChatMessage message = ChatUtils.createChatMessage(msgId, mimeType, content,
-                            mContact, null);
+                            mContact, null, timestamp, timestamp);
                     try {
                         if (isAllowedToDequeueOneToOneChatMessage(mContact)) {
                             OneToOneChatSession session = mImService

@@ -41,9 +41,8 @@ import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.RcsServiceRegistration;
-
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.image.IImageSharing;
 import com.gsma.services.rcs.sharing.image.IImageSharingListener;
 import com.gsma.services.rcs.sharing.image.IImageSharingService;
@@ -275,19 +274,20 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
             FileDescription desc = FileFactory.getFactory().getFileDescription(file);
             MmContent content = ContentManager
                     .createMmContent(file, desc.getSize(), desc.getName());
-
+            long timestamp = System.currentTimeMillis();
             final ImageTransferSession session = mRichcallService.initiateImageSharingSession(
-                    contact, content, null);
+                    contact, content, null, timestamp);
 
             String sharingId = session.getSessionID();
             mRichCallLog.addImageSharing(session.getSessionID(), contact, Direction.OUTGOING,
-                    session.getContent(), ImageSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
+                    session.getContent(), ImageSharing.State.INITIATING, ReasonCode.UNSPECIFIED,
+                    timestamp);
             mBroadcaster.broadcastStateChanged(contact, sharingId, ImageSharing.State.INITIATING,
                     ReasonCode.UNSPECIFIED);
 
             ImageSharingPersistedStorageAccessor storageAccessor = new ImageSharingPersistedStorageAccessor(
                     sharingId, contact, Direction.OUTGOING, file, content.getName(),
-                    content.getEncoding(), content.getSize(), mRichCallLog);
+                    content.getEncoding(), content.getSize(), mRichCallLog, timestamp);
             ImageSharingImpl imageSharing = new ImageSharingImpl(sharingId, mRichcallService,
                     mBroadcaster, storageAccessor, this);
 
@@ -363,12 +363,13 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * @param contact Contact
      * @param content Image content
      * @param reasonCode Reason code
+     * @param timestamp Local timestamp when got invitation
      */
     public void addAndBroadcastImageSharingInvitationRejected(ContactId contact, MmContent content,
-            ReasonCode reasonCode) {
+            ReasonCode reasonCode, long timestamp) {
         String sessionId = SessionIdGenerator.getNewId();
         mRichCallLog.addImageSharing(sessionId, contact, Direction.INCOMING, content,
-                ImageSharing.State.REJECTED, reasonCode);
+                ImageSharing.State.REJECTED, reasonCode, timestamp);
         mBroadcaster.broadcastInvitation(sessionId);
     }
 

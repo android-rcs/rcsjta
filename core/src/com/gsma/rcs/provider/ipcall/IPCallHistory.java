@@ -25,9 +25,9 @@ package com.gsma.rcs.provider.ipcall;
 import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.service.ipcalldraft.IPCallLog;
 import com.gsma.rcs.service.ipcalldraft.IPCall.ReasonCode;
 import com.gsma.rcs.service.ipcalldraft.IPCall.State;
+import com.gsma.rcs.service.ipcalldraft.IPCallLog;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
@@ -36,8 +36,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
-
-import java.util.Calendar;
 
 /**
  * IP call history
@@ -68,7 +66,7 @@ public class IPCallHistory {
      */
     private Cursor getIPCallData(String columnName, String callId) {
         String[] projection = new String[] {
-            columnName
+                columnName
         };
         Cursor cursor = null;
         try {
@@ -140,10 +138,12 @@ public class IPCallHistory {
      * @param videocontent Video content
      * @param state Call state
      * @param reasonCode
+     * @param timestamp Local timestamp for both incoming and outgoing call
      * @return Uri
      */
     public Uri addCall(String callId, ContactId contact, Direction direction,
-            AudioContent audiocontent, VideoContent videocontent, State state, ReasonCode reasonCode) {
+            AudioContent audiocontent, VideoContent videocontent, State state,
+            ReasonCode reasonCode, long timestamp) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("Add new call entry for contact ").append(contact)
                     .append(": call=").append(callId).append(", state=").append(state)
@@ -154,7 +154,7 @@ public class IPCallHistory {
         values.put(IPCallData.KEY_CALL_ID, callId);
         values.put(IPCallData.KEY_CONTACT, contact.toString());
         values.put(IPCallData.KEY_DIRECTION, direction.toInt());
-        values.put(IPCallData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
+        values.put(IPCallData.KEY_TIMESTAMP, timestamp);
         values.put(IPCallData.KEY_STATE, state.toInt());
         values.put(IPCallData.KEY_REASON_CODE, reasonCode.toInt());
         if (videocontent != null) {

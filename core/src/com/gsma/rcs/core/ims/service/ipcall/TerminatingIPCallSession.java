@@ -68,13 +68,13 @@ public class TerminatingIPCallSession extends IPCallSession {
      * @param invite Initial INVITE request
      * @param contact
      * @param rcsSettings
+     * @param timestamp Local timestamp for the session
      */
     public TerminatingIPCallSession(ImsService parent, SipRequest invite, ContactId contact,
-            RcsSettings rcsSettings) {
+            RcsSettings rcsSettings, long timestamp) {
         super(parent, contact, ContentManager.createLiveAudioContentFromSdp(invite
                 .getContentBytes()), ContentManager.createLiveVideoContentFromSdp(invite
-                .getContentBytes()), rcsSettings);
-
+                .getContentBytes()), rcsSettings, timestamp);
         // Create dialog path
         createTerminatingDialogPath(invite);
     }
@@ -94,9 +94,10 @@ public class TerminatingIPCallSession extends IPCallSession {
             ContactId contact = getRemoteContact();
             AudioContent audio = getAudioContent();
             VideoContent video = getVideoContent();
+            long timestamp = getTimestamp();
             for (ImsSessionListener listener : listeners) {
                 ((IPCallStreamingSessionListener) listener).handleSessionInvited(contact, audio,
-                        video);
+                        video, timestamp);
             }
 
             InvitationStatus answer = waitInvitationAnswer();

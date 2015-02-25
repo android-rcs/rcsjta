@@ -411,6 +411,22 @@ public class GroupChat {
     }
 
     /**
+     * Returns the local timestamp of when the group chat invitation was initiated for outgoing
+     * group chats or the local timestamp of when the group chat invitation was received for
+     * incoming group chat invitations.
+     * 
+     * @return timestamp
+     * @throws RcsServiceException
+     */
+    public long getTimestamp() throws RcsServiceException {
+        try {
+            return mGroupChatInf.getTimestamp();
+        } catch (Exception e) {
+            throw new RcsServiceException(e.getMessage());
+        }
+    }
+
+    /**
      * Returns true if it is possible to send messages in the group chat right now, else returns
      * false.
      * 

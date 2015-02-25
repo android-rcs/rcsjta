@@ -36,7 +36,6 @@ import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.filetransfer.FileTransfer;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -259,12 +258,15 @@ public class FtHttpResumeManager implements Runnable {
             }
 
             @Override
-            public void handleSessionInvited(ContactId contact, MmContent file, MmContent fileIcon) {
+            public void handleSessionInvited(ContactId contact, MmContent file, MmContent fileIcon,
+                    long timestamp, long timestampSent) {
+
             }
 
             @Override
             public void handleSessionAutoAccepted(ContactId contact, MmContent file,
-                    MmContent fileIcon) {
+                    MmContent fileIcon, long timestamp, long timestampSent) {
+
             }
         };
     }

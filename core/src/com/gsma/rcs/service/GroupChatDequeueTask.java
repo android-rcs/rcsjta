@@ -82,8 +82,10 @@ import android.net.Uri;
                             case Message.HISTORYLOG_MEMBER_ID:
                                 String content = cursor.getString(contentIdx);
                                 String mimeType = cursor.getString(mimeTypeIdx);
+                                long timestamp = System.currentTimeMillis();
+                                /* For outgoing message, timestampSent = timestamp */
                                 ChatMessage message = ChatUtils.createChatMessage(id, mimeType,
-                                        content, null, null);
+                                        content, null, null, timestamp, timestamp);
                                 groupChat.dequeueChatMessage(message);
                                 break;
                             case FileTransferData.HISTORYLOG_MEMBER_ID:

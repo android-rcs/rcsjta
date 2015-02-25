@@ -74,12 +74,13 @@ public class RestartGroupChatSession extends GroupChatSession {
      * @param contributionId Contribution ID
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
+     * @param timestamp Local timestamp for the session
      * @throws CoreException
      */
     public RestartGroupChatSession(ImsService parent, String conferenceId, String subject,
             String contributionId, Map<ContactId, ParticipantStatus> storedParticipants,
-            RcsSettings rcsSettings, MessagingLog messagingLog) {
-        super(parent, null, conferenceId, storedParticipants, rcsSettings, messagingLog);
+            RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp) {
+        super(parent, null, conferenceId, storedParticipants, rcsSettings, messagingLog, timestamp);
 
         if (!TextUtils.isEmpty(subject)) {
             setSubject(subject);

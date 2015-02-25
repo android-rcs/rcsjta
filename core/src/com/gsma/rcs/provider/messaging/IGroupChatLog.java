@@ -51,10 +51,11 @@ public interface IGroupChatLog {
      * @param state State
      * @param reasonCode ReasonCode
      * @param direction Direction
+     * @param timestamp Timestamp
      */
     public void addGroupChat(String chatId, ContactId contact, String subject,
             Map<ContactId, ParticipantStatus> participants, State state, ReasonCode reasonCode,
-            Direction direction);
+            Direction direction, long timestamp);
 
     /**
      * Accept next Group Chat invitation

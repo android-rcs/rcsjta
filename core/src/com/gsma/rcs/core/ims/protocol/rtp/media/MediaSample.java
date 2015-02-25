@@ -31,9 +31,9 @@ public class MediaSample {
     private byte[] data;
 
     /**
-     * Time stamp
+     * Timestamp
      */
-    private long time;
+    private long mTimestamp;
 
     /**
      * RTP marker bit
@@ -51,12 +51,12 @@ public class MediaSample {
      * Constructor
      * 
      * @param data Data
-     * @param time Time stamp
+     * @param timestamp Timestamp
      * @Param sequenceNumber Packet sequence number
      */
-    public MediaSample(byte[] data, long time, long sequenceNumber) {
+    public MediaSample(byte[] data, long timestamp, long sequenceNumber) {
         this.data = data;
-        this.time = time;
+        this.mTimestamp = timestamp;
         this.sequenceNumber = sequenceNumber;
     }
 
@@ -64,23 +64,23 @@ public class MediaSample {
      * Constructor
      * 
      * @param data Data
-     * @param time Time stamp
+     * @param timestamp Timestamp
      */
-    public MediaSample(byte[] data, long time) {
+    public MediaSample(byte[] data, long timestamp) {
         this.data = data;
-        this.time = time;
+        this.mTimestamp = timestamp;
     }
 
     /**
      * Constructor
      * 
      * @param data Data
-     * @param time Time stamp
+     * @param timestamp Timestamp
      * @param marker Marker bit
      */
-    public MediaSample(byte[] data, long time, boolean marker) {
+    public MediaSample(byte[] data, long timestamp, boolean marker) {
         this.data = data;
-        this.time = time;
+        this.mTimestamp = timestamp;
         this.marker = marker;
     }
 
@@ -107,12 +107,12 @@ public class MediaSample {
     }
 
     /**
-     * Returns the time stamp of the sample
+     * Returns the timestamp of the sample
      * 
-     * @return Time in microseconds
+     * @return Timestamp in microseconds
      */
-    public long getTimeStamp() {
-        return time;
+    public long getTimestamp() {
+        return mTimestamp;
     }
 
     /**

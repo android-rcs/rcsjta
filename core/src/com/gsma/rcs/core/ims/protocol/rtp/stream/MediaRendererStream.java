@@ -93,7 +93,7 @@ public class MediaRendererStream implements ProcessorOutputStream {
      * @throws Exception
      */
     public void write(Buffer buffer) throws Exception {
-        MediaSample sample = new MediaSample((byte[]) buffer.getData(), buffer.getTimeStamp(),
+        MediaSample sample = new MediaSample((byte[]) buffer.getData(), buffer.getTimestamp(),
                 buffer.getSequenceNumber());
         renderer.writeSample(sample);
     }

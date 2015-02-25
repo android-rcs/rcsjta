@@ -50,8 +50,8 @@ import android.database.Cursor;
 
     private ChatServiceImpl mChatApi;
 
-    /* package private */DelayedDisplayNotificationDispatcher(LocalContentResolver localContentResolver,
-            ChatServiceImpl chatApi) {
+    /* package private */DelayedDisplayNotificationDispatcher(
+            LocalContentResolver localContentResolver, ChatServiceImpl chatApi) {
         mLocalContentResolver = localContentResolver;
         mChatApi = chatApi;
     }
@@ -70,9 +70,11 @@ import android.database.Cursor;
                 String msgId = cursor.getString(cursor.getColumnIndexOrThrow(Message.MESSAGE_ID));
                 String contactNumber = cursor.getString(cursor
                         .getColumnIndexOrThrow(Message.CONTACT));
+                long timestamp = cursor.getLong(cursor
+                        .getColumnIndexOrThrow(Message.TIMESTAMP_DISPLAYED));
                 try {
                     mChatApi.tryToSendOne2OneDisplayedDeliveryReport(msgId,
-                            ContactUtils.createContactId(contactNumber));
+                            ContactUtils.createContactId(contactNumber), timestamp);
                 } catch (RcsContactFormatException e) {
                     if (logger.isActivated()) {
                         logger.error("Cannot parse contact " + contactNumber);

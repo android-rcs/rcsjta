@@ -307,10 +307,13 @@ public interface CoreListener {
      * @param content File content
      * @param fileIcon Fileicon content
      * @param reasonCode Rejected reason code
+     * @param timestamp Local timestamp when got file transfer invitation
+     * @param timestamp Remote timestamp sent in payload for the file transfer
      */
 
     public void handleFileTransferInvitationRejected(ContactId contact, MmContent content,
-            MmContent fileIcon, FileTransfer.ReasonCode reasonCode);
+            MmContent fileIcon, FileTransfer.ReasonCode reasonCode, long timestamp,
+            long timestampSent);
 
     /**
      * Handle the case of rejected group chat
@@ -320,9 +323,11 @@ public interface CoreListener {
      * @param subject Subject
      * @param participants Participants
      * @param reasonCode Rejected reason code
+     * @param timestamp Local timestamp when got group chat invitation
      */
     public void handleGroupChatInvitationRejected(String chatId, ContactId contact, String subject,
-            Map<ContactId, ParticipantStatus> participants, GroupChat.ReasonCode reasonCode);
+            Map<ContactId, ParticipantStatus> participants, GroupChat.ReasonCode reasonCode,
+            long timestamp);
 
     /**
      * Handles image sharing rejection
@@ -330,9 +335,10 @@ public interface CoreListener {
      * @param contact Remote contact
      * @param content Multimedia content
      * @param reasonCode Rejected reason code
+     * @param timestamp Local timestamp when got image sharing invitation
      */
     public void handleImageSharingInvitationRejected(ContactId contact, MmContent content,
-            ImageSharing.ReasonCode reasonCode);
+            ImageSharing.ReasonCode reasonCode, long timestamp);
 
     /**
      * Handle the case of rejected video sharing
@@ -340,9 +346,10 @@ public interface CoreListener {
      * @param contact Remote contact
      * @param content Video content
      * @param reasonCode Rejected reason code
+     * @param timestamp Local timestamp when got video sharing invitation
      */
     public void handleVideoSharingInvitationRejected(ContactId contact, VideoContent content,
-            VideoSharing.ReasonCode reasonCode);
+            VideoSharing.ReasonCode reasonCode, long timestamp);
 
     /**
      * Handle the case of rejected geoloc sharing
@@ -350,9 +357,10 @@ public interface CoreListener {
      * @param contact Remote contact
      * @param content Geoloc content
      * @param reasonCode Rejected reason code
+     * @param timestamp Local timestamp when got geoloc sharing invitation
      */
     public void handleGeolocSharingInvitationRejected(ContactId contact, GeolocContent content,
-            GeolocSharing.ReasonCode reasonCode);
+            GeolocSharing.ReasonCode reasonCode, long timestamp);
 
     /**
      * Handle the case of rejected ip call
@@ -361,9 +369,10 @@ public interface CoreListener {
      * @param audioContent Audio content
      * @param videoContent Video content
      * @param reasonCode Rejected reason code
+     * @param timestamp Local timestamp when got IP call invitation
      */
     public void handleIPCallInvitationRejected(ContactId contact, AudioContent audioContent,
-            VideoContent videoContent, IPCall.ReasonCode reasonCode);
+            VideoContent videoContent, IPCall.ReasonCode reasonCode, long timestamp);
 
     /**
      * Handle one-to-one chat session initiation
@@ -437,6 +446,7 @@ public interface CoreListener {
     /**
      * Try to mark all queued group chat messages and group file transfers corresponding to contact
      * as failed
+     * 
      * @param contact
      */
     public void tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(String chatId);

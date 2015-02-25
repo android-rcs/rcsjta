@@ -75,8 +75,8 @@ public class IsComposingInfo {
         }
     }
 
-    public void setLastActiveDate(String lastActiveTimeStamp) {
-        this.lastActiveDate = DateUtils.decodeDate(lastActiveTimeStamp) / 1000;
+    public void setLastActiveDate(String lastActiveTimestamp) {
+        this.lastActiveDate = DateUtils.decodeDate(lastActiveTimestamp) / 1000;
     }
 
     public void setRefreshTime(String refreshTime) {

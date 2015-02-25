@@ -72,6 +72,7 @@ public interface ImageTransferSessionListener extends ImsSessionListener {
      * 
      * @param contact Remote contact
      * @param content
+     * @param timestamp Local timestamp when got invitation
      */
-    public void handleSessionInvited(ContactId contact, MmContent content);
+    public void handleSessionInvited(ContactId contact, MmContent content, long timestamp);
 }
