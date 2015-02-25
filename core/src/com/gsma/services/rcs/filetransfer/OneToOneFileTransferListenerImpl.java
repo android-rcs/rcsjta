@@ -19,8 +19,6 @@ package com.gsma.services.rcs.filetransfer;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
-import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
-import com.gsma.rcs.utils.logger.Logger;
 
 import android.os.RemoteException;
 import android.util.Log;
