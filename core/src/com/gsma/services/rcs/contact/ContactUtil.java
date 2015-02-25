@@ -18,16 +18,26 @@
 
 package com.gsma.services.rcs.contact;
 
+import com.gsma.services.rcs.RcsContactFormatException;
+import com.gsma.services.rcs.RcsServiceException;
+
+import android.content.Context;
+import android.content.res.AssetFileDescriptor;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.ContactsContract;
+import android.telephony.TelephonyManager;
+import android.text.TextUtils;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import android.content.Context;
-import android.telephony.TelephonyManager;
-import android.text.TextUtils;
-
-import com.gsma.services.rcs.RcsContactFormatException;
 
 /**
  * ContactUtil class for validation and unique formatting of phone numbers
@@ -51,6 +61,11 @@ public class ContactUtil {
      * The country area code(read from settings provider)
      */
     private final String mCountryAreaCode;
+
+    /**
+     * Application context
+     */
+    private final Context mCtx;
 
     /**
      * Regular expression to validate phone numbers
@@ -800,6 +815,7 @@ public class ContactUtil {
      * @param countryCode
      */
     private ContactUtil(Context context) {
+        mCtx = context;
         // Get ISO country code from telephony manager
         TelephonyManager mgr = (TelephonyManager) context
                 .getSystemService(Context.TELEPHONY_SERVICE);
@@ -942,6 +958,63 @@ public class ContactUtil {
      */
     public String getMyCountryAreaCode() {
         return mCountryAreaCode;
+    }
+
+    /**
+     * Returns the vCard of a contact. The method returns the complete filename including the path
+     * of the visit card. The filename has the file extension ".vcf" and is generated from the
+     * native address book vCard URI (see Android SDK attribute
+     * ContactsContract.Contacts.CONTENT_VCARD_URI which returns the referenced contact formatted as
+     * a vCard when opened through openAssetFileDescriptor(Uri, String)).
+     * 
+     * @param ctx Application context
+     * @param contactUri Contact URI of the contact in the native address book
+     * @return Filename of vCard
+     * @throws RcsServiceException
+     */
+    public String getVCard(Uri contactUri) throws RcsServiceException {
+        Cursor cursor = null;
+        try {
+            cursor = mCtx.getContentResolver().query(contactUri, null, null, null, null);
+            int displayNameColIdx = cursor
+                    .getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+            int lookupKeyColIdx = cursor
+                    .getColumnIndexOrThrow(ContactsContract.Contacts.LOOKUP_KEY);
+            if (!cursor.moveToFirst()) {
+                return null;
+            }
+            String lookupKey = cursor.getString(lookupKeyColIdx);
+            Uri vCardUri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_VCARD_URI,
+                    lookupKey);
+            AssetFileDescriptor fd = mCtx.getContentResolver().openAssetFileDescriptor(vCardUri,
+                    "r");
+
+            FileInputStream fis = fd.createInputStream();
+            byte[] vCardData = new byte[(int) fd.getDeclaredLength()];
+            fis.read(vCardData);
+
+            String name = cursor.getString(displayNameColIdx);
+            String fileName = new StringBuilder(Environment.getExternalStorageDirectory()
+                    .toString()).append(File.separator).append(name).append(".vcf").toString();
+            File vCardFile = new File(fileName);
+            if (vCardFile.exists()) {
+                vCardFile.delete();
+            }
+
+            FileOutputStream fos = new FileOutputStream(vCardFile, true);
+            fos.write(vCardData);
+            fos.close();
+
+            return fileName;
+
+        } catch (IOException e) {
+            throw new RcsServiceException(e);
+
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
     }
 
 }

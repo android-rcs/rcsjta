@@ -23,25 +23,15 @@ import com.gsma.services.rcs.RcsServiceControl;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceListener;
 import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
-import com.gsma.services.rcs.contact.IContactService;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.res.AssetFileDescriptor;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Environment;
 import android.os.IBinder;
 import android.os.IInterface;
-import android.provider.ContactsContract;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -214,63 +204,6 @@ public class ContactService extends RcsService {
             }
         } else {
             throw new RcsServiceNotAvailableException(ERROR_CNX);
-        }
-    }
-
-    /**
-     * Returns the vCard of a contact. The method returns the complete filename including the path
-     * of the visit card. The filename has the file extension ".vcf" and is generated from the
-     * native address book vCard URI (see Android SDK attribute
-     * ContactsContract.Contacts.CONTENT_VCARD_URI which returns the referenced contact formatted as
-     * a vCard when opened through openAssetFileDescriptor(Uri, String)).
-     * 
-     * @param ctx Application context
-     * @param contactUri Contact URI of the contact in the native address book
-     * @return Filename of vCard
-     * @throws RcsServiceException
-     */
-    public static String getVCard(Context ctx, Uri contactUri) throws RcsServiceException {
-        Cursor cursor = null;
-        try {
-            cursor = ctx.getContentResolver().query(contactUri, null, null, null, null);
-            int displayNameColIdx = cursor
-                    .getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
-            int lookupKeyColIdx = cursor
-                    .getColumnIndexOrThrow(ContactsContract.Contacts.LOOKUP_KEY);
-            if (!cursor.moveToFirst()) {
-                return null;
-            }
-            String lookupKey = cursor.getString(lookupKeyColIdx);
-            Uri vCardUri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_VCARD_URI,
-                    lookupKey);
-            AssetFileDescriptor fd = ctx.getContentResolver()
-                    .openAssetFileDescriptor(vCardUri, "r");
-
-            FileInputStream fis = fd.createInputStream();
-            byte[] vCardData = new byte[(int) fd.getDeclaredLength()];
-            fis.read(vCardData);
-
-            String name = cursor.getString(displayNameColIdx);
-            String fileName = new StringBuilder(Environment.getExternalStorageDirectory()
-                    .toString()).append(File.separator).append(name).append(".vcf").toString();
-            File vCardFile = new File(fileName);
-            if (vCardFile.exists()) {
-                vCardFile.delete();
-            }
-
-            FileOutputStream fos = new FileOutputStream(vCardFile, true);
-            fos.write(vCardData);
-            fos.close();
-
-            return fileName;
-
-        } catch (IOException e) {
-            throw new RcsServiceException(e);
-
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
         }
     }
 
