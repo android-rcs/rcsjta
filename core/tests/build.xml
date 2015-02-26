@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="rcstests" default="help">
 
-    <!-- The local.properties file is created and updated by the 'android' tool.
+	<!-- The local.properties file is created and updated by the 'android' tool.
          It contains the path to the SDK. It should *NOT* be checked into
          Version Control Systems. -->
-    <property file="local.properties" />
+	<property file="local.properties"/>
 
-    <!-- The ant.properties file can be created by you. It is only edited by the
+	<!-- The ant.properties file can be created by you. It is only edited by the
          'android' tool to add properties to it.
          This is the place to change some Ant specific build properties.
          Here are some properties you may want to change/update:
@@ -26,18 +26,18 @@
          application and should be checked into Version Control Systems.
 
          -->
-    <property file="ant.properties" />
+	<property file="ant.properties"/>
 
-    <!-- if sdk.dir was not set from one of the property file, then
+	<!-- if sdk.dir was not set from one of the property file, then
          get it from the ANDROID_HOME env var.
          This must be done before we load project.properties since
          the proguard config can use sdk.dir -->
-    <property environment="env" />
-    <condition property="sdk.dir" value="${env.ANDROID_HOME}">
-        <isset property="env.ANDROID_HOME" />
-    </condition>
+	<property environment="env"/>
+	<condition property="sdk.dir" value="${env.ANDROID_HOME}">
+		<isset property="env.ANDROID_HOME"/>
+	</condition>
 
-    <!-- The project.properties file is created and updated by the 'android'
+	<!-- The project.properties file is created and updated by the 'android'
          tool, as well as ADT.
 
          This contains project specific properties such as project target, and library
@@ -46,15 +46,12 @@
 
          This file is an integral part of the build system for your
          application and should be checked into Version Control Systems. -->
-    <loadproperties srcFile="project.properties" />
+	<loadproperties srcFile="project.properties"/>
 
-    <!-- quick check on sdk.dir -->
-    <fail
-            message="sdk.dir is missing. Make sure to generate local.properties using 'android update project' or to inject it through the ANDROID_HOME environment variable."
-            unless="sdk.dir"
-    />
+	<!-- quick check on sdk.dir -->
+	<fail message="sdk.dir is missing. Make sure to generate local.properties using 'android update project' or to inject it through the ANDROID_HOME environment variable." unless="sdk.dir"/>
 
-    <!--
+	<!--
         Import per project custom build rules if present at the root of the project.
         This is the place to put custom intermediary targets such as:
             -pre-build
@@ -66,23 +63,23 @@
             -post-build
             -pre-clean
     -->
-    <import file="custom_rules.xml" optional="true" />
-  <target name="tests" depends="debug,install,test"/>
+	<import file="custom_rules.xml" optional="true"/>
+	
+	<target name="tests">
+		<echo>Running tests ...</echo>
+		<exec executable="${sdk.dir}/platform-tools/adb" failonerror="true">
+			<!-- arg line="${adb.device.arg}"/ -->
+			<arg value="shell"/>
+			<arg value="am"/>
+			<arg value="instrument"/>
+			<arg value="-w"/>
+			<!-- arg value="-d"/ -->
+			<!-- arg value="${project.app.package}/android.test.InstrumentationTestRunner"/ -->
+			<arg value="com.gsma.rcs.tests/com.zutubi.android.junitreport.JUnitReportTestRunner"/>
+		</exec>
+	</target>
 
-       <echo>Running tests ...</echo>
-        <exec executable="${sdk.dir}/platform-tools/adb" failonerror="true">
-            <!-- arg line="${adb.device.arg}"/ -->
-            <arg value="shell"/>
-            <arg value="am"/>
-            <arg value="instrument"/>
-            <arg value="-w"/>
-            <!-- arg value="-d"/ -->
-            <!-- arg value="${project.app.package}/android.test.InstrumentationTestRunner"/ -->
-            <arg value="com.gsma.rcs.tests/android.test.InstrumentationTestRunner"/>
-        </exec>
- 
-
-    <!-- Import the actual build file.
+	<!-- Import the actual build file.
 
          To customize existing targets, there are two options:
          - Customize only one target:
@@ -100,6 +97,6 @@
          In all cases you must update the value of version-tag below to read 'custom' instead of an integer,
          in order to avoid having your file be overridden by tools such as "android update project"
     -->
-    <!-- version-tag: 1 -->
-    <import file="${sdk.dir}/tools/ant/build.xml" />
+	<!-- version-tag: 1 -->
+	<import file="${sdk.dir}/tools/ant/build.xml"/>
 </project>
