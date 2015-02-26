@@ -41,7 +41,7 @@ public abstract class RcsService {
     /**
      * Action to broadcast when RCS service is provisioned.
      */
-    public static final String ACTION_SERVICE_PROVISIONED = "com.gsma.services.rcs.action.SERVICE_PROVISIONED";
+    public static final String ACTION_SERVICE_PROVISIONING_DATA_CHANGED = "com.gsma.services.rcs.action.SERVICE_PROVISIONNING_DATA_CHANGED";
 
     private static final String ERROR_CNX = "Service not connected";
 

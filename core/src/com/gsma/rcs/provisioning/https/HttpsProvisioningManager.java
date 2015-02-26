@@ -908,7 +908,8 @@ public class HttpsProvisioningManager {
                     }
 
                     // Send service provisioning intent
-                    Intent serviceProvisioned = new Intent(RcsService.ACTION_SERVICE_PROVISIONED);
+                    Intent serviceProvisioned = new Intent(
+                            RcsService.ACTION_SERVICE_PROVISIONING_DATA_CHANGED);
                     IntentUtils.tryToSetReceiverForegroundFlag(serviceProvisioned);
                     mCtx.sendBroadcast(serviceProvisioned);
                 } else {

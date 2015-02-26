@@ -242,7 +242,7 @@ public class StartService extends Service {
     }
 
     private void broadcastServiceProvisioned() {
-        Intent serviceProvisioned = new Intent(RcsService.ACTION_SERVICE_PROVISIONED);
+        Intent serviceProvisioned = new Intent(RcsService.ACTION_SERVICE_PROVISIONING_DATA_CHANGED);
         IntentUtils.tryToSetReceiverForegroundFlag(serviceProvisioned);
         getApplicationContext().sendBroadcast(serviceProvisioned);
     }
@@ -384,6 +384,8 @@ public class StartService extends Service {
         Context context = getApplicationContext();
 
         if (!ConfigurationMode.AUTO.equals(mode)) {
+            // Manual provisioning: accept terms and conditions
+            mRcsSettings.setProvisioningTermsAccepted(true);
             // No auto config: directly start the RCS core service
             LauncherUtils.launchRcsCoreService(context, mRcsSettings);
             return;
