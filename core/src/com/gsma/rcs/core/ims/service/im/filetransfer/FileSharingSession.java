@@ -41,6 +41,7 @@ import com.gsma.services.rcs.contact.ContactId;
  * @author jexa7410
  */
 public abstract class FileSharingSession extends ImsServiceSession {
+
     /**
      * Contribution ID
      */
@@ -101,6 +102,8 @@ public abstract class FileSharingSession extends ImsServiceSession {
         mFileIcon = fileIcon;
         mFiletransferId = filetransferId;
     }
+
+    public abstract boolean isHttpTransfer();
 
     /**
      * Return the contribution ID

@@ -51,9 +51,9 @@ interface IFileTransferService {
 	
 	void setImageResizeOption(in int option);
 
-	boolean canTransferFile(in ContactId contact);
+	boolean isAllowedToTransferFile(in ContactId contact);
 
-	boolean canTransferFileToGroupChat(in String chatId);
+	boolean isAllowedToTransferFileToGroupChat(in String chatId);
 
 	void deleteOneToOneFileTransfers();
 

@@ -323,7 +323,7 @@ public class FileTransferList extends Activity {
         // Check if resend is allowed
         try {
             FileTransfer transfer = mCnxManager.getFileTransferApi().getFileTransfer(transferId);
-            if (transfer.canResendTransfer()) {
+            if (transfer.isAllowedToResendTransfer()) {
                 menu.add(0, MENU_ITEM_RESEND, 1, R.string.menu_resend_message);
             }
         } catch (RcsServiceException e) {

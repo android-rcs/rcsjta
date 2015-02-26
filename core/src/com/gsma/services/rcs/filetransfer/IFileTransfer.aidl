@@ -53,11 +53,11 @@ interface IFileTransfer {
 
 	boolean isRead();
 
-	boolean canResendTransfer();
+	boolean isAllowedToResendTransfer();
 
 	void resendTransfer();
 
-	boolean canPauseTransfer();
+	boolean isAllowedToPauseTransfer();
 
-	boolean canResumeTransfer();
+	boolean isAllowedToResumeTransfer();
 }

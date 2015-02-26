@@ -21,5 +21,5 @@ interface IOneToOneChat {
 
 	void resendMessage(in String msgId);
 
-	boolean canSendMessage();
+	boolean isAllowedToSendMessage();
 }

@@ -315,6 +315,8 @@ public class StackProvisioning extends Activity {
         saveCheckBoxParam(R.id.TelUriFormat, RcsSettingsData.TEL_URI_FORMAT, helper);
         saveCheckBoxParam(R.id.ImAlwaysOn, RcsSettingsData.IM_CAPABILITY_ALWAYS_ON, helper);
         saveCheckBoxParam(R.id.FtAlwaysOn, RcsSettingsData.FT_CAPABILITY_ALWAYS_ON, helper);
+        saveCheckBoxParam(R.id.InviteOnlyGroupchatSF,
+                RcsSettingsData.GROUP_CHAT_INVITE_ONLY_FULL_SF, helper);
         saveCheckBoxParam(R.id.ImUseReports, RcsSettingsData.IM_USE_REPORTS, helper);
         saveCheckBoxParam(R.id.Gruu, RcsSettingsData.GRUU, helper);
         saveCheckBoxParam(R.id.CpuAlwaysOn, RcsSettingsData.CPU_ALWAYS_ON, helper);
@@ -541,6 +543,8 @@ public class StackProvisioning extends Activity {
         setCheckBoxParam(R.id.TelUriFormat, RcsSettingsData.TEL_URI_FORMAT, helper);
         setCheckBoxParam(R.id.ImAlwaysOn, RcsSettingsData.IM_CAPABILITY_ALWAYS_ON, helper);
         setCheckBoxParam(R.id.FtAlwaysOn, RcsSettingsData.FT_CAPABILITY_ALWAYS_ON, helper);
+        setCheckBoxParam(R.id.InviteOnlyGroupchatSF,
+                RcsSettingsData.GROUP_CHAT_INVITE_ONLY_FULL_SF, helper);
         setCheckBoxParam(R.id.ImUseReports, RcsSettingsData.IM_USE_REPORTS, helper);
         setCheckBoxParam(R.id.Gruu, RcsSettingsData.GRUU, helper);
         setCheckBoxParam(R.id.CpuAlwaysOn, RcsSettingsData.CPU_ALWAYS_ON, helper);

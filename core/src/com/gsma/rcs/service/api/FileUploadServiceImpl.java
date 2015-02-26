@@ -37,6 +37,7 @@ import com.gsma.rcs.core.ims.service.upload.FileUploadSession;
 import com.gsma.rcs.platform.file.FileDescription;
 import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.service.broadcaster.FileUploadEventBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
@@ -188,14 +189,19 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      * @throws ServerApiException
      */
     public boolean canUploadFile() throws ServerApiException {
-        if (logger.isActivated()) {
-            logger.info("Check if a file can be uploaded");
+        if (!ServerApiUtils.isImsConnected()) {
+            if (logger.isActivated()) {
+                logger.debug("Cannot upload file now as IMS is not connected.");
+            }
+            return false;
         }
-
-        // Test IMS connection
-        ServerApiUtils.testCore();
-
-        return mImService.isFileTransferSessionAvailable();
+        if (!mImService.isFileTransferSessionAvailable()) {
+            if (logger.isActivated()) {
+                logger.debug("Cannot upload file now as no sessions available.");
+            }
+            return false;
+        }
+        return true;
     }
 
     /**

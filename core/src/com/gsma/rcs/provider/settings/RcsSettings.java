@@ -32,6 +32,7 @@ import android.text.TextUtils;
 
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.extension.ServiceExtensionManager;
+import com.gsma.rcs.provider.settings.RcsSettingsData;
 import com.gsma.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ConfigurationMode;
 import com.gsma.rcs.provider.settings.RcsSettingsData.EnableRcseSwitch;
@@ -1410,6 +1411,15 @@ public class RcsSettings {
     }
 
     /**
+     * Is invite only if group chat Store & Forward supported
+     * 
+     * @return Boolean
+     */
+    public boolean isGroupChatInviteIfFullStoreForwardSupported() {
+        return readBoolean(RcsSettingsData.GROUP_CHAT_INVITE_ONLY_FULL_SF);
+    }
+
+    /**
      * Get set of supported RCS extensions
      *
      * @return the set of extensions
@@ -1445,6 +1455,15 @@ public class RcsSettings {
      */
     public boolean isFtAlwaysOn() {
         return readBoolean(RcsSettingsData.FT_CAPABILITY_ALWAYS_ON);
+    }
+
+    /**
+     * Get FT Http cap always on option
+     * 
+     * @return result ( Default = false = OFF and true = ON )
+     */
+    public boolean isFtHttpCapAlwaysOn() {
+        return readBoolean(RcsSettingsData.FT_HTTP_CAP_ALWAYS_ON);
     }
 
     /**
@@ -2102,5 +2121,14 @@ public class RcsSettings {
      */
     public EnableRcseSwitch getEnableRcseSwitch() {
         return EnableRcseSwitch.valueOf(readInteger(RcsSettingsData.ENABLE_RCS_SWITCH));
+    }
+
+    /**
+     * Get contact cap validity period in one-one messaging
+     * 
+     * @return Period in milliseconds
+     */
+    public long getMsgCapValidityPeriod() {
+        return readLong(RcsSettingsData.MSG_CAP_VALIDITY_PERIOD);
     }
 }

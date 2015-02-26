@@ -180,10 +180,10 @@ public class FileTransferService extends RcsService {
      * @return boolean
      * @throws RcsServiceException
      */
-    public boolean canTransferFile(ContactId contact) throws RcsServiceException {
+    public boolean isAllowedToTransferFile(ContactId contact) throws RcsServiceException {
         if (mApi != null) {
             try {
-                return mApi.canTransferFile(contact);
+                return mApi.isAllowedToTransferFile(contact);
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }
@@ -234,10 +234,10 @@ public class FileTransferService extends RcsService {
      * @return boolean
      * @throws RcsServiceException
      */
-    public boolean canTransferFileToGroupChat(String chatId) throws RcsServiceException {
+    public boolean isAllowedToTransferFileToGroupChat(String chatId) throws RcsServiceException {
         if (mApi != null) {
             try {
-                return mApi.canTransferFileToGroupChat(chatId);
+                return mApi.isAllowedToTransferFileToGroupChat(chatId);
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }

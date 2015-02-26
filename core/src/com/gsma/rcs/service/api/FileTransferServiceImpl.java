@@ -25,7 +25,9 @@ package com.gsma.rcs.service.api;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
+import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
@@ -36,12 +38,14 @@ import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.service.broadcaster.GroupFileTransferBroadcaster;
 import com.gsma.rcs.service.broadcaster.OneToOneFileTransferBroadcaster;
 import com.gsma.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.MimeManager;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
 import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
@@ -49,6 +53,7 @@ import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceRegistration;
+import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
@@ -61,9 +66,11 @@ import com.gsma.services.rcs.filetransfer.IFileTransferServiceConfiguration;
 import com.gsma.services.rcs.filetransfer.IGroupFileTransferListener;
 import com.gsma.services.rcs.filetransfer.IOneToOneFileTransferListener;
 
+import android.database.SQLException;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -90,14 +97,14 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactsManager mContactsManager;
+    private final ContactsManager mContactManager;
 
     private final Core mCore;
 
     private final Map<String, IFileTransfer> mFileTransferCache = new HashMap<String, IFileTransfer>();
 
     /**
-     * The logger
+     * The sLogger
      */
     private static final Logger sLogger = Logger.getLogger(FileTransferServiceImpl.class
             .getSimpleName());
@@ -113,18 +120,18 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param imService InstantMessagingService
      * @param messagingLog MessagingLog
      * @param rcsSettings RcsSettings
-     * @param contactsManager ContactsManager
+     * @param contactManager ContactsManager
      * @param core Core
      */
     public FileTransferServiceImpl(InstantMessagingService imService, MessagingLog messagingLog,
-            RcsSettings rcsSettings, ContactsManager contactsManager, Core core) {
+            RcsSettings rcsSettings, ContactsManager contactManager, Core core) {
         if (sLogger.isActivated()) {
             sLogger.info("File transfer service API is loaded");
         }
         mImService = imService;
         mMessagingLog = messagingLog;
         mRcsSettings = rcsSettings;
-        mContactsManager = contactsManager;
+        mContactManager = contactManager;
         mCore = core;
     }
 
@@ -273,7 +280,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         }
 
         // Update displayName of remote contact
-        mContactsManager.setContactDisplayName(contact, displayName);
+        mContactManager.setContactDisplayName(contact, displayName);
 
         // Add session in the list
         String fileTransferId = session.getFileTransferId();
@@ -463,8 +470,65 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param contact
      * @return boolean
      */
-    public boolean canTransferFile(ContactId contact) {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+    public boolean isAllowedToTransferFile(ContactId contact) {
+        Capabilities remoteCapabilities = mContactManager.getContactCapabilities(contact);
+        if (remoteCapabilities == null) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(new StringBuilder(
+                        "Cannot transfer file as the capabilities of contact ").append(contact)
+                        .append(" are not known.").toString());
+            }
+            return false;
+        }
+        Capabilities myCapabilities = mRcsSettings.getMyCapabilities();
+        boolean ftMsrpSupportedforSelf = myCapabilities.isFileTransferSupported();
+        boolean ftHttpSupportedforSelf = myCapabilities.isFileTransferHttpSupported();
+        boolean ftMsrpSupportedforRemote = remoteCapabilities.isFileTransferSupported();
+        boolean ftHttpSupportedforRemote = remoteCapabilities.isFileTransferHttpSupported();
+        FileTransferProtocol protocol;
+        if (ftMsrpSupportedforSelf && ftMsrpSupportedforRemote) {
+            if (ftHttpSupportedforSelf && ftHttpSupportedforRemote) {
+                protocol = mRcsSettings.getFtProtocol();
+            } else {
+                protocol = FileTransferProtocol.MSRP;
+            }
+        } else if (ftHttpSupportedforSelf && ftHttpSupportedforRemote) {
+            protocol = FileTransferProtocol.HTTP;
+        } else {
+            if (sLogger.isActivated()) {
+                sLogger.debug(new StringBuilder(
+                        "Cannot transfer file as there are no available capabilities : FTMsrp(Self)")
+                        .append(ftMsrpSupportedforSelf).append(" FTHttp(Self)")
+                        .append(ftHttpSupportedforSelf).append(" FTMsrp(Remote)")
+                        .append(ftMsrpSupportedforSelf).append(" FTHttp(Remote)")
+                        .append(ftMsrpSupportedforRemote).toString());
+            }
+            return false;
+        }
+        MessagingMode mode = mRcsSettings.getMessagingMode();
+        switch (mode) {
+            case INTEGRATED:
+            case SEAMLESS:
+                if ((FileTransferProtocol.MSRP == protocol && mRcsSettings.isFtAlwaysOn())
+                        || (FileTransferProtocol.HTTP == protocol && mRcsSettings
+                                .isFtHttpCapAlwaysOn())) {
+                    break;
+                }
+                if (!mImService.isCapabilitiesValid(remoteCapabilities)) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(new StringBuilder(
+                                "Cannot transfer file as the cached capabilities of contact ")
+                                .append(contact)
+                                .append(" are not valid anymore for one-to-one communication.")
+                                .toString());
+                    }
+                    return false;
+                }
+                break;
+            default:
+                break;
+        }
+        return true;
     }
 
     /**
@@ -529,8 +593,73 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param chatId
      * @return boolean
      */
-    public boolean canTransferFileToGroupChat(String chatId) {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+    public boolean isAllowedToTransferFileToGroupChat(String chatId) {
+        if (!mRcsSettings.isGroupChatActivated()) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(new StringBuilder(
+                        "Cannot transfer file to group chat with group chat Id '").append(chatId)
+                        .append("' as group chat feature is not supported.").toString());
+            }
+            return false;
+        }
+        if (!mRcsSettings.getMyCapabilities().isFileTransferHttpSupported()) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(new StringBuilder(
+                        "Cannot transfer file to group chat with group chat Id '").append(chatId)
+                        .append("' as FT over HTTP capabilities are not supported for self.")
+                        .toString());
+            }
+            return false;
+        }
+        GroupChat.ReasonCode reasonCode;
+        try {
+            reasonCode = mMessagingLog.getGroupChatReasonCode(chatId);
+        } catch (SQLException e) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(new StringBuilder(
+                        "Cannot transfer file to group chat with group chat Id '").append(chatId)
+                        .append("' as the group chat does not exist in DB.").toString());
+            }
+            return false;
+        }
+        switch (reasonCode) {
+            case ABORTED_BY_USER:
+            case FAILED_INITIATION:
+            case REJECTED_BY_REMOTE:
+            case REJECTED_MAX_CHATS:
+            case REJECTED_SPAM:
+            case REJECTED_BY_INACTIVITY:
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder(
+                            "Cannot transfer file to group chat with group chat Id '")
+                            .append(chatId).append("' as ").append(reasonCode).toString());
+                }
+                return false;
+        }
+        GroupChatSession session = mImService.getGroupChatSession(chatId);
+        if (session == null) {
+            GroupChatInfo groupChat = mMessagingLog.getGroupChatInfo(chatId);
+            if (groupChat == null) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder(
+                            "Cannot transfer file to group chat with group chat Id '")
+                            .append(chatId).append("' as the group chat does not exist in DB.")
+                            .toString());
+                }
+                return false;
+            }
+            if (TextUtils.isEmpty(groupChat.getRejoinId())) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder(
+                            "Cannot transfer file to group chat with group chat Id '")
+                            .append(chatId)
+                            .append("' as there is no ongoing session with corresponding chatId and there exists no rejoinId to rejoin the group chat.")
+                            .toString());
+                }
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -640,6 +769,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      */
     public IFileTransfer transferFileToGroupChat(String chatId, Uri file, boolean attachfileIcon)
             throws ServerApiException {
+        if (!isAllowedToTransferFileToGroupChat(chatId)) {
+            /*
+             * TODO: Throw proper exception in CR037
+             */
+            throw new IllegalStateException(
+                    "No sufficient capabilities to transfer file to group chat.");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("sendFile (file=" + file + ") (fileicon=" + attachfileIcon + ")");
         }

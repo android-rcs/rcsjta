@@ -42,11 +42,11 @@ interface IGroupChat {
 
 	void openChat();
 
-	boolean canSendMessage();
+	boolean isAllowedToSendMessage();
 
-	boolean canInviteParticipants();
+	boolean isAllowedToInviteParticipants();
 
-	boolean canInviteParticipant(in ContactId participant);
+	boolean isAllowedToInviteParticipant(in ContactId participant);
 
-	boolean canLeave();
+	boolean isAllowedToLeave();
 }

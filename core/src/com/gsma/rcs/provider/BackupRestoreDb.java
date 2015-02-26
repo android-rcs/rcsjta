@@ -156,7 +156,7 @@ public class BackupRestoreDb {
                 }
             } catch (Exception e) {
                 if (LOGGER.isActivated()) {
-                    LOGGER.error("Faile to copy file "+srcFile, e);
+                    LOGGER.error("Failed to copy DB files", e);
                 }
                 return false;
 
@@ -198,7 +198,7 @@ public class BackupRestoreDb {
                 FileUtils.copyFileToDirectory(srcFile, databasesDir, true);
             } catch (Exception e) {
                 if (LOGGER.isActivated()) {
-                    LOGGER.error(e.getMessage(), e);
+                    LOGGER.error("Failed to restore account ".concat(account), e);
                 }
                 return false;
 

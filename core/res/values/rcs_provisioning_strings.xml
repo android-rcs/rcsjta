@@ -128,6 +128,7 @@
     <string name="Tel_URI_format">Tel-URI format</string>
     <string name="IM_always_on">IM always-on</string>
     <string name="FT_always_on">FT always-on</string>
+    <string name="Invite_Only_Groupchat_SF">Groupchat Invite only if SF supported</string>
     <string name="IM_delivery_reports">IM delivery reports</string>
     <string name="Permanent_state_mode">Permanent state mode</string>
     <string name="GRUU">GRUU</string>

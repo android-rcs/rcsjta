@@ -220,10 +220,10 @@ public class ChatService extends RcsService {
      * @return boolean
      * @throws RcsServiceException
      */
-    public boolean canInitiateGroupChat() throws RcsServiceException {
+    public boolean isAllowedToInitiateGroupChat() throws RcsServiceException {
         if (mApi != null) {
             try {
-                return mApi.canInitiateGroupChat();
+                return mApi.isAllowedToInitiateGroupChat();
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }
@@ -240,10 +240,10 @@ public class ChatService extends RcsService {
      * @return boolean
      * @throws RcsServiceException
      */
-    public boolean canInitiateGroupChat(ContactId contact) throws RcsServiceException {
+    public boolean isAllowedToInitiateGroupChat(ContactId contact) throws RcsServiceException {
         if (mApi != null) {
             try {
-                return mApi.canInitiateGroupChat2(contact);
+                return mApi.isAllowedToInitiateGroupChat2(contact);
             } catch (Exception e) {
                 throw new RcsServiceException(e);
             }

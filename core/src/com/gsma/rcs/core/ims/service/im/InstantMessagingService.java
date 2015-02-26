@@ -1378,4 +1378,13 @@ public class InstantMessagingService extends ImsService {
 
         return false;
     }
+
+    public boolean isCapabilitiesValid(Capabilities capabilities) {
+        long msgCapValidityPeriod = mRcsSettings.getMsgCapValidityPeriod();
+        if (System.currentTimeMillis() > capabilities.getTimestampOfLastRefresh()
+                + msgCapValidityPeriod) {
+            return false;
+        }
+        return true;
+    }
 }

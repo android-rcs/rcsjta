@@ -972,6 +972,13 @@ public class RcsSettingsData {
     /* package private */static final Boolean DEFAULT_IM_CAPABILITY_ALWAYS_ON = true;
 
     /**
+     * Group chat Store & Forward to invite participants
+     */
+    public static final String GROUP_CHAT_INVITE_ONLY_FULL_SF = "GroupChatInviteOnlyFSF";
+
+    /* package private */static final Boolean DEFAULT_GC_INVITE_ONLY_FULL_SF = false;
+
+    /**
      * SIP Automata capability (@see RFC3840)
      */
     public static final String CAPABILITY_SIP_AUTOMATA = "CapabilitySipAutomata";
@@ -982,6 +989,20 @@ public class RcsSettingsData {
      */
     public static final String FT_CAPABILITY_ALWAYS_ON = "FtAlwaysOn";
     /* package private */static final Boolean DEFAULT_FT_CAPABILITY_ALWAYS_ON = false;
+
+    /**
+     * File transfer over HTTP always on
+     */
+    public static final String FT_HTTP_CAP_ALWAYS_ON = "ftHTTPCapAlwaysOn";
+
+    /* package private */static final Boolean DEFAULT_FT_HTTP_CAP_ALWAYS_ON = false;
+
+    /**
+     * Contacts validity period in one-one messaging
+     */
+    public static final String MSG_CAP_VALIDITY_PERIOD = "msgCapValidity";
+
+    /* package private */static final Long DEFAULT_MSG_CAP_VALIDITY_PERIOD = 0L;
 
     /**
      * Instant messaging use report
