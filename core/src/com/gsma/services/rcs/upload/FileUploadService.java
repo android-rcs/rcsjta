@@ -40,7 +40,6 @@ import android.os.IBinder;
 import android.os.IInterface;
 
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -54,14 +53,6 @@ import java.util.WeakHashMap;
  * @author Jean-Marc AUFFRET
  */
 public class FileUploadService extends RcsService {
-
-    private static final int KITKAT_VERSION_CODE = 19;
-
-    private static final String TAKE_PERSISTABLE_URI_PERMISSION_METHOD_NAME = "takePersistableUriPermission";
-
-    private static final Class<?>[] TAKE_PERSISTABLE_URI_PERMISSION_PARAM_TYPES = new Class[] {
-            Uri.class, int.class
-    };
 
     /**
      * API
@@ -140,56 +131,21 @@ public class FileUploadService extends RcsService {
         }
     };
 
-    private void grantUriPermissionToStackServices(Uri file) {
+    /**
+     * Granting temporary read Uri permission from client to stack service if it is a content URI
+     * 
+     * @param file Uri of file to grant permission
+     */
+    private void tryToGrantUriPermissionToStackServices(Uri file) {
+        if (!ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
+            return;
+        }
         Intent fileTransferServiceIntent = new Intent(IFileUploadService.class.getName());
         List<ResolveInfo> stackServices = mCtx.getPackageManager().queryIntentServices(
                 fileTransferServiceIntent, 0);
         for (ResolveInfo stackService : stackServices) {
             mCtx.grantUriPermission(stackService.serviceInfo.packageName, file,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        }
-    }
-
-    /**
-     * Using reflection to persist Uri permission in order to support backward compatibility since
-     * this API is available only from Kitkat onwards.
-     * 
-     * @param file Uri of file to transfer
-     * @throws RcsServiceException
-     */
-    private void takePersistableUriPermission(Uri file) throws RcsServiceException {
-        try {
-            ContentResolver contentResolver = mCtx.getContentResolver();
-            Method takePersistableUriPermissionMethod = contentResolver.getClass().getMethod(
-                    TAKE_PERSISTABLE_URI_PERMISSION_METHOD_NAME,
-                    TAKE_PERSISTABLE_URI_PERMISSION_PARAM_TYPES);
-            Object[] methodArgs = new Object[] {
-                    file,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            };
-            takePersistableUriPermissionMethod.invoke(contentResolver, methodArgs);
-        } catch (Exception e) {
-            throw new RcsServiceException(e);
-        }
-    }
-
-    /**
-     * Grant permission to the stack and persist access permission
-     * 
-     * @param file the file URI
-     * @throws RcsServiceException
-     */
-    private void tryToGrantAndPersistUriPermission(Uri file) throws RcsServiceException {
-        if (ContentResolver.SCHEME_CONTENT.equals(file.getScheme())) {
-            // Granting temporary read Uri permission from client to
-            // stack service if it is a content URI
-            grantUriPermissionToStackServices(file);
-            // Persist Uri access permission for the client
-            // to be able to read the contents from this Uri even
-            // after the client is restarted after device reboot.
-            if (android.os.Build.VERSION.SDK_INT >= KITKAT_VERSION_CODE) {
-                takePersistableUriPermission(file);
-            }
         }
     }
 
@@ -242,8 +198,8 @@ public class FileUploadService extends RcsService {
     public FileUpload uploadFile(Uri file, boolean attachFileIcon) throws RcsServiceException {
         if (mApi != null) {
             try {
-                tryToGrantAndPersistUriPermission(file);
-
+                /* Only grant permission for content Uris */
+                tryToGrantUriPermissionToStackServices(file);
                 IFileUpload uploadIntf = mApi.uploadFile(file, attachFileIcon);
                 if (uploadIntf != null) {
                     return new FileUpload(uploadIntf);
@@ -316,8 +272,8 @@ public class FileUploadService extends RcsService {
         if (mApi != null) {
             try {
                 IFileUploadListener fileUploadListener = new FileUploadListenerImpl(listener);
-                mFileUploadListeners.put(listener,
-                        new WeakReference<IFileUploadListener>(fileUploadListener));
+                mFileUploadListeners.put(listener, new WeakReference<IFileUploadListener>(
+                        fileUploadListener));
                 mApi.addEventListener(fileUploadListener);
             } catch (Exception e) {
                 throw new RcsServiceException(e);

@@ -18,6 +18,23 @@
 
 package com.orangelabs.rcs.ri.sharing.image;
 
+import com.gsma.services.rcs.RcsContactFormatException;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
+import com.gsma.services.rcs.sharing.image.ImageSharing;
+import com.gsma.services.rcs.sharing.image.ImageSharingListener;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.utils.ContactListAdapter;
+import com.orangelabs.rcs.ri.utils.FileUtils;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -41,22 +58,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Set;
-
-import com.gsma.services.rcs.RcsContactFormatException;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactUtil;
-import com.gsma.services.rcs.sharing.image.ImageSharing;
-import com.gsma.services.rcs.sharing.image.ImageSharingListener;
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.utils.ContactListAdapter;
-import com.orangelabs.rcs.ri.utils.FileUtils;
-import com.orangelabs.rcs.ri.utils.LockAccess;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Initiate image sharing
@@ -149,8 +150,7 @@ public class InitiateImageSharing extends Activity {
 
         @Override
         public void onStateChanged(ContactId contact, String sharingId,
-                final ImageSharing.State state,
-                ImageSharing.ReasonCode reasonCode) {
+                final ImageSharing.State state, ImageSharing.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "onStateChanged contact=" + contact + " sharingId=" + sharingId
                         + " state=" + state + " reason=" + reasonCode);
@@ -225,8 +225,7 @@ public class InitiateImageSharing extends Activity {
             if (LogUtils.isActive) {
                 Log.w(LOGTAG,
                         new StringBuilder("onDeleted contact=").append(contact)
-                                .append(" sharingIds=")
-                                .append(sharingIds).toString());
+                                .append(" sharingIds=").append(sharingIds).toString());
             }
         }
     };
@@ -353,6 +352,9 @@ public class InitiateImageSharing extends Activity {
                 Log.d(LOGTAG, "shareImage image=" + mFilename + " size=" + mFilesize);
             }
             try {
+                /* Only take persistable permission for content Uris */
+                FileUtils.tryToTakePersistableContentUriPermission(getApplicationContext(), mFile);
+
                 // Initiate sharing
                 mImageSharing = mCnxManager.getImageSharingApi().shareImage(remote, mFile);
                 mSharingId = mImageSharing.getSharingId();

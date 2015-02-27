@@ -18,6 +18,24 @@
 
 package com.orangelabs.rcs.ri.messaging.filetransfer;
 
+import com.gsma.services.rcs.RcsContactFormatException;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.utils.ContactListAdapter;
+import com.orangelabs.rcs.ri.utils.FileUtils;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -44,23 +62,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Set;
-
-import com.gsma.services.rcs.RcsContactFormatException;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactUtil;
-import com.gsma.services.rcs.filetransfer.FileTransfer;
-import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.utils.ContactListAdapter;
-import com.orangelabs.rcs.ri.utils.FileUtils;
-import com.orangelabs.rcs.ri.utils.LockAccess;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Initiate file transfer
@@ -162,8 +163,7 @@ public class InitiateFileTransfer extends Activity {
 
         @Override
         public void onStateChanged(ContactId contact, String transferId,
-                final FileTransfer.State state,
-                final FileTransfer.ReasonCode reasonCode) {
+                final FileTransfer.State state, final FileTransfer.ReasonCode reasonCode) {
             // Discard event if not for current transferId
             if (InitiateFileTransfer.this.mFtId == null
                     || !InitiateFileTransfer.this.mFtId.equals(transferId)) {
@@ -246,8 +246,7 @@ public class InitiateFileTransfer extends Activity {
             if (LogUtils.isActive) {
                 Log.w(LOGTAG,
                         new StringBuilder("onDeleted contact=").append(contact)
-                                .append(" transferIds=")
-                                .append(transferIds).toString());
+                                .append(" transferIds=").append(transferIds).toString());
             }
         }
     };
@@ -312,7 +311,7 @@ public class InitiateFileTransfer extends Activity {
                 mFilesize = ftdao.getSize();
                 ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                         android.R.layout.simple_spinner_item, new String[] {
-                                remoteContact.toString()
+                            remoteContact.toString()
                         });
                 mSpinner.setAdapter(adapter);
                 TextView uriEdit = (TextView) findViewById(R.id.uri);
@@ -441,6 +440,9 @@ public class InitiateFileTransfer extends Activity {
                     && !mimeType.toLowerCase().startsWith("image")) {
                 tryToSendFileicon = false;
             }
+            /* Only take persistable permission for content Uris */
+            FileUtils.tryToTakePersistableContentUriPermission(getApplicationContext(), mFile);
+
             // Initiate transfer
             mFileTransfer = mCnxManager.getFileTransferApi().transferFile(remote, mFile,
                     tryToSendFileicon);
@@ -539,8 +541,7 @@ public class InitiateFileTransfer extends Activity {
                     uriEdit.setText(mFilename);
                     if (LogUtils.isActive) {
                         Log.i(LOGTAG, "Select file " + mFilename + " of size " + mFilesize
-                                + " file="
-                                + mFile);
+                                + " file=" + mFile);
                     }
                 } catch (Exception e) {
                     if (LogUtils.isActive) {

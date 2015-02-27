@@ -18,15 +18,6 @@
 
 package com.orangelabs.rcs.ri.messaging.chat.group;
 
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import android.util.Log;
-import android.widget.TextView;
-
-import java.util.Set;
-
 import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
@@ -37,8 +28,18 @@ import com.gsma.services.rcs.filetransfer.GroupFileTransferListener;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.messaging.chat.SendFile;
+import com.orangelabs.rcs.ri.utils.FileUtils;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
+
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.TextView;
+
+import java.util.Set;
 
 /**
  * Send file to group
@@ -74,8 +75,8 @@ public class SendGroupFile extends SendFile {
                 Log.d(LOGTAG,
                         new StringBuilder("onDeliveryInfoChanged chatId=").append(chatId)
                                 .append(" contact=").append(contact).append(" trasnferId=")
-                                .append(transferId).append(" state=").append(status).
-                                append(" reason=").append(reasonCode).toString());
+                                .append(transferId).append(" state=").append(status)
+                                .append(" reason=").append(reasonCode).toString());
             }
         }
 
@@ -96,8 +97,7 @@ public class SendGroupFile extends SendFile {
 
         @Override
         public void onStateChanged(String chatId, String transferId,
-                final FileTransfer.State state,
-                FileTransfer.ReasonCode reasonCode) {
+                final FileTransfer.State state, FileTransfer.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG,
                         new StringBuilder("onStateChanged chatId=").append(chatId)
@@ -193,6 +193,8 @@ public class SendGroupFile extends SendFile {
                 Log.d(LOGTAG, "initiateTransfer filename=" + filename + " size=" + filesize
                         + " chatId=" + mChatId);
             }
+            /* Only take persistable permission for content Uris */
+            FileUtils.tryToTakePersistableContentUriPermission(getApplicationContext(), file);
             // Initiate transfer
             fileTransfer = mCnxManager.getFileTransferApi().transferFileToGroupChat(mChatId, file,
                     fileicon);
