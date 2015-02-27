@@ -961,18 +961,19 @@ public class ContactUtil {
     }
 
     /**
-     * Returns the vCard of a contact. The method returns the complete filename including the path
-     * of the visit card. The filename has the file extension ".vcf" and is generated from the
-     * native address book vCard URI (see Android SDK attribute
-     * ContactsContract.Contacts.CONTENT_VCARD_URI which returns the referenced contact formatted as
-     * a vCard when opened through openAssetFileDescriptor(Uri, String)).
+     * Returns the vCard of a contact. The contact parameter contains the database URI of the
+     * contact in the native address book. The method returns a Uri to the visit card. The visit
+     * card filename has the file extension “.vcf” and is generated from the native address book
+     * vCard URI (see Android SDK attribute ContactsContract.Contacts.CONTENT_VCARD_URI which
+     * returns the referenced contact formatted as a vCard when opened through
+     * openAssetFileDescriptor(Uri, String)).
      * 
      * @param ctx Application context
      * @param contactUri Contact URI of the contact in the native address book
-     * @return Filename of vCard
+     * @return Uri of vCard
      * @throws RcsServiceException
      */
-    public String getVCard(Uri contactUri) throws RcsServiceException {
+    public Uri getVCard(Uri contactUri) throws RcsServiceException {
         Cursor cursor = null;
         try {
             cursor = mCtx.getContentResolver().query(contactUri, null, null, null, null);
@@ -1005,7 +1006,7 @@ public class ContactUtil {
             fos.write(vCardData);
             fos.close();
 
-            return fileName;
+            return Uri.fromFile(vCardFile);
 
         } catch (IOException e) {
             throw new RcsServiceException(e);

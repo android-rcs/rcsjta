@@ -114,9 +114,9 @@ public class ContactVCard extends Activity {
         try {
             Uri contactUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
                     Uri.encode(contact));
-            String vcard = ContactUtil.getInstance(this).getVCard(contactUri);
+            Uri vcard = ContactUtil.getInstance(this).getVCard(contactUri);
             TextView vcardView = (TextView) findViewById(R.id.vcard);
-            vcardView.setText(vcard);
+            vcardView.setText(vcard.getPath());
         } catch (Exception e) {
             Utils.showMessageAndExit(ContactVCard.this, getString(R.string.label_api_failed),
                     mExitOnce, e);
