@@ -24,6 +24,7 @@ package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
@@ -634,6 +635,53 @@ public class FileTransferLog implements IFileTransferLog {
                 cursor.close();
             }
             throw e;
+        }
+    }
+
+    @Override
+    public FtHttpResume getFileTransferResumeInfo(String fileTransferId) {
+        Cursor cursor = null;
+        try {
+            cursor = mLocalContentResolver.query(
+                    Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), null, null,
+                    null, null);
+            if (!cursor.moveToFirst()) {
+                throw new SQLException(
+                        "No row returned while querying for file transfer data with fileTransferId : "
+                                + fileTransferId);
+            }
+            String phoneNumber = cursor.getString(cursor
+                    .getColumnIndexOrThrow(FileTransferData.KEY_CONTACT));
+            ContactId contact = phoneNumber != null ? ContactUtils.createContactId(phoneNumber)
+                    : null;
+            String chatId = cursor.getString(cursor
+                    .getColumnIndexOrThrow(FileTransferData.KEY_CHAT_ID));
+            String fileUri = cursor.getString(cursor
+                    .getColumnIndexOrThrow(FileTransferData.KEY_FILE));
+            Direction direction = Direction.valueOf(cursor.getInt(cursor
+                    .getColumnIndexOrThrow(FileTransferData.KEY_DIRECTION)));
+            String fileIcon = cursor.getString(cursor
+                    .getColumnIndexOrThrow(FileTransferData.KEY_FILEICON));
+            boolean isGroup = chatId.equals(phoneNumber);
+            Uri file = Uri.parse(fileUri);
+            MmContent content = FileTransferUtils.createMmContent(file);
+            Uri fileIconUri = fileIcon != null ? Uri.parse(fileIcon) : null;
+            if (direction == Direction.INCOMING) {
+                String downloadServerAddress = cursor.getString(cursor
+                        .getColumnIndexOrThrow(FileTransferData.KEY_DOWNLOAD_URI));
+                return new FtHttpResumeDownload(Uri.parse(downloadServerAddress),
+                        file, fileIconUri, content, contact, chatId, fileTransferId,
+                        isGroup);
+            } else {
+                String tId = cursor.getString(cursor
+                        .getColumnIndexOrThrow(FileTransferData.KEY_UPLOAD_TID));
+                return new FtHttpResumeUpload(content, fileIconUri, tId, contact,
+                        chatId, fileTransferId, isGroup);
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
     }
 }

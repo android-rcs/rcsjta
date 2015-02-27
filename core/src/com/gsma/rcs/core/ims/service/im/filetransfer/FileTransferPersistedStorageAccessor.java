@@ -17,6 +17,7 @@
 package com.gsma.rcs.core.ims.service.im.filetransfer;
 
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.services.rcs.RcsService.Direction;
@@ -299,5 +300,9 @@ public class FileTransferPersistedStorageAccessor {
             MmContent fileicon, State state, ReasonCode reasonCode) {
         mMessagingLog.addIncomingGroupFileTransfer(mFileTransferId, chatId, contact, content,
                 fileicon, state, reasonCode);
+    }
+
+    public FtHttpResume getFileTransferResumeInfo() {
+        return mMessagingLog.getFileTransferResumeInfo(mFileTransferId);
     }
 }

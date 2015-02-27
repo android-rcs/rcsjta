@@ -33,7 +33,13 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferPersistedStorag
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpTransferState;
+import com.gsma.rcs.core.ims.service.im.filetransfer.http.ResumeDownloadFileSharingSession;
+import com.gsma.rcs.core.ims.service.im.filetransfer.http.ResumeUploadFileSharingSession;
+import com.gsma.rcs.provider.fthttp.FtHttpResume;
+import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
+import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.FileTransferStateAndReasonCode;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.broadcaster.IOneToOneFileTransferBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
@@ -64,6 +70,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
 
     private final FileTransferServiceImpl mFileTransferService;
 
+    private final RcsSettings mRcsSettings;
+
     /**
      * Lock used for synchronization
      */
@@ -82,16 +90,18 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
      * @param imService InstantMessagingService
      * @param persistentStorage FileTransferPersistedStorageAccessor
      * @param fileTransferService FileTransferServiceImpl
+     * @param rcsSettings RcsSettings
      */
     public OneToOneFileTransferImpl(String transferId,
             IOneToOneFileTransferBroadcaster broadcaster, InstantMessagingService imService,
             FileTransferPersistedStorageAccessor persistentStorage,
-            FileTransferServiceImpl fileTransferService) {
+            FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings) {
         mFileTransferId = transferId;
         mBroadcaster = broadcaster;
         mImService = imService;
         mPersistentStorage = persistentStorage;
         mFileTransferService = fileTransferService;
+        mRcsSettings = rcsSettings;
     }
 
     /**
@@ -465,12 +475,54 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
     public void resumeTransfer() {
         FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
         if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException(
-                    "Unable to resume transfer since session with file transfer ID '"
-                            + mFileTransferId + "' not available.");
+            if (ReasonCode.PAUSED_BY_USER != mPersistentStorage.getReasonCode()) {
+                /*
+                 * TODO: Throw correct exception as part of CR037 implementation
+                 */
+                throw new IllegalStateException(
+                        "Unable to resume transfer with file transfer ID '"
+                                + mFileTransferId + "' as it is not in PAUSED state.");
+            }
+            if (!ServerApiUtils.isImsConnected()) {
+                /*
+                 * TODO: Throw correct exception as part of CR037 implementation
+                 */
+                throw new IllegalStateException(
+                        "Unable to resume transfer with file transfer ID '"
+                                + mFileTransferId + "' as there is no IMS connection.");
+            }
+            if (!mImService.isFileTransferSessionAvailable()) {
+                /*
+                 * TODO: Throw correct exception as part of CR037 implementation
+                 */
+                throw new IllegalStateException(
+                        "Unable to resume transfer with file transfer ID '"
+                                + mFileTransferId
+                                + "' as there is no available file transfer session.");
+            }
+            FtHttpResume resume = mPersistentStorage.getFileTransferResumeInfo();
+            if (Direction.OUTGOING == mPersistentStorage.getDirection()) {
+                if (mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
+                    /*
+                     * TODO: Throw correct exception as part of CR037
+                     * implementation
+                     */
+                    throw new IllegalStateException(
+                            "Unable to resume transfer with file transfer ID '"
+                                    + mFileTransferId
+                                    + "' as the limit of maximum concurrent outgoing file transfers is reached.");
+                }
+                session = new ResumeUploadFileSharingSession(
+                        mImService, FileTransferUtils.createMmContent(resume.getFile()),
+                        (FtHttpResumeUpload)resume, mRcsSettings);
+            } else {
+                session = new ResumeDownloadFileSharingSession(
+                        mImService, FileTransferUtils.createMmContent(resume.getFile()),
+                        (FtHttpResumeDownload)resume, mRcsSettings);
+            }
+            session.addListener(this);
+            session.startSession();
+            return;
         }
         boolean fileSharingSessionPaused = isSessionPaused();
         boolean fileTransferOverHttp = isHttpTransfer();
@@ -486,7 +538,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             return;
         }
 
-        ((HttpFileTransferSession) session).resumeFileTransfer();
+        ((HttpFileTransferSession)session).resumeFileTransfer();
     }
 
     /**

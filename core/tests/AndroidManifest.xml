@@ -20,7 +20,7 @@
     -->
 
     <instrumentation
-        android:name="android.test.InstrumentationTestRunner"
+        android:name="com.zutubi.android.junitreport.JUnitReportTestRunner"
         android:label="Unitary tests for RCS core"
         android:targetPackage="com.gsma.rcs" />
 

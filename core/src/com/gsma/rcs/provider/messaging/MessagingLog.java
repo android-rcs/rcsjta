@@ -417,4 +417,9 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     public String getChatMessageContent(String msgId) {
         return mMessageLog.getChatMessageContent(msgId);
     }
+
+    @Override
+    public FtHttpResume getFileTransferResumeInfo(String fileTransferId) {
+        return mFileTransferLog.getFileTransferResumeInfo(fileTransferId);
+    }
 }

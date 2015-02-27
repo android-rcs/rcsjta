@@ -23,9 +23,16 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferPersistedStorageAccessor;
+import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpTransferState;
+import com.gsma.rcs.core.ims.service.im.filetransfer.http.ResumeDownloadFileSharingSession;
+import com.gsma.rcs.core.ims.service.im.filetransfer.http.ResumeUploadFileSharingSession;
+import com.gsma.rcs.provider.fthttp.FtHttpResume;
+import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
+import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.FileTransferStateAndReasonCode;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.broadcaster.IGroupFileTransferBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
@@ -54,6 +61,8 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
     private final FileTransferServiceImpl mFileTransferService;
 
+    private final RcsSettings mRcsSettings;
+
     private String mChatId;
 
     /**
@@ -75,16 +84,18 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
      * @param imService InstantMessagingService
      * @param storageAccessor FileTransferPersistedStorageAccessor
      * @param fileTransferService FileTransferServiceImpl
+     * @param rcsSettings RcsSettings
      */
     public GroupFileTransferImpl(String transferId, IGroupFileTransferBroadcaster broadcaster,
             InstantMessagingService imService,
             FileTransferPersistedStorageAccessor storageAccessor,
-            FileTransferServiceImpl fileTransferService) {
+            FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings) {
         mFileTransferId = transferId;
         mBroadcaster = broadcaster;
         mImService = imService;
         mPersistentStorage = storageAccessor;
         mFileTransferService = fileTransferService;
+        mRcsSettings = rcsSettings;
     }
 
     /**
@@ -96,12 +107,13 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
      * @param imService InstantMessagingService
      * @param storageAccessor FileTransferPersistedStorageAccessor
      * @param fileTransferService FileTransferServiceImpl
+     * @param rcsSettings RcsSettings
      */
     public GroupFileTransferImpl(String transferId, String chatId,
             IGroupFileTransferBroadcaster broadcaster, InstantMessagingService imService,
             FileTransferPersistedStorageAccessor storageAccessor,
-            FileTransferServiceImpl fileTransferService) {
-        this(transferId, broadcaster, imService, storageAccessor, fileTransferService);
+            FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings) {
+        this(transferId, broadcaster, imService, storageAccessor, fileTransferService, rcsSettings);
         mChatId = chatId;
     }
 
@@ -443,12 +455,54 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
     public void resumeTransfer() {
         FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
         if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException(
-                    "Unable to resume transfer since session with file transfer ID '"
-                            + mFileTransferId + "' not available.");
+            if (ReasonCode.PAUSED_BY_USER != mPersistentStorage.getReasonCode()) {
+                /*
+                 * TODO: Throw correct exception as part of CR037 implementation
+                 */
+                throw new IllegalStateException(
+                        "Unable to resume transfer with file transfer ID '"
+                                + mFileTransferId + "' as it is not in PAUSED state.");
+            }
+            if (!ServerApiUtils.isImsConnected()) {
+                /*
+                 * TODO: Throw correct exception as part of CR037 implementation
+                 */
+                throw new IllegalStateException(
+                        "Unable to resume transfer with file transfer ID '"
+                                + mFileTransferId + "' as there is no IMS connection.");
+            }
+            if (!mImService.isFileTransferSessionAvailable()) {
+                /*
+                 * TODO: Throw correct exception as part of CR037 implementation
+                 */
+                throw new IllegalStateException(
+                        "Unable to resume transfer with file transfer ID '"
+                                + mFileTransferId
+                                + "' as there is no available file transfer session.");
+            }
+            FtHttpResume resume = mPersistentStorage.getFileTransferResumeInfo();
+            if (Direction.OUTGOING == mPersistentStorage.getDirection()) {
+                if (mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
+                    /*
+                     * TODO: Throw correct exception as part of CR037
+                     * implementation
+                     */
+                    throw new IllegalStateException(
+                            "Unable to resume transfer with file transfer ID '"
+                                    + mFileTransferId
+                                    + "' as the limit of maximum concurrent outgoing file transfers is reached.");
+                }
+                session = new ResumeUploadFileSharingSession(
+                        mImService, FileTransferUtils.createMmContent(resume.getFile()),
+                        (FtHttpResumeUpload)resume, mRcsSettings);
+            } else {
+                session = new ResumeDownloadFileSharingSession(
+                        mImService, FileTransferUtils.createMmContent(resume.getFile()),
+                        (FtHttpResumeDownload)resume, mRcsSettings);
+            }
+            session.addListener(this);
+            session.startSession();
+            return;
         }
         boolean fileSharingSessionPaused = isSessionPaused();
         if (logger.isActivated()) {
@@ -461,7 +515,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             }
             return;
         }
-        ((HttpFileTransferSession) session).resumeFileTransfer();
+        ((HttpFileTransferSession)session).resumeFileTransfer();
     }
 
     /**
