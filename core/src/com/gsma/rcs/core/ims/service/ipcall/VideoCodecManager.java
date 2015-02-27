@@ -23,7 +23,7 @@ import java.util.Vector;
 import com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.H264Config;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
-import com.gsma.services.rcs.ipcall.VideoCodec;
+import com.gsma.rcs.service.ipcalldraft.VideoCodec;
 
 /**
  * Video codec management
@@ -73,7 +73,7 @@ public class VideoCodecManager {
         }
         return selectedCodec;
     }
-    
+
     /**
      * Compare two video codecs
      * 
@@ -85,7 +85,8 @@ public class VideoCodecManager {
         if (codec1.getEncoding().equalsIgnoreCase(codec2.getEncoding())
                 && (codec1.getVideoWidth() == codec2.getVideoWidth() || codec1.getVideoWidth() == 0 || codec2
                         .getVideoWidth() == 0)
-                && (codec1.getVideoHeight() == codec2.getVideoHeight() || codec1.getVideoHeight() == 0 || codec2
+                && (codec1.getVideoHeight() == codec2.getVideoHeight()
+                        || codec1.getVideoHeight() == 0 || codec2
                         .getVideoHeight() == 0)) {
             if (codec1.getEncoding().equalsIgnoreCase(H264Config.CODEC_NAME)) {
                 if (H264Config.getCodecProfileLevelId(codec1.getParameters()).compareToIgnoreCase(
@@ -99,7 +100,7 @@ public class VideoCodecManager {
             }
         }
         return false;
-    }    
+    }
 
     /**
      * Create a video codec from its SDP description

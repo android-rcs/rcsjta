@@ -96,22 +96,6 @@ public class CapabilitiesLog {
     public static final String CAPABILITY_GEOLOC_PUSH = "capability_geoloc_push";
 
     /**
-     * The name of the column containing the IP voice call capability.
-     * <P>
-     * Type: INTEGER
-     * </P>
-     */
-    public static final String CAPABILITY_IP_VOICE_CALL = "capability_ip_voice_call";
-
-    /**
-     * The name of the column containing the IP video call capability.
-     * <P>
-     * Type: INTEGER
-     * </P>
-     */
-    public static final String CAPABILITY_IP_VIDEO_CALL = "capability_ip_video_call";
-
-    /**
      * The name of the column containing the RCS extensions. List of features tags semicolon
      * separated (e.g. <TAG1>;<TAG2>;...;TAGn).
      * <P>

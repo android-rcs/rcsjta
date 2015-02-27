@@ -21,7 +21,7 @@ package com.gsma.rcs.service.api;
 import android.os.RemoteException;
 
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.services.rcs.ipcall.IIPCallServiceConfiguration;
+import com.gsma.rcs.service.ipcalldraft.IIPCallServiceConfiguration;
 
 /**
  * @author yplo6403

@@ -127,25 +127,4 @@ public class Intents {
         }
     }
 
-    /**
-     * Intents for IP call service
-     */
-    public static class IPCall {
-        /**
-         * Load the IP call application to view a call. This Intent takes into parameter an URI on
-         * the call (i.e. content://ipcalls/ipcall_ID). If no parameter found the main entry of the
-         * IP call application is displayed.
-         */
-        public static final String ACTION_VIEW_IPCALL = "com.gsma.services.rcs.action.VIEW_IPCALL";
-
-        /**
-         * Load the IP call application to start a new call to a given contact. This Intent takes
-         * into parameter a contact URI (i.e. content://contacts/people/contact_ID). If no parameter
-         * the main entry of the IP call application is displayed.
-         */
-        public static final String ACTION_INITIATE_IPCALL = "com.gsma.services.rcs.action.INITIATE_IPCALL";
-
-        private IPCall() {
-        }
-    }
 }

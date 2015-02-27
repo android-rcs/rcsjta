@@ -370,7 +370,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 addOutgoingFileTransfer(fileTransferId, contact, file, fileIcon,
                         FileTransfer.State.QUEUED);
                 return new OneToOneFileTransferImpl(fileTransferId,
-                        mOneToOneFileTransferBroadcaster, mImService, storageAccessor, this, mRcsSettings);
+                        mOneToOneFileTransferBroadcaster, mImService, storageAccessor, this,
+                        mRcsSettings);
             }
             addOutgoingFileTransfer(fileTransferId, contact, file, fileIcon,
                     FileTransfer.State.INITIATING);
@@ -561,7 +562,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileIcon,
                         State.QUEUED);
                 return new GroupFileTransferImpl(fileTransferId, chatId,
-                        mGroupFileTransferBroadcaster, mImService, storageAccessor, this, mRcsSettings);
+                        mGroupFileTransferBroadcaster, mImService, storageAccessor, this,
+                        mRcsSettings);
             }
             final GroupChatSession groupChatSession = mImService.getGroupChatSession(chatId);
             String chatSessionId = groupChatSession != null ? groupChatSession.getSessionID()

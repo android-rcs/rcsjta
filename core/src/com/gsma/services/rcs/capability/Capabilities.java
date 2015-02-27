@@ -37,57 +37,47 @@ public class Capabilities implements Parcelable {
     /**
      * Image sharing support
      */
-    private boolean imageSharing = false;
+    private boolean mImageSharing = false;
 
     /**
      * Video sharing support
      */
-    private boolean videoSharing = false;
+    private boolean mVideoSharing = false;
 
     /**
      * IM session support
      */
-    private boolean imSession = false;
+    private boolean mImSession = false;
 
     /**
      * File transfer support
      */
-    private boolean fileTransfer = false;
+    private boolean mFileTransfer = false;
 
     /**
      * Geolocation push support
      */
-    private boolean geolocPush = false;
-
-    /**
-     * IP voice call support
-     */
-    private boolean ipVoiceCall = false;
-
-    /**
-     * IP video call support
-     */
-    private boolean ipVideoCall = false;
+    private boolean mGeolocPush = false;
 
     /**
      * List of supported extensions
      */
-    private Set<String> extensions = new HashSet<String>();
+    private Set<String> mExtensions = new HashSet<String>();
 
     /**
      * Automata flag
      */
-    private boolean automata = false;
+    private boolean mAutomata = false;
 
     /**
      * The timestamp of the last capability refresh
      */
-    private long timestamp;
+    private long mTimestamp;
 
     /**
      * Capability validity
      */
-    private boolean valid = false;
+    private boolean mValid = false;
 
     /**
      * Constructor
@@ -97,8 +87,6 @@ public class Capabilities implements Parcelable {
      * @param imSession IM/Chat support
      * @param fileTransfer File transfer support
      * @param geolocPush Geolocation push support
-     * @param ipVoiceCall IP voice call support
-     * @param ipVideoCall IP video call support
      * @param extensions Set of supported extensions
      * @param automata Automata flag
      * @param timestamp time of last capability refresh
@@ -106,19 +94,17 @@ public class Capabilities implements Parcelable {
      * @hide
      */
     public Capabilities(boolean imageSharing, boolean videoSharing, boolean imSession,
-            boolean fileTransfer, boolean geolocPush, boolean ipVoiceCall, boolean ipVideoCall,
-            Set<String> extensions, boolean automata, long timestamp, boolean valid) {
-        this.imageSharing = imageSharing;
-        this.videoSharing = videoSharing;
-        this.imSession = imSession;
-        this.fileTransfer = fileTransfer;
-        this.geolocPush = geolocPush;
-        this.ipVoiceCall = ipVoiceCall;
-        this.ipVideoCall = ipVideoCall;
-        this.extensions = extensions;
-        this.automata = automata;
-        this.timestamp = timestamp;
-        this.valid = valid;
+            boolean fileTransfer, boolean geolocPush, Set<String> extensions, boolean automata,
+            long timestamp, boolean valid) {
+        mImageSharing = imageSharing;
+        mVideoSharing = videoSharing;
+        mImSession = imSession;
+        mFileTransfer = fileTransfer;
+        mGeolocPush = geolocPush;
+        mExtensions = extensions;
+        mAutomata = automata;
+        mTimestamp = timestamp;
+        mValid = valid;
     }
 
     /**
@@ -128,25 +114,23 @@ public class Capabilities implements Parcelable {
      * @hide
      */
     public Capabilities(Parcel source) {
-        imageSharing = source.readInt() != 0;
-        videoSharing = source.readInt() != 0;
-        imSession = source.readInt() != 0;
-        fileTransfer = source.readInt() != 0;
+        mImageSharing = source.readInt() != 0;
+        mVideoSharing = source.readInt() != 0;
+        mImSession = source.readInt() != 0;
+        mFileTransfer = source.readInt() != 0;
 
         boolean containsExtension = source.readInt() != 0;
         if (containsExtension) {
             List<String> exts = new ArrayList<String>();
             source.readStringList(exts);
-            extensions = new HashSet<String>(exts);
+            mExtensions = new HashSet<String>(exts);
         } else {
-            extensions = null;
+            mExtensions = null;
         }
-        geolocPush = source.readInt() != 0;
-        ipVoiceCall = source.readInt() != 0;
-        ipVideoCall = source.readInt() != 0;
-        automata = source.readInt() != 0;
-        timestamp = source.readLong();
-        valid = source.readInt() != 0;
+        mGeolocPush = source.readInt() != 0;
+        mAutomata = source.readInt() != 0;
+        mTimestamp = source.readLong();
+        mValid = source.readInt() != 0;
     }
 
     /**
@@ -168,23 +152,21 @@ public class Capabilities implements Parcelable {
      * @hide
      */
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(imageSharing ? 1 : 0);
-        dest.writeInt(videoSharing ? 1 : 0);
-        dest.writeInt(imSession ? 1 : 0);
-        dest.writeInt(fileTransfer ? 1 : 0);
-        if (extensions != null) {
+        dest.writeInt(mImageSharing ? 1 : 0);
+        dest.writeInt(mVideoSharing ? 1 : 0);
+        dest.writeInt(mImSession ? 1 : 0);
+        dest.writeInt(mFileTransfer ? 1 : 0);
+        if (mExtensions != null) {
             dest.writeInt(1);
-            List<String> exts = new ArrayList<String>(extensions);
+            List<String> exts = new ArrayList<String>(mExtensions);
             dest.writeStringList(exts);
         } else {
             dest.writeInt(0);
         }
-        dest.writeInt(geolocPush ? 1 : 0);
-        dest.writeInt(ipVoiceCall ? 1 : 0);
-        dest.writeInt(ipVideoCall ? 1 : 0);
-        dest.writeInt(automata ? 1 : 0);
-        dest.writeLong(timestamp);
-        dest.writeInt(valid ? 1 : 0);
+        dest.writeInt(mGeolocPush ? 1 : 0);
+        dest.writeInt(mAutomata ? 1 : 0);
+        dest.writeLong(mTimestamp);
+        dest.writeInt(mValid ? 1 : 0);
     }
 
     /**
@@ -208,7 +190,7 @@ public class Capabilities implements Parcelable {
      * @return true if supported else returns false
      */
     public boolean isImageSharingSupported() {
-        return imageSharing;
+        return mImageSharing;
     }
 
     /**
@@ -217,7 +199,7 @@ public class Capabilities implements Parcelable {
      * @return true if supported else returns false
      */
     public boolean isVideoSharingSupported() {
-        return videoSharing;
+        return mVideoSharing;
     }
 
     /**
@@ -226,7 +208,7 @@ public class Capabilities implements Parcelable {
      * @return true if supported else returns false
      */
     public boolean isImSessionSupported() {
-        return imSession;
+        return mImSession;
     }
 
     /**
@@ -235,7 +217,7 @@ public class Capabilities implements Parcelable {
      * @return true if supported else returns false
      */
     public boolean isFileTransferSupported() {
-        return fileTransfer;
+        return mFileTransfer;
     }
 
     /**
@@ -244,25 +226,7 @@ public class Capabilities implements Parcelable {
      * @return true if supported else returns false
      */
     public boolean isGeolocPushSupported() {
-        return geolocPush;
-    }
-
-    /**
-     * Is IP voice call supported
-     * 
-     * @return true if supported else returns false
-     */
-    public boolean isIPVoiceCallSupported() {
-        return ipVoiceCall;
-    }
-
-    /**
-     * Is IP video call supported
-     * 
-     * @return true if supported else returns false
-     */
-    public boolean isIPVideoCallSupported() {
-        return ipVideoCall;
+        return mGeolocPush;
     }
 
     /**
@@ -272,7 +236,7 @@ public class Capabilities implements Parcelable {
      * @return true if supported else returns false
      */
     public boolean isExtensionSupported(String tag) {
-        return extensions.contains(tag);
+        return mExtensions.contains(tag);
     }
 
     /**
@@ -281,7 +245,7 @@ public class Capabilities implements Parcelable {
      * @return Set of feature tags
      */
     public Set<String> getSupportedExtensions() {
-        return extensions;
+        return mExtensions;
     }
 
     /**
@@ -290,7 +254,7 @@ public class Capabilities implements Parcelable {
      * @return true if it's an automata else returns false
      */
     public boolean isAutomata() {
-        return automata;
+        return mAutomata;
     }
 
     /**
@@ -299,7 +263,7 @@ public class Capabilities implements Parcelable {
      * @return the time of the last capability refresh
      */
     public long getTimestamp() {
-        return timestamp;
+        return mTimestamp;
     }
 
     /**
@@ -308,6 +272,6 @@ public class Capabilities implements Parcelable {
      * @return true if the capability is valid (no need to refresh it), otherwise false.
      */
     public boolean isValid() {
-        return valid;
+        return mValid;
     }
 }

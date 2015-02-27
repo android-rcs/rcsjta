@@ -17,13 +17,13 @@
 package com.gsma.rcs.service.broadcaster;
 
 import com.gsma.rcs.platform.AndroidFactory;
+import com.gsma.rcs.service.ipcalldraft.IPCallIntent;
+import com.gsma.rcs.service.ipcalldraft.IPCall.ReasonCode;
+import com.gsma.rcs.service.ipcalldraft.IPCall.State;
 import com.gsma.rcs.utils.IntentUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.ipcall.IIPCallListener;
-import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
-import com.gsma.services.rcs.ipcall.IPCall.State;
-import com.gsma.services.rcs.ipcall.IPCallIntent;
+import com.gsma.rcs.service.ipcalldraft.IIPCallListener;
 
 import android.content.Intent;
 import android.os.RemoteCallbackList;

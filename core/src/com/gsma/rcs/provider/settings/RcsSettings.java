@@ -1384,7 +1384,9 @@ public class RcsSettings {
      * @return Boolean
      */
     public boolean isIPVoiceCallSupported() {
-        return readBoolean(RcsSettingsData.CAPABILITY_IP_VOICE_CALL);
+        // TODO: Add Ipcall support here in future releases
+        // return readBoolean(RcsSettingsData.CAPABILITY_IP_VOICE_CALL);
+        return false;
     }
 
     /**
@@ -1393,7 +1395,9 @@ public class RcsSettings {
      * @return Boolean
      */
     public boolean isIPVideoCallSupported() {
-        return readBoolean(RcsSettingsData.CAPABILITY_IP_VIDEO_CALL);
+        // TODO: Add Ipcall support here in future releases
+        // return readBoolean(RcsSettingsData.CAPABILITY_IP_VIDEO_CALL);
+        return false;
     }
 
     /**

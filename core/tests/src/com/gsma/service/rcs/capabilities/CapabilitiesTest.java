@@ -39,10 +39,6 @@ public class CapabilitiesTest extends AndroidTestCase {
 
     private boolean geolocPush;
 
-    private boolean ipVoiceCall;
-
-    private boolean ipVideoCall;
-
     private Set<String> extensions;
 
     private boolean automata;
@@ -59,8 +55,6 @@ public class CapabilitiesTest extends AndroidTestCase {
         imSession = random.nextBoolean();
         fileTransfer = random.nextBoolean();
         geolocPush = random.nextBoolean();
-        ipVideoCall = random.nextBoolean();
-        ipVoiceCall = random.nextBoolean();
         automata = random.nextBoolean();
         extensions = new HashSet<String>();
         extensions.add(String.valueOf(random.nextInt(96) + 32));
@@ -75,7 +69,7 @@ public class CapabilitiesTest extends AndroidTestCase {
 
     public void testCapabilitiesNullSet() {
         Capabilities capabilities = new Capabilities(imageSharing, videoSharing, imSession,
-                fileTransfer, geolocPush, ipVoiceCall, ipVideoCall, null, automata, timestamp,
+                fileTransfer, geolocPush, null, automata, timestamp,
                 valid);
         Parcel parcel = Parcel.obtain();
         capabilities.writeToParcel(parcel, 0);
@@ -88,7 +82,7 @@ public class CapabilitiesTest extends AndroidTestCase {
 
     public void testCapabilities() {
         Capabilities capabilities = new Capabilities(imageSharing, videoSharing, imSession,
-                fileTransfer, geolocPush, ipVoiceCall, ipVideoCall, extensions, automata,
+                fileTransfer, geolocPush, extensions, automata,
                 timestamp, valid);
         Parcel parcel = Parcel.obtain();
         capabilities.writeToParcel(parcel, 0);
@@ -113,12 +107,6 @@ public class CapabilitiesTest extends AndroidTestCase {
             return false;
         }
         if (cap1.isGeolocPushSupported() != cap2.isGeolocPushSupported()) {
-            return false;
-        }
-        if (cap1.isIPVideoCallSupported() != cap2.isIPVideoCallSupported()) {
-            return false;
-        }
-        if (cap1.isIPVoiceCallSupported() != cap2.isIPVoiceCallSupported()) {
             return false;
         }
         if (cap1.isAutomata() != cap2.isAutomata()) {

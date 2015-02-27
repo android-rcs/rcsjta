@@ -25,12 +25,12 @@ package com.gsma.rcs.provider.ipcall;
 import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.service.ipcalldraft.IPCallLog;
+import com.gsma.rcs.service.ipcalldraft.IPCall.ReasonCode;
+import com.gsma.rcs.service.ipcalldraft.IPCall.State;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
-import com.gsma.services.rcs.ipcall.IPCall.State;
-import com.gsma.services.rcs.ipcall.IPCallLog;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -139,7 +139,8 @@ public class IPCallHistory {
      * @param audiocontent Audio content
      * @param videocontent Video content
      * @param state Call state
-     * @param Reason code
+     * @param reasonCode
+     * @return Uri
      */
     public Uri addCall(String callId, ContactId contact, Direction direction,
             AudioContent audiocontent, VideoContent videocontent, State state, ReasonCode reasonCode) {

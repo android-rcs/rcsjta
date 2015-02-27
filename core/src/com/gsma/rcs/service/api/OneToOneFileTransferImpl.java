@@ -504,8 +504,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             if (Direction.OUTGOING == mPersistentStorage.getDirection()) {
                 if (mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
                     /*
-                     * TODO: Throw correct exception as part of CR037
-                     * implementation
+                     * TODO: Throw correct exception as part of CR037 implementation
                      */
                     throw new IllegalStateException(
                             "Unable to resume transfer with file transfer ID '"
@@ -514,11 +513,11 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                 }
                 session = new ResumeUploadFileSharingSession(
                         mImService, FileTransferUtils.createMmContent(resume.getFile()),
-                        (FtHttpResumeUpload)resume, mRcsSettings);
+                        (FtHttpResumeUpload) resume, mRcsSettings);
             } else {
                 session = new ResumeDownloadFileSharingSession(
                         mImService, FileTransferUtils.createMmContent(resume.getFile()),
-                        (FtHttpResumeDownload)resume, mRcsSettings);
+                        (FtHttpResumeDownload) resume, mRcsSettings);
             }
             session.addListener(this);
             session.startSession();
@@ -538,7 +537,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             return;
         }
 
-        ((HttpFileTransferSession)session).resumeFileTransfer();
+        ((HttpFileTransferSession) session).resumeFileTransfer();
     }
 
     /**

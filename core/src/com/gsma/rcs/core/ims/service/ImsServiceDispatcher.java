@@ -391,22 +391,16 @@ public class ImsServiceDispatcher extends Thread {
                     sendFinalResponse(request, Response.DECLINE);
                 }
             } else if (SipUtils
-                    .isFeatureTagPresent(request, FeatureTags.FEATURE_RCSE_IP_VOICE_CALL)
-                    && SipUtils
-                            .isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_IP_VOICE_CALL)) {
+                    .isFeatureTagPresent(request, FeatureTags.FEATURE_RCSE_IP_VOICE_CALL) &&
+                    SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_IP_VOICE_CALL)) {
                 // IP voice call
-                if (mRcsSettings.isIPVoiceCallSupported()) {
-                    if (logger.isActivated()) {
-                        logger.debug("IP Voice call invitation");
-                    }
-                    mImsModule.getIPCallService().receiveIPCallInvitation(request, true, false);
-                } else {
-                    // Service not supported: reject the invitation with a 603 Decline
-                    if (logger.isActivated()) {
-                        logger.debug("IP Voice call service not supported: automatically reject");
-                    }
-                    sendFinalResponse(request, Response.DECLINE);
+
+                // TODO: Add Ipcall support here in future releases
+                // Service not supported: reject the invitation with a 603 Decline
+                if (logger.isActivated()) {
+                    logger.debug("IP Voice call service not supported: automatically reject");
                 }
+                sendFinalResponse(request, Response.DECLINE);
             } else if (SipUtils
                     .isFeatureTagPresent(request, FeatureTags.FEATURE_RCSE_IP_VOICE_CALL)
                     && SipUtils
@@ -414,18 +408,13 @@ public class ImsServiceDispatcher extends Thread {
                     && SipUtils
                             .isFeatureTagPresent(request, FeatureTags.FEATURE_RCSE_IP_VIDEO_CALL)) {
                 // IP video call
-                if (mRcsSettings.isIPVideoCallSupported()) {
-                    if (logger.isActivated()) {
-                        logger.debug("IP video call invitation");
-                    }
-                    mImsModule.getIPCallService().receiveIPCallInvitation(request, true, true);
-                } else {
-                    // Service not supported: reject the invitation with a 603 Decline
-                    if (logger.isActivated()) {
-                        logger.debug("IP video call service not supported: automatically reject");
-                    }
-                    sendFinalResponse(request, Response.DECLINE);
+
+                // TODO: Add Ipcall support here in future releases
+                // Service not supported: reject the invitation with a 603 Decline
+                if (logger.isActivated()) {
+                    logger.debug("IP video call service not supported: automatically reject");
                 }
+                sendFinalResponse(request, Response.DECLINE);
             } else {
                 Intent intent = mIntentMgr.isSipRequestResolved(request);
                 if (intent != null) {

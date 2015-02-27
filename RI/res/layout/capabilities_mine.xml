@@ -89,36 +89,6 @@
 
             <TextView
                 android:layout_marginLeft="5dip"
-                android:gravity="right" />
-
-            <CheckBox
-                android:id="@+id/ip_voice_call"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:clickable="false"
-                android:text="@string/label_capabilities_ip_voice_call"
-                android:textStyle="bold" />
-        </TableRow>
-
-        <TableRow>
-
-            <TextView
-                android:layout_marginLeft="5dip"
-                android:gravity="right" />
-
-            <CheckBox
-                android:id="@+id/ip_video_call"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:clickable="false"
-                android:text="@string/label_capabilities_ip_video_call"
-                android:textStyle="bold" />
-        </TableRow>
-
-        <TableRow>
-
-            <TextView
-                android:layout_marginLeft="5dip"
                 android:gravity="right"
                 android:text="@string/label_capabilities_extensions" />
 

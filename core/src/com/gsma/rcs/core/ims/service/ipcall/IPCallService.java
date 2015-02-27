@@ -36,13 +36,13 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.ipcalldraft.IPCall.ReasonCode;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.ipcall.IIPCallPlayer;
-import com.gsma.services.rcs.ipcall.IIPCallRenderer;
-import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
+import com.gsma.rcs.service.ipcalldraft.IIPCallPlayer;
+import com.gsma.rcs.service.ipcalldraft.IIPCallRenderer;
 
 import java.util.HashMap;
 import java.util.Map;

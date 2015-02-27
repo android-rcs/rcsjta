@@ -36,6 +36,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.security.cert.KeyStoreManager;
 import com.gsma.rcs.core.ims.security.cert.KeyStoreManagerException;
 import com.gsma.rcs.core.ims.service.ImsService;
+import com.gsma.rcs.core.ims.service.ImsService.ImsServiceType;
 import com.gsma.rcs.core.ims.service.ImsServiceDispatcher;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.capability.CapabilityService;
@@ -53,6 +54,10 @@ import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * IMS module
@@ -76,9 +81,9 @@ public class ImsModule implements SipEventListener {
     private ImsConnectionManager mCnxManager;
 
     /**
-     * IMS services
+     * Map of IMS services
      */
-    private ImsService mServices[];
+    private Map<ImsServiceType, ImsService> mServices;
 
     /**
      * Service dispatcher
@@ -143,32 +148,34 @@ public class ImsModule implements SipEventListener {
         }
 
         // Instantiates the IMS services
-        mServices = new ImsService[7];
+        mServices = new HashMap<ImsServiceType, ImsService>();
 
         // Create terms & conditions service
-        mServices[ImsService.TERMS_SERVICE] = new TermsConditionsService(this, rcsSettings);
+        mServices.put(ImsServiceType.TERMS_CONDITIONS,
+                new TermsConditionsService(this, rcsSettings));
 
         // Create capability discovery service
-        mServices[ImsService.CAPABILITY_SERVICE] = new CapabilityService(this, rcsSettings,
-                contactsManager);
+        mServices.put(ImsServiceType.CAPABILITY, new CapabilityService(this, rcsSettings,
+                contactsManager));
 
         // Create IM service (mandatory)
-        mServices[ImsService.IM_SERVICE] = new InstantMessagingService(this, core, rcsSettings,
-                contactsManager, messagingLog);
+        mServices.put(ImsServiceType.INSTANT_MESSAGING, new InstantMessagingService(this, core,
+                rcsSettings,
+                contactsManager, messagingLog));
 
         // Create IP call service (optional)
-        mServices[ImsService.IPCALL_SERVICE] = new IPCallService(this, rcsSettings, contactsManager);
+        mServices.put(ImsServiceType.IPCALL, new IPCallService(this, rcsSettings, contactsManager));
 
         // Create richcall service (optional)
-        mServices[ImsService.RICHCALL_SERVICE] = new RichcallService(this, contactsManager,
-                rcsSettings);
+        mServices.put(ImsServiceType.RICHCALL, new RichcallService(this, contactsManager,
+                rcsSettings));
 
         // Create presence service (optional)
-        mServices[ImsService.PRESENCE_SERVICE] = new PresenceService(this, rcsSettings,
-                contactsManager);
+        mServices.put(ImsServiceType.PRESENCE, new PresenceService(this, rcsSettings,
+                contactsManager));
 
         // Create generic SIP service
-        mServices[ImsService.SIP_SERVICE] = new SipService(this, contactsManager, rcsSettings);
+        mServices.put(ImsServiceType.SIP, new SipService(this, contactsManager, rcsSettings));
 
         // Create the service dispatcher
         mServiceDispatcher = new ImsServiceDispatcher(this, rcsSettings);
@@ -274,7 +281,7 @@ public class ImsModule implements SipEventListener {
      */
     public void startImsServices() {
         // Start each services
-        for (ImsService imsService : mServices) {
+        for (ImsService imsService : mServices.values()) {
             if (imsService.isActivated()) {
                 if (logger.isActivated()) {
                     logger.info("Start IMS service: ".concat(imsService.getClass().getName()));
@@ -294,7 +301,7 @@ public class ImsModule implements SipEventListener {
         abortAllSessions();
 
         // Stop each services
-        for (ImsService imsService : mServices) {
+        for (ImsService imsService : mServices.values()) {
             if (imsService.isActivated()) {
                 if (logger.isActivated()) {
                     logger.info("Stop IMS service: ".concat(imsService.getClass().getName()));
@@ -310,7 +317,7 @@ public class ImsModule implements SipEventListener {
      * Check IMS services
      */
     public void checkImsServices() {
-        for (ImsService imsService : mServices) {
+        for (ImsService imsService : mServices.values()) {
             if (imsService.isActivated()) {
                 if (logger.isActivated()) {
                     logger.info("Check IMS service: ".concat(imsService.getClass().getName()));
@@ -330,22 +337,12 @@ public class ImsModule implements SipEventListener {
     }
 
     /**
-     * Returns the IMS service
-     * 
-     * @param id Id of the IMS service
-     * @return IMS service
-     */
-    public ImsService getImsService(int id) {
-        return mServices[id];
-    }
-
-    /**
      * Returns the IMS services
      * 
-     * @return Table of IMS service
+     * @return Collection of IMS service
      */
-    public ImsService[] getImsServices() {
-        return mServices;
+    public Collection<ImsService> getImsServices() {
+        return mServices.values();
     }
 
     /**
@@ -354,7 +351,7 @@ public class ImsModule implements SipEventListener {
      * @return Terms & conditions service
      */
     public TermsConditionsService getTermsConditionsService() {
-        return (TermsConditionsService) mServices[ImsService.TERMS_SERVICE];
+        return (TermsConditionsService) mServices.get(ImsServiceType.TERMS_CONDITIONS);
     }
 
     /**
@@ -363,7 +360,7 @@ public class ImsModule implements SipEventListener {
      * @return Capability service
      */
     public CapabilityService getCapabilityService() {
-        return (CapabilityService) mServices[ImsService.CAPABILITY_SERVICE];
+        return (CapabilityService) mServices.get(ImsServiceType.CAPABILITY);
     }
 
     /**
@@ -372,7 +369,7 @@ public class ImsModule implements SipEventListener {
      * @return IP call service
      */
     public IPCallService getIPCallService() {
-        return (IPCallService) mServices[ImsService.IPCALL_SERVICE];
+        return (IPCallService) mServices.get(ImsServiceType.IPCALL);
     }
 
     /**
@@ -381,7 +378,7 @@ public class ImsModule implements SipEventListener {
      * @return Richcall service
      */
     public RichcallService getRichcallService() {
-        return (RichcallService) mServices[ImsService.RICHCALL_SERVICE];
+        return (RichcallService) mServices.get(ImsServiceType.RICHCALL);
     }
 
     /**
@@ -390,7 +387,7 @@ public class ImsModule implements SipEventListener {
      * @return Presence service
      */
     public PresenceService getPresenceService() {
-        return (PresenceService) mServices[ImsService.PRESENCE_SERVICE];
+        return (PresenceService) mServices.get(ImsServiceType.PRESENCE);
     }
 
     /**
@@ -399,7 +396,7 @@ public class ImsModule implements SipEventListener {
      * @return Instant Messaging service
      */
     public InstantMessagingService getInstantMessagingService() {
-        return (InstantMessagingService) mServices[ImsService.IM_SERVICE];
+        return (InstantMessagingService) mServices.get(ImsServiceType.INSTANT_MESSAGING);
     }
 
     /**
@@ -408,7 +405,7 @@ public class ImsModule implements SipEventListener {
      * @return SIP service
      */
     public SipService getSipService() {
-        return (SipService) mServices[ImsService.SIP_SERVICE];
+        return (SipService) mServices.get(ImsServiceType.SIP);
     }
 
     /**

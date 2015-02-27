@@ -166,12 +166,18 @@ public final class ContactsManager {
     /**
      * MIME type for RCS IP Voice Call capability
      */
-    private static final String MIMETYPE_CAPABILITY_IP_VOICE_CALL = ContactProvider.MIME_TYPE_IP_VOICE_CALL;
+    // TODO: Add Ipcall support here in future releases
+    // private static final String MIMETYPE_CAPABILITY_IP_VOICE_CALL =
+    // ContactProvider.MIME_TYPE_IP_VOICE_CALL;
+    private static final String MIMETYPE_CAPABILITY_IP_VOICE_CALL = "vnd.android.cursor.item/com.gsma.services.rcs.ip-voice-call";
 
     /**
      * MIME type for RCS IP Video Call capability
      */
-    private static final String MIMETYPE_CAPABILITY_IP_VIDEO_CALL = ContactProvider.MIME_TYPE_IP_VIDEO_CALL;
+    // TODO: Add Ipcall support here in future releases
+    // private static final String MIMETYPE_CAPABILITY_IP_VIDEO_CALL =
+    // ContactProvider.MIME_TYPE_IP_VIDEO_CALL;
+    private static final String MIMETYPE_CAPABILITY_IP_VIDEO_CALL = "vnd.android.cursor.item/com.gsma.services.rcs.ip-video-call";
 
     /**
      * ONLINE available status

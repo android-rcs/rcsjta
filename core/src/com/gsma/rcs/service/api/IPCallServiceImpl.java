@@ -33,6 +33,8 @@ import com.gsma.rcs.provider.ipcall.IPCallHistory;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.broadcaster.IPCallEventBroadcaster;
 import com.gsma.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
+import com.gsma.rcs.service.ipcalldraft.IPCall;
+import com.gsma.rcs.service.ipcalldraft.IPCall.ReasonCode;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
@@ -41,15 +43,12 @@ import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.RcsServiceRegistration;
-
-import com.gsma.services.rcs.ipcall.IIPCall;
-import com.gsma.services.rcs.ipcall.IIPCallListener;
-import com.gsma.services.rcs.ipcall.IIPCallPlayer;
-import com.gsma.services.rcs.ipcall.IIPCallRenderer;
-import com.gsma.services.rcs.ipcall.IIPCallService;
-import com.gsma.services.rcs.ipcall.IIPCallServiceConfiguration;
-import com.gsma.services.rcs.ipcall.IPCall;
-import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
+import com.gsma.rcs.service.ipcalldraft.IIPCall;
+import com.gsma.rcs.service.ipcalldraft.IIPCallListener;
+import com.gsma.rcs.service.ipcalldraft.IIPCallPlayer;
+import com.gsma.rcs.service.ipcalldraft.IIPCallRenderer;
+import com.gsma.rcs.service.ipcalldraft.IIPCallService;
+import com.gsma.rcs.service.ipcalldraft.IIPCallServiceConfiguration;
 
 import android.os.IBinder;
 

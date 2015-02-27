@@ -38,7 +38,6 @@
     <string name="label_state_unknown">unknown</string>
     <string name="label_state_aborted">aborted</string>
     <string name="label_state_rejected">rejected</string>
-    <string name="label_state_hold">hold</string>
     <string name="label_state_accepting">accepting</string>
     <string name="label_state_ringing">ringing</string>
     <string name="label_state_failed">failed</string>
@@ -299,29 +298,6 @@
     <string name="label_select_geoloc_map">Use a long click to select a location on the map.</string>
     <string name="label_geoloc_not_found">No geoloc info to display!</string>
 
-    <!-- IP call menu -->
-    <string name="menu_ipcall">IP call</string>
-    <string name="menu_initiate_ipcall">Initiate IP call</string>
-    <string name="menu_ipcall_sessions">Current IP calls</string>
-    <string name="title_ipcall">IP call</string>
-    <string name="title_ipcall_video">IP video call</string>
-    <string name="title_recv_ipcall">IP call invitation</string>
-    <string name="title_recv_ipcall_video">IP video call invitation</string>
-    <string name="label_ipcall_has_expired">Call has expired</string>
-    <string name="label_ipcall_aborted">Call aborted (%1$s)</string>
-    <string name="label_ipcall_rejected">Call rejected (%1$s)</string>
-    <string name="label_ipcall_failed">Call failed (%1$s)</string>
-    <string name="label_ipcall_canceled">Call initiation has been canceled</string>
-    <string name="menu_ipcall_list">Current calls</string>
-    <string name="menu_ipcall_log">IP call log</string>
-    <string name="label_no_ipcall">No call</string>
-    <string name="label_video">Video</string>
-    <string name="label_initiate_call">Call</string>
-    <string name="label_hold">Hold</string>
-    <string name="label_hangup">Hang Up</string>
-    <string name="label_note_ipcall_codec">Note: the media codecs are not available in the RI due to patent issue on this open source part. Nevertheless the media for audio and video should be implemented in the application side thanks to the RCS API interface. So in this sample no audio and video will be played.</string>
-    <string name="label_ipcall_state_changed">IPCALL state %1$s (%2$s)</string>
-
     <!-- Intents menu -->
     <string name="menu_intents">Intents</string>
     <string name="menu_apps">Applications</string>
@@ -332,8 +308,6 @@
     <string name="label_load_ft">Load a file transfer</string>
     <string name="label_initiate_ft">Start a file transfer</string>
     <string name="label_intent_failed">Intent not found</string>
-    <string name="label_load_ipcall">Load an IP call</string>
-    <string name="label_initiate_ipcall">Start an IP call</string>
 
     <!-- Service menu -->
     <string name="menu_service">Service</string>
@@ -342,7 +316,6 @@
     <string name="label_service_deactivate">Select to turn off the RCS service</string>
     <string name="label_rcs_stack_available">RCS stack available</string>
     <string name="label_rcs_stack_not_available">RCS stack not installed or disabled</string>
-    <string name="label_rcs_stack_activation">RCS stack activation</string>
     <string name="menu_service_status">Service status</string>
     <string name="notification_title_rcs_service">RCS service</string>
     <string name="menu_registration_status">Registration status</string>
@@ -578,30 +551,6 @@
         <item>REJECTED_BY_REMOTE</item>
         <item>FAILED_SESSION</item>
         <item>FAILED_MEDIA</item>
-    </string-array>
-    <string-array name="ipcall_states">
-        <item>INVITED</item>
-        <item>INITIATED</item>
-        <item>STARTED</item>
-        <item>ABORTED</item>
-        <item>FAILED</item>
-        <item>REJECTED</item>
-        <item>HOLD</item>
-        <item>ACCEPTING</item>
-        <item>RINGING</item>
-    </string-array>
-    <string-array name="ipcall_reason_codes">
-        <item></item>
-        <item>ABORTED_BY_USER</item>
-        <item>ABORTED_BY_REMOTE</item>
-        <item>ABORTED_BY_SYSTEM</item>
-        <item>ABORTED_BY_SECONDARY_DEVICE</item>
-        <item>REJECTED_MAX_SESSIONS</item>
-        <item>REJECTED_BY_USER</item>
-        <item>REJECTED_BY_REMOTE</item>
-        <item>REJECTED_TIME_OUT</item>
-        <item>FAILED_INITIATION</item>
-        <item>FAILED_IPCALL</item>
     </string-array>
     <string-array name="group_chat_event">
         <item>PENDING</item>

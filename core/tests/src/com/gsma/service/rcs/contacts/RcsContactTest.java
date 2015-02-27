@@ -43,10 +43,6 @@ public class RcsContactTest extends AndroidTestCase {
 
     private boolean geolocPush;
 
-    private boolean ipVoiceCall;
-
-    private boolean ipVideoCall;
-
     private Set<String> extensions;
 
     private boolean automata;
@@ -71,8 +67,6 @@ public class RcsContactTest extends AndroidTestCase {
         imSession = random.nextBoolean();
         fileTransfer = random.nextBoolean();
         geolocPush = random.nextBoolean();
-        ipVideoCall = random.nextBoolean();
-        ipVoiceCall = random.nextBoolean();
         automata = random.nextBoolean();
         extensions = new HashSet<String>();
         extensions.add(String.valueOf(random.nextInt(96) + 32));
@@ -81,7 +75,7 @@ public class RcsContactTest extends AndroidTestCase {
         valid = random.nextBoolean();
 
         capabilities = new Capabilities(imageSharing, videoSharing, imSession, fileTransfer,
-                geolocPush, ipVoiceCall, ipVideoCall, extensions, automata, timestamp, valid);
+                geolocPush, extensions, automata, timestamp, valid);
         registered = random.nextBoolean();
         ContactUtil contactUtils = ContactUtil.getInstance(getContext());
         contactId = contactUtils.formatContact("+33123456789");

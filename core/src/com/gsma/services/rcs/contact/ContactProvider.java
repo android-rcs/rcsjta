@@ -67,12 +67,14 @@ public class ContactProvider {
     /**
      * IP voice call capability support
      */
-    public final static String MIME_TYPE_IP_VOICE_CALL = "vnd.android.cursor.item/com.gsma.services.rcs.ip-voice-call";
+    // public final static String MIME_TYPE_IP_VOICE_CALL =
+    // "vnd.android.cursor.item/com.gsma.services.rcs.ip-voice-call";
 
     /**
      * IP video call capability support
      */
-    public final static String MIME_TYPE_IP_VIDEO_CALL = "vnd.android.cursor.item/com.gsma.services.rcs.ip-video-call";
+    // public final static String MIME_TYPE_IP_VIDEO_CALL =
+    // "vnd.android.cursor.item/com.gsma.services.rcs.ip-video-call";
 
     /**
      * RCS extensions supported

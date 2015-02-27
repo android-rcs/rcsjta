@@ -21,7 +21,7 @@ package com.gsma.rcs.core.ims.service.ipcall;
 import java.util.Vector;
 
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.services.rcs.ipcall.AudioCodec;
+import com.gsma.rcs.service.ipcalldraft.AudioCodec;
 
 /**
  * Builds the audio SDP

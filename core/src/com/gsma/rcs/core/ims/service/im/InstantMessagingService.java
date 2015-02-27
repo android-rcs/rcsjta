@@ -441,10 +441,9 @@ public class InstantMessagingService extends ImsService {
         synchronized (getImsServiceSessionOperationLock()) {
             mFileTransferSessionCache.put(fileTransferId, session);
             /*
-             * Only FileSharingSessions of type ImsFileSharingSession has a
-             * dialog path. Hence add only those type of sessions to the
-             * ImsServiceSession cache and add HttpFileTransferSession to
-             * ImsServiceSessionWithoutDialogPath cache.
+             * Only FileSharingSessions of type ImsFileSharingSession has a dialog path. Hence add
+             * only those type of sessions to the ImsServiceSession cache and add
+             * HttpFileTransferSession to ImsServiceSessionWithoutDialogPath cache.
              */
             if (session instanceof ImsFileSharingSession) {
                 addImsServiceSession(session);
@@ -470,10 +469,9 @@ public class InstantMessagingService extends ImsService {
                 synchronized (getImsServiceSessionOperationLock()) {
                     mFileTransferSessionCache.remove(fileTransferId);
                     /*
-                     * Only FileSharingSessions of type ImsFileSharingSession
-                     * has a dialog path. Hence it is possible to remove only
-                     * those type of sessions from the ImsServiceSession cache
-                     * and remove HttpFileTransferSession from
+                     * Only FileSharingSessions of type ImsFileSharingSession has a dialog path.
+                     * Hence it is possible to remove only those type of sessions from the
+                     * ImsServiceSession cache and remove HttpFileTransferSession from
                      * ImsServiceSessionWithoutDialogPath cache.
                      */
                     if (session instanceof ImsFileSharingSession) {

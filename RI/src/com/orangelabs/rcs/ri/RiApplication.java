@@ -109,16 +109,6 @@ public class RiApplication extends Application {
     public static String[] GSH_REASON_CODES;
 
     /**
-     * Array of IPCall states
-     */
-    public static String[] IPCALL_STATES;
-
-    /**
-     * Array of IPCall reason codes
-     */
-    public static String[] IPCALL_REASON_CODES;
-
-    /**
      * Array of MULTIMEDIA Messaging Session states
      */
     public static String[] MMS_STATES;
@@ -164,8 +154,6 @@ public class RiApplication extends Application {
         VSH_REASON_CODES = resources.getStringArray(R.array.vsh_reason_codes);
         GSH_STATES = resources.getStringArray(R.array.gsh_states);
         GSH_REASON_CODES = resources.getStringArray(R.array.gsh_reason_codes);
-        IPCALL_STATES = resources.getStringArray(R.array.ipcall_states);
-        IPCALL_REASON_CODES = resources.getStringArray(R.array.ipcall_reason_codes);
         MMS_STATES = resources.getStringArray(R.array.mms_states);
         MMS_REASON_CODES = resources.getStringArray(R.array.mms_reason_codes);
         GROUP_CHAT_EVENTS = resources.getStringArray(R.array.group_chat_event);

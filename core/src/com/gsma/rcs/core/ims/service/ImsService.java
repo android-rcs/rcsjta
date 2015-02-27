@@ -41,39 +41,38 @@ import java.util.Map;
  */
 public abstract class ImsService {
     /**
-     * Terms & conditions service
+     * IMS service enumerated type
      */
-    public static final int TERMS_SERVICE = 0;
-
-    /**
-     * Capability service
-     */
-    public static final int CAPABILITY_SERVICE = 1;
-
-    /**
-     * Instant Messaging service
-     */
-    public static final int IM_SERVICE = 2;
-
-    /**
-     * IP call service
-     */
-    public static final int IPCALL_SERVICE = 3;
-
-    /**
-     * Richcall service
-     */
-    public static final int RICHCALL_SERVICE = 4;
-
-    /**
-     * Presence service
-     */
-    public static final int PRESENCE_SERVICE = 5;
-
-    /**
-     * SIP service
-     */
-    public static final int SIP_SERVICE = 6;
+    public enum ImsServiceType {
+        /**
+         * Terms & conditions service
+         */
+        TERMS_CONDITIONS,
+        /**
+         * Capability service
+         */
+        CAPABILITY,
+        /**
+         * Instant Messaging service
+         */
+        INSTANT_MESSAGING,
+        /**
+         * IP call service
+         */
+        IPCALL,
+        /**
+         * Richcall service
+         */
+        RICHCALL,
+        /**
+         * Presence service
+         */
+        PRESENCE,
+        /**
+         * SIP service
+         */
+        SIP
+    };
 
     /**
      * Activation flag
@@ -169,6 +168,12 @@ public abstract class ImsService {
         mImsServiceSessionCache.remove(session.getDialogPath().getCallId());
     }
 
+    /**
+     * Gets IMS session from callId
+     * 
+     * @param callId
+     * @return ImsServiceSession
+     */
     public ImsServiceSession getImsServiceSession(String callId) {
         synchronized (getImsServiceSessionOperationLock()) {
             return mImsServiceSessionCache.get(callId);
@@ -176,20 +181,18 @@ public abstract class ImsService {
     }
 
     /*
-     * This method is by choice not synchronized here since the class extending
-     * this base-class will need to handle the synchronization over a larger
-     * scope when calling this method anyway and we would like to avoid double
-     * locks.
+     * This method is by choice not synchronized here since the class extending this base-class will
+     * need to handle the synchronization over a larger scope when calling this method anyway and we
+     * would like to avoid double locks.
      */
     protected void addImsServiceSessionWithoutDialogPath(ImsServiceSession session) {
         mImsServiceSessionWithoutDialogPathCache.put(session.getSessionID(), session);
     }
 
     /*
-     * This method is by choice not synchronized here since the class extending
-     * this base-class will need to handle the synchronization over a larger
-     * scope when calling this method anyway and we would like to avoid double
-     * locks.
+     * This method is by choice not synchronized here since the class extending this base-class will
+     * need to handle the synchronization over a larger scope when calling this method anyway and we
+     * would like to avoid double locks.
      */
     protected void removeImsServiceSessionWithoutDialogPath(ImsServiceSession session) {
         mImsServiceSessionWithoutDialogPathCache.remove(session.getSessionID());
@@ -232,6 +235,11 @@ public abstract class ImsService {
      */
     public abstract void check();
 
+    /**
+     * Aborts all sessions
+     * 
+     * @param reason
+     */
     public void abortAllSessions(TerminationReason reason) {
         synchronized (getImsServiceSessionOperationLock()) {
             for (ImsServiceSession session : mImsServiceSessionCache.values()) {

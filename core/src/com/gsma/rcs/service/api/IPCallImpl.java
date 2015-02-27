@@ -33,16 +33,16 @@ import com.gsma.rcs.core.ims.service.ipcall.IPCallSession;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallStreamingSessionListener;
 import com.gsma.rcs.provider.ipcall.IPCallStateAndReasonCode;
 import com.gsma.rcs.service.broadcaster.IIPCallEventBroadcaster;
+import com.gsma.rcs.service.ipcalldraft.AudioCodec;
+import com.gsma.rcs.service.ipcalldraft.VideoCodec;
+import com.gsma.rcs.service.ipcalldraft.IPCall.ReasonCode;
+import com.gsma.rcs.service.ipcalldraft.IPCall.State;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.ipcall.AudioCodec;
-import com.gsma.services.rcs.ipcall.IIPCall;
-import com.gsma.services.rcs.ipcall.IIPCallPlayer;
-import com.gsma.services.rcs.ipcall.IIPCallRenderer;
-import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
-import com.gsma.services.rcs.ipcall.IPCall.State;
-import com.gsma.services.rcs.ipcall.VideoCodec;
+import com.gsma.rcs.service.ipcalldraft.IIPCall;
+import com.gsma.rcs.service.ipcalldraft.IIPCallPlayer;
+import com.gsma.rcs.service.ipcalldraft.IIPCallRenderer;
 
 import android.os.RemoteException;
 

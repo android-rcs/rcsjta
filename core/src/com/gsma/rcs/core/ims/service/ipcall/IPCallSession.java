@@ -42,17 +42,17 @@ import com.gsma.rcs.core.ims.service.ImsSessionBasedServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.richcall.video.SdpOrientationExtension;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.ipcalldraft.AudioCodec;
+import com.gsma.rcs.service.ipcalldraft.VideoCodec;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.ipcall.AudioCodec;
-import com.gsma.services.rcs.ipcall.IIPCallPlayer;
-import com.gsma.services.rcs.ipcall.IIPCallPlayerListener;
-import com.gsma.services.rcs.ipcall.IIPCallRenderer;
-import com.gsma.services.rcs.ipcall.IIPCallRendererListener;
-import com.gsma.services.rcs.ipcall.VideoCodec;
+import com.gsma.rcs.service.ipcalldraft.IIPCallPlayer;
+import com.gsma.rcs.service.ipcalldraft.IIPCallPlayerListener;
+import com.gsma.rcs.service.ipcalldraft.IIPCallRenderer;
+import com.gsma.rcs.service.ipcalldraft.IIPCallRendererListener;
 
 import android.os.RemoteException;
 

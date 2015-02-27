@@ -29,7 +29,6 @@ import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.contact.ContactService;
 import com.gsma.services.rcs.extension.MultimediaSessionService;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
-import com.gsma.services.rcs.ipcall.IPCallService;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingService;
 import com.gsma.services.rcs.sharing.image.ImageSharingService;
 import com.gsma.services.rcs.sharing.video.VideoSharingService;
@@ -77,7 +76,7 @@ public class ConnectionManager {
      */
     @SuppressWarnings("javadoc")
     public enum RcsServiceName {
-        CAPABILITY, CONTACT, CHAT, FILE_TRANSFER, IMAGE_SHARING, VIDEO_SHARING, GEOLOC_SHARING, FILE_UPLOAD, IP_CALL, MULTIMEDIA;
+        CAPABILITY, CONTACT, CHAT, FILE_TRANSFER, IMAGE_SHARING, VIDEO_SHARING, GEOLOC_SHARING, FILE_UPLOAD, MULTIMEDIA;
     };
 
     /**
@@ -299,8 +298,6 @@ public class ConnectionManager {
                 newRcsServiceListener(RcsServiceName.FILE_UPLOAD)));
         mApis.put(RcsServiceName.GEOLOC_SHARING, new GeolocSharingService(context,
                 newRcsServiceListener(RcsServiceName.GEOLOC_SHARING)));
-        mApis.put(RcsServiceName.IP_CALL, new IPCallService(context,
-                newRcsServiceListener(RcsServiceName.IP_CALL)));
         mApis.put(RcsServiceName.MULTIMEDIA, new MultimediaSessionService(context,
                 newRcsServiceListener(RcsServiceName.MULTIMEDIA)));
         // Register the broadcast receiver to catch ACTION_SERVICE_UP
@@ -457,15 +454,6 @@ public class ConnectionManager {
      */
     public FileUploadService getFileUploadApi() {
         return (FileUploadService) mApis.get(RcsServiceName.FILE_UPLOAD);
-    }
-
-    /**
-     * Get the instance of IPCallService
-     * 
-     * @return the instance
-     */
-    public IPCallService getIPCallApi() {
-        return (IPCallService) mApis.get(RcsServiceName.IP_CALL);
     }
 
     /**

@@ -72,11 +72,6 @@
         android:label="@string/rcs_core_permission_read_capability"
         android:protectionLevel="normal" />
     <permission
-        android:name="com.gsma.services.rcs.RCS_READ_IPCALLS"
-        android:description="@string/rcs_core_permission_read_ipcall_desc"
-        android:label="@string/rcs_core_permission_read_ipcall"
-        android:protectionLevel="normal" />
-    <permission
         android:name="com.gsma.rcs.permission.RCS_INTERNAL_ACCESS_ONLY"
         android:protectionLevel="signature" />
 
@@ -97,7 +92,6 @@
                 <action android:name="com.gsma.services.rcs.sharing.image.IImageSharingService" />
                 <action android:name="com.gsma.services.rcs.sharing.geoloc.IGeolocSharingService" />
                 <action android:name="com.gsma.services.rcs.extension.IMultimediaSessionService" />
-                <action android:name="com.gsma.services.rcs.ipcall.IIPCallService" />
                 <action android:name="com.gsma.services.rcs.upload.IFileUploadService" />
             </intent-filter>
         </service>
@@ -187,8 +181,7 @@
         <provider
             android:name=".provider.ipcall.IPCallProvider"
             android:authorities="com.gsma.services.rcs.provider.ipcall"
-            android:exported="true"
-            android:readPermission="com.gsma.services.rcs.RCS_READ_IPCALLS"
+            android:exported="false"
             android:writePermission="com.gsma.rcs.permission.RCS_INTERNAL_ACCESS_ONLY" />
         <provider
             android:name="com.gsma.rcs.provider.settings.RcsSettingsProvider"

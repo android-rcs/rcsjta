@@ -39,10 +39,10 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.ipcalldraft.AudioCodec;
+import com.gsma.rcs.service.ipcalldraft.VideoCodec;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.ipcall.AudioCodec;
-import com.gsma.services.rcs.ipcall.VideoCodec;
 
 import android.os.RemoteException;
 

@@ -19,12 +19,12 @@ package com.gsma.rcs.core.ims.service.ipcall;
 import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.provider.ipcall.IPCallHistory;
+import com.gsma.rcs.service.ipcalldraft.IPCallLog;
+import com.gsma.rcs.service.ipcalldraft.IPCall.ReasonCode;
+import com.gsma.rcs.service.ipcalldraft.IPCall.State;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
-import com.gsma.services.rcs.ipcall.IPCall.State;
-import com.gsma.services.rcs.ipcall.IPCallLog;
 
 import android.database.Cursor;
 import android.net.Uri;

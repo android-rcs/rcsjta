@@ -16,8 +16,8 @@
 
 package com.gsma.rcs.provider.ipcall;
 
-import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
-import com.gsma.services.rcs.ipcall.IPCall.State;
+import com.gsma.rcs.service.ipcalldraft.IPCall.ReasonCode;
+import com.gsma.rcs.service.ipcalldraft.IPCall.State;
 
 public class IPCallStateAndReasonCode {
 

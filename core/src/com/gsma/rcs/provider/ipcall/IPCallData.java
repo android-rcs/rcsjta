@@ -22,7 +22,7 @@
 
 package com.gsma.rcs.provider.ipcall;
 
-import com.gsma.services.rcs.ipcall.IPCallLog;
+import com.gsma.rcs.service.ipcalldraft.IPCallLog;
 
 /**
  * IP call history provider data

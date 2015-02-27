@@ -22,8 +22,8 @@
 
 package com.gsma.rcs.provider.ipcall;
 
+import com.gsma.rcs.service.ipcalldraft.IPCallLog;
 import com.gsma.rcs.utils.DatabaseUtils;
-import com.gsma.services.rcs.ipcall.IPCallLog;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;

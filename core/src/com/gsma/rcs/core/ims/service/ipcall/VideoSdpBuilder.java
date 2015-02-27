@@ -24,7 +24,7 @@ import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.rtp.RtpUtils;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.service.richcall.video.SdpOrientationExtension;
-import com.gsma.services.rcs.ipcall.VideoCodec;
+import com.gsma.rcs.service.ipcalldraft.VideoCodec;
 
 /**
  * Builds the Video SDP

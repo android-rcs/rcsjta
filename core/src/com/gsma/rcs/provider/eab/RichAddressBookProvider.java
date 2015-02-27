@@ -99,9 +99,8 @@ public class RichAddressBookProvider extends ContentProvider {
             RichAddressBookData.KEY_CAPABILITY_IM_SESSION,
             RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER,
             RichAddressBookData.KEY_CAPABILITY_GEOLOCATION_PUSH,
-            RichAddressBookData.KEY_CAPABILITY_IP_VOICE_CALL,
-            RichAddressBookData.KEY_CAPABILITY_IP_VIDEO_CALL,
-            RichAddressBookData.KEY_CAPABILITY_EXTENSIONS, RichAddressBookData.KEY_AUTOMATA,
+            RichAddressBookData.KEY_CAPABILITY_EXTENSIONS,
+            RichAddressBookData.KEY_AUTOMATA,
             RichAddressBookData.KEY_CAPABILITY_TIME_LAST_REFRESH
     };
 
@@ -132,7 +131,10 @@ public class RichAddressBookProvider extends ContentProvider {
             RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL,
             RichAddressBookData.KEY_CAPABILITY_GROUP_CHAT_SF,
             RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_SF,
-            RichAddressBookData.KEY_BLOCKING_TIMESTAMP, RichAddressBookData.KEY_BLOCKED
+            RichAddressBookData.KEY_BLOCKING_TIMESTAMP,
+            RichAddressBookData.KEY_BLOCKED,
+            RichAddressBookData.KEY_CAPABILITY_IP_VOICE_CALL,
+            RichAddressBookData.KEY_CAPABILITY_IP_VIDEO_CALL
     };
 
     private static final Set<String> COLUMN_SET_HIDDEN_FOR_EXTERNAL_ACCESS = new HashSet<String>(

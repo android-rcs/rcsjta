@@ -22,7 +22,7 @@ import java.util.Vector;
 
 import com.gsma.rcs.core.ims.protocol.sdp.MediaAttribute;
 import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
-import com.gsma.services.rcs.ipcall.AudioCodec;
+import com.gsma.rcs.service.ipcalldraft.AudioCodec;
 
 /**
  * Audio codec management

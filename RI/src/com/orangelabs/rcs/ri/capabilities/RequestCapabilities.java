@@ -287,8 +287,6 @@ public class RequestCapabilities extends Activity {
         CheckBox ft = (CheckBox) findViewById(R.id.file_transfer);
         CheckBox im = (CheckBox) findViewById(R.id.im);
         CheckBox geoloc = (CheckBox) findViewById(R.id.geoloc_push);
-        CheckBox ipVoiceCall = (CheckBox) findViewById(R.id.ip_voice_call);
-        CheckBox ipVideoCall = (CheckBox) findViewById(R.id.ip_video_call);
         TextView extensions = (TextView) findViewById(R.id.extensions);
         TextView timestamp = (TextView) findViewById(R.id.last_refresh);
         CheckBox automata = (CheckBox) findViewById(R.id.automata);
@@ -299,10 +297,6 @@ public class RequestCapabilities extends Activity {
         ft.setChecked((capabilities != null) ? capabilities.isFileTransferSupported() : false);
         im.setChecked((capabilities != null) ? capabilities.isImSessionSupported() : false);
         geoloc.setChecked((capabilities != null) ? capabilities.isGeolocPushSupported() : false);
-        ipVoiceCall.setChecked((capabilities != null) ? capabilities.isIPVoiceCallSupported()
-                : false);
-        ipVideoCall.setChecked((capabilities != null) ? capabilities.isIPVideoCallSupported()
-                : false);
 
         // Set extensions
         extensions.setVisibility(View.VISIBLE);

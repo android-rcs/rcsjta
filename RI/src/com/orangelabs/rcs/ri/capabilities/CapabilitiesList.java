@@ -57,7 +57,6 @@ public class CapabilitiesList extends Activity {
             CONTACT_AS_ID, CapabilitiesLog.CAPABILITY_IM_SESSION,
             CapabilitiesLog.CAPABILITY_FILE_TRANSFER, CapabilitiesLog.CAPABILITY_IMAGE_SHARE,
             CapabilitiesLog.CAPABILITY_VIDEO_SHARE, CapabilitiesLog.CAPABILITY_GEOLOC_PUSH,
-            CapabilitiesLog.CAPABILITY_IP_VOICE_CALL, CapabilitiesLog.CAPABILITY_IP_VIDEO_CALL,
             CapabilitiesLog.CAPABILITY_EXTENSIONS, CapabilitiesLog.AUTOMATA,
             CapabilitiesLog.TIMESTAMP
     };
@@ -220,10 +219,6 @@ public class CapabilitiesList extends Activity {
                     .getColumnIndex(CapabilitiesLog.CAPABILITY_VIDEO_SHARE);
             columnCapabilityGeolocPush = cursor
                     .getColumnIndex(CapabilitiesLog.CAPABILITY_GEOLOC_PUSH);
-            columnCapabilityIpVoiceCall = cursor
-                    .getColumnIndex(CapabilitiesLog.CAPABILITY_IP_VOICE_CALL);
-            columnCapabilityIpVideoCall = cursor
-                    .getColumnIndex(CapabilitiesLog.CAPABILITY_IP_VIDEO_CALL);
             columnCapabilityExtensions = cursor
                     .getColumnIndex(CapabilitiesLog.CAPABILITY_EXTENSIONS);
             columnAutomata = cursor.getColumnIndex(CapabilitiesLog.AUTOMATA);

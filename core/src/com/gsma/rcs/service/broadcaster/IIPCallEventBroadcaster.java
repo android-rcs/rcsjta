@@ -16,9 +16,9 @@
 
 package com.gsma.rcs.service.broadcaster;
 
+import com.gsma.rcs.service.ipcalldraft.IPCall.ReasonCode;
+import com.gsma.rcs.service.ipcalldraft.IPCall.State;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.ipcall.IPCall.ReasonCode;
-import com.gsma.services.rcs.ipcall.IPCall.State;
 
 public interface IIPCallEventBroadcaster {
 
