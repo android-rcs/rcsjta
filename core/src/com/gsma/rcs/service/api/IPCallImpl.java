@@ -479,7 +479,6 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * Returns the video codec used during sharing
      * 
      * @return VideoCodec
-     * @throws JoynServiceException
      */
     public VideoCodec getVideoCodec() {
         final IPCallSession session = mIPCallService.getIPCallSession(mCallId);
@@ -504,7 +503,6 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
      * Returns the audio codec used during sharing
      * 
      * @return AudioCodec
-     * @throws JoynServiceException
      */
     public AudioCodec getAudioCodec() {
         final IPCallSession session = mIPCallService.getIPCallSession(mCallId);

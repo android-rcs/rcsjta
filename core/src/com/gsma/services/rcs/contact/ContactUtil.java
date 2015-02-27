@@ -30,7 +30,7 @@ import android.text.TextUtils;
 import com.gsma.services.rcs.RcsContactFormatException;
 
 /**
- * ContactUtil class for validation and unique formatting of phone numbers
+ * Utility class for validation and unique formatting of phone numbers
  * 
  * @author YPLO6403
  */
