@@ -427,8 +427,6 @@ public class HttpsProvisioningManager {
                     if (msisdn == null) {
                         return null;
                     } else {
-                        // formatting plus sign according to [RFC3986]-section 2.1.
-                        msisdn = msisdn.replace("+", "%2B");
                         return sendFirstRequestsToRequireOTP(imsi, imei, msisdn, primaryUri,
                                 secondaryUri, client, localContext);
                     }
