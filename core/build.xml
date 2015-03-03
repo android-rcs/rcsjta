@@ -119,7 +119,7 @@
 		</javadoc>
 	</target>
 	
-	<target name="-pre-compile">
+	<target name="-pre-build">
 		<echo>Generate libraries</echo>
 		<ant antfile="build.xml" target="jar" dir="${terminal.root}/../libs/dnsjava"/>
 		<copy file="${terminal.root}/../libs/dnsjava/build/dnsjava.jar" todir="${terminal.root}/libs"/>

@@ -311,7 +311,7 @@ public class InitiateFileTransfer extends Activity {
                 mFilesize = ftdao.getSize();
                 ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                         android.R.layout.simple_spinner_item, new String[] {
-                            remoteContact.toString()
+                                remoteContact.toString()
                         });
                 mSpinner.setAdapter(adapter);
                 TextView uriEdit = (TextView) findViewById(R.id.uri);

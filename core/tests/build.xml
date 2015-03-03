@@ -65,10 +65,10 @@
     -->
 	<import file="custom_rules.xml" optional="true"/>
 	
-	<target name="tests">
+	<target name="run-test">
 		<echo>Running tests ...</echo>
 		<exec executable="${sdk.dir}/platform-tools/adb" failonerror="true">
-			<!-- arg line="${adb.device.arg}"/ -->
+			<arg line="${adb.device.arg}"/>
 			<arg value="shell"/>
 			<arg value="am"/>
 			<arg value="instrument"/>

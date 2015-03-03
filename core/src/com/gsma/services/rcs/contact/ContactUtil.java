@@ -962,13 +962,13 @@ public class ContactUtil {
 
     /**
      * Returns the vCard of a contact. The contact parameter contains the database URI of the
-     * contact in the  address book. The method returns a Uri to the visit card. The visit
-     * card filename has the file extension .vcf and is generated from the  address book
-     * vCard URI (see Android SDK attribute ContactsContract.Contacts.CONTENT_VCARD_URI which
-     * returns the referenced contact formatted as a vCard when opened through
-     * openAssetFileDescriptor(Uri, String)).
+     * contact in the address book. The method returns a Uri to the visit card. The visit card
+     * filename has the file extension .vcf and is generated from the address book vCard URI (see
+     * Android SDK attribute ContactsContract.Contacts.CONTENT_VCARD_URI which returns the
+     * referenced contact formatted as a vCard when opened through openAssetFileDescriptor(Uri,
+     * String)).
      * 
-     * @param contactUri Contact URI of the contact in the  address book
+     * @param contactUri Contact URI of the contact in the address book
      * @return Uri of vCard
      * @throws RcsServiceException
      */

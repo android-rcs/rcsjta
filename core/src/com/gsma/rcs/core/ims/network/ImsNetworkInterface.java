@@ -76,7 +76,7 @@ public abstract class ImsNetworkInterface {
      * Dot constant
      */
     private static final char DOT = '.';
-    
+
     /**
      * DNS SIP TLS service
      */
@@ -105,8 +105,8 @@ public abstract class ImsNetworkInterface {
     /**
      * TCP protocol
      */
-    private static final String TCP_PROTOCOL = "tcp";    
-    
+    private static final String TCP_PROTOCOL = "tcp";
+
     /**
      * Class containing the resolved fields
      */
@@ -533,12 +533,12 @@ public abstract class ImsNetworkInterface {
     private String getSrvQuery(String sipService) {
         if (DNS_SIP_TLS_SERVICE.equalsIgnoreCase(sipService)) {
             return new StringBuilder(DNS_SIPS_PREFIX)
-                .append(TCP_PROTOCOL).append(DOT).append(mImsProxyAddr)
-                .toString();
+                    .append(TCP_PROTOCOL).append(DOT).append(mImsProxyAddr)
+                    .toString();
         } else {
             return new StringBuilder(DNS_SIP_PREFIX)
-                .append(mImsProxyProtocol.toLowerCase()).append(DOT).append(mImsProxyAddr)
-                .toString();
+                    .append(mImsProxyProtocol.toLowerCase()).append(DOT).append(mImsProxyAddr)
+                    .toString();
         }
     }
 
