@@ -83,12 +83,9 @@ public class ChatMessageTest extends AndroidTestCase {
         // Read entry
         Uri uri = Uri.withAppendedPath(Message.CONTENT_URI, msgId);
         Cursor cursor = mContentResolver.query(uri, new String[] {
-                Message.DIRECTION,
-                Message.CONTACT, Message.CONTENT, Message.MIME_TYPE,
+                Message.DIRECTION, Message.CONTACT, Message.CONTENT, Message.MIME_TYPE,
                 Message.MESSAGE_ID, Message.TIMESTAMP
-        }, "("
-                + Message.MESSAGE_ID + "='" + msgId + "')", null, Message.TIMESTAMP
-                + " ASC");
+        }, "(" + Message.MESSAGE_ID + "='" + msgId + "')", null, Message.TIMESTAMP + " ASC");
         assertEquals(cursor.getCount(), 1);
         while (cursor.moveToNext()) {
             Direction direction = Direction.valueOf(cursor.getInt(cursor
@@ -121,11 +118,9 @@ public class ChatMessageTest extends AndroidTestCase {
         // Read entry
         Uri uri = Uri.withAppendedPath(Message.CONTENT_URI, msgId);
         Cursor cursor = mContentResolver.query(uri, new String[] {
-                Message.DIRECTION,
-                Message.CONTACT, Message.CONTENT, Message.MIME_TYPE,
+                Message.DIRECTION, Message.CONTACT, Message.CONTENT, Message.MIME_TYPE,
                 Message.MESSAGE_ID
-        }, "(" + Message.MESSAGE_ID + "='" + msgId
-                + "')", null, Message.TIMESTAMP + " ASC");
+        }, "(" + Message.MESSAGE_ID + "='" + msgId + "')", null, Message.TIMESTAMP + " ASC");
         assertEquals(cursor.getCount(), 1);
         while (cursor.moveToNext()) {
             Direction direction = Direction.valueOf(cursor.getInt(cursor

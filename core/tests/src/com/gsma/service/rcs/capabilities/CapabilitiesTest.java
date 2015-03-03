@@ -69,8 +69,7 @@ public class CapabilitiesTest extends AndroidTestCase {
 
     public void testCapabilitiesNullSet() {
         Capabilities capabilities = new Capabilities(imageSharing, videoSharing, imSession,
-                fileTransfer, geolocPush, null, automata, timestamp,
-                valid);
+                fileTransfer, geolocPush, null, automata, timestamp, valid);
         Parcel parcel = Parcel.obtain();
         capabilities.writeToParcel(parcel, 0);
         // done writing, now reset parcel for reading
@@ -82,8 +81,7 @@ public class CapabilitiesTest extends AndroidTestCase {
 
     public void testCapabilities() {
         Capabilities capabilities = new Capabilities(imageSharing, videoSharing, imSession,
-                fileTransfer, geolocPush, extensions, automata,
-                timestamp, valid);
+                fileTransfer, geolocPush, extensions, automata, timestamp, valid);
         Parcel parcel = Parcel.obtain();
         capabilities.writeToParcel(parcel, 0);
         // done writing, now reset parcel for reading
