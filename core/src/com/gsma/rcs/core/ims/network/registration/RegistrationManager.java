@@ -62,6 +62,11 @@ public class RegistrationManager extends PeriodicRefresher {
     private static final int CSEQ_ONE = 1;
 
     /**
+     * Default expire period from settings
+     */
+    private int mDefaultExpirePeriod;
+
+    /**
      * Expire period
      */
     private int mExpirePeriod;
@@ -69,7 +74,7 @@ public class RegistrationManager extends PeriodicRefresher {
     /**
      * Dialog path
      */
-    private SipDialogPath mDialogPath;
+    private SipDialogPath mDialogPath = null;
 
     /**
      * Supported feature tags
@@ -89,7 +94,7 @@ public class RegistrationManager extends PeriodicRefresher {
     /**
      * Instance ID
      */
-    private String mInstanceId;
+    private String mInstanceId = null;
 
     /**
      * Registration flag
@@ -137,6 +142,7 @@ public class RegistrationManager extends PeriodicRefresher {
         mFeatureTags = RegistrationUtils.getSupportedFeatureTags(rcsSettings);
         mRcsSettings = rcsSettings;
         mExpirePeriod = mRcsSettings.getRegisterExpirePeriod();
+        mDefaultExpirePeriod = mRcsSettings.getRegisterExpirePeriod();
 
         if (mRcsSettings.isGruuSupported()) {
             mInstanceId = DeviceUtils.getInstanceId(AndroidFactory.getApplicationContext(),
@@ -151,9 +157,10 @@ public class RegistrationManager extends PeriodicRefresher {
      */
     private int getExpiryValue() {
         if (CSEQ_ONE == mDialogPath.getCseq()) {
-            return mRcsSettings.getRegisterExpirePeriod();
+            return mDefaultExpirePeriod;
+        } else {
+            return mExpirePeriod;
         }
-        return mExpirePeriod;
     }
 
     /**
@@ -365,8 +372,8 @@ public class RegistrationManager extends PeriodicRefresher {
         mRegistrationProcedure.writeSecurityHeader(register);
 
         // Send REGISTER request
-        SipTransactionContext ctx = mNetworkInterface.getSipManager().sendSipMessageAndWait(
-                register);
+        SipTransactionContext ctx = mNetworkInterface.getSipManager()
+                .sendSipMessageAndWait(register);
 
         // Analyze the received response
         if (ctx.isSipResponse()) {
