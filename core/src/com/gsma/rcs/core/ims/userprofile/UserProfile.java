@@ -39,7 +39,6 @@ import javax2.sip.header.Header;
  * @author JM. Auffret
  */
 public class UserProfile {
-
     /**
      * User name
      */
