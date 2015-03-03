@@ -67,20 +67,46 @@ public abstract class ImsNetworkInterface {
      */
     private static int DNS_NEGATIVE_CACHING_TIME = 5;
 
-    // Changed by Deutsche Telekom
+    /**
+     * IPv4 address format
+     */
     private static final String REGEX_IPV4 = "\\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\.|$)){4}\\b";
 
+    /**
+     * Dot constant
+     */
     private static final char DOT = '.';
+    
+    /**
+     * DNS SIP TLS service
+     */
+    private static final String DNS_SIP_TLS_SERVICE = "SIPS+D2T";
 
-    private static final String TRANSPORT_PROTOCOL_SERVICE_TLS = "SIPS+D2T";
+    /**
+     * DNS SIP TCP service
+     */
+    private static final String DNS_SIP_TCP_SERVICE = "SIP+D2T";
 
-    private static final String SIP_SERVICE = "_sip._";
+    /**
+     * DNS SIP UDP service
+     */
+    private static final String DNS_SIP_UDP_SERVICE = "SIP+D2U";
 
-    private static final String SIP_SERVICE_SECURE = "_sips._";
+    /**
+     * DNS SIP prefix service
+     */
+    private static final String DNS_SIP_PREFIX = "_sip._";
 
-    private static final String TRANSMISSION_CONTROL_PROTOCOL = "tcp";
+    /**
+     * DNS SIPS prefix service
+     */
+    private static final String DNS_SIPS_PREFIX = "_sips._";
 
-    // Changed by Deutsche Telekom
+    /**
+     * TCP protocol
+     */
+    private static final String TCP_PROTOCOL = "tcp";    
+    
     /**
      * Class containing the resolved fields
      */
@@ -505,14 +531,15 @@ public abstract class ImsNetworkInterface {
      * @return constructed srv query
      */
     private String getSrvQuery(String sipService) {
-        if (TRANSPORT_PROTOCOL_SERVICE_TLS.equalsIgnoreCase(sipService)) {
-            return new StringBuilder(SIP_SERVICE_SECURE)
-                    .append(TRANSMISSION_CONTROL_PROTOCOL).append(DOT).append(mImsProxyAddr)
-                    .toString();
-        }
-        return new StringBuilder(SIP_SERVICE)
+        if (DNS_SIP_TLS_SERVICE.equalsIgnoreCase(sipService)) {
+            return new StringBuilder(DNS_SIPS_PREFIX)
+                .append(TCP_PROTOCOL).append(DOT).append(mImsProxyAddr)
+                .toString();
+        } else {
+            return new StringBuilder(DNS_SIP_PREFIX)
                 .append(mImsProxyProtocol.toLowerCase()).append(DOT).append(mImsProxyAddr)
                 .toString();
+        }
     }
 
     // Changed by Deutsche Telekom
@@ -550,11 +577,11 @@ public abstract class ImsNetworkInterface {
             // DNS NAPTR lookup
             String service;
             if (mImsProxyProtocol.equalsIgnoreCase(ListeningPoint.UDP)) {
-                service = "SIP+D2U";
+                service = DNS_SIP_UDP_SERVICE;
             } else if (mImsProxyProtocol.equalsIgnoreCase(ListeningPoint.TCP)) {
-                service = "SIP+D2T";
+                service = DNS_SIP_TCP_SERVICE;
             } else if (mImsProxyProtocol.equalsIgnoreCase(ListeningPoint.TLS)) {
-                service = "SIPS+D2T";
+                service = DNS_SIP_TLS_SERVICE;
             } else {
                 throw new SipException("Unkown SIP protocol");
             }
@@ -594,8 +621,8 @@ public abstract class ImsNetworkInterface {
                     logger.debug("No NAPTR record found: use DNS SRV instead");
                 }
                 String srvQuery;
-                if (mImsProxyAddr.startsWith(SIP_SERVICE)
-                        || mImsProxyAddr.startsWith(SIP_SERVICE_SECURE)) {
+                if (mImsProxyAddr.startsWith(DNS_SIP_PREFIX)
+                        || mImsProxyAddr.startsWith(DNS_SIPS_PREFIX)) {
                     srvQuery = mImsProxyAddr;
                 } else {
                     srvQuery = getSrvQuery(service);
