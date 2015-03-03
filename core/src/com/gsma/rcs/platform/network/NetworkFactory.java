@@ -64,10 +64,10 @@ public abstract class NetworkFactory {
             return;
         }
         Class<?>[] rcsSettingsArgsClass = new Class[] {
-                RcsSettings.class
+            RcsSettings.class
         };
         Object[] rcsSettingsArgs = new Object[] {
-                rcsSettings
+            rcsSettings
         };
         try {
             mFactory = (NetworkFactory) Class.forName(classname)

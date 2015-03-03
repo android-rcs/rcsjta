@@ -74,7 +74,7 @@ public class RichcallService extends ImsService {
      * Video share features tags
      */
     public final static String[] FEATURE_TAGS_VIDEO_SHARE = {
-            FeatureTags.FEATURE_3GPP_VIDEO_SHARE
+        FeatureTags.FEATURE_3GPP_VIDEO_SHARE
     };
 
     /**

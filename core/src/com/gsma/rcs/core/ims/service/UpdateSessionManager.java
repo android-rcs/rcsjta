@@ -326,8 +326,8 @@ public class UpdateSessionManager {
                             }
 
                             // build sdp response
-                            String sdp = mSession
-                                    .buildReInviteSdpResponse(reInvite, reInviteContext);
+                            String sdp = mSession.buildReInviteSdpResponse(reInvite,
+                                    reInviteContext);
                             if (sdp == null) {
                                 // sdp null - terminate session and send error
                                 mSession.handleError(new ImsSessionBasedServiceError(

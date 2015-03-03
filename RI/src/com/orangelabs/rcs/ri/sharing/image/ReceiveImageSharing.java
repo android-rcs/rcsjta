@@ -109,8 +109,7 @@ public class ReceiveImageSharing extends Activity {
 
         @Override
         public void onStateChanged(ContactId contact, String sharingId,
-                final ImageSharing.State state,
-                ImageSharing.ReasonCode reasonCode) {
+                final ImageSharing.State state, ImageSharing.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG,
                         new StringBuilder("onStateChanged contact=").append(contact.toString())
@@ -182,8 +181,7 @@ public class ReceiveImageSharing extends Activity {
             if (LogUtils.isActive) {
                 Log.w(LOGTAG,
                         new StringBuilder("onDeleted contact=").append(contact)
-                                .append(" sharingIds=")
-                                .append(sharingIds).toString());
+                                .append(" sharingIds=").append(sharingIds).toString());
             }
         }
     };

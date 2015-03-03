@@ -101,8 +101,7 @@ public abstract class GenericSipSession extends ImsServiceSession {
         SipRequest invite = SipMessageFactory.createInvite(getDialogPath(), new String[] {
                 getFeatureTag(), ext
         }, new String[] {
-                getFeatureTag(), ext,
-                SipUtils.EXPLICIT_REQUIRE
+                getFeatureTag(), ext, SipUtils.EXPLICIT_REQUIRE
         }, getDialogPath().getLocalContent());
 
         try {
@@ -130,8 +129,7 @@ public abstract class GenericSipSession extends ImsServiceSession {
                 new String[] {
                         getFeatureTag(), ext
                 }, new String[] {
-                        getFeatureTag(), ext,
-                        SipUtils.EXPLICIT_REQUIRE
+                        getFeatureTag(), ext, SipUtils.EXPLICIT_REQUIRE
                 }, getDialogPath().getLocalContent());
         return resp;
     }

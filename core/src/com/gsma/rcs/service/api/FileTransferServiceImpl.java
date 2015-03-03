@@ -268,8 +268,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             ContactId contact, String displayName) {
         if (sLogger.isActivated()) {
             sLogger.info("Receive FT invitation from " + contact + " file="
-                    + session.getContent().getName()
-                    + " size=" + session.getContent().getSize() + " displayName=" + displayName);
+                    + session.getContent().getName() + " size=" + session.getContent().getSize()
+                    + " displayName=" + displayName);
         }
 
         // Update displayName of remote contact
@@ -314,10 +314,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      */
     private void addOutgoingFileTransfer(String fileTransferId, ContactId contact,
             MmContent content, MmContent fileicon, State state) {
-        mMessagingLog.addFileTransfer(fileTransferId, contact, Direction.OUTGOING,
-                content, fileicon, state, ReasonCode.UNSPECIFIED);
-        mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
-                state, ReasonCode.UNSPECIFIED);
+        mMessagingLog.addFileTransfer(fileTransferId, contact, Direction.OUTGOING, content,
+                fileicon, state, ReasonCode.UNSPECIFIED);
+        mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId, state,
+                ReasonCode.UNSPECIFIED);
     }
 
     private void setFileTransferState(String fileTransferId, ContactId contact, State state) {
@@ -338,8 +338,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      */
     private void addOutgoingGroupFileTransfer(String fileTransferId, String chatId,
             MmContent content, MmContent fileicon, State state) {
-        mMessagingLog.addOutgoingGroupFileTransfer(fileTransferId, chatId, content,
-                fileicon, state, FileTransfer.ReasonCode.UNSPECIFIED);
+        mMessagingLog.addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileicon,
+                state, FileTransfer.ReasonCode.UNSPECIFIED);
         mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId, state,
                 ReasonCode.UNSPECIFIED);
     }
@@ -483,8 +483,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             throws ServerApiException {
         if (sLogger.isActivated()) {
             sLogger.info("Transfer file " + file + " to " + contact + " (fileicon="
-                    + attachfileIcon
-                    + ")");
+                    + attachfileIcon + ")");
         }
         try {
             FileDescription fileDescription = FileFactory.getFactory().getFileDescription(file);
@@ -592,8 +591,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
              * If groupChatSession is NOT established then queue this file transfer and try to
              * rejoin group chat.
              */
-            addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileIcon,
-                    State.QUEUED);
+            addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileIcon, State.QUEUED);
             if (groupChatSession != null) {
                 if (groupChatSession.isInitiatedByRemote()) {
                     if (sLogger.isActivated()) {
@@ -655,8 +653,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             String fileTransferId = IdGenerator.generateMessageID();
             MmContent fileIconContent = null;
             if (attachfileIcon && MimeManager.isImageType(content.getEncoding())) {
-                fileIconContent = FileTransferUtils
-                        .createFileicon(content.getUri(), fileTransferId, mRcsSettings);
+                fileIconContent = FileTransferUtils.createFileicon(content.getUri(),
+                        fileTransferId, mRcsSettings);
             }
 
             /* If the IMS is connected at this time then send this group file. */
@@ -1105,8 +1103,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     public void addAndBroadcastFileTransferInvitationRejected(ContactId contact, MmContent content,
             MmContent fileIcon, ReasonCode reasonCode) {
         String fileTransferId = IdGenerator.generateMessageID();
-        mMessagingLog.addFileTransfer(fileTransferId, contact, Direction.INCOMING,
-                content, fileIcon, FileTransfer.State.REJECTED, reasonCode);
+        mMessagingLog.addFileTransfer(fileTransferId, contact, Direction.INCOMING, content,
+                fileIcon, FileTransfer.State.REJECTED, reasonCode);
 
         mOneToOneFileTransferBroadcaster.broadcastInvitation(fileTransferId);
     }

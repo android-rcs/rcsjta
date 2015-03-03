@@ -265,7 +265,7 @@ public class AndroidSecureSocketConnection extends AndroidSocketConnection {
                     kms[0] = km;
 
                     tms = new TrustManager[] {
-                            new EasyX509TrustManager(null)
+                        new EasyX509TrustManager(null)
                     };
                 }
                 SecureRandom secureRandom = new SecureRandom();

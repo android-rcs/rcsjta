@@ -94,8 +94,7 @@ public class GroupChatList extends Activity {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View v, int pos, long id) {
-                ConnectionManager cnxManager = ConnectionManager
-                        .getInstance(GroupChatList.this);
+                ConnectionManager cnxManager = ConnectionManager.getInstance(GroupChatList.this);
                 if (cnxManager == null || !cnxManager.isServiceConnected(RcsServiceName.CHAT)) {
                     Utils.showMessage(GroupChatList.this,
                             getString(R.string.label_continue_chat_failed));

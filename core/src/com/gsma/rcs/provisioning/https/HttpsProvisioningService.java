@@ -120,8 +120,8 @@ public class HttpsProvisioningService extends Service {
         }
         registerReceiver(retryReceiver, new IntentFilter(ACTION_RETRY));
 
-        mHttpsProvisioningMng = new HttpsProvisioningManager(mContext,
-                mLocalContentResolver, mRetryIntent, first, user, mRcsSettings);
+        mHttpsProvisioningMng = new HttpsProvisioningManager(mContext, mLocalContentResolver,
+                mRetryIntent, first, user, mRcsSettings);
         if (logActivated) {
             sLogger.debug(new StringBuilder("Provisioning (boot=").append(first).append(") (user=")
                     .append(user).append(") (version=").append(version).append(")").toString());

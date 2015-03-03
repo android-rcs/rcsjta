@@ -60,8 +60,7 @@ public class OnlineContactsList extends ListActivity {
 
         // Register to API connection manager
         mCnxManager = ConnectionManager.getInstance(this);
-        if (mCnxManager == null
-                || !mCnxManager.isServiceConnected(RcsServiceName.CONTACT)) {
+        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
             return;
@@ -92,8 +91,7 @@ public class OnlineContactsList extends ListActivity {
     private void updateList() {
         try {
             // Get list of RCS contacts who are online
-            Set<RcsContact> onlineContacts = mCnxManager.getContactApi()
-                    .getRcsContactsOnline();
+            Set<RcsContact> onlineContacts = mCnxManager.getContactApi().getRcsContactsOnline();
             List<RcsContact> contacts = new ArrayList<RcsContact>(onlineContacts);
             if (contacts.size() > 0) {
                 String[] items = new String[contacts.size()];

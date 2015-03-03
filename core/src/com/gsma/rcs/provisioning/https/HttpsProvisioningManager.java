@@ -395,8 +395,7 @@ public class HttpsProvisioningManager {
             // Format first HTTPS request with extra parameters (IMSI and IMEI if available plus
             // SMS_port and token)
             String token = (!TextUtils.isEmpty(mRcsSettings.getProvisioningToken()) ? mRcsSettings
-                    .getProvisioningToken()
-                    : "");
+                    .getProvisioningToken() : "");
             String args = getHttpsRequestArguments(imsi, imei, smsPortForOTP, token, msisdn);
 
             // Execute first HTTPS request with extra parameters
@@ -883,8 +882,7 @@ public class HttpsProvisioningManager {
                                     // Start retry alarm
                                     if (validity > 0) {
                                         HttpsProvisioningService.startRetryAlarm(mCtx,
-                                                mRetryIntent,
-                                                validity * 1000);
+                                                mRetryIntent, validity * 1000);
                                     }
                                     // Terms request
                                     if (info.getMessage() != null

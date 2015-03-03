@@ -118,7 +118,7 @@ public class IPCallProvider extends ContentProvider {
 
     private String[] getSelectionArgsWithCallId(String[] selectionArgs, String callId) {
         String[] callSelectionArg = new String[] {
-                callId
+            callId
         };
         if (selectionArgs == null) {
             return callSelectionArg;
@@ -143,8 +143,7 @@ public class IPCallProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -196,8 +195,7 @@ public class IPCallProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -216,8 +214,7 @@ public class IPCallProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -239,8 +236,7 @@ public class IPCallProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 }

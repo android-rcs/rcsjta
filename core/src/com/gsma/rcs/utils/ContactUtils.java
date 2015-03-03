@@ -53,7 +53,7 @@ public class ContactUtils {
     };
 
     private static final String[] PROJECTION_RAW_CONTACT_ID = new String[] {
-            Data.RAW_CONTACT_ID
+        Data.RAW_CONTACT_ID
     };
 
     private static final String SELECTION_LOOSE = new StringBuilder(Data.MIMETYPE)
@@ -65,7 +65,7 @@ public class ContactUtils {
             .toString();
 
     private static final String[] PROJECTION_DATA_CONTACTID = new String[] {
-            Data.CONTACT_ID
+        Data.CONTACT_ID
     };
 
     private static final String WHERE_DATA_ID = new StringBuilder(Data._ID).append("=?").toString();
@@ -173,7 +173,7 @@ public class ContactUtils {
         Cursor c = null;
         try {
             String[] whereArgs = new String[] {
-                    String.valueOf(rawContactId)
+                String.valueOf(rawContactId)
             };
             c = mResolver.query(Data.CONTENT_URI, PROJECTION_DATA_CONTACTID, WHERE_DATA_ID,
                     whereArgs, null);
@@ -222,8 +222,7 @@ public class ContactUtils {
 
         // No match found using LOOSE equals, try using STRICT equals.
         String[] selectionArgsStrict = {
-                Phone.CONTENT_ITEM_TYPE, contact.toString(),
-                contact.toString()
+                Phone.CONTENT_ITEM_TYPE, contact.toString(), contact.toString()
         };
         try {
             cur = contentResolver.query(Data.CONTENT_URI, PROJECTION_RAW_CONTACT_ID,

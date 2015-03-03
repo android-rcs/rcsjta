@@ -84,8 +84,7 @@ public class TestIntentApps extends Activity {
                     Utils.showMessageAndExit(TestIntentApps.this,
                             getString(R.string.label_intent_failed), mExitOnce, e);
                 }
-            } else
-            if (v.getId() == R.id.initiate_chat) {
+            } else if (v.getId() == R.id.initiate_chat) {
                 try {
                     Intent intent = new Intent(
                             com.gsma.services.rcs.Intents.Chat.ACTION_SEND_ONE_TO_ONE_CHAT_MESSAGE);
@@ -94,8 +93,7 @@ public class TestIntentApps extends Activity {
                     Utils.showMessageAndExit(TestIntentApps.this,
                             getString(R.string.label_intent_failed), mExitOnce, e);
                 }
-            } else
-            if (v.getId() == R.id.load_group_chat) {
+            } else if (v.getId() == R.id.load_group_chat) {
                 try {
                     Intent intent = new Intent(
                             com.gsma.services.rcs.Intents.Chat.ACTION_VIEW_GROUP_CHAT);
@@ -104,8 +102,7 @@ public class TestIntentApps extends Activity {
                     Utils.showMessageAndExit(TestIntentApps.this,
                             getString(R.string.label_intent_failed), mExitOnce, e);
                 }
-            } else
-            if (v.getId() == R.id.initiate_group_chat) {
+            } else if (v.getId() == R.id.initiate_group_chat) {
                 try {
                     Intent intent = new Intent(
                             com.gsma.services.rcs.Intents.Chat.ACTION_INITIATE_GROUP_CHAT);
@@ -114,8 +111,7 @@ public class TestIntentApps extends Activity {
                     Utils.showMessageAndExit(TestIntentApps.this,
                             getString(R.string.label_intent_failed), mExitOnce, e);
                 }
-            } else
-            if (v.getId() == R.id.load_ft) {
+            } else if (v.getId() == R.id.load_ft) {
                 try {
                     Intent intent = new Intent(
                             com.gsma.services.rcs.Intents.FileTransfer.ACTION_VIEW_FILE_TRANSFER);
@@ -124,8 +120,7 @@ public class TestIntentApps extends Activity {
                     Utils.showMessageAndExit(TestIntentApps.this,
                             getString(R.string.label_intent_failed), mExitOnce, e);
                 }
-            } else
-            if (v.getId() == R.id.initiate_ft) {
+            } else if (v.getId() == R.id.initiate_ft) {
                 try {
                     Intent intent = new Intent(
                             com.gsma.services.rcs.Intents.FileTransfer.ACTION_INITIATE_ONE_TO_ONE_FILE_TRANSFER);

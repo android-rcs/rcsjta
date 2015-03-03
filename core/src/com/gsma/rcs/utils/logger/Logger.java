@@ -75,7 +75,7 @@ public class Logger {
      * List of appenders
      */
     private static Appender[] appenders = new Appender[] {
-            new AndroidAppender()
+        new AndroidAppender()
     };
 
     /**

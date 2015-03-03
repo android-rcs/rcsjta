@@ -177,8 +177,7 @@ public class ReceiveFileTransfer extends Activity {
 
         @Override
         public void onStateChanged(ContactId contact, String transferId,
-                final FileTransfer.State state,
-                FileTransfer.ReasonCode reasonCode) {
+                final FileTransfer.State state, FileTransfer.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG,
                         new StringBuilder("onStateChanged contact=").append(contact)
@@ -196,8 +195,7 @@ public class ReceiveFileTransfer extends Activity {
             if (LogUtils.isActive) {
                 Log.w(LOGTAG,
                         new StringBuilder("onDeleted contact=").append(contact)
-                                .append(" transferIds=")
-                                .append(transferIds).toString());
+                                .append(" transferIds=").append(transferIds).toString());
             }
         }
     };

@@ -109,8 +109,7 @@ public class BlockingContact extends Activity {
         } catch (RcsServiceNotAvailableException e) {
             e.printStackTrace();
             Utils.showMessageAndExit(BlockingContact.this,
-                    getString(R.string.label_api_unavailable),
-                    exitOnce);
+                    getString(R.string.label_api_unavailable), exitOnce);
         } catch (RcsServiceException e) {
             e.printStackTrace();
             Utils.showMessageAndExit(BlockingContact.this, getString(R.string.label_api_failed),

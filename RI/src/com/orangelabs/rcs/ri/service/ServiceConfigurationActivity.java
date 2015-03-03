@@ -93,13 +93,11 @@ public class ServiceConfigurationActivity extends Activity {
         }
     }
 
-    private MinimumBatteryLevel getMinimumBatteryLevelFromSpinnerPosition(
-            int position) {
+    private MinimumBatteryLevel getMinimumBatteryLevelFromSpinnerPosition(int position) {
         return sPosToMinimumBatteryLevel.get(position);
     }
 
-    private int getSpinnerPositionFromMinimumBatteryLevel(
-            MinimumBatteryLevel level) {
+    private int getSpinnerPositionFromMinimumBatteryLevel(MinimumBatteryLevel level) {
         return sMinimumBatteryLevelToPos.get(level);
     }
 
@@ -172,8 +170,8 @@ public class ServiceConfigurationActivity extends Activity {
 
         String[] batteryLevels = getResources().getStringArray(R.array.minimum_battery_level);
         mSpinnerMinBatteryLevel = (Spinner) findViewById(R.id.spinner_label_min_battery_level);
-        adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, batteryLevels);
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,
+                batteryLevels);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mSpinnerMinBatteryLevel.setAdapter(adapter);
 
@@ -189,8 +187,7 @@ public class ServiceConfigurationActivity extends Activity {
                     if (!oldLevel.equals(level)) {
                         mConfiguration.setMinimumBatteryLevel(level);
                         if (LogUtils.isActive) {
-                            Log.d(LOGTAG,
-                                    "onClick MinimumBatteryLevel ".concat(level.toString()));
+                            Log.d(LOGTAG, "onClick MinimumBatteryLevel ".concat(level.toString()));
                         }
                     }
                 } catch (RcsServiceException e) {

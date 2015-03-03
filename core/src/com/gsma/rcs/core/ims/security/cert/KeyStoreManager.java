@@ -548,8 +548,7 @@ public class KeyStoreManager {
      */
     private static String hexify(byte bytes[]) {
         char[] hexDigits = {
-                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
-                'E', 'F'
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
         };
         StringBuffer buf = new StringBuffer(bytes.length * 2);
         for (int i = 0; i < bytes.length; ++i) {

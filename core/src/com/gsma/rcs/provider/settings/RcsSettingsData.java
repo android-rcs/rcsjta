@@ -1097,24 +1097,21 @@ public class RcsSettingsData {
      */
     public static final String DIRECTORY_PATH_PHOTOS = "DirectoryPathPhotos";
     /* package private */static final String DEFAULT_DIRECTORY_PATH_PHOTOS = Environment
-            .getExternalStorageDirectory()
-            + "/rcs/photos/";
+            .getExternalStorageDirectory() + "/rcs/photos/";
 
     /**
      * Directory path for videos
      */
     public static final String DIRECTORY_PATH_VIDEOS = "DirectoryPathVideos";
     /* package private */static final String DEFAULT_DIRECTORY_PATH_VIDEOS = Environment
-            .getExternalStorageDirectory()
-            + "/rcs/videos/";
+            .getExternalStorageDirectory() + "/rcs/videos/";
 
     /**
      * Directory path for files
      */
     public static final String DIRECTORY_PATH_FILES = "DirectoryPathFiles";
     /* package private */static final String DEFAULT_DIRECTORY_PATH_FILES = Environment
-            .getExternalStorageDirectory()
-            + "/rcs/files/";
+            .getExternalStorageDirectory() + "/rcs/files/";
 
     /**
      * Secure MSRP over Wi-Fi

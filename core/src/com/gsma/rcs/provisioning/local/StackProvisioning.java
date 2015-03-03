@@ -350,7 +350,7 @@ public class StackProvisioning extends Activity {
 
         spinner = (Spinner) findViewById(R.id.client_vendor);
         final String[] vendorArray = new String[] {
-                Build.MANUFACTURER
+            Build.MANUFACTURER
         };
         ArrayAdapter<CharSequence> adapterVendor = new ArrayAdapter(this,
                 android.R.layout.simple_spinner_item, vendorArray);
@@ -359,8 +359,8 @@ public class StackProvisioning extends Activity {
         spinner.setSelection(0);
 
         spinner = (Spinner) findViewById(R.id.EnableRcsSwitch);
-        adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, mEnableRcseSwitch);
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,
+                mEnableRcseSwitch);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         EnableRcseSwitch rcsSwitch;
@@ -590,7 +590,7 @@ public class StackProvisioning extends Activity {
         if (files == null) {
             // No certificate
             return new String[] {
-                    getString(R.string.label_no_certificate)
+                getString(R.string.label_no_certificate)
             };
         } else {
             // Add certificates in the list

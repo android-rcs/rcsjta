@@ -128,8 +128,7 @@ public class CapabilityUtils {
         if (rcsSettings.isIPVideoCallSupported()) {
             tags.add(FeatureTags.FEATURE_RCSE_IP_VIDEO_CALL);
         }
-        if (rcsSettings.isIPVoiceCallSupported()
-                || rcsSettings.isIPVideoCallSupported()) {
+        if (rcsSettings.isIPVoiceCallSupported() || rcsSettings.isIPVideoCallSupported()) {
             icsiTags.add(FeatureTags.FEATURE_3GPP_IP_VOICE_CALL);
         }
 

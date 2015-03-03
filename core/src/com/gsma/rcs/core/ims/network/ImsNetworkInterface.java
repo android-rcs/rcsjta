@@ -532,13 +532,11 @@ public abstract class ImsNetworkInterface {
      */
     private String getSrvQuery(String sipService) {
         if (DNS_SIP_TLS_SERVICE.equalsIgnoreCase(sipService)) {
-            return new StringBuilder(DNS_SIPS_PREFIX)
-                    .append(TCP_PROTOCOL).append(DOT).append(mImsProxyAddr)
-                    .toString();
+            return new StringBuilder(DNS_SIPS_PREFIX).append(TCP_PROTOCOL).append(DOT)
+                    .append(mImsProxyAddr).toString();
         } else {
-            return new StringBuilder(DNS_SIP_PREFIX)
-                    .append(mImsProxyProtocol.toLowerCase()).append(DOT).append(mImsProxyAddr)
-                    .toString();
+            return new StringBuilder(DNS_SIP_PREFIX).append(mImsProxyProtocol.toLowerCase())
+                    .append(DOT).append(mImsProxyAddr).toString();
         }
     }
 

@@ -206,7 +206,7 @@ public class RcsSettings {
         Cursor c = null;
         try {
             String[] whereArg = new String[] {
-                    key
+                key
             };
             c = mLocalContentResolver.query(RcsSettingsData.CONTENT_URI, null, WHERE_CLAUSE,
                     whereArg, null);
@@ -238,7 +238,7 @@ public class RcsSettings {
         ContentValues values = new ContentValues();
         values.put(RcsSettingsData.KEY_VALUE, value);
         String[] whereArgs = new String[] {
-                key
+            key
         };
         int count = mLocalContentResolver.update(RcsSettingsData.CONTENT_URI, values, WHERE_CLAUSE,
                 whereArgs);

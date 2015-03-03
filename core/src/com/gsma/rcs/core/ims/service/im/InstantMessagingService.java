@@ -134,14 +134,14 @@ public class InstantMessagingService extends ImsService {
      * Chat features tags
      */
     public final static String[] CHAT_FEATURE_TAGS = {
-            FeatureTags.FEATURE_OMA_IM
+        FeatureTags.FEATURE_OMA_IM
     };
 
     /**
      * File transfer features tags
      */
     public final static String[] FT_FEATURE_TAGS = {
-            FeatureTags.FEATURE_OMA_IM
+        FeatureTags.FEATURE_OMA_IM
     };
 
     /**

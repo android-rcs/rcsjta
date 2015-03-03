@@ -94,10 +94,9 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
             ContactId contact, String displayName, RcsSettings rcsSettings) {
         super(parent, ContentManager.createMmContent(ContentManager.generateUriForReceivedContent(
                 fileTransferInfo.getFilename(), fileTransferInfo.getFileType(), rcsSettings),
-                fileTransferInfo
-                        .getFileSize(), fileTransferInfo.getFilename()), contact, PhoneUtils
-                .formatContactIdToUri(contact), null, chatSession.getSessionID(), chatSession
-                .getContributionID(), fileTransferId, rcsSettings);
+                fileTransferInfo.getFileSize(), fileTransferInfo.getFilename()), contact,
+                PhoneUtils.formatContactIdToUri(contact), null, chatSession.getSessionID(),
+                chatSession.getContributionID(), fileTransferId, rcsSettings);
 
         setRemoteDisplayName(displayName);
         // Build a new dialogPath with this of chatSession and an empty CallId

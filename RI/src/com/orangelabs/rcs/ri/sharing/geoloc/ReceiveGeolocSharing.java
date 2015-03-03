@@ -197,8 +197,7 @@ public class ReceiveGeolocSharing extends Activity {
             if (LogUtils.isActive) {
                 Log.w(LOGTAG,
                         new StringBuilder("onDeleted contact=").append(contact)
-                                .append(" sharingIds=")
-                                .append(sharingIds).toString());
+                                .append(" sharingIds=").append(sharingIds).toString());
             }
         }
 

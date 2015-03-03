@@ -123,8 +123,8 @@ public class PhoneUtils {
         } else {
             // SIP-URI format
             return new StringBuilder(SIP_URI_HEADER).append(contactId).append("@")
-                    .append(ImsModule.IMS_USER_PROFILE.getHomeDomain())
-                    .append(";user=phone").toString();
+                    .append(ImsModule.IMS_USER_PROFILE.getHomeDomain()).append(";user=phone")
+                    .toString();
 
         }
     }

@@ -56,8 +56,7 @@ public class AndroidFactory {
         try {
             NetworkFactory.loadFactory("com.gsma.rcs.platform.network.AndroidNetworkFactory",
                     rcsSettings);
-            RegistryFactory
-                    .loadFactory("com.gsma.rcs.platform.registry.AndroidRegistryFactory");
+            RegistryFactory.loadFactory("com.gsma.rcs.platform.registry.AndroidRegistryFactory");
             FileFactory.loadFactory("com.gsma.rcs.platform.file.AndroidFileFactory");
         } catch (FactoryException e) {
             e.printStackTrace();

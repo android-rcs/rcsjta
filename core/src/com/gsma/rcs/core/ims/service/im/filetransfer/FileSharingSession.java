@@ -225,8 +225,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
         long maxFileSharingSize = rcsSettings.getMaxFileTransferSize();
         boolean fileIsToBig = (maxFileSharingSize > 0) ? fileSize > maxFileSharingSize : false;
         boolean storageIsTooSmall = (StorageUtils.getExternalStorageFreeSpace() > 0) ? fileSize > StorageUtils
-                .getExternalStorageFreeSpace()
-                : false;
+                .getExternalStorageFreeSpace() : false;
         if (fileIsToBig) {
             if (sLogger.isActivated()) {
                 sLogger.warn("File is too big, reject the file transfer");

@@ -54,7 +54,7 @@ public class FileTransSSLFactory {
     static public SSLContext getFileTransferSSLContext() {
         try {
             sslcontext.init(null, new TrustManager[] {
-                    new AllTrustManager()
+                new AllTrustManager()
             }, new SecureRandom());
         } catch (KeyManagementException e) {
             return null;

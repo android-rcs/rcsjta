@@ -116,7 +116,7 @@ public class EditGeoloc extends Activity {
         if (geolocLabelMaxLength > 0) {
             InputFilter maxLengthFilter = new InputFilter.LengthFilter(geolocLabelMaxLength);
             locationEdit.setFilters(new InputFilter[] {
-                    maxLengthFilter
+                maxLengthFilter
             });
         }
     }

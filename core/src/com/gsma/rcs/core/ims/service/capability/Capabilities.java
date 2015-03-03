@@ -459,12 +459,11 @@ public class Capabilities {
      */
     public String toString() {
         return "Image_share=" + mImageSharing + ", Video_share=" + mVideoSharing
-                + ", IP_voice_call="
-                + mIpVoiceCall + ", IP_video_call=" + mIpVideoCall + ", File_transfer="
-                + mFileTransfer + ", Chat=" + mImSession + ", FT_http=" + mFileTransferHttp
-                + ", Geolocation_push=" + mGeolocationPush + ", Automata=" + mSipAutomata
-                + ", TimestampLastRequest=" + mTimestampOfLastRequest + ", TimestampLastRefresh="
-                + mTimestampOfLastRefresh;
+                + ", IP_voice_call=" + mIpVoiceCall + ", IP_video_call=" + mIpVideoCall
+                + ", File_transfer=" + mFileTransfer + ", Chat=" + mImSession + ", FT_http="
+                + mFileTransferHttp + ", Geolocation_push=" + mGeolocationPush + ", Automata="
+                + mSipAutomata + ", TimestampLastRequest=" + mTimestampOfLastRequest
+                + ", TimestampLastRefresh=" + mTimestampOfLastRefresh;
     }
 
     /**

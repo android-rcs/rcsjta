@@ -84,8 +84,7 @@ public class ServiceActivation extends Activity {
                     displayRcsStackServiceStates();
                 } catch (RcsPermissionDeniedException e) {
                     Utils.showMessageAndExit(ServiceActivation.this,
-                            getString(R.string.text_service_activate_unchangeable),
-                            mExitOnce, e);
+                            getString(R.string.text_service_activate_unchangeable), mExitOnce, e);
                 }
             }
 

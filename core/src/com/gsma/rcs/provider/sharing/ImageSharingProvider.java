@@ -120,7 +120,7 @@ public class ImageSharingProvider extends ContentProvider {
 
     private String[] getSelectionArgsWithSharingId(String[] selectionArgs, String sharingId) {
         String[] sharingSelectionArg = new String[] {
-                sharingId
+            sharingId
         };
         if (selectionArgs == null) {
             return sharingSelectionArg;
@@ -145,8 +145,7 @@ public class ImageSharingProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -198,8 +197,7 @@ public class ImageSharingProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -218,8 +216,7 @@ public class ImageSharingProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -241,8 +238,7 @@ public class ImageSharingProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 }

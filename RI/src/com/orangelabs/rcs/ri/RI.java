@@ -67,14 +67,10 @@ public class RI extends ListActivity {
 
         // Set items
         String[] items = {
-                getString(R.string.menu_contacts),
-                getString(R.string.menu_capabilities),
-                getString(R.string.menu_messaging),
-                getString(R.string.menu_sharing),
-                getString(R.string.menu_mm_session),
-                getString(R.string.menu_intents),
-                getString(R.string.menu_service),
-                getString(R.string.menu_upload),
+                getString(R.string.menu_contacts), getString(R.string.menu_capabilities),
+                getString(R.string.menu_messaging), getString(R.string.menu_sharing),
+                getString(R.string.menu_mm_session), getString(R.string.menu_intents),
+                getString(R.string.menu_service), getString(R.string.menu_upload),
                 getString(R.string.menu_about)
         };
         setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));

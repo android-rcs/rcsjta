@@ -328,8 +328,7 @@ public class FileTransferList extends Activity {
             }
         } catch (RcsServiceException e) {
             Utils.showMessageAndExit(FileTransferList.this,
-                    getString(R.string.label_api_unavailable),
-                    mExitOnce, e);
+                    getString(R.string.label_api_unavailable), mExitOnce, e);
         }
     }
 

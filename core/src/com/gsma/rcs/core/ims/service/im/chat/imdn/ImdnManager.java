@@ -178,8 +178,7 @@ public class ImdnManager extends Thread {
 
             if (sLogger.isActivated()) {
                 sLogger.debug("Send delivery status " + deliveryStatus.getStatus()
-                        + " for message "
-                        + deliveryStatus.getMsgId());
+                        + " for message " + deliveryStatus.getMsgId());
             }
 
             // Create CPIM/IDMN document

@@ -402,7 +402,7 @@ public class RcsSettingsProvider extends ContentProvider {
             /* Put the old values back when possible */
             for (ContentValues values : valuesList) {
                 String[] selectionArgs = new String[] {
-                        values.getAsString(RcsSettingsData.KEY_KEY)
+                    values.getAsString(RcsSettingsData.KEY_KEY)
                 };
                 db.update(TABLE, values, SELECTION_WITH_KEY_ONLY, selectionArgs);
             }
@@ -421,7 +421,7 @@ public class RcsSettingsProvider extends ContentProvider {
 
     private String[] getSelectionArgsWithKey(String[] selectionArgs, String key) {
         String[] keySelectionArg = new String[] {
-                key
+            key
         };
         if (selectionArgs == null) {
             return keySelectionArg;
@@ -446,8 +446,7 @@ public class RcsSettingsProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -467,8 +466,7 @@ public class RcsSettingsProvider extends ContentProvider {
                 case UriType.SETTINGS:
                     SQLiteDatabase database = mOpenHelper.getReadableDatabase();
                     cursor = database.query(TABLE, projection, selection, selectionArgs, null,
-                            null,
-                            sort);
+                            null, sort);
                     cursor.setNotificationUri(getContext().getContentResolver(), notificationUri);
                     return cursor;
 
@@ -504,8 +502,7 @@ public class RcsSettingsProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 

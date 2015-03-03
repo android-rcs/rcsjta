@@ -343,8 +343,8 @@ public class RegistrationManager extends PeriodicRefresher {
         mRegistrationProcedure.writeSecurityHeader(register);
 
         // Send REGISTER request
-        SipTransactionContext ctx = mNetworkInterface.getSipManager()
-                .sendSipMessageAndWait(register);
+        SipTransactionContext ctx = mNetworkInterface.getSipManager().sendSipMessageAndWait(
+                register);
 
         // Analyze the received response
         if (ctx.isSipResponse()) {

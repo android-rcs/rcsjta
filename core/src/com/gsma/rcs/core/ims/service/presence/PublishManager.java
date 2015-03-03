@@ -385,8 +385,7 @@ public class PublishManager extends PeriodicRefresher {
 
         // Create a PUBLISH request without ETag
         SipRequest publish = SipMessageFactory.createPublish(mDialogPath, mExpirePeriod,
-                mEntityTag,
-                mDialogPath.getLocalContent());
+                mEntityTag, mDialogPath.getLocalContent());
 
         // Send PUBLISH request
         sendPublish(publish);
@@ -428,8 +427,7 @@ public class PublishManager extends PeriodicRefresher {
 
         // Create a new PUBLISH request with the right expire period
         SipRequest publish = SipMessageFactory.createPublish(mDialogPath, mExpirePeriod,
-                mEntityTag,
-                mDialogPath.getLocalContent());
+                mEntityTag, mDialogPath.getLocalContent());
 
         // Send a PUBLISH request
         sendPublish(publish);

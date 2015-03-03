@@ -64,8 +64,8 @@ public class Provisioning extends TabActivity {
      * @param settingsKey the key of the RCS parameter
      * @param helper
      */
-    /* package private */static void setEditTextParam(int viewID,
-            String settingsKey, ProvisioningHelper helper) {
+    /* package private */static void setEditTextParam(int viewID, String settingsKey,
+            ProvisioningHelper helper) {
         String parameter = null;
         Bundle bundle = helper.getBundle();
         if (bundle != null && bundle.containsKey(settingsKey)) {

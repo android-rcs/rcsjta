@@ -75,7 +75,7 @@ public class RichCallHistory {
      */
     private Cursor getImageTransferData(String columnName, String sharingId) {
         String[] projection = new String[] {
-                columnName
+            columnName
         };
         Cursor cursor = null;
         try {
@@ -106,7 +106,7 @@ public class RichCallHistory {
      */
     private Cursor getVideoSharingData(String columnName, String sharingId) {
         String[] projection = new String[] {
-                columnName
+            columnName
         };
         Cursor cursor = null;
         try {
@@ -188,7 +188,7 @@ public class RichCallHistory {
      */
     private Cursor getGeolocSharingData(String columnName, String sharingId) throws SQLException {
         String[] projection = new String[] {
-                columnName
+            columnName
         };
         Cursor cursor = null;
         try {
@@ -363,7 +363,7 @@ public class RichCallHistory {
         Cursor c = null;
         try {
             String[] projection = new String[] {
-                    ImageSharingData.KEY_FILESIZE
+                ImageSharingData.KEY_FILESIZE
             };
             c = mLocalContentResolver.query(
                     Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId), projection, null,

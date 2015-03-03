@@ -148,8 +148,8 @@ public class BackupRestoreDb {
                 // Copy database file under account directory
                 FileUtils.copyFileToDirectory(srcFile, dstDir, true);
                 if (LOGGER.isActivated()) {
-                    LOGGER.info(new StringBuilder("Save file '").append(srcFile)
-                            .append("' to '").append(dstDir).append("'").toString());
+                    LOGGER.info(new StringBuilder("Save file '").append(srcFile).append("' to '")
+                            .append(dstDir).append("'").toString());
                 }
             } catch (Exception e) {
                 if (LOGGER.isActivated()) {

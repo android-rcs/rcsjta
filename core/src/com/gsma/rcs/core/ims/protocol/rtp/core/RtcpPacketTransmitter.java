@@ -249,7 +249,7 @@ public class RtcpPacketTransmitter extends Thread {
         RtcpByePacket byepacket = null;
         if (rtcpSession.isByeRequested) {
             int ssrc[] = {
-                    rtcpSession.SSRC
+                rtcpSession.SSRC
             };
             byepacket = new RtcpByePacket(ssrc, null);
             data = RtcpPacketUtils.append(data, byepacket.data);
@@ -374,7 +374,7 @@ public class RtcpPacketTransmitter extends Thread {
 
         // Create a RTCP bye packet
         int ssrc[] = {
-                rtcpSession.SSRC
+            rtcpSession.SSRC
         };
         RtcpByePacket rtcpbyepacket = new RtcpByePacket(ssrc, null);
         packets[packets.length - 1] = rtcpbyepacket;

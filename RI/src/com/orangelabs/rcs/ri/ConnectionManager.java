@@ -117,8 +117,7 @@ public class ConnectionManager {
 
     private final Handler mHandler = new Handler();
 
-    private static final String LOGTAG = LogUtils
-            .getTag(ConnectionManager.class.getSimpleName());
+    private static final String LOGTAG = LogUtils.getTag(ConnectionManager.class.getSimpleName());
 
     /**
      * Client connection listener
@@ -242,8 +241,7 @@ public class ConnectionManager {
                     mHandler.post(new Runnable() {
                         public void run() {
                             try {
-                                capabilityService.addEventListener(
-                                        mRcsServiceRegistrationListener);
+                                capabilityService.addEventListener(mRcsServiceRegistrationListener);
                                 if (capabilityService.isServiceRegistered()) {
                                     notifyImsConnection();
                                 } else {
@@ -337,9 +335,7 @@ public class ConnectionManager {
      */
     private void notifyDisconnection(RcsServiceName service, ReasonCode error) {
         if (LogUtils.isActive) {
-            Log.w(LOGTAG,
-                    new StringBuilder(service.name()).append(" ")
-                            .append(error).toString());
+            Log.w(LOGTAG, new StringBuilder(service.name()).append(" ").append(error).toString());
         }
         for (ClientConnectionNotifier clienttoNotify : mClientsToNotify.values()) {
             if (clienttoNotify.getMonitoredServices().contains(service)) {
@@ -478,8 +474,7 @@ public class ConnectionManager {
         // Create notification
         Intent intent = new Intent(mContext, ServiceActivation.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent contentIntent = PendingIntent.getActivity(
-                mContext, 0, intent, 0);
+        PendingIntent contentIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
         int iconId;
         String label;
         if (connected) {
@@ -512,8 +507,7 @@ public class ConnectionManager {
      * @return the notification
      */
     private Notification buildImsConnectionNotification(PendingIntent intent, String title,
-            String message,
-            int iconId) {
+            String message, int iconId) {
         // Create notification
         NotificationCompat.Builder notif = new NotificationCompat.Builder(mContext);
         notif.setContentIntent(intent);

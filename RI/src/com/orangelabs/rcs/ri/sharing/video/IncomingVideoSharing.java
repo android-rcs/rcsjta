@@ -409,8 +409,7 @@ public class IncomingVideoSharing extends Activity implements VideoPlayerListene
 
         @Override
         public void onStateChanged(ContactId contact, String sharingId,
-                final VideoSharing.State state,
-                VideoSharing.ReasonCode reasonCode) {
+                final VideoSharing.State state, VideoSharing.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG,
                         new StringBuilder("onStateChanged contact=").append(contact)
@@ -482,8 +481,7 @@ public class IncomingVideoSharing extends Activity implements VideoPlayerListene
             if (LogUtils.isActive) {
                 Log.w(LOGTAG,
                         new StringBuilder("onDeleted contact=").append(contact)
-                                .append(" sharingIds=")
-                                .append(sharingIds).toString());
+                                .append(" sharingIds=").append(sharingIds).toString());
             }
         }
 

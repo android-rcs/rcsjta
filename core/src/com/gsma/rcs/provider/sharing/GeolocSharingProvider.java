@@ -107,7 +107,7 @@ public class GeolocSharingProvider extends ContentProvider {
 
     private String[] getSelectionArgsWithSharingId(String[] selectionArgs, String sharingId) {
         String[] sharingSelectionArg = new String[] {
-                sharingId
+            sharingId
         };
         if (selectionArgs == null) {
             return sharingSelectionArg;
@@ -132,8 +132,7 @@ public class GeolocSharingProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -151,8 +150,7 @@ public class GeolocSharingProvider extends ContentProvider {
                 case UriType.BASE:
                     SQLiteDatabase database = mOpenHelper.getReadableDatabase();
                     cursor = database.query(TABLE, projection, selection, selectionArgs, null,
-                            null,
-                            sort);
+                            null, sort);
 
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
                     return cursor;
@@ -187,8 +185,7 @@ public class GeolocSharingProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -202,15 +199,13 @@ public class GeolocSharingProvider extends ContentProvider {
                 String sharingId = initialValues.getAsString(GeolocSharingData.KEY_SHARING_ID);
                 database.insert(TABLE, null, initialValues);
                 Uri notificationUri = GeolocSharingData.CONTENT_URI.buildUpon()
-                        .appendPath(sharingId)
-                        .build();
+                        .appendPath(sharingId).build();
                 getContext().getContentResolver().notifyChange(notificationUri, null);
                 return notificationUri;
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -232,8 +227,7 @@ public class GeolocSharingProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 }

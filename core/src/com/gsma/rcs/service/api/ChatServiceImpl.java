@@ -370,8 +370,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         mOneToOneChatCache.remove(contact);
         if (sLogger.isActivated()) {
             sLogger.debug("Remove oneToOne chat from list (size=" + mOneToOneChatCache.size()
-                    + ") for "
-                    + contact);
+                    + ") for " + contact);
         }
     }
 
@@ -387,8 +386,8 @@ public class ChatServiceImpl extends IChatService.Stub {
         if (oneToOneChat != null) {
             return oneToOneChat;
         }
-        return new OneToOneChatImpl(contact, mOneToOneChatEventBroadcaster,
-                mImService, mMessagingLog, mRcsSettings, this);
+        return new OneToOneChatImpl(contact, mOneToOneChatEventBroadcaster, mImService,
+                mMessagingLog, mRcsSettings, this);
     }
 
     /**
@@ -399,8 +398,7 @@ public class ChatServiceImpl extends IChatService.Stub {
     public void receiveGroupChatInvitation(GroupChatSession session) {
         if (sLogger.isActivated()) {
             sLogger.info("Receive group chat invitation from " + session.getRemoteContact()
-                    + " (display="
-                    + session.getRemoteDisplayName() + ")");
+                    + " (display=" + session.getRemoteDisplayName() + ")");
         }
 
         // Update displayName of remote contact
@@ -409,8 +407,8 @@ public class ChatServiceImpl extends IChatService.Stub {
         String chatId = session.getContributionID();
         GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
                 chatId, mMessagingLog, mRcsSettings);
-        GroupChatImpl groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster,
-                mImService, storageAccessor, mRcsSettings, mContactsManager, this, mMessagingLog);
+        GroupChatImpl groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster, mImService,
+                storageAccessor, mRcsSettings, mContactsManager, this, mMessagingLog);
         session.addListener(groupChat);
         addGroupChat(groupChat);
     }
@@ -425,8 +423,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         mGroupChatCache.put(chatId, groupChat);
         if (sLogger.isActivated()) {
             sLogger.debug("Add Group Chat to list (size=" + mGroupChatCache.size()
-                    + ") for chatId "
-                    + chatId);
+                    + ") for chatId " + chatId);
         }
     }
 
@@ -439,8 +436,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         mGroupChatCache.remove(chatId);
         if (sLogger.isActivated()) {
             sLogger.debug("Remove Group Chat to list (size=" + mGroupChatCache.size()
-                    + ") for chatId "
-                    + chatId);
+                    + ") for chatId " + chatId);
         }
     }
 
@@ -491,14 +487,12 @@ public class ChatServiceImpl extends IChatService.Stub {
                 sLogger.error("Core exception", e);
             }
 
-            Set<ParticipantInfo> participants = ParticipantInfoUtils
-                    .getParticipantInfos(contacts);
+            Set<ParticipantInfo> participants = ParticipantInfoUtils.getParticipantInfos(contacts);
 
             String callId = mCore.getImsModule().getSipManager().getSipStack().generateCallId();
-            mMessagingLog.addGroupChat(
-                    ContributionIdGenerator.getContributionId(callId), null, subject, participants,
-                    GroupChat.State.REJECTED, GroupChat.ReasonCode.REJECTED_MAX_CHATS,
-                    Direction.OUTGOING);
+            mMessagingLog.addGroupChat(ContributionIdGenerator.getContributionId(callId), null,
+                    subject, participants, GroupChat.State.REJECTED,
+                    GroupChat.ReasonCode.REJECTED_MAX_CHATS, Direction.OUTGOING);
             throw new ServerApiException(e.getMessage());
         } catch (Exception e) {
             if (sLogger.isActivated()) {

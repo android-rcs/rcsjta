@@ -245,8 +245,7 @@ public abstract class SubscribeManager extends PeriodicRefresher {
 
                 // Create a dialog path
                 mDialogPath = new SipDialogPath(mImsModule.getSipManager().getSipStack(), callId,
-                        1,
-                        target, localParty, remoteParty, route, mRcsSettings);
+                        1, target, localParty, remoteParty, route, mRcsSettings);
             } else {
                 // Increment the Cseq number of the dialog path
                 mDialogPath.incrementCseq();

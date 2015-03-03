@@ -100,8 +100,7 @@ public class Core {
      * @throws CoreException
      */
     public static Core createCore(CoreListener listener, RcsSettings rcsSettings,
-            ContactsManager contactsManager,
-            MessagingLog messagingLog) throws CoreException {
+            ContactsManager contactsManager, MessagingLog messagingLog) throws CoreException {
         if (sInstance != null) {
             return sInstance;
         }
@@ -133,8 +132,7 @@ public class Core {
      * @throws CoreException
      */
     private Core(CoreListener listener, RcsSettings rcsSettings, ContactsManager contactsManager,
-            MessagingLog messagingLog)
-            throws CoreException {
+            MessagingLog messagingLog) throws CoreException {
         boolean logActivated = logger.isActivated();
         if (logActivated) {
             logger.info("Terminal core initialization");

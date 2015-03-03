@@ -67,15 +67,14 @@ public class ProfileProvisioning extends Activity {
      * IMS authentication for mobile access
      */
     private static final String[] MOBILE_IMS_AUTHENT = {
-            AuthenticationProcedure.GIBA.name(),
-            AuthenticationProcedure.DIGEST.name()
+            AuthenticationProcedure.GIBA.name(), AuthenticationProcedure.DIGEST.name()
     };
 
     /**
      * IMS authentication for Wi-Fi access
      */
     private static final String[] WIFI_IMS_AUTHENT = {
-            AuthenticationProcedure.DIGEST.name()
+        AuthenticationProcedure.DIGEST.name()
     };
 
     private static Logger logger = Logger.getLogger(ProfileProvisioning.class.getSimpleName());
@@ -493,7 +492,7 @@ public class ProfileProvisioning extends Activity {
         if ((files == null) || (files.length == 0)) {
             // No provisioning file
             return new String[] {
-                    getString(R.string.label_no_xml_file)
+                getString(R.string.label_no_xml_file)
             };
         } else {
             return files;

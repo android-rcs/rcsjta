@@ -163,8 +163,8 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
 
             final FileUploadSession session = new FileUploadSession(content, fileicon, mRcsSettings);
 
-            FileUploadImpl fileUpload = new FileUploadImpl(session.getUploadID(),
-                    mBroadcaster, mImService, this);
+            FileUploadImpl fileUpload = new FileUploadImpl(session.getUploadID(), mBroadcaster,
+                    mImService, this);
             session.addListener(fileUpload);
 
             session.startSession();

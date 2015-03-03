@@ -143,8 +143,7 @@ public class StreamingSessionView extends Activity {
 
         @Override
         public void onStateChanged(ContactId contact, String sessionId,
-                final MultimediaSession.State state,
-                MultimediaSession.ReasonCode reasonCode) {
+                final MultimediaSession.State state, MultimediaSession.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "onMultimediaStreamingStateChanged contact=" + contact
                         + " sessionId=" + sessionId + " state=" + state + " reason=" + reasonCode);

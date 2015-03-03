@@ -74,8 +74,8 @@ public class AnonymousFetchRequestTask {
     /**
      * The logger
      */
-    private static final Logger sLogger = Logger
-            .getLogger(AnonymousFetchRequestTask.class.getName());
+    private static final Logger sLogger = Logger.getLogger(AnonymousFetchRequestTask.class
+            .getName());
 
     /**
      * Constructor

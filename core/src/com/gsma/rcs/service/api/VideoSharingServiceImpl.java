@@ -304,11 +304,10 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
             String sharingId = session.getSessionID();
             VideoContent content = (VideoContent) session.getContent();
-            mRichCallLog.addVideoSharing(sharingId, contact,
-                    Direction.OUTGOING, content,
+            mRichCallLog.addVideoSharing(sharingId, contact, Direction.OUTGOING, content,
                     VideoSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
-            mBroadcaster.broadcastStateChanged(contact, sharingId,
-                    VideoSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
+            mBroadcaster.broadcastStateChanged(contact, sharingId, VideoSharing.State.INITIATING,
+                    ReasonCode.UNSPECIFIED);
 
             VideoSharingPersistedStorageAccessor storageAccessor = new VideoSharingPersistedStorageAccessor(
                     sharingId, contact, Direction.OUTGOING, mRichCallLog, content.getEncoding(),
@@ -385,8 +384,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
     public void addAndBroadcastVideoSharingInvitationRejected(ContactId contact,
             VideoContent content, ReasonCode reasonCode) {
         String sessionId = SessionIdGenerator.getNewId();
-        mRichCallLog.addVideoSharing(sessionId, contact,
-                Direction.INCOMING, content, VideoSharing.State.REJECTED, reasonCode);
+        mRichCallLog.addVideoSharing(sessionId, contact, Direction.INCOMING, content,
+                VideoSharing.State.REJECTED, reasonCode);
         mBroadcaster.broadcastInvitation(sessionId);
     }
 

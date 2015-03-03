@@ -80,8 +80,7 @@ public class RcsServiceRegistration {
             }
             throw new IllegalArgumentException(new StringBuilder("No enum const class ")
                     .append(RcsServiceRegistration.class.getName()).append(".").append(value)
-                    .append("!")
-                    .toString());
+                    .append("!").toString());
         }
 
     }

@@ -108,7 +108,7 @@ public class MediaRegistry {
         if (encoding.equalsIgnoreCase(H264VideoFormat.ENCODING)) {
             // Java H264 packetizer
             Codec[] chain = {
-                    new com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.JavaPacketizer()
+                new com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.JavaPacketizer()
             };
             return chain;
         } else {
@@ -127,7 +127,7 @@ public class MediaRegistry {
         if (encoding.equalsIgnoreCase(H264VideoFormat.ENCODING)) {
             // Java H264 depacketizer
             Codec[] chain = {
-                    new com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.JavaDepacketizer()
+                new com.gsma.rcs.core.ims.protocol.rtp.codec.video.h264.JavaDepacketizer()
             };
             return chain;
         } else {

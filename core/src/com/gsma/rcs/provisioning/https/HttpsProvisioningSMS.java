@@ -201,8 +201,8 @@ public class HttpsProvisioningSMS {
                         if (mManager != null) {
                             new Thread() {
                                 public void run() {
-                                    mManager.updateConfigWithOTP(smsData, requestUri,
-                                            client, localContext);
+                                    mManager.updateConfigWithOTP(smsData, requestUri, client,
+                                            localContext);
                                 }
                             }.start();
 

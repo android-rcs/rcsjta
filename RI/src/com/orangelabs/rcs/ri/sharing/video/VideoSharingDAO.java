@@ -179,7 +179,7 @@ public class VideoSharingDAO implements Parcelable {
     public VideoSharingDAO(final Context context, final String sharingId) throws Exception {
         Uri uri = VideoSharingLog.CONTENT_URI;
         String[] whereArgs = new String[] {
-                sharingId
+            sharingId
         };
         Cursor cursor = null;
         try {
