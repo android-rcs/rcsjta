@@ -62,11 +62,6 @@ public class RegistrationManager extends PeriodicRefresher {
     private static final int CSEQ_ONE = 1;
 
     /**
-     * Default expire period from settings
-     */
-    private int mDefaultExpirePeriod;
-
-    /**
      * Expire period
      */
     private int mExpirePeriod;
@@ -121,6 +116,9 @@ public class RegistrationManager extends PeriodicRefresher {
      */
     private int mNb401Failures = 0;
 
+    /**
+     * Settings
+     */
     private final RcsSettings mRcsSettings;
 
     /**
@@ -142,7 +140,6 @@ public class RegistrationManager extends PeriodicRefresher {
         mFeatureTags = RegistrationUtils.getSupportedFeatureTags(rcsSettings);
         mRcsSettings = rcsSettings;
         mExpirePeriod = mRcsSettings.getRegisterExpirePeriod();
-        mDefaultExpirePeriod = mRcsSettings.getRegisterExpirePeriod();
 
         if (mRcsSettings.isGruuSupported()) {
             mInstanceId = DeviceUtils.getInstanceId(AndroidFactory.getApplicationContext(),
@@ -157,7 +154,7 @@ public class RegistrationManager extends PeriodicRefresher {
      */
     private int getExpiryValue() {
         if (CSEQ_ONE == mDialogPath.getCseq()) {
-            return mDefaultExpirePeriod;
+            return mRcsSettings.getRegisterExpirePeriod();
         } else {
             return mExpirePeriod;
         }
