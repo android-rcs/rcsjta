@@ -45,7 +45,7 @@ public class DbBackupRestoreTest extends AndroidTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        if (!srcdir.exists() == false) {
+        if (!srcdir.exists()) {
             srcdir.mkdir();
         }
         // Clean up all saved configurations

@@ -136,6 +136,9 @@ public class BackupRestoreDb {
         // Put the names of all files ending with .db in a String array
         String[] listOfDbFiles = databasesDir.list(sFilenameDbFilter);
         if (listOfDbFiles == null || listOfDbFiles.length <= 0) {
+            if (LOGGER.isActivated()) {
+                LOGGER.error("No DB files to save for ".concat(account));
+            }
             return false;
 
         }
@@ -153,7 +156,7 @@ public class BackupRestoreDb {
                 }
             } catch (Exception e) {
                 if (LOGGER.isActivated()) {
-                    LOGGER.error(e.getMessage(), e);
+                    LOGGER.error("Faile to copy file "+srcFile, e);
                 }
                 return false;
 
@@ -180,6 +183,9 @@ public class BackupRestoreDb {
         // Put the names of all files ending with .db in a String array
         String[] listOfDbFiles = srcDir.list(sFilenameDbFilter);
         if (listOfDbFiles == null || listOfDbFiles.length <= 0) {
+            if (LOGGER.isActivated()) {
+                LOGGER.error("No DB files to restore for ".concat(account));
+            }
             return false;
 
         }
@@ -271,7 +277,7 @@ public class BackupRestoreDb {
             return saveAccountDatabases(fdir, account);
         } catch (Exception e) {
             if (LOGGER.isActivated())
-                LOGGER.error(e.getMessage(), e);
+                LOGGER.error("Failed to backup account ".concat(account), e);
         }
         return false;
     }
