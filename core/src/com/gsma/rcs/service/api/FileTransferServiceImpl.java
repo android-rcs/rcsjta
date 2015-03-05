@@ -996,8 +996,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     }
 
     private void handleGroupFileDeliveryStatusFailed(String chatId, String fileTransferId,
-            ContactId contact, int reasonCode) {
-        if (ReasonCode.FAILED_DELIVERY.toInt() == reasonCode) {
+            ContactId contact, ReasonCode reasonCode) {
+        if (ReasonCode.FAILED_DELIVERY == reasonCode) {
             mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, contact,
                     GroupDeliveryInfo.Status.FAILED, GroupDeliveryInfo.ReasonCode.FAILED_DELIVERY);
             mGroupFileTransferBroadcaster.broadcastDeliveryInfoChanged(chatId, contact,
@@ -1035,7 +1035,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 || ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
                 || ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
             ReasonCode reasonCode = imdnToFileTransferFailedReasonCode(imdn);
-            handleGroupFileDeliveryStatusFailed(chatId, msgId, contact, reasonCode.toInt());
+            handleGroupFileDeliveryStatusFailed(chatId, msgId, contact, reasonCode);
         }
     }
 
