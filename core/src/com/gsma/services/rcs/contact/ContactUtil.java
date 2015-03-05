@@ -828,8 +828,9 @@ public class ContactUtil {
         // Get the country code information associated to the ISO country code
         String[] countryCodeInfo = sCountryCodes.get(countryCodeIso);
         if (countryCodeInfo == null) {
-            throw new IllegalStateException("Instantation failure: no cc for SIM ISO country code "
-                    + countryCodeIso);
+            throw new IllegalStateException(new StringBuilder(
+                    "Instantation failure: no CC for SIM ISO country code '")
+                    .append(countryCodeIso).append("'").toString());
 
         }
         // Get the country code from map
