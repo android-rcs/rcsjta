@@ -1,0 +1,44 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+	<CheckBoxPreference
+		android:key="rcs_activation"
+		android:title="@string/rcs_settings_label_rcs_service"
+		android:summaryOn="@string/rcs_settings_summary_rcs_service_on"
+		android:summaryOff="@string/rcs_settings_summary_rcs_service_off"/>
+
+    <ListPreference
+        android:key="min_battery_level"
+        android:title="@string/rcs_settings_label_min_battery_level"
+        android:summary="@string/rcs_settings_summary_min_battery_level"
+        android:entries="@array/rcs_settings_list_battery_level_label"
+        android:entryValues="@array/rcs_settings_list_battery_level_value"
+        android:dialogTitle="@string/rcs_settings_label_min_battery_level" />
+
+    <PreferenceScreen
+        android:key="userprofile_settings"
+        android:title="@string/rcs_settings_title_userprofile_settings"
+        android:summary="@string/rcs_settings_summary_userprofile_settings">
+		<intent android:action="android.intent.action.MAIN"
+			android:targetPackage="com.orangelabs.rcs.ri"
+			android:targetClass="com.orangelabs.rcs.ri.settings.UserprofileSettingsDisplay" />
+    </PreferenceScreen>
+
+    <PreferenceScreen
+        android:key="messaging_settings"
+        android:title="@string/rcs_settings_title_messaging_settings"
+        android:summary="@string/rcs_settings_summary_messaging_settings">
+        <intent android:action="android.intent.action.MAIN"
+            android:targetPackage="com.orangelabs.rcs.ri"
+            android:targetClass="com.orangelabs.rcs.ri.settings.MessagingSettingsDisplay" />
+    </PreferenceScreen>
+
+    <PreferenceScreen
+        android:key="about_settings"
+        android:title="@string/menu_about"
+        android:summary="@string/rcs_settings_summary_about">
+        <intent android:action="android.intent.action.MAIN"
+            android:targetPackage="com.orangelabs.rcs.ri"
+            android:targetClass="com.orangelabs.rcs.ri.settings.AboutSettings" />
+    </PreferenceScreen>
+    
+</PreferenceScreen>

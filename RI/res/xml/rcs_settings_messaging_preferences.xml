@@ -1,0 +1,41 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    	   
+	<ListPreference
+           android:key="messaging_method"
+           android:dialogTitle="@string/rcs_settings_label_messaging_method"
+           android:entries="@array/rcs_settings_list_messaging_method_label"
+           android:entryValues="@array/rcs_settings_list_messaging_method_value"                        
+           android:title="@string/rcs_settings_label_messaging_method"
+           android:summary="@string/rcs_settings_summary_messaging_method" />					
+			
+	<PreferenceCategory android:title="@string/rcs_settings_title_filetransfer_invitation">
+		<CheckBoxPreference
+			android:key="ft_auto_accept"
+			android:showDefault="true"
+			android:title="@string/rcs_settings_label_ft_auto_accept"
+			android:summary="@string/rcs_settings_summary_ft_auto_accept"
+		/>
+		<CheckBoxPreference
+			android:key="ft_auto_accept_in_roaming"
+			android:showDefault="true"
+			android:title="@string/rcs_settings_label_ft_auto_accept_in_roaming"
+			android:summary="@string/rcs_settings_summary_ft_auto_accept_in_roaming"
+		/>
+		<ListPreference
+            android:dialogTitle="@string/rcs_settings_label_image_resize_option"
+            android:entries="@array/rcs_settings_list_image_resize_option_label"
+            android:entryValues="@array/rcs_settings_list_image_resize_option_value"
+            android:key="image_resize_option"
+            android:summary="@string/rcs_settings_summary_image_resize_option"
+            android:title="@string/rcs_settings_label_image_resize_option" />
+
+	</PreferenceCategory>
+	
+	<PreferenceCategory android:title="@string/rcs_settings_title_chat_invitation">
+        <CheckBoxPreference
+            android:key="chat_displayed_notification"
+            android:title="@string/rcs_settings_label_displayed_notification"
+            android:summary="@string/rcs_settings_summary_chat_displayed_notification"
+            android:showDefault="true"/>
+    </PreferenceCategory>
+</PreferenceScreen>

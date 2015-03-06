@@ -433,6 +433,31 @@
         <activity
             android:name=".upload.InitiateFileUpload"
             android:label="@string/title_initiate_upload" />
+
+        <!-- RCS settings application -->
+
+        <activity
+            android:name="com.orangelabs.rcs.ri.settings.SettingsDisplay"
+            android:clearTaskOnLaunch="true"
+            android:icon="@drawable/rcs_icon"
+            android:label="@string/rcs_settings_title_settings"
+            android:launchMode="singleTask" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <action android:name="com.gsma.services.rcs.action.VIEW_SETTINGS" />
+            </intent-filter>
+        </activity>
+        <activity android:name="com.orangelabs.rcs.ri.settings.UserprofileSettingsDisplay" />
+        <activity android:name="com.orangelabs.rcs.ri.settings.MessagingSettingsDisplay" />
+        <activity android:name="com.orangelabs.rcs.ri.settings.AboutSettings" />
     </application>
 
 </manifest>

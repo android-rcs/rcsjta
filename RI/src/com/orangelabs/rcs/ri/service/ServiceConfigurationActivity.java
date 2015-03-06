@@ -213,8 +213,10 @@ public class ServiceConfigurationActivity extends Activity {
     public void onDestroy() {
         super.onDestroy();
 
-        String newDisplayName = mTextEditDisplayName.getText().toString();
-        setDisplayName(newDisplayName);
+        if (mTextEditDisplayName != null) {
+            String newDisplayName = mTextEditDisplayName.getText().toString();
+            setDisplayName(newDisplayName);
+        }
 
         if (mCnxManager == null) {
             return;
