@@ -81,6 +81,8 @@ public class ServiceConfigurationActivity extends Activity {
 
     private CommonServiceConfiguration mConfiguration;
 
+    private String mIntialDisplayName;
+
     private RcsServiceControl mRcsServiceControl;
 
     private static Map<Integer, MinimumBatteryLevel> sPosToMinimumBatteryLevel = new HashMap<Integer, MinimumBatteryLevel>();
@@ -107,11 +109,17 @@ public class ServiceConfigurationActivity extends Activity {
 
         mRcsServiceControl = RcsServiceControl.getInstance(this);
 
-        // Set layout
+        /* Set layout */
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.service_configuration);
 
-        // Register to API connection manager
+        mCheckBoxIsConfigValid = (CheckBox) findViewById(R.id.label_service_configuration_valid);
+        mTextEditMessagingUX = (TextView) findViewById(R.id.label_messaging_mode);
+        mTextEditContactId = (TextView) findViewById(R.id.label_my_contact_id);
+        mTextEditDisplayName = (TextView) findViewById(R.id.text_my_display_name);
+        mTextRcsServiceActivation = (TextView) findViewById(R.id.text_service_activation);
+
+        /* Register to API connection manager */
         mCnxManager = ConnectionManager.getInstance(this);
         if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CONTACT)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
@@ -121,17 +129,15 @@ public class ServiceConfigurationActivity extends Activity {
         }
         try {
             mConfiguration = mCnxManager.getContactApi().getCommonConfiguration();
+            mIntialDisplayName = mConfiguration.getMyDisplayName();
+            if (mIntialDisplayName == null) {
+                mIntialDisplayName = "";
+            }
         } catch (Exception e) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
             return;
 
         }
-
-        mCheckBoxIsConfigValid = (CheckBox) findViewById(R.id.label_service_configuration_valid);
-        mTextEditMessagingUX = (TextView) findViewById(R.id.label_messaging_mode);
-        mTextEditContactId = (TextView) findViewById(R.id.label_my_contact_id);
-        mTextEditDisplayName = (TextView) findViewById(R.id.text_my_display_name);
-        mTextRcsServiceActivation = (TextView) findViewById(R.id.text_service_activation);
 
         String[] messagingMethods = getResources().getStringArray(R.array.messaging_method);
         mSpinnerDefMessaginMethod = (Spinner) findViewById(R.id.spinner_default_messaging_method);
@@ -212,12 +218,10 @@ public class ServiceConfigurationActivity extends Activity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        if (mTextEditDisplayName != null) {
-            String newDisplayName = mTextEditDisplayName.getText().toString();
+        String newDisplayName = mTextEditDisplayName.getText().toString();
+        if (mIntialDisplayName != null && !mIntialDisplayName.equals(newDisplayName)) {
             setDisplayName(newDisplayName);
         }
-
         if (mCnxManager == null) {
             return;
         }

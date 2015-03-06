@@ -8,12 +8,13 @@
 	<string name="rcs_settings_title_messaging_settings">Messaging settings</string>
 	<string name="rcs_settings_title_filetransfer_invitation">File transfer invitation settings</string>
 	<string name="rcs_settings_title_chat_invitation">Chat invitation settings</string>	
+	<string name="rcs_settings_title_about">About settings</string>
 	
 	<string name="rcs_settings_summary_about">About the Reference Implementation</string>			
 	<string name="rcs_settings_summary_messaging_settings">Manage messaging settings</string>
-	<string name="rcs_settings_summary_rcs_service_on">Select to turn off the rcs service</string>
-	<string name="rcs_settings_summary_rcs_service_off">Select to turn on the rcs service</string>
-    <string name="rcs_settings_summary_min_battery_level">Stop the rcs service if battery low</string>
+	<string name="rcs_settings_summary_rcs_service_on">Select to turn off the RCS service</string>
+	<string name="rcs_settings_summary_rcs_service_off">Select to turn on the RCS service</string>
+    <string name="rcs_settings_summary_min_battery_level">Stop the RCS service if battery low</string>
     <string name="rcs_settings_summary_image_resize_option">Select the resize option for outgoing image transfer</string>
     <string name="rcs_settings_summary_ft_auto_accept">Auto accept file transfer</string>
     <string name="rcs_settings_summary_ft_auto_accept_in_roaming">Auto accept file transfer while roaming</string>        
@@ -23,11 +24,14 @@
     <string name="rcs_settings_label_displayed_notification">Displayed notification</string>
     <string name="rcs_settings_label_rcs_service">RCS service</string>
 	<string name="rcs_settings_label_confirm">Confirmation</string>
-	<string name="rcs_settings_label_rcs_service_shutdown">rcs service will be terminated</string>			
+	<string name="rcs_settings_label_rcs_service_shutdown">RCS service will be terminated</string>			
 	<string name="rcs_settings_label_ft_auto_accept">Auto accept</string>
 	<string name="rcs_settings_label_ft_auto_accept_in_roaming">Auto accept in roaming</string>
     <string name="rcs_settings_label_min_battery_level">Minimum battery level</string>
-    <string name="rcs_settings_label_messaging_method">Messaging method</string>
+    <string name="rcs_settings_label_messaging_method">Messaging method</string>    
+    <string name="rcs_settings_label_albatros_20">Albatros 2.0</string>
+    <string name="rcs_settings_label_blackbird_15">Blackbird 1.5</string>
+    <string name="rcs_settings_label_unknown">Unknown</string>
     
     <string-array name="rcs_settings_list_messaging_method_value">
         <item>0</item>

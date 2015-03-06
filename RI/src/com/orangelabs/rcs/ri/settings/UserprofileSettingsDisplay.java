@@ -47,7 +47,6 @@ public class UserprofileSettingsDisplay extends PreferenceActivity implements
         super.onCreate(savedInstanceState);
 
         addPreferencesFromResource(R.xml.rcs_settings_userprofile_preferences);
-        setTitle(R.string.rcs_settings_title_userprofile_settings);
 
         displaynameEdit = (EditTextPreference) findPreference("edit_displayname");
         displaynameEdit.setPersistent(false);
@@ -70,7 +69,7 @@ public class UserprofileSettingsDisplay extends PreferenceActivity implements
     }
 
     public boolean onPreferenceChange(Preference preference, Object objValue) {
-        if (preference.getKey().equals("edit_displayname")) {
+        if ("edit_displayname".equals(preference.getKey())) {
             String name = (String) objValue;
             try {
                 mCnxManager.getContactApi().getCommonConfiguration().setMyDisplayName(name);

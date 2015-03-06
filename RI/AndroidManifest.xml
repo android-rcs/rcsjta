@@ -455,9 +455,15 @@
                 <action android:name="com.gsma.services.rcs.action.VIEW_SETTINGS" />
             </intent-filter>
         </activity>
-        <activity android:name="com.orangelabs.rcs.ri.settings.UserprofileSettingsDisplay" />
-        <activity android:name="com.orangelabs.rcs.ri.settings.MessagingSettingsDisplay" />
-        <activity android:name="com.orangelabs.rcs.ri.settings.AboutSettings" />
+        
+        <activity android:name="com.orangelabs.rcs.ri.settings.UserprofileSettingsDisplay"
+			android:label="@string/rcs_settings_title_userprofile_settings" />            
+        
+        <activity android:name="com.orangelabs.rcs.ri.settings.MessagingSettingsDisplay"
+			android:label="@string/rcs_settings_title_messaging_settings" />
+                            
+        <activity android:name="com.orangelabs.rcs.ri.settings.AboutSettings"
+        	android:label="@string/rcs_settings_title_about" />
     </application>
 
 </manifest>

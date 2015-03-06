@@ -50,7 +50,6 @@ import android.util.Log;
 @SuppressWarnings("deprecation")
 public class SettingsDisplay extends PreferenceActivity implements
         Preference.OnPreferenceChangeListener {
-    // Dialog IDs
     private final static int SERVICE_DEACTIVATION_CONFIRMATION_DIALOG = 1;
 
     /**
@@ -83,13 +82,11 @@ public class SettingsDisplay extends PreferenceActivity implements
                 enablePreferences(true);
                 initCheckbox(mRcsActivationCheckbox, true,
                         mRcsServiceControl.isActivationModeChangeable());
-                // battery level init
                 initBatteryLevel(mCnxManager.getFileTransferApi().getCommonConfiguration());
             } catch (RcsServiceException e) {
                 if (LogUtils.isActive) {
                     Log.e(LOGTAG, "Failed to read configuration", e);
                 }
-                return;
             }
         }
 
@@ -109,19 +106,14 @@ public class SettingsDisplay extends PreferenceActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Set title
-        setTitle(R.string.rcs_settings_title_settings);
         addPreferencesFromResource(R.xml.rcs_settings_preferences);
 
         mRcsActivationCheckbox = (CheckBoxPreference) getPreferenceScreen().findPreference(
                 "rcs_activation");
         mBatteryLevel = (ListPreference) findPreference("min_battery_level");
 
-        // RCS service control
         mRcsServiceControl = RcsServiceControl.getInstance(this);
-        // Register to API connection manager
         mCnxManager = ConnectionManager.getInstance(this);
-
     }
 
     @Override
@@ -171,8 +163,7 @@ public class SettingsDisplay extends PreferenceActivity implements
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
         try {
             if (preference == mRcsActivationCheckbox) {
-                boolean isChecked = mRcsActivationCheckbox.isChecked();
-                if (isChecked) {
+                if (mRcsActivationCheckbox.isChecked()) {
                     try {
                         mRcsServiceControl.setActivationMode(true);
                     } catch (RcsPermissionDeniedException e) {
@@ -219,7 +210,7 @@ public class SettingsDisplay extends PreferenceActivity implements
                         .setPositiveButton(R.string.rcs_settings_label_ok,
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int button) {
-                                        // Stop running service
+                                        /* Stop running service */
                                         enablePreferences(false);
                                         try {
                                             mRcsServiceControl.setActivationMode(false);
@@ -236,7 +227,7 @@ public class SettingsDisplay extends PreferenceActivity implements
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object objValue) {
-        if (preference.getKey().equals("min_battery_level")) {
+        if ("min_battery_level".equals(preference.getKey())) {
             try {
                 int level = Integer.parseInt((String) objValue);
                 CommonServiceConfiguration configuration = mCnxManager.getFileTransferApi()

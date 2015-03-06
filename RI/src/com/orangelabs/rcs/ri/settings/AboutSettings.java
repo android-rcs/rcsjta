@@ -41,7 +41,7 @@ public class AboutSettings extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Set layout
+        /* Set layout */
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.app_about);
 
@@ -67,8 +67,9 @@ public class AboutSettings extends Activity {
      * 
      * @return String
      */
-    private static String getBuildNumber(int versionCode) {
-        return Build.API_CODENAME + " " + getGsmaVersion(versionCode);
+    private String getBuildNumber(int versionCode) {
+        return new StringBuilder(Build.API_CODENAME).append(" ")
+                .append(getGsmaVersion(versionCode)).toString();
     }
 
     /**
@@ -76,14 +77,14 @@ public class AboutSettings extends Activity {
      * 
      * @return String
      */
-    private static String getGsmaVersion(int versionCode) {
+    private String getGsmaVersion(int versionCode) {
         switch (versionCode) {
             case Build.VERSION_CODES.BASE:
-                return "Albatros 2.0";
+                return getString(R.string.rcs_settings_label_albatros_20);
             case Build.VERSION_CODES.BLACKBIRD:
-                return "Blackbird 1.5";
+                return getString(R.string.rcs_settings_label_blackbird_15);
             default:
-                return "Unknown";
+                return getString(R.string.rcs_settings_label_unknown);
         }
     }
 }

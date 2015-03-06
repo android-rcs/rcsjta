@@ -20,6 +20,8 @@ package com.orangelabs.rcs.ri.settings;
 
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
 import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.filetransfer.FileTransferService;
+import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration;
 import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration.ImageResizeOption;
 
 import com.orangelabs.rcs.ri.ConnectionManager;
@@ -54,7 +56,6 @@ public class MessagingSettingsDisplay extends PreferenceActivity implements
         super.onCreate(savedInstanceState);
 
         addPreferencesFromResource(R.xml.rcs_settings_messaging_preferences);
-        setTitle(R.string.rcs_settings_title_messaging_settings);
 
         mCnxManager = ConnectionManager.getInstance(this);
         if (mCnxManager == null
@@ -87,20 +88,17 @@ public class MessagingSettingsDisplay extends PreferenceActivity implements
         ftAutoAcceptInRoaming.setOnPreferenceChangeListener(this);
         ftAutoAcceptInRoaming.setDependency("ft_auto_accept");
         try {
+            FileTransferService fileTransferService = mCnxManager.getFileTransferApi();
+            FileTransferServiceConfiguration configuration = fileTransferService.getConfiguration();
             chat_displayed_notification.setChecked(mCnxManager.getChatApi().getConfiguration()
                     .isRespondToDisplayReportsEnabled());
-            imageResizeOption.setValue(""
-                    + mCnxManager.getFileTransferApi().getConfiguration().getImageResizeOption()
-                            .toInt());
-            ftAutoAccept.setChecked(mCnxManager.getFileTransferApi().getConfiguration()
-                    .isAutoAcceptEnabled());
-            ftAutoAccept.setEnabled(mCnxManager.getFileTransferApi().getConfiguration()
-                    .isAutoAcceptModeChangeable());
-            ftAutoAcceptInRoaming.setChecked(mCnxManager.getFileTransferApi().getConfiguration()
-                    .isAutoAcceptInRoamingEnabled());
-            messagingMethod.setValue(""
-                    + mCnxManager.getFileTransferApi().getCommonConfiguration()
-                            .getDefaultMessagingMethod().toInt());
+            imageResizeOption
+                    .setValue(String.valueOf(configuration.getImageResizeOption().toInt()));
+            ftAutoAccept.setChecked(configuration.isAutoAcceptEnabled());
+            ftAutoAccept.setEnabled(configuration.isAutoAcceptModeChangeable());
+            ftAutoAcceptInRoaming.setChecked(configuration.isAutoAcceptInRoamingEnabled());
+            messagingMethod.setValue(String.valueOf(fileTransferService.getCommonConfiguration()
+                    .getDefaultMessagingMethod().toInt()));
         } catch (RcsServiceException e) {
             Utils.showMessage(this, getString(R.string.label_api_failed));
             return;
@@ -109,39 +107,29 @@ public class MessagingSettingsDisplay extends PreferenceActivity implements
 
     public boolean onPreferenceChange(Preference preference, Object objValue) {
         try {
-            if (preference.getKey().equals("chat_displayed_notification")) {
+            if ("chat_displayed_notification".equals(preference.getKey())) {
                 mCnxManager.getChatApi().getConfiguration()
                         .setRespondToDisplayReports((Boolean) objValue);
-            } else {
-                if (preference.getKey().equals("image_resize_option")) {
-                    ImageResizeOption option = ImageResizeOption.valueOf(Integer
-                            .parseInt((String) objValue));
+            } else if ("image_resize_option".equals(preference.getKey())) {
+                ImageResizeOption option = ImageResizeOption.valueOf(Integer
+                        .parseInt((String) objValue));
+                mCnxManager.getFileTransferApi().getConfiguration().setImageResizeOption(option);
+            } else if ("ft_auto_accept".equals(preference.getKey())) {
+                Boolean aa = (Boolean) objValue;
+                mCnxManager.getFileTransferApi().getConfiguration().setAutoAccept(aa);
+                if (!aa) {
                     mCnxManager.getFileTransferApi().getConfiguration()
-                            .setImageResizeOption(option);
-                } else {
-                    if (preference.getKey().equals("ft_auto_accept")) {
-                        Boolean aa = (Boolean) objValue;
-                        mCnxManager.getFileTransferApi().getConfiguration().setAutoAccept(aa);
-                        if (!aa) {
-                            mCnxManager.getFileTransferApi().getConfiguration()
-                                    .setAutoAcceptInRoaming(false);
-                        }
-                    } else {
-                        if (preference.getKey().equals("ft_auto_accept_in_roaming")) {
-                            mCnxManager.getFileTransferApi().getConfiguration()
-                                    .setAutoAcceptInRoaming((Boolean) objValue);
-                        } else {
-                            if (preference.getKey().equals("messaging_method")) {
-                                mCnxManager
-                                        .getFileTransferApi()
-                                        .getCommonConfiguration()
-                                        .setDefaultMessagingMethod(
-                                                MessagingMethod.valueOf(Integer
-                                                        .parseInt((String) objValue)));
-                            }
-                        }
-                    }
+                            .setAutoAcceptInRoaming(false);
                 }
+            } else if ("ft_auto_accept_in_roaming".equals(preference.getKey())) {
+                mCnxManager.getFileTransferApi().getConfiguration()
+                        .setAutoAcceptInRoaming((Boolean) objValue);
+            } else if ("messaging_method".equals(preference.getKey())) {
+                mCnxManager
+                        .getFileTransferApi()
+                        .getCommonConfiguration()
+                        .setDefaultMessagingMethod(
+                                MessagingMethod.valueOf(Integer.parseInt((String) objValue)));
             }
         } catch (RcsServiceException e) {
             Utils.showMessage(this, getString(R.string.label_api_failed));
