@@ -635,6 +635,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                             .append(chatId).append("' as ").append(reasonCode).toString());
                 }
                 return false;
+            default:
+                break;
         }
         GroupChatSession session = mImService.getGroupChatSession(chatId);
         if (session == null) {

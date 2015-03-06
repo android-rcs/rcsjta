@@ -256,6 +256,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
                             .append("' is ").append(reasonCode).toString());
                 }
                 return true;
+            default:
+                break;
         }
         return false;
     }
@@ -562,21 +564,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * Returns true if it is possible to invite the specified participants to the group chat right
      * now, else returns false.
      * 
-     * @param ContactId participant
+     * @param participant ContactId
      * @return boolean
      */
     public boolean isAllowedToInviteParticipant(ContactId participant) {
-        if (!isGroupChatCapableOfReceivingParticipantInvitations()) {
-            return false;
-        }
-        if (!isAllowedToInviteAdditionalParticipants(1)) {
-            if (logger.isActivated()) {
-                logger.debug(new StringBuilder(
-                        "Cannot add participants to group chat with group chat Id '")
-                        .append(mChatId)
-                        .append("' as max number of participants has been reached already.")
-                        .toString());
-            }
+        if (!isAllowedToInviteParticipants()) {
             return false;
         }
         boolean inviteOnlyFullSF = mRcsSettings.isGroupChatInviteIfFullStoreForwardSupported();
@@ -783,25 +775,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * @return Chat message
      */
     public IChatMessage sendMessage(final String text) {
-        if (isGroupChatAbandoned()) {
-            if (logger.isActivated()) {
-                logger.debug(new StringBuilder(
-                        "Cannot send message on group chat with group chat Id '").append(mChatId)
-                        .append("'").toString());
-            }
+        if (!isAllowedToSendMessage()) {
             /*
              * TODO: Throw proper exception in CR037
              */
-            throw new IllegalArgumentException("Groupchat abandoned by user.");
-        }
-        GroupChatSession session = mImService.getGroupChatSession(mChatId);
-        if (session == null) {
-            if (!isGroupChatRejoinable()) {
-                /*
-                 * TODO: Throw proper exception in CR037
-                 */
-                throw new IllegalArgumentException("Groupchat not rejoinable.");
-            }
+            throw new IllegalArgumentException("Not allowed to send message.");
         }
         ChatMessage msg = ChatUtils.createTextMessage(null, text);
         ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
@@ -825,16 +803,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * @return ChatMessage
      */
     public IChatMessage sendMessage2(Geoloc geoloc) {
-        if (isGroupChatAbandoned()) {
-            if (logger.isActivated()) {
-                logger.debug(new StringBuilder(
-                        "Cannot send message on group chat with group chat Id '").append(mChatId)
-                        .append("'").toString());
-            }
+        if (!isAllowedToSendMessage()) {
             /*
              * TODO: Throw proper exception in CR037
              */
-            throw new IllegalArgumentException("Groupchat abandoned by user.");
+            throw new IllegalArgumentException("Not allowed to send message.");
         }
         ChatMessage geolocMsg = ChatUtils.createGeolocMessage(null, geoloc);
         ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(

@@ -536,6 +536,22 @@
                 android:lines="1"
                 android:maxLength="6" />
 
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dip"
+                android:text="@string/Messaging_capabilities_validity" />
+
+            <EditText
+                android:id="@+id/MessagingCapabilitiesValidity"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:inputType="numberSigned"
+                android:lines="1"
+                android:maxLength="6" />
+
             <CheckBox
                 android:id="@+id/TcpFallback"
                 android:layout_width="fill_parent"
@@ -576,6 +592,14 @@
                 android:layout_marginLeft="5dip"
                 android:layout_marginRight="5dip"
                 android:text="@string/FT_always_on" />
+
+            <CheckBox
+                android:id="@+id/FtHttpAlwaysOn"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:text="@string/FT_HTTP_always_on" />
 
             <CheckBox android:id="@+id/InviteOnlyGroupchatSF"
                 android:layout_height="wrap_content"

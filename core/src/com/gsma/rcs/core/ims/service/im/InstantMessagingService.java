@@ -1379,6 +1379,12 @@ public class InstantMessagingService extends ImsService {
         return false;
     }
 
+    /**
+     * Check if the capabilities are valid based on msgCapValidity paramter
+     * 
+     * @param capabilities
+     * @return {@code true} if valid, otherwise {@code false}
+     */
     public boolean isCapabilitiesValid(Capabilities capabilities) {
         long msgCapValidityPeriod = mRcsSettings.getMsgCapValidityPeriod();
         if (System.currentTimeMillis() > capabilities.getTimestampOfLastRefresh()

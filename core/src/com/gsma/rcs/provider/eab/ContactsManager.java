@@ -499,10 +499,9 @@ public final class ContactsManager {
         support = newCapabilities.isGeolocationPushSupported() && isRegistered;
         values.put(RichAddressBookData.KEY_CAPABILITY_GEOLOCATION_PUSH, support);
 
-        support = newCapabilities.isFileTransferHttpSupported()
-                && isRegistered
-                || (mRcsSettings.isFtHttpCapAlwaysOn() && newCapabilities
-                        .isFileTransferHttpSupported());
+        boolean fileTransferHttpSupported = newCapabilities.isFileTransferHttpSupported();
+        support = ((fileTransferHttpSupported && isRegistered) || (mRcsSettings
+                .isFtHttpCapAlwaysOn() && fileTransferHttpSupported));
         values.put(RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_HTTP, support);
 
         support = newCapabilities.isFileTransferThumbnailSupported() && isRegistered;
@@ -1846,10 +1845,9 @@ public final class ContactsManager {
                 .isFileTransferThumbnailSupported() && isRegistered);
 
         // FT HTTP
-        capabilities
-                .setFileTransferHttpSupport((capabilities.isFileTransferHttpSupported() && isRegistered)
-                        || (mRcsSettings.isFtHttpCapAlwaysOn() && newInfo.getCapabilities()
-                                .isFileTransferHttpSupported()));
+        boolean fileTransferHttpSupported = capabilities.isFileTransferHttpSupported();
+        capabilities.setFileTransferHttpSupport((fileTransferHttpSupported && isRegistered)
+                || (mRcsSettings.isFtHttpCapAlwaysOn() && fileTransferHttpSupported));
 
         // FT S&F
         capabilities.setFileTransferStoreForwardSupport((capabilities

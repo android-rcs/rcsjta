@@ -103,6 +103,11 @@ public abstract class FileSharingSession extends ImsServiceSession {
         mFiletransferId = filetransferId;
     }
 
+    /**
+     * Check if the file sharing session is a HTTP transfer
+     * 
+     * @return {@code true} if HTTP transfer, otherwise {@code false}
+     */
     public abstract boolean isHttpTransfer();
 
     /**

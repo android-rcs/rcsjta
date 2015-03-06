@@ -539,6 +539,38 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             }
             return false;
         }
+        if (!ServerApiUtils.isImsConnected()) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder("Cannot resume transfer with file transfer Id '")
+                        .append(mFileTransferId)
+                        .append("' as it there is no IMS connection right now.")
+                        .toString());
+            }
+            return false;
+        }
+        if (session == null) {
+            if (!mImService.isFileTransferSessionAvailable()) {
+                if (logger.isActivated()) {
+                    logger.debug(new StringBuilder("Cannot resume transfer with file transfer Id '")
+                            .append(mFileTransferId)
+                            .append("' as the limit of available file transfer session is reached.")
+                            .toString());
+                }
+                return false;
+            }
+            if (Direction.OUTGOING == mPersistentStorage.getDirection()) {
+                if (mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
+                    if (logger.isActivated()) {
+                        logger.debug(new StringBuilder(
+                                "Cannot resume transfer with file transfer Id '")
+                                .append(mFileTransferId)
+                                .append("' as the limit of maximum concurrent outgoing file transfer is reached.")
+                                .toString());
+                    }
+                    return false;
+                }
+            }
+        }
         return true;
     }
 
@@ -546,40 +578,13 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
      * Resume the session (only for HTTP transfer)
      */
     public void resumeTransfer() {
+        if (!isAllowedToResumeTransfer()) {
+            throw new IllegalStateException("Not allowed to resume transfer.");
+        }
         FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
         if (session == null) {
-            if (ReasonCode.PAUSED_BY_USER != mPersistentStorage.getReasonCode()) {
-                /*
-                 * TODO: Throw correct exception as part of CR037 implementation
-                 */
-                throw new IllegalStateException("Unable to resume transfer with file transfer ID '"
-                        + mFileTransferId + "' as it is not in PAUSED state.");
-            }
-            if (!ServerApiUtils.isImsConnected()) {
-                /*
-                 * TODO: Throw correct exception as part of CR037 implementation
-                 */
-                throw new IllegalStateException("Unable to resume transfer with file transfer ID '"
-                        + mFileTransferId + "' as there is no IMS connection.");
-            }
-            if (!mImService.isFileTransferSessionAvailable()) {
-                /*
-                 * TODO: Throw correct exception as part of CR037 implementation
-                 */
-                throw new IllegalStateException("Unable to resume transfer with file transfer ID '"
-                        + mFileTransferId + "' as there is no available file transfer session.");
-            }
             FtHttpResume resume = mPersistentStorage.getFileTransferResumeInfo();
             if (Direction.OUTGOING == mPersistentStorage.getDirection()) {
-                if (mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
-                    /*
-                     * TODO: Throw correct exception as part of CR037 implementation
-                     */
-                    throw new IllegalStateException(
-                            "Unable to resume transfer with file transfer ID '"
-                                    + mFileTransferId
-                                    + "' as the limit of maximum concurrent outgoing file transfers is reached.");
-                }
                 session = new ResumeUploadFileSharingSession(mImService,
                         FileTransferUtils.createMmContent(resume.getFile()),
                         (FtHttpResumeUpload) resume, mRcsSettings);
