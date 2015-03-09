@@ -144,20 +144,6 @@
                 android:textStyle="bold" />
         </TableRow>
 
-        <TableRow>
-
-            <TextView
-                android:layout_marginLeft="5dip"
-                android:gravity="right"
-                android:text="@string/label_capabilities_valid" />
-
-            <CheckBox
-                android:id="@+id/is_valid"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:clickable="false"
-                android:textStyle="bold" />
-        </TableRow>
     </TableLayout>
 
 </ScrollView>

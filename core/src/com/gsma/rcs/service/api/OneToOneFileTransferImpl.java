@@ -543,8 +543,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             if (logger.isActivated()) {
                 logger.debug(new StringBuilder("Cannot resume transfer with file transfer Id '")
                         .append(mFileTransferId)
-                        .append("' as it there is no IMS connection right now.")
-                        .toString());
+                        .append("' as it there is no IMS connection right now.").toString());
             }
             return false;
         }

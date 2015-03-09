@@ -888,7 +888,7 @@ public final class ContactsManager {
 
                 if (capabilities == null) {
                     // Capabilities are not cached for this contact
-                    capabilities = new Capabilities(mRcsSettings);
+                    capabilities = new Capabilities();
                     // Get the capabilities infos
                     capabilities.setCsVideoSupport(isCapabilitySupported(cursor,
                             RichAddressBookData.KEY_CAPABILITY_CS_VIDEO));
@@ -2059,7 +2059,7 @@ public final class ContactsManager {
 
         }
         // Not in cache then read from provider
-        caps = new Capabilities(mRcsSettings);
+        caps = new Capabilities();
         Cursor cursor = null;
         try {
             Uri uri = Uri.withAppendedPath(RichAddressBookData.CONTENT_URI, contact.toString());
@@ -2806,7 +2806,7 @@ public final class ContactsManager {
     private ContactInfo getContactInfoFromCursor(Cursor cursor) {
         ContactInfo contactInfo = new ContactInfo();
         PresenceInfo presenceInfo = new PresenceInfo();
-        Capabilities capabilities = new Capabilities(mRcsSettings);
+        Capabilities capabilities = new Capabilities();
 
         int idMimeTypeCOlumnIdx = cursor.getColumnIndexOrThrow(Data.MIMETYPE);
         while (cursor.moveToNext()) {

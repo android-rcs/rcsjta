@@ -100,7 +100,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
         mRcsSettings = rcsSettings;
         mContactsManager = contactsManager;
         // Instantiate the polling manager
-        pollingManager = new PollingManager(this, mRcsSettings);
+        pollingManager = new PollingManager(this, mRcsSettings, mContactsManager);
 
         // Instantiate the options manager
         optionsManager = new OptionsManager(parent, mRcsSettings);

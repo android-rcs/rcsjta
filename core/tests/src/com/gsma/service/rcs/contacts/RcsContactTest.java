@@ -57,8 +57,6 @@ public class RcsContactTest extends AndroidTestCase {
 
     private long timestamp;
 
-    private boolean valid;
-
     protected void setUp() throws Exception {
         super.setUp();
         Random random = new Random();
@@ -72,10 +70,9 @@ public class RcsContactTest extends AndroidTestCase {
         extensions.add(String.valueOf(random.nextInt(96) + 32));
         extensions.add(String.valueOf(random.nextInt(96) + 32));
         timestamp = random.nextLong();
-        valid = random.nextBoolean();
 
         capabilities = new Capabilities(imageSharing, videoSharing, imSession, fileTransfer,
-                geolocPush, extensions, automata, timestamp, valid);
+                geolocPush, extensions, automata, timestamp);
         registered = random.nextBoolean();
         ContactUtil contactUtils = ContactUtil.getInstance(getContext());
         contactId = contactUtils.formatContact("+33123456789");

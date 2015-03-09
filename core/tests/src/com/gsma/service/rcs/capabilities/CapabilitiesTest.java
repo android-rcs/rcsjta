@@ -45,8 +45,6 @@ public class CapabilitiesTest extends AndroidTestCase {
 
     private long timestamp;
 
-    private boolean valid;
-
     protected void setUp() throws Exception {
         super.setUp();
         Random random = new Random();
@@ -60,7 +58,6 @@ public class CapabilitiesTest extends AndroidTestCase {
         extensions.add(String.valueOf(random.nextInt(96) + 32));
         extensions.add(String.valueOf(random.nextInt(96) + 32));
         timestamp = random.nextLong();
-        valid = random.nextBoolean();
     }
 
     protected void tearDown() throws Exception {
@@ -69,7 +66,7 @@ public class CapabilitiesTest extends AndroidTestCase {
 
     public void testCapabilitiesNullSet() {
         Capabilities capabilities = new Capabilities(imageSharing, videoSharing, imSession,
-                fileTransfer, geolocPush, null, automata, timestamp, valid);
+                fileTransfer, geolocPush, null, automata, timestamp);
         Parcel parcel = Parcel.obtain();
         capabilities.writeToParcel(parcel, 0);
         // done writing, now reset parcel for reading
@@ -81,7 +78,7 @@ public class CapabilitiesTest extends AndroidTestCase {
 
     public void testCapabilities() {
         Capabilities capabilities = new Capabilities(imageSharing, videoSharing, imSession,
-                fileTransfer, geolocPush, extensions, automata, timestamp, valid);
+                fileTransfer, geolocPush, extensions, automata, timestamp);
         Parcel parcel = Parcel.obtain();
         capabilities.writeToParcel(parcel, 0);
         // done writing, now reset parcel for reading
@@ -119,9 +116,6 @@ public class CapabilitiesTest extends AndroidTestCase {
             }
         }
         if (cap1.getTimestamp() != cap2.getTimestamp()) {
-            return false;
-        }
-        if (cap1.isValid() != cap2.isValid()) {
             return false;
         }
         return true;

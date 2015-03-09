@@ -671,7 +671,7 @@ public class RcsSettings {
      * @return capability
      */
     public Capabilities getMyCapabilities() {
-        Capabilities capabilities = new Capabilities(this);
+        Capabilities capabilities = new Capabilities();
 
         // Add default capabilities
         capabilities.setCsVideoSupport(isCsVideoSupported());

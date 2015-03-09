@@ -328,8 +328,8 @@ public class StackProvisioning extends Activity {
         saveCheckBoxParam(R.id.AllowExtensions, RcsSettingsData.ALLOW_EXTENSIONS, helper);
         saveEditTextParam(R.id.MaxMsrpLengthExtensions, RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS,
                 helper);
-        saveEditTextParam(R.id.MessagingCapabilitiesValidity, RcsSettingsData.MSG_CAP_VALIDITY_PERIOD,
-                helper);
+        saveEditTextParam(R.id.MessagingCapabilitiesValidity,
+                RcsSettingsData.MSG_CAP_VALIDITY_PERIOD, helper);
     }
 
     /**
@@ -559,8 +559,8 @@ public class StackProvisioning extends Activity {
         setCheckBoxParam(R.id.AllowExtensions, RcsSettingsData.ALLOW_EXTENSIONS, helper);
         setEditTextParam(R.id.MaxMsrpLengthExtensions, RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS,
                 helper);
-        setEditTextParam(R.id.MessagingCapabilitiesValidity, RcsSettingsData.MSG_CAP_VALIDITY_PERIOD,
-                helper);
+        setEditTextParam(R.id.MessagingCapabilitiesValidity,
+                RcsSettingsData.MSG_CAP_VALIDITY_PERIOD, helper);
     }
 
     /**

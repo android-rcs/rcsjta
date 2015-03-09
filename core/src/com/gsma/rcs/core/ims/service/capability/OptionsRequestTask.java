@@ -195,7 +195,7 @@ public class OptionsRequestTask implements Runnable {
         if (RcsStatus.NO_INFO.equals(info.getRcsStatus())) {
             // If we do not have already some info on this contact
             // We update the database with empty capabilities
-            Capabilities capabilities = new Capabilities(mRcsSettings);
+            Capabilities capabilities = new Capabilities();
             contactManager.setContactCapabilities(mContact, capabilities, RcsStatus.NO_INFO,
                     RegistrationState.OFFLINE);
         } else {
@@ -223,7 +223,7 @@ public class OptionsRequestTask implements Runnable {
         }
 
         // The contact is not RCS
-        Capabilities capabilities = new Capabilities(mRcsSettings);
+        Capabilities capabilities = new Capabilities();
         ContactsManager.getInstance().setContactCapabilities(mContact, capabilities,
                 RcsStatus.NOT_RCS, RegistrationState.UNKNOWN);
 
@@ -244,7 +244,7 @@ public class OptionsRequestTask implements Runnable {
 
         // Read capabilities
         SipResponse resp = ctx.getSipResponse();
-        Capabilities capabilities = CapabilityUtils.extractCapabilities(resp, mRcsSettings);
+        Capabilities capabilities = CapabilityUtils.extractCapabilities(resp);
 
         // Update capability time of last refresh
         ContactsManager contactManager = ContactsManager.getInstance();

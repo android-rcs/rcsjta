@@ -175,7 +175,7 @@ public class OptionsManager implements DiscoveryManager {
             }
 
             // Read features tag in the request
-            Capabilities capabilities = CapabilityUtils.extractCapabilities(options, mRcsSettings);
+            Capabilities capabilities = CapabilityUtils.extractCapabilities(options);
 
             // Update capabilities in database
             if (capabilities.isImSessionSupported()) {

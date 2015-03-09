@@ -164,13 +164,12 @@ public class CapabilityUtils {
      * Extract features tags
      * 
      * @param msg Message
-     * @param rcsSettings
      * @return Capabilities
      */
-    public static Capabilities extractCapabilities(SipMessage msg, RcsSettings rcsSettings) {
+    public static Capabilities extractCapabilities(SipMessage msg) {
 
         // Analyze feature tags
-        Capabilities capabilities = new Capabilities(rcsSettings);
+        Capabilities capabilities = new Capabilities();
         ArrayList<String> tags = msg.getFeatureTags();
         boolean ipCall_RCSE = false;
         boolean ipCall_3GPP = false;

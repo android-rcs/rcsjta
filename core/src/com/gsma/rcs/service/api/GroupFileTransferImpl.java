@@ -522,8 +522,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             if (logger.isActivated()) {
                 logger.debug(new StringBuilder("Cannot resume transfer with file transfer Id '")
                         .append(mFileTransferId)
-                        .append("' as it there is no IMS connection right now.")
-                        .toString());
+                        .append("' as it there is no IMS connection right now.").toString());
             }
             return false;
         }

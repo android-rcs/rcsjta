@@ -109,7 +109,7 @@ public class AnonymousFetchManager implements DiscoveryManager {
                     return;
                 }
                 // Extract capabilities
-                Capabilities capabilities = new Capabilities(mRcsSettings);
+                Capabilities capabilities = new Capabilities();
 
                 // We queried via anonymous fetch procedure, so set presence discovery to true
                 capabilities.setPresenceDiscoverySupport(true);
@@ -156,7 +156,7 @@ public class AnonymousFetchManager implements DiscoveryManager {
                         .getAssertedIdentity(notify));
 
                 // Notify content was empty
-                Capabilities capabilities = new Capabilities(mRcsSettings);
+                Capabilities capabilities = new Capabilities();
 
                 // Update capabilities in database
                 ContactsManager.getInstance().setContactCapabilities(contact, capabilities,

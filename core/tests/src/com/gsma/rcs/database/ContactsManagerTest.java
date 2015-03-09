@@ -93,7 +93,7 @@ public class ContactsManagerTest extends AndroidTestCase {
         // info.setContact(contact);
         ContactId contactId = contactUtils.formatContact(mNumber);
         info.setContact(contactId);
-        Capabilities capa = new Capabilities(mRcsSettings);
+        Capabilities capa = new Capabilities();
         capa.setCsVideoSupport(false);
         capa.setFileTransferSupport(false);
         capa.setImageSharingSupport(false);
@@ -199,7 +199,7 @@ public class ContactsManagerTest extends AndroidTestCase {
         info.setRcsStatusTimestamp(timestamp);
         info.setRegistrationState(RegistrationState.ONLINE);
 
-        Capabilities capa = new Capabilities(mRcsSettings);
+        Capabilities capa = new Capabilities();
         capa.setCsVideoSupport(false);
         capa.setFileTransferSupport(false);
         capa.setImageSharingSupport(false);
@@ -250,7 +250,7 @@ public class ContactsManagerTest extends AndroidTestCase {
 
         ContactInfo newInfo = new ContactInfo();
 
-        Capabilities capa = new Capabilities(mRcsSettings);
+        Capabilities capa = new Capabilities();
         capa.setCsVideoSupport(false);
         capa.setFileTransferSupport(false);
         capa.setImageSharingSupport(false);

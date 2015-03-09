@@ -111,8 +111,7 @@ public class ContactServiceImpl extends IContactService.Stub {
                 capabilities.isFileTransferSupported()
                         || capabilities.isFileTransferHttpSupported(),
                 capabilities.isGeolocationPushSupported(), capabilities.getSupportedExtensions(),
-                capabilities.isSipAutomata(), capabilities.getTimestampOfLastRefresh(),
-                capabilities.isValid());
+                capabilities.isSipAutomata(), capabilities.getTimestampOfLastRefresh());
     }
 
     /**
