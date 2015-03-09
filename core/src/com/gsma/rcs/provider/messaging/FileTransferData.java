@@ -36,7 +36,7 @@ public class FileTransferData {
     /**
      * Database URI
      */
-    protected static final Uri CONTENT_URI = Uri
+    public static final Uri CONTENT_URI = Uri
             .parse("content://com.gsma.rcs.filetransfer/filetransfer");
 
     /**

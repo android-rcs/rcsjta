@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.rcs.provider.ContentProviderBaseIdCreator;
 import com.gsma.rcs.provider.history.HistoryMemberBaseIdCreator;
 import com.gsma.rcs.utils.DatabaseUtils;
 import com.gsma.services.rcs.chat.ChatLog;
@@ -50,14 +51,10 @@ public class ChatProvider extends ContentProvider {
 
     private static final String TABLE_GROUP_CHAT = "groupchat";
 
-    public static final String TABLE_MESSAGE = "message";
-
     private static final String SELECTION_WITH_CHAT_ID_ONLY = ChatData.KEY_CHAT_ID.concat("=?");
 
     private static final String SELECTION_WITH_MSG_ID_ONLY = MessageData.KEY_MESSAGE_ID
             .concat("=?");
-
-    public static final String DATABASE_NAME = "chat.db";
 
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     static {
@@ -76,6 +73,16 @@ public class ChatProvider extends ContentProvider {
                 .getPath().substring(1).concat("/*"), UriType.Message.MESSAGE_WITH_ID);
 
     }
+
+    /**
+     * Table name
+     */
+    public static final String TABLE_MESSAGE = "message";
+
+    /**
+     * Database name
+     */
+    public static final String DATABASE_NAME = "chat.db";
 
     /**
      * String to restrict projection for exposed URI to a set of columns
@@ -147,8 +154,7 @@ public class ChatProvider extends ContentProvider {
         @Override
         public void onCreate(SQLiteDatabase db) {
             db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE_GROUP_CHAT)
-                    .append("(")
-                    .append(ChatData.KEY_CHAT_ID).append(" TEXT NOT NULL PRIMARY KEY,")
+                    .append("(").append(ChatData.KEY_CHAT_ID).append(" TEXT NOT NULL PRIMARY KEY,")
                     .append(ChatData.KEY_BASECOLUMN_ID).append(" INTEGER NOT NULL,")
                     .append(ChatData.KEY_REJOIN_ID).append(" TEXT,").append(ChatData.KEY_SUBJECT)
                     .append(" TEXT,").append(ChatData.KEY_PARTICIPANTS).append(" TEXT NOT NULL,")
@@ -167,8 +173,7 @@ public class ChatProvider extends ContentProvider {
                     .append(TABLE_GROUP_CHAT).append("(").append(ChatData.KEY_TIMESTAMP)
                     .append(")").toString());
             db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE_MESSAGE)
-                    .append("(")
-                    .append(MessageData.KEY_BASECOLUMN_ID).append(" INTEGER NOT NULL,")
+                    .append("(").append(MessageData.KEY_BASECOLUMN_ID).append(" INTEGER NOT NULL,")
                     .append(MessageData.KEY_CHAT_ID).append(" TEXT NOT NULL,")
                     .append(MessageData.KEY_CONTACT).append(" TEXT,")
                     .append(MessageData.KEY_MESSAGE_ID).append(" TEXT NOT NULL PRIMARY KEY,")
@@ -185,8 +190,8 @@ public class ChatProvider extends ContentProvider {
                     .toString());
             db.execSQL(new StringBuilder("CREATE INDEX ").append(TABLE_MESSAGE).append("_")
                     .append(MessageData.KEY_BASECOLUMN_ID).append("_idx").append(" ON ")
-                    .append(TABLE_MESSAGE).append("(").append(MessageData.KEY_BASECOLUMN_ID).append(")")
-                    .toString());
+                    .append(TABLE_MESSAGE).append("(").append(MessageData.KEY_BASECOLUMN_ID)
+                    .append(")").toString());
             db.execSQL(new StringBuilder("CREATE INDEX ").append(TABLE_MESSAGE).append("_")
                     .append(MessageData.KEY_CHAT_ID).append("_idx").append(" ON ")
                     .append(TABLE_MESSAGE).append("(").append(MessageData.KEY_CHAT_ID).append(")")
@@ -401,6 +406,8 @@ public class ChatProvider extends ContentProvider {
             case UriType.InternalChat.CHAT_WITH_ID:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 String chatId = initialValues.getAsString(ChatData.KEY_CHAT_ID);
+                initialValues.put(Message.BASECOLUMN_ID, ContentProviderBaseIdCreator
+                        .createUniqueId(getContext(), ChatData.CONTENT_URI));
                 db.insert(TABLE_GROUP_CHAT, null, initialValues);
                 Uri notificationUri = Uri.withAppendedPath(ChatLog.GroupChat.CONTENT_URI, chatId);
                 getContext().getContentResolver().notifyChange(notificationUri, null);
@@ -417,7 +424,8 @@ public class ChatProvider extends ContentProvider {
             case UriType.Message.MESSAGE_WITH_ID:
                 db = mOpenHelper.getWritableDatabase();
                 String messageId = initialValues.getAsString(MessageData.KEY_MESSAGE_ID);
-                initialValues.put(Message.BASECOLUMN_ID, HistoryMemberBaseIdCreator.createUniqueId(getContext(), Message.HISTORYLOG_MEMBER_ID));
+                initialValues.put(Message.BASECOLUMN_ID, HistoryMemberBaseIdCreator.createUniqueId(
+                        getContext(), Message.HISTORYLOG_MEMBER_ID));
                 db.insert(TABLE_MESSAGE, null, initialValues);
                 notificationUri = Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, messageId);
                 getContext().getContentResolver().notifyChange(notificationUri, null);

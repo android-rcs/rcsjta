@@ -27,7 +27,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * As the base column "_id" is mandatory and unique in all providers, this class is used to generate
- * the new id as "_id" cannot be primary key and AUTOINCREMENT cannot be used on other columns.
+ * the new id as "_id" which cannot be primary key and AUTOINCREMENT cannot be used on other
+ * columns.
  */
 public class ContentProviderBaseIdCreator {
 
@@ -36,16 +37,25 @@ public class ContentProviderBaseIdCreator {
 
     private static final Map<Uri, AtomicLong> sNextIds = new HashMap<Uri, AtomicLong>();
 
-    public static long createUniqueId(Context ctx, Uri contentProviderUri) {
+    /**
+     * Creates a unique ID for a specific content provider by incrementing the last generated id,
+     * which is found by reading the base column "_id" of that provider, or will return 1 if not
+     * found.
+     * 
+     * @param ctx the android context
+     * @param providerUri the caller provider Uri
+     * @return the generated id
+     */
+    public static long createUniqueId(Context ctx, Uri providerUri) {
 
-        AtomicLong nextId = sNextIds.get(contentProviderUri);
+        AtomicLong nextId = sNextIds.get(providerUri);
 
         if (nextId != null) {
             return nextId.incrementAndGet();
         }
 
         synchronized (sNextIds) {
-            nextId = sNextIds.get(contentProviderUri);
+            nextId = sNextIds.get(providerUri);
 
             if (nextId != null) {
                 return nextId.incrementAndGet();
@@ -55,7 +65,7 @@ public class ContentProviderBaseIdCreator {
 
             Cursor cursor = null;
             try {
-                cursor = ctx.getContentResolver().query(contentProviderUri, new String[] {
+                cursor = ctx.getContentResolver().query(providerUri, new String[] {
                     MAX_PROJECTION
                 }, null, null, null);
                 if (cursor.moveToNext()) {
@@ -65,7 +75,7 @@ public class ContentProviderBaseIdCreator {
                 cursor.close();
             }
 
-            sNextIds.put(contentProviderUri, nextId);
+            sNextIds.put(providerUri, nextId);
 
             return nextId.incrementAndGet();
         }

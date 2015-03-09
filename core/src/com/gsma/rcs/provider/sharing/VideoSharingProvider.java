@@ -43,15 +43,8 @@ import android.text.TextUtils;
  */
 public class VideoSharingProvider extends ContentProvider {
 
-    public static final String TABLE = "videoshare";
-
     private static final String SELECTION_WITH_SHARING_ID_ONLY = VideoSharingData.KEY_SHARING_ID
             .concat("=?");
-
-    /**
-     * Database name
-     */
-    public static final String DATABASE_NAME = "videoshare.db";
 
     private static final UriMatcher sUriMatcher;
     static {
@@ -61,6 +54,16 @@ public class VideoSharingProvider extends ContentProvider {
         sUriMatcher.addURI(VideoSharingLog.CONTENT_URI.getAuthority(), VideoSharingLog.CONTENT_URI
                 .getPath().substring(1).concat("/*"), UriType.VIDEO_SHARING_WITH_ID);
     }
+
+    /**
+     * Table name
+     */
+    public static final String TABLE = "videoshare";
+
+    /**
+     * Database name
+     */
+    public static final String DATABASE_NAME = "videoshare.db";
 
     private static final class UriType {
 
@@ -100,9 +103,10 @@ public class VideoSharingProvider extends ContentProvider {
                     .append(VideoSharingData.KEY_VIDEO_ENCODING).append(" TEXT,")
                     .append(VideoSharingData.KEY_WIDTH).append(" INTEGER NOT NULL,")
                     .append(VideoSharingData.KEY_HEIGHT).append(" INTEGER NOT NULL)").toString());
-            db.execSQL(new StringBuilder("CREATE INDEX ").append(VideoSharingData.KEY_BASECOLUMN_ID)
-                    .append("_idx").append(" ON ").append(TABLE).append("(")
-                    .append(VideoSharingData.KEY_BASECOLUMN_ID).append(")").toString());
+            db.execSQL(new StringBuilder("CREATE INDEX ")
+                    .append(VideoSharingData.KEY_BASECOLUMN_ID).append("_idx").append(" ON ")
+                    .append(TABLE).append("(").append(VideoSharingData.KEY_BASECOLUMN_ID)
+                    .append(")").toString());
             db.execSQL(new StringBuilder("CREATE INDEX ").append(VideoSharingData.KEY_CONTACT)
                     .append("_idx").append(" ON ").append(TABLE).append("(")
                     .append(VideoSharingData.KEY_CONTACT).append(")").toString());
@@ -219,8 +223,8 @@ public class VideoSharingProvider extends ContentProvider {
             case UriType.VIDEO_SHARING_WITH_ID:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 String sharingId = initialValues.getAsString(VideoSharingData.KEY_SHARING_ID);
-                initialValues.put(VideoSharingData.KEY_BASECOLUMN_ID,
-                        HistoryMemberBaseIdCreator.createUniqueId(getContext(), VideoSharingData.HISTORYLOG_MEMBER_ID));
+                initialValues.put(VideoSharingData.KEY_BASECOLUMN_ID, HistoryMemberBaseIdCreator
+                        .createUniqueId(getContext(), VideoSharingData.HISTORYLOG_MEMBER_ID));
                 db.insert(TABLE, null, initialValues);
                 Uri notificationUri = Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, sharingId);
                 getContext().getContentResolver().notifyChange(notificationUri, null);

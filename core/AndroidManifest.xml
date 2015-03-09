@@ -198,7 +198,7 @@
             android:writePermission="com.gsma.rcs.permission.RCS_INTERNAL_ACCESS_ONLY" />
         <provider
             android:name="com.gsma.rcs.provider.history.HistoryProvider"
-            android:authorities="com.gsma.services.rcs.provider.history"
+            android:authorities="com.gsma.rcs.history;com.gsma.services.rcs.provider.history"
             android:exported="true"
             android:readPermission="com.gsma.services.rcs.RCS_READ_HISTORY"
             android:writePermission="com.gsma.rcs.permission.RCS_INTERNAL_ACCESS_ONLY"/>

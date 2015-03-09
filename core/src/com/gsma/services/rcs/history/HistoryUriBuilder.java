@@ -18,6 +18,9 @@ package com.gsma.services.rcs.history;
 
 import android.net.Uri;
 
+/**
+ * Utility builder class to generate the uri used to query the History provider.
+ */
 public class HistoryUriBuilder {
 
     private final Uri.Builder mUriBuilder;
@@ -26,11 +29,22 @@ public class HistoryUriBuilder {
         mUriBuilder = historyLogUri.buildUpon();
     }
 
+    /**
+     * Add the provider ids that will be part of the query.
+     * 
+     * @param providerId
+     * @return the builder
+     */
     public HistoryUriBuilder appendProvider(int providerId) {
         mUriBuilder.appendQueryParameter(HistoryLog.PROVIDER_ID, String.valueOf(providerId));
         return this;
     }
 
+    /**
+     * Creates and returns the uri that contains the provider id parameters.
+     * 
+     * @return the generated uri
+     */
     public Uri build() {
         return mUriBuilder.build();
     }

@@ -33,6 +33,15 @@ public class HistoryMemberBaseIdCreator {
 
     private static SparseArray<AtomicLong> sNextIds = new SparseArray<AtomicLong>();
 
+    /**
+     * Creates a unique ID for a specific content provider by incrementing the last generated id and
+     * by assigning a range big enough to avoid any overlap. The last generated id is found by
+     * reading the base column "_id" of that provider, or will return 1 if not found.
+     * 
+     * @param ctx the android context
+     * @param contentProviderUri the caller provider Uri
+     * @return the generated id
+     */
     public static long createUniqueId(Context ctx, int memberId) {
         AtomicLong nextId = sNextIds.get(memberId);
 

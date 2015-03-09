@@ -415,6 +415,7 @@ public class RcsCoreService extends Service implements CoreListener {
             mVshApi = null;
         }
         if (mHistoryApi != null) {
+            mHistoryApi.close();
             mHistoryApi = null;
         }
         // Terminate the core in background

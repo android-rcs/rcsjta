@@ -43,20 +43,33 @@ public class HistoryProvider extends MultiDbProvider {
 
     private static final class UriType {
 
-        private static final int BASE = 1;
+        private static final class History {
+
+            private static final int HISTORY = 1;
+
+        }
+
+        private static final class InternalHistory {
+
+            private static final int HISTORY = 2;
+
+        }
 
     }
 
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     static {
         sUriMatcher.addURI(HistoryLog.CONTENT_URI.getAuthority(), HistoryLog.CONTENT_URI.getPath()
-                .substring(1), UriType.BASE);
+                .substring(1), UriType.History.HISTORY);
+        sUriMatcher.addURI(HistoryLogData.CONTENT_URI.getAuthority(), HistoryLogData.CONTENT_URI
+                .getPath().substring(1), UriType.InternalHistory.HISTORY);
     }
 
     @Override
     public String getType(Uri uri) {
         switch (sUriMatcher.match(uri)) {
-            case UriType.BASE:
+            case UriType.History.HISTORY:
+            case UriType.InternalHistory.HISTORY:
                 return CursorType.TYPE_DIRECTORY;
 
             default:

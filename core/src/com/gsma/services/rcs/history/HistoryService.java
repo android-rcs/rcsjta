@@ -44,7 +44,7 @@ public class HistoryService extends RcsService {
     /**
      * Constructor
      * 
-     * @param context Application context
+     * @param ctx Application context
      * @param listener Service listener
      */
     public HistoryService(Context ctx, RcsServiceListener listener) {
@@ -113,17 +113,18 @@ public class HistoryService extends RcsService {
      * Registers an external history log member.
      * 
      * @param providerId Provider ID of history log member
+     * @param providerUri Provider Uri
      * @param database URI of database to register
      * @param table Name of table to register
      * @param columnMapping Translator of internal field names to history log provider field names
      * @throws RcsServiceException
      */
-    public void registerExtraHistoryLogMember(int providerId, Uri contentProviderUri, Uri database,
+    public void registerExtraHistoryLogMember(int providerId, Uri providerUri, Uri database,
             String table, Map<String, String> columnMapping) throws RcsServiceException {
         if (mService != null) {
             try {
-                mService.registerExtraHistoryLogMember(providerId, contentProviderUri, database,
-                        table, columnMapping);
+                mService.registerExtraHistoryLogMember(providerId, providerUri, database, table,
+                        columnMapping);
             } catch (Exception e) {
                 throw new RcsServiceException(e.getMessage());
             }
@@ -151,9 +152,10 @@ public class HistoryService extends RcsService {
     }
 
     /**
-     * Creates an id that will be unique across all tables.
+     * Creates an id that will be unique across all tables in the base column "_id".
      * 
-     * @return
+     * @param id of the provider that requires the generated id for its table
+     * @return the generated id as long
      * @throws RcsServiceException
      */
     public long createUniqueId(int providerId) throws RcsServiceException {

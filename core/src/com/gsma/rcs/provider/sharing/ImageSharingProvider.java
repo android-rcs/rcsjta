@@ -43,12 +43,8 @@ import android.text.TextUtils;
  */
 public class ImageSharingProvider extends ContentProvider {
 
-    public static final String TABLE = "imageshare";
-
     private static final String SELECTION_WITH_SHARING_ID_ONLY = ImageSharingData.KEY_SHARING_ID
             .concat("=?");
-
-    public static final String DATABASE_NAME = "imageshare.db";
 
     private static final UriMatcher sUriMatcher;
     static {
@@ -58,6 +54,16 @@ public class ImageSharingProvider extends ContentProvider {
         sUriMatcher.addURI(ImageSharingLog.CONTENT_URI.getAuthority(), ImageSharingLog.CONTENT_URI
                 .getPath().substring(1).concat("/*"), UriType.IMAGE_SHARING_WITH_ID);
     }
+
+    /**
+     * Table name
+     */
+    public static final String TABLE = "imageshare";
+
+    /**
+     * Database name
+     */
+    public static final String DATABASE_NAME = "imageshare.db";
 
     private static final class UriType {
 
@@ -95,9 +101,10 @@ public class ImageSharingProvider extends ContentProvider {
                     .append(ImageSharingData.KEY_TIMESTAMP).append(" INTEGER NOT NULL,")
                     .append(ImageSharingData.KEY_TRANSFERRED).append(" INTEGER NOT NULL,")
                     .append(ImageSharingData.KEY_FILESIZE).append(" INTEGER NOT NULL)").toString());
-            db.execSQL(new StringBuilder("CREATE INDEX ").append(ImageSharingData.KEY_BASECOLUMN_ID)
-                    .append("_idx").append(" ON ").append(TABLE).append("(")
-                    .append(ImageSharingData.KEY_BASECOLUMN_ID).append(")").toString());
+            db.execSQL(new StringBuilder("CREATE INDEX ")
+                    .append(ImageSharingData.KEY_BASECOLUMN_ID).append("_idx").append(" ON ")
+                    .append(TABLE).append("(").append(ImageSharingData.KEY_BASECOLUMN_ID)
+                    .append(")").toString());
             db.execSQL(new StringBuilder("CREATE INDEX ").append(ImageSharingData.KEY_CONTACT)
                     .append("_idx").append(" ON ").append(TABLE).append("(")
                     .append(ImageSharingData.KEY_CONTACT).append(")").toString());
@@ -214,8 +221,8 @@ public class ImageSharingProvider extends ContentProvider {
             case UriType.IMAGE_SHARING_WITH_ID:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 String sharingId = initialValues.getAsString(ImageSharingData.KEY_SHARING_ID);
-                initialValues.put(ImageSharingData.KEY_BASECOLUMN_ID,
-                        HistoryMemberBaseIdCreator.createUniqueId(getContext(), ImageSharingData.HISTORYLOG_MEMBER_ID));
+                initialValues.put(ImageSharingData.KEY_BASECOLUMN_ID, HistoryMemberBaseIdCreator
+                        .createUniqueId(getContext(), ImageSharingData.HISTORYLOG_MEMBER_ID));
                 db.insert(TABLE, null, initialValues);
                 Uri notificationUri = Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId);
                 getContext().getContentResolver().notifyChange(notificationUri, null);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Sony Mobile Communications Inc.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -73,6 +73,29 @@ public class HistoryServiceImpl extends IHistoryService.Stub {
     }
 
     /**
+     * Validates that the provided map is of generic type Map<String, String>.
+     * 
+     * @param columnMapping
+     */
+    private static final void assertMapTypeOfString(@SuppressWarnings("rawtypes")
+    Map columnMapping) {
+        for (Object key : columnMapping.keySet()) {
+            if (!((key instanceof String) && (columnMapping.get(key) instanceof String))) {
+                throw new IllegalArgumentException(new StringBuilder(
+                        "Map not valid when registering provider with key ").append(key)
+                        .append("!").toString());
+            }
+        }
+    }
+
+    public void close() {
+        mHistoryProvider = null;
+        if (sLogger.isActivated()) {
+            sLogger.info("History service API is closed");
+        }
+    }
+
+    /**
      * Registers an external history log member.
      * 
      * @param int Id of provider
@@ -91,11 +114,14 @@ public class HistoryServiceImpl extends IHistoryService.Stub {
             @SuppressWarnings("rawtypes")
             Map columnMapping) {
         try {
+            assertMapTypeOfString(columnMapping);
             retrieveHistoryLogProvider().registerDatabase(providerId, providerUri, databaseUri,
                     table, columnMapping);
         } catch (IOException e) {
-            throw new IllegalStateException("Error registering external provider " + providerId
-                    + " with table " + table + " and database " + databaseUri, e);
+            throw new IllegalStateException(new StringBuilder(
+                    "Error registering external provider ").append(providerId)
+                    .append(" with table ").append(table).append(" and database ")
+                    .append(databaseUri).append("!").toString(), e);
         }
     }
 
@@ -114,8 +140,9 @@ public class HistoryServiceImpl extends IHistoryService.Stub {
         if (INTERNAL_MEMBER_IDS.contains(providerId)
                 || providerId > HistoryProvider.MAX_ATTACHED_PROVIDERS) {
             /* TODO: This exception handling will be changed with CR037. */
-            throw new IllegalStateException("Cannot create ID (not allowed) for internal provider "
-                    + providerId);
+            throw new IllegalStateException(new StringBuilder()
+                    .append("Cannot create ID (not allowed) for internal provider ")
+                    .append(providerId).toString());
         }
         return HistoryMemberBaseIdCreator.createUniqueId(mCtx, providerId);
     }

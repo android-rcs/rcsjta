@@ -31,8 +31,6 @@ import android.text.TextUtils;
 
 public class GeolocSharingProvider extends ContentProvider {
 
-    public static final String TABLE = "geolocshare";
-
     private static final String SELECTION_WITH_SHARING_ID_ONLY = GeolocSharingData.KEY_SHARING_ID
             .concat("=?");
 
@@ -60,6 +58,14 @@ public class GeolocSharingProvider extends ContentProvider {
                 UriType.WITH_SHARING_ID);
     }
 
+    /**
+     * Table name
+     */
+    public static final String TABLE = "geolocshare";
+
+    /**
+     * Database name
+     */
     public static final String DATABASE_NAME = "geolocshare.db";
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
@@ -72,17 +78,17 @@ public class GeolocSharingProvider extends ContentProvider {
         @Override
         public void onCreate(SQLiteDatabase database) {
             database.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE)
-                    .append(" (")
-                    .append(GeolocSharingData.KEY_SHARING_ID).append(" TEXT NOT NULL PRIMARY KEY,")
+                    .append(" (").append(GeolocSharingData.KEY_SHARING_ID)
+                    .append(" TEXT NOT NULL PRIMARY KEY,")
                     .append(GeolocSharingData.KEY_BASECOLUMN_ID).append(" INTEGER NOT NULL,")
-                    .append(GeolocSharingData.KEY_CONTACT)
-                    .append(" TEXT NOT NULL,").append(GeolocSharingData.KEY_CONTENT)
-                    .append(" TEXT,").append(GeolocSharingData.KEY_MIME_TYPE)
-                    .append(" TEXT NOT NULL,").append(GeolocSharingData.KEY_DIRECTION)
-                    .append(" INTEGER NOT NULL,").append(GeolocSharingData.KEY_STATE)
-                    .append(" INTEGER NOT NULL,").append(GeolocSharingData.KEY_REASON_CODE)
-                    .append(" INTEGER NOT NULL,").append(GeolocSharingData.KEY_TIMESTAMP)
-                    .append(" INTEGER NOT NULL);").toString());
+                    .append(GeolocSharingData.KEY_CONTACT).append(" TEXT NOT NULL,")
+                    .append(GeolocSharingData.KEY_CONTENT).append(" TEXT,")
+                    .append(GeolocSharingData.KEY_MIME_TYPE).append(" TEXT NOT NULL,")
+                    .append(GeolocSharingData.KEY_DIRECTION).append(" INTEGER NOT NULL,")
+                    .append(GeolocSharingData.KEY_STATE).append(" INTEGER NOT NULL,")
+                    .append(GeolocSharingData.KEY_REASON_CODE).append(" INTEGER NOT NULL,")
+                    .append(GeolocSharingData.KEY_TIMESTAMP).append(" INTEGER NOT NULL);")
+                    .toString());
             database.execSQL(new StringBuilder("CREATE INDEX ")
                     .append(GeolocSharingData.KEY_BASECOLUMN_ID).append("_idx ON ").append(TABLE)
                     .append("(").append(GeolocSharingData.KEY_BASECOLUMN_ID).append(")").toString());
@@ -203,8 +209,8 @@ public class GeolocSharingProvider extends ContentProvider {
             case UriType.BASE:
                 SQLiteDatabase database = mOpenHelper.getWritableDatabase();
                 String sharingId = initialValues.getAsString(GeolocSharingData.KEY_SHARING_ID);
-                initialValues.put(GeolocSharingData.KEY_BASECOLUMN_ID,
-                        HistoryMemberBaseIdCreator.createUniqueId(getContext(), GeolocSharingData.HISTORYLOG_MEMBER_ID));
+                initialValues.put(GeolocSharingData.KEY_BASECOLUMN_ID, HistoryMemberBaseIdCreator
+                        .createUniqueId(getContext(), GeolocSharingData.HISTORYLOG_MEMBER_ID));
                 database.insert(TABLE, null, initialValues);
                 Uri notificationUri = GeolocSharingData.CONTENT_URI.buildUpon()
                         .appendPath(sharingId).build();

@@ -35,6 +35,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Mother class for the History Provider that embeds generic functions for the
+ * registration/unregistration of external providers and its related database operations.
+ */
 /* package private */abstract class MultiDbProvider extends ContentProvider {
 
     private static final String MAX_PROJECTION = new StringBuilder().append("MAX(")

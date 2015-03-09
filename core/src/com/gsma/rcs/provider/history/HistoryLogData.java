@@ -16,9 +16,16 @@
 
 package com.gsma.rcs.provider.history;
 
+import android.net.Uri;
+
 import com.gsma.services.rcs.history.HistoryLog;
 
 public class HistoryLogData {
+
+    /**
+     * Database URI
+     */
+    protected static final Uri CONTENT_URI = Uri.parse("content://com.gsma.rcs.history/history");
 
     public static final String KEY_BASECOLUMN_ID = HistoryLog.BASECOLUMN_ID;
 
