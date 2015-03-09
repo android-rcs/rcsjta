@@ -18,7 +18,8 @@
 
 package com.orangelabs.rcs.tts;
 
-import java.util.ArrayList;
+import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.OneToOneChatIntent;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -29,8 +30,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import com.gsma.services.rcs.chat.ChatIntent;
-import com.gsma.services.rcs.chat.ChatLog;
+import java.util.ArrayList;
 
 /**
  * Chat invitation event receiver
@@ -46,13 +46,13 @@ public class ChatEvent extends BroadcastReceiver {
         boolean flag = Registry.readBoolean(preferences, Registry.ACTIVATE_TTS, false);
         if (flag) {
             // Get the chat message ID from the Intent
-            String msgId = intent.getParcelableExtra(ChatIntent.EXTRA_MESSAGE_ID);
+            String msgId = intent.getParcelableExtra(OneToOneChatIntent.EXTRA_MESSAGE_ID);
 
             // Get the message content associated to the message ID from the database
             String message = null;
             Uri uri = ChatLog.Message.CONTENT_URI;
             String[] PROJECTION = new String[] {
-                    ChatLog.Message.BODY
+                    ChatLog.Message.CONTENT
             };
             String where = ChatLog.Message.MESSAGE_ID + "='" + msgId + "'";
             Cursor cursor = context.getContentResolver().query(uri, PROJECTION, where, null, null);

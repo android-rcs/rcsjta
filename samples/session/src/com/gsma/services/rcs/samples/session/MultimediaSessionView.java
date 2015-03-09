@@ -18,7 +18,17 @@
 
 package com.gsma.services.rcs.samples.session;
 
-import java.util.Arrays;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.extension.MultimediaMessagingSession;
+import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
+import com.gsma.services.rcs.extension.MultimediaMessagingSessionListener;
+import com.gsma.services.rcs.extension.MultimediaSession;
+import com.gsma.services.rcs.extension.MultimediaSessionService;
+import com.gsma.services.rcs.samples.session.utils.Utils;
+import com.gsma.services.rcs.samples.utils.LogUtils;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -37,24 +47,14 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.gsma.services.rcs.JoynService;
-import com.gsma.services.rcs.JoynServiceException;
-import com.gsma.services.rcs.JoynServiceListener;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.extension.MultimediaMessagingSession;
-import com.gsma.services.rcs.extension.MultimediaMessagingSessionIntent;
-import com.gsma.services.rcs.extension.MultimediaMessagingSessionListener;
-import com.gsma.services.rcs.extension.MultimediaSession;
-import com.gsma.services.rcs.extension.MultimediaSessionService;
-import com.gsma.services.rcs.samples.session.utils.Utils;
-import com.gsma.services.rcs.samples.utils.LogUtils;
+import java.util.Arrays;
 
 /**
  * Multimedia session view
  * 
  * @author Jean-Marc AUFFRET
  */
-public class MultimediaSessionView extends Activity implements JoynServiceListener {
+public class MultimediaSessionView extends Activity implements RcsServiceListener {
     /**
      * View modes
      */
@@ -147,18 +147,11 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
     private MultimediaMessagingSessionListener serviceListener = new MultimediaMessagingSessionListener() {
 
         @Override
-        public void onMultimediaMessagingStateChanged(ContactId contact, String sessionId,
-                final int state) {
+        public void onStateChanged(ContactId contact, String sessionId, MultimediaSession.State state, MultimediaSession.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "onMultimediaMessagingStateChanged contact=" + contact
                         + " sessionId=" + sessionId + " state="
                         + state);
-            }
-            if (state > MMS_STATES.length) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "onMultimediaMessagingStateChanged unhandled state=" + state);
-                }
-                return;
             }
             // TODO : handle reason code (CR025)
             final String reason = MMS_REASON_CODES[0];
@@ -242,7 +235,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
         }
 
         @Override
-        public void onNewMessage(ContactId contact, String sessionId, byte[] content) {
+        public void onMessageReceived(ContactId contact, String sessionId, byte[] content) {
             // Receive data
             dataRecv += content.length;
             // Update UI
@@ -288,7 +281,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
         if (serviceConnected) {
             // Remove session listener
             try {
-                sessionApi.removeMessagingEventListener(serviceListener);
+                sessionApi.removeEventListener(serviceListener);
             } catch (Exception e) {
                 if (LogUtils.isActive) {
                     Log.e(LOGTAG, "Failed to remove listener", e);
@@ -308,7 +301,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
     public void onServiceConnected() {
         try {
             // Add service listener
-            sessionApi.addMessagingEventListener(serviceListener);
+            sessionApi.addEventListener(serviceListener);
             serviceConnected = true;
 
             mode = getIntent().getIntExtra(MultimediaSessionView.EXTRA_MODE, -1);
@@ -359,7 +352,7 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
             // Display session info
             TextView contactEdit = (TextView) findViewById(R.id.contact);
             contactEdit.setText(contact.toString());
-        } catch (JoynServiceException e) {
+        } catch (RcsServiceException e) {
             if (LogUtils.isActive) {
                 Log.e(LOGTAG, "Failed to connect API", e);
             }
@@ -372,14 +365,14 @@ public class MultimediaSessionView extends Activity implements JoynServiceListen
      * Callback called when service has been disconnected. This method is called when the service is
      * disconnected from the RCS service (e.g. service deactivated).
      * 
-     * @param error Error
-     * @see JoynService.Error
+     * @param reasonCode
+     * @see ReasonCode
      */
-    public void onServiceDisconnected(int error) {
+    public void onServiceDisconnected(RcsServiceListener.ReasonCode reasonCode) {
         serviceConnected = false;
         Utils.showMessageAndExit(MultimediaSessionView.this, getString(R.string.label_api_disabled));
         if (LogUtils.isActive) {
-            Log.w(LOGTAG, "onServiceDisconnected error=" + error);
+            Log.w(LOGTAG, "onServiceDisconnected error=" + reasonCode);
         }
     }
 

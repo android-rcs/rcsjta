@@ -18,6 +18,12 @@
 
 package com.gsma.services.rcs.samples.session;
 
+import com.gsma.services.rcs.RcsContactFormatException;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
+import com.gsma.services.rcs.samples.session.utils.Utils;
+import com.gsma.services.rcs.samples.utils.LogUtils;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -29,12 +35,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Spinner;
-
-import com.gsma.services.rcs.JoynContactFormatException;
-import com.gsma.services.rcs.contacts.ContactId;
-import com.gsma.services.rcs.contacts.ContactUtils;
-import com.gsma.services.rcs.samples.session.utils.Utils;
-import com.gsma.services.rcs.samples.utils.LogUtils;
 
 /**
  * Initiate multimedia session
@@ -84,9 +84,8 @@ public class InitiateMultimediaSession extends Activity {
             String remoteContact = cursor.getString(1);
 
             try {
-                ContactUtils contactUtils = ContactUtils
-                        .getInstance(InitiateMultimediaSession.this);
-                ContactId contact = contactUtils.formatContactId(remoteContact);
+                ContactUtil contactUtils = ContactUtil.getInstance(InitiateMultimediaSession.this);
+                ContactId contact = contactUtils.formatContact(remoteContact);
                 // Initiate session
                 // Display session view
                 Intent intent = new Intent(InitiateMultimediaSession.this,
@@ -96,7 +95,7 @@ public class InitiateMultimediaSession extends Activity {
                         MultimediaSessionView.MODE_OUTGOING);
                 intent.putExtra(MultimediaSessionView.EXTRA_CONTACT, (Parcelable) contact);
                 startActivity(intent);
-            } catch (JoynContactFormatException e) {
+            } catch (RcsContactFormatException e) {
                 if (LogUtils.isActive) {
                     Log.e(LOGTAG, "Cannot parse contact " + remoteContact);
                 }
