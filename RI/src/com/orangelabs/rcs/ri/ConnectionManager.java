@@ -34,7 +34,7 @@ import com.gsma.services.rcs.sharing.image.ImageSharingService;
 import com.gsma.services.rcs.sharing.video.VideoSharingService;
 import com.gsma.services.rcs.upload.FileUploadService;
 
-import com.orangelabs.rcs.ri.service.ServiceActivation;
+import com.orangelabs.rcs.ri.settings.SettingsDisplay;
 import com.orangelabs.rcs.ri.utils.LockAccess;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
@@ -113,12 +113,11 @@ public class ConnectionManager {
         }
     };
 
-    private Context mContext;
+    private final Context mContext;
 
     private final Handler mHandler = new Handler();
 
-    private static final String LOGTAG = LogUtils
-            .getTag(ConnectionManager.class.getSimpleName());
+    private static final String LOGTAG = LogUtils.getTag(ConnectionManager.class.getSimpleName());
 
     /**
      * Client connection listener
@@ -127,7 +126,7 @@ public class ConnectionManager {
         /**
          * The set of monitored services
          */
-        private Set<RcsServiceName> mMonitoredServices;
+        private final Set<RcsServiceName> mMonitoredServices;
 
         /**
          * The activity to notify
@@ -138,6 +137,8 @@ public class ConnectionManager {
          * A locker to notify only once
          */
         private LockAccess mTriggerOnlyOnce;
+
+        private RcsServiceListener mListener;
 
         /**
          * Constructor
@@ -156,14 +157,44 @@ public class ConnectionManager {
             }
         }
 
-        public void notifyDisconnection(ReasonCode error) {
-            String msg = null;
-            if (ReasonCode.SERVICE_DISABLED == error) {
-                msg = mActivity.getString(R.string.label_api_disabled_);
-            } else {
-                msg = mActivity.getString(R.string.label_api_disconnected);
+        /**
+         * Constructor
+         * 
+         * @param listener
+         * @param services
+         */
+        public ClientConnectionNotifier(RcsServiceListener listener, RcsServiceName... services) {
+            mListener = listener;
+            mMonitoredServices = new HashSet<RcsServiceName>();
+            for (RcsServiceName service : services) {
+                mMonitoredServices.add(service);
             }
-            Utils.showMessageAndExit(mActivity, msg, mTriggerOnlyOnce);
+        }
+
+        public void notifyConnection() {
+            if (mListener == null) {
+                return;
+            }
+            if (mConnectedServices.containsAll(mMonitoredServices)) {
+                /* All monitored services are connected -> notify connection */
+                mListener.onServiceConnected();
+            }
+        }
+
+        public void notifyDisconnection(ReasonCode error) {
+            if (mActivity != null) {
+                String msg = null;
+                if (ReasonCode.SERVICE_DISABLED == error) {
+                    msg = mActivity.getString(R.string.label_api_disabled_);
+                } else {
+                    msg = mActivity.getString(R.string.label_api_disconnected);
+                }
+                Utils.showMessageAndExit(mActivity, msg, mTriggerOnlyOnce);
+                return;
+            }
+            if (mListener != null) {
+                mListener.onServiceDisconnected(error);
+            }
         }
 
         public Set<RcsServiceName> getMonitoredServices() {
@@ -185,7 +216,7 @@ public class ConnectionManager {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "RCS service is UP");
             }
-            // Connect all APIs
+            /* Connect all APIs */
             ConnectionManager.getInstance(context).connectApis();
         }
     }
@@ -234,6 +265,7 @@ public class ConnectionManager {
             @Override
             public void onServiceConnected() {
                 mConnectedServices.add(service);
+                notifyConnection(service);
                 if (RcsServiceName.CAPABILITY == service) {
                     if (LogUtils.isActive) {
                         Log.d(LOGTAG, "API connected");
@@ -242,8 +274,7 @@ public class ConnectionManager {
                     mHandler.post(new Runnable() {
                         public void run() {
                             try {
-                                capabilityService.addEventListener(
-                                        mRcsServiceRegistrationListener);
+                                capabilityService.addEventListener(mRcsServiceRegistrationListener);
                                 if (capabilityService.isServiceRegistered()) {
                                     notifyImsConnection();
                                 } else {
@@ -275,13 +306,13 @@ public class ConnectionManager {
             Log.d(LOGTAG, "ConnectionManager");
         }
         mContext = context;
-        // Construct list of connected services
+        /* Construct list of connected services */
         mConnectedServices = new HashSet<RcsServiceName>();
-        // Construct list of clients to notify
+        /* Construct list of clients to notify */
         mClientsToNotify = new HashMap<Activity, ClientConnectionNotifier>();
-        // Construct list of APIs
+        /* Construct list of APIs */
         mApis = new HashMap<RcsServiceName, RcsService>();
-        // Instantiate APIs
+        /* Instantiate APIs */
         mApis.put(RcsServiceName.CAPABILITY, new CapabilityService(context,
                 newRcsServiceListener(RcsServiceName.CAPABILITY)));
         mApis.put(RcsServiceName.CHAT, new ChatService(context,
@@ -300,7 +331,7 @@ public class ConnectionManager {
                 newRcsServiceListener(RcsServiceName.GEOLOC_SHARING)));
         mApis.put(RcsServiceName.MULTIMEDIA, new MultimediaSessionService(context,
                 newRcsServiceListener(RcsServiceName.MULTIMEDIA)));
-        // Register the broadcast receiver to catch ACTION_SERVICE_UP
+        /* Register the broadcast receiver to catch ACTION_SERVICE_UP */
         IntentFilter filter = new IntentFilter();
         filter.addAction(RcsService.ACTION_SERVICE_UP);
         context.registerReceiver(new RcsServiceReceiver(), filter);
@@ -310,9 +341,9 @@ public class ConnectionManager {
      * Connect APIs
      */
     public void connectApis() {
-        // Connect all APIs
+        /* Connect all APIs */
         for (RcsServiceName service : mApis.keySet()) {
-            // Check if not already connected
+            /* Check if not already connected */
             if (!isServiceConnected(service)) {
                 try {
                     RcsService rcsService = mApis.get(service);
@@ -337,14 +368,23 @@ public class ConnectionManager {
      */
     private void notifyDisconnection(RcsServiceName service, ReasonCode error) {
         if (LogUtils.isActive) {
-            Log.w(LOGTAG,
-                    new StringBuilder(service.name()).append(" ")
-                            .append(error).toString());
+            Log.w(LOGTAG, new StringBuilder(service.name()).append(" ").append(error).toString());
         }
         for (ClientConnectionNotifier clienttoNotify : mClientsToNotify.values()) {
-            if (clienttoNotify.getMonitoredServices().contains(service)) {
+            Set<RcsServiceName> monitoredServices = clienttoNotify.getMonitoredServices();
+            if (monitoredServices == null || monitoredServices.contains(service)) {
                 clienttoNotify.notifyDisconnection(error);
             }
+        }
+    }
+
+    private void notifyConnection(RcsServiceName service) {
+        if (LogUtils.isActive) {
+            Log.w(LOGTAG, new StringBuilder(service.name()).append(" ").append(" is connected")
+                    .toString());
+        }
+        for (ClientConnectionNotifier clienttoNotify : mClientsToNotify.values()) {
+            clienttoNotify.notifyConnection();
         }
     }
 
@@ -364,7 +404,19 @@ public class ConnectionManager {
     }
 
     /**
-     * Start monitoring the services
+     * Start monitoring the API connection by using a callback listener
+     * 
+     * @param activity the activity requesting to start monitoring the API connection
+     * @param listener
+     * @param services
+     */
+    public void startMonitorApiCnx(Activity activity, RcsServiceListener listener,
+            RcsServiceName... services) {
+        mClientsToNotify.put(activity, new ClientConnectionNotifier(listener, services));
+    }
+
+    /**
+     * Start monitoring the services and finish activities if service is disconnected
      * 
      * @param activity the activity requesting to start monitoring the services
      * @param exitOnce a locker
@@ -381,6 +433,15 @@ public class ConnectionManager {
      * @param activity the activity requesting to stop monitoring the services
      */
     public void stopMonitorServices(Activity activity) {
+        mClientsToNotify.remove(activity);
+    }
+
+    /**
+     * Stop monitoring the API connection
+     * 
+     * @param activity the activity requesting to stop monitoring the API connection
+     */
+    public void stopMonitorApiCnx(Activity activity) {
         mClientsToNotify.remove(activity);
     }
 
@@ -475,11 +536,10 @@ public class ConnectionManager {
 
     private void addImsConnectionNotification(boolean connected,
             RcsServiceRegistration.ReasonCode reason) {
-        // Create notification
-        Intent intent = new Intent(mContext, ServiceActivation.class);
+        /* Create notification */
+        Intent intent = new Intent(mContext, SettingsDisplay.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent contentIntent = PendingIntent.getActivity(
-                mContext, 0, intent, 0);
+        PendingIntent contentIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
         int iconId;
         String label;
         if (connected) {
@@ -494,9 +554,9 @@ public class ConnectionManager {
             }
         }
         String title = mContext.getString(R.string.notification_title_rcs_service);
-        // Create notification
+        /* Create notification */
         Notification notif = buildImsConnectionNotification(contentIntent, title, label, iconId);
-        // Send notification
+        /* Send notification */
         NotificationManager notificationManager = (NotificationManager) mContext
                 .getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(SERVICE_NOTIFICATION, notif);
@@ -512,9 +572,8 @@ public class ConnectionManager {
      * @return the notification
      */
     private Notification buildImsConnectionNotification(PendingIntent intent, String title,
-            String message,
-            int iconId) {
-        // Create notification
+            String message, int iconId) {
+        /* Create notification */
         NotificationCompat.Builder notif = new NotificationCompat.Builder(mContext);
         notif.setContentIntent(intent);
         notif.setSmallIcon(iconId);

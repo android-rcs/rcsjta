@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.capability;
@@ -69,6 +73,7 @@ public class CapabilityUtils {
         // Chat support
         if (rcsSettings.isImSessionSupported()) {
             iariTags.add(FeatureTags.FEATURE_RCSE_CHAT);
+            tags.add(FeatureTags.FEATURE_OMA_IM);
         }
 
         // FT support
@@ -123,8 +128,7 @@ public class CapabilityUtils {
         if (rcsSettings.isIPVideoCallSupported()) {
             tags.add(FeatureTags.FEATURE_RCSE_IP_VIDEO_CALL);
         }
-        if (rcsSettings.isIPVoiceCallSupported()
-                || rcsSettings.isIPVideoCallSupported()) {
+        if (rcsSettings.isIPVoiceCallSupported() || rcsSettings.isIPVideoCallSupported()) {
             icsiTags.add(FeatureTags.FEATURE_3GPP_IP_VOICE_CALL);
         }
 
@@ -160,13 +164,12 @@ public class CapabilityUtils {
      * Extract features tags
      * 
      * @param msg Message
-     * @param rcsSettings
      * @return Capabilities
      */
-    public static Capabilities extractCapabilities(SipMessage msg, RcsSettings rcsSettings) {
+    public static Capabilities extractCapabilities(SipMessage msg) {
 
         // Analyze feature tags
-        Capabilities capabilities = new Capabilities(rcsSettings);
+        Capabilities capabilities = new Capabilities();
         ArrayList<String> tags = msg.getFeatureTags();
         boolean ipCall_RCSE = false;
         boolean ipCall_3GPP = false;

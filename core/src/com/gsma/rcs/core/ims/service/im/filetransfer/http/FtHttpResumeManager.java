@@ -69,8 +69,8 @@ public class FtHttpResumeManager {
     /**
      * The logger
      */
-    private static final Logger sLogger = Logger
-            .getLogger(FtHttpResumeManager.class.getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(FtHttpResumeManager.class
+            .getSimpleName());
 
     private final RcsSettings mRcsSettings;
 

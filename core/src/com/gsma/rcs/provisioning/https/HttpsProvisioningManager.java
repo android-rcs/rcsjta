@@ -24,15 +24,32 @@ package com.gsma.rcs.provisioning.https;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
+import com.gsma.rcs.core.TerminalInfo;
+import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
+import com.gsma.rcs.provisioning.ProvisioningFailureReasons;
+import com.gsma.rcs.provisioning.ProvisioningInfo;
+import com.gsma.rcs.provisioning.ProvisioningInfo.Version;
+import com.gsma.rcs.provisioning.ProvisioningParser;
+import com.gsma.rcs.provisioning.TermsAndConditionsRequest;
+import com.gsma.rcs.service.LauncherUtils;
+import com.gsma.rcs.utils.IntentUtils;
+import com.gsma.rcs.utils.NetworkUtils;
+import com.gsma.rcs.utils.StringUtils;
+import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
+import com.gsma.services.rcs.RcsService;
+
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.Proxy;
+import android.net.Uri;
+import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
@@ -61,33 +78,15 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.Proxy;
-import android.net.Uri;
-import android.os.Environment;
-import android.telephony.TelephonyManager;
-import android.text.TextUtils;
-
-import com.gsma.rcs.core.TerminalInfo;
-import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
-import com.gsma.rcs.provisioning.ProvisioningFailureReasons;
-import com.gsma.rcs.provisioning.ProvisioningInfo;
-import com.gsma.rcs.provisioning.ProvisioningParser;
-import com.gsma.rcs.provisioning.TermsAndConditionsRequest;
-import com.gsma.rcs.provisioning.ProvisioningInfo.Version;
-import com.gsma.rcs.service.LauncherUtils;
-import com.gsma.rcs.utils.IntentUtils;
-import com.gsma.rcs.utils.NetworkUtils;
-import com.gsma.rcs.utils.StringUtils;
-import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
-import com.gsma.services.rcs.RcsService;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 
 /**
  * Provisioning via network manager
@@ -97,6 +96,8 @@ import com.gsma.services.rcs.RcsService;
  * @author Deutsche Telekom AG
  */
 public class HttpsProvisioningManager {
+
+    private static final String PROVISIONING_URI_FILENAME = "rcs_provisioning_uri.txt";
 
     private static final String PARAM_VERS = "vers";
 
@@ -395,8 +396,7 @@ public class HttpsProvisioningManager {
             // Format first HTTPS request with extra parameters (IMSI and IMEI if available plus
             // SMS_port and token)
             String token = (!TextUtils.isEmpty(mRcsSettings.getProvisioningToken()) ? mRcsSettings
-                    .getProvisioningToken()
-                    : "");
+                    .getProvisioningToken() : "");
             String args = getHttpsRequestArguments(imsi, imei, smsPortForOTP, token, msisdn);
 
             // Execute first HTTPS request with extra parameters
@@ -427,8 +427,6 @@ public class HttpsProvisioningManager {
                     if (msisdn == null) {
                         return null;
                     } else {
-                        // formatting plus sign according to [RFC3986]-section 2.1.
-                        msisdn = msisdn.replace("+", "%2B");
                         return sendFirstRequestsToRequireOTP(imsi, imei, msisdn, primaryUri,
                                 secondaryUri, client, localContext);
                     }
@@ -523,9 +521,10 @@ public class HttpsProvisioningManager {
         String mnc = ope.substring(3);
         String mcc = ope.substring(0, 3);
         while (mnc.length() < 3) { // Set mnc on 3 digits
-            mnc = "0" + mnc;
+            mnc = "0".concat(mnc);
         }
-        return "config.rcs." + "mnc" + mnc + ".mcc" + mcc + ".pub.3gppnetwork.org";
+        return new StringBuilder("config.rcs.mnc").append(mnc).append(".mcc").append(mcc)
+                .append(".pub.3gppnetwork.org").toString();
     }
 
     /**
@@ -553,28 +552,18 @@ public class HttpsProvisioningManager {
                 secondaryUri = mRcsSettings.getSecondaryProvisioningAddress();
             }
 
-            // Check if a configuration file for HTTPS provisioning exists
-            String PROVISIONING_FILE = Environment.getExternalStorageDirectory().getPath()
-                    + "/joyn_provisioning.txt";
-            try {
-                File file = new File(PROVISIONING_FILE);
-                if (file.exists()) {
-                    if (logActivated) {
-                        sLogger.debug("Provisioning file found !");
-                    }
-                    FileInputStream fis = new FileInputStream(PROVISIONING_FILE);
-                    DataInputStream in = new DataInputStream(fis);
-                    BufferedReader br = new BufferedReader(new InputStreamReader(in));
-                    primaryUri = br.readLine();
-                    secondaryUri = null;
-                    in.close();
-                }
-            } catch (Exception e) {
-                // Nothing to do
+            /*
+             * Check if a file containing URI for HTTPS provisioning exists
+             */
+            String primaryUriFromFile = getPrimaryProvisionigServerUriFromFile();
+            if (primaryUriFromFile != null) {
+                primaryUri = primaryUriFromFile;
+                secondaryUri = null;
             }
 
             if (logActivated) {
-                sLogger.debug("HCS/RCS Uri to connect: " + primaryUri + " or " + secondaryUri);
+                sLogger.debug(new StringBuilder("HCS/RCS Uri to connect: ").append(primaryUri)
+                        .append(" or ").append(secondaryUri).toString());
             }
 
             String imsi = tm.getSubscriberId();
@@ -684,6 +673,37 @@ public class HttpsProvisioningManager {
             }
             return null;
         }
+    }
+
+    private String getPrimaryProvisionigServerUriFromFile() {
+        boolean logActivated = sLogger.isActivated();
+        DataInputStream dataInputStream = null;
+        try {
+            File primaryUri = new File(mCtx.getFilesDir(), PROVISIONING_URI_FILENAME);
+            if (!primaryUri.exists()) {
+                return null;
+            }
+            if (logActivated) {
+                sLogger.debug("Provisioning URI file found !");
+            }
+            FileInputStream fis = new FileInputStream(primaryUri);
+            dataInputStream = new DataInputStream(fis);
+            BufferedReader br = new BufferedReader(new InputStreamReader(dataInputStream));
+            return br.readLine();
+        } catch (Exception e) {
+            if (logActivated) {
+                sLogger.error("Failed to locate URI provisioning file", e);
+            }
+        } finally {
+            if (dataInputStream != null) {
+                try {
+                    dataInputStream.close();
+                } catch (IOException e) {
+                    // Do nothing
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -885,8 +905,7 @@ public class HttpsProvisioningManager {
                                     // Start retry alarm
                                     if (validity > 0) {
                                         HttpsProvisioningService.startRetryAlarm(mCtx,
-                                                mRetryIntent,
-                                                validity * 1000);
+                                                mRetryIntent, validity * 1000);
                                     }
                                     // Terms request
                                     if (info.getMessage() != null

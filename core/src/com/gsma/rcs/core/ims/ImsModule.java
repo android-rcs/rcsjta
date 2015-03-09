@@ -115,8 +115,7 @@ public class ImsModule implements SipEventListener {
      * @throws CoreException
      */
     public ImsModule(Core core, RcsSettings rcsSettings, ContactsManager contactsManager,
-            MessagingLog messagingLog)
-            throws CoreException {
+            MessagingLog messagingLog) throws CoreException {
         mCore = core;
 
         if (logger.isActivated()) {
@@ -160,8 +159,7 @@ public class ImsModule implements SipEventListener {
 
         // Create IM service (mandatory)
         mServices.put(ImsServiceType.INSTANT_MESSAGING, new InstantMessagingService(this, core,
-                rcsSettings,
-                contactsManager, messagingLog));
+                rcsSettings, contactsManager, messagingLog));
 
         // Create IP call service (optional)
         mServices.put(ImsServiceType.IPCALL, new IPCallService(this, rcsSettings, contactsManager));

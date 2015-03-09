@@ -557,9 +557,9 @@ public class FileTransfer {
      * @return boolean
      * @throws RcsServiceException
      */
-    public boolean canPauseTransfer() throws RcsServiceException {
+    public boolean isAllowedToPauseTransfer() throws RcsServiceException {
         try {
-            return mTransferInf.canPauseTransfer();
+            return mTransferInf.isAllowedToPauseTransfer();
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }
@@ -586,9 +586,9 @@ public class FileTransfer {
      * @return boolean
      * @throws RcsServiceException
      */
-    public boolean canResumeTransfer() throws RcsServiceException {
+    public boolean isAllowedToResumeTransfer() throws RcsServiceException {
         try {
-            return mTransferInf.canResumeTransfer();
+            return mTransferInf.isAllowedToResumeTransfer();
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }
@@ -613,9 +613,9 @@ public class FileTransfer {
      * @return boolean
      * @throws RcsServiceException
      */
-    public boolean canResendTransfer() throws RcsServiceException {
+    public boolean isAllowedToResendTransfer() throws RcsServiceException {
         try {
-            return mTransferInf.canResendTransfer();
+            return mTransferInf.isAllowedToResendTransfer();
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }

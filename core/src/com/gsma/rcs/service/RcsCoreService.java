@@ -338,14 +338,12 @@ public class RcsCoreService extends Service implements CoreListener {
                 // RCS account deletion will be done by user during this amount of time, as he just
                 // started his service.
                 Handler handler = new Handler();
-                handler.postDelayed(
-                        new Runnable() {
-                            public void run() {
-                                registerReceiver(mAccountChangedReceiver, new IntentFilter(
-                                        "android.accounts.LOGIN_ACCOUNTS_CHANGED"));
-                            }
-                        },
-                        2000);
+                handler.postDelayed(new Runnable() {
+                    public void run() {
+                        registerReceiver(mAccountChangedReceiver, new IntentFilter(
+                                "android.accounts.LOGIN_ACCOUNTS_CHANGED"));
+                    }
+                }, 2000);
             }
 
             if (logActivated) {
@@ -674,8 +672,7 @@ public class RcsCoreService extends Service implements CoreListener {
 
     @Override
     public void handleFileTransferInvitation(FileSharingSession fileSharingSession,
-            boolean isGroup, ContactId contact,
-            String displayName) {
+            boolean isGroup, ContactId contact, String displayName) {
         if (sLogger.isActivated()) {
             sLogger.debug("Handle event file transfer invitation");
         }
@@ -693,8 +690,7 @@ public class RcsCoreService extends Service implements CoreListener {
 
         // Broadcast the invitation
         mFtApi.receiveFileTransferInvitation(fileSharingSession, false,
-                oneToOneChatSession.getRemoteContact(),
-                oneToOneChatSession.getRemoteDisplayName());
+                oneToOneChatSession.getRemoteContact(), oneToOneChatSession.getRemoteDisplayName());
     }
 
     @Override
@@ -801,9 +797,9 @@ public class RcsCoreService extends Service implements CoreListener {
     }
 
     @Override
-    public void handleUserConfirmationRequest(ContactId remote, String id,
-            String type, boolean pin, String subject, String text,
-            String acceptButtonLabel, String rejectButtonLabel, int timeout) {
+    public void handleUserConfirmationRequest(ContactId remote, String id, String type,
+            boolean pin, String subject, String text, String acceptButtonLabel,
+            String rejectButtonLabel, int timeout) {
         if (sLogger.isActivated()) {
             sLogger.debug("Handle event user terms confirmation request");
         }

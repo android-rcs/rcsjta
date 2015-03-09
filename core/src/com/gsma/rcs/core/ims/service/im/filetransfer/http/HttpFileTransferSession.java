@@ -90,6 +90,11 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         mSessionState = HttpTransferState.PENDING;
     }
 
+    @Override
+    public boolean isHttpTransfer() {
+        return true;
+    }
+
     /**
      * Returns the chat session ID associated to the transfer
      * 

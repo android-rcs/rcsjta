@@ -126,8 +126,8 @@ public abstract class HttpTransferManager {
     /**
      * The logger
      */
-    private static final Logger sLogger = Logger
-            .getLogger(HttpTransferManager.class.getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(HttpTransferManager.class
+            .getSimpleName());
 
     /**
      * Constructor

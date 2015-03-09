@@ -41,6 +41,7 @@ import com.gsma.services.rcs.contact.ContactId;
  * @author jexa7410
  */
 public abstract class FileSharingSession extends ImsServiceSession {
+
     /**
      * Contribution ID
      */
@@ -101,6 +102,13 @@ public abstract class FileSharingSession extends ImsServiceSession {
         mFileIcon = fileIcon;
         mFiletransferId = filetransferId;
     }
+
+    /**
+     * Check if the file sharing session is a HTTP transfer
+     * 
+     * @return {@code true} if HTTP transfer, otherwise {@code false}
+     */
+    public abstract boolean isHttpTransfer();
 
     /**
      * Return the contribution ID
@@ -225,8 +233,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
         long maxFileSharingSize = rcsSettings.getMaxFileTransferSize();
         boolean fileIsToBig = (maxFileSharingSize > 0) ? fileSize > maxFileSharingSize : false;
         boolean storageIsTooSmall = (StorageUtils.getExternalStorageFreeSpace() > 0) ? fileSize > StorageUtils
-                .getExternalStorageFreeSpace()
-                : false;
+                .getExternalStorageFreeSpace() : false;
         if (fileIsToBig) {
             if (sLogger.isActivated()) {
                 sLogger.warn("File is too big, reject the file transfer");

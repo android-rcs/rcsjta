@@ -73,7 +73,7 @@ public class RcsSettingsProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 108;
+        private static final int DATABASE_VERSION = 109;
 
         /**
          * Add a parameter in the db
@@ -286,8 +286,14 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_CAPABILITY_POLLING_PERIOD);
             addParameter(db, RcsSettingsData.IM_CAPABILITY_ALWAYS_ON,
                     RcsSettingsData.DEFAULT_IM_CAPABILITY_ALWAYS_ON);
+            addParameter(db, RcsSettingsData.GROUP_CHAT_INVITE_ONLY_FULL_SF,
+                    RcsSettingsData.DEFAULT_GC_INVITE_ONLY_FULL_SF);
             addParameter(db, RcsSettingsData.FT_CAPABILITY_ALWAYS_ON,
                     RcsSettingsData.DEFAULT_FT_CAPABILITY_ALWAYS_ON);
+            addParameter(db, RcsSettingsData.FT_HTTP_CAP_ALWAYS_ON,
+                    RcsSettingsData.DEFAULT_FT_HTTP_CAP_ALWAYS_ON);
+            addParameter(db, RcsSettingsData.MSG_CAP_VALIDITY_PERIOD,
+                    RcsSettingsData.DEFAULT_MSG_CAP_VALIDITY_PERIOD);
             addParameter(db, RcsSettingsData.IM_USE_REPORTS, RcsSettingsData.DEFAULT_IM_USE_REPORTS);
             addParameter(db, RcsSettingsData.NETWORK_ACCESS, RcsSettingsData.DEFAULT_NETWORK_ACCESS);
             addParameter(db, RcsSettingsData.SIP_TIMER_T1, RcsSettingsData.DEFAULT_SIP_TIMER_T1);
@@ -402,7 +408,7 @@ public class RcsSettingsProvider extends ContentProvider {
             /* Put the old values back when possible */
             for (ContentValues values : valuesList) {
                 String[] selectionArgs = new String[] {
-                        values.getAsString(RcsSettingsData.KEY_KEY)
+                    values.getAsString(RcsSettingsData.KEY_KEY)
                 };
                 db.update(TABLE, values, SELECTION_WITH_KEY_ONLY, selectionArgs);
             }
@@ -421,7 +427,7 @@ public class RcsSettingsProvider extends ContentProvider {
 
     private String[] getSelectionArgsWithKey(String[] selectionArgs, String key) {
         String[] keySelectionArg = new String[] {
-                key
+            key
         };
         if (selectionArgs == null) {
             return keySelectionArg;
@@ -446,8 +452,7 @@ public class RcsSettingsProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -467,8 +472,7 @@ public class RcsSettingsProvider extends ContentProvider {
                 case UriType.SETTINGS:
                     SQLiteDatabase database = mOpenHelper.getReadableDatabase();
                     cursor = database.query(TABLE, projection, selection, selectionArgs, null,
-                            null,
-                            sort);
+                            null, sort);
                     cursor.setNotificationUri(getContext().getContentResolver(), notificationUri);
                     return cursor;
 
@@ -504,8 +508,7 @@ public class RcsSettingsProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 

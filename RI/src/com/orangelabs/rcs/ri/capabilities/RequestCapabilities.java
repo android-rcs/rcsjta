@@ -290,7 +290,6 @@ public class RequestCapabilities extends Activity {
         TextView extensions = (TextView) findViewById(R.id.extensions);
         TextView timestamp = (TextView) findViewById(R.id.last_refresh);
         CheckBox automata = (CheckBox) findViewById(R.id.automata);
-        CheckBox valid = (CheckBox) findViewById(R.id.is_valid);
         // Set capabilities
         imageCSh.setChecked((capabilities != null) ? capabilities.isImageSharingSupported() : false);
         videoCSh.setChecked((capabilities != null) ? capabilities.isVideoSharingSupported() : false);
@@ -305,7 +304,6 @@ public class RequestCapabilities extends Activity {
         timestamp.setText((capabilities != null) ? DateUtils.getRelativeTimeSpanString(
                 capabilities.getTimestamp(), System.currentTimeMillis(),
                 DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE) : "");
-        valid.setChecked((capabilities != null) ? capabilities.isValid() : false);
     }
 
     /* package private */static String getExtensions(Capabilities capabilities) {

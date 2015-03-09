@@ -95,7 +95,7 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
 
     private String[] getSelectionArgsWithAppendedId(String[] selectionArgs, String appendedId) {
         String[] appendedIdSelectionArg = new String[] {
-                appendedId
+            appendedId
         };
         if (selectionArgs == null) {
             return appendedIdSelectionArg;

@@ -74,8 +74,8 @@ public class AnonymousFetchRequestTask {
     /**
      * The logger
      */
-    private static final Logger sLogger = Logger
-            .getLogger(AnonymousFetchRequestTask.class.getName());
+    private static final Logger sLogger = Logger.getLogger(AnonymousFetchRequestTask.class
+            .getName());
 
     /**
      * Constructor
@@ -277,7 +277,7 @@ public class AnonymousFetchRequestTask {
         }
 
         // We update the database with empty capabilities
-        Capabilities capabilities = new Capabilities(mRcsSettings);
+        Capabilities capabilities = new Capabilities();
         ContactsManager.getInstance().setContactCapabilities(mContact, capabilities,
                 RcsStatus.NOT_RCS, RegistrationState.UNKNOWN);
     }

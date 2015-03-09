@@ -226,8 +226,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
     public void receiveImageSharingInvitation(ImageTransferSession session) {
         if (logger.isActivated()) {
             logger.info("Receive image sharing invitation from " + session.getRemoteContact()
-                    + " displayName="
-                    + session.getRemoteDisplayName());
+                    + " displayName=" + session.getRemoteDisplayName());
         }
         ContactId contact = session.getRemoteContact();
 
@@ -281,11 +280,10 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
                     contact, content, null);
 
             String sharingId = session.getSessionID();
-            mRichCallLog.addImageSharing(session.getSessionID(), contact,
-                    Direction.OUTGOING, session.getContent(),
-                    ImageSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
-            mBroadcaster.broadcastStateChanged(contact, sharingId,
-                    ImageSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
+            mRichCallLog.addImageSharing(session.getSessionID(), contact, Direction.OUTGOING,
+                    session.getContent(), ImageSharing.State.INITIATING, ReasonCode.UNSPECIFIED);
+            mBroadcaster.broadcastStateChanged(contact, sharingId, ImageSharing.State.INITIATING,
+                    ReasonCode.UNSPECIFIED);
 
             ImageSharingPersistedStorageAccessor storageAccessor = new ImageSharingPersistedStorageAccessor(
                     sharingId, contact, Direction.OUTGOING, file, content.getName(),
@@ -369,8 +367,8 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
     public void addAndBroadcastImageSharingInvitationRejected(ContactId contact, MmContent content,
             ReasonCode reasonCode) {
         String sessionId = SessionIdGenerator.getNewId();
-        mRichCallLog.addImageSharing(sessionId, contact,
-                Direction.INCOMING, content, ImageSharing.State.REJECTED, reasonCode);
+        mRichCallLog.addImageSharing(sessionId, contact, Direction.INCOMING, content,
+                ImageSharing.State.REJECTED, reasonCode);
         mBroadcaster.broadcastInvitation(sessionId);
     }
 

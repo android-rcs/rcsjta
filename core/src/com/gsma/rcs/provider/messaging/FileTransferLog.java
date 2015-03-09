@@ -101,8 +101,8 @@ public class FileTransferLog implements IFileTransferLog {
                     .append(fileTransferId).append(", contact=").append(contact)
                     .append(", filename=").append(content.getName()).append(", size=")
                     .append(content.getSize()).append(", MIME=").append(content.getEncoding())
-                    .append(", state=").append(state).append(", reasonCode=")
-                    .append(reasonCode).toString());
+                    .append(", state=").append(state).append(", reasonCode=").append(reasonCode)
+                    .toString());
         }
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_FT_ID, fileTransferId);
@@ -489,7 +489,7 @@ public class FileTransferLog implements IFileTransferLog {
     private Cursor getFileTransferData(String columnName, String fileTransferId)
             throws SQLException {
         String[] projection = {
-                columnName
+            columnName
         };
         Cursor cursor = null;
         try {
@@ -590,10 +590,10 @@ public class FileTransferLog implements IFileTransferLog {
      */
     public boolean isGroupFileTransfer(String fileTransferId) {
         String[] projection = new String[] {
-                FileTransferData.KEY_FT_ID
+            FileTransferData.KEY_FT_ID
         };
         String[] selArgs = new String[] {
-                fileTransferId
+            fileTransferId
         };
         Cursor cursor = null;
         try {
@@ -669,14 +669,13 @@ public class FileTransferLog implements IFileTransferLog {
             if (direction == Direction.INCOMING) {
                 String downloadServerAddress = cursor.getString(cursor
                         .getColumnIndexOrThrow(FileTransferData.KEY_DOWNLOAD_URI));
-                return new FtHttpResumeDownload(Uri.parse(downloadServerAddress),
-                        file, fileIconUri, content, contact, chatId, fileTransferId,
-                        isGroup);
+                return new FtHttpResumeDownload(Uri.parse(downloadServerAddress), file,
+                        fileIconUri, content, contact, chatId, fileTransferId, isGroup);
             } else {
                 String tId = cursor.getString(cursor
                         .getColumnIndexOrThrow(FileTransferData.KEY_UPLOAD_TID));
-                return new FtHttpResumeUpload(content, fileIconUri, tId, contact,
-                        chatId, fileTransferId, isGroup);
+                return new FtHttpResumeUpload(content, fileIconUri, tId, contact, chatId,
+                        fileTransferId, isGroup);
             }
         } finally {
             if (cursor != null) {

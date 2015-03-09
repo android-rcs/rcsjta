@@ -234,8 +234,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
             return null;
         }
         // Read capabilities in the local database
-        return ContactServiceImpl
-                .getCapabilities(mContactsManager.getContactCapabilities(contact));
+        return ContactServiceImpl.getCapabilities(mContactsManager.getContactCapabilities(contact));
     }
 
     /**
@@ -298,8 +297,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * @param capabilities Capabilities
      */
     private void notifyListeners(ContactId contact, Capabilities capabilities) {
-        mCapabilitiesBroadcaster.broadcastCapabilitiesReceived(contact,
-                capabilities);
+        mCapabilitiesBroadcaster.broadcastCapabilitiesReceived(contact, capabilities);
     }
 
     /**
@@ -321,8 +319,8 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
         ServerApiUtils.testIms();
 
         try {
-            mOptionsExchangeRequestHandler.post(new AllCapabilitiesRequester(mContactsManager,
-                    Core.getInstance().getCapabilityService()));
+            mOptionsExchangeRequestHandler.post(new AllCapabilitiesRequester(mContactsManager, Core
+                    .getInstance().getCapabilityService()));
         } catch (Exception e) {
             if (logger.isActivated()) {
                 logger.error("Unexpected error", e);

@@ -75,11 +75,6 @@ public class Capabilities implements Parcelable {
     private long mTimestamp;
 
     /**
-     * Capability validity
-     */
-    private boolean mValid = false;
-
-    /**
      * Constructor
      * 
      * @param imageSharing Image sharing support
@@ -90,12 +85,11 @@ public class Capabilities implements Parcelable {
      * @param extensions Set of supported extensions
      * @param automata Automata flag
      * @param timestamp time of last capability refresh
-     * @param valid validity of capability
      * @hide
      */
     public Capabilities(boolean imageSharing, boolean videoSharing, boolean imSession,
             boolean fileTransfer, boolean geolocPush, Set<String> extensions, boolean automata,
-            long timestamp, boolean valid) {
+            long timestamp) {
         mImageSharing = imageSharing;
         mVideoSharing = videoSharing;
         mImSession = imSession;
@@ -104,7 +98,6 @@ public class Capabilities implements Parcelable {
         mExtensions = extensions;
         mAutomata = automata;
         mTimestamp = timestamp;
-        mValid = valid;
     }
 
     /**
@@ -130,7 +123,6 @@ public class Capabilities implements Parcelable {
         mGeolocPush = source.readInt() != 0;
         mAutomata = source.readInt() != 0;
         mTimestamp = source.readLong();
-        mValid = source.readInt() != 0;
     }
 
     /**
@@ -166,7 +158,6 @@ public class Capabilities implements Parcelable {
         dest.writeInt(mGeolocPush ? 1 : 0);
         dest.writeInt(mAutomata ? 1 : 0);
         dest.writeLong(mTimestamp);
-        dest.writeInt(mValid ? 1 : 0);
     }
 
     /**
@@ -266,12 +257,4 @@ public class Capabilities implements Parcelable {
         return mTimestamp;
     }
 
-    /**
-     * Check validity of capability
-     * 
-     * @return true if the capability is valid (no need to refresh it), otherwise false.
-     */
-    public boolean isValid() {
-        return mValid;
-    }
 }

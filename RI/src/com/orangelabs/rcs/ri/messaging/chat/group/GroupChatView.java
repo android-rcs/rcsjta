@@ -508,7 +508,7 @@ public class GroupChatView extends ChatView {
         // Create a new CursorLoader with the following query parameters.
         CursorLoader loader = new CursorLoader(this, Message.CONTENT_URI, PROJECTION, WHERE_CLAUSE,
                 new String[] {
-                        mChatId
+                    mChatId
                 }, QUERY_SORT_ORDER);
         return loader;
     }
@@ -713,8 +713,7 @@ public class GroupChatView extends ChatView {
                                     getString(R.string.label_command_in_progress));
 
                             Set<ContactId> contacts = new HashSet<ContactId>();
-                            ContactUtil contactUtils = ContactUtil
-                                    .getInstance(GroupChatView.this);
+                            ContactUtil contactUtils = ContactUtil.getInstance(GroupChatView.this);
                             for (String participant : selectedParticipants) {
                                 contacts.add(contactUtils.formatContact(participant));
                             }

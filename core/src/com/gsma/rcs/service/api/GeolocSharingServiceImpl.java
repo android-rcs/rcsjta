@@ -321,8 +321,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
         }
 
         try {
-            List<IBinder> geolocSharings = new ArrayList<IBinder>(
-                    mGeolocSharingCache.size());
+            List<IBinder> geolocSharings = new ArrayList<IBinder>(mGeolocSharingCache.size());
             for (IGeolocSharing geolocSharing : mGeolocSharingCache.values()) {
                 geolocSharings.add(geolocSharing.asBinder());
             }

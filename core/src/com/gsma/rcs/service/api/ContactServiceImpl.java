@@ -46,8 +46,7 @@ public class ContactServiceImpl extends IContactService.Stub {
     /**
      * The logger
      */
-    private static final Logger logger = Logger
-            .getLogger(ContactServiceImpl.class.getSimpleName());
+    private static final Logger logger = Logger.getLogger(ContactServiceImpl.class.getSimpleName());
 
     private final RcsSettings mRcsSettings;
 
@@ -108,13 +107,11 @@ public class ContactServiceImpl extends IContactService.Stub {
             return null;
         }
         return new Capabilities(capabilities.isImageSharingSupported(),
-                capabilities.isVideoSharingSupported(),
-                capabilities.isImSessionSupported(), capabilities.isFileTransferSupported()
+                capabilities.isVideoSharingSupported(), capabilities.isImSessionSupported(),
+                capabilities.isFileTransferSupported()
                         || capabilities.isFileTransferHttpSupported(),
-                capabilities.isGeolocationPushSupported(),
-                capabilities.getSupportedExtensions(),
-                capabilities.isSipAutomata(), capabilities.getTimestampOfLastRefresh(),
-                capabilities.isValid());
+                capabilities.isGeolocationPushSupported(), capabilities.getSupportedExtensions(),
+                capabilities.isSipAutomata(), capabilities.getTimestampOfLastRefresh());
     }
 
     /**
@@ -132,8 +129,7 @@ public class ContactServiceImpl extends IContactService.Stub {
         boolean registered = RegistrationState.ONLINE.equals(contactInfo.getRegistrationState());
         boolean blocked = (contactInfo.getBlockingState() == BlockingState.BLOCKED);
         return new RcsContact(contactInfo.getContact(), registered, capaApi,
-                contactInfo.getDisplayName(),
-                blocked, contactInfo.getBlockingTimestamp());
+                contactInfo.getDisplayName(), blocked, contactInfo.getBlockingTimestamp());
     }
 
     /**

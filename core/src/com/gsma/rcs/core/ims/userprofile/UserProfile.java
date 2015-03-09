@@ -39,13 +39,6 @@ import javax2.sip.header.Header;
  * @author JM. Auffret
  */
 public class UserProfile {
-
-    private static final String TEL_URI = "tel:";
-
-    private static final String SIP_URI = "sip:";
-
-    private static final char AT = '@';
-
     /**
      * User name
      */
@@ -184,11 +177,7 @@ public class UserProfile {
      * @return Public URI
      */
     public String getPublicUriForRegistration() {
-        if (mRcsSettings.isTelUriFormatUsed()) {
-            return new StringBuilder(TEL_URI).append(mContact).toString();
-        }
-        return new StringBuilder(SIP_URI).append(mContact).append(AT).append(mHomeDomain)
-                .toString();
+        return PhoneUtils.formatContactIdToUri(mContact);
     }
 
     /**

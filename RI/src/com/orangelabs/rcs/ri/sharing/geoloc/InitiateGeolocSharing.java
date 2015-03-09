@@ -146,8 +146,7 @@ public class InitiateGeolocSharing extends Activity {
 
         @Override
         public void onStateChanged(final ContactId contact, String sharingId,
-                final GeolocSharing.State state,
-                GeolocSharing.ReasonCode reasonCode) {
+                final GeolocSharing.State state, GeolocSharing.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "onStateChanged contact=" + contact + " sharingId=" + sharingId
                         + " state=" + state + " reason=" + reasonCode);
@@ -225,8 +224,7 @@ public class InitiateGeolocSharing extends Activity {
             if (LogUtils.isActive) {
                 Log.w(LOGTAG,
                         new StringBuilder("onDeleted contact=").append(contact)
-                                .append(" sharingIds=")
-                                .append(sharingIds).toString());
+                                .append(" sharingIds=").append(sharingIds).toString());
             }
         }
 

@@ -175,11 +175,9 @@ public abstract class ImageTransferSession extends ContentSharingSession {
     public static ContentSharingError isImageCapacityAcceptable(long imageSize,
             RcsSettings rcsSettings) {
         boolean fileIsToBig = (ImageTransferSession.getMaxImageSharingSize(rcsSettings) > 0) ? imageSize > ImageTransferSession
-                .getMaxImageSharingSize(rcsSettings)
-                : false;
+                .getMaxImageSharingSize(rcsSettings) : false;
         boolean storageIsTooSmall = (StorageUtils.getExternalStorageFreeSpace() > 0) ? imageSize > StorageUtils
-                .getExternalStorageFreeSpace()
-                : false;
+                .getExternalStorageFreeSpace() : false;
         if (fileIsToBig) {
             if (logger.isActivated()) {
                 logger.warn("Image is too big, reject the image sharing");

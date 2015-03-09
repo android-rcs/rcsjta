@@ -311,11 +311,7 @@
 
     <!-- Service menu -->
     <string name="menu_service">Service</string>
-    <string name="menu_service_activation">Service activation</string>
     <string name="label_service_activate">Select to turn on the RCS service</string>
-    <string name="label_service_deactivate">Select to turn off the RCS service</string>
-    <string name="label_rcs_stack_available">RCS stack available</string>
-    <string name="label_rcs_stack_not_available">RCS stack not installed or disabled</string>
     <string name="menu_service_status">Service status</string>
     <string name="notification_title_rcs_service">RCS service</string>
     <string name="menu_registration_status">Registration status</string>
@@ -328,7 +324,6 @@
     <string name="label_my_display_name">My display name:</string>
     <string name="label_my_contact_id">My contact identifier:</string>
     <string name="label_min_battery_level">Min battery level:</string>
-    <string name="label_service_is_up">RCS service is up and running</string>
     <string name="label_service_activatation">RCS stack activation:</string>
     <string name="label_service_activate_unchangeable">Unchangeable</string>
     <string name="label_service_activate_changeable">Changeable</string>

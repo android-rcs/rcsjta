@@ -87,8 +87,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
     public TerminatingImageTransferSession(ImsService parent, SipRequest invite, ContactId contact,
             RcsSettings rcsSettings) {
         super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), contact,
-                FileTransferUtils
-                        .extractFileIcon(invite, rcsSettings), rcsSettings);
+                FileTransferUtils.extractFileIcon(invite, rcsSettings), rcsSettings);
 
         // Create dialog path
         createTerminatingDialogPath(invite);

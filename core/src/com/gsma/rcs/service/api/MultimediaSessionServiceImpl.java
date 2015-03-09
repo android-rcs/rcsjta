@@ -274,8 +274,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
             GenericSipMsrpSession session) {
         // Add session in the list
         MultimediaMessagingSessionImpl multimediaMessaging = new MultimediaMessagingSessionImpl(
-                session.getSessionID(), mMultimediaMessagingSessionEventBroadcaster,
-                mSipService, this);
+                session.getSessionID(), mMultimediaMessagingSessionEventBroadcaster, mSipService,
+                this);
         session.addListener(multimediaMessaging);
         addMultimediaMessaging(multimediaMessaging);
 
@@ -292,8 +292,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      */
     public void receiveSipRtpSessionInvitation(Intent rtpSessionInvite, GenericSipRtpSession session) {
         MultimediaStreamingSessionImpl multimediaStreaming = new MultimediaStreamingSessionImpl(
-                session.getSessionID(), mMultimediaStreamingSessionEventBroadcaster,
-                mSipService, this);
+                session.getSessionID(), mMultimediaStreamingSessionEventBroadcaster, mSipService,
+                this);
         session.addListener(multimediaStreaming);
         addMultimediaStreaming(multimediaStreaming);
 
@@ -356,8 +356,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
                     session.getSessionID(), mMultimediaMessagingSessionEventBroadcaster,
                     mSipService, this);
             session.addListener(multiMediaMessaging);
-            mMultimediaMessagingSessionEventBroadcaster.broadcastStateChanged(
-                    contact, session.getSessionID(), MultimediaSession.State.INITIATING,
+            mMultimediaMessagingSessionEventBroadcaster.broadcastStateChanged(contact,
+                    session.getSessionID(), MultimediaSession.State.INITIATING,
                     ReasonCode.UNSPECIFIED);
 
             addMultimediaMessaging(multiMediaMessaging);
@@ -465,8 +465,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
                     session.getSessionID(), mMultimediaStreamingSessionEventBroadcaster,
                     mSipService, this);
             session.addListener(multimediaStreaming);
-            mMultimediaStreamingSessionEventBroadcaster.broadcastStateChanged(
-                    contact, session.getSessionID(), MultimediaSession.State.INITIATING,
+            mMultimediaStreamingSessionEventBroadcaster.broadcastStateChanged(contact,
+                    session.getSessionID(), MultimediaSession.State.INITIATING,
                     ReasonCode.UNSPECIFIED);
 
             addMultimediaStreaming(multimediaStreaming);

@@ -657,7 +657,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
         if (method != null) {
             try {
                 camera = (Camera) method.invoke(camera, new Object[] {
-                        cameraId.getValue()
+                    cameraId.getValue()
                 });
             } catch (Exception e) {
                 camera = Camera.open();
@@ -822,7 +822,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
             Class<?> cameraClass = classLoader.loadClass("android.hardware.Camera");
             try {
                 return cameraClass.getMethod("open", new Class[] {
-                        int.class
+                    int.class
                 });
             } catch (NoSuchMethodException e) {
             }
@@ -852,7 +852,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
                     }
                 }
                 mCamera = (Camera) method.invoke(mCamera, new Object[] {
-                        hCamId
+                    hCamId
                 });
                 mOpenedCameraId = cameraId;
             } catch (Exception e) {
@@ -916,8 +916,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
     private VideoSharingListener vshListener = new VideoSharingListener() {
         @Override
         public void onStateChanged(ContactId contact, String sharingId,
-                final VideoSharing.State state,
-                VideoSharing.ReasonCode reasonCode) {
+                final VideoSharing.State state, VideoSharing.ReasonCode reasonCode) {
             // Discard event if not for current sharingId
             if (mSharingId == null || !mSharingId.equals(sharingId)) {
                 return;
@@ -1010,8 +1009,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
             if (LogUtils.isActive) {
                 Log.w(LOGTAG,
                         new StringBuilder("onDeleted contact=").append(contact)
-                                .append(" sharingIds=")
-                                .append(sharingIds).toString());
+                                .append(" sharingIds=").append(sharingIds).toString());
             }
         }
     };

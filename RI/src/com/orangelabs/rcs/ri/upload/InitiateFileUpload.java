@@ -18,6 +18,19 @@
 
 package com.orangelabs.rcs.ri.upload;
 
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.upload.FileUpload;
+import com.gsma.services.rcs.upload.FileUploadListener;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.FileUtils;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -32,18 +45,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.upload.FileUpload;
-import com.gsma.services.rcs.upload.FileUploadListener;
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.FileUtils;
-import com.orangelabs.rcs.ri.utils.LockAccess;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Initiate file upload
@@ -184,6 +185,9 @@ public class InitiateFileUpload extends Activity {
                 // Get thumbnail option
                 CheckBox ftThumb = (CheckBox) findViewById(R.id.file_thumb);
                 boolean thumbnail = ftThumb.isChecked();
+
+                /* Only take persistable permission for content Uris */
+                FileUtils.tryToTakePersistableContentUriPermission(getApplicationContext(), file);
 
                 // Initiate upload
                 upload = mCnxManager.getFileUploadApi().uploadFile(file, thumbnail);

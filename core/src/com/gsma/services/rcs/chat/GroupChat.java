@@ -334,9 +334,9 @@ public class GroupChat {
      * @return boolean
      * @throws RcsServiceException
      */
-    public boolean canSendMessage() throws RcsServiceException {
+    public boolean isAllowedToSendMessage() throws RcsServiceException {
         try {
-            return mGroupChatInf.canSendMessage();
+            return mGroupChatInf.isAllowedToSendMessage();
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }
@@ -394,9 +394,9 @@ public class GroupChat {
      * @return boolean
      * @throws RcsServiceException
      */
-    public boolean canInviteParticipants() throws RcsServiceException {
+    public boolean isAllowedToInviteParticipants() throws RcsServiceException {
         try {
-            return mGroupChatInf.canInviteParticipants();
+            return mGroupChatInf.isAllowedToInviteParticipants();
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }
@@ -410,9 +410,9 @@ public class GroupChat {
      * @return boolean
      * @throws RcsServiceException
      */
-    public boolean canInviteParticipant(ContactId participant) throws RcsServiceException {
+    public boolean isAllowedToInviteParticipant(ContactId participant) throws RcsServiceException {
         try {
-            return mGroupChatInf.canInviteParticipant(participant);
+            return mGroupChatInf.isAllowedToInviteParticipant(participant);
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }
@@ -453,9 +453,9 @@ public class GroupChat {
      * @return boolean
      * @throws RcsServiceException
      */
-    public boolean canLeave() throws RcsServiceException {
+    public boolean isAllowedToLeave() throws RcsServiceException {
         try {
-            return mGroupChatInf.canLeave();
+            return mGroupChatInf.isAllowedToLeave();
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }

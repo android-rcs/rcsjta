@@ -117,7 +117,7 @@ public class SingleChatView extends ChatView {
             .append("')").toString();
 
     private final static String[] PROJECTION_MSG_ID = new String[] {
-            Message.MESSAGE_ID
+        Message.MESSAGE_ID
     };
 
     /**
@@ -259,7 +259,7 @@ public class SingleChatView extends ChatView {
         // Create a new CursorLoader with the following query parameters.
         Uri uri = Message.CONTENT_URI;
         return new CursorLoader(this, uri, PROJECTION, WHERE_CLAUSE, new String[] {
-                mContact.toString()
+            mContact.toString()
         }, QUERY_SORT_ORDER);
     }
 
@@ -343,7 +343,7 @@ public class SingleChatView extends ChatView {
     private Set<String> getUnreadMessageIds(ContactId contact) {
         Set<String> unReadMessageIDs = new HashSet<String>();
         String[] where_args = new String[] {
-                contact.toString()
+            contact.toString()
         };
 
         Cursor cursor = null;

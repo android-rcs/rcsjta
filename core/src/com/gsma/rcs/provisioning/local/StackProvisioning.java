@@ -315,6 +315,9 @@ public class StackProvisioning extends Activity {
         saveCheckBoxParam(R.id.TelUriFormat, RcsSettingsData.TEL_URI_FORMAT, helper);
         saveCheckBoxParam(R.id.ImAlwaysOn, RcsSettingsData.IM_CAPABILITY_ALWAYS_ON, helper);
         saveCheckBoxParam(R.id.FtAlwaysOn, RcsSettingsData.FT_CAPABILITY_ALWAYS_ON, helper);
+        saveCheckBoxParam(R.id.FtHttpAlwaysOn, RcsSettingsData.FT_HTTP_CAP_ALWAYS_ON, helper);
+        saveCheckBoxParam(R.id.InviteOnlyGroupchatSF,
+                RcsSettingsData.GROUP_CHAT_INVITE_ONLY_FULL_SF, helper);
         saveCheckBoxParam(R.id.ImUseReports, RcsSettingsData.IM_USE_REPORTS, helper);
         saveCheckBoxParam(R.id.Gruu, RcsSettingsData.GRUU, helper);
         saveCheckBoxParam(R.id.CpuAlwaysOn, RcsSettingsData.CPU_ALWAYS_ON, helper);
@@ -325,6 +328,8 @@ public class StackProvisioning extends Activity {
         saveCheckBoxParam(R.id.AllowExtensions, RcsSettingsData.ALLOW_EXTENSIONS, helper);
         saveEditTextParam(R.id.MaxMsrpLengthExtensions, RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS,
                 helper);
+        saveEditTextParam(R.id.MessagingCapabilitiesValidity,
+                RcsSettingsData.MSG_CAP_VALIDITY_PERIOD, helper);
     }
 
     /**
@@ -350,7 +355,7 @@ public class StackProvisioning extends Activity {
 
         spinner = (Spinner) findViewById(R.id.client_vendor);
         final String[] vendorArray = new String[] {
-                Build.MANUFACTURER
+            Build.MANUFACTURER
         };
         ArrayAdapter<CharSequence> adapterVendor = new ArrayAdapter(this,
                 android.R.layout.simple_spinner_item, vendorArray);
@@ -359,8 +364,8 @@ public class StackProvisioning extends Activity {
         spinner.setSelection(0);
 
         spinner = (Spinner) findViewById(R.id.EnableRcsSwitch);
-        adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, mEnableRcseSwitch);
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,
+                mEnableRcseSwitch);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         EnableRcseSwitch rcsSwitch;
@@ -541,6 +546,9 @@ public class StackProvisioning extends Activity {
         setCheckBoxParam(R.id.TelUriFormat, RcsSettingsData.TEL_URI_FORMAT, helper);
         setCheckBoxParam(R.id.ImAlwaysOn, RcsSettingsData.IM_CAPABILITY_ALWAYS_ON, helper);
         setCheckBoxParam(R.id.FtAlwaysOn, RcsSettingsData.FT_CAPABILITY_ALWAYS_ON, helper);
+        setCheckBoxParam(R.id.FtHttpAlwaysOn, RcsSettingsData.FT_HTTP_CAP_ALWAYS_ON, helper);
+        setCheckBoxParam(R.id.InviteOnlyGroupchatSF,
+                RcsSettingsData.GROUP_CHAT_INVITE_ONLY_FULL_SF, helper);
         setCheckBoxParam(R.id.ImUseReports, RcsSettingsData.IM_USE_REPORTS, helper);
         setCheckBoxParam(R.id.Gruu, RcsSettingsData.GRUU, helper);
         setCheckBoxParam(R.id.CpuAlwaysOn, RcsSettingsData.CPU_ALWAYS_ON, helper);
@@ -551,6 +559,8 @@ public class StackProvisioning extends Activity {
         setCheckBoxParam(R.id.AllowExtensions, RcsSettingsData.ALLOW_EXTENSIONS, helper);
         setEditTextParam(R.id.MaxMsrpLengthExtensions, RcsSettingsData.MAX_MSRP_SIZE_EXTENSIONS,
                 helper);
+        setEditTextParam(R.id.MessagingCapabilitiesValidity,
+                RcsSettingsData.MSG_CAP_VALIDITY_PERIOD, helper);
     }
 
     /**
@@ -590,7 +600,7 @@ public class StackProvisioning extends Activity {
         if (files == null) {
             // No certificate
             return new String[] {
-                    getString(R.string.label_no_certificate)
+                getString(R.string.label_no_certificate)
             };
         } else {
             // Add certificates in the list

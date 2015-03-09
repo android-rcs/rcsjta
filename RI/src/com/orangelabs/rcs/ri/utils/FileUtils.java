@@ -18,7 +18,7 @@
 
 package com.orangelabs.rcs.ri.utils;
 
-import java.io.File;
+import com.gsma.services.rcs.RcsServiceException;
 
 import android.app.Activity;
 import android.content.ContentResolver;
@@ -29,9 +29,18 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.OpenableColumns;
 
+import java.io.File;
+import java.lang.reflect.Method;
+
 public class FileUtils {
 
     private static final int KITKAT_VERSION_CODE = 19;
+
+    private static final String TAKE_PERSISTABLE_URI_PERMISSION_METHOD_NAME = "takePersistableUriPermission";
+
+    private static final Class<?>[] TAKE_PERSISTABLE_URI_PERMISSION_PARAM_TYPES = new Class[] {
+            Uri.class, int.class
+    };
 
     /**
      * Fetch the file name from URI
@@ -120,4 +129,35 @@ public class FileUtils {
         activity.startActivityForResult(intent, action);
     }
 
+    /**
+     * Using reflection to persist Uri permission in order to support backward compatibility since
+     * this API is available only from Kitkat onwards. Try to persist Uri access permission for the
+     * client to be able to read the contents from this Uri even after the client is restarted after
+     * device reboot.
+     * 
+     * @param file Uri of file to transfer
+     * @throws RcsServiceException
+     */
+    public static void tryToTakePersistableContentUriPermission(Context context, Uri file)
+            throws RcsServiceException {
+        if (!(ContentResolver.SCHEME_CONTENT.equals(file.getScheme()))) {
+            return;
+        }
+        if (android.os.Build.VERSION.SDK_INT < KITKAT_VERSION_CODE) {
+            return;
+        }
+        try {
+            ContentResolver contentResolver = context.getContentResolver();
+            Method takePersistableUriPermissionMethod = contentResolver.getClass().getMethod(
+                    TAKE_PERSISTABLE_URI_PERMISSION_METHOD_NAME,
+                    TAKE_PERSISTABLE_URI_PERMISSION_PARAM_TYPES);
+            Object[] methodArgs = new Object[] {
+                    file,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            };
+            takePersistableUriPermissionMethod.invoke(contentResolver, methodArgs);
+        } catch (Exception e) {
+            throw new RcsServiceException(e);
+        }
+    }
 }

@@ -689,8 +689,7 @@ public class ImsConnectionManager implements Runnable {
             int batteryPlugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 1);
             if (logger.isActivated()) {
                 logger.info(new StringBuilder("Battery level: ").append(batteryLevel)
-                        .append("% plugged: ").append(batteryPlugged)
-                        .toString());
+                        .append("% plugged: ").append(batteryPlugged).toString());
             }
             if (batteryLevel <= batteryLimit.toInt() && batteryPlugged == 0) {
                 if (!mDisconnectedByBattery) {

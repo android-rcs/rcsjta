@@ -82,10 +82,9 @@ public class DisplayGeoloc extends MapActivity {
         mapView.getOverlays().add(overlay);
 
         // Center the map
-        mapView.getController()
-                .setCenter(
-                        new GeoPoint((int) (geoloc.getLatitude() * 1E6),
-                                (int) (geoloc.getLongitude() * 1E6)));
+        mapView.getController().setCenter(
+                new GeoPoint((int) (geoloc.getLatitude() * 1E6),
+                        (int) (geoloc.getLongitude() * 1E6)));
     }
 
     @Override

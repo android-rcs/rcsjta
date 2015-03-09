@@ -18,16 +18,6 @@
 
 package com.orangelabs.rcs.ri.messaging.chat.single;
 
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Parcelable;
-import android.util.Log;
-import android.widget.TextView;
-
-import java.util.Set;
-
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
@@ -37,8 +27,19 @@ import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
 import com.orangelabs.rcs.ri.messaging.chat.SendFile;
+import com.orangelabs.rcs.ri.utils.FileUtils;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.Utils;
+
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Parcelable;
+import android.util.Log;
+import android.widget.TextView;
+
+import java.util.Set;
 
 /**
  * Send file to contact
@@ -81,14 +82,12 @@ public class SendSingleFile extends SendFile {
 
         @Override
         public void onStateChanged(ContactId contact, String transferId,
-                final FileTransfer.State state,
-                FileTransfer.ReasonCode reasonCode) {
+                final FileTransfer.State state, FileTransfer.ReasonCode reasonCode) {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG,
                         new StringBuilder("onStateChanged contact=").append(contact)
                                 .append(" transferId=").append(transferId).append(" state=")
-                                .append(state).append(" reason=")
-                                .append(reasonCode).toString());
+                                .append(state).append(" reason=").append(reasonCode).toString());
             }
             // Discard event if not for current transferId
             if (mTransferId == null || !mTransferId.equals(transferId)) {
@@ -146,8 +145,7 @@ public class SendSingleFile extends SendFile {
             if (LogUtils.isActive) {
                 Log.w(LOGTAG,
                         new StringBuilder("onDeleted contact=").append(contact)
-                                .append(" transferIds=")
-                                .append(transferIds).toString());
+                                .append(" transferIds=").append(transferIds).toString());
             }
         }
 
@@ -178,6 +176,8 @@ public class SendSingleFile extends SendFile {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "initiateTransfer filename=" + filename + " size=" + filesize);
             }
+            /* Only take persistable permission for content Uris */
+            FileUtils.tryToTakePersistableContentUriPermission(getApplicationContext(), file);
             // Initiate transfer
             fileTransfer = mCnxManager.getFileTransferApi().transferFile(mContact, file, fileicon);
             mTransferId = fileTransfer.getTransferId();

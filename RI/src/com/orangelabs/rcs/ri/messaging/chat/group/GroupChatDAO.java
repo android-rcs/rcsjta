@@ -117,7 +117,7 @@ public class GroupChatDAO implements Parcelable {
     public GroupChatDAO(final Context context, final String chatId) throws Exception {
         Uri uri = ChatLog.GroupChat.CONTENT_URI;
         String[] whereArgs = new String[] {
-                chatId
+            chatId
         };
         Cursor cursor = null;
         try {
@@ -134,8 +134,8 @@ public class GroupChatDAO implements Parcelable {
             mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.TIMESTAMP));
             mParticipants = cursor.getString(cursor
                     .getColumnIndexOrThrow(ChatLog.GroupChat.PARTICIPANTS));
-            mReasonCode = GroupChat.ReasonCode.valueOf(cursor
-                    .getInt(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.REASON_CODE)));
+            mReasonCode = GroupChat.ReasonCode.valueOf(cursor.getInt(cursor
+                    .getColumnIndexOrThrow(ChatLog.GroupChat.REASON_CODE)));
         } catch (Exception e) {
             throw e;
         } finally {

@@ -86,8 +86,7 @@ public class VideoCodecManager {
                 && (codec1.getVideoWidth() == codec2.getVideoWidth() || codec1.getVideoWidth() == 0 || codec2
                         .getVideoWidth() == 0)
                 && (codec1.getVideoHeight() == codec2.getVideoHeight()
-                        || codec1.getVideoHeight() == 0 || codec2
-                        .getVideoHeight() == 0)) {
+                        || codec1.getVideoHeight() == 0 || codec2.getVideoHeight() == 0)) {
             if (codec1.getEncoding().equalsIgnoreCase(H264Config.CODEC_NAME)) {
                 if (H264Config.getCodecProfileLevelId(codec1.getParameters()).compareToIgnoreCase(
                         H264Config.getCodecProfileLevelId(codec2.getParameters())) == 0) {

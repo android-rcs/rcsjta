@@ -85,8 +85,8 @@ public class HttpDownloadManager extends HttpTransferManager {
     /**
      * The logger
      */
-    private static final Logger sLogger = Logger
-            .getLogger(HttpDownloadManager.class.getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(HttpDownloadManager.class
+            .getSimpleName());
 
     /**
      * Constructor

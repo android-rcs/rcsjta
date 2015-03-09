@@ -36,7 +36,7 @@ public class IntentUtils {
     private static final String ADD_FLAGS_METHOD_NAME = "addFlags";
 
     private static final Class[] ADD_FLAGS_PARAM = new Class[] {
-            int.class
+        int.class
     };
 
     private static final String FLAG_EXCLUDE_STOPPED_PACKAGES = "FLAG_EXCLUDE_STOPPED_PACKAGES";

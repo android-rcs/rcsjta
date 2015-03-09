@@ -31,6 +31,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferPersistedStorageAccessor;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
+import com.gsma.rcs.core.ims.service.im.filetransfer.ImsFileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpTransferState;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.ResumeDownloadFileSharingSession;
@@ -48,6 +49,7 @@ import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 import com.gsma.services.rcs.filetransfer.IFileTransfer;
 
+import android.database.SQLException;
 import android.net.Uri;
 
 import javax2.sip.message.Response;
@@ -102,6 +104,43 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         mPersistentStorage = persistentStorage;
         mFileTransferService = fileTransferService;
         mRcsSettings = rcsSettings;
+    }
+
+    private State getRcsState(FileSharingSession session) {
+        if (session instanceof HttpFileTransferSession) {
+            int state = ((HttpFileTransferSession) session).getSessionState();
+            if (state == HttpTransferState.ESTABLISHED) {
+                if (isSessionPaused()) {
+                    return State.PAUSED;
+                }
+
+                return State.STARTED;
+            }
+        } else if (session instanceof ImsFileSharingSession) {
+            SipDialogPath dialogPath = session.getDialogPath();
+            if (dialogPath != null && dialogPath.isSessionEstablished()) {
+                return State.STARTED;
+            }
+        } else {
+            throw new IllegalArgumentException("Unsupported Filetransfer session type.");
+        }
+        if (session.isInitiatedByRemote()) {
+            if (session.isSessionAccepted()) {
+                return State.ACCEPTING;
+            }
+            return State.INVITED;
+        }
+        return State.INITIATING;
+    }
+
+    private ReasonCode getRcsReasonCode(FileSharingSession session) {
+        if (isSessionPaused()) {
+            /*
+             * If session is paused and still established it must have been paused by user
+             */
+            return ReasonCode.PAUSED_BY_USER;
+        }
+        return ReasonCode.UNSPECIFIED;
     }
 
     /**
@@ -226,29 +265,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         if (session == null) {
             return mPersistentStorage.getState().toInt();
         }
-        if (session instanceof HttpFileTransferSession) {
-            int state = ((HttpFileTransferSession) session).getSessionState();
-            if (state == HttpTransferState.ESTABLISHED) {
-                if (isSessionPaused()) {
-                    return State.PAUSED.toInt();
-                }
-
-                return State.STARTED.toInt();
-            }
-        } else {
-            // MSRP transfer
-            SipDialogPath dialogPath = session.getDialogPath();
-            if (dialogPath != null && dialogPath.isSessionEstablished()) {
-                return State.STARTED.toInt();
-            }
-        }
-        if (session.isInitiatedByRemote()) {
-            if (session.isSessionAccepted()) {
-                return State.ACCEPTING.toInt();
-            }
-            return State.INVITED.toInt();
-        }
-        return State.INITIATING.toInt();
+        return getRcsState(session).toInt();
     }
 
     /**
@@ -261,13 +278,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         if (session == null) {
             return mPersistentStorage.getReasonCode().toInt();
         }
-        if (isSessionPaused()) {
-            /*
-             * If session is paused and still established it must have been paused by user
-             */
-            return ReasonCode.PAUSED_BY_USER.toInt();
-        }
-        return ReasonCode.UNSPECIFIED.toInt();
+        return getRcsReasonCode(session).toInt();
     }
 
     /**
@@ -404,8 +415,35 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
      * 
      * @return boolean
      */
-    public boolean canPauseTransfer() {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+    public boolean isAllowedToPauseTransfer() {
+        FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+        if (session == null) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder("Cannot pause transfer with file transfer Id '")
+                        .append(mFileTransferId)
+                        .append("' as there is no ongoing session corresponding to the fileTransferId.")
+                        .toString());
+            }
+            return false;
+        }
+        if (!session.isHttpTransfer()) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder("Cannot pause transfer with file transfer Id '")
+                        .append(mFileTransferId).append("' as it is not a HTTP File transfer.")
+                        .toString());
+            }
+            return false;
+        }
+        State state = getRcsState(session);
+        if (State.STARTED != state) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder("Cannot pause transfer with file transfer Id '")
+                        .append(mFileTransferId).append("' as it is in state ").append(state)
+                        .toString());
+            }
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -430,7 +468,18 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             }
             return;
         }
-
+        State state = getRcsState(session);
+        if (State.STARTED != state) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder("Cannot pause transfer with file transfer Id '")
+                        .append(mFileTransferId).append("' as it is in state ").append(state)
+                        .toString());
+            }
+            /*
+             * TODO: Throw correct exception as part of CR037 implementation
+             */
+            throw new IllegalStateException("Session not in STARTED state.");
+        }
         ((HttpFileTransferSession) session).pauseFileTransfer();
     }
 
@@ -465,58 +514,82 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
      * 
      * @return boolean
      */
-    public boolean canResumeTransfer() {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+    public boolean isAllowedToResumeTransfer() {
+        ReasonCode reasonCode;
+        FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+        if (session != null) {
+            reasonCode = getRcsReasonCode(session);
+        } else {
+            try {
+                reasonCode = mPersistentStorage.getReasonCode();
+            } catch (SQLException e) {
+                if (logger.isActivated()) {
+                    logger.debug(new StringBuilder("Cannot resume transfer with file transfer Id '")
+                            .append(mFileTransferId).append("' as it does not exist in DB.")
+                            .toString());
+                }
+                return false;
+            }
+        }
+        if (ReasonCode.PAUSED_BY_USER != reasonCode) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder("Cannot resume transfer with file transfer Id '")
+                        .append(mFileTransferId).append("' as it is ").append(reasonCode)
+                        .toString());
+            }
+            return false;
+        }
+        if (!ServerApiUtils.isImsConnected()) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder("Cannot resume transfer with file transfer Id '")
+                        .append(mFileTransferId)
+                        .append("' as it there is no IMS connection right now.").toString());
+            }
+            return false;
+        }
+        if (session == null) {
+            if (!mImService.isFileTransferSessionAvailable()) {
+                if (logger.isActivated()) {
+                    logger.debug(new StringBuilder("Cannot resume transfer with file transfer Id '")
+                            .append(mFileTransferId)
+                            .append("' as the limit of available file transfer session is reached.")
+                            .toString());
+                }
+                return false;
+            }
+            if (Direction.OUTGOING == mPersistentStorage.getDirection()) {
+                if (mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
+                    if (logger.isActivated()) {
+                        logger.debug(new StringBuilder(
+                                "Cannot resume transfer with file transfer Id '")
+                                .append(mFileTransferId)
+                                .append("' as the limit of maximum concurrent outgoing file transfer is reached.")
+                                .toString());
+                    }
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**
      * Resume the session (only for HTTP transfer)
      */
     public void resumeTransfer() {
+        if (!isAllowedToResumeTransfer()) {
+            throw new IllegalStateException("Not allowed to resume transfer.");
+        }
         FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
         if (session == null) {
-            if (ReasonCode.PAUSED_BY_USER != mPersistentStorage.getReasonCode()) {
-                /*
-                 * TODO: Throw correct exception as part of CR037 implementation
-                 */
-                throw new IllegalStateException(
-                        "Unable to resume transfer with file transfer ID '"
-                                + mFileTransferId + "' as it is not in PAUSED state.");
-            }
-            if (!ServerApiUtils.isImsConnected()) {
-                /*
-                 * TODO: Throw correct exception as part of CR037 implementation
-                 */
-                throw new IllegalStateException(
-                        "Unable to resume transfer with file transfer ID '"
-                                + mFileTransferId + "' as there is no IMS connection.");
-            }
-            if (!mImService.isFileTransferSessionAvailable()) {
-                /*
-                 * TODO: Throw correct exception as part of CR037 implementation
-                 */
-                throw new IllegalStateException(
-                        "Unable to resume transfer with file transfer ID '"
-                                + mFileTransferId
-                                + "' as there is no available file transfer session.");
-            }
             FtHttpResume resume = mPersistentStorage.getFileTransferResumeInfo();
             if (Direction.OUTGOING == mPersistentStorage.getDirection()) {
-                if (mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
-                    /*
-                     * TODO: Throw correct exception as part of CR037 implementation
-                     */
-                    throw new IllegalStateException(
-                            "Unable to resume transfer with file transfer ID '"
-                                    + mFileTransferId
-                                    + "' as the limit of maximum concurrent outgoing file transfers is reached.");
-                }
-                session = new ResumeUploadFileSharingSession(
-                        mImService, FileTransferUtils.createMmContent(resume.getFile()),
+                session = new ResumeUploadFileSharingSession(mImService,
+                        FileTransferUtils.createMmContent(resume.getFile()),
                         (FtHttpResumeUpload) resume, mRcsSettings);
             } else {
-                session = new ResumeDownloadFileSharingSession(
-                        mImService, FileTransferUtils.createMmContent(resume.getFile()),
+                session = new ResumeDownloadFileSharingSession(mImService,
+                        FileTransferUtils.createMmContent(resume.getFile()),
                         (FtHttpResumeDownload) resume, mRcsSettings);
             }
             session.addListener(this);
@@ -545,9 +618,15 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
      * 
      * @return boolean
      */
-    public boolean canResendTransfer() {
+    public boolean isAllowedToResendTransfer() {
         FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-        if (session == null) {
+        if (session != null) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder("Cannot resend transfer with fileTransferId ")
+                        .append(mFileTransferId)
+                        .append(" as there is already an ongoing session corresponding to this fileTransferId")
+                        .toString());
+            }
             return false;
         }
         State rcsState = mPersistentStorage.getState();
@@ -589,7 +668,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
      * exception is thrown in case of a file transfer to group.
      */
     public void resendTransfer() {
-        if (!canResendTransfer()) {
+        if (!isAllowedToResendTransfer()) {
             // TODO Temporarily illegal access exception
             throw new IllegalStateException(new StringBuilder(
                     "Unable to resend file with fileTransferId ").append(mFileTransferId)

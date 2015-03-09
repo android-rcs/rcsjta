@@ -24,6 +24,7 @@ package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.CoreException;
+import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
@@ -93,7 +94,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactsManager mContactsManager;
+    private final ContactsManager mContactManager;
 
     private final Core mCore;
 
@@ -102,7 +103,7 @@ public class ChatServiceImpl extends IChatService.Stub {
     private final Map<String, GroupChatImpl> mGroupChatCache = new HashMap<String, GroupChatImpl>();
 
     /**
-     * The logger
+     * The sLogger
      */
     private static final Logger sLogger = Logger.getLogger(ChatServiceImpl.class.getSimpleName());
 
@@ -117,18 +118,18 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param imService InstantMessagingService
      * @param messagingLog MessagingLog
      * @param rcsSettings RcsSettings
-     * @param contactsManager ContactsManager
+     * @param contactManager ContactsManager
      * @param core Core
      */
     public ChatServiceImpl(InstantMessagingService imService, MessagingLog messagingLog,
-            RcsSettings rcsSettings, ContactsManager contactsManager, Core core) {
+            RcsSettings rcsSettings, ContactsManager contactManager, Core core) {
         if (sLogger.isActivated()) {
             sLogger.info("Chat service API is loaded");
         }
         mImService = imService;
         mMessagingLog = messagingLog;
         mRcsSettings = rcsSettings;
-        mContactsManager = contactsManager;
+        mContactManager = contactManager;
         mCore = core;
     }
 
@@ -270,11 +271,12 @@ public class ChatServiceImpl extends IChatService.Stub {
                     + session.getRemoteDisplayName() + ")");
         }
         // Update displayName of remote contact
-        mContactsManager.setContactDisplayName(contact, session.getRemoteDisplayName());
+        mContactManager.setContactDisplayName(contact, session.getRemoteDisplayName());
 
         // Add session in the list
         OneToOneChatImpl oneToOneChat = new OneToOneChatImpl(contact,
-                mOneToOneChatEventBroadcaster, mImService, mMessagingLog, mRcsSettings, this);
+                mOneToOneChatEventBroadcaster, mImService, mMessagingLog, mRcsSettings, this,
+                mContactManager);
         session.addListener(oneToOneChat);
         addOneToOneChat(contact, oneToOneChat);
 
@@ -370,8 +372,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         mOneToOneChatCache.remove(contact);
         if (sLogger.isActivated()) {
             sLogger.debug("Remove oneToOne chat from list (size=" + mOneToOneChatCache.size()
-                    + ") for "
-                    + contact);
+                    + ") for " + contact);
         }
     }
 
@@ -387,8 +388,8 @@ public class ChatServiceImpl extends IChatService.Stub {
         if (oneToOneChat != null) {
             return oneToOneChat;
         }
-        return new OneToOneChatImpl(contact, mOneToOneChatEventBroadcaster,
-                mImService, mMessagingLog, mRcsSettings, this);
+        return new OneToOneChatImpl(contact, mOneToOneChatEventBroadcaster, mImService,
+                mMessagingLog, mRcsSettings, this, mContactManager);
     }
 
     /**
@@ -399,18 +400,17 @@ public class ChatServiceImpl extends IChatService.Stub {
     public void receiveGroupChatInvitation(GroupChatSession session) {
         if (sLogger.isActivated()) {
             sLogger.info("Receive group chat invitation from " + session.getRemoteContact()
-                    + " (display="
-                    + session.getRemoteDisplayName() + ")");
+                    + " (display=" + session.getRemoteDisplayName() + ")");
         }
 
         // Update displayName of remote contact
-        mContactsManager.setContactDisplayName(session.getRemoteContact(),
+        mContactManager.setContactDisplayName(session.getRemoteContact(),
                 session.getRemoteDisplayName());
         String chatId = session.getContributionID();
         GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
                 chatId, mMessagingLog, mRcsSettings);
-        GroupChatImpl groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster,
-                mImService, storageAccessor, mRcsSettings, mContactsManager, this, mMessagingLog);
+        GroupChatImpl groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster, mImService,
+                storageAccessor, mRcsSettings, mContactManager, this, mMessagingLog);
         session.addListener(groupChat);
         addGroupChat(groupChat);
     }
@@ -425,8 +425,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         mGroupChatCache.put(chatId, groupChat);
         if (sLogger.isActivated()) {
             sLogger.debug("Add Group Chat to list (size=" + mGroupChatCache.size()
-                    + ") for chatId "
-                    + chatId);
+                    + ") for chatId " + chatId);
         }
     }
 
@@ -439,8 +438,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         mGroupChatCache.remove(chatId);
         if (sLogger.isActivated()) {
             sLogger.debug("Remove Group Chat to list (size=" + mGroupChatCache.size()
-                    + ") for chatId "
-                    + chatId);
+                    + ") for chatId " + chatId);
         }
     }
 
@@ -456,13 +454,20 @@ public class ChatServiceImpl extends IChatService.Stub {
      */
     public IGroupChat initiateGroupChat(List<ContactId> contacts, String subject)
             throws ServerApiException {
+        if (!mRcsSettings.isGroupChatActivated()) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Cannot initiate group chat as group chat feature is not activated by the operator.");
+            }
+            /*
+             * TODO: Throw proper exception in CR037
+             */
+            throw new IllegalArgumentException("Groupchat not activated.");
+        }
+        // Test IMS connection
+        ServerApiUtils.testIms();
         if (sLogger.isActivated()) {
             sLogger.info("Initiate an ad-hoc group chat session");
         }
-
-        // Test IMS connection
-        ServerApiUtils.testIms();
-
         try {
             final ChatSession session = mImService.initiateAdhocGroupChatSession(contacts, subject);
 
@@ -470,8 +475,7 @@ public class ChatServiceImpl extends IChatService.Stub {
             GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
                     chatId, subject, Direction.OUTGOING, mMessagingLog, mRcsSettings);
             GroupChatImpl groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster,
-                    mImService, storageAccessor, mRcsSettings, mContactsManager, this,
-                    mMessagingLog);
+                    mImService, storageAccessor, mRcsSettings, mContactManager, this, mMessagingLog);
             session.addListener(groupChat);
 
             mMessagingLog.addGroupChat(session.getContributionID(), session.getRemoteContact(),
@@ -491,14 +495,12 @@ public class ChatServiceImpl extends IChatService.Stub {
                 sLogger.error("Core exception", e);
             }
 
-            Set<ParticipantInfo> participants = ParticipantInfoUtils
-                    .getParticipantInfos(contacts);
+            Set<ParticipantInfo> participants = ParticipantInfoUtils.getParticipantInfos(contacts);
 
             String callId = mCore.getImsModule().getSipManager().getSipStack().generateCallId();
-            mMessagingLog.addGroupChat(
-                    ContributionIdGenerator.getContributionId(callId), null, subject, participants,
-                    GroupChat.State.REJECTED, GroupChat.ReasonCode.REJECTED_MAX_CHATS,
-                    Direction.OUTGOING);
+            mMessagingLog.addGroupChat(ContributionIdGenerator.getContributionId(callId), null,
+                    subject, participants, GroupChat.State.REJECTED,
+                    GroupChat.ReasonCode.REJECTED_MAX_CHATS, Direction.OUTGOING);
             throw new ServerApiException(e.getMessage());
         } catch (Exception e) {
             if (sLogger.isActivated()) {
@@ -516,7 +518,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
                 chatId, mMessagingLog, mRcsSettings);
         return new GroupChatImpl(chatId, mGroupChatEventBroadcaster, mImService, storageAccessor,
-                mRcsSettings, mContactsManager, this, mMessagingLog);
+                mRcsSettings, mContactManager, this, mMessagingLog);
     }
 
     /**
@@ -535,8 +537,26 @@ public class ChatServiceImpl extends IChatService.Stub {
      * 
      * @return boolean
      */
-    public boolean canInitiateGroupChat() {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+    public boolean isAllowedToInitiateGroupChat() {
+        if (!mRcsSettings.isGroupChatActivated()) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Cannot initiate group chat as group chat feature is not supported.");
+            }
+            return false;
+        }
+        if (!mRcsSettings.getMyCapabilities().isImSessionSupported()) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Cannot initiate group chat as IM capabilities are not supported for self.");
+            }
+            return false;
+        }
+        if (!ServerApiUtils.isImsConnected()) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("Cannot initiate group chat as IMS is not connected.");
+            }
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -546,8 +566,36 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param contact
      * @return true if it's possible to initiate a new group chat
      */
-    public boolean canInitiateGroupChat2(ContactId contact) {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+    public boolean isAllowedToInitiateGroupChat2(ContactId contact) {
+        if (!isAllowedToInitiateGroupChat()) {
+            return false;
+        }
+        Capabilities contactCapabilities = mContactManager.getContactCapabilities(contact);
+        if (contactCapabilities == null) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(new StringBuilder(
+                        "Cannot initiate group chat as the capabilities of the participant '")
+                        .append(contact).append("' are not known.").toString());
+            }
+            return false;
+        }
+        if (!contactCapabilities.isImSessionSupported()) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(new StringBuilder("Cannot initiate group chat as the participant '")
+                        .append(contact).append("' does not have IM capabilities.").toString());
+            }
+            return false;
+        }
+        if (mRcsSettings.isGroupChatInviteIfFullStoreForwardSupported()
+                && !contactCapabilities.isGroupChatStoreForwardSupported()) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(new StringBuilder("Cannot initiate group chat as the participant '")
+                        .append(contact)
+                        .append("' does not have store and forward feature supported.").toString());
+            }
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -740,7 +788,8 @@ public class ChatServiceImpl extends IChatService.Stub {
     public void handleOneToOneChatSessionInitiation(OneToOneChatSession session) {
         ContactId contact = session.getRemoteContact();
         OneToOneChatImpl oneToOneChat = new OneToOneChatImpl(contact,
-                mOneToOneChatEventBroadcaster, mImService, mMessagingLog, mRcsSettings, this);
+                mOneToOneChatEventBroadcaster, mImService, mMessagingLog, mRcsSettings, this,
+                mContactManager);
         session.addListener(oneToOneChat);
         addOneToOneChat(contact, oneToOneChat);
     }

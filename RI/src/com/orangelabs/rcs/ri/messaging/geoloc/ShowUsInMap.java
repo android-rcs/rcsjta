@@ -55,7 +55,7 @@ public class ShowUsInMap extends MapActivity {
             .toString();
 
     private final static String[] QUERY_PROJECTION = new String[] {
-            ChatLog.Message.CONTENT
+        ChatLog.Message.CONTENT
     };
 
     /**

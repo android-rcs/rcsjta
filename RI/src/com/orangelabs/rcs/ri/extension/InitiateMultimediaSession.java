@@ -89,8 +89,7 @@ public abstract class InitiateMultimediaSession extends Activity {
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
             try {
                 // Convert phone number to contactId
-                ContactUtil contactUtil = ContactUtil
-                        .getInstance(InitiateMultimediaSession.this);
+                ContactUtil contactUtil = ContactUtil.getInstance(InitiateMultimediaSession.this);
                 ContactId contact = contactUtil.formatContact(phoneNumber);
                 // Initiate session
                 initiateSession(contact);

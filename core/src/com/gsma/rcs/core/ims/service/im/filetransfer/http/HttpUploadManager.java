@@ -320,8 +320,7 @@ public class HttpUploadManager extends HttpTransferManager {
             mAuth.readWwwAuthenticateHeader(authHeaders[0].getValue());
 
             String authValue = mAuth.generateAuthorizationHeaderValue(
-                    connection.getRequestMethod(),
-                    mUrl.getPath(), body);
+                    connection.getRequestMethod(), mUrl.getPath(), body);
             if (authValue != null) {
                 connection.setRequestProperty("Authorization", authValue);
             }
@@ -477,8 +476,7 @@ public class HttpUploadManager extends HttpTransferManager {
     private void writeThumbnailMultipart(DataOutputStream outputStream) throws IOException {
         if (sLogger.isActivated()) {
             sLogger.debug("write file icon " + mFileIcon.getName() + " (size="
-                    + mFileIcon.getSize()
-                    + ")");
+                    + mFileIcon.getSize() + ")");
         }
         if (mFileIcon.getSize() > 0) {
             outputStream.writeBytes(twoHyphens + BOUNDARY_TAG + lineEnd);
@@ -740,8 +738,7 @@ public class HttpUploadManager extends HttpTransferManager {
         // Update authentication agent from response
         if (mAuthenticationFlag && mAuth != null) {
             String authValue = mAuth.generateAuthorizationHeaderValue(
-                    connection.getRequestMethod(),
-                    mUrl.getPath(), body);
+                    connection.getRequestMethod(), mUrl.getPath(), body);
             if (authValue != null) {
                 connection.setRequestProperty("Authorization", authValue);
             }

@@ -134,14 +134,14 @@ public class InstantMessagingService extends ImsService {
      * Chat features tags
      */
     public final static String[] CHAT_FEATURE_TAGS = {
-            FeatureTags.FEATURE_OMA_IM
+        FeatureTags.FEATURE_OMA_IM
     };
 
     /**
      * File transfer features tags
      */
     public final static String[] FT_FEATURE_TAGS = {
-            FeatureTags.FEATURE_OMA_IM
+        FeatureTags.FEATURE_OMA_IM
     };
 
     /**
@@ -1377,5 +1377,20 @@ public class InstantMessagingService extends ImsService {
         }
 
         return false;
+    }
+
+    /**
+     * Check if the capabilities are valid based on msgCapValidity paramter
+     * 
+     * @param capabilities
+     * @return {@code true} if valid, otherwise {@code false}
+     */
+    public boolean isCapabilitiesValid(Capabilities capabilities) {
+        long msgCapValidityPeriod = mRcsSettings.getMsgCapValidityPeriod();
+        if (System.currentTimeMillis() > capabilities.getTimestampOfLastRefresh()
+                + msgCapValidityPeriod) {
+            return false;
+        }
+        return true;
     }
 }

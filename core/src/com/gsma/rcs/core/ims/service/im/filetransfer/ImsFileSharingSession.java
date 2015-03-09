@@ -79,6 +79,11 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
                 filetransferId, rcsSettings);
     }
 
+    @Override
+    public boolean isHttpTransfer() {
+        return false;
+    }
+
     /**
      * Returns the "file-transfer-id" attribute
      * 

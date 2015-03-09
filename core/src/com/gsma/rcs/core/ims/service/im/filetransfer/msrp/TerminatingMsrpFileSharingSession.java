@@ -457,15 +457,6 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                 ((FileSharingSessionListener) getListeners().get(j)).handleFileTransfered(file,
                         contact);
             }
-        } catch (IOException e) {
-            // Delete the temp file
-            deleteFile();
-
-            // Notify listeners
-            for (int j = 0; j < getListeners().size(); j++) {
-                ((FileSharingSessionListener) getListeners().get(j)).handleTransferError(
-                        new FileSharingError(FileSharingError.MEDIA_SAVING_FAILED), contact);
-            }
         } catch (Exception e) {
             // Delete the temp file
             deleteFile();
@@ -473,7 +464,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
             // Notify listeners
             for (int j = 0; j < getListeners().size(); j++) {
                 ((FileSharingSessionListener) getListeners().get(j)).handleTransferError(
-                        new FileSharingError(FileSharingError.MEDIA_TRANSFER_FAILED), contact);
+                        new FileSharingError(FileSharingError.MEDIA_SAVING_FAILED), contact);
             }
         }
     }

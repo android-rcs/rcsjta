@@ -205,7 +205,7 @@ public class ChatProvider extends ContentProvider {
 
     private String[] getSelectionArgsWithChatId(String[] selectionArgs, String chatId) {
         String[] chatSelectionArg = new String[] {
-                chatId
+            chatId
         };
         if (selectionArgs == null) {
             return chatSelectionArg;
@@ -223,7 +223,7 @@ public class ChatProvider extends ContentProvider {
 
     private String[] getSelectionArgsWithMessageId(String[] selectionArgs, String messageId) {
         String[] messageSelectionArg = new String[] {
-                messageId
+            messageId
         };
         if (selectionArgs == null) {
             return messageSelectionArg;
@@ -273,8 +273,7 @@ public class ChatProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -321,8 +320,7 @@ public class ChatProvider extends ContentProvider {
                 case UriType.Message.MESSAGE:
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(TABLE_MESSAGE, projection, selection, selectionArgs, null,
-                            null,
-                            sort);
+                            null, sort);
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
                     return cursor;
 
@@ -377,8 +375,7 @@ public class ChatProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -413,8 +410,7 @@ public class ChatProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -457,8 +453,7 @@ public class ChatProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 }

@@ -186,9 +186,8 @@ public abstract class ImsServiceSession extends Thread {
                 .getServiceRoutePath();
 
         // Create a dialog path
-        mDialogPath = new SipDialogPath(
-                getImsService().getImsModule().getSipManager().getSipStack(), callId, 1,
-                mRemoteUri,
+        mDialogPath = new SipDialogPath(getImsService().getImsModule().getSipManager()
+                .getSipStack(), callId, 1, mRemoteUri,
                 ImsModule.IMS_USER_PROFILE.getPublicAddress(), mRemoteUri, route, mRcsSettings);
 
         // Set the authentication agent in the dialog path
@@ -228,9 +227,8 @@ public abstract class ImsServiceSession extends Thread {
         Vector<String> route = SipUtils.routeProcessing(invite, false);
 
         // Create a dialog path
-        mDialogPath = new SipDialogPath(
-                getImsService().getImsModule().getSipManager().getSipStack(), callId, cseq, target,
-                localParty, remoteParty, route, mRcsSettings);
+        mDialogPath = new SipDialogPath(getImsService().getImsModule().getSipManager()
+                .getSipStack(), callId, cseq, target, localParty, remoteParty, route, mRcsSettings);
 
         // Set the INVITE request
         mDialogPath.setInvite(invite);

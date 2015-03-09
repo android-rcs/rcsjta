@@ -58,8 +58,7 @@ public class MyCapabilities extends Activity {
 
         // Register to API connection manager
         mCnxManager = ConnectionManager.getInstance(this);
-        if (mCnxManager == null
-                || !mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
+        if (mCnxManager == null || !mCnxManager.isServiceConnected(RcsServiceName.CAPABILITY)) {
             Utils.showMessageAndExit(this, getString(R.string.label_service_not_available),
                     mExitOnce);
             return;

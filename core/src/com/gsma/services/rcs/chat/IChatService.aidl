@@ -50,9 +50,9 @@ interface IChatService {
 	
 	ICommonServiceConfiguration getCommonConfiguration();
 
-	boolean canInitiateGroupChat();
+	boolean isAllowedToInitiateGroupChat();
 
-	boolean canInitiateGroupChat2(in ContactId contact);
+	boolean isAllowedToInitiateGroupChat2(in ContactId contact);
 
 	void deleteOneToOneChats();
 

@@ -41,7 +41,7 @@ import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
 public class TestGeolocSharingApi extends ListActivity {
 
     private static final String[] PROJECTION = new String[] {
-            CapabilitiesLog.CONTACT
+        CapabilitiesLog.CONTACT
     };
 
     @Override

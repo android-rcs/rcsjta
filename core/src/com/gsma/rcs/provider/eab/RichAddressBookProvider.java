@@ -65,7 +65,7 @@ public class RichAddressBookProvider extends ContentProvider {
             .concat("=?");
 
     private final static String[] PHOTO_DATA_PROJECTION = new String[] {
-            RichAddressBookData.KEY_PRESENCE_PHOTO_DATA
+        RichAddressBookData.KEY_PRESENCE_PHOTO_DATA
     };
 
     private static final String FILENAME_PREFIX = "photoData";
@@ -99,8 +99,7 @@ public class RichAddressBookProvider extends ContentProvider {
             RichAddressBookData.KEY_CAPABILITY_IM_SESSION,
             RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER,
             RichAddressBookData.KEY_CAPABILITY_GEOLOCATION_PUSH,
-            RichAddressBookData.KEY_CAPABILITY_EXTENSIONS,
-            RichAddressBookData.KEY_AUTOMATA,
+            RichAddressBookData.KEY_CAPABILITY_EXTENSIONS, RichAddressBookData.KEY_AUTOMATA,
             RichAddressBookData.KEY_CAPABILITY_TIME_LAST_REFRESH
     };
 
@@ -131,8 +130,7 @@ public class RichAddressBookProvider extends ContentProvider {
             RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL,
             RichAddressBookData.KEY_CAPABILITY_GROUP_CHAT_SF,
             RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_SF,
-            RichAddressBookData.KEY_BLOCKING_TIMESTAMP,
-            RichAddressBookData.KEY_BLOCKED,
+            RichAddressBookData.KEY_BLOCKING_TIMESTAMP, RichAddressBookData.KEY_BLOCKED,
             RichAddressBookData.KEY_CAPABILITY_IP_VOICE_CALL,
             RichAddressBookData.KEY_CAPABILITY_IP_VIDEO_CALL
     };
@@ -279,7 +277,7 @@ public class RichAddressBookProvider extends ContentProvider {
 
     private String[] getSelectionArgsWithContact(String[] selectionArgs, String contact) {
         String[] contactSelectionArg = new String[] {
-                contact
+            contact
         };
         if (selectionArgs == null) {
             return contactSelectionArg;
@@ -298,7 +296,7 @@ public class RichAddressBookProvider extends ContentProvider {
     private String[] getSelectionArgsWithAggregationId(String[] selectionArgs,
             String aggregationDataId) {
         String[] idSelectionArg = new String[] {
-                aggregationDataId
+            aggregationDataId
         };
         if (selectionArgs == null) {
             return idSelectionArg;
@@ -381,8 +379,7 @@ public class RichAddressBookProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -439,8 +436,7 @@ public class RichAddressBookProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -495,8 +491,7 @@ public class RichAddressBookProvider extends ContentProvider {
                 case UriType.Aggregation.AGGREGATION:
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(AGGREGATION_TABLE, projection, selection, selectionArgs,
-                            null,
-                            null, sort);
+                            null, null, sort);
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
                     return cursor;
 
@@ -551,8 +546,7 @@ public class RichAddressBookProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -595,8 +589,7 @@ public class RichAddressBookProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -620,8 +613,7 @@ public class RichAddressBookProvider extends ContentProvider {
                         .toString());
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 }

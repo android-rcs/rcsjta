@@ -66,8 +66,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
      * @throws RcsContactFormatException
      */
     public TerminatingSipRtpSession(ImsService parent, SipRequest invite, Intent sessionInvite,
-            RcsSettings rcsSettings)
-            throws RcsContactFormatException {
+            RcsSettings rcsSettings) throws RcsContactFormatException {
         super(parent, ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite)), invite
                 .getFeatureTags().get(0), rcsSettings);
 

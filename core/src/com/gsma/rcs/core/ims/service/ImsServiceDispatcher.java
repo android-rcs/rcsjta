@@ -391,8 +391,9 @@ public class ImsServiceDispatcher extends Thread {
                     sendFinalResponse(request, Response.DECLINE);
                 }
             } else if (SipUtils
-                    .isFeatureTagPresent(request, FeatureTags.FEATURE_RCSE_IP_VOICE_CALL) &&
-                    SipUtils.isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_IP_VOICE_CALL)) {
+                    .isFeatureTagPresent(request, FeatureTags.FEATURE_RCSE_IP_VOICE_CALL)
+                    && SipUtils
+                            .isFeatureTagPresent(request, FeatureTags.FEATURE_3GPP_IP_VOICE_CALL)) {
                 // IP voice call
 
                 // TODO: Add Ipcall support here in future releases

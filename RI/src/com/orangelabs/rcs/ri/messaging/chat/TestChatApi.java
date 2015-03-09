@@ -45,7 +45,7 @@ import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
 public class TestChatApi extends ListActivity {
 
     private static final String[] PROJECTION = new String[] {
-            CapabilitiesLog.CONTACT
+        CapabilitiesLog.CONTACT
     };
 
     @Override

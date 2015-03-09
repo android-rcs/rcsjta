@@ -126,15 +126,10 @@ public class Capabilities {
      */
     private long mTimestampOfLastRefresh = INVALID_TIMESTAMP;
 
-    private final RcsSettings mRcsSettings;
-
     /**
      * Constructor
-     * 
-     * @param rcsSettings
      */
-    public Capabilities(RcsSettings rcsSettings) {
-        mRcsSettings = rcsSettings;
+    public Capabilities() {
     }
 
     /**
@@ -459,22 +454,11 @@ public class Capabilities {
      */
     public String toString() {
         return "Image_share=" + mImageSharing + ", Video_share=" + mVideoSharing
-                + ", IP_voice_call="
-                + mIpVoiceCall + ", IP_video_call=" + mIpVideoCall + ", File_transfer="
-                + mFileTransfer + ", Chat=" + mImSession + ", FT_http=" + mFileTransferHttp
-                + ", Geolocation_push=" + mGeolocationPush + ", Automata=" + mSipAutomata
-                + ", TimestampLastRequest=" + mTimestampOfLastRequest + ", TimestampLastRefresh="
-                + mTimestampOfLastRefresh;
-    }
-
-    /**
-     * Check validity of capability
-     * 
-     * @return true if the capability is valid (no need to refresh it), otherwise False.
-     */
-    public boolean isValid() {
-        // If no refresh of capabilities is required then capabilities are valid
-        return !PollingManager.isCapabilityRefreshRequired(mTimestampOfLastRefresh, mRcsSettings);
+                + ", IP_voice_call=" + mIpVoiceCall + ", IP_video_call=" + mIpVideoCall
+                + ", File_transfer=" + mFileTransfer + ", Chat=" + mImSession + ", FT_http="
+                + mFileTransferHttp + ", Geolocation_push=" + mGeolocationPush + ", Automata="
+                + mSipAutomata + ", TimestampLastRequest=" + mTimestampOfLastRequest
+                + ", TimestampLastRefresh=" + mTimestampOfLastRefresh;
     }
 
     /**

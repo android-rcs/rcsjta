@@ -68,9 +68,9 @@ public class OneToOneChat {
      * @return boolean
      * @throws RcsServiceException
      */
-    public boolean canSendMessage() throws RcsServiceException {
+    public boolean isAllowedToSendMessage() throws RcsServiceException {
         try {
-            return mOneToOneChatInf.canSendMessage();
+            return mOneToOneChatInf.isAllowedToSendMessage();
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }

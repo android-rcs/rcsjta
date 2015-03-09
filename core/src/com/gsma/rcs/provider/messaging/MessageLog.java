@@ -65,7 +65,7 @@ public class MessageLog implements IMessageLog {
     private static final Logger logger = Logger.getLogger(MessageLog.class.getSimpleName());
 
     private static final String[] PROJECTION_MESSAGE_ID = new String[] {
-            MessageData.KEY_MESSAGE_ID
+        MessageData.KEY_MESSAGE_ID
     };
 
     private static final int FIRST_COLUMN_IDX = 0;
@@ -79,8 +79,8 @@ public class MessageLog implements IMessageLog {
      * @param rcsSettings
      */
     /* package private */MessageLog(LocalContentResolver localContentResolver,
-            GroupChatLog groupChatLog,
-            GroupDeliveryInfoLog groupChatDeliveryInfoLog, RcsSettings rcsSettings) {
+            GroupChatLog groupChatLog, GroupDeliveryInfoLog groupChatDeliveryInfoLog,
+            RcsSettings rcsSettings) {
         mLocalContentResolver = localContentResolver;
         mGroupChatLog = groupChatLog;
         mGroupChatDeliveryInfoLog = groupChatDeliveryInfoLog;
@@ -91,10 +91,9 @@ public class MessageLog implements IMessageLog {
         ContactId contact = msg.getRemoteContact();
         String msgId = msg.getMessageId();
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Add incoming chat message: contact=")
-                    .append(contact).append(", msg=").append(msgId).append(", status=")
-                    .append(status).append(", reasonCode=").append(reasonCode).append(".")
-                    .toString());
+            logger.debug(new StringBuilder("Add incoming chat message: contact=").append(contact)
+                    .append(", msg=").append(msgId).append(", status=").append(status)
+                    .append(", reasonCode=").append(reasonCode).append(".").toString());
         }
 
         ContentValues values = new ContentValues();
@@ -129,10 +128,9 @@ public class MessageLog implements IMessageLog {
         ContactId contact = msg.getRemoteContact();
         String msgId = msg.getMessageId();
         if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Add outgoing chat message: contact=")
-                    .append(contact).append(", msg=").append(msgId).append(", status=")
-                    .append(status).append(", reasonCode=").append(reasonCode).append(".")
-                    .toString());
+            logger.debug(new StringBuilder("Add outgoing chat message: contact=").append(contact)
+                    .append(", msg=").append(msgId).append(", status=").append(status)
+                    .append(", reasonCode=").append(reasonCode).append(".").toString());
         }
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_CHAT_ID, contact.toString());
@@ -142,8 +140,7 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD.toInt());
         String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
         values.put(MessageData.KEY_MIME_TYPE, apiMimeType);
-        values.put(MessageData.KEY_CONTENT,
-                ChatUtils.networkContentToPersistedContent(msg));
+        values.put(MessageData.KEY_CONTENT, ChatUtils.networkContentToPersistedContent(msg));
 
         values.put(MessageData.KEY_TIMESTAMP, msg.getDate().getTime());
         values.put(MessageData.KEY_TIMESTAMP_SENT, msg.getDate().getTime());
@@ -208,8 +205,7 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_REASON_CODE, reasonCode.toInt());
         String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
         values.put(MessageData.KEY_MIME_TYPE, apiMimeType);
-        values.put(MessageData.KEY_CONTENT,
-                ChatUtils.networkContentToPersistedContent(msg));
+        values.put(MessageData.KEY_CONTENT, ChatUtils.networkContentToPersistedContent(msg));
 
         if (direction == Direction.INCOMING) {
             // Receive message
@@ -346,7 +342,7 @@ public class MessageLog implements IMessageLog {
 
     private Cursor getMessageData(String columnName, String msgId) throws SQLException {
         String[] projection = new String[] {
-                columnName
+            columnName
         };
         Cursor cursor = null;
         try {

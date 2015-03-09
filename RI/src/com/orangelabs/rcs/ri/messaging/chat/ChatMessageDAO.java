@@ -155,7 +155,7 @@ public class ChatMessageDAO implements Parcelable {
     public ChatMessageDAO(final Context context, final String messageId) throws Exception {
         Uri uri = ChatLog.Message.CONTENT_URI;
         String[] whereArgs = new String[] {
-                messageId
+            messageId
         };
         Cursor cursor = null;
         try {

@@ -175,7 +175,7 @@ public class FileTransferProvider extends ContentProvider {
 
     private String[] getSelectionArgsWithFtId(String[] selectionArgs, String ftId) {
         String[] ftSelectionArg = new String[] {
-                ftId
+            ftId
         };
         if (selectionArgs == null) {
             return ftSelectionArg;
@@ -219,8 +219,7 @@ public class FileTransferProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -252,8 +251,8 @@ public class FileTransferProvider extends ContentProvider {
                 case UriType.FileTransfer.FILE_TRANSFER:
                     db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(TABLE,
-                            restrictProjectionToExternallyDefinedColumns(projection),
-                            selection, selectionArgs, null, null, sort);
+                            restrictProjectionToExternallyDefinedColumns(projection), selection,
+                            selectionArgs, null, null, sort);
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
                     return cursor;
 
@@ -296,8 +295,7 @@ public class FileTransferProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -322,8 +320,7 @@ public class FileTransferProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 
@@ -353,8 +350,7 @@ public class FileTransferProvider extends ContentProvider {
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
-                        .append(uri)
-                        .append("!").toString());
+                        .append(uri).append("!").toString());
         }
     }
 }

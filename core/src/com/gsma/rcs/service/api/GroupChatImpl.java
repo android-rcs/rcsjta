@@ -24,12 +24,14 @@ package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
+import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatError;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
+import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatPersistedStorageAccessor;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.event.User;
@@ -56,6 +58,9 @@ import com.gsma.services.rcs.chat.IGroupChat;
 import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.database.SQLException;
+import android.text.TextUtils;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -80,7 +85,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactsManager mContactsManager;
+    private final ContactsManager mContactManager;
 
     private final MessagingLog mMessagingLog;
 
@@ -104,13 +109,13 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * @param imService InstantMessagingService
      * @param persistentStorage GroupChatPersistedStorageAccessor
      * @param rcsSettings RcsSettings
-     * @param contactsManager ContactsManager
+     * @param contactManager ContactsManager
      * @param chatService ChatServiceImpl
      * @param messagingLog MessagingLog
      */
     public GroupChatImpl(String chatId, IGroupChatEventBroadcaster broadcaster,
             InstantMessagingService imService, GroupChatPersistedStorageAccessor persistentStorage,
-            RcsSettings rcsSettings, ContactsManager contactsManager, ChatServiceImpl chatService,
+            RcsSettings rcsSettings, ContactsManager contactManager, ChatServiceImpl chatService,
             MessagingLog messagingLog) {
         mChatId = chatId;
         mBroadcaster = broadcaster;
@@ -118,7 +123,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
         mPersistentStorage = persistentStorage;
         mChatService = chatService;
         mRcsSettings = rcsSettings;
-        mContactsManager = contactsManager;
+        mContactManager = contactManager;
         mMessagingLog = messagingLog;
     }
 
@@ -225,6 +230,104 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
                         GroupDeliveryInfo.ReasonCode.FAILED_DISPLAY);
             }
         }
+    }
+
+    private boolean isGroupChatAbandoned() {
+        GroupChatSession session = mImService.getGroupChatSession(mChatId);
+        if (session != null) {
+            /* Group chat is not abandoned if there exists a session */
+            return false;
+        }
+        ReasonCode reasonCode;
+        try {
+            reasonCode = mPersistentStorage.getReasonCode();
+        } catch (SQLException e) {
+            return false;
+        }
+        switch (reasonCode) {
+            case ABORTED_BY_USER:
+            case FAILED_INITIATION:
+            case REJECTED_BY_REMOTE:
+            case REJECTED_MAX_CHATS:
+            case REJECTED_SPAM:
+            case REJECTED_BY_INACTIVITY:
+                if (logger.isActivated()) {
+                    logger.debug(new StringBuilder("Group chat with chatId '").append(mChatId)
+                            .append("' is ").append(reasonCode).toString());
+                }
+                return true;
+            default:
+                break;
+        }
+        return false;
+    }
+
+    private boolean isGroupChatSessionEstablished() {
+        GroupChatSession session = mImService.getGroupChatSession(mChatId);
+        return session != null && session.isMediaEstablished();
+    }
+
+    private boolean isAllowedToInviteAdditionalParticipants(int additionalParticipants) {
+        int nrOfParticipants = getParticipants().size() + additionalParticipants;
+        int maxNrOfAllowedParticipants = mRcsSettings.getMaxChatParticipants();
+        return nrOfParticipants < maxNrOfAllowedParticipants;
+    }
+
+    private boolean isGroupChatCapableOfReceivingParticipantInvitations() {
+        if (!mRcsSettings.isGroupChatActivated()) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder(
+                        "Cannot add participants to on group chat with group chat Id '")
+                        .append(mChatId)
+                        .append("' as group chat feature has been disabled by the operator.")
+                        .toString());
+            }
+            return false;
+        }
+        if (isGroupChatAbandoned()) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder(
+                        "Cannot invite participants to group chat with group chat Id '")
+                        .append(mChatId).append("'").toString());
+            }
+            return false;
+        }
+        /*
+         * TODO : This check will be removed in CR018 implementation as we will be be allowed to add
+         * participants even if session is not established right now.
+         */
+        if (!isGroupChatSessionEstablished()) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder(
+                        "Cannot invite participants to group chat with group chat Id '")
+                        .append(mChatId).append("' as it is not yet established.").toString());
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isGroupChatRejoinable() {
+        GroupChatInfo groupChat = mMessagingLog.getGroupChatInfo(mChatId);
+        if (groupChat == null) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder(
+                        "Cannot send message on group chat with group chat Id '").append(mChatId)
+                        .append("' as the group chat does not exist in DB.").toString());
+            }
+            return false;
+        }
+        if (TextUtils.isEmpty(groupChat.getRejoinId())) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder(
+                        "Cannot send message on group chat with group chat Id '")
+                        .append(mChatId)
+                        .append("' as there is no ongoing session with corresponding chatId and there exists no rejoinId to rejoin the group chat.")
+                        .toString());
+            }
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -336,8 +439,15 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * 
      * @return boolean
      */
-    public boolean canLeave() {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+    public boolean isAllowedToLeave() {
+        if (isGroupChatAbandoned()) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder("Cannot leave group chat with group chat Id '")
+                        .append(mChatId).append("'").toString());
+            }
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -345,6 +455,16 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * there are enough participants.
      */
     public void leave() {
+        if (isGroupChatAbandoned()) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder("Cannot leave group chat with group chat Id '")
+                        .append(mChatId).append("'").toString());
+            }
+            /*
+             * TODO: Throw proper exception in CR037
+             */
+            throw new IllegalArgumentException("Groupchat abandoned by user.");
+        }
         final GroupChatSession session = mImService.getGroupChatSession(mChatId);
         if (session == null || !ServerApiUtils.isImsConnected()) {
             /*
@@ -423,19 +543,70 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * 
      * @return boolean
      */
-    public boolean canInviteParticipants() {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+    public boolean isAllowedToInviteParticipants() {
+        if (!isGroupChatCapableOfReceivingParticipantInvitations()) {
+            return false;
+        }
+        if (!isAllowedToInviteAdditionalParticipants(1)) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder(
+                        "Cannot invite participants to group chat with group chat Id '")
+                        .append(mChatId)
+                        .append("' as max number of participants has been reached already.")
+                        .toString());
+            }
+            return false;
+        }
+        return true;
     }
 
     /**
      * Returns true if it is possible to invite the specified participants to the group chat right
      * now, else returns false.
      * 
-     * @param ContactId participant
+     * @param participant ContactId
      * @return boolean
      */
-    public boolean canInviteParticipant(ContactId participant) {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+    public boolean isAllowedToInviteParticipant(ContactId participant) {
+        if (!isAllowedToInviteParticipants()) {
+            return false;
+        }
+        boolean inviteOnlyFullSF = mRcsSettings.isGroupChatInviteIfFullStoreForwardSupported();
+        Capabilities remoteCapabilities = mContactManager.getContactCapabilities(participant);
+        if (remoteCapabilities == null) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder(
+                        "Cannot invite participant to group chat with group chat Id '")
+                        .append(mChatId).append("' as the capabilities of participant '")
+                        .append(participant).append("' are not known.").toString());
+            }
+            return false;
+        }
+        if (!remoteCapabilities.isImSessionSupported()) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder(
+                        "Cannot invite participant to group chat with group chat Id '")
+                        .append(mChatId).append("' as the participant '").append(participant)
+                        .append("' does not have IM capabilities.").toString());
+            }
+            return false;
+        }
+        if (inviteOnlyFullSF && !remoteCapabilities.isGroupChatStoreForwardSupported()) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder(
+                        "Cannot invite participant to group chat with group chat Id '")
+                        .append(mChatId)
+                        .append("' as full store and forward is required and the participant '")
+                        .append(participant).append("' does not have that feature supported.")
+                        .toString());
+            }
+            return false;
+        }
+        /*
+         * TODO: Participant's current status has to be considered to decide if he/she can be
+         * invited to this group chat.
+         */
+        return true;
     }
 
     /**
@@ -444,6 +615,17 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * @param participants Set of participants
      */
     public void inviteParticipants(final List<ContactId> participants) {
+        if (!isGroupChatCapableOfReceivingParticipantInvitations()) {
+            /*
+             * TODO: Throw proper exception in CR037
+             */
+            throw new IllegalArgumentException(
+                    "Groupchat not capable of receiving particpant invitations.");
+        }
+        /*
+         * TODO: Participant's current status has to be considered to decide if he/she can be
+         * invited to this group chat.
+         */
         final GroupChatSession session = mImService.getGroupChatSession(mChatId);
         if (session == null) {
             /* TODO: Throw proper exception as part of CR037 implementation */
@@ -552,8 +734,38 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * 
      * @return boolean
      */
-    public boolean canSendMessage() {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+    public boolean isAllowedToSendMessage() {
+        if (!mRcsSettings.isGroupChatActivated()) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder(
+                        "Cannot send message on group chat with group chat Id '").append(mChatId)
+                        .append("' as group chat feature is not supported.").toString());
+            }
+            return false;
+        }
+        if (isGroupChatAbandoned()) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder(
+                        "Cannot send message on group chat with group chat Id '").append(mChatId)
+                        .append("'").toString());
+            }
+            return false;
+        }
+        if (!mRcsSettings.getMyCapabilities().isImSessionSupported()) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder(
+                        "Cannot send message on group chat with group chat Id '").append(mChatId)
+                        .append("' as IM capabilities are not supported for self.").toString());
+            }
+            return false;
+        }
+        GroupChatSession session = mImService.getGroupChatSession(mChatId);
+        if (session == null) {
+            if (!isGroupChatRejoinable()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -563,6 +775,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * @return Chat message
      */
     public IChatMessage sendMessage(final String text) {
+        if (!isAllowedToSendMessage()) {
+            /*
+             * TODO: Throw proper exception in CR037
+             */
+            throw new IllegalArgumentException("Not allowed to send message.");
+        }
         ChatMessage msg = ChatUtils.createTextMessage(null, text);
         ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
                 mMessagingLog, msg.getMessageId(), msg.getRemoteContact(), text,
@@ -585,6 +803,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * @return ChatMessage
      */
     public IChatMessage sendMessage2(Geoloc geoloc) {
+        if (!isAllowedToSendMessage()) {
+            /*
+             * TODO: Throw proper exception in CR037
+             */
+            throw new IllegalArgumentException("Not allowed to send message.");
+        }
         ChatMessage geolocMsg = ChatUtils.createGeolocMessage(null, geoloc);
         ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
                 mMessagingLog, geolocMsg.getMessageId(), geolocMsg.getRemoteContact(),
@@ -898,7 +1122,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
         synchronized (lock) {
             mPersistentStorage.addGroupChatMessage(msg, Direction.INCOMING,
                     Content.Status.RECEIVED, Content.ReasonCode.UNSPECIFIED);
-            mContactsManager.setContactDisplayName(msg.getRemoteContact(), msg.getDisplayName());
+            mContactManager.setContactDisplayName(msg.getRemoteContact(), msg.getDisplayName());
 
             String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
             mBroadcaster.broadcastMessageReceived(apiMimeType, msgId);

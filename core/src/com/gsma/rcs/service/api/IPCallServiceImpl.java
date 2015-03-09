@@ -269,11 +269,10 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
                     player, renderer);
 
             String callId = session.getSessionID();
-            mIPCallLog.addCall(callId, contact,
-                    Direction.OUTGOING, session.getAudioContent(),
+            mIPCallLog.addCall(callId, contact, Direction.OUTGOING, session.getAudioContent(),
                     session.getVideoContent(), IPCall.State.INITIATED, ReasonCode.UNSPECIFIED);
-            mBroadcaster.broadcastIPCallStateChanged(contact, callId,
-                    IPCall.State.INITIATED, ReasonCode.UNSPECIFIED);
+            mBroadcaster.broadcastIPCallStateChanged(contact, callId, IPCall.State.INITIATED,
+                    ReasonCode.UNSPECIFIED);
 
             IPCallPersistedStorageAccessor storageAccessor = new IPCallPersistedStorageAccessor(
                     callId, contact, Direction.OUTGOING, mIPCallLog);
@@ -293,9 +292,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
             return ipCall;
 
         } catch (Exception e) {
-            mIPCallLog.addCall(SessionIdGenerator.getNewId(), contact,
-                    Direction.OUTGOING, null, null, IPCall.State.FAILED,
-                    ReasonCode.FAILED_INITIATION);
+            mIPCallLog.addCall(SessionIdGenerator.getNewId(), contact, Direction.OUTGOING, null,
+                    null, IPCall.State.FAILED, ReasonCode.FAILED_INITIATION);
             ;
             throw new ServerApiException(e.getMessage());
         }
@@ -332,11 +330,10 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
                     player, renderer);
 
             String callId = session.getSessionID();
-            mIPCallLog.addCall(callId, contact,
-                    Direction.OUTGOING, session.getAudioContent(),
+            mIPCallLog.addCall(callId, contact, Direction.OUTGOING, session.getAudioContent(),
                     session.getVideoContent(), IPCall.State.INITIATED, ReasonCode.UNSPECIFIED);
-            mBroadcaster.broadcastIPCallStateChanged(contact, callId,
-                    IPCall.State.INITIATED, ReasonCode.UNSPECIFIED);
+            mBroadcaster.broadcastIPCallStateChanged(contact, callId, IPCall.State.INITIATED,
+                    ReasonCode.UNSPECIFIED);
 
             IPCallPersistedStorageAccessor storageAccessor = new IPCallPersistedStorageAccessor(
                     callId, contact, Direction.OUTGOING, mIPCallLog);
@@ -356,9 +353,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
             return ipCall;
 
         } catch (Exception e) {
-            mIPCallLog.addCall(SessionIdGenerator.getNewId(), contact,
-                    Direction.OUTGOING, null, null, IPCall.State.FAILED,
-                    ReasonCode.FAILED_INITIATION);
+            mIPCallLog.addCall(SessionIdGenerator.getNewId(), contact, Direction.OUTGOING, null,
+                    null, IPCall.State.FAILED, ReasonCode.FAILED_INITIATION);
             throw new ServerApiException(e.getMessage());
         }
     }
@@ -430,8 +426,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
     public void addAndBroadcastIPCallInvitationRejected(ContactId contact,
             AudioContent audioContent, VideoContent videoContent, ReasonCode reasonCode) {
         String sessionId = SessionIdGenerator.getNewId();
-        mIPCallLog.addCall(sessionId, contact, Direction.INCOMING,
-                audioContent, videoContent, IPCall.State.REJECTED, reasonCode);
+        mIPCallLog.addCall(sessionId, contact, Direction.INCOMING, audioContent, videoContent,
+                IPCall.State.REJECTED, reasonCode);
         mBroadcaster.broadcastIPCallInvitation(sessionId);
     }
 

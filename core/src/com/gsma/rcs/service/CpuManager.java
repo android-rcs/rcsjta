@@ -60,8 +60,8 @@ public class CpuManager {
             return;
         }
         // Activate the always-on procedure even if the device wakes up
-        PowerManager pm = (PowerManager) AndroidFactory.getApplicationContext()
-                .getSystemService(Context.POWER_SERVICE);
+        PowerManager pm = (PowerManager) AndroidFactory.getApplicationContext().getSystemService(
+                Context.POWER_SERVICE);
         mPowerLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "RcsCore");
         mPowerLock.acquire();
         if (logger.isActivated()) {

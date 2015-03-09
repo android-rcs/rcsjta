@@ -48,7 +48,7 @@ public class EasySSLSocketFactory implements LayeredSocketFactory {
         try {
             SSLContext context = SSLContext.getInstance("TLS");
             context.init(null, new TrustManager[] {
-                    new EasyX509TrustManager(null)
+                new EasyX509TrustManager(null)
             }, null);
             return context;
         } catch (Exception e) {

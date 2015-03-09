@@ -23,6 +23,7 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
+import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatError;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
@@ -30,11 +31,13 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
 import com.gsma.rcs.service.broadcaster.IOneToOneChatEventBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
@@ -66,6 +69,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
 
     private final RcsSettings mRcsSettings;
 
+    private final ContactsManager mContactManager;
+
     /**
      * Lock used for synchronization
      */
@@ -85,16 +90,18 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
      * @param messagingLog MessagingLog
      * @param rcsSettings RcsSettings
      * @param chatService ChatServiceImpl
+     * @param contactManager ContactsManager
      */
     public OneToOneChatImpl(ContactId contact, IOneToOneChatEventBroadcaster broadcaster,
             InstantMessagingService imService, MessagingLog messagingLog, RcsSettings rcsSettings,
-            ChatServiceImpl chatService) {
+            ChatServiceImpl chatService, ContactsManager contactManager) {
         mContact = contact;
         mBroadcaster = broadcaster;
         mImService = imService;
         mMessagingLog = messagingLog;
         mChatService = chatService;
         mRcsSettings = rcsSettings;
+        mContactManager = contactManager;
     }
 
     private ReasonCode imdnToFailedReasonCode(ImdnDocument imdn) {
@@ -247,8 +254,53 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
      * 
      * @return boolean
      */
-    public boolean canSendMessage() {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+    public boolean isAllowedToSendMessage() {
+        if (!mRcsSettings.getMyCapabilities().isImSessionSupported()) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder(
+                        "Cannot send message on one-to-one chat with contact '").append(mContact)
+                        .append("' as IM capabilities are not supported for self.").toString());
+            }
+            return false;
+        }
+        Capabilities remoteCapabilities = mContactManager.getContactCapabilities(mContact);
+        if (remoteCapabilities == null) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder(
+                        "Cannot send message on one-to-one chat with contact '").append(mContact)
+                        .append("' as the contact's capabilities are not known.").toString());
+            }
+            return false;
+        }
+        MessagingMode mode = mRcsSettings.getMessagingMode();
+        switch (mode) {
+            case INTEGRATED:
+            case SEAMLESS:
+                if (!mRcsSettings.isImAlwaysOn()
+                        && !mImService.isCapabilitiesValid(remoteCapabilities)) {
+                    if (logger.isActivated()) {
+                        logger.debug(new StringBuilder(
+                                "Cannot send message on one-to-one chat with contact '")
+                                .append(mContact)
+                                .append("' as the contact's cached capabilities are not valid anymore for one-to-one communication.")
+                                .toString());
+                    }
+                    return false;
+                }
+                break;
+            default:
+                break;
+        }
+        if (!remoteCapabilities.isImSessionSupported()) {
+            if (logger.isActivated()) {
+                logger.debug(new StringBuilder(
+                        "Cannot send message on one-to-one chat with contact '").append(mContact)
+                        .append("' as IM capabilities are not supported for that contact.")
+                        .toString());
+            }
+            return false;
+        }
+        return true;
     }
 
     /**

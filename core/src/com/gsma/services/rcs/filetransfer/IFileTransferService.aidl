@@ -9,6 +9,7 @@ import com.gsma.services.rcs.filetransfer.IGroupFileTransferListener;
 import com.gsma.services.rcs.filetransfer.IFileTransferServiceConfiguration;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.RcsServiceRegistration;
+import com.gsma.services.rcs.ICommonServiceConfiguration;
 
 /**
  * File transfer service API
@@ -51,9 +52,9 @@ interface IFileTransferService {
 	
 	void setImageResizeOption(in int option);
 
-	boolean canTransferFile(in ContactId contact);
+	boolean isAllowedToTransferFile(in ContactId contact);
 
-	boolean canTransferFileToGroupChat(in String chatId);
+	boolean isAllowedToTransferFileToGroupChat(in String chatId);
 
 	void deleteOneToOneFileTransfers();
 
@@ -66,4 +67,6 @@ interface IFileTransferService {
 	void deleteFileTransfer(in String transferId);
 
 	void markUndeliveredFileTransfersAsProcessed(in List<String> transferIds);
+	
+	ICommonServiceConfiguration getCommonConfiguration();
 }

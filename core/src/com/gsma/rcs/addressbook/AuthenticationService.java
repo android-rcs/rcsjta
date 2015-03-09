@@ -94,8 +94,7 @@ public class AuthenticationService extends Service {
      * @param rcsSettings
      */
     public static void createRcsAccount(Context context, LocalContentResolver localContentResolver,
-            String username,
-            boolean enableSync, RcsSettings rcsSettings) {
+            String username, boolean enableSync, RcsSettings rcsSettings) {
         ContactsManager.createInstance(context, context.getContentResolver(), localContentResolver,
                 rcsSettings);
 

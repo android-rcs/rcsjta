@@ -61,7 +61,7 @@ public class Smileys implements AbstractMessageParser.Resources {
             R.drawable.ri_smiley_lips_are_sealed, // 14
             R.drawable.ri_smiley_laughing, // 15
             R.drawable.ri_smiley_wtf
-            // 16
+    // 16
     };
 
     private static final int DEFAULT_SMILEY_TEXTS = R.array.default_smiley_texts;

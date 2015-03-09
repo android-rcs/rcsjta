@@ -318,7 +318,7 @@ public class SipMessageFactory {
             // Set feature tags
             if (featureTag != null) {
                 SipUtils.setFeatureTags(message, new String[] {
-                        featureTag
+                    featureTag
                 });
             }
 
@@ -1096,7 +1096,7 @@ public class SipMessageFactory {
 
             // Set feature tags
             String[] tags = {
-                    FeatureTags.FEATURE_OMA_IM
+                FeatureTags.FEATURE_OMA_IM
             };
             SipUtils.setFeatureTags(refer, tags);
 
@@ -1168,7 +1168,7 @@ public class SipMessageFactory {
 
             // Set feature tags
             String[] tags = {
-                    FeatureTags.FEATURE_OMA_IM
+                FeatureTags.FEATURE_OMA_IM
             };
             SipUtils.setFeatureTags(refer, tags);
 
