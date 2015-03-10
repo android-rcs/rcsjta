@@ -274,9 +274,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         mContactManager.setContactDisplayName(contact, session.getRemoteDisplayName());
 
         // Add session in the list
-        OneToOneChatImpl oneToOneChat = new OneToOneChatImpl(contact,
-                mOneToOneChatEventBroadcaster, mImService, mMessagingLog, mRcsSettings, this,
-                mContactManager);
+        OneToOneChatImpl oneToOneChat = getOrCreateOneToOneChat(contact);
         session.addListener(oneToOneChat);
         addOneToOneChat(contact, oneToOneChat);
 
@@ -376,6 +374,15 @@ public class ChatServiceImpl extends IChatService.Stub {
         }
     }
 
+    private OneToOneChatImpl getOrCreateOneToOneChat(ContactId contact) {
+        OneToOneChatImpl oneToOneChat = mOneToOneChatCache.get(contact);
+        if (oneToOneChat != null) {
+            return oneToOneChat;
+        }
+        return new OneToOneChatImpl(contact, mOneToOneChatEventBroadcaster, mImService,
+                mMessagingLog, mRcsSettings, this, mContactManager);
+    }
+
     /**
      * Returns a chat from its unique ID
      * 
@@ -384,12 +391,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @throws ServerApiException
      */
     public IOneToOneChat getOneToOneChat(ContactId contact) throws ServerApiException {
-        IOneToOneChat oneToOneChat = mOneToOneChatCache.get(contact);
-        if (oneToOneChat != null) {
-            return oneToOneChat;
-        }
-        return new OneToOneChatImpl(contact, mOneToOneChatEventBroadcaster, mImService,
-                mMessagingLog, mRcsSettings, this, mContactManager);
+        return getOrCreateOneToOneChat(contact);
     }
 
     /**

@@ -62,7 +62,8 @@ import com.gsma.rcs.core.ims.service.im.chat.TerminatingOneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.StoreAndForwardManager;
-import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardMsgSession;
+import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneMessageSession;
+import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneNotificationSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
@@ -109,6 +110,16 @@ public class InstantMessagingService extends ImsService {
      * OneToOneChatSessionCache with ContactId as key
      */
     private Map<ContactId, OneToOneChatSession> mOneToOneChatSessionCache = new HashMap<ContactId, OneToOneChatSession>();
+
+    /**
+     * StoreAndForwardMsgSessionCache with ContactId as key
+     */
+    private Map<ContactId, TerminatingStoreAndForwardOneToOneMessageSession> mStoreAndForwardMsgSessionCache = new HashMap<ContactId, TerminatingStoreAndForwardOneToOneMessageSession>();
+
+    /**
+     * StoreAndForwardNotifSessionCache with ContactId as key
+     */
+    private Map<ContactId, TerminatingStoreAndForwardOneToOneNotificationSession> mStoreAndForwardNotifSessionCache = new HashMap<ContactId, TerminatingStoreAndForwardOneToOneNotificationSession>();
 
     /**
      * GroupChatSessionCache with ChatId as key
@@ -313,6 +324,93 @@ public class InstantMessagingService extends ImsService {
         }
         synchronized (getImsServiceSessionOperationLock()) {
             return mOneToOneChatSessionCache.get(contact);
+        }
+    }
+
+    public void addSession(TerminatingStoreAndForwardOneToOneMessageSession session) {
+        ContactId contact = session.getRemoteContact();
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Add StoreAndForwardMsgSession with contact '")
+                    .append(contact).append("'").toString());
+        }
+        synchronized (getImsServiceSessionOperationLock()) {
+            mStoreAndForwardMsgSessionCache.put(contact, session);
+            addImsServiceSession(session);
+        }
+    }
+
+    public void removeSession(final TerminatingStoreAndForwardOneToOneMessageSession session) {
+        final ContactId contact = session.getRemoteContact();
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Remove StoreAndForwardMsgSession with contact '")
+                    .append(contact).append("'").toString());
+        }
+        /*
+         * Performing remove session operation on a new thread so that ongoing threads trying to get
+         * that session can finish up before it is actually removed
+         */
+        new Thread() {
+            @Override
+            public void run() {
+                synchronized (getImsServiceSessionOperationLock()) {
+                    mStoreAndForwardMsgSessionCache.remove(contact);
+                    removeImsServiceSession(session);
+                }
+            }
+        }.start();
+    }
+
+    public TerminatingStoreAndForwardOneToOneMessageSession getStoreAndForwardMsgSession(ContactId contact) {
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Get StoreAndForwardMsgSession with contact '")
+                    .append(contact).append("'").toString());
+        }
+        synchronized (getImsServiceSessionOperationLock()) {
+            return mStoreAndForwardMsgSessionCache.get(contact);
+        }
+    }
+
+    public void addSession(TerminatingStoreAndForwardOneToOneNotificationSession session) {
+        ContactId contact = session.getRemoteContact();
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Add StoreAndForwardNotifSessionCache with contact '")
+                    .append(contact).append("'").toString());
+        }
+        synchronized (getImsServiceSessionOperationLock()) {
+            mStoreAndForwardNotifSessionCache.put(contact, session);
+            addImsServiceSession(session);
+        }
+    }
+
+    public void removeSession(final TerminatingStoreAndForwardOneToOneNotificationSession session) {
+        final ContactId contact = session.getRemoteContact();
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder(
+                    "Remove StoreAndForwardNotifSessionCache with contact '").append(contact)
+                    .append("'").toString());
+        }
+        /*
+         * Performing remove session operation on a new thread so that ongoing threads trying to get
+         * that session can finish up before it is actually removed
+         */
+        new Thread() {
+            @Override
+            public void run() {
+                synchronized (getImsServiceSessionOperationLock()) {
+                    mStoreAndForwardNotifSessionCache.remove(contact);
+                    removeImsServiceSession(session);
+                }
+            }
+        }.start();
+    }
+
+    public TerminatingStoreAndForwardOneToOneNotificationSession getStoreAndForwardNotifSession(ContactId contact) {
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Get StoreAndForwardNotifSession with contact '")
+                    .append(contact).append("'").toString());
+        }
+        synchronized (getImsServiceSessionOperationLock()) {
+            return mStoreAndForwardNotifSessionCache.get(contact);
         }
     }
 
@@ -1330,7 +1428,7 @@ public class InstantMessagingService extends ImsService {
         }
 
         // Create and start a chat session
-        TerminatingStoreAndForwardMsgSession one2oneChatSession = new TerminatingStoreAndForwardMsgSession(
+        TerminatingStoreAndForwardOneToOneMessageSession one2oneChatSession = new TerminatingStoreAndForwardOneToOneMessageSession(
                 this, invite, remote, mRcsSettings, mMessagingLog);
         one2oneChatSession.startSession();
 

@@ -31,6 +31,7 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
+import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneMessageSession;
 import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -391,7 +392,10 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
             if (logger.isActivated()) {
                 logger.debug("Set displayed delivery report for " + msgId);
             }
-            final OneToOneChatSession session = mImService.getOneToOneChatSession(contact);
+            TerminatingStoreAndForwardOneToOneMessageSession storeAndForwardSession = mImService
+                    .getStoreAndForwardMsgSession(mContact);
+            final OneToOneChatSession session = storeAndForwardSession != null ? storeAndForwardSession
+                    : mImService.getOneToOneChatSession(mContact);
             if (session != null && session.isMediaEstablished()) {
                 if (logger.isActivated()) {
                     logger.info("Use the original session to send the delivery status for " + msgId);

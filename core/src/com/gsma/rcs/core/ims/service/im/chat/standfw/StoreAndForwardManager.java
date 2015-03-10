@@ -74,7 +74,7 @@ public class StoreAndForwardManager {
             logger.debug("Receive stored messages");
         }
 
-        TerminatingStoreAndForwardMsgSession session = new TerminatingStoreAndForwardMsgSession(
+        TerminatingStoreAndForwardOneToOneMessageSession session = new TerminatingStoreAndForwardOneToOneMessageSession(
                 imsService, invite, contact, rcsSettings, messagingLog);
 
         imsService.getImsModule().getCore().getListener()
@@ -98,7 +98,7 @@ public class StoreAndForwardManager {
             logger.debug("Receive stored notifications");
         }
 
-        TerminatingStoreAndForwardNotifSession session = new TerminatingStoreAndForwardNotifSession(
+        TerminatingStoreAndForwardOneToOneNotificationSession session = new TerminatingStoreAndForwardOneToOneNotificationSession(
                 imsService, invite, contact, rcsSettings, messagingLog);
 
         // Start the session

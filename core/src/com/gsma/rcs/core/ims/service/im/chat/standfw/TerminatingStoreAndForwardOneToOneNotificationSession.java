@@ -57,11 +57,11 @@ import java.io.IOException;
 import java.util.Vector;
 
 /**
- * Terminating Store & Forward session for push notifications
+ * Terminating Store & Forward session for one-one push notifications
  * 
  * @author jexa7410
  */
-public class TerminatingStoreAndForwardNotifSession extends OneToOneChatSession implements
+public class TerminatingStoreAndForwardOneToOneNotificationSession extends OneToOneChatSession implements
         MsrpEventListener {
     /**
      * MSRP manager
@@ -72,7 +72,7 @@ public class TerminatingStoreAndForwardNotifSession extends OneToOneChatSession 
      * The logger
      */
     private static final Logger sLogger = Logger
-            .getLogger(TerminatingStoreAndForwardNotifSession.class.getSimpleName());
+            .getLogger(TerminatingStoreAndForwardOneToOneNotificationSession.class.getSimpleName());
 
     /**
      * Constructor
@@ -83,7 +83,7 @@ public class TerminatingStoreAndForwardNotifSession extends OneToOneChatSession 
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
      */
-    public TerminatingStoreAndForwardNotifSession(ImsService parent, SipRequest invite,
+    public TerminatingStoreAndForwardOneToOneNotificationSession(ImsService parent, SipRequest invite,
             ContactId contact, RcsSettings rcsSettings, MessagingLog messagingLog) {
         super(parent, contact, PhoneUtils.formatContactIdToUri(contact), null, rcsSettings,
                 messagingLog);
@@ -444,60 +444,7 @@ public class TerminatingStoreAndForwardNotifSession extends OneToOneChatSession 
 
     @Override
     public void startSession() {
-        final boolean logActivated = sLogger.isActivated();
-        ContactId contact = getRemoteContact();
-        if (logActivated) {
-            sLogger.debug("Start OneToOneChatSession with '" + contact + "'");
-        }
-        InstantMessagingService imService = getImsService().getImsModule()
-                .getInstantMessagingService();
-        OneToOneChatSession currentSession = imService.getOneToOneChatSession(contact);
-        if (currentSession != null) {
-            boolean currentSessionInitiatedByRemote = currentSession.isInitiatedByRemote();
-            boolean currentSessionEstablished = currentSession.getDialogPath()
-                    .isSessionEstablished();
-            if (!currentSessionEstablished && !currentSessionInitiatedByRemote) {
-                /*
-                 * Rejecting the NEW invitation since there is already a PENDING OneToOneChatSession
-                 * that was locally originated with the same contact.
-                 */
-                if (logActivated) {
-                    sLogger.warn("Rejecting OneToOneChatSession (session id '" + getSessionID()
-                            + "') with '" + contact + "'");
-                }
-                rejectSession();
-                return;
-            }
-            /*
-             * If this oneToOne session does NOT already contain another oneToOne chat session which
-             * in state PENDING and also LOCALLY originating we should leave (reject or abort) the
-             * CURRENT rcs chat session if there is one and replace it with the new one.
-             */
-            if (logActivated) {
-                sLogger.warn("Rejecting/Aborting existing OneToOneChatSession (session id '"
-                        + getSessionID() + "') with '" + contact + "'");
-            }
-            if (currentSessionInitiatedByRemote) {
-                if (currentSessionEstablished) {
-                    currentSession.abortSession(TerminationReason.TERMINATION_BY_SYSTEM);
-                } else {
-                    currentSession.rejectSession();
-                }
-            } else {
-                currentSession.abortSession(TerminationReason.TERMINATION_BY_SYSTEM);
-            }
-            /*
-             * Since the current session was already established and we are now replacing that
-             * session with a new session then we make sure to auto-accept that new replacement
-             * session also so to leave the client in the same situation for the replacement session
-             * as for the original "current" session regardless if the the provisioning setting for
-             * chat is set to non-auto-accept or not.
-             */
-            if (currentSessionEstablished) {
-                setSessionAccepted();
-            }
-        }
-        imService.addSession(this);
+        getImsService().getImsModule().getInstantMessagingService().addSession(this);
         start();
     }
 
