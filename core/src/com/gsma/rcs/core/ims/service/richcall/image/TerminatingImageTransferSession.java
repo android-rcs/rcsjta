@@ -426,22 +426,13 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                 ((ImageTransferSessionListener) getListeners().get(j)).handleContentTransfered(
                         contact, image);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             // Delete the temp file
             deleteFile();
 
             for (int j = 0; j < getListeners().size(); j++) {
                 ((ImageTransferSessionListener) getListeners().get(j)).handleSharingError(contact,
                         new ContentSharingError(ContentSharingError.MEDIA_SAVING_FAILED));
-            }
-        } catch (Exception e) {
-            // Delete the temp file
-            deleteFile();
-
-            // Notify listeners
-            for (int j = 0; j < getListeners().size(); j++) {
-                ((ImageTransferSessionListener) getListeners().get(j)).handleSharingError(contact,
-                        new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
             }
         }
     }
@@ -482,7 +473,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
             // Notify listeners
             for (int j = 0; j < getListeners().size(); j++) {
                 ((ImageTransferSessionListener) getListeners().get(j)).handleSharingError(contact,
-                        new ContentSharingError(ContentSharingError.MEDIA_SAVING_FAILED));
+                        new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED));
             }
         }
         return true;
