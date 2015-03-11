@@ -121,7 +121,7 @@ public class FileTransferProvider extends ContentProvider {
     public static final String DATABASE_NAME = "filetransfer.db";
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 13;
+        private static final int DATABASE_VERSION = 14;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);

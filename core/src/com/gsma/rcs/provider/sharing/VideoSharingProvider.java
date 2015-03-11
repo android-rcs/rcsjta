@@ -83,7 +83,7 @@ public class VideoSharingProvider extends ContentProvider {
      * Helper class for opening, creating and managing db version control
      */
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 6;
+        private static final int DATABASE_VERSION = 7;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);

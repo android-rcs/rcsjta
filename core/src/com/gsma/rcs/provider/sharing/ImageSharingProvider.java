@@ -80,7 +80,7 @@ public class ImageSharingProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 5;
+        private static final int DATABASE_VERSION = 6;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);

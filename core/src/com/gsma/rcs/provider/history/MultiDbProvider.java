@@ -134,7 +134,9 @@ import java.util.Set;
                 }
 
             } finally {
-                cursor.close();
+                if (cursor != null) {
+                    cursor.close();
+                }
             }
             mOpenHelper.attach(providerId);
         }
@@ -163,7 +165,7 @@ import java.util.Set;
     }
 
     /**
-     * Initializes the internal providers. Used by the unit test to reinitialize after shutdown.
+     * Initializes the internal providers.
      * 
      * @throws IOException
      */
@@ -171,6 +173,16 @@ import java.util.Set;
         if (mHistoryMemberDatabases.size() > 0) {
             return;
         }
+
+        if (mOpenHelper == null) {
+            return;
+        }
+
+        mOpenHelper.detachAll();
+        mAllDatabasesAttached = false;
+        mQueryHelper.clear();
+        mForbiddenCanonicalPaths.clear();
+        mHistoryMemberDatabases.clear();
 
         for (String databaseName : HistoryConstants.PROTECTED_INTERNAL_DATABASES) {
             Uri databaseUri = Uri.fromFile(getContext().getDatabasePath(databaseName));
@@ -200,18 +212,6 @@ import java.util.Set;
             throw new IllegalStateException("Problem registering internal history providers!", e);
         }
         return true;
-    }
-
-    @Override
-    public void shutdown() {
-        if (mOpenHelper == null) {
-            return;
-        }
-        mOpenHelper.detachAll();
-        mAllDatabasesAttached = false;
-        mQueryHelper.clear();
-        mForbiddenCanonicalPaths.clear();
-        mHistoryMemberDatabases.clear();
     }
 
     public void registerDatabase(int providerId, Uri contentProviderUri, Uri databaseUri,

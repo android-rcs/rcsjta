@@ -206,7 +206,7 @@ public class HistoryLogTest extends AndroidTestCase {
         super.setUp();
 
         ContentResolver realResolver = getContext().getContentResolver();
-        MockContentResolver mockResolver = new MockContentResolver(getContext());
+        MockContentResolver mockResolver = new MockContentResolver();
         IsolatedContext iContext = new IsolatedContext(mockResolver, super.getContext());
 
         mockResolver.addProvider("com.gsma.services.rcs.provider.chat", realResolver
@@ -230,7 +230,6 @@ public class HistoryLogTest extends AndroidTestCase {
         mockResolver.addProvider(HistoryLog.CONTENT_URI.getAuthority(), historyProvider);
         mockResolver.addProvider(EXTERNAL_AUTHORITY, sMyContentProvider);
 
-        historyProvider.shutdown();
         historyProvider.registerInternalProviders();
 
         sMyContentProvider.attachInfo(iContext, null);

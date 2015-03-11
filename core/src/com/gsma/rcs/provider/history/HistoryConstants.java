@@ -86,7 +86,7 @@ import java.util.Set;
                 ChatLog.Message.CONTENT_URI, ChatProvider.DATABASE_NAME, null,
                 ChatProvider.TABLE_MESSAGE, getChatMessageProviderColumnMapping()));
         internalMembers.add(new HistoryMemberDatabase(FileTransferData.HISTORYLOG_MEMBER_ID,
-                FileTransferLog.CONTENT_URI, FileTransferProvider.DATABASE_NAME, null,
+                FileTransferData.CONTENT_URI, FileTransferProvider.DATABASE_NAME, null,
                 FileTransferProvider.TABLE, getFileTransferProviderColumnMapping()));
         internalMembers.add(new HistoryMemberDatabase(ImageSharingData.HISTORYLOG_MEMBER_ID,
                 ImageSharingLog.CONTENT_URI, ImageSharingProvider.DATABASE_NAME, null,
