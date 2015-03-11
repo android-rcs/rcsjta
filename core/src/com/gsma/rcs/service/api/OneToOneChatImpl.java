@@ -619,18 +619,35 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
 
     /*
      * (non-Javadoc)
+     * @see com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener#
+     * handleOneToOneIncomingSessionInitiationError
+     * (com.gsma.rcs.core.ims.service.im.chat.ChatError)
+     */
+    @Override
+    public void handleIncomingSessionInitiationError(ChatError error) {
+        int errorCode = error.getErrorCode();
+        if (logger.isActivated()) {
+            logger.info("IncomingSessionInitiation error " + errorCode);
+        }
+        synchronized (lock) {
+            mChatService.removeOneToOneChat(mContact);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
      * @see com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener#handleImError
      * (com.gsma.rcs.core.ims.service.im.chat.ChatError)
      */
     @Override
     public void handleImError(ChatError error, ChatMessage message) {
+        int errorCode = error.getErrorCode();
         if (logger.isActivated()) {
-            logger.info("IM error " + error.getErrorCode());
+            logger.info("IM error " + errorCode);
         }
         synchronized (lock) {
             mChatService.removeOneToOneChat(mContact);
-            /* TODO: Fix mapping between ChatError and reasonCode. */
-            switch (error.getErrorCode()) {
+            switch (errorCode) {
                 case ChatError.SESSION_INITIATION_FAILED:
                 case ChatError.SESSION_INITIATION_CANCELLED:
                     if (message != null) {
@@ -641,9 +658,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                                 ReasonCode.FAILED_SEND);
                         mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId,
                                 Status.FAILED, ReasonCode.FAILED_SEND);
-                        break;
                     }
-                    mCore.getListener().tryToMarkQueuedOneToOneChatMessagesAndOneToOneFileTransfersAsFailed(mContact);
+                    mCore.getListener()
+                            .tryToMarkQueuedOneToOneChatMessagesAndOneToOneFileTransfersAsFailed(
+                                    mContact);
+                    break;
                 default:
                     break;
             }

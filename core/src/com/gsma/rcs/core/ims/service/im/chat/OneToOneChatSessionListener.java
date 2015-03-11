@@ -42,4 +42,12 @@ public interface OneToOneChatSessionListener extends ChatSessionListener {
      * @param contact Remote contact
      */
     public void handleSessionAutoAccepted(ContactId contact);
+    
+    /**
+     * IncomingSessionInitiation error
+     * 
+     * @param error Error
+     * @param message
+     */
+    public void handleIncomingSessionInitiationError(ChatError error);
 }

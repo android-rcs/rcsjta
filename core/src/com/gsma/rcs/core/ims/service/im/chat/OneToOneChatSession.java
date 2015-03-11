@@ -29,6 +29,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
+import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
@@ -117,6 +118,24 @@ public abstract class OneToOneChatSession extends ChatSession {
 
         // Close MSRP session
         closeMsrpSession();
+    }
+
+    /**
+     * Handle IncomingSessionInitiation error
+     * 
+     * @param error Error
+     */
+    public void handleIncomingSessionInitiationError(ImsServiceError error) {
+        if (isSessionInterrupted()) {
+            return;
+        }
+        closeMediaSession();
+        removeSession();
+        for (ImsSessionListener listener : getListeners()) {
+            ((OneToOneChatSessionListener) listener)
+                    .handleIncomingSessionInitiationError(new ChatError(error));
+        }
+
     }
 
     /**

@@ -364,7 +364,8 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                 }
 
                 // No response received: timeout
-                handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED));
+                handleIncomingSessionInitiationError(new ChatError(
+                        ChatError.SESSION_INITIATION_FAILED));
             }
         } catch (Exception e) {
             if (logActivated) {

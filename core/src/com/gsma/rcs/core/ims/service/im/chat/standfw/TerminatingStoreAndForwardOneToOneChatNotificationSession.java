@@ -61,8 +61,8 @@ import java.util.Vector;
  * 
  * @author jexa7410
  */
-public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends OneToOneChatSession implements
-        MsrpEventListener {
+public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends OneToOneChatSession
+        implements MsrpEventListener {
     /**
      * MSRP manager
      */
@@ -72,7 +72,8 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
      * The logger
      */
     private static final Logger sLogger = Logger
-            .getLogger(TerminatingStoreAndForwardOneToOneChatNotificationSession.class.getSimpleName());
+            .getLogger(TerminatingStoreAndForwardOneToOneChatNotificationSession.class
+                    .getSimpleName());
 
     /**
      * Constructor
@@ -83,8 +84,8 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
      */
-    public TerminatingStoreAndForwardOneToOneChatNotificationSession(ImsService parent, SipRequest invite,
-            ContactId contact, RcsSettings rcsSettings, MessagingLog messagingLog) {
+    public TerminatingStoreAndForwardOneToOneChatNotificationSession(ImsService parent,
+            SipRequest invite, ContactId contact, RcsSettings rcsSettings, MessagingLog messagingLog) {
         super(parent, contact, PhoneUtils.formatContactIdToUri(contact), null, rcsSettings,
                 messagingLog);
 
@@ -238,7 +239,8 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
                 }
 
                 // No response received: timeout
-                handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED));
+                handleIncomingSessionInitiationError(new ChatError(
+                        ChatError.SESSION_INITIATION_FAILED));
             }
         } catch (Exception e) {
             if (logActivated) {
