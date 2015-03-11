@@ -6,8 +6,8 @@
     <string name="rcs_settings_title_settings">Settings</string>
 	<string name="rcs_settings_title_userprofile_settings">User profile settings</string>	
 	<string name="rcs_settings_title_messaging_settings">Messaging settings</string>
-	<string name="rcs_settings_title_filetransfer_invitation">File transfer invitation settings</string>
-	<string name="rcs_settings_title_chat_invitation">Chat invitation settings</string>	
+	<string name="rcs_settings_title_filetransfer_invitation">File transfer settings</string>
+	<string name="rcs_settings_title_chat_invitation">Chat settings</string>	
 	<string name="rcs_settings_title_about">About settings</string>
 	
 	<string name="rcs_settings_summary_about">About the Reference Implementation</string>			
