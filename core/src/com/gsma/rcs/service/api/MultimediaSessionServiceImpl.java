@@ -39,9 +39,8 @@ import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
-import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.RcsServiceRegistration;
-
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSession;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSessionListener;
 import com.gsma.services.rcs.extension.IMultimediaSessionService;
@@ -187,9 +186,9 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         switch (reason) {
             case TERMINATION_BY_SYSTEM:
             case TERMINATION_BY_TIMEOUT:
-                return ReasonCode.FAILED_SESSION;
+                return ReasonCode.ABORTED_BY_SYSTEM;
             case TERMINATION_BY_USER:
-                return ReasonCode.REJECTED_BY_USER;
+                return ReasonCode.ABORTED_BY_USER;
             default:
                 throw new IllegalArgumentException("Unknown TerminationReason=".concat(String
                         .valueOf(reason)));
@@ -216,7 +215,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 
     /**
      * Registers a listener on service registration events
-     *
+     * 
      * @param listener Service registration listener
      */
     public void addEventListener(IRcsServiceRegistrationListener listener) {
@@ -230,7 +229,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 
     /**
      * Unregisters a listener on service registration events
-     *
+     * 
      * @param listener Service registration listener
      */
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
@@ -254,7 +253,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 
     /**
      * Notifies unregistration event
-     *
+     * 
      * @param reasonCode for unregistration
      */
     public void notifyUnRegistration(RcsServiceRegistration.ReasonCode reasonCode) {
@@ -552,7 +551,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 
     /**
      * Adds a listener on multimedia messaging session events
-     *
+     * 
      * @param listener Session event listener
      */
     public void addEventListener2(IMultimediaMessagingSessionListener listener) {
@@ -568,7 +567,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 
     /**
      * Removes a listener on multimedia messaging session events
-     *
+     * 
      * @param listener Session event listener
      */
     public void removeEventListener2(IMultimediaMessagingSessionListener listener) {
@@ -583,7 +582,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 
     /**
      * Adds a listener on multimedia streaming session events
-     *
+     * 
      * @param listener Session event listener
      */
     public void addEventListener3(IMultimediaStreamingSessionListener listener) {
@@ -598,7 +597,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 
     /**
      * Removes a listener on multimedia streaming session events
-     *
+     * 
      * @param listener Session event listener
      */
     public void removeEventListener3(IMultimediaStreamingSessionListener listener) {

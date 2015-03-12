@@ -91,7 +91,8 @@ public class OriginatingSipRtpSession extends GenericSipRtpSession {
             }
 
             // Unexpected error
-            handleError(new SipSessionError(SipSessionError.UNEXPECTED_EXCEPTION, e.getMessage()));
+            handleError(new SipSessionError(SipSessionError.SESSION_INITIATION_FAILED,
+                    e.getMessage()));
         }
     }
 

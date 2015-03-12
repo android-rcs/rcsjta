@@ -375,7 +375,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
         synchronized (mLock) {
             mMultimediaSessionService.removeMultimediaMessaging(mSessionId);
             mBroadcaster.broadcastStateChanged(contact, mSessionId, State.ABORTED,
-                    ReasonCode.REJECTED_BY_REMOTE);
+                    ReasonCode.ABORTED_BY_REMOTE);
         }
     }
 
@@ -400,6 +400,11 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
                 case SipSessionError.MEDIA_FAILED:
                     mBroadcaster.broadcastStateChanged(contact, mSessionId, State.FAILED,
                             ReasonCode.FAILED_MEDIA);
+                    break;
+                case SipSessionError.SESSION_INITIATION_CANCELLED:
+                case SipSessionError.SESSION_INITIATION_FAILED:
+                    mBroadcaster.broadcastStateChanged(contact, mSessionId, State.FAILED,
+                            ReasonCode.FAILED_INITIATION);
                     break;
                 default:
                     mBroadcaster.broadcastStateChanged(contact, mSessionId, State.FAILED,

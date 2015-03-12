@@ -118,29 +118,54 @@ public abstract class MultimediaSession {
         UNSPECIFIED(0),
 
         /**
-         * Session invitation was rejected due to inactivity.
+         * Session is aborted by local user.
          */
-        REJECTED_BY_INACTIVITY(1),
+        ABORTED_BY_USER(1),
+
+        /**
+         * Session is aborted by remote user.
+         */
+        ABORTED_BY_REMOTE(2),
+
+        /**
+         * Session is aborted by system.
+         */
+        ABORTED_BY_SYSTEM(3),
+
+        /**
+         * Session is aborted by inactivity.
+         */
+        ABORTED_BY_INACTIVITY(4),
 
         /**
          * Session invitation was rejected by local user.
          */
-        REJECTED_BY_USER(2),
+        REJECTED_BY_USER(5),
 
         /**
          * Session invitation was rejected by remote.
          */
-        REJECTED_BY_REMOTE(3),
+        REJECTED_BY_REMOTE(6),
+
+        /**
+         * Session invitation was rejected by inactivity.
+         */
+        REJECTED_BY_INACTIVITY(7),
+
+        /**
+         * Initiation failed.
+         */
+        FAILED_INITIATION(8),
 
         /**
          * Session failed.
          */
-        FAILED_SESSION(4),
+        FAILED_SESSION(9),
 
         /**
          * Media failed.
          */
-        FAILED_MEDIA(5);
+        FAILED_MEDIA(10);
 
         private final int mValue;
 
