@@ -280,14 +280,19 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
         }
     }
 
+    private void setStateAndReasonCodeAndBroadcast(ContactId contact, State state,
+            ReasonCode reasonCode) {
+        mPersistentStorage.setStateAndReasonCode(state, reasonCode);
+        mBroadcaster.broadcastStateChanged(contact, mSharingId, state, reasonCode);
+    }
+
     private void handleSessionRejected(ReasonCode reasonCode, ContactId contact) {
         if (logger.isActivated()) {
             logger.info("Session rejected; reasonCode=" + reasonCode + ".");
         }
         synchronized (lock) {
             mGeolocSharingService.removeGeolocSharing(mSharingId);
-            mPersistentStorage.setStateAndReasonCode(State.REJECTED, reasonCode);
-            mBroadcaster.broadcastStateChanged(contact, mSharingId, State.REJECTED, reasonCode);
+            setStateAndReasonCodeAndBroadcast(contact, State.REJECTED, reasonCode);
         }
     }
 
@@ -299,9 +304,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
             logger.info("Session started.");
         }
         synchronized (lock) {
-            mPersistentStorage.setStateAndReasonCode(State.STARTED, ReasonCode.UNSPECIFIED);
-            mBroadcaster.broadcastStateChanged(contact, mSharingId, State.STARTED,
-                    ReasonCode.UNSPECIFIED);
+            setStateAndReasonCodeAndBroadcast(contact, State.STARTED, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -316,23 +319,27 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
             logger.info(new StringBuilder("Session aborted; reason=").append(reason).append(".")
                     .toString());
         }
-        ReasonCode reasonCode;
-        switch (reason) {
-            case TERMINATION_BY_TIMEOUT:
-            case TERMINATION_BY_SYSTEM:
-                reasonCode = ReasonCode.ABORTED_BY_SYSTEM;
-                break;
-            case TERMINATION_BY_USER:
-                reasonCode = ReasonCode.ABORTED_BY_USER;
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown reason ; sessionAbortedReason="
-                        + reason + "!");
-        }
         synchronized (lock) {
             mGeolocSharingService.removeGeolocSharing(mSharingId);
-            mPersistentStorage.setStateAndReasonCode(State.ABORTED, reasonCode);
-            mBroadcaster.broadcastStateChanged(contact, mSharingId, State.ABORTED, reasonCode);
+            switch (reason) {
+                case TERMINATION_BY_TIMEOUT:
+                case TERMINATION_BY_SYSTEM:
+                    setStateAndReasonCodeAndBroadcast(contact, State.ABORTED,
+                            ReasonCode.ABORTED_BY_SYSTEM);
+                    break;
+                case TERMINATION_BY_CONNECTION_LOST:
+                    setStateAndReasonCodeAndBroadcast(contact, State.FAILED,
+                            ReasonCode.FAILED_SHARING);
+                    break;
+                case TERMINATION_BY_USER:
+                    setStateAndReasonCodeAndBroadcast(contact, State.ABORTED,
+                            ReasonCode.ABORTED_BY_USER);
+                    break;
+                default:
+                    throw new IllegalArgumentException(new StringBuilder(
+                            "Unknown reason ; sessionAbortedReason=").append(reason).append("!")
+                            .toString());
+            }
         }
     }
 
@@ -351,9 +358,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
              * storing and broadcasting right state and reasoncode.
              */
             if (State.TRANSFERRED != mPersistentStorage.getState()) {
-                mPersistentStorage.setStateAndReasonCode(State.ABORTED,
-                        ReasonCode.ABORTED_BY_REMOTE);
-                mBroadcaster.broadcastStateChanged(contact, mSharingId, State.ABORTED,
+                setStateAndReasonCodeAndBroadcast(contact, State.ABORTED,
                         ReasonCode.ABORTED_BY_REMOTE);
             }
         }
@@ -375,8 +380,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
         ReasonCode reasonCode = stateAndReasonCode.getReasonCode();
         synchronized (lock) {
             mGeolocSharingService.removeGeolocSharing(mSharingId);
-            mPersistentStorage.setStateAndReasonCode(state, reasonCode);
-            mBroadcaster.broadcastStateChanged(contact, mSharingId, state, reasonCode);
+            setStateAndReasonCodeAndBroadcast(contact, state, reasonCode);
         }
     }
 
@@ -409,9 +413,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
             logger.info("Accepting sharing.");
         }
         synchronized (lock) {
-            mPersistentStorage.setStateAndReasonCode(State.ACCEPTING, ReasonCode.UNSPECIFIED);
-            mBroadcaster.broadcastStateChanged(contact, mSharingId, State.ACCEPTING,
-                    ReasonCode.UNSPECIFIED);
+            setStateAndReasonCodeAndBroadcast(contact, State.ACCEPTING, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -445,9 +447,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
     @Override
     public void handle180Ringing(ContactId contact) {
         synchronized (lock) {
-            mPersistentStorage.setStateAndReasonCode(State.RINGING, ReasonCode.UNSPECIFIED);
-            mBroadcaster.broadcastStateChanged(contact, mSharingId, State.RINGING,
-                    ReasonCode.UNSPECIFIED);
+            setStateAndReasonCodeAndBroadcast(contact, State.RINGING, ReasonCode.UNSPECIFIED);
         }
     }
 }

@@ -18,7 +18,17 @@
 
 package com.gsma.rcs.core.ims.network;
 
-import java.util.Random;
+import com.gsma.rcs.core.CoreException;
+import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.network.ImsNetworkInterface.DnsResolvedFields;
+import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
+import com.gsma.rcs.platform.AndroidFactory;
+import com.gsma.rcs.platform.network.NetworkFactory;
+import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.settings.RcsSettingsData.NetworkAccessType;
+import com.gsma.rcs.service.LauncherUtils;
+import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.CommonServiceConfiguration.MinimumBatteryLevel;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -29,16 +39,7 @@ import android.net.NetworkInfo;
 import android.os.BatteryManager;
 import android.telephony.TelephonyManager;
 
-import com.gsma.rcs.core.CoreException;
-import com.gsma.rcs.core.ims.ImsModule;
-import com.gsma.rcs.core.ims.network.ImsNetworkInterface.DnsResolvedFields;
-import com.gsma.rcs.platform.AndroidFactory;
-import com.gsma.rcs.platform.network.NetworkFactory;
-import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.provider.settings.RcsSettingsData.NetworkAccessType;
-import com.gsma.rcs.service.LauncherUtils;
-import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.CommonServiceConfiguration.MinimumBatteryLevel;
+import java.util.Random;
 
 /**
  * IMS connection manager
@@ -238,7 +239,7 @@ public class ImsConnectionManager implements Runnable {
         }
 
         // Stop the IMS connection manager
-        stopImsConnection();
+        stopImsConnection(TerminationReason.TERMINATION_BY_SYSTEM);
 
         // Unregister from the IMS
         mCurrentNetworkInterface.unregister();
@@ -479,7 +480,7 @@ public class ImsConnectionManager implements Runnable {
      */
     private void disconnectFromIms() {
         // Stop the IMS connection
-        stopImsConnection();
+        stopImsConnection(TerminationReason.TERMINATION_BY_CONNECTION_LOST);
 
         // Registration terminated
         mCurrentNetworkInterface.registrationTerminated();
@@ -517,7 +518,7 @@ public class ImsConnectionManager implements Runnable {
     /**
      * Stop the IMS connection
      */
-    private synchronized void stopImsConnection() {
+    private synchronized void stopImsConnection(TerminationReason reasonCode) {
         if (mImsPollingThreadId == -1) {
             // Already disconnected
             return;
@@ -541,7 +542,7 @@ public class ImsConnectionManager implements Runnable {
 
         // Stop IMS services
         if (mImsServicesStarted) {
-            mImsModule.stopImsServices();
+            mImsModule.stopImsServices(reasonCode);
             mImsServicesStarted = false;
         }
     }

@@ -294,9 +294,9 @@ public class ImsModule implements SipEventListener {
     /**
      * Stop IMS services
      */
-    public void stopImsServices() {
+    public void stopImsServices(TerminationReason reasonCode) {
         // Abort all pending sessions
-        abortAllSessions();
+        abortAllSessions(reasonCode);
 
         // Stop each services
         for (ImsService imsService : mServices.values()) {
@@ -437,12 +437,12 @@ public class ImsModule implements SipEventListener {
     /**
      * Abort all sessions
      */
-    public void abortAllSessions() {
+    public void abortAllSessions(TerminationReason reasonCode) {
         if (logger.isActivated()) {
             logger.debug("Abort all pending sessions");
         }
         for (ImsService service : getImsServices()) {
-            service.abortAllSessions(TerminationReason.TERMINATION_BY_SYSTEM);
+            service.abortAllSessions(reasonCode);
         }
     }
 

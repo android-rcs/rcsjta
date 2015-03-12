@@ -137,6 +137,12 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         return System.currentTimeMillis() - getTimestamp();
     }
 
+    private void setStateAndReasonCodeAndDurationAndBroadcast(ContactId contact,
+            long currentDuration, State state, ReasonCode reasonCode) {
+        mPersistentStorage.setStateReasonCodeAndDuration(state, reasonCode, currentDuration);
+        mBroadcaster.broadcastStateChanged(contact, mSharingId, state, reasonCode);
+    }
+
     /**
      * Returns the sharing ID of the video sharing
      * 
@@ -382,12 +388,10 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         if (logger.isActivated()) {
             logger.info("Session started");
         }
+        long currentDuration = getCurrentDuration();
         synchronized (mLock) {
-            mPersistentStorage.setStateReasonCodeAndDuration(VideoSharing.State.STARTED,
-                    ReasonCode.UNSPECIFIED, getCurrentDuration());
-
-            mBroadcaster.broadcastStateChanged(contact, mSharingId, VideoSharing.State.STARTED,
-                    ReasonCode.UNSPECIFIED);
+            setStateAndReasonCodeAndDurationAndBroadcast(contact, currentDuration,
+                    VideoSharing.State.STARTED, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -404,27 +408,24 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         long currentDuration = getCurrentDuration();
         synchronized (mLock) {
             mVideoSharingService.removeVideoSharing(mSharingId);
-            /*
-             * TODO: Fix reasoncode mapping in the switch.
-             */
-            ReasonCode reasonCode;
             switch (reason) {
                 case TERMINATION_BY_SYSTEM:
                 case TERMINATION_BY_TIMEOUT:
-                    reasonCode = ReasonCode.ABORTED_BY_SYSTEM;
+                    setStateAndReasonCodeAndDurationAndBroadcast(contact, currentDuration,
+                            State.ABORTED, ReasonCode.ABORTED_BY_SYSTEM);
+                    break;
+                case TERMINATION_BY_CONNECTION_LOST:
+                    setStateAndReasonCodeAndDurationAndBroadcast(contact, currentDuration,
+                            State.FAILED, ReasonCode.FAILED_SHARING);
                     break;
                 case TERMINATION_BY_USER:
-                    reasonCode = ReasonCode.ABORTED_BY_USER;
+                    setStateAndReasonCodeAndDurationAndBroadcast(contact, currentDuration,
+                            State.ABORTED, ReasonCode.ABORTED_BY_USER);
                     break;
                 default:
                     throw new IllegalArgumentException(
                             "Unknown imsServiceSessionError=".concat(String.valueOf(reason)));
             }
-            mPersistentStorage.setStateReasonCodeAndDuration(VideoSharing.State.ABORTED,
-                    reasonCode, currentDuration);
-
-            mBroadcaster.broadcastStateChanged(contact, mSharingId, VideoSharing.State.ABORTED,
-                    reasonCode);
         }
     }
 
@@ -438,12 +439,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         long currentDuration = getCurrentDuration();
         synchronized (mLock) {
             mVideoSharingService.removeVideoSharing(mSharingId);
-
-            mPersistentStorage.setStateReasonCodeAndDuration(VideoSharing.State.ABORTED,
-                    ReasonCode.ABORTED_BY_REMOTE, currentDuration);
-
-            mBroadcaster.broadcastStateChanged(contact, getSharingId(), VideoSharing.State.ABORTED,
-                    ReasonCode.ABORTED_BY_REMOTE);
+            setStateAndReasonCodeAndDurationAndBroadcast(contact, currentDuration,
+                    VideoSharing.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
         }
     }
 
@@ -463,10 +460,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         long currentDuration = getCurrentDuration();
         synchronized (mLock) {
             mVideoSharingService.removeVideoSharing(mSharingId);
-
-            mPersistentStorage.setStateReasonCodeAndDuration(state, reasonCode, currentDuration);
-
-            mBroadcaster.broadcastStateChanged(contact, mSharingId, state, reasonCode);
+            setStateAndReasonCodeAndDurationAndBroadcast(contact, currentDuration, state,
+                    reasonCode);
         }
     }
 
@@ -477,10 +472,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         }
         long currentDuration = getCurrentDuration();
         synchronized (mLock) {
-            mPersistentStorage.setStateReasonCodeAndDuration(VideoSharing.State.ACCEPTING,
-                    ReasonCode.UNSPECIFIED, currentDuration);
-            mBroadcaster.broadcastStateChanged(contact, mSharingId, VideoSharing.State.ACCEPTING,
-                    ReasonCode.UNSPECIFIED);
+            setStateAndReasonCodeAndDurationAndBroadcast(contact, currentDuration,
+                    VideoSharing.State.ACCEPTING, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -528,10 +521,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
     public void handle180Ringing(ContactId contact) {
         long currentDuration = getCurrentDuration();
         synchronized (mLock) {
-            mPersistentStorage.setStateReasonCodeAndDuration(VideoSharing.State.RINGING,
-                    ReasonCode.UNSPECIFIED, currentDuration);
-            mBroadcaster.broadcastStateChanged(contact, mSharingId, VideoSharing.State.RINGING,
-                    ReasonCode.UNSPECIFIED);
+            setStateAndReasonCodeAndDurationAndBroadcast(contact, currentDuration,
+                    VideoSharing.State.RINGING, ReasonCode.UNSPECIFIED);
         }
     }
 }

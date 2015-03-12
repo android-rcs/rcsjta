@@ -43,7 +43,6 @@ import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
-import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.rcs.service.broadcaster.IGroupChatEventBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
@@ -172,14 +171,16 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 .toString());
     }
 
+    private void setStateAndReasonCodeAndBroadcast(State state, ReasonCode reasonCode) {
+        mPersistentStorage.setStateAndReasonCode(state, reasonCode);
+        mBroadcaster.broadcastStateChanged(mChatId, state, reasonCode);
+    }
+
     private void handleSessionRejected(ReasonCode reasonCode) {
         setRejoinedAsPartOfSendOperation(false);
         synchronized (lock) {
             mChatService.removeGroupChat(mChatId);
-
-            mPersistentStorage.setStateAndReasonCode(State.REJECTED, reasonCode);
-
-            mBroadcaster.broadcastStateChanged(mChatId, State.REJECTED, reasonCode);
+            setStateAndReasonCodeAndBroadcast(State.REJECTED, reasonCode);
         }
     }
 
@@ -301,8 +302,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         GroupChatInfo groupChat = mMessagingLog.getGroupChatInfo(mChatId);
         if (groupChat == null) {
             if (logger.isActivated()) {
-                logger.debug(new StringBuilder(
-                        "Group chat with group chat Id '").append(mChatId)
+                logger.debug(new StringBuilder("Group chat with group chat Id '").append(mChatId)
                         .append("' is not rejoinable as the group chat does not exist in DB.")
                         .toString());
             }
@@ -310,13 +310,11 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         }
         if (TextUtils.isEmpty(groupChat.getRejoinId())) {
             if (logger.isActivated()) {
-                logger.debug(new StringBuilder(
-                        "Group chat with group chat Id '")
+                logger.debug(new StringBuilder("Group chat with group chat Id '")
                         .append(mChatId)
                         .append("' is not rejoinable as there is no ongoing session with "
                                 + "corresponding chatId and there exists no rejoinId to "
-                                + "rejoin the group chat.")
-                        .toString());
+                                + "rejoin the group chat.").toString());
             }
             return false;
         }
@@ -651,8 +649,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         }
 
         if (session == null || !mediaEstablished) {
-            Map<ContactId, ParticipantStatus> participantsToStore =
-                    mMessagingLog.getParticipants(mChatId);
+            Map<ContactId, ParticipantStatus> participantsToStore = mMessagingLog
+                    .getParticipants(mChatId);
 
             for (ContactId contact : participants) {
                 participantsToStore.put(contact, ParticipantStatus.INVITE_QUEUED);
@@ -1108,35 +1106,28 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         setRejoinedAsPartOfSendOperation(false);
         synchronized (lock) {
             mChatService.removeGroupChat(mChatId);
-
-            /* TODO: Fix mapping between int reason and reasonCode. */
-
-            ReasonCode reasonCode;
             switch (reason) {
+                case TERMINATION_BY_CONNECTION_LOST:
                 case TERMINATION_BY_SYSTEM:
-                case TERMINATION_BY_TIMEOUT:
-                    reasonCode = ReasonCode.ABORTED_BY_INACTIVITY;
+                    /*
+                     * This error is caused because of a network drop so the group chat is not set
+                     * to ABORTED state in this case as it will try to be auto-rejoined when IMS
+                     * connection is regained
+                     */
                     break;
                 case TERMINATION_BY_USER:
-                    reasonCode = ReasonCode.ABORTED_BY_USER;
+                    setStateAndReasonCodeAndBroadcast(State.ABORTED, ReasonCode.ABORTED_BY_USER);
                     break;
+                case TERMINATION_BY_TIMEOUT:
                 case TERMINATION_BY_INACTIVITY:
-                    reasonCode = ReasonCode.ABORTED_BY_INACTIVITY;
+                    setStateAndReasonCodeAndBroadcast(State.ABORTED,
+                            ReasonCode.ABORTED_BY_INACTIVITY);
                     break;
                 default:
                     throw new IllegalArgumentException(
-                            "Unknown reason in GroupChatImpl.handleSessionAborted; terminationReason="
-                                    + reason + "!");
-            }
-            if (TerminationReason.TERMINATION_BY_SYSTEM == reason) {
-                /*
-                 * This error is caused because of a network drop so the group chat is not set to
-                 * ABORTED state in this case as it will be auto-rejoined when network connection is
-                 * regained
-                 */
-            } else {
-                mPersistentStorage.setStateAndReasonCode(State.ABORTED, reasonCode);
-                mBroadcaster.broadcastStateChanged(mChatId, State.ABORTED, reasonCode);
+                            new StringBuilder(
+                                    "Unknown reason in GroupChatImpl.handleSessionAborted; terminationReason=")
+                                    .append(reason).append("!").toString());
             }
         }
     }
@@ -1168,11 +1159,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         setRejoinedAsPartOfSendOperation(false);
         synchronized (lock) {
             mChatService.removeGroupChat(mChatId);
-
-            mPersistentStorage.setStateAndReasonCode(State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
-
-            mBroadcaster
-                    .broadcastStateChanged(mChatId, State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
+            setStateAndReasonCodeAndBroadcast(State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
         }
     }
 
@@ -1242,8 +1229,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                  * regained
                  */
             } else {
-                mPersistentStorage.setStateAndReasonCode(state, reasonCode);
-                mBroadcaster.broadcastStateChanged(mChatId, state, reasonCode);
+                setStateAndReasonCodeAndBroadcast(state, reasonCode);
             }
             switch (reasonCode) {
                 case FAILED_INITIATION:
@@ -1396,9 +1382,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             logger.info("Accepting group chat session");
         }
         synchronized (lock) {
-            mPersistentStorage.setStateAndReasonCode(State.ACCEPTING, ReasonCode.UNSPECIFIED);
-
-            mBroadcaster.broadcastStateChanged(mChatId, State.ACCEPTING, ReasonCode.UNSPECIFIED);
+            setStateAndReasonCodeAndBroadcast(State.ACCEPTING, ReasonCode.UNSPECIFIED);
         }
     }
 
