@@ -58,7 +58,6 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
-import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration.ImageResizeOption;
 import com.gsma.services.rcs.filetransfer.IFileTransfer;
 import com.gsma.services.rcs.filetransfer.IFileTransferService;
 import com.gsma.services.rcs.filetransfer.IFileTransferServiceConfiguration;
@@ -1118,56 +1117,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     public void markFileTransferAsRead(String transferId) throws RemoteException {
         // No notification type corresponds currently to mark as read
         mMessagingLog.markFileTransferAsRead(transferId);
-    }
-
-    /**
-     * Set Auto accept mode
-     * 
-     * @param enable true is AA is enabled in normal conditions
-     */
-    @Override
-    public void setAutoAccept(boolean enable) throws RemoteException {
-        if (!mRcsSettings.isFtAutoAcceptedModeChangeable()) {
-            throw new IllegalArgumentException("Auto accept mode is not changeable");
-        }
-        mRcsSettings.setFileTransferAutoAccepted(enable);
-        if (!enable) {
-            // If AA is disabled in normal conditions then it must be disabled while roaming
-            mRcsSettings.setFileTransferAutoAcceptedInRoaming(false);
-        }
-    }
-
-    /**
-     * Set Auto accept mode in roaming
-     * 
-     * @param enable true is AA is enabled in roaming
-     */
-    @Override
-    public void setAutoAcceptInRoaming(boolean enable) throws RemoteException {
-        if (!mRcsSettings.isFtAutoAcceptedModeChangeable()) {
-            throw new IllegalArgumentException("Auto accept mode in roaming is not changeable");
-        }
-        if (!mRcsSettings.isFileTransferAutoAccepted()) {
-            throw new IllegalArgumentException(
-                    "Auto accept mode in normal conditions must be enabled");
-        }
-        mRcsSettings.setFileTransferAutoAcceptedInRoaming(enable);
-    }
-
-    /**
-     * Set the image resize option
-     * 
-     * @param option the image resize option (0: ALWAYS_PERFORM, 1: ONLY_ABOVE_MAX_SIZE, 2: ASK)
-     */
-    @Override
-    public void setImageResizeOption(int option) throws RemoteException {
-        try {
-            // TODO CR031
-            ImageResizeOption imageResizeOption = ImageResizeOption.valueOf(option);
-            mRcsSettings.setImageResizeOption(imageResizeOption);
-        } catch (Exception e) {
-            // TODO: handle exception
-        }
     }
 
     /**

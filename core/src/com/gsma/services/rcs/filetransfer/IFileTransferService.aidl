@@ -45,12 +45,6 @@ interface IFileTransferService {
 	void removeEventListener3(in IGroupFileTransferListener listener);
 	
 	int getServiceVersion();
-	
-	void setAutoAccept(in boolean enable);
-	
-	void setAutoAcceptInRoaming(in boolean enable);
-	
-	void setImageResizeOption(in int option);
 
 	boolean isAllowedToTransferFile(in ContactId contact);
 

@@ -43,11 +43,9 @@ interface IChatService {
 	void removeEventListener2(in IOneToOneChatListener listener);
 
 	int getServiceVersion();
-	
-	void setRespondToDisplayReports(in boolean enable);
 
 	IChatMessage getChatMessage(in String msgId);
-	
+
 	ICommonServiceConfiguration getCommonConfiguration();
 
 	boolean isAllowedToInitiateGroupChat();

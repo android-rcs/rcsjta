@@ -381,27 +381,6 @@ public class ChatService extends RcsService {
     }
 
     /**
-     * Set the parameter that controls whether to respond or not to display reports when requested
-     * by the remote.
-     * <p>
-     * Only applicable to one to one chat messages.
-     * 
-     * @param enable true if respond to display reports
-     * @throws RcsServiceException
-     */
-    public void setRespondToDisplayReports(boolean enable) throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                mApi.setRespondToDisplayReports(enable);
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
-        }
-    }
-
-    /**
      * Adds a listener on group chat events
      * 
      * @param listener Group chat listener

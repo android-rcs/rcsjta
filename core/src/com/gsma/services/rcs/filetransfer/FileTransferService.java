@@ -441,67 +441,6 @@ public class FileTransferService extends RcsService {
     }
 
     /**
-     * set the Auto Accept Mode of a File Transfer configuration.
-     * <p>
-     * The Auto Accept Mode can only be modified by client application if isAutoAcceptModeChangeable
-     * (see FileTransferServiceConfiguration class) is true
-     * 
-     * @param enable true to enable else false
-     * @throws RcsServiceException
-     */
-    public void setAutoAccept(boolean enable) throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                mApi.setAutoAccept(enable);
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
-        }
-    }
-
-    /**
-     * set the Auto Accept Mode of a File Transfer configuration while roaming.
-     * <p>
-     * The AutoAcceptModeInRoaming can only be modified by client application if
-     * isAutoAcceptModeChangeable (@see FileTransferServiceConfiguration class) is true and if the
-     * Auto Accept Mode in normal conditions is true
-     * 
-     * @param enable true to enable else false
-     * @throws RcsServiceException
-     */
-    public void setAutoAcceptInRoaming(boolean enable) throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                mApi.setAutoAcceptInRoaming(enable);
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
-        }
-    }
-
-    /**
-     * set the image resize option for file transfer.
-     * 
-     * @param option the image resize option (0: ALWAYS_PERFORM, 1: ONLY_ABOVE_MAX_SIZE, 2: ASK)
-     * @throws RcsServiceException
-     */
-    public void setImageResizeOption(int option) throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                mApi.setImageResizeOption(option);
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
-        }
-    }
-
-    /**
      * Deletes all one to one file transfer from history and abort/reject any associated ongoing
      * session if such exists.
      * 

@@ -16,11 +16,11 @@
 
 package com.gsma.rcs.service.api;
 
-import android.os.RemoteException;
-
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration.ImageResizeOption;
 import com.gsma.services.rcs.filetransfer.IFileTransferServiceConfiguration;
+
+import android.os.RemoteException;
 
 /**
  * A class that implements interface to allow access to file transfer service configuration from API
@@ -44,12 +44,26 @@ public class IFileTransferServiceConfigurationImpl extends IFileTransferServiceC
 
     @Override
     public void setAutoAcceptInRoaming(boolean enable) throws RemoteException {
+        if (!mRcsSettings.isFtAutoAcceptedModeChangeable()) {
+            throw new IllegalArgumentException("Auto accept mode in roaming is not changeable");
+        }
+        if (!mRcsSettings.isFileTransferAutoAccepted()) {
+            throw new IllegalArgumentException(
+                    "Auto accept mode in normal conditions must be enabled");
+        }
         mRcsSettings.setFileTransferAutoAcceptedInRoaming(enable);
     }
 
     @Override
     public void setAutoAccept(boolean enable) throws RemoteException {
+        if (!mRcsSettings.isFtAutoAcceptedModeChangeable()) {
+            throw new IllegalArgumentException("Auto accept mode is not changeable");
+        }
         mRcsSettings.setFileTransferAutoAccepted(enable);
+        if (!enable) {
+            /* If AA is disabled in normal conditions then it must be disabled while roaming. */
+            mRcsSettings.setFileTransferAutoAcceptedInRoaming(false);
+        }
     }
 
     @Override

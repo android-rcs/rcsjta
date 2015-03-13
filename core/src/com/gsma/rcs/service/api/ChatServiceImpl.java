@@ -741,18 +741,6 @@ public class ChatServiceImpl extends IChatService.Stub {
     }
 
     /**
-     * Set the parameter in order to respond or not to display reports when requested by the remote
-     * part.
-     * 
-     * @param enable true if respond to display reports
-     * @throws ServerApiException
-     */
-    @Override
-    public void setRespondToDisplayReports(boolean enable) throws RemoteException {
-        mRcsSettings.setRespondToDisplayReports(enable);
-    }
-
-    /**
      * Add and broadcast group chat invitation rejections.
      * 
      * @param chatId Chat ID

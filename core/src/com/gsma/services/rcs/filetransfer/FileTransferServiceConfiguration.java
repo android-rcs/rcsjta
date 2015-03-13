@@ -22,10 +22,9 @@
 
 package com.gsma.services.rcs.filetransfer;
 
-import android.util.SparseArray;
-
 import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.filetransfer.IFileTransferServiceConfiguration;
+
+import android.util.SparseArray;
 
 /**
  * File transfer service configuration
