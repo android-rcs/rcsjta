@@ -1,0 +1,46 @@
+From: <sip:1234@sonymobile.com>
+Date: Fri, 21 Nov 1997 09:55:06 -0600
+Conversation-ID: a1b2c3d4
+Contribution-ID: e5f6g7h8i9
+Content-Type: multipart/related;boundary=cpm; type="Application/X-CPM-File-Transfer"
+
+--cpm
+Content-Type: Application/X-CPM-File-Transfer
+
+<file-transfer-type>1-1</file-transfer-type>
+<invited-participants>sip:1234@sonymobile.com, sip:2222@sonymobile.com</invited-participants>
+<file-object>
+	<cid>cid:33333</cid>
+	<sdp>
+		i=This is my latest picture
+		a=sendonly
+		a=file-selector:name:"My picture.jpg" type:image/jpeg size:4092
+		a=file-disposition:render
+		a=file-date:creation:"Mon, 15 May 2006 15:01:31 +0300"
+	</sdp>
+</file-object>
+--cpm
+Content-Type: image/jpeg
+Content-Transfer-Encoding: binary
+Content-ID: <1234@example.com>
+
+/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0a
+HBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAALCABAAEABAREA/8QAGwABAAIDAQEA
+AAAAAAAAAAAAAAMEAQIFBgf/xAAzEAABAwMBBgUCBgIDAAAAAAABAgMEAAURBhIVITFUkwcTIkHR
+UWEUFjJxgZEjJZKhwf/aAAgBAQAAPwD4VvSf1snuq+ab0n9bJ7qvmm9J/Wye6r5pvSf1snuq+ab0
+n9bJ7qvmm9J/Wye6r5pvSf1snuq+ab0n9bJ7qvmqlKUpSlK9VF8P7y9b2J0lcK3sSE7TBnSkMlwf
+VIJziqd60heLDCZmzWWvwjzhbaeaeS4hZAzwKSauxPDy+vW9mfKTFt0V8ZZcnyEs+Z+wUcmql70X
+e7AqMZ0ZIYkkBiS24lbTmfosHFTXbQGpbJakXSbbVJgrxh9taXE8eRyknh960Voe+IsibwphgQF4
+2XfxLeCSM4xtZz9udTTfDzUlvsq7xIhNi3pGS+mQ2pJ9uGFcaru6JvjFhbvbsdpFvdRttumQj1D7
+DOSftX2NNwuSrDZ2Z2k7XqxpMJspcbWlL7II/SpPE/yOdcHXzFghaas8pFtcs0wTg45ZDJ8wFHuv
+Zz6c4A9qz4o2e4a6uUG/aX/2lsVFQ0lqMoFUdQzkKRzHP6VrdB+WvBVOlbu805fJkwOR4YcC1Rk7
+Q/Vj9PI/8v3rrzNU3XQ1p0y1KiszbIbYiLcYanELAc2lZwAT6sfxXH8RGNNR/DGEdMTEuwpN0MlL
+JUNtkqbwUkcxgj3qLwWnyJrs3T1zSy/puQ2fxCZLgCWl44FOTnjj2ryXiTOuD2pXIUhtuPDhjyoU
+ZlQLbbIPpIweZ5k864FqtUy5FZirQkoKU5W6EZKuQGfc4qz+Wbi46kFbH+RQS24p9Oy4okjAOeJy
+DVgaVu7TiQwSApsLK9vZ4YGf4BIGfrVGPZJUi6SYL60svsIWtZdUAPSMnJqZOlLstpbqGkrbSMpU
+lYIc4bXpPvwqw5o24l4txwHUjhtH0gnKgAPv6TVdnSt1eW4lLISGzhSlKAHIH/0f3XJlxnocp2NI
+QUOtqKVJPsRUkW4SIacML2Rtpc5Z9Sc4P/dXI+o7hGS2lC21JaO02HG0q2FZJyMjnkmpfzXdjgLk
++YAnYCVpBATw4Y+nAH96jRqS4ox62lepxR2mUna2xhQPDiCBy9vasnUtyLS2vMR5ahhKQ2nDYxj0
+8PTwHtWU6ougKsvhWfZSAQDknI4c/Ua0b1Jcmg0kP7SG2/KShaQRs5zxHvxx/Vc199yS+4+6racW
+oqUfqajpSlKUpVrdk/oZPaV8U3ZP6GT2lfFN2T+hk9pXxTdk/oZPaV8U3ZP6GT2lfFN2T+hk9pXx
+Tdk/oZPaV8U3ZP6GT2lfFf/Z

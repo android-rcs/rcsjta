@@ -1,0 +1,10 @@
+<sync-adapter xmlns:android="http://schemas.android.com/apk/res/android"
+    android:contentAuthority="com.gsma.services.rcs.provider.chat"
+    android:name="Lalala"
+    android:label="Bababa"
+    android:accountType="example.com"
+    android:userVisible="true"
+    android:supportsUploading="true"
+    android:allowParallelSyncs="false"
+    android:isAlwaysSyncable="true"
+ />
