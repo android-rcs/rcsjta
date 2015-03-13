@@ -1,6 +1,5 @@
 package com.gsma.services.rcs.chat;
 
-import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
 
 /**
@@ -18,7 +17,7 @@ interface IGroupChatListener {
 	void onMessageGroupDeliveryInfoChanged(in String chatId, in ContactId contact, in String mimeType,
 			in String msgId, in int status, in int reasonCode);
 
-	void onParticipantInfoChanged(in String chatId, in ParticipantInfo info);
+	void onParticipantInfoChanged(in String chatId, in ContactId contact, in int status);
 
 	void onDeleted(in List<String> chatIds);
 

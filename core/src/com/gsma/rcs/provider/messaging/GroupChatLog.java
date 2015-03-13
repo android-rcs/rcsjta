@@ -26,10 +26,10 @@ import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatLog.GroupChat;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat.State;
-import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.ContentValues;
@@ -39,7 +39,9 @@ import android.database.SQLException;
 import android.util.SparseArray;
 
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -105,29 +107,25 @@ public class GroupChatLog implements IGroupChatLog {
     }
 
     /**
-     * Convert a set of ParticipantInfo into a string
+     * Convert participants to string representation
      * 
-     * @param participants the participant information
+     * @param participants the participants
      * @return the string with comma separated values of key pairs formatted as follows: "key=value"
      */
-    private static String writeParticipantInfo(Set<ParticipantInfo> participants) {
-        if (participants == null || participants.size() == 0) {
-            return null;
-        }
-        StringBuilder sb = new StringBuilder();
+    private static String convert(Map<ContactId, ParticipantStatus> participants) {
+        StringBuilder builder = new StringBuilder();
         int size = participants.size();
-        for (ParticipantInfo participant : participants) {
-            // set key
-            sb.append(participant.getContact());
-            sb.append('=');
-            // set value
-            sb.append(participant.getStatus());
+
+        for (Map.Entry<ContactId, ParticipantStatus> participant : participants.entrySet()) {
+            builder.append(participant.getKey());
+            builder.append('=');
+            builder.append(participant.getValue().toInt());
             if (--size != 0) {
-                // Not last item : add separator
-                sb.append(',');
+
+                builder.append(',');
             }
         }
-        return sb.toString();
+        return builder.toString();
     }
 
     /*
@@ -136,7 +134,7 @@ public class GroupChatLog implements IGroupChatLog {
      * java.lang.String, java.util.Set, int, int)
      */
     public void addGroupChat(String chatId, ContactId contact, String subject,
-            Set<ParticipantInfo> participants, State state, ReasonCode reasonCode,
+            Map<ContactId, ParticipantStatus> participants, State state, ReasonCode reasonCode,
             Direction direction) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("addGroupChat; chatID=").append(chatId)
@@ -152,7 +150,8 @@ public class GroupChatLog implements IGroupChatLog {
         values.put(ChatData.KEY_STATE, state.toInt());
         values.put(ChatData.KEY_REASON_CODE, reasonCode.toInt());
         values.put(ChatData.KEY_SUBJECT, subject);
-        values.put(ChatData.KEY_PARTICIPANTS, writeParticipantInfo(participants));
+
+        values.put(ChatData.KEY_PARTICIPANTS, convert(participants));
         values.put(ChatData.KEY_DIRECTION, direction.toInt());
         values.put(ChatData.KEY_TIMESTAMP, Calendar.getInstance().getTimeInMillis());
         values.put(ChatData.KEY_USER_ABORTION, UserAbortion.SERVER_NOTIFIED.toInt());
@@ -202,8 +201,9 @@ public class GroupChatLog implements IGroupChatLog {
      * String, java.util.Set)
      */
     @Override
-    public void updateGroupChatParticipant(String chatId, Set<ParticipantInfo> participants) {
-        String encodedParticipants = writeParticipantInfo(participants);
+    public void updateGroupChatParticipants(String chatId,
+            Map<ContactId, ParticipantStatus> participants) {
+        String encodedParticipants = convert(participants);
         if (logger.isActivated()) {
             logger.debug("updateGroupChatParticipant (chatId=" + chatId + ") (participants="
                     + encodedParticipants + ")");
@@ -256,8 +256,7 @@ public class GroupChatLog implements IGroupChatLog {
             cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection, SELECT_CHAT_ID,
                     selArgs, ORDER_BY_TIMESTAMP_DESC);
             if (cursor.moveToFirst()) {
-                // Decode list of participants
-                Set<ParticipantInfo> participants = ChatLog.GroupChat.getParticipantInfo(mCtx,
+                Map<ContactId, ParticipantStatus> participants = GroupChat.getParticipants(mCtx,
                         cursor.getString(2));
                 result = new GroupChatInfo(cursor.getString(0), cursor.getString(1), chatId,
                         participants, cursor.getString(3));
@@ -270,54 +269,24 @@ public class GroupChatLog implements IGroupChatLog {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog#getGroupChatConnectedParticipants(java
-     * .lang.String)
+    /**
+     * Get the participants associated with a group chat
+     * 
+     * @param chatId ChatId identifying the group chat
+     * @return participants for the group chat
      */
-    @Override
-    public Set<ParticipantInfo> getGroupChatConnectedParticipants(String chatId) {
+    public Map<ContactId, ParticipantStatus> getParticipants(String chatId) {
         if (logger.isActivated()) {
-            logger.debug("Get connected participants for " + chatId);
+            logger.debug("Get group chat participants for ".concat(chatId));
         }
-        Set<ParticipantInfo> result = new HashSet<ParticipantInfo>();
-        String[] projection = new String[] {
-            ChatData.KEY_PARTICIPANTS
-        };
-        String[] selArgs = new String[] {
-            chatId
-        };
-        Cursor cursor = null;
         try {
-            cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection, SELECT_CHAT_ID,
-                    selArgs, ORDER_BY_TIMESTAMP_DESC);
-            if (cursor.moveToFirst()) {
-                // Decode list of participants
-                Set<ParticipantInfo> participants = ChatLog.GroupChat.getParticipantInfo(mCtx,
-                        cursor.getString(0));
-                if (participants != null) {
-                    for (ParticipantInfo participantInfo : participants) {
-                        // Only consider participants who have not declined or left GC
-                        switch (participantInfo.getStatus()) {
-                            case ParticipantInfo.Status.DEPARTED:
-                            case ParticipantInfo.Status.DECLINED:
-                                break;
-                            default:
-                                result.add(participantInfo);
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Exception", e);
-            }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+            return GroupChat.getParticipants(mCtx,
+                    getDataAsString(getGroupChatData(ChatData.KEY_PARTICIPANTS, chatId)));
+        } catch (SQLException exception) {
+            /* No row returned, that's OK we return no participants. */
+            // TODO: will be fixed in CR037
+            return new HashMap<ContactId, ParticipantStatus>();
         }
-        return result;
     }
 
     /*
@@ -406,14 +375,6 @@ public class GroupChatLog implements IGroupChatLog {
 
     /*
      * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog#getParticipants(java .lang.String)
-     */
-    public Set<ParticipantInfo> getParticipants(String participants) {
-        return ChatLog.GroupChat.getParticipantInfo(mCtx, participants);
-    }
-
-    /*
-     * (non-Javadoc)
      * @see com.gsma.rcs.provider.messaging.IGroupChatLog#getGroupChatState (java.lang.String)
      */
     public State getGroupChatState(String chatId) {
@@ -432,18 +393,6 @@ public class GroupChatLog implements IGroupChatLog {
             logger.debug("Get group chat reason code for ".concat(chatId));
         }
         return ReasonCode.valueOf(getDataAsInt(getGroupChatData(ChatData.KEY_REASON_CODE, chatId)));
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog#getGroupChatParticipants
-     * (java.lang.String)
-     */
-    public Set<ParticipantInfo> getGroupChatParticipants(String chatId) {
-        if (logger.isActivated()) {
-            logger.debug("Get group chat participants for ".concat(chatId));
-        }
-        return getParticipants(getDataAsString(getGroupChatData(ChatData.KEY_PARTICIPANTS, chatId)));
     }
 
     /*

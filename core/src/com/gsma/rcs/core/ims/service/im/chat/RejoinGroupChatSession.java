@@ -22,9 +22,6 @@
 
 package com.gsma.rcs.core.ims.service.im.chat;
 
-import javax2.sip.header.SubjectHeader;
-import android.text.TextUtils;
-
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
@@ -34,6 +31,10 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
+
+import android.text.TextUtils;
+
+import javax2.sip.header.SubjectHeader;
 
 /**
  * Rejoin a group chat session
@@ -60,15 +61,12 @@ public class RejoinGroupChatSession extends GroupChatSession {
         super(parent, null, groupChatInfo.getRejoinId(), groupChatInfo.getParticipants(),
                 rcsSettings, messagingLog);
 
-        // Set subject
         if (!TextUtils.isEmpty(groupChatInfo.getSubject())) {
             setSubject(groupChatInfo.getSubject());
         }
 
-        // Create dialog path
         createOriginatingDialogPath();
 
-        // Set contribution ID
         setContributionID(groupChatInfo.getContributionId());
     }
 
@@ -81,49 +79,40 @@ public class RejoinGroupChatSession extends GroupChatSession {
                 logger.info("Rejoin an existing group chat session");
             }
 
-            // Set setup mode
             String localSetup = createSetupOffer();
             if (logger.isActivated()) {
                 logger.debug("Local setup attribute is " + localSetup);
             }
 
-            // Set local port
             int localMsrpPort;
             if ("active".equals(localSetup)) {
-                localMsrpPort = 9; // See RFC4145, Page 4
+                localMsrpPort = 9; /* See RFC4145, Page 4 */
             } else {
                 localMsrpPort = getMsrpMgr().getLocalMsrpPort();
             }
 
-            // Build SDP part
             String ipAddress = getDialogPath().getSipStack().getLocalIpAddress();
             String sdp = SdpUtils.buildGroupChatSDP(ipAddress, localMsrpPort, getMsrpMgr()
                     .getLocalSocketProtocol(), getAcceptTypes(), getWrappedTypes(), localSetup,
                     getMsrpMgr().getLocalMsrpPath(), SdpUtils.DIRECTION_SENDRECV);
 
-            // Set the local SDP part in the dialog path
             getDialogPath().setLocalContent(sdp);
 
-            // Create an INVITE request
             if (logger.isActivated()) {
                 logger.info("Send INVITE");
             }
             SipRequest invite = createInviteRequest(sdp);
 
-            // Set the Authorization header
             getAuthenticationAgent().setAuthorizationHeader(invite);
 
-            // Set initial request in the dialog path
             getDialogPath().setInvite(invite);
 
-            // Send INVITE request
             sendInvite(invite);
         } catch (Exception e) {
             if (logger.isActivated()) {
                 logger.error("Session initiation has failed", e);
             }
 
-            // Unexpected error
             handleError(new ChatError(ChatError.UNEXPECTED_EXCEPTION, e.getMessage()));
         }
     }

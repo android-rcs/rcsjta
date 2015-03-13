@@ -29,12 +29,11 @@ import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatError;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
-import com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatPersistedStorageAccessor;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
-import com.gsma.rcs.core.ims.service.im.chat.event.User;
+import com.gsma.rcs.core.ims.service.im.chat.GroupChatSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.messaging.GroupChatStateAndReasonCode;
@@ -51,19 +50,20 @@ import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.IChatMessage;
 import com.gsma.services.rcs.chat.IGroupChat;
-import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.database.SQLException;
 import android.text.TextUtils;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -71,7 +71,7 @@ import java.util.Set;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListener {
+public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionListener {
 
     private final String mChatId;
 
@@ -489,18 +489,28 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
     }
 
     /**
-     * Returns the list of participants. A participant is identified by its MSISDN in national or
+     * Returns the participants. A participant is identified by its MSISDN in national or
      * international format, SIP address, SIP-URI or Tel-URI.
      * 
-     * @return List of participants
+     * @return Participants
      */
-    public List<ParticipantInfo> getParticipants() {
+    public Map<ContactId, Integer> getParticipants() {
+
+        Map<ContactId, Integer> apiParticipants = new HashMap<ContactId, Integer>();
+        Map<ContactId, ParticipantStatus> participants;
+
         GroupChatSession session = mImService.getGroupChatSession(mChatId);
         if (session == null) {
-            return new ArrayList<ParticipantInfo>(mPersistentStorage.getParticipants());
+            participants = mPersistentStorage.getParticipants();
+        } else {
+            participants = session.getParticipants();
         }
 
-        return new ArrayList<ParticipantInfo>(session.getParticipants());
+        for (Map.Entry<ContactId, ParticipantStatus> participant : participants.entrySet()) {
+            apiParticipants.put(participant.getKey(), participant.getValue().toInt());
+        }
+
+        return apiParticipants;
     }
 
     /**
@@ -515,26 +525,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
             return mPersistentStorage.getMaxParticipants();
         }
         return session.getMaxParticipants();
-    }
-
-    /**
-     * Calculate the number of participants who did not decline or left the Group chat.
-     * 
-     * @param setOfParticipant the set of participant information
-     * @return the number of participants who did not decline or left the Group chat.
-     */
-    private static int getNumberOfParticipants(final Set<ParticipantInfo> participants) {
-        int result = 0;
-        for (ParticipantInfo participant : participants) {
-            switch (participant.getStatus()) {
-                case ParticipantInfo.Status.DEPARTED:
-                case ParticipantInfo.Status.DECLINED:
-                    break;
-                default:
-                    result++;
-            }
-        }
-        return result;
     }
 
     /**
@@ -614,18 +604,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
      * 
      * @param participants Set of participants
      */
-    public void inviteParticipants(final List<ContactId> participants) {
-        if (!isGroupChatCapableOfReceivingParticipantInvitations()) {
-            /*
-             * TODO: Throw proper exception in CR037
-             */
-            throw new IllegalArgumentException(
-                    "Groupchat not capable of receiving particpant invitations.");
-        }
-        /*
-         * TODO: Participant's current status has to be considered to decide if he/she can be
-         * invited to this group chat.
-         */
+    public void inviteParticipants(final List<ContactId> contacts) {
         final GroupChatSession session = mImService.getGroupChatSession(mChatId);
         if (session == null) {
             /* TODO: Throw proper exception as part of CR037 implementation */
@@ -635,30 +614,24 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
         }
         if (logger.isActivated()) {
             StringBuilder listOfParticipants = new StringBuilder("Add ");
-            for (ContactId contactId : participants) {
+            for (ContactId contactId : contacts) {
                 listOfParticipants.append(contactId.toString()).append(" ");
             }
             listOfParticipants.append("participants to the session");
             logger.info(listOfParticipants.toString());
         }
 
-        int maxParticipants = session.getMaxParticipants() - 1;
-        // PDD 6.3.5.9 Adding participants to a Group Chat (Clarification)
-        // For the maximum user count, the RCS client shall take into
-        // account both the active and inactive users,
-        // but not those that have explicitly left or declined the Chat.
-        int nrOfConnectedParticipants = getNumberOfParticipants(session.getConnectedParticipants());
-        if (nrOfConnectedParticipants < maxParticipants) {
-            // Add a list of participants to the session
+        final Set<ContactId> contactsToBeInvited = new HashSet<ContactId>(contacts);
+
+        if (contactsToBeInvited.size() <= session.getMaxNumberOfAdditionalParticipants()) {
             new Thread() {
                 public void run() {
-                    session.addParticipants(new HashSet<ContactId>(participants));
+                    session.inviteParticipants(contactsToBeInvited);
                 }
             }.start();
         } else {
-            // Max participants achieved
-            for (ContactId participant : participants) {
-                handleAddParticipantFailed(participant, "Maximum number of participants reached");
+            for (ContactId contact : contactsToBeInvited) {
+                handleAddParticipantFailed(contact, "Maximum number of participants reached");
             }
         }
     }
@@ -1259,23 +1232,17 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
     }
 
     @Override
-    public void handleConferenceEvent(ContactId contact, String contactDisplayname, String state) {
+    public void handleConferenceEvent(ContactId contact, ParticipantStatus status) {
         if (logger.isActivated()) {
-            logger.info("New conference event " + state + " for " + contact);
+            logger.info("New conference event " + status.toString() + " for " + contact);
         }
         synchronized (lock) {
-            if (User.STATE_CONNECTED.equals(state)) {
+            if (ParticipantStatus.CONNECTED.equals(status)) {
                 mPersistentStorage
                         .addGroupChatEvent(mChatId, contact, GroupChatEvent.Status.JOINED);
-                mBroadcaster.broadcastParticipantInfoStatusChanged(mChatId, new ParticipantInfo(
-                        contact, ParticipantInfo.Status.CONNECTED));
-
-            } else if (User.STATE_DEPARTED.equals(state)) {
+            } else if (ParticipantStatus.DEPARTED.equals(status)) {
                 mPersistentStorage.addGroupChatEvent(mChatId, contact,
                         GroupChatEvent.Status.DEPARTED);
-
-                mBroadcaster.broadcastParticipantInfoStatusChanged(mChatId, new ParticipantInfo(
-                        contact, ParticipantInfo.Status.DEPARTED));
             }
         }
     }
@@ -1302,21 +1269,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener#handleAddParticipantSuccessful
-     * (com.gsma.services.rcs.contact.ContactId)
-     */
-    public void handleAddParticipantSuccessful(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Add participant request is successful");
-        }
-        synchronized (lock) {
-            mBroadcaster.broadcastParticipantInfoStatusChanged(mChatId, new ParticipantInfo(
-                    contact, ParticipantInfo.Status.CONNECTED));
-        }
-    }
-
     /**
      * Request to add participant has failed
      * 
@@ -1327,23 +1279,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
         if (logger.isActivated()) {
             logger.info("Add participant request has failed " + reason);
         }
-        synchronized (lock) {
-            mBroadcaster.broadcastParticipantInfoStatusChanged(mChatId, new ParticipantInfo(
-                    contact, ParticipantInfo.Status.FAILED));
-        }
-    }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener#handleParticipantStatusChanged
-     * (com.gsma.services.rcs.chat.ParticipantInfo)
-     */
-    public void handleParticipantStatusChanged(ParticipantInfo participantInfo) {
-        if (logger.isActivated()) {
-            logger.info("handleParticipantStatusChanged " + participantInfo);
-        }
         synchronized (lock) {
-            mBroadcaster.broadcastParticipantInfoStatusChanged(mChatId, participantInfo);
+            mBroadcaster.broadcastParticipantInfoStatusChanged(mChatId, contact,
+                    ParticipantStatus.FAILED);
         }
     }
 
@@ -1386,7 +1325,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 
     @Override
     public void handleSessionInvited(ContactId contact, String subject,
-            Set<ParticipantInfo> participants) {
+            Map<ContactId, ParticipantStatus> participants) {
         if (logger.isActivated()) {
             logger.info("Invited to group chat session");
         }
@@ -1400,7 +1339,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
 
     @Override
     public void handleSessionAutoAccepted(ContactId contact, String subject,
-            Set<ParticipantInfo> participants) {
+            Map<ContactId, ParticipantStatus> participants) {
         if (logger.isActivated()) {
             logger.info("Session auto accepted");
         }
@@ -1410,5 +1349,25 @@ public class GroupChatImpl extends IGroupChat.Stub implements ChatSessionListene
         }
 
         mBroadcaster.broadcastInvitation(mChatId);
+    }
+
+    @Override
+    public void handleParticipantUpdates(Map<ContactId, ParticipantStatus> updatedParticipants,
+            Map<ContactId, ParticipantStatus> allParticipants) {
+        synchronized (lock) {
+            mMessagingLog.updateGroupChatParticipants(mChatId, allParticipants);
+        }
+
+        for (Map.Entry<ContactId, ParticipantStatus> updatedParticipant : updatedParticipants
+                .entrySet()) {
+            ContactId contact = updatedParticipant.getKey();
+            ParticipantStatus status = updatedParticipant.getValue();
+
+            if (logger.isActivated()) {
+                logger.info("ParticipantUpdate for: " + contact + " status: " + status);
+            }
+
+            mBroadcaster.broadcastParticipantInfoStatusChanged(mChatId, contact, status);
+        }
     }
 }

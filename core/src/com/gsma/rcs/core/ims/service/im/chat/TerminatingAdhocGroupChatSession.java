@@ -43,13 +43,14 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -60,10 +61,7 @@ import java.util.Vector;
  */
 public class TerminatingAdhocGroupChatSession extends GroupChatSession implements MsrpEventListener {
 
-    /**
-     * Set of missing participants in case of restart
-     */
-    Set<ContactId> missingParticipants;
+    private final MessagingLog mMessagingLog;
 
     /**
      * The logger
@@ -78,76 +76,26 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
      * @param invite Initial INVITE request
      * @param contact remote contact
      * @param remoteUri the remote Uri
-     * @param participants set of participants
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
      */
     public TerminatingAdhocGroupChatSession(ImsService parent, SipRequest invite,
-            ContactId contact, String remoteUri, Set<ParticipantInfo> participants,
-            RcsSettings rcsSettings, MessagingLog messagingLog) {
-        super(parent, contact, remoteUri, participants, rcsSettings, messagingLog);
+            ContactId contact, Map<ContactId, ParticipantStatus> participantsFromInvite,
+            String remoteUri, RcsSettings rcsSettings, MessagingLog messagingLog) {
+        super(parent, contact, remoteUri, participantsFromInvite, rcsSettings, messagingLog);
 
-        Set<ParticipantInfo> sessionParticipants = getParticipants();
-        // Set subject
+        mMessagingLog = messagingLog;
+
         String subject = ChatUtils.getSubject(invite);
         setSubject(subject);
 
-        // Create dialog path
         createTerminatingDialogPath(invite);
 
         setRemoteDisplayName(SipUtils.getDisplayNameFromUri(SipUtils
                 .getAssertedIdentityHeader(invite)));
 
-        // Set contribution ID
         String chatId = ChatUtils.getContributionId(invite);
         setContributionID(chatId);
-
-        boolean logActivated = logger.isActivated();
-        // Detect if it's a rejoin
-        if (sessionParticipants.size() == 0) {
-            if (logActivated) {
-                logger.info("Invite to join a group chat");
-            }
-        } else {
-            if (logActivated) {
-                logger.info("Set of invited participants: "
-                        + getListOfParticipants(sessionParticipants));
-            }
-            // Detect if it's a restart: retrieve set of initial participants
-            Set<ParticipantInfo> initialParticipants = MessagingLog.getInstance()
-                    .getGroupChatConnectedParticipants(getContributionID());
-            if (initialParticipants != null && initialParticipants.size() > 0) {
-                if (logActivated) {
-                    logger.info("Set of initial participants: "
-                            + getListOfParticipants(initialParticipants));
-                }
-                missingParticipants = new HashSet<ContactId>();
-                // Run through the set of initial participants
-                for (ParticipantInfo participantInfo : initialParticipants) {
-                    // Is initial participant in the invited list ?
-                    if (ParticipantInfoUtils.getItem(getParticipants(),
-                            participantInfo.getContact()) == null) {
-                        // Initial participant does not belong to list of invited.
-                        // Participant is missing: should be re-invited
-                        missingParticipants.add(participantInfo.getContact());
-                    }
-                }
-                if (missingParticipants.size() != 0) {
-                    if (logActivated) {
-                        StringBuilder sb = new StringBuilder(
-                                "Invite to restart with missing participants: ");
-                        for (ContactId missing : missingParticipants) {
-                            sb.append(missing.toString()).append(" ");
-                        }
-                        logger.info(sb.toString());
-                    }
-                }
-            } else {
-                if (logActivated) {
-                    logger.info("No initial Group Chat");
-                }
-            }
-        }
 
         if (shouldBeAutoAccepted()) {
             setSessionAccepted();
@@ -184,15 +132,60 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
             Collection<ImsSessionListener> listeners = getListeners();
             ContactId contact = getRemoteContact();
             String subject = getSubject();
-            Set<ParticipantInfo> participants = getParticipants();
+            Map<ContactId, ParticipantStatus> participants = getParticipants();
+
+            String chatId = getContributionID();
+
+            Set<ContactId> storedContacts = new HashSet<ContactId>();
+            for (Map.Entry<ContactId, ParticipantStatus> participant : mMessagingLog
+                    .getParticipants(chatId).entrySet()) {
+                switch (participant.getValue()) {
+                    case INVITING:
+                    case INVITED:
+                    case CONNECTED:
+                    case DISCONNECTED:
+                        storedContacts.add(participant.getKey());
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            Set<ContactId> contactsToBeInvited = new HashSet<ContactId>();
+
+            if (!storedContacts.isEmpty()) {
+                contactsToBeInvited = storedContacts;
+
+                /*
+                 * Only contacts we have stored since before but didn't receive in the group chat
+                 * invitation are missing and should be re-invited.
+                 */
+                contactsToBeInvited.removeAll(participants.keySet());
+
+                if (!contactsToBeInvited.isEmpty()) {
+                    if (logActivated) {
+                        StringBuilder stringBuilder = new StringBuilder(
+                                "Invite to restart with missing contacts: ");
+                        for (ContactId contactToBeInvited : contactsToBeInvited) {
+                            stringBuilder.append(contactToBeInvited.toString()).append(" ");
+                        }
+                        logger.info(stringBuilder.toString());
+                    }
+                }
+            } else {
+                if (logActivated) {
+                    logger.info("No initial Group Chat");
+                }
+            }
+
             /* Check if session should be auto-accepted once */
             if (isSessionAccepted()) {
                 if (logActivated) {
                     logger.debug("Received group chat invitation marked for auto-accept");
                 }
                 for (ImsSessionListener listener : listeners) {
-                    ((ChatSessionListener) listener).handleSessionAutoAccepted(contact, subject,
-                            participants);
+                    ((GroupChatSessionListener) listener).handleSessionAutoAccepted(contact,
+                            subject, participants);
                 }
             } else {
                 if (logActivated) {
@@ -200,7 +193,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
                 }
 
                 for (ImsSessionListener listener : listeners) {
-                    ((ChatSessionListener) listener).handleSessionInvited(contact, subject,
+                    ((GroupChatSessionListener) listener).handleSessionInvited(contact, subject,
                             participants);
                 }
 
@@ -380,7 +373,6 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
                     // Open the MSRP session
                     getMsrpMgr().openMsrpSession();
 
-                    // Send an empty packet
                     sendEmptyDataChunk();
                 }
 
@@ -388,16 +380,12 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
                     listener.handleSessionStarted(contact);
                 }
 
-                // Check if some participants are missing
-                if (missingParticipants != null && missingParticipants.size() > 0) {
-                    // Only keep participants who are not invited by the AS
-                    inviteMissingParticipants(missingParticipants);
+                if (!contactsToBeInvited.isEmpty()) {
+                    inviteMissingParticipants(contactsToBeInvited);
                 }
 
-                // Subscribe to event package
                 getConferenceEventSubscriber().subscribe();
 
-                // Start session timer
                 if (getSessionTimerManager().isSessionTimerActivated(resp)) {
                     getSessionTimerManager().start(SessionTimerManager.UAS_ROLE,
                             getDialogPath().getSessionExpireTime());
@@ -428,13 +416,12 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
     private void inviteMissingParticipants(final Set<ContactId> participants) {
         final boolean logActivated = logger.isActivated();
         if (logActivated) {
-            logger.info("Invite missing participants: "
-                    + Arrays.toString(missingParticipants.toArray()));
+            logger.info("Invite missing participants: " + Arrays.toString(participants.toArray()));
         }
         new Thread() {
             public void run() {
                 try {
-                    addParticipants(participants);
+                    inviteParticipants(participants);
                 } catch (Exception e) {
                     if (logActivated) {
                         logger.error("Session initiation has failed", e);
@@ -447,20 +434,6 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
     @Override
     public boolean isInitiatedByRemote() {
         return true;
-    }
-
-    /**
-     * Returns the list of participants separated by commas
-     * 
-     * @param participants set of participants
-     * @return the list of participants separated by commas
-     */
-    private String getListOfParticipants(Set<ParticipantInfo> participants) {
-        StringBuilder sb = new StringBuilder();
-        for (ParticipantInfo participantInfo : participants) {
-            sb.append(participantInfo.getContact().toString()).append(",");
-        }
-        return sb.toString();
     }
 
     @Override

@@ -24,13 +24,14 @@ package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat.State;
-import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.database.Cursor;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -52,7 +53,7 @@ public interface IGroupChatLog {
      * @param direction Direction
      */
     public void addGroupChat(String chatId, ContactId contact, String subject,
-            Set<ParticipantInfo> participants, State state, ReasonCode reasonCode,
+            Map<ContactId, ParticipantStatus> participants, State state, ReasonCode reasonCode,
             Direction direction);
 
     /**
@@ -72,12 +73,13 @@ public interface IGroupChatLog {
     public void setGroupChatStateAndReasonCode(String chatId, State state, ReasonCode reasonCode);
 
     /**
-     * Update group chat set of participants
+     * Update group chat participants
      * 
      * @param chatId Chat ID
-     * @param participants The set of participants
+     * @param participants The group chat participants
      */
-    public void updateGroupChatParticipant(String chatId, Set<ParticipantInfo> participants);
+    public void updateGroupChatParticipants(String chatId,
+            Map<ContactId, ParticipantStatus> participants);
 
     /**
      * Set group chat rejoin ID
@@ -97,14 +99,6 @@ public interface IGroupChatLog {
     public GroupChatInfo getGroupChatInfo(String chatId);
 
     /**
-     * Get the group chat participants
-     * 
-     * @param chatId Chat ID
-     * @result List of contacts
-     */
-    public Set<ParticipantInfo> getGroupChatConnectedParticipants(String chatId);
-
-    /**
      * Is next group chat Invitation rejected
      * 
      * @param chatId Chat ID
@@ -118,14 +112,6 @@ public interface IGroupChatLog {
      * @param chatId Chat ID
      */
     public void setRejectNextGroupChatNextInvitation(String chatId);
-
-    /**
-     * Convert String to ParticipantInfo
-     * 
-     * @param participants String
-     * @return Set<ParticipantInfo>
-     */
-    public Set<ParticipantInfo> getParticipants(String participants);
 
     /**
      * Get group chat state from its chat ID
@@ -147,9 +133,9 @@ public interface IGroupChatLog {
      * Get group chat participants from its chat ID
      * 
      * @param chatId Chat ID of the group chat
-     * @return Set of participants
+     * @return all group chat participants
      */
-    public Set<ParticipantInfo> getGroupChatParticipants(String chatId);
+    public Map<ContactId, ParticipantStatus> getParticipants(String chatId);
 
     /**
      * Get cacheable group chat data from its chat ID
@@ -165,4 +151,5 @@ public interface IGroupChatLog {
      * @return List of chat IDs of those group chats that has to be auto-rejoined
      */
     public Set<String> getChatIdsOfActiveGroupChatsForAutoRejoin();
+
 }

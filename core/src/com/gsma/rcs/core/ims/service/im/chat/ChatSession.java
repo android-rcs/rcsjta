@@ -24,14 +24,6 @@ package com.gsma.rcs.core.ims.service.im.chat;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
@@ -64,8 +56,13 @@ import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
-import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
+
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Chat session
@@ -77,11 +74,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * Subject
      */
     private String mSubject;
-
-    /**
-     * List of participants
-     */
-    private Set<ParticipantInfo> mParticipants = new HashSet<ParticipantInfo>();
 
     /**
      * MSRP manager
@@ -97,11 +89,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * Chat activity manager
      */
     private final ChatActivityManager mActivityMgr;
-
-    /**
-     * Max number of participants in the session
-     */
-    private int mMaxParticipants;
 
     /**
      * Contribution ID
@@ -173,22 +160,16 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param parent IMS service
      * @param contact Remote contactId
      * @param remoteUri Remote URI
-     * @param participants List of participants
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
      * @param firstMsg First message in session
      */
     public ChatSession(ImsService parent, ContactId contact, String remoteUri,
-            Set<ParticipantInfo> participants, RcsSettings rcsSettings, MessagingLog messagingLog,
-            ChatMessage firstMsg) {
+            RcsSettings rcsSettings, MessagingLog messagingLog, ChatMessage firstMsg) {
         super(parent, contact, remoteUri, rcsSettings);
 
         mMessagingLog = messagingLog;
-        mMaxParticipants = rcsSettings.getMaxChatParticipants();
         mActivityMgr = new ChatActivityManager(this, rcsSettings);
-
-        // Set the session participants
-        mParticipants = participants;
 
         // Create the MSRP manager
         int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(rcsSettings);
@@ -326,22 +307,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
     public void setContributionID(String id) {
         this.mContributionId = id;
     }
-
-    /**
-     * Returns the list of participants
-     * 
-     * @return List of participants
-     */
-    public Set<ParticipantInfo> getParticipants() {
-        return mParticipants;
-    }
-
-    /**
-     * Returns the list of participants currently connected to the session
-     * 
-     * @return List of participants
-     */
-    public abstract Set<ParticipantInfo> getConnectedParticipants();
 
     /**
      * Returns the IM session identity
@@ -873,20 +838,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      */
     public abstract void sendIsComposingStatus(boolean status);
 
-    // /**
-    // * Add a participant to the session
-    // *
-    // * @param participant Participant
-    // */
-    // public abstract void addParticipant(String participant);
-    //
-    // /**
-    // * Add a list of participants to the session
-    // *
-    // * @param participants List of participants
-    // */
-    // public abstract void addParticipants(List<String> participants);
-
     /**
      * Send message delivery status via MSRP
      * 
@@ -986,24 +937,6 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                 sLogger.error("Can't parse IMDN document", e);
             }
         }
-    }
-
-    /**
-     * Get max number of participants in the session including the initiator
-     * 
-     * @return Integer
-     */
-    public int getMaxParticipants() {
-        return mMaxParticipants;
-    }
-
-    /**
-     * Set max number of participants in the session including the initiator
-     * 
-     * @param maxParticipants Max number
-     */
-    public void setMaxParticipants(int maxParticipants) {
-        mMaxParticipants = maxParticipants;
     }
 
     /**

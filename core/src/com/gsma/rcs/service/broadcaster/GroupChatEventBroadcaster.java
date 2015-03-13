@@ -23,11 +23,11 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.gsma.services.rcs.chat.IGroupChatListener;
-import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.Intent;
@@ -89,11 +89,13 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
         mGroupChatListeners.finishBroadcast();
     }
 
-    public void broadcastParticipantInfoStatusChanged(String chatId, ParticipantInfo info) {
+    public void broadcastParticipantInfoStatusChanged(String chatId, ContactId contact,
+            ParticipantStatus status) {
         final int N = mGroupChatListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
-                mGroupChatListeners.getBroadcastItem(i).onParticipantInfoChanged(chatId, info);
+                mGroupChatListeners.getBroadcastItem(i).onParticipantInfoChanged(chatId, contact,
+                        status.toInt());
             } catch (Exception e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);

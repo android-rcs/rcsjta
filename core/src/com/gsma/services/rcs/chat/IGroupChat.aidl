@@ -6,7 +6,6 @@ import com.gsma.services.rcs.chat.IChatMessage;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.filetransfer.IFileTransfer;
 import com.gsma.services.rcs.filetransfer.IOneToOneFileTransferListener;
-import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
 
 /**
@@ -26,7 +25,7 @@ interface IGroupChat {
 
 	String getSubject();	
 
-	List<ParticipantInfo> getParticipants();
+	Map getParticipants();
 
 	IChatMessage sendMessage(in String text);
 

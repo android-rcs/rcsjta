@@ -24,8 +24,6 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.util.Set;
-
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.ImsModule;
@@ -42,7 +40,6 @@ import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.chat.ParticipantInfo;
 
 /**
  * Originating file transfer HTTP session
@@ -83,7 +80,6 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      * @param content The file content to share
      * @param fileIcon Content of fileicon
      * @param conferenceId Conference ID
-     * @param participants Set of participants
      * @param chatSessionId Chat session ID
      * @param chatContributionId Chat contribution Id
      * @param tId TID of the upload
@@ -91,13 +87,11 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      * @param rcsSettings
      */
     public OriginatingHttpGroupFileSharingSession(String fileTransferId, ImsService parent,
-            MmContent content, MmContent fileIcon, String conferenceId,
-            Set<ParticipantInfo> participants, String chatSessionId, String chatContributionId,
-            String tId, Core core, RcsSettings rcsSettings) {
+            MmContent content, MmContent fileIcon, String conferenceId, String chatSessionId,
+            String chatContributionId, String tId, Core core, RcsSettings rcsSettings) {
         super(parent, content, null, conferenceId, fileIcon, chatSessionId, chatContributionId,
                 fileTransferId, rcsSettings);
         mCore = core;
-        mParticipants = participants;
 
         // Instantiate the upload manager
         uploadManager = new HttpUploadManager(getContent(), fileIcon, this, tId, rcsSettings);

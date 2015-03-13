@@ -14,17 +14,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.service.rcs.chat;
 
-import java.util.Set;
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Map;
 
 import android.content.Context;
 import android.test.AndroidTestCase;
 
 import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
 
@@ -45,23 +50,28 @@ public class ChatLogTest extends AndroidTestCase {
         super.tearDown();
     }
 
-    public void testGetParticipantInfoNull() {
-        Set<ParticipantInfo> participantInfos = ChatLog.GroupChat
-                .getParticipantInfo(mContext, null);
-        assertNull(participantInfos);
-    }
+    public void testGetParticipants() {
+        Map<ContactId, ParticipantStatus> participants = ChatLog.GroupChat.getParticipants(
+                mContext, "+330123=3,+330124=5");
+        assertNotNull(participants);
 
-    public void testGetParticipantInfo() {
-        Set<ParticipantInfo> participantInfos = ChatLog.GroupChat.getParticipantInfo(mContext,
-                "+330123=1,+330124=3");
-        assertNotNull(participantInfos);
-        assertEquals(2, participantInfos.size());
-        ContactId participant1 = mContactUtils.formatContact("+330123");
-        ParticipantInfo info1 = new ParticipantInfo(participant1, ParticipantInfo.Status.CONNECTED);
-        assertTrue(participantInfos.contains(info1));
-        ContactId participant2 = mContactUtils.formatContact("+330124");
-        ParticipantInfo info2 = new ParticipantInfo(participant2, ParticipantInfo.Status.DEPARTED);
-        assertTrue(participantInfos.contains(info2));
+        assertEquals(2, participants.size());
+
+        ContactId contact1 = mContactUtils.formatContact("+330123");
+        AbstractMap.SimpleEntry<ContactId, ParticipantStatus> formatContactParticipant1 = new HashMap.SimpleEntry<ContactId, ParticipantStatus>(
+                contact1, ParticipantStatus.CONNECTED);
+        AbstractMap.SimpleEntry<ContactId, ParticipantStatus> participantsParticipant1 = new HashMap.SimpleEntry<ContactId, ParticipantStatus>(
+                contact1, participants.get(contact1));
+
+        assertTrue(formatContactParticipant1.equals(participantsParticipant1));
+
+        ContactId contact2 = mContactUtils.formatContact("+330124");
+        AbstractMap.SimpleEntry<ContactId, ParticipantStatus> formatContactParticipant2 = new HashMap.SimpleEntry<ContactId, ParticipantStatus>(
+                contact2, ParticipantStatus.DEPARTED);
+        AbstractMap.SimpleEntry<ContactId, ParticipantStatus> participantsParticipant2 = new HashMap.SimpleEntry<ContactId, ParticipantStatus>(
+                contact2, participants.get(contact2));
+
+        assertTrue(formatContactParticipant2.equals(participantsParticipant2));
     }
 
 }

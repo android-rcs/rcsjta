@@ -22,9 +22,6 @@
 
 package com.gsma.rcs.core.ims.service.im.filetransfer;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
@@ -32,8 +29,11 @@ import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.StorageUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Abstract file sharing session
@@ -58,9 +58,9 @@ public abstract class FileSharingSession extends ImsServiceSession {
     private boolean mFileTransfered = false;
 
     /**
-     * List of participants
+     * Participants
      */
-    protected Set<ParticipantInfo> mParticipants = new HashSet<ParticipantInfo>();
+    protected Map<ContactId, ParticipantStatus> mParticipants = new HashMap<ContactId, ParticipantStatus>();
 
     /**
      * Fileicon
@@ -142,7 +142,7 @@ public abstract class FileSharingSession extends ImsServiceSession {
      * 
      * @return List of participants
      */
-    public Set<ParticipantInfo> getParticipants() {
+    public Map<ContactId, ParticipantStatus> getParticipants() {
         return mParticipants;
     }
 

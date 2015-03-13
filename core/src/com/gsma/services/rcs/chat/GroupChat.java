@@ -30,7 +30,8 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.util.SparseArray;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -83,8 +84,8 @@ public class GroupChat {
 
         private static SparseArray<State> mValueToEnum = new SparseArray<State>();
         static {
-            for (State entry : State.values()) {
-                mValueToEnum.put(entry.toInt(), entry);
+            for (State state : State.values()) {
+                mValueToEnum.put(state.toInt(), state);
             }
         }
 
@@ -108,12 +109,81 @@ public class GroupChat {
          * @return instance
          */
         public final static State valueOf(int value) {
-            State entry = mValueToEnum.get(value);
-            if (entry != null) {
-                return entry;
+            State state = mValueToEnum.get(value);
+            if (state != null) {
+                return state;
             }
             throw new IllegalArgumentException(new StringBuilder("No enum const class ")
                     .append(State.class.getName()).append(".").append(value).append("!").toString());
+        }
+    }
+
+    /**
+     * Group chat participant status
+     */
+    public enum ParticipantStatus {
+        /**
+         * Invite can not be sent, instead it has been queued
+         */
+        INVITE_QUEUED(0),
+        /**
+         * Participant is about to be invited
+         */
+        INVITING(1),
+        /**
+         * Participant is invited
+         */
+        INVITED(2),
+        /**
+         * Participant is connected
+         */
+        CONNECTED(3),
+        /**
+         * Participant disconnected
+         */
+        DISCONNECTED(4),
+        /**
+         * Participant has departed
+         */
+        DEPARTED(5),
+        /**
+         * Participant status is failed
+         */
+        FAILED(6),
+        /**
+         * Participant declined invitation
+         */
+        DECLINED(7),
+        /**
+         * Participant invitation has timed-out
+         */
+        TIMEOUT(8);
+
+        private final int mValue;
+
+        private static SparseArray<ParticipantStatus> mValueToEnum = new SparseArray<ParticipantStatus>();
+        static {
+            for (ParticipantStatus status : ParticipantStatus.values()) {
+                mValueToEnum.put(status.toInt(), status);
+            }
+        }
+
+        private ParticipantStatus(int value) {
+            mValue = value;
+        }
+
+        public final int toInt() {
+            return mValue;
+        }
+
+        public final static ParticipantStatus valueOf(int value) {
+            ParticipantStatus status = mValueToEnum.get(value);
+            if (status != null) {
+                return status;
+            }
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(ParticipantStatus.class.getName()).append(".").append(value)
+                    .append("!").toString());
         }
     }
 
@@ -176,8 +246,8 @@ public class GroupChat {
 
         private static SparseArray<ReasonCode> mValueToEnum = new SparseArray<ReasonCode>();
         static {
-            for (ReasonCode entry : ReasonCode.values()) {
-                mValueToEnum.put(entry.toInt(), entry);
+            for (ReasonCode reasonCode : ReasonCode.values()) {
+                mValueToEnum.put(reasonCode.toInt(), reasonCode);
             }
         }
 
@@ -201,9 +271,9 @@ public class GroupChat {
          * @return instance
          */
         public final static ReasonCode valueOf(int value) {
-            ReasonCode entry = mValueToEnum.get(value);
-            if (entry != null) {
-                return entry;
+            ReasonCode reasonCode = mValueToEnum.get(value);
+            if (reasonCode != null) {
+                return reasonCode;
             }
             throw new IllegalArgumentException(new StringBuilder("No enum const class ")
                     .append(ReasonCode.class.getName()).append(".").append(value).append("!")
@@ -319,9 +389,22 @@ public class GroupChat {
      * @return List of participants
      * @throws RcsServiceException
      */
-    public Set<ParticipantInfo> getParticipants() throws RcsServiceException {
+    /*
+     * Unchecked cast must be suppressed since AIDL provides a raw Map type that must be cast.
+     */
+    @SuppressWarnings("unchecked")
+    public Map<ContactId, ParticipantStatus> getParticipants() throws RcsServiceException {
         try {
-            return new HashSet<ParticipantInfo>(mGroupChatInf.getParticipants());
+            Map<ContactId, Integer> apiParticipants = mGroupChatInf.getParticipants();
+            Map<ContactId, ParticipantStatus> participants = new HashMap<ContactId, ParticipantStatus>();
+
+            for (Map.Entry<ContactId, Integer> apiParticipant : apiParticipants.entrySet()) {
+                participants.put(apiParticipant.getKey(),
+                        ParticipantStatus.valueOf(apiParticipant.getValue()));
+            }
+
+            return participants;
+
         } catch (Exception e) {
             throw new RcsServiceException(e.getMessage());
         }

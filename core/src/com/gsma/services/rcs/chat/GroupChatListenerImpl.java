@@ -19,6 +19,7 @@ package com.gsma.services.rcs.chat;
 import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.os.RemoteException;
@@ -109,9 +110,17 @@ public class GroupChatListenerImpl extends IGroupChatListener.Stub {
     }
 
     @Override
-    public void onParticipantInfoChanged(String chatId, ParticipantInfo info)
-            throws RemoteException {
-        mListener.onParticipantInfoChanged(chatId, info);
+    public void onParticipantInfoChanged(String chatId, ContactId contact, int status) {
+        try {
+            mListener.onParticipantInfoChanged(chatId, contact, ParticipantStatus.valueOf(status));
+        } catch (IllegalArgumentException e) {
+            /*
+             * Detected unknown status not part of standard coming from stack which a client
+             * application can not handle since it is built only to handle the possible enum values
+             * documented and specified in the api standard.
+             */
+            Log.e(LOG_TAG, e.getMessage());
+        }
     }
 
     /**

@@ -54,7 +54,6 @@ import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.chat.GroupChat;
-import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
@@ -76,7 +75,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * File transfer service implementation
@@ -215,7 +213,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Registers a listener on service registration events
-     *
+     * 
      * @param listener Service registration listener
      */
     public void addEventListener(IRcsServiceRegistrationListener listener) {
@@ -229,7 +227,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Unregisters a listener on service registration events
-     *
+     * 
      * @param listener Service registration listener
      */
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
@@ -253,7 +251,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Notifies unregistration event
-     *
+     * 
      * @param reasonCode for unregistration
      */
     public void notifyUnRegistration(RcsServiceRegistration.ReasonCode reasonCode) {
@@ -312,7 +310,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Add outgoing file transfer to DB
-     *
+     * 
      * @param fileTransferId File transfer ID
      * @param contact ContactId
      * @param content Content of file
@@ -353,7 +351,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * 1-1 file send operation initiated
-     *
+     * 
      * @param contact
      * @param file
      * @param fileIcon
@@ -666,16 +664,15 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Group file send operation initiated
-     *
-     * @param participants
+     * 
      * @param content
      * @param fileIcon
      * @param chatId
      * @param fileTransferId
      * @throws ServerApiException
      */
-    private IFileTransfer sendGroupFile(Set<ParticipantInfo> participants, MmContent content,
-            MmContent fileIcon, String chatId, String fileTransferId) throws ServerApiException {
+    private IFileTransfer sendGroupFile(MmContent content, MmContent fileIcon, String chatId,
+            String fileTransferId) throws ServerApiException {
         try {
             long fileSize = content.getSize();
             mImService.assertFileSizeNotExceedingMaxLimit(fileSize, "File exceeds max size.");
@@ -703,7 +700,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileIcon,
                         State.INITIATING);
                 final FileSharingSession session = mImService.initiateGroupFileTransferSession(
-                        fileTransferId, participants, content, fileIcon, chatId, chatSessionId);
+                        fileTransferId, content, fileIcon, chatId, chatSessionId);
 
                 GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(
                         session.getFileTransferId(), chatId, mGroupFileTransferBroadcaster,
@@ -762,7 +759,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     /**
      * Transfers a file to participants. The parameter file contains the URI of the file to be
      * transferred (for a local or a remote file).
-     *
+     * 
      * @param chatId ChatId of group chat
      * @param file Uri of file to transfer
      * @param attachfileIcon true if the stack must try to attach fileIcon
@@ -786,8 +783,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             MmContent content = ContentManager.createMmContent(file, fileDescription.getSize(),
                     fileDescription.getName());
 
-            Set<ParticipantInfo> participants = mMessagingLog
-                    .getGroupChatConnectedParticipants(chatId);
             String fileTransferId = IdGenerator.generateMessageID();
             MmContent fileIconContent = null;
             if (attachfileIcon && MimeManager.isImageType(content.getEncoding())) {
@@ -797,7 +792,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
             /* If the IMS is connected at this time then send this group file. */
             if (ServerApiUtils.isImsConnected()) {
-                return sendGroupFile(participants, content, fileIconContent, chatId, fileTransferId);
+                return sendGroupFile(content, fileIconContent, chatId, fileTransferId);
             }
             /* If the IMS is NOT connected at this time then queue this group file. */
             addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileIconContent,
@@ -904,7 +899,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Adds a listener on group file transfer events
-     *
+     * 
      * @param listener Group file transfer listener
      * @throws ServerApiException
      */
@@ -919,7 +914,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Removes a listener on group file transfer events
-     *
+     * 
      * @param listener Group file transfer listener
      * @throws ServerApiException
      */
@@ -1116,7 +1111,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     /**
      * Mark a received file transfer as read (i.e. the invitation or the file has been displayed in
      * the UI).
-     *
+     * 
      * @param transferId File transfer ID
      */
     @Override
@@ -1232,7 +1227,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Add and broadcast file transfer invitation rejections
-     *
+     * 
      * @param contact Contact
      * @param content File content
      * @param fileIcon File content

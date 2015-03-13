@@ -25,15 +25,15 @@ import com.gsma.services.rcs.chat.ChatLog.GroupChat;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat.State;
-import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 
 import android.database.Cursor;
 
-import java.util.Set;
+import java.util.Map;
 
 /**
  * GroupChatPersistedStorageAccessor helps in retrieving persisted data related to a group chat from
@@ -133,8 +133,8 @@ public class GroupChatPersistedStorageAccessor {
         return mContact;
     }
 
-    public Set<ParticipantInfo> getParticipants() {
-        return mMessagingLog.getGroupChatParticipants(mChatId);
+    public Map<ContactId, ParticipantStatus> getParticipants() {
+        return mMessagingLog.getParticipants(mChatId);
     }
 
     public int getMaxParticipants() {
@@ -168,8 +168,9 @@ public class GroupChatPersistedStorageAccessor {
         mMessagingLog.setGroupChatRejoinId(mChatId, rejoinId);
     }
 
-    public void addGroupChat(ContactId contact, String subject, Set<ParticipantInfo> participants,
-            State state, ReasonCode reasonCode, Direction direction) {
+    public void addGroupChat(ContactId contact, String subject,
+            Map<ContactId, ParticipantStatus> participants, State state, ReasonCode reasonCode,
+            Direction direction) {
         mMessagingLog.addGroupChat(mChatId, contact, subject, participants, state, reasonCode,
                 direction);
     }

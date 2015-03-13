@@ -14,13 +14,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.im.chat;
 
-import java.util.Set;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
+import com.gsma.services.rcs.contact.ContactId;
 
-import com.gsma.services.rcs.chat.ParticipantInfo;
+import java.util.Map;
 
 /**
  * Group chat info
@@ -31,27 +35,27 @@ public class GroupChatInfo {
     /**
      * Session ID
      */
-    private String sessionId;
+    private String mSessionId;
 
     /**
      * Rejoin ID
      */
-    private String rejoinId;
+    private String mRejoinId;
 
     /**
      * Contribution Id
      */
-    private String contributionId;
+    private String mContributionId;
 
     /**
      * Set of initial participants
      */
-    private Set<ParticipantInfo> participants;
+    private Map<ContactId, ParticipantStatus> mParticipants;
 
     /**
      * Subject
      */
-    private String subject;
+    private String mSubject;
 
     /**
      * Constructor
@@ -63,12 +67,12 @@ public class GroupChatInfo {
      * @param subject Subject
      */
     public GroupChatInfo(String sessionId, String rejoinId, String contributionId,
-            Set<ParticipantInfo> participants, String subject) {
-        this.sessionId = sessionId;
-        this.rejoinId = rejoinId;
-        this.contributionId = contributionId;
-        this.participants = participants;
-        this.subject = subject;
+            Map<ContactId, ParticipantStatus> participants, String subject) {
+        mSessionId = sessionId;
+        mRejoinId = rejoinId;
+        mContributionId = contributionId;
+        mParticipants = participants;
+        mSubject = subject;
     }
 
     /**
@@ -77,7 +81,7 @@ public class GroupChatInfo {
      * @return ID
      */
     public String getSessionId() {
-        return sessionId;
+        return mSessionId;
     }
 
     /**
@@ -86,7 +90,7 @@ public class GroupChatInfo {
      * @return ID
      */
     public String getRejoinId() {
-        return rejoinId;
+        return mRejoinId;
     }
 
     /**
@@ -95,7 +99,7 @@ public class GroupChatInfo {
      * @return ID
      */
     public String getContributionId() {
-        return contributionId;
+        return mContributionId;
     }
 
     /**
@@ -103,8 +107,8 @@ public class GroupChatInfo {
      * 
      * @return Participants
      */
-    public Set<ParticipantInfo> getParticipants() {
-        return participants;
+    public Map<ContactId, ParticipantStatus> getParticipants() {
+        return mParticipants;
     }
 
     /**
@@ -113,7 +117,7 @@ public class GroupChatInfo {
      * @return Subject
      */
     public String getSubject() {
-        return subject;
+        return mSubject;
     }
 
     /**
@@ -122,7 +126,7 @@ public class GroupChatInfo {
      * @return String
      */
     public String toString() {
-        return "Session ID=" + sessionId + ", Contribution ID=" + contributionId + ", Rejoin ID="
-                + rejoinId + ", Subject=" + subject + ", Participants=" + participants.size();
+        return "Session ID=" + mSessionId + ", Contribution ID=" + mContributionId + ", Rejoin ID="
+                + mRejoinId + ", Subject=" + mSubject + ", Participants=" + mParticipants.size();
     }
 }

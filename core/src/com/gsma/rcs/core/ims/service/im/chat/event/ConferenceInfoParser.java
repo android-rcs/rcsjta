@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +15,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.im.chat.event;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
+import com.gsma.rcs.utils.logger.Logger;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.gsma.rcs.utils.logger.Logger;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 /**
  * Conference-Info parser
@@ -59,9 +63,21 @@ public class ConferenceInfoParser extends DefaultHandler {
      * </user> </users> </conference-info>
      */
 
-    private StringBuffer accumulator;
-    private ConferenceInfoDocument conference = null;
-    private User user = null;
+    private StringBuffer mAccumulator;
+
+    private ConferenceInfoDocument mConference = null;
+
+    private String mEntity;
+
+    private boolean mMe;
+
+    private String mStatus;
+
+    private String mDisplayName;
+
+    private String mDisconnectionMethod;
+
+    private String mFailureReason;
 
     /**
      * The logger
@@ -81,71 +97,72 @@ public class ConferenceInfoParser extends DefaultHandler {
     }
 
     public ConferenceInfoDocument getConferenceInfo() {
-        return conference;
+        return mConference;
     }
 
     public void startDocument() {
         if (logger.isActivated()) {
             logger.debug("Start document");
         }
-        accumulator = new StringBuffer();
+        mAccumulator = new StringBuffer();
     }
 
     public void characters(char buffer[], int start, int length) {
-        accumulator.append(buffer, start, length);
+        mAccumulator.append(buffer, start, length);
     }
 
     public void startElement(String namespaceURL, String localName, String qname, Attributes attr) {
-        accumulator.setLength(0);
+        mAccumulator.setLength(0);
 
         if (localName.equals("conference-info")) {
             String entity = attr.getValue("entity").trim();
             String state = attr.getValue("state").trim();
-            conference = new ConferenceInfoDocument(entity, state);
+            mConference = new ConferenceInfoDocument(entity, state);
         } else if (localName.equals("user")) {
-            String entity = attr.getValue("entity").trim();
+            mEntity = attr.getValue("entity").trim();
             String yourown = attr.getValue("yourown");
-            boolean me = false;
+            mMe = false;
+            mStatus = null;
+            mDisplayName = null;
+            mDisconnectionMethod = null;
+            mFailureReason = null;
             if (yourown != null) {
                 try {
-                    me = Boolean.parseBoolean(yourown);
+                    mMe = Boolean.parseBoolean(yourown);
+                    /* TODO: Implement proper exception handling in CR037 */
                 } catch (Exception e) {
                 }
             }
-            user = new User(entity, me);
         }
     }
 
     public void endElement(String namespaceURL, String localName, String qname) {
         if (localName.equals("user")) {
-            if (user != null) {
-                conference.addUser(user);
-                user = null;
+            if (mConference != null) {
+                User user = new User(mEntity, mMe, mStatus, mDisplayName, mDisconnectionMethod,
+                        mFailureReason);
+                mConference.addUser(user);
             }
         } else if (localName.equals("display-text")) {
-            if (user != null) {
-                user.setDisplayName(accumulator.toString().trim());
-            }
+            mDisplayName = mAccumulator.toString().trim();
         } else if (localName.equals("status")) {
-            if (user != null) {
-                user.setState(accumulator.toString().trim());
-            }
+            mStatus = mAccumulator.toString().trim();
         } else if (localName.equals("maximum-user-count")) {
-            conference.setMaxUserCount(Integer.parseInt(accumulator.toString().trim()));
+            if (mConference != null) {
+                mConference.setMaxUserCount(Integer.parseInt(mAccumulator.toString().trim()));
+            }
         } else if (localName.equals("user-count")) {
-            conference.setUserCount(Integer.parseInt(accumulator.toString().trim()));
+            if (mConference != null) {
+                mConference.setUserCount(Integer.parseInt(mAccumulator.toString().trim()));
+            }
         } else if (localName.equals("conference-info")) {
             if (logger.isActivated()) {
                 logger.debug("Conference-Info document complete");
             }
         } else if (localName.equals("disconnection-method")) {
-            if (user != null) {
-                user.setDisconnectionMethod(accumulator.toString().trim());
-            }
+            mDisconnectionMethod = mAccumulator.toString().trim();
         } else if (localName.equals("reason")) {
-            if (user != null) {
-                user.setFailureReason(accumulator.toString().trim());
-            }
+            mFailureReason = mAccumulator.toString().trim();
         }
     }
 

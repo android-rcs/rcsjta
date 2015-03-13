@@ -36,7 +36,7 @@ import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
-import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.ContentValues;
@@ -45,6 +45,8 @@ import android.database.SQLException;
 import android.net.Uri;
 
 import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -72,7 +74,7 @@ public class MessageLog implements IMessageLog {
 
     /**
      * Constructor
-     *
+     * 
      * @param localContentResolver Local content resolver
      * @param groupChatLog
      * @param groupChatDeliveryInfoLog
@@ -118,7 +120,7 @@ public class MessageLog implements IMessageLog {
 
     /**
      * Add outgoing one-to-one chat message
-     *
+     * 
      * @param msg Chat message
      * @param status Status
      * @param reasonCode Reason code
@@ -159,7 +161,7 @@ public class MessageLog implements IMessageLog {
 
     /**
      * Add incoming one-to-one chat message
-     *
+     * 
      * @param msg Chat message
      * @param imdnDisplayedRequested Indicates whether IMDN display was requested
      */
@@ -175,7 +177,7 @@ public class MessageLog implements IMessageLog {
 
     /**
      * Add group chat message
-     *
+     * 
      * @param chatId Chat ID
      * @param msg Chat message
      * @param direction Direction
@@ -228,12 +230,26 @@ public class MessageLog implements IMessageLog {
                 if (mRcsSettings.isAlbatrosRelease()) {
                     deliveryStatus = GroupDeliveryInfo.Status.UNSUPPORTED;
                 }
-                Set<ParticipantInfo> participants = mGroupChatLog
-                        .getGroupChatConnectedParticipants(chatId);
-                for (ParticipantInfo participant : participants) {
-                    mGroupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId,
-                            participant.getContact(), msgId, deliveryStatus,
-                            GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
+
+                Set<ContactId> recipients = new HashSet<ContactId>();
+                for (Map.Entry<ContactId, ParticipantStatus> participant : mGroupChatLog
+                        .getParticipants(chatId).entrySet()) {
+                    // TODO: Verify that these are the proper values to include.
+                    switch (participant.getValue()) {
+                        case INVITE_QUEUED:
+                        case INVITING:
+                        case INVITED:
+                        case CONNECTED:
+                        case DISCONNECTED:
+                            recipients.add(participant.getKey());
+                        default:
+                            break;
+                    }
+                }
+
+                for (ContactId recipient : recipients) {
+                    mGroupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId, recipient,
+                            msgId, deliveryStatus, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
                 }
             } catch (Exception e) {
                 mLocalContentResolver.delete(Uri.withAppendedPath(Message.CONTENT_URI, msgId),

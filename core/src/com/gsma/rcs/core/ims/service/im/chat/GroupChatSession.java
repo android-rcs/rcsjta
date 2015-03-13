@@ -47,17 +47,21 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
-import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax2.sip.header.ExtensionHeader;
@@ -69,10 +73,15 @@ import javax2.sip.header.ExtensionHeader;
  * @author YPLO6403
  */
 public abstract class GroupChatSession extends ChatSession {
+
+    private final ConferenceEventSubscribeManager mConferenceSubscriber;
+
     /**
-     * Conference event subscribe manager
+     * List of participants as reported by the network via conference events or invited by us. These
+     * are persisted in the database. mParticipants should be in sync with the provider at all
+     * times.
      */
-    private ConferenceEventSubscribeManager mConferenceSubscriber;
+    private final Map<ContactId, ParticipantStatus> mParticipants;
 
     /**
      * Boolean variable indicating that the session is no longer marked as the active one for
@@ -80,6 +89,12 @@ public abstract class GroupChatSession extends ChatSession {
      */
     private boolean mPendingRemoval = false;
 
+    private final ImsModule mImsModule;
+
+    /**
+     * Max number of participants allowed in the group chat including the current user.
+     */
+    private int mMaxParticipants;
     /**
      * The logger
      */
@@ -91,20 +106,25 @@ public abstract class GroupChatSession extends ChatSession {
      * @param parent IMS service
      * @param contact remote contact identifier
      * @param conferenceId Conference id
-     * @param participants Set of invited participants
+     * @param participants Initial set of participants
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
      */
     public GroupChatSession(ImsService parent, ContactId contact, String conferenceId,
-            Set<ParticipantInfo> participants, RcsSettings rcsSettings, MessagingLog messagingLog) {
-        super(parent, contact, conferenceId, participants, rcsSettings, messagingLog, null);
+            Map<ContactId, ParticipantStatus> participants, RcsSettings rcsSettings,
+            MessagingLog messagingLog) {
+        super(parent, contact, conferenceId, rcsSettings, messagingLog, null);
+
+        mMaxParticipants = rcsSettings.getMaxChatParticipants();
+
+        mParticipants = participants;
 
         mConferenceSubscriber = new ConferenceEventSubscribeManager(this, rcsSettings);
 
-        // Set feature tags
+        mImsModule = parent.getImsModule();
+
         setFeatureTags(ChatUtils.getSupportedFeatureTagsForGroupChat(rcsSettings));
 
-        // Set Accept-Contact header
         setAcceptContactTags(ChatUtils.getAcceptContactTagsForGroupChat());
 
         String acceptTypes = CpimMessage.MIME_TYPE;
@@ -126,9 +146,97 @@ public abstract class GroupChatSession extends ChatSession {
         return true;
     }
 
-    @Override
-    public Set<ParticipantInfo> getConnectedParticipants() {
-        return mConferenceSubscriber.getParticipants();
+    /**
+     * Get max number of participants in the session including the initiator
+     * 
+     * @return Maximum number of participants
+     */
+    public int getMaxParticipants() {
+        return mMaxParticipants;
+    }
+
+    /**
+     * Set max number of participants in the session including the initiator
+     * 
+     * @param maxParticipants Max number
+     */
+    public void setMaxParticipants(int maxParticipants) {
+        mMaxParticipants = maxParticipants;
+    }
+
+    /**
+     * Returns all participants associated with the session.
+     * 
+     * @return Set of participants associated with the session.
+     */
+    public Map<ContactId, ParticipantStatus> getParticipants() {
+        synchronized (mParticipants) {
+            return new HashMap<ContactId, ParticipantStatus>(mParticipants);
+        }
+    }
+
+    /**
+     * Returns participants with ParticipantStatus status.
+     * 
+     * @param participantStatus Status of participants to be returned.
+     * @return Set of participants with status participantStatus.
+     */
+    public Map<ContactId, ParticipantStatus> getParticipants(ParticipantStatus status) {
+        synchronized (mParticipants) {
+            Map<ContactId, ParticipantStatus> matcingParticipants = new HashMap<ContactId, ParticipantStatus>();
+
+            for (Map.Entry<ContactId, ParticipantStatus> participant : mParticipants.entrySet()) {
+                if (participant.getValue() == status) {
+                    matcingParticipants.put(participant.getKey(), participant.getValue());
+                }
+            }
+
+            return matcingParticipants;
+        }
+    }
+
+    /**
+     * Apply updates or additions to participants of the group chat.
+     * 
+     * @param participantUpdates Participant updates
+     */
+    public void updateParticipants(Map<ContactId, ParticipantStatus> participantUpdates) {
+        synchronized (mParticipants) {
+            Map<ContactId, ParticipantStatus> updatedParticipants = new HashMap<ContactId, ParticipantStatus>();
+
+            for (Map.Entry<ContactId, ParticipantStatus> participantUpdate : participantUpdates
+                    .entrySet()) {
+                ContactId contact = participantUpdate.getKey();
+                ParticipantStatus status = participantUpdate.getValue();
+                if (!status.equals(mParticipants.get(contact))) {
+                    mParticipants.put(contact, status);
+                    updatedParticipants.put(contact, status);
+                }
+            }
+
+            if (!updatedParticipants.isEmpty()) {
+                for (ImsSessionListener listener : getListeners()) {
+                    ((GroupChatSessionListener) listener).handleParticipantUpdates(
+                            updatedParticipants, mParticipants);
+                }
+            }
+        }
+    }
+
+    /**
+     * Set a status for group chat participants.
+     * 
+     * @param contacts The contacts that should have their status set.
+     * @param status The status to set.
+     */
+    public void updateParticipants(final Set<ContactId> contacts, ParticipantStatus status) {
+        Map<ContactId, ParticipantStatus> participants = new HashMap<ContactId, ParticipantStatus>();
+
+        for (ContactId contact : contacts) {
+            participants.put(contact, status);
+        }
+
+        updateParticipants(participants);
     }
 
     /**
@@ -193,9 +301,8 @@ public abstract class GroupChatSession extends ChatSession {
     private void requestContactCapabilities(String contact) {
         try {
             ContactId remote = ContactUtils.createContactId(contact);
-            // Request capabilities to the remote
-            getImsService().getImsModule().getCapabilityService()
-                    .requestContactCapabilities(remote);
+
+            mImsModule.getCapabilityService().requestContactCapabilities(remote);
         } catch (RcsContactFormatException e) {
             if (sLogger.isActivated()) {
                 sLogger.debug("Failed to request capabilities: cannot parse contact " + contact);
@@ -323,117 +430,42 @@ public abstract class GroupChatSession extends ChatSession {
     }
 
     /**
-     * Add a participant to the session
+     * Get the number of participants that can be added to the group chat without exceeding its max
+     * number of participants.
      * 
-     * @param participant Participant
+     * @return the max number of participants that can be added.
      */
-    public void addParticipant(ContactId participant) {
-        try {
-            if (sLogger.isActivated()) {
-                sLogger.debug("Add one participant (" + participant + ") to the session");
-            }
+    public int getMaxNumberOfAdditionalParticipants() {
+        synchronized (mParticipants) {
 
-            // Re-use INVITE dialog path
-            SessionAuthenticationAgent authenticationAgent = getAuthenticationAgent();
+            int currentParticipants = 0;
 
-            // Increment the Cseq number of the dialog path
-            getDialogPath().incrementCseq();
-
-            // Send REFER request
-            if (sLogger.isActivated()) {
-                sLogger.debug("Send REFER");
-            }
-            String contactUri = PhoneUtils.formatContactIdToUri(participant);
-            SipRequest refer = SipMessageFactory.createRefer(getDialogPath(), contactUri,
-                    getSubject(), getContributionID());
-            SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
-                    .sendSubsequentRequest(getDialogPath(), refer);
-
-            // Analyze received message
-            if (ctx.getStatusCode() == 407) {
-                // 407 response received
-                if (sLogger.isActivated()) {
-                    sLogger.debug("407 response received");
-                }
-
-                // Set the Proxy-Authorization header
-                authenticationAgent.readProxyAuthenticateHeader(ctx.getSipResponse());
-
-                // Increment the Cseq number of the dialog path
-                getDialogPath().incrementCseq();
-
-                // Create a second REFER request with the right token
-                if (sLogger.isActivated()) {
-                    sLogger.info("Send second REFER");
-                }
-                refer = SipMessageFactory.createRefer(getDialogPath(), contactUri, getSubject(),
-                        getContributionID());
-
-                // Set the Authorization header
-                authenticationAgent.setProxyAuthorizationHeader(refer);
-
-                // Send REFER request
-                ctx = getImsService().getImsModule().getSipManager()
-                        .sendSubsequentRequest(getDialogPath(), refer);
-
-                // Analyze received message
-                if ((ctx.getStatusCode() >= 200) && (ctx.getStatusCode() < 300)) {
-                    // 200 OK response
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("200 OK response received");
-                    }
-
-                    // Notify listeners
-                    for (int i = 0; i < getListeners().size(); i++) {
-                        ((ChatSessionListener) getListeners().get(i))
-                                .handleAddParticipantSuccessful(participant);
-                    }
-                } else {
-                    // Error
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("REFER has failed (" + ctx.getStatusCode() + ")");
-                    }
-
-                    // Notify listeners
-                    for (int i = 0; i < getListeners().size(); i++) {
-                        ((ChatSessionListener) getListeners().get(i)).handleAddParticipantFailed(
-                                participant, ctx.getReasonPhrase());
-                    }
-                }
-            } else if ((ctx.getStatusCode() >= 200) && (ctx.getStatusCode() < 300)) {
-                // 200 OK received
-                if (sLogger.isActivated()) {
-                    sLogger.debug("200 OK response received");
-                }
-
-                // Notify listeners
-                for (int i = 0; i < getListeners().size(); i++) {
-                    ((ChatSessionListener) getListeners().get(i))
-                            .handleAddParticipantSuccessful(participant);
-                }
-            } else {
-                // Error responses
-                if (sLogger.isActivated()) {
-                    sLogger.debug("No response received");
-                }
-
-                // Notify listeners
-                for (int i = 0; i < getListeners().size(); i++) {
-                    ((ChatSessionListener) getListeners().get(i)).handleAddParticipantFailed(
-                            participant, ctx.getReasonPhrase());
+            for (ParticipantStatus status : mParticipants.values()) {
+                switch (status) {
+                    case INVITE_QUEUED:
+                    case INVITING:
+                    case INVITED:
+                    case CONNECTED:
+                        currentParticipants++;
+                        break;
+                    default:
+                        break;
                 }
             }
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("REFER request has failed", e);
-            }
 
-            // Notify listeners
-            for (int i = 0; i < getListeners().size(); i++) {
-                ((ChatSessionListener) getListeners().get(i)).handleAddParticipantFailed(
-                        participant, e.getMessage());
-            }
+            return mMaxParticipants - currentParticipants - 1;
         }
+    }
+
+    /**
+     * Invite a contact to the session
+     * 
+     * @param contact Contact to invite
+     */
+    public void inviteContact(ContactId contact) {
+        Set<ContactId> contacts = new HashSet<ContactId>();
+        contacts.add(contact);
+        inviteParticipants(contacts);
     }
 
     /**
@@ -441,126 +473,114 @@ public abstract class GroupChatSession extends ChatSession {
      * 
      * @param participants set of participants
      */
-    public void addParticipants(Set<ContactId> participants) {
+    public void inviteParticipants(Set<ContactId> contacts) {
         try {
-            if (participants.size() == 1) {
-                addParticipant(participants.iterator().next());
+            int nbrOfContacts = contacts.size();
+
+            if (sLogger.isActivated()) {
+                sLogger.debug("Add " + nbrOfContacts + " participants to the session");
+            }
+
+            /*
+             * If we are disconnected, just add the participants as queued and return. The dequeuing
+             * mechanism will take care of them.
+             */
+            if (!ServerApiUtils.isImsConnected()) {
+
+                updateParticipants(contacts, ParticipantStatus.INVITE_QUEUED);
+
+                mImsModule.getCoreListener().handleAutoRejoinGroupChat(getContributionID());
+
                 return;
             }
 
-            if (sLogger.isActivated()) {
-                sLogger.debug("Add " + participants.size() + " participants to the session");
-            }
+            updateParticipants(contacts, ParticipantStatus.INVITING);
 
-            // Re-use INVITE dialog path
             SessionAuthenticationAgent authenticationAgent = getAuthenticationAgent();
 
-            // Increment the Cseq number of the dialog path
             getDialogPath().incrementCseq();
 
-            // Send REFER request
             if (sLogger.isActivated()) {
                 sLogger.debug("Send REFER");
             }
-            SipRequest refer = SipMessageFactory.createRefer(getDialogPath(), participants,
-                    getSubject(), getContributionID());
-            SipTransactionContext ctx = getImsService().getImsModule().getSipManager()
-                    .sendSubsequentRequest(getDialogPath(), refer);
 
-            // Analyze received message
-            if (ctx.getStatusCode() == 407) {
-                // 407 response received
+            SipRequest refer;
+
+            if (nbrOfContacts == 1) {
+                String singleContactUri = PhoneUtils.formatContactIdToUri(contacts.iterator()
+                        .next());
+                refer = SipMessageFactory.createRefer(getDialogPath(), singleContactUri,
+                        getSubject(), getContributionID());
+            } else {
+                refer = SipMessageFactory.createRefer(getDialogPath(), contacts, getSubject(),
+                        getContributionID());
+            }
+            SipTransactionContext ctx = mImsModule.getSipManager().sendSubsequentRequest(
+                    getDialogPath(), refer);
+
+            int statusCode = ctx.getStatusCode();
+
+            if (statusCode == 407) {
                 if (sLogger.isActivated()) {
                     sLogger.debug("407 response received");
                 }
 
-                // Set the Proxy-Authorization header
                 authenticationAgent.readProxyAuthenticateHeader(ctx.getSipResponse());
 
-                // Increment the Cseq number of the dialog path
                 getDialogPath().incrementCseq();
 
-                // Create a second REFER request with the right token
                 if (sLogger.isActivated()) {
                     sLogger.info("Send second REFER");
                 }
-                refer = SipMessageFactory.createRefer(getDialogPath(), participants, getSubject(),
-                        getContributionID());
 
-                // Set the Authorization header
+                if (nbrOfContacts == 1) {
+                    String singleContactUri = PhoneUtils.formatContactIdToUri(contacts.iterator()
+                            .next());
+                    refer = SipMessageFactory.createRefer(getDialogPath(), singleContactUri,
+                            getSubject(), getContributionID());
+                } else {
+                    refer = SipMessageFactory.createRefer(getDialogPath(), contacts, getSubject(),
+                            getContributionID());
+                }
+
                 authenticationAgent.setProxyAuthorizationHeader(refer);
 
-                // Send REFER request
-                ctx = getImsService().getImsModule().getSipManager()
-                        .sendSubsequentRequest(getDialogPath(), refer);
+                ctx = mImsModule.getSipManager().sendSubsequentRequest(getDialogPath(), refer);
 
-                // Analyze received message
-                if ((ctx.getStatusCode() >= 200) && (ctx.getStatusCode() < 300)) {
-                    // 200 OK response
+                statusCode = ctx.getStatusCode();
+
+                if ((statusCode >= 200) && (statusCode < 300)) {
                     if (sLogger.isActivated()) {
                         sLogger.debug("20x OK response received");
                     }
 
-                    // Notify listeners
-                    for (ContactId participant : participants) {
-                        for (int i = 0; i < getListeners().size(); i++) {
-                            ((ChatSessionListener) getListeners().get(i))
-                                    .handleAddParticipantSuccessful(participant);
-                        }
-                    }
+                    updateParticipants(contacts, ParticipantStatus.INVITED);
                 } else {
-                    // Error
                     if (sLogger.isActivated()) {
-                        sLogger.debug("REFER has failed (" + ctx.getStatusCode() + ")");
+                        sLogger.debug("REFER has failed (" + statusCode + ")");
                     }
 
-                    // Notify listeners
-                    for (ContactId participant : participants) {
-                        for (int i = 0; i < getListeners().size(); i++) {
-                            ((ChatSessionListener) getListeners().get(i))
-                                    .handleAddParticipantFailed(participant, ctx.getReasonPhrase());
-                        }
-                    }
+                    updateParticipants(contacts, ParticipantStatus.FAILED);
                 }
-            } else if ((ctx.getStatusCode() >= 200) && (ctx.getStatusCode() < 300)) {
-                // 200 OK received
+            } else if ((statusCode >= 200) && (statusCode < 300)) {
                 if (sLogger.isActivated()) {
                     sLogger.debug("20x OK response received");
                 }
 
-                // Notify listeners
-                for (ContactId participant : participants) {
-                    for (int i = 0; i < getListeners().size(); i++) {
-                        ((ChatSessionListener) getListeners().get(i))
-                                .handleAddParticipantSuccessful(participant);
-                    }
-                }
+                updateParticipants(contacts, ParticipantStatus.INVITED);
             } else {
-                // Error responses
                 if (sLogger.isActivated()) {
                     sLogger.debug("No response received");
                 }
 
-                // Notify listeners
-                for (ContactId participant : participants) {
-                    for (int i = 0; i < getListeners().size(); i++) {
-                        ((ChatSessionListener) getListeners().get(i)).handleAddParticipantFailed(
-                                participant, ctx.getReasonPhrase());
-                    }
-                }
+                updateParticipants(contacts, ParticipantStatus.FAILED);
             }
         } catch (Exception e) {
             if (sLogger.isActivated()) {
                 sLogger.error("REFER request has failed", e);
             }
 
-            // Notify listeners
-            for (ContactId participant : participants) {
-                for (int i = 0; i < getListeners().size(); i++) {
-                    ((ChatSessionListener) getListeners().get(i)).handleAddParticipantFailed(
-                            participant, e.getMessage());
-                }
-            }
+            updateParticipants(contacts, ParticipantStatus.FAILED);
         }
     }
 
@@ -590,8 +610,7 @@ public abstract class GroupChatSession extends ChatSession {
     public void handle200OK(SipResponse resp) {
         super.handle200OK(resp);
 
-        // Subscribe to event package
-        getConferenceEventSubscriber().subscribe();
+        mConferenceSubscriber.subscribe();
     }
 
     /*
@@ -792,6 +811,7 @@ public abstract class GroupChatSession extends ChatSession {
 
     @Override
     public void removeSession() {
-        getImsService().getImsModule().getInstantMessagingService().removeSession(this);
+        mImsModule.getInstantMessagingService().removeSession(this);
     }
+
 }

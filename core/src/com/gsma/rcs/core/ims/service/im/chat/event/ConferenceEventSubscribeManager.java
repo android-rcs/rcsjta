@@ -22,16 +22,6 @@
 
 package com.gsma.rcs.core.ims.service.im.chat.event;
 
-import java.io.ByteArrayInputStream;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Vector;
-
-import javax2.sip.header.ExpiresHeader;
-import javax2.sip.header.SubscriptionStateHeader;
-
-import org.xml.sax.InputSource;
-
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
@@ -40,22 +30,30 @@ import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
+import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatError;
-import com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
-import com.gsma.rcs.core.ims.service.im.chat.ParticipantInfoUtils;
+import com.gsma.rcs.core.ims.service.im.chat.GroupChatSessionListener;
 import com.gsma.rcs.platform.registry.RegistryFactory;
-import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.PeriodicRefresher;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
-import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.chat.ParticipantInfo.Status;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
+
+import org.xml.sax.InputSource;
+
+import java.io.ByteArrayInputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Vector;
+
+import javax2.sip.header.ExpiresHeader;
+import javax2.sip.header.SubscriptionStateHeader;
 
 /**
  * Conference event subscribe manager
@@ -98,11 +96,6 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      */
     private SessionAuthenticationAgent mAuthenticationAgent;
 
-    /**
-     * List of connected participants
-     */
-    private Set<ParticipantInfo> mParticipants;
-
     private final RcsSettings mRcsSettings;
 
     /**
@@ -121,8 +114,6 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
         mSession = session;
         mImsModule = session.getImsService().getImsModule();
         mAuthenticationAgent = new SessionAuthenticationAgent(mImsModule);
-        // Initiate list of participants with list of invited with status UNKNOWN
-        mParticipants = new HashSet<ParticipantInfo>(session.getParticipants());
         mRcsSettings = rcsSettings;
 
         int defaultExpirePeriod = mRcsSettings.getSubscribeExpirePeriod();
@@ -145,21 +136,12 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
     }
 
     /**
-     * Returns the presentity
+     * Returns the identity.
      * 
-     * @return Presentity
+     * @return Identity
      */
-    public String getPresentity() {
+    public String getIdentity() {
         return mSession.getImSessionIdentity();
-    }
-
-    /**
-     * Returns the list of connected participants
-     * 
-     * @return List of participants
-     */
-    public Set<ParticipantInfo> getParticipants() {
-        return mParticipants;
     }
 
     /**
@@ -196,10 +178,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
                         }
                         mSession.setMaxParticipants(maxParticipants);
                     }
-                    Set<ParticipantInfo> newSet = new HashSet<ParticipantInfo>();
-                    if (!ConferenceInfoDocument.STATE_FULL.equalsIgnoreCase(conference.getState())) {
-                        newSet = new HashSet<ParticipantInfo>(mParticipants);
-                    }
+
+                    Map<ContactId, ParticipantStatus> participants = new HashMap<ContactId, ParticipantStatus>();
                     Vector<User> users = conference.getUsers();
                     for (User user : users) {
                         ContactId contact;
@@ -250,23 +230,25 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
                                 || (state.equalsIgnoreCase("dialing-in"))) {
                             state = User.STATE_PENDING;
                         }
-                        ParticipantInfo item2add = new ParticipantInfo(contact, getStatus(state));
-                        // Update the set of participants
-                        ParticipantInfoUtils.addParticipant(newSet, item2add);
-                        // Check if original set has changed
-                        if (mParticipants.contains(item2add) == false) {
-                            // Notify session listeners
-                            for (int j = 0; j < mSession.getListeners().size(); j++) {
-                                ((ChatSessionListener) mSession.getListeners().get(j))
-                                        .handleConferenceEvent(contact, user.getDisplayName(),
-                                                state);
+
+                        /*
+                         * Collect contact updates to be able to apply them in a one-shot operation
+                         * outside the loop.
+                         */
+                        participants.put(contact, getStatus(state));
+
+                    }
+
+                    if (!participants.isEmpty()) {
+                        mSession.updateParticipants(participants);
+
+                        for (Map.Entry<ContactId, ParticipantStatus> participant : participants
+                                .entrySet()) {
+                            for (ImsSessionListener listener : mSession.getListeners()) {
+                                ((GroupChatSessionListener) listener).handleConferenceEvent(
+                                        participant.getKey(), participant.getValue());
                             }
                         }
-                    }
-                    if (mSession instanceof GroupChatSession
-                            && newSet.equals(mParticipants) == false) {
-                        // Update the set of participants of the terminating group chat session
-                        UpdateSessionParticipantSet(newSet);
                     }
                 }
             } catch (Exception e) {
@@ -284,31 +266,6 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
                 sLogger.info("Conference event subscription has been terminated by server");
             }
             terminatedByServer();
-        }
-    }
-
-    /**
-     * Update the set of participants of the group chat session to be aligned with the provider
-     * content
-     * 
-     * @param newSet the new set of participants
-     */
-    private void UpdateSessionParticipantSet(final Set<ParticipantInfo> newSet) {
-        // Save old set of participants
-        Set<ParticipantInfo> oldSet = mParticipants;
-        mParticipants = newSet;
-        // Update provider
-        MessagingLog.getInstance().updateGroupChatParticipant(mSession.getContributionID(),
-                mParticipants);
-        // Notify participant status change. Make a copy of new set.
-        Set<ParticipantInfo> workSet = new HashSet<ParticipantInfo>(newSet);
-        // Notify status change for the new set
-        workSet.removeAll(oldSet);
-        for (ParticipantInfo item : workSet) {
-            for (int i = 0; i < mSession.getListeners().size(); i++) {
-                ((ChatSessionListener) mSession.getListeners().get(i))
-                        .handleParticipantStatusChanged(item);
-            }
         }
     }
 
@@ -415,40 +372,30 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
         new Thread() {
             public void run() {
                 if (sLogger.isActivated()) {
-                    sLogger.info("Subscribe to " + getPresentity());
+                    sLogger.info("Subscribe to " + getIdentity());
                 }
 
                 try {
-                    // Create a dialog path if necessary
                     if (mDialogPath == null) {
-                        // Set Call-Id
                         String callId = mImsModule.getSipManager().getSipStack().generateCallId();
 
-                        // Set target
-                        String target = getPresentity();
+                        String target = getIdentity();
 
-                        // Set local party
                         String localParty = ImsModule.IMS_USER_PROFILE.getPublicUri();
 
-                        // Set remote party
-                        String remoteParty = getPresentity();
+                        String remoteParty = getIdentity();
 
-                        // Set the route path
                         Vector<String> route = mImsModule.getSipManager().getSipStack()
                                 .getServiceRoutePath();
 
-                        // Create a dialog path
                         mDialogPath = new SipDialogPath(mImsModule.getSipManager().getSipStack(),
                                 callId, 1, target, localParty, remoteParty, route, mRcsSettings);
                     } else {
-                        // Increment the Cseq number of the dialog path
                         mDialogPath.incrementCseq();
                     }
 
-                    // Create a SUBSCRIBE request
                     SipRequest subscribe = createSubscribe(mDialogPath, mExpirePeriod);
 
-                    // Send SUBSCRIBE request
                     sendSubscribe(subscribe);
 
                 } catch (Exception e) {
@@ -471,7 +418,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
         }
 
         if (sLogger.isActivated()) {
-            sLogger.info("Unsubscribe to " + getPresentity());
+            sLogger.info("Unsubscribe to " + getIdentity());
         }
 
         try {
@@ -733,34 +680,32 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * @param status the string status
      * @return the integer status
      */
-    private static int getStatus(final String status) {
-        if (status == null || status.equals(User.STATE_UNKNOWN)) {
-            return Status.UNKNOWN;
+    private static ParticipantStatus getStatus(final String status) {
+        if (User.STATE_CONNECTED.equals(status)) {
+            return ParticipantStatus.CONNECTED;
+
+        } else if (User.STATE_DISCONNECTED.equals(status)) {
+            return ParticipantStatus.DISCONNECTED;
+
+        } else if (User.STATE_DEPARTED.equals(status)) {
+            return ParticipantStatus.DEPARTED;
+
+        } else if (User.STATE_BOOTED.equals(status)) {
+            return ParticipantStatus.DISCONNECTED;
+
+        } else if (User.STATE_FAILED.equals(status)) {
+            return ParticipantStatus.FAILED;
+
+        } else if (User.STATE_BUSY.equals(status)) {
+            return ParticipantStatus.DISCONNECTED;
+
+        } else if (User.STATE_DECLINED.equals(status)) {
+            return ParticipantStatus.DECLINED;
+
+        } else if (User.STATE_PENDING.equals(status)) {
+            return ParticipantStatus.INVITED;
         }
-        if (status.equals(User.STATE_CONNECTED)) {
-            return Status.CONNECTED;
-        }
-        if (status.equals(User.STATE_DISCONNECTED)) {
-            return Status.DISCONNECTED;
-        }
-        if (status.equals(User.STATE_DEPARTED)) {
-            return Status.DEPARTED;
-        }
-        if (status.equals(User.STATE_BOOTED)) {
-            return Status.BOOTED;
-        }
-        if (status.equals(User.STATE_FAILED)) {
-            return Status.FAILED;
-        }
-        if (status.equals(User.STATE_BUSY)) {
-            return Status.BUSY;
-        }
-        if (status.equals(User.STATE_DECLINED)) {
-            return Status.DECLINED;
-        }
-        if (status.equals(User.STATE_PENDING)) {
-            return Status.PENDING;
-        }
-        return Status.UNKNOWN;
+        throw new IllegalArgumentException(new StringBuilder("Unknown status ").append(status)
+                .append(" passed to getStatus!").toString());
     }
 }

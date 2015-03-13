@@ -28,6 +28,7 @@ import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
@@ -35,18 +36,18 @@ import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
 import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat.State;
-import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
-import com.gsma.rcs.provider.settings.RcsSettings;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -119,7 +120,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 
     @Override
     public void addGroupChat(String chatId, ContactId contact, String subject,
-            Set<ParticipantInfo> participants, State state, ReasonCode reasonCode,
+            Map<ContactId, ParticipantStatus> participants, State state, ReasonCode reasonCode,
             Direction direction) {
         mGroupChatLog.addGroupChat(chatId, contact, subject, participants, state, reasonCode,
                 direction);
@@ -136,8 +137,9 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public void updateGroupChatParticipant(String chatId, Set<ParticipantInfo> participants) {
-        mGroupChatLog.updateGroupChatParticipant(chatId, participants);
+    public void updateGroupChatParticipants(String chatId,
+            Map<ContactId, ParticipantStatus> participants) {
+        mGroupChatLog.updateGroupChatParticipants(chatId, participants);
     }
 
     @Override
@@ -148,11 +150,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     @Override
     public GroupChatInfo getGroupChatInfo(String chatId) {
         return mGroupChatLog.getGroupChatInfo(chatId);
-    }
-
-    @Override
-    public Set<ParticipantInfo> getGroupChatConnectedParticipants(String chatId) {
-        return mGroupChatLog.getGroupChatConnectedParticipants(chatId);
     }
 
     @Override
@@ -313,11 +310,6 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public Set<ParticipantInfo> getParticipants(String participants) {
-        return mGroupChatLog.getParticipants(participants);
-    }
-
-    @Override
     public GroupChat.State getGroupChatState(String chatId) {
         return mGroupChatLog.getGroupChatState(chatId);
     }
@@ -348,8 +340,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public Set<ParticipantInfo> getGroupChatParticipants(String chatId) {
-        return mGroupChatLog.getGroupChatParticipants(chatId);
+    public Map<ContactId, ParticipantStatus> getParticipants(String chatId) {
+        return mGroupChatLog.getParticipants(chatId);
     }
 
     @Override

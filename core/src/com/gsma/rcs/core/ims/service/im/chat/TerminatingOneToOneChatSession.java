@@ -47,12 +47,10 @@ import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
-import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Set;
 import java.util.Vector;
 
 /**
@@ -144,8 +142,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
 
             Collection<ImsSessionListener> listeners = getListeners();
             ContactId contact = getRemoteContact();
-            String subject = getSubject();
-            Set<ParticipantInfo> participants = getParticipants();
+
             /* Check if session should be auto-accepted once */
             if (isSessionAccepted()) {
                 if (logActivated) {
@@ -153,8 +150,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                 }
 
                 for (ImsSessionListener listener : listeners) {
-                    ((ChatSessionListener) listener).handleSessionAutoAccepted(contact, subject,
-                            participants);
+                    ((OneToOneChatSessionListener) listener).handleSessionAutoAccepted(contact);
                 }
             } else {
                 if (logActivated) {
@@ -162,8 +158,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                 }
 
                 for (ImsSessionListener listener : listeners) {
-                    ((ChatSessionListener) listener).handleSessionInvited(contact, subject,
-                            participants);
+                    ((OneToOneChatSessionListener) listener).handleSessionInvited(contact);
                 }
 
                 send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());

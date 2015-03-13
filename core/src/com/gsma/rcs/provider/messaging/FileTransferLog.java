@@ -34,7 +34,7 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
-import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
@@ -46,7 +46,9 @@ import android.net.Uri;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -170,12 +172,25 @@ public class FileTransferLog implements IFileTransferLog {
         mLocalContentResolver.insert(FileTransferData.CONTENT_URI, values);
 
         try {
-            Set<ParticipantInfo> participants = mGroupChatLog
-                    .getGroupChatConnectedParticipants(chatId);
-            for (ParticipantInfo participant : participants) {
-                mGroupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId,
-                        participant.getContact(), fileTransferId,
-                        GroupDeliveryInfo.Status.NOT_DELIVERED,
+            Set<ContactId> recipients = new HashSet<ContactId>();
+            for (Map.Entry<ContactId, ParticipantStatus> participant : mGroupChatLog
+                    .getParticipants(chatId).entrySet()) {
+                // TODO: Verify that these are the proper values to include.
+                switch (participant.getValue()) {
+                    case INVITE_QUEUED:
+                    case INVITING:
+                    case INVITED:
+                    case CONNECTED:
+                    case DISCONNECTED:
+                        recipients.add(participant.getKey());
+                    default:
+                        break;
+                }
+            }
+
+            for (ContactId contact : recipients) {
+                mGroupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId, contact,
+                        fileTransferId, GroupDeliveryInfo.Status.NOT_DELIVERED,
                         GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
             }
         } catch (Exception e) {

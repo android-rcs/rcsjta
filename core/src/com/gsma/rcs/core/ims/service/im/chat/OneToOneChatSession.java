@@ -22,11 +22,6 @@
 
 package com.gsma.rcs.core.ims.service.im.chat;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
@@ -47,9 +42,11 @@ import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
-import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contact.ContactId;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Abstract 1-1 chat session
@@ -80,14 +77,11 @@ public abstract class OneToOneChatSession extends ChatSession {
      */
     public OneToOneChatSession(ImsService parent, ContactId contact, String remoteUri,
             ChatMessage firstMsg, RcsSettings rcsSettings, MessagingLog messagingLog) {
-        super(parent, contact, remoteUri, OneToOneChatSession.generateOneOneParticipants(contact),
-                rcsSettings, messagingLog, firstMsg);
+        super(parent, contact, remoteUri, rcsSettings, messagingLog, firstMsg);
 
-        // Set feature tags
         List<String> featureTags = ChatUtils.getSupportedFeatureTagsForChat(rcsSettings);
         setFeatureTags(featureTags);
 
-        // Set Accept-Contact header
         setAcceptContactTags(featureTags);
 
         String acceptTypes = new StringBuilder(CpimMessage.MIME_TYPE).append(" ")
@@ -112,27 +106,6 @@ public abstract class OneToOneChatSession extends ChatSession {
      */
     public boolean isGroupChat() {
         return false;
-    }
-
-    /**
-     * Generate the set of participants for a 1-1 chat
-     * 
-     * @param contact ContactId
-     * @return Set of participants
-     */
-    private static Set<ParticipantInfo> generateOneOneParticipants(ContactId contact) {
-        Set<ParticipantInfo> set = new HashSet<ParticipantInfo>();
-        ParticipantInfoUtils.addParticipant(set, contact);
-        return set;
-    }
-
-    /**
-     * Returns the set of participants currently connected to the session
-     * 
-     * @return Set of participants
-     */
-    public Set<ParticipantInfo> getConnectedParticipants() {
-        return getParticipants();
     }
 
     /**

@@ -39,21 +39,19 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.im.chat.ChatError;
-import com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
+import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Set;
 import java.util.Vector;
 
 /**
@@ -139,8 +137,7 @@ public class TerminatingStoreAndForwardOneToOneMessageSession extends OneToOneCh
 
             Collection<ImsSessionListener> listeners = getListeners();
             ContactId contact = getRemoteContact();
-            String subject = getSubject();
-            Set<ParticipantInfo> participants = getParticipants();
+
             /* Check if session should be auto-accepted once */
             if (isSessionAccepted()) {
                 if (logActivated) {
@@ -148,8 +145,7 @@ public class TerminatingStoreAndForwardOneToOneMessageSession extends OneToOneCh
                 }
 
                 for (ImsSessionListener listener : listeners) {
-                    ((ChatSessionListener) listener).handleSessionAutoAccepted(contact, subject,
-                            participants);
+                    ((OneToOneChatSessionListener) listener).handleSessionAutoAccepted(contact);
                 }
             } else {
                 if (logActivated) {
@@ -157,8 +153,7 @@ public class TerminatingStoreAndForwardOneToOneMessageSession extends OneToOneCh
                 }
 
                 for (ImsSessionListener listener : listeners) {
-                    ((ChatSessionListener) listener).handleSessionInvited(contact, subject,
-                            participants);
+                    ((OneToOneChatSessionListener) listener).handleSessionInvited(contact);
                 }
 
                 send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());

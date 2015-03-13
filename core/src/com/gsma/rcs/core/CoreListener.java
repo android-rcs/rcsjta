@@ -43,9 +43,9 @@ import com.gsma.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.gsma.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.rcs.service.ipcalldraft.IPCall;
-import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.RcsServiceRegistration;
-import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
@@ -54,7 +54,7 @@ import com.gsma.services.rcs.sharing.video.VideoSharing;
 
 import android.content.Intent;
 
-import java.util.Set;
+import java.util.Map;
 
 /**
  * Observer of core events
@@ -326,7 +326,7 @@ public interface CoreListener {
      * @param reasonCode Rejected reason code
      */
     public void handleGroupChatInvitationRejected(String chatId, ContactId contact, String subject,
-            Set<ParticipantInfo> participants, GroupChat.ReasonCode reasonCode);
+            Map<ContactId, ParticipantStatus> participants, GroupChat.ReasonCode reasonCode);
 
     /**
      * Handles image sharing rejection

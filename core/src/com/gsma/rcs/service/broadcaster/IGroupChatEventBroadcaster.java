@@ -20,8 +20,8 @@ import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.chat.GroupChat.State;
-import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
 
 /**
@@ -36,7 +36,8 @@ public interface IGroupChatEventBroadcaster {
             String mimeType, String msgId, GroupDeliveryInfo.Status status,
             GroupDeliveryInfo.ReasonCode reasonCode);
 
-    public void broadcastParticipantInfoStatusChanged(String chatId, ParticipantInfo info);
+    public void broadcastParticipantInfoStatusChanged(String chatId, ContactId contact,
+            ParticipantStatus status);
 
     public void broadcastStateChanged(String chatId, State state, GroupChat.ReasonCode reasonCode);
 

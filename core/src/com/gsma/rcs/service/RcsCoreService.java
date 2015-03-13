@@ -79,8 +79,8 @@ import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.capability.ICapabilityService;
 import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.chat.IChatService;
-import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.IContactService;
 import com.gsma.services.rcs.extension.IMultimediaSessionService;
@@ -103,7 +103,7 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.IBinder;
 
-import java.util.Set;
+import java.util.Map;
 
 /**
  * RCS core service. This service offers a flat API to any other process (activities) to access to
@@ -877,7 +877,7 @@ public class RcsCoreService extends Service implements CoreListener {
 
     @Override
     public void handleGroupChatInvitationRejected(String chatId, ContactId contact, String subject,
-            Set<ParticipantInfo> participants, GroupChat.ReasonCode reasonCode) {
+            Map<ContactId, ParticipantStatus> participants, GroupChat.ReasonCode reasonCode) {
         mChatApi.addAndBroadcastGroupChatInvitationRejected(chatId, contact, subject, participants,
                 reasonCode);
     }
@@ -920,4 +920,5 @@ public class RcsCoreService extends Service implements CoreListener {
     public void handleAutoRejoinGroupChat(String chatId) throws ServerApiException {
         mChatApi.handleAutoRejoinGroupChat(chatId);
     }
+
 }

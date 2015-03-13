@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2014 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service.im.chat.event;
@@ -22,82 +26,79 @@ package com.gsma.rcs.core.ims.service.im.chat.event;
  * @author YPLO6403
  */
 public class User {
-    public final static String STATE_UNKNOWN = "unknown";
+
     public final static String STATE_CONNECTED = "connected";
+
     public final static String STATE_DISCONNECTED = "disconnected";
+
     public final static String STATE_DEPARTED = "departed";
+
     public final static String STATE_BOOTED = "booted";
+
     public final static String STATE_FAILED = "failed";
+
     public final static String STATE_BUSY = "busy";
+
     public final static String STATE_DECLINED = "declined";
+
     public final static String STATE_PENDING = "pending";
 
-    private String entity;
+    private final String mEntity;
 
-    private boolean me;
+    private final boolean mMe;
 
-    private String state = STATE_UNKNOWN;
+    private final String mState;
 
-    private String displayName = null;
+    private final String mDisplayName;
 
-    private String disconnectionMethod = null;
+    private final String mDisconnectionMethod;
 
-    private String failureReason = null;
+    private final String mFailureReason;
 
-    public User(String entity, boolean me) {
-        this.entity = entity;
-        this.me = me;
+    public User(String entity, boolean me, String state, String displayName,
+            String disconnectionMethod, String failureReason) {
+        mEntity = entity;
+        mMe = me;
+        mState = state;
+        mDisplayName = displayName;
+        mDisconnectionMethod = disconnectionMethod;
+        mFailureReason = failureReason;
     }
 
     public String getEntity() {
-        return entity;
+        return mEntity;
     }
 
     public boolean isMe() {
-        return me;
+        return mMe;
     }
 
     public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
+        return mState;
     }
 
     public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
-    public void setDisconnectionMethod(String method) {
-        this.disconnectionMethod = method;
+        return mDisplayName;
     }
 
     public String getDisconnectionMethod() {
-        return disconnectionMethod;
-    }
-
-    public void setFailureReason(String reason) {
-        this.failureReason = reason;
+        return mDisconnectionMethod;
     }
 
     public String getFailureReason() {
-        return failureReason;
+        return mFailureReason;
     }
 
     public String toString() {
-        String result = "user=" + entity + ", state=" + state;
-        if (disconnectionMethod != null) {
-            result += ", method=" + disconnectionMethod;
+        StringBuilder result = new StringBuilder("user=").append(mEntity).append(", state=")
+                .append(mState);
+        if (mDisconnectionMethod != null) {
+            result.append(", method=").append(mDisconnectionMethod);
         }
-        if (failureReason != null) {
-            result += ", reason=" + failureReason;
+        if (mFailureReason != null) {
+            result.append(", reason=").append(mFailureReason);
         }
-        return result;
+        return result.toString();
     }
 
 }

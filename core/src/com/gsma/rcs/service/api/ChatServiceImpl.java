@@ -23,17 +23,13 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.Core;
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
-import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
-import com.gsma.rcs.core.ims.service.im.chat.ContributionIdGenerator;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatPersistedStorageAccessor;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
-import com.gsma.rcs.core.ims.service.im.chat.ParticipantInfoUtils;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.eab.ContactsManager;
@@ -48,11 +44,12 @@ import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
-import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.chat.IChatMessage;
 import com.gsma.services.rcs.chat.IChatService;
 import com.gsma.services.rcs.chat.IChatServiceConfiguration;
@@ -60,12 +57,12 @@ import com.gsma.services.rcs.chat.IGroupChat;
 import com.gsma.services.rcs.chat.IGroupChatListener;
 import com.gsma.services.rcs.chat.IOneToOneChat;
 import com.gsma.services.rcs.chat.IOneToOneChatListener;
-import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.os.RemoteException;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -114,7 +111,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Constructor
-     *
+     * 
      * @param imService InstantMessagingService
      * @param messagingLog MessagingLog
      * @param rcsSettings RcsSettings
@@ -157,7 +154,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Tries to send a displayed delivery report
-     *
+     * 
      * @param msgId Message ID
      * @param contact Contact ID
      */
@@ -193,7 +190,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Returns true if the service is registered to the platform, else returns false
-     *
+     * 
      * @return Returns true if registered else returns false
      */
     public boolean isServiceRegistered() {
@@ -211,7 +208,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Registers a listener on service registration events
-     *
+     * 
      * @param listener Service registration listener
      */
     public void addEventListener(IRcsServiceRegistrationListener listener) {
@@ -225,7 +222,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Unregisters a listener on service registration events
-     *
+     * 
      * @param listener Service registration listener
      */
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
@@ -249,7 +246,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Notifies unregistration event
-     *
+     * 
      * @param reasonCode for unregistration
      */
     public void notifyUnRegistration(RcsServiceRegistration.ReasonCode reasonCode) {
@@ -261,7 +258,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Receive a new chat invitation
-     *
+     * 
      * @param session Chat session
      */
     public void receiveOneOneChatInvitation(OneToOneChatSession session) {
@@ -302,7 +299,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Receive message delivery status
-     *
+     * 
      * @param contact Contact ID
      * @param imdn Imdn document
      */
@@ -349,7 +346,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Add a oneToOne chat in the list
-     *
+     * 
      * @param contact Contact ID
      * @param oneToOneChat OneToOne Chat
      */
@@ -363,7 +360,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Remove a oneToOne chat from the list
-     *
+     * 
      * @param contact Contact ID
      */
     /* package private */void removeOneToOneChat(ContactId contact) {
@@ -396,7 +393,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Receive a new group chat invitation
-     *
+     * 
      * @param session Chat session
      */
     public void receiveGroupChatInvitation(GroupChatSession session) {
@@ -419,7 +416,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Add a group chat in the list
-     *
+     * 
      * @param groupChat Group chat
      */
     /* package private */void addGroupChat(GroupChatImpl groupChat) {
@@ -433,7 +430,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Remove a group chat from the list
-     *
+     * 
      * @param chatId Chat ID
      */
     /* package private */void removeGroupChat(String chatId) {
@@ -447,7 +444,7 @@ public class ChatServiceImpl extends IChatService.Stub {
     /**
      * Initiates a group chat with a group of contact and returns a GroupChat instance. The subject
      * is optional and may be null.
-     *
+     * 
      * @param contacts List of contact IDs
      * @param subject Subject
      * @return instance of IGroupChat
@@ -471,7 +468,10 @@ public class ChatServiceImpl extends IChatService.Stub {
             sLogger.info("Initiate an ad-hoc group chat session");
         }
         try {
-            final ChatSession session = mImService.initiateAdhocGroupChatSession(contacts, subject);
+            Set<ContactId> contactToInvite = new HashSet<ContactId>(contacts);
+
+            final GroupChatSession session = mImService.initiateAdhocGroupChatSession(
+                    contactToInvite, subject);
 
             String chatId = session.getContributionID();
             GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
@@ -492,18 +492,6 @@ public class ChatServiceImpl extends IChatService.Stub {
             }.start();
             return groupChat;
 
-        } catch (CoreException e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Core exception", e);
-            }
-
-            Set<ParticipantInfo> participants = ParticipantInfoUtils.getParticipantInfos(contacts);
-
-            String callId = mCore.getImsModule().getSipManager().getSipStack().generateCallId();
-            mMessagingLog.addGroupChat(ContributionIdGenerator.getContributionId(callId), null,
-                    subject, participants, GroupChat.State.REJECTED,
-                    GroupChat.ReasonCode.REJECTED_MAX_CHATS, Direction.OUTGOING);
-            throw new ServerApiException(e.getMessage());
         } catch (Exception e) {
             if (sLogger.isActivated()) {
                 sLogger.error("Unexpected error", e);
@@ -525,7 +513,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Returns a group chat from its unique ID. An exception is thrown if the chat ID does not exist
-     *
+     * 
      * @param chatId Chat ID
      * @return IGroupChat
      * @throws ServerApiException
@@ -656,7 +644,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Adds a listener on one-to-one chat events
-     *
+     * 
      * @param listener One-to-One chat event listener
      * @throws RemoteException
      */
@@ -671,7 +659,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Removes a listener on one-to-one chat events
-     *
+     * 
      * @param listener One-to-One chat event listener
      * @throws RemoteException
      */
@@ -686,7 +674,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Adds a listener on group chat events
-     *
+     * 
      * @param listener Group chat event listener
      * @throws ServerApiException
      */
@@ -701,7 +689,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Removes a listener on group chat events
-     *
+     * 
      * @param listener Group chat event listener
      * @throws ServerApiException
      */
@@ -725,7 +713,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Mark a received message as read (ie. displayed in the UI)
-     *
+     * 
      * @param msgId Message ID
      * @throws ServerApiException
      */
@@ -743,7 +731,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Returns service version
-     *
+     * 
      * @return Version
      * @see VERSION_CODES
      * @throws ServerApiException
@@ -755,7 +743,7 @@ public class ChatServiceImpl extends IChatService.Stub {
     /**
      * Set the parameter in order to respond or not to display reports when requested by the remote
      * part.
-     *
+     * 
      * @param enable true if respond to display reports
      * @throws ServerApiException
      */
@@ -766,7 +754,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Add and broadcast group chat invitation rejections.
-     *
+     * 
      * @param chatId Chat ID
      * @param contact Contact ID
      * @param subject Subject
@@ -774,7 +762,8 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param reasonCode Reason code
      */
     public void addAndBroadcastGroupChatInvitationRejected(String chatId, ContactId contact,
-            String subject, Set<ParticipantInfo> participants, GroupChat.ReasonCode reasonCode) {
+            String subject, Map<ContactId, ParticipantStatus> participants,
+            GroupChat.ReasonCode reasonCode) {
 
         mMessagingLog.addGroupChat(chatId, contact, subject, participants,
                 GroupChat.State.REJECTED, reasonCode, Direction.INCOMING);
@@ -784,7 +773,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Handle one-to-one chat session initiation
-     *
+     * 
      * @param session OneToOneChatSession
      */
     public void handleOneToOneChatSessionInitiation(OneToOneChatSession session) {
@@ -798,7 +787,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Returns a chat message from its unique ID
-     *
+     * 
      * @param msgId
      * @return IChatMessage
      */
@@ -810,7 +799,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Handle rejoin group chat as part of send operation
-     *
+     * 
      * @param chatId
      * @throws ServerApiException
      */
@@ -822,7 +811,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Handle auto rejoin group chat
-     *
+     * 
      * @param chatId
      * @throws ServerApiException
      */
@@ -834,7 +823,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     /**
      * Returns the common service configuration
-     *
+     * 
      * @return the common service configuration
      */
     public ICommonServiceConfiguration getCommonConfiguration() {

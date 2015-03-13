@@ -24,10 +24,7 @@ package com.gsma.rcs.core.ims.service.im.chat;
 
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
-import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
-
-import java.util.Set;
 
 /**
  * Chat session listener
@@ -60,15 +57,6 @@ public interface ChatSessionListener extends ImsSessionListener {
     public void handleIsComposingEvent(ContactId contact, boolean status);
 
     /**
-     * New conference event
-     * 
-     * @param contact Contact identifier
-     * @param contactDisplayname Contact display name
-     * @param state State associated to the contact
-     */
-    public void handleConferenceEvent(ContactId contact, String contactDisplayname, String state);
-
-    /**
      * Notifying sending of a message
      * 
      * @param msg Chat message
@@ -98,46 +86,4 @@ public interface ChatSessionListener extends ImsSessionListener {
      * @param ImdnDocument imdn Imdn document
      */
     public void handleMessageDeliveryStatus(ContactId contact, ImdnDocument imdn);
-
-    /**
-     * Request to add participant is successful
-     * 
-     * @param contact Contact ID
-     */
-    public void handleAddParticipantSuccessful(ContactId contact);
-
-    /**
-     * Request to add participant has failed
-     * 
-     * @param contact Contact ID
-     * @param reason Error reason
-     */
-    public void handleAddParticipantFailed(ContactId contact, String reason);
-
-    /**
-     * Participant status changed
-     * 
-     * @param participantInfo the participant information
-     */
-    public void handleParticipantStatusChanged(ParticipantInfo participantInfo);
-
-    /**
-     * A session invitation has been received
-     * 
-     * @param contact Remote contact
-     * @param subject
-     * @param participants Participants in case of groupchat
-     */
-    public void handleSessionInvited(ContactId contact, String subject,
-            Set<ParticipantInfo> participants);
-
-    /**
-     * Chat is auto-accepted and the session is in the process of being started
-     * 
-     * @param contact Remote contact
-     * @param subject
-     * @param participants Participants in case of groupchat
-     */
-    public void handleSessionAutoAccepted(ContactId contact, String subject,
-            Set<ParticipantInfo> participants);
 }

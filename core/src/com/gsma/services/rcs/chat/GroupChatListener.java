@@ -25,6 +25,7 @@ package com.gsma.services.rcs.chat;
 import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -84,16 +85,18 @@ public abstract class GroupChatListener {
 
     /**
      * Callback called when a participant status has been changed in a group chat.
-     *
+     * 
      * @param chatId chat id
+     * @param contact contact id
      * @param info participant info
      */
-    public abstract void onParticipantInfoChanged(String chatId, ParticipantInfo info);
+    public abstract void onParticipantInfoChanged(String chatId, ContactId contact,
+            ParticipantStatus info);
 
     /**
      * Callback called when a delete operation completed that resulted in that one or several group
      * chats was deleted specified by the chatIds parameter.
-     *
+     * 
      * @param chatIds chat ids of those deleted chats
      */
     public abstract void onDeleted(Set<String> chatIds);
@@ -102,7 +105,7 @@ public abstract class GroupChatListener {
      * Callback called when a delete operation completed that resulted in that one or several group
      * chat messages was deleted specified by the msgIds parameter corresponding to a specific group
      * chat.
-     *
+     * 
      * @param chatId chat id of those deleted messages
      * @param msgIds message ids of those deleted messages
      */

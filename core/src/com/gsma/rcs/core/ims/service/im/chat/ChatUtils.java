@@ -51,7 +51,7 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
-import com.gsma.services.rcs.chat.ParticipantInfo;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.text.TextUtils;
@@ -63,8 +63,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -304,6 +305,24 @@ public class ChatUtils {
                     .append("\" cp:copyControl=\"to\"/>").append(CRLF);
         }
         return resources.append("</list></resource-lists>").toString();
+    }
+
+    /**
+     * Get participants from contacts
+     * 
+     * @param contacts contacts
+     * @param status status
+     * @return participants
+     */
+    public static Map<ContactId, ParticipantStatus> getParticipants(Set<ContactId> contacts,
+            ParticipantStatus status) {
+        Map<ContactId, ParticipantStatus> participants = new HashMap<ContactId, ParticipantStatus>();
+
+        for (ContactId contact : contacts) {
+            participants.put(contact, status);
+        }
+
+        return participants;
     }
 
     /**
@@ -839,28 +858,33 @@ public class ChatUtils {
     }
 
     /**
-     * Get list of participants from 'resource-list' present in XML document and include the
-     * 'remote' as participant.
+     * Get participants from 'resource-list' present in XML document and include the 'remote' as
+     * participant.
      * 
      * @param request Request
-     * @return set of participants
+     * @param status Status to assign to created participants
+     * @return Participants based on contacts in the request
      */
-    public static Set<ParticipantInfo> getListOfParticipants(SipRequest request) {
-        Set<ParticipantInfo> participants = new HashSet<ParticipantInfo>();
+    public static Map<ContactId, ParticipantStatus> getParticipants(SipRequest request,
+            ParticipantStatus status) {
+        Map<ContactId, ParticipantStatus> participants = new HashMap<ContactId, ParticipantStatus>();
         String content = request.getContent();
         String boundary = request.getBoundaryContentType();
         Multipart multi = new Multipart(content, boundary);
         if (multi.isMultipart()) {
-            // Extract resource-lists
+
             String listPart = multi.getPart("application/resource-lists+xml");
             if (listPart != null) {
-                // Create list from XML
-                participants = ParticipantInfoUtils.parseResourceList(listPart);
+
+                participants = ParticipantInfoUtils.parseResourceList(listPart, status);
                 try {
                     ContactId remote = getReferredIdentityAsContactId(request);
-                    // Include remote contact if format if correct
-                    ParticipantInfoUtils.addParticipant(participants, remote);
+                    /* Include remote contact if format if correct */
+                    participants.put(remote, status);
                 } catch (RcsContactFormatException e) {
+                    if (logger.isActivated()) {
+                        logger.warn("getParticipants: cannot parse contact");
+                    }
                 }
             }
         }

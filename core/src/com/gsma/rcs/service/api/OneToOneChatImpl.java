@@ -27,9 +27,9 @@ import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatError;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
-import com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
+import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneMessageSession;
 import com.gsma.rcs.provider.eab.ContactsManager;
@@ -46,17 +46,14 @@ import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.IChatMessage;
 import com.gsma.services.rcs.chat.IOneToOneChat;
-import com.gsma.services.rcs.chat.ParticipantInfo;
 import com.gsma.services.rcs.contact.ContactId;
-
-import java.util.Set;
 
 /**
  * One-to-One Chat implementation
  * 
  * @author Jean-Marc AUFFRET
  */
-public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionListener {
+public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChatSessionListener {
 
     private final ContactId mContact;
 
@@ -762,37 +759,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
     }
 
     @Override
-    public void handleConferenceEvent(ContactId contact, String contactDisplayname, String state) {
-        /* Not used by one-to-one chat */
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener#
-     * handleAddParticipantSuccessful(com.gsma.services.rcs.contact.ContactId)
-     */
-    @Override
-    public void handleAddParticipantSuccessful(ContactId contact) {
-        /* Not used by one-to-one chat */
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener#
-     * handleAddParticipantFailed(com.gsma.services.rcs.contact.ContactId, java.lang.String)
-     */
-    @Override
-    public void handleAddParticipantFailed(ContactId contact, String reason) {
-        /* Not used by one-to-one chat */
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener#
-     * handleParticipantStatusChanged (com.gsma.services.rcs.chat.ParticipantInfo)
-     */
-    @Override
-    public void handleParticipantStatusChanged(ParticipantInfo participantInfo) {
+    public void handleSessionInvited(ContactId contact) {
         /* Not used by one-to-one chat */
     }
 
@@ -802,14 +769,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements ChatSessionL
     }
 
     @Override
-    public void handleSessionInvited(ContactId contact, String subject,
-            Set<ParticipantInfo> participants) {
-        /* Not used by one-to-one chat */
-    }
-
-    @Override
-    public void handleSessionAutoAccepted(ContactId contact, String subject,
-            Set<ParticipantInfo> participants) {
+    public void handleSessionAutoAccepted(ContactId contact) {
         /* Not used by one-to-one chat */
     }
 }

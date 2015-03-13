@@ -24,7 +24,9 @@ package com.gsma.services.rcs.chat;
 
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.chat.GroupChat.State;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
 
 import android.content.Context;
@@ -32,8 +34,8 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.SparseArray;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Content provider for chat history
@@ -134,36 +136,31 @@ public class ChatLog {
         public static final String CONTACT = "contact";
 
         /**
-         * Utility method to get the set of ParticipantInfo objects from its string representation
-         * in the ChatLog provider.
+         * Utility method to get participants from its string representation in the ChatLog
+         * provider.
          * 
-         * @param context
-         * @param participants the SET of participant information from the ChatLog provider
-         * @return the SET of participant information
+         * @param ctx
+         * @param participants Participants in string representation
+         * @return Participants
          */
-        public static Set<ParticipantInfo> getParticipantInfo(Context context, String participants) {
-            if (participants == null) {
-                return null;
-            }
-            ContactUtil contactUtils = ContactUtil.getInstance(context);
+        public static Map<ContactId, ParticipantStatus> getParticipants(Context ctx,
+                String participants) {
+            ContactUtil contactUtils = ContactUtil.getInstance(ctx);
             if (contactUtils == null) {
                 throw new IllegalStateException("Cannot read contact from provider");
             }
             String[] tokens = participants.split(",");
-            Set<ParticipantInfo> result = new HashSet<ParticipantInfo>();
+            Map<ContactId, ParticipantStatus> participantResult = new HashMap<ContactId, ParticipantStatus>();
             for (String participant : tokens) {
                 String[] keyValue = participant.split("=");
                 if (keyValue.length == 2) {
                     String contact = keyValue[0];
-                    int status = ParticipantInfo.Status.UNKNOWN;
-                    try {
-                        status = Integer.parseInt(keyValue[1]) % 9;
-                    } catch (NumberFormatException e) {
-                    }
-                    result.add(new ParticipantInfo(contactUtils.formatContact(contact), status));
+                    ParticipantStatus status = ParticipantStatus.valueOf(Integer
+                            .parseInt(keyValue[1]));
+                    participantResult.put(contactUtils.formatContact(contact), status);
                 }
             }
-            return result;
+            return participantResult;
         }
     }
 
