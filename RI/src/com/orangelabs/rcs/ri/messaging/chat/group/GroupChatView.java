@@ -30,10 +30,9 @@ import com.gsma.services.rcs.chat.ChatMessage;
 import com.gsma.services.rcs.chat.ChatService;
 import com.gsma.services.rcs.chat.ChatServiceConfiguration;
 import com.gsma.services.rcs.chat.GroupChat;
+import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.chat.GroupChatIntent;
 import com.gsma.services.rcs.chat.GroupChatListener;
-import com.gsma.services.rcs.chat.ParticipantInfo;
-import com.gsma.services.rcs.chat.ParticipantInfo.Status;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.contact.RcsContact;
@@ -77,6 +76,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -178,12 +178,12 @@ public class GroupChatView extends ChatView {
         }
 
         @Override
-        public void onParticipantInfoChanged(String chatId, ParticipantInfo participant) {
+        public void onParticipantInfoChanged(String chatId, ContactId contact,
+                ParticipantStatus status) {
             if (LogUtils.isActive) {
-                Log.d(LOGTAG,
-                        new StringBuilder("onParticipantInfoChanged chatId=").append(chatId)
-                                .append(" contact=").append(participant.getContact().toString())
-                                .append(" status=").append(participant.getStatus()).toString());
+                Log.d(LOGTAG, new StringBuilder("onParticipantInfoChanged chatId=").append(chatId)
+                        .append(" contact=").append(contact).append(" status=").append(status)
+                        .toString());
             }
         }
 
@@ -209,7 +209,7 @@ public class GroupChatView extends ChatView {
                                 .append(" state=").append(state).append(" reason=")
                                 .append(reasonCode).toString());
             }
-            // Discard event if not for current chatId
+            /* Discard event if not for current chatId */
             if (mChatId == null || !mChatId.equals(chatId)) {
                 return;
 
@@ -219,29 +219,26 @@ public class GroupChatView extends ChatView {
                 public void run() {
                     switch (state) {
                         case STARTED:
-                            // Session is well established : hide progress
-                            // dialog
+                            /* Session is well established : hide progress dialog. */
                             hideProgressDialog();
                             break;
 
                         case ABORTED:
-                            // Session is aborted: hide progress dialog then
-                            // exit
+                            /* Session is aborted: hide progress dialog then exit. */
                             hideProgressDialog();
                             Utils.showMessageAndExit(GroupChatView.this,
                                     getString(R.string.label_chat_aborted, _reasonCode), mExitOnce);
                             break;
 
                         case REJECTED:
-                            // Session is rejected: hide progress dialog then
-                            // exit
+                            /* Session is rejected: hide progress dialog then exit. */
                             hideProgressDialog();
                             Utils.showMessageAndExit(GroupChatView.this,
                                     getString(R.string.label_chat_rejected, _reasonCode), mExitOnce);
                             break;
 
                         case FAILED:
-                            // Session is failed: hide progress dialog then exit
+                            /* Session is failed: hide progress dialog then exit. */
                             hideProgressDialog();
                             Utils.showMessageAndExit(GroupChatView.this,
                                     getString(R.string.label_chat_failed, _reasonCode), mExitOnce);
@@ -274,7 +271,7 @@ public class GroupChatView extends ChatView {
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        // Get the list item position
+        /* Get the list item position. */
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
         Cursor cursor = (Cursor) mAdapter.getItem(info.position);
         menu.add(0, GROUPCHAT_MENU_ITEM_DELETE, 0, R.string.menu_delete_message);
@@ -420,7 +417,7 @@ public class GroupChatView extends ChatView {
                     updateGroupChatViewTitle(mSubject);
 
                     // Set list of participants
-                    mParticipants = getListOfParticipants(mGroupChat.getParticipants());
+                    mParticipants = mGroupChat.getParticipants().keySet();
                     if (LogUtils.isActive) {
                         if (mParticipants == null) {
                             Log.e(LOGTAG,
@@ -472,7 +469,7 @@ public class GroupChatView extends ChatView {
                         mSubject = mGroupChat.getSubject();
                         updateGroupChatViewTitle(mSubject);
                         // Set list of participants
-                        mParticipants = getListOfParticipants(mGroupChat.getParticipants());
+                        mParticipants = mGroupChat.getParticipants().keySet();
                         // Display accept/reject dialog
                         // TODO manage new state ACCEPTING and REJECTED
                         if (GroupChat.State.INVITED == mGroupChat.getState()) {
@@ -553,34 +550,17 @@ public class GroupChatView extends ChatView {
     }
 
     /**
-     * get a list of contact from a set of participant info
-     * 
-     * @param setOfParticipant a set of participant info
-     * @return a list of contact
-     */
-    private Set<ContactId> getListOfParticipants(Set<ParticipantInfo> setOfParticipant) {
-        Set<ContactId> result = new HashSet<ContactId>();
-        if (setOfParticipant.size() != 0) {
-            for (ParticipantInfo participantInfo : setOfParticipant) {
-                // TODO consider status ?
-                result.add(participantInfo.getContact());
-            }
-        }
-        return result;
-    }
-
-    /**
      * get a set of contact from a set of participant info
-     * 
+     *
      * @param setOfParticipant a set of participant info
      * @return a set of contact
      */
-    private Set<String> getSetOfParticipants(Set<ParticipantInfo> setOfParticipant) {
+    private Set<String> getSetOfParticipants(Map<ContactId, ParticipantStatus> setOfParticipant) {
         Set<String> result = new HashSet<String>();
         if (setOfParticipant.size() != 0) {
-            for (ParticipantInfo participantInfo : setOfParticipant) {
+            for (ContactId contact : setOfParticipant.keySet()) {
                 // TODO consider status ?
-                result.add(participantInfo.getContact().toString());
+                result.add(contact.toString());
             }
         }
         return result;
@@ -644,18 +624,17 @@ public class GroupChatView extends ChatView {
         // Build list of available contacts not already in the conference
         Set<ContactId> availableParticipants = new HashSet<ContactId>();
         try {
-            Set<ParticipantInfo> currentContacts = mGroupChat.getParticipants();
+            Map<ContactId, ParticipantStatus> currentContacts = mGroupChat.getParticipants();
             Set<RcsContact> contacts = mCnxManager.getContactApi().getRcsContacts();
             for (RcsContact c1 : contacts) {
                 ContactId contact = c1.getContactId();
-                boolean found = false;
-                for (ParticipantInfo c2 : currentContacts) {
-                    if (c2.getContact().equals(contact) && isConnected(c2.getStatus())) {
-                        found = true;
-                        break;
+                boolean isConnected = false;
+                if (currentContacts.containsKey(contact)) {
+                    if (isConnected(currentContacts.get(contact))) {
+                        isConnected = true;
                     }
                 }
-                if (!found) {
+                if (!isConnected) {
                     availableParticipants.add(contact);
                 }
             }
@@ -818,8 +797,17 @@ public class GroupChatView extends ChatView {
      * @param status the status
      * @return true if connected
      */
-    private static boolean isConnected(int status) {
-        return ((Status.CONNECTED == status) || (Status.PENDING == status) || (Status.BOOTED == status));
+    private static boolean isConnected(ParticipantStatus status) {
+        // TODO check if correct
+        switch (status) {
+            case CONNECTED:
+            case INVITE_QUEUED:
+            case INVITED:
+            case INVITING:
+                return true;
+            default:
+                return false;
+        }
     }
 
     /**
