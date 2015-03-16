@@ -452,4 +452,14 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     public Cursor getQueuedOneToOneFileTransfers(ContactId contact) {
         return mFileTransferLog.getQueuedOneToOneFileTransfers(contact);
     }
+
+    @Override
+    public String getFileTransferUploadTid(String fileTransferId) {
+        return mFileTransferLog.getFileTransferUploadTid(fileTransferId);
+    }
+
+    @Override
+    public Cursor getInterruptedFileTransfers() {
+        return mFileTransferLog.getInterruptedFileTransfers();
+    }
 }

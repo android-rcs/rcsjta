@@ -21,6 +21,7 @@ import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.GroupChatImpl;
+import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
 import java.util.Set;
@@ -35,6 +36,8 @@ import java.util.Set;
 
     private final InstantMessagingService mImService;
 
+    private final Logger mLogger = Logger.getLogger(getClass().getName());
+
     /* package private */GroupChatInviteQueuedParticipants(String chatId,
             ChatServiceImpl chatService, MessagingLog messagingLog,
             InstantMessagingService imService) {
@@ -46,12 +49,23 @@ import java.util.Set;
 
     @Override
     public void run() {
-        GroupChatImpl groupChat = mChatService.getOrCreateGroupChat(mChatId);
-        Set<ContactId> participants = mMessagingLog
-                .getGroupChatParticipantsToBeInvited(mChatId);
-        GroupChatSession session = mImService.getGroupChatSession(mChatId);
-        if (session != null && session.isMediaEstablished()) {
-            groupChat.inviteParticipants(session, participants);
+        try {
+            GroupChatImpl groupChat = mChatService.getOrCreateGroupChat(mChatId);
+            Set<ContactId> participants = mMessagingLog
+                    .getGroupChatParticipantsToBeInvited(mChatId);
+            GroupChatSession session = mImService.getGroupChatSession(mChatId);
+            if (session != null && session.isMediaEstablished()) {
+                groupChat.inviteParticipants(session, participants);
+            }
+        } catch (Exception e) {
+            /*
+             * Exception will be handled better in CR037.
+             */
+            if (mLogger.isActivated()) {
+                mLogger.error(
+                        "Exception occured while trying to invite queued participants to group chat with chatId "
+                                .concat(mChatId), e);
+            }
         }
     }
 }

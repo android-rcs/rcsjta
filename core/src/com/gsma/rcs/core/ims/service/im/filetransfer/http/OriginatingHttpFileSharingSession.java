@@ -55,8 +55,6 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
 
     private final Core mCore;
 
-    private final MessagingLog mMessagingLog;
-
     /**
      * HTTP upload manager
      */
@@ -85,9 +83,8 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
             MmContent content, ContactId contact, MmContent fileIcon, String tId, Core core,
             MessagingLog messagingLog, RcsSettings rcsSettings) {
         super(parent, content, contact, PhoneUtils.formatContactIdToUri(contact), fileIcon, null,
-                null, fileTransferId, rcsSettings);
+                null, fileTransferId, rcsSettings, messagingLog);
         mCore = core;
-        mMessagingLog = messagingLog;
         if (logger.isActivated()) {
             logger.debug("OriginatingHttpFileSharingSession contact=" + contact);
         }

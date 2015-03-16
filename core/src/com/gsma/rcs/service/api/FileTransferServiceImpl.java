@@ -287,13 +287,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         if (isGroup) {
             GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(fileTransferId,
                     session.getContributionID(), mGroupFileTransferBroadcaster, mImService,
-                    storageAccessor, this, mRcsSettings, mCore);
+                    storageAccessor, this, mRcsSettings, mCore, mMessagingLog);
             session.addListener(groupFileTransfer);
             addFileTransfer(groupFileTransfer);
         } else {
             OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
                     fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
-                    this, mRcsSettings, mCore);
+                    this, mRcsSettings, mCore, mMessagingLog);
             session.addListener(oneToOneFileTransfer);
             addFileTransfer(oneToOneFileTransfer);
         }
@@ -376,7 +376,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                         FileTransfer.State.QUEUED);
                 return new OneToOneFileTransferImpl(fileTransferId,
                         mOneToOneFileTransferBroadcaster, mImService, storageAccessor, this,
-                        mRcsSettings, mCore);
+                        mRcsSettings, mCore, mMessagingLog);
             }
             addOutgoingFileTransfer(fileTransferId, contact, file, fileIcon,
                     FileTransfer.State.INITIATING);
@@ -385,7 +385,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
             OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
                     fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
-                    this, mRcsSettings, mCore);
+                    this, mRcsSettings, mCore, mMessagingLog);
             session.addListener(oneToOneFileTransfer);
             addFileTransfer(oneToOneFileTransfer);
 
@@ -429,7 +429,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
                 fileTransferId, mOneToOneFileTransferBroadcaster, mImService,
                 new FileTransferPersistedStorageAccessor(fileTransferId, mMessagingLog), this,
-                mRcsSettings, mCore);
+                mRcsSettings, mCore, mMessagingLog);
         session.addListener(oneToOneFileTransfer);
         addFileTransfer(oneToOneFileTransfer);
         session.startSession();
@@ -471,7 +471,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                     fileIcon, mMessagingLog);
             OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
                     fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
-                    this, mRcsSettings, mCore);
+                    this, mRcsSettings, mCore, mMessagingLog);
             session.addListener(oneToOneFileTransfer);
             addFileTransfer(oneToOneFileTransfer);
 
@@ -598,7 +598,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                     fileTransferId, contact, Direction.OUTGOING, contact.toString(), content,
                     fileIconContent, mMessagingLog);
             return new OneToOneFileTransferImpl(fileTransferId, mOneToOneFileTransferBroadcaster,
-                    mImService, storageAccessor, this, mRcsSettings, mCore);
+                    mImService, storageAccessor, this, mRcsSettings, mCore, mMessagingLog);
 
         } catch (Exception e) {
             /*
@@ -718,7 +718,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                         State.QUEUED);
                 return new GroupFileTransferImpl(fileTransferId, chatId,
                         mGroupFileTransferBroadcaster, mImService, storageAccessor, this,
-                        mRcsSettings, mCore);
+                        mRcsSettings, mCore, mMessagingLog);
             }
             final GroupChatSession groupChatSession = mImService.getGroupChatSession(chatId);
             String chatSessionId = groupChatSession != null ? groupChatSession.getSessionID()
@@ -732,7 +732,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
                 GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(
                         session.getFileTransferId(), chatId, mGroupFileTransferBroadcaster,
-                        mImService, storageAccessor, this, mRcsSettings, mCore);
+                        mImService, storageAccessor, this, mRcsSettings, mCore, mMessagingLog);
                 session.addListener(groupFileTransfer);
                 addFileTransfer(groupFileTransfer);
 
@@ -771,7 +771,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 }
             }
             return new GroupFileTransferImpl(fileTransferId, chatId, mGroupFileTransferBroadcaster,
-                    mImService, storageAccessor, this, mRcsSettings, mCore);
+                    mImService, storageAccessor, this, mRcsSettings, mCore, mMessagingLog);
 
         } catch (Exception e) {
             /*
@@ -808,7 +808,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(fileTransferId, chatId,
                 mGroupFileTransferBroadcaster, mImService,
                 new FileTransferPersistedStorageAccessor(fileTransferId, mMessagingLog), this,
-                mRcsSettings, mCore);
+                mRcsSettings, mCore, mMessagingLog);
         session.addListener(groupFileTransfer);
         addFileTransfer(groupFileTransfer);
         session.startSession();
@@ -859,7 +859,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                     fileTransferId, null, Direction.OUTGOING, chatId, content, fileIconContent,
                     mMessagingLog);
             return new GroupFileTransferImpl(fileTransferId, chatId, mGroupFileTransferBroadcaster,
-                    mImService, storageAccessor, this, mRcsSettings, mCore);
+                    mImService, storageAccessor, this, mRcsSettings, mCore, mMessagingLog);
 
         } catch (Exception e) {
             /*
@@ -918,10 +918,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 transferId, mMessagingLog);
         if (mMessagingLog.isGroupFileTransfer(transferId)) {
             return new GroupFileTransferImpl(transferId, mGroupFileTransferBroadcaster, mImService,
-                    storageAccessor, this, mRcsSettings, mCore);
+                    storageAccessor, this, mRcsSettings, mCore, mMessagingLog);
         }
         return new OneToOneFileTransferImpl(transferId, mOneToOneFileTransferBroadcaster,
-                mImService, storageAccessor, this, mRcsSettings, mCore);
+                mImService, storageAccessor, this, mRcsSettings, mCore, mMessagingLog);
     }
 
     /**
@@ -1123,13 +1123,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         if (isGroup) {
             GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(fileTransferId,
                     session.getContributionID(), mGroupFileTransferBroadcaster, mImService,
-                    storageAccessor, this, mRcsSettings, mCore);
+                    storageAccessor, this, mRcsSettings, mCore, mMessagingLog);
             session.addListener(groupFileTransfer);
             addFileTransfer(groupFileTransfer);
         } else {
             OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
                     fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
-                    this, mRcsSettings, mCore);
+                    this, mRcsSettings, mCore, mMessagingLog);
             session.addListener(oneToOneFileTransfer);
             addFileTransfer(oneToOneFileTransfer);
         }
@@ -1154,13 +1154,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         if (isGroup) {
             GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(fileTransferId,
                     session.getContributionID(), mGroupFileTransferBroadcaster, mImService,
-                    storageAccessor, this, mRcsSettings, mCore);
+                    storageAccessor, this, mRcsSettings, mCore, mMessagingLog);
             session.addListener(groupFileTransfer);
             addFileTransfer(groupFileTransfer);
         } else {
             OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
                     fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
-                    this, mRcsSettings, mCore);
+                    this, mRcsSettings, mCore, mMessagingLog);
             session.addListener(oneToOneFileTransfer);
             addFileTransfer(oneToOneFileTransfer);
         }

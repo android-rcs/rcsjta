@@ -37,6 +37,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
+import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
@@ -85,12 +86,13 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      * @param tId TID of the upload
      * @param core Core
      * @param rcsSettings
+     * @param messagingLog
      */
     public OriginatingHttpGroupFileSharingSession(String fileTransferId, ImsService parent,
             MmContent content, MmContent fileIcon, String conferenceId, String chatSessionId,
-            String chatContributionId, String tId, Core core, RcsSettings rcsSettings) {
+            String chatContributionId, String tId, Core core, RcsSettings rcsSettings, MessagingLog messagingLog) {
         super(parent, content, null, conferenceId, fileIcon, chatSessionId, chatContributionId,
-                fileTransferId, rcsSettings);
+                fileTransferId, rcsSettings, messagingLog);
         mCore = core;
 
         // Instantiate the upload manager

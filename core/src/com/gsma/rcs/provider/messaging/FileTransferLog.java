@@ -79,6 +79,11 @@ public class FileTransferLog implements IFileTransferLog {
             FileTransferData.KEY_CONTACT).append("=? AND ")
             .append(SELECTION_BY_QUEUED_FILE_TRANSFERS).toString();
 
+    private static final String SELECTION_BY_INTERRUPTED_FILE_TRANSFERS = new StringBuilder(
+            FileTransferData.KEY_STATE).append("=").append(State.STARTED.toInt()).append(" AND ")
+            .append(FileTransferData.KEY_TRANSFERRED).append("<>")
+            .append(FileTransferData.KEY_FILESIZE).toString();
+
     private static final String ORDER_BY_TIMESTAMP_ASC = MessageData.KEY_TIMESTAMP.concat(" ASC");
 
     private static final int FIRST_COLUMN_IDX = 0;
@@ -560,6 +565,17 @@ public class FileTransferLog implements IFileTransferLog {
         }
     }
 
+    private String getDataAsString(Cursor cursor) {
+        try {
+            return cursor.getString(FIRST_COLUMN_IDX);
+
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
     /*
      * (non-Javadoc)
      * @see com.gsma.rcs.provider.messaging.IFileTransferLog#getFileTransferState (java.lang.String)
@@ -754,5 +770,16 @@ public class FileTransferLog implements IFileTransferLog {
         };
         return mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
                 SELECTION_BY_QUEUED_ONETOONE_FILE_TRANSFERS, selectionArgs, ORDER_BY_TIMESTAMP_ASC);
+    }
+
+    @Override
+    public String getFileTransferUploadTid(String fileTransferId) {
+        return getDataAsString(getFileTransferData(FileTransferData.KEY_UPLOAD_TID, fileTransferId));
+    }
+
+    @Override
+    public Cursor getInterruptedFileTransfers() {
+        return mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
+                SELECTION_BY_INTERRUPTED_FILE_TRANSFERS, null, ORDER_BY_TIMESTAMP_ASC);
     }
 }

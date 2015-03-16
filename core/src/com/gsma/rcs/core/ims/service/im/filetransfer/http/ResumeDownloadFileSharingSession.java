@@ -27,6 +27,7 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
+import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
@@ -49,10 +50,11 @@ public class ResumeDownloadFileSharingSession extends TerminatingHttpFileSharing
      * @param content the content (url, mime-type and size)
      * @param resumeDownload the data object in DB
      * @param rcsSettings
+     * @param messagingLog
      */
     public ResumeDownloadFileSharingSession(ImsService parent, MmContent content,
-            FtHttpResumeDownload resumeDownload, RcsSettings rcsSettings) {
-        super(parent, content, resumeDownload, rcsSettings);
+            FtHttpResumeDownload resumeDownload, RcsSettings rcsSettings, MessagingLog messagingLog) {
+        super(parent, content, resumeDownload, rcsSettings, messagingLog);
     }
 
     /**

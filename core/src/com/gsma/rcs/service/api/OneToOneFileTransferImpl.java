@@ -41,6 +41,7 @@ import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.FileTransferStateAndReasonCode;
+import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.broadcaster.IOneToOneFileTransferBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
@@ -77,6 +78,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
 
     private final Core mCore;
 
+    private final MessagingLog mMessagingLog;
+
     /**
      * Lock used for synchronization
      */
@@ -97,11 +100,12 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
      * @param fileTransferService FileTransferServiceImpl
      * @param rcsSettings RcsSettings
      * @param core Core
+     * @param messagingLog
      */
     public OneToOneFileTransferImpl(String transferId,
             IOneToOneFileTransferBroadcaster broadcaster, InstantMessagingService imService,
             FileTransferPersistedStorageAccessor persistentStorage,
-            FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings, Core core) {
+            FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings, Core core, MessagingLog messagingLog) {
         mFileTransferId = transferId;
         mBroadcaster = broadcaster;
         mImService = imService;
@@ -109,6 +113,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         mFileTransferService = fileTransferService;
         mRcsSettings = rcsSettings;
         mCore = core;
+        mMessagingLog = messagingLog;
     }
 
     private State getRcsState(FileSharingSession session) {
@@ -595,7 +600,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             } else {
                 session = new ResumeDownloadFileSharingSession(mImService,
                         FileTransferUtils.createMmContent(resume.getFile()),
-                        (FtHttpResumeDownload) resume, mRcsSettings);
+                        (FtHttpResumeDownload) resume, mRcsSettings, mMessagingLog);
             }
             session.addListener(this);
             session.startSession();

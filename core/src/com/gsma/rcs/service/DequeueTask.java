@@ -166,18 +166,4 @@ public abstract class DequeueTask implements Runnable {
         }
         return true;
     }
-
-    /**
-     * Check if it is a group entry
-     * 
-     * @param chatId
-     * @param contact
-     * @return boolean
-     */
-    protected boolean isGroupEntry(String chatId, ContactId contact) {
-        if (contact == null) {
-            return true;
-        }
-        return !chatId.equals(contact.toString());
-    }
 }

@@ -73,7 +73,7 @@ import android.net.Uri;
                             Uri fileIconUri = Uri.parse(fileIcon);
                             fileIconContent = FileTransferUtils.createMmContent(fileIconUri);
                         }
-                        if (!isGroupEntry(chatId, contact)) {
+                        if (chatId.equals(contactNumber)) {
                             if (isAllowedToDequeueOneToOneFileTransfer()) {
                                 mFileTransferService.dequeueOneToOneFileTransfer(fileTransferId,
                                         contact, content, fileIconContent);
@@ -92,7 +92,7 @@ import android.net.Uri;
                                     .append(fileTransferId).append("', so mark as failed")
                                     .toString());
                         }
-                        if (!isGroupEntry(chatId, contact)) {
+                        if (chatId.equals(contactNumber)) {
                             mFileTransferService.setOneToOneFileTransferStateAndReasonCode(
                                     fileTransferId, contact, State.FAILED,
                                     ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);

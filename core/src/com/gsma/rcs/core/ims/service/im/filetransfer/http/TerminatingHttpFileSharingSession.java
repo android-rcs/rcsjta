@@ -88,15 +88,16 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
      * @param contact the remote contact Id
      * @param displayName the display name of the remote contact
      * @param rcsSettings
+     * @param messagingLog
      */
     public TerminatingHttpFileSharingSession(ImsService parent, ChatSession chatSession,
             FileTransferHttpInfoDocument fileTransferInfo, String fileTransferId,
-            ContactId contact, String displayName, RcsSettings rcsSettings) {
+            ContactId contact, String displayName, RcsSettings rcsSettings, MessagingLog messagingLog) {
         super(parent, ContentManager.createMmContent(ContentManager.generateUriForReceivedContent(
                 fileTransferInfo.getFilename(), fileTransferInfo.getFileType(), rcsSettings),
                 fileTransferInfo.getFileSize(), fileTransferInfo.getFilename()), contact,
                 PhoneUtils.formatContactIdToUri(contact), null, chatSession.getSessionID(),
-                chatSession.getContributionID(), fileTransferId, rcsSettings);
+                chatSession.getContributionID(), fileTransferId, rcsSettings, messagingLog);
 
         setRemoteDisplayName(displayName);
         // Build a new dialogPath with this of chatSession and an empty CallId
@@ -135,13 +136,14 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
      * @param content the content to be transferred
      * @param resume the Data Object to access FT HTTP table in DB
      * @param rcsSettings
+     * @param messagingLog
      */
     public TerminatingHttpFileSharingSession(ImsService parent, MmContent content,
-            FtHttpResumeDownload resume, RcsSettings rcsSettings) {
+            FtHttpResumeDownload resume, RcsSettings rcsSettings, MessagingLog messagingLog) {
         super(parent, content, resume.getContact(), PhoneUtils.formatContactIdToUri(resume
                 .getContact()), resume.getFileicon() != null ? FileTransferUtils
                 .createMmContent(resume.getFileicon()) : null, null, resume.getChatId(), resume
-                .getFileTransferId(), rcsSettings);
+                .getFileTransferId(), rcsSettings, messagingLog);
         mGroupFileTransfer = resume.isGroupTransfer();
         mResumeFT = resume;
         // Instantiate the download manager

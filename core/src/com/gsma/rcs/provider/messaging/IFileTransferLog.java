@@ -241,4 +241,18 @@ public interface IFileTransferLog {
      * @return Cursor
      */
     public Cursor getQueuedOneToOneFileTransfers(ContactId contact);
+
+    /**
+     * Get file transfer Upload Tid
+     * 
+     * @param fileTransferId
+     * @return Tid
+     */
+    public String getFileTransferUploadTid(String fileTransferId);
+
+    /**
+     * Update file transfer state for interrupted file transfers
+     * @return TODO
+     */
+    public Cursor getInterruptedFileTransfers();
 }

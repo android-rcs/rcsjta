@@ -745,7 +745,7 @@ public class InstantMessagingService extends ImsService {
 
         FileSharingSession session = new OriginatingHttpGroupFileSharingSession(fileTransferId,
                 this, content, fileIcon, ImsModule.IMS_USER_PROFILE.getImConferenceUri(),
-                groupChatSessionId, groupChatId, UUID.randomUUID().toString(), mCore, mRcsSettings);
+                groupChatSessionId, groupChatId, UUID.randomUUID().toString(), mCore, mRcsSettings, mMessagingLog);
 
         return session;
     }
@@ -1346,7 +1346,7 @@ public class InstantMessagingService extends ImsService {
             TerminatingHttpFileSharingSession httpFiletransferSession = new TerminatingHttpFileSharingSession(
                     this, oneToOneChatSession, ftinfo, ChatUtils.getMessageId(invite),
                     oneToOneChatSession.getRemoteContact(),
-                    oneToOneChatSession.getRemoteDisplayName(), mRcsSettings);
+                    oneToOneChatSession.getRemoteDisplayName(), mRcsSettings, mMessagingLog);
 
             getImsModule()
                     .getCore()
@@ -1410,7 +1410,7 @@ public class InstantMessagingService extends ImsService {
         TerminatingHttpFileSharingSession httpFiletransferSession = new TerminatingHttpFileSharingSession(
                 this, one2oneChatSession, ftinfo, ChatUtils.getMessageId(invite),
                 one2oneChatSession.getRemoteContact(), one2oneChatSession.getRemoteDisplayName(),
-                mRcsSettings);
+                mRcsSettings, mMessagingLog);
 
         getImsModule().getCore().getListener()
                 .handleOneToOneFileTransferInvitation(httpFiletransferSession, one2oneChatSession);

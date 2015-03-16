@@ -33,9 +33,13 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDaoImpl;
+import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
+
+import android.text.TextUtils;
 
 import java.util.Collection;
 import java.util.List;
@@ -62,6 +66,8 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      */
     protected FtHttpResume mResumeFT;
 
+    protected final MessagingLog mMessagingLog;
+
     /**
      * The logger
      */
@@ -80,14 +86,16 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * @param chatContributionId Chat contribution Id
      * @param fileTransferId File transfer Id
      * @param rcsSettings
+     * @param messagingLog
      */
     public HttpFileTransferSession(ImsService parent, MmContent content, ContactId contact,
             String remoteUri, MmContent fileIcon, String chatSessionId, String chatContributionId,
-            String fileTransferId, RcsSettings rcsSettings) {
+            String fileTransferId, RcsSettings rcsSettings, MessagingLog messagingLog) {
         super(parent, content, contact, remoteUri, fileIcon, fileTransferId, rcsSettings);
         mChatSessionId = chatSessionId;
         setContributionID(chatContributionId);
         mSessionState = HttpTransferState.PENDING;
+        mMessagingLog = messagingLog;
     }
 
     @Override
@@ -124,51 +132,47 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         return null;
     }
 
+    private void closeSession(TerminationReason reason) {
+        interruptSession();
+
+        terminateSession(reason);
+
+        removeSession();
+    }
+
     @Override
     public void abortSession(TerminationReason reason) {
-        FtHttpResumeDaoImpl dao = FtHttpResumeDaoImpl.getInstance();
-
-        // If reason is TERMINATION_BY_SYSTEM and session already started, then it's a pause
+        /* If reason is TERMINATION_BY_SYSTEM and session already started, then it's a pause */
+        String fileTransferId = getFileTransferId();
+        FileTransfer.State state = mMessagingLog.getFileTransferState(fileTransferId);
         if (TerminationReason.TERMINATION_BY_SYSTEM == reason) {
-            // Check if the session is not in created status. In this status,
-            // the thumbnail is not yet sent and the resume is not possible.
-            if (dao != null) {
-                boolean found = false;
-                List<FtHttpResume> createdFileTransfers = dao.queryAll();
-                for (FtHttpResume ftHttpResume : createdFileTransfers) {
-                    if (ftHttpResume.getFileTransferId().equals(getFileTransferId())) {
-                        found = true;
+            switch (state) {
+                case INVITED:
+                    closeSession(reason);
+                    return;
+                case STARTED:
+                    if (!isInitiatedByRemote()
+                            && mMessagingLog.getFileTransferUploadTid(fileTransferId) == null) {
                         break;
                     }
-                }
-                if (found) {
-                    // If the session has been terminated by system and already started, then
-                    // Pause the session
+                    closeSession(reason);
                     if (sLogger.isActivated()) {
                         sLogger.info("Pause the session (session terminated, but can be resumed)");
                     }
 
-                    // Interrupt the session
-                    interruptSession();
-
-                    // Terminate session
-                    terminateSession(reason);
-
-                    // Remove the current session
-                    removeSession();
-
-                    Collection<ImsSessionListener> listeners = getListeners();
                     ContactId contact = getRemoteContact();
-                    for (ImsSessionListener listener : listeners) {
+                    for (ImsSessionListener listener : getListeners()) {
                         ((FileSharingSessionListener) listener)
                                 .handleFileTransferPausedBySystem(contact);
                     }
                     return;
-                }
+                case PAUSED:
+                    closeSession(reason);
+                    return;
+                default:
+                    break;
             }
         }
-
-        // in others case, call the normal abortSession and remove session from resumable sessions
         super.abortSession(reason);
     }
 

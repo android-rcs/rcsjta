@@ -33,6 +33,7 @@ import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.FileTransferStateAndReasonCode;
+import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.broadcaster.IGroupFileTransferBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
@@ -66,6 +67,8 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
     private final Core mCore;
 
+    private final MessagingLog mMessagingLog;
+
     private String mChatId;
 
     /**
@@ -89,11 +92,13 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
      * @param fileTransferService FileTransferServiceImpl
      * @param rcsSettings RcsSettings
      * @param core Core
+     * @param messagingLog
      */
     public GroupFileTransferImpl(String transferId, IGroupFileTransferBroadcaster broadcaster,
             InstantMessagingService imService,
             FileTransferPersistedStorageAccessor storageAccessor,
-            FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings, Core core) {
+            FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings, Core core,
+            MessagingLog messagingLog) {
         mFileTransferId = transferId;
         mBroadcaster = broadcaster;
         mImService = imService;
@@ -101,6 +106,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         mFileTransferService = fileTransferService;
         mRcsSettings = rcsSettings;
         mCore = core;
+        mMessagingLog = messagingLog;
     }
 
     /**
@@ -114,12 +120,15 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
      * @param fileTransferService FileTransferServiceImpl
      * @param rcsSettings RcsSettings
      * @param core Core
+     * @param messagingLog
      */
     public GroupFileTransferImpl(String transferId, String chatId,
             IGroupFileTransferBroadcaster broadcaster, InstantMessagingService imService,
             FileTransferPersistedStorageAccessor storageAccessor,
-            FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings, Core core) {
-        this(transferId, broadcaster, imService, storageAccessor, fileTransferService, rcsSettings, core);
+            FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings, Core core,
+            MessagingLog messagingLog) {
+        this(transferId, broadcaster, imService, storageAccessor, fileTransferService, rcsSettings,
+                core, messagingLog);
         mChatId = chatId;
     }
 
@@ -574,7 +583,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             } else {
                 session = new ResumeDownloadFileSharingSession(mImService,
                         FileTransferUtils.createMmContent(resume.getFile()),
-                        (FtHttpResumeDownload) resume, mRcsSettings);
+                        (FtHttpResumeDownload) resume, mRcsSettings, mMessagingLog);
             }
             session.addListener(this);
             session.startSession();

@@ -19,6 +19,7 @@ package com.gsma.rcs.service;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
+import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
@@ -40,6 +41,8 @@ import android.database.Cursor;
     private final MessagingLog mMessagingLog;
 
     private final Object mLock;
+
+    private final Logger mLogger = Logger.getLogger(getClass().getName());
 
     /* package private */public OneToOneChatTerminalExceptionTask(ContactId contact,
             ChatServiceImpl chatService, FileTransferServiceImpl fileTransferService,
@@ -71,6 +74,15 @@ import android.database.Cursor;
                     String fileTransferId = fileCursor.getString(fileTransferIdIdx);
                     mFileTransferService.setOneToOneFileTransferStateAndReasonCode(fileTransferId,
                             mContact, State.FAILED, ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
+                }
+            } catch (Exception e) {
+                /*
+                 * Exception will be handled better in CR037.
+                 */
+                if (mLogger.isActivated()) {
+                    mLogger.error(
+                            "Exception occured while trying to mark queued one-one chat messages and one-one file transfers as failed.",
+                            e);
                 }
             } finally {
                 if (messageCursor != null) {

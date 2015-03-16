@@ -47,104 +47,104 @@ public class FileTransferData {
     /**
      * Unique history log id
      */
-    static final String KEY_BASECOLUMN_ID = FileTransferLog.BASECOLUMN_ID;
+    public static final String KEY_BASECOLUMN_ID = FileTransferLog.BASECOLUMN_ID;
 
     /**
      * Unique file transfer identifier
      */
-    static final String KEY_FT_ID = FileTransferLog.FT_ID;
+    public static final String KEY_FT_ID = FileTransferLog.FT_ID;
 
     /**
      * Id of chat
      */
-    static final String KEY_CHAT_ID = FileTransferLog.CHAT_ID;
+    public static final String KEY_CHAT_ID = FileTransferLog.CHAT_ID;
 
     /**
      * Date of the transfer
      */
-    static final String KEY_TIMESTAMP = FileTransferLog.TIMESTAMP;
+    public static final String KEY_TIMESTAMP = FileTransferLog.TIMESTAMP;
 
     /**
      * Time when file is sent. If 0 means not sent.
      */
-    static final String KEY_TIMESTAMP_SENT = FileTransferLog.TIMESTAMP_SENT;
+    public static final String KEY_TIMESTAMP_SENT = FileTransferLog.TIMESTAMP_SENT;
 
     /**
      * Time when file is delivered. If 0 means not delivered.
      */
-    static final String KEY_TIMESTAMP_DELIVERED = FileTransferLog.TIMESTAMP_DELIVERED;
+    public static final String KEY_TIMESTAMP_DELIVERED = FileTransferLog.TIMESTAMP_DELIVERED;
 
     /**
      * Time when file is displayed.
      */
-    static final String KEY_TIMESTAMP_DISPLAYED = FileTransferLog.TIMESTAMP_DISPLAYED;
+    public static final String KEY_TIMESTAMP_DISPLAYED = FileTransferLog.TIMESTAMP_DISPLAYED;
 
     /**
      * ContactId formatted number of remote contact or null if the filetransfer is an outgoing group
      * file transfer.
      */
-    static final String KEY_CONTACT = FileTransferLog.CONTACT;
+    public static final String KEY_CONTACT = FileTransferLog.CONTACT;
 
     /**
      * @see FileTransfer.State for possible states.
      */
-    static final String KEY_STATE = FileTransferLog.STATE;
+    public static final String KEY_STATE = FileTransferLog.STATE;
 
     /**
      * Reason code associated with the file transfer state.
      * 
      * @see FileTransfer.ReasonCode for possible reason codes.
      */
-    static final String KEY_REASON_CODE = FileTransferLog.REASON_CODE;
+    public static final String KEY_REASON_CODE = FileTransferLog.REASON_CODE;
 
     /**
      * @see ReadStatus
      */
-    static final String KEY_READ_STATUS = FileTransferLog.READ_STATUS;
+    public static final String KEY_READ_STATUS = FileTransferLog.READ_STATUS;
 
     /**
      * Multipurpose Internet Mail Extensions (MIME) type of message
      */
-    static final String KEY_MIME_TYPE = FileTransferLog.MIME_TYPE;
+    public static final String KEY_MIME_TYPE = FileTransferLog.MIME_TYPE;
 
     /**
      * URI of the file
      */
-    static final String KEY_FILE = FileTransferLog.FILE;
+    public static final String KEY_FILE = FileTransferLog.FILE;
 
     /**
      * Filename
      */
-    static final String KEY_FILENAME = FileTransferLog.FILENAME;
+    public static final String KEY_FILENAME = FileTransferLog.FILENAME;
 
     /**
      * Size transferred in bytes
      */
-    static final String KEY_TRANSFERRED = FileTransferLog.TRANSFERRED;
+    public static final String KEY_TRANSFERRED = FileTransferLog.TRANSFERRED;
 
     /**
      * File size in bytes
      */
-    static final String KEY_FILESIZE = FileTransferLog.FILESIZE;
+    public static final String KEY_FILESIZE = FileTransferLog.FILESIZE;
 
     /**
      * Incoming transfer or outgoing transfer
      * 
      * @see Direction
      */
-    static final String KEY_DIRECTION = FileTransferLog.DIRECTION;
+    public static final String KEY_DIRECTION = FileTransferLog.DIRECTION;
 
     /**
      * Column name KEY_FILEICON : the URI of the file icon
      */
-    static final String KEY_FILEICON = FileTransferLog.FILEICON;
+    public static final String KEY_FILEICON = FileTransferLog.FILEICON;
 
     /**
      * URI of the file icon
      */
-    static final String KEY_FILEICON_MIME_TYPE = FileTransferLog.FILEICON_MIME_TYPE;
+    public static final String KEY_FILEICON_MIME_TYPE = FileTransferLog.FILEICON_MIME_TYPE;
 
-    static final String KEY_UPLOAD_TID = "upload_tid";
+    public static final String KEY_UPLOAD_TID = "upload_tid";
 
-    static final String KEY_DOWNLOAD_URI = "download_uri";
+    public static final String KEY_DOWNLOAD_URI = "download_uri";
 }

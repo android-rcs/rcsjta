@@ -19,6 +19,7 @@ package com.gsma.rcs.service;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
+import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
@@ -39,6 +40,8 @@ public class GroupChatTerminalExceptionTask implements Runnable {
     private final MessagingLog mMessagingLog;
 
     private final Object mLock;
+
+    private final Logger mLogger = Logger.getLogger(getClass().getName());
 
     /* package private */public GroupChatTerminalExceptionTask(String chatId,
             ChatServiceImpl chatService, FileTransferServiceImpl fileTransferService,
@@ -73,6 +76,15 @@ public class GroupChatTerminalExceptionTask implements Runnable {
                             mChatId, State.FAILED,
                             FileTransfer.ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
                 }
+            }
+        } catch (Exception e) {
+            /*
+             * Exception will be handled better in CR037.
+             */
+            if (mLogger.isActivated()) {
+                mLogger.error(
+                        "Exception occured while trying to mark queued group chat messages and group file transfers as failed with chatId "
+                                .concat(mChatId), e);
             }
         } finally {
             if (messageCursor != null) {

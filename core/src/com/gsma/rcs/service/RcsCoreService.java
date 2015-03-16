@@ -935,10 +935,13 @@ public class RcsCoreService extends Service implements CoreListener {
     @Override
     public void tryToStartImServiceTasks(InstantMessagingService imService) {
         Core core = Core.getInstance();
+        /* Update interrupted file transfer status */
+        mImOperationExecutor.execute(new UpdateFileTransferStateTask(mMessagingLog, mFtApi));
         /* Try to auto-rejoin group chats that are still marked as active. */
         mImOperationExecutor.execute(new GroupChatAutoRejoinTask(mMessagingLog, core));
         /* Try to start auto resuming of HTTP file transfers marked as PAUSED_BY_SYSTEM */
-        mImOperationExecutor.execute(new FtHttpResumeManager(imService, mRcsSettings));
+        mImOperationExecutor
+                .execute(new FtHttpResumeManager(imService, mRcsSettings, mMessagingLog));
         /* Try to dequeue one-to-one chat messages and one-to-one file transfers. */
         mImOperationExecutor.execute(new OneToOneChatDequeueTask(IM_OPERATION_LOCK, imService, mChatApi,
                 mFtApi, mHistoryLog, mMessagingLog, mContactManager, mRcsSettings));

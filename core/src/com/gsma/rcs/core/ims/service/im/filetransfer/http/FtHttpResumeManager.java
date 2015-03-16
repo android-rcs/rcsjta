@@ -74,15 +74,19 @@ public class FtHttpResumeManager implements Runnable {
 
     private final RcsSettings mRcsSettings;
 
+    private final MessagingLog mMessagingLog;
+
     /**
      * Constructor
      * 
      * @param instantMessagingService IMS service
      * @param rcsSettings
+     * @param messagingLog
      */
     public FtHttpResumeManager(InstantMessagingService instantMessagingService,
-            RcsSettings rcsSettings) {
+            RcsSettings rcsSettings, MessagingLog messagingLog) {
         mRcsSettings = rcsSettings;
+        mMessagingLog = messagingLog;
         if (mDao == null) {
             if (sLogger.isActivated()) {
                 sLogger.error("Cannot resume FT");
@@ -98,14 +102,6 @@ public class FtHttpResumeManager implements Runnable {
             // Retrieve all resumable sessions
             List<FtHttpResume> listFile2resume = mDao.queryAll();
             if (listFile2resume.isEmpty() == false) {
-                // Rich Messaging - set all "in progress" File transfer to "paused".
-                // This is necessary in case of the application can't update the
-                // state before device switch off.
-                for (FtHttpResume ftHttpResume : listFile2resume) {
-                    MessagingLog.getInstance().setFileTransferStateAndReasonCode(
-                            ftHttpResume.getFileTransferId(), FileTransfer.State.PAUSED,
-                            FileTransfer.ReasonCode.PAUSED_BY_SYSTEM);
-                }
                 mListOfFtHttpResume = new LinkedList<FtHttpResume>(listFile2resume);
                 processNext();
             }
@@ -135,7 +131,7 @@ public class FtHttpResumeManager implements Runnable {
                         downloadInfo.getSize(), downloadInfo.getFileName());
                 // Creates the Resume Download session object
                 final ResumeDownloadFileSharingSession resumeDownload = new ResumeDownloadFileSharingSession(
-                        mImsService, downloadContent, downloadInfo, mRcsSettings);
+                        mImsService, downloadContent, downloadInfo, mRcsSettings, mMessagingLog);
                 resumeDownload.addListener(getFileSharingSessionListener());
                 // Start the download HTTP FT session object
                 new Thread() {
