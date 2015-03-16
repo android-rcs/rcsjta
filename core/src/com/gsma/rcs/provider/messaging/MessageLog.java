@@ -25,6 +25,7 @@ package com.gsma.rcs.provider.messaging;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.provider.messaging.MessageData;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
@@ -71,6 +72,16 @@ public class MessageLog implements IMessageLog {
     };
 
     private static final int FIRST_COLUMN_IDX = 0;
+
+    private static final String SELECTION_QUEUED_ONETOONE_CHAT_MESSAGES = new StringBuilder(
+            MessageData.KEY_CONTACT).append("=? AND ").append(MessageData.KEY_STATUS).append("=")
+            .append(Status.QUEUED.toInt()).toString();
+
+    private static final String SELECTION_QUEUED_GROUP_CHAT_MESSAGES = new StringBuilder(
+            MessageData.KEY_CHAT_ID).append("=? AND ").append(MessageData.KEY_STATUS).append("=")
+            .append(Status.QUEUED.toInt()).toString();
+
+    private static final String ORDER_BY_TIMESTAMP_ASC = MessageData.KEY_TIMESTAMP.concat(" ASC");
 
     /**
      * Constructor
@@ -485,5 +496,45 @@ public class MessageLog implements IMessageLog {
     @Override
     public String getChatMessageContent(String msgId) {
         return getDataAsString(getMessageData(MessageData.KEY_CONTENT, msgId));
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.orangelabs.rcs.provider.messaging.IMessageLog#
+     * getQueuedChatMessages(ContactId)
+     */
+    @Override
+    public Cursor getQueuedOneToOneChatMessages(ContactId contact) {
+        String[] selectionArgs = new String[] {
+                contact.toString()
+        };
+        return mLocalContentResolver.query(Message.CONTENT_URI, null,
+                SELECTION_QUEUED_ONETOONE_CHAT_MESSAGES, selectionArgs, ORDER_BY_TIMESTAMP_ASC);
+    }
+
+    @Override
+    public void dequeueChatMessage(ChatMessage message) {
+        ContentValues values = new ContentValues();
+        values.put(MessageData.KEY_STATUS, Status.SENDING.toInt());
+        values.put(MessageData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
+        /* Reset the timestamp as this message was originally queued and is sent only now. */
+        /*
+         * TODO: Change to message.getTimestamp() and message.getTimestampSent() respectively once
+         * these methods have been introduced in ChatMessage
+         */
+        values.put(MessageData.KEY_TIMESTAMP, message.getDate().getTime());
+        values.put(MessageData.KEY_TIMESTAMP_SENT, message.getServerDate().getTime());
+        mLocalContentResolver.update(
+                Uri.withAppendedPath(Message.CONTENT_URI, message.getMessageId()), values, null,
+                null);
+    }
+
+    @Override
+    public Cursor getQueuedGroupChatMessages(String chatId) {
+        String[] selectionArgs = new String[] {
+            chatId
+        };
+        return mLocalContentResolver.query(Message.CONTENT_URI, null,
+                SELECTION_QUEUED_GROUP_CHAT_MESSAGES, selectionArgs, ORDER_BY_TIMESTAMP_ASC);
     }
 }

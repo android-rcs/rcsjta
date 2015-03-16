@@ -61,7 +61,7 @@ import java.util.Vector;
  * 
  * @author jexa7410
  */
-public class TerminatingStoreAndForwardOneToOneNotificationSession extends OneToOneChatSession implements
+public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends OneToOneChatSession implements
         MsrpEventListener {
     /**
      * MSRP manager
@@ -72,7 +72,7 @@ public class TerminatingStoreAndForwardOneToOneNotificationSession extends OneTo
      * The logger
      */
     private static final Logger sLogger = Logger
-            .getLogger(TerminatingStoreAndForwardOneToOneNotificationSession.class.getSimpleName());
+            .getLogger(TerminatingStoreAndForwardOneToOneChatNotificationSession.class.getSimpleName());
 
     /**
      * Constructor
@@ -83,7 +83,7 @@ public class TerminatingStoreAndForwardOneToOneNotificationSession extends OneTo
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
      */
-    public TerminatingStoreAndForwardOneToOneNotificationSession(ImsService parent, SipRequest invite,
+    public TerminatingStoreAndForwardOneToOneChatNotificationSession(ImsService parent, SipRequest invite,
             ContactId contact, RcsSettings rcsSettings, MessagingLog messagingLog) {
         super(parent, contact, PhoneUtils.formatContactIdToUri(contact), null, rcsSettings,
                 messagingLog);

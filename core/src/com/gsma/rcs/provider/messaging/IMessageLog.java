@@ -178,4 +178,28 @@ public interface IMessageLog {
      * @return Content of chat message
      */
     public String getChatMessageContent(String msgId);
+
+    /**
+     * Get all one-to-one and group chat messages that are in queued state in
+     * ascending order of timestamp
+     * 
+     * @param contact
+     * @return Cursor
+     */
+    public Cursor getQueuedOneToOneChatMessages(ContactId contact);
+
+    /**
+     * Dequeue chat message
+     * 
+     * @param message
+     */
+    public void dequeueChatMessage(ChatMessage message);
+
+    /**
+     * Get queued group chat messages
+     * 
+     * @param chatId
+     * @return Cursor
+     */
+    public Cursor getQueuedGroupChatMessages(String chatId);
 }

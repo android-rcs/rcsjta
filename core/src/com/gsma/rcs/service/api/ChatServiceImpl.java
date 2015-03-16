@@ -76,9 +76,6 @@ import java.util.concurrent.Executors;
  */
 public class ChatServiceImpl extends IChatService.Stub {
 
-    private final static Executor mDisplayNotificationProcessor = Executors
-            .newSingleThreadExecutor();
-
     private final OneToOneChatEventBroadcaster mOneToOneChatEventBroadcaster = new OneToOneChatEventBroadcaster();
 
     private final GroupChatEventBroadcaster mGroupChatEventBroadcaster = new GroupChatEventBroadcaster();
@@ -142,14 +139,6 @@ public class ChatServiceImpl extends IChatService.Stub {
         throw new IllegalArgumentException(new StringBuilder(
                 "Received invalid imdn notification type:'").append(notificationType).append("'")
                 .toString());
-    }
-
-    /**
-     * Tries to Flush pending display notifications
-     */
-    public void tryToDispatchAllPendingDisplayNotifications() {
-        mDisplayNotificationProcessor.execute(new DelayedDisplayNotificationDispatcher(
-                AndroidFactory.getApplicationContext().getContentResolver(), this));
     }
 
     /**
@@ -371,13 +360,13 @@ public class ChatServiceImpl extends IChatService.Stub {
         }
     }
 
-    private OneToOneChatImpl getOrCreateOneToOneChat(ContactId contact) {
+    public OneToOneChatImpl getOrCreateOneToOneChat(ContactId contact) {
         OneToOneChatImpl oneToOneChat = mOneToOneChatCache.get(contact);
         if (oneToOneChat != null) {
             return oneToOneChat;
         }
         return new OneToOneChatImpl(contact, mOneToOneChatEventBroadcaster, mImService,
-                mMessagingLog, mRcsSettings, this, mContactManager);
+                mMessagingLog, mRcsSettings, this, mContactManager, mCore);
     }
 
     /**
@@ -409,7 +398,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
                 chatId, mMessagingLog, mRcsSettings);
         GroupChatImpl groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster, mImService,
-                storageAccessor, mRcsSettings, mContactManager, this, mMessagingLog);
+                storageAccessor, mRcsSettings, mContactManager, this, mMessagingLog, mCore);
         session.addListener(groupChat);
         addGroupChat(groupChat);
     }
@@ -477,7 +466,7 @@ public class ChatServiceImpl extends IChatService.Stub {
             GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
                     chatId, subject, Direction.OUTGOING, mMessagingLog, mRcsSettings);
             GroupChatImpl groupChat = new GroupChatImpl(chatId, mGroupChatEventBroadcaster,
-                    mImService, storageAccessor, mRcsSettings, mContactManager, this, mMessagingLog);
+                    mImService, storageAccessor, mRcsSettings, mContactManager, this, mMessagingLog, mCore);
             session.addListener(groupChat);
 
             mMessagingLog.addGroupChat(session.getContributionID(), session.getRemoteContact(),
@@ -500,7 +489,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         }
     }
 
-    private GroupChatImpl getOrCreateGroupChat(String chatId) {
+    public GroupChatImpl getOrCreateGroupChat(String chatId) {
         GroupChatImpl groupChat = mGroupChatCache.get(chatId);
         if (groupChat != null) {
             return groupChat;
@@ -508,7 +497,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
                 chatId, mMessagingLog, mRcsSettings);
         return new GroupChatImpl(chatId, mGroupChatEventBroadcaster, mImService, storageAccessor,
-                mRcsSettings, mContactManager, this, mMessagingLog);
+                mRcsSettings, mContactManager, this, mMessagingLog, mCore);
     }
 
     /**
@@ -725,7 +714,7 @@ public class ChatServiceImpl extends IChatService.Stub {
                 sLogger.debug("tryToDispatchAllPendingDisplayNotifications for msgID "
                         .concat(msgId));
             }
-            tryToDispatchAllPendingDisplayNotifications();
+            mCore.getListener().tryToDispatchAllPendingDisplayNotifications();
         }
     }
 
@@ -768,7 +757,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         ContactId contact = session.getRemoteContact();
         OneToOneChatImpl oneToOneChat = new OneToOneChatImpl(contact,
                 mOneToOneChatEventBroadcaster, mImService, mMessagingLog, mRcsSettings, this,
-                mContactManager);
+                mContactManager, mCore);
         session.addListener(oneToOneChat);
         addOneToOneChat(contact, oneToOneChat);
     }
@@ -818,4 +807,35 @@ public class ChatServiceImpl extends IChatService.Stub {
         return new CommonServiceConfigurationImpl(mRcsSettings);
     }
 
+    /**
+     * Set one-one chat message status and reason code
+     * 
+     * @param msgId
+     * @param mimeType
+     * @param contact
+     * @param status
+     * @param reasonCode
+     */
+    public void setOneToOneChatMessageStatusAndReasonCode(String msgId, String mimeType,
+            ContactId contact, Status status, ReasonCode reasonCode) {
+        mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode);
+        mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, mimeType, msgId,
+                status, reasonCode);
+    }
+
+    /**
+     * Set group chat message status and reason code
+     * 
+     * @param msgId
+     * @param mimeType
+     * @param chatId
+     * @param status
+     * @param reasonCode
+     */
+    public void setGroupChatMessageStatusAndReasonCode(String msgId, String mimeType,
+            String chatId, Status status, ReasonCode reasonCode) {
+        mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode);
+        mGroupChatEventBroadcaster.broadcastMessageStatusChanged(chatId, mimeType, msgId, status,
+                reasonCode);
+    }
 }

@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.service.api;
 
+import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -31,7 +32,7 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
-import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneMessageSession;
+import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatMessageSession;
 import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -69,6 +70,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
 
     private final ContactsManager mContactManager;
 
+    private final Core mCore;
+
     /**
      * Lock used for synchronization
      */
@@ -89,10 +92,11 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @param rcsSettings RcsSettings
      * @param chatService ChatServiceImpl
      * @param contactManager ContactsManager
+     * @param core Core
      */
     public OneToOneChatImpl(ContactId contact, IOneToOneChatEventBroadcaster broadcaster,
             InstantMessagingService imService, MessagingLog messagingLog, RcsSettings rcsSettings,
-            ChatServiceImpl chatService, ContactsManager contactManager) {
+            ChatServiceImpl chatService, ContactsManager contactManager, Core core) {
         mContact = contact;
         mBroadcaster = broadcaster;
         mImService = imService;
@@ -100,6 +104,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         mChatService = chatService;
         mRcsSettings = rcsSettings;
         mContactManager = contactManager;
+        mCore = core;
     }
 
     private ReasonCode imdnToFailedReasonCode(ImdnDocument imdn) {
@@ -377,6 +382,36 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         return new ChatMessageImpl(persistentStorage);
     }
 
+    public void dequeueChatMessageWithinSession(ChatMessage message, OneToOneChatSession session) {
+        String msgId = message.getMessageId();
+        String mimeType = message.getMimeType();
+        if (logger.isActivated()) {
+            logger.debug("Dequeue chat message msgId=".concat(msgId));
+        }
+        mMessagingLog.dequeueChatMessage(message);
+        String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(mimeType);
+        mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId, Status.SENDING,
+                ReasonCode.UNSPECIFIED);
+        synchronized (lock) {
+            sendChatMessageWithinSession(session, message);
+        }
+    }
+
+    public void dequeueChatMessageInNewSession(ChatMessage message) {
+        String msgId = message.getMessageId();
+        String mimeType = message.getMimeType();
+        if (logger.isActivated()) {
+            logger.debug("Dequeue chat message msgId=".concat(msgId));
+        }
+        mMessagingLog.dequeueChatMessage(message);
+        String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(mimeType);
+        mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId, Status.SENDING,
+                ReasonCode.UNSPECIFIED);
+        synchronized (lock) {
+            sendChatMessageInNewSession(message);
+        }
+    }
+
     /**
      * Sends a displayed delivery report for a given message ID
      * 
@@ -389,7 +424,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             if (logger.isActivated()) {
                 logger.debug("Set displayed delivery report for " + msgId);
             }
-            TerminatingStoreAndForwardOneToOneMessageSession storeAndForwardSession = mImService
+            TerminatingStoreAndForwardOneToOneChatMessageSession storeAndForwardSession = mImService
                     .getStoreAndForwardMsgSession(mContact);
             final OneToOneChatSession session = storeAndForwardSession != null ? storeAndForwardSession
                     : mImService.getOneToOneChatSession(mContact);
@@ -530,6 +565,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         if (logger.isActivated()) {
             logger.info("Session started");
         }
+        mCore.getListener().tryToDequeueOneToOneChatMessages(mContact, mImService);
     }
 
     /*
@@ -607,6 +643,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                                 Status.FAILED, ReasonCode.FAILED_SEND);
                         break;
                     }
+                    mCore.getListener().tryToMarkQueuedOneToOneChatMessagesAndOneToOneFileTransfersAsFailed(mContact);
                 default:
                     break;
             }

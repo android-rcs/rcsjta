@@ -39,6 +39,7 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.im.chat.ChatError;
+import com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSessionListener;
@@ -52,6 +53,7 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Set;
 import java.util.Vector;
 
 /**
@@ -59,13 +61,13 @@ import java.util.Vector;
  * 
  * @author jexa7410
  */
-public class TerminatingStoreAndForwardOneToOneMessageSession extends OneToOneChatSession implements
+public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToOneChatSession implements
         MsrpEventListener {
     /**
      * The logger
      */
     private static final Logger sLogger = Logger
-            .getLogger(TerminatingStoreAndForwardOneToOneMessageSession.class.getSimpleName());
+            .getLogger(TerminatingStoreAndForwardOneToOneChatMessageSession.class.getSimpleName());
 
     /**
      * Constructor
@@ -76,7 +78,7 @@ public class TerminatingStoreAndForwardOneToOneMessageSession extends OneToOneCh
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
      */
-    public TerminatingStoreAndForwardOneToOneMessageSession(ImsService parent, SipRequest invite,
+    public TerminatingStoreAndForwardOneToOneChatMessageSession(ImsService parent, SipRequest invite,
             ContactId contact, RcsSettings rcsSettings, MessagingLog messagingLog) {
         super(parent, contact, PhoneUtils.formatContactIdToUri(contact), ChatUtils
                 .getFirstMessage(invite), rcsSettings, messagingLog);
@@ -137,7 +139,6 @@ public class TerminatingStoreAndForwardOneToOneMessageSession extends OneToOneCh
 
             Collection<ImsSessionListener> listeners = getListeners();
             ContactId contact = getRemoteContact();
-
             /* Check if session should be auto-accepted once */
             if (isSessionAccepted()) {
                 if (logActivated) {

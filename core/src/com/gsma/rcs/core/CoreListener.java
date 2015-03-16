@@ -28,11 +28,12 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.ImsError;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
+import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.TerminatingOneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
-import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneMessageSession;
+import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatMessageSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallSession;
 import com.gsma.rcs.core.ims.service.presence.pidf.PidfDocument;
@@ -210,7 +211,7 @@ public interface CoreListener {
      * @param session Chat session
      */
     public void handleStoreAndForwardMsgSessionInvitation(
-            TerminatingStoreAndForwardOneToOneMessageSession session);
+            TerminatingStoreAndForwardOneToOneChatMessageSession session);
 
     /**
      * New message delivery status
@@ -300,11 +301,6 @@ public interface CoreListener {
     public void handleSimHasChanged();
 
     /**
-     * Try to send delayed displayed notification after service reconnection
-     */
-    public void tryToDispatchAllPendingDisplayNotifications();
-
-    /**
      * Handle the case of rejected file transfer
      * 
      * @param contact Remote contact
@@ -391,4 +387,66 @@ public interface CoreListener {
      * @throws ServerApiException
      */
     public void handleAutoRejoinGroupChat(String chatId) throws ServerApiException;
+
+    /**
+     * Try to start ImService tasks once the IMS connection is re-established and the ImsServices
+     * are restarted
+     * 
+     * @param imService
+     */
+    public void tryToStartImServiceTasks(InstantMessagingService imService);
+
+    /**
+     * Try to invite queued group chat participants
+     * 
+     * @param chatId
+     * @param imService
+     */
+    public void tryToInviteQueuedGroupChatParticipantInvitations(String chatId,
+            InstantMessagingService imService);
+
+    /**
+     * Try to send delayed displayed notification after service reconnection
+     */
+    public void tryToDispatchAllPendingDisplayNotifications();
+
+    /**
+     * Try to dequeue group chat messages and group file transfers
+     * 
+     * @param imService
+     */
+    public void tryToDequeueGroupChatMessagesAndGroupFileTransfers(String chatId,
+            InstantMessagingService imService);
+
+    /**
+     * Try to dequeue of one-to-one chat messages
+     * 
+     * @param contact
+     * @param imService
+     */
+    public void tryToDequeueOneToOneChatMessages(ContactId contact,
+            InstantMessagingService imService);
+
+    /**
+     * Try to dequeue one-to-one and group file transfers
+     * 
+     * @param imService
+     */
+    public void tryToDequeueFileTransfers(InstantMessagingService imService);
+
+    /**
+     * Try to mark all queued one-one chat messages and one-one file transfers corresponding to
+     * contact as failed
+     * 
+     * @param contact
+     */
+    public void tryToMarkQueuedOneToOneChatMessagesAndOneToOneFileTransfersAsFailed(
+            final ContactId contact);
+
+    /**
+     * Try to mark all queued group chat messages and group file transfers corresponding to contact
+     * as failed
+     * @param contact
+     */
+    public void tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(String chatId);
 }

@@ -43,8 +43,8 @@ import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnUtils;
 import com.gsma.rcs.core.ims.service.im.chat.iscomposing.IsComposingManager;
-import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneMessageSession;
-import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneNotificationSession;
+import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatMessageSession;
+import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatNotificationSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
@@ -816,8 +816,8 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @return Boolean
      */
     public boolean isStoreAndForward() {
-        if (this instanceof TerminatingStoreAndForwardOneToOneMessageSession
-                || this instanceof TerminatingStoreAndForwardOneToOneNotificationSession) {
+        if (this instanceof TerminatingStoreAndForwardOneToOneChatMessageSession
+                || this instanceof TerminatingStoreAndForwardOneToOneChatNotificationSession) {
             return true;
         } else {
             return false;

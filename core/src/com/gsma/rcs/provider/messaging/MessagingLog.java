@@ -62,15 +62,15 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      */
     private static volatile MessagingLog sInstance;
 
-    private LocalContentResolver mLocalContentResolver;
+    private final LocalContentResolver mLocalContentResolver;
 
-    private GroupChatLog mGroupChatLog;
+    private final GroupChatLog mGroupChatLog;
 
-    private MessageLog mMessageLog;
+    private final MessageLog mMessageLog;
 
-    private FileTransferLog mFileTransferLog;
+    private final FileTransferLog mFileTransferLog;
 
-    private GroupDeliveryInfoLog mGroupChatDeliveryInfoLog;
+    private final GroupDeliveryInfoLog mGroupChatDeliveryInfoLog;
 
     /**
      * Create instance
@@ -412,5 +412,44 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     @Override
     public FtHttpResume getFileTransferResumeInfo(String fileTransferId) {
         return mFileTransferLog.getFileTransferResumeInfo(fileTransferId);
+    }
+
+    @Override
+    public Cursor getQueuedOneToOneChatMessages(ContactId contact) {
+        return mMessageLog.getQueuedOneToOneChatMessages(contact);
+    }
+
+    @Override
+    public Cursor getQueuedFileTransfers() {
+        return mFileTransferLog.getQueuedFileTransfers();
+    }
+
+    @Override
+    public void dequeueChatMessage(ChatMessage message) {
+        mMessageLog.dequeueChatMessage(message);
+    }
+
+    @Override
+    public void dequeueFileTransfer(String fileTransferId, long timestamp, long timestampSent) {
+        mFileTransferLog.dequeueFileTransfer(fileTransferId, timestamp, timestampSent);
+    }
+
+    @Override
+    public Set<ContactId> getGroupChatParticipantsToBeInvited(String chatId) {
+        return mGroupChatLog.getGroupChatParticipantsToBeInvited(chatId);
+    }
+
+    @Override
+    public Cursor getQueuedGroupChatMessages(String chatId) {
+        return mMessageLog.getQueuedGroupChatMessages(chatId);
+    }
+
+    @Override
+    public Cursor getQueuedGroupFileTransfers(String chatId) {
+        return mFileTransferLog.getQueuedGroupFileTransfers(chatId);
+    }
+
+    public Cursor getQueuedOneToOneFileTransfers(ContactId contact) {
+        return mFileTransferLog.getQueuedOneToOneFileTransfers(contact);
     }
 }

@@ -941,4 +941,17 @@ public class ChatUtils {
         }
         return msg.getContent();
     }
+
+    public static ChatMessage createChatMessage(String msgId, String apiMimeType, String content,
+            ContactId contact, String displayName) {
+        if (MimeType.TEXT_MESSAGE.equals(apiMimeType)) {
+            return new ChatMessage(msgId, contact, content, MimeType.TEXT_MESSAGE, null,
+                    displayName);
+        } else if (MimeType.GEOLOC_MESSAGE.equals(apiMimeType)) {
+            return new ChatMessage(msgId, contact, content, GeolocInfoDocument.MIME_TYPE, null,
+                    displayName);
+        }
+        throw new IllegalArgumentException(
+                "Unable to create message, Invalid mimetype ".concat(apiMimeType));
+    }
 }

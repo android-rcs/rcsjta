@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.service.api;
 
+import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
@@ -74,6 +75,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
 
     private final RcsSettings mRcsSettings;
 
+    private final Core mCore;
+
     /**
      * Lock used for synchronization
      */
@@ -93,17 +96,19 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
      * @param persistentStorage FileTransferPersistedStorageAccessor
      * @param fileTransferService FileTransferServiceImpl
      * @param rcsSettings RcsSettings
+     * @param core Core
      */
     public OneToOneFileTransferImpl(String transferId,
             IOneToOneFileTransferBroadcaster broadcaster, InstantMessagingService imService,
             FileTransferPersistedStorageAccessor persistentStorage,
-            FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings) {
+            FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings, Core core) {
         mFileTransferId = transferId;
         mBroadcaster = broadcaster;
         mImService = imService;
         mPersistentStorage = persistentStorage;
         mFileTransferService = fileTransferService;
         mRcsSettings = rcsSettings;
+        mCore = core;
     }
 
     private State getRcsState(FileSharingSession session) {
@@ -740,6 +745,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             mBroadcaster
                     .broadcastStateChanged(contact, mFileTransferId, State.REJECTED, reasonCode);
         }
+        mCore.getListener().tryToDequeueFileTransfers(mImService);
     }
 
     /**
@@ -791,6 +797,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
 
             mBroadcaster.broadcastStateChanged(contact, mFileTransferId, State.ABORTED, reasonCode);
         }
+        mCore.getListener().tryToDequeueFileTransfers(mImService);
     }
 
     /**
@@ -813,6 +820,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                         ReasonCode.ABORTED_BY_REMOTE);
             }
         }
+        mCore.getListener().tryToDequeueFileTransfers(mImService);
     }
 
     /**
@@ -836,6 +844,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             mBroadcaster.broadcastStateChanged(getRemoteContact(), mFileTransferId, state,
                     reasonCode);
         }
+        mCore.getListener().tryToDequeueFileTransfers(mImService);
     }
 
     /**
@@ -866,6 +875,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             mBroadcaster.broadcastStateChanged(contact, mFileTransferId, State.FAILED,
                     ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
         }
+        mCore.getListener().tryToDequeueFileTransfers(mImService);
     }
 
     /**
@@ -886,6 +896,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             mBroadcaster.broadcastStateChanged(contact, mFileTransferId, State.TRANSFERRED,
                     ReasonCode.UNSPECIFIED);
         }
+        mCore.getListener().tryToDequeueFileTransfers(mImService);
     }
 
     /**

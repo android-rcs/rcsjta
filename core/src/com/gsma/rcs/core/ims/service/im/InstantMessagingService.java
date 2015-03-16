@@ -38,8 +38,6 @@ import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
-import com.gsma.rcs.core.ims.service.im.chat.DelayedDisplayNotificationTask;
-import com.gsma.rcs.core.ims.service.im.chat.GroupChatAutoRejoinTask;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
@@ -52,14 +50,13 @@ import com.gsma.rcs.core.ims.service.im.chat.TerminatingOneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.StoreAndForwardManager;
-import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneMessageSession;
-import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneNotificationSession;
+import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatMessageSession;
+import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatNotificationSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.ImsFileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
-import com.gsma.rcs.core.ims.service.im.filetransfer.http.FtHttpResumeManager;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpFileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpGroupFileSharingSession;
@@ -112,12 +109,12 @@ public class InstantMessagingService extends ImsService {
     /**
      * StoreAndForwardMsgSessionCache with ContactId as key
      */
-    private Map<ContactId, TerminatingStoreAndForwardOneToOneMessageSession> mStoreAndForwardMsgSessionCache = new HashMap<ContactId, TerminatingStoreAndForwardOneToOneMessageSession>();
+    private Map<ContactId, TerminatingStoreAndForwardOneToOneChatMessageSession> mStoreAndForwardMsgSessionCache = new HashMap<ContactId, TerminatingStoreAndForwardOneToOneChatMessageSession>();
 
     /**
      * StoreAndForwardNotifSessionCache with ContactId as key
      */
-    private Map<ContactId, TerminatingStoreAndForwardOneToOneNotificationSession> mStoreAndForwardNotifSessionCache = new HashMap<ContactId, TerminatingStoreAndForwardOneToOneNotificationSession>();
+    private Map<ContactId, TerminatingStoreAndForwardOneToOneChatNotificationSession> mStoreAndForwardNotifSessionCache = new HashMap<ContactId, TerminatingStoreAndForwardOneToOneChatNotificationSession>();
 
     /**
      * GroupChatSessionCache with ChatId as key
@@ -157,10 +154,6 @@ public class InstantMessagingService extends ImsService {
      * IMDN manager
      */
     private ImdnManager mImdnMgr;
-
-    private FtHttpResumeManager mResumeManager;
-
-    private GroupChatAutoRejoinTask mGroupChatAutoRejoinTask;
 
     /**
      * Store & Forward manager
@@ -227,17 +220,7 @@ public class InstantMessagingService extends ImsService {
         mImdnMgr = new ImdnManager(this, mRcsSettings);
         mImdnMgr.start();
 
-        /*
-         * Send delayed displayed notifications for read messages if they were not sent before
-         * already. This only attempts to send report and in case of failure the report will be sent
-         * later as postponed delivery report
-         */
-        new DelayedDisplayNotificationTask(this);
-        // Start resuming FT HTTP
-        mResumeManager = new FtHttpResumeManager(this, mRcsSettings);
-        /* Auto-rejoin group chats that are still marked as active. */
-        mGroupChatAutoRejoinTask = new GroupChatAutoRejoinTask(MessagingLog.getInstance(), mCore);
-        mGroupChatAutoRejoinTask.start();
+        mCore.getListener().tryToStartImServiceTasks(this);
     }
 
     /**
@@ -253,12 +236,6 @@ public class InstantMessagingService extends ImsService {
         // Stop IMDN manager
         mImdnMgr.terminate();
         mImdnMgr.interrupt();
-        if (mResumeManager != null) {
-            mResumeManager.terminate();
-        }
-        if (mGroupChatAutoRejoinTask.isAlive()) {
-            mGroupChatAutoRejoinTask.interrupt();
-        }
     }
 
     /**
@@ -326,7 +303,7 @@ public class InstantMessagingService extends ImsService {
         }
     }
 
-    public void addSession(TerminatingStoreAndForwardOneToOneMessageSession session) {
+    public void addSession(TerminatingStoreAndForwardOneToOneChatMessageSession session) {
         ContactId contact = session.getRemoteContact();
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder("Add StoreAndForwardMsgSession with contact '")
@@ -338,7 +315,7 @@ public class InstantMessagingService extends ImsService {
         }
     }
 
-    public void removeSession(final TerminatingStoreAndForwardOneToOneMessageSession session) {
+    public void removeSession(final TerminatingStoreAndForwardOneToOneChatMessageSession session) {
         final ContactId contact = session.getRemoteContact();
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder("Remove StoreAndForwardMsgSession with contact '")
@@ -359,7 +336,7 @@ public class InstantMessagingService extends ImsService {
         }.start();
     }
 
-    public TerminatingStoreAndForwardOneToOneMessageSession getStoreAndForwardMsgSession(
+    public TerminatingStoreAndForwardOneToOneChatMessageSession getStoreAndForwardMsgSession(
             ContactId contact) {
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder("Get StoreAndForwardMsgSession with contact '")
@@ -370,7 +347,7 @@ public class InstantMessagingService extends ImsService {
         }
     }
 
-    public void addSession(TerminatingStoreAndForwardOneToOneNotificationSession session) {
+    public void addSession(TerminatingStoreAndForwardOneToOneChatNotificationSession session) {
         ContactId contact = session.getRemoteContact();
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder("Add StoreAndForwardNotifSessionCache with contact '")
@@ -382,7 +359,7 @@ public class InstantMessagingService extends ImsService {
         }
     }
 
-    public void removeSession(final TerminatingStoreAndForwardOneToOneNotificationSession session) {
+    public void removeSession(final TerminatingStoreAndForwardOneToOneChatNotificationSession session) {
         final ContactId contact = session.getRemoteContact();
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder(
@@ -404,7 +381,7 @@ public class InstantMessagingService extends ImsService {
         }.start();
     }
 
-    public TerminatingStoreAndForwardOneToOneNotificationSession getStoreAndForwardNotifSession(
+    public TerminatingStoreAndForwardOneToOneChatNotificationSession getStoreAndForwardNotifSession(
             ContactId contact) {
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder("Get StoreAndForwardNotifSession with contact '")
@@ -759,18 +736,11 @@ public class InstantMessagingService extends ImsService {
      * @param groupChatId Chat contribution ID
      * @param groupChatSessionId GroupChatSession Id
      * @return File transfer session
-     * @throws CoreException
      */
     public FileSharingSession initiateGroupFileTransferSession(String fileTransferId,
-            MmContent content, MmContent fileIcon, String groupChatId, String groupChatSessionId)
-            throws CoreException {
+            MmContent content, MmContent fileIcon, String groupChatId, String groupChatSessionId) {
         if (sLogger.isActivated()) {
             sLogger.info("Send file " + content.toString() + " to " + groupChatId);
-        }
-
-        Capabilities myCapability = mRcsSettings.getMyCapabilities();
-        if (!myCapability.isFileTransferHttpSupported()) {
-            throw new CoreException("Group file transfer not supported.");
         }
 
         FileSharingSession session = new OriginatingHttpGroupFileSharingSession(fileTransferId,
@@ -1415,7 +1385,7 @@ public class InstantMessagingService extends ImsService {
         }
 
         // Create and start a chat session
-        TerminatingStoreAndForwardOneToOneMessageSession one2oneChatSession = new TerminatingStoreAndForwardOneToOneMessageSession(
+        TerminatingStoreAndForwardOneToOneChatMessageSession one2oneChatSession = new TerminatingStoreAndForwardOneToOneChatMessageSession(
                 this, invite, remote, mRcsSettings, mMessagingLog);
         one2oneChatSession.startSession();
 

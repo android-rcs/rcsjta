@@ -74,6 +74,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * File transfer service implementation
@@ -286,13 +287,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         if (isGroup) {
             GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(fileTransferId,
                     session.getContributionID(), mGroupFileTransferBroadcaster, mImService,
-                    storageAccessor, this, mRcsSettings);
+                    storageAccessor, this, mRcsSettings, mCore);
             session.addListener(groupFileTransfer);
             addFileTransfer(groupFileTransfer);
         } else {
             OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
                     fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
-                    this, mRcsSettings);
+                    this, mRcsSettings, mCore);
             session.addListener(oneToOneFileTransfer);
             addFileTransfer(oneToOneFileTransfer);
         }
@@ -375,7 +376,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                         FileTransfer.State.QUEUED);
                 return new OneToOneFileTransferImpl(fileTransferId,
                         mOneToOneFileTransferBroadcaster, mImService, storageAccessor, this,
-                        mRcsSettings);
+                        mRcsSettings, mCore);
             }
             addOutgoingFileTransfer(fileTransferId, contact, file, fileIcon,
                     FileTransfer.State.INITIATING);
@@ -384,7 +385,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
             OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
                     fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
-                    this, mRcsSettings);
+                    this, mRcsSettings, mCore);
             session.addListener(oneToOneFileTransfer);
             addFileTransfer(oneToOneFileTransfer);
 
@@ -404,6 +405,34 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             }
             throw new ServerApiException(e);
         }
+    }
+
+    /**
+     * Dequeue one-to-one file transfer
+     * 
+     * @param fileTransferId
+     * @param contact
+     * @param file
+     * @param fileIcon
+     */
+    public void dequeueOneToOneFileTransfer(String fileTransferId, ContactId contact,
+            MmContent file, MmContent fileIcon) {
+        long timestamp = System.currentTimeMillis();
+        /* For outgoing file transfer, timestampSent = timestamp */
+        long timestampSent = timestamp;
+        mMessagingLog.dequeueFileTransfer(fileTransferId, timestamp, timestampSent);
+        mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
+                State.INITIATING, ReasonCode.UNSPECIFIED);
+        final FileSharingSession session = mImService.initiateFileTransferSession(fileTransferId,
+                contact, file, fileIcon);
+
+        OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
+                fileTransferId, mOneToOneFileTransferBroadcaster, mImService,
+                new FileTransferPersistedStorageAccessor(fileTransferId, mMessagingLog), this,
+                mRcsSettings, mCore);
+        session.addListener(oneToOneFileTransfer);
+        addFileTransfer(oneToOneFileTransfer);
+        session.startSession();
     }
 
     /**
@@ -442,7 +471,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                     fileIcon, mMessagingLog);
             OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
                     fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
-                    this, mRcsSettings);
+                    this, mRcsSettings, mCore);
             session.addListener(oneToOneFileTransfer);
             addFileTransfer(oneToOneFileTransfer);
 
@@ -569,7 +598,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                     fileTransferId, contact, Direction.OUTGOING, contact.toString(), content,
                     fileIconContent, mMessagingLog);
             return new OneToOneFileTransferImpl(fileTransferId, mOneToOneFileTransferBroadcaster,
-                    mImService, storageAccessor, this, mRcsSettings);
+                    mImService, storageAccessor, this, mRcsSettings, mCore);
 
         } catch (Exception e) {
             /*
@@ -689,7 +718,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                         State.QUEUED);
                 return new GroupFileTransferImpl(fileTransferId, chatId,
                         mGroupFileTransferBroadcaster, mImService, storageAccessor, this,
-                        mRcsSettings);
+                        mRcsSettings, mCore);
             }
             final GroupChatSession groupChatSession = mImService.getGroupChatSession(chatId);
             String chatSessionId = groupChatSession != null ? groupChatSession.getSessionID()
@@ -703,7 +732,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
                 GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(
                         session.getFileTransferId(), chatId, mGroupFileTransferBroadcaster,
-                        mImService, storageAccessor, this, mRcsSettings);
+                        mImService, storageAccessor, this, mRcsSettings, mCore);
                 session.addListener(groupFileTransfer);
                 addFileTransfer(groupFileTransfer);
 
@@ -742,7 +771,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 }
             }
             return new GroupFileTransferImpl(fileTransferId, chatId, mGroupFileTransferBroadcaster,
-                    mImService, storageAccessor, this, mRcsSettings);
+                    mImService, storageAccessor, this, mRcsSettings, mCore);
 
         } catch (Exception e) {
             /*
@@ -753,6 +782,36 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             }
             throw new ServerApiException(e.getMessage());
         }
+    }
+
+    /**
+     * Dequeue group file transfer
+     * 
+     * @param fileTransferId
+     * @param participants
+     * @param content
+     * @param fileIcon
+     * @param chatId
+     */
+    public void dequeueGroupFileTransfer(String fileTransferId, MmContent content,
+            MmContent fileIcon, String chatId) {
+        long timestamp = System.currentTimeMillis();
+        /* For outgoing file transfer, timestampSent = timestamp */
+        long timestampSent = timestamp;
+        mMessagingLog.dequeueFileTransfer(fileTransferId, timestamp, timestampSent);
+        mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId,
+                State.INITIATING, ReasonCode.UNSPECIFIED);
+        GroupChatSession groupChatSession = mImService.getGroupChatSession(chatId);
+        final FileSharingSession session = mImService.initiateGroupFileTransferSession(
+                fileTransferId, content, fileIcon, chatId, groupChatSession.getSessionID());
+
+        GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(fileTransferId, chatId,
+                mGroupFileTransferBroadcaster, mImService,
+                new FileTransferPersistedStorageAccessor(fileTransferId, mMessagingLog), this,
+                mRcsSettings, mCore);
+        session.addListener(groupFileTransfer);
+        addFileTransfer(groupFileTransfer);
+        session.startSession();
     }
 
     /**
@@ -800,7 +859,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                     fileTransferId, null, Direction.OUTGOING, chatId, content, fileIconContent,
                     mMessagingLog);
             return new GroupFileTransferImpl(fileTransferId, chatId, mGroupFileTransferBroadcaster,
-                    mImService, storageAccessor, this, mRcsSettings);
+                    mImService, storageAccessor, this, mRcsSettings, mCore);
 
         } catch (Exception e) {
             /*
@@ -859,10 +918,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 transferId, mMessagingLog);
         if (mMessagingLog.isGroupFileTransfer(transferId)) {
             return new GroupFileTransferImpl(transferId, mGroupFileTransferBroadcaster, mImService,
-                    storageAccessor, this, mRcsSettings);
+                    storageAccessor, this, mRcsSettings, mCore);
         }
         return new OneToOneFileTransferImpl(transferId, mOneToOneFileTransferBroadcaster,
-                mImService, storageAccessor, this, mRcsSettings);
+                mImService, storageAccessor, this, mRcsSettings, mCore);
     }
 
     /**
@@ -1064,13 +1123,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         if (isGroup) {
             GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(fileTransferId,
                     session.getContributionID(), mGroupFileTransferBroadcaster, mImService,
-                    storageAccessor, this, mRcsSettings);
+                    storageAccessor, this, mRcsSettings, mCore);
             session.addListener(groupFileTransfer);
             addFileTransfer(groupFileTransfer);
         } else {
             OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
                     fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
-                    this, mRcsSettings);
+                    this, mRcsSettings, mCore);
             session.addListener(oneToOneFileTransfer);
             addFileTransfer(oneToOneFileTransfer);
         }
@@ -1095,13 +1154,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         if (isGroup) {
             GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(fileTransferId,
                     session.getContributionID(), mGroupFileTransferBroadcaster, mImService,
-                    storageAccessor, this, mRcsSettings);
+                    storageAccessor, this, mRcsSettings, mCore);
             session.addListener(groupFileTransfer);
             addFileTransfer(groupFileTransfer);
         } else {
             OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
                     fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
-                    this, mRcsSettings);
+                    this, mRcsSettings, mCore);
             session.addListener(oneToOneFileTransfer);
             addFileTransfer(oneToOneFileTransfer);
         }
@@ -1200,4 +1259,33 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         return new CommonServiceConfigurationImpl(mRcsSettings);
     }
 
+    /**
+     * Set one-one file transfer state and reason code
+     * 
+     * @param fileTransferId
+     * @param contact
+     * @param state
+     * @param reasonCode
+     */
+    public void setOneToOneFileTransferStateAndReasonCode(String fileTransferId, ContactId contact,
+            State state, ReasonCode reasonCode) {
+        mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, state, reasonCode);
+        mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId, state,
+                reasonCode);
+    }
+
+    /**
+     * Set group file transfer state and reason code
+     * 
+     * @param fileTransferId
+     * @param chatId
+     * @param state
+     * @param reasonCode
+     */
+    public void setGroupFileTransferStateAndReasonCode(String fileTransferId, String chatId,
+            State state, ReasonCode reasonCode) {
+        mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, state, reasonCode);
+        mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId, state,
+                reasonCode);
+    }
 }

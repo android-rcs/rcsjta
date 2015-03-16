@@ -467,4 +467,16 @@ public class GroupChatLog implements IGroupChatLog {
             throw e;
         }
     }
+
+    @Override
+    public Set<ContactId> getGroupChatParticipantsToBeInvited(String chatId) {
+        Set<ContactId> participantsToBeInvited = new HashSet<ContactId>();
+        Map<ContactId, ParticipantStatus> participants = getParticipants(chatId);
+        for (Map.Entry<ContactId, ParticipantStatus> participant : participants.entrySet()) {
+            if (ParticipantStatus.INVITE_QUEUED == participant.getValue()) {
+                participantsToBeInvited.add(participant.getKey());
+            }
+        }
+        return participantsToBeInvited;
+    }
 }

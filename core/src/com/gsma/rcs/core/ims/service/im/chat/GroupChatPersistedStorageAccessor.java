@@ -192,4 +192,8 @@ public class GroupChatPersistedStorageAccessor {
             FileTransfer.ReasonCode reasonCode) {
         mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, state, reasonCode);
     }
+
+    public void dequeueChatMessage(ChatMessage message) {
+        mMessagingLog.dequeueChatMessage(message);
+    }
 }

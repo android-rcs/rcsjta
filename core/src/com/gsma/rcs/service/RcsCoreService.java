@@ -33,12 +33,14 @@ import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.ImsError;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
+import com.gsma.rcs.core.ims.service.im.chat.GroupChatAutoRejoinTask;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.TerminatingAdhocGroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.TerminatingOneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
-import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneMessageSession;
+import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatMessageSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
+import com.gsma.rcs.core.ims.service.im.filetransfer.http.FtHttpResumeManager;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallService;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallSession;
 import com.gsma.rcs.core.ims.service.presence.pidf.PidfDocument;
@@ -54,6 +56,7 @@ import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDaoImpl;
+import com.gsma.rcs.provider.history.HistoryLog;
 import com.gsma.rcs.provider.ipcall.IPCallHistory;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -104,6 +107,8 @@ import android.os.Handler;
 import android.os.IBinder;
 
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * RCS core service. This service offers a flat API to any other process (activities) to access to
@@ -112,6 +117,11 @@ import java.util.Map;
  * @author Jean-Marc AUFFRET
  */
 public class RcsCoreService extends Service implements CoreListener {
+
+    private final static Object IM_OPERATION_LOCK = new Object();
+
+    private final static ExecutorService mImOperationExecutor = Executors.newSingleThreadExecutor();
+
     /**
      * CPU manager
      */
@@ -196,6 +206,12 @@ public class RcsCoreService extends Service implements CoreListener {
     private ContentResolver mContentResolver;
     private LocalContentResolver mLocalContentResolver;
 
+    private MessagingLog mMessagingLog;
+
+    private HistoryLog mHistoryLog;
+
+    private ContactsManager mContactManager;
+
     /**
      * The logger
      */
@@ -279,16 +295,16 @@ public class RcsCoreService extends Service implements CoreListener {
             RichCallHistory.createInstance(mLocalContentResolver);
             IPCallHistory.createInstance(mLocalContentResolver);
             FtHttpResumeDaoImpl.createInstance(mContext);
-
-            ContactsManager contactsManager = ContactsManager.getInstance();
-            MessagingLog messagingLog = MessagingLog.getInstance();
-
+            HistoryLog.createInstance(mLocalContentResolver);
+            mContactManager = ContactsManager.getInstance();
+            mMessagingLog = MessagingLog.getInstance();
+            mHistoryLog = HistoryLog.getInstance();
             // Create the core
-            Core.createCore(this, mRcsSettings, contactsManager, messagingLog);
+            Core.createCore(this, mRcsSettings, mContactManager, mMessagingLog);
 
             // Instantiate API
-            mContactApi = new ContactServiceImpl(contactsManager, mRcsSettings);
-            mCapabilityApi = new CapabilityServiceImpl(contactsManager, mRcsSettings);
+            mContactApi = new ContactServiceImpl(mContactManager, mRcsSettings);
+            mCapabilityApi = new CapabilityServiceImpl(mContactManager, mRcsSettings);
             core = Core.getInstance();
             InstantMessagingService imService = core.getImService();
             RichcallService richCallService = core.getRichcallService();
@@ -297,21 +313,21 @@ public class RcsCoreService extends Service implements CoreListener {
 
             RichCallHistory richcallLog = RichCallHistory.getInstance();
 
-            mChatApi = new ChatServiceImpl(imService, messagingLog, mRcsSettings, contactsManager,
+            mChatApi = new ChatServiceImpl(imService, mMessagingLog, mRcsSettings, mContactManager,
                     core);
-            mFtApi = new FileTransferServiceImpl(imService, messagingLog, mRcsSettings,
-                    contactsManager, core);
+            mFtApi = new FileTransferServiceImpl(imService, mMessagingLog, mRcsSettings,
+                    mContactManager, core);
             mVshApi = new VideoSharingServiceImpl(richCallService, richcallLog, mRcsSettings,
-                    contactsManager, core);
+                    mContactManager, core);
             mIshApi = new ImageSharingServiceImpl(richCallService, richcallLog, mRcsSettings,
-                    contactsManager);
-            mGshApi = new GeolocSharingServiceImpl(richCallService, contactsManager, richcallLog,
+                    mContactManager);
+            mGshApi = new GeolocSharingServiceImpl(richCallService, mContactManager, richcallLog,
                     mRcsSettings);
             mHistoryApi = new HistoryServiceImpl(getApplicationContext());
             mIpcallApi = new IPCallServiceImpl(ipCallService, IPCallHistory.getInstance(),
-                    contactsManager, mRcsSettings);
+                    mContactManager, mRcsSettings);
             mSessionApi = new MultimediaSessionServiceImpl(sipService, mRcsSettings,
-                    contactsManager);
+                    mContactManager);
             mUploadApi = new FileUploadServiceImpl(imService, mRcsSettings);
 
             // Set the logger properties
@@ -752,7 +768,7 @@ public class RcsCoreService extends Service implements CoreListener {
 
     @Override
     public void handleStoreAndForwardMsgSessionInvitation(
-            TerminatingStoreAndForwardOneToOneMessageSession session) {
+            TerminatingStoreAndForwardOneToOneChatMessageSession session) {
         if (sLogger.isActivated()) {
             sLogger.debug("Handle event S&F messages session invitation");
         }
@@ -865,11 +881,6 @@ public class RcsCoreService extends Service implements CoreListener {
     }
 
     @Override
-    public void tryToDispatchAllPendingDisplayNotifications() {
-        mChatApi.tryToDispatchAllPendingDisplayNotifications();
-    }
-
-    @Override
     public void handleFileTransferInvitationRejected(ContactId contact, MmContent content,
             MmContent fileicon, FileTransfer.ReasonCode reasonCode) {
         mFtApi.addAndBroadcastFileTransferInvitationRejected(contact, content, fileicon, reasonCode);
@@ -921,4 +932,68 @@ public class RcsCoreService extends Service implements CoreListener {
         mChatApi.handleAutoRejoinGroupChat(chatId);
     }
 
+    @Override
+    public void tryToStartImServiceTasks(InstantMessagingService imService) {
+        Core core = Core.getInstance();
+        /* Try to auto-rejoin group chats that are still marked as active. */
+        mImOperationExecutor.execute(new GroupChatAutoRejoinTask(mMessagingLog, core));
+        /* Try to start auto resuming of HTTP file transfers marked as PAUSED_BY_SYSTEM */
+        mImOperationExecutor.execute(new FtHttpResumeManager(imService, mRcsSettings));
+        /* Try to dequeue one-to-one chat messages and one-to-one file transfers. */
+        mImOperationExecutor.execute(new OneToOneChatDequeueTask(IM_OPERATION_LOCK, imService, mChatApi,
+                mFtApi, mHistoryLog, mMessagingLog, mContactManager, mRcsSettings));
+        /*
+         * Try to send delayed displayed notifications for read messages if they were not sent
+         * before already. This only attempts to send report and in case of failure the report will
+         * be sent later as postponed delivery report
+         */
+        mImOperationExecutor.execute(new DelayedDisplayNotificationDispatcher(
+                mLocalContentResolver, mChatApi));
+    }
+
+    @Override
+    public void tryToInviteQueuedGroupChatParticipantInvitations(String chatId,
+            InstantMessagingService imService) {
+        mImOperationExecutor.execute(new GroupChatInviteQueuedParticipants(chatId, mChatApi,
+                mMessagingLog, imService));
+    }
+
+    @Override
+    public void tryToDispatchAllPendingDisplayNotifications() {
+        mImOperationExecutor.execute(new DelayedDisplayNotificationDispatcher(
+                mLocalContentResolver, mChatApi));
+    }
+
+    @Override
+    public void tryToDequeueGroupChatMessagesAndGroupFileTransfers(String chatId,
+            InstantMessagingService imService) {
+        mImOperationExecutor.execute(new GroupChatDequeueTask(IM_OPERATION_LOCK, chatId, imService,
+                mMessagingLog, mChatApi, mFtApi, mRcsSettings, mHistoryLog, mContactManager));
+    }
+
+    @Override
+    public void tryToDequeueOneToOneChatMessages(ContactId contact,
+            InstantMessagingService imService) {
+        mImOperationExecutor.execute(new OneToOneChatMessageDequeueTask(IM_OPERATION_LOCK, contact,
+                imService, mMessagingLog, mChatApi, mRcsSettings, mContactManager));
+    }
+
+    @Override
+    public void tryToDequeueFileTransfers(InstantMessagingService imService) {
+        mImOperationExecutor.execute(new FileTransferDequeueTask(IM_OPERATION_LOCK, imService, mMessagingLog,
+                mFtApi, mContactManager, mRcsSettings));
+    }
+
+    @Override
+    public void tryToMarkQueuedOneToOneChatMessagesAndOneToOneFileTransfersAsFailed(
+            ContactId contact) {
+        mImOperationExecutor.execute(new OneToOneChatTerminalExceptionTask(contact, mChatApi,
+                mFtApi, mMessagingLog, IM_OPERATION_LOCK));
+    }
+
+    @Override
+    public void tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(String chatId) {
+        mImOperationExecutor.execute(new GroupChatTerminalExceptionTask(chatId, mChatApi, mFtApi,
+                mMessagingLog, IM_OPERATION_LOCK));
+    }
 }

@@ -14,8 +14,10 @@
  * the License.
  */
 
-package com.gsma.rcs.service.api;
+package com.gsma.rcs.service;
 
+import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
@@ -24,14 +26,13 @@ import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 
-import android.content.ContentResolver;
 import android.database.Cursor;
 
 /**
  * Delayed Display Notification Dispatcher retrieves those text messages for which requested display
  * reports have not yet been successfully sent.
  */
-public class DelayedDisplayNotificationDispatcher implements Runnable {
+/* package private */class DelayedDisplayNotificationDispatcher implements Runnable {
 
     private final static String SELECTION_READ_CHAT_MESSAGES_WITH_DISPLAY_REPORT_REQUESTED = new StringBuilder(
             Message.CHAT_ID).append("=").append(Message.CONTACT).append(" AND ")
@@ -45,13 +46,13 @@ public class DelayedDisplayNotificationDispatcher implements Runnable {
     private static Logger logger = Logger.getLogger(DelayedDisplayNotificationDispatcher.class
             .getName());
 
-    private ContentResolver mContentResolver;
+    private LocalContentResolver mLocalContentResolver;
 
     private ChatServiceImpl mChatApi;
 
-    /* package private */DelayedDisplayNotificationDispatcher(ContentResolver contentResolver,
+    /* package private */DelayedDisplayNotificationDispatcher(LocalContentResolver localContentResolver,
             ChatServiceImpl chatApi) {
-        mContentResolver = contentResolver;
+        mLocalContentResolver = localContentResolver;
         mChatApi = chatApi;
     }
 
@@ -62,7 +63,7 @@ public class DelayedDisplayNotificationDispatcher implements Runnable {
             String[] projection = new String[] {
                     Message.MESSAGE_ID, Message.CONTACT
             };
-            cursor = mContentResolver.query(Message.CONTENT_URI, projection,
+            cursor = mLocalContentResolver.query(Message.CONTENT_URI, projection,
                     SELECTION_READ_CHAT_MESSAGES_WITH_DISPLAY_REPORT_REQUESTED, null,
                     ORDER_BY_TIMESTAMP_ASC);
             while (cursor.moveToNext()) {

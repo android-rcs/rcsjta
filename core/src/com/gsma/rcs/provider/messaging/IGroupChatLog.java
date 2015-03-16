@@ -152,4 +152,11 @@ public interface IGroupChatLog {
      */
     public Set<String> getChatIdsOfActiveGroupChatsForAutoRejoin();
 
+    /**
+     * Get group chat participants to be invited
+     * 
+     * @param chatId
+     * @return List of participants
+     */
+    public Set<ContactId> getGroupChatParticipantsToBeInvited(String chatId);
 }

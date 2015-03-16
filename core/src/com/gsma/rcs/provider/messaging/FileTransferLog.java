@@ -68,6 +68,17 @@ public class FileTransferLog implements IFileTransferLog {
             FileTransferData.KEY_FT_ID).append("=? AND ").append(FileTransferData.KEY_CHAT_ID)
             .append("=").append(FileTransferData.KEY_CONTACT).toString();
 
+    private static final String SELECTION_BY_QUEUED_FILE_TRANSFERS = new StringBuilder(
+            FileTransferData.KEY_STATE).append("=").append(State.QUEUED.toInt()).toString();
+
+    private static final String SELECTION_BY_QUEUED_GROUP_FILE_TRANSFERS = new StringBuilder(
+            FileTransferData.KEY_CHAT_ID).append("=? AND ")
+            .append(SELECTION_BY_QUEUED_FILE_TRANSFERS).toString();
+
+    private static final String SELECTION_BY_QUEUED_ONETOONE_FILE_TRANSFERS = new StringBuilder(
+            FileTransferData.KEY_CONTACT).append("=? AND ")
+            .append(SELECTION_BY_QUEUED_FILE_TRANSFERS).toString();
+
     private static final String ORDER_BY_TIMESTAMP_ASC = MessageData.KEY_TIMESTAMP.concat(" ASC");
 
     private static final int FIRST_COLUMN_IDX = 0;
@@ -697,5 +708,51 @@ public class FileTransferLog implements IFileTransferLog {
                 cursor.close();
             }
         }
+    }
+
+    /*
+     * Get both queued one-to-one and group file transfers. (non-Javadoc)
+     * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
+     * getQueuedFileTransfers()
+     */
+    @Override
+    public Cursor getQueuedFileTransfers() {
+        return mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
+                SELECTION_BY_QUEUED_FILE_TRANSFERS, null, ORDER_BY_TIMESTAMP_ASC);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.orangelabs.rcs.provider.messaging.IFileTransferLog#
+     * dequeueFileTransfer(java.lang.String)
+     */
+    public void dequeueFileTransfer(String fileTransferId, long timestamp, long timestampSent) {
+        ContentValues values = new ContentValues();
+        values.put(FileTransferData.KEY_STATE, State.INITIATING.toInt());
+        values.put(FileTransferData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
+        /* Needs to reset the timestamp as this file was originally queued and is sent only now. */
+        values.put(FileTransferData.KEY_TIMESTAMP, timestamp);
+        values.put(FileTransferData.KEY_TIMESTAMP_SENT, timestampSent);
+        mLocalContentResolver.update(
+                Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
+                null);
+    }
+
+    @Override
+    public Cursor getQueuedGroupFileTransfers(String chatId) {
+        String[] selectionArgs = new String[] {
+            chatId
+        };
+        return mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
+                SELECTION_BY_QUEUED_GROUP_FILE_TRANSFERS, selectionArgs, ORDER_BY_TIMESTAMP_ASC);
+    }
+
+    @Override
+    public Cursor getQueuedOneToOneFileTransfers(ContactId contact) {
+        String[] selectionArgs = new String[] {
+            contact.toString()
+        };
+        return mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
+                SELECTION_BY_QUEUED_ONETOONE_FILE_TRANSFERS, selectionArgs, ORDER_BY_TIMESTAMP_ASC);
     }
 }

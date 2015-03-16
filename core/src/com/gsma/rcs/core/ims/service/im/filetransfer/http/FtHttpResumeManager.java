@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * File Transfer HTTP resume manager
  */
-public class FtHttpResumeManager {
+public class FtHttpResumeManager implements Runnable {
     /**
      * Interface to get access to the FtHttp table
      */
@@ -90,7 +90,10 @@ public class FtHttpResumeManager {
             return;
         }
         mImsService = instantMessagingService;
+    }
 
+    @Override
+    public void run() {
         try {
             // Retrieve all resumable sessions
             List<FtHttpResume> listFile2resume = mDao.queryAll();

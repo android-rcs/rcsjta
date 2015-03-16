@@ -21,7 +21,7 @@ import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.rcs.utils.logger.Logger;
 
-public class GroupChatAutoRejoinTask extends Thread {
+public class GroupChatAutoRejoinTask implements Runnable {
 
     private final MessagingLog mMessagingLog;
 
@@ -38,9 +38,6 @@ public class GroupChatAutoRejoinTask extends Thread {
     public void run() {
         for (String chatId : mMessagingLog.getChatIdsOfActiveGroupChatsForAutoRejoin()) {
             try {
-                if (isInterrupted()) {
-                    return;
-                }
                 mCore.getListener().handleAutoRejoinGroupChat(chatId);
 
             } catch (ServerApiException e) {

@@ -208,4 +208,37 @@ public interface IFileTransferLog {
      * @return FtHttpResume
      */
     public FtHttpResume getFileTransferResumeInfo(String fileTransferId);
+
+    /**
+     * Get all one-to-one and group file transfers that are in queued state in
+     * ascending order of timestamp
+     * 
+     * @return Cursor
+     */
+    public Cursor getQueuedFileTransfers();
+
+    /**
+     * Dequeue file transfer
+     * 
+     * @param fileTransferId
+     * @param timestamp
+     * @param timestampSent
+     */
+    public void dequeueFileTransfer(String fileTransferId, long timestamp, long timestampSent);
+
+    /**
+     * Get queued group file transfers
+     * 
+     * @param chatId
+     * @return Cursor
+     */
+    public Cursor getQueuedGroupFileTransfers(String chatId);
+
+    /**
+     * Get queued one-one file transfers
+     * 
+     * @param contact
+     * @return Cursor
+     */
+    public Cursor getQueuedOneToOneFileTransfers(ContactId contact);
 }

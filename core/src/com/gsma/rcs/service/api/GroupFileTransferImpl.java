@@ -16,6 +16,7 @@
 
 package com.gsma.rcs.service.api;
 
+import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -63,6 +64,8 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
     private final RcsSettings mRcsSettings;
 
+    private final Core mCore;
+
     private String mChatId;
 
     /**
@@ -85,17 +88,19 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
      * @param storageAccessor FileTransferPersistedStorageAccessor
      * @param fileTransferService FileTransferServiceImpl
      * @param rcsSettings RcsSettings
+     * @param core Core
      */
     public GroupFileTransferImpl(String transferId, IGroupFileTransferBroadcaster broadcaster,
             InstantMessagingService imService,
             FileTransferPersistedStorageAccessor storageAccessor,
-            FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings) {
+            FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings, Core core) {
         mFileTransferId = transferId;
         mBroadcaster = broadcaster;
         mImService = imService;
         mPersistentStorage = storageAccessor;
         mFileTransferService = fileTransferService;
         mRcsSettings = rcsSettings;
+        mCore = core;
     }
 
     /**
@@ -108,12 +113,13 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
      * @param storageAccessor FileTransferPersistedStorageAccessor
      * @param fileTransferService FileTransferServiceImpl
      * @param rcsSettings RcsSettings
+     * @param core Core
      */
     public GroupFileTransferImpl(String transferId, String chatId,
             IGroupFileTransferBroadcaster broadcaster, InstantMessagingService imService,
             FileTransferPersistedStorageAccessor storageAccessor,
-            FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings) {
-        this(transferId, broadcaster, imService, storageAccessor, fileTransferService, rcsSettings);
+            FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings, Core core) {
+        this(transferId, broadcaster, imService, storageAccessor, fileTransferService, rcsSettings, core);
         mChatId = chatId;
     }
 
@@ -684,6 +690,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             mBroadcaster
                     .broadcastStateChanged(mChatId, mFileTransferId, State.REJECTED, reasonCode);
         }
+        mCore.getListener().tryToDequeueFileTransfers(mImService);
     }
 
     /**
@@ -720,6 +727,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
             mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId, State.ABORTED, reasonCode);
         }
+        mCore.getListener().tryToDequeueFileTransfers(mImService);
     }
 
     /**
@@ -743,6 +751,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                         ReasonCode.ABORTED_BY_REMOTE);
             }
         }
+        mCore.getListener().tryToDequeueFileTransfers(mImService);
     }
 
     /**
@@ -764,6 +773,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
             mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId, state, reasonCode);
         }
+        mCore.getListener().tryToDequeueFileTransfers(mImService);
     }
 
     /**
@@ -792,6 +802,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId, State.FAILED,
                     ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
         }
+        mCore.getListener().tryToDequeueFileTransfers(mImService);
     }
 
     /**
@@ -810,6 +821,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId, State.TRANSFERRED,
                     ReasonCode.UNSPECIFIED);
         }
+        mCore.getListener().tryToDequeueFileTransfers(mImService);
     }
 
     /**
