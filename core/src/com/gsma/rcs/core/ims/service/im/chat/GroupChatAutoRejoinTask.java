@@ -38,7 +38,7 @@ public class GroupChatAutoRejoinTask implements Runnable {
     public void run() {
         for (String chatId : mMessagingLog.getChatIdsOfActiveGroupChatsForAutoRejoin()) {
             try {
-                mCore.getListener().handleAutoRejoinGroupChat(chatId);
+                mCore.getListener().handleRejoinGroupChat(chatId);
 
             } catch (ServerApiException e) {
                 if (logger.isActivated()) {

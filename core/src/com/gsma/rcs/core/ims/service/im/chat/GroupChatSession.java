@@ -481,19 +481,6 @@ public abstract class GroupChatSession extends ChatSession {
                 sLogger.debug("Add " + nbrOfContacts + " participants to the session");
             }
 
-            /*
-             * If we are disconnected, just add the participants as queued and return. The dequeuing
-             * mechanism will take care of them.
-             */
-            if (!ServerApiUtils.isImsConnected()) {
-
-                updateParticipants(contacts, ParticipantStatus.INVITE_QUEUED);
-
-                mImsModule.getCoreListener().handleAutoRejoinGroupChat(getContributionID());
-
-                return;
-            }
-
             updateParticipants(contacts, ParticipantStatus.INVITING);
 
             SessionAuthenticationAgent authenticationAgent = getAuthenticationAgent();

@@ -928,8 +928,8 @@ public class RcsCoreService extends Service implements CoreListener {
     }
 
     @Override
-    public void handleAutoRejoinGroupChat(String chatId) throws ServerApiException {
-        mChatApi.handleAutoRejoinGroupChat(chatId);
+    public void handleRejoinGroupChat(String chatId) throws ServerApiException {
+        mChatApi.handleRejoinGroupChat(chatId);
     }
 
     @Override

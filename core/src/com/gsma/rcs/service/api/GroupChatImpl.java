@@ -43,9 +43,7 @@ import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
-import com.gsma.rcs.service.DequeueTask;
 import com.gsma.rcs.service.api.ServerApiException;
-import com.gsma.rcs.service.broadcaster.GroupFileTransferBroadcaster;
 import com.gsma.rcs.service.broadcaster.IGroupChatEventBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
@@ -271,11 +269,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         return false;
     }
 
-    private boolean isGroupChatSessionEstablished() {
-        GroupChatSession session = mImService.getGroupChatSession(mChatId);
-        return session != null && session.isMediaEstablished();
-    }
-
     private boolean isAllowedToInviteAdditionalParticipants(int additionalParticipants) {
         int nrOfParticipants = getParticipants().size() + additionalParticipants;
         int maxNrOfAllowedParticipants = mRcsSettings.getMaxChatParticipants();
@@ -309,17 +302,20 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         if (groupChat == null) {
             if (logger.isActivated()) {
                 logger.debug(new StringBuilder(
-                        "Cannot send message on group chat with group chat Id '").append(mChatId)
-                        .append("' as the group chat does not exist in DB.").toString());
+                        "Group chat with group chat Id '").append(mChatId)
+                        .append("' is not rejoinable as the group chat does not exist in DB.")
+                        .toString());
             }
             return false;
         }
         if (TextUtils.isEmpty(groupChat.getRejoinId())) {
             if (logger.isActivated()) {
                 logger.debug(new StringBuilder(
-                        "Cannot send message on group chat with group chat Id '")
+                        "Group chat with group chat Id '")
                         .append(mChatId)
-                        .append("' as there is no ongoing session with corresponding chatId and there exists no rejoinId to rejoin the group chat.")
+                        .append("' is not rejoinable as there is no ongoing session with "
+                                + "corresponding chatId and there exists no rejoinId to "
+                                + "rejoin the group chat.")
                         .toString());
             }
             return false;
@@ -644,9 +640,42 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 throw new IllegalArgumentException("Participants not eligible to be invited.");
             }
         }
+
         final GroupChatSession session = mImService.getGroupChatSession(mChatId);
-        if (session != null && session.isMediaEstablished()) {
+
+        boolean mediaEstablished = (session != null && session.isMediaEstablished());
+
+        if (mediaEstablished) {
             inviteParticipants(session, new HashSet<ContactId>(participants));
+            return;
+        }
+
+        if (session == null || !mediaEstablished) {
+            Map<ContactId, ParticipantStatus> participantsToStore =
+                    mMessagingLog.getParticipants(mChatId);
+
+            for (ContactId contact : participants) {
+                participantsToStore.put(contact, ParticipantStatus.INVITE_QUEUED);
+            }
+
+            if (session != null) {
+                session.updateParticipants(participantsToStore);
+            } else {
+                mMessagingLog.updateGroupChatParticipants(mChatId, participantsToStore);
+            }
+        }
+
+        if (session == null) {
+            try {
+                if (isGroupChatRejoinable() && ServerApiUtils.isImsConnected()) {
+                    rejoinGroupChat();
+                }
+            } catch (ServerApiException e) {
+                if (logger.isActivated()) {
+                    logger.warn(new StringBuilder("Could not auto-rejoin group chat with chatID '")
+                            .append(mChatId).append("'").toString());
+                }
+            }
         }
     }
 
@@ -678,6 +707,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             }
         }
     }
+
     /**
      * Add group chat message to Db
      * 

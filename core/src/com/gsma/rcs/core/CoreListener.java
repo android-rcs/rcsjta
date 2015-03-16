@@ -386,7 +386,7 @@ public interface CoreListener {
      * @param chatId
      * @throws ServerApiException
      */
-    public void handleAutoRejoinGroupChat(String chatId) throws ServerApiException;
+    public void handleRejoinGroupChat(String chatId) throws ServerApiException;
 
     /**
      * Try to start ImService tasks once the IMS connection is re-established and the ImsServices
