@@ -193,19 +193,6 @@ public abstract class SendFile extends Activity implements ISendFile {
      * Initiate transfer
      */
     private void initiateTransfer() {
-        // Check if the service is available
-        boolean registered = false;
-        try {
-            registered = mCnxManager.getFileTransferApi().isServiceRegistered();
-        } catch (Exception e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
-            return;
-        }
-        if (!registered) {
-            Utils.showMessage(SendFile.this, getString(R.string.label_service_not_available));
-            return;
-        }
-
         // Get thumbnail option
         CheckBox ftThumb = (CheckBox) findViewById(R.id.ft_thumb);
         if (transferFile(file, ftThumb.isChecked())) {

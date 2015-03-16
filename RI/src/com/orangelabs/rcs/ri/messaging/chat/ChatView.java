@@ -296,11 +296,6 @@ public abstract class ChatView extends FragmentActivity implements
             return;
 
         }
-        // Check if the service is available
-        if (!isServiceRegistered()) {
-            return;
-
-        }
         // Send text message
         ChatMessage message = sendMessage(text);
         if (message == null) {
@@ -319,33 +314,11 @@ public abstract class ChatView extends FragmentActivity implements
      * @param geoloc
      */
     private void sendGeoloc(Geoloc geoloc) {
-        // Check if the service is available
-        if (!isServiceRegistered()) {
-            return;
-
-        }
         // Send text message
         ChatMessage message = sendMessage(geoloc);
         if (message == null) {
             Utils.showMessage(ChatView.this, getString(R.string.label_send_im_failed));
         }
-    }
-
-    boolean isServiceRegistered() {
-        // Check if the service is available
-        boolean registered = false;
-        try {
-            registered = ConnectionManager.getInstance(ChatView.this).getChatApi()
-                    .isServiceRegistered();
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "isRegistered failed", e);
-            }
-        }
-        if (!registered) {
-            Utils.showMessage(ChatView.this, getString(R.string.label_service_not_available));
-        }
-        return registered;
     }
 
     /**

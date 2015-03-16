@@ -349,16 +349,7 @@ public class GroupChatView extends ChatView {
         try {
             switch ((GroupChatMode) getIntent().getSerializableExtra(EXTRA_MODE)) {
                 case OUTGOING:
-                    // Initiate a Group Chat: check if the service is available
-                    boolean registered = mCnxManager.getChatApi().isServiceRegistered();
-                    if (!registered) {
-                        Utils.showMessageAndExit(this,
-                                getString(R.string.label_service_not_available), mExitOnce);
-                        return false;
-
-                    }
-
-                    // Get subject
+                    /* Initiate a Group Chat: Get subject */
                     mSubject = getIntent().getStringExtra(GroupChatView.EXTRA_SUBJECT);
                     updateGroupChatViewTitle(mSubject);
 

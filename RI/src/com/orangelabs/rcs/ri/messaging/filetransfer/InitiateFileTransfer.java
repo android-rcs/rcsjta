@@ -405,19 +405,6 @@ public class InitiateFileTransfer extends Activity {
      * Initiate transfer
      */
     private void initiateTransfer() {
-        // Check if the service is available
-        boolean registered = false;
-        try {
-            registered = mCnxManager.getFileTransferApi().isServiceRegistered();
-        } catch (Exception e) {
-            Utils.showMessageAndExit(this, getString(R.string.label_api_failed), mExitOnce, e);
-            return;
-        }
-        if (!registered) {
-            Utils.showMessage(this, getString(R.string.label_service_not_available));
-            return;
-        }
-
         // get selected phone number
         ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
         String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
