@@ -567,8 +567,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         long timestamp = System.currentTimeMillis();
         /* For outgoing message, timestampSent = timestamp */
         ChatMessage msg = new ChatMessage(msgId, mContact,
-                mMessagingLog.getChatMessageContent(msgId), mimeType, timestamp, timestamp,
-                null);
+                mMessagingLog.getChatMessageContent(msgId), mimeType, timestamp, timestamp, null);
         if (ServerApiUtils.isImsConnected()) {
             resendChatMessage(msg);
         } else {

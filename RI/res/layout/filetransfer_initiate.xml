@@ -84,6 +84,22 @@
                 android:gravity="left" />
         </TableRow>
 
+        <TableRow android:paddingTop="5dip"
+             android:id="@+id/expiration" >
+
+            <TextView
+                android:layout_marginLeft="5dip"
+                android:gravity="right"
+                android:text="@string/label_expiration" />
+
+            <TextView
+                android:id="@+id/value_expiration"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
+                android:singleLine="true"
+                android:textStyle="bold" />
+        </TableRow>
+
         <TableRow android:padding="5dip" >
         </TableRow>
 

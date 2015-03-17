@@ -61,7 +61,7 @@ public class InitiateGroupChat extends Activity implements OnItemClickListener {
     private List<ContactId> mAllowedContactIds;
 
     private Button mInviteBtn;
-    
+
     private LockAccess mExitOnce = new LockAccess();
 
     @Override
@@ -110,7 +110,7 @@ public class InitiateGroupChat extends Activity implements OnItemClickListener {
             } else {
                 Utils.showMessage(this, getString(R.string.label_no_participant_found));
                 return;
-                
+
             }
         } catch (RcsServiceException e) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce);

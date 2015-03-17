@@ -113,10 +113,21 @@ public class FileTransfer {
             mValue = value;
         }
 
+        /**
+         * Returns the value of this State as an integer.
+         * 
+         * @return integer value
+         */
         public final int toInt() {
             return mValue;
         }
 
+        /**
+         * Returns a State instance representing the specified integer value.
+         * 
+         * @param value the integer value
+         * @return State instance
+         */
         public final static State valueOf(int value) {
             State entry = mValueToEnum.get(value);
             if (entry != null) {
@@ -246,10 +257,21 @@ public class FileTransfer {
             mValue = value;
         }
 
+        /**
+         * Returns the value of this ReasonCode as an integer.
+         * 
+         * @return integer value
+         */
         public final int toInt() {
             return mValue;
         }
 
+        /**
+         * Returns a ReasonCode instance representing the specified integer value.
+         * 
+         * @param value the integer value
+         * @return ReasonCode instance
+         */
         public final static ReasonCode valueOf(int value) {
             ReasonCode entry = mValueToEnum.get(value);
             if (entry != null) {
@@ -519,7 +541,7 @@ public class FileTransfer {
         try {
             mTransferInf.acceptInvitation();
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsServiceException(e);
         }
     }
 
@@ -644,6 +666,34 @@ public class FileTransfer {
     public boolean isRead() throws RcsServiceException {
         try {
             return mTransferInf.isRead();
+        } catch (Exception e) {
+            throw new RcsServiceException(e);
+        }
+    }
+
+    /**
+     * Returns the time for when file on the content server is no longer valid to download.
+     * 
+     * @return time in milliseconds or 0 if not applicable or -1 if unknown
+     * @throws RcsServiceException
+     */
+    public long getFileExpiration() throws RcsServiceException {
+        try {
+            return mTransferInf.getFileExpiration();
+        } catch (Exception e) {
+            throw new RcsServiceException(e);
+        }
+    }
+
+    /**
+     * Returns the time for when file icon on the content server is no longer valid to download.
+     * 
+     * @return time in milliseconds or 0 if not applicable or -1 if unknown
+     * @throws RcsServiceException
+     */
+    public long getFileIconExpiration() throws RcsServiceException {
+        try {
+            return mTransferInf.getFileIconExpiration();
         } catch (Exception e) {
             throw new RcsServiceException(e);
         }

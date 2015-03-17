@@ -65,11 +65,32 @@ public class FileTransferPersistedStorageAccessor {
 
     private long mTimestampDisplayed;
 
+    private long mFileExpiration = FileTransferLog.UNKNOWN_EXPIRATION;
+
+    private long mFileIconExpiration = FileTransferLog.UNKNOWN_EXPIRATION;
+
+    /**
+     * Constructor
+     * 
+     * @param fileTransferId
+     * @param messagingLog
+     */
     public FileTransferPersistedStorageAccessor(String fileTransferId, MessagingLog messagingLog) {
         mFileTransferId = fileTransferId;
         mMessagingLog = messagingLog;
     }
 
+    /**
+     * Constructor
+     * 
+     * @param fileTransferId
+     * @param contact
+     * @param direction
+     * @param chatId
+     * @param file
+     * @param fileIcon
+     * @param messagingLog
+     */
     public FileTransferPersistedStorageAccessor(String fileTransferId, ContactId contact,
             Direction direction, String chatId, MmContent file, MmContent fileIcon,
             MessagingLog messagingLog) {
@@ -99,8 +120,7 @@ public class FileTransferPersistedStorageAccessor {
                     .getColumnIndexOrThrow(FileTransferLog.DIRECTION)));
             mChatId = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.CHAT_ID));
             mFileName = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FILENAME));
-            mMimeType = cursor.getString(cursor
-                    .getColumnIndexOrThrow(FileTransferLog.MIME_TYPE));
+            mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.MIME_TYPE));
             mFile = Uri.parse(cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FILE)));
             String fileIcon = cursor.getString(cursor
                     .getColumnIndexOrThrow(FileTransferLog.FILEICON));
@@ -121,6 +141,14 @@ public class FileTransferPersistedStorageAccessor {
             if (mTimestampDisplayed <= 0) {
                 mTimestampDisplayed = cursor.getLong(cursor
                         .getColumnIndexOrThrow(FileTransferLog.TIMESTAMP_DISPLAYED));
+            }
+            if (mFileExpiration == FileTransferLog.UNKNOWN_EXPIRATION) {
+                mFileExpiration = cursor.getLong(cursor
+                        .getColumnIndexOrThrow(FileTransferLog.FILE_EXPIRATION));
+            }
+            if (mFileIconExpiration == FileTransferLog.UNKNOWN_EXPIRATION) {
+                mFileIconExpiration = cursor.getLong(cursor
+                        .getColumnIndexOrThrow(FileTransferLog.FILEICON_EXPIRATION));
             }
         } finally {
             if (cursor != null) {
@@ -286,29 +314,63 @@ public class FileTransferPersistedStorageAccessor {
         mMessagingLog.setFileTransferProgress(mFileTransferId, currentSize);
     }
 
-    public void setTransferred(MmContent content) {
-        mMessagingLog.setFileTransferred(mFileTransferId, content);
+    public void setTransferred(MmContent content, long fileExpiration, long fileIconExpiration) {
+        mMessagingLog.setFileTransferred(mFileTransferId, content, fileExpiration,
+                fileIconExpiration);
     }
 
     public void addFileTransfer(ContactId contact, Direction direction, MmContent content,
             MmContent fileIcon, State status, ReasonCode reasonCode, long timestamp,
-            long timestampSent) {
+            long timestampSent, long fileExpiration, long fileIconExpiration) {
         mContact = contact;
         mDirection = direction;
         mMessagingLog.addFileTransfer(mFileTransferId, contact, direction, content, fileIcon,
-                status, reasonCode, timestamp, timestampSent);
+                status, reasonCode, timestamp, timestampSent, fileExpiration, fileIconExpiration);
     }
 
     public void addIncomingGroupFileTransfer(String chatId, ContactId contact, MmContent content,
             MmContent fileicon, State state, ReasonCode reasonCode, long timestamp,
-            long timestampSent) {
+            long timestampSent, long fileExpiration, long fileIconExpiration) {
         mChatId = chatId;
         mContact = contact;
         mMessagingLog.addIncomingGroupFileTransfer(mFileTransferId, chatId, contact, content,
-                fileicon, state, reasonCode, timestamp, timestampSent);
+                fileicon, state, reasonCode, timestamp, timestampSent, fileExpiration,
+                fileIconExpiration);
     }
 
     public FtHttpResume getFileTransferResumeInfo() {
         return mMessagingLog.getFileTransferResumeInfo(mFileTransferId);
+    }
+
+    /**
+     * Returns the time for when file on the content server is no longer valid to download.
+     * 
+     * @return time
+     */
+    public long getFileExpiration() {
+        /*
+         * Utilizing cache here as file expiration can only be changed in persistent storage if its
+         * initial value is unknown, so no need to query for it multiple times.
+         */
+        if (FileTransferLog.UNKNOWN_EXPIRATION == mFileExpiration) {
+            cacheData();
+        }
+        return mFileExpiration;
+    }
+
+    /**
+     * Returns the time for when file icon on the content server is no longer valid to download.
+     * 
+     * @return time
+     */
+    public long getFileIconExpiration() {
+        /*
+         * Utilizing cache here as file icon expiration can only be changed in persistent storage if
+         * its initial value is unknown, so no need to query for it multiple times.
+         */
+        if (FileTransferLog.UNKNOWN_EXPIRATION == mFileIconExpiration) {
+            cacheData();
+        }
+        return mFileIconExpiration;
     }
 }

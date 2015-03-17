@@ -26,6 +26,7 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.TerminalInfo;
 import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
 import com.gsma.rcs.provisioning.ProvisioningFailureReasons;
@@ -173,6 +174,8 @@ public class HttpsProvisioningManager {
 
     private final RcsSettings mRcsSettings;
 
+    private final MessagingLog mMessagingLog;
+
     /**
      * Builds HTTPS request parameters that are related to Terminal, PARAM_RCS_VERSION &
      * PARAM_RCS_PROFILE.
@@ -200,10 +203,11 @@ public class HttpsProvisioningManager {
      * @param first is provisioning service launch after (re)boot ?
      * @param user is provisioning service launch after user action ?
      * @param rcsSettings
+     * @param messagingLog
      */
     public HttpsProvisioningManager(Context applicationContext,
             LocalContentResolver localContentResolver, final PendingIntent retryIntent,
-            boolean first, boolean user, RcsSettings rcsSettings) {
+            boolean first, boolean user, RcsSettings rcsSettings, MessagingLog messagingLog) {
         mCtx = applicationContext;
         mLocalContentResolver = localContentResolver;
         mRetryIntent = retryIntent;
@@ -212,6 +216,7 @@ public class HttpsProvisioningManager {
         mSmsManager = new HttpsProvisioningSMS(this);
         mNetworkCnx = new HttpsProvisioningConnection(this);
         mRcsSettings = rcsSettings;
+        mMessagingLog = messagingLog;
     }
 
     /**
@@ -449,7 +454,7 @@ public class HttpsProvisioningManager {
 
                 // Register SMS provisioning receiver
                 mSmsManager.registerSmsProvisioningReceiver(mLocalContentResolver, smsPortForOTP,
-                        primaryUri, client, localContext, mRcsSettings);
+                        primaryUri, client, localContext, mRcsSettings, mMessagingLog);
 
                 // Save the MSISDN
                 mRcsSettings.setMsisdn(msisdn);
@@ -888,7 +893,7 @@ public class HttpsProvisioningManager {
                                 }
                                 // Reset config
                                 LauncherUtils.resetRcsConfig(mCtx, mLocalContentResolver,
-                                        mRcsSettings);
+                                        mRcsSettings, mMessagingLog);
                                 // Force version to "-1" (resetRcs set version to "0")
                                 mRcsSettings.setProvisioningVersion(version);
                                 // Disable the RCS service
@@ -900,7 +905,7 @@ public class HttpsProvisioningManager {
                                     }
                                     // Reset config
                                     LauncherUtils.resetRcsConfig(mCtx, mLocalContentResolver,
-                                            mRcsSettings);
+                                            mRcsSettings, mMessagingLog);
                                 } else {
                                     // Start retry alarm
                                     if (validity > 0) {
@@ -978,7 +983,8 @@ public class HttpsProvisioningManager {
                 // Reset version to "0"
                 mRcsSettings.setProvisioningVersion(Version.RESETED.toString());
                 // Reset config
-                LauncherUtils.resetRcsConfig(mCtx, mLocalContentResolver, mRcsSettings);
+                LauncherUtils.resetRcsConfig(mCtx, mLocalContentResolver, mRcsSettings,
+                        mMessagingLog);
                 // Reason: Provisioning forbidden
                 provisioningFails(ProvisioningFailureReasons.PROVISIONING_FORBIDDEN);
             } else if (result.code == 511) {

@@ -23,20 +23,13 @@
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.Core;
-import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
-import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
-import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
-import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
-import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
@@ -45,32 +38,28 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
 
-import java.util.Vector;
-
-import javax2.sip.header.ContactHeader;
-
 /**
  * Terminating file transfer HTTP session
  * 
  * @author vfml3370
  */
-public class TerminatingHttpFileSharingSession extends HttpFileTransferSession implements
+public abstract class TerminatingHttpFileSharingSession extends HttpFileTransferSession implements
         HttpTransferEventListener {
 
     /**
      * HTTP download manager
      */
-    protected HttpDownloadManager downloadManager;
+    protected final HttpDownloadManager mDownloadManager;
 
     /**
      * Remote instance Id
      */
-    private String remoteInstanceId;
+    protected final String mRemoteInstanceId;
 
     /**
      * The logger
      */
-    private final static Logger logger = Logger.getLogger(TerminatingHttpFileSharingSession.class
+    private final static Logger LOGGER = Logger.getLogger(TerminatingHttpFileSharingSession.class
             .getSimpleName());
 
     /**
@@ -79,114 +68,36 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
     protected final boolean mGroupFileTransfer;
 
     /**
-     * The remote timestamp sent in payload for incoming file sharing
-     */
-    private long mTimestampSent;
-
-    /**
      * Constructor
      * 
      * @param parent IMS service
-     * @param chatSession the chat session
-     * @param fileTransferInfo the File transfer info document
      * @param fileTransferId the File transfer Id
      * @param contact the remote contact Id
-     * @param displayName the display name of the remote contact
+     * @param content
+     * @param fileExpiration
+     * @param fileIcon
+     * @param iconExpiration
+     * @param chatSessionId
+     * @param chatContributionId
+     * @param isGroup
+     * @param httpServerAddress
      * @param rcsSettings
      * @param messagingLog
      * @param timestamp Local timestamp for the session
-     * @param timestampSent the remote timestamp sent in payload for the file sharing
-     */
-    public TerminatingHttpFileSharingSession(ImsService parent, ChatSession chatSession,
-            FileTransferHttpInfoDocument fileTransferInfo, String fileTransferId,
-            ContactId contact, String displayName, RcsSettings rcsSettings,
-            MessagingLog messagingLog, long timestamp, long timestampSent) {
-        super(parent, ContentManager.createMmContent(ContentManager.generateUriForReceivedContent(
-                fileTransferInfo.getFilename(), fileTransferInfo.getFileType(), rcsSettings),
-                fileTransferInfo.getFileSize(), fileTransferInfo.getFilename()), contact,
-                PhoneUtils.formatContactIdToUri(contact), null, chatSession.getSessionID(),
-                chatSession.getContributionID(), fileTransferId, rcsSettings, messagingLog,
-                timestamp);
-        mTimestampSent = timestampSent;
-        setRemoteDisplayName(displayName);
-        // Build a new dialogPath with this of chatSession and an empty CallId
-        setDialogPath(new SipDialogPath(chatSession.getDialogPath()));
-        getDialogPath().setCallId("");
-
-        ContactHeader inviteContactHeader = (ContactHeader) chatSession.getDialogPath().getInvite()
-                .getHeader(ContactHeader.NAME);
-        if (inviteContactHeader != null) {
-            this.remoteInstanceId = inviteContactHeader.getParameter(SipUtils.SIP_INSTANCE_PARAM);
-        }
-        mGroupFileTransfer = chatSession.isGroupChat();
-
-        // Instantiate the download manager
-        MmContent content = getContent();
-        downloadManager = new HttpDownloadManager(content, this, fileTransferInfo.getFileUri(),
-                rcsSettings);
-
-        // Download thumbnail
-        if (fileTransferInfo.getFileThumbnail() != null) {
-            FileTransferHttpThumbnail thumbnailInfo = fileTransferInfo.getFileThumbnail();
-            String iconName = FileTransferUtils.buildFileiconUrl(fileTransferId,
-                    thumbnailInfo.getThumbnailType());
-            setFileicon(downloadManager.downloadThumbnail(thumbnailInfo, iconName));
-        }
-
-        if (shouldBeAutoAccepted()) {
-            setSessionAccepted();
-        }
-    }
-
-    /**
-     * Constructor
-     * 
-     * @param parent IMS service
-     * @param content the content to be transferred
-     * @param resume the Data Object to access FT HTTP table in DB
-     * @param rcsSettings
-     * @param messagingLog
+     * @param remoteInstanceId
      */
     public TerminatingHttpFileSharingSession(ImsService parent, MmContent content,
-            FtHttpResumeDownload resume, RcsSettings rcsSettings, MessagingLog messagingLog) {
-        super(parent, content, resume.getContact(), PhoneUtils.formatContactIdToUri(resume
-                .getContact()), resume.getFileicon() != null ? FileTransferUtils
-                .createMmContent(resume.getFileicon()) : null, null, resume.getChatId(), resume
-                .getFileTransferId(), rcsSettings, messagingLog, resume.getTimestamp());
-        mGroupFileTransfer = resume.isGroupTransfer();
-        mResumeFT = resume;
-        mTimestampSent = resume.getTimestampSent();
+            long fileExpiration, MmContent fileIcon, long iconExpiration, ContactId contact,
+            String chatSessionId, String chatContributionId, String fileTransferId,
+            boolean isGroup, Uri httpServerAddress, RcsSettings rcsSettings,
+            MessagingLog messagingLog, long timestamp, String remoteInstanceId) {
+        super(parent, content, contact, PhoneUtils.formatContactIdToUri(contact), fileIcon,
+                chatSessionId, chatContributionId, fileTransferId, rcsSettings, messagingLog,
+                timestamp, fileExpiration, iconExpiration);
+        mGroupFileTransfer = isGroup;
+        mRemoteInstanceId = remoteInstanceId;
         // Instantiate the download manager
-        downloadManager = new HttpDownloadManager(getContent(), this,
-                resume.getDownloadServerAddress(), rcsSettings);
-
-        if (shouldBeAutoAccepted()) {
-            setSessionAccepted();
-        }
-    }
-
-    /**
-     * Check if session should be auto accepted depending on settings and roaming conditions This
-     * method should only be called once per session
-     * 
-     * @return true if file transfer should be auto accepted
-     */
-    private boolean shouldBeAutoAccepted() {
-        long ftWarnSize = mRcsSettings.getWarningMaxFileTransferSize();
-
-        if (ftWarnSize > 0 && getContent().getSize() > ftWarnSize) {
-            /*
-             * User should be warned about the potential charges associated to the transfer of a
-             * large file. Hence do not auto accept if file size is above the warning limit.
-             */
-            return false;
-        }
-
-        if (getImsService().getImsModule().isInRoaming()) {
-            return mRcsSettings.isFileTransferAutoAcceptedInRoaming();
-        }
-
-        return mRcsSettings.isFileTransferAutoAccepted();
+        mDownloadManager = new HttpDownloadManager(content, this, httpServerAddress, rcsSettings);
     }
 
     protected boolean isGroupFileTransfer() {
@@ -201,7 +112,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
         super.interrupt();
 
         // Interrupt the download
-        downloadManager.interrupt();
+        mDownloadManager.interrupt();
     }
 
     /**
@@ -209,89 +120,6 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
      */
     public void run() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Initiate a new HTTP file transfer session as terminating");
-            }
-
-            Vector<ImsSessionListener> listeners = getListeners();
-            ContactId contact = getRemoteContact();
-            MmContent content = getContent();
-            MmContent fileIcon = getFileicon();
-            long timestamp = getTimestamp();
-            /* Check if session should be auto-accepted once */
-            if (isSessionAccepted()) {
-                if (logger.isActivated()) {
-                    logger.debug("Received http file transfer invitation marked for auto-accept");
-                }
-                for (ImsSessionListener listener : listeners) {
-                    ((FileSharingSessionListener) listener).handleSessionAutoAccepted(contact,
-                            content, fileIcon, timestamp, mTimestampSent);
-                }
-            } else {
-                if (logger.isActivated()) {
-                    logger.debug("Received http file transfer invitation marked for manual accept");
-                }
-
-                for (ImsSessionListener listener : listeners) {
-                    ((FileSharingSessionListener) listener).handleSessionInvited(contact, content,
-                            fileIcon, timestamp, mTimestampSent);
-                }
-
-                InvitationStatus answer = waitInvitationAnswer();
-                switch (answer) {
-                    case INVITATION_REJECTED:
-                        if (logger.isActivated()) {
-                            logger.debug("Transfer has been rejected by user");
-                        }
-
-                        removeSession();
-
-                        for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionRejectedByUser(contact);
-                        }
-                        return;
-
-                    case INVITATION_NOT_ANSWERED:
-                        if (logger.isActivated()) {
-                            logger.debug("Transfer has been rejected on timeout");
-                        }
-
-                        removeSession();
-
-                        for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionRejectedByTimeout(contact);
-                        }
-                        return;
-
-                    case INVITATION_CANCELED:
-                        if (logger.isActivated()) {
-                            logger.debug("Http transfer has been rejected by remote.");
-
-                            removeSession();
-
-                            for (ImsSessionListener listener : listeners) {
-                                listener.handleSessionRejectedByRemote(contact);
-                            }
-                        }
-                        return;
-
-                    case INVITATION_ACCEPTED:
-                        setSessionAccepted();
-
-                        for (ImsSessionListener listener : listeners) {
-                            ((FileSharingSessionListener) listener).handleSessionAccepted(contact);
-                        }
-                        break;
-
-                    default:
-                        if (logger.isActivated()) {
-                            logger.debug("Unknown invitation answer in run; answer=".concat(String
-                                    .valueOf(answer)));
-                        }
-                        return;
-                }
-            }
-
             // Reject if file is too big or size exceeds device storage capacity. This control
             // should be done
             // on UI. It is done after end user accepts invitation to enable prior handling by the
@@ -306,18 +134,13 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
             }
 
             // Notify listeners
-            for (int j = 0; j < getListeners().size(); j++) {
-                getListeners().get(j).handleSessionStarted(contact);
-            }
-            Uri file = downloadManager.getDownloadedFileUri();
-            Uri downloadServerAddress = downloadManager.getHttpServerAddr();
+            httpTransferStarted();
 
-            MessagingLog.getInstance().setFileDownloadAddress(getFileTransferId(),
-                    downloadServerAddress);
+            Uri file = mDownloadManager.getDownloadedFileUri();
             // Download file from the HTTP server
-            if (downloadManager.downloadFile()) {
-                if (logger.isActivated()) {
-                    logger.debug("Download file with success");
+            if (mDownloadManager.downloadFile()) {
+                if (LOGGER.isActivated()) {
+                    LOGGER.debug("Download file with success");
                 }
 
                 // Set filename
@@ -334,19 +157,19 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
                 }
             } else {
                 // Don't call handleError in case of Pause or Cancel
-                if (downloadManager.isCancelled() || downloadManager.isPaused()) {
+                if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
                     return;
                 }
 
                 // Upload error
-                if (logger.isActivated()) {
-                    logger.info("Download file has failed");
+                if (LOGGER.isActivated()) {
+                    LOGGER.info("Download file has failed");
                 }
                 handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED));
             }
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Transfer has failed", e);
+            if (LOGGER.isActivated()) {
+                LOGGER.error("Transfer has failed", e);
             }
 
             // Unexpected error
@@ -358,8 +181,8 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
     // 200OK).
     @Override
     public void rejectSession(int code) {
-        if (logger.isActivated()) {
-            logger.debug("Session invitation has been rejected");
+        if (LOGGER.isActivated()) {
+            LOGGER.debug("Session invitation has been rejected");
         }
         mInvitationStatus = InvitationStatus.INVITATION_REJECTED;
 
@@ -390,8 +213,8 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
      */
     protected void sendDeliveryReport(String status, long timestamp) {
         String msgId = getFileTransferId();
-        if (logger.isActivated()) {
-            logger.debug("Send delivery report " + status);
+        if (LOGGER.isActivated()) {
+            LOGGER.debug("Send delivery report ".concat(status));
         }
         ChatSession chatSession;
         ContactId contact = getRemoteContact();
@@ -407,7 +230,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
         } else {
             // Send message delivery status via a SIP MESSAGE
             imService.getImdnManager().sendMessageDeliveryStatusImmediately(contact, msgId, status,
-                    remoteInstanceId, timestamp);
+                    mRemoteInstanceId, timestamp);
         }
     }
 
@@ -417,18 +240,18 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
     @Override
     public void resumeFileTransfer() {
         fileTransferResumed();
-        downloadManager.getListener().httpTransferResumed();
+        mDownloadManager.getListener().httpTransferResumed();
 
         new Thread(new Runnable() {
             public void run() {
                 // Download file from the HTTP server
-                if (downloadManager.resumeDownload()) {
-                    if (logger.isActivated()) {
-                        logger.debug("Download file with success");
+                if (mDownloadManager.resumeDownload()) {
+                    if (LOGGER.isActivated()) {
+                        LOGGER.debug("Download file with success");
                     }
 
                     // Set filename
-                    getContent().setUri(downloadManager.getDownloadedFileUri());
+                    getContent().setUri(mDownloadManager.getDownloadedFileUri());
 
                     // File transfered
                     handleFileTransfered();
@@ -438,13 +261,13 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
                             System.currentTimeMillis());
                 } else {
                     // Don't call handleError in case of Pause or Cancel
-                    if (downloadManager.isCancelled() || downloadManager.isPaused()) {
+                    if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
                         return;
                     }
 
                     // Upload error
-                    if (logger.isActivated()) {
-                        logger.info("Download file has failed");
+                    if (LOGGER.isActivated()) {
+                        LOGGER.info("Download file has failed");
                     }
                     handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED));
                 }
@@ -459,7 +282,7 @@ public class TerminatingHttpFileSharingSession extends HttpFileTransferSession i
     public void pauseFileTransfer() {
         fileTransferPaused();
         interruptSession();
-        downloadManager.pauseTransferByUser();
+        mDownloadManager.pauseTransferByUser();
     }
 
     @Override

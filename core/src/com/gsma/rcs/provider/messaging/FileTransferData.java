@@ -27,6 +27,8 @@ import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 import android.net.Uri;
 
+import com.gsma.services.rcs.RcsService.Direction;
+
 /**
  * File transfer data constants
  * 
@@ -48,7 +50,7 @@ public class FileTransferData {
     /**
      * Unique history log id
      */
-    public static final String KEY_BASECOLUMN_ID = FileTransferLog.BASECOLUMN_ID;
+    /* package private */static final String KEY_BASECOLUMN_ID = FileTransferLog.BASECOLUMN_ID;
 
     /**
      * Unique file transfer identifier
@@ -63,22 +65,22 @@ public class FileTransferData {
     /**
      * Date of the transfer
      */
-    public static final String KEY_TIMESTAMP = FileTransferLog.TIMESTAMP;
+    /* package private */static final String KEY_TIMESTAMP = FileTransferLog.TIMESTAMP;
 
     /**
      * Time when file is sent. If 0 means not sent.
      */
-    public static final String KEY_TIMESTAMP_SENT = FileTransferLog.TIMESTAMP_SENT;
+    /* package private */static final String KEY_TIMESTAMP_SENT = FileTransferLog.TIMESTAMP_SENT;
 
     /**
      * Time when file is delivered. If 0 means not delivered.
      */
-    public static final String KEY_TIMESTAMP_DELIVERED = FileTransferLog.TIMESTAMP_DELIVERED;
+    /* package private */static final String KEY_TIMESTAMP_DELIVERED = FileTransferLog.TIMESTAMP_DELIVERED;
 
     /**
      * Time when file is displayed.
      */
-    public static final String KEY_TIMESTAMP_DISPLAYED = FileTransferLog.TIMESTAMP_DISPLAYED;
+    /* package private */static final String KEY_TIMESTAMP_DISPLAYED = FileTransferLog.TIMESTAMP_DISPLAYED;
 
     /**
      * ContactId formatted number of remote contact or null if the filetransfer is an outgoing group
@@ -89,24 +91,24 @@ public class FileTransferData {
     /**
      * @see FileTransfer.State for possible states.
      */
-    public static final String KEY_STATE = FileTransferLog.STATE;
+    /* package private */static final String KEY_STATE = FileTransferLog.STATE;
 
     /**
      * Reason code associated with the file transfer state.
      * 
      * @see FileTransfer.ReasonCode for possible reason codes.
      */
-    public static final String KEY_REASON_CODE = FileTransferLog.REASON_CODE;
+    /* package private */static final String KEY_REASON_CODE = FileTransferLog.REASON_CODE;
 
     /**
      * @see ReadStatus
      */
-    public static final String KEY_READ_STATUS = FileTransferLog.READ_STATUS;
+    /* package private */static final String KEY_READ_STATUS = FileTransferLog.READ_STATUS;
 
     /**
      * Multipurpose Internet Mail Extensions (MIME) type of message
      */
-    public static final String KEY_MIME_TYPE = FileTransferLog.MIME_TYPE;
+    /* package private */static final String KEY_MIME_TYPE = FileTransferLog.MIME_TYPE;
 
     /**
      * URI of the file
@@ -116,17 +118,17 @@ public class FileTransferData {
     /**
      * Filename
      */
-    public static final String KEY_FILENAME = FileTransferLog.FILENAME;
+    /* package private */static final String KEY_FILENAME = FileTransferLog.FILENAME;
 
     /**
      * Size transferred in bytes
      */
-    public static final String KEY_TRANSFERRED = FileTransferLog.TRANSFERRED;
+    /* package private */static final String KEY_TRANSFERRED = FileTransferLog.TRANSFERRED;
 
     /**
      * File size in bytes
      */
-    public static final String KEY_FILESIZE = FileTransferLog.FILESIZE;
+    /* package private */static final String KEY_FILESIZE = FileTransferLog.FILESIZE;
 
     /**
      * Incoming transfer or outgoing transfer
@@ -143,9 +145,43 @@ public class FileTransferData {
     /**
      * URI of the file icon
      */
-    public static final String KEY_FILEICON_MIME_TYPE = FileTransferLog.FILEICON_MIME_TYPE;
+    /* package private */static final String KEY_FILEICON_MIME_TYPE = FileTransferLog.FILEICON_MIME_TYPE;
 
+    /**
+     * The upload transaction ID (hidden field from client applications)
+     */
     public static final String KEY_UPLOAD_TID = "upload_tid";
 
+    /**
+     * The download server address (hidden field from client applications)
+     */
     public static final String KEY_DOWNLOAD_URI = "download_uri";
+
+    /**
+     * The time for when file on the content server is no longer valid to download.
+     */
+    /* package private */static final String KEY_FILE_EXPIRATION = FileTransferLog.FILE_EXPIRATION;
+
+    /**
+     * The time for when file icon on the content server is no longer valid to download.
+     */
+    /* package private */static final String KEY_FILEICON_EXPIRATION = FileTransferLog.FILEICON_EXPIRATION;
+
+    /**
+     * @see FileTransferLog#NOT_APPLICABLE_EXPIRATION
+     */
+    public static final long NOT_APPLICABLE_EXPIRATION = FileTransferLog.NOT_APPLICABLE_EXPIRATION;
+
+    /**
+     * @see FileTransferLog#UNKNOWN_EXPIRATION
+     */
+    public static final long UNKNOWN_EXPIRATION = FileTransferLog.UNKNOWN_EXPIRATION;
+
+    /**
+     * The remote SIP instance ID to fill the accept contact header of the SIP delivery
+     * notification.<br>
+     * Only application for incoming HTTP file transfers.
+     */
+    /* package private */static final String KEY_REMOTE_SIP_ID = "remote_sip_id";
+
 }

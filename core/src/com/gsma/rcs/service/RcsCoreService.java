@@ -55,7 +55,6 @@ import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.eab.ContactsManager;
-import com.gsma.rcs.provider.fthttp.FtHttpResumeDaoImpl;
 import com.gsma.rcs.provider.history.HistoryLog;
 import com.gsma.rcs.provider.ipcall.IPCallHistory;
 import com.gsma.rcs.provider.messaging.MessagingLog;
@@ -204,6 +203,7 @@ public class RcsCoreService extends Service implements CoreListener {
     private RcsSettings mRcsSettings;
 
     private ContentResolver mContentResolver;
+
     private LocalContentResolver mLocalContentResolver;
 
     private MessagingLog mMessagingLog;
@@ -220,11 +220,10 @@ public class RcsCoreService extends Service implements CoreListener {
     @Override
     public void onCreate() {
         mContext = getApplicationContext();
-
         mContentResolver = mContext.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(mContentResolver);
-
         mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
+        mMessagingLog = MessagingLog.createInstance(mContext, mLocalContentResolver, mRcsSettings);
 
         // Set application context
         AndroidFactory.setApplicationContext(mContext, mRcsSettings);
@@ -291,14 +290,13 @@ public class RcsCoreService extends Service implements CoreListener {
 
             ContactsManager.createInstance(mContext, mContentResolver, mLocalContentResolver,
                     mRcsSettings);
-            MessagingLog.createInstance(mContext, mLocalContentResolver, mRcsSettings);
             RichCallHistory.createInstance(mLocalContentResolver);
             IPCallHistory.createInstance(mLocalContentResolver);
-            FtHttpResumeDaoImpl.createInstance(mContext);
+
             HistoryLog.createInstance(mLocalContentResolver);
             mContactManager = ContactsManager.getInstance();
-            mMessagingLog = MessagingLog.getInstance();
             mHistoryLog = HistoryLog.getInstance();
+
             // Create the core
             Core.createCore(this, mRcsSettings, mContactManager, mMessagingLog);
 
@@ -704,7 +702,7 @@ public class RcsCoreService extends Service implements CoreListener {
 
     @Override
     public void handleFileTransferInvitation(FileSharingSession fileSharingSession,
-            boolean isGroup, ContactId contact, String displayName) {
+            boolean isGroup, ContactId contact, String displayName, long fileExpiration) {
         if (sLogger.isActivated()) {
             sLogger.debug("Handle event file transfer invitation");
         }
@@ -715,7 +713,7 @@ public class RcsCoreService extends Service implements CoreListener {
 
     @Override
     public void handleOneToOneFileTransferInvitation(FileSharingSession fileSharingSession,
-            OneToOneChatSession oneToOneChatSession) {
+            OneToOneChatSession oneToOneChatSession, long fileExpiration) {
         if (sLogger.isActivated()) {
             sLogger.debug("Handle event file transfer invitation");
         }
@@ -890,7 +888,8 @@ public class RcsCoreService extends Service implements CoreListener {
 
     @Override
     public void handleGroupChatInvitationRejected(String chatId, ContactId contact, String subject,
-            Map<ContactId, ParticipantStatus> participants, GroupChat.ReasonCode reasonCode, long timestamp) {
+            Map<ContactId, ParticipantStatus> participants, GroupChat.ReasonCode reasonCode,
+            long timestamp) {
         mChatApi.addAndBroadcastGroupChatInvitationRejected(chatId, contact, subject, participants,
                 reasonCode, timestamp);
     }
@@ -948,8 +947,8 @@ public class RcsCoreService extends Service implements CoreListener {
         mImOperationExecutor
                 .execute(new FtHttpResumeManager(imService, mRcsSettings, mMessagingLog));
         /* Try to dequeue one-to-one chat messages and one-to-one file transfers. */
-        mImOperationExecutor.execute(new OneToOneChatDequeueTask(IM_OPERATION_LOCK, imService, mChatApi,
-                mFtApi, mHistoryLog, mMessagingLog, mContactManager, mRcsSettings));
+        mImOperationExecutor.execute(new OneToOneChatDequeueTask(IM_OPERATION_LOCK, imService,
+                mChatApi, mFtApi, mHistoryLog, mMessagingLog, mContactManager, mRcsSettings));
         /*
          * Try to send delayed displayed notifications for read messages if they were not sent
          * before already. This only attempts to send report and in case of failure the report will
@@ -988,8 +987,8 @@ public class RcsCoreService extends Service implements CoreListener {
 
     @Override
     public void tryToDequeueFileTransfers(InstantMessagingService imService) {
-        mImOperationExecutor.execute(new FileTransferDequeueTask(IM_OPERATION_LOCK, imService, mMessagingLog,
-                mFtApi, mContactManager, mRcsSettings));
+        mImOperationExecutor.execute(new FileTransferDequeueTask(IM_OPERATION_LOCK, imService,
+                mMessagingLog, mFtApi, mContactManager, mRcsSettings));
     }
 
     @Override

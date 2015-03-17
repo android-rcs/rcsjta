@@ -59,6 +59,9 @@ public class RichAddressBookProvider extends ContentProvider {
 
     private static final String AGGREGATION_TABLE = "aggregation";
 
+    /**
+     * Database filename
+     */
     public static final String DATABASE_NAME = "capability.db";
 
     private static final String RICH_ADDRESS_BOOK_SELECTION_WITH_CONTACT_ONLY = RichAddressBookData.KEY_CONTACT

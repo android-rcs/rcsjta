@@ -87,7 +87,6 @@ public interface IGroupChatLog {
      * 
      * @param chatId Chat ID
      * @param rejoinId Rejoin ID
-     * @param status Status
      */
     public void setGroupChatRejoinId(String chatId, String rejoinId);
 
@@ -95,7 +94,7 @@ public interface IGroupChatLog {
      * Get the group chat info
      * 
      * @param chatId Chat ID
-     * @result Group chat info
+     * @return Group chat info
      */
     public GroupChatInfo getGroupChatInfo(String chatId);
 

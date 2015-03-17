@@ -158,7 +158,9 @@
     <string name="menu_file_transfer_config">File transfer service configuration</string>
     <string name="label_ft_ImageResizeOption">Image resize option:</string>
     <string name="label_resend_failed">Transfer resend failed</string>
-
+    <string name="label_expiration">Expiration:</string>
+    <string name="label_expiration_args">Expiration: %s</string>
+    
     <!-- Chat menu -->
     <string name="menu_initiate_chat">Initiate single chat</string>
     <string name="menu_initiate_group_chat">Initiate group chat</string>

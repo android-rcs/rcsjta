@@ -67,6 +67,8 @@ public abstract class ImsServiceSession extends Thread {
 
     private final static int SESSION_INTERVAL_TOO_SMALL = 422;
 
+    private static final long SECONDS_TO_MILILSECONDS_CONVERSION_RATE = 1000L;
+
     /**
      * IMS service
      */
@@ -359,7 +361,7 @@ public abstract class ImsServiceSession extends Thread {
      *            </p>
      */
     public void setSessionID(String sessionId) {
-        this.mSessionId = sessionId;
+        mSessionId = sessionId;
     }
 
     /**
@@ -395,7 +397,7 @@ public abstract class ImsServiceSession extends Thread {
      * @param remoteDisplayName
      */
     public void setRemoteDisplayName(String remoteDisplayName) {
-        this.mRemoteDisplayName = remoteDisplayName;
+        mRemoteDisplayName = remoteDisplayName;
     }
 
     /**
@@ -466,27 +468,42 @@ public abstract class ImsServiceSession extends Thread {
     /**
      * Wait session invitation answer
      * 
+     * @param timeout value
      * @return Answer
      */
-    public InvitationStatus waitInvitationAnswer() {
+    public InvitationStatus waitInvitationAnswer(long timeout) {
         if (InvitationStatus.INVITATION_NOT_ANSWERED != mInvitationStatus) {
             return mInvitationStatus;
         }
 
         if (sLogger.isActivated()) {
-            sLogger.debug("Wait session invitation answer");
+            sLogger.debug("Wait session invitation answer delay=".concat(Long.toString(timeout)));
         }
 
         // Wait until received response or received timeout
         try {
             synchronized (mWaitUserAnswer) {
-                mWaitUserAnswer.wait(mRingingPeriod * 1000);
+                if (timeout > 0) {
+                    mWaitUserAnswer.wait(timeout);
+                } else {
+                    // Default timeout is ringing period
+                    mWaitUserAnswer.wait(mRingingPeriod * SECONDS_TO_MILILSECONDS_CONVERSION_RATE);
+                }
             }
         } catch (InterruptedException e) {
             mSessionInterrupted = true;
         }
 
         return mInvitationStatus;
+    }
+
+    /**
+     * Wait session invitation answer
+     * 
+     * @return Answer
+     */
+    public InvitationStatus waitInvitationAnswer() {
+        return waitInvitationAnswer(mRingingPeriod * SECONDS_TO_MILILSECONDS_CONVERSION_RATE);
     }
 
     /**

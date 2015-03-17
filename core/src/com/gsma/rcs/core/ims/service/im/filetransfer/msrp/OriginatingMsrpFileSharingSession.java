@@ -49,6 +49,7 @@ import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 import android.net.Uri;
 
@@ -312,7 +313,9 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         ContactId contact = getRemoteContact();
         MmContent content = getContent();
         for (ImsSessionListener listener : getListeners()) {
-            ((FileSharingSessionListener) listener).handleFileTransfered(content, contact);
+            ((FileSharingSessionListener) listener).handleFileTransfered(content, contact,
+                    FileTransferLog.NOT_APPLICABLE_EXPIRATION,
+                    FileTransferLog.NOT_APPLICABLE_EXPIRATION);
         }
         InstantMessagingService imService = ((InstantMessagingService) getImsService());
         String fileTransferId = getFileTransferId();

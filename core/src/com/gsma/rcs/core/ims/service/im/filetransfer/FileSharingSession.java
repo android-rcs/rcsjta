@@ -280,4 +280,19 @@ public abstract class FileSharingSession extends ImsServiceSession {
     public void removeSession() {
         getImsService().getImsModule().getInstantMessagingService().removeSession(this);
     }
+
+    /**
+     * Returns the time when the file on the content server is no longer valid to download.
+     * 
+     * @return time
+     */
+    public abstract long getFileExpiration();
+
+    /**
+     * Returns the time when the file icon on the content server is no longer valid to download.
+     * 
+     * @return time
+     */
+    public abstract long getIconExpiration();
+
 }

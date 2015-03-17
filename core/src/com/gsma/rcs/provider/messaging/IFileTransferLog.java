@@ -49,17 +49,21 @@ public interface IFileTransferLog {
      * @param contact Contact ID
      * @param direction Direction
      * @param content File content
-     * @param fileIcon Fileicon content
+     * @param fileIcon File icon content
      * @param state File transfer state
      * @param reasonCode Reason code
      * @param timestamp Local timestamp for both incoming and outgoing file transfer for one-one
      *            chat
      * @param timestampSent Timestamp sent in payload for both incoming and outgoing file transfer
      *            for one-one chat
+     * @param fileExpiration the time when file on the content server is no longer valid to
+     *            download.
+     * @param fileIconExpiration the time when file icon on the content server is no longer valid to
+     *            download.
      */
     public void addFileTransfer(String fileTransferId, ContactId contact, Direction direction,
             MmContent content, MmContent fileIcon, State state, ReasonCode reasonCode,
-            long timestamp, long timestampSent);
+            long timestamp, long timestampSent, long fileExpiration, long fileIconExpiration);
 
     /**
      * Add an outgoing File Transfer supported by Group Chat
@@ -67,7 +71,7 @@ public interface IFileTransferLog {
      * @param fileTransferId the identity of the file transfer
      * @param chatId the identity of the group chat
      * @param content the File content
-     * @param Fileicon the fileIcon content
+     * @param fileIcon the fileIcon content
      * @param state File transfer state
      * @param reasonCode Reason code
      * @param timestamp Local timestamp for outgoing file transfer for a group chat
@@ -84,15 +88,20 @@ public interface IFileTransferLog {
      * @param chatId Chat ID
      * @param contact Contact ID
      * @param content File content
-     * @param fileIcon Fileicon contentID
+     * @param fileIcon File icon contentID
      * @param state File transfer state
      * @param reasonCode Reason code
      * @param timestamp Local timestamp for incoming file transfer for a group chat
      * @param timestampSent Timestamp sent in payload for incoming file transfer for a group chat
+     * @param fileExpiration the time when file on the content server is no longer valid to
+     *            download.
+     * @param fileIconExpiration the time when file icon on the content server is no longer valid to
+     *            download.
      */
     public void addIncomingGroupFileTransfer(String fileTransferId, String chatId,
             ContactId contact, MmContent content, MmContent fileIcon, State state,
-            ReasonCode reasonCode, long timestamp, long timestampSent);
+            ReasonCode reasonCode, long timestamp, long timestampSent, long fileExpiration,
+            long fileIconExpiration);
 
     /**
      * Set file transfer state and reason code
@@ -113,8 +122,8 @@ public interface IFileTransferLog {
      * @param timestamp New local timestamp for the file transfer
      * @param timestampSent New timestamp sent in payload for the file transfer
      */
-    public void setFileTransferStateAndTimestamps(String fileTransferId, State state, ReasonCode reasonCode,
-            long timestamp, long timestampSent);
+    public void setFileTransferStateAndTimestamps(String fileTransferId, State state,
+            ReasonCode reasonCode, long timestamp, long timestampSent);
 
     /**
      * Update file transfer read status
@@ -136,8 +145,12 @@ public interface IFileTransferLog {
      * 
      * @param fileTransferId File transfer ID
      * @param content the MmContent of received file
+     * @param fileExpiration the time when file on the content server is no longer valid to download
+     * @param fileIconExpiration the time when file icon on the content server is no longer valid to
+     *            download
      */
-    public void setFileTransferred(String fileTransferId, MmContent content);
+    public void setFileTransferred(String fileTransferId, MmContent content, long fileExpiration,
+            long fileIconExpiration);
 
     /**
      * Tells if the MessageID corresponds to that of a file transfer
@@ -165,6 +178,8 @@ public interface IFileTransferLog {
 
     /**
      * Retrieve file transfers paused by SYSTEM on connection loss
+     * 
+     * @return list of FtHttpResume
      */
     public List<FtHttpResume> retrieveFileTransfersPausedBySystem();
 
@@ -172,6 +187,7 @@ public interface IFileTransferLog {
      * Retrieve resumable file upload
      * 
      * @param tId Unique Id used while uploading
+     * @return instance of FtHttpResumeUpload
      */
     public FtHttpResumeUpload retrieveFtHttpResumeUpload(String tId);
 
@@ -232,8 +248,8 @@ public interface IFileTransferLog {
     public FtHttpResume getFileTransferResumeInfo(String fileTransferId);
 
     /**
-     * Get all one-to-one and group file transfers that are in queued state in
-     * ascending order of timestamp
+     * Get all one-to-one and group file transfers that are in queued state in ascending order of
+     * timestamp
      * 
      * @return Cursor
      */
@@ -274,7 +290,16 @@ public interface IFileTransferLog {
 
     /**
      * Update file transfer state for interrupted file transfers
+     * 
      * @return TODO
      */
     public Cursor getInterruptedFileTransfers();
+
+    /**
+     * Sets remote SIP Instance identifier for download HTTP file transfer
+     * 
+     * @param fileTransferId
+     * @param remoteInstanceId
+     */
+    public void setRemoteSipId(String fileTransferId, String remoteInstanceId);
 }

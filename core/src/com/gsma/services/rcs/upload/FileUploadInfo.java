@@ -38,9 +38,9 @@ public class FileUploadInfo implements Parcelable {
     private Uri mFile;
 
     /**
-     * Validity of the file
+     * Time in milliseconds for when file on the content server is no longer valid to download
      */
-    private long mValidity;
+    private long mExpiration;
 
     /**
      * Original filename
@@ -63,9 +63,10 @@ public class FileUploadInfo implements Parcelable {
     private final Uri mFileIcon;
 
     /**
-     * Validity of the file icon
+     * Time in milliseconds for when file icon on the content server is no longer valid to download
+     * or 0 if not applicable
      */
-    private final long mFileIconValidity;
+    private final long mFileIconExpiration;
 
     /**
      * File icon size
@@ -94,12 +95,12 @@ public class FileUploadInfo implements Parcelable {
     public FileUploadInfo(Uri file, long validity, String filename, long size, String type,
             Uri fileIcon, long fileIconValidity, long fileIconSize, String fileIconType) {
         mFile = file;
-        mValidity = validity;
+        mExpiration = validity;
         mFileName = filename;
         mSize = size;
         mMimeType = type;
         mFileIcon = fileIcon;
-        mFileIconValidity = fileIconValidity;
+        mFileIconExpiration = fileIconValidity;
         mFileIconSize = fileIconSize;
         mFileIconMimeType = fileIconType;
     }
@@ -112,12 +113,12 @@ public class FileUploadInfo implements Parcelable {
      */
     public FileUploadInfo(Parcel source) {
         mFile = Uri.parse(source.readString());
-        mValidity = source.readLong();
+        mExpiration = source.readLong();
         mFileName = source.readString();
         mSize = source.readLong();
         mMimeType = source.readString();
         mFileIcon = Uri.parse(source.readString());
-        mFileIconValidity = source.readLong();
+        mFileIconExpiration = source.readLong();
         mFileIconSize = source.readLong();
         mFileIconMimeType = source.readString();
     }
@@ -142,12 +143,12 @@ public class FileUploadInfo implements Parcelable {
      */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mFile.toString());
-        dest.writeLong(mValidity);
+        dest.writeLong(mExpiration);
         dest.writeString(mFileName);
         dest.writeLong(mSize);
         dest.writeString(mMimeType);
         dest.writeString(mFileIcon.toString());
-        dest.writeLong(mFileIconValidity);
+        dest.writeLong(mFileIconExpiration);
         dest.writeLong(mFileIconSize);
         dest.writeString(mFileIconMimeType);
     }
@@ -177,13 +178,12 @@ public class FileUploadInfo implements Parcelable {
     }
 
     /**
-     * Returns the validity of the file on the content server. This corresponds to the date and time
-     * from when the file will be removed on the content server.
+     * Returns the timestamp for when the file on the content server is no longer valid to download.
      * 
-     * @return Duration
+     * @return timestamp in milliseconds
      */
-    public long getValidity() {
-        return mValidity;
+    public long getExpiration() {
+        return mExpiration;
     }
 
     /**
@@ -223,13 +223,13 @@ public class FileUploadInfo implements Parcelable {
     }
 
     /**
-     * Returns the validity of the file icon on the content server. This corresponds to the date and
-     * time from when the file icon will be removed on the content server.
+     * Returns the timestamp for when the file icon on the content server is no longer valid to
+     * download.
      * 
-     * @return Duration
+     * @return timestamp in milliseconds of 0 if not applicable
      */
-    public long getFileIconValidity() {
-        return mFileIconValidity;
+    public long getFileIconExpiration() {
+        return mFileIconExpiration;
     }
 
     /**

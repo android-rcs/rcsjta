@@ -1,5 +1,5 @@
 /*******************************************************************************
-w * Software Name : RCS IMS Stack
+ * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
  * Copyright (C) 2014 Sony Mobile Communications Inc.
@@ -22,45 +22,54 @@ w * Software Name : RCS IMS Stack
 
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
-import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
-import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
+import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
+import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
 /**
- * Resuming session of OriginatingHttpFileSharingSession
- * 
- * @author Benoit JOGUET
+ * Terminating file transfer HTTP session starting from user acceptance (after core was restarted).
  */
-public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSession {
+public class DownloadFromAcceptFileSharingSession extends TerminatingHttpFileSharingSession {
+
+    private final static Logger LOGGER = Logger
+            .getLogger(DownloadFromAcceptFileSharingSession.class.getSimpleName());
 
     /**
-     * The logger
-     */
-    private final static Logger LOGGER = Logger.getLogger(ResumeUploadFileSharingSession.class
-            .getSimpleName());
-
-    /**
-     * Constructor create instance of session object to resume download
+     * Constructor
      * 
      * @param parent IMS service
-     * @param content the content (url, mime-type and size)
-     * @param resumeUpload the data object in DB
+     * @param content the content to be transferred
+     * @param resume the Data Object to access FT HTTP table in DB
      * @param rcsSettings
      * @param messagingLog
      */
-    public ResumeUploadFileSharingSession(ImsService parent, MmContent content,
-            FtHttpResumeUpload resumeUpload, RcsSettings rcsSettings, MessagingLog messagingLog) {
-        super(resumeUpload.getFileTransferId(), parent, content, resumeUpload.getContact(),
-                resumeUpload.getFileicon() != null ? FileTransferUtils.createMmContent(resumeUpload
-                        .getFileicon()) : null, resumeUpload.getTId(), Core.getInstance(),
-                messagingLog, rcsSettings, resumeUpload.getTimestamp(), resumeUpload
-                        .getTimestampSent());
+    public DownloadFromAcceptFileSharingSession(ImsService parent, MmContent content,
+            FtHttpResumeDownload resume, RcsSettings rcsSettings, MessagingLog messagingLog) {
+
+        // @formatter:off
+        super(parent,
+                content,
+                resume.getFileExpiration(),
+                resume.getFileicon() != null ? FileTransferUtils.createMmContent(resume.getFileicon()) : null,
+                resume.getFileicon() != null ? resume.getIconExpiration() : FileTransferData.NOT_APPLICABLE_EXPIRATION,
+                resume.getContact(),
+                null,
+                resume.getChatId(),
+                resume.getFileTransferId(),
+                resume.isGroupTransfer(),
+                resume.getServerAddress(),
+                rcsSettings,
+                messagingLog,
+                resume.getTimestamp(),
+                resume.getRemoteSipInstance());
+        // @formatter:on
+        setSessionAccepted();
     }
 
     /**
@@ -69,26 +78,20 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
     public void run() {
         boolean logActivated = LOGGER.isActivated();
         if (logActivated) {
-            LOGGER.info("Resume a HTTP file transfer session as originating");
+            LOGGER.info("Accept HTTP file transfer session");
         }
         try {
             httpTransferStarted();
-
-            // Resume the file upload to the HTTP server
-            byte[] result = mUploadManager.resumeUpload();
-            sendResultToContact(result);
         } catch (Exception e) {
             if (logActivated) {
                 LOGGER.error("Transfer has failed", e);
             }
             // Unexpected error
             handleError(new FileSharingError(FileSharingError.UNEXPECTED_EXCEPTION, e.getMessage()));
-        }
-    }
+            return;
 
-    @Override
-    public void uploadStarted() {
-        // Upload entry already created in fthttp table
+        }
+        super.run();
     }
 
 }

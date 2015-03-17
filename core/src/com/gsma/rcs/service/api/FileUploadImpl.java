@@ -29,6 +29,7 @@ import com.gsma.rcs.core.ims.service.upload.FileUploadSession;
 import com.gsma.rcs.core.ims.service.upload.FileUploadSessionListener;
 import com.gsma.rcs.service.broadcaster.IFileUploadEventBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import com.gsma.services.rcs.upload.FileUpload;
 import com.gsma.services.rcs.upload.FileUpload.State;
 import com.gsma.services.rcs.upload.FileUploadInfo;
@@ -57,7 +58,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
     private State mState;
 
     /**
-     * mLock used for synchronisation
+     * mLock used for synchronization
      */
     private final Object mLock = new Object();
 
@@ -95,30 +96,30 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
     /**
      * Returns info related to upload file
      * 
-     * @return Upload info or null if not yet upload or in case of error
+     * @return Upload info or null if not yet uploaded or in case of error
      * @see FileUploadInfo
      */
     public FileUploadInfo getUploadInfo() {
         FileUploadSession session = mImService.getFileUploadSession(mUploadId);
-        if (session == null) {
+        FileTransferHttpInfoDocument file;
+        if (session == null || (file = session.getFileInfoDocument()) == null) {
             /*
              * TODO: Throw proper exception as part of CR037 as persisted storage not available for
              * this service!
              */
             throw new IllegalStateException(
-                    "Unable to get file upload info since session with upload ID '" + mUploadId
-                            + "' not available.");
+                    "File upload info not found for session ID=".concat(mUploadId));
         }
-        FileTransferHttpInfoDocument file = session.getFileInfoDocument();
+
         FileTransferHttpThumbnail fileicon = file.getFileThumbnail();
         if (fileicon != null) {
             return new FileUploadInfo(file.getFileUri(), file.getTransferValidity(),
-                    file.getFilename(), file.getFileSize(), file.getFileType(),
-                    fileicon.getThumbnailUri(), fileicon.getThumbnailValidity(),
-                    fileicon.getThumbnailSize(), fileicon.getThumbnailType());
+                    file.getFilename(), file.getFileSize(), file.getFileType(), fileicon.getUri(),
+                    fileicon.getValidity(), fileicon.getSize(), fileicon.getType());
         }
         return new FileUploadInfo(file.getFileUri(), file.getTransferValidity(),
-                file.getFilename(), file.getFileSize(), file.getFileType(), Uri.EMPTY, 0, 0, "");
+                file.getFilename(), file.getFileSize(), file.getFileType(), Uri.EMPTY,
+                FileTransferLog.NOT_APPLICABLE_EXPIRATION, 0, "");
     }
 
     /**
@@ -133,8 +134,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
              * TODO: Throw proper exception as part of CR037 as persisted storage not available for
              * this service!
              */
-            throw new IllegalStateException("Unable to get file since session with upload ID '"
-                    + mUploadId + "' not available.");
+            throw new IllegalStateException("File not found for session ID=".concat(mUploadId));
         }
         return session.getContent().getUri();
     }
@@ -151,8 +151,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
              * TODO: Throw proper exception as part of CR037 as persisted storage not available for
              * this service!
              */
-            throw new IllegalStateException("Unable to get state since session with upload ID '"
-                    + mUploadId + "' not available.");
+            throw new IllegalStateException("State not found for session ID=".concat(mUploadId));
         }
         synchronized (mLock) {
             return mState.toInt();
@@ -171,9 +170,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
             /*
              * TODO: Throw proper exception as part of CR037 implementation
              */
-            throw new IllegalStateException(
-                    "Unable to abort file upload since session with upload ID '" + mUploadId
-                            + "' not available.");
+            throw new IllegalStateException("Cannot abot session with ID=".concat(mUploadId));
         }
 
         // Abort the session

@@ -490,4 +490,3 @@ public class GroupChatLog implements IGroupChatLog {
         return participantsToBeInvited;
     }
 }
-

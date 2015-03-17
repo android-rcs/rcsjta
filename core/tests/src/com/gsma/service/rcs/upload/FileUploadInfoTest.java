@@ -94,12 +94,13 @@ public class FileUploadInfoTest extends AndroidTestCase {
         // finish round trip
         FileUploadInfo createFromParcel = FileUploadInfo.CREATOR.createFromParcel(parcel);
         assertEquals(createFromParcel.getFile(), tfileUploadInfo.getFile());
-        assertEquals(createFromParcel.getValidity(), tfileUploadInfo.getValidity());
+        assertEquals(createFromParcel.getExpiration(), tfileUploadInfo.getExpiration());
         assertEquals(createFromParcel.getFileName(), tfileUploadInfo.getFileName());
         assertEquals(createFromParcel.getSize(), tfileUploadInfo.getSize());
         assertEquals(createFromParcel.getMimeType(), tfileUploadInfo.getMimeType());
         assertEquals(createFromParcel.getFileIcon(), tfileUploadInfo.getFileIcon());
-        assertEquals(createFromParcel.getFileIconValidity(), tfileUploadInfo.getFileIconValidity());
+        assertEquals(createFromParcel.getFileIconExpiration(),
+                tfileUploadInfo.getFileIconExpiration());
         assertEquals(createFromParcel.getFileIconMimeType(), tfileUploadInfo.getFileIconMimeType());
         assertEquals(createFromParcel.getFileIconSize(), tfileUploadInfo.getFileIconSize());
     }

@@ -26,58 +26,74 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
+import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
+import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contact.ContactId;
 
 /**
- * @author yplo6403
+ * Terminating file transfer HTTP session starting from system resuming (because core was
+ * restarted).
  */
-public class ResumeDownloadFileSharingSession extends TerminatingHttpFileSharingSession {
+public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSharingSession {
 
-    /**
-     * The logger
-     */
-    private final static Logger logger = Logger.getLogger(ResumeDownloadFileSharingSession.class
-            .getSimpleName());
+    private final static Logger LOGGER = Logger
+            .getLogger(DownloadFromResumeFileSharingSession.class.getSimpleName());
+
+    private final FtHttpResumeDownload mResume;
 
     /**
      * Constructor create instance of session object to resume download
      * 
      * @param parent IMS service
      * @param content the content (url, mime-type and size)
-     * @param resumeDownload the data object in DB
+     * @param resume the data object in DB
      * @param rcsSettings
      * @param messagingLog
      */
-    public ResumeDownloadFileSharingSession(ImsService parent, MmContent content,
-            FtHttpResumeDownload resumeDownload, RcsSettings rcsSettings,
-            MessagingLog messagingLog) {
-        super(parent, content, resumeDownload, rcsSettings, messagingLog);
+
+    public DownloadFromResumeFileSharingSession(ImsService parent, MmContent content,
+            FtHttpResumeDownload resume, RcsSettings rcsSettings, MessagingLog messagingLog) {
+        // @formatter:off
+        super(parent,
+                content,
+                resume.getFileExpiration(),
+                resume.getFileicon() != null ? FileTransferUtils.createMmContent(resume.getFileicon()) : null,
+                resume.getFileicon() != null ? resume.getIconExpiration() : FileTransferData.NOT_APPLICABLE_EXPIRATION,
+                resume.getContact(),
+                null,
+                resume.getChatId(),
+                resume.getFileTransferId(),
+                resume.isGroupTransfer(),
+                resume.getServerAddress(),
+                rcsSettings,
+                messagingLog,
+                resume.getTimestamp(),
+                resume.getRemoteSipInstance());
+        // @formatter:on
+        mResume = resume;
     }
 
     /**
      * Background processing
      */
     public void run() {
+        boolean logActivated = LOGGER.isActivated();
+        if (logActivated) {
+            LOGGER.info("Resume a HTTP file transfer session as terminating");
+        }
         try {
-            if (logger.isActivated()) {
-                logger.info("Resume a HTTP file transfer session as terminating");
-            }
-            ContactId contact = getRemoteContact();
-            for (int j = 0; j < getListeners().size(); j++) {
-                getListeners().get(j).handleSessionStarted(contact);
-            }
+            httpTransferStarted();
 
             // Resume download file from the HTTP server
-            if (downloadManager.mStreamForFile != null && downloadManager.resumeDownload()) {
-                if (logger.isActivated()) {
-                    logger.debug("Resume download success for " + mResumeFT);
+            if (mDownloadManager.mStreamForFile != null && mDownloadManager.resumeDownload()) {
+                if (logActivated) {
+                    LOGGER.debug("Resume download success for ".concat(mResume.toString()));
                 }
                 // Set file URL
-                getContent().setUri(downloadManager.getDownloadedFileUri());
+                getContent().setUri(mDownloadManager.getDownloadedFileUri());
 
                 // File transfered
                 handleFileTransfered();
@@ -86,19 +102,19 @@ public class ResumeDownloadFileSharingSession extends TerminatingHttpFileSharing
                         System.currentTimeMillis());
             } else {
                 // Don't call handleError in case of Pause or Cancel
-                if (downloadManager.isCancelled() || downloadManager.isPaused()) {
+                if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {
                     return;
                 }
 
                 // Upload error
-                if (logger.isActivated()) {
-                    logger.info("Resume Download file has failed");
+                if (logActivated) {
+                    LOGGER.info("Resume Download file has failed");
                 }
                 handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED));
             }
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Transfer has failed", e);
+            if (logActivated) {
+                LOGGER.error("Transfer has failed", e);
             }
             // Unexpected error
             handleError(new FileSharingError(FileSharingError.UNEXPECTED_EXCEPTION, e.getMessage()));

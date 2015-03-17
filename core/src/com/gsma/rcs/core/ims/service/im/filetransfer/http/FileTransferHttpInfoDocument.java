@@ -38,32 +38,32 @@ public class FileTransferHttpInfoDocument {
     /**
      * File size
      */
-    private int size = 0;
+    private int mSize = 0;
 
     /**
      * File content type
      */
-    private String type = null;
+    private String mType;
 
     /**
      * URI of the file
      */
-    private Uri file = null;
+    private Uri mFile;
 
     /**
      * Validity of the file
      */
-    private long validity = 0;
+    private long mValidity = 0;
 
     /**
      * File thumbnail
      */
-    private FileTransferHttpThumbnail thumbnail = null;
+    private FileTransferHttpThumbnail mThumbnail;
 
     /**
      * Filename
      */
-    private String fileName;
+    private String mFileName;
 
     /**
      * Constructor
@@ -77,7 +77,7 @@ public class FileTransferHttpInfoDocument {
      * @param thumbnail Thumbnail
      */
     public void setFileThumbnail(FileTransferHttpThumbnail thumbnail) {
-        this.thumbnail = thumbnail;
+        mThumbnail = thumbnail;
     }
 
     /**
@@ -86,25 +86,25 @@ public class FileTransferHttpInfoDocument {
      * @return File thumbnail
      */
     public FileTransferHttpThumbnail getFileThumbnail() {
-        return thumbnail;
+        return mThumbnail;
     }
 
     /**
-     * Get file transfer validity
+     * Get file transfer validity in milliseconds
      * 
      * @return Validity
      */
     public long getTransferValidity() {
-        return validity;
+        return mValidity;
     }
 
     /**
-     * Set file transfer validity
+     * Set file transfer validity in milliseconds
      * 
-     * @param validity Validity
+     * @param validity
      */
     public void setTransferValidity(long validity) {
-        this.validity = validity;
+        mValidity = validity;
     }
 
     /**
@@ -113,7 +113,7 @@ public class FileTransferHttpInfoDocument {
      * @return File URI
      */
     public Uri getFileUri() {
-        return file;
+        return mFile;
     }
 
     /**
@@ -122,7 +122,7 @@ public class FileTransferHttpInfoDocument {
      * @param file
      */
     public void setFileUri(Uri file) {
-        this.file = file;
+        mFile = file;
     }
 
     /**
@@ -131,7 +131,7 @@ public class FileTransferHttpInfoDocument {
      * @return File content type
      */
     public String getFileType() {
-        return type;
+        return mType;
     }
 
     /**
@@ -140,7 +140,7 @@ public class FileTransferHttpInfoDocument {
      * @param type File content type
      */
     public void setFileType(String type) {
-        this.type = type;
+        mType = type;
     }
 
     /**
@@ -149,7 +149,7 @@ public class FileTransferHttpInfoDocument {
      * @return File size
      */
     public int getFileSize() {
-        return size;
+        return mSize;
     }
 
     /**
@@ -158,7 +158,7 @@ public class FileTransferHttpInfoDocument {
      * @param size File size
      */
     public void setFileSize(int size) {
-        this.size = size;
+        mSize = size;
     }
 
     /**
@@ -167,7 +167,7 @@ public class FileTransferHttpInfoDocument {
      * @param fileName FileName
      */
     public void setFilename(String fileName) {
-        this.fileName = fileName;
+        mFileName = fileName;
     }
 
     /**
@@ -176,6 +176,6 @@ public class FileTransferHttpInfoDocument {
      * @return FileName
      */
     public String getFilename() {
-        return fileName;
+        return mFileName;
     }
 }

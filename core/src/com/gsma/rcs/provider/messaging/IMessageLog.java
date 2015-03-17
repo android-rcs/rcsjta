@@ -89,7 +89,6 @@ public interface IMessageLog {
      * Update chat message read status
      * 
      * @param msgId Message ID
-     * @param status Message status
      */
     public void markMessageAsRead(String msgId);
 

@@ -35,58 +35,58 @@ public class FileTransferHttpResumeInfo extends DefaultHandler {
     /**
      * start-offset in bytes
      */
-    private int start = 0;
+    private int mStart = 0;
 
     /**
      * end-offset in bytes
      */
-    private int end = 0;
+    private int mEnd = 0;
 
     /**
      * HTTP upload Uri for the file
      */
-    private Uri file = null;
+    private Uri mFile;
 
     /**
      * @return the start
      */
     protected int getStart() {
-        return start;
+        return mStart;
     }
 
     /**
      * @param start the start to set
      */
     protected void setStart(int start) {
-        this.start = start;
+        mStart = start;
     }
 
     /**
      * @return the end
      */
     protected int getEnd() {
-        return end;
+        return mEnd;
     }
 
     /**
      * @param end the end to set
      */
     protected void setEnd(int end) {
-        this.end = end;
+        mEnd = end;
     }
 
     /**
      * @return the Uri
      */
     protected Uri getUri() {
-        return file;
+        return mFile;
     }
 
     /**
      * @param file the Uri to set
      */
     protected void setUri(Uri file) {
-        this.file = file;
+        mFile = file;
     }
 
 }

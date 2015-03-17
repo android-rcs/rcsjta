@@ -31,25 +31,13 @@ import android.net.Uri;
  */
 public class FileTransferHttpThumbnail {
 
-    /**
-     * Thumbnail size
-     */
-    private int size = 0;
+    private int mSize = 0;
 
-    /**
-     * Thumbnail content type
-     */
-    private String contentType = null;
+    private String mContentType;
 
-    /**
-     * Thumbnail URI
-     */
-    private Uri thumbnail = null;
+    private Uri mUri;
 
-    /**
-     * Validity of the file thumbnail
-     */
-    private long validity = 0;
+    private long mValidity = 0;
 
     /**
      * Constructor
@@ -58,74 +46,74 @@ public class FileTransferHttpThumbnail {
     }
 
     /**
-     * Get thumbnail validity
+     * Gets validity
      * 
-     * @return Thumbnail validity
+     * @return validity
      */
-    public long getThumbnailValidity() {
-        return validity;
+    public long getValidity() {
+        return mValidity;
     }
 
     /**
-     * Set thumbnail validity
+     * Sets validity
      * 
-     * @param validity Thumbnail validity
+     * @param validity validity
      */
-    public void setThumbnailValidity(long validity) {
-        this.validity = validity;
+    public void setValidity(long validity) {
+        mValidity = validity;
     }
 
     /**
-     * Get thumbnail URI
+     * Gets URI
      * 
-     * @return Thumbnail URI
+     * @return URI
      */
-    public Uri getThumbnailUri() {
-        return thumbnail;
+    public Uri getUri() {
+        return mUri;
     }
 
     /**
-     * Set thumbnail URI
+     * Sets URI
      * 
-     * @param thumbnail Thumbnail URI
+     * @param thumbnail URI
      */
-    public void setThumbnailUri(Uri thumbnail) {
-        this.thumbnail = thumbnail;
+    public void setUri(Uri thumbnail) {
+        mUri = thumbnail;
     }
 
     /**
-     * Get thumbnail content type
+     * Gets content type
      * 
-     * @return Thumbnail content type
+     * @return content type
      */
-    public String getThumbnailType() {
-        return contentType;
+    public String getType() {
+        return mContentType;
     }
 
     /**
-     * Set thumbnail content type
+     * Sets content type
      * 
      * @param type
      */
-    public void setThumbnailType(String type) {
-        this.contentType = type;
+    public void setType(String type) {
+        mContentType = type;
     }
 
     /**
-     * Get thumbnail size
+     * Gets size
      * 
-     * @return Thumbnail size
+     * @return size
      */
-    public int getThumbnailSize() {
-        return size;
+    public int getSize() {
+        return mSize;
     }
 
     /**
-     * Set thumbnail size
+     * Sets size
      * 
-     * @param size Thumbnail size
+     * @param size
      */
-    public void setThumbnailSize(int size) {
-        this.size = size;
+    public void setSize(int size) {
+        mSize = size;
     }
 }

@@ -64,6 +64,8 @@ public class ImdnManager extends Thread {
 
     private final RcsSettings mRcsSettings;
 
+    private final MessagingLog mMessagingLog;
+
     /**
      * The logger
      */
@@ -74,11 +76,13 @@ public class ImdnManager extends Thread {
      * 
      * @param imsService IMS service
      * @param rcsSettings
+     * @param messagingLog
      */
-    public ImdnManager(ImsService imsService, RcsSettings rcsSettings) {
+    public ImdnManager(ImsService imsService, RcsSettings rcsSettings, MessagingLog messagingLog) {
         mImsService = imsService;
         mActivated = rcsSettings.isImReportsActivated();
         mRcsSettings = rcsSettings;
+        mMessagingLog = messagingLog;
     }
 
     /**
@@ -117,8 +121,7 @@ public class ImdnManager extends Thread {
                 // Since the requested display report was now successfully send we mark this message
                 // as fully received
                 if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(delivery.getStatus()))
-                    MessagingLog.getInstance().markIncomingChatMessageAsReceived(
-                            delivery.getMsgId());
+                    mMessagingLog.markIncomingChatMessageAsReceived(delivery.getMsgId());
             } catch (Exception e) {
                 if (sLogger.isActivated()) {
                     sLogger.error("Unexpected exception", e);

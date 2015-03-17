@@ -159,18 +159,20 @@ public interface CoreListener {
      * @param isGroup is Group file transfer
      * @param contact Contact ID
      * @param displayName the display name of the remote contact
+     * @param fileExpiration file transfer validity in milliseconds (or 0 if not applicable)
      */
     public void handleFileTransferInvitation(FileSharingSession fileSharingSession,
-            boolean isGroup, ContactId contact, String displayName);
+            boolean isGroup, ContactId contact, String displayName, long fileExpiration);
 
     /**
      * A new file transfer invitation has been received
      * 
      * @param fileSharingSession File transfer session
      * @param oneToOneChatSession Chat session
+     * @param fileTransferValidity file transfer validity in milliseconds (or 0 if applicable)
      */
     public void handleOneToOneFileTransferInvitation(FileSharingSession fileSharingSession,
-            OneToOneChatSession oneToOneChatSession);
+            OneToOneChatSession oneToOneChatSession, long fileTransferValidity);
 
     /**
      * An incoming file transfer has been resumed
@@ -422,6 +424,7 @@ public interface CoreListener {
     /**
      * Try to dequeue group chat messages and group file transfers
      * 
+     * @param chatId
      * @param imService
      */
     public void tryToDequeueGroupChatMessagesAndGroupFileTransfers(String chatId,
@@ -447,7 +450,7 @@ public interface CoreListener {
      * Try to mark all queued group chat messages and group file transfers corresponding to contact
      * as failed
      * 
-     * @param contact
+     * @param chatId
      */
     public void tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(String chatId);
 }

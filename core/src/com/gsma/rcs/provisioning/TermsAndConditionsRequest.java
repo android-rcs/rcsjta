@@ -24,6 +24,7 @@ package com.gsma.rcs.provisioning;
 
 import com.gsma.rcs.R;
 import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.LauncherUtils;
 
@@ -68,6 +69,8 @@ public class TermsAndConditionsRequest extends Activity {
         final LocalContentResolver localContentResolver = new LocalContentResolver(ctx);
 
         final RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
+        final MessagingLog messaginLog = MessagingLog.createInstance(ctx, localContentResolver,
+                rcsSettings);
 
         Intent intent = getIntent();
         if (intent == null) {
@@ -110,7 +113,8 @@ public class TermsAndConditionsRequest extends Activity {
                             // If the user declines the terms, the RCS service is stopped
                             // and the RCS config is reset
                             LauncherUtils.stopRcsService(ctx);
-                            LauncherUtils.resetRcsConfig(ctx, localContentResolver, rcsSettings);
+                            LauncherUtils.resetRcsConfig(ctx, localContentResolver, rcsSettings,
+                                    messaginLog);
                             rcsSettings.setProvisioningVersion("0");
                             finish();
                         }

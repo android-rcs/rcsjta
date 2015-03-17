@@ -23,6 +23,7 @@
 package com.gsma.rcs.provisioning.https;
 
 import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provisioning.ProvisioningInfo;
 import com.gsma.rcs.service.LauncherUtils;
@@ -72,6 +73,8 @@ public class HttpsProvisioningService extends Service {
 
     private Context mContext;
 
+    private MessagingLog mMessagingLog;
+
     /**
      * Retry action for provisioning failure
      */
@@ -91,6 +94,7 @@ public class HttpsProvisioningService extends Service {
         mContext = getApplicationContext();
         mLocalContentResolver = new LocalContentResolver(mContext.getContentResolver());
         mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
+        mMessagingLog = MessagingLog.createInstance(mContext, mLocalContentResolver, mRcsSettings);
         mRetryIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_RETRY), 0);
     }
 
@@ -121,7 +125,7 @@ public class HttpsProvisioningService extends Service {
         registerReceiver(retryReceiver, new IntentFilter(ACTION_RETRY));
 
         mHttpsProvisioningMng = new HttpsProvisioningManager(mContext, mLocalContentResolver,
-                mRetryIntent, first, user, mRcsSettings);
+                mRetryIntent, first, user, mRcsSettings, mMessagingLog);
         if (logActivated) {
             sLogger.debug(new StringBuilder("Provisioning (boot=").append(first).append(") (user=")
                     .append(user).append(") (version=").append(version).append(")").toString());

@@ -177,7 +177,7 @@ public abstract class GroupChatSession extends ChatSession {
     /**
      * Returns participants with ParticipantStatus status.
      * 
-     * @param participantStatus Status of participants to be returned.
+     * @param status of participants to be returned.
      * @return Set of participants with status participantStatus.
      */
     public Map<ContactId, ParticipantStatus> getParticipants(ParticipantStatus status) {
@@ -475,7 +475,7 @@ public abstract class GroupChatSession extends ChatSession {
     /**
      * Add a set of participants to the session
      * 
-     * @param participants set of participants
+     * @param contacts set of participants
      */
     public void inviteParticipants(Set<ContactId> contacts) {
         try {

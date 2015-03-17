@@ -98,14 +98,16 @@ public class FileTransferProvider extends ContentProvider {
             FileTransferLog.FILESIZE, FileTransferLog.TRANSFERRED, FileTransferLog.TIMESTAMP,
             FileTransferLog.TIMESTAMP_SENT, FileTransferLog.TIMESTAMP_DELIVERED,
             FileTransferLog.TIMESTAMP_DISPLAYED, FileTransferLog.STATE,
-            FileTransferLog.REASON_CODE, FileTransferLog.READ_STATUS
+            FileTransferLog.REASON_CODE, FileTransferLog.READ_STATUS,
+            FileTransferLog.FILE_EXPIRATION, FileTransferLog.FILEICON_EXPIRATION
     };
 
     /**
      * Columns that are not exposed through external URI
      */
     private static final String[] COLUMNS_HIDDEN_FOR_EXTERNAL_ACCESS = new String[] {
-            FileTransferData.KEY_UPLOAD_TID, FileTransferData.KEY_DOWNLOAD_URI
+            FileTransferData.KEY_UPLOAD_TID, FileTransferData.KEY_DOWNLOAD_URI,
+            FileTransferData.KEY_REMOTE_SIP_ID
     };
 
     private static final Set<String> COLUMN_SET_HIDDEN_FOR_EXTERNAL_ACCESS = new HashSet<String>(
@@ -122,7 +124,7 @@ public class FileTransferProvider extends ContentProvider {
     public static final String DATABASE_NAME = "filetransfer.db";
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 14;
+        private static final int DATABASE_VERSION = 15;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -151,7 +153,10 @@ public class FileTransferProvider extends ContentProvider {
                     .append(FileTransferData.KEY_FILEICON).append(" TEXT,")
                     .append(FileTransferData.KEY_UPLOAD_TID).append(" TEXT,")
                     .append(FileTransferData.KEY_DOWNLOAD_URI).append(" TEXT,")
-                    .append(FileTransferData.KEY_FILEICON_MIME_TYPE).append(" TEXT)").toString());
+                    .append(FileTransferData.KEY_FILEICON_MIME_TYPE).append(" TEXT,")
+                    .append(FileTransferData.KEY_FILEICON_EXPIRATION).append(" INTEGER,")
+                    .append(FileTransferData.KEY_FILE_EXPIRATION).append(" INTEGER NOT NULL,")
+                    .append(FileTransferData.KEY_REMOTE_SIP_ID).append(" TEXT)").toString());
             db.execSQL(new StringBuilder("CREATE INDEX ")
                     .append(FileTransferData.KEY_BASECOLUMN_ID).append("_idx").append(" ON ")
                     .append(TABLE).append("(").append(FileTransferData.KEY_BASECOLUMN_ID)

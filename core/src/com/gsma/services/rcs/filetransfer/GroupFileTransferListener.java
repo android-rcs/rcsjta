@@ -44,7 +44,7 @@ public abstract class GroupFileTransferListener {
      * @param chatId Id of chat
      * @param contact Contact ID
      * @param transferId Id of file transfer
-     * @param state state of file transfer after change
+     * @param status state of file transfer after change
      * @param reasonCode Reason code of state after change
      */
     public abstract void onDeliveryInfoChanged(String chatId, ContactId contact, String transferId,

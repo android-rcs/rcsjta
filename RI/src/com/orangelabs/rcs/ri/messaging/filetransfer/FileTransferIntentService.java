@@ -76,15 +76,15 @@ public class FileTransferIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        if (intent == null || intent.getAction() == null) {
+        String action;
+        if (intent == null || (action = intent.getAction()) == null) {
             return;
         }
         // Check action from incoming intent
-        if (!intent.getAction().equalsIgnoreCase(FileTransferIntent.ACTION_NEW_INVITATION)
-                && !intent.getAction()
-                        .equalsIgnoreCase(FileTransferResumeReceiver.ACTION_FT_RESUME)) {
+        if (!FileTransferIntent.ACTION_NEW_INVITATION.equals(action)
+                && !FileTransferResumeReceiver.ACTION_FT_RESUME.equals(action)) {
             if (LogUtils.isActive) {
-                Log.e(LOGTAG, "Unknown action " + intent.getAction());
+                Log.e(LOGTAG, "Unknown action ".concat(action));
             }
             return;
         }
@@ -97,7 +97,7 @@ public class FileTransferIntentService extends IntentService {
             return;
         }
         if (LogUtils.isActive) {
-            Log.d(LOGTAG, "onHandleIntent file transfer with ID " + transferId);
+            Log.d(LOGTAG, "onHandleIntent file transfer with ID ".concat(transferId));
         }
         try {
             // Get File Transfer from provider
@@ -122,7 +122,7 @@ public class FileTransferIntentService extends IntentService {
             Bundle bundle = new Bundle();
             bundle.putParcelable(BUNDLE_FTDAO_ID, ftDao);
             intent.putExtras(bundle);
-            if (intent.getAction().equalsIgnoreCase(FileTransferIntent.ACTION_NEW_INVITATION)) {
+            if (FileTransferIntent.ACTION_NEW_INVITATION.equals(action)) {
                 if (LogUtils.isActive) {
                     Log.d(LOGTAG, "File Transfer invitation filename=" + ftDao.getFilename()
                             + " size=" + ftDao.getSize());
@@ -132,7 +132,7 @@ public class FileTransferIntentService extends IntentService {
                 addFileTransferInvitationNotification(intent, ftDao);
             } else {
                 if (LogUtils.isActive) {
-                    Log.d(LOGTAG, "onHandleIntent file transfer resume with ID " + transferId);
+                    Log.d(LOGTAG, "onHandleIntent file transfer resume with ID ".concat(transferId));
                 }
                 Intent intentLocal = new Intent(intent);
                 if (Direction.INCOMING == ftDao.getDirection()) {

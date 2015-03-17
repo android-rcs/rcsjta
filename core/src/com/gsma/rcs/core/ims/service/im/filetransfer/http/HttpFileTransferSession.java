@@ -31,14 +31,13 @@ import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
-import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 
-import java.util.Collection;
+import android.util.SparseArray;
 
 /**
  * Abstract file transfer HTTP session
@@ -48,6 +47,59 @@ import java.util.Collection;
 public abstract class HttpFileTransferSession extends FileSharingSession {
 
     /**
+     * HttpFileTransferSession state
+     */
+    public enum State {
+
+        /**
+         * Session is pending (not yet accepted by a final response by the remote)
+         */
+        PENDING(0),
+
+        /**
+         * Session has been established (i.e. 200 OK/ACK exchanged)
+         */
+        ESTABLISHED(1);
+
+        private final int mValue;
+
+        private static SparseArray<State> mValueToEnum = new SparseArray<State>();
+        static {
+            for (State entry : State.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
+
+        private State(int value) {
+            mValue = value;
+        }
+
+        /**
+         * Gets integer value associated to State instance
+         * 
+         * @return value
+         */
+        public final int toInt() {
+            return mValue;
+        }
+
+        /**
+         * Returns a State instance for the specified integer value.
+         * 
+         * @param value
+         * @return instance
+         */
+        public final static State valueOf(int value) {
+            State entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(State.class.getName()).append(".").append(value).append("!").toString());
+        }
+    }
+
+    /**
      * Chat session ID
      */
     private String mChatSessionId;
@@ -55,19 +107,18 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
     /**
      * Session state
      */
-    private int mSessionState;
+    private State mSessionState;
 
-    /**
-     * Data object to access the resume FT instance in DB
-     */
-    protected FtHttpResume mResumeFT;
+    private long mFileExpiration;
+
+    private long mIconExpiration;
 
     protected final MessagingLog mMessagingLog;
 
     /**
      * The logger
      */
-    private static final Logger sLogger = Logger.getLogger(HttpFileTransferSession.class
+    private static final Logger LOGGER = Logger.getLogger(HttpFileTransferSession.class
             .getSimpleName());
 
     /**
@@ -82,17 +133,22 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * @param chatContributionId Chat contribution Id
      * @param fileTransferId File transfer Id
      * @param rcsSettings
+     * @param fileExpiration
+     * @param iconExpiration
      * @param messagingLog
      * @param timestamp Local timestamp for the session
      */
     public HttpFileTransferSession(ImsService parent, MmContent content, ContactId contact,
             String remoteUri, MmContent fileIcon, String chatSessionId, String chatContributionId,
             String fileTransferId, RcsSettings rcsSettings, MessagingLog messagingLog,
-            long timestamp) {
+            long timestamp, long fileExpiration, long iconExpiration) {
         super(parent, content, contact, remoteUri, fileIcon, fileTransferId, rcsSettings, timestamp);
+
         mChatSessionId = chatSessionId;
         setContributionID(chatContributionId);
-        mSessionState = HttpTransferState.PENDING;
+        mSessionState = State.PENDING;
+        mFileExpiration = fileExpiration;
+        mIconExpiration = iconExpiration;
         mMessagingLog = messagingLog;
     }
 
@@ -116,7 +172,43 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * @param chatSessionID
      */
     public void setChatSessionID(String chatSessionID) {
-        this.mChatSessionId = chatSessionID;
+        mChatSessionId = chatSessionID;
+    }
+
+    /**
+     * Returns the time when file on the content server is no longer valid to download.
+     * 
+     * @return the time
+     */
+    public long getFileExpiration() {
+        return mFileExpiration;
+    }
+
+    /**
+     * Sets the time when file on the content server is no longer valid to download.
+     * 
+     * @param time
+     */
+    public void setFileExpiration(long time) {
+        mFileExpiration = time;
+    }
+
+    /**
+     * Returns the time when file icon on the content server is no longer valid to download.
+     * 
+     * @return the time
+     */
+    public long getIconExpiration() {
+        return mIconExpiration;
+    }
+
+    /**
+     * Sets the time when file icon on the content server is no longer valid to download.
+     * 
+     * @param time
+     */
+    public void setIconExpiration(long time) {
+        mIconExpiration = time;
     }
 
     /**
@@ -143,6 +235,12 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         /* If reason is TERMINATION_BY_SYSTEM and session already started, then it's a pause */
         String fileTransferId = getFileTransferId();
         FileTransfer.State state = mMessagingLog.getFileTransferState(fileTransferId);
+        /* If reason is TERMINATION_BY_SYSTEM and session already started, then it's a pause */
+        boolean logActivated = LOGGER.isActivated();
+        if (logActivated) {
+            LOGGER.error("abortSession reason=".concat(reason.toString()));
+        }
+
         if (TerminationReason.TERMINATION_BY_SYSTEM == reason) {
             switch (state) {
                 case INVITED:
@@ -154,8 +252,8 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
                         break;
                     }
                     closeSession(reason);
-                    if (sLogger.isActivated()) {
-                        sLogger.info("Pause the session (session terminated, but can be resumed)");
+                    if (logActivated) {
+                        LOGGER.info("Pause the session (session terminated, but can be resumed)");
                     }
 
                     ContactId contact = getRemoteContact();
@@ -185,17 +283,16 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         }
 
         // Error
-        if (sLogger.isActivated()) {
-            sLogger.info("Transfer error: " + error.getErrorCode() + ", reason="
-                    + error.getMessage());
+        if (LOGGER.isActivated()) {
+            LOGGER.info(new StringBuilder("Transfer error: ").append(error.getErrorCode())
+                    .append(", reason=").append(error.getMessage()).toString());
         }
 
         // Remove the current session
         removeSession();
 
-        Collection<ImsSessionListener> listeners = getListeners();
         ContactId contact = getRemoteContact();
-        for (ImsSessionListener listener : listeners) {
+        for (ImsSessionListener listener : getListeners()) {
             ((FileSharingSessionListener) listener).handleTransferError(
                     new FileSharingError(error), contact);
         }
@@ -238,11 +335,13 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         // Remove the current session
         removeSession();
 
-        Collection<ImsSessionListener> listeners = getListeners();
         ContactId contact = getRemoteContact();
         MmContent content = getContent();
-        for (ImsSessionListener listener : listeners) {
-            ((FileSharingSessionListener) listener).handleFileTransfered(content, contact);
+        long fileExpiration = getFileExpiration();
+        long fileIconExpiration = getIconExpiration();
+        for (ImsSessionListener listener : getListeners()) {
+            ((FileSharingSessionListener) listener).handleFileTransfered(content, contact,
+                    fileExpiration, fileIconExpiration);
         }
     }
 
@@ -253,9 +352,8 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * @param totalSize Total size in bytes
      */
     public void httpTransferProgress(long currentSize, long totalSize) {
-        Collection<ImsSessionListener> listeners = getListeners();
         ContactId contact = getRemoteContact();
-        for (ImsSessionListener listener : listeners) {
+        for (ImsSessionListener listener : getListeners()) {
             ((FileSharingSessionListener) listener).handleTransferProgress(contact, currentSize,
                     totalSize);
         }
@@ -265,9 +363,8 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * HTTP not allowed to send
      */
     public void httpTransferNotAllowedToSend() {
-        Collection<ImsSessionListener> listeners = getListeners();
         ContactId contact = getRemoteContact();
-        for (ImsSessionListener listener : listeners) {
+        for (ImsSessionListener listener : getListeners()) {
             ((FileSharingSessionListener) listener).handleTransferNotAllowedToSend(contact);
         }
     }
@@ -276,10 +373,10 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * HTTP transfer started HttpTransferEventListener implementation
      */
     public void httpTransferStarted() {
-        this.mSessionState = HttpTransferState.ESTABLISHED;
+        mSessionState = State.ESTABLISHED;
         ContactId contact = getRemoteContact();
-        for (int j = 0; j < getListeners().size(); j++) {
-            ((FileSharingSessionListener) getListeners().get(j)).handleSessionStarted(contact);
+        for (ImsSessionListener listener : getListeners()) {
+            ((FileSharingSessionListener) listener).handleSessionStarted(contact);
         }
     }
 
@@ -287,9 +384,8 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * Handle file transfer paused by user
      */
     public void httpTransferPausedByUser() {
-        Collection<ImsSessionListener> listeners = getListeners();
         ContactId contact = getRemoteContact();
-        for (ImsSessionListener listener : listeners) {
+        for (ImsSessionListener listener : getListeners()) {
             ((FileSharingSessionListener) listener).handleFileTransferPausedByUser(contact);
         }
     }
@@ -298,9 +394,8 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * Handle file transfer paused by system
      */
     public void httpTransferPausedBySystem() {
-        Collection<ImsSessionListener> listeners = getListeners();
         ContactId contact = getRemoteContact();
-        for (ImsSessionListener listener : listeners) {
+        for (ImsSessionListener listener : getListeners()) {
             ((FileSharingSessionListener) listener).handleFileTransferPausedBySystem(contact);
         }
     }
@@ -309,9 +404,8 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * Handle file transfer paused
      */
     public void httpTransferResumed() {
-        Collection<ImsSessionListener> listeners = getListeners();
         ContactId contact = getRemoteContact();
-        for (ImsSessionListener listener : listeners) {
+        for (ImsSessionListener listener : getListeners()) {
             ((FileSharingSessionListener) listener).handleFileTransferResumed(contact);
         }
     }
@@ -321,7 +415,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * 
      * @return State
      */
-    public int getSessionState() {
+    public State getSessionState() {
         return mSessionState;
     }
 
@@ -329,8 +423,8 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * Pausing file transfer Implementation should be overridden in subclasses
      */
     public void pauseFileTransfer() {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Pausing is not available");
+        if (LOGGER.isActivated()) {
+            LOGGER.debug("Pausing is not available");
         }
     }
 
@@ -338,8 +432,8 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * Resuming file transfer Implementation should be overridden in subclasses
      */
     public void resumeFileTransfer() {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Resuming is not available");
+        if (LOGGER.isActivated()) {
+            LOGGER.debug("Resuming is not available");
         }
     }
 }

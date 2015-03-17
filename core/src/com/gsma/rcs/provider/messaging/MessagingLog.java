@@ -78,26 +78,19 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      * @param context Context
      * @param localContentResolver Local content resolver
      * @param rcsSettings
+     * @return singleton instance
      */
-    public static void createInstance(Context context, LocalContentResolver localContentResolver,
-            RcsSettings rcsSettings) {
+    public static MessagingLog createInstance(Context context,
+            LocalContentResolver localContentResolver, RcsSettings rcsSettings) {
         if (sInstance != null) {
-            return;
+            return sInstance;
         }
         synchronized (MessagingLog.class) {
             if (sInstance == null) {
                 sInstance = new MessagingLog(context, localContentResolver, rcsSettings);
             }
+            return sInstance;
         }
-    }
-
-    /**
-     * Returns instance
-     * 
-     * @return Instance
-     */
-    public static MessagingLog getInstance() {
-        return sInstance;
     }
 
     /**
@@ -204,9 +197,10 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     @Override
     public void addFileTransfer(String fileTransferId, ContactId contact, Direction direction,
             MmContent content, MmContent fileIcon, FileTransfer.State state,
-            FileTransfer.ReasonCode reasonCode, long timestamp, long timestampSent) {
+            FileTransfer.ReasonCode reasonCode, long timestamp, long timestampSent,
+            long fileExpiration, long fileIconExpiration) {
         mFileTransferLog.addFileTransfer(fileTransferId, contact, direction, content, fileIcon,
-                state, reasonCode, timestamp, timestampSent);
+                state, reasonCode, timestamp, timestampSent, fileExpiration, fileIconExpiration);
     }
 
     @Override
@@ -220,9 +214,11 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     @Override
     public void addIncomingGroupFileTransfer(String fileTransferId, String chatId,
             ContactId contact, MmContent content, MmContent fileIcon, FileTransfer.State state,
-            FileTransfer.ReasonCode reasonCode, long timestamp, long timestampSent) {
+            FileTransfer.ReasonCode reasonCode, long timestamp, long timestampSent,
+            long fileExpiration, long fileIconExpiration) {
         mFileTransferLog.addIncomingGroupFileTransfer(fileTransferId, chatId, contact, content,
-                fileIcon, state, reasonCode, timestamp, timestampSent);
+                fileIcon, state, reasonCode, timestamp, timestampSent, fileExpiration,
+                fileIconExpiration);
     }
 
     @Override
@@ -250,8 +246,10 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public void setFileTransferred(String fileTransferId, MmContent content) {
-        mFileTransferLog.setFileTransferred(fileTransferId, content);
+    public void setFileTransferred(String fileTransferId, MmContent content, long fileExpiration,
+            long fileIconExpiration) {
+        mFileTransferLog.setFileTransferred(fileTransferId, content, fileExpiration,
+                fileIconExpiration);
     }
 
     @Override
@@ -474,5 +472,10 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 
     public void setChatMessageTimestamp(String msgId, long timestamp, long timestampSent) {
         mMessageLog.setChatMessageTimestamp(msgId, timestamp, timestampSent);
+    }
+
+    @Override
+    public void setRemoteSipId(String fileTransferId, String remoteInstanceId) {
+        mFileTransferLog.setRemoteSipId(fileTransferId, remoteInstanceId);
     }
 }

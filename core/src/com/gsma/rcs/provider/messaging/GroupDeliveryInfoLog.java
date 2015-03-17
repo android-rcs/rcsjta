@@ -43,11 +43,11 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
 
     private static final String SELECTION_CONTACTS_NOT_RECEIVED_MESSAGE = new StringBuilder(
             GroupDeliveryInfoData.KEY_DELIVERY_STATUS).append("=")
-            .append(Status.NOT_DELIVERED.toInt())
-            .append(" OR (").append(GroupDeliveryInfoData.KEY_DELIVERY_STATUS).append("=")
+            .append(Status.NOT_DELIVERED.toInt()).append(" OR (")
+            .append(GroupDeliveryInfoData.KEY_DELIVERY_STATUS).append("=")
             .append(Status.FAILED.toInt()).append(" AND ")
-            .append(GroupDeliveryInfoData.KEY_REASON_CODE)
-            .append(" IN (").append(ReasonCode.FAILED_DELIVERY.toInt()).append(",")
+            .append(GroupDeliveryInfoData.KEY_REASON_CODE).append(" IN (")
+            .append(ReasonCode.FAILED_DELIVERY.toInt()).append(",")
             .append(ReasonCode.FAILED_DISPLAY.toInt()).append("))").toString();
 
     private static final String SELECTION_DELIVERY_INFO_NOT_DISPLAYED = new StringBuilder(
@@ -85,7 +85,7 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
     /**
      * Set delivery status for outgoing group chat messages and files
      * 
-     * @param msgID Message ID
+     * @param msgId Message ID
      * @param contact The contact ID for which the entry is to be updated
      * @param status Status
      * @param reasonCode Reason code

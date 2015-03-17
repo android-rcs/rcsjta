@@ -47,8 +47,8 @@ import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardO
 import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatNotificationSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
+import com.gsma.rcs.core.ims.service.im.filetransfer.http.DownloadFromInviteFileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
-import com.gsma.rcs.core.ims.service.im.filetransfer.http.TerminatingHttpFileSharingSession;
 import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -129,7 +129,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      */
     private static final Logger sLogger = Logger.getLogger(ChatSession.class.getSimpleName());
 
-    private final MessagingLog mMessagingLog;
+    protected final MessagingLog mMessagingLog;
 
     private final ChatMessage mFirstMsg;
 
@@ -787,14 +787,17 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         }
 
         // Create a new session
-        FileSharingSession session = new TerminatingHttpFileSharingSession(getImsService(), this,
-                fileTransferInfo, msgId, contact, displayName, mRcsSettings, mMessagingLog,
-                timestamp, timestampSent);
+        FileSharingSession fileSharingSession = new DownloadFromInviteFileSharingSession(
+                getImsService(), this, fileTransferInfo, msgId, contact, displayName, mRcsSettings,
+                mMessagingLog, timestamp, timestampSent);
 
-        getImsService().getImsModule().getCoreListener()
-                .handleFileTransferInvitation(session, isGroupChat(), contact, displayName);
+        getImsService()
+                .getImsModule()
+                .getCoreListener()
+                .handleFileTransferInvitation(fileSharingSession, isGroupChat(), contact,
+                        displayName, fileTransferInfo.getTransferValidity());
 
-        session.startSession();
+        fileSharingSession.startSession();
     }
 
     /**

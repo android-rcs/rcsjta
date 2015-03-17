@@ -29,6 +29,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HttpContext;
 
 import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.LauncherUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -107,10 +108,12 @@ public class HttpsProvisioningSMS {
      * @param client Instance of {@link DefaultHttpClient}
      * @param localContext Instance of {@link HttpContext}
      * @param rcsSettings
+     * @param messagingLog
      */
     public void registerSmsProvisioningReceiver(final LocalContentResolver localContentResolver,
             final String smsPort, final String requestUri, final DefaultHttpClient client,
-            final HttpContext localContext, final RcsSettings rcsSettings) {
+            final HttpContext localContext, final RcsSettings rcsSettings,
+            final MessagingLog messagingLog) {
         // Unregister previous one
         unregisterSmsProvisioningReceiver();
 
@@ -188,8 +191,8 @@ public class HttpsProvisioningSMS {
                             public void run() {
                                 rcsSettings.setProvisioningVersion("0");
                                 LauncherUtils.stopRcsService(ctx);
-                                LauncherUtils
-                                        .resetRcsConfig(ctx, localContentResolver, rcsSettings);
+                                LauncherUtils.resetRcsConfig(ctx, localContentResolver,
+                                        rcsSettings, messagingLog);
                                 LauncherUtils.launchRcsService(ctx, true, false, rcsSettings);
                             }
                         }.start();

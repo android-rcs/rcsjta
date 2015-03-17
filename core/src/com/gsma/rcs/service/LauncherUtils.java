@@ -157,14 +157,15 @@ public class LauncherUtils {
     }
 
     /**
-     * Reset RCS config
+     * Reset RCS configuration
      * 
      * @param ctx Application context
      * @param localContentResolver Local content resolver
      * @param rcsSettings
+     * @param mMessagingLog
      */
     public static void resetRcsConfig(Context ctx, LocalContentResolver localContentResolver,
-            RcsSettings rcsSettings) {
+            RcsSettings rcsSettings, MessagingLog mMessagingLog) {
         if (sLogger.isActivated()) {
             sLogger.debug("Reset RCS config");
         }
@@ -175,8 +176,7 @@ public class LauncherUtils {
         rcsSettings.resetUserProfile();
 
         // Clear all entries in chat, message and file transfer tables
-        MessagingLog.createInstance(ctx, localContentResolver, rcsSettings);
-        MessagingLog.getInstance().deleteAllEntries();
+        mMessagingLog.deleteAllEntries();
 
         // Clear all entries in IP call table
         IPCallHistory.createInstance(localContentResolver);

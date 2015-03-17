@@ -38,6 +38,7 @@ import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 import android.net.Uri;
 
@@ -91,7 +92,7 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
      * @return String
      */
     public String getFileTransferIdAttribute() {
-        return "" + System.currentTimeMillis();
+        return Long.toString(System.currentTimeMillis());
     }
 
     /**
@@ -223,6 +224,40 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
                         contact);
             }
         }
+    }
+
+    @Override
+    public long getFileExpiration() {
+        return FileTransferLog.NOT_APPLICABLE_EXPIRATION;
+    }
+
+    @Override
+    public long getIconExpiration() {
+        return FileTransferLog.NOT_APPLICABLE_EXPIRATION;
+    }
+
+    @Override
+    public void prepareMediaSession() throws Exception {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void startMediaSession() throws Exception {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void closeMediaSession() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public boolean isInitiatedByRemote() {
+        // TODO Auto-generated method stub
+        return false;
     }
 
 }

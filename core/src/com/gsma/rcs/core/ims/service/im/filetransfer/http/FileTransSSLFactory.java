@@ -29,31 +29,30 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 /**
- * SSL Factory created for file tranfer
+ * SSL Factory created for file transfer
  * 
  * @author hhff3235
  */
 public class FileTransSSLFactory {
 
-    static private SSLContext sslcontext = null;
+    static private SSLContext sSslContext;
 
     static {
         try {
-            sslcontext = SSLContext.getInstance("TLS");
+            sSslContext = SSLContext.getInstance("TLS");
         } catch (NoSuchAlgorithmException e) {
-            sslcontext = null;
+            sSslContext = null;
         }
     }
 
     /**
      * Get a SSL context generated with a trust all manager
      * 
-     * @return SSLContext
-     * @return XML result or null if fails
+     * @return SSLContext result or null if fails
      */
     static public SSLContext getFileTransferSSLContext() {
         try {
-            sslcontext.init(null, new TrustManager[] {
+            sSslContext.init(null, new TrustManager[] {
                 new AllTrustManager()
             }, new SecureRandom());
         } catch (KeyManagementException e) {
@@ -62,9 +61,13 @@ public class FileTransSSLFactory {
             return null;
         }
 
-        return sslcontext;
+        return sSslContext;
     }
 
+    /**
+     * 
+     *
+     */
     public static class AllTrustManager implements X509TrustManager {
 
         @Override

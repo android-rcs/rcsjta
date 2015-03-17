@@ -70,6 +70,10 @@ public class FileTransferDAO implements Parcelable {
 
     private Uri mThumbnail;
 
+    private long mFileExpiration;
+
+    private long mFileIconExpiration;
+
     private FileTransfer.ReasonCode mReasonCode;
 
     private static final String WHERE_CLAUSE = new StringBuilder(FileTransferLog.FT_ID)
@@ -139,6 +143,24 @@ public class FileTransferDAO implements Parcelable {
         return mThumbnail;
     }
 
+    /**
+     * Returns the time when the file on the content server is no longer valid to download.
+     * 
+     * @return time
+     */
+    public long getFileExpiration() {
+        return mFileExpiration;
+    }
+
+    /**
+     * Returns the time when the file icon on the content server is no longer valid to download.
+     * 
+     * @return time
+     */
+    public long getFileIconExpiration() {
+        return mFileIconExpiration;
+    }
+
     public FileTransfer.ReasonCode getReasonCode() {
         return mReasonCode;
     }
@@ -181,6 +203,8 @@ public class FileTransferDAO implements Parcelable {
             mThumbnail = null;
         }
         mReasonCode = FileTransfer.ReasonCode.valueOf(source.readInt());
+        mFileExpiration = source.readLong();
+        mFileIconExpiration = source.readLong();
     }
 
     /**
@@ -237,6 +261,10 @@ public class FileTransferDAO implements Parcelable {
             }
             mReasonCode = FileTransfer.ReasonCode.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(FileTransferLog.REASON_CODE)));
+            mFileExpiration = cursor.getLong(cursor
+                    .getColumnIndexOrThrow(FileTransferLog.FILE_EXPIRATION));
+            mFileIconExpiration = cursor.getLong(cursor
+                    .getColumnIndexOrThrow(FileTransferLog.FILEICON_EXPIRATION));
         } catch (Exception e) {
             throw e;
         } finally {
@@ -250,7 +278,8 @@ public class FileTransferDAO implements Parcelable {
     public String toString() {
         return "FileTransferDAO [ftId=" + mTransferId + ", contact=" + mContact + ", filename="
                 + mFilename + ", chatId=" + mChatId + ", mimeType=" + mMimeType + ", state="
-                + mState + ", size=" + mSize + "]";
+                + mState + ", size=" + mSize + ", expiration=" + mFileExpiration + ", thumbnail="
+                + mThumbnail + ", iconExpiration=" + mFileIconExpiration + "]";
     }
 
     @Override
@@ -292,6 +321,8 @@ public class FileTransferDAO implements Parcelable {
             dest.writeInt(0);
         }
         dest.writeInt(mReasonCode.toInt());
+        dest.writeLong(mFileExpiration);
+        dest.writeLong(mFileIconExpiration);
     };
 
     public static final Parcelable.Creator<FileTransferDAO> CREATOR = new Parcelable.Creator<FileTransferDAO>() {

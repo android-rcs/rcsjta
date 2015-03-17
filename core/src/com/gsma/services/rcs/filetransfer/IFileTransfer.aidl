@@ -60,4 +60,8 @@ interface IFileTransfer {
 	boolean isAllowedToPauseTransfer();
 
 	boolean isAllowedToResumeTransfer();
+	
+	long getFileExpiration();
+	
+	long getFileIconExpiration();
 }

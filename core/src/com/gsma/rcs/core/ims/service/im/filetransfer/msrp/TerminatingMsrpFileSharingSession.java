@@ -56,6 +56,7 @@ import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -73,11 +74,10 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      */
     private MsrpManager msrpMgr;
 
-
     /**
-     * Since in MSRP communication we do not have a timestampSent to be extracted from the
-     * payload then we need to fake that by using the local timestamp even if this is not
-     * the real proper timestamp from the remote side in this case.
+     * Since in MSRP communication we do not have a timestampSent to be extracted from the payload
+     * then we need to fake that by using the local timestamp even if this is not the real proper
+     * timestamp from the remote side in this case.
      */
     private long mTimestampSent;
 
@@ -165,7 +165,9 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                 for (ImsSessionListener listener : listeners) {
 
                     ((FileSharingSessionListener) listener).handleSessionAutoAccepted(contact,
-                            file, fileIcon, timestamp, mTimestampSent);
+                            file, fileIcon, timestamp, mTimestampSent,
+                            FileTransferLog.NOT_APPLICABLE_EXPIRATION,
+                            FileTransferLog.NOT_APPLICABLE_EXPIRATION);
                 }
 
             } else {
@@ -175,7 +177,9 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 
                 for (ImsSessionListener listener : listeners) {
                     ((FileSharingSessionListener) listener).handleSessionInvited(contact, file,
-                            fileIcon, timestamp, mTimestampSent);
+                            fileIcon, timestamp, mTimestampSent,
+                            FileTransferLog.NOT_APPLICABLE_EXPIRATION,
+                            FileTransferLog.NOT_APPLICABLE_EXPIRATION);
                 }
 
                 send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
@@ -472,24 +476,26 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
         fileTransfered();
         ContactId contact = getRemoteContact();
         MmContent file = getContent();
+        Collection<ImsSessionListener> listeners = getListeners();
         try {
             // Close content with received data
             getContent().writeData2File(data);
             getContent().closeFile();
 
             // Notify listeners
-            for (int j = 0; j < getListeners().size(); j++) {
-                ((FileSharingSessionListener) getListeners().get(j)).handleFileTransfered(file,
-                        contact);
+            for (ImsSessionListener listener : listeners) {
+                ((FileSharingSessionListener) listener).handleFileTransfered(file, contact,
+                        FileTransferLog.NOT_APPLICABLE_EXPIRATION,
+                        FileTransferLog.NOT_APPLICABLE_EXPIRATION);
             }
         } catch (Exception e) {
             // Delete the temp file
             deleteFile();
 
             // Notify listeners
-            for (int j = 0; j < getListeners().size(); j++) {
-                ((FileSharingSessionListener) getListeners().get(j)).handleTransferError(
-                        new FileSharingError(FileSharingError.MEDIA_SAVING_FAILED), contact);
+            for (ImsSessionListener listener : listeners) {
+                ((FileSharingSessionListener) listener).handleTransferError(new FileSharingError(
+                        FileSharingError.MEDIA_SAVING_FAILED), contact);
             }
         }
     }
@@ -517,24 +523,25 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
             return true;
         }
         ContactId contact = getRemoteContact();
+        Collection<ImsSessionListener> listeners = getListeners();
         try {
             // Update content with received data
             getContent().writeData2File(data);
 
             // Notify listeners
-            for (int j = 0; j < getListeners().size(); j++) {
-                ((FileSharingSessionListener) getListeners().get(j)).handleTransferProgress(
-                        contact, currentSize, totalSize);
+            for (ImsSessionListener listener : listeners) {
+                ((FileSharingSessionListener) listener).handleTransferProgress(contact,
+                        currentSize, totalSize);
             }
+
         } catch (Exception e) {
             // Delete the temp file
             deleteFile();
 
             // Notify listeners
-            for (int j = 0; j < getListeners().size(); j++) {
-                ((FileSharingSessionListener) getListeners().get(j)).handleTransferError(
-                        new FileSharingError(FileSharingError.MEDIA_SAVING_FAILED, e.getMessage()),
-                        contact);
+            for (ImsSessionListener listener : listeners) {
+                ((FileSharingSessionListener) listener).handleTransferError(new FileSharingError(
+                        FileSharingError.MEDIA_SAVING_FAILED, e.getMessage()), contact);
             }
         }
         return true;

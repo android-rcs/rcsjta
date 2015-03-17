@@ -48,6 +48,9 @@ public class RcsSettingsProvider extends ContentProvider {
 
     private static final String SELECTION_WITH_KEY_ONLY = RcsSettingsData.KEY_KEY.concat("=?");
 
+    /**
+     * Database filename
+     */
     public static final String DATABASE_NAME = "rcs_settings.db";
 
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -108,7 +111,7 @@ public class RcsSettingsProvider extends ContentProvider {
         @Override
         public void onCreate(SQLiteDatabase db) {
             db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append("(")
-            .append(RcsSettingsData.KEY_KEY).append(" TEXT NOT NULL PRIMARY KEY,")
+                    .append(RcsSettingsData.KEY_KEY).append(" TEXT NOT NULL PRIMARY KEY,")
                     .append(RcsSettingsData.KEY_VALUE).append(" TEXT NOT NULL)").toString());
 
             /* Insert default values for parameters */

@@ -77,10 +77,21 @@ public class FileUpload {
             mValue = value;
         }
 
+        /**
+         * Returns the value of this State as an integer.
+         * 
+         * @return integer value
+         */
         public final int toInt() {
             return mValue;
         }
 
+        /**
+         * Returns a State instance representing the specified integer value.
+         * 
+         * @param value the integer value
+         * @return State instance
+         */
         public static final State valueOf(int value) {
             State entry = mValueToEnum.get(value);
             if (entry != null) {

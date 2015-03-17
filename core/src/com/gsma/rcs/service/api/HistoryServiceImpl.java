@@ -77,8 +77,7 @@ public class HistoryServiceImpl extends IHistoryService.Stub {
      * 
      * @param columnMapping
      */
-    private static final void assertMapTypeOfString(@SuppressWarnings("rawtypes")
-    Map columnMapping) {
+    private static final void assertMapTypeOfString(@SuppressWarnings("rawtypes") Map columnMapping) {
         for (Object key : columnMapping.keySet()) {
             if (!((key instanceof String) && (columnMapping.get(key) instanceof String))) {
                 throw new IllegalArgumentException(new StringBuilder(
@@ -111,8 +110,7 @@ public class HistoryServiceImpl extends IHistoryService.Stub {
     public void registerExtraHistoryLogMember(int providerId, Uri providerUri, Uri databaseUri,
             String table,
             /* Only raw map types are supported by AIDL. */
-            @SuppressWarnings("rawtypes")
-            Map columnMapping) {
+            @SuppressWarnings("rawtypes") Map columnMapping) {
         try {
             assertMapTypeOfString(columnMapping);
             retrieveHistoryLogProvider().registerDatabase(providerId, providerUri, databaseUri,

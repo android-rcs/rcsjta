@@ -50,6 +50,8 @@ public class ChatMessageTest extends AndroidTestCase {
     private long mTimestamp;
     private long mTimestampSent;
     private String mText;
+    private MessagingLog mMessagingLog;
+    private LocalContentResolver mLocalContentResolver;
 
     private static final String[] SELECTION = new String[] {
             Message.DIRECTION, Message.CONTACT, Message.CONTENT, Message.MIME_TYPE,
@@ -60,9 +62,9 @@ public class ChatMessageTest extends AndroidTestCase {
         super.setUp();
         mContext = getContext();
         mContentResolver = mContext.getContentResolver();
-        LocalContentResolver localContentResolver = new LocalContentResolver(mContentResolver);
-        mRcsSettings = RcsSettings.createInstance(localContentResolver);
-        MessagingLog.createInstance(mContext, localContentResolver, mRcsSettings);
+        mLocalContentResolver = new LocalContentResolver(mContentResolver);
+        mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
+        mMessagingLog = MessagingLog.createInstance(mContext, mLocalContentResolver, mRcsSettings);
         ContactUtil contactUtils = ContactUtil.getInstance(mContext);
         try {
             mContact = contactUtils.formatContact("+339000000");
@@ -82,12 +84,12 @@ public class ChatMessageTest extends AndroidTestCase {
     }
 
     public void testTextMessage() {
-        String msgId = "" + System.currentTimeMillis();
+        String msgId = Long.toString(System.currentTimeMillis());
         ChatMessage msg = new ChatMessage(msgId, mContact, mText, MimeType.TEXT_MESSAGE,
                 mTimestamp, mTimestampSent, "display");
 
         // Add entry
-        MessagingLog.getInstance().addOutgoingOneToOneChatMessage(msg, Message.Content.Status.SENT,
+        mMessagingLog.addOutgoingOneToOneChatMessage(msg, Message.Content.Status.SENT,
                 Message.Content.ReasonCode.UNSPECIFIED);
 
         String where = new StringBuilder(Message.MESSAGE_ID).append("=?").toString();
@@ -116,6 +118,8 @@ public class ChatMessageTest extends AndroidTestCase {
         assertEquals(msgId, id);
         assertEquals(mTimestamp, readTimestamp);
         assertEquals(mTimestampSent, readTimestampSent);
+        mLocalContentResolver.delete(Uri.withAppendedPath(Message.CONTENT_URI, msgId), null, null);
+        assertFalse(mMessagingLog.isMessagePersisted(msgId));
     }
 
     public void testGeolocMessage() {
@@ -124,8 +128,8 @@ public class ChatMessageTest extends AndroidTestCase {
                 mTimestampSent);
         String msgId = chatMsg.getMessageId();
         // Add entry
-        MessagingLog.getInstance().addOutgoingOneToOneChatMessage(chatMsg,
-                Message.Content.Status.SENT, Message.Content.ReasonCode.UNSPECIFIED);
+        mMessagingLog.addOutgoingOneToOneChatMessage(chatMsg, Message.Content.Status.SENT,
+                Message.Content.ReasonCode.UNSPECIFIED);
 
         // Read entry
         Uri uri = Uri.withAppendedPath(Message.CONTENT_URI, msgId);
@@ -156,5 +160,7 @@ public class ChatMessageTest extends AndroidTestCase {
         assertEquals(msgId, id);
         assertEquals(mTimestamp, readTimestamp);
         assertEquals(mTimestampSent, readTimestampSent);
+        mLocalContentResolver.delete(Uri.withAppendedPath(Message.CONTENT_URI, msgId), null, null);
+        assertFalse(mMessagingLog.isMessagePersisted(msgId));
     }
 }

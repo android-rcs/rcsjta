@@ -24,6 +24,7 @@ import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
 
 import com.orangelabs.rcs.ri.ConnectionManager;
@@ -46,6 +47,7 @@ import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -58,6 +60,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -140,117 +143,6 @@ public class InitiateFileTransfer extends Activity {
 
     private boolean mTransferred = false;
 
-    /**
-     * File transfer listener
-     */
-    private OneToOneFileTransferListener ftListener = new OneToOneFileTransferListener() {
-
-        @Override
-        public void onProgressUpdate(ContactId contact, String transferId, final long currentSize,
-                final long totalSize) {
-            // Discard event if not for current transferId
-            if (InitiateFileTransfer.this.mFtId == null
-                    || !InitiateFileTransfer.this.mFtId.equals(transferId)) {
-                return;
-            }
-            mHandler.post(new Runnable() {
-                public void run() {
-                    // Display transfer progress
-                    updateProgressBar(currentSize, totalSize);
-                }
-            });
-        }
-
-        @Override
-        public void onStateChanged(ContactId contact, String transferId,
-                final FileTransfer.State state, final FileTransfer.ReasonCode reasonCode) {
-            // Discard event if not for current transferId
-            if (InitiateFileTransfer.this.mFtId == null
-                    || !InitiateFileTransfer.this.mFtId.equals(transferId)) {
-                return;
-            }
-            final String _reasonCode = RiApplication.FT_REASON_CODES[reasonCode.toInt()];
-            final String _state = RiApplication.FT_STATES[state.toInt()];
-            if (LogUtils.isActive) {
-                Log.d(LOGTAG,
-                        new StringBuilder("onStateChanged contact=").append(contact)
-                                .append(" transferId=").append(transferId).append(" state=")
-                                .append(_state).append(" reason=").append(_reasonCode).toString());
-            }
-            mHandler.post(new Runnable() {
-                public void run() {
-                    TextView statusView = (TextView) findViewById(R.id.progress_status);
-                    switch (state) {
-                        case STARTED:
-                            // Session is well established : hide progress
-                            // dialog
-                            hideProgressDialog();
-                            // Display session status
-                            statusView.setText(_state);
-                            break;
-
-                        case ABORTED:
-                            // Session is aborted: hide progress dialog then
-                            // exit
-                            hideProgressDialog();
-                            Utils.showMessageAndExit(InitiateFileTransfer.this,
-                                    getString(R.string.label_transfer_aborted, _reasonCode),
-                                    mExitOnce);
-                            break;
-
-                        case REJECTED:
-                            // Session is rejected: hide progress dialog then
-                            // exit
-                            hideProgressDialog();
-                            Utils.showMessageAndExit(InitiateFileTransfer.this,
-                                    getString(R.string.label_transfer_rejected, _reasonCode),
-                                    mExitOnce);
-                            break;
-
-                        case FAILED:
-                            // Session failed: hide progress dialog then exit
-                            hideProgressDialog();
-                            Utils.showMessageAndExit(InitiateFileTransfer.this,
-                                    getString(R.string.label_transfer_failed, _reasonCode),
-                                    mExitOnce);
-                            break;
-
-                        case TRANSFERRED:
-                            // Hide progress dialog
-                            hideProgressDialog();
-                            // Display transfer progress
-                            statusView.setText(_state);
-                            // Hide buttons Pause and Resume
-                            Button pauseBtn = (Button) findViewById(R.id.pause_btn);
-                            pauseBtn.setVisibility(View.INVISIBLE);
-                            Button resumeBtn = (Button) findViewById(R.id.resume_btn);
-                            resumeBtn.setVisibility(View.INVISIBLE);
-                            mTransferred = true;
-                            break;
-
-                        default:
-                            statusView.setText(_state);
-                            if (LogUtils.isActive) {
-                                Log.d(LOGTAG,
-                                        "onStateChanged "
-                                                + getString(R.string.label_ft_state_changed,
-                                                        _state, _reasonCode));
-                            }
-                    }
-                }
-            });
-        }
-
-        @Override
-        public void onDeleted(ContactId contact, Set<String> transferIds) {
-            if (LogUtils.isActive) {
-                Log.w(LOGTAG,
-                        new StringBuilder("onDeleted contact=").append(contact)
-                                .append(" transferIds=").append(transferIds).toString());
-            }
-        }
-    };
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -282,6 +174,9 @@ public class InitiateFileTransfer extends Activity {
         Button resumeBtn = (Button) findViewById(R.id.resume_btn);
         resumeBtn.setOnClickListener(btnResumeListener);
         resumeBtn.setEnabled(false);
+
+        TableRow expiration = (TableRow) findViewById(R.id.expiration);
+        expiration.setVisibility(View.GONE);
 
         // Register to API connection manager
         mCnxManager = ConnectionManager.getInstance(this);
@@ -667,4 +562,142 @@ public class InitiateFileTransfer extends Activity {
             }
         }
     };
+
+    /**
+     * File transfer listener
+     */
+    private OneToOneFileTransferListener ftListener = new OneToOneFileTransferListener() {
+
+        @Override
+        public void onProgressUpdate(ContactId contact, String transferId, final long currentSize,
+                final long totalSize) {
+            // Discard event if not for current transferId
+            if (InitiateFileTransfer.this.mFtId == null
+                    || !InitiateFileTransfer.this.mFtId.equals(transferId)) {
+                return;
+            }
+            mHandler.post(new Runnable() {
+                public void run() {
+                    // Display transfer progress
+                    updateProgressBar(currentSize, totalSize);
+                }
+            });
+        }
+
+        @Override
+        public void onStateChanged(ContactId contact, String transferId,
+                final FileTransfer.State state, final FileTransfer.ReasonCode reasonCode) {
+            // Discard event if not for current transferId
+            if (InitiateFileTransfer.this.mFtId == null
+                    || !InitiateFileTransfer.this.mFtId.equals(transferId)) {
+                return;
+            }
+            final String _reasonCode = RiApplication.FT_REASON_CODES[reasonCode.toInt()];
+            final String _state = RiApplication.FT_STATES[state.toInt()];
+            if (LogUtils.isActive) {
+                Log.d(LOGTAG,
+                        new StringBuilder("onStateChanged contact=").append(contact)
+                                .append(" transferId=").append(transferId).append(" state=")
+                                .append(_state).append(" reason=").append(_reasonCode).toString());
+            }
+            mHandler.post(new Runnable() {
+                public void run() {
+                    TextView statusView = (TextView) findViewById(R.id.progress_status);
+                    switch (state) {
+                        case STARTED:
+                            // Session is well established : hide progress
+                            // dialog
+                            hideProgressDialog();
+                            // Display session status
+                            statusView.setText(_state);
+                            break;
+
+                        case ABORTED:
+                            // Session is aborted: hide progress dialog then
+                            // exit
+                            hideProgressDialog();
+                            Utils.showMessageAndExit(InitiateFileTransfer.this,
+                                    getString(R.string.label_transfer_aborted, _reasonCode),
+                                    mExitOnce);
+                            break;
+
+                        case REJECTED:
+                            // Session is rejected: hide progress dialog then
+                            // exit
+                            hideProgressDialog();
+                            Utils.showMessageAndExit(InitiateFileTransfer.this,
+                                    getString(R.string.label_transfer_rejected, _reasonCode),
+                                    mExitOnce);
+                            break;
+
+                        case FAILED:
+                            // Session failed: hide progress dialog then exit
+                            hideProgressDialog();
+                            Utils.showMessageAndExit(InitiateFileTransfer.this,
+                                    getString(R.string.label_transfer_failed, _reasonCode),
+                                    mExitOnce);
+                            break;
+
+                        case TRANSFERRED:
+                            // Hide progress dialog
+                            hideProgressDialog();
+                            // Display transfer progress
+                            statusView.setText(_state);
+                            // Hide buttons Pause and Resume
+                            Button pauseBtn = (Button) findViewById(R.id.pause_btn);
+                            pauseBtn.setVisibility(View.INVISIBLE);
+                            Button resumeBtn = (Button) findViewById(R.id.resume_btn);
+                            resumeBtn.setVisibility(View.INVISIBLE);
+                            mTransferred = true;
+
+                            try {
+                                displayFileExpiration(mFileTransfer.getFileExpiration());
+                                Uri fileIconUri = mFileTransfer.getFileIcon();
+                                long fileIconExpiration = mFileTransfer.getFileIconExpiration();
+                                if (LogUtils.isActive) {
+                                    Log.d(LOGTAG,
+                                            new StringBuilder("File transferred icon uri= ")
+                                                    .append(fileIconUri).append(" expiration=")
+                                                    .append(fileIconExpiration).toString());
+                                }
+                            } catch (RcsServiceException e) {
+                                e.printStackTrace();
+                            }
+                            break;
+
+                        default:
+                            statusView.setText(_state);
+                            if (LogUtils.isActive) {
+                                Log.d(LOGTAG, "onStateChanged ".concat(getString(
+                                        R.string.label_ft_state_changed, _state, _reasonCode)));
+                            }
+                    }
+                }
+
+            });
+        }
+
+        @Override
+        public void onDeleted(ContactId contact, Set<String> transferIds) {
+            if (LogUtils.isActive) {
+                Log.w(LOGTAG,
+                        new StringBuilder("onDeleted contact=").append(contact)
+                                .append(" transferIds=").append(transferIds).toString());
+            }
+        }
+    };
+
+    private void displayFileExpiration(long fileExpiration) {
+        if (FileTransferLog.UNKNOWN_EXPIRATION == fileExpiration
+                || FileTransferLog.NOT_APPLICABLE_EXPIRATION == fileExpiration) {
+            return;
+        }
+        TableRow expirationTableRow = (TableRow) findViewById(R.id.expiration);
+        expirationTableRow.setVisibility(View.VISIBLE);
+        TextView expirationView = (TextView) findViewById(R.id.value_expiration);
+        CharSequence expirationDate = DateUtils.getRelativeTimeSpanString(fileExpiration,
+                System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS,
+                DateUtils.FORMAT_ABBREV_RELATIVE);
+        expirationView.setText(expirationDate);
+    }
 }

@@ -126,8 +126,8 @@ public abstract class HttpTransferManager {
     /**
      * The logger
      */
-    private static final Logger sLogger = Logger.getLogger(HttpTransferManager.class
-            .getSimpleName());
+    private static final Logger LOGGER = Logger
+            .getLogger(HttpTransferManager.class.getSimpleName());
 
     /**
      * Constructor
@@ -199,8 +199,10 @@ public abstract class HttpTransferManager {
             params.setParameter(HttpProtocolParams.USE_EXPECT_CONTINUE, false);
             NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
             if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
+                @SuppressWarnings("deprecation")
                 String proxyHost = Proxy.getDefaultHost();
                 if (proxyHost != null && proxyHost.length() > 1) {
+                    @SuppressWarnings("deprecation")
                     int proxyPort = Proxy.getDefaultPort();
                     params.setParameter(ConnRoutePNames.DEFAULT_PROXY, new HttpHost(proxyHost,
                             proxyPort));
@@ -298,8 +300,8 @@ public abstract class HttpTransferManager {
      * Interrupts file transfer
      */
     public void interrupt() {
-        if (sLogger.isActivated()) {
-            sLogger.warn("interrupting transfer");
+        if (LOGGER.isActivated()) {
+            LOGGER.warn("interrupting transfer");
         }
         mIsCancelled = true;
     }
@@ -308,8 +310,8 @@ public abstract class HttpTransferManager {
      * Interrupts file transfer
      */
     public void pauseTransferByUser() {
-        if (sLogger.isActivated()) {
-            sLogger.warn("User is pausing transfer");
+        if (LOGGER.isActivated()) {
+            LOGGER.warn("User is pausing transfer");
         }
         mIsPaused = true;
         getListener().httpTransferPausedByUser();
@@ -319,8 +321,8 @@ public abstract class HttpTransferManager {
      * Interrupts file transfer
      */
     public void pauseTransferBySystem() {
-        if (sLogger.isActivated()) {
-            sLogger.warn("System is pausing transfer");
+        if (LOGGER.isActivated()) {
+            LOGGER.warn("System is pausing transfer");
         }
         mIsPaused = true;
         getListener().httpTransferPausedBySystem();

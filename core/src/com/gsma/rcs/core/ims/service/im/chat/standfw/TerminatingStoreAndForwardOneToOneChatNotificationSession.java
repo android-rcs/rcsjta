@@ -416,7 +416,7 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
                 return;
             }
 
-            boolean isFileTransfer = MessagingLog.getInstance().isFileTransfer(imdn.getMsgId());
+            boolean isFileTransfer = mMessagingLog.isFileTransfer(imdn.getMsgId());
             if (isFileTransfer) {
                 ((InstantMessagingService) getImsService())
                         .receiveFileDeliveryStatus(contact, imdn);

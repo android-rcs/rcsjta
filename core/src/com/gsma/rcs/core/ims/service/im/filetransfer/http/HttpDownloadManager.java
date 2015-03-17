@@ -103,8 +103,9 @@ public class HttpDownloadManager extends HttpTransferManager {
         mDownloadedFile = content.getUri();
         mFile = new File(mDownloadedFile.getPath());
         if (sLogger.isActivated()) {
-            sLogger.debug("HttpDownloadManager file from " + httpServerAddress + " length="
-                    + content.getSize());
+            sLogger.debug(new StringBuilder("HttpDownloadManager file from ")
+                    .append(httpServerAddress).append(" length=").append(content.getSize())
+                    .toString());
         }
         mStreamForFile = openStreamForFile(mFile);
     }
@@ -274,7 +275,7 @@ public class HttpDownloadManager extends HttpTransferManager {
             }
 
             // Send GET request
-            HttpGet request = new HttpGet(thumbnailInfo.getThumbnailUri().toString());
+            HttpGet request = new HttpGet(thumbnailInfo.getUri().toString());
             if (HTTP_TRACE_ENABLED) {
                 String trace = ">>> Send HTTP request:";
                 trace += "\n" + request.getMethod() + " " + request.getRequestLine().getUri();
@@ -291,7 +292,7 @@ public class HttpDownloadManager extends HttpTransferManager {
             }
             // Create the content for filename
             Uri fileIconUri = ContentManager.generateUriForReceivedContent(fileName,
-                    thumbnailInfo.getThumbnailType(), mRcsSettings);
+                    thumbnailInfo.getType(), mRcsSettings);
             fileIcon = ContentManager.createMmContent(fileIconUri, baos.size(), fileName);
             // Save data to file
             fileIcon.writeData2File(baos.toByteArray());

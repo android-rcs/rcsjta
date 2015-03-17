@@ -73,7 +73,8 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
     public OriginatingAdhocGroupChatSession(ImsService parent, String conferenceId, String subject,
             Map<ContactId, ParticipantStatus> participantsToInvite, RcsSettings rcsSettings,
             MessagingLog messagingLog, long timestamp) {
-        super(parent, null, conferenceId, participantsToInvite, rcsSettings, messagingLog, timestamp);
+        super(parent, null, conferenceId, participantsToInvite, rcsSettings, messagingLog,
+                timestamp);
 
         if ((subject != null) && (subject.length() > 0)) {
             setSubject(subject);

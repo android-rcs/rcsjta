@@ -30,6 +30,7 @@ import com.gsma.rcs.platform.registry.AndroidRegistryFactory;
 import com.gsma.rcs.provider.BackupRestoreDb;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ConfigurationMode;
 import com.gsma.rcs.provisioning.ProvisioningInfo;
@@ -97,6 +98,8 @@ public class StartService extends Service {
 
     private RcsSettings mRcsSettings;
 
+    private MessagingLog mMessagingLog;
+
     /**
      * The logger
      */
@@ -107,9 +110,11 @@ public class StartService extends Service {
 
     @Override
     public void onCreate() {
-        // Instantiate RcsSettings
-        mLocalContentResolver = new LocalContentResolver(getApplicationContext());
+        Context context = getApplicationContext();
+        mLocalContentResolver = new LocalContentResolver(context);
         mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
+        mMessagingLog = MessagingLog.createInstance(context, mLocalContentResolver, mRcsSettings);
+
         ConfigurationMode mode = mRcsSettings.getConfigurationMode();
         if (sLogger.isActivated()) {
             sLogger.debug("onCreate ConfigurationMode=".concat(mode.toString()));
@@ -297,7 +302,7 @@ public class StartService extends Service {
             }
 
             // Reset RCS account
-            LauncherUtils.resetRcsConfig(ctx, mLocalContentResolver, mRcsSettings);
+            LauncherUtils.resetRcsConfig(ctx, mLocalContentResolver, mRcsSettings, mMessagingLog);
 
             // Restore current account settings
             if (logActivated) {

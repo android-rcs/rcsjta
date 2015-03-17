@@ -58,6 +58,7 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
+import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import com.gsma.services.rcs.filetransfer.IFileTransfer;
 import com.gsma.services.rcs.filetransfer.IFileTransferService;
 import com.gsma.services.rcs.filetransfer.IFileTransferServiceConfiguration;
@@ -313,7 +314,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param fileTransferId File transfer ID
      * @param contact ContactId
      * @param content Content of file
-     * @param fileicon Content of fileicon
+     * @param fileicon Content of file icon
      * @param state State of the file transfer
      * @param timestamp Local timestamp of the file transfer
      * @param timestampSent Timestamp sent in payload of the file transfer
@@ -321,7 +322,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     private void addOutgoingFileTransfer(String fileTransferId, ContactId contact,
             MmContent content, MmContent fileicon, State state, long timestamp, long timestampSent) {
         mMessagingLog.addFileTransfer(fileTransferId, contact, Direction.OUTGOING, content,
-                fileicon, state, ReasonCode.UNSPECIFIED, timestamp, timestampSent);
+                fileicon, state, ReasonCode.UNSPECIFIED, timestamp, timestampSent,
+                FileTransferLog.UNKNOWN_EXPIRATION, FileTransferLog.UNKNOWN_EXPIRATION);
         mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId, state,
                 ReasonCode.UNSPECIFIED);
     }
@@ -821,7 +823,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * Dequeue group file transfer
      * 
      * @param fileTransferId
-     * @param participants
      * @param content
      * @param fileIcon
      * @param chatId
@@ -1283,7 +1284,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             MmContent fileIcon, ReasonCode reasonCode, long timestamp, long timestampSent) {
         String fileTransferId = IdGenerator.generateMessageID();
         mMessagingLog.addFileTransfer(fileTransferId, contact, Direction.INCOMING, content,
-                fileIcon, FileTransfer.State.REJECTED, reasonCode, timestamp, timestampSent);
+                fileIcon, FileTransfer.State.REJECTED, reasonCode, timestamp, timestampSent,
+                FileTransferLog.UNKNOWN_EXPIRATION, FileTransferLog.UNKNOWN_EXPIRATION);
 
         mOneToOneFileTransferBroadcaster.broadcastInvitation(fileTransferId);
     }

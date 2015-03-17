@@ -18,6 +18,26 @@
 
 package com.orangelabs.rcs.ri.messaging.filetransfer;
 
+import com.gsma.services.rcs.GroupDeliveryInfo;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.FileTransferLog;
+import com.gsma.services.rcs.filetransfer.FileTransferService;
+import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration;
+import com.gsma.services.rcs.filetransfer.GroupFileTransferListener;
+import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -26,12 +46,14 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.StatFs;
 import android.provider.MediaStore;
 import android.telephony.TelephonyManager;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -43,24 +65,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.Set;
-
-import com.gsma.services.rcs.GroupDeliveryInfo;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.filetransfer.FileTransfer;
-import com.gsma.services.rcs.filetransfer.FileTransferService;
-import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration;
-import com.gsma.services.rcs.filetransfer.GroupFileTransferListener;
-import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.utils.LockAccess;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Received file transfer
@@ -109,96 +113,6 @@ public class ReceiveFileTransfer extends Activity {
     private static final String LOGTAG = LogUtils.getTag(ReceiveFileTransfer.class.getSimpleName());
 
     private static final String VCARD_MIME_TYPE = "text/x-vcard";
-
-    /**
-     * Group File transfer listener
-     */
-    private GroupFileTransferListener groupFtListener = new GroupFileTransferListener() {
-
-        @Override
-        public void onDeliveryInfoChanged(String chatId, ContactId contact, String transferId,
-                GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
-            if (LogUtils.isActive) {
-                Log.d(LOGTAG, new StringBuilder("onDeliveryInfoChanged contact=").append(contact)
-                        .append(" transferId=").append(transferId).append(" state=").append(status)
-                        .append(" reason=").append(reasonCode).toString());
-            }
-        }
-
-        @Override
-        public void onProgressUpdate(String chatId, String transferId, long currentSize,
-                long totalSize) {
-            // Discard event if not for current transferId
-            if (!mFtDao.getTransferId().equals(transferId)) {
-                return;
-            }
-            ReceiveFileTransfer.this.onTransferProgressUpdateUI(currentSize, totalSize);
-        }
-
-        @Override
-        public void onStateChanged(String chatId, String transferId, FileTransfer.State state,
-                FileTransfer.ReasonCode reasonCode) {
-            if (LogUtils.isActive) {
-                Log.d(LOGTAG,
-                        new StringBuilder("onStateChanged chatId=").append(chatId)
-                                .append(" transferId=").append(transferId).toString());
-            }
-            // Discard event if not for current transferId
-            if (!mFtDao.getTransferId().equals(transferId)) {
-                return;
-            }
-            ReceiveFileTransfer.this.onTransferStateChangedUpdateUI(state, reasonCode);
-        }
-
-        @Override
-        public void onDeleted(String chatId, Set<String> transferIds) {
-            if (LogUtils.isActive) {
-                Log.w(LOGTAG,
-                        new StringBuilder("onDeleted chatId=").append(chatId)
-                                .append(" transferIds=").append(transferIds).toString());
-            }
-        }
-    };
-
-    /**
-     * File transfer listener
-     */
-    private OneToOneFileTransferListener ftListener = new OneToOneFileTransferListener() {
-
-        @Override
-        public void onProgressUpdate(ContactId contact, String transferId, final long currentSize,
-                final long totalSize) {
-            // Discard event if not for current transferId
-            if (!mFtDao.getTransferId().equals(transferId)) {
-                return;
-            }
-            ReceiveFileTransfer.this.onTransferProgressUpdateUI(currentSize, totalSize);
-        }
-
-        @Override
-        public void onStateChanged(ContactId contact, String transferId,
-                final FileTransfer.State state, FileTransfer.ReasonCode reasonCode) {
-            if (LogUtils.isActive) {
-                Log.d(LOGTAG,
-                        new StringBuilder("onStateChanged contact=").append(contact)
-                                .append(" transferId=").append(transferId).toString());
-            }
-            // Discard event if not for current transferId
-            if (!mFtDao.getTransferId().equals(transferId)) {
-                return;
-            }
-            ReceiveFileTransfer.this.onTransferStateChangedUpdateUI(state, reasonCode);
-        }
-
-        @Override
-        public void onDeleted(ContactId contact, Set<String> transferIds) {
-            if (LogUtils.isActive) {
-                Log.w(LOGTAG,
-                        new StringBuilder("onDeleted contact=").append(contact)
-                                .append(" transferIds=").append(transferIds).toString());
-            }
-        }
-    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -280,6 +194,26 @@ public class ReceiveFileTransfer extends Activity {
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "initiateFileTransfer ".concat(mFtDao.toString()));
             }
+
+            String from = RcsDisplayName.getInstance(this).getDisplayName(mFtDao.getContact());
+            TextView fromTextView = (TextView) findViewById(R.id.from);
+            fromTextView.setText(getString(R.string.label_from_args, from));
+
+            String size = getString(R.string.label_file_size, mFtDao.getSize() / 1024);
+            TextView sizeTxt = (TextView) findViewById(R.id.image_size);
+            sizeTxt.setText(size);
+
+            TextView expirationView = (TextView) findViewById(R.id.expiration);
+            long fileExpiration = mFtDao.getFileExpiration();
+            if (fileExpiration != FileTransferLog.NOT_APPLICABLE_EXPIRATION) {
+                CharSequence expiration = DateUtils.getRelativeTimeSpanString(
+                        mFtDao.getFileExpiration(), System.currentTimeMillis(),
+                        DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE);
+                expirationView.setText(getString(R.string.label_expiration_args, expiration));
+            } else {
+                expirationView.setVisibility(View.GONE);
+            }
+
             FileTransferService ftApi = mCnxManager.getFileTransferApi();
             // Get the file transfer session
             mFileTransfer = ftApi.getFileTransfer(mFtDao.getTransferId());
@@ -295,8 +229,10 @@ public class ReceiveFileTransfer extends Activity {
                         String reasonCode = RiApplication.FT_REASON_CODES[mFtDao.getReasonCode()
                                 .toInt()];
                         if (LogUtils.isActive) {
-                            Log.e(LOGTAG, "Transfer failed state: " + mFtDao.getState()
-                                    + " reason: " + reasonCode);
+                            Log.e(LOGTAG,
+                                    new StringBuilder("Transfer failed state: ")
+                                            .append(mFtDao.getState()).append(" reason: ")
+                                            .append(reasonCode).toString());
                         }
                         // Transfer failed
                         Utils.showMessageAndExit(this,
@@ -322,16 +258,6 @@ public class ReceiveFileTransfer extends Activity {
             } else {
                 ftApi.addEventListener(ftListener);
             }
-
-            String from = RcsDisplayName.getInstance(this).getDisplayName(mFtDao.getContact());
-
-            // Display transfer infos
-            TextView fromTextView = (TextView) findViewById(R.id.from);
-            fromTextView.setText(getString(R.string.label_from_args, from));
-
-            String size = getString(R.string.label_file_size, mFtDao.getSize() / 1024);
-            TextView sizeTxt = (TextView) findViewById(R.id.image_size);
-            sizeTxt.setText(size);
 
             // Do not consider acceptance if mResuming
             if (mResuming) {
@@ -746,6 +672,23 @@ public class ReceiveFileTransfer extends Activity {
     }
 
     private void displayTransferredFile() {
+        try {
+            long fileExpiration = mFileTransfer.getFileExpiration();
+            long iconExpiration = mFileTransfer.getFileIconExpiration();
+            Uri iconUri = mFileTransfer.getFileIcon();
+            String iconMimeType = mFileTransfer.getFileIconMimeType();
+            if (LogUtils.isActive) {
+                Log.d(LOGTAG,
+                        new StringBuilder("FileTransfer iconUri=")
+                                .append((iconUri == null) ? null : iconUri.toString())
+                                .append(" iconMimeType=").append(iconMimeType)
+                                .append(" iconExpiration=").append(iconExpiration)
+                                .append(" fileExpiration=").append(fileExpiration).toString());
+            }
+        } catch (RcsServiceException e) {
+            e.printStackTrace();
+        }
+
         mTransferred = true;
         TextView statusView = (TextView) findViewById(R.id.progress_status);
         statusView.setText(RiApplication.FT_STATES[FileTransfer.State.TRANSFERRED.toInt()]);
@@ -787,4 +730,94 @@ public class ReceiveFileTransfer extends Activity {
             }
         });
     }
+
+    /**
+     * Group File transfer listener
+     */
+    private GroupFileTransferListener groupFtListener = new GroupFileTransferListener() {
+
+        @Override
+        public void onDeliveryInfoChanged(String chatId, ContactId contact, String transferId,
+                GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
+            if (LogUtils.isActive) {
+                Log.d(LOGTAG, new StringBuilder("onDeliveryInfoChanged contact=").append(contact)
+                        .append(" transferId=").append(transferId).append(" state=").append(status)
+                        .append(" reason=").append(reasonCode).toString());
+            }
+        }
+
+        @Override
+        public void onProgressUpdate(String chatId, String transferId, long currentSize,
+                long totalSize) {
+            // Discard event if not for current transferId
+            if (!mFtDao.getTransferId().equals(transferId)) {
+                return;
+            }
+            ReceiveFileTransfer.this.onTransferProgressUpdateUI(currentSize, totalSize);
+        }
+
+        @Override
+        public void onStateChanged(String chatId, String transferId, FileTransfer.State state,
+                FileTransfer.ReasonCode reasonCode) {
+            if (LogUtils.isActive) {
+                Log.d(LOGTAG,
+                        new StringBuilder("onStateChanged chatId=").append(chatId)
+                                .append(" transferId=").append(transferId).toString());
+            }
+            // Discard event if not for current transferId
+            if (!mFtDao.getTransferId().equals(transferId)) {
+                return;
+            }
+            ReceiveFileTransfer.this.onTransferStateChangedUpdateUI(state, reasonCode);
+        }
+
+        @Override
+        public void onDeleted(String chatId, Set<String> transferIds) {
+            if (LogUtils.isActive) {
+                Log.w(LOGTAG,
+                        new StringBuilder("onDeleted chatId=").append(chatId)
+                                .append(" transferIds=").append(transferIds).toString());
+            }
+        }
+    };
+
+    /**
+     * File transfer listener
+     */
+    private OneToOneFileTransferListener ftListener = new OneToOneFileTransferListener() {
+
+        @Override
+        public void onProgressUpdate(ContactId contact, String transferId, final long currentSize,
+                final long totalSize) {
+            // Discard event if not for current transferId
+            if (!mFtDao.getTransferId().equals(transferId)) {
+                return;
+            }
+            ReceiveFileTransfer.this.onTransferProgressUpdateUI(currentSize, totalSize);
+        }
+
+        @Override
+        public void onStateChanged(ContactId contact, String transferId,
+                final FileTransfer.State state, FileTransfer.ReasonCode reasonCode) {
+            if (LogUtils.isActive) {
+                Log.d(LOGTAG,
+                        new StringBuilder("onStateChanged contact=").append(contact)
+                                .append(" transferId=").append(transferId).toString());
+            }
+            // Discard event if not for current transferId
+            if (!mFtDao.getTransferId().equals(transferId)) {
+                return;
+            }
+            ReceiveFileTransfer.this.onTransferStateChangedUpdateUI(state, reasonCode);
+        }
+
+        @Override
+        public void onDeleted(ContactId contact, Set<String> transferIds) {
+            if (LogUtils.isActive) {
+                Log.w(LOGTAG,
+                        new StringBuilder("onDeleted contact=").append(contact)
+                                .append(" transferIds=").append(transferIds).toString());
+            }
+        }
+    };
 }
