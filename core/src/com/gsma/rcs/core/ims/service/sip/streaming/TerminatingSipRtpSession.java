@@ -103,7 +103,7 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                     }
                     return;
 
-                case INVITATION_NOT_ANSWERED:
+                case INVITATION_TIMEOUT:
                     if (sLogger.isActivated()) {
                         sLogger.debug("Session has been rejected on timeout");
                     }
@@ -116,6 +116,13 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                     for (ImsSessionListener listener : listeners) {
                         listener.handleSessionRejectedByTimeout(contact);
                     }
+                    return;
+
+                case INVITATION_ABORTED_BY_SYSTEM:
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Session has been aborted by system");
+                    }
+                    removeSession();
                     return;
 
                 case INVITATION_CANCELED:

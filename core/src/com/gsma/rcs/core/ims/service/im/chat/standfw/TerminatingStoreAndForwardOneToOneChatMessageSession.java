@@ -174,7 +174,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                         }
                         return;
 
-                    case INVITATION_NOT_ANSWERED:
+                    case INVITATION_TIMEOUT:
                         if (logActivated) {
                             sLogger.debug("Session has been rejected on timeout");
                         }
@@ -187,6 +187,13 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                         for (ImsSessionListener listener : listeners) {
                             listener.handleSessionRejectedByTimeout(contact);
                         }
+                        return;
+
+                    case INVITATION_ABORTED_BY_SYSTEM:
+                        if (logActivated) {
+                            sLogger.debug("Session has been aborted by system");
+                        }
+                        removeSession();
                         return;
 
                     case INVITATION_CANCELED:

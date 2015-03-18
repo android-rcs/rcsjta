@@ -257,6 +257,13 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
                         }
                         break;
 
+                    case INVITATION_ABORTED_BY_SYSTEM:
+                        if (logActivated) {
+                            sLogger.debug("Http transfer has aborted by system");
+                        }
+                        removeSession();
+                        return;
+
                     default:
                         if (logActivated) {
                             sLogger.debug("Unknown invitation answer in run; answer=".concat(answer
