@@ -18,15 +18,20 @@
 
 package com.orangelabs.rcs.ri.sharing.image;
 
-import java.text.DateFormat;
-import java.util.Date;
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.sharing.image.ImageSharing;
+import com.gsma.services.rcs.sharing.image.ImageSharingLog;
+
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.provider.BaseColumns;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -37,13 +42,8 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.sharing.image.ImageSharing;
-import com.gsma.services.rcs.sharing.image.ImageSharingLog;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
-import com.orangelabs.rcs.ri.utils.Utils;
+import java.text.DateFormat;
+import java.util.Date;
 
 /**
  * List image sharings from the content provider
@@ -52,19 +52,17 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public class ImageSharingList extends Activity {
 
-    /**
-     * SHARING_ID is the ID since it is a primary key
-     */
-    private static final String SHARING_ID_AS_ID = new StringBuilder(ImageSharingLog.SHARING_ID)
-            .append(" AS ").append(BaseColumns._ID).toString();
-
     // @formatter:off
     private static final String[] PROJECTION = new String[] {
-            SHARING_ID_AS_ID, ImageSharingLog.CONTACT, ImageSharingLog.FILENAME,
-            ImageSharingLog.FILESIZE, ImageSharingLog.STATE, ImageSharingLog.DIRECTION,
-            ImageSharingLog.TIMESTAMP
+        ImageSharingLog.BASECOLUMN_ID,
+        ImageSharingLog.SHARING_ID, 
+        ImageSharingLog.CONTACT, 
+        ImageSharingLog.FILENAME,
+        ImageSharingLog.FILESIZE, 
+        ImageSharingLog.STATE, 
+        ImageSharingLog.DIRECTION,
+        ImageSharingLog.TIMESTAMP
     };
-
     // @formatter:on
 
     private static final String SORT_ORDER = new StringBuilder(ImageSharingLog.TIMESTAMP).append(
@@ -193,12 +191,12 @@ public class ImageSharingList extends Activity {
         TextView timestamptext;
 
         public ImageSharingItemCache(View view, Cursor cursor) {
-            columnNumber = cursor.getColumnIndex(ImageSharingLog.CONTACT);
-            columnFilename = cursor.getColumnIndex(ImageSharingLog.FILENAME);
-            columnFilesize = cursor.getColumnIndex(ImageSharingLog.FILESIZE);
-            columnState = cursor.getColumnIndex(ImageSharingLog.STATE);
-            columnDirection = cursor.getColumnIndex(ImageSharingLog.DIRECTION);
-            columnTimestamp = cursor.getColumnIndex(ImageSharingLog.TIMESTAMP);
+            columnNumber = cursor.getColumnIndexOrThrow(ImageSharingLog.CONTACT);
+            columnFilename = cursor.getColumnIndexOrThrow(ImageSharingLog.FILENAME);
+            columnFilesize = cursor.getColumnIndexOrThrow(ImageSharingLog.FILESIZE);
+            columnState = cursor.getColumnIndexOrThrow(ImageSharingLog.STATE);
+            columnDirection = cursor.getColumnIndexOrThrow(ImageSharingLog.DIRECTION);
+            columnTimestamp = cursor.getColumnIndexOrThrow(ImageSharingLog.TIMESTAMP);
             numberText = (TextView) view.findViewById(R.id.number);
             filenameText = (TextView) view.findViewById(R.id.filename);
             filesizeText = (TextView) view.findViewById(R.id.filesize);

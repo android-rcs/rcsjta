@@ -18,12 +18,17 @@
 
 package com.orangelabs.rcs.ri.capabilities;
 
+import com.gsma.services.rcs.capability.CapabilitiesLog;
+
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.provider.BaseColumns;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,11 +38,6 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.capability.CapabilitiesLog;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
-import com.orangelabs.rcs.ri.utils.Utils;
-
 /**
  * List capabilities from the content provider
  * 
@@ -46,19 +46,18 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public class CapabilitiesList extends Activity {
 
-    /**
-     * Contact is the ID since there is a single contact occurrence per capabilities
-     */
-    private static final String CONTACT_AS_ID = new StringBuilder(CapabilitiesLog.CONTACT)
-            .append(" AS ").append(BaseColumns._ID).toString();
-
     // @formatter:off
     private static final String[] PROJECTION = new String[] {
-            CONTACT_AS_ID, CapabilitiesLog.CAPABILITY_IM_SESSION,
-            CapabilitiesLog.CAPABILITY_FILE_TRANSFER, CapabilitiesLog.CAPABILITY_IMAGE_SHARE,
-            CapabilitiesLog.CAPABILITY_VIDEO_SHARE, CapabilitiesLog.CAPABILITY_GEOLOC_PUSH,
-            CapabilitiesLog.CAPABILITY_EXTENSIONS, CapabilitiesLog.AUTOMATA,
-            CapabilitiesLog.TIMESTAMP
+        CapabilitiesLog.BASECOLUMN_ID,
+        CapabilitiesLog.CONTACT,
+        CapabilitiesLog.CAPABILITY_IM_SESSION,
+        CapabilitiesLog.CAPABILITY_FILE_TRANSFER,
+        CapabilitiesLog.CAPABILITY_IMAGE_SHARE,
+        CapabilitiesLog.CAPABILITY_VIDEO_SHARE,
+        CapabilitiesLog.CAPABILITY_GEOLOC_PUSH,
+        CapabilitiesLog.CAPABILITY_EXTENSIONS,
+        CapabilitiesLog.AUTOMATA,
+        CapabilitiesLog.TIMESTAMP
     };
 
     // @formatter:on
@@ -209,20 +208,21 @@ public class CapabilitiesList extends Activity {
         public int columnTimestamp;
 
         CapabilitiesItemViewHolder(View base, Cursor cursor) {
-            columnContact = cursor.getColumnIndex(BaseColumns._ID);
-            columnCapabilityIm = cursor.getColumnIndex(CapabilitiesLog.CAPABILITY_IM_SESSION);
+            columnContact = cursor.getColumnIndexOrThrow(CapabilitiesLog.CONTACT);
+            columnCapabilityIm = cursor
+                    .getColumnIndexOrThrow(CapabilitiesLog.CAPABILITY_IM_SESSION);
             columnCapabilityFileTransfer = cursor
-                    .getColumnIndex(CapabilitiesLog.CAPABILITY_FILE_TRANSFER);
+                    .getColumnIndexOrThrow(CapabilitiesLog.CAPABILITY_FILE_TRANSFER);
             columnCapabilityImageSharing = cursor
-                    .getColumnIndex(CapabilitiesLog.CAPABILITY_IMAGE_SHARE);
+                    .getColumnIndexOrThrow(CapabilitiesLog.CAPABILITY_IMAGE_SHARE);
             columnCapabilityVideoSharing = cursor
-                    .getColumnIndex(CapabilitiesLog.CAPABILITY_VIDEO_SHARE);
+                    .getColumnIndexOrThrow(CapabilitiesLog.CAPABILITY_VIDEO_SHARE);
             columnCapabilityGeolocPush = cursor
-                    .getColumnIndex(CapabilitiesLog.CAPABILITY_GEOLOC_PUSH);
+                    .getColumnIndexOrThrow(CapabilitiesLog.CAPABILITY_GEOLOC_PUSH);
             columnCapabilityExtensions = cursor
-                    .getColumnIndex(CapabilitiesLog.CAPABILITY_EXTENSIONS);
-            columnAutomata = cursor.getColumnIndex(CapabilitiesLog.AUTOMATA);
-            columnTimestamp = cursor.getColumnIndex(CapabilitiesLog.TIMESTAMP);
+                    .getColumnIndexOrThrow(CapabilitiesLog.CAPABILITY_EXTENSIONS);
+            columnAutomata = cursor.getColumnIndexOrThrow(CapabilitiesLog.AUTOMATA);
+            columnTimestamp = cursor.getColumnIndexOrThrow(CapabilitiesLog.TIMESTAMP);
 
             numberText = (TextView) base.findViewById(R.id.number);
             imBox = (CheckBox) base.findViewById(R.id.im);

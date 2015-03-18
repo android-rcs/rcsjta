@@ -18,15 +18,25 @@
 
 package com.orangelabs.rcs.ri.messaging.filetransfer;
 
-import java.text.DateFormat;
-import java.util.Date;
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.filetransfer.FileTransferLog;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.provider.BaseColumns;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -42,18 +52,8 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.filetransfer.FileTransfer;
-import com.gsma.services.rcs.filetransfer.FileTransferLog;
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.LockAccess;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
-import com.orangelabs.rcs.ri.utils.Utils;
+import java.text.DateFormat;
+import java.util.Date;
 
 /**
  * List file transfers from the content provider
@@ -63,19 +63,17 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public class FileTransferList extends Activity {
 
-    /**
-     * FT_ID is the ID since it is a primary key
-     */
-    private static final String FILE_TRANSFER_ID_AS_ID = new StringBuilder(FileTransferLog.FT_ID)
-            .append(" AS ").append(BaseColumns._ID).toString();
-
     // @formatter:off
     private static final String[] PROJECTION = new String[] {
-            FILE_TRANSFER_ID_AS_ID, FileTransferLog.CONTACT, FileTransferLog.FILENAME,
-            FileTransferLog.FILESIZE, FileTransferLog.STATE, FileTransferLog.DIRECTION,
+            FileTransferLog.BASECOLUMN_ID,
+            FileTransferLog.FT_ID,
+            FileTransferLog.CONTACT,
+            FileTransferLog.FILENAME,
+            FileTransferLog.FILESIZE,
+            FileTransferLog.STATE,
+            FileTransferLog.DIRECTION,
             FileTransferLog.TIMESTAMP
     };
-
     // @formatter:on
 
     private static final String SORT_ORDER = new StringBuilder(FileTransferLog.TIMESTAMP).append(
@@ -224,12 +222,12 @@ public class FileTransferList extends Activity {
         TextView timestamptext;
 
         public FileTransferItemViewHolder(View base, Cursor cursor) {
-            columnNumber = cursor.getColumnIndex(FileTransferLog.CONTACT);
-            columnFilename = cursor.getColumnIndex(FileTransferLog.FILENAME);
-            columnFilesize = cursor.getColumnIndex(FileTransferLog.FILESIZE);
-            columnState = cursor.getColumnIndex(FileTransferLog.STATE);
-            columnDirection = cursor.getColumnIndex(FileTransferLog.DIRECTION);
-            columnTimestamp = cursor.getColumnIndex(FileTransferLog.TIMESTAMP);
+            columnNumber = cursor.getColumnIndexOrThrow(FileTransferLog.CONTACT);
+            columnFilename = cursor.getColumnIndexOrThrow(FileTransferLog.FILENAME);
+            columnFilesize = cursor.getColumnIndexOrThrow(FileTransferLog.FILESIZE);
+            columnState = cursor.getColumnIndexOrThrow(FileTransferLog.STATE);
+            columnDirection = cursor.getColumnIndexOrThrow(FileTransferLog.DIRECTION);
+            columnTimestamp = cursor.getColumnIndexOrThrow(FileTransferLog.TIMESTAMP);
             numberText = (TextView) base.findViewById(R.id.number);
             filenameText = (TextView) base.findViewById(R.id.filename);
             filesizeText = (TextView) base.findViewById(R.id.filesize);
@@ -237,6 +235,7 @@ public class FileTransferList extends Activity {
             directionText = (TextView) base.findViewById(R.id.direction);
             timestamptext = (TextView) base.findViewById(R.id.date);
         }
+
     }
 
     /**
@@ -315,15 +314,10 @@ public class FileTransferList extends Activity {
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
         Cursor cursor = (Cursor) mAdapter.getItem(info.position);
         menu.add(0, MENU_ITEM_DELETE, 0, R.string.menu_delete_message);
-        String transferId = cursor.getString(cursor.getColumnIndexOrThrow(BaseColumns._ID));
-        if (LogUtils.isActive) {
-            Log.d(LOGTAG, "onCreateContextMenu ftId=".concat(transferId));
-        }
-
+        String transferId = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FT_ID));
         // Check if resend is allowed
         try {
             FileTransfer transfer = mCnxManager.getFileTransferApi().getFileTransfer(transferId);
-            // TODO check for remove
             if (transfer.isAllowedToResendTransfer()) {
                 menu.add(0, MENU_ITEM_RESEND, 1, R.string.menu_resend_message);
             }
@@ -337,7 +331,7 @@ public class FileTransferList extends Activity {
     public boolean onContextItemSelected(MenuItem item) {
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
         Cursor cursor = (Cursor) (mAdapter.getItem(info.position));
-        String transferId = cursor.getString(cursor.getColumnIndexOrThrow(BaseColumns._ID));
+        String transferId = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FT_ID));
         switch (item.getItemId()) {
             case MENU_ITEM_RESEND:
                 if (LogUtils.isActive) {

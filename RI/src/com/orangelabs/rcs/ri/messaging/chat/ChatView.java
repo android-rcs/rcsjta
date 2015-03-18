@@ -18,8 +18,21 @@
 
 package com.orangelabs.rcs.ri.messaging.chat;
 
-import java.util.ArrayList;
-import java.util.Set;
+import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.chat.ChatLog.Message;
+import com.gsma.services.rcs.chat.ChatMessage;
+import com.gsma.services.rcs.contact.ContactId;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.messaging.geoloc.EditGeoloc;
+import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -28,7 +41,6 @@ import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.BaseColumns;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -45,20 +57,8 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.chat.ChatLog.Message;
-import com.gsma.services.rcs.chat.ChatMessage;
-import com.gsma.services.rcs.contact.ContactId;
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.messaging.geoloc.EditGeoloc;
-import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
-import com.orangelabs.rcs.ri.utils.LockAccess;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
-import com.orangelabs.rcs.ri.utils.Utils;
+import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Chat view
@@ -115,16 +115,18 @@ public abstract class ChatView extends FragmentActivity implements
      */
     private static final String LOGTAG = LogUtils.getTag(ChatView.class.getSimpleName());
 
-    /**
-     * MESSAGE_ID is the ID since it is unique
-     */
-    private static final String MESSAGE_ID_AS_ID = new StringBuilder(Message.MESSAGE_ID)
-            .append(" AS ").append(BaseColumns._ID).toString();
-
+    // @formatter:off
     protected static final String[] PROJECTION = new String[] {
-            MESSAGE_ID_AS_ID, Message.MIME_TYPE, Message.CONTENT, Message.TIMESTAMP,
-            Message.STATUS, Message.DIRECTION, Message.CONTACT
+        Message.BASECOLUMN_ID, 
+        Message.MESSAGE_ID, 
+        Message.MIME_TYPE, 
+        Message.CONTENT, 
+        Message.TIMESTAMP,
+        Message.STATUS, 
+        Message.DIRECTION, 
+        Message.CONTACT
     };
+    // @formatter:on
 
     protected final static String QUERY_SORT_ORDER = new StringBuilder(Message.TIMESTAMP).append(
             " ASC").toString();

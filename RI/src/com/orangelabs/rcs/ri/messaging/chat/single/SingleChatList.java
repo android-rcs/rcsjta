@@ -18,12 +18,24 @@
 
 package com.orangelabs.rcs.ri.messaging.chat.single;
 
+import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.RcsContactFormatException;
+import com.gsma.services.rcs.chat.ChatLog.Message;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.provider.BaseColumns;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,18 +50,6 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsContactFormatException;
-import com.gsma.services.rcs.chat.ChatLog.Message;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactUtil;
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
-import com.orangelabs.rcs.ri.utils.Utils;
-
 /**
  * List chats from the content provider
  * 
@@ -57,17 +57,15 @@ import com.orangelabs.rcs.ri.utils.Utils;
  */
 public class SingleChatList extends Activity {
 
-    /**
-     * Contact is the ID since there is a single contact occurrence in the query result
-     */
-    private static final String CONTACT_AS_ID = new StringBuilder(Message.CONTACT).append(" AS ")
-            .append(BaseColumns._ID).toString();
-
     // @formatter:off
     private static final String[] PROJECTION = new String[] {
-            CONTACT_AS_ID, Message.CHAT_ID, Message.CONTENT, Message.MIME_TYPE, Message.TIMESTAMP
+        Message.BASECOLUMN_ID,
+        Message.CONTACT,
+        Message.CHAT_ID,
+        Message.CONTENT,
+        Message.MIME_TYPE,
+        Message.TIMESTAMP
     };
-
     // @formatter:on
 
     /**
@@ -125,7 +123,7 @@ public class SingleChatList extends Activity {
                 }
                 // Get selected item
                 Cursor cursor = (Cursor) (parent.getAdapter()).getItem(pos);
-                String number = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
+                String number = cursor.getString(cursor.getColumnIndexOrThrow(Message.CONTACT));
 
                 ContactId contact;
                 try {
@@ -248,7 +246,7 @@ public class SingleChatList extends Activity {
         TextView dateText;
 
         SingleChatListItemViewHolder(View base, Cursor cursor) {
-            columnContact = cursor.getColumnIndexOrThrow(BaseColumns._ID);
+            columnContact = cursor.getColumnIndexOrThrow(Message.CONTACT);
             columnContent = cursor.getColumnIndexOrThrow(Message.CONTENT);
             columnMimetype = cursor.getColumnIndexOrThrow(Message.MIME_TYPE);
             columnTimestamp = cursor.getColumnIndexOrThrow(Message.TIMESTAMP);

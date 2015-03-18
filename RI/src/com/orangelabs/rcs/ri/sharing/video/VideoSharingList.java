@@ -18,15 +18,20 @@
 
 package com.orangelabs.rcs.ri.sharing.video;
 
-import java.text.DateFormat;
-import java.util.Date;
+import com.gsma.services.rcs.RcsService.Direction;
+import com.gsma.services.rcs.sharing.video.VideoSharing;
+import com.gsma.services.rcs.sharing.video.VideoSharingLog;
+
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.provider.BaseColumns;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -37,13 +42,8 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.sharing.video.VideoSharing;
-import com.gsma.services.rcs.sharing.video.VideoSharingLog;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
-import com.orangelabs.rcs.ri.utils.Utils;
+import java.text.DateFormat;
+import java.util.Date;
 
 /**
  * List video sharing from the content provider
@@ -52,18 +52,17 @@ import com.orangelabs.rcs.ri.utils.Utils;
  * @author YPLO6403
  */
 public class VideoSharingList extends Activity {
-    /**
-     * SHARING_ID is the ID since it is a primary key
-     */
-    private static final String SHARING_ID_AS_ID = new StringBuilder(VideoSharingLog.SHARING_ID)
-            .append(" AS ").append(BaseColumns._ID).toString();
 
     // @formatter:off
     private static final String[] PROJECTION = new String[] {
-            SHARING_ID_AS_ID, VideoSharingLog.CONTACT, VideoSharingLog.DURATION,
-            VideoSharingLog.STATE, VideoSharingLog.DIRECTION, VideoSharingLog.TIMESTAMP
+        VideoSharingLog.BASECOLUMN_ID,
+        VideoSharingLog.SHARING_ID,
+        VideoSharingLog.CONTACT,
+        VideoSharingLog.DURATION,
+        VideoSharingLog.STATE,
+        VideoSharingLog.DIRECTION,
+        VideoSharingLog.TIMESTAMP
     };
-
     // @formatter:on
 
     private static final String SORT_ORDER = new StringBuilder(VideoSharingLog.TIMESTAMP).append(
@@ -182,11 +181,11 @@ public class VideoSharingList extends Activity {
         TextView timestamptext;
 
         public VideoSharingItemCache(View view, Cursor cursor) {
-            columnNumber = cursor.getColumnIndex(VideoSharingLog.CONTACT);
-            columnDuration = cursor.getColumnIndex(VideoSharingLog.DURATION);
-            columnState = cursor.getColumnIndex(VideoSharingLog.STATE);
-            columnDirection = cursor.getColumnIndex(VideoSharingLog.DIRECTION);
-            columnTimestamp = cursor.getColumnIndex(VideoSharingLog.TIMESTAMP);
+            columnNumber = cursor.getColumnIndexOrThrow(VideoSharingLog.CONTACT);
+            columnDuration = cursor.getColumnIndexOrThrow(VideoSharingLog.DURATION);
+            columnState = cursor.getColumnIndexOrThrow(VideoSharingLog.STATE);
+            columnDirection = cursor.getColumnIndexOrThrow(VideoSharingLog.DIRECTION);
+            columnTimestamp = cursor.getColumnIndexOrThrow(VideoSharingLog.TIMESTAMP);
             numberText = (TextView) view.findViewById(R.id.number);
             durationText = (TextView) view.findViewById(R.id.duration);
             stateText = (TextView) view.findViewById(R.id.state);

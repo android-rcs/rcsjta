@@ -74,7 +74,7 @@ public class TestGeolocSharingApi extends ListActivity {
                             null, null, null);
                     while (cursor.moveToNext()) {
                         String contact = cursor.getString(cursor
-                                .getColumnIndex(CapabilitiesLog.CONTACT));
+                                .getColumnIndexOrThrow(CapabilitiesLog.CONTACT));
                         list.add(contact);
                     }
                     ShowUsInMap.startShowUsInMap(this, list);

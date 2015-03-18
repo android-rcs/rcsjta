@@ -18,12 +18,22 @@
 
 package com.orangelabs.rcs.ri.messaging.chat.group;
 
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.GroupChat;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.provider.BaseColumns;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
@@ -38,34 +48,21 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.GroupChat;
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.LockAccess;
-import com.orangelabs.rcs.ri.utils.Utils;
-
 /**
  * List group chats from the content provider
  * 
  * @author YPLO6403
  */
 public class GroupChatList extends Activity {
-    /**
-     * ChatId is the ID since there is a single occurrence in group chat log
-     */
-    private static final String CHATID_AS_ID = new StringBuilder(ChatLog.GroupChat.CHAT_ID)
-            .append(" AS ").append(BaseColumns._ID).toString();
 
     // @formatter:off
     String[] PROJECTION = new String[] {
-            CHATID_AS_ID, ChatLog.GroupChat.SUBJECT, ChatLog.GroupChat.STATE,
+            ChatLog.GroupChat.BASECOLUMN_ID,
+            ChatLog.GroupChat.CHAT_ID,
+            ChatLog.GroupChat.SUBJECT,
+            ChatLog.GroupChat.STATE,
             ChatLog.GroupChat.TIMESTAMP
     };
-
     // @formatter:on
 
     private static final String SORT_ORDER = new StringBuilder(ChatLog.GroupChat.TIMESTAMP).append(
@@ -102,7 +99,8 @@ public class GroupChatList extends Activity {
 
                 }
                 Cursor cursor = (Cursor) (parent.getAdapter()).getItem(pos);
-                String chatId = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
+                String chatId = cursor.getString(cursor
+                        .getColumnIndexOrThrow(ChatLog.GroupChat.CHAT_ID));
                 try {
                     // Get group chat
                     GroupChat groupChat = cnxManager.getChatApi().getGroupChat(chatId);

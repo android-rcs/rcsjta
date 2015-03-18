@@ -47,7 +47,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.provider.BaseColumns;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.text.InputFilter;
@@ -272,13 +271,13 @@ public class SingleChatView extends ChatView {
         // Adapt the contextual menu according to the selected item
         menu.add(0, CHAT_MENU_ITEM_DELETE, CHAT_MENU_ITEM_DELETE, R.string.menu_delete_message);
         Direction direction = Direction.valueOf(cursor.getInt(cursor
-                .getColumnIndex(Message.DIRECTION)));
+                .getColumnIndexOrThrow(Message.DIRECTION)));
         if (Direction.OUTGOING != direction) {
             return;
 
         }
         Content.Status status = Content.Status.valueOf(cursor.getInt(cursor
-                .getColumnIndex(Message.STATUS)));
+                .getColumnIndexOrThrow(Message.STATUS)));
         switch (status) {
             case FAILED:
                 menu.add(0, CHAT_MENU_ITEM_RESEND, CHAT_MENU_ITEM_RESEND,
@@ -301,7 +300,7 @@ public class SingleChatView extends ChatView {
     public boolean onContextItemSelected(MenuItem item) {
         AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
         Cursor cursor = (Cursor) (mAdapter.getItem(info.position));
-        String messageId = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
+        String messageId = cursor.getString(cursor.getColumnIndexOrThrow(Message.MESSAGE_ID));
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "onContextItemSelected msgId=".concat(messageId));
         }

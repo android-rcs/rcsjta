@@ -18,22 +18,22 @@
 
 package com.orangelabs.rcs.ri.messaging;
 
+import com.gsma.services.rcs.GroupDeliveryInfo;
+
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.provider.BaseColumns;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.util.Log;
 import android.widget.ListView;
-
-import com.gsma.services.rcs.GroupDeliveryInfo;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.LogUtils;
 
 /**
  * A list view of group chat delivery information where the data comes from a cursor.
@@ -55,19 +55,15 @@ public class GroupDeliveryInfoList extends FragmentActivity implements
      */
     private static final int LOADER_ID = 1;
 
-    /**
-     * Contact is the ID since there is a single contact occurrence per message ID
-     */
-    private static final String CONTACT_AS_ID = new StringBuilder(GroupDeliveryInfo.CONTACT)
-            .append(" AS ").append(BaseColumns._ID).toString();
-
     // @formatter:off
     private static final String[] PROJECTION = new String[] {
-            CONTACT_AS_ID, GroupDeliveryInfo.TIMESTAMP_DELIVERED,
-            GroupDeliveryInfo.TIMESTAMP_DISPLAYED, GroupDeliveryInfo.STATUS,
-            GroupDeliveryInfo.REASON_CODE
+        GroupDeliveryInfo.BASECOLUMN_ID,
+        GroupDeliveryInfo.CONTACT,
+        GroupDeliveryInfo.TIMESTAMP_DELIVERED,
+        GroupDeliveryInfo.TIMESTAMP_DISPLAYED,
+        GroupDeliveryInfo.STATUS,
+        GroupDeliveryInfo.REASON_CODE
     };
-
     // @formatter:on
 
     private static final String WHERE_CLAUSE = new StringBuilder(GroupDeliveryInfo.ID).append("=?")
