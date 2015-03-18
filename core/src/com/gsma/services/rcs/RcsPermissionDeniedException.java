@@ -22,25 +22,57 @@
 
 package com.gsma.services.rcs;
 
+import android.text.TextUtils;
+
 /**
  * RCS permission denied exception
+ * <p>
+ * Thrown when a method of the service API is called that not allowed right now. This can be for
+ * multiple reasons like it is not possible to call accept() on a file transfer invitation that has
+ * previously already been rejected, the file trying to be sent is not allowed to be read back due
+ * to security aspects or any other operation that fails because the operation is not allowed or has
+ * been blocked for some other reason.
+ * </p>
  */
 public class RcsPermissionDeniedException extends RcsServiceException {
+
     static final long serialVersionUID = 1L;
 
     /**
      * Constructor
+     * 
+     * @param message Error message obtained either from a constant string or through e.getMessage()
      */
-    public RcsPermissionDeniedException() {
-        this("RCS permission denied");
+    public RcsPermissionDeniedException(String message) {
+        super(message);
     }
 
     /**
      * Constructor
      * 
-     * @param error
+     * @param message Error message obtained either from a constant string or through e.getMessage()
+     * @param cause the cause (which is saved for later retrieval by the Throwable.getCause()
+     *            method). (A null value is permitted, and indicates that the cause is nonexistent
+     *            or unknown.)
      */
-    public RcsPermissionDeniedException(String error) {
-        super(error);
+    public RcsPermissionDeniedException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    /**
+     * Asserts {@link RcsPermissionDeniedException}
+     * <p>
+     * An utility method that will translate the Server side exception to client specific exception
+     * by parsing exception message which will have a special formatted exception message with a
+     * pre-defined delimiter.
+     * </p>
+     * 
+     * @param e Exception
+     * @throws RcsPermissionDeniedException
+     */
+    public static void assertException(Exception e) throws RcsPermissionDeniedException {
+        if (isIntendedException(e, RcsPermissionDeniedException.class)) {
+            throw new RcsPermissionDeniedException(extractServerException(e), e);
+        }
     }
 }
