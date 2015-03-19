@@ -54,7 +54,11 @@ public class GroupChatTerminalExceptionTask implements Runnable {
     }
 
     public void run() {
-
+        boolean logActivated = mLogger.isActivated();
+        if (logActivated) {
+            mLogger.debug("Execute task to mark all queued group chat messages and group file transfers as failed with chatId "
+                    .concat(mChatId));
+        }
         Cursor messageCursor = null;
         Cursor fileCursor = null;
         try {
@@ -81,7 +85,7 @@ public class GroupChatTerminalExceptionTask implements Runnable {
             /*
              * Exception will be handled better in CR037.
              */
-            if (mLogger.isActivated()) {
+            if (logActivated) {
                 mLogger.error(
                         "Exception occured while trying to mark queued group chat messages and group file transfers as failed with chatId "
                                 .concat(mChatId), e);

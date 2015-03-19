@@ -170,9 +170,8 @@ public class FileUtils {
      * @param context Context
      * @param file URI
      * @return fileName String
-     * @throws IllegalArgumentException
      */
-    public static String getFileName(Context context, Uri file) throws IllegalArgumentException {
+    public static String getFileName(Context context, Uri file) {
         Cursor cursor = null;
         try {
             cursor = context.getContentResolver().query(file, null, null, null, null);
@@ -189,8 +188,6 @@ public class FileUtils {
             } else {
                 throw new IllegalArgumentException("Unsupported URI scheme");
             }
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Error in retrieving file name from the URI");
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -204,9 +201,8 @@ public class FileUtils {
      * @param context Context
      * @param file URI
      * @return fileSize long
-     * @throws IllegalArgumentException
      */
-    public static long getFileSize(Context context, Uri file) throws IllegalArgumentException {
+    public static long getFileSize(Context context, Uri file) {
         Cursor cursor = null;
         try {
             cursor = context.getContentResolver().query(file, null, null, null, null);
@@ -223,8 +219,6 @@ public class FileUtils {
             } else {
                 throw new IllegalArgumentException("Unsupported URI scheme");
             }
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Error in retrieving file size form the URI");
         } finally {
             if (cursor != null) {
                 cursor.close();

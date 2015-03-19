@@ -84,7 +84,7 @@ public class FileTransferLog implements IFileTransferLog {
             .append(FileTransferData.KEY_TRANSFERRED).append("<>")
             .append(FileTransferData.KEY_FILESIZE).toString();
 
-    private static final String ORDER_BY_TIMESTAMP_ASC = MessageData.KEY_TIMESTAMP.concat(" ASC");
+    private static final String ORDER_BY_TIMESTAMP_ASC = FileTransferData.KEY_TIMESTAMP.concat(" ASC");
 
     private static final int FIRST_COLUMN_IDX = 0;
 
@@ -174,7 +174,7 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_TRANSFERRED, 0);
         values.put(FileTransferData.KEY_FILESIZE, content.getSize());
         long date = Calendar.getInstance().getTimeInMillis();
-        values.put(MessageData.KEY_READ_STATUS, ReadStatus.UNREAD.toInt());
+        values.put(FileTransferData.KEY_READ_STATUS, ReadStatus.UNREAD.toInt());
         // Send file
         values.put(FileTransferData.KEY_TIMESTAMP, date);
         values.put(FileTransferData.KEY_TIMESTAMP_SENT, date);

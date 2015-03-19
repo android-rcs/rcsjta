@@ -435,15 +435,6 @@ public interface CoreListener {
     public void tryToDequeueFileTransfers(InstantMessagingService imService);
 
     /**
-     * Try to mark all queued one-one chat messages and one-one file transfers corresponding to
-     * contact as failed
-     * 
-     * @param contact
-     */
-    public void tryToMarkQueuedOneToOneChatMessagesAndOneToOneFileTransfersAsFailed(
-            final ContactId contact);
-
-    /**
      * Try to mark all queued group chat messages and group file transfers corresponding to contact
      * as failed
      * @param contact

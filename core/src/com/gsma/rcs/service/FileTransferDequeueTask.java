@@ -20,6 +20,7 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
@@ -27,7 +28,6 @@ import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
-import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 import android.database.Cursor;
 import android.net.Uri;
@@ -53,17 +53,18 @@ import android.net.Uri;
         try {
             synchronized (mLock) {
                 cursor = mMessagingLog.getQueuedFileTransfers();
-                int fileTransferIdIdx = cursor.getColumnIndexOrThrow(FileTransferLog.FT_ID);
-                int fileIdx = cursor.getColumnIndexOrThrow(FileTransferLog.FILE);
-                int fileIconIdx = cursor.getColumnIndexOrThrow(FileTransferLog.FILEICON);
-                int contactIdx = cursor.getColumnIndexOrThrow(FileTransferLog.CONTACT);
-                int chatIdIdx = cursor.getColumnIndexOrThrow(FileTransferLog.CHAT_ID);
+                int fileTransferIdIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FT_ID);
+                int fileIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILE);
+                int fileIconIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILEICON);
+                int contactIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_CONTACT);
+                int chatIdIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_CHAT_ID);
                 while (cursor.moveToNext()) {
                     String fileTransferId = cursor.getString(fileTransferIdIdx);
                     String chatId = cursor.getString(chatIdIdx);
                     String contactNumber = cursor.getString(contactIdx);
                     ContactId contact = contactNumber != null ? ContactUtils
                             .createContactId(contactNumber) : null;
+                    boolean isGroupFileTransfer = !chatId.equals(contactNumber); 
                     try {
                         Uri file = Uri.parse(cursor.getString(fileIdx));
                         MmContent content = FileTransferUtils.createMmContent(file);
@@ -73,7 +74,7 @@ import android.net.Uri;
                             Uri fileIconUri = Uri.parse(fileIcon);
                             fileIconContent = FileTransferUtils.createMmContent(fileIconUri);
                         }
-                        if (chatId.equals(contactNumber)) {
+                        if (!isGroupFileTransfer) {
                             if (isAllowedToDequeueOneToOneFileTransfer()) {
                                 mFileTransferService.dequeueOneToOneFileTransfer(fileTransferId,
                                         contact, content, fileIconContent);
@@ -92,7 +93,7 @@ import android.net.Uri;
                                     .append(fileTransferId).append("', so mark as failed")
                                     .toString());
                         }
-                        if (chatId.equals(contactNumber)) {
+                        if (!isGroupFileTransfer) {
                             mFileTransferService.setOneToOneFileTransferStateAndReasonCode(
                                     fileTransferId, contact, State.FAILED,
                                     ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);

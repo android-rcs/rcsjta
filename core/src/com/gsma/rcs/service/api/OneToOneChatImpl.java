@@ -659,9 +659,6 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                         mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId,
                                 Status.FAILED, ReasonCode.FAILED_SEND);
                     }
-                    mCore.getListener()
-                            .tryToMarkQueuedOneToOneChatMessagesAndOneToOneFileTransfersAsFailed(
-                                    mContact);
                     break;
                 default:
                     break;

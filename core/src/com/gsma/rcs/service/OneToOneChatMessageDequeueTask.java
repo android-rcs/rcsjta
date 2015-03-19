@@ -21,11 +21,11 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.messaging.MessageData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.OneToOneChatImpl;
-import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.database.Cursor;
@@ -54,9 +54,9 @@ import android.database.Cursor;
         try {
             synchronized (mLock) {
                 cursor = mMessagingLog.getQueuedOneToOneChatMessages(mContact);
-                int msgIdIdx = cursor.getColumnIndexOrThrow(Message.MESSAGE_ID);
-                int contentIdx = cursor.getColumnIndexOrThrow(Message.CONTENT);
-                int mimeTypeIdx = cursor.getColumnIndexOrThrow(Message.MIME_TYPE);
+                int msgIdIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_MESSAGE_ID);
+                int contentIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_CONTENT);
+                int mimeTypeIdx = cursor.getColumnIndexOrThrow(MessageData.KEY_MIME_TYPE);
                 OneToOneChatImpl oneToOneChat = mChatService.getOrCreateOneToOneChat(mContact);
                 while (cursor.moveToNext()) {
                     String msgId = cursor.getString(msgIdIdx);

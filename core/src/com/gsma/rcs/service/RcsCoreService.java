@@ -988,13 +988,6 @@ public class RcsCoreService extends Service implements CoreListener {
     }
 
     @Override
-    public void tryToMarkQueuedOneToOneChatMessagesAndOneToOneFileTransfersAsFailed(
-            ContactId contact) {
-        mImOperationExecutor.execute(new OneToOneChatTerminalExceptionTask(contact, mChatApi,
-                mFtApi, mMessagingLog, IM_OPERATION_LOCK));
-    }
-
-    @Override
     public void tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(String chatId) {
         mImOperationExecutor.execute(new GroupChatTerminalExceptionTask(chatId, mChatApi, mFtApi,
                 mMessagingLog, IM_OPERATION_LOCK));

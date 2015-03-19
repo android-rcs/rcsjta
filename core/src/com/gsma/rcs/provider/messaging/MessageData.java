@@ -37,77 +37,77 @@ public class MessageData {
     /**
      * Unique history ID
      */
-    static final String KEY_BASECOLUMN_ID = ChatLog.Message.BASECOLUMN_ID;
+    public static final String KEY_BASECOLUMN_ID = ChatLog.Message.BASECOLUMN_ID;
 
     /**
      * Id of chat room
      */
-    static final String KEY_CHAT_ID = ChatLog.Message.CHAT_ID;
+    public static final String KEY_CHAT_ID = ChatLog.Message.CHAT_ID;
 
     /**
      * ContactId formatted number of remote contact or null if the message is an outgoing group chat
      * message.
      */
-    static final String KEY_CONTACT = ChatLog.Message.CONTACT;
+    public static final String KEY_CONTACT = ChatLog.Message.CONTACT;
 
     /**
      * Id of the message
      */
-    static final String KEY_MESSAGE_ID = ChatLog.Message.MESSAGE_ID;
+    public static final String KEY_MESSAGE_ID = ChatLog.Message.MESSAGE_ID;
 
     /**
      * Content of the message (as defined by one of the mimetypes in ChatLog.Message.Mimetype)
      */
-    static final String KEY_CONTENT = ChatLog.Message.CONTENT;
+    public static final String KEY_CONTENT = ChatLog.Message.CONTENT;
 
     /**
      * Multipurpose Internet Mail Extensions (MIME) type of message
      */
-    static final String KEY_MIME_TYPE = ChatLog.Message.MIME_TYPE;
+    public static final String KEY_MIME_TYPE = ChatLog.Message.MIME_TYPE;
 
     /**
      * Status direction of message.
      * 
      * @see Direction
      */
-    static final String KEY_DIRECTION = ChatLog.Message.DIRECTION;
+    public static final String KEY_DIRECTION = ChatLog.Message.DIRECTION;
 
     /**
      * @see Status
      */
-    static final String KEY_STATUS = ChatLog.Message.STATUS;
+    public static final String KEY_STATUS = ChatLog.Message.STATUS;
 
     /**
      * Reason code associated with the message status.
      * 
      * @see ReasonCode
      */
-    static final String KEY_REASON_CODE = ChatLog.Message.REASON_CODE;
+    public static final String KEY_REASON_CODE = ChatLog.Message.REASON_CODE;
 
     /**
      * This is set on the receiver side when the message has been displayed.
      * 
      * @see com.gsma.services.rcs.RcsCommon.ReadStatus for the list of status.
      */
-    static final String KEY_READ_STATUS = ChatLog.Message.READ_STATUS;
+    public static final String KEY_READ_STATUS = ChatLog.Message.READ_STATUS;
 
     /**
      * Time when message inserted
      */
-    static final String KEY_TIMESTAMP = ChatLog.Message.TIMESTAMP;
+    public static final String KEY_TIMESTAMP = ChatLog.Message.TIMESTAMP;
 
     /**
      * Time when message sent. If 0 means not sent.
      */
-    static final String KEY_TIMESTAMP_SENT = ChatLog.Message.TIMESTAMP_SENT;
+    public static final String KEY_TIMESTAMP_SENT = ChatLog.Message.TIMESTAMP_SENT;
 
     /**
      * Time when message delivered. If 0 means not delivered
      */
-    static final String KEY_TIMESTAMP_DELIVERED = ChatLog.Message.TIMESTAMP_DELIVERED;
+    public static final String KEY_TIMESTAMP_DELIVERED = ChatLog.Message.TIMESTAMP_DELIVERED;
 
     /**
      * Time when message displayed. If 0 means not displayed.
      */
-    static final String KEY_TIMESTAMP_DISPLAYED = ChatLog.Message.TIMESTAMP_DISPLAYED;
+    public static final String KEY_TIMESTAMP_DISPLAYED = ChatLog.Message.TIMESTAMP_DISPLAYED;
 }
