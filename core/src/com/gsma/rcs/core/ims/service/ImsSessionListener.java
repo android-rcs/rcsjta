@@ -47,13 +47,6 @@ public interface ImsSessionListener {
     public void handleSessionAborted(ContactId contact, TerminationReason reason);
 
     /**
-     * Session has been terminated by remote
-     * 
-     * @param contact Remote contact
-     */
-    public void handleSessionTerminatedByRemote(ContactId contact);
-
-    /**
      * Session is being rejected by user
      * 
      * @param contact Remote contact

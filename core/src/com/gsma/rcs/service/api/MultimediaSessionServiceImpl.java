@@ -23,7 +23,6 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
-import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.gsma.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
@@ -176,23 +175,6 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         }
 
         mMultimediaStreamingCache.remove(sessionId);
-    }
-
-    /*
-     * Translate IMS session error to ReasonCode
-     * @param ims session error
-     */
-    /* package private */ReasonCode sessionAbortedReasonToReasonCode(TerminationReason reason) {
-        switch (reason) {
-            case TERMINATION_BY_SYSTEM:
-            case TERMINATION_BY_TIMEOUT:
-                return ReasonCode.ABORTED_BY_SYSTEM;
-            case TERMINATION_BY_USER:
-                return ReasonCode.ABORTED_BY_USER;
-            default:
-                throw new IllegalArgumentException("Unknown TerminationReason=".concat(String
-                        .valueOf(reason)));
-        }
     }
 
     /**

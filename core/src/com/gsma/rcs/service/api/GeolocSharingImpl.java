@@ -339,31 +339,21 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
                     setStateAndReasonCodeAndBroadcast(contact, State.ABORTED,
                             ReasonCode.ABORTED_BY_USER);
                     break;
+                case TERMINATION_BY_REMOTE:
+                    /*
+                     * TODO : Fix sending of SIP BYE by sender once transfer is completed and media
+                     * session is closed. Then this check of state can be removed. Also need to
+                     * check if it is storing and broadcasting right state and reasoncode.
+                     */
+                    if (State.TRANSFERRED != mPersistentStorage.getState()) {
+                        setStateAndReasonCodeAndBroadcast(contact, State.ABORTED,
+                                ReasonCode.ABORTED_BY_REMOTE);
+                    }
+                    break;
                 default:
                     throw new IllegalArgumentException(new StringBuilder(
                             "Unknown reason ; sessionAbortedReason=").append(reason).append("!")
                             .toString());
-            }
-        }
-    }
-
-    /**
-     * Session has been terminated by remote
-     */
-    public void handleSessionTerminatedByRemote(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Session terminated by remote");
-        }
-        synchronized (lock) {
-            mGeolocSharingService.removeGeolocSharing(mSharingId);
-            /*
-             * TODO : Fix sending of SIP BYE by sender once transfer is completed and media session
-             * is closed. Then this check of state can be removed. Also need to check if it is
-             * storing and broadcasting right state and reasoncode.
-             */
-            if (State.TRANSFERRED != mPersistentStorage.getState()) {
-                setStateAndReasonCodeAndBroadcast(contact, State.ABORTED,
-                        ReasonCode.ABORTED_BY_REMOTE);
             }
         }
     }

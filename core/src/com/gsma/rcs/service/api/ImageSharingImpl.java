@@ -390,32 +390,21 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
                     setStateAndReasonCodeAndBroadcast(contact, State.ABORTED,
                             ReasonCode.ABORTED_BY_USER);
                     break;
+                case TERMINATION_BY_REMOTE:
+                    /*
+                     * TODO : Fix sending of SIP BYE by sender once transfer is completed and media
+                     * session is closed. Then this check of state can be removed.
+                     */
+                    if (State.TRANSFERRED != mPersistentStorage.getState()) {
+                        setStateAndReasonCodeAndBroadcast(contact, ImageSharing.State.ABORTED,
+                                ReasonCode.ABORTED_BY_REMOTE);
+                    }
+                    break;
                 default:
                     throw new IllegalArgumentException(
                             new StringBuilder(
                                     "Unknown reason in ImageSharingImpl.handleSessionAborted; terminationReason=")
                                     .append(reason).append("!").toString());
-            }
-        }
-    }
-
-    /**
-     * Session has been terminated by remote
-     */
-    public void handleSessionTerminatedByRemote(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Session terminated by remote");
-        }
-
-        synchronized (lock) {
-            mImageSharingService.removeImageSharing(mSharingId);
-            /*
-             * TODO : Fix sending of SIP BYE by sender once transfer is completed and media session
-             * is closed. Then this check of state can be removed.
-             */
-            if (State.TRANSFERRED != mPersistentStorage.getState()) {
-                setStateAndReasonCodeAndBroadcast(contact, ImageSharing.State.ABORTED,
-                        ReasonCode.ABORTED_BY_REMOTE);
             }
         }
     }

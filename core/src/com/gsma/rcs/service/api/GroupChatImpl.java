@@ -1142,43 +1142,15 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     setStateAndReasonCodeAndBroadcast(State.ABORTED,
                             ReasonCode.ABORTED_BY_INACTIVITY);
                     break;
+                case TERMINATION_BY_REMOTE:
+                    setStateAndReasonCodeAndBroadcast(State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
+                    break;
                 default:
                     throw new IllegalArgumentException(
                             new StringBuilder(
                                     "Unknown reason in GroupChatImpl.handleSessionAborted; terminationReason=")
                                     .append(reason).append("!").toString());
             }
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.ims.service.ImsSessionListener#handleSessionTerminatedByRemote()
-     */
-    public void handleSessionTerminatedByRemote(ContactId contact) {
-        GroupChatSession session = mImService.getGroupChatSession(mChatId);
-        if (session != null && session.isPendingForRemoval()) {
-            /*
-             * If there is an ongoing group chat session with same chatId, this session has to be
-             * silently aborted so after aborting the session we make sure to not call the rest of
-             * this method that would otherwise abort the "current" session also and the GroupChat
-             * as a whole which is of course not the intention here
-             */
-            if (logger.isActivated()) {
-                logger.info(new StringBuilder("Session marked pending for removal status ")
-                        .append(State.ABORTED).append(" reason ")
-                        .append(ReasonCode.ABORTED_BY_REMOTE).toString());
-            }
-            return;
-        }
-        if (logger.isActivated()) {
-            logger.info(new StringBuilder("Session status ").append(State.ABORTED)
-                    .append(" reason ").append(ReasonCode.ABORTED_BY_REMOTE).toString());
-        }
-        setRejoinedAsPartOfSendOperation(false);
-        synchronized (lock) {
-            mChatService.removeGroupChat(mChatId);
-            setStateAndReasonCodeAndBroadcast(State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
         }
     }
 

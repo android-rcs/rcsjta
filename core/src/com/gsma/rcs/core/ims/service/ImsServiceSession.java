@@ -60,7 +60,7 @@ public abstract class ImsServiceSession extends Thread {
      * Session termination reason
      */
     public enum TerminationReason {
-        TERMINATION_BY_SYSTEM, TERMINATION_BY_USER, TERMINATION_BY_TIMEOUT, TERMINATION_BY_INACTIVITY, TERMINATION_BY_CONNECTION_LOST;
+        TERMINATION_BY_SYSTEM, TERMINATION_BY_USER, TERMINATION_BY_TIMEOUT, TERMINATION_BY_INACTIVITY, TERMINATION_BY_CONNECTION_LOST, TERMINATION_BY_REMOTE;
     }
 
     private final static int SESSION_INTERVAL_TOO_SMALL = 422;
@@ -643,8 +643,9 @@ public abstract class ImsServiceSession extends Thread {
         getSessionTimerManager().stop();
 
         // Notify listeners
-        for (ImsSessionListener listener : getListeners()) {
-            listener.handleSessionTerminatedByRemote(mContact);
+        for (int i = 0; i < getListeners().size(); i++) {
+            getListeners().get(i).handleSessionAborted(mContact,
+                    TerminationReason.TERMINATION_BY_REMOTE);
         }
 
         getImsService().getImsModule().getCapabilityService().requestContactCapabilities(mContact);
