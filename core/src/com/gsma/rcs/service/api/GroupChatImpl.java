@@ -1391,7 +1391,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         }
 
         synchronized (lock) {
-            mBroadcaster.broadcastParticipantInfoStatusChanged(mChatId, contact,
+            mBroadcaster.broadcastParticipantStatusChanged(mChatId, contact,
                     ParticipantStatus.FAILED);
         }
     }
@@ -1475,7 +1475,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 logger.info("ParticipantUpdate for: " + contact + " status: " + status);
             }
 
-            mBroadcaster.broadcastParticipantInfoStatusChanged(mChatId, contact, status);
+            mBroadcaster.broadcastParticipantStatusChanged(mChatId, contact, status);
         }
     }
 }

@@ -177,10 +177,10 @@ public class GroupChatView extends ChatView {
         }
 
         @Override
-        public void onParticipantInfoChanged(String chatId, ContactId contact,
+        public void onParticipantStatusChanged(String chatId, ContactId contact,
                 ParticipantStatus status) {
             if (LogUtils.isActive) {
-                Log.d(LOGTAG, new StringBuilder("onParticipantInfoChanged chatId=").append(chatId)
+                Log.d(LOGTAG, new StringBuilder("onParticipantStatusChanged chatId=").append(chatId)
                         .append(" contact=").append(contact).append(" status=").append(status)
                         .toString());
             }
@@ -479,7 +479,7 @@ public class GroupChatView extends ChatView {
 
     /**
      * Update the view title
-     * 
+     *
      * @param subject the group chat subject or null
      */
     private void updateGroupChatViewTitle(String subject) {
@@ -502,7 +502,7 @@ public class GroupChatView extends ChatView {
 
     /**
      * Display notification to accept or reject invitation
-     * 
+     *
      * @param remote remote contact
      */
     private void displayAcceptRejectDialog(ContactId remote) {
@@ -558,7 +558,7 @@ public class GroupChatView extends ChatView {
 
     /**
      * Start the group chat
-     * 
+     *
      * @return True if successful
      */
     private boolean startGroupChat() {
@@ -783,7 +783,7 @@ public class GroupChatView extends ChatView {
 
     /**
      * Test if status is connected
-     * 
+     *
      * @param status the status
      * @return true if connected
      */
@@ -848,7 +848,7 @@ public class GroupChatView extends ChatView {
 
     /**
      * Initiate a new Group Chat
-     * 
+     *
      * @param context context
      * @param subject subject
      * @param participants list of participants
@@ -865,7 +865,7 @@ public class GroupChatView extends ChatView {
 
     /**
      * Open a Group Chat
-     * 
+     *
      * @param context
      * @param chatId
      */
@@ -879,7 +879,7 @@ public class GroupChatView extends ChatView {
 
     /**
      * Forge intent to notify Group Chat message
-     * 
+     *
      * @param context
      * @param chatMessageDAO the chat message from provider
      * @return intent
@@ -896,7 +896,7 @@ public class GroupChatView extends ChatView {
 
     /**
      * Forge intent to notify new Group Chat
-     * 
+     *
      * @param context
      * @param chatId the chat ID
      * @param groupChatDAO the Group Chat session from provider

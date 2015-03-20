@@ -27,9 +27,12 @@ import com.gsma.rcs.core.ims.service.ContactInfo.BlockingState;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
+import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.contact.ContactId;
@@ -47,6 +50,13 @@ public class ContactServiceImpl extends IContactService.Stub {
      * The logger
      */
     private static final Logger logger = Logger.getLogger(ContactServiceImpl.class.getSimpleName());
+
+    private final RcsServiceRegistrationEventBroadcaster mRcsServiceRegistrationEventBroadcaster = new RcsServiceRegistrationEventBroadcaster();
+
+    /**
+     * Lock used for synchronization
+     */
+    private final Object mLock = new Object();
 
     private final RcsSettings mRcsSettings;
 
@@ -76,6 +86,65 @@ public class ContactServiceImpl extends IContactService.Stub {
     public void close() {
         if (logger.isActivated()) {
             logger.info("Contacts service API is closed");
+        }
+    }
+
+    /**
+     * Returns true if the service is registered to the platform, else returns false
+     *
+     * @return Returns true if registered else returns false
+     */
+    public boolean isServiceRegistered() {
+        return ServerApiUtils.isImsConnected();
+    }
+
+    /**
+     * Registers a listener on service registration events
+     *
+     * @param listener Service registration listener
+     */
+    public void addEventListener(IRcsServiceRegistrationListener listener) {
+        if (logger.isActivated()) {
+            logger.info("Add a service listener");
+        }
+        synchronized (mLock) {
+            mRcsServiceRegistrationEventBroadcaster.addEventListener(listener);
+        }
+    }
+
+    /**
+     * Unregisters a listener on service registration events
+     *
+     * @param listener Service registration listener
+     */
+    public void removeEventListener(IRcsServiceRegistrationListener listener) {
+        if (logger.isActivated()) {
+            logger.info("Remove a service listener");
+        }
+        synchronized (mLock) {
+            mRcsServiceRegistrationEventBroadcaster.removeEventListener(listener);
+        }
+    }
+
+    /**
+     * Notifies registration event
+     */
+    public void notifyRegistration() {
+        // Notify listeners
+        synchronized (mLock) {
+            mRcsServiceRegistrationEventBroadcaster.broadcastServiceRegistered();
+        }
+    }
+
+    /**
+     * Notifies unregistration event
+     *
+     * @param reasonCode for unregistration
+     */
+    public void notifyUnRegistration(RcsServiceRegistration.ReasonCode reasonCode) {
+        // Notify listeners
+        synchronized (mLock) {
+            mRcsServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered(reasonCode);
         }
     }
 

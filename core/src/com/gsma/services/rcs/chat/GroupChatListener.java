@@ -88,10 +88,10 @@ public abstract class GroupChatListener {
      * 
      * @param chatId chat id
      * @param contact contact id
-     * @param info participant info
+     * @param status participant status
      */
-    public abstract void onParticipantInfoChanged(String chatId, ContactId contact,
-            ParticipantStatus info);
+    public abstract void onParticipantStatusChanged(String chatId, ContactId contact,
+            ParticipantStatus status);
 
     /**
      * Callback called when a delete operation completed that resulted in that one or several group

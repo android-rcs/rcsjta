@@ -1,5 +1,6 @@
 package com.gsma.services.rcs.contact;
 
+import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.contact.RcsContact;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
@@ -8,6 +9,12 @@ import com.gsma.services.rcs.ICommonServiceConfiguration;
  * Contacts service API
  */
 interface IContactService {
+
+	boolean isServiceRegistered();
+
+	void addEventListener(IRcsServiceRegistrationListener listener);
+
+	void removeEventListener(IRcsServiceRegistrationListener listener);
 
 	RcsContact getRcsContact(in ContactId contact);
 

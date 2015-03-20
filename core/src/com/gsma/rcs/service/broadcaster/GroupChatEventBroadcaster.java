@@ -89,12 +89,12 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
         mGroupChatListeners.finishBroadcast();
     }
 
-    public void broadcastParticipantInfoStatusChanged(String chatId, ContactId contact,
+    public void broadcastParticipantStatusChanged(String chatId, ContactId contact,
             ParticipantStatus status) {
         final int N = mGroupChatListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
-                mGroupChatListeners.getBroadcastItem(i).onParticipantInfoChanged(chatId, contact,
+                mGroupChatListeners.getBroadcastItem(i).onParticipantStatusChanged(chatId, contact,
                         status.toInt());
             } catch (Exception e) {
                 if (logger.isActivated()) {

@@ -110,9 +110,9 @@ public class GroupChatListenerImpl extends IGroupChatListener.Stub {
     }
 
     @Override
-    public void onParticipantInfoChanged(String chatId, ContactId contact, int status) {
+    public void onParticipantStatusChanged(String chatId, ContactId contact, int status) {
         try {
-            mListener.onParticipantInfoChanged(chatId, contact, ParticipantStatus.valueOf(status));
+            mListener.onParticipantStatusChanged(chatId, contact, ParticipantStatus.valueOf(status));
         } catch (IllegalArgumentException e) {
             /*
              * Detected unknown status not part of standard coming from stack which a client

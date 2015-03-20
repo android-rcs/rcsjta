@@ -36,7 +36,7 @@ public interface IGroupChatEventBroadcaster {
             String mimeType, String msgId, GroupDeliveryInfo.Status status,
             GroupDeliveryInfo.ReasonCode reasonCode);
 
-    public void broadcastParticipantInfoStatusChanged(String chatId, ContactId contact,
+    public void broadcastParticipantStatusChanged(String chatId, ContactId contact,
             ParticipantStatus status);
 
     public void broadcastStateChanged(String chatId, State state, GroupChat.ReasonCode reasonCode);

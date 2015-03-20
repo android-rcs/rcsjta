@@ -123,6 +123,14 @@ public class Intents {
          */
         public static final String ACTION_INITIATE_ONE_TO_ONE_FILE_TRANSFER = "com.gsma.services.rcs.action.INITIATE_ONE_TO_ONE_FILE_TRANSFER";
 
+        /**
+         * Load the group chat application to start a new conversation with a group of contacts and
+         * send a file to them. This Intent takes into parameter a list of contact URIs (i.e.
+         * content://contacts/people/contact_ID). If no parameter, the main entry of the group chat
+         * application is displayed.
+         */
+        public static final String ACTION_INITIATE_GROUP_FILE_TRANSFER = "com.gsma.services.rcs.action.ACTION_INITIATE_GROUP_FILE_TRANSFER";
+
         private FileTransfer() {
         }
     }
