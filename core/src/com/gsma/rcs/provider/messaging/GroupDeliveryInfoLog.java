@@ -42,15 +42,17 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
             .append(GroupDeliveryInfoData.KEY_CONTACT).append("=?").toString();
 
     private static final String SELECTION_CONTACTS_NOT_RECEIVED_MESSAGE = new StringBuilder(
-            GroupDeliveryInfoData.KEY_DELIVERY_STATUS).append("=").append(Status.NOT_DELIVERED)
+            GroupDeliveryInfoData.KEY_DELIVERY_STATUS).append("=")
+            .append(Status.NOT_DELIVERED.toInt())
             .append(" OR (").append(GroupDeliveryInfoData.KEY_DELIVERY_STATUS).append("=")
-            .append(Status.FAILED).append(" AND ").append(GroupDeliveryInfoData.KEY_REASON_CODE)
-            .append(" IN (").append(ReasonCode.FAILED_DELIVERY).append(",")
-            .append(ReasonCode.FAILED_DISPLAY).append("))").toString();
+            .append(Status.FAILED.toInt()).append(" AND ")
+            .append(GroupDeliveryInfoData.KEY_REASON_CODE)
+            .append(" IN (").append(ReasonCode.FAILED_DELIVERY.toInt()).append(",")
+            .append(ReasonCode.FAILED_DISPLAY.toInt()).append("))").toString();
 
     private static final String SELECTION_DELIVERY_INFO_NOT_DISPLAYED = new StringBuilder(
-            GroupDeliveryInfoData.KEY_DELIVERY_STATUS).append("!=").append(Status.DISPLAYED)
-            .toString();
+            GroupDeliveryInfoData.KEY_DELIVERY_STATUS).append("!=")
+            .append(Status.DISPLAYED.toInt()).toString();
 
     private static final Logger logger = Logger.getLogger(GroupDeliveryInfoLog.class
             .getSimpleName());
