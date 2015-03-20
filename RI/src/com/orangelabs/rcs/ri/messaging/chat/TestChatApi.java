@@ -18,24 +18,31 @@
 
 package com.orangelabs.rcs.ri.messaging.chat;
 
-import java.util.ArrayList;
-
-import android.app.ListActivity;
-import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.database.Cursor;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.capability.CapabilitiesLog;
+import com.gsma.services.rcs.chat.ChatService;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.chat.group.GroupChatList;
 import com.orangelabs.rcs.ri.messaging.chat.group.InitiateGroupChat;
 import com.orangelabs.rcs.ri.messaging.chat.single.InitiateSingleChat;
 import com.orangelabs.rcs.ri.messaging.chat.single.SingleChatList;
 import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
+
+import android.app.ListActivity;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.database.Cursor;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import java.util.ArrayList;
 
 /**
  * CHAT API
@@ -48,6 +55,10 @@ public class TestChatApi extends ListActivity {
         CapabilitiesLog.CONTACT
     };
 
+    private static final int COLOR_GREY_DISABLE = Color.parseColor("#696969");
+
+    private boolean mAllowedToInitiateGroupChat = false;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,15 +66,44 @@ public class TestChatApi extends ListActivity {
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        // Set items
+        // @formatter:off
         String[] items = {
-                getString(R.string.menu_initiate_chat), getString(R.string.menu_chat_log),
+                getString(R.string.menu_initiate_chat), 
+                getString(R.string.menu_chat_log),
                 getString(R.string.menu_initiate_group_chat),
                 getString(R.string.menu_group_chat_log),
-                getString(R.string.menu_chat_service_config), getString(R.string.menu_showus_map),
-
+                getString(R.string.menu_chat_service_config), 
+                getString(R.string.menu_showus_map),
         };
-        setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
+        // @formatter:on
+
+        /* Check if Group chat initialization is allowed */
+        ChatService chatService = ConnectionManager.getInstance(this).getChatApi();
+        try {
+            mAllowedToInitiateGroupChat = chatService.isAllowedToInitiateGroupChat();
+        } catch (RcsServiceException e) {
+            /* Do nothing */
+        }
+        setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items) {
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                TextView textView = (TextView) super.getView(position, convertView, parent);
+                if (position == 2 && !mAllowedToInitiateGroupChat) {
+                    textView.setTextColor(COLOR_GREY_DISABLE);
+                }
+                return textView;
+            }
+
+            @Override
+            public boolean isEnabled(int position) {
+                if (position == 2 && !mAllowedToInitiateGroupChat) {
+                    return false;
+                }
+                return true;
+            }
+
+        });
     }
 
     @Override

@@ -88,9 +88,10 @@ public class ChatProvider extends ContentProvider {
      * String to restrict projection for exposed URI to a set of columns
      */
     private static final String[] RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS = new String[] {
-            ChatLog.GroupChat.CHAT_ID, ChatLog.GroupChat.CONTACT, ChatLog.GroupChat.STATE,
-            ChatLog.GroupChat.SUBJECT, ChatLog.GroupChat.DIRECTION, ChatLog.GroupChat.TIMESTAMP,
-            ChatLog.GroupChat.REASON_CODE, ChatLog.GroupChat.PARTICIPANTS
+            ChatData.KEY_BASECOLUMN_ID, ChatLog.GroupChat.CHAT_ID, ChatLog.GroupChat.CONTACT,
+            ChatLog.GroupChat.STATE, ChatLog.GroupChat.SUBJECT, ChatLog.GroupChat.DIRECTION,
+            ChatLog.GroupChat.TIMESTAMP, ChatLog.GroupChat.REASON_CODE,
+            ChatLog.GroupChat.PARTICIPANTS
     };
 
     /**

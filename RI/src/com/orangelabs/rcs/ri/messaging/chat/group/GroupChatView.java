@@ -180,9 +180,9 @@ public class GroupChatView extends ChatView {
         public void onParticipantStatusChanged(String chatId, ContactId contact,
                 ParticipantStatus status) {
             if (LogUtils.isActive) {
-                Log.d(LOGTAG, new StringBuilder("onParticipantStatusChanged chatId=").append(chatId)
-                        .append(" contact=").append(contact).append(" status=").append(status)
-                        .toString());
+                Log.d(LOGTAG, new StringBuilder("onParticipantStatusChanged chatId=")
+                        .append(chatId).append(" contact=").append(contact).append(" status=")
+                        .append(status).toString());
             }
         }
 
@@ -614,17 +614,10 @@ public class GroupChatView extends ChatView {
         // Build list of available contacts not already in the conference
         Set<ContactId> availableParticipants = new HashSet<ContactId>();
         try {
-            Map<ContactId, ParticipantStatus> currentContacts = mGroupChat.getParticipants();
             Set<RcsContact> contacts = mCnxManager.getContactApi().getRcsContacts();
-            for (RcsContact c1 : contacts) {
-                ContactId contact = c1.getContactId();
-                boolean isConnected = false;
-                if (currentContacts.containsKey(contact)) {
-                    if (isConnected(currentContacts.get(contact))) {
-                        isConnected = true;
-                    }
-                }
-                if (!isConnected) {
+            for (RcsContact rcsContact : contacts) {
+                ContactId contact = rcsContact.getContactId();
+                if (mGroupChat.isAllowedToInviteParticipant(contact)) {
                     availableParticipants.add(contact);
                 }
             }
@@ -711,7 +704,17 @@ public class GroupChatView extends ChatView {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = new MenuInflater(getApplicationContext());
         inflater.inflate(R.menu.menu_group_chat, menu);
+        return true;
+    }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        try {
+            menu.findItem(R.id.menu_participants).setEnabled(
+                    mGroupChat.isAllowedToInviteParticipants());
+        } catch (RcsServiceException e) {
+            e.printStackTrace();
+        }
         return true;
     }
 
@@ -779,25 +782,6 @@ public class GroupChatView extends ChatView {
                 break;
         }
         return true;
-    }
-
-    /**
-     * Test if status is connected
-     *
-     * @param status the status
-     * @return true if connected
-     */
-    private static boolean isConnected(ParticipantStatus status) {
-        // TODO check if correct
-        switch (status) {
-            case CONNECTED:
-            case INVITE_QUEUED:
-            case INVITED:
-            case INVITING:
-                return true;
-            default:
-                return false;
-        }
     }
 
     /**

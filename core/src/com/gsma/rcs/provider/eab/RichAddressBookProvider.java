@@ -97,7 +97,8 @@ public class RichAddressBookProvider extends ContentProvider {
      * String to restrict projection for exposed URI to a set of columns
      */
     private static final String[] RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS = new String[] {
-            RichAddressBookData.KEY_CONTACT, RichAddressBookData.KEY_CAPABILITY_IMAGE_SHARING,
+            RichAddressBookData.KEY_BASECOLUMN_ID, RichAddressBookData.KEY_CONTACT,
+            RichAddressBookData.KEY_CAPABILITY_IMAGE_SHARING,
             RichAddressBookData.KEY_CAPABILITY_VIDEO_SHARING,
             RichAddressBookData.KEY_CAPABILITY_IM_SESSION,
             RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER,
@@ -192,16 +193,14 @@ public class RichAddressBookProvider extends ContentProvider {
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
 
-
         private static final int DATABASE_VERSION = 27;
 
         private void createDb(SQLiteDatabase db) {
             db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(CAPABILITY_TABLE)
-                    .append("(")
-                    .append(RichAddressBookData.KEY_CONTACT).append(" TEXT PRIMARY KEY,")
-                    .append(RichAddressBookData.KEY_BASECOLUMN_ID).append(" INTEGER NOT NULL,")
-                    .append(RichAddressBookData.KEY_DISPLAY_NAME).append(" TEXT,")
-                    .append(RichAddressBookData.KEY_RCS_STATUS).append(" TEXT,")
+                    .append("(").append(RichAddressBookData.KEY_CONTACT)
+                    .append(" TEXT PRIMARY KEY,").append(RichAddressBookData.KEY_BASECOLUMN_ID)
+                    .append(" INTEGER NOT NULL,").append(RichAddressBookData.KEY_DISPLAY_NAME)
+                    .append(" TEXT,").append(RichAddressBookData.KEY_RCS_STATUS).append(" TEXT,")
                     .append(RichAddressBookData.KEY_RCS_STATUS_TIMESTAMP).append(" INTEGER,")
                     .append(RichAddressBookData.KEY_REGISTRATION_STATE).append(" INTEGER,")
                     .append(RichAddressBookData.KEY_PRESENCE_SHARING_STATUS).append(" TEXT,")
@@ -242,8 +241,9 @@ public class RichAddressBookProvider extends ContentProvider {
                     .append(RichAddressBookData.KEY_AUTOMATA).append(" TEXT,")
                     .append(RichAddressBookData.KEY_CAPABILITY_TIME_LAST_REFRESH)
                     .append(" INTEGER)").toString());
-            db.execSQL(new StringBuilder("CREATE INDEX ").append(RichAddressBookData.KEY_BASECOLUMN_ID)
-                    .append("_idx").append(" ON ").append(CAPABILITY_TABLE).append("(")
+            db.execSQL(new StringBuilder("CREATE INDEX ")
+                    .append(RichAddressBookData.KEY_BASECOLUMN_ID).append("_idx").append(" ON ")
+                    .append(CAPABILITY_TABLE).append("(")
                     .append(RichAddressBookData.KEY_BASECOLUMN_ID).append(")").toString());
             db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(AGGREGATION_TABLE)
                     .append("(").append(AggregationData.KEY_ID)

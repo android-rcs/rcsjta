@@ -91,13 +91,14 @@ public class FileTransferProvider extends ContentProvider {
      * Strings to restrict projection for exposed URI to a set of columns
      */
     private static final String[] RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS = new String[] {
-            FileTransferLog.FT_ID, FileTransferLog.CHAT_ID, FileTransferLog.CONTACT,
-            FileTransferLog.FILE, FileTransferLog.FILENAME, FileTransferLog.MIME_TYPE,
-            FileTransferLog.FILEICON, FileTransferLog.FILEICON_MIME_TYPE,
-            FileTransferLog.DIRECTION, FileTransferLog.FILESIZE, FileTransferLog.TRANSFERRED,
-            FileTransferLog.TIMESTAMP, FileTransferLog.TIMESTAMP_SENT,
-            FileTransferLog.TIMESTAMP_DELIVERED, FileTransferLog.TIMESTAMP_DISPLAYED,
-            FileTransferLog.STATE, FileTransferLog.REASON_CODE, FileTransferLog.READ_STATUS
+            FileTransferData.KEY_BASECOLUMN_ID, FileTransferLog.FT_ID, FileTransferLog.CHAT_ID,
+            FileTransferLog.CONTACT, FileTransferLog.FILE, FileTransferLog.FILENAME,
+            FileTransferLog.MIME_TYPE, FileTransferLog.FILEICON,
+            FileTransferLog.FILEICON_MIME_TYPE, FileTransferLog.DIRECTION,
+            FileTransferLog.FILESIZE, FileTransferLog.TRANSFERRED, FileTransferLog.TIMESTAMP,
+            FileTransferLog.TIMESTAMP_SENT, FileTransferLog.TIMESTAMP_DELIVERED,
+            FileTransferLog.TIMESTAMP_DISPLAYED, FileTransferLog.STATE,
+            FileTransferLog.REASON_CODE, FileTransferLog.READ_STATUS
     };
 
     /**

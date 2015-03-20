@@ -53,9 +53,9 @@ import android.test.IsolatedContext;
 import android.test.mock.MockContentResolver;
 import android.util.Log;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class HistoryLogTest extends AndroidTestCase {
 
@@ -150,6 +150,12 @@ public class HistoryLogTest extends AndroidTestCase {
     private static LocalContentResolver sLocalContentResolver;
 
     private RichCallHistory mRichCallHistory;
+    
+    private Random mRandom = new Random();
+    
+    private long mTimestamp;
+    
+    private long mTimestampSent;
 
     static class MyContentProvider extends ContentProvider {
 
@@ -276,6 +282,8 @@ public class HistoryLogTest extends AndroidTestCase {
         db.execSQL(EXTERNAL_TABLE_CREATE);
         db.delete(EXTERNAL_TABLE, null, null);
         db.close();
+        mTimestamp = mRandom.nextLong();
+        mTimestampSent = mRandom.nextLong();
     }
 
     public Context getContext() {
@@ -293,19 +301,19 @@ public class HistoryLogTest extends AndroidTestCase {
     private void addOutgoingFileTransferSharing() {
         mMessagingLog
                 .addFileTransfer(FILE_TRANSFER_ID, getRemoteContact(), Direction.INCOMING, CONTENT,
-                        THUMBNAIL, FileTransfer.State.INVITED, FileTransfer.ReasonCode.UNSPECIFIED);
+                        THUMBNAIL, FileTransfer.State.INVITED, FileTransfer.ReasonCode.UNSPECIFIED, mTimestamp++, mTimestampSent++);
     }
 
     private void addOutgoingOneToOneChatMessages(String... ids) {
         if (ids.length == 0) {
             ChatMessage msg = new ChatMessage(MESSAGE_ID, getRemoteContact(), TXT,
-                    MimeType.TEXT_MESSAGE, new Date(), DISPLAY_NAME);
+                    MimeType.TEXT_MESSAGE, mTimestamp++, mTimestampSent++, DISPLAY_NAME);
             mMessagingLog.addOutgoingOneToOneChatMessage(msg, Message.Content.Status.SENT,
                     Message.Content.ReasonCode.UNSPECIFIED);
         }
         for (String id : ids) {
             ChatMessage msg = new ChatMessage(id, getRemoteContact(), TXT, MimeType.TEXT_MESSAGE,
-                    new Date(), DISPLAY_NAME);
+                    mTimestamp++, mTimestampSent++, DISPLAY_NAME);
             mMessagingLog.addOutgoingOneToOneChatMessage(msg, Message.Content.Status.SENT,
                     Message.Content.ReasonCode.UNSPECIFIED);
         }
@@ -313,18 +321,18 @@ public class HistoryLogTest extends AndroidTestCase {
 
     private void addOutgoingImageSharing() {
         mRichCallHistory.addImageSharing(IMAGE_SHARING_ID, getRemoteContact(), Direction.INCOMING,
-                CONTENT, ImageSharing.State.ACCEPTING, ImageSharing.ReasonCode.UNSPECIFIED);
+                CONTENT, ImageSharing.State.ACCEPTING, ImageSharing.ReasonCode.UNSPECIFIED, mTimestamp++);
     }
 
     private void addOutgoingVideoSharing() {
         mRichCallHistory.addVideoSharing(VIDEO_SHARING_ID, getRemoteContact(), Direction.INCOMING,
-                VIDEO_CONTENT, VideoSharing.State.ACCEPTING, VideoSharing.ReasonCode.UNSPECIFIED);
+                VIDEO_CONTENT, VideoSharing.State.ACCEPTING, VideoSharing.ReasonCode.UNSPECIFIED, mTimestamp++);
     }
 
     private void addOutgoingGeolocSharing() {
         mRichCallHistory.addOutgoingGeolocSharing(getRemoteContact(), GEOLOC_SHARING_ID,
                 new Geoloc("test", 0, 0, 0, 0), GeolocSharing.State.TRANSFERRED,
-                GeolocSharing.ReasonCode.UNSPECIFIED);
+                GeolocSharing.ReasonCode.UNSPECIFIED, mTimestamp++);
     }
 
     private void addItems() {
