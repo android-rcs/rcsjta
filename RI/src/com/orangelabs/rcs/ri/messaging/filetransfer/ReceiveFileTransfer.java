@@ -205,7 +205,7 @@ public class ReceiveFileTransfer extends Activity {
 
             TextView expirationView = (TextView) findViewById(R.id.expiration);
             long fileExpiration = mFtDao.getFileExpiration();
-            if (fileExpiration != FileTransferLog.NOT_APPLICABLE_EXPIRATION) {
+            if (fileExpiration != FileTransferLog.UNKNOWN_EXPIRATION) {
                 CharSequence expiration = DateUtils.getRelativeTimeSpanString(
                         mFtDao.getFileExpiration(), System.currentTimeMillis(),
                         DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE);

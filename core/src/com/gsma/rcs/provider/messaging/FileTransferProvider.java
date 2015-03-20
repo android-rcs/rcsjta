@@ -154,7 +154,7 @@ public class FileTransferProvider extends ContentProvider {
                     .append(FileTransferData.KEY_UPLOAD_TID).append(" TEXT,")
                     .append(FileTransferData.KEY_DOWNLOAD_URI).append(" TEXT,")
                     .append(FileTransferData.KEY_FILEICON_MIME_TYPE).append(" TEXT,")
-                    .append(FileTransferData.KEY_FILEICON_EXPIRATION).append(" INTEGER,")
+                    .append(FileTransferData.KEY_FILEICON_EXPIRATION).append(" INTEGER NOT NULL,")
                     .append(FileTransferData.KEY_FILE_EXPIRATION).append(" INTEGER NOT NULL,")
                     .append(FileTransferData.KEY_REMOTE_SIP_ID).append(" TEXT)").toString());
             db.execSQL(new StringBuilder("CREATE INDEX ")

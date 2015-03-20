@@ -688,8 +688,7 @@ public class InitiateFileTransfer extends Activity {
     };
 
     private void displayFileExpiration(long fileExpiration) {
-        if (FileTransferLog.UNKNOWN_EXPIRATION == fileExpiration
-                || FileTransferLog.NOT_APPLICABLE_EXPIRATION == fileExpiration) {
+        if (FileTransferLog.UNKNOWN_EXPIRATION == fileExpiration) {
             return;
         }
         TableRow expirationTableRow = (TableRow) findViewById(R.id.expiration);

@@ -43,34 +43,34 @@ public abstract class MmContent {
     /**
      * Content uri
      */
-    private Uri file;
+    private Uri mFile;
 
     /**
      * The filename
      */
-    private String fileName;
+    private String mFileName;
 
     /**
      * Content size in bytes
      */
-    private long size;
+    private long mSize;
 
     /**
      * Encoding
      */
-    private String encoding;
+    private String mEncoding;
 
     /**
      * Data
      */
-    private byte[] data = null;
+    private byte[] mData;
 
     /**
      * Stream to write received data direct to file.
      */
-    private BufferedOutputStream out = null;
+    private BufferedOutputStream mOut;
 
-    private ParcelFileDescriptor pfd;
+    private ParcelFileDescriptor mPfd;
 
     /**
      * Constructor
@@ -78,8 +78,8 @@ public abstract class MmContent {
      * @param encoding Encoding
      */
     public MmContent(String encoding) {
-        this.encoding = encoding;
-        this.size = -1;
+        mEncoding = encoding;
+        mSize = -1;
     }
 
     /**
@@ -90,9 +90,9 @@ public abstract class MmContent {
      * @param encoding Encoding
      */
     public MmContent(String fileName, long size, String encoding) {
-        this.fileName = fileName;
-        this.size = size;
-        this.encoding = encoding;
+        mFileName = fileName;
+        mSize = size;
+        mEncoding = encoding;
     }
 
     /**
@@ -104,10 +104,10 @@ public abstract class MmContent {
      * @param fileName File name
      */
     public MmContent(Uri file, String encoding, long size, String fileName) {
-        this.file = file;
-        this.encoding = encoding;
-        this.size = size;
-        this.fileName = fileName;
+        mFile = file;
+        mEncoding = encoding;
+        mSize = size;
+        mFileName = fileName;
     }
 
     /**
@@ -116,7 +116,7 @@ public abstract class MmContent {
      * @return uri
      */
     public Uri getUri() {
-        return file;
+        return mFile;
     }
 
     /**
@@ -125,7 +125,7 @@ public abstract class MmContent {
      * @param file Uri
      */
     public void setUri(Uri file) {
-        this.file = file;
+        mFile = file;
     }
 
     /**
@@ -134,7 +134,7 @@ public abstract class MmContent {
      * @return Size in bytes
      */
     public long getSize() {
-        return size;
+        return mSize;
     }
 
     /**
@@ -143,7 +143,7 @@ public abstract class MmContent {
      * @return Size in Kbytes
      */
     public long getKbSize() {
-        return size / 1024;
+        return mSize / 1024;
     }
 
     /**
@@ -152,7 +152,7 @@ public abstract class MmContent {
      * @return Size in Mbytes
      */
     public long getMbSize() {
-        return size / (1024 * 1024);
+        return mSize / (1024 * 1024);
     }
 
     /**
@@ -161,7 +161,7 @@ public abstract class MmContent {
      * @return Encoding type
      */
     public String getEncoding() {
-        return encoding;
+        return mEncoding;
     }
 
     /**
@@ -170,7 +170,7 @@ public abstract class MmContent {
      * @param encoding Encoding type
      */
     public void setEncoding(String encoding) {
-        this.encoding = encoding;
+        mEncoding = encoding;
     }
 
     /**
@@ -179,11 +179,11 @@ public abstract class MmContent {
      * @return Codec name
      */
     public String getCodec() {
-        int index = encoding.indexOf("/");
+        int index = mEncoding.indexOf("/");
         if (index != -1) {
-            return encoding.substring(index + 1);
+            return mEncoding.substring(index + 1);
         } else {
-            return encoding;
+            return mEncoding;
         }
     }
 
@@ -193,16 +193,16 @@ public abstract class MmContent {
      * @return Name
      */
     public String getName() {
-        return fileName;
+        return mFileName;
     }
 
     /**
      * Set the name
      * 
-     * @return Name
+     * @param fileName
      */
     public void setName(String fileName) {
-        this.fileName = fileName;
+        mFileName = fileName;
     }
 
     /**
@@ -211,7 +211,7 @@ public abstract class MmContent {
      * @return String
      */
     public String toString() {
-        return file + " (" + size + " bytes)";
+        return mFile + " (" + mSize + " bytes)";
     }
 
     /**
@@ -220,16 +220,16 @@ public abstract class MmContent {
      * @return Data
      */
     public byte[] getData() {
-        return data;
+        return mData;
     }
 
     /**
      * Sets the content data
      * 
-     * @param Data
+     * @param data
      */
     public void setData(byte[] data) {
-        this.data = data;
+        mData = data;
     }
 
     /**
@@ -238,14 +238,15 @@ public abstract class MmContent {
      * @param data Data to append to file
      * @throws IOException
      */
-    public void writeData2File(byte[] data) throws IOException, IllegalArgumentException {
-        if (out == null) {
-            pfd = AndroidFactory.getApplicationContext().getContentResolver()
-                    .openFileDescriptor(file, "w");
+    public void writeData2File(byte[] data) throws IOException {
+        if (mOut == null) {
+            mPfd = AndroidFactory.getApplicationContext().getContentResolver()
+                    .openFileDescriptor(mFile, "w");
             // To optimize I/O set buffer size to 8kBytes
-            out = new BufferedOutputStream(new FileOutputStream(pfd.getFileDescriptor()), 8 * 1024);
+            mOut = new BufferedOutputStream(new FileOutputStream(mPfd.getFileDescriptor()),
+                    8 * 1024);
         }
-        out.write(data);
+        mOut.write(data);
     }
 
     /**
@@ -255,15 +256,15 @@ public abstract class MmContent {
      */
     public void closeFile() throws IOException {
         try {
-            if (out != null) {
-                out.flush();
-                out.close();
-                out = null;
+            if (mOut != null) {
+                mOut.flush();
+                mOut.close();
+                mOut = null;
                 FileFactory.getFactory().updateMediaStorage(getUri().getEncodedPath());
             }
         } finally {
-            if (pfd != null) {
-                pfd.close();
+            if (mPfd != null) {
+                mPfd.close();
             }
         }
     }
@@ -274,10 +275,10 @@ public abstract class MmContent {
      * @throws IOException
      */
     public void deleteFile() throws IOException {
-        if (out != null) {
+        if (mOut != null) {
             try {
-                out.close();
-                out = null;
+                mOut.close();
+                mOut = null;
             } finally {
                 Uri fileToDelete = getUri();
                 if (ContentResolver.SCHEME_FILE.equals(fileToDelete.getScheme())) {

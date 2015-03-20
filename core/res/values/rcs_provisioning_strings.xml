@@ -106,7 +106,7 @@
     <string name="SIP_timer_T2_milliseconds">SIP timer T2 (milliseconds):</string>
     <string name="SIP_timer_T4_milliseconds">SIP timer T4 (milliseconds):</string>
     <string name="SIP_keep_alive_period_seconds">SIP keep-alive period (seconds):</string>
-    <string name="SIP_transaction_timeout_seconds">SIP transaction timeout (seconds):</string>
+    <string name="SIP_transaction_timeout">SIP transaction timeout (ms):</string>
     <string name="Default_TCP_port_for_MSRP_session">Default TCP port for MSRP session:</string>
     <string name="Default_UDP_port_for_RTP_session">Default UDP port for RTP session:</string>
     <string name="MSRP_transaction_timeout_seconds">MSRP transaction timeout (seconds):</string>
@@ -115,7 +115,7 @@
     <string name="Registration_retry_max_time_seconds">Registration retry max time (seconds):</string>
     <string name="Publish_expire_period_seconds">Publish expire period (seconds):</string>
     <string name="Revoke_timeout_seconds">Revoke timeout (seconds):</string>
-    <string name="Ringing_session_period_seconds">Ringing session period (seconds):</string>
+    <string name="Ringing_session_period">Ringing session period (ms):</string>
     <string name="Subscribe_expiration_timeout_seconds">Subscribe expiration timeout (seconds):</string>
     <string name="Is_composing_timeout_for_chat_seconds">Is-composing timeout for chat (seconds):</string>
     <string name="Session_refresh_expire_period_seconds">Session refresh expire period (seconds):</string>

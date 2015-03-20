@@ -821,8 +821,7 @@ public class InstantMessagingService extends ImsService {
                     .getCore()
                     .getListener()
                     .handleFileTransferInvitation(session, false, remote,
-                            session.getRemoteDisplayName(),
-                            FileTransferLog.NOT_APPLICABLE_EXPIRATION);
+                            session.getRemoteDisplayName(), FileTransferLog.UNKNOWN_EXPIRATION);
 
             session.startSession();
 
@@ -1252,7 +1251,7 @@ public class InstantMessagingService extends ImsService {
             }
 
             // Send a 486 Busy response
-            sendErrorResponse(invite, 486);
+            sendErrorResponse(invite, Response.BUSY_HERE);
             return;
         }
 
@@ -1298,7 +1297,7 @@ public class InstantMessagingService extends ImsService {
             }
 
             // Send a 486 Busy response
-            sendErrorResponse(invite, 486);
+            sendErrorResponse(invite, Response.BUSY_HERE);
             return;
         }
 
@@ -1318,92 +1317,100 @@ public class InstantMessagingService extends ImsService {
         if (sLogger.isActivated()) {
             sLogger.info("Receive a single HTTP file transfer invitation");
         }
-
+        ContactId remote;
         try {
-            ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);
-            CpimMessage cpimMessage = ChatUtils.extractCpimMessage(invite);
-            long timestampSent = cpimMessage.getTimestampSent();
-
-            // Test if the contact is blocked
-            if (mContactsManager.isBlockedForContact(remote)) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Contact " + remote
-                            + " is blocked, automatically reject the HTTP File transfer");
-                }
-
-                handleFileTransferInvitationRejected(invite, FileTransfer.ReasonCode.REJECTED_SPAM,
-                        timestamp, timestampSent);
-                // Send a 603 Decline response
-                sendErrorResponse(invite, Response.DECLINE);
-                return;
-            }
-
-            // Test number of sessions
-            if (!isFileTransferSessionAvailable()) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("The max number of FT sessions is achieved, reject the HTTP File transfer");
-                }
-
-                handleFileTransferInvitationRejected(invite,
-                        FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp,
-                        timestampSent);
-                // Send a 603 Decline response
-                sendErrorResponse(invite, 603);
-                return;
-            }
-
-            // Reject if file is too big or size exceeds device storage capacity. This control
-            // should be done
-            // on UI. It is done after end user accepts invitation to enable prior handling by the
-            // application.
-            FileSharingError error = FileSharingSession.isFileCapacityAcceptable(
-                    ftinfo.getFileSize(), mRcsSettings);
-            if (error != null) {
-                // Send a 603 Decline response
-                sendErrorResponse(invite, 603);
-                int errorCode = error.getErrorCode();
-                switch (errorCode) {
-                    case FileSharingError.MEDIA_SIZE_TOO_BIG:
-                        handleFileTransferInvitationRejected(invite,
-                                FileTransfer.ReasonCode.REJECTED_MAX_SIZE, timestamp, timestampSent);
-                    case FileSharingError.NOT_ENOUGH_STORAGE_SPACE:
-                        handleFileTransferInvitationRejected(invite,
-                                FileTransfer.ReasonCode.REJECTED_LOW_SPACE, timestamp,
-                                timestampSent);
-                    default:
-                        if (sLogger.isActivated()) {
-                            sLogger.error("Encountered unexpected error while receiving HTTP file transfer invitation"
-                                    + errorCode);
-                        }
-                }
-                return;
-            }
-
-            // Create and start a chat session
-            TerminatingOneToOneChatSession oneToOneChatSession = new TerminatingOneToOneChatSession(
-                    this, invite, remote, mRcsSettings, mMessagingLog, timestamp);
-            oneToOneChatSession.startSession();
-
-            // Create and start a new HTTP file transfer session
-            FileSharingSession fileSharingSession = new DownloadFromInviteFileSharingSession(this,
-                    oneToOneChatSession, ftinfo, ChatUtils.getMessageId(invite),
-                    oneToOneChatSession.getRemoteContact(),
-                    oneToOneChatSession.getRemoteDisplayName(), mRcsSettings, mMessagingLog,
-                    timestamp, timestampSent);
-
-            getImsModule()
-                    .getCore()
-                    .getListener()
-                    .handleOneToOneFileTransferInvitation(fileSharingSession, oneToOneChatSession,
-                            ftinfo.getTransferValidity());
-
-            fileSharingSession.startSession();
-
+            remote = ChatUtils.getReferredIdentityAsContactId(invite);
         } catch (RcsContactFormatException e) {
             if (sLogger.isActivated()) {
                 sLogger.error("receiveHttpFileTranferInvitation: cannot parse remote contact");
             }
+            return;
+
         }
+        CpimMessage cpimMessage = ChatUtils.extractCpimMessage(invite);
+        long timestampSent = cpimMessage.getTimestampSent();
+        // Test if the contact is blocked
+        if (mContactsManager.isBlockedForContact(remote)) {
+            if (sLogger.isActivated()) {
+                sLogger.debug(new StringBuilder("Contact ").append(remote)
+                        .append(" is blocked, automatically reject the HTTP File transfer")
+                        .toString());
+            }
+
+            handleFileTransferInvitationRejected(invite, FileTransfer.ReasonCode.REJECTED_SPAM,
+                    timestamp, timestampSent);
+            sendErrorResponse(invite, Response.DECLINE);
+            return;
+
+        }
+        /* Test number of sessions */
+        if (!isFileTransferSessionAvailable()) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("The max number of FT sessions is achieved, reject the HTTP File transfer");
+            }
+            handleFileTransferInvitationRejected(invite,
+                    FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp, timestampSent);
+            // Send a 603 Decline response
+            sendErrorResponse(invite, Response.DECLINE);
+            return;
+        }
+
+        // Reject if file is too big or size exceeds device storage capacity. This control
+        // should be done
+        // on UI. It is done after end user accepts invitation to enable prior handling by the
+        // application.
+        FileSharingError error = FileSharingSession.isFileCapacityAcceptable(ftinfo.getSize(),
+                mRcsSettings);
+        if (error != null) {
+            // Send a 603 Decline response
+            sendErrorResponse(invite, Response.DECLINE);
+            int errorCode = error.getErrorCode();
+            switch (errorCode) {
+                case FileSharingError.MEDIA_SIZE_TOO_BIG:
+                    handleFileTransferInvitationRejected(invite,
+                            FileTransfer.ReasonCode.REJECTED_MAX_SIZE, timestamp, timestampSent);
+                case FileSharingError.NOT_ENOUGH_STORAGE_SPACE:
+                    handleFileTransferInvitationRejected(invite,
+                            FileTransfer.ReasonCode.REJECTED_LOW_SPACE, timestamp, timestampSent);
+                default:
+                    if (sLogger.isActivated()) {
+                        sLogger.error("Unexpected error while receiving HTTP file transfer invitation"
+                                .concat(Integer.toString(errorCode)));
+                    }
+            }
+            return;
+        }
+
+        // Create and start a chat session
+        TerminatingOneToOneChatSession oneToOneChatSession = new TerminatingOneToOneChatSession(
+                this, invite, remote, mRcsSettings, mMessagingLog, timestamp);
+
+        // Create and start a new HTTP file transfer session
+        DownloadFromInviteFileSharingSession fileSharingSession = new DownloadFromInviteFileSharingSession(
+                this, oneToOneChatSession, ftinfo, ChatUtils.getMessageId(invite),
+                oneToOneChatSession.getRemoteContact(), oneToOneChatSession.getRemoteDisplayName(),
+                mRcsSettings, mMessagingLog, timestamp, timestampSent);
+        if (fileSharingSession.getFileicon() != null) {
+            try {
+                fileSharingSession.downloadFileIcon();
+            } catch (CoreException e) {
+                if (sLogger.isActivated()) {
+                    sLogger.error("Failed to initiate download file transfer", e);
+                }
+                handleFileTransferInvitationRejected(invite,
+                        FileTransfer.ReasonCode.REJECTED_MEDIA_FAILED, timestamp, timestampSent);
+                sendErrorResponse(invite, Response.DECLINE);
+                return;
+
+            }
+        }
+        getImsModule()
+                .getCore()
+                .getListener()
+                .handleOneToOneFileTransferInvitation(fileSharingSession, oneToOneChatSession,
+                        ftinfo.getExpiration());
+        oneToOneChatSession.startSession();
+        fileSharingSession.startSession();
     }
 
     /**
@@ -1434,16 +1441,15 @@ public class InstantMessagingService extends ImsService {
                 this, invite, remote, mRcsSettings, mMessagingLog, timestamp);
         one2oneChatSession.startSession();
 
-        // Auto reject if file too big
-        if (isFileSizeExceeded(ftinfo.getFileSize())) {
+        /* Auto reject if file too big */
+        if (isFileSizeExceeded(ftinfo.getSize())) {
             if (sLogger.isActivated()) {
                 sLogger.debug("File is too big, reject file transfer invitation");
             }
 
-            // Send a 403 Decline response
             // TODO add warning header "xxx Size exceeded"
             one2oneChatSession.sendErrorResponse(invite, one2oneChatSession.getDialogPath()
-                    .getLocalTag(), 403);
+                    .getLocalTag(), Response.FORBIDDEN);
 
             // Close session
             one2oneChatSession
@@ -1451,18 +1457,33 @@ public class InstantMessagingService extends ImsService {
             return;
         }
 
-        // Create and start a new HTTP file transfer session
-        FileSharingSession filetransferSession = new DownloadFromInviteFileSharingSession(this,
-                one2oneChatSession, ftinfo, ChatUtils.getMessageId(invite),
+        /* Create and start a new HTTP file transfer session from INVITE */
+        DownloadFromInviteFileSharingSession filetransferSession = new DownloadFromInviteFileSharingSession(
+                this, one2oneChatSession, ftinfo, ChatUtils.getMessageId(invite),
                 one2oneChatSession.getRemoteContact(), one2oneChatSession.getRemoteDisplayName(),
                 mRcsSettings, mMessagingLog, timestamp, timestampSent);
+        if (filetransferSession.getFileicon() != null) {
+            try {
+                filetransferSession.downloadFileIcon();
+            } catch (CoreException e) {
+                if (sLogger.isActivated()) {
+                    sLogger.error("Failed to download file icon", e);
+                }
+                one2oneChatSession.sendErrorResponse(invite, one2oneChatSession.getDialogPath()
+                        .getLocalTag(), Response.DECLINE);
 
+                /* Close session */
+                one2oneChatSession.handleError(new FileSharingError(
+                        FileSharingError.MEDIA_DOWNLOAD_FAILED));
+                return;
+            }
+
+        }
         getImsModule()
                 .getCore()
                 .getListener()
                 .handleOneToOneFileTransferInvitation(filetransferSession, one2oneChatSession,
-                        ftinfo.getTransferValidity());
-
+                        ftinfo.getExpiration());
         filetransferSession.startSession();
     }
 

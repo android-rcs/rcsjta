@@ -123,11 +123,8 @@ public abstract class HttpTransferManager {
 
     protected final RcsSettings mRcsSettings;
 
-    /**
-     * The logger
-     */
-    private static final Logger LOGGER = Logger
-            .getLogger(HttpTransferManager.class.getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(HttpTransferManager.class
+            .getSimpleName());
 
     /**
      * Constructor
@@ -300,8 +297,8 @@ public abstract class HttpTransferManager {
      * Interrupts file transfer
      */
     public void interrupt() {
-        if (LOGGER.isActivated()) {
-            LOGGER.warn("interrupting transfer");
+        if (sLogger.isActivated()) {
+            sLogger.warn("interrupting transfer");
         }
         mIsCancelled = true;
     }
@@ -310,8 +307,8 @@ public abstract class HttpTransferManager {
      * Interrupts file transfer
      */
     public void pauseTransferByUser() {
-        if (LOGGER.isActivated()) {
-            LOGGER.warn("User is pausing transfer");
+        if (sLogger.isActivated()) {
+            sLogger.warn("User is pausing transfer");
         }
         mIsPaused = true;
         getListener().httpTransferPausedByUser();
@@ -321,8 +318,8 @@ public abstract class HttpTransferManager {
      * Interrupts file transfer
      */
     public void pauseTransferBySystem() {
-        if (LOGGER.isActivated()) {
-            LOGGER.warn("System is pausing transfer");
+        if (sLogger.isActivated()) {
+            sLogger.warn("System is pausing transfer");
         }
         mIsPaused = true;
         getListener().httpTransferPausedBySystem();

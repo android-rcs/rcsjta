@@ -348,11 +348,9 @@ public class FileTransferPersistedStorageAccessor {
      * @return time
      */
     public long getFileExpiration() {
-        /*
-         * Utilizing cache here as file expiration can only be changed in persistent storage if its
-         * initial value is unknown, so no need to query for it multiple times.
-         */
-        if (FileTransferLog.UNKNOWN_EXPIRATION == mFileExpiration) {
+        /* No need to read from provider unless outgoing and expiration is unknown. */
+        if (Direction.OUTGOING == mDirection
+                && FileTransferLog.UNKNOWN_EXPIRATION == mFileExpiration) {
             cacheData();
         }
         return mFileExpiration;
@@ -364,11 +362,9 @@ public class FileTransferPersistedStorageAccessor {
      * @return time
      */
     public long getFileIconExpiration() {
-        /*
-         * Utilizing cache here as file icon expiration can only be changed in persistent storage if
-         * its initial value is unknown, so no need to query for it multiple times.
-         */
-        if (FileTransferLog.UNKNOWN_EXPIRATION == mFileIconExpiration) {
+        /* No need to read from provider unless outgoing and expiration is unknown. */
+        if (Direction.OUTGOING == mDirection
+                && FileTransferLog.UNKNOWN_EXPIRATION == mFileIconExpiration) {
             cacheData();
         }
         return mFileIconExpiration;

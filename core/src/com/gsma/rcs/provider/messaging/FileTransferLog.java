@@ -144,7 +144,7 @@ public class FileTransferLog implements IFileTransferLog {
             values.put(FileTransferData.KEY_FILEICON_EXPIRATION, fileIconExpiration);
         } else {
             values.put(FileTransferData.KEY_FILEICON_EXPIRATION,
-                    FileTransferData.NOT_APPLICABLE_EXPIRATION);
+                    FileTransferData.UNKNOWN_EXPIRATION);
         }
         values.put(FileTransferData.KEY_READ_STATUS, ReadStatus.UNREAD.toInt());
         values.put(FileTransferData.KEY_STATE, state.toInt());
@@ -190,7 +190,7 @@ public class FileTransferLog implements IFileTransferLog {
                     FileTransferData.UNKNOWN_EXPIRATION);
         } else {
             values.put(FileTransferData.KEY_FILEICON_EXPIRATION,
-                    FileTransferData.NOT_APPLICABLE_EXPIRATION);
+                    FileTransferData.UNKNOWN_EXPIRATION);
         }
         values.put(FileTransferData.KEY_FILE_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION);
         mLocalContentResolver.insert(FileTransferData.CONTENT_URI, values);
@@ -269,7 +269,7 @@ public class FileTransferLog implements IFileTransferLog {
             values.put(FileTransferData.KEY_FILEICON_EXPIRATION, fileIconExpiration);
         } else {
             values.put(FileTransferData.KEY_FILEICON_EXPIRATION,
-                    FileTransferData.NOT_APPLICABLE_EXPIRATION);
+                    FileTransferData.UNKNOWN_EXPIRATION);
         }
         values.put(FileTransferData.KEY_FILE_EXPIRATION, fileExpiration);
         mLocalContentResolver.insert(FileTransferData.CONTENT_URI, values);

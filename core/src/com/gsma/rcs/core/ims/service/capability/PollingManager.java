@@ -50,7 +50,7 @@ public class PollingManager extends PeriodicRefresher {
     /**
      * The logger
      */
-    private final static Logger LOGGER = Logger.getLogger(PollingManager.class.getSimpleName());
+    private final static Logger sLogger = Logger.getLogger(PollingManager.class.getSimpleName());
 
     /**
      * Constructor
@@ -89,8 +89,8 @@ public class PollingManager extends PeriodicRefresher {
      */
     public void periodicProcessing() {
         // Make a registration
-        if (LOGGER.isActivated()) {
-            LOGGER.info("Execute new capabilities update");
+        if (sLogger.isActivated()) {
+            sLogger.info("Execute new capabilities update");
         }
 
         // Update all contacts capabilities if refresh timeout has not expired
@@ -111,10 +111,10 @@ public class PollingManager extends PeriodicRefresher {
     private void requestContactCapabilities(ContactId contact) {
         // Read capabilities from the database
         Capabilities capabilities = mContatManager.getContactCapabilities(contact);
-        boolean locActivated = LOGGER.isActivated();
+        boolean locActivated = sLogger.isActivated();
         if (capabilities == null) {
             if (locActivated) {
-                LOGGER.debug("No capability exist for ".concat(contact.toString()));
+                sLogger.debug("No capability exist for ".concat(contact.toString()));
             }
 
             // New contact: request capabilities from the network
@@ -124,7 +124,7 @@ public class PollingManager extends PeriodicRefresher {
         }
         if (isCapabilityRefreshRequired(capabilities.getTimestampOfLastRefresh(), mRcsSettings)) {
             if (locActivated) {
-                LOGGER.debug("Capabilities have expired for ".concat(contact.toString()));
+                sLogger.debug("Capabilities have expired for ".concat(contact.toString()));
             }
 
             // Capabilities are too old: request capabilities from the network
@@ -138,7 +138,7 @@ public class PollingManager extends PeriodicRefresher {
             }
         } else {
             if (locActivated) {
-                LOGGER.debug("Capabilities exist for ".concat(contact.toString()));
+                sLogger.debug("Capabilities exist for ".concat(contact.toString()));
             }
         }
     }

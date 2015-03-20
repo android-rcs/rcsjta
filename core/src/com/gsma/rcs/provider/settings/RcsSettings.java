@@ -1025,10 +1025,10 @@ public class RcsSettings {
     /**
      * Get SIP transaction timeout used to wait SIP response
      * 
-     * @return Timeout in seconds
+     * @return Timeout in milliseconds
      */
-    public int getSipTransactionTimeout() {
-        return readInteger(RcsSettingsData.SIP_TRANSACTION_TIMEOUT);
+    public long getSipTransactionTimeout() {
+        return readLong(RcsSettingsData.SIP_TRANSACTION_TIMEOUT);
     }
 
     /**
@@ -1153,10 +1153,10 @@ public class RcsSettings {
     /**
      * Get ringing period
      *
-     * @return Period in seconds
+     * @return Period in milliseconds
      */
-    public int getRingingPeriod() {
-        return readInteger(RcsSettingsData.RINGING_SESSION_PERIOD);
+    public long getRingingPeriod() {
+        return readLong(RcsSettingsData.RINGING_SESSION_PERIOD);
     }
 
     /**

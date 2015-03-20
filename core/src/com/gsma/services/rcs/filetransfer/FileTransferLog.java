@@ -203,8 +203,8 @@ public class FileTransferLog {
     public static final String FILEICON_MIME_TYPE = "fileicon_mime_type";
 
     /**
-     * The name of the column containing the time when the file on the content server is no longer
-     * valid to download.
+     * The name of the column containing the timestamp when the file on the content server is no
+     * longer valid to download.
      * <P>
      * Type: LONG
      * </P>
@@ -212,8 +212,8 @@ public class FileTransferLog {
     public static final String FILE_EXPIRATION = "file_expiration";
 
     /**
-     * The name of the column containing the time when the file icon on the content server is no
-     * longer valid to download.
+     * The name of the column containing the timestamp when the file icon on the content server is
+     * no longer valid to download.
      * <P>
      * Type: LONG
      * </P>
@@ -221,13 +221,8 @@ public class FileTransferLog {
     public static final String FILEICON_EXPIRATION = "fileicon_expiration";
 
     /**
-     * The value assigned if file or icon expiration is not applicable since file is not transferred
-     * via HTTP.
+     * The value assigned if file or icon expiration is unknown
      */
-    public static final long NOT_APPLICABLE_EXPIRATION = 0L;
+    public static final long UNKNOWN_EXPIRATION = 0L;
 
-    /**
-     * The value assigned if file or icon expiration is not known since file is not yet uploaded.
-     */
-    public static final long UNKNOWN_EXPIRATION = -1L;
 }

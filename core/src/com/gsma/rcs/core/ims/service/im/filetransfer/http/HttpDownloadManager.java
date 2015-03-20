@@ -22,24 +22,24 @@
 
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.utils.logger.Logger;
+
+import android.net.Uri;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 
-import android.net.Uri;
-
-import com.gsma.rcs.core.content.ContentManager;
-import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.logger.Logger;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * HTTP upload manager
@@ -82,9 +82,6 @@ public class HttpDownloadManager extends HttpTransferManager {
      */
     private int mRetryCount = 0;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(HttpDownloadManager.class
             .getSimpleName());
 
@@ -219,6 +216,8 @@ public class HttpDownloadManager extends HttpTransferManager {
             return false;
         }
 
+        boolean isSuccess = false;
+
         try {
             // Read content
             byte[] buffer = new byte[CHUNK_MAX_SIZE];
@@ -235,73 +234,69 @@ public class HttpDownloadManager extends HttpTransferManager {
                 sLogger.error("Download file exception. Set in paused", e);
             }
             pauseTransferBySystem();
-            return false;
+        }
+
+        if (!isPaused() && !isCancelled()) {
+            /* Check length of received data */
+            if (mCalcLength == mContent.getSize()) {
+                isSuccess = true;
+            } else {
+                if (sLogger.isActivated()) {
+                    sLogger.error("Download file error, the file is not complete.");
+                }
+            }
         }
 
         try {
             mStreamForFile.flush();
-            if (isPaused()) {
-                return false;
-            }
-            mStreamForFile.close();
-            mStreamForFile = null;
-
-            if (isCancelled()) {
-                mFile.delete();
-                return false;
-            } else {
-                return true;
-            }
         } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Download file exception", e);
-            }
+            /* Nothing to do */
+        }
+
+        /* If paused, keep the streamForFile and the file */
+        if (isPaused()) {
             return false;
         }
+
+        try {
+            mStreamForFile.close();
+        } catch (Exception e) {
+            /* Nothing to do */
+        }
+        mStreamForFile = null;
+
+        /* Delete file if not successful */
+        if (!isSuccess) {
+            mFile.delete();
+        }
+        return isSuccess;
     }
 
     /**
-     * Download the thumbnail
+     * Download the thumbnail and save it
      * 
-     * @param thumbnailInfo file icon info
-     * @param fileName the file icon filename
-     * @return fileIcon picture content or null in case of error
+     * @param iconUri the remote URI
+     * @param fileIcon the local descriptor
+     * @throws IOException
      */
-    public MmContent downloadThumbnail(FileTransferHttpThumbnail thumbnailInfo, String fileName) {
-        MmContent fileIcon = null;
+    public void downloadThumbnail(Uri iconUri, MmContent fileIcon) throws IOException {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Download file icon from ".concat(getHttpServerAddr().toString()));
+        }
+        // Send GET request
+        HttpGet request = new HttpGet(iconUri.toString());
+        if (HTTP_TRACE_ENABLED) {
+            String trace = ">>> Send HTTP request:";
+            trace += "\n" + request.getMethod() + " " + request.getRequestLine().getUri();
+            System.out.println(trace);
+        }
+
+        // Execute request
+        ByteArrayOutputStream baos;
+        baos = getThumbnail(request);
         try {
-            if (sLogger.isActivated()) {
-                sLogger.debug("Download file icon" + getHttpServerAddr());
-            }
-
-            // Send GET request
-            HttpGet request = new HttpGet(thumbnailInfo.getUri().toString());
-            if (HTTP_TRACE_ENABLED) {
-                String trace = ">>> Send HTTP request:";
-                trace += "\n" + request.getMethod() + " " + request.getRequestLine().getUri();
-                System.out.println(trace);
-            }
-
-            // Execute request
-            ByteArrayOutputStream baos;
-            if ((baos = getThumbnail(request)) == null) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Failed to download Thumbnail");
-                }
-                return null;
-            }
-            // Create the content for filename
-            Uri fileIconUri = ContentManager.generateUriForReceivedContent(fileName,
-                    thumbnailInfo.getType(), mRcsSettings);
-            fileIcon = ContentManager.createMmContent(fileIconUri, baos.size(), fileName);
             // Save data to file
             fileIcon.writeData2File(baos.toByteArray());
-            return fileIcon;
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Download thumbnail exception", e);
-            }
-            return null;
         } finally {
             if (fileIcon != null) {
                 try {
@@ -313,53 +308,41 @@ public class HttpDownloadManager extends HttpTransferManager {
     }
 
     /**
-     * Get the thumbnail and save it
+     * Get the thumbnail
      * 
      * @param request HTTP request
-     * @return Thumbnail picture data or null in case of error
+     * @return Thumbnail picture data
+     * @throws IOException
      */
-    private ByteArrayOutputStream getThumbnail(HttpGet request) {
-        try {
-            // Execute HTTP request
-            HttpResponse response = getHttpClient().execute(request);
-            int statusCode = response.getStatusLine().getStatusCode();
-            if (HTTP_TRACE_ENABLED) {
-                String trace = "<<< Receive HTTP response:";
-                trace += "\n" + statusCode + " " + response.getStatusLine().getReasonPhrase();
-                System.out.println(trace);
-            }
-
-            // Analyze HTTP response
-            if (statusCode == 200) {
-                mCalcLength = 0;
-                byte[] buffer = new byte[CHUNK_MAX_SIZE];
-                ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
-                HttpEntity entity = response.getEntity();
-                InputStream input = entity.getContent();
-                int num;
-                while ((num = input.read(buffer)) != -1 && !isCancelled()) {
-                    mCalcLength += num;
-                    getListener().httpTransferProgress(mCalcLength, mContent.getSize());
-                    bOutputStream.write(buffer, 0, num);
-                }
-
-                bOutputStream.flush();
-                bOutputStream.close();
-
-                if (isCancelled()) {
-                    return null;
-                } else {
-                    return bOutputStream;
-                }
-            } else {
-                return null;
-            }
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Download thumbnail exception", e);
-            }
-            return null;
+    private ByteArrayOutputStream getThumbnail(HttpGet request) throws IOException {
+        // Execute HTTP request
+        HttpResponse response = getHttpClient().execute(request);
+        int statusCode = response.getStatusLine().getStatusCode();
+        if (HTTP_TRACE_ENABLED) {
+            String trace = "<<< Receive HTTP response:";
+            trace += "\n" + statusCode + " " + response.getStatusLine().getReasonPhrase();
+            System.out.println(trace);
         }
+
+        // Analyze HTTP response
+        if (statusCode == 200) {
+            byte[] buffer = new byte[CHUNK_MAX_SIZE];
+            ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
+            HttpEntity entity = response.getEntity();
+            InputStream input = entity.getContent();
+            int num;
+            while ((num = input.read(buffer)) != -1) {
+                bOutputStream.write(buffer, 0, num);
+                if (isCancelled()) {
+                    break;
+                }
+            }
+            bOutputStream.flush();
+            bOutputStream.close();
+            return bOutputStream;
+        }
+        throw new IOException(new StringBuilder("Received '").append(statusCode)
+                .append("' from server").toString());
     }
 
     /**

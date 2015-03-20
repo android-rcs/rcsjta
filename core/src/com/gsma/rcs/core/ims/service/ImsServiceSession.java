@@ -67,8 +67,6 @@ public abstract class ImsServiceSession extends Thread {
 
     private final static int SESSION_INTERVAL_TOO_SMALL = 422;
 
-    private static final long SECONDS_TO_MILILSECONDS_CONVERSION_RATE = 1000L;
-
     /**
      * IMS service
      */
@@ -130,9 +128,9 @@ public abstract class ImsServiceSession extends Thread {
     protected UpdateSessionManager mUpdateMgr;
 
     /**
-     * Ringing period (in seconds)
+     * Ringing period (in milliseconds)
      */
-    private final int mRingingPeriod;
+    private final long mRingingPeriod;
 
     /**
      * Session interrupted flag
@@ -487,7 +485,7 @@ public abstract class ImsServiceSession extends Thread {
                     mWaitUserAnswer.wait(timeout);
                 } else {
                     // Default timeout is ringing period
-                    mWaitUserAnswer.wait(mRingingPeriod * SECONDS_TO_MILILSECONDS_CONVERSION_RATE);
+                    mWaitUserAnswer.wait(mRingingPeriod);
                 }
             }
         } catch (InterruptedException e) {
@@ -503,7 +501,7 @@ public abstract class ImsServiceSession extends Thread {
      * @return Answer
      */
     public InvitationStatus waitInvitationAnswer() {
-        return waitInvitationAnswer(mRingingPeriod * SECONDS_TO_MILILSECONDS_CONVERSION_RATE);
+        return waitInvitationAnswer(mRingingPeriod);
     }
 
     /**
@@ -929,11 +927,11 @@ public abstract class ImsServiceSession extends Thread {
     }
 
     /**
-     * Returns the response timeout (in seconds)
+     * Returns the response timeout (in milliseconds)
      * 
      * @return Timeout
      */
-    public int getResponseTimeout() {
+    public long getResponseTimeout() {
         return mRingingPeriod + SipManager.TIMEOUT;
     }
 

@@ -113,13 +113,13 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
 
         FileTransferHttpThumbnail fileicon = file.getFileThumbnail();
         if (fileicon != null) {
-            return new FileUploadInfo(file.getFileUri(), file.getTransferValidity(),
-                    file.getFilename(), file.getFileSize(), file.getFileType(), fileicon.getUri(),
-                    fileicon.getValidity(), fileicon.getSize(), fileicon.getType());
+            return new FileUploadInfo(file.getUri(), file.getExpiration(), file.getFilename(),
+                    file.getSize(), file.getMimeType(), fileicon.getUri(),
+                    fileicon.getExpiration(), fileicon.getSize(), fileicon.getMimeType());
         }
-        return new FileUploadInfo(file.getFileUri(), file.getTransferValidity(),
-                file.getFilename(), file.getFileSize(), file.getFileType(), Uri.EMPTY,
-                FileTransferLog.NOT_APPLICABLE_EXPIRATION, 0, "");
+        return new FileUploadInfo(file.getUri(), file.getExpiration(), file.getFilename(),
+                file.getSize(), file.getMimeType(), Uri.EMPTY, FileTransferLog.UNKNOWN_EXPIRATION,
+                0, "");
     }
 
     /**

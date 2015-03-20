@@ -39,10 +39,7 @@ import com.gsma.rcs.utils.logger.Logger;
  */
 public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSession {
 
-    /**
-     * The logger
-     */
-    private final static Logger LOGGER = Logger.getLogger(ResumeUploadFileSharingSession.class
+    private final static Logger sLogger = Logger.getLogger(ResumeUploadFileSharingSession.class
             .getSimpleName());
 
     /**
@@ -67,9 +64,9 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
      * Background processing
      */
     public void run() {
-        boolean logActivated = LOGGER.isActivated();
+        boolean logActivated = sLogger.isActivated();
         if (logActivated) {
-            LOGGER.info("Resume a HTTP file transfer session as originating");
+            sLogger.info("Resume a HTTP file transfer session as originating");
         }
         try {
             httpTransferStarted();
@@ -79,7 +76,7 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
             sendResultToContact(result);
         } catch (Exception e) {
             if (logActivated) {
-                LOGGER.error("Transfer has failed", e);
+                sLogger.error("Transfer has failed", e);
             }
             // Unexpected error
             handleError(new FileSharingError(FileSharingError.UNEXPECTED_EXCEPTION, e.getMessage()));

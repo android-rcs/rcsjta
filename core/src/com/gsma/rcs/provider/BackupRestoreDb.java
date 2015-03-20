@@ -49,10 +49,7 @@ public class BackupRestoreDb {
      */
     private static final int MAX_SAVED_ACCOUNT = 3;
 
-    /**
-     * The logger
-     */
-    private static final Logger LOGGER = Logger.getLogger(BackupRestoreDb.class.getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(BackupRestoreDb.class.getSimpleName());
 
     /**
      * Filter to get database files
@@ -123,12 +120,12 @@ public class BackupRestoreDb {
      * @return true if save succeeded
      */
     private static boolean saveAccountDatabases(final File databasesDir, final String account) {
-        if (LOGGER.isActivated()) {
-            LOGGER.info("saveAccountDatabases account=".concat(account));
+        if (sLogger.isActivated()) {
+            sLogger.info("saveAccountDatabases account=".concat(account));
         }
         if (checkBackupRestoreArguments(databasesDir, account) == false) {
-            if (LOGGER.isActivated()) {
-                LOGGER.error("Cannot save account ".concat(account));
+            if (sLogger.isActivated()) {
+                sLogger.error("Cannot save account ".concat(account));
             }
             return false;
 
@@ -136,8 +133,8 @@ public class BackupRestoreDb {
         // Put the names of all files ending with .db in a String array
         String[] listOfDbFiles = databasesDir.list(sFilenameDbFilter);
         if (listOfDbFiles == null || listOfDbFiles.length <= 0) {
-            if (LOGGER.isActivated()) {
-                LOGGER.error("No DB files to save for ".concat(account));
+            if (sLogger.isActivated()) {
+                sLogger.error("No DB files to save for ".concat(account));
             }
             return false;
 
@@ -150,13 +147,13 @@ public class BackupRestoreDb {
             try {
                 // Copy database file under account directory
                 FileUtils.copyFileToDirectory(srcFile, dstDir, true);
-                if (LOGGER.isActivated()) {
-                    LOGGER.info(new StringBuilder("Save file '").append(srcFile).append("' to '")
+                if (sLogger.isActivated()) {
+                    sLogger.info(new StringBuilder("Save file '").append(srcFile).append("' to '")
                             .append(dstDir).append("'").toString());
                 }
             } catch (Exception e) {
-                if (LOGGER.isActivated()) {
-                    LOGGER.error("Failed to copy DB files", e);
+                if (sLogger.isActivated()) {
+                    sLogger.error("Failed to copy DB files", e);
                 }
                 return false;
 
@@ -183,8 +180,8 @@ public class BackupRestoreDb {
         // Put the names of all files ending with .db in a String array
         String[] listOfDbFiles = srcDir.list(sFilenameDbFilter);
         if (listOfDbFiles == null || listOfDbFiles.length <= 0) {
-            if (LOGGER.isActivated()) {
-                LOGGER.error("No DB files to restore for ".concat(account));
+            if (sLogger.isActivated()) {
+                sLogger.error("No DB files to restore for ".concat(account));
             }
             return false;
 
@@ -197,8 +194,8 @@ public class BackupRestoreDb {
                 // Copy database file under database directory
                 FileUtils.copyFileToDirectory(srcFile, databasesDir, true);
             } catch (Exception e) {
-                if (LOGGER.isActivated()) {
-                    LOGGER.error("Failed to restore account ".concat(account), e);
+                if (sLogger.isActivated()) {
+                    sLogger.error("Failed to restore account ".concat(account), e);
                 }
                 return false;
 
@@ -225,8 +222,8 @@ public class BackupRestoreDb {
         File file = FileUtils.getOldestFile(files);
         if (!file.getName().equals(currentUserAccount)) {
             FileUtils.deleteDirectory(file);
-            if (LOGGER.isActivated()) {
-                LOGGER.debug("Clean oldest Backup : account=".concat(file.getName()));
+            if (sLogger.isActivated()) {
+                sLogger.debug("Clean oldest Backup : account=".concat(file.getName()));
             }
             return;
 
@@ -241,8 +238,8 @@ public class BackupRestoreDb {
         }
         file = FileUtils.getOldestFile(filesWithoutCurrentAccount);
         FileUtils.deleteDirectory(file);
-        if (LOGGER.isActivated()) {
-            LOGGER.debug("Clean oldest Backup : account=".concat(file.getName()));
+        if (sLogger.isActivated()) {
+            sLogger.debug("Clean oldest Backup : account=".concat(file.getName()));
         }
     }
 
@@ -258,8 +255,8 @@ public class BackupRestoreDb {
             File srcdir = new File(accountDBs);
             cleanBackups(srcdir, currentUserAccount);
         } catch (Exception e) {
-            if (LOGGER.isActivated())
-                LOGGER.error(e.getMessage(), e);
+            if (sLogger.isActivated())
+                sLogger.error(e.getMessage(), e);
         }
     }
 
@@ -276,8 +273,8 @@ public class BackupRestoreDb {
             File fdir = new File(accountDBs);
             return saveAccountDatabases(fdir, account);
         } catch (Exception e) {
-            if (LOGGER.isActivated())
-                LOGGER.error("Failed to backup account ".concat(account), e);
+            if (sLogger.isActivated())
+                sLogger.error("Failed to backup account ".concat(account), e);
         }
         return false;
     }
@@ -295,8 +292,8 @@ public class BackupRestoreDb {
             File fdir = new File(accountDBs);
             return restoreAccountDatabases(fdir, account);
         } catch (Exception e) {
-            if (LOGGER.isActivated())
-                LOGGER.error(e.getMessage(), e);
+            if (sLogger.isActivated())
+                sLogger.error(e.getMessage(), e);
         }
         return false;
     }

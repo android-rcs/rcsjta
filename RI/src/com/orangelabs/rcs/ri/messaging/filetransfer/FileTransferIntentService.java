@@ -58,10 +58,18 @@ public class FileTransferIntentService extends IntentService {
 
     /* package private */static final String EXTRA_GROUP_FILE = "group_file";
 
+    /**
+     * Constructor
+     * 
+     * @param name
+     */
     public FileTransferIntentService(String name) {
         super(name);
     }
 
+    /**
+     * Constructor
+     */
     public FileTransferIntentService() {
         super("FileTransferIntentService");
     }
@@ -77,7 +85,7 @@ public class FileTransferIntentService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         String action;
-        if (intent == null || (action = intent.getAction()) == null) {
+        if ((action = intent.getAction()) == null) {
             return;
         }
         // Check action from incoming intent
@@ -110,10 +118,10 @@ public class FileTransferIntentService extends IntentService {
                 // Purposely left blank
             }
 
-            // Check if it's a spam
-            if (FileTransfer.ReasonCode.REJECTED_SPAM == ftDao.getReasonCode()) {
+            // Check if file transfer is already rejected
+            if (FileTransfer.State.REJECTED == ftDao.getState()) {
                 if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "Do nothing on a spam");
+                    Log.e(LOGTAG, "File transfer already rejected. Id=".concat(transferId));
                 }
                 return;
             }

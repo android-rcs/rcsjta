@@ -268,7 +268,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dip"
-                android:text="@string/SIP_transaction_timeout_seconds" />
+                android:text="@string/SIP_transaction_timeout" />
 
             <EditText
                 android:id="@+id/SipTransactionTimeout"
@@ -278,7 +278,7 @@
                 android:layout_marginRight="5dip"
                 android:inputType="number"
                 android:lines="1"
-                android:maxLength="5" />
+                android:maxLength="6" />
 
             <TextView
                 android:layout_width="fill_parent"
@@ -412,7 +412,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dip"
-                android:text="@string/Ringing_session_period_seconds" />
+                android:text="@string/Ringing_session_period" />
 
             <EditText
                 android:id="@+id/RingingPeriod"

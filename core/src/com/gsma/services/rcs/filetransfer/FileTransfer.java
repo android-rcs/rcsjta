@@ -205,44 +205,49 @@ public class FileTransfer {
         REJECTED_BY_REMOTE(11),
 
         /**
+         * File transfer invitation was rejected because of media failure
+         */
+        REJECTED_MEDIA_FAILED(12),
+
+        /**
          * File transfer was paused by system.
          */
-        PAUSED_BY_SYSTEM(12),
+        PAUSED_BY_SYSTEM(13),
 
         /**
          * File transfer was paused by user.
          */
-        PAUSED_BY_USER(13),
+        PAUSED_BY_USER(14),
 
         /**
          * File transfer initiation failed.
          */
-        FAILED_INITIATION(14),
+        FAILED_INITIATION(15),
 
         /**
          * The transferring of the file contents (data) from/to remote side failed.
          */
-        FAILED_DATA_TRANSFER(15),
+        FAILED_DATA_TRANSFER(16),
 
         /**
          * Saving of the incoming file transfer failed.
          */
-        FAILED_SAVING(16),
+        FAILED_SAVING(17),
 
         /**
          * Delivering of the file transfer invitation failed.
          */
-        FAILED_DELIVERY(17),
+        FAILED_DELIVERY(18),
 
         /**
          * Displaying of the file transfer invitation failed.
          */
-        FAILED_DISPLAY(18),
+        FAILED_DISPLAY(19),
 
         /**
          * File transfer not allowed to be sent.
          */
-        FAILED_NOT_ALLOWED_TO_SEND(19);
+        FAILED_NOT_ALLOWED_TO_SEND(20);
 
         private final int mValue;
 

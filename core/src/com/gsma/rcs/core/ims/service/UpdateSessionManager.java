@@ -55,13 +55,10 @@ public class UpdateSessionManager {
     private Object mWaitUserAnswer = new Object();
 
     /**
-     * Ringing period (in seconds)
+     * Ringing period (in milliseconds)
      */
-    private final int mRingingPeriod;
+    private final long mRingingPeriod;
 
-    /**
-     * The logger
-     */
     private static final Logger sLogger = Logger.getLogger(UpdateSessionManager.class.getName());
 
     /**
@@ -446,7 +443,7 @@ public class UpdateSessionManager {
         try {
             synchronized (mWaitUserAnswer) {
                 // Wait until received response or received timeout
-                mWaitUserAnswer.wait(mRingingPeriod * 500);
+                mWaitUserAnswer.wait(mRingingPeriod / 2);
             }
         } catch (InterruptedException e) {
 

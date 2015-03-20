@@ -37,7 +37,7 @@ import com.gsma.rcs.utils.logger.Logger;
  */
 public class DownloadFromAcceptFileSharingSession extends TerminatingHttpFileSharingSession {
 
-    private final static Logger LOGGER = Logger
+    private final static Logger sLogger = Logger
             .getLogger(DownloadFromAcceptFileSharingSession.class.getSimpleName());
 
     /**
@@ -57,7 +57,7 @@ public class DownloadFromAcceptFileSharingSession extends TerminatingHttpFileSha
                 content,
                 resume.getFileExpiration(),
                 resume.getFileicon() != null ? FileTransferUtils.createMmContent(resume.getFileicon()) : null,
-                resume.getFileicon() != null ? resume.getIconExpiration() : FileTransferData.NOT_APPLICABLE_EXPIRATION,
+                resume.getFileicon() != null ? resume.getIconExpiration() : FileTransferData.UNKNOWN_EXPIRATION,
                 resume.getContact(),
                 null,
                 resume.getChatId(),
@@ -76,15 +76,15 @@ public class DownloadFromAcceptFileSharingSession extends TerminatingHttpFileSha
      * Background processing
      */
     public void run() {
-        boolean logActivated = LOGGER.isActivated();
+        boolean logActivated = sLogger.isActivated();
         if (logActivated) {
-            LOGGER.info("Accept HTTP file transfer session");
+            sLogger.info("Accept HTTP file transfer session");
         }
         try {
             httpTransferStarted();
         } catch (Exception e) {
             if (logActivated) {
-                LOGGER.error("Transfer has failed", e);
+                sLogger.error("Transfer has failed", e);
             }
             // Unexpected error
             handleError(new FileSharingError(FileSharingError.UNEXPECTED_EXCEPTION, e.getMessage()));

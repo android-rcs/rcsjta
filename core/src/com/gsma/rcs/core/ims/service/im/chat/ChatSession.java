@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.im.chat;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
@@ -45,7 +46,6 @@ import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnUtils;
 import com.gsma.rcs.core.ims.service.im.chat.iscomposing.IsComposingManager;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatMessageSession;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatNotificationSession;
-import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.DownloadFromInviteFileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
@@ -766,7 +766,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 
         // Auto reject if file too big
         long maxSize = mRcsSettings.getMaxFileTransferSize();
-        if (maxSize > 0 && fileTransferInfo.getFileSize() > maxSize) {
+        if (maxSize > 0 && fileTransferInfo.getSize() > maxSize) {
             if (sLogger.isActivated()) {
                 sLogger.debug("File is too big, reject the HTTP File transfer");
             }
@@ -786,18 +786,26 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             return;
         }
 
-        // Create a new session
-        FileSharingSession fileSharingSession = new DownloadFromInviteFileSharingSession(
+        DownloadFromInviteFileSharingSession fileSession = new DownloadFromInviteFileSharingSession(
                 getImsService(), this, fileTransferInfo, msgId, contact, displayName, mRcsSettings,
                 mMessagingLog, timestamp, timestampSent);
-
+        if (fileSession.getFileicon() != null) {
+            try {
+                fileSession.downloadFileIcon();
+            } catch (CoreException e) {
+                if (sLogger.isActivated()) {
+                    sLogger.error("Failed to download file icon", e);
+                }
+                // TODO : reject (SIP MESSAGE ?)
+                return;
+            }
+        }
         getImsService()
                 .getImsModule()
                 .getCoreListener()
-                .handleFileTransferInvitation(fileSharingSession, isGroupChat(), contact,
-                        displayName, fileTransferInfo.getTransferValidity());
-
-        fileSharingSession.startSession();
+                .handleFileTransferInvitation(fileSession, isGroupChat(), contact, displayName,
+                        fileTransferInfo.getExpiration());
+        fileSession.startSession();
     }
 
     /**

@@ -22,6 +22,8 @@
 
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
+import com.gsma.services.rcs.filetransfer.FileTransferLog;
+
 import android.net.Uri;
 
 /**
@@ -41,19 +43,19 @@ public class FileTransferHttpInfoDocument {
     private int mSize = 0;
 
     /**
-     * File content type
+     * File mime type
      */
-    private String mType;
+    private String mMimeType;
 
     /**
      * URI of the file
      */
-    private Uri mFile;
+    private Uri mUri;
 
     /**
-     * Validity of the file
+     * Expiration of the file
      */
-    private long mValidity = 0;
+    private long mExpiration = FileTransferLog.UNKNOWN_EXPIRATION;
 
     /**
      * File thumbnail
@@ -72,7 +74,7 @@ public class FileTransferHttpInfoDocument {
     }
 
     /**
-     * Set file thumbnail
+     * Sets file thumbnail
      * 
      * @param thumbnail Thumbnail
      */
@@ -81,7 +83,7 @@ public class FileTransferHttpInfoDocument {
     }
 
     /**
-     * Get file thumbnail
+     * Gets file thumbnail
      * 
      * @return File thumbnail
      */
@@ -90,79 +92,79 @@ public class FileTransferHttpInfoDocument {
     }
 
     /**
-     * Get file transfer validity in milliseconds
+     * Gets expiration
      * 
-     * @return Validity
+     * @return expiration in milliseconds
      */
-    public long getTransferValidity() {
-        return mValidity;
+    public long getExpiration() {
+        return mExpiration;
     }
 
     /**
-     * Set file transfer validity in milliseconds
+     * Sets file expiration
      * 
-     * @param validity
+     * @param expiration in milliseconds
      */
-    public void setTransferValidity(long validity) {
-        mValidity = validity;
+    public void setExpiration(long expiration) {
+        mExpiration = expiration;
     }
 
     /**
-     * Get file URI
+     * Gets file URI
      * 
      * @return File URI
      */
-    public Uri getFileUri() {
-        return mFile;
+    public Uri getUri() {
+        return mUri;
     }
 
     /**
-     * Set file URI
+     * Sets file URI
      * 
      * @param file
      */
-    public void setFileUri(Uri file) {
-        mFile = file;
+    public void setUri(Uri file) {
+        mUri = file;
     }
 
     /**
-     * Get file content type
+     * Gets file mime type
      * 
-     * @return File content type
+     * @return File mime type
      */
-    public String getFileType() {
-        return mType;
+    public String getMimeType() {
+        return mMimeType;
     }
 
     /**
-     * Set file content type
+     * Sets file mime type
      * 
-     * @param type File content type
+     * @param mimeType File mime type
      */
-    public void setFileType(String type) {
-        mType = type;
+    public void setMimeType(String mimeType) {
+        mMimeType = mimeType;
     }
 
     /**
-     * Get file size
+     * Gets file size
      * 
      * @return File size
      */
-    public int getFileSize() {
+    public int getSize() {
         return mSize;
     }
 
     /**
-     * Set file size
+     * Sets file size
      * 
      * @param size File size
      */
-    public void setFileSize(int size) {
+    public void setSize(int size) {
         mSize = size;
     }
 
     /**
-     * Set the fileName
+     * Sets the fileName
      * 
      * @param fileName FileName
      */
@@ -171,7 +173,7 @@ public class FileTransferHttpInfoDocument {
     }
 
     /**
-     * Return the fileName
+     * Gets the fileName
      * 
      * @return FileName
      */

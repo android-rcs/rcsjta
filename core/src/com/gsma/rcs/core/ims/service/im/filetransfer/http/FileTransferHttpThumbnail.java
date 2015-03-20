@@ -22,6 +22,8 @@
 
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
+import com.gsma.services.rcs.filetransfer.FileTransferLog;
+
 import android.net.Uri;
 
 /**
@@ -33,11 +35,11 @@ public class FileTransferHttpThumbnail {
 
     private int mSize = 0;
 
-    private String mContentType;
+    private String mMimeType;
 
     private Uri mUri;
 
-    private long mValidity = 0;
+    private long mExpiration = FileTransferLog.UNKNOWN_EXPIRATION;
 
     /**
      * Constructor
@@ -46,21 +48,21 @@ public class FileTransferHttpThumbnail {
     }
 
     /**
-     * Gets validity
+     * Gets expiration
      * 
-     * @return validity
+     * @return expiration in milliseconds
      */
-    public long getValidity() {
-        return mValidity;
+    public long getExpiration() {
+        return mExpiration;
     }
 
     /**
-     * Sets validity
+     * Sets expiration
      * 
-     * @param validity validity
+     * @param expiration
      */
-    public void setValidity(long validity) {
-        mValidity = validity;
+    public void setExpiration(long expiration) {
+        mExpiration = expiration;
     }
 
     /**
@@ -75,28 +77,28 @@ public class FileTransferHttpThumbnail {
     /**
      * Sets URI
      * 
-     * @param thumbnail URI
+     * @param uri URI
      */
-    public void setUri(Uri thumbnail) {
-        mUri = thumbnail;
+    public void setUri(Uri uri) {
+        mUri = uri;
     }
 
     /**
-     * Gets content type
+     * Gets mime type
      * 
-     * @return content type
+     * @return mime type
      */
-    public String getType() {
-        return mContentType;
+    public String getMimeType() {
+        return mMimeType;
     }
 
     /**
-     * Sets content type
+     * Sets mime type
      * 
-     * @param type
+     * @param mimetype
      */
-    public void setType(String type) {
-        mContentType = type;
+    public void setMimeType(String mimetype) {
+        mMimeType = mimetype;
     }
 
     /**

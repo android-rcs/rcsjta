@@ -45,9 +45,9 @@ import com.gsma.rcs.utils.logger.Logger;
 public class SipManager {
 
     /**
-     * SIP timeout for SIP transaction (in seconds)
+     * SIP timeout for SIP transaction (in milliseconds)
      */
-    public static int TIMEOUT = 30;
+    public static long TIMEOUT = 30000;
 
     /**
      * IMS network interface
@@ -173,12 +173,12 @@ public class SipManager {
      * Send a SIP message and create a context to wait for response
      * 
      * @param message
-     * @param timeout
+     * @param timeout in milliseconds
      * @param callback callback to handle provisional response
      * @return SIP transaction context
      * @throws SipException
      */
-    public SipTransactionContext sendSipMessageAndWait(SipMessage message, int timeout,
+    public SipTransactionContext sendSipMessageAndWait(SipMessage message, long timeout,
             SipTransactionContext.INotifySipProvisionalResponse callback) throws SipException {
         if (sipstack == null) {
             throw new SipException("Stack not initialized");
@@ -266,11 +266,11 @@ public class SipManager {
      * Send a SIP message and create a context to wait a response
      * 
      * @param message SIP message
-     * @param timeout SIP timeout
+     * @param timeout SIP timeout in milliseconds
      * @return Transaction context
      * @throws SipException
      */
-    public SipTransactionContext sendSipMessageAndWait(SipMessage message, int timeout)
+    public SipTransactionContext sendSipMessageAndWait(SipMessage message, long timeout)
             throws SipException {
         return sendSipMessageAndWait(message, timeout, null);
     }
@@ -349,12 +349,12 @@ public class SipManager {
      * 
      * @param dialog Dialog path
      * @param request Request
-     * @param timeout SIP timeout
+     * @param timeout SIP timeout in milliseconds
      * @return SipTransactionContext
      * @throws SipException
      */
-    public SipTransactionContext sendSubsequentRequest(SipDialogPath dialog, SipRequest request,
-            int timeout) throws SipException {
+    private SipTransactionContext sendSubsequentRequest(SipDialogPath dialog, SipRequest request,
+            long timeout) throws SipException {
         if (sipstack != null) {
             SipTransactionContext ctx = sipstack.sendSubsequentRequest(dialog, request);
 

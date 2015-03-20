@@ -166,8 +166,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 
                     ((FileSharingSessionListener) listener).handleSessionAutoAccepted(contact,
                             file, fileIcon, timestamp, mTimestampSent,
-                            FileTransferLog.NOT_APPLICABLE_EXPIRATION,
-                            FileTransferLog.NOT_APPLICABLE_EXPIRATION);
+                            FileTransferLog.UNKNOWN_EXPIRATION, FileTransferLog.UNKNOWN_EXPIRATION);
                 }
 
             } else {
@@ -178,8 +177,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                 for (ImsSessionListener listener : listeners) {
                     ((FileSharingSessionListener) listener).handleSessionInvited(contact, file,
                             fileIcon, timestamp, mTimestampSent,
-                            FileTransferLog.NOT_APPLICABLE_EXPIRATION,
-                            FileTransferLog.NOT_APPLICABLE_EXPIRATION);
+                            FileTransferLog.UNKNOWN_EXPIRATION, FileTransferLog.UNKNOWN_EXPIRATION);
                 }
 
                 send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
@@ -485,8 +483,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
             // Notify listeners
             for (ImsSessionListener listener : listeners) {
                 ((FileSharingSessionListener) listener).handleFileTransfered(file, contact,
-                        FileTransferLog.NOT_APPLICABLE_EXPIRATION,
-                        FileTransferLog.NOT_APPLICABLE_EXPIRATION);
+                        FileTransferLog.UNKNOWN_EXPIRATION, FileTransferLog.UNKNOWN_EXPIRATION);
             }
         } catch (Exception e) {
             // Delete the temp file

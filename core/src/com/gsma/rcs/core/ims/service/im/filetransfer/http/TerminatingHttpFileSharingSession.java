@@ -59,7 +59,7 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
     /**
      * The logger
      */
-    private final static Logger LOGGER = Logger.getLogger(TerminatingHttpFileSharingSession.class
+    private final static Logger sLogger = Logger.getLogger(TerminatingHttpFileSharingSession.class
             .getSimpleName());
 
     /**
@@ -120,27 +120,14 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
      */
     public void run() {
         try {
-            // Reject if file is too big or size exceeds device storage capacity. This control
-            // should be done
-            // on UI. It is done after end user accepts invitation to enable prior handling by the
-            // application.
-            FileSharingError error = isFileCapacityAcceptable(getContent().getSize(), mRcsSettings);
-            if (error != null) {
-                // Invitation cannot be declined in MSRP or SIP at this level
-
-                // Close session and notify listeners
-                handleError(error);
-                return;
-            }
-
             // Notify listeners
             httpTransferStarted();
 
             Uri file = mDownloadManager.getDownloadedFileUri();
             // Download file from the HTTP server
             if (mDownloadManager.downloadFile()) {
-                if (LOGGER.isActivated()) {
-                    LOGGER.debug("Download file with success");
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Download file with success");
                 }
 
                 // Set filename
@@ -162,14 +149,14 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                 }
 
                 // Upload error
-                if (LOGGER.isActivated()) {
-                    LOGGER.info("Download file has failed");
+                if (sLogger.isActivated()) {
+                    sLogger.info("Download file has failed");
                 }
                 handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED));
             }
         } catch (Exception e) {
-            if (LOGGER.isActivated()) {
-                LOGGER.error("Transfer has failed", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Transfer has failed", e);
             }
 
             // Unexpected error
@@ -181,8 +168,8 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
     // 200OK).
     @Override
     public void rejectSession(int code) {
-        if (LOGGER.isActivated()) {
-            LOGGER.debug("Session invitation has been rejected");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Session invitation has been rejected");
         }
         mInvitationStatus = InvitationStatus.INVITATION_REJECTED;
 
@@ -213,8 +200,8 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
      */
     protected void sendDeliveryReport(String status, long timestamp) {
         String msgId = getFileTransferId();
-        if (LOGGER.isActivated()) {
-            LOGGER.debug("Send delivery report ".concat(status));
+        if (sLogger.isActivated()) {
+            sLogger.debug("Send delivery report ".concat(status));
         }
         ChatSession chatSession;
         ContactId contact = getRemoteContact();
@@ -246,8 +233,8 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
             public void run() {
                 // Download file from the HTTP server
                 if (mDownloadManager.resumeDownload()) {
-                    if (LOGGER.isActivated()) {
-                        LOGGER.debug("Download file with success");
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Download file with success");
                     }
 
                     // Set filename
@@ -266,8 +253,8 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                     }
 
                     // Upload error
-                    if (LOGGER.isActivated()) {
-                        LOGGER.info("Download file has failed");
+                    if (sLogger.isActivated()) {
+                        sLogger.info("Download file has failed");
                     }
                     handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED));
                 }

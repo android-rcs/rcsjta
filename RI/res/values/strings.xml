@@ -387,6 +387,7 @@
         <item>REJECTED_MAX_FILE_TRANSFERS</item>
         <item>REJECTED_BY_USER</item>
         <item>REJECTED_BY_REMOTE</item>
+        <item>REJECTED_MEDIA_FAILED</item>
         <item>PAUSED_BY_SYSTEM</item>
         <item>PAUSED_BY_USER</item>
         <item>FAILED_INITIATION</item>
@@ -394,7 +395,7 @@
         <item>FAILED_SAVING</item>
         <item>FAILED_DELIVERY</item>
         <item>FAILED_DISPLAY</item>
-        <item>FAILED_NOT_ALLOWED_TO_TRANSFER</item>
+        <item>FAILED_NOT_ALLOWED_TO_SEND</item>
     </string-array>
     <string-array name="participant_statuses">
         <item>UNKNOWN</item>

@@ -22,7 +22,9 @@
 
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
+import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.content.ContentManager;
+import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.service.ImsService;
@@ -31,7 +33,6 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
-import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
@@ -50,15 +51,10 @@ import javax2.sip.header.ContactHeader;
  * @author vfml3370
  */
 public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSharingSession {
-    /**
-     * The minimum delay in milliseconds to wait for user acceptance
-     */
-    private static long MINIMUM_DELAY_FOR_USER_ACCEPTANCE = 30000;
 
-    /**
-     * The logger
-     */
-    private final static Logger LOGGER = Logger
+    private final Uri mIconRemoteUri;
+
+    private final static Logger sLogger = Logger
             .getLogger(DownloadFromInviteFileSharingSession.class.getSimpleName());
 
     private final long mTimestampSent;
@@ -84,18 +80,16 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
 
         // @formatter:off
         super(parent,
-                ContentManager.createMmContent(ContentManager.generateUriForReceivedContent(
-                fileTransferInfo.getFilename(), fileTransferInfo.getFileType(), rcsSettings),
-                fileTransferInfo.getFileSize(), fileTransferInfo.getFilename()),
-                fileTransferInfo.getTransferValidity(),
-                null,
-                FileTransferData.UNKNOWN_EXPIRATION,
+                getFileMmContent(fileTransferInfo, rcsSettings),
+                fileTransferInfo.getExpiration(),
+                getFileIconMmContent(fileTransferInfo.getFileThumbnail(), fileTransferId, rcsSettings),
+                getFileIconExpiration(fileTransferInfo.getFileThumbnail()),
                 contact,
                 chatSession.getSessionID(),
                 chatSession.getContributionID(),
                 fileTransferId,
                 chatSession.isGroupChat(),
-                fileTransferInfo.getFileUri(),
+                fileTransferInfo.getUri(),
                 rcsSettings,
                 messagingLog,
                 timestamp,
@@ -109,20 +103,40 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
         setDialogPath(new SipDialogPath(chatSession.getDialogPath()));
         getDialogPath().setCallId("");
 
-        // Download thumbnail
-        FileTransferHttpThumbnail thumbnailInfo = fileTransferInfo.getFileThumbnail();
-        if (thumbnailInfo != null) {
-            String iconName = FileTransferUtils.buildFileiconUrl(fileTransferId,
-                    thumbnailInfo.getType());
-            setFileicon(mDownloadManager.downloadThumbnail(thumbnailInfo, iconName));
-            setIconExpiration(thumbnailInfo.getValidity());
+        if (fileTransferInfo.getFileThumbnail() != null) {
+            mIconRemoteUri = fileTransferInfo.getFileThumbnail().getUri();
         } else {
-            setIconExpiration(FileTransferLog.NOT_APPLICABLE_EXPIRATION);
+            mIconRemoteUri = null;
         }
-
         if (shouldBeAutoAccepted()) {
             setSessionAccepted();
         }
+    }
+
+    private static MmContent getFileMmContent(FileTransferHttpInfoDocument fileInfo,
+            RcsSettings rcsSettings) {
+        String fileName = fileInfo.getFilename();
+        return ContentManager.createMmContent(ContentManager.generateUriForReceivedContent(
+                fileName, fileInfo.getMimeType(), rcsSettings), fileInfo.getSize(), fileName);
+    }
+
+    private static MmContent getFileIconMmContent(FileTransferHttpThumbnail thumbnail,
+            String fileTransferId, RcsSettings rcsSettings) {
+        if (thumbnail == null) {
+            return null;
+        }
+        String iconMimeType = thumbnail.getMimeType();
+        String iconName = FileTransferUtils.buildFileiconUrl(fileTransferId, iconMimeType);
+        return ContentManager.createMmContent(
+                ContentManager.generateUriForReceivedContent(iconName, iconMimeType, rcsSettings),
+                thumbnail.getSize(), iconName);
+    }
+
+    private static long getFileIconExpiration(FileTransferHttpThumbnail thumbnailInfo) {
+        if (thumbnailInfo != null) {
+            return thumbnailInfo.getExpiration();
+        }
+        return FileTransferLog.UNKNOWN_EXPIRATION;
     }
 
     /**
@@ -150,12 +164,26 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
     }
 
     /**
+     * Download file icon from network server.<br>
+     * Throws an exception if download fails.
+     * 
+     * @throws CoreException
+     */
+    public void downloadFileIcon() throws CoreException {
+        try {
+            mDownloadManager.downloadThumbnail(mIconRemoteUri, getFileicon());
+        } catch (Exception e) {
+            throw new CoreException("Failed to download file icon", e);
+        }
+    }
+
+    /**
      * Background processing
      */
     public void run() {
-        boolean logActivated = LOGGER.isActivated();
+        boolean logActivated = sLogger.isActivated();
         if (logActivated) {
-            LOGGER.info("Initiate a HTTP file transfer session as terminating");
+            sLogger.info("Initiate a HTTP file transfer session as terminating");
         }
         Vector<ImsSessionListener> listeners = getListeners();
         ContactId contact = getRemoteContact();
@@ -164,7 +192,7 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
             /* Check if session should be auto-accepted once */
             if (isSessionAccepted()) {
                 if (logActivated) {
-                    LOGGER.debug("Received HTTP file transfer invitation marked for auto-accept");
+                    sLogger.debug("Received HTTP file transfer invitation marked for auto-accept");
                 }
 
                 for (ImsSessionListener listener : listeners) {
@@ -179,7 +207,7 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
                 }
             } else {
                 if (logActivated) {
-                    LOGGER.debug("Received HTTP file transfer invitation marked for manual accept");
+                    sLogger.debug("Received HTTP file transfer invitation marked for manual accept");
                 }
                 for (ImsSessionListener listener : listeners) {
                     ((FileSharingSessionListener) listener).handleSessionInvited(contact,
@@ -195,7 +223,7 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
                 long delay = fileExpiration - System.currentTimeMillis();
                 if (delay <= 0) {
                     if (logActivated) {
-                        LOGGER.debug("File no more available on server: transfer rejected on timeout");
+                        sLogger.debug("File no more available on server: transfer rejected on timeout");
                     }
                     removeSession();
 
@@ -204,13 +232,9 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
                     }
                     return;
 
-                } else {
-                    if (delay < MINIMUM_DELAY_FOR_USER_ACCEPTANCE) {
-                        delay = MINIMUM_DELAY_FOR_USER_ACCEPTANCE;
-                    }
                 }
                 if (logActivated) {
-                    LOGGER.debug("Accept manually file transfer tiemout=".concat(Long
+                    sLogger.debug("Accept manually file transfer tiemout=".concat(Long
                             .toString(delay)));
                 }
                 // Wait invitation answer
@@ -218,7 +242,7 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
                 switch (answer) {
                     case INVITATION_REJECTED:
                         if (logActivated) {
-                            LOGGER.debug("Transfer has been rejected by user");
+                            sLogger.debug("Transfer has been rejected by user");
                         }
                         removeSession();
                         for (ImsSessionListener listener : listeners) {
@@ -227,22 +251,22 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
                         return;
 
                     case INVITATION_NOT_ANSWERED:
-                        if (!isFileTransferPaused()) {
-                            if (logActivated) {
-                                LOGGER.debug("Transfer has been rejected on timeout");
-                            }
-                            removeSession();
-                            for (ImsSessionListener listener : listeners) {
-                                listener.handleSessionRejectedByTimeout(contact);
-                            }
+                        if (logActivated) {
+                            sLogger.debug("Transfer has been rejected on timeout");
+                        }
+                        removeSession();
+
+                        for (ImsSessionListener listener : listeners) {
+                            listener.handleSessionRejectedByTimeout(contact);
                         }
                         return;
 
                     case INVITATION_CANCELED:
                         if (logActivated) {
-                            LOGGER.debug("Http transfer has been rejected by remote.");
+                            sLogger.debug("Http transfer has been rejected by remote.");
                         }
                         removeSession();
+
                         for (ImsSessionListener listener : listeners) {
                             listener.handleSessionRejectedByRemote(contact);
                         }
@@ -257,7 +281,7 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
 
                     default:
                         if (logActivated) {
-                            LOGGER.debug("Unknown invitation answer in run; answer=".concat(answer
+                            sLogger.debug("Unknown invitation answer in run; answer=".concat(answer
                                     .toString()));
                         }
                         return;
@@ -265,8 +289,8 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
                 }
             }
         } catch (Exception e) {
-            if (LOGGER.isActivated()) {
-                LOGGER.error("Transfer has failed", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Transfer has failed", e);
             }
             // Unexpected error
             handleError(new FileSharingError(FileSharingError.UNEXPECTED_EXCEPTION, e.getMessage()));

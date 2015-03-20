@@ -168,11 +168,6 @@ public class FileTransferData {
     /* package private */static final String KEY_FILEICON_EXPIRATION = FileTransferLog.FILEICON_EXPIRATION;
 
     /**
-     * @see FileTransferLog#NOT_APPLICABLE_EXPIRATION
-     */
-    public static final long NOT_APPLICABLE_EXPIRATION = FileTransferLog.NOT_APPLICABLE_EXPIRATION;
-
-    /**
      * @see FileTransferLog#UNKNOWN_EXPIRATION
      */
     public static final long UNKNOWN_EXPIRATION = FileTransferLog.UNKNOWN_EXPIRATION;

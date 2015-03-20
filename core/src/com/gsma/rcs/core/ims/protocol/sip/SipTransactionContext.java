@@ -197,16 +197,16 @@ public class SipTransactionContext {
     /**
      * Wait the response of a request until a timeout occurs
      * 
-     * @param timeout Timeout value
+     * @param timeout value in milliseconds
      */
-    public void waitResponse(int timeout) {
+    public void waitResponse(long timeout) {
         try {
             if (recvMsg != null) {
                 // Response already received, no need to wait
                 return;
             }
             synchronized (this) {
-                super.wait(timeout * 1000);
+                super.wait(timeout);
             }
         } catch (InterruptedException e) {
             // Thread has been interrupted

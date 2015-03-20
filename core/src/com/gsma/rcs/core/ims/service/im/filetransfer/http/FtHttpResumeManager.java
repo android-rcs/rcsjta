@@ -59,8 +59,8 @@ public class FtHttpResumeManager implements Runnable {
      */
     private FtHttpResume mFtHttpResume;
 
-    private static final Logger LOGGER = Logger
-            .getLogger(FtHttpResumeManager.class.getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(FtHttpResumeManager.class
+            .getSimpleName());
 
     private final RcsSettings mRcsSettings;
 
@@ -83,8 +83,6 @@ public class FtHttpResumeManager implements Runnable {
     @Override
     public void run() {
         try {
-            // Update File Transfer which were interrupted by system
-            // TODO mMessagingLog.updateStateOfSessionsStoppedBySystem();
             // Retrieve all resumable sessions
             List<FtHttpResume> transfersToResume = mMessagingLog
                     .retrieveFileTransfersPausedBySystem();
@@ -94,8 +92,8 @@ public class FtHttpResumeManager implements Runnable {
             }
         } catch (Exception e) {
             // handle exception
-            if (LOGGER.isActivated()) {
-                LOGGER.error("Exception occurred", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Exception occurred", e);
             }
         }
     }
@@ -108,8 +106,8 @@ public class FtHttpResumeManager implements Runnable {
             return;
         // Remove the oldest session from the list
         mFtHttpResume = mListOfFtHttpResume.poll();
-        if (LOGGER.isActivated()) {
-            LOGGER.debug("Resume FT HTTP ".concat(mFtHttpResume.toString()));
+        if (sLogger.isActivated()) {
+            sLogger.debug("Resume FT HTTP ".concat(mFtHttpResume.toString()));
         }
         switch (mFtHttpResume.getDirection()) {
             case INCOMING:

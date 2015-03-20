@@ -216,15 +216,6 @@ public abstract class FileSharingSession extends ImsServiceSession {
     }
 
     /**
-     * Set the fileIcon
-     * 
-     * @param fileIcon Fileicon content
-     */
-    public void setFileicon(MmContent fileIcon) {
-        mFileIcon = fileIcon;
-    }
-
-    /**
      * Check if file capacity is acceptable
      * 
      * @param fileSize File size in bytes

@@ -314,8 +314,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         MmContent content = getContent();
         for (ImsSessionListener listener : getListeners()) {
             ((FileSharingSessionListener) listener).handleFileTransfered(content, contact,
-                    FileTransferLog.NOT_APPLICABLE_EXPIRATION,
-                    FileTransferLog.NOT_APPLICABLE_EXPIRATION);
+                    FileTransferLog.UNKNOWN_EXPIRATION, FileTransferLog.UNKNOWN_EXPIRATION);
         }
         InstantMessagingService imService = ((InstantMessagingService) getImsService());
         String fileTransferId = getFileTransferId();

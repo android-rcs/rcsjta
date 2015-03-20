@@ -228,36 +228,12 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
 
     @Override
     public long getFileExpiration() {
-        return FileTransferLog.NOT_APPLICABLE_EXPIRATION;
+        return FileTransferLog.UNKNOWN_EXPIRATION;
     }
 
     @Override
     public long getIconExpiration() {
-        return FileTransferLog.NOT_APPLICABLE_EXPIRATION;
-    }
-
-    @Override
-    public void prepareMediaSession() throws Exception {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void startMediaSession() throws Exception {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void closeMediaSession() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public boolean isInitiatedByRemote() {
-        // TODO Auto-generated method stub
-        return false;
+        return FileTransferLog.UNKNOWN_EXPIRATION;
     }
 
 }

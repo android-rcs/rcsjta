@@ -723,10 +723,10 @@ public class RcsSettingsData {
     /* package private */static final String DEFAULT_TLS_CERTIFICATE_INTERMEDIATE = "";
 
     /**
-     * SIP transaction timeout used to wait a SIP response
+     * SIP transaction timeout used to wait a SIP response in milliseconds
      */
     public static final String SIP_TRANSACTION_TIMEOUT = "SipTransactionTimeout";
-    /* package private */static final Integer DEFAULT_SIP_TRANSACTION_TIMEOUT = 120;
+    /* package private */static final Long DEFAULT_SIP_TRANSACTION_TIMEOUT = 120000L;
 
     /**
      * Default TCP port for MSRP session
@@ -797,10 +797,10 @@ public class RcsSettingsData {
     /* package private */static final Boolean DEFAULT_TEL_URI_FORMAT = true;
 
     /**
-     * Ringing session period. At the end of the period the session is cancelled
+     * Ringing session period in milliseconds. At the end of the period the session is cancelled
      */
     public static final String RINGING_SESSION_PERIOD = "RingingPeriod";
-    /* package private */static final Integer DEFAULT_RINGING_SESSION_PERIOD = 60;
+    /* package private */static final Long DEFAULT_RINGING_SESSION_PERIOD = 60000L;
 
     /**
      * Subscribe expiration timeout

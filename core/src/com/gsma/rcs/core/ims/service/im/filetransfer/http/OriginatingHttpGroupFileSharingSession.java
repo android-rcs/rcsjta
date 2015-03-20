@@ -76,7 +76,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
     /**
      * The logger
      */
-    private static final Logger LOGGER = Logger
+    private static final Logger sLogger = Logger
             .getLogger(OriginatingHttpGroupFileSharingSession.class.getName());
 
     /**
@@ -114,16 +114,16 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      * Background processing
      */
     public void run() {
-        if (LOGGER.isActivated()) {
-            LOGGER.info("Initiate a new HTTP group file transfer session as originating");
+        if (sLogger.isActivated()) {
+            sLogger.info("Initiate a new HTTP group file transfer session as originating");
         }
         try {
             // Upload the file to the HTTP server
             byte[] result = mUploadManager.uploadFile();
             sendResultToContact(result);
         } catch (Exception e) {
-            if (LOGGER.isActivated()) {
-                LOGGER.error("File transfer has failed", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("File transfer has failed", e);
             }
 
             // Unexpected error
@@ -175,11 +175,11 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
             return;
         }
         FileTransferHttpInfoDocument infoDocument;
-        boolean logActivated = LOGGER.isActivated();
+        boolean logActivated = sLogger.isActivated();
         if (result == null
                 || (infoDocument = FileTransferUtils.parseFileTransferHttpDocument(result)) == null) {
             if (logActivated) {
-                LOGGER.debug("Upload has failed");
+                sLogger.debug("Upload has failed");
             }
             handleError(new FileSharingError(FileSharingError.MEDIA_UPLOAD_FAILED));
             return;
@@ -187,20 +187,20 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
         }
         mFileInfo = new String(result, UTF8);
         if (logActivated) {
-            LOGGER.debug("Upload done with success: ".concat(mFileInfo.toString()));
+            sLogger.debug("Upload done with success: ".concat(mFileInfo.toString()));
         }
-        setFileExpiration(infoDocument.getTransferValidity());
+        setFileExpiration(infoDocument.getExpiration());
         FileTransferHttpThumbnail thumbnail = infoDocument.getFileThumbnail();
         if (thumbnail != null) {
-            setIconExpiration(thumbnail.getValidity());
+            setIconExpiration(thumbnail.getExpiration());
         } else {
-            setIconExpiration(FileTransferLog.NOT_APPLICABLE_EXPIRATION);
+            setIconExpiration(FileTransferLog.UNKNOWN_EXPIRATION);
         }
 
         mChatSession = mCore.getImService().getGroupChatSession(getContributionID());
         if (mChatSession != null) {
             if (logActivated) {
-                LOGGER.debug("Send file transfer info via an existing chat session");
+                sLogger.debug("Send file transfer info via an existing chat session");
             }
             sendFileTransferInfo();
             handleFileTransfered();
@@ -250,5 +250,23 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
     @Override
     public boolean isInitiatedByRemote() {
         return false;
+    }
+
+    /**
+     * Sets the timestamp when file icon on the content server is no longer valid to download.
+     * 
+     * @param timestamp
+     */
+    public void setIconExpiration(long timestamp) {
+        mIconExpiration = timestamp;
+    }
+
+    /**
+     * Sets the timestamp when file on the content server is no longer valid to download.
+     * 
+     * @param timestamp
+     */
+    public void setFileExpiration(long timestamp) {
+        mFileExpiration = timestamp;
     }
 }

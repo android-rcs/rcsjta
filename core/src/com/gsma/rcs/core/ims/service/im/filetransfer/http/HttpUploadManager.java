@@ -271,8 +271,7 @@ public class HttpUploadManager extends HttpTransferManager {
      * @throws IOException
      * @throws Exception
      */
-    private byte[] sendMultipartPost(HttpResponse resp) throws CoreException, IOException,
-            Exception {
+    private byte[] sendMultipartPost(HttpResponse resp) throws IOException, Exception {
         DataOutputStream outputStream = null;
         Uri file = mContent.getUri();
 

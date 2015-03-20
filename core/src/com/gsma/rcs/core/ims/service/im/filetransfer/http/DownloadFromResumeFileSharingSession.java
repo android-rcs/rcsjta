@@ -39,7 +39,7 @@ import com.gsma.rcs.utils.logger.Logger;
  */
 public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSharingSession {
 
-    private final static Logger LOGGER = Logger
+    private final static Logger sLogger = Logger
             .getLogger(DownloadFromResumeFileSharingSession.class.getSimpleName());
 
     private final FtHttpResumeDownload mResume;
@@ -61,7 +61,7 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
                 content,
                 resume.getFileExpiration(),
                 resume.getFileicon() != null ? FileTransferUtils.createMmContent(resume.getFileicon()) : null,
-                resume.getFileicon() != null ? resume.getIconExpiration() : FileTransferData.NOT_APPLICABLE_EXPIRATION,
+                resume.getFileicon() != null ? resume.getIconExpiration() : FileTransferData.UNKNOWN_EXPIRATION,
                 resume.getContact(),
                 null,
                 resume.getChatId(),
@@ -74,15 +74,16 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
                 resume.getRemoteSipInstance());
         // @formatter:on
         mResume = resume;
+        setSessionAccepted();
     }
 
     /**
      * Background processing
      */
     public void run() {
-        boolean logActivated = LOGGER.isActivated();
+        boolean logActivated = sLogger.isActivated();
         if (logActivated) {
-            LOGGER.info("Resume a HTTP file transfer session as terminating");
+            sLogger.info("Resume a HTTP file transfer session as terminating");
         }
         try {
             httpTransferStarted();
@@ -90,7 +91,7 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
             // Resume download file from the HTTP server
             if (mDownloadManager.mStreamForFile != null && mDownloadManager.resumeDownload()) {
                 if (logActivated) {
-                    LOGGER.debug("Resume download success for ".concat(mResume.toString()));
+                    sLogger.debug("Resume download success for ".concat(mResume.toString()));
                 }
                 // Set file URL
                 getContent().setUri(mDownloadManager.getDownloadedFileUri());
@@ -108,13 +109,13 @@ public class DownloadFromResumeFileSharingSession extends TerminatingHttpFileSha
 
                 // Upload error
                 if (logActivated) {
-                    LOGGER.info("Resume Download file has failed");
+                    sLogger.info("Resume Download file has failed");
                 }
                 handleError(new FileSharingError(FileSharingError.MEDIA_DOWNLOAD_FAILED));
             }
         } catch (Exception e) {
             if (logActivated) {
-                LOGGER.error("Transfer has failed", e);
+                sLogger.error("Transfer has failed", e);
             }
             // Unexpected error
             handleError(new FileSharingError(FileSharingError.UNEXPECTED_EXCEPTION, e.getMessage()));

@@ -42,41 +42,20 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
 
     private final static int UPLOAD_ERROR_UNSPECIFIED = -1;
 
-    /**
-     * Upload ID
-     */
     private String mUploadId;
 
-    /**
-     * File
-     */
     private MmContent mFile;
 
-    /**
-     * File icon
-     */
     private boolean mFileIcon = false;
 
-    /**
-     * HTTP upload manager
-     */
     protected HttpUploadManager mUploadManager;
 
-    /**
-     * Upload listener
-     */
     private FileUploadSessionListener mListener;
 
-    /**
-     * File info
-     */
     private FileTransferHttpInfoDocument mFileInfoDoc;
 
     private final RcsSettings mRcsSettings;
 
-    /**
-     * The logger
-     */
     private final static Logger sLogger = Logger.getLogger(FileUploadSession.class.getSimpleName());
 
     /**
@@ -137,7 +116,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
     public void run() {
         try {
             if (sLogger.isActivated()) {
-                sLogger.info("Initiate a new HTTP upload " + mUploadId);
+                sLogger.info("Initiate a new HTTP upload ".concat(mUploadId));
             }
 
             // Create fileIcon content is requested
@@ -181,7 +160,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
     }
 
     /**
-     * Analyse the result
+     * Analyze the result
      * 
      * @param result Byte array result
      */
@@ -215,7 +194,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
         if (mFileInfoDoc != null) {
             // File uploaded with success
             if (sLogger.isActivated()) {
-                sLogger.debug("Upload done with success: " + mFileInfoDoc.getFileUri().toString());
+                sLogger.debug("Upload done with success: ".concat(mFileInfoDoc.getUri().toString()));
             }
 
             removeSession();
