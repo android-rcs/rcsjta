@@ -22,9 +22,10 @@
 
 package com.gsma.rcs.provider.messaging;
 
-import android.net.Uri;
-
+import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
+
+import android.net.Uri;
 
 /**
  * File transfer data constants
@@ -42,7 +43,7 @@ public class FileTransferData {
     /**
      * History log member id
      */
-    public static final int HISTORYLOG_MEMBER_ID = 2;
+    public static final int HISTORYLOG_MEMBER_ID = FileTransferLog.HISTORYLOG_MEMBER_ID;
 
     /**
      * Unique history log id

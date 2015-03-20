@@ -22,10 +22,10 @@
 
 package com.gsma.services.rcs.sharing.video;
 
+import com.gsma.services.rcs.RcsService.Direction;
+
 import android.net.Uri;
 import android.provider.BaseColumns;
-
-import com.gsma.services.rcs.RcsService.Direction;
 
 /**
  * Content provider for video sharing history
@@ -38,6 +38,11 @@ public class VideoSharingLog {
      */
     public static final Uri CONTENT_URI = Uri
             .parse("content://com.gsma.services.rcs.provider.videoshare/videoshare");
+
+    /**
+     * History log member id
+     */
+    public static final int HISTORYLOG_MEMBER_ID = 4;
 
     /**
      * The name of the column containing the unique id across provider tables.

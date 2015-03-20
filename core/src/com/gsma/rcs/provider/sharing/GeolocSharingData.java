@@ -27,10 +27,7 @@ public class GeolocSharingData {
 
     public static final Uri CONTENT_URI = GeolocSharingLog.CONTENT_URI;
 
-    /**
-     * History log member id
-     */
-    public static final int HISTORYLOG_MEMBER_ID = 5;
+    public static final int HISTORYLOG_MEMBER_ID = GeolocSharingLog.HISTORYLOG_MEMBER_ID;
 
     static final String KEY_BASECOLUMN_ID = GeolocSharingLog.BASECOLUMN_ID;
 

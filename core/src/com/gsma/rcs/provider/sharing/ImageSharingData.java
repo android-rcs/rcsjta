@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.provider.sharing;
 
+import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.image.ImageSharingLog;
 
 /**
@@ -31,11 +32,10 @@ import com.gsma.services.rcs.sharing.image.ImageSharingLog;
  */
 public class ImageSharingData {
 
-
     /**
      * History log member id
      */
-    public static final int HISTORYLOG_MEMBER_ID = 3;
+    public static final int HISTORYLOG_MEMBER_ID = ImageSharingLog.HISTORYLOG_MEMBER_ID;
 
     /**
      * Unique history log id

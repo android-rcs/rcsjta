@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.provider.sharing;
 
+import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharingLog;
 
 /**
@@ -34,7 +35,7 @@ public class VideoSharingData {
     /**
      * History log member id
      */
-    public static final int HISTORYLOG_MEMBER_ID = 4;
+    public static final int HISTORYLOG_MEMBER_ID = VideoSharingLog.HISTORYLOG_MEMBER_ID;
 
     /**
      * Unique history log id

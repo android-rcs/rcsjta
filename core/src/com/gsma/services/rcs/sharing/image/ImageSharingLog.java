@@ -40,6 +40,11 @@ public class ImageSharingLog {
             .parse("content://com.gsma.services.rcs.provider.imageshare/imageshare");
 
     /**
+     * History log member id
+     */
+    public static final int HISTORYLOG_MEMBER_ID = 3;
+
+    /**
      * The name of the column containing the unique id across provider tables.
      * <P>
      * Type: INTEGER

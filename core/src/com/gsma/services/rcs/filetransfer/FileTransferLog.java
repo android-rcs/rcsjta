@@ -40,6 +40,11 @@ public class FileTransferLog {
             .parse("content://com.gsma.services.rcs.provider.filetransfer/filetransfer");
 
     /**
+     * History log member id
+     */
+    public static final int HISTORYLOG_MEMBER_ID = 2;
+
+    /**
      * The name of the column containing the unique id across provider tables.
      * <P>
      * Type: INTEGER
