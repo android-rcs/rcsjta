@@ -450,8 +450,10 @@ public class ContactUtil {
                             contact = new StringBuilder(mCountryCode).append(contact,
                                     mCountryAreaCode.length(), contact.length()).toString();
                         } else {
-                            throw new RcsContactFormatException(
-                                    "Local phone number should be prefixed with Country Area Code");
+                            throw new RcsContactFormatException(new StringBuilder(
+                                    "Local phone number '").append(contact)
+                                    .append("' should be prefixed with Country Area Code (")
+                                    .append(mCountryAreaCode).append(")").toString());
                         }
                     } else {
                         // No Country Area Code, add Country code to local number

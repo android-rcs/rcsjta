@@ -18,39 +18,51 @@
 
 package com.orangelabs.rcs.ri.messaging.chat.group;
 
-import java.util.ArrayList;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.chat.ChatService;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactService;
+import com.gsma.services.rcs.contact.RcsContact;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.MultiContactListAdapter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Initiate group chat
  * 
  * @author Jean-Marc AUFFRET
+ * @author yplo6403
  */
 public class InitiateGroupChat extends Activity implements OnItemClickListener {
-    /**
-     * List of participants
-     */
-    private ArrayList<String> participants = new ArrayList<String>();
 
-    private MultiContactListAdapter mAdapter;
+    private ArrayList<String> mParticipants;
 
-    /**
-     * Invite button
-     */
-    private Button inviteBtn;
+    private ListView mContactList;
+
+    private List<ContactId> mAllowedContactIds;
+
+    private Button mInviteBtn;
+    
+    private LockAccess mExitOnce = new LockAccess();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -60,17 +72,49 @@ public class InitiateGroupChat extends Activity implements OnItemClickListener {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.chat_initiate_group);
 
-        // Set contact selector
-        ListView contactList = (ListView) findViewById(R.id.contacts);
-        mAdapter = MultiContactListAdapter.createMultiRcsContactListAdapter(this);
-        contactList.setAdapter(mAdapter);
-        contactList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-        contactList.setOnItemClickListener(this);
+        mContactList = (ListView) findViewById(R.id.contacts);
 
-        // Set button callback
-        inviteBtn = (Button) findViewById(R.id.invite_btn);
-        inviteBtn.setOnClickListener(btnInviteListener);
-        inviteBtn.setEnabled(false);
+        /* Check if Group chat initialization is allowed */
+        ContactService contactService = ConnectionManager.getInstance(this).getContactApi();
+        ChatService chatService = ConnectionManager.getInstance(this).getChatApi();
+        try {
+            Set<RcsContact> rcsContacts = contactService.getRcsContacts();
+            mAllowedContactIds = new ArrayList<ContactId>();
+            List<String> allowedContacts = new ArrayList<String>();
+            for (RcsContact rcsContact : rcsContacts) {
+                ContactId contact = rcsContact.getContactId();
+                if (chatService.isAllowedToInitiateGroupChat(contact)) {
+                    mAllowedContactIds.add(contact);
+                    if (rcsContact.getDisplayName() != null) {
+                        allowedContacts.add(new StringBuilder(rcsContact.getDisplayName())
+                                .append(" (").append(rcsContact.getContactId()).append(")")
+                                .toString());
+                    } else {
+                        allowedContacts.add(contact.toString());
+                    }
+
+                }
+            }
+            if (allowedContacts.size() > 0) {
+                String[] contacts = allowedContacts.toArray(new String[allowedContacts.size()]);
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                        android.R.layout.simple_list_item_multiple_choice, contacts);
+                mContactList.setAdapter(adapter);
+                mContactList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+                mContactList.setOnItemClickListener(this);
+
+                // Set button callback
+                mInviteBtn = (Button) findViewById(R.id.invite_btn);
+                mInviteBtn.setOnClickListener(btnInviteListener);
+                mInviteBtn.setEnabled(false);
+            } else {
+                Utils.showMessage(this, getString(R.string.label_no_participant_found));
+                return;
+                
+            }
+        } catch (RcsServiceException e) {
+            Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce);
+        }
     }
 
     /**
@@ -81,28 +125,26 @@ public class InitiateGroupChat extends Activity implements OnItemClickListener {
             // Get subject
             EditText subjectTxt = (EditText) findViewById(R.id.subject);
             String subject = subjectTxt.getText().toString();
-            GroupChatView.initiateGroupChat(InitiateGroupChat.this, subject, participants);
+            GroupChatView.initiateGroupChat(InitiateGroupChat.this, subject, mParticipants);
             // Exit activity
             finish();
         }
     };
 
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-        // Check if number is in participants list
-        String number = mAdapter.getSelectedNumber(view);
-        if (participants.contains(number)) {
-            // Number is in list, we remove it
-            participants.remove(number);
-        } else {
-            // Number is not in list, add it
-            participants.add(number);
+        /* Build list of participant numbers */
+        SparseBooleanArray checked = mContactList.getCheckedItemPositions();
+        mParticipants = new ArrayList<String>();
+        for (int i = 0; i < checked.size(); i++) {
+            if (checked.get(i)) {
+                mParticipants.add(mAllowedContactIds.get(i).toString());
+            }
         }
-
-        // Disable the invite button if no contact selected
-        if (participants.size() == 0) {
-            inviteBtn.setEnabled(false);
+        /* Disable the invite button if no contact selected */
+        if (mParticipants.size() == 0) {
+            mInviteBtn.setEnabled(false);
         } else {
-            inviteBtn.setEnabled(true);
+            mInviteBtn.setEnabled(true);
         }
     }
 }

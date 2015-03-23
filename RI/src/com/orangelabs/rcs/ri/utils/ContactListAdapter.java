@@ -39,6 +39,7 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.contact.ContactService;
 import com.gsma.services.rcs.contact.RcsContact;
+
 import com.orangelabs.rcs.ri.ConnectionManager;
 import com.orangelabs.rcs.ri.R;
 
@@ -47,16 +48,20 @@ import com.orangelabs.rcs.ri.R;
  */
 public class ContactListAdapter extends CursorAdapter {
 
-    private static String[] PROJECTION = new String[] {
+    private static String[] PROJECTION_PHONE = new String[] {
             Phone._ID, Phone.NUMBER, Phone.LABEL, Phone.TYPE, Phone.CONTACT_ID
     };
 
-    private static String WHERE_CLAUSE = new StringBuilder(Phone.NUMBER).append("!='null'")
+    private static String[] PROJECTION_CONTACT = new String[] {
+        Contacts.DISPLAY_NAME
+    };
+
+    private static String WHERE_CLAUSE_PHONE = new StringBuilder(Phone.NUMBER).append("!='null'")
             .toString();
 
-    /**
-     * The log tag for this class
-     */
+    private static String WHERE_CLAUSE_CONTACT = new StringBuilder(Contacts._ID).append("=?")
+            .toString();
+
     private static final String LOGTAG = LogUtils.getTag(ContactListAdapter.class.getSimpleName());
 
     /**
@@ -69,10 +74,11 @@ public class ContactListAdapter extends CursorAdapter {
         ContentResolver content = context.getContentResolver();
         Cursor cursor = null;
         try {
-            cursor = content.query(Phone.CONTENT_URI, PROJECTION, WHERE_CLAUSE, null, null);
+            cursor = content.query(Phone.CONTENT_URI, PROJECTION_PHONE, WHERE_CLAUSE_PHONE, null,
+                    null);
             // Set of unique numbers
             Set<String> treatedNumbers = new HashSet<String>();
-            MatrixCursor matrix = new MatrixCursor(PROJECTION);
+            MatrixCursor matrix = new MatrixCursor(PROJECTION_PHONE);
             while (cursor.moveToNext()) {
                 // Key is phone number
                 String phoneNumber = cursor.getString(cursor.getColumnIndex(Phone.NUMBER));
@@ -112,7 +118,7 @@ public class ContactListAdapter extends CursorAdapter {
         Cursor cursor = null;
         ConnectionManager apiConnectionManager = ConnectionManager.getInstance(context);
         ContactUtil contactUtil = ContactUtil.getInstance(context);
-        MatrixCursor matrix = new MatrixCursor(PROJECTION);
+        MatrixCursor matrix = new MatrixCursor(PROJECTION_PHONE);
         ContactService contactsApi = apiConnectionManager.getContactApi();
         try {
             // Get the set of RCS contacts
@@ -124,7 +130,8 @@ public class ContactListAdapter extends CursorAdapter {
                     rcsContactIds.add(rcsContact.getContactId());
                 }
                 // Query all phone numbers
-                cursor = content.query(Phone.CONTENT_URI, PROJECTION, WHERE_CLAUSE, null, null);
+                cursor = content.query(Phone.CONTENT_URI, PROJECTION_PHONE, WHERE_CLAUSE_PHONE,
+                        null, null);
                 Set<ContactId> treatedContactIDs = new HashSet<ContactId>();
 
                 while (cursor.moveToNext()) {
@@ -216,11 +223,12 @@ public class ContactListAdapter extends CursorAdapter {
         }
 
         String name = null;
+        String[] selectionArgs = new String[] {
+            Long.toString(c.getLong(holder.columnContactId))
+        };
         // Get contact name from contact id
         Cursor personCursor = context.getContentResolver().query(Contacts.CONTENT_URI,
-                new String[] {
-                    Contacts.DISPLAY_NAME
-                }, Contacts._ID + " = " + c.getLong(holder.columnContactId), null, null);
+                PROJECTION_CONTACT, WHERE_CLAUSE_CONTACT, selectionArgs, null, null);
         if (personCursor.moveToFirst()) {
             name = personCursor.getString(holder.columnID);
         }
@@ -230,7 +238,7 @@ public class ContactListAdapter extends CursorAdapter {
             return c.getString(holder.columnNumber);
         } else {
             // Return "name (phone label)"
-            return name + " (" + label + " )";
+            return new StringBuilder(name).append(" (").append(label).append(")").toString();
         }
     }
 
