@@ -312,7 +312,6 @@
 
     <!-- Service menu -->
     <string name="menu_service">Service</string>
-    <string name="label_service_activate">Select to turn on the RCS service</string>
     <string name="menu_service_status">Service status</string>
     <string name="notification_title_rcs_service">RCS service</string>
     <string name="menu_registration_status">Registration status</string>

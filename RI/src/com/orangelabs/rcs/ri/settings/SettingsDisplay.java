@@ -137,10 +137,6 @@ public class SettingsDisplay extends PreferenceActivity implements
                     .isServiceConnected(RcsServiceName.FILE_TRANSFER);
             initCheckbox(mRcsActivationCheckbox, (isServiceActivated), isChangeable);
             enablePreferences(isServiceActivated && isServiceConnected);
-            if (!isServiceActivated) {
-                Utils.showMessage(this, getString(R.string.label_service_activate));
-                return;
-            }
             if (isServiceConnected) {
                 initBatteryLevel(mCnxManager.getFileTransferApi().getCommonConfiguration());
             }
