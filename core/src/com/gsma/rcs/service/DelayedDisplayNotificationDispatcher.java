@@ -61,7 +61,7 @@ import android.database.Cursor;
         Cursor cursor = null;
         try {
             String[] projection = new String[] {
-                    Message.MESSAGE_ID, Message.CONTACT
+                    Message.MESSAGE_ID, Message.CONTACT, Message.TIMESTAMP_DISPLAYED
             };
             cursor = mLocalContentResolver.query(Message.CONTENT_URI, projection,
                     SELECTION_READ_CHAT_MESSAGES_WITH_DISPLAY_REPORT_REQUESTED, null,
