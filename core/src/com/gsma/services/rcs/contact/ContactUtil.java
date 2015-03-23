@@ -23,19 +23,18 @@ import com.gsma.services.rcs.RcsServiceException;
 
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.ContactsContract;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.SparseArray;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,13 +51,12 @@ public class ContactUtil {
     private static volatile ContactUtil sInstance;
 
     /**
-     * The country code of the device (read from settings provider: is null before first
-     * provisioning)
+     * The country code of the device
      */
     private final String mCountryCode;
 
     /**
-     * The country area code(read from settings provider)
+     * The country area code
      */
     private final String mCountryAreaCode;
 
@@ -96,714 +94,246 @@ public class ContactUtil {
      * Note 1 : the Area Code is optional (if it does not exist then it is null).<br>
      * Note 2 : the Country Code is optional (if it does not exist then the string array is null).
      */
-    private static final Map<String, String[]> sCountryCodes = new HashMap<String, String[]>() {
+    // @formatter:off
+      
+    private static final SparseArray<String[]> sCountryCodes = new SparseArray<String[]> () {
 
-        private static final long serialVersionUID = 1L;
-        // @formatter:off
         {
-            put("ad", new String[] {
-                    "376"
-            });
-            put("ae", new String[] {
-                    "971", "0"
-            });
-            put("af", new String[] {
-                    "93", "0"
-            });
-            put("ag", new String[] {
-                    "1-268", "1"
-            });
-            put("ai", new String[] {
-                    "1-264", "1"
-            });
-            put("al", new String[] {
-                    "355", "0"
-            });
-            put("am", new String[] {
-                    "374", "0"
-            });
-            put("an", new String[] {
-                    "599", "0"
-            });
-            put("ao", new String[] {
-                    "244", "0"
-            });
-            put("aq", null);
-            put("ar", new String[] {
-                    "54", "0"
-            });
-            put("as", new String[] {
-                    "1-684", "1"
-            });
-            put("at", new String[] {
-                    "43", "0"
-            });
-            put("au", new String[] {
-                    "61", "0"
-            });
-            put("aw", new String[] {
-                    "297"
-            });
-            put("az", new String[] {
-                    "994", "0"
-            });
-            put("ba", new String[] {
-                    "387", "0"
-            });
-            put("bb", new String[] {
-                    "1-246", "1"
-            });
-            put("bd", new String[] {
-                    "880", "0"
-            });
-            put("be", new String[] {
-                    "32", "0"
-            });
-            put("bf", new String[] {
-                    "226"
-            });
-            put("bg", new String[] {
-                    "359", "0"
-            });
-            put("bh", new String[] {
-                    "973"
-            });
-            put("bi", new String[] {
-                    "257"
-            });
-            put("bj", new String[] {
-                    "229"
-            });
-            put("bm", new String[] {
-                    "1-441", "1"
-            });
-            put("bn", new String[] {
-                    "673"
-            });
-            put("bo", new String[] {
-                    "591", "0"
-            });
-            put("br", new String[] {
-                    "55", "0"
-            });
-            put("bs", new String[] {
-                    "1-242", "1"
-            });
-            put("bt", new String[] {
-                    "975"
-            });
-            put("bv", null);
-            put("bw", new String[] {
-                    "267"
-            });
-            put("by", new String[] {
-                    "375", "8"
-            });
-            put("bz", new String[] {
-                    "501"
-            });
-            put("ca", new String[] {
-                    "1", "1"
-            });
-            put("cc", null);
-            put("cd", new String[] {
-                    "243"
-            });
-            put("cf", new String[] {
-                    "236"
-            });
-            put("cg", new String[] {
-                    "242"
-            });
-            put("ch", new String[] {
-                    "41", "0"
-            });
-            put("ci", new String[] {
-                    "225"
-            });
-            put("ck", new String[] {
-                    "682"
-            });
-            put("cl", new String[] {
-                    "56", "0"
-            });
-            put("cm", new String[] {
-                    "237"
-            });
-            put("cn", new String[] {
-                    "86", "0"
-            });
-            put("co", new String[] {
-                    "57", "09"
-            });
-            put("cr", new String[] {
-                    "506"
-            });
-            put("cu", new String[] {
-                    "53", "0"
-            });
-            put("cv", new String[] {
-                    "238"
-            });
-            put("cx", new String[] {
-                    "61"
-            });
-            put("cy", new String[] {
-                    "357"
-            });
-            put("cz", new String[] {
-                    "420", "0"
-            });
-            put("de", new String[] {
-                    "49", "0"
-            });
-            put("dj", new String[] {
-                    "253"
-            });
-            put("dk", new String[] {
-                    "45"
-            });
-            put("dm", new String[] {
-                    "1-767", "1"
-            });
-            put("do", new String[] {
-                    "1-809", "1"
-            });
-            put("dz", new String[] {
-                    "213", "0"
-            });
-            put("ec", null);
-            put("ee", new String[] {
-                    "372"
-            });
-            put("eg", new String[] {
-                    "20", "0"
-            });
-            put("eh", new String[] {
-                    "212"
-            });
-            put("er", new String[] {
-                    "291", "0"
-            });
-            put("es", new String[] {
-                    "34"
-            });
-            put("et", new String[] {
-                    "251", "0"
-            });
-            put("fi", new String[] {
-                    "358", "0"
-            });
-            put("fj", new String[] {
-                    "679"
-            });
-            put("fk", new String[] {
-                    "500"
-            });
-            put("fm", new String[] {
-                    "691", "1"
-            });
-            put("fo", new String[] {
-                    "298"
-            });
-            put("fr", new String[] {
-                    "33", "0"
-            });
-            put("ga", new String[] {
-                    "241"
-            });
-            put("gb", new String[] {
-                    "44", "0"
-            });
-            put("gd", new String[] {
-                    "1-473", "1"
-            });
-            put("ge", new String[] {
-                    "955", "8"
-            });
-            put("gf", new String[] {
-                    "594", "0"
-            });
-            put("gh", new String[] {
-                    "233", "0"
-            });
-            put("gi", new String[] {
-                    "350"
-            });
-            put("gl", new String[] {
-                    "299"
-            });
-            put("gm", new String[] {
-                    "220"
-            });
-            put("gn", new String[] {
-                    "224"
-            });
-            put("gp", new String[] {
-                    "590", "0"
-            });
-            put("gq", new String[] {
-                    "240"
-            });
-            put("gr", new String[] {
-                    "30"
-            });
-            put("gs", null);
-            put("gt", new String[] {
-                    "502"
-            });
-            put("gu", new String[] {
-                    "1-671", "1"
-            });
-            put("gw", new String[] {
-                    "245"
-            });
-            put("gy", new String[] {
-                    "592"
-            });
-            put("hk", new String[] {
-                    "852"
-            });
-            put("hm", null);
-            put("hn", new String[] {
-                    "504"
-            });
-            put("hr", new String[] {
-                    "385", "0"
-            });
-            put("ht", new String[] {
-                    "509"
-            });
-            put("hu", new String[] {
-                    "36", "06"
-            });
-            put("id", new String[] {
-                    "62", "0"
-            });
-            put("ie", new String[] {
-                    "353", "0"
-            });
-            put("il", new String[] {
-                    "972", "0"
-            });
-            put("in", new String[] {
-                    "91", "0"
-            });
-            put("io", new String[] {
-                    "246"
-            });
-            put("iq", new String[] {
-                    "964"
-            });
-            put("ir", new String[] {
-                    "98", "0"
-            });
-            put("is", new String[] {
-                    "354"
-            });
-            put("it", new String[] {
-                    "39"
-            });
-            put("jm", new String[] {
-                    "1-876", "1"
-            });
-            put("jo", new String[] {
-                    "962", "0"
-            });
-            put("jp", new String[] {
-                    "81", "0"
-            });
-            put("ke", new String[] {
-                    "254", "0"
-            });
-            put("kg", new String[] {
-                    "996", "0"
-            });
-            put("kh", new String[] {
-                    "855", "0"
-            });
-            put("ki", new String[] {
-                    "686"
-            });
-            put("km", new String[] {
-                    "269"
-            });
-            put("kn", new String[] {
-                    "1-869", "1"
-            });
-            put("kp", new String[] {
-                    "850"
-            });
-            put("kr", new String[] {
-                    "82", "0"
-            });
-            put("kw", new String[] {
-                    "965"
-            });
-            put("ky", new String[] {
-                    "1-345", "1"
-            });
-            put("kz", new String[] {
-                    "7-7", "8"
-            });
-            put("la", new String[] {
-                    "856"
-            });
-            put("lb", new String[] {
-                    "961", "0"
-            });
-            put("lc", new String[] {
-                    "1-758", "1"
-            });
-            put("li", new String[] {
-                    "423"
-            });
-            put("lk", new String[] {
-                    "94", "0"
-            });
-            put("lr", new String[] {
-                    "231"
-            });
-            put("ls", new String[] {
-                    "266"
-            });
-            put("lt", new String[] {
-                    "370", "8"
-            });
-            put("lu", new String[] {
-                    "352"
-            });
-            put("lv", new String[] {
-                    "371"
-            });
-            put("ly", new String[] {
-                    "281", "0"
-            });
-            put("ma", new String[] {
-                    "212", "0"
-            });
-            put("mc", new String[] {
-                    "377"
-            });
-            put("md", new String[] {
-                    "373", "0"
-            });
-            put("me", new String[] {
-                    "382", "0"
-            });
-            put("mg", new String[] {
-                    "261"
-            });
-            put("mh", new String[] {
-                    "692", "1"
-            });
-            put("mk", new String[] {
-                    "389", "0"
-            });
-            put("ml", new String[] {
-                    "223"
-            });
-            put("mm", new String[] {
-                    "95"
-            });
-            put("mn", new String[] {
-                    "976", "0"
-            });
-            put("mo", new String[] {
-                    "853"
-            });
-            put("mp", new String[] {
-                    "1-670", "1"
-            });
-            put("mq", new String[] {
-                    "596", "0"
-            });
-            put("mr", new String[] {
-                    "222"
-            });
-            put("ms", new String[] {
-                    "1-664", "1"
-            });
-            put("mt", new String[] {
-                    "356"
-            });
-            put("mu", new String[] {
-                    "230"
-            });
-            put("mv", new String[] {
-                    "960"
-            });
-            put("mw", new String[] {
-                    "265"
-            });
-            put("mx", new String[] {
-                    "52", "01"
-            });
-            put("my", new String[] {
-                    "60", "0"
-            });
-            put("mz", new String[] {
-                    "258"
-            });
-            put("na", new String[] {
-                    "264", "0"
-            });
-            put("nc", new String[] {
-                    "687"
-            });
-            put("ne", new String[] {
-                    "227"
-            });
-            put("nf", new String[] {
-                    "6723"
-            });
-            put("ng", new String[] {
-                    "234", "0"
-            });
-            put("ni", new String[] {
-                    "505"
-            });
-            put("nl", new String[] {
-                    "31", "0"
-            });
-            put("no", new String[] {
-                    "47"
-            });
-            put("np", new String[] {
-                    "977", "0"
-            });
-            put("nr", new String[] {
-                    "674"
-            });
-            put("nu", new String[] {
-                    "683"
-            });
-            put("nz", new String[] {
-                    "64", "0"
-            });
-            put("om", new String[] {
-                    "968"
-            });
-            put("pa", new String[] {
-                    "507"
-            });
-            put("pe", new String[] {
-                    "51", "0"
-            });
-            put("pf", new String[] {
-                    "689"
-            });
-            put("pg", new String[] {
-                    "675"
-            });
-            put("ph", new String[] {
-                    "63", "0"
-            });
-            put("pk", new String[] {
-                    "92", "0"
-            });
-            put("pl", new String[] {
-                    "48"
-            });
-            put("pm", new String[] {
-                    "508"
-            });
-            put("pn", new String[] {
-                    "870"
-            });
-            put("pr", new String[] {
-                    "1-787", "1"
-            });
-            put("ps", null);
-            put("pt", new String[] {
-                    "351"
-            });
-            put("pw", new String[] {
-                    "680"
-            });
-            put("py", new String[] {
-                    "595", "0"
-            });
-            put("qa", new String[] {
-                    "974"
-            });
-            put("re", new String[] {
-                    "262", "0"
-            });
-            put("ro", new String[] {
-                    "40", "0"
-            });
-            put("rs", new String[] {
-                    "381", "0"
-            });
-            put("ru", new String[] {
-                    "7", "8"
-            });
-            put("rw", new String[] {
-                    "250"
-            });
-            put("sa", new String[] {
-                    "966", "0"
-            });
-            put("sb", new String[] {
-                    "677"
-            });
-            put("sc", new String[] {
-                    "248"
-            });
-            put("sd", new String[] {
-                    "249", "0"
-            });
-            put("se", new String[] {
-                    "46", "0"
-            });
-            put("sg", new String[] {
-                    "65"
-            });
-            put("sh", new String[] {
-                    "290"
-            });
-            put("si", new String[] {
-                    "386"
-            });
-            put("sj", null);
-            put("sk", new String[] {
-                    "421", "0"
-            });
-            put("sl", new String[] {
-                    "232", "0"
-            });
-            put("sm", new String[] {
-                    "378"
-            });
-            put("sn", new String[] {
-                    "221"
-            });
-            put("so", new String[] {
-                    "252"
-            });
-            put("sr", new String[] {
-                    "597", "0"
-            });
-            put("st", new String[] {
-                    "239"
-            });
-            put("sv", new String[] {
-                    "503"
-            });
-            put("sy", new String[] {
-                    "963", "0"
-            });
-            put("sz", new String[] {
-                    "268"
-            });
-            put("tc", new String[] {
-                    "1-649", "1"
-            });
-            put("td", new String[] {
-                    "235"
-            });
-            put("tf", null);
-            put("tg", new String[] {
-                    "228"
-            });
-            put("th", new String[] {
-                    "66", "0"
-            });
-            put("tj", new String[] {
-                    "992", "8"
-            });
-            put("tk", new String[] {
-                    "690"
-            });
-            put("tl", new String[] {
-                    "670"
-            });
-            put("tm", new String[] {
-                    "993", "8"
-            });
-            put("tn", new String[] {
-                    "216"
-            });
-            put("to", new String[] {
-                    "676"
-            });
-            put("tr", new String[] {
-                    "90", "0"
-            });
-            put("tt", new String[] {
-                    "1-868", "1"
-            });
-            put("tv", new String[] {
-                    "688"
-            });
-            put("tw", new String[] {
-                    "886", "0"
-            });
-            put("tz", new String[] {
-                    "255", "0"
-            });
-            put("ua", new String[] {
-                    "380", "0"
-            });
-            put("ug", new String[] {
-                    "256", "0"
-            });
-            put("um", new String[] {
-                    "1"
-            });
-            put("us", new String[] {
-                    "1", "1"
-            });
-            put("uy", new String[] {
-                    "598", "0"
-            });
-            put("uz", new String[] {
-                    "998", "8"
-            });
-            put("va", new String[] {
-                    "379"
-            });
-            put("vc", new String[] {
-                    "1-784", "1"
-            });
-            put("ve", new String[] {
-                    "58", "0"
-            });
-            put("vg", new String[] {
-                    "1-284", "1"
-            });
-            put("vi", new String[] {
-                    "1-340", "1"
-            });
-            put("vn", new String[] {
-                    "84", "0"
-            });
-            put("vu", new String[] {
-                    "678"
-            });
-            put("wf", new String[] {
-                    "681"
-            });
-            put("ws", new String[] {
-                    "685"
-            });
-            put("ye", new String[] {
-                    "967", "0"
-            });
-            put("yt", new String[] {
-                    "262"
-            });
-            put("za", new String[] {
-                    "27", "0"
-            });
-            put("zm", new String[] {
-                    "260", "0"
-            });
-            put("zw", new String[] {
-                    "263", "0"
-            });
-        }
+            {
+                put( 202 , new String[] {"30" }); // Greece
+                put( 204 , new String[] {"31" , "0" }); // Netherlands (Kingdom of the)
+                put( 206 , new String[] {"32" , "0" }); // Belgium
+                put( 208 , new String[] {"33" , "0" }); // France
+                put( 212 , new String[] {"377" }); // Monaco (Principality of)
+                put( 213 , new String[] {"376" }); // Andorra (Principality of)
+                put( 214 , new String[] {"34" }); // Spain
+                put( 216 , new String[] {"36" , "06" }); // Hungary (Republic of)
+                put( 218 , new String[] {"387" , "0" }); // Bosnia and Herzegovina
+                put( 219 , new String[] {"385" , "0" }); // Croatia (Republic of)
+                put( 220 , new String[] {"381" , "0" }); // Serbia and Montenegro
+                put( 222 , new String[] {"39" }); // Italy
+                put( 225 , new String[] {"379" }); // Vatican City State
+                put( 226 , new String[] {"40" , "0" }); // Romania
+                put( 228 , new String[] {"41" , "0" }); // Switzerland (Confederation of)
+                put( 230 , new String[] {"420" , "0" }); // Czech Republic
+                put( 231 , new String[] {"421" , "0" }); // Slovak Republic
+                put( 232 , new String[] {"43" , "0" }); // Austria
+                put( 234 , new String[] {"44" , "0" }); // United Kingdom of Great Britain and Northern Ireland
+                put( 235 , new String[] {"44" , "0" }); // United Kingdom of Great Britain and Northern Ireland
+                put( 238 , new String[] {"45" }); // Denmark
+                put( 240 , new String[] {"46" , "0" }); // Sweden
+                put( 242 , new String[] {"47" }); // Norway
+                put( 244 , new String[] {"358" , "0" }); // Finland
+                put( 246 , new String[] {"370" , "8" }); // Lithuania (Republic of)
+                put( 247 , new String[] {"371" }); // Latvia (Republic of)
+                put( 248 , new String[] {"372" }); // Estonia (Republic of)
+                put( 250 , new String[] {"7" , "8" }); // Russian Federation
+                put( 255 , new String[] {"380" , "0" }); // Ukraine
+                put( 257 , new String[] {"375" , "8" }); // Belarus (Republic of)
+                put( 259 , new String[] {"373" , "0" }); // Moldova (Republic of)
+                put( 260 , new String[] {"48" }); // Poland (Republic of)
+                put( 262 , new String[] {"49" , "0" }); // Germany (Federal Republic of)
+                put( 266 , new String[] {"350" }); // Gibraltar
+                put( 268 , new String[] {"351" }); // Portugal
+                put( 270 , new String[] {"352" }); // Luxembourg
+                put( 272 , new String[] {"353" , "0" }); // Ireland
+                put( 274 , new String[] {"354" }); // Iceland
+                put( 276 , new String[] {"355" , "0" }); // Albania (Republic of)
+                put( 278 , new String[] {"356" }); // Malta
+                put( 280 , new String[] {"357" }); // Cyprus (Republic of)
+                put( 282 , new String[] {"955" , "8" }); // Georgia
+                put( 283 , new String[] {"374" , "0" }); // Armenia (Republic of)
+                put( 284 , new String[] {"359" , "0" }); // Bulgaria (Republic of)
+                put( 286 , new String[] {"90" , "0" }); // Turkey
+                put( 288 , new String[] {"298" }); // Faroe Islands
+                put( 289 , new String[] {"955" , "8" }); // Abkhazia (Georgia)
+                put( 290 , new String[] {"299" }); // Greenland (Denmark)
+                put( 292 , new String[] {"378" }); // San Marino (Republic of)
+                put( 293 , new String[] {"386" }); // Slovenia (Republic of)
+                put( 294 , new String[] {"389" , "0" }); // The Former Yugoslav Republic of Macedonia
+                put( 295 , new String[] {"423" }); // Liechtenstein (Principality of)
+                put( 297 , new String[] {"382" , "0" }); // Montenegro (Republic of)
+                put( 302 , new String[] {"1" , "1" }); // Canada
+                put( 308 , new String[] {"508" }); // Saint Pierre and Miquelon (Collectivite territoriale de la Republique francaise)
+                put( 310 , new String[] {"1" , "1" }); // United States of America
+                put( 311 , new String[] {"1" , "1" }); // United States of America
+                put( 312 , new String[] {"1" , "1" }); // United States of America
+                put( 313 , new String[] {"1" , "1" }); // United States of America
+                put( 314 , new String[] {"1" , "1" }); // United States of America
+                put( 315 , new String[] {"1" , "1" }); // United States of America
+                put( 316 , new String[] {"1" , "1" }); // United States of America
+                put( 330 , new String[] {"1-787" , "1" }); // Puerto Rico
+                put( 332 , new String[] {"1-340" , "1" }); // United States Virgin Islands
+                put( 334 , new String[] {"52" , "01" }); // Mexico
+                put( 338 , new String[] {"1-876" , "1" }); // Jamaica
+                put( 340 , new String[] {"590" , "0" }); // Guadeloupe (French Department of)
+                put( 342 , new String[] {"1-246" , "1" }); // Barbados
+                put( 344 , new String[] {"1-268" , "1" }); // Antigua and Barbuda
+                put( 346 , new String[] {"1-345" , "1" }); // Cayman Islands
+                put( 348 , new String[] {"1-284" , "1" }); // British Virgin Islands
+                put( 350 , new String[] {"1-441" , "1" }); // Bermuda
+                put( 352 , new String[] {"1-473" , "1" }); // Grenada
+                put( 354 , new String[] {"1-664" , "1" }); // Montserrat
+                put( 356 , new String[] {"1-869" , "1" }); // Saint Kitts and Nevis
+                put( 358 , new String[] {"1-758" , "1" }); // Saint Lucia
+                put( 360 , new String[] {"1-784" , "1" }); // Saint Vincent and the Grenadines
+                put( 362 , new String[] {"1-264" , "1" }); // Netherlands Antilles
+                put( 363 , new String[] {"297" }); // Aruba
+                put( 364 , new String[] {"1-242" , "1" }); // Bahamas (Commonwealth of the)
+                put( 365 , new String[] {"1-264" , "1" }); // Anguilla
+                put( 366 , new String[] {"1-767" , "1" }); // Dominica (Commonwealth of)
+                put( 368 , new String[] {"53" , "0" }); // Cuba
+                put( 370 , new String[] {"1-809" , "1" }); // Dominican Republic
+                put( 372 , new String[] {"509" }); // Haiti (Republic of)
+                put( 374 , new String[] {"1-868" , "1" }); // Trinidad and Tobago
+                put( 376 , new String[] {"1-649" , "1" }); // Turks and Caicos Islands
+                put( 400 , new String[] {"994" , "0" }); // Azerbaijani Republic
+                put( 401 , new String[] {"7-7" , "8" }); // Kazakhstan (Republic of)
+                put( 402 , new String[] {"975" }); // Bhutan (Kingdom of)
+                put( 404 , new String[] {"91" , "0" }); // India (Republic of)
+                put( 405 , new String[] {"91" , "0" }); // India (Republic of)
+                put( 410 , new String[] {"92" , "0" }); // Pakistan (Islamic Republic of)
+                put( 412 , new String[] {"93" , "0" }); // Afghanistan
+                put( 413 , new String[] {"94" , "0" }); // Sri Lanka (Democratic Socialist Republic of)
+                put( 414 , new String[] {"95" }); // Myanmar (Union of)
+                put( 415 , new String[] {"961" , "0" }); // Lebanon
+                put( 416 , new String[] {"962" , "0" }); // Jordan (Hashemite Kingdom of)
+                put( 417 , new String[] {"963" , "0" }); // Syrian Arab Republic
+                put( 418 , new String[] {"964" }); // Iraq (Republic of)
+                put( 419 , new String[] {"965" }); // Kuwait (State of)
+                put( 420 , new String[] {"966" , "0" }); // Saudi Arabia (Kingdom of)
+                put( 421 , new String[] {"967" , "0" }); // Yemen (Republic of)
+                put( 422 , new String[] {"968" }); // Oman (Sultanate of)
+                put( 424 , new String[] {"971" , "0" }); // United Arab Emirates
+                put( 425 , new String[] {"972" , "0" }); // Israel (State of)
+                put( 426 , new String[] {"973" }); // Bahrain (Kingdom of)
+                put( 427 , new String[] {"974" }); // Qatar (State of)
+                put( 428 , new String[] {"976" , "0" }); // Mongolia
+                put( 429 , new String[] {"977" , "0" }); // Nepal
+                put( 430 , new String[] {"971" , "0" }); // United Arab Emirates
+                put( 431 , new String[] {"971" , "0" }); // United Arab Emirates
+                put( 432 , new String[] {"98" , "0" }); // Iran (Islamic Republic of)
+                put( 434 , new String[] {"998" , "8" }); // Uzbekistan (Republic of)
+                put( 436 , new String[] {"992" , "8" }); // Tajikistan (Republic of)
+                put( 437 , new String[] {"996" , "0" }); // Kyrgyz Republic
+                put( 438 , new String[] {"993" , "8" }); // Turkmenistan
+                put( 440 , new String[] {"81" , "0" }); // Japan
+                put( 441 , new String[] {"81" , "0" }); // Japan
+                put( 450 , new String[] {"82" , "0" }); // Korea (Republic of)
+                put( 452 , new String[] {"84" , "0" }); // Viet Nam (Socialist Republic of)
+                put( 454 , new String[] {"852" }); // "Hong Kong, China"
+                put( 455 , new String[] {"853" }); // "Macao, China"
+                put( 456 , new String[] {"855" , "0" }); // Cambodia (Kingdom of)
+                put( 457 , new String[] {"856" }); // Lao People's Democratic Republic
+                put( 460 , new String[] {"86" , "0" }); // China (People's Republic of)
+                put( 461 , new String[] {"86" , "0" }); // China (People's Republic of)
+                put( 466 , new String[] {"886" , "0" }); // "Taiwan, China"
+                put( 467 , new String[] {"850" }); // Democratic People's Republic of Korea
+                put( 470 , new String[] {"880" , "0" }); // Bangladesh (People's Republic of)
+                put( 472 , new String[] {"960" }); // Maldives (Republic of)
+                put( 502 , new String[] {"60" , "0" }); // Malaysia
+                put( 505 , new String[] {"61" , "0" }); // Australia
+                put( 510 , new String[] {"62" , "0" }); // Indonesia (Republic of)
+                put( 514 , new String[] {"670" }); // Democratic Republic of Timor-Leste
+                put( 515 , new String[] {"63" , "0" }); // Philippines (Republic of the)
+                put( 520 , new String[] {"66" , "0" }); // Thailand
+                put( 525 , new String[] {"65" }); // Singapore (Republic of)
+                put( 528 , new String[] {"673" }); // Brunei Darussalam
+                put( 530 , new String[] {"64" , "0" }); // New Zealand
+                put( 534 , new String[] {"1-670" , "1" }); // Northern Mariana Islands (Commonwealth of the)
+                put( 535 , new String[] {"1-671" , "1" }); // Guam
+                put( 536 , new String[] {"674" }); // Nauru (Republic of)
+                put( 537 , new String[] {"675" }); // Papua New Guinea
+                put( 539 , new String[] {"676" }); // Tonga (Kingdom of)
+                put( 540 , new String[] {"677" }); // Solomon Islands
+                put( 541 , new String[] {"678" }); // Vanuatu (Republic of)
+                put( 542 , new String[] {"679" }); // Fiji (Republic of)
+                put( 543 , new String[] {"681" }); // Wallis and Futuna (Territoire franais d'outre-mer)
+                put( 544 , new String[] {"1-684" , "1" }); // American Samoa
+                put( 545 , new String[] {"686" }); // Kiribati (Republic of)
+                put( 546 , new String[] {"687" }); // New Caledonia (Territoire franais d'outre-mer)
+                put( 547 , new String[] {"689" }); // French Polynesia (Territoire franais d'outre-mer)
+                put( 548 , new String[] {"682" }); // Cook Islands
+                put( 549 , new String[] {"685" }); // Samoa (Independent State of)
+                put( 550 , new String[] {"691" , "1" }); // Micronesia (Federated States of)
+                put( 551 , new String[] {"692" , "1" }); // Marshall Islands (Republic of the)
+                put( 552 , new String[] {"680" }); // Palau (Republic of)
+                put( 602 , new String[] {"20" , "0" }); // Egypt (Arab Republic of)
+                put( 603 , new String[] {"213" , "0" }); // Algeria (People's Democratic Republic of)
+                put( 604 , new String[] {"212" , "0" }); // Morocco (Kingdom of)
+                put( 605 , new String[] {"216" }); // Tunisia
+                put( 606 , new String[] {"281" , "0" }); // Libya (Socialist People's Libyan Arab Jamahiriya)
+                put( 607 , new String[] {"220" }); // Gambia (Republic of the)
+                put( 608 , new String[] {"221" }); // Senegal (Republic of)
+                put( 609 , new String[] {"222" }); // Mauritania (Islamic Republic of)
+                put( 610 , new String[] {"223" }); // Mali (Republic of)
+                put( 611 , new String[] {"224" }); // Guinea (Republic of)
+                put( 612 , new String[] {"225" }); // Cte d'Ivoire (Republic of)
+                put( 613 , new String[] {"226" }); // Burkina Faso
+                put( 614 , new String[] {"227" }); // Niger (Republic of the)
+                put( 615 , new String[] {"228" }); // Togolese Republic
+                put( 616 , new String[] {"229" }); // Benin (Republic of)
+                put( 617 , new String[] {"230" }); // Mauritius (Republic of)
+                put( 618 , new String[] {"231" }); // Liberia (Republic of)
+                put( 619 , new String[] {"232" , "0" }); // Sierra Leone
+                put( 620 , new String[] {"233" , "0" }); // Ghana
+                put( 621 , new String[] {"234" , "0" }); // Nigeria (Federal Republic of)
+                put( 622 , new String[] {"235" }); // Chad (Republic of)
+                put( 623 , new String[] {"236" }); // Central African Republic
+                put( 624 , new String[] {"237" }); // Cameroon (Republic of)
+                put( 625 , new String[] {"238" }); // Cape Verde (Republic of)
+                put( 626 , new String[] {"239" }); // Sao Tome and Principe (Democratic Republic of)
+                put( 627 , new String[] {"240" }); // Equatorial Guinea (Republic of)
+                put( 628 , new String[] {"241" }); // Gabonese Republic
+                put( 629 , new String[] {"242" }); // Congo (Republic of the)
+                put( 630 , new String[] {"242" }); // Democratic Republic of the Congo
+                put( 631 , new String[] {"244" , "0" }); // Angola (Republic of)
+                put( 632 , new String[] {"245" }); // Guinea-Bissau (Republic of)
+                put( 633 , new String[] {"248" }); // Seychelles (Republic of)
+                put( 634 , new String[] {"249" , "0" }); // Sudan (Republic of the)
+                put( 635 , new String[] {"250" }); // Rwanda (Republic of)
+                put( 636 , new String[] {"251" , "0" }); // Ethiopia (Federal Democratic Republic of)
+                put( 637 , new String[] {"252" }); // Somali Democratic Republic
+                put( 638 , new String[] {"253" }); // Djibouti (Republic of)
+                put( 639 , new String[] {"254" , "0" }); // Kenya (Republic of)
+                put( 640 , new String[] {"255" , "0" }); // Tanzania (United Republic of)
+                put( 641 , new String[] {"256" , "0" }); // Uganda (Republic of)
+                put( 642 , new String[] {"257" }); // Burundi (Republic of)
+                put( 643 , new String[] {"258" }); // Mozambique (Republic of)
+                put( 645 , new String[] {"260" , "0" }); // Zambia (Republic of)
+                put( 646 , new String[] {"261" }); // Madagascar (Republic of)
+                put( 647 , new String[] {"262" , "0" }); // Reunion (French Department of)
+                put( 648 , new String[] {"263" , "0" }); // Zimbabwe (Republic of)
+                put( 649 , new String[] {"264" , "0" }); // Namibia (Republic of)
+                put( 650 , new String[] {"265" }); // Malawi
+                put( 651 , new String[] {"266" }); // Lesotho (Kingdom of)
+                put( 652 , new String[] {"267" }); // Botswana (Republic of)
+                put( 653 , new String[] {"268" }); // Swaziland (Kingdom of)
+                put( 654 , new String[] {"269" }); // Comoros (Union of the)
+                put( 655 , new String[] {"27" , "0" }); // South Africa (Republic of)
+                put( 657 , new String[] {"291" , "0" }); // Eritrea
+                put( 702 , new String[] {"501" }); // Belize
+                put( 704 , new String[] {"502" }); // Guatemala (Republic of)
+                put( 706 , new String[] {"503" }); // El Salvador (Republic of)
+                put( 708 , new String[] {"504" }); // Honduras (Republic of)
+                put( 710 , new String[] {"505" }); // Nicaragua
+                put( 712 , new String[] {"506" }); // Costa Rica
+                put( 714 , new String[] {"507" }); // Panama (Republic of)
+                put( 716 , new String[] {"51" , "0" }); // Peru
+                put( 722 , new String[] {"54" , "0" }); // Argentine Republic
+                put( 724 , new String[] {"55" , "0" }); // Brazil (Federative Republic of)
+                put( 730 , new String[] {"56" , "0" }); // Chile
+                put( 732 , new String[] {"57" , "09" }); // Colombia (Republic of)
+                put( 734 , new String[] {"58" , "0" }); // Venezuela (Bolivarian Republic of)
+                put( 736 , new String[] {"591" , "0" }); // Bolivia (Republic of)
+                put( 738 , new String[] {"592" }); // Guyana
+                put( 742 , new String[] {"594" , "0" }); // French Guiana (French Department of)
+                put( 744 , new String[] {"595" , "0" }); // Paraguay (Republic of)
+                put( 746 , new String[] {"597" , "0" }); // Suriname (Republic of)
+                put( 748 , new String[] {"598" , "0" }); // Uruguay (Eastern Republic of)
+                put( 750 , new String[] {"500" }); // Falkland Islands (Malvinas)
+            }
+        };
     };
 
     // @formatter:on
@@ -816,21 +346,13 @@ public class ContactUtil {
      */
     private ContactUtil(Context context) {
         mCtx = context;
-        // Get ISO country code from telephony manager
-        TelephonyManager mgr = (TelephonyManager) context
-                .getSystemService(Context.TELEPHONY_SERVICE);
-        String countryCodeIso = mgr.getSimCountryIso();
-        if (countryCodeIso == null) {
-            throw new IllegalStateException(
-                    "Instantation failure: cannot read SIM ISO country code");
-
-        }
-        // Get the country code information associated to the ISO country code
-        String[] countryCodeInfo = sCountryCodes.get(countryCodeIso);
+        Configuration config = context.getResources().getConfiguration();
+        // Get the country code information associated to the mobile country code
+        String[] countryCodeInfo = sCountryCodes.get(config.mcc);
         if (countryCodeInfo == null) {
             throw new IllegalStateException(new StringBuilder(
-                    "Instantation failure: no CC for SIM ISO country code '")
-                    .append(countryCodeIso).append("'").toString());
+                    "Instantation failure: no CC for mobile country code '").append(config.mcc)
+                    .append("'").toString());
 
         }
         // Get the country code from map
