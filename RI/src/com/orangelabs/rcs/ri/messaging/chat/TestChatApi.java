@@ -25,22 +25,23 @@ import com.gsma.services.rcs.chat.ChatService;
 import com.orangelabs.rcs.ri.ConnectionManager;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.messaging.chat.group.GroupChatList;
+import com.orangelabs.rcs.ri.messaging.chat.group.GroupChatView;
 import com.orangelabs.rcs.ri.messaging.chat.group.InitiateGroupChat;
 import com.orangelabs.rcs.ri.messaging.chat.single.InitiateSingleChat;
 import com.orangelabs.rcs.ri.messaging.chat.single.SingleChatList;
 import com.orangelabs.rcs.ri.messaging.geoloc.ShowUsInMap;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -55,9 +56,7 @@ public class TestChatApi extends ListActivity {
         CapabilitiesLog.CONTACT
     };
 
-    private static final int COLOR_GREY_DISABLE = Color.parseColor("#696969");
-
-    private boolean mAllowedToInitiateGroupChat = false;
+    private static final String LOGTAG = LogUtils.getTag(GroupChatView.class.getSimpleName());
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -65,7 +64,6 @@ public class TestChatApi extends ListActivity {
 
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
         // @formatter:off
         String[] items = {
                 getString(R.string.menu_initiate_chat), 
@@ -76,34 +74,7 @@ public class TestChatApi extends ListActivity {
                 getString(R.string.menu_showus_map),
         };
         // @formatter:on
-
-        /* Check if Group chat initialization is allowed */
-        ChatService chatService = ConnectionManager.getInstance(this).getChatApi();
-        try {
-            mAllowedToInitiateGroupChat = chatService.isAllowedToInitiateGroupChat();
-        } catch (RcsServiceException e) {
-            /* Do nothing */
-        }
-        setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items) {
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                TextView textView = (TextView) super.getView(position, convertView, parent);
-                if (position == 2 && !mAllowedToInitiateGroupChat) {
-                    textView.setTextColor(COLOR_GREY_DISABLE);
-                }
-                return textView;
-            }
-
-            @Override
-            public boolean isEnabled(int position) {
-                if (position == 2 && !mAllowedToInitiateGroupChat) {
-                    return false;
-                }
-                return true;
-            }
-
-        });
+        setListAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
     }
 
     @Override
@@ -118,7 +89,21 @@ public class TestChatApi extends ListActivity {
                 break;
 
             case 2:
-                startActivity(new Intent(this, InitiateGroupChat.class));
+                /* Check if Group chat initialization is allowed */
+                ChatService chatService = ConnectionManager.getInstance(this).getChatApi();
+                try {
+                    if (chatService.isAllowedToInitiateGroupChat()) {
+                        startActivity(new Intent(this, InitiateGroupChat.class));
+                    } else {
+                        Utils.showMessage(this,
+                                getString(R.string.label_NotAllowedToInitiateGroupChat));
+                    }
+                } catch (RcsServiceException e) {
+                    if (LogUtils.isActive) {
+                        Log.d(LOGTAG, "Cannot check if Group chat initialization is allowed", e);
+                    }
+                    Utils.showMessage(this, getString(R.string.label_api_failed));
+                }
                 break;
 
             case 3:
@@ -152,4 +137,5 @@ public class TestChatApi extends ListActivity {
 
         }
     }
+
 }

@@ -217,7 +217,8 @@
     <string name="label_GeolocExpireTime">Geoloc Expire Timeout:</string>
     <string name="label_GroupChatSupported">GC supported:</string>
     <string name="label_ChatTimeout">Chat timeout</string>
-
+    <string name="label_NotAllowedToInitiateGroupChat">Not allowed to initiate Group Chat</string>
+    
     <!-- Sharing menu -->
     <string name="menu_sharing">Sharing</string>
     <string name="menu_image_sharing">Image sharing</string>
