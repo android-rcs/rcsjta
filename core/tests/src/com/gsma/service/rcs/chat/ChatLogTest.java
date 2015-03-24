@@ -28,6 +28,7 @@ import java.util.Map;
 import android.content.Context;
 import android.test.AndroidTestCase;
 
+import com.gsma.rcs.utils.ContactUtilMockContext;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
@@ -43,7 +44,7 @@ public class ChatLogTest extends AndroidTestCase {
         super.setUp();
 
         mContext = getContext();
-        mContactUtils = ContactUtil.getInstance(mContext);
+        mContactUtils = ContactUtil.getInstance(new ContactUtilMockContext(mContext));
     }
 
     protected void tearDown() throws Exception {

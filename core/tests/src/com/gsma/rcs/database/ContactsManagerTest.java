@@ -37,6 +37,7 @@ import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.eab.ContactsManagerException;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.utils.ContactUtilMockContext;
 import com.gsma.rcs.utils.logger.Logger;
 
 public class ContactsManagerTest extends AndroidTestCase {
@@ -62,7 +63,7 @@ public class ContactsManagerTest extends AndroidTestCase {
                 mRcsSettings);
 
         cm = ContactsManager.getInstance();
-        contactUtils = ContactUtil.getInstance(mContext);
+        contactUtils = ContactUtil.getInstance(new ContactUtilMockContext(mContext));
         // info.setContact(contact);
         mContact = contactUtils.formatContact("+33633139785");
     }

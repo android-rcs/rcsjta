@@ -25,6 +25,7 @@ import java.util.Set;
 import android.os.Parcel;
 import android.test.AndroidTestCase;
 
+import com.gsma.rcs.utils.ContactUtilMockContext;
 import com.gsma.service.rcs.capabilities.CapabilitiesTest;
 import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.contact.ContactId;
@@ -74,7 +75,8 @@ public class RcsContactTest extends AndroidTestCase {
         capabilities = new Capabilities(imageSharing, videoSharing, imSession, fileTransfer,
                 geolocPush, extensions, automata, timestamp);
         registered = random.nextBoolean();
-        ContactUtil contactUtils = ContactUtil.getInstance(getContext());
+        ContactUtil contactUtils = ContactUtil
+                .getInstance(new ContactUtilMockContext(getContext()));
         contactId = contactUtils.formatContact("+33123456789");
         displayName = "displayName";
     }

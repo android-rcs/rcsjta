@@ -347,7 +347,7 @@ public class ContactUtil {
     private ContactUtil(Context context) {
         mCtx = context;
         Configuration config = context.getResources().getConfiguration();
-        // Get the country code information associated to the mobile country code
+        /* Get the country code information associated to the mobile country code */
         String[] countryCodeInfo = sCountryCodes.get(config.mcc);
         if (countryCodeInfo == null) {
             throw new IllegalStateException(new StringBuilder(
@@ -355,11 +355,11 @@ public class ContactUtil {
                     .append("'").toString());
 
         }
-        // Get the country code from map
+        /* Get the country code from map */
         String ccWithoutHeader = countryCodeInfo[COUNTRY_CODE_IDX];
         mCountryCode = COUNTRY_CODE_PREFIX.concat(ccWithoutHeader);
         if (countryCodeInfo.length == 2) {
-            // Get the country area code from map
+            /* Get the country area code from map */
             mCountryAreaCode = countryCodeInfo[COUNTRY_AREA_CODE_IDX];
         } else {
             mCountryAreaCode = null;
@@ -396,10 +396,6 @@ public class ContactUtil {
      * @return phone string stripped of separators.
      */
     private String stripSeparators(String contact) {
-        if (TextUtils.isEmpty(contact)) {
-            return null;
-
-        }
         contact = contact.replaceAll("[ -]", "");
         Matcher matcher = PATTERN_CONTACT.matcher(contact);
         if (matcher.find()) {
@@ -416,7 +412,29 @@ public class ContactUtil {
      * @return Returns true if the given ContactId have the syntax of valid RCS ContactId.
      */
     public boolean isValidContact(String contact) {
-        return (!TextUtils.isEmpty(stripSeparators(contact)));
+        if (TextUtils.isEmpty(contact)) {
+            return false;
+        }
+        String strippedContact = stripSeparators(contact);
+        if (TextUtils.isEmpty(strippedContact)) {
+            return false;
+        }
+        if (strippedContact.startsWith(COUNTRY_CODE_PREFIX)) {
+            return true;
+        }
+        if (strippedContact.startsWith(MSISDN_PREFIX_INTERNATIONAL)) {
+            return true;
+        }
+        if (mCountryCode == null) {
+            return false;
+        }
+        if (TextUtils.isEmpty(mCountryAreaCode)) {
+            return true;
+        }
+        if (strippedContact.startsWith(mCountryAreaCode)) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -429,42 +447,43 @@ public class ContactUtil {
      * @return the ContactId
      */
     public ContactId formatContact(String contact) {
-        contact = stripSeparators(contact);
-        if (!TextUtils.isEmpty(contact)) {
-            // Is Country Code provided ?
-            if (!contact.startsWith(COUNTRY_CODE_PREFIX)) {
-                // CC not provided, does it exists in provider ?
-                if (mCountryCode == null) {
-                    throw new RcsContactFormatException("Country code is unknown");
-                }
-                // International numbering with prefix ?
-                if (contact.startsWith(MSISDN_PREFIX_INTERNATIONAL)) {
-                    contact = new StringBuilder(COUNTRY_CODE_PREFIX).append(contact,
-                            MSISDN_PREFIX_INTERNATIONAL.length(), contact.length()).toString();
-                } else {
-                    // Local numbering ?
-                    if (!TextUtils.isEmpty(mCountryAreaCode)) {
-                        // Local number must start with Country Area Code
-                        if (contact.startsWith(mCountryAreaCode)) {
-                            // Remove Country Area Code and add Country Code
-                            contact = new StringBuilder(mCountryCode).append(contact,
-                                    mCountryAreaCode.length(), contact.length()).toString();
-                        } else {
-                            throw new RcsContactFormatException(new StringBuilder(
-                                    "Local phone number '").append(contact)
-                                    .append("' should be prefixed with Country Area Code (")
-                                    .append(mCountryAreaCode).append(")").toString());
-                        }
-                    } else {
-                        // No Country Area Code, add Country code to local number
-                        contact = new StringBuilder(mCountryCode).append(contact).toString();
-                    }
-                }
-            }
-            return new ContactId(contact);
-
+        if (TextUtils.isEmpty(contact)) {
+            throw new RcsContactFormatException("Input parameter is null or empty");
         }
-        throw new RcsContactFormatException("Input parameter is null or empty");
+        String strippedContact = stripSeparators(contact);
+        if (TextUtils.isEmpty(strippedContact)) {
+            throw new RcsContactFormatException(new StringBuilder("Contact '")
+                    .append(contact).append("' has invalid characters or is too long").toString());
+        }
+
+        /* Is Country Code provided ? */
+        if (strippedContact.startsWith(COUNTRY_CODE_PREFIX)) {
+            return new ContactId(strippedContact);
+        }
+        /* International numbering with prefix ? */
+        if (strippedContact.startsWith(MSISDN_PREFIX_INTERNATIONAL)) {
+            return new ContactId(new StringBuilder(COUNTRY_CODE_PREFIX).append(strippedContact,
+                    MSISDN_PREFIX_INTERNATIONAL.length(), strippedContact.length()).toString());
+        }
+        /* CC not provided, does it exists in provider ? */
+        if (mCountryCode == null) {
+            throw new RcsContactFormatException(new StringBuilder("Local phone number '")
+            .append(strippedContact).append("' cannot be formatted: unknown country code").toString());
+        }
+        /* Local numbering ? */
+        if (TextUtils.isEmpty(mCountryAreaCode)) {
+            /* No Country Area Code, add Country code to local number */
+            return new ContactId(mCountryCode.concat(strippedContact));
+        }
+        // Local number must start with Country Area Code
+        if (strippedContact.startsWith(mCountryAreaCode)) {
+            /* Remove Country Area Code and add Country Code */
+            return new ContactId(new StringBuilder(mCountryCode).append(strippedContact,
+                    mCountryAreaCode.length(), strippedContact.length()).toString());
+        }
+        throw new RcsContactFormatException(new StringBuilder("Local phone number '")
+                .append(strippedContact).append("' should be prefixed with Country Area Code (")
+                .append(mCountryAreaCode).append(")").toString());
     }
 
     /**

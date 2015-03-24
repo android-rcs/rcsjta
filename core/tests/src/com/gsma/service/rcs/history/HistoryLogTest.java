@@ -23,6 +23,7 @@ import com.gsma.rcs.provider.sharing.ImageSharingData;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
 import com.gsma.rcs.provider.sharing.VideoSharingData;
 import com.gsma.rcs.service.api.HistoryServiceImpl;
+import com.gsma.rcs.utils.ContactUtilMockContext;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService.Direction;
@@ -251,7 +252,8 @@ public class HistoryLogTest extends AndroidTestCase {
                 RcsSettings.createInstance(sLocalContentResolver));
         RichCallHistory.createInstance(sLocalContentResolver);
         mRichCallHistory = RichCallHistory.getInstance();
-        ContactUtil.getInstance(getContext());
+        ContactUtil
+                .getInstance(new ContactUtilMockContext(new ContactUtilMockContext(getContext())));
 
         sLocalContentResolver.delete(
                 Uri.parse("content://com.gsma.services.rcs.provider.chat/chatmessage"), null, null);

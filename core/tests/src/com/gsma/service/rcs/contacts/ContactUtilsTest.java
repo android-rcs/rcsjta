@@ -18,20 +18,24 @@
 
 package com.gsma.service.rcs.contacts;
 
-import android.test.AndroidTestCase;
-import android.text.TextUtils;
-
+import com.gsma.rcs.utils.ContactUtilMockContext;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
 
+import android.test.AndroidTestCase;
+import android.text.TextUtils;
+
 public class ContactUtilsTest extends AndroidTestCase {
 
     private ContactUtil mContactUtils;
+    private String mNextCountryAreaCode;
 
     protected void setUp() throws Exception {
         super.setUp();
-        mContactUtils = ContactUtil.getInstance(getContext());
+        mContactUtils = ContactUtil.getInstance(new ContactUtilMockContext(getContext()));
+        mNextCountryAreaCode = String.valueOf(Integer
+                .valueOf(ContactUtilMockContext.COUNTRY_AREA_CODE) + 1);
     }
 
     protected void tearDown() throws Exception {
@@ -58,8 +62,13 @@ public class ContactUtilsTest extends AndroidTestCase {
         assertFalse(mContactUtils.isValidContact("012345a"));
     }
 
+    public void testIsValidContactWrongAreaCode() {
+        assertFalse(mContactUtils.isValidContact(mNextCountryAreaCode.concat("123456789")));
+    }
+
     public void testIsValidContactNormalCase_1() {
-        assertTrue(mContactUtils.isValidContact("0123456789"));
+        assertTrue(mContactUtils.isValidContact(ContactUtilMockContext.COUNTRY_AREA_CODE
+                .concat("123456789")));
     }
 
     public void testIsValidContactNormalCase_2() {
@@ -71,23 +80,29 @@ public class ContactUtilsTest extends AndroidTestCase {
     }
 
     public void testIsValidContactNormalCase_4() {
-        assertTrue(mContactUtils.isValidContact("012345678901234"));
+        assertTrue(mContactUtils.isValidContact(ContactUtilMockContext.COUNTRY_AREA_CODE
+                .concat("12345678901234")));
     }
 
     public void testIsValidContactNormalCase_5() {
-        assertTrue(mContactUtils.isValidContact("0 1 2 3 4 5 6 7 8 9 0 1 2 3 4"));
+        assertTrue(mContactUtils.isValidContact(ContactUtilMockContext.COUNTRY_AREA_CODE
+                .concat("1 2 3 4 5 6 7 8 9 0 1 2 3 4")));
     }
 
     public void testIsValidContactNormalCase_6() {
-        assertTrue(mContactUtils.isValidContact("0-1-2-3-4-5-6-7-8-9-0-1-2-3-4"));
+        assertTrue(mContactUtils.isValidContact(ContactUtilMockContext.COUNTRY_AREA_CODE
+                .concat("-1-2-3-4-5-6-7-8-9-0-1-2-3-4")));
     }
 
     public void testIsValidContactNormalCase_7() {
-        assertTrue(mContactUtils.isValidContact(" 0-1 2-3 4-5 6-7 8-9 0-1 2-3 4 "));
+        assertTrue(mContactUtils.isValidContact(new StringBuilder(" ")
+                .append(ContactUtilMockContext.COUNTRY_AREA_CODE)
+                .append("-1 2-3 4-5 6-7 8-9 0-1 2-3 4 ").toString()));
     }
 
     public void testIsValidContactNormalCase_8() {
-        assertTrue(mContactUtils.isValidContact("0    1--------2-3 4-5 6-7 8-9 0-1 2-3 4 "));
+        assertTrue(mContactUtils.isValidContact(ContactUtilMockContext.COUNTRY_AREA_CODE
+                .concat("    1--------2-3 4-5 6-7 8-9 0-1 2-3 4 ")));
     }
 
     public void testFormatContactIdNull() {
@@ -147,5 +162,13 @@ public class ContactUtilsTest extends AndroidTestCase {
         } catch (RcsContactFormatException e) {
             fail("RcsContactFormatException thrown");
         }
+    }
+
+    public void testGetMyCountryAreaCode() {
+        assertEquals(ContactUtilMockContext.COUNTRY_AREA_CODE, mContactUtils.getMyCountryAreaCode());
+    }
+
+    public void testGetMyCountryCode() {
+        assertEquals(ContactUtilMockContext.COUNTRY_CODE, mContactUtils.getMyCountryCode());
     }
 }
