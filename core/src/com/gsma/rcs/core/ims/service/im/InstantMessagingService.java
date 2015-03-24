@@ -191,11 +191,8 @@ public class InstantMessagingService extends ImsService {
         ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
         MmContent content = ContentManager.createMmContentFromSdp(invite, mRcsSettings);
         MmContent fileIcon = FileTransferUtils.extractFileIcon(invite, mRcsSettings);
-        getImsModule()
-                .getCore()
-                .getListener()
-                .handleFileTransferInvitationRejected(contact, content, fileIcon, reasonCode,
-                        timestamp, timestampSent);
+        mCore.getListener().handleFileTransferInvitationRejected(contact, content, fileIcon,
+                reasonCode, timestamp, timestampSent);
     }
 
     private void handleGroupChatInvitationRejected(SipRequest invite, ReasonCode reasonCode,
@@ -205,11 +202,8 @@ public class InstantMessagingService extends ImsService {
         String subject = ChatUtils.getSubject(invite);
         Map<ContactId, ParticipantStatus> participants = ChatUtils.getParticipants(invite,
                 ParticipantStatus.FAILED);
-        getImsModule()
-                .getCore()
-                .getListener()
-                .handleGroupChatInvitationRejected(chatId, contact, subject, participants,
-                        reasonCode, timestamp);
+        mCore.getListener().handleGroupChatInvitationRejected(chatId, contact, subject,
+                participants, reasonCode, timestamp);
     }
 
     /**
@@ -817,11 +811,8 @@ public class InstantMessagingService extends ImsService {
             FileSharingSession session = new TerminatingMsrpFileSharingSession(this, invite,
                     mRcsSettings, timestamp, timestampSent);
 
-            getImsModule()
-                    .getCore()
-                    .getListener()
-                    .handleFileTransferInvitation(session, false, remote,
-                            session.getRemoteDisplayName(), FileTransferLog.UNKNOWN_EXPIRATION);
+            mCore.getListener().handleFileTransferInvitation(session, false, remote,
+                    session.getRemoteDisplayName(), FileTransferLog.UNKNOWN_EXPIRATION);
 
             session.startSession();
 
@@ -929,7 +920,7 @@ public class InstantMessagingService extends ImsService {
             TerminatingOneToOneChatSession session = new TerminatingOneToOneChatSession(this,
                     invite, remote, mRcsSettings, mMessagingLog, firstMsg.getTimestamp());
 
-            getImsModule().getCore().getListener().handleOneOneChatSessionInvitation(session);
+            mCore.getListener().handleOneOneChatSessionInvitation(session);
 
             session.startSession();
 
@@ -1048,7 +1039,7 @@ public class InstantMessagingService extends ImsService {
             return;
         }
 
-        getImsModule().getCore().getListener().handleAdhocGroupChatSessionInvitation(session);
+        mCore.getListener().handleAdhocGroupChatSessionInvitation(session);
 
         session.startSession();
     }
@@ -1189,8 +1180,7 @@ public class InstantMessagingService extends ImsService {
                     session.handleMessageDeliveryStatus(contact, imdn);
                 } else {
                     // Notify the message delivery outside of the chat session
-                    getImsModule().getCore().getListener()
-                            .handleMessageDeliveryStatus(contact, imdn);
+                    mCore.getListener().handleMessageDeliveryStatus(contact, imdn);
                 }
             }
         } catch (Exception e) {
@@ -1208,7 +1198,7 @@ public class InstantMessagingService extends ImsService {
      */
     public void receiveFileDeliveryStatus(ContactId contact, ImdnDocument imdn) {
         // Notify the file delivery outside of the chat session
-        getImsModule().getCore().getListener().handleFileDeliveryStatus(contact, imdn);
+        mCore.getListener().handleFileDeliveryStatus(contact, imdn);
     }
 
     /**
@@ -1219,7 +1209,7 @@ public class InstantMessagingService extends ImsService {
      * @param imdn IM delivery notification document
      */
     public void receiveGroupFileDeliveryStatus(String chatId, ContactId contact, ImdnDocument imdn) {
-        getImsModule().getCore().getListener().handleGroupFileDeliveryStatus(chatId, contact, imdn);
+        mCore.getListener().handleGroupFileDeliveryStatus(chatId, contact, imdn);
     }
 
     /**
@@ -1336,10 +1326,9 @@ public class InstantMessagingService extends ImsService {
                         .append(" is blocked, automatically reject the HTTP File transfer")
                         .toString());
             }
-
+            sendErrorResponse(invite, Response.DECLINE);
             handleFileTransferInvitationRejected(invite, FileTransfer.ReasonCode.REJECTED_SPAM,
                     timestamp, timestampSent);
-            sendErrorResponse(invite, Response.DECLINE);
             return;
 
         }
@@ -1348,10 +1337,10 @@ public class InstantMessagingService extends ImsService {
             if (sLogger.isActivated()) {
                 sLogger.debug("The max number of FT sessions is achieved, reject the HTTP File transfer");
             }
-            handleFileTransferInvitationRejected(invite,
-                    FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp, timestampSent);
             // Send a 603 Decline response
             sendErrorResponse(invite, Response.DECLINE);
+            handleFileTransferInvitationRejected(invite,
+                    FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp, timestampSent);
             return;
         }
 
@@ -1397,18 +1386,15 @@ public class InstantMessagingService extends ImsService {
                 if (sLogger.isActivated()) {
                     sLogger.error("Failed to initiate download file transfer", e);
                 }
+                sendErrorResponse(invite, Response.DECLINE);
                 handleFileTransferInvitationRejected(invite,
                         FileTransfer.ReasonCode.REJECTED_MEDIA_FAILED, timestamp, timestampSent);
-                sendErrorResponse(invite, Response.DECLINE);
                 return;
 
             }
         }
-        getImsModule()
-                .getCore()
-                .getListener()
-                .handleOneToOneFileTransferInvitation(fileSharingSession, oneToOneChatSession,
-                        ftinfo.getExpiration());
+        mCore.getListener().handleOneToOneFileTransferInvitation(fileSharingSession,
+                oneToOneChatSession, ftinfo.getExpiration());
         oneToOneChatSession.startSession();
         fileSharingSession.startSession();
     }
@@ -1479,11 +1465,8 @@ public class InstantMessagingService extends ImsService {
             }
 
         }
-        getImsModule()
-                .getCore()
-                .getListener()
-                .handleOneToOneFileTransferInvitation(filetransferSession, one2oneChatSession,
-                        ftinfo.getExpiration());
+        mCore.getListener().handleOneToOneFileTransferInvitation(filetransferSession,
+                one2oneChatSession, ftinfo.getExpiration());
         filetransferSession.startSession();
     }
 

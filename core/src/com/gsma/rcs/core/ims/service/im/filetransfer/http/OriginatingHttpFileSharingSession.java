@@ -124,7 +124,8 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
         boolean logActivated = sLogger.isActivated();
         FileTransferHttpInfoDocument infoDocument;
         if (result == null
-                || (infoDocument = FileTransferUtils.parseFileTransferHttpDocument(result)) == null) {
+                || (infoDocument = FileTransferUtils.parseFileTransferHttpDocument(result,
+                        mRcsSettings)) == null) {
             // Don't call handleError in case of Pause or Cancel
             if (mUploadManager.isCancelled() || mUploadManager.isPaused()) {
                 return;

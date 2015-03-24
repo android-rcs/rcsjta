@@ -22,6 +22,10 @@
 
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
+import com.gsma.rcs.core.content.ContentManager;
+import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 import android.net.Uri;
@@ -41,10 +45,15 @@ public class FileTransferHttpThumbnail {
 
     private long mExpiration = FileTransferLog.UNKNOWN_EXPIRATION;
 
+    private final RcsSettings mRcsSettings;
+
     /**
      * Constructor
+     * 
+     * @param rcsSettings
      */
-    public FileTransferHttpThumbnail() {
+    public FileTransferHttpThumbnail(RcsSettings rcsSettings) {
+        mRcsSettings = rcsSettings;
     }
 
     /**
@@ -117,5 +126,18 @@ public class FileTransferHttpThumbnail {
      */
     public void setSize(int size) {
         mSize = size;
+    }
+
+    /**
+     * Gets local MmContent
+     * 
+     * @param fileTransferId
+     * @return local content
+     */
+    public MmContent getLocalMmContent(String fileTransferId) {
+        String iconName = FileTransferUtils.buildFileiconUrl(fileTransferId, mMimeType);
+        return ContentManager.createMmContent(
+                ContentManager.generateUriForReceivedContent(iconName, mMimeType, mRcsSettings),
+                mSize, iconName);
     }
 }

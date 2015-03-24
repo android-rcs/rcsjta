@@ -222,12 +222,15 @@ public class FileTransferUtils {
      * Parse a file transfer over HTTP document
      * 
      * @param xml XML document
+     * @param rcsSettings RCS settings
      * @return File transfer document
      */
-    public static FileTransferHttpInfoDocument parseFileTransferHttpDocument(byte[] xml) {
+    public static FileTransferHttpInfoDocument parseFileTransferHttpDocument(byte[] xml,
+            RcsSettings rcsSettings) {
         try {
             InputSource ftHttpInput = new InputSource(new ByteArrayInputStream(xml));
-            FileTransferHttpInfoParser ftHttpParser = new FileTransferHttpInfoParser(ftHttpInput);
+            FileTransferHttpInfoParser ftHttpParser = new FileTransferHttpInfoParser(ftHttpInput,
+                    rcsSettings);
             return ftHttpParser.getFtInfo();
         } catch (Exception e) {
             return null;
@@ -238,9 +241,11 @@ public class FileTransferUtils {
      * Get the HTTP file transfer info document
      * 
      * @param request Request
+     * @param rcsSettings RCS settings
      * @return FT HTTP info
      */
-    public static FileTransferHttpInfoDocument getHttpFTInfo(SipRequest request) {
+    public static FileTransferHttpInfoDocument getHttpFTInfo(SipRequest request,
+            RcsSettings rcsSettings) {
         /* Not a valid timestamp here as the message is just for temp use */
         long timestamp = -1;
         ChatMessage message = ChatUtils.getFirstMessage(request, timestamp);
@@ -248,7 +253,7 @@ public class FileTransferUtils {
             return null;
         }
         byte[] xml = message.getContent().getBytes(UTF8);
-        return parseFileTransferHttpDocument(xml);
+        return parseFileTransferHttpDocument(xml, rcsSettings);
     }
 
     /**

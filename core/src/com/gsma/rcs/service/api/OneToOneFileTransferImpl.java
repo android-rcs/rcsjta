@@ -38,8 +38,6 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.http.DownloadFromAcceptFile
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.DownloadFromResumeFileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.ResumeUploadFileSharingSession;
-import com.gsma.rcs.core.ims.service.im.filetransfer.http.TerminatingHttpFileSharingSession;
-import com.gsma.rcs.core.ims.service.im.filetransfer.msrp.TerminatingMsrpFileSharingSession;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
@@ -325,14 +323,6 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         return mPersistentStorage.getTimestampDisplayed();
     }
 
-    private Direction getDirection(FileSharingSession session) {
-        if (session instanceof TerminatingHttpFileSharingSession
-                || session instanceof TerminatingMsrpFileSharingSession) {
-            return Direction.INCOMING;
-        }
-        return Direction.OUTGOING;
-    }
-
     /**
      * Accepts file transfer invitation
      */
@@ -342,7 +332,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
         final FileSharingSession ongoingSession = mImService.getFileSharingSession(mFileTransferId);
         if (ongoingSession != null) {
-            if (Direction.INCOMING != getDirection(ongoingSession)) {
+            if (!ongoingSession.isInitiatedByRemote()) {
                 // TODO Temporarily illegal access exception
                 throw new IllegalStateException(new StringBuilder(
                         "Cannot accept transfer with fileTransferId '").append(mFileTransferId)

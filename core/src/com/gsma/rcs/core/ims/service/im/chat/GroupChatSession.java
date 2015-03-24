@@ -718,7 +718,8 @@ public abstract class GroupChatSession extends ChatSession {
             // File transfer over HTTP message
             // Parse HTTP document
             FileTransferHttpInfoDocument fileInfo = FileTransferUtils
-                    .parseFileTransferHttpDocument(cpimMsg.getMessageContent().getBytes(UTF8));
+                    .parseFileTransferHttpDocument(cpimMsg.getMessageContent().getBytes(UTF8),
+                            mRcsSettings);
             if (fileInfo != null) {
                 receiveHttpFileTransfer(remoteId, pseudo, fileInfo, cpimMsgId, timestamp,
                         timestampSent);

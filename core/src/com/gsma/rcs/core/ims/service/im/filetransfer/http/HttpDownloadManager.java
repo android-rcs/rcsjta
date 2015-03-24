@@ -31,6 +31,7 @@ import android.net.Uri;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 
 import java.io.BufferedOutputStream;
@@ -202,9 +203,9 @@ public class HttpDownloadManager extends HttpTransferManager {
             }
 
             // Analyze HTTP response
-            if (statusCode == 200) { // TODO need to check other responses ?
+            if (HttpStatus.SC_OK == statusCode) { // TODO need to check other responses ?
                 mCalcLength = 0;
-            } else if (statusCode == 206) {
+            } else if (HttpStatus.SC_PARTIAL_CONTENT == statusCode) {
                 mCalcLength = Long.valueOf(mFile.length()).intValue();
             } else {
                 return false;
@@ -215,8 +216,6 @@ public class HttpDownloadManager extends HttpTransferManager {
             }
             return false;
         }
-
-        boolean isSuccess = false;
 
         try {
             // Read content
@@ -235,6 +234,8 @@ public class HttpDownloadManager extends HttpTransferManager {
             }
             pauseTransferBySystem();
         }
+
+        boolean isSuccess = false;
 
         if (!isPaused() && !isCancelled()) {
             /* Check length of received data */
@@ -325,7 +326,7 @@ public class HttpDownloadManager extends HttpTransferManager {
         }
 
         // Analyze HTTP response
-        if (statusCode == 200) {
+        if (HttpStatus.SC_OK == statusCode) {
             byte[] buffer = new byte[CHUNK_MAX_SIZE];
             ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
             HttpEntity entity = response.getEntity();

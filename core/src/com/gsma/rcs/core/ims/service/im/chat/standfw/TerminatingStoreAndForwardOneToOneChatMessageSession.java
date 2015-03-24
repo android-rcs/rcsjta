@@ -108,7 +108,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
          * In case the invite contains a http file transfer info the chat session should be
          * auto-accepted so that the file transfer session can be started.
          */
-        if (FileTransferUtils.getHttpFTInfo(getDialogPath().getInvite()) != null) {
+        if (FileTransferUtils.getHttpFTInfo(getDialogPath().getInvite(), mRcsSettings) != null) {
             return true;
         }
 

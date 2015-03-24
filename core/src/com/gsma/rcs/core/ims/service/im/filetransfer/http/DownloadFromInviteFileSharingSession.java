@@ -23,8 +23,6 @@
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
 import com.gsma.rcs.core.CoreException;
-import com.gsma.rcs.core.content.ContentManager;
-import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.service.ImsService;
@@ -32,7 +30,6 @@ import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
-import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
@@ -80,9 +77,9 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
 
         // @formatter:off
         super(parent,
-                getFileMmContent(fileTransferInfo, rcsSettings),
+                fileTransferInfo.getLocalMmContent(),
                 fileTransferInfo.getExpiration(),
-                getFileIconMmContent(fileTransferInfo.getFileThumbnail(), fileTransferId, rcsSettings),
+                fileTransferInfo.getFileThumbnail() == null ? null : fileTransferInfo.getFileThumbnail().getLocalMmContent(fileTransferId),
                 getFileIconExpiration(fileTransferInfo.getFileThumbnail()),
                 contact,
                 chatSession.getSessionID(),
@@ -111,25 +108,6 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
         if (shouldBeAutoAccepted()) {
             setSessionAccepted();
         }
-    }
-
-    private static MmContent getFileMmContent(FileTransferHttpInfoDocument fileInfo,
-            RcsSettings rcsSettings) {
-        String fileName = fileInfo.getFilename();
-        return ContentManager.createMmContent(ContentManager.generateUriForReceivedContent(
-                fileName, fileInfo.getMimeType(), rcsSettings), fileInfo.getSize(), fileName);
-    }
-
-    private static MmContent getFileIconMmContent(FileTransferHttpThumbnail thumbnail,
-            String fileTransferId, RcsSettings rcsSettings) {
-        if (thumbnail == null) {
-            return null;
-        }
-        String iconMimeType = thumbnail.getMimeType();
-        String iconName = FileTransferUtils.buildFileiconUrl(fileTransferId, iconMimeType);
-        return ContentManager.createMmContent(
-                ContentManager.generateUriForReceivedContent(iconName, iconMimeType, rcsSettings),
-                thumbnail.getSize(), iconName);
     }
 
     private static long getFileIconExpiration(FileTransferHttpThumbnail thumbnailInfo) {

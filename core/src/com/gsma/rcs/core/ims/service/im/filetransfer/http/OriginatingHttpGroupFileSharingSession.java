@@ -177,7 +177,8 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
         FileTransferHttpInfoDocument infoDocument;
         boolean logActivated = sLogger.isActivated();
         if (result == null
-                || (infoDocument = FileTransferUtils.parseFileTransferHttpDocument(result)) == null) {
+                || (infoDocument = FileTransferUtils.parseFileTransferHttpDocument(result,
+                        mRcsSettings)) == null) {
             if (logActivated) {
                 sLogger.debug("Upload has failed");
             }

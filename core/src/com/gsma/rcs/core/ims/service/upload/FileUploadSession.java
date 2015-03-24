@@ -189,7 +189,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
         // </file-info>
         // </file>
         if (result != null) {
-            mFileInfoDoc = FileTransferUtils.parseFileTransferHttpDocument(result);
+            mFileInfoDoc = FileTransferUtils.parseFileTransferHttpDocument(result, mRcsSettings);
         }
         if (mFileInfoDoc != null) {
             // File uploaded with success

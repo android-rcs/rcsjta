@@ -22,6 +22,9 @@
 
 package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 
+import com.gsma.rcs.core.content.ContentManager;
+import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 import android.net.Uri;
@@ -67,10 +70,15 @@ public class FileTransferHttpInfoDocument {
      */
     private String mFileName;
 
+    private final RcsSettings mRcsSettings;
+
     /**
      * Constructor
+     * 
+     * @param rcsSettings
      */
-    public FileTransferHttpInfoDocument() {
+    public FileTransferHttpInfoDocument(RcsSettings rcsSettings) {
+        mRcsSettings = rcsSettings;
     }
 
     /**
@@ -179,5 +187,16 @@ public class FileTransferHttpInfoDocument {
      */
     public String getFilename() {
         return mFileName;
+    }
+
+    /**
+     * Gets local MmContent
+     * 
+     * @return local MmCOntent
+     */
+    public MmContent getLocalMmContent() {
+        return ContentManager.createMmContent(
+                ContentManager.generateUriForReceivedContent(mFileName, mMimeType, mRcsSettings),
+                mSize, mFileName);
     }
 }

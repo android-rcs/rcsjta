@@ -55,6 +55,7 @@ import android.text.TextUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CookieStore;
@@ -97,6 +98,8 @@ import java.net.UnknownHostException;
  * @author Deutsche Telekom AG
  */
 public class HttpsProvisioningManager {
+
+    private static final int HTTP_STATUS_ERROR_NETWORK_AUTHENTICATION_REQUIRED = 511;
 
     private static final String PROVISIONING_URI_FILENAME = "rcs_provisioning_uri.txt";
 
@@ -441,7 +444,7 @@ public class HttpsProvisioningManager {
                         sLogger.debug("First HTTPS request to require OTP failed: Retry After (request status code: 503)");
                     }
                     result.retryAfter = getRetryAfter(response);
-                } else if (result.code == 511) {
+                } else if (HTTP_STATUS_ERROR_NETWORK_AUTHENTICATION_REQUIRED == result.code) {
                     if (logActivated) {
                         sLogger.debug("First HTTPS request to require OTP failed: Invalid token (request status code: 511)");
                     }
@@ -632,15 +635,15 @@ public class HttpsProvisioningManager {
 
             result.code = response.getStatusLine().getStatusCode();
             result.content = new String(EntityUtils.toByteArray(response.getEntity()), UTF8);
-            if (result.code == 511) {
+            if (HTTP_STATUS_ERROR_NETWORK_AUTHENTICATION_REQUIRED == result.code) {
                 // Blackbird guidelines ID_2_6 Configuration mechanism over PS without Header
                 // Enrichment
                 // Use SMS provisioning on PS data network if server reply 511 NETWORK
                 // AUTHENTICATION REQUIRED
                 return sendFirstRequestsToRequireOTP(imsi, imei, null, primaryUri, secondaryUri,
                         client, localContext);
-            } else if (result.code != 200) {
-                if (result.code == 503) {
+            } else if (HttpStatus.SC_OK != result.code) {
+                if (HttpStatus.SC_SERVICE_UNAVAILABLE == result.code) {
                     result.retryAfter = getRetryAfter(response);
                 }
                 return result;
@@ -659,8 +662,8 @@ public class HttpsProvisioningManager {
                 return null;
             }
             result.code = response.getStatusLine().getStatusCode();
-            if (result.code != 200) {
-                if (result.code == 503) {
+            if (HttpStatus.SC_OK != result.code) {
+                if (HttpStatus.SC_SERVICE_UNAVAILABLE == result.code) {
                     result.retryAfter = getRetryAfter(response);
                 }
                 return result;
@@ -757,10 +760,10 @@ public class HttpsProvisioningManager {
                 return null;
             }
             result.code = response.getStatusLine().getStatusCode();
-            if (result.code != 200) {
-                if (result.code == 503) {
+            if (HttpStatus.SC_OK != result.code) {
+                if (HttpStatus.SC_SERVICE_UNAVAILABLE == result.code) {
                     result.retryAfter = getRetryAfter(response);
-                } else if (result.code == 511) {
+                } else if (HTTP_STATUS_ERROR_NETWORK_AUTHENTICATION_REQUIRED == result.code) {
                     if (logActivated) {
                         sLogger.debug("Second HTTPS request with OTP failed: Invalid one time password (request status code: 511)");
                     }
@@ -803,7 +806,7 @@ public class HttpsProvisioningManager {
     private void processProvisioningResult(HttpsProvisioningResult result) {
         boolean logActivated = sLogger.isActivated();
         if (result != null) {
-            if (result.code == 200) {
+            if (HttpStatus.SC_OK == result.code) {
                 // Reset after 511 counter
                 mRetryAfter511ErrorCount = 0;
 
@@ -960,7 +963,7 @@ public class HttpsProvisioningManager {
                         tryLaunchRcsCoreService(mCtx, -1);
                     }
                 }
-            } else if (result.code == 503) {
+            } else if (HttpStatus.SC_SERVICE_UNAVAILABLE == result.code) {
                 // Server Unavailable
                 if (logActivated) {
                     sLogger.debug("Server Unavailable. Retry after: " + result.retryAfter);
@@ -975,7 +978,7 @@ public class HttpsProvisioningManager {
                 } else {
                     tryLaunchRcsCoreService(mCtx, result.retryAfter * 1000);
                 }
-            } else if (result.code == 403) {
+            } else if (HttpStatus.SC_FORBIDDEN == result.code) {
                 // Forbidden: reset account + version = 0
                 if (logActivated) {
                     sLogger.debug("Provisioning forbidden: reset account");
@@ -987,7 +990,7 @@ public class HttpsProvisioningManager {
                         mMessagingLog);
                 // Reason: Provisioning forbidden
                 provisioningFails(ProvisioningFailureReasons.PROVISIONING_FORBIDDEN);
-            } else if (result.code == 511) {
+            } else if (HTTP_STATUS_ERROR_NETWORK_AUTHENTICATION_REQUIRED == result.code) {
                 // Provisioning authentication required
                 if (logActivated) {
                     sLogger.debug("Provisioning authentication required");

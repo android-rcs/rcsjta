@@ -75,6 +75,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
      * @param parent IMS service
      * @param invite Initial INVITE request
      * @param contact remote contact
+     * @param participantsFromInvite
      * @param remoteUri the remote Uri
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
@@ -114,7 +115,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
          * In case the invite contains a http file transfer info the chat session should be
          * auto-accepted so that the file transfer session can be started.
          */
-        if (FileTransferUtils.getHttpFTInfo(getDialogPath().getInvite()) != null) {
+        if (FileTransferUtils.getHttpFTInfo(getDialogPath().getInvite(), mRcsSettings) != null) {
             return true;
         }
 

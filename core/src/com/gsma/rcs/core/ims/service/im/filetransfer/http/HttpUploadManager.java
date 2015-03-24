@@ -47,6 +47,7 @@ import javax.net.ssl.SSLSession;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.ParseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -184,16 +185,16 @@ public class HttpUploadManager extends HttpTransferManager {
                 sLogger.debug("First POST response: " + resp.getStatusLine());
             }
             switch (statusCode) {
-                case 401:
-                    // AUTHENTICATION REQUIRED
+                case HttpStatus.SC_UNAUTHORIZED:
+                    // AUTHENTICATION REQUIRED: 401
                     mAuthenticationFlag = true;
                     break;
-                case 204:
-                    // NO CONTENT
+                case HttpStatus.SC_NO_CONTENT:
+                    // NO CONTENT : 204
                     mAuthenticationFlag = false;
                     break;
-                case 503:
-                    // INTERNAL ERROR - check retry-after header
+                case HttpStatus.SC_SERVICE_UNAVAILABLE:
+                    // SERVICE_UNAVAILABLE : 503 - check retry-after header
                     Header[] headers = resp.getHeaders("Retry-After");
                     int retryAfter = 0;
                     if (headers.length > 0) {
@@ -369,7 +370,7 @@ public class HttpUploadManager extends HttpTransferManager {
                     System.out.println(trace);
                 }
                 switch (responseCode) {
-                    case 200:
+                    case HttpStatus.SC_OK:
                         // 200 OK
                         success = true;
                         InputStream inputStream = connection.getInputStream();
@@ -379,8 +380,8 @@ public class HttpUploadManager extends HttpTransferManager {
                             System.out.println("\n " + new String(result));
                         }
                         break;
-                    case 503:
-                        // INTERNAL ERROR
+                    case HttpStatus.SC_SERVICE_UNAVAILABLE:
+                        // SERVICE UNAVAILABLE : 503
                         String header = connection.getHeaderField("Retry-After");
                         int retryAfter = 0;
                         if (header != null) {
@@ -933,7 +934,7 @@ public class HttpUploadManager extends HttpTransferManager {
             System.out.println(trace);
         }
         switch (statusCode) {
-            case 401:
+            case HttpStatus.SC_UNAUTHORIZED:
                 if (authRequired) {
                     throw new Exception("Unexpected response from server, got " + statusCode
                             + " for the second time. Authentication rejected.");
@@ -948,7 +949,7 @@ public class HttpUploadManager extends HttpTransferManager {
                 }
                 mAuth.readWwwAuthenticateHeader(authHeaders[0].getValue());
                 return sendGetInfo(suffix, true);
-            case 200:
+            case HttpStatus.SC_OK:
                 return resp;
             default:
                 return null;

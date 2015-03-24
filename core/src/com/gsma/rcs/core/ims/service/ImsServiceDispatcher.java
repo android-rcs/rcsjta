@@ -304,8 +304,8 @@ public class ImsServiceDispatcher extends Thread {
                 }
 
                 if (ChatUtils.isFileTransferOverHttp(request)) {
-                    FileTransferHttpInfoDocument ftHttpInfo = FileTransferUtils
-                            .getHttpFTInfo(request);
+                    FileTransferHttpInfoDocument ftHttpInfo = FileTransferUtils.getHttpFTInfo(
+                            request, mRcsSettings);
                     if (ftHttpInfo != null) {
                         // HTTP file transfer invitation
                         if (SipUtils.getReferredByHeader(request) != null) {
@@ -325,7 +325,7 @@ public class ImsServiceDispatcher extends Thread {
                         }
                     } else {
                         // TODO : else return error to Originating side
-                        // Malformed xml for FToHTTP: automatically reject with a 606 Not Acceptable
+                        // Malformed XML for FToHTTP: automatically reject with a 606 Not Acceptable
                         if (logger.isActivated()) {
                             logger.debug("Malformed xml for FToHTTP: automatically reject");
                         }

@@ -37,6 +37,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import android.net.Uri;
 import android.util.TimeFormatException;
 
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.DateUtils;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -86,18 +87,20 @@ public class FileTransferHttpInfoParser extends DefaultHandler {
      */
     private FileTransferHttpThumbnail mThumbnailInfo;
 
-    /**
-     * The logger
-     */
     private Logger logger = Logger.getLogger(this.getClass().getName());
+
+    private final RcsSettings mRcsSettings;
 
     /**
      * Constructor
      * 
      * @param inputSource Input source
+     * @param rcsSettings
      * @throws Exception
      */
-    public FileTransferHttpInfoParser(InputSource inputSource) throws Exception {
+    public FileTransferHttpInfoParser(InputSource inputSource, RcsSettings rcsSettings)
+            throws Exception {
+        mRcsSettings = rcsSettings;
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser parser = factory.newSAXParser();
         parser.parse(inputSource, this);
@@ -145,12 +148,12 @@ public class FileTransferHttpInfoParser extends DefaultHandler {
         mAccumulator.setLength(0);
 
         if (localName.equalsIgnoreCase("file")) {
-            mFtInfo = new FileTransferHttpInfoDocument();
+            mFtInfo = new FileTransferHttpInfoDocument(mRcsSettings);
         } else if (localName.equalsIgnoreCase("file-info")) {
             if (mFtInfo != null) {
                 String type = attr.getValue("type").trim();
                 if (type.equalsIgnoreCase("thumbnail")) {
-                    mThumbnailInfo = new FileTransferHttpThumbnail();
+                    mThumbnailInfo = new FileTransferHttpThumbnail(mRcsSettings);
                 }
             }
         } else if (localName.equalsIgnoreCase("data")) {
