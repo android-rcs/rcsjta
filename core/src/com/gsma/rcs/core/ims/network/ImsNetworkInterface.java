@@ -205,6 +205,14 @@ public abstract class ImsNetworkInterface {
     private final RcsSettings mRcsSettings;
 
     /**
+     * Holds retry duration value obtained from Retry-After header
+     * <p>
+     * Default value = 0L
+     * </p>
+     */
+    private long mRetryDuration = 0;
+
+    /**
      * The logger
      */
     private Logger logger = Logger.getLogger(this.getClass().getName());
@@ -328,6 +336,24 @@ public abstract class ImsNetworkInterface {
      */
     public RegistrationManager getRegistrationManager() {
         return mRegistration;
+    }
+
+    /**
+     * Get the Retry header time
+     * 
+     * @return retryHeader Retry-After duration value
+     */
+    public long getRetryAfterHeaderDuration() {
+        return mRetryDuration;
+    }
+
+    /**
+     * Sets the Retry header time
+     * 
+     * @param retryHeader Retry-After duration value
+     */
+    public void setRetryAfterHeaderDuration(long retryValue) {
+        mRetryDuration = retryValue;
     }
 
     /**

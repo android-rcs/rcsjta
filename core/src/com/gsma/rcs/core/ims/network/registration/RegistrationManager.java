@@ -22,14 +22,6 @@
 
 package com.gsma.rcs.core.ims.network.registration;
 
-import java.util.ListIterator;
-import java.util.Vector;
-
-import javax2.sip.header.ContactHeader;
-import javax2.sip.header.ExpiresHeader;
-import javax2.sip.header.Header;
-import javax2.sip.header.ViaHeader;
-
 import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsError;
 import com.gsma.rcs.core.ims.ImsModule;
@@ -49,12 +41,26 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.RcsServiceRegistration.ReasonCode;
 
+import java.util.ListIterator;
+import java.util.Vector;
+
+import javax2.sip.header.ContactHeader;
+import javax2.sip.header.ExpiresHeader;
+import javax2.sip.header.Header;
+import javax2.sip.header.RetryAfterHeader;
+import javax2.sip.header.ViaHeader;
+import javax2.sip.message.Response;
+
 /**
  * Registration manager (register, re-register, un-register)
  * 
  * @author JM. Auffret
  */
 public class RegistrationManager extends PeriodicRefresher {
+
+    private static final int MAX_REGISTRATION_FAILURES = 3;
+
+    private static final int MILLISEC_CONVERSION_RATE = 1000;
 
     /**
      * First C Sequence
@@ -115,6 +121,11 @@ public class RegistrationManager extends PeriodicRefresher {
      * Number of 401 failures
      */
     private int mNb401Failures = 0;
+
+    /**
+     * Number of 4xx5xx6xx failures
+     */
+    private int mNb4xx5xx6xxFailures;
 
     /**
      * Settings
@@ -251,6 +262,12 @@ public class RegistrationManager extends PeriodicRefresher {
             // Reset the number of 401 failures
             mNb401Failures = 0;
 
+            // Reset the number of 4xx5xx6xx failures
+            mNb4xx5xx6xxFailures = 0;
+
+            // Reset retry after header duration
+            mNetworkInterface.setRetryAfterHeaderDuration(0);
+
             // Create REGISTER request
             SipRequest register = SipMessageFactory.createRegister(mDialogPath, mFeatureTags,
                     getExpiryValue(), mInstanceId);
@@ -326,6 +343,9 @@ public class RegistrationManager extends PeriodicRefresher {
             // Increment the Cseq number of the dialog path
             mDialogPath.incrementCseq();
 
+            // Reset the number of 4xx5xx6xx failures
+            mNb4xx5xx6xxFailures = 0;
+
             // Create REGISTER request with expire 0
             SipRequest register = SipMessageFactory.createRegister(mDialogPath, mFeatureTags, 0,
                     mInstanceId);
@@ -375,35 +395,54 @@ public class RegistrationManager extends PeriodicRefresher {
         // Analyze the received response
         if (ctx.isSipResponse()) {
             // A response has been received
-            if (ctx.getStatusCode() == 200) {
-                // 200 OK
-                if (register.getExpires() != 0) {
-                    handle200OK(ctx);
-                } else {
-                    handle200OkUnregister(ctx);
-                }
-            } else if (ctx.getStatusCode() == 302) {
-                // 302 Moved Temporarily
-                handle302MovedTemporarily(ctx);
-            } else if (ctx.getStatusCode() == 401) {
-                // Increment the number of 401 failures
-                mNb401Failures++;
-
-                // Check number of failures
-                if (mNb401Failures < 3) {
-                    // 401 Unauthorized
+            switch (ctx.getStatusCode()) {
+                case Response.OK:
+                    /**
+                     * 200 OK
+                     */
+                    if (register.getExpires() != 0) {
+                        handle200OK(ctx);
+                    } else {
+                        handle200OkUnregister(ctx);
+                    }
+                    break;
+                case Response.MOVED_TEMPORARILY:
+                    /**
+                     * 302 Moved Temporarily
+                     */
+                    handle302MovedTemporarily(ctx);
+                    break;
+                case Response.UNAUTHORIZED:
+                    /**
+                     * 401 Unauthorized
+                     */
                     handle401Unauthorized(ctx);
-                } else {
-                    // We reached 3 successive 401 failures, stop registration retries
-                    handleError(new ImsError(ImsError.REGISTRATION_FAILED, "too many 401"));
-                }
-            } else if (ctx.getStatusCode() == 423) {
-                // 423 Interval Too Brief
-                handle423IntervalTooBrief(ctx);
-            } else {
-                // Other error response
-                handleError(new ImsError(ImsError.REGISTRATION_FAILED, ctx.getStatusCode() + " "
-                        + ctx.getReasonPhrase()));
+                    break;
+                case Response.INTERVAL_TOO_BRIEF:
+                    /**
+                     * 423 Interval Too Brief
+                     */
+                    handle423IntervalTooBrief(ctx);
+                    break;
+                case Response.NOT_FOUND:
+                case Response.REQUEST_TIMEOUT:
+                case Response.TEMPORARILY_UNAVAILABLE:
+                case Response.SERVER_INTERNAL_ERROR:
+                case Response.SERVICE_UNAVAILABLE:
+                case Response.SERVER_TIMEOUT:
+                case Response.BUSY_EVERYWHERE:
+                    /**
+                     * Intentional fall-through for 4xx, 5xx & 6xx SIP error responses.
+                     */
+                    handle4xx5xx6xxNoRetryAfterHeader(ctx);
+                    break;
+                default:
+                    /**
+                     * Other error response
+                     */
+                    handleError(new ImsError(ImsError.REGISTRATION_FAILED, ctx.getStatusCode()
+                            + " " + ctx.getReasonPhrase()));
+                    break;
             }
         } else {
             // No response received: timeout
@@ -567,9 +606,22 @@ public class RegistrationManager extends PeriodicRefresher {
      */
     private void handle401Unauthorized(SipTransactionContext ctx) throws SipException,
             CoreException {
+        /**
+         * Increment the number of 401 failures
+         */
+        mNb401Failures++;
+
         // 401 response received
         if (logger.isActivated()) {
             logger.info("401 response received, nbFailures=" + mNb401Failures);
+        }
+
+        if (mNb401Failures >= MAX_REGISTRATION_FAILURES) {
+            /**
+             * We reached MAX_REGISTRATION_FAILURES, stop registration retries
+             */
+            handleError(new ImsError(ImsError.REGISTRATION_FAILED, "too many 401"));
+            return;
         }
 
         SipResponse resp = ctx.getSipResponse();
@@ -706,5 +758,41 @@ public class RegistrationManager extends PeriodicRefresher {
             logger.info("Execute re-registration");
         }
         registration();
+    }
+
+    /**
+     * Handle 4xx5xx6xx response without retry header
+     * 
+     * @param ctx SIP transaction context
+     * @throws SipException
+     * @throws CoreException
+     */
+    private void handle4xx5xx6xxNoRetryAfterHeader(SipTransactionContext ctx) throws SipException,
+            CoreException {
+        if (logger.isActivated()) {
+            logger.info("4xx5xx6xx response without retry after header received");
+        }
+        final SipResponse response = ctx.getSipResponse();
+        final RetryAfterHeader retryHeader = (RetryAfterHeader) response.getStackMessage()
+                .getHeader(RetryAfterHeader.NAME);
+        final int durationInMillis = retryHeader.getDuration() * MILLISEC_CONVERSION_RATE;
+        if (retryHeader != null && durationInMillis > 0) {
+            mNetworkInterface.setRetryAfterHeaderDuration(durationInMillis);
+            handleError(new ImsError(ImsError.REGISTRATION_FAILED, new StringBuilder("retry after")
+                    .append(durationInMillis).append(" for 4xx/5xx/6xx").toString()));
+            return;
+        } else {
+            mNb4xx5xx6xxFailures++;
+            if (mNb4xx5xx6xxFailures >= MAX_REGISTRATION_FAILURES) {
+                /**
+                 * We reached MAX_REGISTRATION_FAILURES, stop registration retries
+                 */
+                handleError(new ImsError(ImsError.REGISTRATION_FAILED, "too many 4xx/5xx/6xx"));
+                return;
+            }
+        }
+        SipRequest register = SipMessageFactory.createRegister(mDialogPath, mFeatureTags, ctx
+                .getTransaction().getRequest().getExpires().getExpires(), mInstanceId);
+        sendRegister(register);
     }
 }
