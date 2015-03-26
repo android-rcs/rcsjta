@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.network.sip;
@@ -49,6 +53,14 @@ import com.gsma.rcs.utils.PhoneUtils;
  * @author JM. Auffret
  */
 public class SipUtils {
+
+    private final static char WHITESPACE = ' ';
+
+    private final static String UA_HEADER_OMA_SIMPLE_IM = "IM-client/OMA1.0 ";
+
+    private final static String UA_HEADER_EXT_TO_EXT_CLIENT = "ExttoExt-client/Ext1.0 ";
+
+    private final static String HEADER_EXT_TO_EXT_SERVER = "ExttoExt-serv/Ext1.0 ";
     /**
      * CRLF constant
      */
@@ -162,6 +174,10 @@ public class SipUtils {
      */
     public static final String EXPLICIT_REQUIRE = "explicit;require";
 
+    private static String sUserAgentString;
+
+    private static String sServerHeaderValue;
+
     /**
      * Extract the URI part of a SIP address
      * 
@@ -194,19 +210,25 @@ public class SipUtils {
 
     /**
      * Build User Agent value for UAC
+     * <p>
+     * UA Format : IM-client/OMA1.0 [terminal_vendor/terminal_model-terminal_SW_version]
+     * [client_vendor/client_version]
+     * </p>
      * 
      * @return UA value
      */
     public static String userAgentString() {
-        String userAgent = "ExttoExt-client/Ext1.0 IM-client/OMA1.0 "
-                + TerminalInfo.getProductInfo();
-        return userAgent;
+        if (sUserAgentString == null) {
+            sUserAgentString = new StringBuilder(UA_HEADER_EXT_TO_EXT_CLIENT)
+                    .append(UA_HEADER_OMA_SIMPLE_IM).append(TerminalInfo.getBuildInfo())
+                    .append(WHITESPACE).append(TerminalInfo.getClientInfo()).toString();
+        }
+        return sUserAgentString;
     }
 
     /**
      * Build User-Agent header
      * 
-     * @param Header
      * @throws Exception
      */
     public static Header buildUserAgentHeader() throws Exception {
@@ -218,12 +240,15 @@ public class SipUtils {
     /**
      * Build Server header
      * 
-     * @return Header
      * @throws Exception
      */
     public static Header buildServerHeader() throws Exception {
-        String userAgent = "ExttoExt-serv/Ext1.0 IM-client/OMA1.0 " + TerminalInfo.getProductInfo();
-        return HEADER_FACTORY.createHeader(ServerHeader.NAME, userAgent);
+        if (sServerHeaderValue == null) {
+            sServerHeaderValue = new StringBuilder(HEADER_EXT_TO_EXT_SERVER)
+                    .append(UA_HEADER_OMA_SIMPLE_IM).append(TerminalInfo.getClientInfo())
+                    .toString();
+        }
+        return HEADER_FACTORY.createHeader(ServerHeader.NAME, sServerHeaderValue);
     }
 
     /**

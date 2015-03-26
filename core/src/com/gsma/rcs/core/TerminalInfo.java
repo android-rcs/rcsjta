@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core;
 
+import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.utils.logger.Logger;
 
 import android.content.Context;
@@ -57,7 +58,15 @@ public class TerminalInfo {
 
     private static final String UNKNOWN = "unknown";
 
+    private static final char FORWARD_SLASH = '/';
+
+    private static final char HYPHEN = '-';
+
     private static String sClientVersion;
+
+    private static String sBuildInfo;
+
+    private static String sClientInfo;
 
     /**
      * Returns the product name
@@ -99,10 +108,10 @@ public class TerminalInfo {
      * Returns the client version as mentioned under versionName in AndroidManifest, prefixed with
      * CLIENT_VERSION_PREFIX.
      * <p>
-     * In case versionName is not found under AndroidManifest it will default to
-     * DEFAULT_CLIENT_VERSION.
+     * In case versionName is not found under AndroidManifest it will default to UNKNOWN.
      * </p>
      * 
+     * @param ctx
      * @return Client version
      */
     public static String getClientVersion(Context ctx) {
@@ -156,5 +165,33 @@ public class TerminalInfo {
      */
     public static String getTerminalSoftwareVersion() {
         return (Build.DISPLAY != null) ? Build.DISPLAY : UNKNOWN;
+    }
+
+    /**
+     * Get the build info
+     * 
+     * @return build info
+     */
+    public static String getBuildInfo() {
+        if (sBuildInfo == null) {
+            final String buildVersion = new StringBuilder(getTerminalModel()).append(HYPHEN)
+                    .append(getTerminalSoftwareVersion()).toString();
+            sBuildInfo = new StringBuilder(getTerminalVendor()).append(FORWARD_SLASH)
+                    .append(buildVersion).toString();
+        }
+        return sBuildInfo;
+    }
+
+    /**
+     * Returns the client_vendor '/' client_version
+     * 
+     * @return client information
+     */
+    public static String getClientInfo() {
+        if (sClientInfo == null) {
+            sClientInfo = new StringBuilder(getClientVendor()).append(FORWARD_SLASH)
+                    .append(getClientVersion(AndroidFactory.getApplicationContext())).toString();
+        }
+        return sClientInfo;
     }
 }
