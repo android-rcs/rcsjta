@@ -338,7 +338,7 @@ public class HttpsProvisioningManager {
             sHttpsReqUriBuilder.appendQueryParameter(PARAM_CLIENT_VENDOR,
                     TerminalInfo.getClientVendor());
             sHttpsReqUriBuilder.appendQueryParameter(PARAM_CLIENT_VERSION,
-                    TerminalInfo.getClientVersion());
+                    TerminalInfo.getClientVersion(mCtx));
             sHttpsReqUriBuilder.appendQueryParameter(PARAM_TERMINAL_VENDOR,
                     TerminalInfo.getTerminalVendor());
             sHttpsReqUriBuilder.appendQueryParameter(PARAM_TERMINAL_MODEL,
