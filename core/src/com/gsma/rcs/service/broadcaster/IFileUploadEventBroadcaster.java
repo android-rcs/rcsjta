@@ -23,6 +23,7 @@
 package com.gsma.rcs.service.broadcaster;
 
 import com.gsma.services.rcs.upload.FileUpload.State;
+import com.gsma.services.rcs.upload.FileUploadInfo;
 
 /**
  * Interface to perform broadcast events on FileUploadListeners
@@ -32,4 +33,6 @@ public interface IFileUploadEventBroadcaster {
     public void broadcastStateChanged(String uploadId, State state);
 
     public void broadcastProgressUpdate(String uploadId, long currentSize, long totalSize);
+    
+    public void broadcastUploaded(String uploadId, FileUploadInfo info);
 }

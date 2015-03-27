@@ -56,4 +56,9 @@ public class FileUploadListenerImpl extends IFileUploadListener.Stub {
             throws RemoteException {
         mListener.onProgressUpdate(uploadId, currentSize, totalSize);
     }
+
+    public void onUploaded(String uploadId, FileUploadInfo info)
+            throws RemoteException {
+        mListener.onUploaded(uploadId, info);
+    }
 }

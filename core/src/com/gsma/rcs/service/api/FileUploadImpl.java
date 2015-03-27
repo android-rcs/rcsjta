@@ -111,15 +111,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
                     "File upload info not found for session ID=".concat(mUploadId));
         }
 
-        FileTransferHttpThumbnail fileicon = file.getFileThumbnail();
-        if (fileicon != null) {
-            return new FileUploadInfo(file.getUri(), file.getExpiration(), file.getFilename(),
-                    file.getSize(), file.getMimeType(), fileicon.getUri(),
-                    fileicon.getExpiration(), fileicon.getSize(), fileicon.getMimeType());
-        }
-        return new FileUploadInfo(file.getUri(), file.getExpiration(), file.getFilename(),
-                file.getSize(), file.getMimeType(), Uri.EMPTY, FileTransferLog.UNKNOWN_EXPIRATION,
-                0, "");
+        return createFileUploadInfo(file);
     }
 
     /**
@@ -181,6 +173,18 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
         };
         t.start();
     }
+    
+    private FileUploadInfo createFileUploadInfo(FileTransferHttpInfoDocument file) {
+        FileTransferHttpThumbnail fileicon = file.getFileThumbnail();
+        if (fileicon != null) {
+            return new FileUploadInfo(file.getUri(), file.getExpiration(), file.getFilename(),
+                    file.getSize(), file.getMimeType(), fileicon.getUri(),
+                    fileicon.getExpiration(), fileicon.getSize(), fileicon.getMimeType());
+        }
+        return new FileUploadInfo(file.getUri(), file.getExpiration(), file.getFilename(),
+                file.getSize(), file.getMimeType(), Uri.EMPTY, FileTransferLog.UNKNOWN_EXPIRATION,
+                0, "");        
+    }
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
 
@@ -222,6 +226,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
             mState = FileUpload.State.TRANSFERRED;
             mFileUploadService.removeFileUpload(mUploadId);
             mBroadcaster.broadcastStateChanged(mUploadId, mState);
+            mBroadcaster.broadcastUploaded(mUploadId, createFileUploadInfo(info));
         }
     }
 

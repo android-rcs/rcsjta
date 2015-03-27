@@ -39,11 +39,19 @@ public abstract class FileUploadListener {
     public abstract void onStateChanged(String uploadId, State state);
 
     /**
-     * Callback called during the upload progress
+     * Callback called during the upload progress.
      * 
      * @param uploadId ID of upload
      * @param currentSize Current transferred size in bytes
      * @param totalSize Total size to transfer in bytes
      */
     public abstract void onProgressUpdate(String uploadId, long currentSize, long totalSize);
+
+    /**
+     * Callback called when the file has been uploaded.
+     * 
+     * @param uploadId ID of upload
+     * @param info Info about the file upload
+     */
+    public abstract void onUploaded(String uploadId, FileUploadInfo info);
 }

@@ -21,6 +21,7 @@ package com.orangelabs.rcs.ri.upload;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.upload.FileUpload;
+import com.gsma.services.rcs.upload.FileUploadInfo;
 import com.gsma.services.rcs.upload.FileUploadListener;
 
 import com.orangelabs.rcs.ri.ConnectionManager;
@@ -229,7 +230,7 @@ public class InitiateFileUpload extends Activity {
                 startActivity(intent);
             } catch (Exception e) {
                 e.printStackTrace();
-                Utils.showMessage(InitiateFileUpload.this, getString(R.string.label_upload_failed));
+                Utils.showMessage(InitiateFileUpload.this, getString(R.string.label_open_upload_failed));
             }
         }
     };
@@ -300,10 +301,6 @@ public class InitiateFileUpload extends Activity {
                     } else if (state == FileUpload.State.TRANSFERRED) {
                         // Display sharing status
                         statusView.setText(getString(R.string.label_upload_transferred));
-
-                        // Activate show button
-                        Button showBtn = (Button) findViewById(R.id.show_btn);
-                        showBtn.setEnabled(true);
                     }
                 }
             });
@@ -311,7 +308,7 @@ public class InitiateFileUpload extends Activity {
         }
 
         /**
-         * Callback called during the upload progress
+         * Callback called during the upload progress.
          * 
          * @param sharingId ID of upload
          * @param currentSize Current transferred size in bytes
@@ -326,6 +323,23 @@ public class InitiateFileUpload extends Activity {
                 }
             });
         }
+
+        /**
+         * Callback called when the file has been uploaded.
+         * 
+         * @param uploadId ID of upload
+         * @param info Info about the file upload
+         */
+        @Override
+        public void onUploaded(String uploadId, final FileUploadInfo info) {
+            handler.post(new Runnable() {
+                public void run() {
+                    // Activate show button
+                    Button showBtn = (Button) findViewById(R.id.show_btn);
+                    showBtn.setEnabled(true);
+                }
+            });
+        }    
     };
 
     /**

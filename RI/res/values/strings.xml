@@ -346,6 +346,7 @@
     <string name="label_upload_max_size">File is too big. The max size authorised is %s</string>
     <string name="label_upload_started">STARTED</string>
     <string name="label_upload_transferred">TRANSFERRED</string>
+    <string name="label_open_upload_failed">Show file upload failed</string>
 
     <!-- Group delivery information menu -->
     <string name="title_group_delivery_info">Group delivery information</string>
