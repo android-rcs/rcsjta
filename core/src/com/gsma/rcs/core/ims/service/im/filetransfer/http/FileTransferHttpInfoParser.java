@@ -50,7 +50,7 @@ public class FileTransferHttpInfoParser extends DefaultHandler {
     // @formatter:off
     
     /*
-    <?xml version="1.0" encoding=”UTF-8”?>
+    <?xml version="1.0" encoding=UTF-8>
     <file>
     <file-info type="thumbnail">
                 <file-size>[thumbnail size in bytes]</file-size>
