@@ -926,7 +926,7 @@ public class RcsSettingsData {
     /**
      * File transfer via HTTP capability
      */
-    public static final String CAPABILITY_FILE_TRANSFER_HTTP = "CapabilityFileTransferHttp";
+    /* package private */static final String CAPABILITY_FILE_TRANSFER_HTTP = "CapabilityFileTransferHttp";
     /* package private */static final Boolean DEFAULT_CAPABILITY_FT_HTTP = false;
 
     /**

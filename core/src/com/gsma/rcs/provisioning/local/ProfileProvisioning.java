@@ -179,8 +179,6 @@ public class ProfileProvisioning extends Activity {
         setCheckBoxParam(R.id.image_sharing, RcsSettingsData.CAPABILITY_IMAGE_SHARING, helper);
         setCheckBoxParam(R.id.video_sharing, RcsSettingsData.CAPABILITY_VIDEO_SHARING, helper);
         setCheckBoxParam(R.id.file_transfer, RcsSettingsData.CAPABILITY_FILE_TRANSFER, helper);
-        setCheckBoxParam(R.id.file_transfer_http, RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP,
-                helper);
         setCheckBoxParam(R.id.im, RcsSettingsData.CAPABILITY_IM_SESSION, helper);
         setCheckBoxParam(R.id.im_group, RcsSettingsData.CAPABILITY_IM_GROUP_SESSION, helper);
         setCheckBoxParam(R.id.ipvoicecall, RcsSettingsData.CAPABILITY_IP_VOICE_CALL, helper);
@@ -271,8 +269,6 @@ public class ProfileProvisioning extends Activity {
         saveCheckBoxParam(R.id.image_sharing, RcsSettingsData.CAPABILITY_IMAGE_SHARING, helper);
         saveCheckBoxParam(R.id.video_sharing, RcsSettingsData.CAPABILITY_VIDEO_SHARING, helper);
         saveCheckBoxParam(R.id.file_transfer, RcsSettingsData.CAPABILITY_FILE_TRANSFER, helper);
-        saveCheckBoxParam(R.id.file_transfer_http, RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP,
-                helper);
         saveCheckBoxParam(R.id.im, RcsSettingsData.CAPABILITY_IM_SESSION, helper);
         saveCheckBoxParam(R.id.im_group, RcsSettingsData.CAPABILITY_IM_GROUP_SESSION, helper);
         saveCheckBoxParam(R.id.ipvoicecall, RcsSettingsData.CAPABILITY_IP_VOICE_CALL, helper);
@@ -439,6 +435,10 @@ public class ProfileProvisioning extends Activity {
                 String sipUri = userPhoneNumber + "@" + homeDomain;
                 mRcsSettings.writeParameter(RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID, sipUri);
                 mRcsSettings.writeParameter(RcsSettingsData.FT_HTTP_LOGIN, sipUri);
+                mRcsSettings
+                        .setFileTransferHttpSupported(mRcsSettings.getFtHttpServer().length() > 0
+                                && mRcsSettings.getFtHttpLogin().length() > 0
+                                && mRcsSettings.getFtHttpPassword().length() > 0);
                 return true;
             } else {
                 if (logger.isActivated()) {

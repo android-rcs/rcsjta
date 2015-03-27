@@ -861,6 +861,11 @@ public class HttpsProvisioningManager {
                     }
                     mRcsSettings.setProvisioningToken(token);
 
+                    mRcsSettings.setFileTransferHttpSupported(mRcsSettings.getFtHttpServer()
+                            .length() > 0
+                            && mRcsSettings.getFtHttpLogin().length() > 0
+                            && mRcsSettings.getFtHttpPassword().length() > 0);
+
                     // Reset retry alarm counter
                     mRetryCount = 0;
                     if (ProvisioningInfo.Version.DISABLED_DORMANT.equals(version)) {

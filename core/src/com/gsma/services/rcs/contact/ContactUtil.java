@@ -452,8 +452,8 @@ public class ContactUtil {
         }
         String strippedContact = stripSeparators(contact);
         if (TextUtils.isEmpty(strippedContact)) {
-            throw new RcsContactFormatException(new StringBuilder("Contact '")
-                    .append(contact).append("' has invalid characters or is too long").toString());
+            throw new RcsContactFormatException(new StringBuilder("Contact '").append(contact)
+                    .append("' has invalid characters or is too long").toString());
         }
 
         /* Is Country Code provided ? */
@@ -468,7 +468,8 @@ public class ContactUtil {
         /* CC not provided, does it exists in provider ? */
         if (mCountryCode == null) {
             throw new RcsContactFormatException(new StringBuilder("Local phone number '")
-            .append(strippedContact).append("' cannot be formatted: unknown country code").toString());
+                    .append(strippedContact).append("' cannot be formatted: unknown country code")
+                    .toString());
         }
         /* Local numbering ? */
         if (TextUtils.isEmpty(mCountryAreaCode)) {

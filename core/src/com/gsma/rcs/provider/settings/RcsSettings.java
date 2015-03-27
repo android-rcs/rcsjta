@@ -1286,16 +1286,21 @@ public class RcsSettings {
     }
 
     /**
+     * Set HTTP file transfer support
+     * 
+     * @param supported
+     */
+    public void setFileTransferHttpSupported(boolean supported) {
+        writeBoolean(RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP, supported);
+    }
+
+    /**
      * Is file transfer via HTTP supported
      *
      * @return Boolean
      */
     public boolean isFileTransferHttpSupported() {
-        if ((getFtHttpServer().length() > 0) && (getFtHttpLogin().length() > 0)
-                && (getFtHttpPassword().length() > 0)) {
-            return readBoolean(RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP);
-        }
-        return false;
+        return readBoolean(RcsSettingsData.CAPABILITY_FILE_TRANSFER_HTTP);
     }
 
     /**
