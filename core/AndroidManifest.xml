@@ -224,14 +224,6 @@
             </intent-filter>
         </receiver>
 
-        <!-- Outgoing call state -->
-
-        <receiver android:name="com.gsma.rcs.core.ims.network.gsm.OutgoingCallReceiver" >
-            <intent-filter>
-                <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
-            </intent-filter>
-        </receiver>
-
         <!-- External capability monitoring -->
         <receiver android:name="com.gsma.rcs.core.ims.service.capability.ExternalCapabilityMonitoring" >
             <intent-filter>

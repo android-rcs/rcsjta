@@ -167,7 +167,7 @@ public class Core {
         mAddressBookManager = new AddressBookManager();
 
         // Create the IMS module
-        mImsModule = new ImsModule(this, mRcsSettings, contactsManager, messagingLog);
+        mImsModule = new ImsModule(this, context, mRcsSettings, contactsManager, messagingLog);
 
         if (logActivated) {
             logger.info("Terminal core is created with success");

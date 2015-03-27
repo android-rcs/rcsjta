@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +15,28 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.network.gsm;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
-import android.content.Context;
-import android.telephony.PhoneStateListener;
-import android.telephony.TelephonyManager;
-
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsModule;
-import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Call manager. Note: for outgoing call the capability request is initiated only when we receive
@@ -92,6 +97,16 @@ public class CallManager {
     private TelephonyManager tm;
 
     /**
+     * Receiver for outgoing calls
+     */
+    private BroadcastReceiver mOutgoingCallReceiver;
+
+    /**
+     * The context this manager is part of
+     */
+    private Context mContext;
+
+    /**
      * The logger
      */
     private static final Logger logger = Logger.getLogger(CallManager.class.getSimpleName());
@@ -99,14 +114,22 @@ public class CallManager {
     /**
      * Constructor
      * 
-     * @param core Core
+     * @param parent The ImsModule this manager is part of
+     * @param context The Context this manager is part of
      */
-    public CallManager(ImsModule parent) throws CoreException {
+    public CallManager(ImsModule parent, Context context) {
         this.imsModule = parent;
+        mContext = context;
 
         // Instantiate the telephony manager
-        tm = (TelephonyManager) AndroidFactory.getApplicationContext().getSystemService(
-                Context.TELEPHONY_SERVICE);
+        tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+
+        mOutgoingCallReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                setRemoteParty(intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER));
+            }
+        };
     }
 
     /**
@@ -119,6 +142,9 @@ public class CallManager {
 
         // Monitor phone state
         tm.listen(listener, PhoneStateListener.LISTEN_CALL_STATE);
+
+        mContext.registerReceiver(mOutgoingCallReceiver, new IntentFilter(
+                Intent.ACTION_NEW_OUTGOING_CALL));
     }
 
     /**
@@ -128,6 +154,8 @@ public class CallManager {
         if (logger.isActivated()) {
             logger.info("Stop call monitoring");
         }
+
+        mContext.unregisterReceiver(mOutgoingCallReceiver);
 
         // Unmonitor phone state
         tm.listen(listener, PhoneStateListener.LISTEN_NONE);

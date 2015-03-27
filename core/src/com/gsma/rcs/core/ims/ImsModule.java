@@ -49,11 +49,12 @@ import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.terms.TermsConditionsService;
 import com.gsma.rcs.core.ims.userprofile.UserProfile;
-import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
+
+import android.content.Context;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -109,13 +110,14 @@ public class ImsModule implements SipEventListener {
      * Constructor
      * 
      * @param core Core
+     * @param context The context this module is part of
      * @param rcsSettings RCSsettings instance
      * @param contactsManager
      * @param messagingLog
      * @throws CoreException
      */
-    public ImsModule(Core core, RcsSettings rcsSettings, ContactsManager contactsManager,
-            MessagingLog messagingLog) throws CoreException {
+    public ImsModule(Core core, Context context, RcsSettings rcsSettings,
+            ContactsManager contactsManager, MessagingLog messagingLog) throws CoreException {
         mCore = core;
 
         if (logger.isActivated()) {
@@ -123,8 +125,7 @@ public class ImsModule implements SipEventListener {
         }
 
         // Get capability extensions
-        ServiceExtensionManager.getInstance(rcsSettings).updateSupportedExtensions(
-                AndroidFactory.getApplicationContext());
+        ServiceExtensionManager.getInstance(rcsSettings).updateSupportedExtensions(context);
 
         // Create the IMS connection manager
         try {
@@ -179,7 +180,7 @@ public class ImsModule implements SipEventListener {
         mServiceDispatcher = new ImsServiceDispatcher(this, rcsSettings);
 
         // Create the call manager
-        mCallManager = new CallManager(this);
+        mCallManager = new CallManager(this, context);
 
         mInitializationFinished = true;
 
