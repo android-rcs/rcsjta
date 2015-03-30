@@ -29,7 +29,6 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.http.DownloadFromAcceptFile
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.DownloadFromResumeFileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.ResumeUploadFileSharingSession;
-import com.gsma.rcs.core.ims.service.im.filetransfer.http.TerminatingHttpFileSharingSession;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
@@ -336,7 +335,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
         final FileSharingSession ongoingSession = mImService.getFileSharingSession(mFileTransferId);
         if (ongoingSession != null) {
-            if (ongoingSession instanceof TerminatingHttpFileSharingSession) {
+            if (!ongoingSession.isInitiatedByRemote()) {
                 // TODO Temporarily illegal access exception
                 throw new IllegalStateException(new StringBuilder(
                         "Cannot accept transfer with fileTransferId '").append(mFileTransferId)
