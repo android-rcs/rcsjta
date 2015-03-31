@@ -3138,6 +3138,10 @@ public final class ContactsManager {
             String oldDisplayName = getContactDisplayName(contact);
             boolean updateRequired = !StringUtils.equals(oldDisplayName, displayName);
             if (updateRequired) {
+                if (logger.isActivated()) {
+                    logger.debug("Update display name '" + displayName + "' for contact:"
+                            + contact.toString());
+                }
                 Uri uri = Uri.withAppendedPath(RichAddressBookData.CONTENT_URI, contact.toString());
                 // Contact already present and display name is new, update
                 mLocalContentResolver.update(uri, values, null, null);

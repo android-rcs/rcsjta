@@ -90,7 +90,7 @@ public class PhoneUtils {
         }
         if (TEL_URI_SUPPORTED) {
             /* Tel-URI format */
-            return TEL_URI_HEADER.concat(contactId.toString()).toString();
+            return TEL_URI_HEADER.concat(contactId.toString());
 
         }
         /* SIP-URI format */

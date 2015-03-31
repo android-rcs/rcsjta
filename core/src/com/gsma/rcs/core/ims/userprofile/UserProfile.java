@@ -175,6 +175,11 @@ public class UserProfile {
                 .append(">").toString();
     }
 
+    private String formatAddressWithDisplayName(String displayName, ContactId contact) {
+        return new StringBuilder("\"").append(displayName).append("\" <")
+                .append(PhoneUtils.formatContactIdToUri(contact)).append(">").toString();
+    }
+
     /**
      * Get the user public address
      * 
@@ -195,7 +200,7 @@ public class UserProfile {
             /* Do no insert display name if it is equal to the international number */
             return addr;
         }
-        return formatAddressWithDisplayName(displayName, me.toString());
+        return formatAddressWithDisplayName(displayName, me);
     }
 
     /**
