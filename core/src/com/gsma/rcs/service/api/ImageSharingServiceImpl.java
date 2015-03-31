@@ -49,6 +49,7 @@ import com.gsma.services.rcs.sharing.image.IImageSharingService;
 import com.gsma.services.rcs.sharing.image.IImageSharingServiceConfiguration;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.image.ImageSharing.ReasonCode;
+import com.gsma.services.rcs.sharing.image.ImageSharing.State;
 
 import android.net.Uri;
 import android.os.IBinder;
@@ -169,7 +170,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 
     /**
      * Registers a listener on service registration events
-     *
+     * 
      * @param listener Service registration listener
      */
     public void addEventListener(IRcsServiceRegistrationListener listener) {
@@ -183,7 +184,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 
     /**
      * Unregisters a listener on service registration events
-     *
+     * 
      * @param listener Service registration listener
      */
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
@@ -193,6 +194,12 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
         synchronized (lock) {
             mRcsServiceRegistrationEventBroadcaster.removeEventListener(listener);
         }
+    }
+
+    public void setImageSharingStateAndReasonCode(ContactId contact, String sharingId, State state,
+            ReasonCode reasonCode) {
+        mRichCallLog.setImageSharingStateAndReasonCode(sharingId, state, reasonCode);
+        mBroadcaster.broadcastStateChanged(contact, sharingId, state, reasonCode);
     }
 
     /**
@@ -207,7 +214,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 
     /**
      * Notifies unregistration event
-     *
+     * 
      * @param reasonCode for unregistration
      */
     public void notifyUnRegistration(RcsServiceRegistration.ReasonCode reasonCode) {
@@ -359,7 +366,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 
     /**
      * Add and broadcast image sharing invitation rejection invitation.
-     *
+     * 
      * @param contact Contact
      * @param content Image content
      * @param reasonCode Reason code

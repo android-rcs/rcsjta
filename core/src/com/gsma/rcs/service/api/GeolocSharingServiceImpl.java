@@ -173,7 +173,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 
     /**
      * Registers a listener on service registration events
-     *
+     * 
      * @param listener Service registration listener
      */
     public void addEventListener(IRcsServiceRegistrationListener listener) {
@@ -187,7 +187,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 
     /**
      * Unregisters a listener on service registration events
-     *
+     * 
      * @param listener Service registration listener
      */
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
@@ -211,7 +211,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 
     /**
      * Notifies unregistration event
-     *
+     * 
      * @param reasonCode for unregistration
      */
     public void notifyUnRegistration(RcsServiceRegistration.ReasonCode reasonCode) {
@@ -375,7 +375,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 
     /**
      * Removes a listener on geoloc sharing events
-     *
+     * 
      * @param listener Listener
      */
     public void removeEventListener2(IGeolocSharingListener listener) {
@@ -409,9 +409,15 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
     public void addAndBroadcastGeolocSharingInvitationRejected(ContactId contact,
             GeolocContent content, ReasonCode reasonCode, long timestamp) {
         String sharingId = SessionIdGenerator.getNewId();
-        RichCallHistory.getInstance().addIncomingGeolocSharing(contact, sharingId,
-                GeolocSharing.State.REJECTED, reasonCode, timestamp);
+        mRichcallLog.addIncomingGeolocSharing(contact, sharingId, GeolocSharing.State.REJECTED,
+                reasonCode, timestamp);
         mBroadcaster.broadcastInvitation(sharingId);
+    }
+
+    public void setGeolocSharingStateAndReasonCode(ContactId contact, String sharingId,
+            State state, ReasonCode reasonCode) {
+        mRichcallLog.setGeolocSharingStateAndReasonCode(sharingId, state, reasonCode);
+        mBroadcaster.broadcastStateChanged(contact, sharingId, state, reasonCode);
     }
 
     /**

@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.richcall;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.GeolocContent;
@@ -118,6 +119,8 @@ public class RichcallService extends ImsService {
 
     private final RcsSettings mRcsSettings;
 
+    private final Core mCore;
+
     /**
      * Constructor
      * 
@@ -126,9 +129,10 @@ public class RichcallService extends ImsService {
      * @param rcsSettings
      * @throws CoreException
      */
-    public RichcallService(ImsModule parent, ContactsManager contactsManager,
+    public RichcallService(ImsModule parent, Core core, ContactsManager contactsManager,
             RcsSettings rcsSettings) throws CoreException {
         super(parent, true);
+        mCore = core;
         mContactsManager = contactsManager;
         mRcsSettings = rcsSettings;
     }
@@ -165,6 +169,8 @@ public class RichcallService extends ImsService {
             return;
         }
         setServiceStarted(true);
+
+        mCore.getListener().tryToStartRichcallServiceTasks(this);
     }
 
     /**

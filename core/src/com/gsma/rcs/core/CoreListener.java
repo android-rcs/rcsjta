@@ -37,6 +37,7 @@ import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardO
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallSession;
 import com.gsma.rcs.core.ims.service.presence.pidf.PidfDocument;
+import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
 import com.gsma.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.gsma.rcs.core.ims.service.richcall.video.VideoStreamingSession;
@@ -406,6 +407,14 @@ public interface CoreListener {
      * @param imService
      */
     public void tryToStartImServiceTasks(InstantMessagingService imService);
+
+    /**
+     * Try to start ImService tasks once the IMS connection is re-established and the ImsServices
+     * are restarted
+     * 
+     * @param rcService
+     */
+    public void tryToStartRichcallServiceTasks(RichcallService rcService);
 
     /**
      * Try to invite queued group chat participants

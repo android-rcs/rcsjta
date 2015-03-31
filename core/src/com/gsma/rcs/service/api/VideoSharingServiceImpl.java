@@ -48,6 +48,7 @@ import com.gsma.services.rcs.sharing.video.IVideoSharingService;
 import com.gsma.services.rcs.sharing.video.IVideoSharingServiceConfiguration;
 import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharing.ReasonCode;
+import com.gsma.services.rcs.sharing.video.VideoSharing.State;
 
 import android.os.IBinder;
 
@@ -169,7 +170,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
     /**
      * Registers a listener on service registration events
-     *
+     * 
      * @param listener Service registration listener
      */
     public void addEventListener(IRcsServiceRegistrationListener listener) {
@@ -183,7 +184,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
     /**
      * Unregisters a listener on service registration events
-     *
+     * 
      * @param listener Service registration listener
      */
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
@@ -207,7 +208,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
     /**
      * Notifies unregistration event
-     *
+     * 
      * @param reasonCode for unregistration
      */
     public void notifyUnRegistration(RcsServiceRegistration.ReasonCode reasonCode) {
@@ -215,6 +216,13 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
         synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.broadcastServiceUnRegistered(reasonCode);
         }
+    }
+
+    public void setVideoSharingStateAndReasonCode(ContactId contact, String sharingId, State state,
+            ReasonCode reasonCode, long duration) {
+        mRichCallLog.setVideoSharingStateReasonCodeAndDuration(sharingId, state, reasonCode,
+                duration);
+        mBroadcaster.broadcastStateChanged(contact, sharingId, state, reasonCode);
     }
 
     /**

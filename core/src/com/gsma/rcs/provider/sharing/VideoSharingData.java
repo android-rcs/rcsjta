@@ -40,60 +40,60 @@ public class VideoSharingData {
     /**
      * Unique history log id
      */
-    static final String KEY_BASECOLUMN_ID = VideoSharingLog.BASECOLUMN_ID;
+    /* package private */static final String KEY_BASECOLUMN_ID = VideoSharingLog.BASECOLUMN_ID;
 
     /**
      * Unique sharing identifier
      */
-    static final String KEY_SHARING_ID = VideoSharingLog.SHARING_ID;
+    /* package private */static final String KEY_SHARING_ID = VideoSharingLog.SHARING_ID;
 
     /**
      * ContactId formatted number of the remote contact
      */
-    static final String KEY_CONTACT = VideoSharingLog.CONTACT;
+    /* package private */static final String KEY_CONTACT = VideoSharingLog.CONTACT;
 
     /**
      * Date of the sharing
      */
-    static final String KEY_TIMESTAMP = VideoSharingLog.TIMESTAMP;
+    /* package private */static final String KEY_TIMESTAMP = VideoSharingLog.TIMESTAMP;
 
     /**
      * @see VideoSharing.State for the list of states
      */
-    static final String KEY_STATE = VideoSharingLog.STATE;
+    /* package private */static final String KEY_STATE = VideoSharingLog.STATE;
 
     /**
      * Reason code associated with the video sharing state.
      * 
      * @see VideoSharing.ReasonCode
      */
-    static final String KEY_REASON_CODE = VideoSharingLog.REASON_CODE;
+    /* package private */static final String KEY_REASON_CODE = VideoSharingLog.REASON_CODE;
 
     /**
      * Incoming sharing or outgoing sharing.
      * 
      * @see Direction
      */
-    static final String KEY_DIRECTION = VideoSharingLog.DIRECTION;
+    /* package private */static final String KEY_DIRECTION = VideoSharingLog.DIRECTION;
 
     /**
      * Duration of the sharing in seconds. The value is only set at the end of the sharing.
      */
-    static final String KEY_DURATION = VideoSharingLog.DURATION;
+    /* package private */static final String KEY_DURATION = VideoSharingLog.DURATION;
 
     /**
      * Encoding of the shared video
      */
-    static final String KEY_VIDEO_ENCODING = VideoSharingLog.VIDEO_ENCODING;
+    /* package private */static final String KEY_VIDEO_ENCODING = VideoSharingLog.VIDEO_ENCODING;
 
     /**
      * Width of the shared video
      */
-    static final String KEY_WIDTH = VideoSharingLog.WIDTH;
+    /* package private */static final String KEY_WIDTH = VideoSharingLog.WIDTH;
 
     /**
      * Height of the shared video
      */
-    static final String KEY_HEIGHT = VideoSharingLog.HEIGHT;
+    /* package private */static final String KEY_HEIGHT = VideoSharingLog.HEIGHT;
 
 }

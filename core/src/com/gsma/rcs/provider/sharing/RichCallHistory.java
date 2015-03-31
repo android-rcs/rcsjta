@@ -64,6 +64,25 @@ public class RichCallHistory {
 
     private static final int FIRST_COLUMN_IDX = 0;
 
+    private static final String SELECTION_BY_INTERRUPTED_GEOLOC_SHARINGS = new StringBuilder(
+            GeolocSharingData.KEY_STATE).append(" IN ('")
+            .append(GeolocSharing.State.STARTED.toInt()).append("','")
+            .append(GeolocSharing.State.INITIATING.toInt()).append("','")
+            .append(GeolocSharing.State.INVITED.toInt()).append("')").toString();
+
+    private static final String SELECTION_BY_INTERRUPTED_IMAGE_SHARINGS = new StringBuilder(
+            ImageSharingData.KEY_STATE).append(" IN ('").append(ImageSharing.State.STARTED.toInt())
+            .append("','").append(ImageSharing.State.INITIATING.toInt()).append("','")
+            .append(ImageSharing.State.INVITED.toInt()).append("')").toString();
+
+    private static final String SELECTION_BY_INTERRUPTED_VIDEO_SHARINGS = new StringBuilder(
+            VideoSharingData.KEY_STATE).append(" IN ('").append(VideoSharing.State.STARTED.toInt())
+            .append("','").append(VideoSharing.State.INITIATING.toInt()).append("','")
+            .append(VideoSharing.State.INVITED.toInt()).append("')").toString();
+
+    private static final String ORDER_BY_TIMESTAMP_ASC = GeolocSharingData.KEY_TIMESTAMP
+            .concat(" ASC");
+
     /**
      * Get image transfer info from its unique Id
      * 
@@ -512,6 +531,21 @@ public class RichCallHistory {
         }
         return ReasonCode.valueOf(getDataAsInt(getGeolocSharingData(
                 GeolocSharingData.KEY_REASON_CODE, sharingId)));
+    }
+
+    public Cursor getInterruptedGeolocSharings() {
+        return mLocalContentResolver.query(GeolocSharingData.CONTENT_URI, null,
+                SELECTION_BY_INTERRUPTED_GEOLOC_SHARINGS, null, ORDER_BY_TIMESTAMP_ASC);
+    }
+
+    public Cursor getInterruptedImageSharings() {
+        return mLocalContentResolver.query(ImageSharingLog.CONTENT_URI, null,
+                SELECTION_BY_INTERRUPTED_IMAGE_SHARINGS, null, ORDER_BY_TIMESTAMP_ASC);
+    }
+
+    public Cursor getInterruptedVideoSharings() {
+        return mLocalContentResolver.query(VideoSharingLog.CONTENT_URI, null,
+                SELECTION_BY_INTERRUPTED_VIDEO_SHARINGS, null, ORDER_BY_TIMESTAMP_ASC);
     }
 
     /**

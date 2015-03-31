@@ -166,7 +166,7 @@ public class ImsModule implements SipEventListener {
         mServices.put(ImsServiceType.IPCALL, new IPCallService(this, rcsSettings, contactsManager));
 
         // Create richcall service (optional)
-        mServices.put(ImsServiceType.RICHCALL, new RichcallService(this, contactsManager,
+        mServices.put(ImsServiceType.RICHCALL, new RichcallService(this, core, contactsManager,
                 rcsSettings));
 
         // Create presence service (optional)

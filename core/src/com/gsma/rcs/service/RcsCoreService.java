@@ -60,6 +60,9 @@ import com.gsma.rcs.provider.ipcall.IPCallHistory;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
+import com.gsma.rcs.provider.sharing.UpdateGeolocSharingStateAfterUngracefulTerminationTask;
+import com.gsma.rcs.provider.sharing.UpdateImageSharingStateAfterUngracefulTerminationTask;
+import com.gsma.rcs.provider.sharing.UpdateVideoSharingStateAfterUngracefulTerminationTask;
 import com.gsma.rcs.service.api.CapabilityServiceImpl;
 import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.ContactServiceImpl;
@@ -120,6 +123,8 @@ public class RcsCoreService extends Service implements CoreListener {
     private final static Object IM_OPERATION_LOCK = new Object();
 
     private final static ExecutorService mImOperationExecutor = Executors.newSingleThreadExecutor();
+
+    private final static ExecutorService mRcOperationExecutor = Executors.newSingleThreadExecutor();
 
     /**
      * CPU manager
@@ -208,6 +213,8 @@ public class RcsCoreService extends Service implements CoreListener {
 
     private MessagingLog mMessagingLog;
 
+    private RichCallHistory mRichCallHistory;
+
     private HistoryLog mHistoryLog;
 
     private ContactsManager mContactManager;
@@ -224,7 +231,8 @@ public class RcsCoreService extends Service implements CoreListener {
         mLocalContentResolver = new LocalContentResolver(mContentResolver);
         mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
         mMessagingLog = MessagingLog.createInstance(mContext, mLocalContentResolver, mRcsSettings);
-
+        RichCallHistory.createInstance(mLocalContentResolver);
+        mRichCallHistory = RichCallHistory.getInstance();
         // Set application context
         AndroidFactory.setApplicationContext(mContext, mRcsSettings);
 
@@ -290,7 +298,6 @@ public class RcsCoreService extends Service implements CoreListener {
 
             ContactsManager.createInstance(mContext, mContentResolver, mLocalContentResolver,
                     mRcsSettings);
-            RichCallHistory.createInstance(mLocalContentResolver);
             IPCallHistory.createInstance(mLocalContentResolver);
 
             HistoryLog.createInstance(mLocalContentResolver);
@@ -309,18 +316,16 @@ public class RcsCoreService extends Service implements CoreListener {
             IPCallService ipCallService = core.getIPCallService();
             SipService sipService = core.getSipService();
 
-            RichCallHistory richcallLog = RichCallHistory.getInstance();
-
             mChatApi = new ChatServiceImpl(imService, mMessagingLog, mRcsSettings, mContactManager,
                     core);
             mFtApi = new FileTransferServiceImpl(imService, mMessagingLog, mRcsSettings,
                     mContactManager, core);
-            mVshApi = new VideoSharingServiceImpl(richCallService, richcallLog, mRcsSettings,
+            mVshApi = new VideoSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings,
                     mContactManager, core);
-            mIshApi = new ImageSharingServiceImpl(richCallService, richcallLog, mRcsSettings,
+            mIshApi = new ImageSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings,
                     mContactManager);
-            mGshApi = new GeolocSharingServiceImpl(richCallService, mContactManager, richcallLog,
-                    mRcsSettings);
+            mGshApi = new GeolocSharingServiceImpl(richCallService, mContactManager,
+                    mRichCallHistory, mRcsSettings);
             mHistoryApi = new HistoryServiceImpl(getApplicationContext());
             mIpcallApi = new IPCallServiceImpl(ipCallService, IPCallHistory.getInstance(),
                     mContactManager, mRcsSettings);
@@ -956,6 +961,16 @@ public class RcsCoreService extends Service implements CoreListener {
          */
         mImOperationExecutor.execute(new DelayedDisplayNotificationDispatcher(
                 mLocalContentResolver, mChatApi));
+    }
+
+    @Override
+    public void tryToStartRichcallServiceTasks(RichcallService rcService) {
+        mRcOperationExecutor.execute(new UpdateGeolocSharingStateAfterUngracefulTerminationTask(
+                mRichCallHistory, mGshApi));
+        mRcOperationExecutor.execute(new UpdateImageSharingStateAfterUngracefulTerminationTask(
+                mRichCallHistory, mIshApi));
+        mRcOperationExecutor.execute(new UpdateVideoSharingStateAfterUngracefulTerminationTask(
+                mRichCallHistory, mVshApi));
     }
 
     @Override

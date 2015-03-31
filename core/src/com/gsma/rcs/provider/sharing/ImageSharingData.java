@@ -40,64 +40,64 @@ public class ImageSharingData {
     /**
      * Unique history log id
      */
-    static final String KEY_BASECOLUMN_ID = ImageSharingLog.BASECOLUMN_ID;
+    /* package private */static final String KEY_BASECOLUMN_ID = ImageSharingLog.BASECOLUMN_ID;
 
     /**
      * Unique sharing identifier
      */
-    static final String KEY_SHARING_ID = ImageSharingLog.SHARING_ID;
+    /* package private */static final String KEY_SHARING_ID = ImageSharingLog.SHARING_ID;
 
     /**
      * Date of the sharing
      */
-    static final String KEY_TIMESTAMP = ImageSharingLog.TIMESTAMP;
+    /* package private */static final String KEY_TIMESTAMP = ImageSharingLog.TIMESTAMP;
 
     /**
      * ContactId formatted number of the remote contact
      */
-    static final String KEY_CONTACT = ImageSharingLog.CONTACT;
+    /* package private */static final String KEY_CONTACT = ImageSharingLog.CONTACT;
 
     /**
      * @see ImageSharing.State
      */
-    static final String KEY_STATE = ImageSharingLog.STATE;
+    /* package private */static final String KEY_STATE = ImageSharingLog.STATE;
 
     /**
      * Reason code associated with the image sharing state.
      * 
      * @see ImageSharing.ReasonCode
      */
-    static final String KEY_REASON_CODE = ImageSharingLog.REASON_CODE;
+    /* package private */static final String KEY_REASON_CODE = ImageSharingLog.REASON_CODE;
 
     /**
      * Multipurpose Internet Mail Extensions (MIME) type of file
      */
-    static final String KEY_MIME_TYPE = ImageSharingLog.MIME_TYPE;
+    /* package private */static final String KEY_MIME_TYPE = ImageSharingLog.MIME_TYPE;
 
     /**
      * URI of the file
      */
-    static final String KEY_FILE = ImageSharingLog.FILE;
+    /* package private */static final String KEY_FILE = ImageSharingLog.FILE;
 
     /**
      * Filename
      */
-    static final String KEY_FILENAME = ImageSharingLog.FILENAME;
+    /* package private */static final String KEY_FILENAME = ImageSharingLog.FILENAME;
 
     /**
      * Size transferred in bytes
      */
-    static final String KEY_TRANSFERRED = ImageSharingLog.TRANSFERRED;
+    /* package private */static final String KEY_TRANSFERRED = ImageSharingLog.TRANSFERRED;
 
     /**
      * File size in bytes
      */
-    static final String KEY_FILESIZE = ImageSharingLog.FILESIZE;
+    /* package private */static final String KEY_FILESIZE = ImageSharingLog.FILESIZE;
 
     /**
      * Incoming sharing or outgoing sharing.
      * 
      * @see Direction
      */
-    static final String KEY_DIRECTION = ImageSharingLog.DIRECTION;
+    /* package private */static final String KEY_DIRECTION = ImageSharingLog.DIRECTION;
 }

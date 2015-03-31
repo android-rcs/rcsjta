@@ -29,21 +29,21 @@ public class GeolocSharingData {
 
     public static final int HISTORYLOG_MEMBER_ID = GeolocSharingLog.HISTORYLOG_MEMBER_ID;
 
-    static final String KEY_BASECOLUMN_ID = GeolocSharingLog.BASECOLUMN_ID;
+    /* package private */static final String KEY_BASECOLUMN_ID = GeolocSharingLog.BASECOLUMN_ID;
 
-    static final String KEY_SHARING_ID = GeolocSharingLog.SHARING_ID;
+    /* package private */static final String KEY_SHARING_ID = GeolocSharingLog.SHARING_ID;
 
-    static final String KEY_CONTACT = GeolocSharingLog.CONTACT;
+    /* package private */static final String KEY_CONTACT = GeolocSharingLog.CONTACT;
 
-    static final String KEY_CONTENT = GeolocSharingLog.CONTENT;
+    /* package private */static final String KEY_CONTENT = GeolocSharingLog.CONTENT;
 
-    static final String KEY_MIME_TYPE = GeolocSharingLog.MIME_TYPE;
+    /* package private */static final String KEY_MIME_TYPE = GeolocSharingLog.MIME_TYPE;
 
-    static final String KEY_DIRECTION = GeolocSharingLog.DIRECTION;
+    /* package private */static final String KEY_DIRECTION = GeolocSharingLog.DIRECTION;
 
-    static final String KEY_STATE = GeolocSharingLog.STATE;
+    /* package private */static final String KEY_STATE = GeolocSharingLog.STATE;
 
-    static final String KEY_REASON_CODE = GeolocSharingLog.REASON_CODE;
+    /* package private */static final String KEY_REASON_CODE = GeolocSharingLog.REASON_CODE;
 
-    static final String KEY_TIMESTAMP = GeolocSharingLog.TIMESTAMP;
+    /* package private */static final String KEY_TIMESTAMP = GeolocSharingLog.TIMESTAMP;
 }
