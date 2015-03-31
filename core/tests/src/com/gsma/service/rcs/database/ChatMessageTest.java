@@ -27,7 +27,6 @@ import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtilMockContext;
 import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
@@ -67,11 +66,7 @@ public class ChatMessageTest extends AndroidTestCase {
         mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
         mMessagingLog = MessagingLog.createInstance(mContext, mLocalContentResolver, mRcsSettings);
         ContactUtil contactUtils = ContactUtil.getInstance(new ContactUtilMockContext(mContext));
-        try {
-            mContact = contactUtils.formatContact("+339000000");
-        } catch (RcsContactFormatException e) {
-            fail("Cannot create contactID");
-        }
+        mContact = contactUtils.formatContact("+339000000");
         ImsModule.IMS_USER_PROFILE = new UserProfile(mContact, "homeDomain", "privateID",
                 "password", "realm", "xdmServerAddr", "xdmServerLogin", "xdmServerPassword",
                 "imConferenceUri", mRcsSettings);

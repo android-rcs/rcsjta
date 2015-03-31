@@ -18,7 +18,6 @@
 
 package com.gsma.services.rcs.contact;
 
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsServiceException;
 
 import android.content.Context;
@@ -448,11 +447,11 @@ public class ContactUtil {
      */
     public ContactId formatContact(String contact) {
         if (TextUtils.isEmpty(contact)) {
-            throw new RcsContactFormatException("Input parameter is null or empty");
+            throw new IllegalArgumentException("Input parameter is null or empty");
         }
         String strippedContact = stripSeparators(contact);
         if (TextUtils.isEmpty(strippedContact)) {
-            throw new RcsContactFormatException(new StringBuilder("Contact '").append(contact)
+            throw new IllegalArgumentException(new StringBuilder("Contact '").append(contact)
                     .append("' has invalid characters or is too long").toString());
         }
 
@@ -467,7 +466,7 @@ public class ContactUtil {
         }
         /* CC not provided, does it exists in provider ? */
         if (mCountryCode == null) {
-            throw new RcsContactFormatException(new StringBuilder("Local phone number '")
+            throw new IllegalArgumentException(new StringBuilder("Local phone number '")
                     .append(strippedContact).append("' cannot be formatted: unknown country code")
                     .toString());
         }
@@ -482,7 +481,7 @@ public class ContactUtil {
             return new ContactId(new StringBuilder(mCountryCode).append(strippedContact,
                     mCountryAreaCode.length(), strippedContact.length()).toString());
         }
-        throw new RcsContactFormatException(new StringBuilder("Local phone number '")
+        throw new IllegalArgumentException(new StringBuilder("Local phone number '")
                 .append(strippedContact).append("' should be prefixed with Country Area Code (")
                 .append(mCountryAreaCode).append(")").toString());
     }

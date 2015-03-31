@@ -18,15 +18,14 @@
 
 package com.gsma.rcs.utils;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.Context;
 
-import com.gsma.rcs.core.ims.ImsModule;
-import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.services.rcs.RcsContactFormatException;
-import com.gsma.services.rcs.contact.ContactId;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Phone utility functions
@@ -49,9 +48,25 @@ public class PhoneUtils {
      */
     private final static Pattern PATTERN_EXTRACT_URI = Pattern.compile(REGEXP_EXTRACT_URI);
 
-    private static final String TEL_URI_HEADER = "tel:";
+    /**
+     * Header for TEL URI
+     */
+    public static final String TEL_URI_HEADER = "tel:";
 
-    private static final String SIP_URI_HEADER = "sip:";
+    /**
+     * header for SIP URI
+     */
+    public static final String SIP_URI_HEADER = "sip:";
+
+    /**
+     * Start delimiter for URI
+     */
+    public static final String URI_START_DELIMITER = "<";
+
+    /**
+     * End delimiter for URI
+     */
+    public static final String URI_END_DELIMITER = ">";
 
     /**
      * Set the country code
@@ -64,48 +79,6 @@ public class PhoneUtils {
     }
 
     /**
-     * Format a phone number to a SIP URI
-     * 
-     * @param number Phone number
-     * @return SIP URI
-     */
-    public static String formatNumberToSipUri(String number) {
-        if (number == null) {
-            return null;
-
-        }
-
-        // Remove spaces
-        number = number.trim();
-
-        // Extract username part
-        if (number.startsWith(TEL_URI_HEADER)) {
-            number = number.substring(TEL_URI_HEADER.length());
-        } else if (number.startsWith(SIP_URI_HEADER)) {
-            number = number.substring(SIP_URI_HEADER.length(), number.indexOf("@"));
-        }
-        try {
-            ContactId contact = ContactUtils.createContactId(number);
-            number = contact.toString();
-            if (TEL_URI_SUPPORTED) {
-                // Tel-URI format
-                return new StringBuilder(TEL_URI_HEADER).append(number).toString();
-
-            } else {
-                // SIP-URI format
-                return new StringBuilder(SIP_URI_HEADER).append(number).append("@")
-                        .append(ImsModule.IMS_USER_PROFILE.getHomeDomain()).append(";user=phone")
-                        .toString();
-
-            }
-        } catch (RcsContactFormatException e) {
-            return null;
-
-        }
-
-    }
-
-    /**
      * Format ContactId to tel or sip Uri
      * 
      * @param contactId the contact identifier
@@ -114,19 +87,16 @@ public class PhoneUtils {
     public static String formatContactIdToUri(ContactId contactId) {
         if (contactId == null) {
             throw new IllegalArgumentException("ContactId is null");
-
         }
         if (TEL_URI_SUPPORTED) {
-            // Tel-URI format
-            return new StringBuilder(TEL_URI_HEADER).append(contactId).toString();
-
-        } else {
-            // SIP-URI format
-            return new StringBuilder(SIP_URI_HEADER).append(contactId).append("@")
-                    .append(ImsModule.IMS_USER_PROFILE.getHomeDomain()).append(";user=phone")
-                    .toString();
+            /* Tel-URI format */
+            return TEL_URI_HEADER.concat(contactId.toString()).toString();
 
         }
+        /* SIP-URI format */
+        return new StringBuilder(SIP_URI_HEADER).append(contactId).append("@")
+                .append(ImsModule.IMS_USER_PROFILE.getHomeDomain()).append(";user=phone")
+                .toString();
     }
 
     /**
@@ -135,60 +105,42 @@ public class PhoneUtils {
      * @param uri SIP or Tel URI
      * @return Unformatted Number or null in case of error
      */
-    public static String extractNumberFromUriWithoutFormatting(String uri) {
+    /* package private */static String extractNumberFromUriWithoutFormatting(String uri) {
         if (uri == null) {
             return null;
-
         }
 
         try {
-            // Extract URI from address
-            int index0 = uri.indexOf("<");
+            /* Extract URI from address */
+            int index0 = uri.indexOf(URI_START_DELIMITER);
             if (index0 != -1) {
-                uri = uri.substring(index0 + 1, uri.indexOf(">", index0));
+                uri = uri.substring(index0 + URI_START_DELIMITER.length(),
+                        uri.indexOf(URI_END_DELIMITER, index0));
             }
 
-            // Extract a Tel-URI
+            /* Extract a Tel-URI */
             int index1 = uri.indexOf(TEL_URI_HEADER);
             if (index1 != -1) {
-                uri = uri.substring(index1 + 4);
+                uri = uri.substring(index1 + TEL_URI_HEADER.length());
             }
 
-            // Extract a SIP-URI
+            /* Extract a SIP-URI */
             index1 = uri.indexOf(SIP_URI_HEADER);
             if (index1 != -1) {
                 int index2 = uri.indexOf("@", index1);
-                uri = uri.substring(index1 + 4, index2);
+                uri = uri.substring(index1 + SIP_URI_HEADER.length(), index2);
             }
 
-            // Remove URI parameters
+            /* Remove URI parameters */
             int index2 = uri.indexOf(";");
             if (index2 != -1) {
                 uri = uri.substring(0, index2);
             }
 
-            // Returns the extracted number (username part of the URI)
+            /* Returns the extracted number (username part of the URI) */
             return uri;
 
         } catch (Exception e) {
-            return null;
-        }
-    }
-
-    /**
-     * Extract user part phone number from a SIP-URI or Tel-URI or SIP address
-     * 
-     * @param uri SIP or Tel URI
-     * @return Number or null in case of error
-     */
-    public static String extractNumberFromUri(String uri) {
-        // Format the extracted number (username part of the URI)
-        try {
-            ContactId contact = ContactUtils
-                    .createContactId(extractNumberFromUriWithoutFormatting(uri));
-            return contact.toString();
-
-        } catch (RcsContactFormatException e) {
             return null;
         }
     }

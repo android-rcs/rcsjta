@@ -21,18 +21,15 @@ package com.orangelabs.rcs.ri.messaging.chat.single;
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Spinner;
 
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
-import com.orangelabs.rcs.ri.utils.LogUtils;
 
 /**
  * Initiate chat
@@ -43,14 +40,11 @@ import com.orangelabs.rcs.ri.utils.LogUtils;
 public class InitiateSingleChat extends Activity {
 
     /**
-     * The log tag for this class
-     */
-    private static final String LOGTAG = LogUtils.getTag(InitiateSingleChat.class.getSimpleName());
-
-    /**
      * Spinner for contact selection
      */
     private Spinner mSpinner;
+
+    private ContactUtil mContactUtil;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,6 +53,8 @@ public class InitiateSingleChat extends Activity {
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.chat_initiate_single);
+
+        mContactUtil = ContactUtil.getInstance(this);
 
         // Set contact selector
         mSpinner = (Spinner) findViewById(R.id.contact);
@@ -84,16 +80,9 @@ public class InitiateSingleChat extends Activity {
             ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
             // Format phone number to contactId
-            ContactUtil contactUtils = ContactUtil.getInstance(InitiateSingleChat.this);
-            try {
-                ContactId contact = contactUtils.formatContact(phoneNumber);
-                // start chat view activity
-                startActivity(SingleChatView.forgeIntentToStart(InitiateSingleChat.this, contact));
-            } catch (RcsContactFormatException e) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "Cannot parse contact " + phoneNumber);
-                }
-            }
+            ContactId contact = mContactUtil.formatContact(phoneNumber);
+            // start chat view activity
+            startActivity(SingleChatView.forgeIntentToStart(InitiateSingleChat.this, contact));
 
             // Exit activity
             finish();

@@ -55,11 +55,11 @@ import com.gsma.rcs.core.ims.service.presence.directory.XcapDirectoryParser;
 import com.gsma.rcs.platform.network.NetworkFactory;
 import com.gsma.rcs.platform.network.SocketConnection;
 import com.gsma.rcs.utils.Base64;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.HttpUtils;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 
 /**
@@ -886,13 +886,14 @@ public class XdmManager {
         Set<ContactId> result = new HashSet<ContactId>();
         if (uris != null) {
             for (String uri : uris) {
-                try {
-                    result.add(ContactUtils.createContactId(uri));
-                } catch (RcsContactFormatException e) {
+                PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(uri);
+                if (number == null) {
                     if (logger.isActivated()) {
                         logger.warn("Cannot parse uri " + uri);
                     }
+                    continue;
                 }
+                result.add(ContactUtil.createContactIdFromValidatedData(number));
             }
         }
         return result;
@@ -1273,7 +1274,6 @@ public class XdmManager {
     /**
      * Delete the end user photo
      * 
-     * @param photo Photo icon
      * @return Response
      */
     public HttpResponse deleteEndUserPhoto() {

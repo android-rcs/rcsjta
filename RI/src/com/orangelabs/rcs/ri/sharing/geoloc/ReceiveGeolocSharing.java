@@ -18,6 +18,25 @@
 
 package com.orangelabs.rcs.ri.sharing.geoloc;
 
+import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharingIntent;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharingListener;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharingService;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -36,24 +55,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.Set;
-
-import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharingIntent;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharingListener;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharingService;
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
-import com.orangelabs.rcs.ri.utils.LockAccess;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Receive geoloc sharing
@@ -363,7 +364,7 @@ public class ReceiveGeolocSharing extends Activity {
     private void quitSession() {
         // Stop session
         try {
-            if (mGeolocSharing != null) {
+            if (mGeolocSharing != null && GeolocSharing.State.STARTED == mGeolocSharing.getState()) {
                 mGeolocSharing.abortSharing();
             }
         } catch (Exception e) {

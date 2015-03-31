@@ -22,7 +22,7 @@ import com.gsma.rcs.provider.ipcall.IPCallHistory;
 import com.gsma.rcs.service.ipcalldraft.IPCall.ReasonCode;
 import com.gsma.rcs.service.ipcalldraft.IPCall.State;
 import com.gsma.rcs.service.ipcalldraft.IPCallLog;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -66,7 +66,7 @@ public class IPCallPersistedStorageAccessor {
             cursor = mIPCallLog.getCacheableIPCallData(mCallId);
             String contact = cursor.getString(cursor.getColumnIndexOrThrow(IPCallLog.CONTACT));
             if (contact != null) {
-                mContact = ContactUtils.createContactId(contact);
+                mContact = ContactUtil.createContactIdFromTrustedData(contact);
             }
             mDirection = Direction.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(IPCallLog.DIRECTION)));

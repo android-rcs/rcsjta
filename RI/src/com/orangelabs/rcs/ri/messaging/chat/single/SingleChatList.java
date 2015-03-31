@@ -19,7 +19,6 @@
 package com.orangelabs.rcs.ri.messaging.chat.single;
 
 import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
@@ -125,16 +124,9 @@ public class SingleChatList extends Activity {
                 Cursor cursor = (Cursor) (parent.getAdapter()).getItem(pos);
                 String number = cursor.getString(cursor.getColumnIndexOrThrow(Message.CONTACT));
 
-                ContactId contact;
-                try {
-                    contact = mContactUtil.formatContact(number);
-                    // Open chat
-                    startActivity(SingleChatView.forgeIntentToStart(SingleChatList.this, contact));
-                } catch (RcsContactFormatException e) {
-                    if (LogUtils.isActive) {
-                        Log.e(LOGTAG, "Cannot parse contact ".concat(number));
-                    }
-                }
+                ContactId contact = mContactUtil.formatContact(number);
+                // Open chat
+                startActivity(SingleChatView.forgeIntentToStart(SingleChatList.this, contact));
 
             }
 

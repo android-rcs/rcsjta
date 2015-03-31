@@ -24,16 +24,6 @@ package com.gsma.rcs.core.ims.service.presence;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.io.ByteArrayInputStream;
-import java.util.Vector;
-
-import javax2.sip.header.AcceptHeader;
-import javax2.sip.header.EventHeader;
-import javax2.sip.header.SubscriptionStateHeader;
-import javax2.sip.header.SupportedHeader;
-
-import org.xml.sax.InputSource;
-
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
@@ -46,9 +36,20 @@ import com.gsma.rcs.core.ims.service.presence.rlmi.ResourceInstance;
 import com.gsma.rcs.core.ims.service.presence.rlmi.RlmiDocument;
 import com.gsma.rcs.core.ims.service.presence.rlmi.RlmiParser;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
+
+import org.xml.sax.InputSource;
+
+import java.io.ByteArrayInputStream;
+import java.util.Vector;
+
+import javax2.sip.header.AcceptHeader;
+import javax2.sip.header.EventHeader;
+import javax2.sip.header.SubscriptionStateHeader;
+import javax2.sip.header.SupportedHeader;
 
 /**
  * Subscribe manager for presence event
@@ -137,9 +138,17 @@ public class PresenceSubscribeManager extends SubscribeManager {
                             RlmiParser rlmiParser = new RlmiParser(rlmiInput);
                             RlmiDocument rlmiInfo = rlmiParser.getResourceInfo();
                             Vector<ResourceInstance> list = rlmiInfo.getResourceList();
-                            for (int i = 0; i < list.size(); i++) {
-                                ResourceInstance res = (ResourceInstance) list.elementAt(i);
-                                ContactId contact = ContactUtils.createContactId(res.getUri());
+                            for (ResourceInstance res : list) {
+                                String uri = res.getUri();
+                                PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(uri);
+                                if (number == null) {
+                                    if (logger.isActivated()) {
+                                        logger.warn("Invalid uri '" + uri + "'");
+                                    }
+                                    continue;
+                                }
+                                ContactId contact = ContactUtil
+                                        .createContactIdFromValidatedData(number);
                                 String state = res.getState();
                                 String reason = res.getReason();
 
@@ -176,11 +185,19 @@ public class PresenceSubscribeManager extends SubscribeManager {
                                 pidfPart.getBytes(UTF8)));
                         PidfParser pidfParser = new PidfParser(pidfInput);
                         PidfDocument presenceInfo = pidfParser.getPresence();
-
-                        ContactId contact = ContactUtils.createContactId(presenceInfo.getEntity());
-                        // Notify listener
-                        getImsModule().getCore().getListener()
-                                .handlePresenceInfoNotification(contact, presenceInfo);
+                        String entity = presenceInfo.getEntity();
+                        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(entity);
+                        if (number == null) {
+                            if (logger.isActivated()) {
+                                logger.warn("Invalid entity '" + entity + "'");
+                            }
+                        } else {
+                            ContactId contact = ContactUtil
+                                    .createContactIdFromValidatedData(number);
+                            // Notify listener
+                            getImsModule().getCore().getListener()
+                                    .handlePresenceInfoNotification(contact, presenceInfo);
+                        }
                     } catch (Exception e) {
                         if (logger.isActivated()) {
                             logger.error("Can't parse PIDF notification", e);

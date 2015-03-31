@@ -17,7 +17,7 @@
 package com.gsma.rcs.core.ims.service.richcall.geoloc;
 
 import com.gsma.rcs.provider.sharing.RichCallHistory;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
@@ -69,7 +69,7 @@ public class GeolocSharingPersistedStorageAccessor {
             String contact = cursor.getString(cursor
                     .getColumnIndexOrThrow(GeolocSharingLog.CONTACT));
             if (contact != null) {
-                mContact = ContactUtils.createContactId(contact);
+                mContact = ContactUtil.createContactIdFromTrustedData(contact);
             }
             mDirection = Direction.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(GeolocSharingLog.DIRECTION)));

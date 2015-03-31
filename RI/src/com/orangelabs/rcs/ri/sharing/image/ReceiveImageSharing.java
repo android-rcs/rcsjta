@@ -18,6 +18,22 @@
 
 package com.orangelabs.rcs.ri.sharing.image;
 
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.sharing.image.ImageSharing;
+import com.gsma.services.rcs.sharing.image.ImageSharingListener;
+import com.gsma.services.rcs.sharing.image.ImageSharingService;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -34,21 +50,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.Set;
-
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.sharing.image.ImageSharing;
-import com.gsma.services.rcs.sharing.image.ImageSharingListener;
-import com.gsma.services.rcs.sharing.image.ImageSharingService;
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.utils.LockAccess;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
-import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Receive image sharing
@@ -361,7 +362,7 @@ public class ReceiveImageSharing extends Activity {
     private void quitSession() {
         // Stop session
         try {
-            if (mImageSharing != null) {
+            if (mImageSharing != null && ImageSharing.State.STARTED == mImageSharing.getState()) {
                 mImageSharing.abortSharing();
             }
         } catch (Exception e) {

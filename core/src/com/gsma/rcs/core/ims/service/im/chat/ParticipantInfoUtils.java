@@ -27,7 +27,8 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.service.im.chat.resourcelist.ResourceListDocument;
 import com.gsma.rcs.core.ims.service.im.chat.resourcelist.ResourceListParser;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
@@ -67,7 +68,11 @@ public class ParticipantInfoUtils {
             ResourceListDocument resList = listParser.getResourceList();
             if (resList != null) {
                 for (String entry : resList.getEntries()) {
-                    ContactId contact = ContactUtils.createContactId(entry);
+                    PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(entry);
+                    if (number == null) {
+                        continue;
+                    }
+                    ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
                     if (!contact.equals(ImsModule.IMS_USER_PROFILE.getUsername())) {
                         participants.put(contact, status);
                         if (logger.isActivated()) {

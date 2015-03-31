@@ -21,7 +21,6 @@ package com.orangelabs.rcs.ri.utils;
 import android.content.Context;
 import android.util.Log;
 
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.contact.ContactService;
@@ -41,7 +40,7 @@ public class RcsDisplayName {
     /**
      * Singleton of RcsDisplayName
      */
-    private static volatile RcsDisplayName mInstance;
+    private static volatile RcsDisplayName sInstance;
 
     private Context mContext;
 
@@ -52,7 +51,7 @@ public class RcsDisplayName {
     /**
      * The default display name
      */
-    private static String DefaultDisplayName;
+    private static String sDefaultDisplayName;
 
     /**
      * Constructor
@@ -63,7 +62,7 @@ public class RcsDisplayName {
         mContext = context;
         mService = ConnectionManager.getInstance(mContext).getContactApi();
         mContactUtil = ContactUtil.getInstance(mContext);
-        DefaultDisplayName = context.getString(R.string.label_no_contact);
+        sDefaultDisplayName = context.getString(R.string.label_no_contact);
     }
 
     /**
@@ -73,17 +72,17 @@ public class RcsDisplayName {
      * @return the singleton instance.
      */
     public static RcsDisplayName getInstance(Context context) {
-        if (mInstance == null) {
+        if (sInstance == null) {
             synchronized (RcsDisplayName.class) {
-                if (mInstance == null) {
+                if (sInstance == null) {
                     if (context == null) {
                         throw new IllegalArgumentException("Context is null");
                     }
-                    mInstance = new RcsDisplayName(context);
+                    sInstance = new RcsDisplayName(context);
                 }
             }
         }
-        return mInstance;
+        return sInstance;
     }
 
     /**
@@ -94,7 +93,7 @@ public class RcsDisplayName {
      */
     public String getDisplayName(ContactId contact) {
         if (contact == null) {
-            return DefaultDisplayName;
+            return sDefaultDisplayName;
         }
         try {
             if (mService == null) {
@@ -123,13 +122,12 @@ public class RcsDisplayName {
      */
     public String getDisplayName(String number) {
         if (number == null) {
-            return DefaultDisplayName;
+            return sDefaultDisplayName;
         }
-        try {
-            ContactId contact = mContactUtil.formatContact(number);
-            return getDisplayName(contact);
-        } catch (RcsContactFormatException e) {
+        if (!mContactUtil.isValidContact(number)) {
             return number;
         }
+        ContactId contact = mContactUtil.formatContact(number);
+        return getDisplayName(contact);
     }
 }

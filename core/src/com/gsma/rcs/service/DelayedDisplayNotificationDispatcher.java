@@ -18,13 +18,13 @@ package com.gsma.rcs.service;
 
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.service.api.ChatServiceImpl;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.database.Cursor;
 
@@ -33,6 +33,10 @@ import android.database.Cursor;
  * reports have not yet been successfully sent.
  */
 /* package private */class DelayedDisplayNotificationDispatcher implements Runnable {
+
+    private static final String[] PROJECTION_CHAT_MESSAGE = new String[] {
+            Message.MESSAGE_ID, Message.CONTACT, Message.TIMESTAMP_DISPLAYED
+    };
 
     private final static String SELECTION_READ_CHAT_MESSAGES_WITH_DISPLAY_REPORT_REQUESTED = new StringBuilder(
             Message.CHAT_ID).append("=").append(Message.CONTACT).append(" AND ")
@@ -60,32 +64,21 @@ import android.database.Cursor;
     public void run() {
         Cursor cursor = null;
         try {
-            String[] projection = new String[] {
-                    Message.MESSAGE_ID, Message.CONTACT, Message.TIMESTAMP_DISPLAYED
-            };
-            cursor = mLocalContentResolver.query(Message.CONTENT_URI, projection,
+            cursor = mLocalContentResolver.query(Message.CONTENT_URI, PROJECTION_CHAT_MESSAGE,
                     SELECTION_READ_CHAT_MESSAGES_WITH_DISPLAY_REPORT_REQUESTED, null,
                     ORDER_BY_TIMESTAMP_ASC);
+            int columIdxMessageId = cursor.getColumnIndexOrThrow(Message.MESSAGE_ID);
+            int columnIdxContact = cursor.getColumnIndexOrThrow(Message.CONTACT);
+            int columIdxTimestamp = cursor.getColumnIndexOrThrow(Message.TIMESTAMP_DISPLAYED);
             while (cursor.moveToNext()) {
-                String msgId = cursor.getString(cursor.getColumnIndexOrThrow(Message.MESSAGE_ID));
-                String contactNumber = cursor.getString(cursor
-                        .getColumnIndexOrThrow(Message.CONTACT));
-                long timestamp = cursor.getLong(cursor
-                        .getColumnIndexOrThrow(Message.TIMESTAMP_DISPLAYED));
-                try {
-                    mChatApi.tryToSendOne2OneDisplayedDeliveryReport(msgId,
-                            ContactUtils.createContactId(contactNumber), timestamp);
-                } catch (RcsContactFormatException e) {
-                    if (logger.isActivated()) {
-                        logger.error("Cannot parse contact " + contactNumber);
-                    }
+                String contactNumber = cursor.getString(columnIdxContact);
+                if (contactNumber != null) {
+                    String msgId = cursor.getString(columIdxMessageId);
+                    long timestamp = cursor.getLong(columIdxTimestamp);
+                    /* Do no check validity for trusted data */
+                    ContactId contact = ContactUtil.createContactIdFromTrustedData(contactNumber);
+                    mChatApi.tryToSendOne2OneDisplayedDeliveryReport(msgId, contact, timestamp);
                 }
-            }
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error(
-                        "Could not retrieve messages for which delayed display notification should be send!",
-                        e);
             }
         } finally {
             if (cursor != null) {

@@ -310,7 +310,7 @@ public interface CoreListener {
      * @param fileIcon Fileicon content
      * @param reasonCode Rejected reason code
      * @param timestamp Local timestamp when got file transfer invitation
-     * @param timestamp Remote timestamp sent in payload for the file transfer
+     * @param timestampSent Remote timestamp sent in payload for the file transfer
      */
 
     public void handleFileTransferInvitationRejected(ContactId contact, MmContent content,

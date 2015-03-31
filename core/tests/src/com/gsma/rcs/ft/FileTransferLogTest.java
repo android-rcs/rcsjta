@@ -26,7 +26,6 @@ import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtilMockContext;
 import com.gsma.rcs.utils.MimeManager;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.contact.ContactId;
@@ -77,11 +76,7 @@ public class FileTransferLogTest extends AndroidTestCase {
         RcsSettings rcsSettings = RcsSettings.createInstance(mLocalContentResolver);
         mMessagingLog = MessagingLog.createInstance(mContext, mLocalContentResolver, rcsSettings);
         ContactUtil contactUtils = ContactUtil.getInstance(new ContactUtilMockContext(mContext));
-        try {
-            mContact = contactUtils.formatContact("+339000000");
-        } catch (RcsContactFormatException e) {
-            fail("Cannot create contactID");
-        }
+        mContact = contactUtils.formatContact("+339000000");
         mFileTransferId = Long.toString(mRandom.nextLong());
         mChatId = String.valueOf(mRandom.nextLong());
         mTimestamp = mRandom.nextLong();

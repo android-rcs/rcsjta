@@ -30,13 +30,12 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
+import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
@@ -182,8 +181,9 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
         if (isSessionInterrupted() || getDialogPath().isSessionTerminated()) {
             return;
         }
+        boolean logActivated = logger.isActivated();
 
-        if (logger.isActivated()) {
+        if (logActivated) {
             logger.info("Data transfer error " + error);
         }
 
@@ -194,23 +194,14 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
             // Close the media session
             closeMediaSession();
         } catch (Exception e) {
-            if (logger.isActivated()) {
+            if (logActivated) {
                 logger.error("Can't close correctly the file transfer session", e);
             }
         }
 
-        try {
-            ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
-            // Request capabilities
-            getImsService().getImsModule().getCapabilityService()
-                    .requestContactCapabilities(remote);
-
-        } catch (RcsContactFormatException e) {
-            if (logger.isActivated()) {
-                logger.warn("Cannot request capabilities for contact "
-                        + getDialogPath().getRemoteParty());
-            }
-        }
+        // Request capabilities
+        getImsService().getImsModule().getCapabilityService()
+                .requestContactCapabilities(getRemoteContact());
 
         // Remove the current session
         removeSession();
@@ -218,10 +209,9 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
         // Notify listeners
         if (!isSessionInterrupted() && !isSessionTerminatedByRemote()) {
             ContactId contact = getRemoteContact();
-            for (int j = 0; j < getListeners().size(); j++) {
-                ((FileSharingSessionListener) getListeners().get(j)).handleTransferError(
-                        new FileSharingError(FileSharingError.MEDIA_TRANSFER_FAILED, error),
-                        contact);
+            for (ImsSessionListener listener : getListeners()) {
+                ((FileSharingSessionListener) listener).handleTransferError(new FileSharingError(
+                        FileSharingError.MEDIA_TRANSFER_FAILED, error), contact);
             }
         }
     }

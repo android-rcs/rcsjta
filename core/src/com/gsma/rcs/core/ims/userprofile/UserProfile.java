@@ -27,8 +27,12 @@ import java.util.Vector;
 
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.services.rcs.contact.ContactId;
+
+import android.text.TextUtils;
 
 import javax2.sip.header.ExtensionHeader;
 import javax2.sip.header.Header;
@@ -123,10 +127,7 @@ public class UserProfile {
         mXdmServerPassword = xdmServerPassword;
         mImConferenceUri = imConferenceUri;
         mRcsSettings = rcsSettings;
-        // Changed by Deutsche Telekom
-        // Continuation from the changes done by "AS" on "2012-09-01"
-        // this.preferredUri = "sip:" + username + "@" + homeDomain;
-        mPreferredUri = getPublicUriForRegistration();
+        mPreferredUri = PhoneUtils.formatContactIdToUri(mContact);
     }
 
     /**
@@ -163,21 +164,15 @@ public class UserProfile {
      */
     public String getPublicUri() {
         if (mPreferredUri == null) {
-            // Changed by Deutsche Telekom
-            // Continuation from the changes done by "AS" on "2012-09-01"
-            return getPublicUriForRegistration();
+            return PhoneUtils.formatContactIdToUri(mContact);
         } else {
             return mPreferredUri;
         }
     }
 
-    /**
-     * Get the user public URI for registration
-     * 
-     * @return Public URI
-     */
-    public String getPublicUriForRegistration() {
-        return PhoneUtils.formatContactIdToUri(mContact);
+    private String formatAddressWithDisplayName(String displayName, String address) {
+        return new StringBuilder("\"").append(displayName).append("\" <").append(address)
+                .append(">").toString();
     }
 
     /**
@@ -188,15 +183,19 @@ public class UserProfile {
     public String getPublicAddress() {
         String addr = getPublicUri();
         String displayName = mRcsSettings.getUserProfileImsDisplayName();
-        if ((displayName != null) && (displayName.length() > 0)) {
-            String number = PhoneUtils.extractNumberFromUri(addr);
-            if (number != null && number.equals(displayName)) {
-                // Do no insert display name if it is equal to the international number
-                return addr;
-            }
-            addr = "\"" + displayName + "\" <" + addr + ">";
+        if (TextUtils.isEmpty(displayName)) {
+            return addr;
         }
-        return addr;
+        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(addr);
+        if (number == null) {
+            return formatAddressWithDisplayName(displayName, addr);
+        }
+        ContactId me = ContactUtil.createContactIdFromValidatedData(number);
+        if (displayName.equals(me.toString())) {
+            /* Do no insert display name if it is equal to the international number */
+            return addr;
+        }
+        return formatAddressWithDisplayName(displayName, me.toString());
     }
 
     /**
@@ -217,9 +216,9 @@ public class UserProfile {
             value = SipUtils.extractUriFromAddress(value);
             mAssociatedUriList.addElement(value);
 
-            if (value.startsWith("sip:")) {
+            if (value.startsWith(PhoneUtils.SIP_URI_HEADER)) {
                 sipUri = value;
-            } else if (value.startsWith("tel:")) {
+            } else if (value.startsWith(PhoneUtils.TEL_URI_HEADER)) {
                 telUri = value;
             }
         }

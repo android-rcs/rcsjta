@@ -19,7 +19,7 @@ package com.gsma.rcs.core.ims.service.im.filetransfer;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.messaging.MessagingLog;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.contact.ContactId;
@@ -114,7 +114,7 @@ public class FileTransferPersistedStorageAccessor {
             String contact = cursor
                     .getString(cursor.getColumnIndexOrThrow(FileTransferLog.CONTACT));
             if (contact != null) {
-                mContact = ContactUtils.createContactId(contact);
+                mContact = ContactUtil.createContactIdFromTrustedData(contact);
             }
             mDirection = Direction.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(FileTransferLog.DIRECTION)));

@@ -102,6 +102,9 @@ public class InitiateGroupChat extends Activity implements OnItemClickListener {
                 mContactList.setAdapter(adapter);
                 mContactList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
                 mContactList.setOnItemClickListener(this);
+                for (int i = 0; i < mContactList.getCount(); i++) {
+                    mContactList.setItemChecked(i, false);
+                }
 
                 // Set button callback
                 mInviteBtn = (Button) findViewById(R.id.invite_btn);
@@ -133,10 +136,10 @@ public class InitiateGroupChat extends Activity implements OnItemClickListener {
 
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
         /* Build list of participant numbers */
-        SparseBooleanArray checked = mContactList.getCheckedItemPositions();
+        SparseBooleanArray checkedArray = mContactList.getCheckedItemPositions();
         mParticipants = new ArrayList<String>();
-        for (int i = 0; i < checked.size(); i++) {
-            if (checked.get(i)) {
+        for (int i = 0; i < checkedArray.size(); i++) {
+            if (checkedArray.get(i)) {
                 mParticipants.add(mAllowedContactIds.get(i).toString());
             }
         }

@@ -23,7 +23,6 @@
 
 package com.gsma.rcs.core.ims.service.sip.streaming;
 
-import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
@@ -33,9 +32,7 @@ import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.sip.SipSessionError;
 import com.gsma.rcs.core.ims.service.sip.SipSessionListener;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.Intent;
@@ -61,15 +58,14 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
      * 
      * @param parent IMS service
      * @param invite Initial INVITE request
+     * @param contact
      * @param sessionInvite
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
-     * @throws RcsContactFormatException
      */
-    public TerminatingSipRtpSession(ImsService parent, SipRequest invite, Intent sessionInvite,
-            RcsSettings rcsSettings, long timestamp) throws RcsContactFormatException {
-        super(parent, ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite)), invite
-                .getFeatureTags().get(0), rcsSettings, timestamp);
+    public TerminatingSipRtpSession(ImsService parent, SipRequest invite, ContactId contact,
+            Intent sessionInvite, RcsSettings rcsSettings, long timestamp) {
+        super(parent, contact, invite.getFeatureTags().get(0), rcsSettings, timestamp);
 
         mSessionInvite = sessionInvite;
         // Create dialog path

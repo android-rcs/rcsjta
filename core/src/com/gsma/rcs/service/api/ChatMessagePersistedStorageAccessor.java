@@ -17,7 +17,7 @@
 package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.provider.messaging.MessagingLog;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.chat.ChatLog.Message;
@@ -94,7 +94,8 @@ public class ChatMessagePersistedStorageAccessor {
             cursor = mMessagingLog.getCacheableChatMessageData(mId);
             String contact = cursor.getString(cursor.getColumnIndexOrThrow(Message.CONTACT));
             if (contact != null) {
-                mRemoteContact = ContactUtils.createContactId(contact);
+                /* Do not check validity for trusted data */
+                mRemoteContact = ContactUtil.createContactIdFromTrustedData(contact);
             }
             mDirection = Direction.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(Message.DIRECTION)));

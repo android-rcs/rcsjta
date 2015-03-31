@@ -18,12 +18,6 @@
 
 package com.gsma.rcs.core.ims.service.presence;
 
-import java.io.ByteArrayInputStream;
-
-import javax2.sip.header.SubscriptionStateHeader;
-
-import org.xml.sax.InputSource;
-
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
@@ -33,9 +27,16 @@ import com.gsma.rcs.core.ims.service.presence.watcherinfo.Watcher;
 import com.gsma.rcs.core.ims.service.presence.watcherinfo.WatcherInfoDocument;
 import com.gsma.rcs.core.ims.service.presence.watcherinfo.WatcherInfoParser;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
+
+import org.xml.sax.InputSource;
+
+import java.io.ByteArrayInputStream;
+
+import javax2.sip.header.SubscriptionStateHeader;
 
 /**
  * Subscribe manager for presence watcher info event
@@ -111,11 +112,18 @@ public class WatcherInfoSubscribeManager extends SubscribeManager {
                 WatcherInfoParser parser = new WatcherInfoParser(input);
                 WatcherInfoDocument watcherinfo = parser.getWatcherInfo();
                 if (watcherinfo != null) {
-                    for (int i = 0; i < watcherinfo.getWatcherList().size(); i++) {
-                        Watcher w = (Watcher) watcherinfo.getWatcherList().elementAt(i);
-                        ContactId contact = ContactUtils.createContactId(w.getUri());
-                        String status = w.getStatus();
-                        String event = w.getEvent();
+                    for (Watcher watcher : watcherinfo.getWatcherList()) {
+                        String uri = watcher.getUri();
+                        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(uri);
+                        if (number == null) {
+                            if (logger.isActivated()) {
+                                logger.warn("Invalid URI '" + uri + "'");
+                            }
+                            continue;
+                        }
+                        ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
+                        String status = watcher.getStatus();
+                        String event = watcher.getEvent();
 
                         if ((status != null) && (event != null)) {
                             if (status.equalsIgnoreCase("pending")) {

@@ -43,13 +43,13 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDo
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpResumeInfo;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpResumeInfoParser;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.DateUtils;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
@@ -68,6 +68,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
+
 import javax2.sip.header.ContactHeader;
 import javax2.sip.header.ExtensionHeader;
 
@@ -92,10 +93,7 @@ public class ChatUtils {
      */
     private static final String CRLF = "\r\n";
 
-    /**
-     * The logger
-     */
-    private static final Logger logger = Logger.getLogger(ChatUtils.class.getName());
+    private static final Logger sLogger = Logger.getLogger(ChatUtils.class.getName());
 
     /**
      * Get supported feature tags for a group chat
@@ -177,8 +175,7 @@ public class ChatUtils {
      * @return String
      */
     public static String getContributionId(SipRequest request) {
-        ExtensionHeader contribHeader = (ExtensionHeader) request
-                .getHeader(ChatUtils.HEADER_CONTRIBUTION_ID);
+        ExtensionHeader contribHeader = (ExtensionHeader) request.getHeader(HEADER_CONTRIBUTION_ID);
         if (contribHeader != null) {
             return contribHeader.getValue();
         } else {
@@ -195,11 +192,7 @@ public class ChatUtils {
     public static boolean isGroupChatInvitation(SipRequest request) {
         ContactHeader contactHeader = (ContactHeader) request.getHeader(ContactHeader.NAME);
         String param = contactHeader.getParameter("isfocus");
-        if (param != null) {
-            return true;
-        } else {
-            return false;
-        }
+        return param != null;
     }
 
     /**
@@ -207,17 +200,20 @@ public class ChatUtils {
      * 
      * @param request SIP request
      * @return ContactId
-     * @throws RcsContactFormatException
      */
-    public static ContactId getReferredIdentityAsContactId(SipRequest request)
-            throws RcsContactFormatException {
-        try {
-            // Use the Referred-By header
-            return ContactUtils.createContactId(SipUtils.getReferredByHeader(request));
-        } catch (Exception e) {
-            // Use the Asserted-Identity header if parsing of Referred-By header failed
-            return ContactUtils.createContactId(SipUtils.getAssertedIdentity(request));
+    public static ContactId getReferredIdentityAsContactId(SipRequest request) {
+        /* First use the Referred-By header */
+        String referredBy = SipUtils.getReferredByHeader(request);
+        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(referredBy);
+        if (number == null) {
+            /* Use the Asserted-Identity header if parsing of Referred-By header failed */
+            String assertedId = SipUtils.getAssertedIdentity(request);
+            number = ContactUtil.getValidPhoneNumberFromUri(assertedId);
+            if (number == null) {
+                return null;
+            }
         }
+        return ContactUtil.createContactIdFromValidatedData(number);
     }
 
     /**
@@ -231,10 +227,9 @@ public class ChatUtils {
         if (referredBy != null) {
             // Use the Referred-By header
             return referredBy;
-        } else {
-            // Use the Asserted-Identity header
-            return SipUtils.getAssertedIdentity(request);
         }
+        // Use the Asserted-Identity header
+        return SipUtils.getAssertedIdentity(request);
     }
 
     /**
@@ -320,7 +315,6 @@ public class ChatUtils {
         for (ContactId contact : contacts) {
             participants.put(contact, status);
         }
-
         return participants;
     }
 
@@ -417,6 +411,11 @@ public class ChatUtils {
         return result;
     }
 
+    private static String addUriDelimiters(String uri) {
+        return new StringBuilder(PhoneUtils.URI_START_DELIMITER).append(uri)
+                .append(PhoneUtils.URI_END_DELIMITER).toString();
+    }
+
     /**
      * Format to a SIP-URI for CPIM message
      * 
@@ -426,23 +425,31 @@ public class ChatUtils {
     private static String formatCpimSipUri(String input) {
         input = input.trim();
 
-        if (input.startsWith("<")) {
-            // Already a SIP-URI format
+        if (input.startsWith(PhoneUtils.URI_START_DELIMITER)) {
+            /* Already a SIP-URI format */
             return input;
         }
 
-        // It's already a SIP address with display name
+        /* It's already a SIP address with display name */
         if (input.startsWith("\"")) {
             return input;
         }
 
-        if (input.startsWith("sip:") || input.startsWith("tel:")) {
-            // Just add URI delimiter
-            return "<" + input + ">";
-        } else {
-            // It's a number, format it
-            return "<" + PhoneUtils.formatNumberToSipUri(input) + ">";
+        if (input.startsWith(PhoneUtils.SIP_URI_HEADER)
+                || input.startsWith(PhoneUtils.TEL_URI_HEADER)) {
+            /* It is already a SIP or TEL URI: just add URI delimiters */
+            return addUriDelimiters(input);
         }
+
+        PhoneNumber validatedNumber = ContactUtil.getValidPhoneNumberFromUri(input);
+        if (validatedNumber == null) {
+            /* It's not a valid phone number: just add URI delimiters */
+            return addUriDelimiters(input);
+        }
+
+        /* It's a valid phone number, format it to URI and add delimiters */
+        ContactId contact = ContactUtil.createContactIdFromValidatedData(validatedNumber);
+        return addUriDelimiters(PhoneUtils.formatContactIdToUri(contact));
     }
 
     /**
@@ -458,9 +465,9 @@ public class ChatUtils {
     public static String buildCpimMessage(String from, String to, String content,
             String contentType, long timestampSent) {
         return new StringBuilder(CpimMessage.HEADER_FROM).append(": ")
-                .append(ChatUtils.formatCpimSipUri(from)).append(CRLF)
-                .append(CpimMessage.HEADER_TO).append(": ").append(ChatUtils.formatCpimSipUri(to))
-                .append(CRLF).append(CpimMessage.HEADER_DATETIME).append(": ")
+                .append(formatCpimSipUri(from)).append(CRLF).append(CpimMessage.HEADER_TO)
+                .append(": ").append(formatCpimSipUri(to)).append(CRLF)
+                .append(CpimMessage.HEADER_DATETIME).append(": ")
                 .append(DateUtils.encodeDate(timestampSent)).append(CRLF).append(CRLF)
                 .append(CpimMessage.HEADER_CONTENT_TYPE).append(": ").append(contentType)
                 .append(";charset=").append(UTF8_STR).append(CRLF).append(CRLF).append(content)
@@ -481,12 +488,11 @@ public class ChatUtils {
     public static String buildCpimMessageWithImdn(String from, String to, String messageId,
             String content, String contentType, long timestampSent) {
         return new StringBuilder(CpimMessage.HEADER_FROM).append(": ")
-                .append(ChatUtils.formatCpimSipUri(from)).append(CRLF)
-                .append(CpimMessage.HEADER_TO).append(": ").append(ChatUtils.formatCpimSipUri(to))
-                .append(CRLF).append(CpimMessage.HEADER_NS).append(": ")
-                .append(ImdnDocument.IMDN_NAMESPACE).append(CRLF)
-                .append(ImdnUtils.HEADER_IMDN_MSG_ID).append(": ").append(messageId).append(CRLF)
-                .append(CpimMessage.HEADER_DATETIME).append(": ")
+                .append(formatCpimSipUri(from)).append(CRLF).append(CpimMessage.HEADER_TO)
+                .append(": ").append(formatCpimSipUri(to)).append(CRLF)
+                .append(CpimMessage.HEADER_NS).append(": ").append(ImdnDocument.IMDN_NAMESPACE)
+                .append(CRLF).append(ImdnUtils.HEADER_IMDN_MSG_ID).append(": ").append(messageId)
+                .append(CRLF).append(CpimMessage.HEADER_DATETIME).append(": ")
                 .append(DateUtils.encodeDate(timestampSent)).append(CRLF)
                 .append(ImdnUtils.HEADER_IMDN_DISPO_NOTIF).append(": ")
                 .append(ImdnDocument.POSITIVE_DELIVERY).append(", ").append(ImdnDocument.DISPLAY)
@@ -511,12 +517,11 @@ public class ChatUtils {
     public static String buildCpimMessageWithDeliveredImdn(String from, String to,
             String messageId, String content, String contentType, long timestampSent) {
         return new StringBuilder(CpimMessage.HEADER_FROM).append(": ")
-                .append(ChatUtils.formatCpimSipUri(from)).append(CRLF)
-                .append(CpimMessage.HEADER_TO).append(": ").append(ChatUtils.formatCpimSipUri(to))
-                .append(CRLF).append(CpimMessage.HEADER_NS).append(": ")
-                .append(ImdnDocument.IMDN_NAMESPACE).append(CRLF)
-                .append(ImdnUtils.HEADER_IMDN_MSG_ID).append(": ").append(messageId).append(CRLF)
-                .append(CpimMessage.HEADER_DATETIME).append(": ")
+                .append(formatCpimSipUri(from)).append(CRLF).append(CpimMessage.HEADER_TO)
+                .append(": ").append(formatCpimSipUri(to)).append(CRLF)
+                .append(CpimMessage.HEADER_NS).append(": ").append(ImdnDocument.IMDN_NAMESPACE)
+                .append(CRLF).append(ImdnUtils.HEADER_IMDN_MSG_ID).append(": ").append(messageId)
+                .append(CRLF).append(CpimMessage.HEADER_DATETIME).append(": ")
                 .append(DateUtils.encodeDate(timestampSent)).append(CRLF)
                 .append(ImdnUtils.HEADER_IMDN_DISPO_NOTIF).append(": ")
                 .append(ImdnDocument.POSITIVE_DELIVERY).append(CRLF).append(CRLF)
@@ -539,11 +544,10 @@ public class ChatUtils {
     public static String buildCpimDeliveryReport(String from, String to, String imdn,
             long timestampSent) {
         return new StringBuilder(CpimMessage.HEADER_FROM).append(": ")
-                .append(ChatUtils.formatCpimSipUri(from)).append(CRLF)
-                .append(CpimMessage.HEADER_TO).append(": ").append(ChatUtils.formatCpimSipUri(to))
-                .append(CRLF).append(CpimMessage.HEADER_NS).append(": ")
-                .append(ImdnDocument.IMDN_NAMESPACE).append(CRLF)
-                .append(ImdnUtils.HEADER_IMDN_MSG_ID).append(": ")
+                .append(formatCpimSipUri(from)).append(CRLF).append(CpimMessage.HEADER_TO)
+                .append(": ").append(formatCpimSipUri(to)).append(CRLF)
+                .append(CpimMessage.HEADER_NS).append(": ").append(ImdnDocument.IMDN_NAMESPACE)
+                .append(CRLF).append(ImdnUtils.HEADER_IMDN_MSG_ID).append(": ")
                 .append(IdGenerator.generateMessageID()).append(CRLF)
                 .append(CpimMessage.HEADER_DATETIME).append(": ")
                 .append(DateUtils.encodeDate(timestampSent)).append(CRLF).append(CRLF)
@@ -571,7 +575,7 @@ public class ChatUtils {
         if (cpimMsg != null) {
             // Check if the content is a IMDN message
             String contentType = cpimMsg.getContentType();
-            if ((contentType != null) && ChatUtils.isMessageImdnType(contentType)) {
+            if ((contentType != null) && isMessageImdnType(contentType)) {
                 // Parse the IMDN document
                 imdn = parseDeliveryReport(cpimMsg.getMessageContent());
             }
@@ -752,7 +756,7 @@ public class ChatUtils {
     public static ChatMessage createGeolocMessage(ContactId remote, Geoloc geoloc, long timestamp,
             long timestampSent) {
         String msgId = IdGenerator.generateMessageID();
-        String geolocContent = ChatUtils.buildGeolocDocument(geoloc,
+        String geolocContent = buildGeolocDocument(geoloc,
                 ImsModule.IMS_USER_PROFILE.getPublicUri(), msgId, timestamp);
         return new ChatMessage(msgId, remote, geolocContent, GeolocInfoDocument.MIME_TYPE,
                 timestamp, timestampSent, null);
@@ -792,37 +796,35 @@ public class ChatUtils {
      * @return First message
      */
     private static ChatMessage getFirstMessageFromCpim(SipRequest invite, long timestamp) {
-        CpimMessage cpimMsg = ChatUtils.extractCpimMessage(invite);
+        CpimMessage cpimMsg = extractCpimMessage(invite);
         if (cpimMsg == null) {
             return null;
         }
-        ContactId remote = null;
-        try {
-            remote = ChatUtils.getReferredIdentityAsContactId(invite);
-        } catch (RcsContactFormatException e) {
-            if (logger.isActivated()) {
-                logger.warn("getFirstMessageFromCpim: cannot parse contact");
+        ContactId remote = getReferredIdentityAsContactId(invite);
+        if (remote == null) {
+            if (sLogger.isActivated()) {
+                sLogger.warn("getFirstMessageFromCpim: cannot parse contact");
             }
             return null;
         }
-        String msgId = ChatUtils.getMessageId(invite);
+        String msgId = getMessageId(invite);
         String content = cpimMsg.getMessageContent();
         long timestampSent = cpimMsg.getTimestampSent();
         String mime = cpimMsg.getContentType();
         if (msgId == null || content == null || mime == null) {
             return null;
         }
-        if (ChatUtils.isGeolocType(mime)) {
+        if (isGeolocType(mime)) {
             return new ChatMessage(msgId, remote, content, GeolocInfoDocument.MIME_TYPE, timestamp,
                     timestampSent, null);
         } else if (FileTransferUtils.isFileTransferHttpType(mime)) {
             return new ChatMessage(msgId, remote, content, FileTransferHttpInfoDocument.MIME_TYPE,
                     timestamp, timestampSent, null);
-        } else if (ChatUtils.isTextPlainType(mime)) {
+        } else if (isTextPlainType(mime)) {
             return new ChatMessage(msgId, remote, content, MimeType.TEXT_MESSAGE, timestamp,
                     timestampSent, null);
         }
-        logger.warn(new StringBuilder("Unknown MIME-type in first message; msgId=").append(msgId)
+        sLogger.warn(new StringBuilder("Unknown MIME-type in first message; msgId=").append(msgId)
                 .append(", mime='").append(mime).append("'.").toString());
         return null;
     }
@@ -839,16 +841,13 @@ public class ChatUtils {
         if (TextUtils.isEmpty(subject)) {
             return null;
         }
-        ContactId remote = null;
-        try {
-            remote = ChatUtils.getReferredIdentityAsContactId(invite);
-        } catch (RcsContactFormatException e) {
-            if (logger.isActivated()) {
-                logger.debug("getFirstMessageFromSubject: cannot parse contact");
+        ContactId remote = getReferredIdentityAsContactId(invite);
+        if (remote == null) {
+            if (sLogger.isActivated()) {
+                sLogger.warn("getFirstMessageFromSubject: cannot parse contact");
             }
             return null;
         }
-
         /**
          * Since in subject, there is no DateTime or datetime included, then we need to fake that by
          * using the local timestamp even if this is not the real proper timestamp from the remote
@@ -904,14 +903,14 @@ public class ChatUtils {
             if (listPart != null) {
 
                 participants = ParticipantInfoUtils.parseResourceList(listPart, status);
-                try {
-                    ContactId remote = getReferredIdentityAsContactId(request);
+                ContactId remote = getReferredIdentityAsContactId(request);
+                if (remote == null) {
+                    if (sLogger.isActivated()) {
+                        sLogger.warn("getParticipants: cannot parse contact");
+                    }
+                } else {
                     /* Include remote contact if format if correct */
                     participants.put(remote, status);
-                } catch (RcsContactFormatException e) {
-                    if (logger.isActivated()) {
-                        logger.warn("getParticipants: cannot parse contact");
-                    }
                 }
             }
         }
@@ -945,7 +944,7 @@ public class ChatUtils {
          * Geolocation chat messages does not have the same mimetype in the payload as in the TAPI.
          * Text chat messages do.
          */
-        if (ChatUtils.isGeolocType(networkMimeType)) {
+        if (isGeolocType(networkMimeType)) {
             return MimeType.GEOLOC_MESSAGE;
         }
         return networkMimeType;
@@ -962,13 +961,25 @@ public class ChatUtils {
          * Geolocation chat messages does not have the same mimetype in the payload as in the TAPI.
          * Text chat messages do.
          */
-        if (ChatUtils.isGeolocType(msg.getMimeType())) {
+        if (isGeolocType(msg.getMimeType())) {
             Geoloc geoloc = parseGeolocDocument(msg.getContent());
             return geoloc.toString();
         }
         return msg.getContent();
     }
 
+    /**
+     * Create a chat message
+     * 
+     * @param msgId
+     * @param apiMimeType
+     * @param content
+     * @param contact
+     * @param displayName
+     * @param timestamp
+     * @param timestampSent
+     * @return ChatMessgae
+     */
     public static ChatMessage createChatMessage(String msgId, String apiMimeType, String content,
             ContactId contact, String displayName, long timestamp, long timestampSent) {
         if (MimeType.TEXT_MESSAGE.equals(apiMimeType)) {
@@ -981,4 +992,5 @@ public class ChatUtils {
         throw new IllegalArgumentException(
                 "Unable to create message, Invalid mimetype ".concat(apiMimeType));
     }
+
 }

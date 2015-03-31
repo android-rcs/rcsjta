@@ -27,7 +27,6 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
-import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpConstants;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
@@ -50,11 +49,9 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.ImsFileSharingSession;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
@@ -92,18 +89,16 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      * 
      * @param parent IMS service
      * @param invite Initial INVITE request
+     * @param remote contact
      * @param rcsSettings RCS settings
      * @param timestamp Local timestamp for the session
      * @param timestampSent the remote timestamp sent in payload for the file sharing
-     * @throws RcsContactFormatException
      */
     public TerminatingMsrpFileSharingSession(ImsService parent, SipRequest invite,
-            RcsSettings rcsSettings, long timestamp, long timestampSent)
-            throws RcsContactFormatException {
-        super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), ContactUtils
-                .createContactId(SipUtils.getAssertedIdentity(invite)), FileTransferUtils
-                .extractFileIcon(invite, rcsSettings), IdGenerator.generateMessageID(),
-                rcsSettings, timestamp);
+            ContactId remote, RcsSettings rcsSettings, long timestamp, long timestampSent) {
+        super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), remote,
+                FileTransferUtils.extractFileIcon(invite, rcsSettings), IdGenerator
+                        .generateMessageID(), rcsSettings, timestamp);
         mTimestampSent = timestampSent;
 
         // Create dialog path

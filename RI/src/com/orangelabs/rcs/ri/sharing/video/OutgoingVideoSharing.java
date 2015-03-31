@@ -51,7 +51,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
@@ -442,14 +441,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
 
             ContactUtil contactUtil = ContactUtil.getInstance(OutgoingVideoSharing.this);
-            try {
-                mContact = contactUtil.formatContact(phoneNumber);
-            } catch (RcsContactFormatException e1) {
-                Utils.showMessage(OutgoingVideoSharing.this,
-                        getString(R.string.label_invalid_contact, phoneNumber));
-                return;
-
-            }
+            mContact = contactUtil.formatContact(phoneNumber);
 
             new Thread() {
                 public void run() {
@@ -532,7 +524,7 @@ public class OutgoingVideoSharing extends Activity implements VideoPlayerListene
     private void quitSession() {
         // Stop the sharing
         try {
-            if (mVideoSharing != null) {
+            if (mVideoSharing != null && VideoSharing.State.STARTED == mVideoSharing.getState()) {
                 if (LogUtils.isActive) {
                     Log.d(LOGTAG, "Abort sharing");
                 }

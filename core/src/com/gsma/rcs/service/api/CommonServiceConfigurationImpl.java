@@ -18,14 +18,13 @@
 
 package com.gsma.rcs.service.api;
 
-import android.os.RemoteException;
-
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
 import com.gsma.services.rcs.CommonServiceConfiguration.MinimumBatteryLevel;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.contact.ContactId;
+
+import android.os.RemoteException;
 
 /**
  * A class that implements interface to allow access to common service configuration from APIs
@@ -57,8 +56,7 @@ public class CommonServiceConfigurationImpl extends ICommonServiceConfiguration.
 
     @Override
     public ContactId getMyContactId() throws RemoteException {
-        String myContact = mRcsSettings.getUserProfileImsUserName();
-        return ContactUtils.createContactId(myContact);
+        return mRcsSettings.getUserProfileImsUserName();
     }
 
     @Override

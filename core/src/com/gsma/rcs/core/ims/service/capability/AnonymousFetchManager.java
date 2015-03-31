@@ -18,10 +18,6 @@
 
 package com.gsma.rcs.core.ims.service.capability;
 
-import java.io.ByteArrayInputStream;
-
-import org.xml.sax.InputSource;
-
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
@@ -34,10 +30,14 @@ import com.gsma.rcs.core.ims.service.presence.pidf.PidfParser;
 import com.gsma.rcs.core.ims.service.presence.pidf.Tuple;
 import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
+
+import org.xml.sax.InputSource;
+
+import java.io.ByteArrayInputStream;
 
 /**
  * Capability discovery manager using anonymous fetch procedure
@@ -101,75 +101,87 @@ public class AnonymousFetchManager implements DiscoveryManager {
             if (isLogActivated) {
                 logger.debug("Anonymous fetch notification with PIDF document");
             }
+            InputSource pidfInput = new InputSource(new ByteArrayInputStream(content));
+            PidfParser pidfParser = null;
             try {
-                InputSource pidfInput = new InputSource(new ByteArrayInputStream(content));
-                PidfParser pidfParser = new PidfParser(pidfInput);
-                PidfDocument presence = pidfParser.getPresence();
-                if (presence == null) {
-                    return;
-                }
-                // Extract capabilities
-                Capabilities capabilities = new Capabilities();
-
-                // We queried via anonymous fetch procedure, so set presence discovery to true
-                capabilities.setPresenceDiscoverySupport(true);
-
-                ContactId contact = ContactUtils.createContactId(presence.getEntity());
-                for (Tuple tuple : presence.getTuplesList()) {
-                    boolean state = false;
-                    if (PresenceInfo.ONLINE.equals(tuple.getStatus().getBasic().getValue())) {
-                        state = true;
-                    }
-                    String id = tuple.getService().getId();
-                    if (PresenceUtils.FEATURE_RCS2_VIDEO_SHARE.equalsIgnoreCase(id)) {
-                        capabilities.setVideoSharingSupport(state);
-                    } else if (PresenceUtils.FEATURE_RCS2_IMAGE_SHARE.equalsIgnoreCase(id)) {
-                        capabilities.setImageSharingSupport(state);
-                    } else if (PresenceUtils.FEATURE_RCS2_FT.equalsIgnoreCase(id)) {
-                        capabilities.setFileTransferSupport(state);
-                    } else if (PresenceUtils.FEATURE_RCS2_CS_VIDEO.equalsIgnoreCase(id)) {
-                        capabilities.setCsVideoSupport(state);
-                    } else if (PresenceUtils.FEATURE_RCS2_CHAT.equalsIgnoreCase(id)) {
-                        capabilities.setImSessionSupport(state);
-                    }
-                }
-
-                // Update capabilities in database
-                ContactsManager.getInstance().setContactCapabilities(contact, capabilities,
-                        RcsStatus.RCS_CAPABLE, RegistrationState.UNKNOWN);
-
-                // Notify listener
-                mImsModule.getCore().getListener()
-                        .handleCapabilitiesNotification(contact, capabilities);
-
+                pidfParser = new PidfParser(pidfInput);
             } catch (Exception e) {
                 if (isLogActivated) {
                     logger.error("Can't parse XML notification", e);
                 }
+                return;
             }
+            PidfDocument presence = pidfParser.getPresence();
+            if (presence == null) {
+                return;
+            }
+            // Extract capabilities
+            Capabilities capabilities = new Capabilities();
+
+            // We queried via anonymous fetch procedure, so set presence discovery to true
+            capabilities.setPresenceDiscoverySupport(true);
+
+            String entity = presence.getEntity();
+            PhoneNumber validPhoneNumber = ContactUtil.getValidPhoneNumberFromUri(entity);
+            if (validPhoneNumber == null) {
+                if (isLogActivated) {
+                    logger.error(new StringBuilder("Discard XML notification: bad entity '")
+                            .append(entity).append("'").toString());
+                }
+                return;
+            }
+            ContactId contact = ContactUtil.createContactIdFromValidatedData(validPhoneNumber);
+            for (Tuple tuple : presence.getTuplesList()) {
+                boolean state = false;
+                if (PresenceInfo.ONLINE.equals(tuple.getStatus().getBasic().getValue())) {
+                    state = true;
+                }
+                String id = tuple.getService().getId();
+                if (PresenceUtils.FEATURE_RCS2_VIDEO_SHARE.equalsIgnoreCase(id)) {
+                    capabilities.setVideoSharingSupport(state);
+                } else if (PresenceUtils.FEATURE_RCS2_IMAGE_SHARE.equalsIgnoreCase(id)) {
+                    capabilities.setImageSharingSupport(state);
+                } else if (PresenceUtils.FEATURE_RCS2_FT.equalsIgnoreCase(id)) {
+                    capabilities.setFileTransferSupport(state);
+                } else if (PresenceUtils.FEATURE_RCS2_CS_VIDEO.equalsIgnoreCase(id)) {
+                    capabilities.setCsVideoSupport(state);
+                } else if (PresenceUtils.FEATURE_RCS2_CHAT.equalsIgnoreCase(id)) {
+                    capabilities.setImSessionSupport(state);
+                }
+            }
+
+            // Update capabilities in database
+            ContactsManager.getInstance().setContactCapabilities(contact, capabilities,
+                    RcsStatus.RCS_CAPABLE, RegistrationState.UNKNOWN);
+
+            // Notify listener
+            mImsModule.getCore().getListener()
+                    .handleCapabilitiesNotification(contact, capabilities);
         } else {
-            try {
-                if (isLogActivated) {
-                    logger.debug("Anonymous fetch notification is empty");
-                }
-                ContactId contact = ContactUtils.createContactId(SipUtils
-                        .getAssertedIdentity(notify));
-
-                // Notify content was empty
-                Capabilities capabilities = new Capabilities();
-
-                // Update capabilities in database
-                ContactsManager.getInstance().setContactCapabilities(contact, capabilities,
-                        RcsStatus.NO_INFO, RegistrationState.UNKNOWN);
-
-                // Notify listener
-                mImsModule.getCore().getListener()
-                        .handleCapabilitiesNotification(contact, capabilities);
-            } catch (RcsContactFormatException e) {
-                if (isLogActivated) {
-                    logger.error("Cannot get contact from notify");
-                }
+            if (isLogActivated) {
+                logger.debug("Anonymous fetch notification is empty");
             }
+            String sipAssertedId = SipUtils.getAssertedIdentity(notify);
+            PhoneNumber validPhoneNumber = ContactUtil.getValidPhoneNumberFromUri(sipAssertedId);
+            if (validPhoneNumber == null) {
+                if (isLogActivated) {
+                    logger.error(new StringBuilder("Cannot process notification: invalid SIP id '")
+                            .append(sipAssertedId).append("'").toString());
+                }
+                return;
+            }
+            ContactId contact = ContactUtil.createContactIdFromValidatedData(validPhoneNumber);
+
+            // Notify content was empty
+            Capabilities capabilities = new Capabilities();
+
+            // Update capabilities in database
+            ContactsManager.getInstance().setContactCapabilities(contact, capabilities,
+                    RcsStatus.NO_INFO, RegistrationState.UNKNOWN);
+
+            // Notify listener
+            mImsModule.getCore().getListener()
+                    .handleCapabilitiesNotification(contact, capabilities);
         }
     }
 }

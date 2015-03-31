@@ -69,10 +69,10 @@ import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.GroupChat;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
@@ -186,19 +186,17 @@ public class InstantMessagingService extends ImsService {
         mMessagingLog = messagingLog;
     }
 
-    private void handleFileTransferInvitationRejected(SipRequest invite,
+    private void handleFileTransferInvitationRejected(SipRequest invite, ContactId contact,
             FileTransfer.ReasonCode reasonCode, long timestamp, long timestampSent) {
-        ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
         MmContent content = ContentManager.createMmContentFromSdp(invite, mRcsSettings);
         MmContent fileIcon = FileTransferUtils.extractFileIcon(invite, mRcsSettings);
         mCore.getListener().handleFileTransferInvitationRejected(contact, content, fileIcon,
                 reasonCode, timestamp, timestampSent);
     }
 
-    private void handleGroupChatInvitationRejected(SipRequest invite, ReasonCode reasonCode,
-            long timestamp) {
+    private void handleGroupChatInvitationRejected(SipRequest invite, ContactId contact,
+            ReasonCode reasonCode, long timestamp) {
         String chatId = ChatUtils.getContributionId(invite);
-        ContactId contact = ChatUtils.getReferredIdentityAsContactId(invite);
         String subject = ChatUtils.getSubject(invite);
         Map<ContactId, ParticipantStatus> participants = ChatUtils.getParticipants(invite,
                 ParticipantStatus.FAILED);
@@ -767,60 +765,63 @@ public class InstantMessagingService extends ImsService {
      * @param timestamp Local timestamp when got SipRequest
      */
     public void receiveMsrpFileTransferInvitation(SipRequest invite, long timestamp) {
-        if (sLogger.isActivated()) {
+        boolean logActivated = sLogger.isActivated();
+        String assertedId = SipUtils.getAssertedIdentity(invite);
+        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(assertedId);
+        if (number == null) {
+            if (logActivated) {
+                sLogger.error("Discard MSRP FileTransfer Invitation: invalid remote ID '"
+                        + assertedId + "'");
+            }
+            sendErrorResponse(invite, Response.DECLINE);
+            return;
+
+        }
+        if (logActivated) {
             sLogger.info("Receive a file transfer session invitation");
         }
-
-        try {
-            // Test if the contact is blocked
-            ContactId remote = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
-            /**
-             * Since in MSRP communication we do not have a timestampSent to be extracted from the
-             * payload then we need to fake that by using the local timestamp even if this is not
-             * the real proper timestamp from the remote side in this case.
-             */
-            long timestampSent = timestamp;
-            if (mContactsManager.isBlockedForContact(remote)) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Contact " + remote
-                            + " is blocked: automatically reject the file transfer invitation");
-                }
-                handleFileTransferInvitationRejected(invite, FileTransfer.ReasonCode.REJECTED_SPAM,
-                        timestamp, timestampSent);
-
-                // Send a 603 Decline response
-                sendErrorResponse(invite, Response.DECLINE);
-                return;
+        ContactId remote = ContactUtil.createContactIdFromValidatedData(number);
+        // Test if the contact is blocked
+        /**
+         * Since in MSRP communication we do not have a timestampSent to be extracted from the
+         * payload then we need to fake that by using the local timestamp even if this is not the
+         * real proper timestamp from the remote side in this case.
+         */
+        long timestampSent = timestamp;
+        if (mContactsManager.isBlockedForContact(remote)) {
+            if (logActivated) {
+                sLogger.debug("Contact " + remote
+                        + " is blocked: automatically reject the file transfer invitation");
             }
+            handleFileTransferInvitationRejected(invite, remote,
+                    FileTransfer.ReasonCode.REJECTED_SPAM, timestamp, timestampSent);
 
-            // Test number of sessions
-            if (!isFileTransferSessionAvailable()) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("The max number of file transfer sessions is achieved: reject the invitation");
-                }
-
-                handleFileTransferInvitationRejected(invite,
-                        FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp,
-                        timestampSent);
-
-                // Send a 603 Decline response
-                sendErrorResponse(invite, Response.DECLINE);
-                return;
-            }
-
-            FileSharingSession session = new TerminatingMsrpFileSharingSession(this, invite,
-                    mRcsSettings, timestamp, timestampSent);
-
-            mCore.getListener().handleFileTransferInvitation(session, false, remote,
-                    session.getRemoteDisplayName(), FileTransferLog.UNKNOWN_EXPIRATION);
-
-            session.startSession();
-
-        } catch (RcsContactFormatException e) {
-            if (sLogger.isActivated()) {
-                sLogger.warn("Cannot parse contact from FT invitation");
-            }
+            // Send a 603 Decline response
+            sendErrorResponse(invite, Response.DECLINE);
+            return;
         }
+
+        // Test number of sessions
+        if (!isFileTransferSessionAvailable()) {
+            if (logActivated) {
+                sLogger.debug("The max number of file transfer sessions is achieved: reject the invitation");
+            }
+
+            handleFileTransferInvitationRejected(invite, remote,
+                    FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp, timestampSent);
+
+            // Send a 603 Decline response
+            sendErrorResponse(invite, Response.DECLINE);
+            return;
+        }
+
+        FileSharingSession session = new TerminatingMsrpFileSharingSession(this, invite, remote,
+                mRcsSettings, timestamp, timestampSent);
+
+        mCore.getListener().handleFileTransferInvitation(session, false, remote,
+                session.getRemoteDisplayName(), FileTransferLog.UNKNOWN_EXPIRATION);
+
+        session.startSession();
     }
 
     /**
@@ -851,84 +852,84 @@ public class InstantMessagingService extends ImsService {
      * @param timestamp Local timestamp when got SipRequest
      */
     public void receiveOne2OneChatSession(SipRequest invite, long timestamp) {
-        if (sLogger.isActivated()) {
+        boolean logActivated = sLogger.isActivated();
+        String referredId = ChatUtils.getReferredIdentityAsContactUri(invite);
+        ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);
+        if (remote == null) {
+            if (logActivated) {
+                sLogger.error("Discard One2OneChatSession: invalid remote ID '" + referredId + "'");
+            }
+            sendErrorResponse(invite, Response.BUSY_HERE);
+            return;
+
+        }
+        if (logActivated) {
             sLogger.info("Receive a 1-1 chat session invitation");
         }
-        try {
-            ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);
-            ChatMessage firstMsg = ChatUtils.getFirstMessage(invite, timestamp);
-
-            // Test if the contact is blocked
-            if (mContactsManager.isBlockedForContact(remote)) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Contact " + remote
-                            + " is blocked: automatically reject the chat invitation");
-                }
-
-                // Save the message in the spam folder
-                if (firstMsg != null && !mMessagingLog.isMessagePersisted(firstMsg.getMessageId())) {
-                    mMessagingLog.addOneToOneSpamMessage(firstMsg);
-                }
-
-                // Send message delivery report if requested
-                if (ChatUtils.isImdnDeliveredRequested(invite)) {
-                    // Check notification disposition
-                    String msgId = ChatUtils.getMessageId(invite);
-                    if (msgId != null) {
-                        String remoteInstanceId = null;
-                        ContactHeader inviteContactHeader = (ContactHeader) invite
-                                .getHeader(ContactHeader.NAME);
-                        if (inviteContactHeader != null) {
-                            remoteInstanceId = inviteContactHeader
-                                    .getParameter(SipUtils.SIP_INSTANCE_PARAM);
-                        }
-                        // Send message delivery status via a SIP MESSAGE
-                        getImdnManager()
-                                .sendMessageDeliveryStatusImmediately(remote, msgId,
-                                        ImdnDocument.DELIVERY_STATUS_DELIVERED, remoteInstanceId,
-                                        timestamp);
-                    }
-                }
-
-                // Send a 486 Busy response
-                sendErrorResponse(invite, Response.BUSY_HERE);
-                return;
+        ChatMessage firstMsg = ChatUtils.getFirstMessage(invite, timestamp);
+        // Test if the contact is blocked
+        if (mContactsManager.isBlockedForContact(remote)) {
+            if (logActivated) {
+                sLogger.debug("Contact " + remote
+                        + " is blocked: automatically reject the chat invitation");
             }
 
-            /*
-             * Save the message if it was not already persisted in the DB. We don't have to reject
-             * the session if the message was a duplicate one as the session rejection/keeping will
-             * be handled in TerminatingOneToOneChatSession.startSession() in an uniform way as
-             * according to the defined race conditions in the specification document.
-             */
+            // Save the message in the spam folder
             if (firstMsg != null && !mMessagingLog.isMessagePersisted(firstMsg.getMessageId())) {
-                mMessagingLog.addIncomingOneToOneChatMessage(firstMsg,
-                        ChatUtils.isImdnDisplayedRequested(invite));
+                mMessagingLog.addOneToOneSpamMessage(firstMsg);
             }
 
-            // Test number of sessions
-            if (!isChatSessionAvailable()) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("The max number of chat sessions is achieved: reject the invitation");
+            // Send message delivery report if requested
+            if (ChatUtils.isImdnDeliveredRequested(invite)) {
+                // Check notification disposition
+                String msgId = ChatUtils.getMessageId(invite);
+                if (msgId != null) {
+                    String remoteInstanceId = null;
+                    ContactHeader inviteContactHeader = (ContactHeader) invite
+                            .getHeader(ContactHeader.NAME);
+                    if (inviteContactHeader != null) {
+                        remoteInstanceId = inviteContactHeader
+                                .getParameter(SipUtils.SIP_INSTANCE_PARAM);
+                    }
+                    // Send message delivery status via a SIP MESSAGE
+                    getImdnManager().sendMessageDeliveryStatusImmediately(remote, msgId,
+                            ImdnDocument.DELIVERY_STATUS_DELIVERED, remoteInstanceId, timestamp);
                 }
-
-                // Send a 486 Busy response
-                sendErrorResponse(invite, Response.BUSY_HERE);
-                return;
             }
 
-            TerminatingOneToOneChatSession session = new TerminatingOneToOneChatSession(this,
-                    invite, remote, mRcsSettings, mMessagingLog, firstMsg.getTimestamp());
-
-            mCore.getListener().handleOneOneChatSessionInvitation(session);
-
-            session.startSession();
-
-        } catch (RcsContactFormatException e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Cannot parse remote contact");
-            }
+            // Send a 486 Busy response
+            sendErrorResponse(invite, Response.BUSY_HERE);
+            return;
         }
+
+        /*
+         * Save the message if it was not already persisted in the DB. We don't have to reject the
+         * session if the message was a duplicate one as the session rejection/keeping will be
+         * handled in TerminatingOneToOneChatSession.startSession() in an uniform way as according
+         * to the defined race conditions in the specification document.
+         */
+        if (firstMsg != null && !mMessagingLog.isMessagePersisted(firstMsg.getMessageId())) {
+            mMessagingLog.addIncomingOneToOneChatMessage(firstMsg,
+                    ChatUtils.isImdnDisplayedRequested(invite));
+        }
+
+        // Test number of sessions
+        if (!isChatSessionAvailable()) {
+            if (logActivated) {
+                sLogger.debug("The max number of chat sessions is achieved: reject the invitation");
+            }
+
+            // Send a 486 Busy response
+            sendErrorResponse(invite, Response.BUSY_HERE);
+            return;
+        }
+
+        TerminatingOneToOneChatSession session = new TerminatingOneToOneChatSession(this, invite,
+                remote, mRcsSettings, mMessagingLog, firstMsg.getTimestamp());
+
+        mCore.getListener().handleOneOneChatSessionInvitation(session);
+
+        session.startSession();
     }
 
     /**
@@ -965,44 +966,33 @@ public class InstantMessagingService extends ImsService {
      * @param timestamp Local timestamp when got SipRequest
      */
     public void receiveAdhocGroupChatSession(SipRequest invite, long timestamp) {
-        if (sLogger.isActivated()) {
+        boolean logActivated = sLogger.isActivated();
+        if (logActivated) {
             sLogger.info("Receive an ad-hoc group chat session invitation");
         }
-        ContactId contact = null;
-        String remoteUri = null;
-
-        try {
-            contact = ChatUtils.getReferredIdentityAsContactId(invite);
-            // Test if the contact is blocked
-            if (mContactsManager.isBlockedForContact(contact)) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Contact " + contact
-                            + " is blocked: automatically reject the chat invitation");
-                }
-
-                handleGroupChatInvitationRejected(invite, GroupChat.ReasonCode.REJECTED_SPAM,
-                        timestamp);
-
-                // Send a 486 Busy response
-                sendErrorResponse(invite, Response.BUSY_HERE);
-                return;
+        ContactId contact = ChatUtils.getReferredIdentityAsContactId(invite);
+        if (contact != null && mContactsManager.isBlockedForContact(contact)) {
+            if (logActivated) {
+                sLogger.debug("Contact " + contact
+                        + " is blocked: automatically reject the chat invitation");
             }
-        } catch (RcsContactFormatException e) {
-            // GC invitation is out of the blue (i.e. Store & Forward)
-            remoteUri = ChatUtils.getReferredIdentityAsContactUri(invite);
-            if (sLogger.isActivated()) {
-                sLogger.info("Receive a forward GC invitation from " + remoteUri);
-            }
+
+            handleGroupChatInvitationRejected(invite, contact, GroupChat.ReasonCode.REJECTED_SPAM,
+                    timestamp);
+
+            // Send a 486 Busy response
+            sendErrorResponse(invite, Response.BUSY_HERE);
+            return;
         }
 
         // Test number of sessions
         if (!isChatSessionAvailable()) {
-            if (sLogger.isActivated()) {
+            if (logActivated) {
                 sLogger.debug("The max number of chat sessions is achieved: reject the invitation");
             }
 
-            handleGroupChatInvitationRejected(invite, GroupChat.ReasonCode.REJECTED_MAX_CHATS,
-                    timestamp);
+            handleGroupChatInvitationRejected(invite, contact,
+                    GroupChat.ReasonCode.REJECTED_MAX_CHATS, timestamp);
 
             // Send a 486 Busy response
             sendErrorResponse(invite, Response.BUSY_HERE);
@@ -1016,9 +1006,11 @@ public class InstantMessagingService extends ImsService {
         Map<ContactId, ParticipantStatus> inviteParticipants = ChatUtils.getParticipants(invite,
                 ParticipantStatus.INVITED);
 
-        TerminatingAdhocGroupChatSession session = new TerminatingAdhocGroupChatSession(this,
+        String remoteUri = ChatUtils.getReferredIdentityAsContactUri(invite);
 
-        invite, contact, inviteParticipants, remoteUri, mRcsSettings, mMessagingLog, timestamp);
+        TerminatingAdhocGroupChatSession session = new TerminatingAdhocGroupChatSession(this,
+                invite, contact, inviteParticipants, remoteUri, mRcsSettings, mMessagingLog,
+                timestamp);
 
         /*--
          * 6.3.3.1 Leaving a Group Chat that is idle
@@ -1029,7 +1021,7 @@ public class InstantMessagingService extends ImsService {
          */
         boolean reject = mMessagingLog.isGroupChatNextInviteRejected(session.getContributionID());
         if (reject) {
-            if (sLogger.isActivated()) {
+            if (logActivated) {
                 sLogger.debug("Chat Id " + session.getContributionID()
                         + " is declined since previously terminated by user while disconnected");
             }
@@ -1139,29 +1131,41 @@ public class InstantMessagingService extends ImsService {
      * @param message Received message
      */
     public void receiveMessageDeliveryStatus(SipRequest message) {
+        boolean logActivated = sLogger.isActivated();
         // Send a 200 OK response
         try {
-            if (sLogger.isActivated()) {
+            if (logActivated) {
                 sLogger.info("Send 200 OK");
             }
             SipResponse response = SipMessageFactory.createResponse(message,
                     IdGenerator.getIdentifier(), 200);
             getImsModule().getSipManager().sendSipResponse(response);
         } catch (Exception e) {
-            if (sLogger.isActivated()) {
+            if (logActivated) {
                 sLogger.error("Can't send 200 OK response", e);
             }
             return;
         }
 
+        // Parse received message
+        ImdnDocument imdn;
         try {
-            // Parse received message
-            ImdnDocument imdn = ChatUtils.parseCpimDeliveryReport(message.getContent());
+            imdn = ChatUtils.parseCpimDeliveryReport(message.getContent());
             if (imdn == null) {
                 return;
             }
 
-            ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(message));
+            String assertedId = SipUtils.getAssertedIdentity(message);
+            PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(assertedId);
+            if (number == null) {
+                if (logActivated) {
+                    sLogger.error("receiveMessageDeliveryStatus failed: invalid remote ID '"
+                            + assertedId + "'");
+                }
+                return;
+            }
+            ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
+
             String msgId = imdn.getMsgId();
             // Note: FileTransferId is always generated to equal the
             // associated msgId of a FileTransfer invitation message.
@@ -1184,7 +1188,7 @@ public class InstantMessagingService extends ImsService {
                 }
             }
         } catch (Exception e) {
-            if (sLogger.isActivated()) {
+            if (logActivated) {
                 sLogger.warn("Cannot parse message delivery status");
             }
         }
@@ -1219,23 +1223,24 @@ public class InstantMessagingService extends ImsService {
      * @param timestamp Local timestamp when got SipRequest
      */
     public void receiveStoredAndForwardPushMessages(SipRequest invite, long timestamp) {
-        if (sLogger.isActivated()) {
-            sLogger.debug("Receive S&F push messages invitation");
-        }
-        ContactId remote;
-        try {
-            remote = ChatUtils.getReferredIdentityAsContactId(invite);
-        } catch (RcsContactFormatException e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Cannot parse remote contact");
+        boolean logActivated = sLogger.isActivated();
+        String referredId = ChatUtils.getReferredIdentityAsContactUri(invite);
+        ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);
+        if (remote == null) {
+            if (logActivated) {
+                sLogger.error("Discard S&F PushMessages: invalid remote ID '" + referredId + "'");
             }
+            sendErrorResponse(invite, Response.BUSY_HERE);
             return;
+        }
+        if (logActivated) {
+            sLogger.debug("Receive S&F push messages invitation");
         }
         ChatMessage firstMsg = ChatUtils.getFirstMessage(invite, timestamp);
 
         // Test if the contact is blocked
         if (mContactsManager.isBlockedForContact(remote)) {
-            if (sLogger.isActivated()) {
+            if (logActivated) {
                 sLogger.debug("Contact " + remote
                         + " is blocked: automatically reject the S&F invitation");
             }
@@ -1267,17 +1272,19 @@ public class InstantMessagingService extends ImsService {
      * @param timestamp Local timestamp when got SipRequest
      */
     public void receiveStoredAndForwardPushNotifications(SipRequest invite, long timestamp) {
+        String referredId = ChatUtils.getReferredIdentityAsContactUri(invite);
+        ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);
+        if (remote == null) {
+            if (sLogger.isActivated()) {
+                sLogger.error("Discard S&F PushNotifications: invalid remote ID '" + referredId
+                        + "'");
+            }
+            sendErrorResponse(invite, Response.BUSY_HERE);
+            return;
+
+        }
         if (sLogger.isActivated()) {
             sLogger.debug("Receive S&F push notifications invitation");
-        }
-        ContactId remote;
-        try {
-            remote = ChatUtils.getReferredIdentityAsContactId(invite);
-        } catch (RcsContactFormatException e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Cannot parse remote contact");
-            }
-            return;
         }
         // Test if the contact is blocked
         if (mContactsManager.isBlockedForContact(remote)) {
@@ -1304,42 +1311,44 @@ public class InstantMessagingService extends ImsService {
      */
     public void receiveOneToOneHttpFileTranferInvitation(SipRequest invite,
             FileTransferHttpInfoDocument ftinfo, long timestamp) {
-        if (sLogger.isActivated()) {
-            sLogger.info("Receive a single HTTP file transfer invitation");
-        }
-        ContactId remote;
-        try {
-            remote = ChatUtils.getReferredIdentityAsContactId(invite);
-        } catch (RcsContactFormatException e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("receiveHttpFileTranferInvitation: cannot parse remote contact");
+        boolean logActivated = sLogger.isActivated();
+        String referredId = ChatUtils.getReferredIdentityAsContactUri(invite);
+        ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);
+        if (remote == null) {
+            if (logActivated) {
+                sLogger.error("Discard OneToOne HttpFileTranferInvitation: invalid remote ID '"
+                        + referredId + "'");
             }
+            sendErrorResponse(invite, Response.DECLINE);
             return;
 
+        }
+        if (logActivated) {
+            sLogger.info("Receive a single HTTP file transfer invitation");
         }
         CpimMessage cpimMessage = ChatUtils.extractCpimMessage(invite);
         long timestampSent = cpimMessage.getTimestampSent();
         // Test if the contact is blocked
         if (mContactsManager.isBlockedForContact(remote)) {
-            if (sLogger.isActivated()) {
+            if (logActivated) {
                 sLogger.debug(new StringBuilder("Contact ").append(remote)
                         .append(" is blocked, automatically reject the HTTP File transfer")
                         .toString());
             }
             sendErrorResponse(invite, Response.DECLINE);
-            handleFileTransferInvitationRejected(invite, FileTransfer.ReasonCode.REJECTED_SPAM,
-                    timestamp, timestampSent);
+            handleFileTransferInvitationRejected(invite, remote,
+                    FileTransfer.ReasonCode.REJECTED_SPAM, timestamp, timestampSent);
             return;
 
         }
         /* Test number of sessions */
         if (!isFileTransferSessionAvailable()) {
-            if (sLogger.isActivated()) {
+            if (logActivated) {
                 sLogger.debug("The max number of FT sessions is achieved, reject the HTTP File transfer");
             }
             // Send a 603 Decline response
             sendErrorResponse(invite, Response.DECLINE);
-            handleFileTransferInvitationRejected(invite,
+            handleFileTransferInvitationRejected(invite, remote,
                     FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp, timestampSent);
             return;
         }
@@ -1356,13 +1365,13 @@ public class InstantMessagingService extends ImsService {
             int errorCode = error.getErrorCode();
             switch (errorCode) {
                 case FileSharingError.MEDIA_SIZE_TOO_BIG:
-                    handleFileTransferInvitationRejected(invite,
+                    handleFileTransferInvitationRejected(invite, remote,
                             FileTransfer.ReasonCode.REJECTED_MAX_SIZE, timestamp, timestampSent);
                 case FileSharingError.NOT_ENOUGH_STORAGE_SPACE:
-                    handleFileTransferInvitationRejected(invite,
+                    handleFileTransferInvitationRejected(invite, remote,
                             FileTransfer.ReasonCode.REJECTED_LOW_SPACE, timestamp, timestampSent);
                 default:
-                    if (sLogger.isActivated()) {
+                    if (logActivated) {
                         sLogger.error("Unexpected error while receiving HTTP file transfer invitation"
                                 .concat(Integer.toString(errorCode)));
                     }
@@ -1383,11 +1392,11 @@ public class InstantMessagingService extends ImsService {
             try {
                 fileSharingSession.downloadFileIcon();
             } catch (CoreException e) {
-                if (sLogger.isActivated()) {
+                if (logActivated) {
                     sLogger.error("Failed to initiate download file transfer", e);
                 }
                 sendErrorResponse(invite, Response.DECLINE);
-                handleFileTransferInvitationRejected(invite,
+                handleFileTransferInvitationRejected(invite, remote,
                         FileTransfer.ReasonCode.REJECTED_MEDIA_FAILED, timestamp, timestampSent);
                 return;
 
@@ -1408,17 +1417,21 @@ public class InstantMessagingService extends ImsService {
      */
     public void receiveStoredAndForwardOneToOneHttpFileTranferInvitation(SipRequest invite,
             FileTransferHttpInfoDocument ftinfo, long timestamp) {
-        if (sLogger.isActivated()) {
-            sLogger.info("Receive a single S&F HTTP file transfer invitation");
-        }
-        ContactId remote;
-        try {
-            remote = ChatUtils.getReferredIdentityAsContactId(invite);
-        } catch (RcsContactFormatException e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("receiveStoredAndForwardHttpFileTranferInvitation: cannot parse remote contact");
+        boolean logActivated = sLogger.isActivated();
+        String referredId = ChatUtils.getReferredIdentityAsContactUri(invite);
+        ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);
+        if (remote == null) {
+            if (logActivated) {
+                sLogger.error("Discard S&F OneToOne HttpFileTranfer Invitation. Invalid remote ID '"
+                        + referredId + "'");
             }
+            /* We cannot refuse a S&F File transfer invitation */
+            // TODO normally send a deliver to enable transmission of awaiting messages
             return;
+
+        }
+        if (logActivated) {
+            sLogger.info("Receive a single S&F HTTP file transfer invitation");
         }
         CpimMessage cpimMessage = ChatUtils.extractCpimMessage(invite);
         long timestampSent = cpimMessage.getTimestampSent();
@@ -1429,7 +1442,7 @@ public class InstantMessagingService extends ImsService {
 
         /* Auto reject if file too big */
         if (isFileSizeExceeded(ftinfo.getSize())) {
-            if (sLogger.isActivated()) {
+            if (logActivated) {
                 sLogger.debug("File is too big, reject file transfer invitation");
             }
 
@@ -1452,7 +1465,7 @@ public class InstantMessagingService extends ImsService {
             try {
                 filetransferSession.downloadFileIcon();
             } catch (CoreException e) {
-                if (sLogger.isActivated()) {
+                if (logActivated) {
                     sLogger.error("Failed to download file icon", e);
                 }
                 one2oneChatSession.sendErrorResponse(invite, one2oneChatSession.getDialogPath()

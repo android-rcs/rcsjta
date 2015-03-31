@@ -41,10 +41,8 @@ import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.Base64;
-import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
@@ -376,23 +374,15 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
         // Close the media session
         closeMediaSession();
 
-        try {
-            ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
-            // Request capabilities to the remote
-            getImsService().getImsModule().getCapabilityService()
-                    .requestContactCapabilities(remote);
-        } catch (RcsContactFormatException e) {
-            if (logger.isActivated()) {
-                logger.warn("Cannot parse contact " + getDialogPath().getRemoteParty());
-            }
-        }
+        ContactId contact = getRemoteContact();
+        // Request capabilities to the remote
+        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(contact);
 
         // Remove the current session
         removeSession();
 
         // Notify listeners
         if (!isSessionInterrupted() && !isSessionTerminatedByRemote()) {
-            ContactId contact = getRemoteContact();
             for (ImsSessionListener listener : getListeners()) {
                 ((ImageTransferSessionListener) listener).handleSharingError(contact,
                         new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED, error));

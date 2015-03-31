@@ -34,7 +34,6 @@ import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
 
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.contact.ContactService;
@@ -76,30 +75,32 @@ public class ContactListAdapter extends CursorAdapter {
         try {
             cursor = content.query(Phone.CONTENT_URI, PROJECTION_PHONE, WHERE_CLAUSE_PHONE, null,
                     null);
-            // Set of unique numbers
-            Set<String> treatedNumbers = new HashSet<String>();
+            Set<ContactId> treatedNumbers = new HashSet<ContactId>();
             MatrixCursor matrix = new MatrixCursor(PROJECTION_PHONE);
+            ContactUtil contactUtil = ContactUtil.getInstance(context);
+            int columnIdxId = cursor.getColumnIndexOrThrow(Phone._ID);
+            int columIdxLabel = cursor.getColumnIndexOrThrow(Phone.LABEL);
+            int columnIdxType = cursor.getColumnIndexOrThrow(Phone.TYPE);
+            int columnIdxContactId = cursor.getColumnIndexOrThrow(Phone.CONTACT_ID);
+            int columnIdxNumber = cursor.getColumnIndexOrThrow(Phone.NUMBER);
             while (cursor.moveToNext()) {
-                // Key is phone number
-                String phoneNumber = cursor.getString(cursor.getColumnIndex(Phone.NUMBER));
-
-                // Filter number already treated
-                if (!treatedNumbers.contains(phoneNumber)) {
+                String phoneNumber = cursor.getString(columnIdxNumber);
+                if (!contactUtil.isValidContact(phoneNumber)) {
+                    /* Not a valid phone number: skip it */
+                    continue;
+                }
+                ContactId contact = contactUtil.formatContact(phoneNumber);
+                /* Filter number already treated */
+                if (!treatedNumbers.contains(contact)) {
                     matrix.addRow(new Object[] {
-                            cursor.getLong(cursor.getColumnIndex(Phone._ID)), phoneNumber,
-                            cursor.getString(cursor.getColumnIndex(Phone.LABEL)),
-                            cursor.getInt(cursor.getColumnIndex(Phone.TYPE)),
-                            cursor.getLong(cursor.getColumnIndex(Phone.CONTACT_ID))
+                            cursor.getLong(columnIdxId), contact.toString(),
+                            cursor.getString(columIdxLabel), cursor.getInt(columnIdxType),
+                            cursor.getLong(columnIdxContactId)
                     });
-                    treatedNumbers.add(phoneNumber);
+                    treatedNumbers.add(contact);
                 }
             }
             return new ContactListAdapter(context, matrix);
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "createContactListAdapter", e);
-            }
-            return null;
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -133,25 +134,28 @@ public class ContactListAdapter extends CursorAdapter {
                 cursor = content.query(Phone.CONTENT_URI, PROJECTION_PHONE, WHERE_CLAUSE_PHONE,
                         null, null);
                 Set<ContactId> treatedContactIDs = new HashSet<ContactId>();
-
+                int columnIdxId = cursor.getColumnIndexOrThrow(Phone._ID);
+                int columIdxLabel = cursor.getColumnIndexOrThrow(Phone.LABEL);
+                int columnIdxType = cursor.getColumnIndexOrThrow(Phone.TYPE);
+                int columnIdxContactId = cursor.getColumnIndexOrThrow(Phone.CONTACT_ID);
+                int columnIdxNumber = cursor.getColumnIndexOrThrow(Phone.NUMBER);
                 while (cursor.moveToNext()) {
                     // Keep a trace of already treated row
-                    String phoneNumber = cursor.getString(cursor.getColumnIndex(Phone.NUMBER));
-                    try {
-                        ContactId contact = contactUtil.formatContact(phoneNumber);
-                        // If this number is RCS and not already in the list,
-                        // take it
-                        if (rcsContactIds.contains(contact) && !treatedContactIDs.contains(contact)) {
-                            matrix.addRow(new Object[] {
-                                    cursor.getLong(cursor.getColumnIndex(Phone._ID)), phoneNumber,
-                                    cursor.getString(cursor.getColumnIndex(Phone.LABEL)),
-                                    cursor.getInt(cursor.getColumnIndex(Phone.TYPE)),
-                                    cursor.getLong(cursor.getColumnIndex(Phone.CONTACT_ID))
-                            });
-                            treatedContactIDs.add(contact);
-                        }
-                    } catch (RcsContactFormatException e) {
-                        // No a valid phone number: skip it
+                    String phoneNumber = cursor.getString(columnIdxNumber);
+                    if (!contactUtil.isValidContact(phoneNumber)) {
+                        /* Not a valid phone number: skip it */
+                        continue;
+                    }
+                    ContactId contact = contactUtil.formatContact(phoneNumber);
+                    // If this number is RCS and not already in the list,
+                    // take it
+                    if (rcsContactIds.contains(contact) && !treatedContactIDs.contains(contact)) {
+                        matrix.addRow(new Object[] {
+                                cursor.getLong(columnIdxId), contact.toString(),
+                                cursor.getString(columIdxLabel), cursor.getInt(columnIdxType),
+                                cursor.getLong(columnIdxContactId)
+                        });
+                        treatedContactIDs.add(contact);
                     }
                 }
             }
@@ -228,7 +232,7 @@ public class ContactListAdapter extends CursorAdapter {
         };
         // Get contact name from contact id
         Cursor personCursor = context.getContentResolver().query(Contacts.CONTENT_URI,
-                PROJECTION_CONTACT, WHERE_CLAUSE_CONTACT, selectionArgs, null, null);
+                PROJECTION_CONTACT, WHERE_CLAUSE_CONTACT, selectionArgs, null);
         if (personCursor.moveToFirst()) {
             name = personCursor.getString(holder.columnID);
         }
@@ -261,11 +265,11 @@ public class ContactListAdapter extends CursorAdapter {
         String number;
 
         ViewHolder(View base, Cursor cursor) {
-            columnID = cursor.getColumnIndex(Phone._ID);
-            columnNumber = cursor.getColumnIndex(Phone.NUMBER);
-            columnLabel = cursor.getColumnIndex(Phone.LABEL);
-            columnType = cursor.getColumnIndex(Phone.TYPE);
-            columnContactId = cursor.getColumnIndex(Phone.CONTACT_ID);
+            columnID = cursor.getColumnIndexOrThrow(Phone._ID);
+            columnNumber = cursor.getColumnIndexOrThrow(Phone.NUMBER);
+            columnLabel = cursor.getColumnIndexOrThrow(Phone.LABEL);
+            columnType = cursor.getColumnIndexOrThrow(Phone.TYPE);
+            columnContactId = cursor.getColumnIndexOrThrow(Phone.CONTACT_ID);
             number = cursor.getString(columnNumber);
         }
     }

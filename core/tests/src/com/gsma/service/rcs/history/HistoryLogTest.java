@@ -24,7 +24,6 @@ import com.gsma.rcs.provider.sharing.RichCallHistory;
 import com.gsma.rcs.provider.sharing.VideoSharingData;
 import com.gsma.rcs.service.api.HistoryServiceImpl;
 import com.gsma.rcs.utils.ContactUtilMockContext;
-import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
@@ -159,6 +158,8 @@ public class HistoryLogTest extends AndroidTestCase {
 
     private long mTimestampSent;
 
+    private ContactUtil mContactUtil;
+
     static class MyContentProvider extends ContentProvider {
 
         private boolean mQueried = false;
@@ -252,8 +253,8 @@ public class HistoryLogTest extends AndroidTestCase {
                 RcsSettings.createInstance(sLocalContentResolver));
         RichCallHistory.createInstance(sLocalContentResolver);
         mRichCallHistory = RichCallHistory.getInstance();
-        ContactUtil
-                .getInstance(new ContactUtilMockContext(new ContactUtilMockContext(getContext())));
+        mContactUtil = ContactUtil.getInstance(new ContactUtilMockContext(
+                new ContactUtilMockContext(getContext())));
 
         sLocalContentResolver.delete(
                 Uri.parse("content://com.gsma.services.rcs.provider.chat/chatmessage"), null, null);
@@ -296,7 +297,7 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     private ContactId getRemoteContact() {
-        return ContactUtils.createContactId(REMOTE_CONTACT_NUMBER);
+        return mContactUtil.formatContact(REMOTE_CONTACT_NUMBER);
     }
 
     private void addOutgoingFileTransferSharing() {

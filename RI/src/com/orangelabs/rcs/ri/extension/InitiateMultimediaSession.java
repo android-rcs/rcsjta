@@ -21,18 +21,15 @@ package com.orangelabs.rcs.ri.extension;
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Spinner;
 
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.ContactListAdapter;
-import com.orangelabs.rcs.ri.utils.LogUtils;
 
 /**
  * Abstract class to initiate a multimedia session
@@ -46,11 +43,7 @@ public abstract class InitiateMultimediaSession extends Activity {
      */
     private Spinner mSpinner;
 
-    /**
-     * The log tag for this class
-     */
-    private static final String LOGTAG = LogUtils.getTag(InitiateMultimediaSession.class
-            .getSimpleName());
+    private ContactUtil mContactUtil;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,6 +52,8 @@ public abstract class InitiateMultimediaSession extends Activity {
         // Set layout
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.extension_initiate_session);
+
+        mContactUtil = ContactUtil.getInstance(this);
 
         // Set contact selector
         mSpinner = (Spinner) findViewById(R.id.contact);
@@ -87,20 +82,11 @@ public abstract class InitiateMultimediaSession extends Activity {
             // get selected phone number
             ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
-            try {
-                // Convert phone number to contactId
-                ContactUtil contactUtil = ContactUtil.getInstance(InitiateMultimediaSession.this);
-                ContactId contact = contactUtil.formatContact(phoneNumber);
-                // Initiate session
-                initiateSession(contact);
-            } catch (RcsContactFormatException e) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "Cannot parse contact " + phoneNumber);
-                }
-            } finally {
-                // Exit activity
-                finish();
-            }
+            ContactId contact = mContactUtil.formatContact(phoneNumber);
+            // Initiate session
+            initiateSession(contact);
+            // Exit activity
+            finish();
         }
     };
 

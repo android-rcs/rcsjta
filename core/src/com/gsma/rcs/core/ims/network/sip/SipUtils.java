@@ -229,6 +229,7 @@ public class SipUtils {
     /**
      * Build User-Agent header
      * 
+     * @return header
      * @throws Exception
      */
     public static Header buildUserAgentHeader() throws Exception {
@@ -370,14 +371,14 @@ public class SipUtils {
             if (list.hasNext()) {
                 // Get value of the first header
                 assertedHeader1 = ((ExtensionHeader) list.next()).getValue();
-                if (assertedHeader1.contains("tel:")) {
+                if (assertedHeader1.contains(PhoneUtils.TEL_URI_HEADER)) {
                     return assertedHeader1;
                 }
 
                 if (list.hasNext()) {
                     // Get value of the second header (it may not be present)
                     String assertedHeader2 = ((ExtensionHeader) list.next()).getValue();
-                    if (assertedHeader2.contains("tel:")) {
+                    if (assertedHeader2.contains(PhoneUtils.TEL_URI_HEADER)) {
                         return assertedHeader2;
                     }
                 }

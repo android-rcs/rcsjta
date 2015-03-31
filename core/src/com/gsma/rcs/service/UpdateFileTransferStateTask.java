@@ -19,7 +19,7 @@ package com.gsma.rcs.service;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
@@ -56,8 +56,8 @@ import android.database.Cursor;
                 String fileTransferId = cursor.getString(fileTransferIdIdx);
                 String contactNumber = cursor.getString(contactIdx);
                 String chatId = cursor.getString(chatIdIdx);
-                ContactId contact = contactNumber != null ? ContactUtils
-                        .createContactId(contactNumber) : null;
+                ContactId contact = contactNumber != null ? ContactUtil
+                        .createContactIdFromTrustedData(contactNumber) : null;
                 Direction direction = Direction.valueOf(cursor.getInt(directionIdx));
                 boolean groupFileTransfer = !chatId.equals(contact);
                 switch (direction) {

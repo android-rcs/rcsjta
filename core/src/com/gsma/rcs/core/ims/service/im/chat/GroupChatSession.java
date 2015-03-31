@@ -47,11 +47,11 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
@@ -298,13 +298,13 @@ public abstract class GroupChatSession extends ChatSession {
      * @param contact
      */
     private void requestContactCapabilities(String contact) {
-        try {
-            ContactId remote = ContactUtils.createContactId(contact);
-
+        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(contact);
+        if (number != null) {
+            ContactId remote = ContactUtil.createContactIdFromValidatedData(number);
             mImsModule.getCapabilityService().requestContactCapabilities(remote);
-        } catch (RcsContactFormatException e) {
+        } else {
             if (sLogger.isActivated()) {
-                sLogger.debug("Failed to request capabilities: cannot parse contact " + contact);
+                sLogger.debug("Failed to request capabilities: invalid contact '" + contact + "'");
             }
         }
     }
@@ -611,7 +611,8 @@ public abstract class GroupChatSession extends ChatSession {
      */
     @Override
     public void msrpDataReceived(String msgId, byte[] data, String mimeType) {
-        if (sLogger.isActivated()) {
+        boolean logActivated = sLogger.isActivated();
+        if (logActivated) {
             sLogger.info("Data received (type " + mimeType + ")");
         }
 
@@ -620,7 +621,7 @@ public abstract class GroupChatSession extends ChatSession {
 
         if (data == null || data.length == 0) {
             // By-pass empty data
-            if (sLogger.isActivated()) {
+            if (logActivated) {
                 sLogger.debug("By-pass received empty data");
             }
             return;
@@ -646,7 +647,7 @@ public abstract class GroupChatSession extends ChatSession {
 
         } else if (!ChatUtils.isMessageCpimType(mimeType)) {
             // Not supported content
-            if (sLogger.isActivated()) {
+            if (logActivated) {
                 sLogger.debug("Not supported content " + mimeType + " in chat session");
             }
             return;
@@ -657,7 +658,7 @@ public abstract class GroupChatSession extends ChatSession {
         try {
             cpimParser = new CpimParser(data);
         } catch (Exception e) {
-            if (sLogger.isActivated()) {
+            if (logActivated) {
                 sLogger.error("Can't parse the CPIM message", e);
             }
             return;
@@ -677,29 +678,31 @@ public abstract class GroupChatSession extends ChatSession {
         String pseudo = null;
         // In GC, the MSRP 'FROM' header of the SEND message is set to the remote URI
         // Extract URI and optional display name to get pseudo and remoteId
-        try {
-            CpimIdentity cpimIdentity = new CpimIdentity(cpimMsg.getHeader(CpimMessage.HEADER_FROM));
-            pseudo = cpimIdentity.getDisplayName();
-            remoteId = ContactUtils.createContactId(cpimIdentity.getUri());
-            if (sLogger.isActivated()) {
-                sLogger.info("Cpim FROM Identity: " + cpimIdentity);
+        CpimIdentity cpimIdentity = new CpimIdentity(cpimMsg.getHeader(CpimMessage.HEADER_FROM));
+        pseudo = cpimIdentity.getDisplayName();
+        PhoneNumber remoteNumber = ContactUtil.getValidPhoneNumberFromUri(cpimIdentity.getUri());
+        if (remoteNumber == null) {
+            if (logActivated) {
+                sLogger.warn("Cannot parse FROM Cpim Identity: ".concat(cpimIdentity.toString()));
             }
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.warn("Cannot parse FROM Cpim Identity: "
-                        + cpimMsg.getHeader(CpimMessage.HEADER_FROM));
+        } else {
+            remoteId = ContactUtil.createContactIdFromValidatedData(remoteNumber);
+            if (logActivated) {
+                sLogger.info("Cpim FROM Identity: ".concat(cpimIdentity.toString()));
             }
         }
+
         // Extract local contactId from "TO" header
         ContactId localId = null;
-        try {
-            CpimIdentity cpimIdentity = new CpimIdentity(cpimMsg.getHeader(CpimMessage.HEADER_TO));
-            localId = ContactUtils.createContactId(cpimIdentity.getUri());
-            if (sLogger.isActivated()) {
-                sLogger.info("Cpim TO Identity: " + cpimIdentity);
+        cpimIdentity = new CpimIdentity(cpimMsg.getHeader(CpimMessage.HEADER_TO));
+        PhoneNumber localNumber = ContactUtil.getValidPhoneNumberFromUri(cpimIdentity.getUri());
+        if (localNumber == null) {
+            /* purposely left blank */
+        } else {
+            localId = ContactUtil.createContactIdFromValidatedData(localNumber);
+            if (logActivated) {
+                sLogger.info("Cpim TO Identity: ".concat(cpimIdentity.toString()));
             }
-        } catch (Exception e) {
-            // Purposely left blank
         }
 
         // Check if the message needs a delivery report
@@ -742,19 +745,22 @@ public abstract class GroupChatSession extends ChatSession {
                 } else {
                     if (ChatUtils.isMessageImdnType(contentType)) {
                         // Delivery report
-                        try {
-                            ContactId me = ContactUtils.createContactId(ImsModule.IMS_USER_PROFILE
-                                    .getPublicUri());
+                        String publicUri = ImsModule.IMS_USER_PROFILE.getPublicUri();
+                        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(publicUri);
+                        if (number == null) {
+                            if (logActivated) {
+                                sLogger.error("Cannot parse user contact " + publicUri);
+                            }
+                        } else {
+                            ContactId me = ContactUtil.createContactIdFromValidatedData(number);
                             // Only consider delivery report if sent to me
                             if (localId != null && localId.equals(me)) {
                                 receiveMessageDeliveryStatus(remoteId, cpimMsg.getMessageContent());
                             } else {
-                                if (sLogger.isActivated()) {
+                                if (logActivated) {
                                     sLogger.debug("Discard delivery report send to " + localId);
                                 }
                             }
-                        } catch (RcsContactFormatException e) {
-                            // Purposely left blank
                         }
                     } else {
                         if (ChatUtils.isGeolocType(contentType)) {

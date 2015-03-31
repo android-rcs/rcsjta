@@ -30,11 +30,14 @@ import com.gsma.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
 import com.gsma.rcs.provider.settings.RcsSettingsData.EnableRcseSwitch;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.DeviceUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
 import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.contact.ContactId;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -44,6 +47,7 @@ import java.io.ByteArrayInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+
 import javax2.sip.ListeningPoint;
 
 /**
@@ -1460,7 +1464,17 @@ public class ProvisioningParser {
                     if ((publicUserIdentity = getValueByParamName("Public_User_Identity",
                             childnode, TYPE_TXT)) != null) {
                         String username = extractUserNamePart(publicUserIdentity);
-                        mRcsSettings.setUserProfileImsUserName(username);
+                        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(username);
+                        if (number == null) {
+                            if (logger.isActivated()) {
+                                logger.error("Invalid public user identity '" + username + "'");
+                            }
+                            mRcsSettings.setUserProfileImsUserName(null);
+                        } else {
+                            ContactId contact = ContactUtil
+                                    .createContactIdFromValidatedData(number);
+                            mRcsSettings.setUserProfileImsUserName(contact);
+                        }
                         continue;
                     }
                 }

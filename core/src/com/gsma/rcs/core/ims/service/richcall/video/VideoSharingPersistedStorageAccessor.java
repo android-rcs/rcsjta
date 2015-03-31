@@ -18,7 +18,7 @@ package com.gsma.rcs.core.ims.service.richcall.video;
 
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.VideoDescriptor;
@@ -92,7 +92,7 @@ public class VideoSharingPersistedStorageAccessor {
             String contact = cursor
                     .getString(cursor.getColumnIndexOrThrow(VideoSharingLog.CONTACT));
             if (contact != null) {
-                mContact = ContactUtils.createContactId(contact);
+                mContact = ContactUtil.createContactIdFromTrustedData(contact);
             }
             mDirection = Direction.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(VideoSharingLog.DIRECTION)));
