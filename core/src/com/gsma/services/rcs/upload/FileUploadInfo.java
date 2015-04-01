@@ -22,6 +22,8 @@
 
 package com.gsma.services.rcs.upload;
 
+import com.gsma.services.rcs.filetransfer.FileTransferLog;
+
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -105,6 +107,28 @@ public class FileUploadInfo implements Parcelable {
         mFileIconMimeType = fileIconType;
     }
 
+    /**
+     * Constructor for outgoing message
+     * 
+     * @param file
+     * @param validity
+     * @param filename
+     * @param size
+     * @param type
+     * @hide
+     */
+    public FileUploadInfo(Uri file, long validity, String filename, long size, String type) {
+        mFile = file;
+        mExpiration = validity;
+        mFileName = filename;
+        mSize = size;
+        mMimeType = type;
+        mFileIcon = null;
+        mFileIconExpiration = FileTransferLog.UNKNOWN_EXPIRATION;
+        mFileIconSize = 0L;
+        mFileIconMimeType = null;
+    }    
+    
     /**
      * Constructor
      * 
@@ -207,7 +231,7 @@ public class FileUploadInfo implements Parcelable {
     /**
      * Returns the MIME type of the file
      * 
-     * @return Content type
+     * @return MIME type
      */
     public String getMimeType() {
         return mMimeType;
@@ -216,7 +240,7 @@ public class FileUploadInfo implements Parcelable {
     /**
      * Returns URI of the file icon on the content server
      * 
-     * @return Uri
+     * @return Uri or null if no file icon defined
      */
     public Uri getFileIcon() {
         return mFileIcon;
@@ -226,7 +250,7 @@ public class FileUploadInfo implements Parcelable {
      * Returns the timestamp for when the file icon on the content server is no longer valid to
      * download.
      * 
-     * @return timestamp in milliseconds of 0 if not applicable
+     * @return timestamp in milliseconds of 0 if no file icon defined
      */
     public long getFileIconExpiration() {
         return mFileIconExpiration;
@@ -235,7 +259,7 @@ public class FileUploadInfo implements Parcelable {
     /**
      * Returns the size of the file icon
      * 
-     * @return Size
+     * @return Size or 0 if no file icon defined
      */
     public long getFileIconSize() {
         return mFileIconSize;
@@ -244,7 +268,7 @@ public class FileUploadInfo implements Parcelable {
     /**
      * Returns the MIME type of the file icon
      * 
-     * @return Content type
+     * @return MIME type or null if no file icon defined
      */
     public String getFileIconMimeType() {
         return mFileIconMimeType;

@@ -29,7 +29,6 @@ import com.gsma.rcs.core.ims.service.upload.FileUploadSession;
 import com.gsma.rcs.core.ims.service.upload.FileUploadSessionListener;
 import com.gsma.rcs.service.broadcaster.IFileUploadEventBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import com.gsma.services.rcs.upload.FileUpload;
 import com.gsma.services.rcs.upload.FileUpload.State;
 import com.gsma.services.rcs.upload.FileUploadInfo;
@@ -182,8 +181,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
                     fileicon.getExpiration(), fileicon.getSize(), fileicon.getMimeType());
         }
         return new FileUploadInfo(file.getUri(), file.getExpiration(), file.getFilename(),
-                file.getSize(), file.getMimeType(), Uri.EMPTY, FileTransferLog.UNKNOWN_EXPIRATION,
-                0, "");        
+                file.getSize(), file.getMimeType());        
     }
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
