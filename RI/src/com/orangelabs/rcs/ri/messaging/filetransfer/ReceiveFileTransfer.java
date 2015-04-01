@@ -226,8 +226,8 @@ public class ReceiveFileTransfer extends Activity {
                         return;
 
                     } else {
-                        String reasonCode = RiApplication.FT_REASON_CODES[mFtDao.getReasonCode()
-                                .toInt()];
+                        String reasonCode = RiApplication.sFileTransferReasonCodes[mFtDao
+                                .getReasonCode().toInt()];
                         if (LogUtils.isActive) {
                             Log.e(LOGTAG,
                                     new StringBuilder("Transfer failed state: ")
@@ -623,8 +623,8 @@ public class ReceiveFileTransfer extends Activity {
      */
     private void onTransferStateChangedUpdateUI(final FileTransfer.State state,
             FileTransfer.ReasonCode reasonCode) {
-        final String _reasonCode = RiApplication.FT_REASON_CODES[reasonCode.toInt()];
-        final String _state = RiApplication.FT_STATES[state.toInt()];
+        final String _reasonCode = RiApplication.sFileTransferReasonCodes[reasonCode.toInt()];
+        final String _state = RiApplication.sFileTransferStates[state.toInt()];
 
         if (LogUtils.isActive) {
             Log.d(LOGTAG,
@@ -691,7 +691,8 @@ public class ReceiveFileTransfer extends Activity {
 
         mTransferred = true;
         TextView statusView = (TextView) findViewById(R.id.progress_status);
-        statusView.setText(RiApplication.FT_STATES[FileTransfer.State.TRANSFERRED.toInt()]);
+        statusView
+                .setText(RiApplication.sFileTransferStates[FileTransfer.State.TRANSFERRED.toInt()]);
         // Make sure progress bar is at the end
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         progressBar.setProgress(progressBar.getMax());

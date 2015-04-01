@@ -34,94 +34,94 @@ import com.gsma.services.rcs.RcsService.Direction;
 public class RiApplication extends Application {
 
     /**
-     * Array of participant status
+     * Array of participant statuses
      */
-    public static String[] PARTICIPANT_STATUSES;
+    public static String[] sParticipantStatuses;
 
     /**
-     * Array of delivery states
+     * Array of delivery statuses
      */
-    public static String[] DELIVERY_STATUSES;
+    public static String[] sDeliveryStatuses;
 
     /**
      * Array of delivery reason codes
      */
-    public static String[] DELIVERY_REASON_CODES;
+    public static String[] sDeliveryReasonCode;
 
     /**
      * Array of Group CHAT states
      */
-    public static String[] GC_STATES;
+    public static String[] sGroupChatStates;
 
     /**
      * Array of Group CHAT reason codes
      */
-    public static String[] GC_REASON_CODES;
+    public static String[] sGroupChatReasonCodes;
 
     /**
      * Array of message reason codes
      */
-    public static String[] MESSAGE_REASON_CODES;
+    public static String[] sMessageReasonCodes;
 
     /**
      * Array of message statuses
      */
-    public static String[] MESSAGE_STATUSES;
+    public static String[] sMessagesStatuses;
 
     /**
      * Array of file transfer states
      */
-    public static String[] FT_STATES;
+    public static String[] sFileTransferStates;
 
     /**
      * Array of file transfer reason codes
      */
-    public static String[] FT_REASON_CODES;
+    public static String[] sFileTransferReasonCodes;
 
     /**
      * Array of Image sharing states
      */
-    public static String[] ISH_STATES;
+    public static String[] sImageSharingStates;
 
     /**
      * Array of Image sharing reason codes
      */
-    public static String[] ISH_REASON_CODES;
+    public static String[] sImageSharingReasonCodes;
 
     /**
      * Array of Video sharing states
      */
-    public static String[] VSH_STATES;
+    public static String[] sVideoSharingStates;
 
     /**
      * Array of Video sharing reason codes
      */
-    public static String[] VSH_REASON_CODES;
+    public static String[] sVideoReasonCodes;
 
     /**
      * Array of Geolocation sharing states
      */
-    public static String[] GSH_STATES;
+    public static String[] sGeolocSharingStates;
 
     /**
      * Array of Geolocation sharing reason codes
      */
-    public static String[] GSH_REASON_CODES;
+    public static String[] sGeolocReasonCodes;
 
     /**
      * Array of MULTIMEDIA Messaging Session states
      */
-    public static String[] MMS_STATES;
+    public static String[] sMultimediaStates;
 
     /**
      * Array of MULTIMEDIA Messaging Session codes
      */
-    public static String[] MMS_REASON_CODES;
+    public static String[] sMultimediaReasonCodes;
 
     /**
      * Array of group chat events
      */
-    public static String[] GROUP_CHAT_EVENTS;
+    public static String[] sGroupChatEvents;
 
     private static Map<Direction, String> sDirectionToString;
 
@@ -139,24 +139,24 @@ public class RiApplication extends Application {
     public void onCreate() {
         super.onCreate();
         Resources resources = getResources();
-        PARTICIPANT_STATUSES = resources.getStringArray(R.array.participant_statuses);
-        DELIVERY_STATUSES = resources.getStringArray(R.array.delivery_statuses);
-        DELIVERY_REASON_CODES = resources.getStringArray(R.array.delivery_reason_codes);
-        GC_STATES = resources.getStringArray(R.array.group_chat_states);
-        GC_REASON_CODES = resources.getStringArray(R.array.group_chat_reason_codes);
-        MESSAGE_REASON_CODES = resources.getStringArray(R.array.message_reason_codes);
-        MESSAGE_STATUSES = resources.getStringArray(R.array.message_statuses);
-        FT_STATES = resources.getStringArray(R.array.file_transfer_states);
-        FT_REASON_CODES = resources.getStringArray(R.array.file_transfer_reason_codes);
-        ISH_STATES = resources.getStringArray(R.array.ish_states);
-        ISH_REASON_CODES = resources.getStringArray(R.array.ish_reason_codes);
-        VSH_STATES = resources.getStringArray(R.array.vsh_states);
-        VSH_REASON_CODES = resources.getStringArray(R.array.vsh_reason_codes);
-        GSH_STATES = resources.getStringArray(R.array.gsh_states);
-        GSH_REASON_CODES = resources.getStringArray(R.array.gsh_reason_codes);
-        MMS_STATES = resources.getStringArray(R.array.mms_states);
-        MMS_REASON_CODES = resources.getStringArray(R.array.mms_reason_codes);
-        GROUP_CHAT_EVENTS = resources.getStringArray(R.array.group_chat_event);
+        sParticipantStatuses = resources.getStringArray(R.array.participant_statuses);
+        sDeliveryStatuses = resources.getStringArray(R.array.delivery_statuses);
+        sDeliveryReasonCode = resources.getStringArray(R.array.delivery_reason_codes);
+        sGroupChatStates = resources.getStringArray(R.array.group_chat_states);
+        sGroupChatReasonCodes = resources.getStringArray(R.array.group_chat_reason_codes);
+        sMessageReasonCodes = resources.getStringArray(R.array.message_reason_codes);
+        sMessagesStatuses = resources.getStringArray(R.array.message_statuses);
+        sFileTransferStates = resources.getStringArray(R.array.file_transfer_states);
+        sFileTransferReasonCodes = resources.getStringArray(R.array.file_transfer_reason_codes);
+        sImageSharingStates = resources.getStringArray(R.array.ish_states);
+        sImageSharingReasonCodes = resources.getStringArray(R.array.ish_reason_codes);
+        sVideoSharingStates = resources.getStringArray(R.array.vsh_states);
+        sVideoReasonCodes = resources.getStringArray(R.array.vsh_reason_codes);
+        sGeolocSharingStates = resources.getStringArray(R.array.gsh_states);
+        sGeolocReasonCodes = resources.getStringArray(R.array.gsh_reason_codes);
+        sMultimediaStates = resources.getStringArray(R.array.mms_states);
+        sMultimediaReasonCodes = resources.getStringArray(R.array.mms_reason_codes);
+        sGroupChatEvents = resources.getStringArray(R.array.group_chat_event);
 
         sDirectionToString = new HashMap<Direction, String>();
         sDirectionToString.put(Direction.INCOMING, resources.getString(R.string.label_incoming));

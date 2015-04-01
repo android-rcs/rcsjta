@@ -61,9 +61,11 @@ public class GroupDeliveryInfoCursorAdapter extends CursorAdapter {
         // Set the deliver date/time field
         long display = cursor.getLong(holder.columnDisplay);
         // Set the status text
-        int status = cursor.getInt(holder.columnStatus);
+        GroupDeliveryInfo.Status status = GroupDeliveryInfo.Status.valueOf(cursor
+                .getInt(holder.columnStatus));
         // Set the reason text
-        int reason = cursor.getInt(holder.columnReason);
+        GroupDeliveryInfo.ReasonCode reason = GroupDeliveryInfo.ReasonCode.valueOf(cursor
+                .getInt(holder.columnReason));
         // Set the display name
         String number = cursor.getString(holder.columnContact);
         String displayName = RcsDisplayName.getInstance(mContext).getDisplayName(number);
@@ -83,12 +85,11 @@ public class GroupDeliveryInfoCursorAdapter extends CursorAdapter {
         }
 
         String _status = mContext.getString(R.string.label_status,
-                RiApplication.DELIVERY_STATUSES[status % RiApplication.DELIVERY_STATUSES.length]);
+                RiApplication.sDeliveryStatuses[status.toInt()]);
         holder.statusText.setText(_status);
-        if (reason != 0) {
+        if (reason != GroupDeliveryInfo.ReasonCode.UNSPECIFIED) {
             String _reason = mContext.getString(R.string.label_reason_code,
-                    RiApplication.DELIVERY_REASON_CODES[reason
-                            % RiApplication.DELIVERY_REASON_CODES.length]);
+                    RiApplication.sDeliveryReasonCode[reason.toInt()]);
             holder.reasonText.setText(_reason);
         } else {
             holder.reasonText.setVisibility(View.INVISIBLE);

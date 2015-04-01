@@ -116,8 +116,7 @@ public class ChatCursorAdapter extends CursorAdapter {
         }
 
         String mimeType = cursor.getString(holder.columnMimetype);
-        holder.statusText.setText(RiApplication.MESSAGE_STATUSES[status
-                % RiApplication.MESSAGE_STATUSES.length]);
+        holder.statusText.setText(RiApplication.sMessagesStatuses[status]);
 
         holder.dateText.setText(df.format(date));
 
@@ -152,8 +151,7 @@ public class ChatCursorAdapter extends CursorAdapter {
                 if (ChatLog.Message.MimeType.GROUPCHAT_EVENT.equals(mimeType)) {
                     lp.addRule(RelativeLayout.CENTER_IN_PARENT);
                     holder.chatItemLayout.setBackgroundDrawable(null);
-                    String event = RiApplication.GROUP_CHAT_EVENTS[status
-                            % RiApplication.GROUP_CHAT_EVENTS.length];
+                    String event = RiApplication.sGroupChatEvents[status];
                     holder.chatText.setText(context
                             .getString(R.string.label_groupchat_event, event));
                     if (displayName != null) {

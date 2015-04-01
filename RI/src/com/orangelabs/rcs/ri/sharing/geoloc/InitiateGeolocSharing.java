@@ -151,8 +151,8 @@ public class InitiateGeolocSharing extends Activity {
                     || !InitiateGeolocSharing.this.mSharingId.equals(sharingId)) {
                 return;
             }
-            final String _state = RiApplication.GSH_STATES[state.toInt()];
-            final String _reasonCode = RiApplication.GSH_REASON_CODES[reasonCode.toInt()];
+            final String _state = RiApplication.sGeolocSharingStates[state.toInt()];
+            final String _reasonCode = RiApplication.sGeolocReasonCodes[reasonCode.toInt()];
             mHandler.post(new Runnable() {
                 public void run() {
                     TextView statusView = (TextView) findViewById(R.id.progress_status);

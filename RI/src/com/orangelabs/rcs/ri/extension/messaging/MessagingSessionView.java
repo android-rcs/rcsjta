@@ -153,7 +153,7 @@ public class MessagingSessionView extends Activity {
                     || !MessagingSessionView.this.sessionId.equals(sessionId)) {
                 return;
             }
-            final String _reasonCode = RiApplication.MMS_REASON_CODES[reasonCode.toInt()];
+            final String _reasonCode = RiApplication.sMultimediaReasonCodes[reasonCode.toInt()];
             handler.post(new Runnable() {
                 public void run() {
                     switch (state) {
@@ -196,8 +196,8 @@ public class MessagingSessionView extends Activity {
                                 Log.d(LOGTAG,
                                         "onStateChanged "
                                                 + getString(R.string.label_mms_state_changed,
-                                                        RiApplication.MMS_STATES[state.toInt()],
-                                                        _reasonCode));
+                                                        RiApplication.sMultimediaStates[state
+                                                                .toInt()], _reasonCode));
                             }
                     }
                 }

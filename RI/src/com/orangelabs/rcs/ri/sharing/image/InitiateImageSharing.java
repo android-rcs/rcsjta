@@ -159,8 +159,8 @@ public class InitiateImageSharing extends Activity {
                 return;
 
             }
-            final String _reasonCode = RiApplication.ISH_REASON_CODES[reasonCode.toInt()];
-            final String _state = RiApplication.ISH_STATES[state.toInt()];
+            final String _reasonCode = RiApplication.sImageSharingReasonCodes[reasonCode.toInt()];
+            final String _state = RiApplication.sImageSharingStates[state.toInt()];
             handler.post(new Runnable() {
                 public void run() {
                     TextView statusView = (TextView) findViewById(R.id.progress_status);

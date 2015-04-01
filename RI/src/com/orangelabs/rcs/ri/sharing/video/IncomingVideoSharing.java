@@ -421,7 +421,7 @@ public class IncomingVideoSharing extends Activity implements VideoPlayerListene
                 return;
 
             }
-            final String _reasonCode = RiApplication.VSH_REASON_CODES[reasonCode.toInt()];
+            final String _reasonCode = RiApplication.sVideoReasonCodes[reasonCode.toInt()];
             handler.post(new Runnable() {
                 public void run() {
                     switch (state) {
@@ -469,7 +469,8 @@ public class IncomingVideoSharing extends Activity implements VideoPlayerListene
                             if (LogUtils.isActive) {
                                 Log.d(LOGTAG, "onStateChanged ".concat(getString(
                                         R.string.label_vsh_state_changed,
-                                        RiApplication.VSH_STATES[state.toInt()], _reasonCode)));
+                                        RiApplication.sVideoSharingStates[state.toInt()],
+                                        _reasonCode)));
                             }
                     }
                 }
