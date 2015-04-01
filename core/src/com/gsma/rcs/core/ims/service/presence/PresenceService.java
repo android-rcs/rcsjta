@@ -40,11 +40,11 @@ import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.eab.ContactsManagerException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.StartService;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.DateUtils;
 import com.gsma.rcs.utils.StringUtils;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 
 /**
@@ -217,7 +217,8 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      */
     private void firstLaunchOrAccountChangedCheck(Set<ContactId> grantedContacts,
             Set<ContactId> blockedContacts) {
-        if (logger.isActivated()) {
+        boolean logActivated = logger.isActivated();
+        if (logActivated) {
             logger.debug("First launch or account change check procedure");
         }
 
@@ -225,31 +226,32 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         mContactsManager.flushContactProvider();
 
         ContactId me = null;
-        try {
-            me = ContactUtils.createContactId(ImsModule.IMS_USER_PROFILE.getPublicUri());
-        } catch (RcsContactFormatException e) {
-            if (logger.isActivated()) {
-                logger.error("Cannot parse user contact "
-                        + ImsModule.IMS_USER_PROFILE.getPublicUri());
+        String publicUri = ImsModule.IMS_USER_PROFILE.getPublicUri();
+        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(publicUri);
+        if (number == null) {
+            if (logActivated) {
+                logger.error("Cannot parse user contact " + publicUri);
             }
+        } else {
+            me = ContactUtil.createContactIdFromValidatedData(number);
         }
         // Treat the buddy list
         for (ContactId contact : grantedContacts) {
             if (me != null && !contact.equals(me)) {
                 // For each RCS granted contact, except me
-                if (!ContactUtils.isNumberInAddressBook(contact)) {
+                if (!PresenceUtils.isNumberInAddressBook(contact)) {
                     // If it is not present in the address book
-                    if (logger.isActivated()) {
+                    if (logActivated) {
                         logger.debug("The RCS number " + contact
                                 + " was not found in the address book: add it");
                     }
 
                     // => We create the entry in the regular address book
                     try {
-                        ContactUtils.createRcsContactIfNeeded(
+                        PresenceUtils.createRcsContactIfNeeded(
                                 AndroidFactory.getApplicationContext(), contact);
                     } catch (Exception e) {
-                        if (logger.isActivated()) {
+                        if (logActivated) {
                             logger.error("Something went wrong when creating contact " + contact, e);
                         }
                     }
@@ -263,19 +265,19 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         // Treat the blocked contact list
         for (ContactId contact : blockedContacts) {
             // For each RCS blocked contact
-            if (!ContactUtils.isNumberInAddressBook(contact)) {
+            if (!PresenceUtils.isNumberInAddressBook(contact)) {
                 // If it is not present in the address book
-                if (logger.isActivated()) {
+                if (logActivated) {
                     logger.debug("The RCS number " + contact
                             + " was not found in the address book: add it");
                 }
 
                 // => We create the entry in the regular address book
                 try {
-                    ContactUtils.createRcsContactIfNeeded(AndroidFactory.getApplicationContext(),
+                    PresenceUtils.createRcsContactIfNeeded(AndroidFactory.getApplicationContext(),
                             contact);
                 } catch (Exception e) {
-                    if (logger.isActivated()) {
+                    if (logActivated) {
                         logger.error("Something went wrong when creating contact " + contact, e);
                     }
                 }
@@ -283,7 +285,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                 try {
                     mContactsManager.blockContact(contact);
                 } catch (ContactsManagerException e) {
-                    if (logger.isActivated()) {
+                    if (logActivated) {
                         logger.error("Something went wrong when blocking contact " + contact, e);
                     }
                 }
@@ -891,7 +893,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         Set<ContactId> rcsNumbers = mContactsManager.getRcsContactsWithSocialPresence();
         // For each RCS number
         for (ContactId contact : rcsNumbers) {
-            if (!ContactUtils.isNumberInAddressBook(contact)) {
+            if (!PresenceUtils.isNumberInAddressBook(contact)) {
                 // If it is not present in the address book
                 if (logger.isActivated()) {
                     logger.debug("The RCS number " + contact

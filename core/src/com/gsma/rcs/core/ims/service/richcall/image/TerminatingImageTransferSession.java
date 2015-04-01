@@ -46,10 +46,8 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
@@ -523,30 +521,21 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
             }
         }
 
-        try {
-            ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
-            // Request capabilities to the remote
-            getImsService().getImsModule().getCapabilityService()
-                    .requestContactCapabilities(remote);
-        } catch (RcsContactFormatException e) {
-            if (logger.isActivated()) {
-                logger.warn("Cannot parse contact " + getDialogPath().getRemoteParty());
-            }
-        }
+        ContactId contact = getRemoteContact();
+        // Request capabilities to the remote
+        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(contact);
 
         // Remove the current session
         removeSession();
 
-        // Changed by Deutsche Telekom
-        if (!isImageTransfered()) {
-            // Notify listeners
-            if (!isSessionInterrupted() && !isSessionTerminatedByRemote()) {
-                ContactId contact = getRemoteContact();
-                for (int j = 0; j < getListeners().size(); j++) {
-                    ((ImageTransferSessionListener) getListeners().get(j)).handleSharingError(
-                            contact, new ContentSharingError(
-                                    ContentSharingError.MEDIA_TRANSFER_FAILED, error));
-                }
+        if (isImageTransfered()) {
+            return;
+        }
+        // Notify listeners
+        if (!isSessionInterrupted() && !isSessionTerminatedByRemote()) {
+            for (ImsSessionListener listener : getListeners()) {
+                ((ImageTransferSessionListener) listener).handleSharingError(contact,
+                        new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED, error));
             }
         }
     }

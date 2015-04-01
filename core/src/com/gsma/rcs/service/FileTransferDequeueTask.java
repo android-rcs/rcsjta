@@ -24,7 +24,7 @@ import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
@@ -62,8 +62,8 @@ import android.net.Uri;
                     String fileTransferId = cursor.getString(fileTransferIdIdx);
                     String chatId = cursor.getString(chatIdIdx);
                     String contactNumber = cursor.getString(contactIdx);
-                    ContactId contact = contactNumber != null ? ContactUtils
-                            .createContactId(contactNumber) : null;
+                    ContactId contact = contactNumber != null ? ContactUtil
+                            .createContactIdFromTrustedData(contactNumber) : null;
                     boolean isGroupFileTransfer = !chatId.equals(contactNumber);
                     try {
                         Uri file = Uri.parse(cursor.getString(fileIdx));

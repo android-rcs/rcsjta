@@ -33,9 +33,7 @@ import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingSession;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.IVideoPlayer;
 
@@ -145,33 +143,19 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
         if (isSessionInterrupted()) {
             return;
         }
-
-        boolean logActivated = sLogger.isActivated();
-        // Error
-        if (logActivated) {
+        if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Session error: ").append(error.getErrorCode())
                     .append(", reason=").append(error.getMessage()).toString());
         }
-
-        // Close media session
         closeMediaSession();
 
-        // Remove the current session
         removeSession();
 
-        try {
-            ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
-            // Request capabilities to the remote
-            getImsService().getImsModule().getCapabilityService()
-                    .requestContactCapabilities(remote);
-        } catch (RcsContactFormatException e) {
-            if (logActivated) {
-                sLogger.warn(new StringBuilder("Cannot parse contact ").append(
-                        getDialogPath().getRemoteParty()).toString());
-            }
-        }
-
         ContactId contact = getRemoteContact();
+
+        /* Request capabilities to the remote */
+        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(contact);
+
         for (ImsSessionListener imsSessionListener : getListeners()) {
             ((VideoStreamingSessionListener) imsSessionListener).handleSharingError(contact,
                     new ContentSharingError(error));

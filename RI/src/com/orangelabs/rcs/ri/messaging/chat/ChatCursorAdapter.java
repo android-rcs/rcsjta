@@ -21,7 +21,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.contact.ContactId;
@@ -105,17 +104,13 @@ public class ChatCursorAdapter extends CursorAdapter {
         if (!mIsSingleChat && Direction.OUTGOING != direction) {
             String number = cursor.getString(holder.columnContact);
             if (number != null) {
-                try {
-                    ContactId contact = mContactUtils.formatContact(number);
-                    if (!mContactIdDisplayNameMap.containsKey(contact)) {
-                        // Display name is not known, save it into map
-                        displayName = RcsDisplayName.getInstance(context).getDisplayName(contact);
-                        mContactIdDisplayNameMap.put(contact, displayName);
-                    } else {
-                        displayName = mContactIdDisplayNameMap.get(contact);
-                    }
-                } catch (RcsContactFormatException e) {
-                    displayName = number;
+                ContactId contact = mContactUtils.formatContact(number);
+                if (!mContactIdDisplayNameMap.containsKey(contact)) {
+                    // Display name is not known, save it into map
+                    displayName = RcsDisplayName.getInstance(context).getDisplayName(contact);
+                    mContactIdDisplayNameMap.put(contact, displayName);
+                } else {
+                    displayName = mContactIdDisplayNameMap.get(contact);
                 }
             }
         }

@@ -18,7 +18,6 @@
 
 package com.orangelabs.rcs.ri.messaging.filetransfer;
 
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
 import com.gsma.services.rcs.contact.ContactId;
@@ -304,13 +303,7 @@ public class InitiateFileTransfer extends Activity {
         ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
         String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
         ContactUtil contactUtil = ContactUtil.getInstance(this);
-        ContactId remote;
-        try {
-            remote = contactUtil.formatContact(phoneNumber);
-        } catch (RcsContactFormatException e1) {
-            Utils.showMessage(this, getString(R.string.label_invalid_contact, phoneNumber));
-            return;
-        }
+        ContactId remote = contactUtil.formatContact(phoneNumber);
 
         // Get thumbnail option
         CheckBox ftThumb = (CheckBox) findViewById(R.id.ft_thumb);

@@ -39,9 +39,9 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.ipcalldraft.IIPCallPlayer;
 import com.gsma.rcs.service.ipcalldraft.IIPCallRenderer;
 import com.gsma.rcs.service.ipcalldraft.IPCall.ReasonCode;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 
 import java.util.HashMap;
@@ -104,9 +104,8 @@ public class IPCallService extends ImsService {
         mContactsManager = contactsManager;
     }
 
-    private void handleIPCallInvitationRejected(SipRequest invite, ReasonCode reasonCode,
-            long timestamp) {
-        ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
+    private void handleIPCallInvitationRejected(SipRequest invite, ContactId contact,
+            ReasonCode reasonCode, long timestamp) {
         byte[] sessionDescriptionProtocol = invite.getSdpContent().getBytes(UTF8);
         AudioContent audioContent = ContentManager
                 .createLiveAudioContentFromSdp(sessionDescriptionProtocol);
@@ -246,24 +245,26 @@ public class IPCallService extends ImsService {
      * Receive a IP call invitation
      * 
      * @param invite Initial invite
+     * @param audio
+     * @param video
      */
     public void receiveIPCallInvitation(SipRequest invite, boolean audio, boolean video) {
+        boolean logActivated = sLogger.isActivated();
         // Parse contact
-        ContactId contact = null;
-        long timestamp = System.currentTimeMillis();
-        try {
-            contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
-        } catch (RcsContactFormatException e) {
-            if (sLogger.isActivated()) {
+        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(SipUtils
+                .getAssertedIdentity(invite));
+        if (number == null) {
+            if (logActivated) {
                 sLogger.debug("Cannot parse contact: reject the invitation");
             }
-            sendErrorResponse(invite, 486);
+            sendErrorResponse(invite, Response.NOT_ACCEPTABLE);
             return;
-        }
 
+        }
+        ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
         // Test if the contact is blocked
         if (mContactsManager.isBlockedForContact(contact)) {
-            if (sLogger.isActivated()) {
+            if (logActivated) {
                 sLogger.debug("Contact " + contact
                         + " is blocked: automatically reject the sharing invitation");
             }
@@ -273,14 +274,17 @@ public class IPCallService extends ImsService {
             return;
         }
 
+        long timestamp = System.currentTimeMillis();
+
         // Reject if there is already a call in progress
         if (isCurrentSharingUnidirectional()) {
             // Max session
-            if (sLogger.isActivated()) {
+            if (logActivated) {
                 sLogger.debug("The max number of IP call sessions is achieved: reject the invitation");
             }
-            handleIPCallInvitationRejected(invite, ReasonCode.REJECTED_MAX_SESSIONS, timestamp);
-            sendErrorResponse(invite, 486);
+            handleIPCallInvitationRejected(invite, contact, ReasonCode.REJECTED_MAX_SESSIONS,
+                    timestamp);
+            sendErrorResponse(invite, Response.BUSY_HERE);
             return;
         }
 

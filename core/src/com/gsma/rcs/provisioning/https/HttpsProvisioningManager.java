@@ -855,10 +855,6 @@ public class HttpsProvisioningManager {
 
                     // Save token
                     String token = info.getToken();
-                    long tokenValidity = info.getTokenValidity();
-                    if (logActivated) {
-                        sLogger.debug("Provisioning Token=" + token + ", validity=" + tokenValidity);
-                    }
                     mRcsSettings.setProvisioningToken(token);
 
                     mRcsSettings.setFileTransferHttpSupported(mRcsSettings.getFtHttpServer()

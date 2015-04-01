@@ -28,7 +28,7 @@ import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsService.Direction;
@@ -442,19 +442,9 @@ public class FileTransferLog implements IFileTransferLog {
                 long size = cursor.getLong(sizeColumnIdx);
                 String mimeType = cursor.getString(mimeTypeColumnIdx);
                 String fileTransferId = cursor.getString(fileTransferIdColumnIdx);
-                ContactId contact = null;
                 String phoneNumber = cursor.getString(contactColumnIdx);
-                try {
-                    contact = ContactUtils.createContactId(phoneNumber);
-                } catch (Exception e) {
-                    if (logger.isActivated()) {
-                        logger.error(new StringBuilder("Cannot parse contact '")
-                                .append(phoneNumber)
-                                .append("' for file transfer with transfer ID '")
-                                .append(fileTransferId).append("'").toString());
-                    }
-                    continue;
-                }
+                ContactId contact = phoneNumber == null ? null : ContactUtil
+                        .createContactIdFromTrustedData(phoneNumber);
                 String chatId = cursor.getString(chatIdColumnIdx);
                 String file = cursor.getString(fileColumnIdx);
                 String fileName = cursor.getString(fileNameColumnIdx);
@@ -462,7 +452,7 @@ public class FileTransferLog implements IFileTransferLog {
                 String fileIcon = cursor.getString(fileIconColumnIdx);
                 long timestamp = cursor.getLong(timestampColumnIdx);
                 long timestampSent = cursor.getLong(timestampSentColumnIdx);
-                boolean isGroup = !contact.toString().equals(chatId);
+                boolean isGroup = (contact == null) || (!contact.toString().equals(chatId));
                 MmContent content = ContentManager.createMmContentFromMime(Uri.parse(file),
                         mimeType, size, fileName);
                 Uri fileIconUri = fileIcon != null ? Uri.parse(fileIcon) : null;
@@ -520,30 +510,20 @@ public class FileTransferLog implements IFileTransferLog {
                     .getColumnIndexOrThrow(FileTransferData.KEY_MIME_TYPE));
             String fileTransferId = cursor.getString(cursor
                     .getColumnIndexOrThrow(FileTransferData.KEY_FT_ID));
-            ContactId contact = null;
             String phoneNumber = cursor.getString(cursor
                     .getColumnIndexOrThrow(FileTransferData.KEY_CONTACT));
+            ContactId contact = phoneNumber == null ? null : ContactUtil
+                    .createContactIdFromTrustedData(phoneNumber);
             long timestamp = cursor.getLong(cursor
                     .getColumnIndexOrThrow(FileTransferData.KEY_TIMESTAMP));
             long timestampSent = cursor.getLong(cursor
                     .getColumnIndexOrThrow(FileTransferData.KEY_TIMESTAMP_SENT));
-            try {
-                contact = ContactUtils.createContactId(phoneNumber);
-            } catch (Exception e) {
-                if (logger.isActivated()) {
-                    logger.error(new StringBuilder("Cannot parse contact '").append(phoneNumber)
-                            .append("' for file transfer with transfer ID '")
-                            .append(fileTransferId).append("'").toString());
-                }
-                return null;
-
-            }
             String chatId = cursor.getString(cursor
                     .getColumnIndexOrThrow(FileTransferData.KEY_CHAT_ID));
             String file = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILE));
             String fileIcon = cursor.getString(cursor
                     .getColumnIndexOrThrow(FileTransferData.KEY_FILEICON));
-            boolean isGroup = !contact.toString().equals(chatId);
+            boolean isGroup = (contact == null) || !contact.toString().equals(chatId);
             MmContent content = ContentManager.createMmContentFromMime(Uri.parse(file), mimeType,
                     size, fileName);
             Uri fileIconUri = fileIcon != null ? Uri.parse(fileIcon) : null;
@@ -717,8 +697,8 @@ public class FileTransferLog implements IFileTransferLog {
             }
             String phoneNumber = cursor.getString(cursor
                     .getColumnIndexOrThrow(FileTransferData.KEY_CONTACT));
-            ContactId contact = phoneNumber != null ? ContactUtils.createContactId(phoneNumber)
-                    : null;
+            ContactId contact = phoneNumber != null ? ContactUtil
+                    .createContactIdFromTrustedData(phoneNumber) : null;
             String chatId = cursor.getString(cursor
                     .getColumnIndexOrThrow(FileTransferData.KEY_CHAT_ID));
             String fileUri = cursor.getString(cursor
@@ -737,7 +717,7 @@ public class FileTransferLog implements IFileTransferLog {
                     .getColumnIndexOrThrow(FileTransferData.KEY_FILENAME));
             String fileMimetype = cursor.getString(cursor
                     .getColumnIndexOrThrow(FileTransferData.KEY_MIME_TYPE));
-            boolean isGroup = !chatId.equals(phoneNumber);
+            boolean isGroup = (phoneNumber == null) || !chatId.equals(phoneNumber);
             Uri file = Uri.parse(fileUri);
             MmContent content = ContentManager.createMmContentFromMime(file, fileMimetype,
                     fileSize, fileName);

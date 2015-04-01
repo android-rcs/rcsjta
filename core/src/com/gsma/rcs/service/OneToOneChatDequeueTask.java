@@ -31,7 +31,7 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.rcs.service.api.OneToOneChatImpl;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
@@ -76,7 +76,8 @@ import android.net.Uri;
                 while (cursor.moveToNext()) {
                     int providerId = cursor.getInt(providerIdIdx);
                     String id = cursor.getString(idIdx);
-                    ContactId contact = ContactUtils.createContactId(cursor.getString(contactIdx));
+                    String phoneNumber = cursor.getString(contactIdx);
+                    ContactId contact = ContactUtil.createContactIdFromTrustedData(phoneNumber);
                     try {
                         switch (providerId) {
                             case Message.HISTORYLOG_MEMBER_ID:

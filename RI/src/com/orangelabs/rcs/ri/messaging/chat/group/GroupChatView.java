@@ -20,7 +20,6 @@ package com.orangelabs.rcs.ri.messaging.chat.group;
 
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.GroupDeliveryInfo;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
@@ -364,13 +363,7 @@ public class GroupChatView extends ChatView {
                     }
 
                     for (String contact : contacts) {
-                        try {
-                            mParticipants.add(contactUtil.formatContact(contact));
-                        } catch (RcsContactFormatException e) {
-                            if (LogUtils.isActive) {
-                                Log.e(LOGTAG, "processIntent invalid participant ".concat(contact));
-                            }
-                        }
+                        mParticipants.add(contactUtil.formatContact(contact));
                     }
                     if (mParticipants.isEmpty()) {
                         Utils.showMessageAndExit(this, getString(R.string.label_invalid_contacts),
@@ -424,11 +417,13 @@ public class GroupChatView extends ChatView {
                     if (message != null) {
                         // It is a new message: check if for the displayed
                         // conversation
-                        if (message.getChatId().equals(mChatId)) {
+                        if (message.getChatId().equals(mChatId) || mChatId == null) {
                             // Mark the message as read
                             mCnxManager.getChatApi().markMessageAsRead(message.getMsgId());
-                            return true;
-
+                            if (mChatId != null) {
+                                return true;
+                            }
+                            mChatId = message.getChatId();
                         } else {
                             // Ignore message if it does not belong to current
                             // GC
@@ -444,27 +439,30 @@ public class GroupChatView extends ChatView {
                     } else {
                         // New GC invitation
                         mChatId = getIntent().getStringExtra(GroupChatIntent.EXTRA_CHAT_ID);
-                        mGroupChat = mCnxManager.getChatApi().getGroupChat(mChatId);
-                        if (mGroupChat == null) {
-                            Utils.showMessageAndExit(this,
-                                    getString(R.string.label_session_not_found), mExitOnce);
-                            return false;
+                    }
+                    mGroupChat = mCnxManager.getChatApi().getGroupChat(mChatId);
+                    if (mGroupChat == null) {
+                        Utils.showMessageAndExit(this, getString(R.string.label_session_not_found),
+                                mExitOnce);
+                        return false;
 
-                        }
-                        getSupportLoaderManager().initLoader(LOADER_ID, null, this);
-                        chatIdOnForeground = mChatId;
-                        // Get remote contact
-                        ContactId contact = null; // mGroupChat.getRemoteContact();
-                        // Get subject
-                        mSubject = mGroupChat.getSubject();
-                        updateGroupChatViewTitle(mSubject);
-                        // Set list of participants
-                        mParticipants = mGroupChat.getParticipants().keySet();
-                        // Display accept/reject dialog
-                        // TODO manage new state ACCEPTING and REJECTED
-                        if (GroupChat.State.INVITED == mGroupChat.getState()) {
-                            displayAcceptRejectDialog(contact);
-                        }
+                    }
+                    getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+                    chatIdOnForeground = mChatId;
+                    // Get remote contact
+                    ContactId contact = null; // mGroupChat.getRemoteContact();
+                    // Get subject
+                    mSubject = mGroupChat.getSubject();
+                    updateGroupChatViewTitle(mSubject);
+                    // Set list of participants
+                    mParticipants = mGroupChat.getParticipants().keySet();
+                    // Display accept/reject dialog
+                    // TODO manage new state ACCEPTING and REJECTED
+                    if (GroupChat.State.INVITED == mGroupChat.getState()) {
+                        displayAcceptRejectDialog(contact);
+                    }
+                    if (LogUtils.isActive) {
+                        Log.d(LOGTAG, "New group chat for chatId ".concat(mChatId));
                     }
                     return true;
 
@@ -709,9 +707,11 @@ public class GroupChatView extends ChatView {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem menuItem = menu.findItem(R.id.menu_participants);
         try {
-            menu.findItem(R.id.menu_participants).setEnabled(
-                    mGroupChat.isAllowedToInviteParticipants());
+            if (mGroupChat != null) {
+                menuItem.setEnabled(mGroupChat.isAllowedToInviteParticipants());
+            }
         } catch (RcsServiceException e) {
             e.printStackTrace();
         }

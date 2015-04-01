@@ -118,10 +118,11 @@ import java.util.Set;
 
     protected void ensureDatabaseAttached(int providerId) {
         HistoryMemberDatabase memberDatabase = mHistoryMemberDatabases.get(providerId);
-        if (memberDatabase.isAttached()) {
-            return;
-        }
         synchronized (memberDatabase) {
+            if (memberDatabase.isAttached()) {
+                return;
+            }
+
             Cursor cursor = null;
             try {
                 cursor = getContext().getContentResolver().query(
@@ -241,12 +242,12 @@ import java.util.Set;
                     .append(providerId).append("!").toString());
         }
 
-        synchronized (mOpenHelper) {
+        HistoryMemberDatabase memberDatabase = mHistoryMemberDatabases.get(providerId);
+        synchronized (memberDatabase) {
             mQueryHelper.clearProvider(providerId);
-            if (mHistoryMemberDatabases.get(providerId).isAttached()) {
+            if (memberDatabase.isAttached()) {
                 mOpenHelper.detach(providerId);
             }
-
         }
     }
 }

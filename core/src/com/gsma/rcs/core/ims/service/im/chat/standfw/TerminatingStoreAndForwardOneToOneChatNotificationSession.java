@@ -46,11 +46,11 @@ import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimParser;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 
 import java.io.IOException;
@@ -332,21 +332,22 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
             try {
                 CpimParser cpimParser = new CpimParser(data);
                 CpimMessage cpimMsg = cpimParser.getCpimMessage();
-                if (cpimMsg != null) {
-                    String contentType = cpimMsg.getContentType();
-                    String from = cpimMsg.getHeader(CpimMessage.HEADER_FROM);
-
-                    if (ChatUtils.isMessageImdnType(contentType)) {
-                        try {
-                            ContactId contact = ContactUtils.createContactId(from);
-                            // Receive an IMDN report
-                            receiveMessageDeliveryStatus(contact, cpimMsg.getMessageContent());
-                        } catch (RcsContactFormatException e) {
-                            // Receive an IMDN report
-                            receiveMessageDeliveryStatus(getRemoteContact(),
-                                    cpimMsg.getMessageContent());
-                        }
-                    }
+                if (cpimMsg == null) {
+                    return;
+                }
+                String contentType = cpimMsg.getContentType();
+                if (!ChatUtils.isMessageImdnType(contentType)) {
+                    return;
+                }
+                String from = cpimMsg.getHeader(CpimMessage.HEADER_FROM);
+                PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(from);
+                if (number != null) {
+                    ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
+                    // Receive an IMDN report
+                    receiveMessageDeliveryStatus(contact, cpimMsg.getMessageContent());
+                } else {
+                    // Receive an IMDN report
+                    receiveMessageDeliveryStatus(getRemoteContact(), cpimMsg.getMessageContent());
                 }
             } catch (Exception e) {
                 if (logActivated) {

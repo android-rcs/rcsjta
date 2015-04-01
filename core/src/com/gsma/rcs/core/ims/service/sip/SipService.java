@@ -24,13 +24,9 @@ package com.gsma.rcs.core.ims.service.sip;
 
 import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsModule;
-import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
-import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.gsma.rcs.core.ims.service.ImsService;
-import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
 import com.gsma.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.gsma.rcs.core.ims.service.sip.messaging.OriginatingSipMsrpSession;
 import com.gsma.rcs.core.ims.service.sip.messaging.TerminatingSipMsrpSession;
@@ -39,10 +35,9 @@ import com.gsma.rcs.core.ims.service.sip.streaming.OriginatingSipRtpSession;
 import com.gsma.rcs.core.ims.service.sip.streaming.TerminatingSipRtpSession;
 import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.ContactUtils;
-import com.gsma.rcs.utils.PhoneUtils;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.Intent;
@@ -157,28 +152,30 @@ public class SipService extends ImsService {
      * @param timestamp Local timestamp when got SipRequest
      */
     public void receiveMsrpSessionInvitation(Intent sessionInvite, SipRequest invite, long timestamp) {
-        try {
-            // Test if the contact is blocked
-            ContactId remote = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
-            if (mContactsManager.isBlockedForContact(remote)) {
-                if (logger.isActivated()) {
-                    logger.debug("Contact " + remote
-                            + " is blocked: automatically reject the session invitation");
-                }
-
-                // Send a 603 Decline response
-                sendErrorResponse(invite, Response.DECLINE);
-                return;
-            }
-        } catch (RcsContactFormatException e) {
+        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(SipUtils
+                .getAssertedIdentity(invite));
+        if (number == null) {
             if (logger.isActivated()) {
-                logger.warn("Cannot parse contact from FT invitation");
+                logger.warn("Cannot process MSRP invitation: invalid SIP header");
             }
+            sendErrorResponse(invite, Response.SESSION_NOT_ACCEPTABLE);
+            return;
+        }
+        // Test if the contact is blocked
+        ContactId remote = ContactUtil.createContactIdFromValidatedData(number);
+        if (mContactsManager.isBlockedForContact(remote)) {
+            if (logger.isActivated()) {
+                logger.debug("Contact " + remote
+                        + " is blocked: automatically reject the session invitation");
+            }
+
+            // Send a 603 Decline response
+            sendErrorResponse(invite, Response.DECLINE);
             return;
         }
 
         // Create a new session
-        TerminatingSipMsrpSession session = new TerminatingSipMsrpSession(this, invite,
+        TerminatingSipMsrpSession session = new TerminatingSipMsrpSession(this, invite, remote,
                 sessionInvite, mRcsSettings, timestamp);
 
         getImsModule().getCore().getListener()
@@ -213,32 +210,32 @@ public class SipService extends ImsService {
      * @param sessionInvite Resolved intent
      * @param invite Initial invite
      * @param timestamp Local timestamp when got SipRequest
-     * @throws RcsContactFormatException
      */
-    public void receiveRtpSessionInvitation(Intent sessionInvite, SipRequest invite, long timestamp)
-            throws RcsContactFormatException {
-        try {
-            // Test if the contact is blocked
-            ContactId remote = ContactUtils.createContactId(SipUtils.getAssertedIdentity(invite));
-            if (mContactsManager.isBlockedForContact(remote)) {
-                if (logger.isActivated()) {
-                    logger.debug("Contact " + remote
-                            + " is blocked: automatically reject the session invitation");
-                }
-
-                // Send a 603 Decline response
-                sendErrorResponse(invite, Response.DECLINE);
-                return;
-            }
-        } catch (RcsContactFormatException e) {
+    public void receiveRtpSessionInvitation(Intent sessionInvite, SipRequest invite, long timestamp) {
+        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(SipUtils
+                .getAssertedIdentity(invite));
+        if (number == null) {
             if (logger.isActivated()) {
-                logger.warn("Cannot parse contact from FT invitation");
+                logger.warn("Cannot process RTP invitation: invalid SIP header");
             }
+            sendErrorResponse(invite, Response.SESSION_NOT_ACCEPTABLE);
+            return;
+        }
+        // Test if the contact is blocked
+        ContactId remote = ContactUtil.createContactIdFromValidatedData(number);
+        if (mContactsManager.isBlockedForContact(remote)) {
+            if (logger.isActivated()) {
+                logger.debug("Contact " + remote
+                        + " is blocked: automatically reject the session invitation");
+            }
+
+            // Send a 603 Decline response
+            sendErrorResponse(invite, Response.DECLINE);
             return;
         }
 
         // Create a new session
-        TerminatingSipRtpSession session = new TerminatingSipRtpSession(this, invite,
+        TerminatingSipRtpSession session = new TerminatingSipRtpSession(this, invite, remote,
                 sessionInvite, mRcsSettings, timestamp);
 
         getImsModule().getCore().getListener()
@@ -333,101 +330,4 @@ public class SipService extends ImsService {
         }
     }
 
-    /**
-     * Send an instant message (SIP MESSAGE)
-     * 
-     * @param contact Contact
-     * @param featureTag Feature tag of the service
-     * @param content Content
-     * @return True if successful else returns false
-     */
-    public boolean sendInstantMessage(String contact, String featureTag, byte[] content) {
-        boolean result = false;
-        try {
-            if (logger.isActivated()) {
-                logger.debug("Send instant message to " + contact);
-            }
-
-            // Create authentication agent
-            SessionAuthenticationAgent authenticationAgent = new SessionAuthenticationAgent(
-                    getImsModule());
-
-            // Create a dialog path
-            String contactUri = PhoneUtils.formatNumberToSipUri(contact);
-            SipDialogPath dialogPath = new SipDialogPath(getImsModule().getSipManager()
-                    .getSipStack(), getImsModule().getSipManager().getSipStack().generateCallId(),
-                    1, contactUri, ImsModule.IMS_USER_PROFILE.getPublicUri(), contactUri,
-                    getImsModule().getSipManager().getSipStack().getServiceRoutePath(),
-                    mRcsSettings);
-
-            // Create MESSAGE request
-            if (logger.isActivated()) {
-                logger.info("Send first MESSAGE");
-            }
-            SipRequest msg = SipMessageFactory.createMessage(dialogPath, featureTag,
-                    SipService.MIME_TYPE, content);
-
-            // Send MESSAGE request
-            SipTransactionContext ctx = getImsModule().getSipManager().sendSipMessageAndWait(msg);
-
-            // Analyze received message
-            if (ctx.getStatusCode() == 407) {
-                // 407 response received
-                if (logger.isActivated()) {
-                    logger.info("407 response received");
-                }
-
-                // Set the Proxy-Authorization header
-                authenticationAgent.readProxyAuthenticateHeader(ctx.getSipResponse());
-
-                // Increment the Cseq number of the dialog path
-                dialogPath.incrementCseq();
-
-                // Create a second MESSAGE request with the right token
-                if (logger.isActivated()) {
-                    logger.info("Send second MESSAGE");
-                }
-                msg = SipMessageFactory.createMessage(dialogPath, featureTag, SipService.MIME_TYPE,
-                        content);
-
-                // Set the Authorization header
-                authenticationAgent.setProxyAuthorizationHeader(msg);
-
-                // Send MESSAGE request
-                ctx = getImsModule().getSipManager().sendSipMessageAndWait(msg);
-
-                // Analyze received message
-                if ((ctx.getStatusCode() == 200) || (ctx.getStatusCode() == 202)) {
-                    // 200 OK response
-                    if (logger.isActivated()) {
-                        logger.info("20x OK response received");
-                    }
-                    result = true;
-                } else {
-                    // Error
-                    if (logger.isActivated()) {
-                        logger.info("Send instant message has failed: " + ctx.getStatusCode()
-                                + " response received");
-                    }
-                }
-            } else if ((ctx.getStatusCode() == 200) || (ctx.getStatusCode() == 202)) {
-                // 200 OK received
-                if (logger.isActivated()) {
-                    logger.info("20x OK response received");
-                }
-                result = true;
-            } else {
-                // Error responses
-                if (logger.isActivated()) {
-                    logger.info("Send instant message has failed: " + ctx.getStatusCode()
-                            + " response received");
-                }
-            }
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't send MESSAGE request", e);
-            }
-        }
-        return result;
-    }
 }

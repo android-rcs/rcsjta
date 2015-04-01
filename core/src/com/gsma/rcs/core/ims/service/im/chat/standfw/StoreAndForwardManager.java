@@ -27,7 +27,6 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 
 /**
@@ -67,7 +66,6 @@ public class StoreAndForwardManager {
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp when got SipRequest
-     * @throws RcsContactFormatException
      */
     public void receiveStoredMessages(SipRequest invite, ContactId contact,
             RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp) {
@@ -91,7 +89,6 @@ public class StoreAndForwardManager {
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp when got SipRequest
-     * @throws RcsContactFormatException
      */
     public void receiveStoredNotifications(SipRequest invite, ContactId contact,
             RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp) {

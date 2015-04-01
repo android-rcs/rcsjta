@@ -172,7 +172,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
         };
         t.start();
     }
-    
+
     private FileUploadInfo createFileUploadInfo(FileTransferHttpInfoDocument file) {
         FileTransferHttpThumbnail fileicon = file.getFileThumbnail();
         if (fileicon != null) {
@@ -181,7 +181,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
                     fileicon.getExpiration(), fileicon.getSize(), fileicon.getMimeType());
         }
         return new FileUploadInfo(file.getUri(), file.getExpiration(), file.getFilename(),
-                file.getSize(), file.getMimeType());        
+                file.getSize(), file.getMimeType());
     }
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/

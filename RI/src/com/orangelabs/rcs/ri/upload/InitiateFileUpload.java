@@ -58,45 +58,24 @@ public class InitiateFileUpload extends Activity {
      */
     private final static int SELECT_IMAGE = 0;
 
-    /**
-     * UI handler
-     */
-    private final Handler handler = new Handler();
+    private final Handler mHandler = new Handler();
 
-    /**
-     * Selected file URI
-     */
-    private Uri file;
+    private Uri mFile;
 
     /**
      * Selected filesize (kB)
      */
-    private long filesize = -1;
+    private long mFilesize = -1;
 
-    /**
-     * File upload session
-     */
-    private FileUpload upload;
+    private FileUpload mUpload;
 
-    /**
-     * File upload Id
-     */
-    private String uploadId;
+    private String mUploadId;
 
-    /**
-     * A locker to exit only once
-     */
     private LockAccess mExitOnce = new LockAccess();
 
-    /**
-     * API connection manager
-     */
     private ConnectionManager mCnxManager;
 
-    /**
-     * File upload listener
-     */
-    private MyFileUploadListener uploadListener = new MyFileUploadListener();
+    private MyFileUploadListener mUploadListener = new MyFileUploadListener();
 
     /**
      * The log tag for this class
@@ -131,7 +110,7 @@ public class InitiateFileUpload extends Activity {
         mCnxManager.startMonitorServices(this, mExitOnce, RcsServiceName.FILE_UPLOAD);
         try {
             // Add upload listener
-            mCnxManager.getFileUploadApi().addEventListener(uploadListener);
+            mCnxManager.getFileUploadApi().addEventListener(mUploadListener);
         } catch (RcsServiceNotAvailableException e) {
             Utils.showMessageAndExit(this, getString(R.string.label_api_unavailable), mExitOnce, e);
         } catch (RcsServiceException e) {
@@ -149,7 +128,7 @@ public class InitiateFileUpload extends Activity {
         // Remove upload listener
         if (mCnxManager.isServiceConnected(RcsServiceName.FILE_TRANSFER)) {
             try {
-                mCnxManager.getFileUploadApi().removeEventListener(uploadListener);
+                mCnxManager.getFileUploadApi().removeEventListener(mUploadListener);
             } catch (Exception e) {
                 if (LogUtils.isActive) {
                     Log.e(LOGTAG, "Failed to remove listener", e);
@@ -175,7 +154,7 @@ public class InitiateFileUpload extends Activity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                if ((maxSize > 0) && (filesize >= maxSize)) {
+                if ((maxSize > 0) && (mFilesize >= maxSize)) {
                     // Display an error
                     Utils.showMessage(InitiateFileUpload.this,
                             getString(R.string.label_upload_max_size, maxSize));
@@ -188,11 +167,11 @@ public class InitiateFileUpload extends Activity {
                 boolean thumbnail = ftThumb.isChecked();
 
                 /* Only take persistable permission for content Uris */
-                FileUtils.tryToTakePersistableContentUriPermission(getApplicationContext(), file);
+                FileUtils.tryToTakePersistableContentUriPermission(getApplicationContext(), mFile);
 
                 // Initiate upload
-                upload = mCnxManager.getFileUploadApi().uploadFile(file, thumbnail);
-                uploadId = upload.getUploadId();
+                mUpload = mCnxManager.getFileUploadApi().uploadFile(mFile, thumbnail);
+                mUploadId = mUpload.getUploadId();
 
                 // Hide buttons
                 Button uploadBtn = (Button) findViewById(R.id.upload_btn);
@@ -223,14 +202,15 @@ public class InitiateFileUpload extends Activity {
             // Show upload info
             try {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                String filename = upload.getUploadInfo().getFile().toString() + "/"
-                        + upload.getUploadInfo().getFileName();
+                String filename = mUpload.getUploadInfo().getFile().toString() + "/"
+                        + mUpload.getUploadInfo().getFileName();
                 intent.setData(Uri.parse(filename));
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
             } catch (Exception e) {
                 e.printStackTrace();
-                Utils.showMessage(InitiateFileUpload.this, getString(R.string.label_open_upload_failed));
+                Utils.showMessage(InitiateFileUpload.this,
+                        getString(R.string.label_open_upload_failed));
             }
         }
     };
@@ -246,7 +226,7 @@ public class InitiateFileUpload extends Activity {
         if (resultCode != RESULT_OK || (data == null) || (data.getData() == null)) {
             return;
         }
-        file = data.getData();
+        mFile = data.getData();
         TextView uriEdit = (TextView) findViewById(R.id.uri);
         Button uploadBtn = (Button) findViewById(R.id.upload_btn);
         switch (requestCode) {
@@ -254,10 +234,10 @@ public class InitiateFileUpload extends Activity {
                 // Display file info
                 try {
                     // Get image filename and size
-                    filesize = FileUtils.getFileSize(this, file) / 1024;
-                    uriEdit.setText(filesize + " KB");
+                    mFilesize = FileUtils.getFileSize(this, mFile) / 1024;
+                    uriEdit.setText(mFilesize + " KB");
                 } catch (Exception e) {
-                    filesize = -1;
+                    mFilesize = -1;
                     uriEdit.setText("Unknown");
                 }
 
@@ -280,11 +260,11 @@ public class InitiateFileUpload extends Activity {
         @Override
         public void onStateChanged(String uploadId, final FileUpload.State state) {
             // Discard event if not for current uploadId
-            if (InitiateFileUpload.this.uploadId == null
-                    || !InitiateFileUpload.this.uploadId.equals(uploadId)) {
+            if (InitiateFileUpload.this.mUploadId == null
+                    || !InitiateFileUpload.this.mUploadId.equals(uploadId)) {
                 return;
             }
-            handler.post(new Runnable() {
+            mHandler.post(new Runnable() {
                 public void run() {
                     TextView statusView = (TextView) findViewById(R.id.progress_status);
                     if (state == FileUpload.State.STARTED) {
@@ -316,7 +296,7 @@ public class InitiateFileUpload extends Activity {
          */
         @Override
         public void onProgressUpdate(String uploadId, final long currentSize, final long totalSize) {
-            handler.post(new Runnable() {
+            mHandler.post(new Runnable() {
                 public void run() {
                     // Display sharing progress
                     updateProgressBar(currentSize, totalSize);
@@ -332,14 +312,14 @@ public class InitiateFileUpload extends Activity {
          */
         @Override
         public void onUploaded(String uploadId, final FileUploadInfo info) {
-            handler.post(new Runnable() {
+            mHandler.post(new Runnable() {
                 public void run() {
                     // Activate show button
                     Button showBtn = (Button) findViewById(R.id.show_btn);
                     showBtn.setEnabled(true);
                 }
             });
-        }    
+        }
     };
 
     /**
@@ -373,13 +353,13 @@ public class InitiateFileUpload extends Activity {
     private void quitUpload() {
         // Stop upload
         try {
-            if (upload != null) {
-                upload.abortUpload();
+            if (mUpload != null && FileUpload.State.STARTED == mUpload.getState()) {
+                mUpload.abortUpload();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        upload = null;
+        mUpload = null;
 
         // Exit activity
         finish();

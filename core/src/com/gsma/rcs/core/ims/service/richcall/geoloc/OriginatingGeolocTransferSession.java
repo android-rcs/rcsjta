@@ -38,10 +38,8 @@ import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
@@ -322,21 +320,14 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
         // Terminate session
         terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
 
-        try {
-            ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
-            // Request capabilities to the remote
-            getImsService().getImsModule().getCapabilityService()
-                    .requestContactCapabilities(remote);
-        } catch (RcsContactFormatException e) {
-            if (logger.isActivated()) {
-                logger.warn("Cannot parse contact " + getDialogPath().getRemoteParty());
-            }
-        }
+        ContactId contact = getRemoteContact();
+
+        // Request capabilities to the remote
+        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(contact);
 
         // Remove the current session
         removeSession();
 
-        ContactId contact = getRemoteContact();
         for (ImsSessionListener listener : getListeners()) {
             ((GeolocTransferSessionListener) listener).handleSharingError(contact,
                     new ContentSharingError(ContentSharingError.MEDIA_TRANSFER_FAILED, error));

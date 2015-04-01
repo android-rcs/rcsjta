@@ -48,10 +48,8 @@ import com.gsma.rcs.service.ipcalldraft.IIPCallPlayerListener;
 import com.gsma.rcs.service.ipcalldraft.IIPCallRenderer;
 import com.gsma.rcs.service.ipcalldraft.IIPCallRendererListener;
 import com.gsma.rcs.service.ipcalldraft.VideoCodec;
-import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.os.RemoteException;
@@ -283,7 +281,7 @@ public abstract class IPCallSession extends ImsServiceSession {
 
         // Open the renderer
         if (getRenderer() != null) {
-            getRenderer().addEventListener(new RendererEventListener(this));
+            getRenderer().addEventListener(new RendererEventListener());
             getRenderer().open(selectedAudioCodec, selectedVideoCodec, remoteHost, audioRemotePort,
                     videoRemotePort);
             if (logger.isActivated()) {
@@ -781,18 +779,11 @@ public abstract class IPCallSession extends ImsServiceSession {
         // Remove the current session
         removeSession();
 
-        try {
-            ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
-            // Request capabilities to the remote
-            getImsService().getImsModule().getCapabilityService()
-                    .requestContactCapabilities(remote);
-        } catch (RcsContactFormatException e) {
-            if (logger.isActivated()) {
-                logger.warn("Cannot parse contact " + getDialogPath().getRemoteParty());
-            }
-        }
-
         ContactId contact = getRemoteContact();
+
+        // Request capabilities to the remote
+        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(contact);
+
         for (ImsSessionListener listener : getListeners()) {
             ((IPCallStreamingSessionListener) listener).handle486Busy(contact);
         }
@@ -801,7 +792,7 @@ public abstract class IPCallSession extends ImsServiceSession {
     /**
      * Handle 407 Proxy authent error
      * 
-     * @param resp SipResponse
+     * @param response SipResponse
      * @param requestType type of request (addVideo/RemoveVideo/Set on Hold/Set on Resume)
      */
     public void handleReInvite407ProxyAuthent(SipResponse response, int requestType) {
@@ -854,21 +845,13 @@ public abstract class IPCallSession extends ImsServiceSession {
         // Remove the current session
         removeSession();
 
-        try {
-            ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
-            // Request capabilities to the remote
-            getImsService().getImsModule().getCapabilityService()
-                    .requestContactCapabilities(remote);
-        } catch (RcsContactFormatException e) {
-            if (logger.isActivated()) {
-                logger.warn("Cannot parse contact " + getDialogPath().getRemoteParty());
-            }
-        }
-
         ContactId contact = getRemoteContact();
-        for (int i = 0; i < getListeners().size(); i++) {
-            ((IPCallStreamingSessionListener) getListeners().get(i)).handleCallError(contact,
-                    new IPCallError(error));
+
+        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(contact);
+
+        for (ImsSessionListener listener : getListeners()) {
+            ((IPCallStreamingSessionListener) listener).handleCallError(contact, new IPCallError(
+                    error));
         }
     }
 
@@ -1217,25 +1200,20 @@ public abstract class IPCallSession extends ImsServiceSession {
             // Terminate session
             terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
 
+            ContactId contact = getRemoteContact();
+
+            // Request capabilities to the remote
+            getImsService().getImsModule().getCapabilityService()
+                    .requestContactCapabilities(contact);
+
             // Remove the current session
             removeSession();
 
-            ContactId contact = getRemoteContact();
-            for (int i = 0; i < getListeners().size(); i++) {
-                ((IPCallStreamingSessionListener) getListeners().get(i)).handleCallError(contact,
+            for (ImsSessionListener listener : getListeners()) {
+                ((IPCallStreamingSessionListener) listener).handleCallError(contact,
                         new IPCallError(IPCallError.PLAYER_FAILED));
             }
 
-            try {
-                ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
-                // Request capabilities to the remote
-                getImsService().getImsModule().getCapabilityService()
-                        .requestContactCapabilities(remote);
-            } catch (RcsContactFormatException e) {
-                if (logger.isActivated()) {
-                    logger.warn("Cannot parse contact " + getDialogPath().getRemoteParty());
-                }
-            }
         }
     }
 
@@ -1244,17 +1222,9 @@ public abstract class IPCallSession extends ImsServiceSession {
      */
     protected class RendererEventListener extends IIPCallRendererListener.Stub {
         /**
-         * Streaming session
-         */
-        private IPCallSession session;
-
-        /**
          * Constructor
-         * 
-         * @param session Streaming session
          */
-        public RendererEventListener(IPCallSession session) {
-            this.session = session;
+        public RendererEventListener() {
         }
 
         /**
@@ -1278,9 +1248,8 @@ public abstract class IPCallSession extends ImsServiceSession {
             }
 
             // Notify listeners
-            for (int i = 0; i < getListeners().size(); i++) {
-                ((IPCallStreamingSessionListener) getListeners().get(i)).handleVideoResized(width,
-                        height);
+            for (ImsSessionListener listener : getListeners()) {
+                ((IPCallStreamingSessionListener) listener).handleVideoResized(width, height);
             }
         }
 
@@ -1335,21 +1304,14 @@ public abstract class IPCallSession extends ImsServiceSession {
             removeSession();
 
             ContactId contact = getRemoteContact();
-            for (int i = 0; i < getListeners().size(); i++) {
-                ((IPCallStreamingSessionListener) getListeners().get(i)).handleCallError(contact,
+            for (ImsSessionListener listener : getListeners()) {
+                ((IPCallStreamingSessionListener) listener).handleCallError(contact,
                         new IPCallError(IPCallError.RENDERER_FAILED));
             }
 
-            try {
-                ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
-                // Request capabilities to the remote
-                getImsService().getImsModule().getCapabilityService()
-                        .requestContactCapabilities(remote);
-            } catch (RcsContactFormatException e) {
-                if (logger.isActivated()) {
-                    logger.warn("Cannot parse contact " + getDialogPath().getRemoteParty());
-                }
-            }
+            // Request capabilities to the remote
+            getImsService().getImsModule().getCapabilityService()
+                    .requestContactCapabilities(contact);
         }
     }
 

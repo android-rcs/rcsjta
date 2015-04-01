@@ -18,7 +18,7 @@ package com.gsma.rcs.core.ims.service.richcall.image;
 
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.image.ImageSharing.ReasonCode;
@@ -79,7 +79,7 @@ public class ImageSharingPersistedStorageAccessor {
             String contact = cursor
                     .getString(cursor.getColumnIndexOrThrow(ImageSharingLog.CONTACT));
             if (contact != null) {
-                mContact = ContactUtils.createContactId(contact);
+                mContact = ContactUtil.createContactIdFromTrustedData(contact);
             }
             mDirection = Direction.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(ImageSharingLog.DIRECTION)));

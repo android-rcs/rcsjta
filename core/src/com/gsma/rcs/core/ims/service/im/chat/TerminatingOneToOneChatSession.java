@@ -43,10 +43,8 @@ import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 
 import java.io.IOException;
@@ -119,31 +117,22 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
             if (logActivated) {
                 logger.info("Initiate a new 1-1 chat session as terminating");
             }
-
-            // Send message delivery report if requested
+            ContactId contact = getRemoteContact();
+            /* Send message delivery report if requested */
             if ((ChatUtils.isImdnDeliveredRequested(getDialogPath().getInvite()))
                     || (ChatUtils.isFileTransferOverHttp(getDialogPath().getInvite()))) {
-                // Check notification disposition
+                /* Check notification disposition */
                 String msgId = ChatUtils.getMessageId(getDialogPath().getInvite());
                 if (msgId != null) {
-                    try {
-                        ContactId remote = ContactUtils.createContactId(getDialogPath()
-                                .getRemoteParty());
-                        // Send message delivery status via a SIP MESSAGE
-                        getImdnManager().sendMessageDeliveryStatusImmediately(remote, msgId,
-                                ImdnDocument.DELIVERY_STATUS_DELIVERED,
-                                SipUtils.getRemoteInstanceID(getDialogPath().getInvite()),
-                                getTimestamp());
-                    } catch (RcsContactFormatException e) {
-                        if (logActivated) {
-                            logger.warn("Cannot parse contact " + getDialogPath().getRemoteParty());
-                        }
-                    }
+                    /* Send message delivery status via a SIP MESSAGE */
+                    getImdnManager().sendMessageDeliveryStatusImmediately(contact, msgId,
+                            ImdnDocument.DELIVERY_STATUS_DELIVERED,
+                            SipUtils.getRemoteInstanceID(getDialogPath().getInvite()),
+                            getTimestamp());
                 }
             }
 
             Collection<ImsSessionListener> listeners = getListeners();
-            ContactId contact = getRemoteContact();
 
             /* Check if session should be auto-accepted once */
             if (isSessionAccepted()) {

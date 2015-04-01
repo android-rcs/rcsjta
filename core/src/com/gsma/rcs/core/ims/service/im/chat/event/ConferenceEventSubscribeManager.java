@@ -38,10 +38,10 @@ import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSessionListener;
 import com.gsma.rcs.platform.registry.RegistryFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.PeriodicRefresher;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -160,7 +160,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * @param timestamp Local timestamp when got SipRequest
      */
     public void receiveNotification(SipRequest notify, long timestamp) {
-        if (sLogger.isActivated()) {
+        boolean logActivated = sLogger.isActivated();
+        if (logActivated) {
             sLogger.debug("New conference event notification received");
         }
 
@@ -174,7 +175,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
                 if (conference != null) {
                     int maxParticipants = conference.getMaxUserCount();
                     if (maxParticipants > 0) {
-                        if (sLogger.isActivated()) {
+                        if (logActivated) {
                             sLogger.debug("Set max number of participants to " + maxParticipants);
                         }
                         mSession.setMaxParticipants(maxParticipants);
@@ -183,15 +184,19 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
                     Map<ContactId, ParticipantStatus> participants = new HashMap<ContactId, ParticipantStatus>();
                     Vector<User> users = conference.getUsers();
                     for (User user : users) {
+                        String phonenumber = user.getEntity();
                         ContactId contact;
-                        try {
-                            contact = ContactUtils.createContactId(user.getEntity());
-                        } catch (RcsContactFormatException e) {
+                        PhoneNumber validPhoneNumber = ContactUtil
+                                .getValidPhoneNumberFromUri(phonenumber);
+                        if (validPhoneNumber != null) {
+                            contact = ContactUtil
+                                    .createContactIdFromValidatedData(validPhoneNumber);
+                        } else {
                             // Invalid entity
                             continue;
                         }
 
-                        if (sLogger.isActivated()) {
+                        if (logActivated) {
                             sLogger.debug("Conference info notification for " + contact);
                         }
 
@@ -203,7 +208,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
                         // Get state
                         String state = user.getState();
                         String method = user.getDisconnectionMethod();
-                        if (sLogger.isActivated()) {
+                        if (logActivated) {
                             sLogger.debug("User conference info: " + user);
                         }
                         if (method != null) {
@@ -253,7 +258,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
                     }
                 }
             } catch (Exception e) {
-                if (sLogger.isActivated()) {
+                if (logActivated) {
                     sLogger.error("Can't parse XML notification", e);
                 }
             }
@@ -263,7 +268,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
         SubscriptionStateHeader stateHeader = (SubscriptionStateHeader) notify
                 .getHeader(SubscriptionStateHeader.NAME);
         if ((stateHeader != null) && stateHeader.getState().equalsIgnoreCase("terminated")) {
-            if (sLogger.isActivated()) {
+            if (logActivated) {
                 sLogger.info("Conference event subscription has been terminated by server");
             }
             terminatedByServer();

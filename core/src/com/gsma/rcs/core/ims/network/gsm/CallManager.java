@@ -23,9 +23,9 @@
 package com.gsma.rcs.core.ims.network.gsm;
 
 import com.gsma.rcs.core.ims.ImsModule;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.BroadcastReceiver;
@@ -46,55 +46,40 @@ import java.util.TimerTask;
  * @author jexa7410
  */
 public class CallManager {
-    /**
-     * Call state unknown
-     */
-    public final static int UNKNOWN = 0;
 
-    /**
-     * Call state ringing
-     */
-    public final static int RINGING = 1;
+    private enum State {
+        /**
+         * Call state unknown
+         */
+        UNKNOWN,
+        /**
+         * Call state ringing
+         */
+        RINGING,
+        /**
+         * Call state connected
+         */
+        CONNECTED,
+        /**
+         * Call state disconnected
+         */
+        DISCONNECTED;
+    }
 
-    /**
-     * Call state connected
-     */
-    public final static int CONNECTED = 2;
+    private final ImsModule mImsModule;
 
-    /**
-     * Call state disconnected
-     */
-    public final static int DISCONNECTED = 3;
-
-    /**
-     * IMS module
-     */
-    private ImsModule imsModule;
-
-    /**
-     * Call state
-     */
-    private int callState = UNKNOWN;
+    private State callState = State.UNKNOWN;
 
     /**
      * Remote contact
      */
-    private static ContactId mContact;
+    private static ContactId sContact;
 
-    /**
-     * Multiparty call
-     */
-    private boolean multipartyCall = false;
+    private boolean mMultipartyCall = false;
 
-    /**
-     * Call hold
-     */
-    private boolean callHold = false;
+    private boolean mCallHold = false;
 
-    /**
-     * Telephony manager
-     */
-    private TelephonyManager tm;
+    private final TelephonyManager mPhonyManager;
 
     /**
      * Receiver for outgoing calls
@@ -109,7 +94,7 @@ public class CallManager {
     /**
      * The logger
      */
-    private static final Logger logger = Logger.getLogger(CallManager.class.getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(CallManager.class.getSimpleName());
 
     /**
      * Constructor
@@ -118,16 +103,20 @@ public class CallManager {
      * @param context The Context this manager is part of
      */
     public CallManager(ImsModule parent, Context context) {
-        this.imsModule = parent;
+        mImsModule = parent;
         mContext = context;
 
         // Instantiate the telephony manager
-        tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        mPhonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 
         mOutgoingCallReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                setRemoteParty(intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER));
+                PhoneNumber number = ContactUtil.getValidPhoneNumberFromAndroid(intent
+                        .getStringExtra(Intent.EXTRA_PHONE_NUMBER));
+                if (number != null) {
+                    setRemoteParty(ContactUtil.createContactIdFromValidatedData(number));
+                }
             }
         };
     }
@@ -136,12 +125,11 @@ public class CallManager {
      * Start call monitoring
      */
     public void startCallMonitoring() {
-        if (logger.isActivated()) {
-            logger.info("Start call monitoring");
+        if (sLogger.isActivated()) {
+            sLogger.info("Start call monitoring");
         }
-
-        // Monitor phone state
-        tm.listen(listener, PhoneStateListener.LISTEN_CALL_STATE);
+        /* Monitor phone state */
+        mPhonyManager.listen(listener, PhoneStateListener.LISTEN_CALL_STATE);
 
         mContext.registerReceiver(mOutgoingCallReceiver, new IntentFilter(
                 Intent.ACTION_NEW_OUTGOING_CALL));
@@ -151,14 +139,14 @@ public class CallManager {
      * Stop call monitoring
      */
     public void stopCallMonitoring() {
-        if (logger.isActivated()) {
-            logger.info("Stop call monitoring");
+        if (sLogger.isActivated()) {
+            sLogger.info("Stop call monitoring");
         }
 
         mContext.unregisterReceiver(mOutgoingCallReceiver);
 
         // Unmonitor phone state
-        tm.listen(listener, PhoneStateListener.LISTEN_NONE);
+        mPhonyManager.listen(listener, PhoneStateListener.LISTEN_NONE);
     }
 
     /**
@@ -166,71 +154,72 @@ public class CallManager {
      */
     private PhoneStateListener listener = new PhoneStateListener() {
         public void onCallStateChanged(int state, String incomingNumber) {
+            boolean logActivated = sLogger.isActivated();
             switch (state) {
                 case TelephonyManager.CALL_STATE_RINGING:
-                    if (callState == CallManager.CONNECTED) {
+                    if (State.CONNECTED == callState) {
                         // Tentative of multiparty call
                         return;
                     }
-
-                    if (logger.isActivated()) {
-                        logger.debug("Call is RINGING: incoming number=" + incomingNumber);
-                    }
-
-                    // Set remote party
-                    try {
-                        mContact = ContactUtils.createContactId(incomingNumber);
-                        // Phone is ringing: this state is only used for incoming call
-                        callState = CallManager.RINGING;
-                    } catch (RcsContactFormatException e) {
-                        if (logger.isActivated()) {
-                            logger.warn("Cannot parse ringning contact");
+                    PhoneNumber number = ContactUtil.getValidPhoneNumberFromAndroid(incomingNumber);
+                    if (number == null) {
+                        if (logActivated) {
+                            sLogger.info(new StringBuilder("Invalid phone number '")
+                                    .append(incomingNumber).append("' is RINGING").toString());
                         }
+                        return;
                     }
-
+                    // Set remote party
+                    if (logActivated) {
+                        sLogger.debug("Call is RINGING: incoming number=".concat(incomingNumber));
+                    }
+                    sContact = ContactUtil.createContactIdFromValidatedData(number);
+                    // Phone is ringing: this state is only used for incoming call
+                    callState = State.RINGING;
                     break;
 
                 case TelephonyManager.CALL_STATE_IDLE:
-                    if (logger.isActivated()) {
-                        logger.debug("Call is IDLE: last number=" + mContact);
+                    if (logActivated) {
+                        sLogger.debug("Call is IDLE: last number=" + sContact);
                     }
 
                     // No more call in progress
-                    callState = CallManager.DISCONNECTED;
-                    multipartyCall = false;
-                    callHold = false;
+                    callState = State.DISCONNECTED;
+                    mMultipartyCall = false;
+                    mCallHold = false;
 
                     // Abort pending richcall sessions
-                    imsModule.getRichcallService().abortAllSessions();
+                    mImsModule.getRichcallService().abortAllSessions();
 
-                    if (mContact != null) {
-                        // Disable content sharing capabilities
-                        imsModule.getCapabilityService().resetContactCapabilitiesForContentSharing(
-                                mContact);
-
-                        // Request capabilities to the remote
-                        imsModule.getCapabilityService().requestContactCapabilities(mContact);
+                    if (sContact == null) {
+                        return;
                     }
+                    // Disable content sharing capabilities
+                    mImsModule.getCapabilityService().resetContactCapabilitiesForContentSharing(
+                            sContact);
+
+                    // Request capabilities to the remote
+                    mImsModule.getCapabilityService().requestContactCapabilities(sContact);
 
                     // Reset remote party
-                    mContact = null;
+                    sContact = null;
                     break;
 
                 case TelephonyManager.CALL_STATE_OFFHOOK:
-                    if (callState == CallManager.CONNECTED) {
+                    if (State.CONNECTED == callState) {
                         // Request capabilities only if not a multiparty call or call hold
-                        if (logger.isActivated()) {
-                            logger.debug("Multiparty call established");
+                        if (logActivated) {
+                            sLogger.debug("Multiparty call established");
                         }
                         return;
                     }
 
-                    if (logger.isActivated()) {
-                        logger.debug("Call is CONNECTED: connected number=" + mContact);
+                    if (logActivated) {
+                        sLogger.debug("Call is CONNECTED: connected number=" + sContact);
                     }
 
                     // Both parties are connected
-                    callState = CallManager.CONNECTED;
+                    callState = State.CONNECTED;
 
                     // Delay option request 2 seconds according to implementation guideline ID_4_20
                     Timer timer = new Timer();
@@ -238,14 +227,14 @@ public class CallManager {
                         @Override
                         public void run() {
                             // Request capabilities
-                            requestCapabilities(mContact);
+                            requestCapabilities(sContact);
                         }
                     }, 2000);
                     break;
 
                 default:
-                    if (logger.isActivated()) {
-                        logger.debug("Unknown call state " + state);
+                    if (logActivated) {
+                        sLogger.debug("Unknown call state ".concat(Integer.toString(state)));
                     }
                     break;
             }
@@ -253,18 +242,12 @@ public class CallManager {
     };
 
     /**
-     * Set the remote phone number
+     * Set the remote contact
      * 
-     * @param number Phone number
+     * @param contact
      */
-    public static void setRemoteParty(String number) {
-        try {
-            CallManager.mContact = ContactUtils.createContactId(number);
-        } catch (RcsContactFormatException e) {
-            if (logger.isActivated()) {
-                logger.error("Cannot parse remote party " + number);
-            }
-        }
+    public static void setRemoteParty(ContactId contact) {
+        sContact = contact;
     }
 
     /**
@@ -273,11 +256,10 @@ public class CallManager {
      * @return Phone number or null is disconnected
      */
     private ContactId getPhoneNumberOfConntectedRemote() {
-        if (callState == CallManager.DISCONNECTED) {
+        if (State.DISCONNECTED == callState) {
             return null;
-        } else {
-            return mContact;
         }
+        return sContact;
     }
 
     /**
@@ -286,7 +268,7 @@ public class CallManager {
      * @return MSISDN
      */
     public ContactId getContact() {
-        return mContact;
+        return sContact;
     }
 
     /**
@@ -295,7 +277,7 @@ public class CallManager {
      * @return Boolean
      */
     public boolean isCallConnected() {
-        return (callState == CONNECTED);
+        return (State.CONNECTED == callState);
     }
 
     /**
@@ -306,7 +288,7 @@ public class CallManager {
      */
 
     public boolean isCallConnectedWith(ContactId contact) {
-        if (this.multipartyCall || this.callHold) {
+        if (mMultipartyCall || mCallHold) {
             return false;
         }
 
@@ -320,7 +302,7 @@ public class CallManager {
      * @return Boolean
      */
     public boolean isMultipartyCall() {
-        return multipartyCall;
+        return mMultipartyCall;
     }
 
     /**
@@ -329,7 +311,7 @@ public class CallManager {
      * @return Boolean
      */
     public boolean isCallHold() {
-        return callHold;
+        return mCallHold;
     }
 
     /**
@@ -338,8 +320,8 @@ public class CallManager {
      * @param contact Contact identifier
      */
     private void requestCapabilities(ContactId contact) {
-        if (imsModule.getCapabilityService().isServiceStarted()) {
-            imsModule.getCapabilityService().requestContactCapabilities(contact);
+        if (mImsModule.getCapabilityService().isServiceStarted()) {
+            mImsModule.getCapabilityService().requestContactCapabilities(contact);
         }
     }
 
@@ -347,13 +329,13 @@ public class CallManager {
      * Call leg has changed
      */
     private void callLegHasChanged() {
-        if (multipartyCall | callHold) {
+        if (mMultipartyCall | mCallHold) {
             // Abort pending richcall sessions if call hold or multiparty call
-            imsModule.getRichcallService().abortAllSessions();
+            mImsModule.getRichcallService().abortAllSessions();
         }
 
         // Request new capabilities
-        requestCapabilities(mContact);
+        requestCapabilities(sContact);
     }
 
     /**
@@ -362,10 +344,10 @@ public class CallManager {
      * @param state State
      */
     public void setMultiPartyCall(boolean state) {
-        if (logger.isActivated()) {
-            logger.info("Set multiparty call to " + state);
+        if (sLogger.isActivated()) {
+            sLogger.info("Set multiparty call to " + state);
         }
-        this.multipartyCall = state;
+        mMultipartyCall = state;
 
         callLegHasChanged();
     }
@@ -376,10 +358,10 @@ public class CallManager {
      * @param state State
      */
     public void setCallHold(boolean state) {
-        if (logger.isActivated()) {
-            logger.info("Set call hold to " + state);
+        if (sLogger.isActivated()) {
+            sLogger.info("Set call hold to " + state);
         }
-        this.callHold = state;
+        mCallHold = state;
 
         callLegHasChanged();
     }
@@ -390,24 +372,24 @@ public class CallManager {
      * @param connected Connection state
      */
     public void connectionEvent(boolean connected) {
-        if (mContact == null) {
+        if (sContact == null) {
             return;
         }
 
         if (connected) {
-            if (logger.isActivated()) {
-                logger.info("Connectivity changed: update content sharing capabilities");
+            if (sLogger.isActivated()) {
+                sLogger.info("Connectivity changed: update content sharing capabilities");
             }
 
             // Update content sharing capabilities
-            requestCapabilities(mContact);
+            requestCapabilities(sContact);
         } else {
-            if (logger.isActivated()) {
-                logger.info("Connectivity changed: disable content sharing capabilities");
+            if (sLogger.isActivated()) {
+                sLogger.info("Connectivity changed: disable content sharing capabilities");
             }
 
             // Disable content sharing capabilities
-            imsModule.getCapabilityService().resetContactCapabilitiesForContentSharing(mContact);
+            mImsModule.getCapabilityService().resetContactCapabilitiesForContentSharing(sContact);
         }
     }
 }

@@ -31,9 +31,9 @@ import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 
 /**
@@ -150,51 +150,52 @@ public class OptionsManager implements DiscoveryManager {
      * @param options Received options message
      */
     public void receiveCapabilityRequest(SipRequest options) {
+        String sipId = SipUtils.getAssertedIdentity(options);
+        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(sipId);
+        if (number == null) {
+            if (sLogger.isActivated()) {
+                sLogger.warn("Invalid contact from capability request '" + sipId + "'");
+            }
+            return;
+        }
+        ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
+        if (sLogger.isActivated()) {
+            sLogger.debug("OPTIONS request received from ".concat(contact.toString()));
+        }
+
         try {
-            ContactId contact = ContactUtils.createContactId(SipUtils.getAssertedIdentity(options));
+            // Create 200 OK response
+            String ipAddress = mImsModule.getCurrentNetworkInterface().getNetworkAccess()
+                    .getIpAddress();
+            boolean richcall = mImsModule.getRichcallService().isCallConnectedWith(contact);
+            SipResponse resp = SipMessageFactory.create200OkOptionsResponse(options, mImsModule
+                    .getSipManager().getSipStack().getContact(),
+                    CapabilityUtils.getSupportedFeatureTags(richcall, mRcsSettings),
+                    CapabilityUtils.buildSdp(ipAddress, richcall, mRcsSettings));
+
+            // Send 200 OK response
+            mImsModule.getSipManager().sendSipResponse(resp);
+        } catch (Exception e) {
             if (sLogger.isActivated()) {
-                sLogger.debug("OPTIONS request received from " + contact);
-            }
-
-            try {
-                // Create 200 OK response
-                String ipAddress = mImsModule.getCurrentNetworkInterface().getNetworkAccess()
-                        .getIpAddress();
-                boolean richcall = mImsModule.getRichcallService().isCallConnectedWith(contact);
-                SipResponse resp = SipMessageFactory.create200OkOptionsResponse(options, mImsModule
-                        .getSipManager().getSipStack().getContact(),
-                        CapabilityUtils.getSupportedFeatureTags(richcall, mRcsSettings),
-                        CapabilityUtils.buildSdp(ipAddress, richcall, mRcsSettings));
-
-                // Send 200 OK response
-                mImsModule.getSipManager().sendSipResponse(resp);
-            } catch (Exception e) {
-                if (sLogger.isActivated()) {
-                    sLogger.error("Can't send 200 OK for OPTIONS", e);
-                }
-            }
-
-            // Read features tag in the request
-            Capabilities capabilities = CapabilityUtils.extractCapabilities(options);
-
-            // Update capabilities in database
-            if (capabilities.isImSessionSupported()) {
-                // RCS-e contact
-                ContactsManager.getInstance().setContactCapabilities(contact, capabilities,
-                        RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE);
-            } else {
-                // Not a RCS-e contact
-                ContactsManager.getInstance().setContactCapabilities(contact, capabilities,
-                        RcsStatus.NOT_RCS, RegistrationState.UNKNOWN);
-            }
-
-            // Notify listener
-            mImsModule.getCore().getListener()
-                    .handleCapabilitiesNotification(contact, capabilities);
-        } catch (RcsContactFormatException e1) {
-            if (sLogger.isActivated()) {
-                sLogger.warn("Cannot parse contact from capability request");
+                sLogger.error("Can't send 200 OK for OPTIONS", e);
             }
         }
+
+        // Read features tag in the request
+        Capabilities capabilities = CapabilityUtils.extractCapabilities(options);
+
+        // Update capabilities in database
+        if (capabilities.isImSessionSupported()) {
+            // RCS-e contact
+            ContactsManager.getInstance().setContactCapabilities(contact, capabilities,
+                    RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE);
+        } else {
+            // Not a RCS-e contact
+            ContactsManager.getInstance().setContactCapabilities(contact, capabilities,
+                    RcsStatus.NOT_RCS, RegistrationState.UNKNOWN);
+        }
+
+        // Notify listener
+        mImsModule.getCore().getListener().handleCapabilitiesNotification(contact, capabilities);
     }
 }

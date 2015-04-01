@@ -18,6 +18,24 @@
 
 package com.orangelabs.rcs.ri.sharing.geoloc;
 
+import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.contact.ContactUtil;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharingListener;
+
+import com.orangelabs.rcs.ri.ConnectionManager;
+import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.RiApplication;
+import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
+import com.orangelabs.rcs.ri.messaging.geoloc.EditGeoloc;
+import com.orangelabs.rcs.ri.utils.ContactListAdapter;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.Utils;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -43,24 +61,6 @@ import android.widget.Toast;
 
 import java.util.Set;
 
-import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsContactFormatException;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.ContactUtil;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharingListener;
-import com.orangelabs.rcs.ri.ConnectionManager;
-import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.RiApplication;
-import com.orangelabs.rcs.ri.messaging.geoloc.DisplayGeoloc;
-import com.orangelabs.rcs.ri.messaging.geoloc.EditGeoloc;
-import com.orangelabs.rcs.ri.utils.ContactListAdapter;
-import com.orangelabs.rcs.ri.utils.LockAccess;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.Utils;
-
 /**
  * Initiate geoloc sharing
  * 
@@ -75,32 +75,27 @@ public class InitiateGeolocSharing extends Activity {
     /**
      * UI handler
      */
-    private final Handler handler = new Handler();
+    private final Handler mHandler = new Handler();
 
     /**
      * Progress dialog
      */
-    private Dialog progressDialog;
+    private Dialog mProgressDialog;
 
     /**
      * Geoloc info
      */
-    private Geoloc geoloc;
+    private Geoloc mGeoloc;
 
     /**
      * Geoloc sharing session
      */
-    private GeolocSharing geolocSharing;
+    private GeolocSharing mGeolocSharing;
 
     /**
      * Geoloc sharing identifier
      */
-    private String sharingId;
-
-    /**
-     * Remote contact
-     */
-    private ContactId contact;
+    private String mSharingId;
 
     /**
      * The log tag for this class
@@ -132,11 +127,11 @@ public class InitiateGeolocSharing extends Activity {
         public void onProgressUpdate(ContactId contact, String sharingId, final long currentSize,
                 final long totalSize) {
             // Discard event if not for current sharingId
-            if (InitiateGeolocSharing.this.sharingId == null
-                    || !InitiateGeolocSharing.this.sharingId.equals(sharingId)) {
+            if (InitiateGeolocSharing.this.mSharingId == null
+                    || !InitiateGeolocSharing.this.mSharingId.equals(sharingId)) {
                 return;
             }
-            handler.post(new Runnable() {
+            mHandler.post(new Runnable() {
                 public void run() {
                     // Display sharing progress
                     updateProgressBar(currentSize, totalSize);
@@ -152,13 +147,13 @@ public class InitiateGeolocSharing extends Activity {
                         + " state=" + state + " reason=" + reasonCode);
             }
             // Discard event if not for current sharingId
-            if (InitiateGeolocSharing.this.sharingId == null
-                    || !InitiateGeolocSharing.this.sharingId.equals(sharingId)) {
+            if (InitiateGeolocSharing.this.mSharingId == null
+                    || !InitiateGeolocSharing.this.mSharingId.equals(sharingId)) {
                 return;
             }
             final String _state = RiApplication.GSH_STATES[state.toInt()];
             final String _reasonCode = RiApplication.GSH_REASON_CODES[reasonCode.toInt()];
-            handler.post(new Runnable() {
+            mHandler.post(new Runnable() {
                 public void run() {
                     TextView statusView = (TextView) findViewById(R.id.progress_status);
                     switch (state) {
@@ -207,7 +202,7 @@ public class InitiateGeolocSharing extends Activity {
                             Intent intent = new Intent(InitiateGeolocSharing.this,
                                     DisplayGeoloc.class);
                             intent.putExtra(DisplayGeoloc.EXTRA_CONTACT, (Parcelable) contact);
-                            intent.putExtra(DisplayGeoloc.EXTRA_GEOLOC, (Parcelable) geoloc);
+                            intent.putExtra(DisplayGeoloc.EXTRA_GEOLOC, (Parcelable) mGeoloc);
                             startActivity(intent);
                             break;
 
@@ -335,18 +330,12 @@ public class InitiateGeolocSharing extends Activity {
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
 
             ContactUtil contactUtil = ContactUtil.getInstance(InitiateGeolocSharing.this);
-            try {
-                contact = contactUtil.formatContact(phoneNumber);
-            } catch (RcsContactFormatException e1) {
-                Utils.showMessage(InitiateGeolocSharing.this,
-                        getString(R.string.label_invalid_contact, phoneNumber));
-                return;
-            }
+            ContactId contact = contactUtil.formatContact(phoneNumber);
 
             try {
                 // Initiate location share
-                geolocSharing = mCnxManager.getGeolocSharingApi().shareGeoloc(contact, geoloc);
-                sharingId = geolocSharing.getSharingId();
+                mGeolocSharing = mCnxManager.getGeolocSharingApi().shareGeoloc(contact, mGeoloc);
+                mSharingId = mGeolocSharing.getSharingId();
             } catch (Exception e) {
                 hideProgressDialog();
                 Utils.showMessageAndExit(InitiateGeolocSharing.this,
@@ -354,9 +343,9 @@ public class InitiateGeolocSharing extends Activity {
             }
 
             // Display a progress dialog
-            progressDialog = Utils.showProgressDialog(InitiateGeolocSharing.this,
+            mProgressDialog = Utils.showProgressDialog(InitiateGeolocSharing.this,
                     getString(R.string.label_command_in_progress));
-            progressDialog.setOnCancelListener(new OnCancelListener() {
+            mProgressDialog.setOnCancelListener(new OnCancelListener() {
                 public void onCancel(DialogInterface dialog) {
                     Toast.makeText(InitiateGeolocSharing.this,
                             getString(R.string.label_sharing_cancelled), Toast.LENGTH_SHORT).show();
@@ -403,7 +392,7 @@ public class InitiateGeolocSharing extends Activity {
         switch (requestCode) {
             case SELECT_GEOLOCATION: {
                 // Get selected geoloc
-                geoloc = data.getParcelableExtra(EditGeoloc.EXTRA_GEOLOC);
+                mGeoloc = data.getParcelableExtra(EditGeoloc.EXTRA_GEOLOC);
 
                 // Enable invite button
                 Button inviteBtn = (Button) findViewById(R.id.invite_btn);
@@ -417,9 +406,9 @@ public class InitiateGeolocSharing extends Activity {
      * Hide progress dialog
      */
     public void hideProgressDialog() {
-        if (progressDialog != null && progressDialog.isShowing()) {
-            progressDialog.dismiss();
-            progressDialog = null;
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.dismiss();
+            mProgressDialog = null;
         }
     }
 
@@ -454,13 +443,13 @@ public class InitiateGeolocSharing extends Activity {
     private void quitSession() {
         // Stop session
         try {
-            if (geolocSharing != null) {
-                geolocSharing.abortSharing();
+            if (mGeolocSharing != null && GeolocSharing.State.STARTED == mGeolocSharing.getState()) {
+                mGeolocSharing.abortSharing();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        geolocSharing = null;
+        mGeolocSharing = null;
 
         // Exit activity
         finish();

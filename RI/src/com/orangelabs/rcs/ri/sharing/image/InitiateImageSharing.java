@@ -18,7 +18,6 @@
 
 package com.orangelabs.rcs.ri.sharing.image;
 
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
@@ -339,14 +338,7 @@ public class InitiateImageSharing extends Activity {
             ContactListAdapter adapter = (ContactListAdapter) mSpinner.getAdapter();
             String phoneNumber = adapter.getSelectedNumber(mSpinner.getSelectedView());
             ContactUtil contactUtil = ContactUtil.getInstance(InitiateImageSharing.this);
-            final ContactId remote;
-            try {
-                remote = contactUtil.formatContact(phoneNumber);
-            } catch (RcsContactFormatException e1) {
-                Utils.showMessage(InitiateImageSharing.this,
-                        getString(R.string.label_invalid_contact, phoneNumber));
-                return;
-            }
+            final ContactId remote = contactUtil.formatContact(phoneNumber);
 
             if (LogUtils.isActive) {
                 Log.d(LOGTAG, "shareImage image=" + mFilename + " size=" + mFilesize);
@@ -478,7 +470,7 @@ public class InitiateImageSharing extends Activity {
     private void quitSession() {
         // Stop session
         try {
-            if (mImageSharing != null) {
+            if (mImageSharing != null && ImageSharing.State.STARTED == mImageSharing.getState()) {
                 mImageSharing.abortSharing();
             }
         } catch (Exception e) {

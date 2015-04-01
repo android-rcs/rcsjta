@@ -357,7 +357,7 @@ public class IncomingVideoSharing extends Activity implements VideoPlayerListene
     private void quitSession() {
         // Stop the sharing
         try {
-            if (mVideoSharing != null) {
+            if (mVideoSharing != null && VideoSharing.State.STARTED == mVideoSharing.getState()) {
                 mVideoSharing.abortSharing();
             }
         } catch (Exception e) {

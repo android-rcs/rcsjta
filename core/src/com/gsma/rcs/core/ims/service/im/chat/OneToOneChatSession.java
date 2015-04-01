@@ -39,10 +39,7 @@ import com.gsma.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.IdGenerator;
-import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -59,12 +56,6 @@ public abstract class OneToOneChatSession extends ChatSession {
      * Boundary tag
      */
     private final static String BOUNDARY_TAG = "boundary1";
-
-    /**
-     * The logger
-     */
-    private final static Logger logger = Logger
-            .getLogger(OneToOneChatSession.class.getSimpleName());
 
     /**
      * Constructor
@@ -279,25 +270,15 @@ public abstract class OneToOneChatSession extends ChatSession {
      */
     public abstract String getSdpDirection();
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.core.ims.service.im.chat.ChatSession#msrpTransferError (java.lang.String,
-     * java.lang.String, com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk)
-     */
     @Override
     public void msrpTransferError(String msgId, String error,
             MsrpSession.TypeMsrpChunk typeMsrpChunk) {
         super.msrpTransferError(msgId, error, typeMsrpChunk);
-        try {
-            ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
-            // Request capabilities to the remote
-            getImsService().getImsModule().getCapabilityService()
-                    .requestContactCapabilities(remote);
-        } catch (RcsContactFormatException e) {
-            if (logger.isActivated()) {
-                logger.warn("Cannot parse contact " + getDialogPath().getRemoteParty());
-            }
-        }
+
+        // Request capabilities to the remote
+        getImsService().getImsModule().getCapabilityService()
+                .requestContactCapabilities(getRemoteContact());
+
     }
 
     @Override

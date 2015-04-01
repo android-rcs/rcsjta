@@ -33,9 +33,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.ContactUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 
 import java.util.Collection;
@@ -645,20 +643,11 @@ public abstract class ImsServiceSession extends Thread {
         getSessionTimerManager().stop();
 
         // Notify listeners
-        for (int i = 0; i < getListeners().size(); i++) {
-            getListeners().get(i).handleSessionTerminatedByRemote(mContact);
+        for (ImsSessionListener listener : getListeners()) {
+            listener.handleSessionTerminatedByRemote(mContact);
         }
 
-        try {
-            ContactId remote = ContactUtils.createContactId(getDialogPath().getRemoteParty());
-            // Request capabilities to the remote
-            getImsService().getImsModule().getCapabilityService()
-                    .requestContactCapabilities(remote);
-        } catch (RcsContactFormatException e) {
-            if (sLogger.isActivated()) {
-                sLogger.debug("Cannot parse contact " + getDialogPath().getRemoteParty());
-            }
-        }
+        getImsService().getImsModule().getCapabilityService().requestContactCapabilities(mContact);
     }
 
     /**

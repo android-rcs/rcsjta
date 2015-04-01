@@ -36,10 +36,10 @@ import com.gsma.rcs.core.ims.service.presence.PhotoIcon;
 import com.gsma.rcs.core.ims.service.presence.PresenceInfo;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.StringUtils;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.capability.CapabilitiesLog;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactProvider;
@@ -1126,19 +1126,10 @@ public final class ContactsManager {
             }
             int contactColumnIdx = cursor.getColumnIndexOrThrow(RichAddressBookData.KEY_CONTACT);
             do {
-                try {
-                    rcsNumbers
-                            .add(ContactUtils.createContactId(cursor.getString(contactColumnIdx)));
-                } catch (RcsContactFormatException e1) {
-                    if (logger.isActivated()) {
-                        logger.warn("Cannot parse number " + cursor.getString(contactColumnIdx));
-                    }
-                }
+                String contact = cursor.getString(contactColumnIdx);
+                /* Do not check validity of trusted data */
+                rcsNumbers.add(ContactUtil.createContactIdFromTrustedData(contact));
             } while (cursor.moveToNext());
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Exception occurred", e);
-            }
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -1165,19 +1156,10 @@ public final class ContactsManager {
             }
             int contactColumnIdx = cursor.getColumnIndexOrThrow(RichAddressBookData.KEY_CONTACT);
             do {
-                try {
-                    rcsNumbers
-                            .add(ContactUtils.createContactId(cursor.getString(contactColumnIdx)));
-                } catch (RcsContactFormatException e1) {
-                    if (logger.isActivated()) {
-                        logger.warn("Cannot parse number " + cursor.getString(contactColumnIdx));
-                    }
-                }
+                String contact = cursor.getString(contactColumnIdx);
+                /* Do no check validity of trusted data */
+                rcsNumbers.add(ContactUtil.createContactIdFromTrustedData(contact));
             } while (cursor.moveToNext());
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Exception occurred", e);
-            }
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -1203,18 +1185,10 @@ public final class ContactsManager {
             }
             int contactColumnIdx = cursor.getColumnIndexOrThrow(RichAddressBookData.KEY_CONTACT);
             do {
-                try {
-                    numbers.add(ContactUtils.createContactId(cursor.getString(contactColumnIdx)));
-                } catch (RcsContactFormatException e1) {
-                    if (logger.isActivated()) {
-                        logger.warn("Cannot parse contact " + cursor.getString(contactColumnIdx));
-                    }
-                }
+                String contact = cursor.getString(contactColumnIdx);
+                /* Do not check validity of trusted data */
+                numbers.add(ContactUtil.createContactIdFromTrustedData(contact));
             } while (cursor.moveToNext());
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Exception occurred", e);
-            }
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -2867,9 +2841,13 @@ public final class ContactsManager {
                         int columnIndex = cursor.getColumnIndex(Data.DATA1);
                         if (columnIndex != -1) {
                             String contact = cursor.getString(columnIndex);
-                            try {
-                                contactInfo.setContact(ContactUtils.createContactId(contact));
-                            } catch (RcsContactFormatException e) {
+                            /* check validity for contact read from raw contact */
+                            PhoneNumber number = ContactUtil
+                                    .getValidPhoneNumberFromAndroid(contact);
+                            if (number != null) {
+                                contactInfo.setContact(ContactUtil
+                                        .createContactIdFromValidatedData(number));
+                            } else {
                                 if (logger.isActivated()) {
                                     logger.warn("Cannot parse contact " + contact);
                                 }
@@ -3026,32 +3004,34 @@ public final class ContactsManager {
         try {
             cursor = mContentResolver.query(Data.CONTENT_URI, PROJECTION_RAW_CONTACT_DATA1,
                     SELECTION_DATA_MIMETYPE_NUMBER, null, null);
-            if (cursor.moveToFirst()) {
-                int contactColumnIdx = cursor.getColumnIndexOrThrow(Data.RAW_CONTACT_ID);
-                int data1ColumnIdx = cursor.getColumnIndexOrThrow(Data.DATA1);
-                do {
-                    long rawContactId = cursor.getLong(contactColumnIdx);
-                    String phoneNumber = cursor.getString(data1ColumnIdx);
-                    try {
-                        ContactId contact = ContactUtils.createContactId(phoneNumber);
-                        if (getRawContactIdsFromPhoneNumber(contact).isEmpty()) {
-                            ops.add(ContentProviderOperation.newDelete(RawContacts.CONTENT_URI)
-                                    .withSelection(SELECTION_RAW_CONTACT, new String[] {
-                                        Long.toString(rawContactId)
-                                    }).build());
-                            // Also delete the corresponding entries in the aggregation provider
-                            mLocalContentResolver.delete(AggregationData.CONTENT_URI,
-                                    WHERE_RCS_RAW_CONTACT_ID, new String[] {
-                                        Long.toString(rawContactId)
-                                    });
-                        }
-                    } catch (RcsContactFormatException e) {
-                        if (logger.isActivated()) {
-                            logger.warn("Cannot parse contact " + phoneNumber);
-                        }
-                    }
-                } while (cursor.moveToNext());
+            if (!cursor.moveToFirst()) {
+                return;
             }
+            int contactColumnIdx = cursor.getColumnIndexOrThrow(Data.RAW_CONTACT_ID);
+            int data1ColumnIdx = cursor.getColumnIndexOrThrow(Data.DATA1);
+            do {
+                String phoneNumber = cursor.getString(data1ColumnIdx);
+                PhoneNumber number = ContactUtil.getValidPhoneNumberFromAndroid(phoneNumber);
+                if (number == null) {
+                    if (logger.isActivated()) {
+                        logger.warn("Cannot parse contact " + phoneNumber);
+                    }
+                    continue;
+                }
+                ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
+                long rawContactId = cursor.getLong(contactColumnIdx);
+                if (getRawContactIdsFromPhoneNumber(contact).isEmpty()) {
+                    ops.add(ContentProviderOperation.newDelete(RawContacts.CONTENT_URI)
+                            .withSelection(SELECTION_RAW_CONTACT, new String[] {
+                                Long.toString(rawContactId)
+                            }).build());
+                    // Also delete the corresponding entries in the aggregation provider
+                    mLocalContentResolver.delete(AggregationData.CONTENT_URI,
+                            WHERE_RCS_RAW_CONTACT_ID, new String[] {
+                                Long.toString(rawContactId)
+                            });
+                }
+            } while (cursor.moveToNext());
         } catch (Exception e) {
             if (logger.isActivated()) {
                 logger.error("Exception occurred", e);
@@ -3091,23 +3071,17 @@ public final class ContactsManager {
                     null, null, null);
             if (!cursor.moveToFirst()) {
                 return;
-
             }
             int contactColumnIdx = cursor.getColumnIndexOrThrow(RichAddressBookData.KEY_CONTACT);
             // Delete EAB Entry where number is not in the address book anymore
             do {
                 String phoneNumber = cursor.getString(contactColumnIdx);
-                try {
-                    ContactId contact = ContactUtils.createContactId(phoneNumber);
-                    if (getRawContactIdsFromPhoneNumber(contact).isEmpty()) {
-                        Uri uri = Uri
-                                .withAppendedPath(RichAddressBookData.CONTENT_URI, phoneNumber);
-                        mLocalContentResolver.delete(uri, null, null);
-                    }
-                } catch (RcsContactFormatException e) {
-                    if (logger.isActivated()) {
-                        logger.warn("Cannot parse contact " + phoneNumber);
-                    }
+                /* Do not check validity for trusted data */
+                PhoneNumber number = ContactUtil.getValidPhoneNumberFromAndroid(phoneNumber);
+                ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
+                if (getRawContactIdsFromPhoneNumber(contact).isEmpty()) {
+                    Uri uri = Uri.withAppendedPath(RichAddressBookData.CONTENT_URI, phoneNumber);
+                    mLocalContentResolver.delete(uri, null, null);
                 }
             } while (cursor.moveToNext());
         } catch (Exception e) {
@@ -3164,6 +3138,10 @@ public final class ContactsManager {
             String oldDisplayName = getContactDisplayName(contact);
             boolean updateRequired = !StringUtils.equals(oldDisplayName, displayName);
             if (updateRequired) {
+                if (logger.isActivated()) {
+                    logger.debug("Update display name '" + displayName + "' for contact:"
+                            + contact.toString());
+                }
                 Uri uri = Uri.withAppendedPath(RichAddressBookData.CONTENT_URI, contact.toString());
                 // Contact already present and display name is new, update
                 mLocalContentResolver.update(uri, values, null, null);

@@ -32,8 +32,11 @@ import com.gsma.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ConfigurationMode;
 import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
 import com.gsma.rcs.provisioning.ProvisioningParser;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -80,8 +83,6 @@ public class ProfileProvisioning extends Activity {
     private static Logger logger = Logger.getLogger(ProfileProvisioning.class.getSimpleName());
 
     private static final String PROVISIONING_EXTENSION = ".xml";
-    private String mInputedUserPhoneNumber;
-    private String mSelectedProvisioningFile;
 
     private boolean mInFront;
 
@@ -261,6 +262,13 @@ public class ProfileProvisioning extends Activity {
         saveEditTextParam(R.id.FtHttpServerAddr, RcsSettingsData.FT_HTTP_SERVER, helper);
         saveEditTextParam(R.id.FtHttpServerLogin, RcsSettingsData.FT_HTTP_LOGIN, helper);
         saveEditTextParam(R.id.FtHttpServerPassword, RcsSettingsData.FT_HTTP_PASSWORD, helper);
+
+        if (bundle == null) {
+            mRcsSettings.setFileTransferHttpSupported(mRcsSettings.getFtHttpServer().length() > 0
+                    && mRcsSettings.getFtHttpLogin().length() > 0
+                    && mRcsSettings.getFtHttpPassword().length() > 0);
+        }
+
         saveEditTextParam(R.id.ImConferenceUri, RcsSettingsData.IM_CONF_URI, helper);
         saveEditTextParam(R.id.EndUserConfReqUri, RcsSettingsData.ENDUSER_CONFIRMATION_URI, helper);
         saveEditTextParam(R.id.RcsApn, RcsSettingsData.RCS_APN, helper);
@@ -297,6 +305,52 @@ public class ProfileProvisioning extends Activity {
         }
     };
 
+    private void loadProfile(String myPhoneNumber, String provisioningFile) {
+        boolean logActivated = logger.isActivated();
+        if (provisioningFile == null
+                || provisioningFile.equals(getString(R.string.label_no_xml_file))) {
+            if (logActivated) {
+                logger.error("Loading of provisioning failed: no XML file");
+            }
+            Toast.makeText(ProfileProvisioning.this, getString(R.string.label_load_failed),
+                    Toast.LENGTH_LONG).show();
+            return;
+
+        }
+        String filePath = PROVISIONING_FOLDER_PATH + File.separator + provisioningFile;
+        if (logActivated) {
+            logger.debug("Selection of provisioning file: ".concat(provisioningFile));
+        }
+        String mXMLFileContent = getFileContent(filePath);
+        if (mXMLFileContent == null) {
+            if (logActivated) {
+                logger.error("Loading of provisioning failed: invalid XML file '"
+                        + provisioningFile + "'");
+            }
+            Toast.makeText(ProfileProvisioning.this, getString(R.string.label_load_failed),
+                    Toast.LENGTH_LONG).show();
+            return;
+
+        }
+        if (logActivated) {
+            logger.debug("Selection of provisioning file: " + filePath);
+        }
+        PhoneNumber number = ContactUtil.getValidPhoneNumberFromAndroid(myPhoneNumber);
+        if (number == null) {
+            if (logActivated) {
+                logger.error("Loading of provisioning failed: invalid phone number '"
+                        + myPhoneNumber + "'");
+            }
+            Toast.makeText(ProfileProvisioning.this, getString(R.string.label_load_failed),
+                    Toast.LENGTH_LONG).show();
+            return;
+
+        }
+        ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
+        ProvisionTask mProvisionTask = new ProvisionTask();
+        mProvisionTask.execute(mXMLFileContent, contact.toString());
+    }
+
     /**
      * Load the user profile
      */
@@ -304,7 +358,8 @@ public class ProfileProvisioning extends Activity {
         LayoutInflater factory = LayoutInflater.from(this);
         final View view = factory.inflate(R.layout.rcs_provisioning_generate_profile, null);
         final EditText textEdit = (EditText) view.findViewById(R.id.msisdn);
-        textEdit.setText(mRcsSettings.getUserProfileImsUserName());
+        ContactId me = mRcsSettings.getUserProfileImsUserName();
+        textEdit.setText(me == null ? "" : me.toString());
 
         String[] xmlFiles = getProvisioningFiles();
         final Spinner spinner = (Spinner) view.findViewById(R.id.XmlProvisioningFile);
@@ -318,29 +373,9 @@ public class ProfileProvisioning extends Activity {
                 .setNegativeButton(R.string.label_cancel, null)
                 .setPositiveButton(R.string.label_ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        mInputedUserPhoneNumber = textEdit.getText().toString();
-                        mSelectedProvisioningFile = (String) spinner.getSelectedItem();
-                        if (mSelectedProvisioningFile != null
-                                && !mSelectedProvisioningFile
-                                        .equals(getString(R.string.label_no_xml_file))) {
-                            String filePath = PROVISIONING_FOLDER_PATH + File.separator
-                                    + mSelectedProvisioningFile;
-                            if (logger.isActivated()) {
-                                logger.debug("Selection of provisioning file: "
-                                        + mSelectedProvisioningFile);
-                            }
-                            String mXMLFileContent = getFileContent(filePath);
-                            if (mXMLFileContent != null) {
-                                if (logger.isActivated()) {
-                                    logger.debug("Selection of provisioning file: " + filePath);
-                                }
-                                ProvisionTask mProvisionTask = new ProvisionTask();
-                                mProvisionTask.execute(mXMLFileContent, mInputedUserPhoneNumber);
-                                return;
-                            }
-                        }
-                        Toast.makeText(ProfileProvisioning.this,
-                                getString(R.string.label_load_failed), Toast.LENGTH_LONG).show();
+                        String inputUserPhoneNumber = textEdit.getText().toString();
+                        String selectedProvisioningFile = (String) spinner.getSelectedItem();
+                        loadProfile(inputUserPhoneNumber, selectedProvisioningFile);
                     }
                 });
         AlertDialog dialog = builder.create();
@@ -400,7 +435,7 @@ public class ProfileProvisioning extends Activity {
 
         @Override
         protected Boolean doInBackground(String... params) {
-            String UserPhoneNumber = params[1];
+            ContactId UserPhoneNumber = ContactUtil.createContactIdFromTrustedData(params[1]);
             String mXMLFileContent = params[0];
             return createProvisioning(mXMLFileContent, UserPhoneNumber);
         }
@@ -409,10 +444,10 @@ public class ProfileProvisioning extends Activity {
          * Parse the provisioning data then save it into RCS settings provider
          * 
          * @param mXMLFileContent the XML file containing provisioning data
-         * @param userPhoneNumber the user phone number
+         * @param myContact the user phone number
          * @return true if loading the provisioning is successful
          */
-        private boolean createProvisioning(String mXMLFileContent, String userPhoneNumber) {
+        private boolean createProvisioning(String mXMLFileContent, ContactId myContact) {
             ProvisioningParser parser = new ProvisioningParser(mXMLFileContent, mRcsSettings);
             // Save GSMA release set into the provider
             GsmaRelease release = mRcsSettings.getGsmaRelease();
@@ -425,11 +460,10 @@ public class ProfileProvisioning extends Activity {
             mRcsSettings.setMessagingMode(MessagingMode.NONE);
 
             if (parser.parse(release, true)) {
-                // Customize provisioning data with user phone number
-                mRcsSettings.writeParameter(RcsSettingsData.USERPROFILE_IMS_USERNAME,
-                        userPhoneNumber);
-                mRcsSettings.writeParameter(RcsSettingsData.USERPROFILE_IMS_DISPLAY_NAME,
-                        userPhoneNumber);
+                /* Customize provisioning data with user phone number */
+                mRcsSettings.setUserProfileImsUserName(myContact);
+                String userPhoneNumber = myContact.toString();
+                mRcsSettings.setUserProfileImsDisplayName(userPhoneNumber);
                 String homeDomain = mRcsSettings
                         .readParameter(RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN);
                 String sipUri = userPhoneNumber + "@" + homeDomain;

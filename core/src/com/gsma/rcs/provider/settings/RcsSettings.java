@@ -22,17 +22,9 @@
 
 package com.gsma.rcs.provider.settings;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import android.content.ContentValues;
-import android.database.Cursor;
-import android.text.TextUtils;
-
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.extension.ServiceExtensionManager;
-import com.gsma.rcs.provider.settings.RcsSettingsData;
+import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ConfigurationMode;
 import com.gsma.rcs.provider.settings.RcsSettingsData.EnableRcseSwitch;
@@ -40,11 +32,20 @@ import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
 import com.gsma.rcs.provider.settings.RcsSettingsData.NetworkAccessType;
+import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
 import com.gsma.services.rcs.CommonServiceConfiguration.MinimumBatteryLevel;
+import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration.ImageResizeOption;
-import com.gsma.rcs.provider.LocalContentResolver;
+
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.text.TextUtils;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * RCS settings
@@ -307,19 +308,26 @@ public class RcsSettings {
     /**
      * Get user profile username (i.e. username part of the IMPU)
      *
-     * @return Username part of SIP-URI
+     * @return Username part of SIP-URI or null if not provisioned
      */
-    public String getUserProfileImsUserName() {
-        return readString(RcsSettingsData.USERPROFILE_IMS_USERNAME);
+    public ContactId getUserProfileImsUserName() {
+        String phoneNumber = readString(RcsSettingsData.USERPROFILE_IMS_USERNAME);
+        if (RcsSettingsData.DEFAULT_USERPROFILE_IMS_USERNAME.equals(phoneNumber)) {
+            return null;
+        }
+        return ContactUtil.createContactIdFromTrustedData(phoneNumber);
     }
 
     /**
      * Set user profile IMS username (i.e. username part of the IMPU)
      *
-     * @param value Value
+     * @param contact
      */
-    public void setUserProfileImsUserName(String value) {
-        writeParameter(RcsSettingsData.USERPROFILE_IMS_USERNAME, value);
+    public void setUserProfileImsUserName(ContactId contact) {
+        writeParameter(
+                RcsSettingsData.USERPROFILE_IMS_USERNAME,
+                (contact == null) ? RcsSettingsData.DEFAULT_USERPROFILE_IMS_USERNAME : contact
+                        .toString());
     }
 
     /**
@@ -1691,7 +1699,7 @@ public class RcsSettings {
      * Reset user profile settings
      */
     public void resetUserProfile() {
-        setUserProfileImsUserName("");
+        setUserProfileImsUserName(null);
         setUserProfileImsDomain("");
         setUserProfileImsPassword("");
         setImsProxyAddrForMobile("");
@@ -1724,7 +1732,7 @@ public class RcsSettings {
         AuthenticationProcedure mode = getImsAuthenticationProcedureForMobile();
         switch (mode) {
             case DIGEST:
-                if (TextUtils.isEmpty(getUserProfileImsUserName())) {
+                if (getUserProfileImsUserName() == null) {
                     return false;
                 }
                 if (TextUtils.isEmpty(getUserProfileImsPassword())) {

@@ -30,11 +30,14 @@ import com.gsma.rcs.provider.settings.RcsSettingsData.AuthenticationProcedure;
 import com.gsma.rcs.provider.settings.RcsSettingsData.EnableRcseSwitch;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
+import com.gsma.rcs.utils.ContactUtil;
+import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.DeviceUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
 import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.contact.ContactId;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -44,6 +47,7 @@ import java.io.ByteArrayInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+
 import javax2.sip.ListeningPoint;
 
 /**
@@ -651,7 +655,7 @@ public class ProvisioningParser {
 
                 if (xcapRootURI == null) {
                     if ((xcapRootURI = getValueByParamName("XCAPRootURI", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.XDM_SERVER, xcapRootURI);
+                        mRcsSettings.setXdmServer(xcapRootURI);
                         continue;
                     }
                 }
@@ -659,8 +663,7 @@ public class ProvisioningParser {
                 if (xcapAuthenticationUsername == null) {
                     if ((xcapAuthenticationUsername = getValueByParamName(
                             "XCAPAuthenticationUserName", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.XDM_LOGIN,
-                                xcapAuthenticationUsername);
+                        mRcsSettings.setXdmLogin(xcapAuthenticationUsername);
                         continue;
                     }
                 }
@@ -668,8 +671,7 @@ public class ProvisioningParser {
                 if (xcapAuthenticationSecret == null) {
                     if ((xcapAuthenticationSecret = getValueByParamName("XCAPAuthenticationSecret",
                             childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.XDM_PASSWORD,
-                                xcapAuthenticationSecret);
+                        mRcsSettings.setXdmPassword(xcapAuthenticationSecret);
                         continue;
                     }
                 }
@@ -972,21 +974,21 @@ public class ProvisioningParser {
 
                 if (ftHttpCsUri == null) {
                     if ((ftHttpCsUri = getValueByParamName("ftHTTPCSURI", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.FT_HTTP_SERVER, ftHttpCsUri);
+                        mRcsSettings.setFtHttpServer(ftHttpCsUri);
                         continue;
                     }
                 }
 
                 if (ftHttpCsUser == null) {
                     if ((ftHttpCsUser = getValueByParamName("ftHTTPCSUser", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.FT_HTTP_LOGIN, ftHttpCsUser);
+                        mRcsSettings.setFtHttpLogin(ftHttpCsUser);
                         continue;
                     }
                 }
 
                 if (ftHttpCsPwd == null) {
                     if ((ftHttpCsPwd = getValueByParamName("ftHTTPCSPwd", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.FT_HTTP_PASSWORD, ftHttpCsPwd);
+                        mRcsSettings.setFtHttpPassword(ftHttpCsPwd);
                         continue;
                     }
                 }
@@ -1104,8 +1106,7 @@ public class ProvisioningParser {
 
                 if (confFctyUri == null) {
                     if ((confFctyUri = getValueByParamName("conf-fcty-uri", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.IM_CONF_URI,
-                                formatSipUri(confFctyUri));
+                        mRcsSettings.setImConferenceUri(formatSipUri(confFctyUri));
                         continue;
                     }
                 }
@@ -1318,8 +1319,8 @@ public class ProvisioningParser {
                 if (endUserConfReqId == null) {
                     if ((endUserConfReqId = getValueByParamName("endUserConfReqId", childnode,
                             TYPE_TXT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.ENDUSER_CONFIRMATION_URI,
-                                formatSipUri(endUserConfReqId));
+                        mRcsSettings
+                                .setEndUserConfirmationRequestUri(formatSipUri(endUserConfReqId));
                         continue;
                     }
                 }
@@ -1460,7 +1461,17 @@ public class ProvisioningParser {
                     if ((publicUserIdentity = getValueByParamName("Public_User_Identity",
                             childnode, TYPE_TXT)) != null) {
                         String username = extractUserNamePart(publicUserIdentity);
-                        mRcsSettings.setUserProfileImsUserName(username);
+                        PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(username);
+                        if (number == null) {
+                            if (logger.isActivated()) {
+                                logger.error("Invalid public user identity '" + username + "'");
+                            }
+                            mRcsSettings.setUserProfileImsUserName(null);
+                        } else {
+                            ContactId contact = ContactUtil
+                                    .createContactIdFromValidatedData(number);
+                            mRcsSettings.setUserProfileImsUserName(contact);
+                        }
                         continue;
                     }
                 }
@@ -1599,15 +1610,13 @@ public class ProvisioningParser {
                 if (addr == null) {
                     if ((addr = getValueByParamName("Address", childnode, TYPE_TXT)) != null) {
                         String[] address = addr.split(":");
-                        mRcsSettings.writeParameter(RcsSettingsData.IMS_PROXY_ADDR_MOBILE,
-                                address[0]);
-                        mRcsSettings
-                                .writeParameter(RcsSettingsData.IMS_PROXY_ADDR_WIFI, address[0]);
+                        String proxyAddr = address[0];
+                        mRcsSettings.setImsProxyAddrForMobile(proxyAddr);
+                        mRcsSettings.setImsProxyAddrForWifi(proxyAddr);
                         if (address.length > 1) {
-                            mRcsSettings.writeParameter(RcsSettingsData.IMS_PROXY_PORT_MOBILE,
-                                    address[1]);
-                            mRcsSettings.writeParameter(RcsSettingsData.IMS_PROXY_PORT_WIFI,
-                                    address[1]);
+                            int port = Integer.valueOf(address[1]);
+                            mRcsSettings.setImsProxyPortForMobile(port);
+                            mRcsSettings.setImsProxyPortForWifi(port);
                         }
                         continue;
                     }
@@ -1661,23 +1670,21 @@ public class ProvisioningParser {
 
                 if (realm == null) {
                     if ((realm = getValueByParamName("Realm", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.USERPROFILE_IMS_REALM, realm);
+                        mRcsSettings.setUserProfileImsRealm(realm);
                         continue;
                     }
                 }
 
                 if (userName == null) {
                     if ((userName = getValueByParamName("UserName", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID,
-                                userName);
+                        mRcsSettings.setUserProfileImsPrivateId(userName);
                         continue;
                     }
                 }
 
                 if (userPwd == null) {
                     if ((userPwd = getValueByParamName("UserPwd", childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.USERPROFILE_IMS_PASSWORD,
-                                userPwd);
+                        mRcsSettings.setUserProfileImsPassword(userPwd);
                         continue;
                     }
                 }
@@ -1802,8 +1809,7 @@ public class ProvisioningParser {
                 if (privateUserIdentity == null) {
                     if ((privateUserIdentity = getValueByParamName("Private_User_Identity",
                             childnode, TYPE_TXT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.USERPROFILE_IMS_PRIVATE_ID,
-                                privateUserIdentity);
+                        mRcsSettings.setUserProfileImsPrivateId(privateUserIdentity);
                         continue;
                     }
                 }
@@ -1811,8 +1817,7 @@ public class ProvisioningParser {
                 if (homeDomain == null) {
                     if ((homeDomain = getValueByParamName("Home_network_domain_name", childnode,
                             TYPE_TXT)) != null) {
-                        mRcsSettings.writeParameter(RcsSettingsData.USERPROFILE_IMS_HOME_DOMAIN,
-                                homeDomain);
+                        mRcsSettings.setUserProfileImsDomain(homeDomain);
                         continue;
                     }
                 }

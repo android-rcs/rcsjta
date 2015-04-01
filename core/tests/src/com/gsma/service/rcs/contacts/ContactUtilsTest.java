@@ -19,7 +19,6 @@
 package com.gsma.service.rcs.contacts;
 
 import com.gsma.rcs.utils.ContactUtilMockContext;
-import com.gsma.services.rcs.RcsContactFormatException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
 
@@ -108,9 +107,9 @@ public class ContactUtilsTest extends AndroidTestCase {
     public void testFormatContactIdNull() {
         try {
             mContactUtils.formatContact(null);
-            fail("Expected RcsContactFormatException to be thrown");
-        } catch (RcsContactFormatException e) {
-            assertTrue(e instanceof RcsContactFormatException);
+            fail("Expected IllegalArgumentException to be thrown");
+        } catch (IllegalArgumentException e) {
+            assertTrue(e instanceof IllegalArgumentException);
         }
     }
 
@@ -120,8 +119,8 @@ public class ContactUtilsTest extends AndroidTestCase {
             assertEquals("+33612345678", cid.toString());
             cid = mContactUtils.formatContact("+34612345678");
             assertEquals("+34612345678", cid.toString());
-        } catch (RcsContactFormatException e) {
-            fail("RcsContactFormatException thrown");
+        } catch (IllegalArgumentException e) {
+            fail("IllegalArgumentException thrown");
         }
     }
 
@@ -133,8 +132,8 @@ public class ContactUtilsTest extends AndroidTestCase {
         try {
             ContactId cid = mContactUtils.formatContact(cac + "612345678");
             assertEquals(cc + "612345678", cid.toString());
-        } catch (RcsContactFormatException e) {
-            fail("RcsContactFormatException thrown");
+        } catch (IllegalArgumentException e) {
+            fail("IllegalArgumentException thrown");
         }
     }
 
@@ -145,9 +144,9 @@ public class ContactUtilsTest extends AndroidTestCase {
         try {
             int cacInteger = Integer.parseInt(cac);
             mContactUtils.formatContact((++cacInteger) + "612345678");
-            fail("RcsContactFormatException expected");
+            fail("IllegalArgumentException expected");
         } catch (Exception e) {
-            assertTrue(e instanceof RcsContactFormatException);
+            assertTrue(e instanceof IllegalArgumentException);
         }
     }
 
@@ -159,8 +158,8 @@ public class ContactUtilsTest extends AndroidTestCase {
             int ccInteger = Integer.parseInt(cc.substring(1)) + 1;
             cid = mContactUtils.formatContact("00" + ccInteger + "612345678");
             assertEquals("+" + ccInteger + "612345678", cid.toString());
-        } catch (RcsContactFormatException e) {
-            fail("RcsContactFormatException thrown");
+        } catch (IllegalArgumentException e) {
+            fail("IllegalArgumentException thrown");
         }
     }
 

@@ -18,7 +18,7 @@ package com.gsma.rcs.core.ims.service.im.chat;
 
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.ContactUtils;
+import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.GroupChat;
@@ -82,7 +82,7 @@ public class GroupChatPersistedStorageAccessor {
                     .getColumnIndexOrThrow(GroupChat.DIRECTION)));
             String contact = cursor.getString(cursor.getColumnIndexOrThrow(GroupChat.CONTACT));
             if (contact != null) {
-                mContact = ContactUtils.createContactId(contact);
+                mContact = ContactUtil.createContactIdFromTrustedData(contact);
             }
             mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(GroupChat.TIMESTAMP));
         } finally {
