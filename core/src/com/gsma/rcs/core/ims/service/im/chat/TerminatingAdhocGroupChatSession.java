@@ -94,8 +94,9 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 
         createTerminatingDialogPath(invite);
 
-        setRemoteDisplayName(SipUtils.getDisplayNameFromUri(SipUtils
-                .getAssertedIdentityHeader(invite)));
+        if (contact != null) {
+            setRemoteDisplayName(SipUtils.getDisplayNameFromUri(invite.getFrom()));
+        }
 
         String chatId = ChatUtils.getContributionId(invite);
         setContributionID(chatId);
