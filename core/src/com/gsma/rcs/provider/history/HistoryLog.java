@@ -20,6 +20,7 @@ import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
+import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.history.HistoryUriBuilder;
 
@@ -39,7 +40,9 @@ public class HistoryLog {
 
     private static final String SELECTION_QUEUED_CHATMESSAGES_AND_FILETRANSFERS = new StringBuilder(
             "(").append(HistoryLogData.KEY_STATUS).append("=").append(Status.QUEUED.toInt())
-            .append(" AND ").append(HistoryLogData.KEY_PROVIDER_ID).append("=")
+            .append(" AND ").append(HistoryLogData.KEY_MIME_TYPE).append("<>'")
+            .append(MimeType.GROUPCHAT_EVENT).append("' AND ")
+            .append(HistoryLogData.KEY_PROVIDER_ID).append("=")
             .append(Message.HISTORYLOG_MEMBER_ID).append(") OR (")
             .append(HistoryLogData.KEY_STATUS).append("=")
             .append(FileTransfer.State.QUEUED.toInt()).append(" AND ")
