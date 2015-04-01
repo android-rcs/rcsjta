@@ -190,22 +190,6 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
                     return;
             }
 
-            // Auto reject if file too big or if storage capacity is too small
-            ContentSharingError error = isImageCapacityAcceptable(getContent().getSize(),
-                    mRcsSettings);
-            if (error != null) {
-                if (logger.isActivated()) {
-                    logger.debug("Auto reject image sharing invitation");
-                }
-
-                // Decline the invitation
-                sendErrorResponse(getDialogPath().getInvite(), getDialogPath().getLocalTag(), 603);
-
-                // Close session
-                handleError(new ContentSharingError(error));
-                return;
-            }
-
             // Parse the remote SDP part
             String remoteSdp = getDialogPath().getInvite().getSdpContent();
             SdpParser parser = new SdpParser(remoteSdp.getBytes(UTF8));

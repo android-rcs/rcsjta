@@ -31,6 +31,7 @@ import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
@@ -167,6 +168,8 @@ public class InstantMessagingService extends ImsService {
      */
     private static final Logger sLogger = Logger.getLogger(InstantMessagingService.class.getName());
 
+    private static final String sSizeExceededMsg = "133 Size exceeded";
+
     /**
      * Constructor
      * 
@@ -202,6 +205,23 @@ public class InstantMessagingService extends ImsService {
                 ParticipantStatus.FAILED);
         mCore.getListener().handleGroupChatInvitationRejected(chatId, contact, subject,
                 participants, reasonCode, timestamp);
+    }
+
+    private void send403Forbidden(SipRequest request, String warning) {
+        try {
+            /* Send a 403 Forbidden */
+            if (sLogger.isActivated()) {
+                sLogger.info("Send 403 Forbidden (warning=" + warning + ")");
+            }
+            SipResponse resp = SipMessageFactory.createResponse(request, null, Response.FORBIDDEN,
+                    warning);
+            getImsModule().getSipManager().sendSipResponse(resp);
+        } catch (SipException e) {
+            /* Better exception handling after CR037 */
+            if (sLogger.isActivated()) {
+                sLogger.error("Can't send 403 Forbidden response", e);
+            }
+        }
     }
 
     /**
@@ -806,12 +826,47 @@ public class InstantMessagingService extends ImsService {
             if (logActivated) {
                 sLogger.debug("The max number of file transfer sessions is achieved: reject the invitation");
             }
-
             handleFileTransferInvitationRejected(invite, remote,
                     FileTransfer.ReasonCode.REJECTED_MAX_FILE_TRANSFERS, timestamp, timestampSent);
 
             // Send a 603 Decline response
             sendErrorResponse(invite, Response.DECLINE);
+            return;
+        }
+        /*
+         * Reject if file is too big or size exceeds device storage capacity. This control should be
+         * done on UI. It is done after end user accepts invitation to enable prior handling by the
+         * application.
+         */
+        MmContent content = ContentManager.createMmContentFromSdp(invite, mRcsSettings);
+        FileSharingError error = FileSharingSession.isFileCapacityAcceptable(content.getSize(),
+                mRcsSettings);
+        if (error != null) {
+            /*
+             * Extract of GSMA specification: If the file is bigger than FT MAX SIZE, a warning
+             * message is displayed when trying to send or receive a file larger than the mentioned
+             * limit and the transfer will be cancelled (that is at protocol level, the SIP INVITE
+             * request will never be sent or an automatic rejection response SIP 403 Forbidden with
+             * a Warning header set to 133 Size exceeded will be sent by the entity that detects
+             * that the file size is too big to the other end depending on the scenario).
+             */
+            send403Forbidden(invite, sSizeExceededMsg);
+            int errorCode = error.getErrorCode();
+            switch (errorCode) {
+                case FileSharingError.MEDIA_SIZE_TOO_BIG:
+                    handleFileTransferInvitationRejected(invite, remote,
+                            FileTransfer.ReasonCode.REJECTED_MAX_SIZE, timestamp, timestampSent);
+                    break;
+                case FileSharingError.NOT_ENOUGH_STORAGE_SPACE:
+                    handleFileTransferInvitationRejected(invite, remote,
+                            FileTransfer.ReasonCode.REJECTED_LOW_SPACE, timestamp, timestampSent);
+                    break;
+                default:
+                    if (sLogger.isActivated()) {
+                        sLogger.error("Unexpected error while receiving MSRP file transfer invitation"
+                                .concat(Integer.toString(errorCode)));
+                    }
+            }
             return;
         }
 
@@ -1367,9 +1422,11 @@ public class InstantMessagingService extends ImsService {
                 case FileSharingError.MEDIA_SIZE_TOO_BIG:
                     handleFileTransferInvitationRejected(invite, remote,
                             FileTransfer.ReasonCode.REJECTED_MAX_SIZE, timestamp, timestampSent);
+                    break;
                 case FileSharingError.NOT_ENOUGH_STORAGE_SPACE:
                     handleFileTransferInvitationRejected(invite, remote,
                             FileTransfer.ReasonCode.REJECTED_LOW_SPACE, timestamp, timestampSent);
+                    break;
                 default:
                     if (logActivated) {
                         sLogger.error("Unexpected error while receiving HTTP file transfer invitation"

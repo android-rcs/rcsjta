@@ -561,6 +561,32 @@ public class RichcallService extends ImsService {
             return;
         }
 
+        // Auto reject if file too big or if storage capacity is too small
+        MmContent content = ContentManager.createMmContentFromSdp(invite, mRcsSettings);
+        ContentSharingError error = ImageTransferSession.isImageCapacityAcceptable(
+                content.getSize(), mRcsSettings);
+        if (error != null) {
+            // Send a 603 Decline response
+            sendErrorResponse(invite, Response.DECLINE);
+            int errorCode = error.getErrorCode();
+            switch (errorCode) {
+                case ContentSharingError.MEDIA_SIZE_TOO_BIG:
+                    handleImageSharingInvitationRejected(invite, contact,
+                            ImageSharing.ReasonCode.REJECTED_MAX_SIZE, timestamp);
+                    break;
+                case ContentSharingError.NOT_ENOUGH_STORAGE_SPACE:
+                    handleImageSharingInvitationRejected(invite, contact,
+                            ImageSharing.ReasonCode.REJECTED_LOW_SPACE, timestamp);
+                    break;
+                default:
+                    if (sLogger.isActivated()) {
+                        sLogger.error("Unexpected error while receiving image share invitation"
+                                .concat(Integer.toString(errorCode)));
+                    }
+            }
+            return;
+        }
+
         // Create a new session
         ImageTransferSession session = new TerminatingImageTransferSession(this, invite, contact,
                 mRcsSettings, timestamp);
