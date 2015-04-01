@@ -262,6 +262,13 @@ public class ProfileProvisioning extends Activity {
         saveEditTextParam(R.id.FtHttpServerAddr, RcsSettingsData.FT_HTTP_SERVER, helper);
         saveEditTextParam(R.id.FtHttpServerLogin, RcsSettingsData.FT_HTTP_LOGIN, helper);
         saveEditTextParam(R.id.FtHttpServerPassword, RcsSettingsData.FT_HTTP_PASSWORD, helper);
+
+        if (bundle == null) {
+            mRcsSettings.setFileTransferHttpSupported(mRcsSettings.getFtHttpServer().length() > 0
+                    && mRcsSettings.getFtHttpLogin().length() > 0
+                    && mRcsSettings.getFtHttpPassword().length() > 0);
+        }
+
         saveEditTextParam(R.id.ImConferenceUri, RcsSettingsData.IM_CONF_URI, helper);
         saveEditTextParam(R.id.EndUserConfReqUri, RcsSettingsData.ENDUSER_CONFIRMATION_URI, helper);
         saveEditTextParam(R.id.RcsApn, RcsSettingsData.RCS_APN, helper);
