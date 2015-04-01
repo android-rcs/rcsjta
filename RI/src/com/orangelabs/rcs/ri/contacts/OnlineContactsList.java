@@ -98,7 +98,7 @@ public class OnlineContactsList extends ListActivity {
                 for (int i = 0; i < contacts.size(); i++) {
                     RcsContact contact = contacts.get(i);
                     String status;
-                    if (contact.isRegistered()) {
+                    if (contact.isOnline()) {
                         status = "online";
                     } else {
                         status = "offline";

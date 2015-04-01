@@ -46,9 +46,9 @@ public class RcsContact implements Parcelable {
     private String mDisplayName;
 
     /**
-     * Registration state
+     * Online state
      */
-    private boolean mRegistered;
+    private boolean mOnline;
 
     /**
      * Blocking state
@@ -64,17 +64,17 @@ public class RcsContact implements Parcelable {
      * Constructor
      * 
      * @param contact Contact ID
-     * @param registered Registration state
+     * @param online Online state
      * @param capabilities Capabilities
      * @param displayName Display name
      * @param blocked Blocking state
      * @param blockingTs Blocking timestamp
      * @hide
      */
-    public RcsContact(ContactId contact, boolean registered, Capabilities capabilities,
+    public RcsContact(ContactId contact, boolean online, Capabilities capabilities,
             String displayName, boolean blocked, long blockingTs) {
         mContact = contact;
-        mRegistered = registered;
+        mOnline = online;
         mCapabilities = capabilities;
         mDisplayName = displayName;
         mBlocked = blocked;
@@ -94,7 +94,7 @@ public class RcsContact implements Parcelable {
         } else {
             mContact = null;
         }
-        mRegistered = source.readInt() != 0;
+        mOnline = source.readInt() != 0;
         boolean containsCapabilities = source.readInt() != 0;
         if (containsCapabilities) {
             mCapabilities = Capabilities.CREATOR.createFromParcel(source);
@@ -131,7 +131,7 @@ public class RcsContact implements Parcelable {
         } else {
             dest.writeInt(0);
         }
-        dest.writeInt(mRegistered ? 1 : 0);
+        dest.writeInt(mOnline ? 1 : 0);
         if (mCapabilities != null) {
             dest.writeInt(1);
             mCapabilities.writeToParcel(dest, flags);
@@ -170,10 +170,10 @@ public class RcsContact implements Parcelable {
     /**
      * Is contact online (i.e. registered to the service platform)
      * 
-     * @return Returns true if registered else returns false
+     * @return Returns true if online else returns false
      */
-    public boolean isRegistered() {
-        return mRegistered;
+    public boolean isOnline() {
+        return mOnline;
     }
 
     /**

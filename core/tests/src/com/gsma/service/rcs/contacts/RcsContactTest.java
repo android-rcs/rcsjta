@@ -133,7 +133,7 @@ public class RcsContactTest extends AndroidTestCase {
     }
 
     private boolean rcsContactIsEqual(RcsContact rcs1, RcsContact rcs2) {
-        if (rcs1.isRegistered() != rcs2.isRegistered()) {
+        if (rcs1.isOnline() != rcs2.isOnline()) {
             return false;
         }
         if (rcs1.getContactId() != null) {
