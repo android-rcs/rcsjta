@@ -416,6 +416,17 @@
  visibility="public"
 >
 </constructor>
+<field name="BASECOLUMN_ID"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;_id&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
 <field name="CHAT_ID"
  type="java.lang.String"
  transient="false"
@@ -696,6 +707,17 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<field name="ACTION_INITIATE_GROUP_FILE_TRANSFER"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;com.gsma.services.rcs.action.ACTION_INITIATE_GROUP_FILE_TRANSFER&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
 <field name="ACTION_INITIATE_ONE_TO_ONE_FILE_TRANSFER"
  type="java.lang.String"
  transient="false"
@@ -712,37 +734,6 @@
  transient="false"
  volatile="false"
  value="&quot;com.gsma.services.rcs.action.VIEW_FILE_TRANSFER&quot;"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-</class>
-<class name="Intents.IPCall"
- extends="java.lang.Object"
- abstract="false"
- static="true"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<field name="ACTION_INITIATE_IPCALL"
- type="java.lang.String"
- transient="false"
- volatile="false"
- value="&quot;com.gsma.services.rcs.action.INITIATE_IPCALL&quot;"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="ACTION_VIEW_IPCALL"
- type="java.lang.String"
- transient="false"
- volatile="false"
- value="&quot;com.gsma.services.rcs.action.VIEW_IPCALL&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -825,24 +816,62 @@
 >
 </field>
 </class>
-<class name="RcsContactFormatException"
- extends="java.lang.RuntimeException"
+<class name="RcsGenericException"
+ extends="com.gsma.services.rcs.RcsServiceException"
  abstract="false"
  static="false"
  final="false"
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="RcsContactFormatException"
- type="com.gsma.services.rcs.RcsContactFormatException"
+<constructor name="RcsGenericException"
+ type="com.gsma.services.rcs.RcsGenericException"
  static="false"
  final="false"
  deprecated="not deprecated"
  visibility="public"
 >
+<parameter name="cause" type="java.lang.Throwable">
+</parameter>
 </constructor>
-<constructor name="RcsContactFormatException"
- type="com.gsma.services.rcs.RcsContactFormatException"
+<constructor name="RcsGenericException"
+ type="com.gsma.services.rcs.RcsGenericException"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="message" type="java.lang.String">
+</parameter>
+<parameter name="cause" type="java.lang.Throwable">
+</parameter>
+</constructor>
+<method name="assertException"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="e" type="java.lang.Exception">
+</parameter>
+<exception name="RcsGenericException" type="com.gsma.services.rcs.RcsGenericException">
+</exception>
+</method>
+</class>
+<class name="RcsIllegalArgumentException"
+ extends="com.gsma.services.rcs.RcsServiceException"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="RcsIllegalArgumentException"
+ type="com.gsma.services.rcs.RcsIllegalArgumentException"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -851,6 +880,79 @@
 <parameter name="message" type="java.lang.String">
 </parameter>
 </constructor>
+<constructor name="RcsIllegalArgumentException"
+ type="com.gsma.services.rcs.RcsIllegalArgumentException"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="message" type="java.lang.String">
+</parameter>
+<parameter name="cause" type="java.lang.Throwable">
+</parameter>
+</constructor>
+<method name="assertException"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="e" type="java.lang.Exception">
+</parameter>
+<exception name="RcsIllegalArgumentException" type="com.gsma.services.rcs.RcsIllegalArgumentException">
+</exception>
+</method>
+</class>
+<class name="RcsMaxAllowedSessionLimitReachedException"
+ extends="com.gsma.services.rcs.RcsServiceException"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="RcsMaxAllowedSessionLimitReachedException"
+ type="com.gsma.services.rcs.RcsMaxAllowedSessionLimitReachedException"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="message" type="java.lang.String">
+</parameter>
+</constructor>
+<constructor name="RcsMaxAllowedSessionLimitReachedException"
+ type="com.gsma.services.rcs.RcsMaxAllowedSessionLimitReachedException"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="message" type="java.lang.String">
+</parameter>
+<parameter name="cause" type="java.lang.Throwable">
+</parameter>
+</constructor>
+<method name="assertException"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="e" type="java.lang.Exception">
+</parameter>
+<exception name="RcsMaxAllowedSessionLimitReachedException" type="com.gsma.services.rcs.RcsMaxAllowedSessionLimitReachedException">
+</exception>
+</method>
 </class>
 <class name="RcsPermissionDeniedException"
  extends="com.gsma.services.rcs.RcsServiceException"
@@ -867,6 +969,8 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<parameter name="message" type="java.lang.String">
+</parameter>
 </constructor>
 <constructor name="RcsPermissionDeniedException"
  type="com.gsma.services.rcs.RcsPermissionDeniedException"
@@ -875,9 +979,72 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="error" type="java.lang.String">
+<parameter name="message" type="java.lang.String">
+</parameter>
+<parameter name="cause" type="java.lang.Throwable">
 </parameter>
 </constructor>
+<method name="assertException"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="e" type="java.lang.Exception">
+</parameter>
+<exception name="RcsPermissionDeniedException" type="com.gsma.services.rcs.RcsPermissionDeniedException">
+</exception>
+</method>
+</class>
+<class name="RcsPersistentStorageException"
+ extends="com.gsma.services.rcs.RcsServiceException"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="RcsPersistentStorageException"
+ type="com.gsma.services.rcs.RcsPersistentStorageException"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="message" type="java.lang.String">
+</parameter>
+</constructor>
+<constructor name="RcsPersistentStorageException"
+ type="com.gsma.services.rcs.RcsPersistentStorageException"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="message" type="java.lang.String">
+</parameter>
+<parameter name="cause" type="java.lang.Throwable">
+</parameter>
+</constructor>
+<method name="assertException"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="e" type="java.lang.Exception">
+</parameter>
+<exception name="RcsPersistentStorageException" type="com.gsma.services.rcs.RcsPersistentStorageException">
+</exception>
+</method>
 </class>
 <class name="RcsService"
  extends="java.lang.Object"
@@ -1014,11 +1181,11 @@
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
-<field name="ACTION_SERVICE_PROVISIONED"
+<field name="ACTION_SERVICE_PROVISIONING_DATA_CHANGED"
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;com.gsma.services.rcs.action.SERVICE_PROVISIONED&quot;"
+ value="&quot;com.gsma.services.rcs.action.SERVICE_PROVISIONNING_DATA_CHANGED&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -1332,7 +1499,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="error" type="java.lang.String">
+<parameter name="message" type="java.lang.String">
 </parameter>
 </constructor>
 <constructor name="RcsServiceException"
@@ -1342,7 +1509,19 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="e" type="java.lang.Exception">
+<parameter name="cause" type="java.lang.Throwable">
+</parameter>
+</constructor>
+<constructor name="RcsServiceException"
+ type="com.gsma.services.rcs.RcsServiceException"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="message" type="java.lang.String">
+</parameter>
+<parameter name="cause" type="java.lang.Throwable">
 </parameter>
 </constructor>
 </class>
@@ -1458,7 +1637,7 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="error" type="java.lang.String">
+<parameter name="message" type="java.lang.String">
 </parameter>
 </constructor>
 </class>
@@ -1477,7 +1656,36 @@
  deprecated="not deprecated"
  visibility="public"
 >
+<parameter name="message" type="java.lang.String">
+</parameter>
 </constructor>
+<constructor name="RcsServiceNotRegisteredException"
+ type="com.gsma.services.rcs.RcsServiceNotRegisteredException"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="message" type="java.lang.String">
+</parameter>
+<parameter name="cause" type="java.lang.Throwable">
+</parameter>
+</constructor>
+<method name="assertException"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="e" type="java.lang.Exception">
+</parameter>
+<exception name="RcsServiceNotRegisteredException" type="com.gsma.services.rcs.RcsServiceNotRegisteredException">
+</exception>
+</method>
 </class>
 <class name="RcsServiceRegistration"
  extends="java.lang.Object"
@@ -1586,6 +1794,52 @@
 </parameter>
 </method>
 </class>
+<class name="RcsUnsupportedOperationException"
+ extends="com.gsma.services.rcs.RcsServiceException"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="RcsUnsupportedOperationException"
+ type="com.gsma.services.rcs.RcsUnsupportedOperationException"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="message" type="java.lang.String">
+</parameter>
+</constructor>
+<constructor name="RcsUnsupportedOperationException"
+ type="com.gsma.services.rcs.RcsUnsupportedOperationException"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="message" type="java.lang.String">
+</parameter>
+<parameter name="cause" type="java.lang.Throwable">
+</parameter>
+</constructor>
+<method name="assertException"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="e" type="java.lang.Exception">
+</parameter>
+<exception name="RcsUnsupportedOperationException" type="com.gsma.services.rcs.RcsUnsupportedOperationException">
+</exception>
+</method>
+</class>
 </package>
 <package name="com.gsma.services.rcs.capability"
 >
@@ -1667,28 +1921,6 @@
  visibility="public"
 >
 </method>
-<method name="isIPVideoCallSupported"
- return="boolean"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="isIPVoiceCallSupported"
- return="boolean"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
 <method name="isImSessionSupported"
  return="boolean"
  abstract="false"
@@ -1701,17 +1933,6 @@
 >
 </method>
 <method name="isImageSharingSupported"
- return="boolean"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="isValid"
  return="boolean"
  abstract="false"
  native="false"
@@ -1793,6 +2014,17 @@
  visibility="public"
 >
 </field>
+<field name="BASECOLUMN_ID"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;_id&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
 <field name="CAPABILITY_EXTENSIONS"
  type="java.lang.String"
  transient="false"
@@ -1842,28 +2074,6 @@
  transient="false"
  volatile="false"
  value="&quot;capability_im_session&quot;"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="CAPABILITY_IP_VIDEO_CALL"
- type="java.lang.String"
- transient="false"
- volatile="false"
- value="&quot;capability_ip_video_call&quot;"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="CAPABILITY_IP_VOICE_CALL"
- type="java.lang.String"
- transient="false"
- volatile="false"
- value="&quot;capability_ip_voice_call&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -2172,8 +2382,8 @@
  visibility="public"
 >
 </constructor>
-<method name="getParticipantInfo"
- return="java.util.Set&lt;com.gsma.services.rcs.chat.ParticipantInfo&gt;"
+<method name="getParticipants"
+ return="java.util.Map&lt;com.gsma.services.rcs.contact.ContactId, com.gsma.services.rcs.chat.GroupChat.ParticipantStatus&gt;"
  abstract="false"
  native="false"
  synchronized="false"
@@ -2182,11 +2392,22 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="context" type="android.content.Context">
+<parameter name="ctx" type="android.content.Context">
 </parameter>
 <parameter name="participants" type="java.lang.String">
 </parameter>
 </method>
+<field name="BASECOLUMN_ID"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;_id&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
 <field name="CHAT_ID"
  type="java.lang.String"
  transient="false"
@@ -2302,6 +2523,17 @@
  visibility="public"
 >
 </constructor>
+<field name="BASECOLUMN_ID"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;_id&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
 <field name="CHAT_ID"
  type="java.lang.String"
  transient="false"
@@ -2350,6 +2582,17 @@
  transient="false"
  volatile="false"
  value="&quot;direction&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="HISTORYLOG_MEMBER_ID"
+ type="int"
+ transient="false"
+ volatile="false"
+ value="1"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -2939,34 +3182,6 @@
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
-<method name="canInitiateGroupChat"
- return="boolean"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="canInitiateGroupChat"
- return="boolean"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
-</parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
 <method name="connect"
  return="void"
  abstract="false"
@@ -3135,6 +3350,34 @@
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
+<method name="isAllowedToInitiateGroupChat"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
+</method>
+<method name="isAllowedToInitiateGroupChat"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
+</parameter>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
+</method>
 <method name="markMessageAsRead"
  return="void"
  abstract="false"
@@ -3191,21 +3434,6 @@
  visibility="public"
 >
 <parameter name="listener" type="com.gsma.services.rcs.chat.OneToOneChatListener">
-</parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="setRespondToDisplayReports"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="enable" type="boolean">
 </parameter>
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
@@ -3425,60 +3653,6 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<method name="canInviteParticipant"
- return="boolean"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="participant" type="com.gsma.services.rcs.contact.ContactId">
-</parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="canInviteParticipants"
- return="boolean"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="canLeave"
- return="boolean"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="canSendMessage"
- return="boolean"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
 <method name="getChatId"
  return="java.lang.String"
  abstract="false"
@@ -3519,7 +3693,7 @@
 </exception>
 </method>
 <method name="getParticipants"
- return="java.util.Set&lt;com.gsma.services.rcs.chat.ParticipantInfo&gt;"
+ return="java.util.Map&lt;com.gsma.services.rcs.contact.ContactId, com.gsma.services.rcs.chat.GroupChat.ParticipantStatus&gt;"
  abstract="false"
  native="false"
  synchronized="false"
@@ -3583,6 +3757,19 @@
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
+<method name="getTimestamp"
+ return="long"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
+</method>
 <method name="inviteParticipants"
  return="void"
  abstract="false"
@@ -3595,6 +3782,60 @@
 >
 <parameter name="participants" type="java.util.Set&lt;com.gsma.services.rcs.contact.ContactId&gt;">
 </parameter>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
+</method>
+<method name="isAllowedToInviteParticipant"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="participant" type="com.gsma.services.rcs.contact.ContactId">
+</parameter>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
+</method>
+<method name="isAllowedToInviteParticipants"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
+</method>
+<method name="isAllowedToLeave"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
+</method>
+<method name="isAllowedToSendMessage"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
@@ -3668,6 +3909,63 @@
 </parameter>
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
+</method>
+</class>
+<class name="GroupChat.ParticipantStatus"
+ extends="java.lang.Enum"
+ abstract="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="toInt"
+ return="int"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="valueOf"
+ return="com.gsma.services.rcs.chat.GroupChat.ParticipantStatus"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="name" type="java.lang.String">
+</parameter>
+</method>
+<method name="valueOf"
+ return="com.gsma.services.rcs.chat.GroupChat.ParticipantStatus"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="value" type="int">
+</parameter>
+</method>
+<method name="values"
+ return="com.gsma.services.rcs.chat.GroupChat.ParticipantStatus[]"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
 </method>
 </class>
 <class name="GroupChat.ReasonCode"
@@ -3961,7 +4259,7 @@
 <parameter name="msgIds" type="java.util.Set&lt;java.lang.String&gt;">
 </parameter>
 </method>
-<method name="onParticipantInfoChanged"
+<method name="onParticipantStatusChanged"
  return="void"
  abstract="true"
  native="false"
@@ -3973,7 +4271,9 @@
 >
 <parameter name="chatId" type="java.lang.String">
 </parameter>
-<parameter name="info" type="com.gsma.services.rcs.chat.ParticipantInfo">
+<parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
+</parameter>
+<parameter name="status" type="com.gsma.services.rcs.chat.GroupChat.ParticipantStatus">
 </parameter>
 </method>
 <method name="onStateChanged"
@@ -4002,8 +4302,8 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<method name="canSendMessage"
- return="boolean"
+<method name="getRemoteContact"
+ return="com.gsma.services.rcs.contact.ContactId"
  abstract="false"
  native="false"
  synchronized="false"
@@ -4015,8 +4315,8 @@
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
-<method name="getRemoteContact"
- return="com.gsma.services.rcs.contact.ContactId"
+<method name="isAllowedToSendMessage"
+ return="boolean"
  abstract="false"
  native="false"
  synchronized="false"
@@ -4220,157 +4520,6 @@
 </parameter>
 </method>
 </class>
-<class name="ParticipantInfo"
- extends="java.lang.Object"
- abstract="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<implements name="android.os.Parcelable">
-</implements>
-<constructor name="ParticipantInfo"
- type="com.gsma.services.rcs.chat.ParticipantInfo"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="in" type="android.os.Parcel">
-</parameter>
-</constructor>
-<method name="getContact"
- return="com.gsma.services.rcs.contact.ContactId"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getStatus"
- return="int"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-</class>
-<class name="ParticipantInfo.Status"
- extends="java.lang.Object"
- abstract="false"
- static="true"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<field name="BOOTED"
- type="int"
- transient="false"
- volatile="false"
- value="4"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="BUSY"
- type="int"
- transient="false"
- volatile="false"
- value="6"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="CONNECTED"
- type="int"
- transient="false"
- volatile="false"
- value="1"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="DECLINED"
- type="int"
- transient="false"
- volatile="false"
- value="7"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="DEPARTED"
- type="int"
- transient="false"
- volatile="false"
- value="3"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="DISCONNECTED"
- type="int"
- transient="false"
- volatile="false"
- value="2"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="FAILED"
- type="int"
- transient="false"
- volatile="false"
- value="5"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="PENDING"
- type="int"
- transient="false"
- volatile="false"
- value="8"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="UNKNOWN"
- type="int"
- transient="false"
- volatile="false"
- value="0"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-</class>
 </package>
 <package name="com.gsma.services.rcs.contact"
 >
@@ -4463,28 +4612,6 @@
  transient="false"
  volatile="false"
  value="&quot;vnd.android.cursor.item/com.gsma.services.rcs.im-session&quot;"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="MIME_TYPE_IP_VIDEO_CALL"
- type="java.lang.String"
- transient="false"
- volatile="false"
- value="&quot;vnd.android.cursor.item/com.gsma.services.rcs.ip-video-call&quot;"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="MIME_TYPE_IP_VOICE_CALL"
- type="java.lang.String"
- transient="false"
- volatile="false"
- value="&quot;vnd.android.cursor.item/com.gsma.services.rcs.ip-voice-call&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -4638,23 +4765,6 @@
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
-<method name="getVCard"
- return="java.lang.String"
- abstract="false"
- native="false"
- synchronized="false"
- static="true"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="ctx" type="android.content.Context">
-</parameter>
-<parameter name="contactUri" type="android.net.Uri">
-</parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
 <method name="unblockContact"
  return="void"
  abstract="false"
@@ -4726,6 +4836,21 @@
  deprecated="not deprecated"
  visibility="public"
 >
+</method>
+<method name="getVCard"
+ return="android.net.Uri"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="contactUri" type="android.net.Uri">
+</parameter>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
 </method>
 <method name="isValidContact"
  return="boolean"
@@ -4806,7 +4931,7 @@
  visibility="public"
 >
 </method>
-<method name="isRegistered"
+<method name="isOnline"
  return="boolean"
  abstract="false"
  native="false"
@@ -5796,45 +5921,6 @@
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
-<method name="canPauseTransfer"
- return="boolean"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="canResendTransfer"
- return="boolean"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="canResumeTransfer"
- return="boolean"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
 <method name="getChatId"
  return="java.lang.String"
  abstract="false"
@@ -5874,8 +5960,34 @@
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
+<method name="getFileExpiration"
+ return="long"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
+</method>
 <method name="getFileIcon"
  return="android.net.Uri"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
+</method>
+<method name="getFileIconExpiration"
+ return="long"
  abstract="false"
  native="false"
  synchronized="false"
@@ -6032,6 +6144,45 @@
 </method>
 <method name="getTransferId"
  return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
+</method>
+<method name="isAllowedToPauseTransfer"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
+</method>
+<method name="isAllowedToResendTransfer"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
+</method>
+<method name="isAllowedToResumeTransfer"
+ return="boolean"
  abstract="false"
  native="false"
  synchronized="false"
@@ -6289,6 +6440,17 @@
  visibility="public"
 >
 </constructor>
+<field name="BASECOLUMN_ID"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;_id&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
 <field name="CHAT_ID"
  type="java.lang.String"
  transient="false"
@@ -6354,6 +6516,17 @@
  visibility="public"
 >
 </field>
+<field name="FILEICON_EXPIRATION"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;fileicon_expiration&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
 <field name="FILEICON_MIME_TYPE"
  type="java.lang.String"
  transient="false"
@@ -6387,11 +6560,33 @@
  visibility="public"
 >
 </field>
+<field name="FILE_EXPIRATION"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;file_expiration&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
 <field name="FT_ID"
  type="java.lang.String"
  transient="false"
  volatile="false"
  value="&quot;ft_id&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="HISTORYLOG_MEMBER_ID"
+ type="int"
+ transient="false"
+ volatile="false"
+ value="2"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -6497,6 +6692,17 @@
  visibility="public"
 >
 </field>
+<field name="UNKNOWN_EXPIRATION"
+ type="long"
+ transient="false"
+ volatile="false"
+ value="0L"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
 </class>
 <class name="FileTransferService"
  extends="com.gsma.services.rcs.RcsService"
@@ -6544,36 +6750,6 @@
  visibility="public"
 >
 <parameter name="listener" type="com.gsma.services.rcs.filetransfer.GroupFileTransferListener">
-</parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="canTransferFile"
- return="boolean"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
-</parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="canTransferFileToGroupChat"
- return="boolean"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="chatId" type="java.lang.String">
 </parameter>
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
@@ -6712,6 +6888,36 @@
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
+<method name="isAllowedToTransferFile"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
+</parameter>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
+</method>
+<method name="isAllowedToTransferFileToGroupChat"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="chatId" type="java.lang.String">
+</parameter>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
+</method>
 <method name="markFileTransferAsRead"
  return="void"
  abstract="false"
@@ -6768,51 +6974,6 @@
  visibility="public"
 >
 <parameter name="listener" type="com.gsma.services.rcs.filetransfer.GroupFileTransferListener">
-</parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="setAutoAccept"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="enable" type="boolean">
-</parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="setAutoAcceptInRoaming"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="enable" type="boolean">
-</parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="setImageResizeOption"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="option" type="int">
 </parameter>
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
@@ -7233,9 +7394,9 @@
 </method>
 </class>
 </package>
-<package name="com.gsma.services.rcs.ipcall"
+<package name="com.gsma.services.rcs.history"
 >
-<class name="AudioCodec"
+<class name="HistoryLog"
  extends="java.lang.Object"
  abstract="false"
  static="false"
@@ -7243,508 +7404,30 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<implements name="android.os.Parcelable">
-</implements>
-<method name="compare"
- return="boolean"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="codec" type="com.gsma.services.rcs.ipcall.AudioCodec">
-</parameter>
-</method>
-<method name="getEncoding"
- return="java.lang.String"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getParameters"
- return="java.lang.String"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getPayloadType"
- return="int"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getSampleRate"
- return="int"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-</class>
-<class name="IPCall"
- extends="java.lang.Object"
- abstract="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<method name="abortCall"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="acceptInvitation"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="player" type="com.gsma.services.rcs.ipcall.IPCallPlayer">
-</parameter>
-<parameter name="renderer" type="com.gsma.services.rcs.ipcall.IPCallRenderer">
-</parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="addVideo"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="continueCall"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="getAudioCodec"
- return="com.gsma.services.rcs.ipcall.AudioCodec"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="getCallId"
- return="java.lang.String"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="getDirection"
- return="com.gsma.services.rcs.RcsService.Direction"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="getReasonCode"
- return="com.gsma.services.rcs.ipcall.IPCall.ReasonCode"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="getRemoteContact"
- return="com.gsma.services.rcs.contact.ContactId"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="getState"
- return="com.gsma.services.rcs.ipcall.IPCall.State"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="getVideoCodec"
- return="com.gsma.services.rcs.ipcall.VideoCodec"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="holdCall"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="isOnHold"
- return="boolean"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="isVideo"
- return="boolean"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="rejectInvitation"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="removeVideo"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-</class>
-<class name="IPCall.ReasonCode"
- extends="java.lang.Enum"
- abstract="false"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-<method name="toInt"
- return="int"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="valueOf"
- return="com.gsma.services.rcs.ipcall.IPCall.ReasonCode"
- abstract="false"
- native="false"
- synchronized="false"
- static="true"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="name" type="java.lang.String">
-</parameter>
-</method>
-<method name="valueOf"
- return="com.gsma.services.rcs.ipcall.IPCall.ReasonCode"
- abstract="false"
- native="false"
- synchronized="false"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="value" type="int">
-</parameter>
-</method>
-<method name="values"
- return="com.gsma.services.rcs.ipcall.IPCall.ReasonCode[]"
- abstract="false"
- native="false"
- synchronized="false"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-</class>
-<class name="IPCall.State"
- extends="java.lang.Enum"
- abstract="false"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-<method name="toInt"
- return="int"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="valueOf"
- return="com.gsma.services.rcs.ipcall.IPCall.State"
- abstract="false"
- native="false"
- synchronized="false"
- static="true"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="name" type="java.lang.String">
-</parameter>
-</method>
-<method name="valueOf"
- return="com.gsma.services.rcs.ipcall.IPCall.State"
- abstract="false"
- native="false"
- synchronized="false"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="value" type="int">
-</parameter>
-</method>
-<method name="values"
- return="com.gsma.services.rcs.ipcall.IPCall.State[]"
- abstract="false"
- native="false"
- synchronized="false"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-</class>
-<class name="IPCallIntent"
- extends="java.lang.Object"
- abstract="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<constructor name="IPCallIntent"
- type="com.gsma.services.rcs.ipcall.IPCallIntent"
+<constructor name="HistoryLog"
+ type="com.gsma.services.rcs.history.HistoryLog"
  static="false"
  final="false"
  deprecated="not deprecated"
  visibility="public"
 >
 </constructor>
-<field name="ACTION_NEW_INVITATION"
+<field name="BASECOLUMN_ID"
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;com.gsma.services.rcs.ipcall.action.NEW_CALL&quot;"
+ value="&quot;_id&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
  visibility="public"
 >
 </field>
-<field name="EXTRA_CALL_ID"
+<field name="CHAT_ID"
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;callId&quot;"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-</class>
-<class name="IPCallListener"
- extends="java.lang.Object"
- abstract="true"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<constructor name="IPCallListener"
- type="com.gsma.services.rcs.ipcall.IPCallListener"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
-<method name="onIPCallStateChanged"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
-</parameter>
-<parameter name="callId" type="java.lang.String">
-</parameter>
-<parameter name="state" type="com.gsma.services.rcs.ipcall.IPCall.State">
-</parameter>
-<parameter name="reasonCode" type="com.gsma.services.rcs.ipcall.IPCall.ReasonCode">
-</parameter>
-</method>
-</class>
-<class name="IPCallLog"
- extends="java.lang.Object"
- abstract="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<constructor name="IPCallLog"
- type="com.gsma.services.rcs.ipcall.IPCallLog"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
-<field name="AUDIO_ENCODING"
- type="java.lang.String"
- transient="false"
- volatile="false"
- value="&quot;audioEncoding&quot;"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="CALL_ID"
- type="java.lang.String"
- transient="false"
- volatile="false"
- value="&quot;call_id&quot;"
+ value="&quot;chat_id&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -7756,6 +7439,17 @@
  transient="false"
  volatile="false"
  value="&quot;contact&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="CONTENT"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;content&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -7794,11 +7488,88 @@
  visibility="public"
 >
 </field>
-<field name="HEIGHT"
+<field name="FILEICON"
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;height&quot;"
+ value="&quot;fileicon&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="FILEICON_MIME_TYPE"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;fileicon_mime_type&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="FILENAME"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;filename&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="FILESIZE"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;filesize&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="ID"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;id&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="MIME_TYPE"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;mime_type&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="PROVIDER_ID"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;provider_id&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="READ_STATUS"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;read_status&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -7816,11 +7587,11 @@
  visibility="public"
 >
 </field>
-<field name="STATE"
+<field name="STATUS"
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;state&quot;"
+ value="&quot;status&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -7838,238 +7609,44 @@
  visibility="public"
 >
 </field>
-<field name="VIDEO_ENCODING"
+<field name="TIMESTAMP_DELIVERED"
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;videoEncoding&quot;"
+ value="&quot;timestamp_delivered&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
  visibility="public"
 >
 </field>
-<field name="WIDTH"
+<field name="TIMESTAMP_DISPLAYED"
  type="java.lang.String"
  transient="false"
  volatile="false"
- value="&quot;width&quot;"
+ value="&quot;timestamp_displayed&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
  visibility="public"
 >
 </field>
-</class>
-<class name="IPCallPlayer"
- extends="com.gsma.services.rcs.ipcall.IIPCallPlayer.Stub"
- abstract="true"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<constructor name="IPCallPlayer"
- type="com.gsma.services.rcs.ipcall.IPCallPlayer"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
-<method name="addEventListener"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="listener" type="com.gsma.services.rcs.ipcall.IIPCallPlayerListener">
-</parameter>
-</method>
-<method name="close"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getAudioCodec"
- return="com.gsma.services.rcs.ipcall.AudioCodec"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getEventListeners"
- return="java.util.Set&lt;com.gsma.services.rcs.ipcall.IIPCallPlayerListener&gt;"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getLocalAudioRtpPort"
- return="int"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getLocalVideoRtpPort"
- return="int"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getSupportedAudioCodecs"
- return="com.gsma.services.rcs.ipcall.AudioCodec[]"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getSupportedVideoCodecs"
- return="com.gsma.services.rcs.ipcall.VideoCodec[]"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getVideoCodec"
- return="com.gsma.services.rcs.ipcall.VideoCodec"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="open"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="audiocodec" type="com.gsma.services.rcs.ipcall.AudioCodec">
-</parameter>
-<parameter name="videocodec" type="com.gsma.services.rcs.ipcall.VideoCodec">
-</parameter>
-<parameter name="remoteHost" type="java.lang.String">
-</parameter>
-<parameter name="remoteAudioPort" type="int">
-</parameter>
-<parameter name="remoteVideoPort" type="int">
-</parameter>
-</method>
-<method name="removeAllEventListeners"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="removeEventListener"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="listener" type="com.gsma.services.rcs.ipcall.IIPCallPlayerListener">
-</parameter>
-</method>
-<method name="start"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="stop"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-</class>
-<class name="IPCallPlayer.Error"
- extends="java.lang.Object"
- abstract="false"
- static="true"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<field name="INTERNAL_ERROR"
- type="int"
+<field name="TIMESTAMP_SENT"
+ type="java.lang.String"
  transient="false"
  volatile="false"
- value="0"
+ value="&quot;timestamp_sent&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
  visibility="public"
 >
 </field>
-<field name="NETWORK_FAILURE"
- type="int"
+<field name="TRANSFERRED"
+ type="java.lang.String"
  transient="false"
  volatile="false"
- value="1"
+ value="&quot;transferred&quot;"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -8077,360 +7654,7 @@
 >
 </field>
 </class>
-<class name="IPCallPlayerListener"
- extends="com.gsma.services.rcs.ipcall.IIPCallPlayerListener.Stub"
- abstract="true"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<constructor name="IPCallPlayerListener"
- type="com.gsma.services.rcs.ipcall.IPCallPlayerListener"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
-<method name="onPlayerClosed"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="onPlayerError"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="error" type="int">
-</parameter>
-</method>
-<method name="onPlayerOpened"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="onPlayerStarted"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="onPlayerStopped"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-</class>
-<class name="IPCallRenderer"
- extends="com.gsma.services.rcs.ipcall.IIPCallRenderer.Stub"
- abstract="true"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<constructor name="IPCallRenderer"
- type="com.gsma.services.rcs.ipcall.IPCallRenderer"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
-<method name="addEventListener"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="listener" type="com.gsma.services.rcs.ipcall.IIPCallRendererListener">
-</parameter>
-</method>
-<method name="close"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getAudioCodec"
- return="com.gsma.services.rcs.ipcall.AudioCodec"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getEventListeners"
- return="java.util.Set&lt;com.gsma.services.rcs.ipcall.IIPCallRendererListener&gt;"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getLocalVideoRtpPort"
- return="int"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getSupportedAudioCodecs"
- return="com.gsma.services.rcs.ipcall.AudioCodec[]"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getSupportedVideoCodecs"
- return="com.gsma.services.rcs.ipcall.VideoCodec[]"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getVideoCodec"
- return="com.gsma.services.rcs.ipcall.VideoCodec"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="open"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="audiocodec" type="com.gsma.services.rcs.ipcall.AudioCodec">
-</parameter>
-<parameter name="videocodec" type="com.gsma.services.rcs.ipcall.VideoCodec">
-</parameter>
-<parameter name="remoteHost" type="java.lang.String">
-</parameter>
-<parameter name="remoteAudioPort" type="int">
-</parameter>
-<parameter name="remoteVideoPort" type="int">
-</parameter>
-</method>
-<method name="removeAllEventListeners"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="removeEventListener"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="listener" type="com.gsma.services.rcs.ipcall.IIPCallRendererListener">
-</parameter>
-</method>
-<method name="start"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="stop"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-</class>
-<class name="IPCallRenderer.Error"
- extends="java.lang.Object"
- abstract="false"
- static="true"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<field name="INTERNAL_ERROR"
- type="int"
- transient="false"
- volatile="false"
- value="0"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-<field name="NETWORK_FAILURE"
- type="int"
- transient="false"
- volatile="false"
- value="1"
- static="true"
- final="true"
- deprecated="not deprecated"
- visibility="public"
->
-</field>
-</class>
-<class name="IPCallRendererListener"
- extends="com.gsma.services.rcs.ipcall.IIPCallRendererListener.Stub"
- abstract="true"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<constructor name="IPCallRendererListener"
- type="com.gsma.services.rcs.ipcall.IPCallRendererListener"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</constructor>
-<method name="onRendererClosed"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="onRendererError"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="error" type="int">
-</parameter>
-</method>
-<method name="onRendererOpened"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="onRendererStarted"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="onRendererStopped"
- return="void"
- abstract="true"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-</class>
-<class name="IPCallService"
+<class name="HistoryService"
  extends="com.gsma.services.rcs.RcsService"
  abstract="false"
  static="false"
@@ -8438,8 +7662,8 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<constructor name="IPCallService"
- type="com.gsma.services.rcs.ipcall.IPCallService"
+<constructor name="HistoryService"
+ type="com.gsma.services.rcs.history.HistoryService"
  static="false"
  final="false"
  deprecated="not deprecated"
@@ -8450,21 +7674,6 @@
 <parameter name="listener" type="com.gsma.services.rcs.RcsServiceListener">
 </parameter>
 </constructor>
-<method name="addEventListener"
- return="void"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="listener" type="com.gsma.services.rcs.ipcall.IPCallListener">
-</parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
 <method name="connect"
  return="void"
  abstract="false"
@@ -8475,6 +7684,21 @@
  deprecated="not deprecated"
  visibility="public"
 >
+</method>
+<method name="createUniqueId"
+ return="long"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="providerId" type="int">
+</parameter>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
 </method>
 <method name="disconnect"
  return="void"
@@ -8487,86 +7711,7 @@
  visibility="public"
 >
 </method>
-<method name="getConfiguration"
- return="com.gsma.services.rcs.ipcall.IPCallServiceConfiguration"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="getIPCall"
- return="com.gsma.services.rcs.ipcall.IPCall"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="callId" type="java.lang.String">
-</parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="getIPCalls"
- return="java.util.Set&lt;com.gsma.services.rcs.ipcall.IPCall&gt;"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="initiateCall"
- return="com.gsma.services.rcs.ipcall.IPCall"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
-</parameter>
-<parameter name="player" type="com.gsma.services.rcs.ipcall.IPCallPlayer">
-</parameter>
-<parameter name="renderer" type="com.gsma.services.rcs.ipcall.IPCallRenderer">
-</parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="initiateVisioCall"
- return="com.gsma.services.rcs.ipcall.IPCall"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="contact" type="com.gsma.services.rcs.contact.ContactId">
-</parameter>
-<parameter name="player" type="com.gsma.services.rcs.ipcall.IPCallPlayer">
-</parameter>
-<parameter name="renderer" type="com.gsma.services.rcs.ipcall.IPCallRenderer">
-</parameter>
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-<method name="removeEventListener"
+<method name="registerExtraHistoryLogMember"
  return="void"
  abstract="false"
  native="false"
@@ -8576,13 +7721,36 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<parameter name="listener" type="com.gsma.services.rcs.ipcall.IPCallListener">
+<parameter name="providerId" type="int">
+</parameter>
+<parameter name="providerUri" type="android.net.Uri">
+</parameter>
+<parameter name="database" type="android.net.Uri">
+</parameter>
+<parameter name="table" type="java.lang.String">
+</parameter>
+<parameter name="columnMapping" type="java.util.Map&lt;java.lang.String, java.lang.String&gt;">
+</parameter>
+<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
+</exception>
+</method>
+<method name="unregisterExtraHistoryLogMember"
+ return="void"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="providerId" type="int">
 </parameter>
 <exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
 </exception>
 </method>
 </class>
-<class name="IPCallServiceConfiguration"
+<class name="HistoryUriBuilder"
  extends="java.lang.Object"
  abstract="false"
  static="false"
@@ -8590,8 +7758,18 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<method name="isVoiceCallBreakout"
- return="boolean"
+<constructor name="HistoryUriBuilder"
+ type="com.gsma.services.rcs.history.HistoryUriBuilder"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="historyLogUri" type="android.net.Uri">
+</parameter>
+</constructor>
+<method name="appendProvider"
+ return="com.gsma.services.rcs.history.HistoryUriBuilder"
  abstract="false"
  native="false"
  synchronized="false"
@@ -8600,112 +7778,11 @@
  deprecated="not deprecated"
  visibility="public"
 >
-<exception name="RcsServiceException" type="com.gsma.services.rcs.RcsServiceException">
-</exception>
-</method>
-</class>
-<class name="VideoCodec"
- extends="java.lang.Object"
- abstract="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<implements name="android.os.Parcelable">
-</implements>
-<method name="compare"
- return="boolean"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-<parameter name="codec" type="com.gsma.services.rcs.ipcall.VideoCodec">
+<parameter name="providerId" type="int">
 </parameter>
 </method>
-<method name="getBitRate"
- return="int"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getClockRate"
- return="int"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getEncoding"
- return="java.lang.String"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getFrameRate"
- return="int"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getParameters"
- return="java.lang.String"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getPayloadType"
- return="int"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getVideoHeight"
- return="int"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getVideoWidth"
- return="int"
+<method name="build"
+ return="android.net.Uri"
  abstract="false"
  native="false"
  synchronized="false"
@@ -9097,6 +8174,17 @@
  visibility="public"
 >
 </constructor>
+<field name="BASECOLUMN_ID"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;_id&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
 <field name="CONTACT"
  type="java.lang.String"
  transient="false"
@@ -9134,6 +8222,17 @@
  transient="false"
  volatile="false"
  value="&quot;direction&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="HISTORYLOG_MEMBER_ID"
+ type="int"
+ transient="false"
+ volatile="false"
+ value="5"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -9777,6 +8876,17 @@
  visibility="public"
 >
 </constructor>
+<field name="BASECOLUMN_ID"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;_id&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
 <field name="CONTACT"
  type="java.lang.String"
  transient="false"
@@ -9836,6 +8946,17 @@
  transient="false"
  volatile="false"
  value="&quot;filesize&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="HISTORYLOG_MEMBER_ID"
+ type="int"
+ transient="false"
+ volatile="false"
+ value="3"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -10724,6 +9845,17 @@
  visibility="public"
 >
 </constructor>
+<field name="BASECOLUMN_ID"
+ type="java.lang.String"
+ transient="false"
+ volatile="false"
+ value="&quot;_id&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
 <field name="CONTACT"
  type="java.lang.String"
  transient="false"
@@ -10772,6 +9904,17 @@
  transient="false"
  volatile="false"
  value="&quot;height&quot;"
+ static="true"
+ final="true"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</field>
+<field name="HISTORYLOG_MEMBER_ID"
+ type="int"
+ transient="false"
+ volatile="false"
+ value="4"
  static="true"
  final="true"
  deprecated="not deprecated"
@@ -11185,6 +10328,17 @@
 >
 <implements name="android.os.Parcelable">
 </implements>
+<method name="getExpiration"
+ return="long"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
 <method name="getFile"
  return="android.net.Uri"
  abstract="false"
@@ -11207,6 +10361,17 @@
  visibility="public"
 >
 </method>
+<method name="getFileIconExpiration"
+ return="long"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
 <method name="getFileIconMimeType"
  return="java.lang.String"
  abstract="false"
@@ -11219,17 +10384,6 @@
 >
 </method>
 <method name="getFileIconSize"
- return="long"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getFileIconValidity"
  return="long"
  abstract="false"
  native="false"
@@ -11263,17 +10417,6 @@
 >
 </method>
 <method name="getSize"
- return="long"
- abstract="false"
- native="false"
- synchronized="false"
- static="false"
- final="false"
- deprecated="not deprecated"
- visibility="public"
->
-</method>
-<method name="getValidity"
  return="long"
  abstract="false"
  native="false"
@@ -11331,6 +10474,21 @@
 <parameter name="uploadId" type="java.lang.String">
 </parameter>
 <parameter name="state" type="com.gsma.services.rcs.upload.FileUpload.State">
+</parameter>
+</method>
+<method name="onUploaded"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="uploadId" type="java.lang.String">
+</parameter>
+<parameter name="info" type="com.gsma.services.rcs.upload.FileUploadInfo">
 </parameter>
 </method>
 </class>
