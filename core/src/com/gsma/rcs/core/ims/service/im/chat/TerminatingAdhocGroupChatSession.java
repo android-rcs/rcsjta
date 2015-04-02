@@ -233,7 +233,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
                         }
                         return;
 
-                    case INVITATION_ABORTED_BY_SYSTEM:
+                    case INVITATION_REJECTED_BY_SYSTEM:
                         if (logActivated) {
                             logger.debug("Session has been aborted by system");
                         }

@@ -140,7 +140,7 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
                     }
                     return;
 
-                case INVITATION_ABORTED_BY_SYSTEM:
+                case INVITATION_REJECTED_BY_SYSTEM:
                     if (logger.isActivated()) {
                         logger.debug("Session has been aborted by system");
                     }

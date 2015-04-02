@@ -257,7 +257,7 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
                         }
                         break;
 
-                    case INVITATION_ABORTED_BY_SYSTEM:
+                    case INVITATION_REJECTED_BY_SYSTEM:
                         if (logActivated) {
                             sLogger.debug("Http transfer has aborted by system");
                         }

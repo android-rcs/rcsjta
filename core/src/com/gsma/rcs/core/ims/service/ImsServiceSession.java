@@ -53,7 +53,7 @@ public abstract class ImsServiceSession extends Thread {
      */
     public enum InvitationStatus {
 
-        INVITATION_NOT_ANSWERED, INVITATION_ACCEPTED, INVITATION_REJECTED, INVITATION_CANCELED, INVITATION_TIMEOUT, INVITATION_ABORTED_BY_SYSTEM;
+        INVITATION_NOT_ANSWERED, INVITATION_ACCEPTED, INVITATION_REJECTED, INVITATION_CANCELED, INVITATION_TIMEOUT, INVITATION_REJECTED_BY_SYSTEM;
     }
 
     /**
@@ -494,7 +494,7 @@ public abstract class ImsServiceSession extends Thread {
             }
         } catch (InterruptedException e) {
             mSessionInterrupted = true;
-            return InvitationStatus.INVITATION_ABORTED_BY_SYSTEM;
+            return InvitationStatus.INVITATION_REJECTED_BY_SYSTEM;
         }
     }
 

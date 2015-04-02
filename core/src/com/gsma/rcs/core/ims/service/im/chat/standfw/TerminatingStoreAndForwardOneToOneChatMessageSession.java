@@ -189,7 +189,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
                         }
                         return;
 
-                    case INVITATION_ABORTED_BY_SYSTEM:
+                    case INVITATION_REJECTED_BY_SYSTEM:
                         if (logActivated) {
                             sLogger.debug("Session has been aborted by system");
                         }

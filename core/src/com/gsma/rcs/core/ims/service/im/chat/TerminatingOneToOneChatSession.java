@@ -183,7 +183,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                         }
                         return;
 
-                    case INVITATION_ABORTED_BY_SYSTEM:
+                    case INVITATION_REJECTED_BY_SYSTEM:
                         if (logActivated) {
                             logger.debug("Session has been aborted by system");
                         }
