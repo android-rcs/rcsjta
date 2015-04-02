@@ -50,11 +50,17 @@ import java.util.Set;
     @Override
     public void run() {
         try {
-            GroupChatImpl groupChat = mChatService.getOrCreateGroupChat(mChatId);
             Set<ContactId> participants = mMessagingLog
                     .getGroupChatParticipantsToBeInvited(mChatId);
+
+            if (participants.size() == 0) {
+                return;
+            }
+
             GroupChatSession session = mImService.getGroupChatSession(mChatId);
             if (session != null && session.isMediaEstablished()) {
+                GroupChatImpl groupChat = mChatService.getOrCreateGroupChat(mChatId);
+
                 groupChat.inviteParticipants(session, participants);
             }
         } catch (Exception e) {
