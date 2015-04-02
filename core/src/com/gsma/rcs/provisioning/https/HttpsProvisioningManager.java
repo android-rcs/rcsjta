@@ -824,17 +824,26 @@ public class HttpsProvisioningManager {
                 // Parse the received content
                 ProvisioningParser parser = new ProvisioningParser(result.content, mRcsSettings);
 
-                // Save GSMA release set into the provider
+                /*
+                 * Save GSMA release set into the provider. The Node "SERVICES" is mandatory in GSMA
+                 * release Blackbird and not present in previous one (i.e. Albatros). It is the
+                 * absence of this node in the configuration which allows us to determine that
+                 * current release is Albatros
+                 */
                 GsmaRelease gsmaRelease = mRcsSettings.getGsmaRelease();
-                // Save client Messaging Mode set into the provider
+                /*
+                 * Save client Messaging Mode set into the provider. The message mode NONE value is
+                 * not defined in the standard. It is the absence of the messagingUx parameter which
+                 * allows us to determine that client Message Mode is set to NONE.
+                 */
                 MessagingMode messagingMode = mRcsSettings.getMessagingMode();
 
-                // Before parsing the provisioning, the GSMA release is set to Albatros
+                /* Before parsing the provisioning, the GSMA release is set to Albatros */
                 mRcsSettings.setGsmaRelease(GsmaRelease.ALBATROS);
-                // Before parsing the provisioning, the client Messaging mode is set to NONE
+                /* Before parsing the provisioning, the client Messaging mode is set to NONE */
                 mRcsSettings.setMessagingMode(MessagingMode.NONE);
 
-                if (parser.parse(gsmaRelease, mFirst)) {
+                if (parser.parse(gsmaRelease, messagingMode, mFirst)) {
                     // Successfully provisioned, 1st time reg finalized
                     mFirst = false;
                     ProvisioningInfo info = parser.getProvisioningInfo();
@@ -850,7 +859,7 @@ public class HttpsProvisioningManager {
                     LauncherUtils.saveProvisioningVersion(mCtx, version);
 
                     // Save the validity of the configuration
-                    LauncherUtils.saveProvisioningValidity(mCtx, validity * 1000L);
+                    LauncherUtils.saveProvisioningValidity(mCtx, validity);
                     mRcsSettings.setProvisioningVersion(version);
 
                     // Save token
@@ -871,8 +880,7 @@ public class HttpsProvisioningManager {
                         }
                         // Start retry alarm
                         if (validity > 0) {
-                            HttpsProvisioningService.startRetryAlarm(mCtx, mRetryIntent,
-                                    validity * 1000);
+                            HttpsProvisioningService.startRetryAlarm(mCtx, mRetryIntent, validity);
                         }
                         // We parsed successfully the configuration
                         mRcsSettings.setConfigurationValid(true);
@@ -914,7 +922,7 @@ public class HttpsProvisioningManager {
                                     // Start retry alarm
                                     if (validity > 0) {
                                         HttpsProvisioningService.startRetryAlarm(mCtx,
-                                                mRetryIntent, validity * 1000);
+                                                mRetryIntent, validity);
                                     }
                                     // Terms request
                                     if (info.getMessage() != null

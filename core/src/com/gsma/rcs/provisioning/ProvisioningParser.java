@@ -127,6 +127,7 @@ public class ProvisioningParser {
      * Parse the provisioning document
      * 
      * @param release The GSMA release (Albatros, Blackbird, Crane...) before parsing
+     * @param messagingMode
      * @param first True if it is a first provisioning
      * @return Boolean result
      *         <p>
@@ -135,11 +136,11 @@ public class ProvisioningParser {
      *         unchanged
      *         </p>
      */
-    public boolean parse(GsmaRelease release, boolean first) {
+    public boolean parse(GsmaRelease release, MessagingMode messagingMode, boolean first) {
         boolean logActivated = logger.isActivated();
         try {
             if (logActivated) {
-                logger.debug("Start the parsing of content first=".concat(String.valueOf(first)));
+                logger.debug("Start the parsing of content first=".concat(Boolean.toString(first)));
             }
             mFirst = first;
             ByteArrayInputStream mInputStream = new ByteArrayInputStream(mContent.getBytes(UTF8));
@@ -240,11 +241,14 @@ public class ProvisioningParser {
                 }
             } while ((childnode = childnode.getNextSibling()) != null);
             if (nodeNumber == 1) {
-                // We received a single node (the version one) !
-                // This is the case if the version number is negative or in order to extend the
-                // validity of the provisioning.
-                // In that case we restore the relevant GSMA release saved before parsing.
+                /*
+                 * We received a single node (the version one) ! This is the case if the version
+                 * number is negative or in order to extend the validity of the provisioning. In
+                 * that case we restore the relevant GSMA release saved before parsing.
+                 */
                 mRcsSettings.setGsmaRelease(release);
+                /* We do the same for the messaging mode */
+                mRcsSettings.setMessagingMode(messagingMode);
             }
             return true;
         } catch (Exception e) {
@@ -275,7 +279,8 @@ public class ProvisioningParser {
                 }
                 if (validity == null) {
                     if ((validity = getValueByParamName("validity", versionchild, TYPE_INT)) != null) {
-                        provisioningInfo.setValidity(Long.parseLong(validity));
+                        provisioningInfo.setValidity(Long.parseLong(validity)
+                                * SECONDS_TO_MILILSECONDS_CONVERSION_RATE);
                         continue;
                     }
                 }
@@ -744,7 +749,7 @@ public class ProvisioningParser {
     }
 
     /**
-     * Parse rcs
+     * Parse RCS
      * 
      * @param node Node
      */

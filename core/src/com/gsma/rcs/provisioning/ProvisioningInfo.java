@@ -27,42 +27,42 @@ public class ProvisioningInfo {
     /**
      * Version of the provisioning document
      */
-    private String version = null;
+    private String mVersion;
 
     /**
      * Validity of the provisioning document
      */
-    private long validity = 0L;
+    private long mValidity = 0L;
 
     /**
      * Token of the provisioning document
      */
-    private String token = null;
+    private String mToken;
 
     /**
      * Validity of the token of the provisioning document
      */
-    private long tokenValidity = 0L;
+    private long mTokenValidity = 0L;
 
     /**
      * Title for terms and conditions
      */
-    private String title = null;
+    private String mTitle;
 
     /**
      * Message for terms and conditions
      */
-    private String message = null;
+    private String mMessage;
 
     /**
      * Accept button for terms and conditions
      */
-    private boolean acceptBtn = false;
+    private boolean mAcceptBtn = false;
 
     /**
      * Reject button for terms and conditions
      */
-    private boolean rejectBtn = false;
+    private boolean mRejectBtn = false;
 
     /**
      * Enumerated for the provisioning version
@@ -74,23 +74,23 @@ public class ProvisioningInfo {
         DISABLED_DORMANT(-3); // The RCS client is in dormant state: RCS is disabled but
                               // provisioning is still running
 
-        private int vers;
+        private int mVers;
 
         private Version(int vers) {
-            this.vers = vers;
+            mVers = vers;
         }
 
         public int getVersion() {
-            return this.vers;
+            return mVers;
         }
 
         @Override
         public String toString() {
-            return "" + this.vers;
+            return Integer.toString(mVers);
         }
 
         public boolean equals(String vers) {
-            return this.toString().equals(vers);
+            return toString().equals(vers);
         }
     }
 
@@ -100,16 +100,16 @@ public class ProvisioningInfo {
      * @param version
      */
     public void setVersion(String version) {
-        this.version = version;
+        mVersion = version;
     }
 
     /**
-     * Set validity
+     * Set validity in milliseconds
      * 
      * @param validity
      */
     public void setValidity(long validity) {
-        this.validity = validity;
+        mValidity = validity;
     }
 
     /**
@@ -118,7 +118,7 @@ public class ProvisioningInfo {
      * @param title
      */
     public void setTitle(String title) {
-        this.title = title;
+        mTitle = title;
     }
 
     /**
@@ -127,7 +127,7 @@ public class ProvisioningInfo {
      * @param message
      */
     public void setMessage(String message) {
-        this.message = message;
+        mMessage = message;
     }
 
     /**
@@ -136,7 +136,7 @@ public class ProvisioningInfo {
      * @param acceptBtn
      */
     public void setAcceptBtn(boolean acceptBtn) {
-        this.acceptBtn = acceptBtn;
+        mAcceptBtn = acceptBtn;
     }
 
     /**
@@ -145,7 +145,7 @@ public class ProvisioningInfo {
      * @param rejectBtn
      */
     public void setRejectBtn(boolean rejectBtn) {
-        this.rejectBtn = rejectBtn;
+        mRejectBtn = rejectBtn;
     }
 
     /**
@@ -154,16 +154,16 @@ public class ProvisioningInfo {
      * @return version
      */
     public String getVersion() {
-        return version;
+        return mVersion;
     }
 
     /**
-     * Get validity
+     * Get validity in milliseconds
      * 
      * @return validity
      */
     public long getValidity() {
-        return validity;
+        return mValidity;
     }
 
     /**
@@ -172,7 +172,7 @@ public class ProvisioningInfo {
      * @return title
      */
     public String getTitle() {
-        return title;
+        return mTitle;
     }
 
     /**
@@ -181,7 +181,7 @@ public class ProvisioningInfo {
      * @return message
      */
     public String getMessage() {
-        return message;
+        return mMessage;
     }
 
     /**
@@ -190,7 +190,7 @@ public class ProvisioningInfo {
      * @return acceptBtn
      */
     public boolean getAcceptBtn() {
-        return acceptBtn;
+        return mAcceptBtn;
     }
 
     /**
@@ -199,7 +199,7 @@ public class ProvisioningInfo {
      * @return rejectBtn
      */
     public boolean getRejectBtn() {
-        return rejectBtn;
+        return mRejectBtn;
     }
 
     /**
@@ -208,7 +208,7 @@ public class ProvisioningInfo {
      * @return token
      */
     public String getToken() {
-        return token;
+        return mToken;
     }
 
     /**
@@ -217,7 +217,7 @@ public class ProvisioningInfo {
      * @param token
      */
     public void setToken(String token) {
-        this.token = token;
+        mToken = token;
     }
 
     /**
@@ -226,15 +226,15 @@ public class ProvisioningInfo {
      * @return token validity
      */
     public long getTokenValidity() {
-        return tokenValidity;
+        return mTokenValidity;
     }
 
     /**
      * Set token validity
      * 
-     * @return token validity
+     * @param tokenValidity
      */
     public void setTokenValidity(long tokenValidity) {
-        this.tokenValidity = tokenValidity;
+        mTokenValidity = tokenValidity;
     }
 }

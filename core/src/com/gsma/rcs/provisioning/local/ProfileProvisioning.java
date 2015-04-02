@@ -459,7 +459,7 @@ public class ProfileProvisioning extends Activity {
             // Before parsing the provisioning, the client Messaging mode is set to NONE
             mRcsSettings.setMessagingMode(MessagingMode.NONE);
 
-            if (parser.parse(release, true)) {
+            if (parser.parse(release, messagingMode, true)) {
                 /* Customize provisioning data with user phone number */
                 mRcsSettings.setUserProfileImsUserName(myContact);
                 String userPhoneNumber = myContact.toString();
