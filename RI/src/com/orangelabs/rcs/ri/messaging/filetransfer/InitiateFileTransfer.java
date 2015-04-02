@@ -585,8 +585,8 @@ public class InitiateFileTransfer extends Activity {
                     || !InitiateFileTransfer.this.mFtId.equals(transferId)) {
                 return;
             }
-            final String _reasonCode = RiApplication.FT_REASON_CODES[reasonCode.toInt()];
-            final String _state = RiApplication.FT_STATES[state.toInt()];
+            final String _reasonCode = RiApplication.sFileTransferReasonCodes[reasonCode.toInt()];
+            final String _state = RiApplication.sFileTransferStates[state.toInt()];
             if (LogUtils.isActive) {
                 Log.d(LOGTAG,
                         new StringBuilder("onStateChanged contact=").append(contact)

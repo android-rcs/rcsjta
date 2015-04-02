@@ -35,8 +35,8 @@ public class ContactUtil {
     /**
      * A class to hold a valid phone number
      */
-    public final class PhoneNumber {
-        private String mNumber;
+    public final static class PhoneNumber {
+        private final String mNumber;
 
         /**
          * Constructor
@@ -72,7 +72,7 @@ public class ContactUtil {
             }
         }
         if (mContactUtil.isValidContact(number)) {
-            return new ContactUtil().new PhoneNumber(number);
+            return new PhoneNumber(number);
         }
         return null;
     }
@@ -92,7 +92,7 @@ public class ContactUtil {
             }
         }
         if (mContactUtil.isValidContact(contact)) {
-            return new ContactUtil().new PhoneNumber(contact);
+            return new PhoneNumber(contact);
         }
         return null;
     }

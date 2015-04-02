@@ -422,25 +422,14 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
                     setStateAndReasonCodeAndDurationAndBroadcast(contact, currentDuration,
                             State.ABORTED, ReasonCode.ABORTED_BY_USER);
                     break;
+                case TERMINATION_BY_REMOTE:
+                    setStateAndReasonCodeAndDurationAndBroadcast(contact, currentDuration,
+                            VideoSharing.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
+                    break;
                 default:
                     throw new IllegalArgumentException(
                             "Unknown imsServiceSessionError=".concat(String.valueOf(reason)));
             }
-        }
-    }
-
-    /**
-     * Session has been terminated by remote
-     */
-    public void handleSessionTerminatedByRemote(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Session terminated by remote");
-        }
-        long currentDuration = getCurrentDuration();
-        synchronized (mLock) {
-            mVideoSharingService.removeVideoSharing(mSharingId);
-            setStateAndReasonCodeAndDurationAndBroadcast(contact, currentDuration,
-                    VideoSharing.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
         }
     }
 

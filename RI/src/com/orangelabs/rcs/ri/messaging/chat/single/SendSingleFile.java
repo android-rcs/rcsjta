@@ -93,8 +93,8 @@ public class SendSingleFile extends SendFile {
             if (mTransferId == null || !mTransferId.equals(transferId)) {
                 return;
             }
-            final String _reasonCode = RiApplication.FT_REASON_CODES[reasonCode.toInt()];
-            final String _state = RiApplication.FT_STATES[state.toInt()];
+            final String _reasonCode = RiApplication.sFileTransferReasonCodes[reasonCode.toInt()];
+            final String _state = RiApplication.sFileTransferStates[state.toInt()];
             handler.post(new Runnable() {
                 public void run() {
                     TextView statusView = (TextView) findViewById(R.id.progress_status);

@@ -95,6 +95,11 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
         }
     }
 
+    private void removeSessionAndBroadcast(ContactId contact, State state, ReasonCode reasonCode) {
+        mMultimediaSessionService.removeMultimediaMessaging(mSessionId);
+        mBroadcaster.broadcastStateChanged(contact, mSessionId, state, reasonCode);
+    }
+
     /**
      * Returns the session ID of the multimedia session
      * 
@@ -358,24 +363,25 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
             logger.info(new StringBuilder("Session aborted (terminationReason ").append(reason)
                     .append(")").toString());
         }
-        ReasonCode reasonCode = mMultimediaSessionService.sessionAbortedReasonToReasonCode(reason);
         synchronized (mLock) {
-            mMultimediaSessionService.removeMultimediaMessaging(mSessionId);
-            mBroadcaster.broadcastStateChanged(contact, mSessionId, State.ABORTED, reasonCode);
-        }
-    }
-
-    /**
-     * Session has been terminated by remote
-     */
-    public void handleSessionTerminatedByRemote(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Session terminated by remote");
-        }
-        synchronized (mLock) {
-            mMultimediaSessionService.removeMultimediaMessaging(mSessionId);
-            mBroadcaster.broadcastStateChanged(contact, mSessionId, State.ABORTED,
-                    ReasonCode.ABORTED_BY_REMOTE);
+            switch (reason) {
+                case TERMINATION_BY_SYSTEM:
+                case TERMINATION_BY_TIMEOUT:
+                    removeSessionAndBroadcast(contact, State.ABORTED, ReasonCode.ABORTED_BY_SYSTEM);
+                    break;
+                case TERMINATION_BY_USER:
+                    removeSessionAndBroadcast(contact, State.ABORTED, ReasonCode.ABORTED_BY_USER);
+                    break;
+                case TERMINATION_BY_CONNECTION_LOST:
+                    removeSessionAndBroadcast(contact, State.FAILED, ReasonCode.FAILED_SESSION);
+                    break;
+                case TERMINATION_BY_REMOTE:
+                    removeSessionAndBroadcast(contact, State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown TerminationReason=".concat(String
+                            .valueOf(reason)));
+            }
         }
     }
 

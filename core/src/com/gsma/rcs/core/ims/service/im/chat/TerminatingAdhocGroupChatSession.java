@@ -94,8 +94,9 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
 
         createTerminatingDialogPath(invite);
 
-        setRemoteDisplayName(SipUtils.getDisplayNameFromUri(SipUtils
-                .getAssertedIdentityHeader(invite)));
+        if (contact != null) {
+            setRemoteDisplayName(SipUtils.getDisplayNameFromUri(invite.getFrom()));
+        }
 
         String chatId = ChatUtils.getContributionId(invite);
         setContributionID(chatId);
@@ -217,7 +218,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
                         }
                         return;
 
-                    case INVITATION_NOT_ANSWERED:
+                    case INVITATION_TIMEOUT:
                         if (logActivated) {
                             logger.debug("Session has been rejected on timeout");
                         }
@@ -230,6 +231,13 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
                         for (ImsSessionListener listener : listeners) {
                             listener.handleSessionRejectedByTimeout(contact);
                         }
+                        return;
+
+                    case INVITATION_ABORTED_BY_SYSTEM:
+                        if (logActivated) {
+                            logger.debug("Session has been aborted by system");
+                        }
+                        removeSession();
                         return;
 
                     case INVITATION_CANCELED:

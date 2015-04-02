@@ -780,6 +780,17 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                 case TERMINATION_BY_USER:
                     setStateAndReasonCodeAndBroadcast(State.ABORTED, ReasonCode.ABORTED_BY_USER);
                     break;
+                case TERMINATION_BY_REMOTE:
+                    /*
+                     * TODO : Fix sending of SIP BYE by sender once transfer is completed and media
+                     * session is closed. Then this check of state can be removed. Also need to
+                     * check if it is storing and broadcasting right state and reasoncode.
+                     */
+                    if (State.TRANSFERRED != mPersistentStorage.getState()) {
+                        setStateAndReasonCodeAndBroadcast(State.ABORTED,
+                                ReasonCode.ABORTED_BY_REMOTE);
+                    }
+                    break;
                 default:
                     throw new IllegalArgumentException(
                             new StringBuilder(

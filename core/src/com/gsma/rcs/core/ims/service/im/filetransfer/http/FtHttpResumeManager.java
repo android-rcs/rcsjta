@@ -178,13 +178,6 @@ public class FtHttpResumeManager implements Runnable {
             AtomicBoolean fired = new AtomicBoolean(false);
 
             @Override
-            public void handleSessionTerminatedByRemote(ContactId contact) {
-                if (fired.compareAndSet(false, true)) {
-                    processNext();
-                }
-            }
-
-            @Override
             public void handleSessionStarted(ContactId contact) {
             }
 

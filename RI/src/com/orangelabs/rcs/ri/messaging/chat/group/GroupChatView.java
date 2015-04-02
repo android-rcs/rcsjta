@@ -179,9 +179,8 @@ public class GroupChatView extends ChatView {
         public void onParticipantStatusChanged(String chatId, ContactId contact,
                 ParticipantStatus status) {
             if (LogUtils.isActive) {
-                Log.d(LOGTAG, new StringBuilder("onParticipantStatusChanged chatId=")
-                        .append(chatId).append(" contact=").append(contact).append(" status=")
-                        .append(status).toString());
+                Log.d(LOGTAG, "onParticipantStatusChanged chatId=" + chatId + " contact=" + contact
+                        + " status=" + status);
             }
         }
 
@@ -212,7 +211,7 @@ public class GroupChatView extends ChatView {
                 return;
 
             }
-            final String _reasonCode = RiApplication.GC_REASON_CODES[reasonCode.toInt()];
+            final String _reasonCode = RiApplication.sGroupChatReasonCodes[reasonCode.toInt()];
             handler.post(new Runnable() {
                 public void run() {
                     switch (state) {

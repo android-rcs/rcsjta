@@ -72,7 +72,7 @@ public class MessageLog implements IMessageLog {
     private static final int FIRST_COLUMN_IDX = 0;
 
     private static final String SELECTION_QUEUED_ONETOONE_CHAT_MESSAGES = new StringBuilder(
-            MessageData.KEY_CONTACT).append("=? AND ").append(MessageData.KEY_STATUS).append("=")
+            MessageData.KEY_CHAT_ID).append("=? AND ").append(MessageData.KEY_STATUS).append("=")
             .append(Status.QUEUED.toInt()).toString();
 
     private static final String SELECTION_QUEUED_GROUP_CHAT_MESSAGES = new StringBuilder(

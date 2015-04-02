@@ -399,17 +399,19 @@
         <item>FAILED_NOT_ALLOWED_TO_SEND</item>
     </string-array>
     <string-array name="participant_statuses">
-        <item>UNKNOWN</item>
+        <item>INVITE_QUEUED</item>
+        <item>INVITING</item>
+        <item>DISCONNECTED</item>
+        <item>INVITED</item>
         <item>CONNECTED</item>
         <item>DISCONNECTED</item>
         <item>DEPARTED</item>
-        <item>BOOTED</item>
         <item>FAILED</item>
-        <item>BUSY</item>
         <item>DECLINED</item>
-        <item>PENDING</item>
+        <item>TIMEOUT</item>
     </string-array>
     <string-array name="delivery_statuses">
+        <item>UNSUPPORTED</item>
         <item>NOT_DELIVERED</item>
         <item>DELIVERED</item>
         <item>DISPLAYED</item>
@@ -476,6 +478,7 @@
         <item>ABORTED_BY_REMOTE</item>
         <item>ABORTED_BY_SYSTEM</item>
         <item>ABORTED_BY_SECONDARY_DEVICE</item>
+        <item>REJECTED_SPAM</item>
         <item>REJECTED_BY_INACTIVITY</item>
         <item>REJECTED_LOW_SPACE</item>
         <item>REJECTED_ MAX_SIZE</item>
@@ -502,6 +505,7 @@
         <item>ABORTED_BY_REMOTE</item>
         <item>ABORTED_BY_SYSTEM</item>
         <item>ABORTED_BY_SECONDARY_DEVICE</item>
+        <item>REJECTED_SPAM</item>
         <item>REJECTED_MAX_SESSIONS</item>
         <item>REJECTED_BY_USER</item>
         <item>REJECTED_BY_REMOTE</item>
@@ -526,6 +530,7 @@
         <item>ABORTED_BY_REMOTE</item>
         <item>ABORTED_BY_SYSTEM</item>
         <item>ABORTED_BY_SECONDARY_DEVICE</item>
+        <item>REJECTED_SPAM</item>
         <item>REJECTED_MAX_SESSIONS</item>
         <item>REJECTED_BY_USER</item>
         <item>REJECTED_BY_REMOTE</item>
@@ -545,21 +550,20 @@
     </string-array>
     <string-array name="mms_reason_codes">
         <item></item>
+        <item>ABORTED_BY_USER</item>
+        <item>ABORTED_BY_REMOTE</item>
+        <item>ABORTED_BY_SYSTEM</item>
         <item>REJECTED_BY_INACTIVITY</item>
         <item>REJECTED_BY_USER</item>
         <item>REJECTED_BY_REMOTE</item>
+        <item>REJECTED_BY_INACTIVITY</item>
+        <item>FAILED_INITIATION</item>
         <item>FAILED_SESSION</item>
         <item>FAILED_MEDIA</item>
     </string-array>
     <string-array name="group_chat_event">
-        <item>PENDING</item>
-        <item>ACCEPTED</item>
-        <item>DECLINED</item>
-        <item>FAILED</item>
         <item>JOINED</item>
-        <item>GONE</item>
-        <item>DISCONNECTED</item>
-        <item>BUSY</item>
+        <item>DEPARTED</item>
     </string-array>
     <string-array name="messaging_method">
         <item>Automatic</item>

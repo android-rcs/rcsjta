@@ -608,20 +608,6 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
 
     /*
      * (non-Javadoc)
-     * @see com.gsma.rcs.core.ims.service.ImsSessionListener# handleSessionTerminatedByRemote()
-     */
-    @Override
-    public void handleSessionTerminatedByRemote(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Session terminated by remote");
-        }
-        synchronized (lock) {
-            mChatService.removeOneToOneChat(contact);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
      * @see com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener# handleReceiveMessage
      * (com.gsma.rcs.core.ims.service.im.chat.ChatMessage, boolean)
      */

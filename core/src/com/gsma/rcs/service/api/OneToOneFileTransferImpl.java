@@ -870,6 +870,16 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                     setStateAndReasonCodeAndBroadcast(contact, State.ABORTED,
                             ReasonCode.ABORTED_BY_USER);
                     break;
+                case TERMINATION_BY_REMOTE:
+                    /*
+                     * TODO : Fix sending of SIP BYE by sender once transfer is completed and media
+                     * session is closed. Then this check of state can be removed.
+                     */
+                    if (State.TRANSFERRED != mPersistentStorage.getState()) {
+                        setStateAndReasonCodeAndBroadcast(contact, State.ABORTED,
+                                ReasonCode.ABORTED_BY_REMOTE);
+                    }
+                    break;
                 default:
                     throw new IllegalArgumentException(
                             new StringBuilder(

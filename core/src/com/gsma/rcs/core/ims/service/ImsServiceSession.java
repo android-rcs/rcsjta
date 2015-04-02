@@ -53,14 +53,14 @@ public abstract class ImsServiceSession extends Thread {
      */
     public enum InvitationStatus {
 
-        INVITATION_NOT_ANSWERED, INVITATION_ACCEPTED, INVITATION_REJECTED, INVITATION_CANCELED, INVITATION_TIMEOUT;
+        INVITATION_NOT_ANSWERED, INVITATION_ACCEPTED, INVITATION_REJECTED, INVITATION_CANCELED, INVITATION_TIMEOUT, INVITATION_ABORTED_BY_SYSTEM;
     }
 
     /**
      * Session termination reason
      */
     public enum TerminationReason {
-        TERMINATION_BY_SYSTEM, TERMINATION_BY_USER, TERMINATION_BY_TIMEOUT, TERMINATION_BY_INACTIVITY, TERMINATION_BY_CONNECTION_LOST;
+        TERMINATION_BY_SYSTEM, TERMINATION_BY_USER, TERMINATION_BY_TIMEOUT, TERMINATION_BY_INACTIVITY, TERMINATION_BY_CONNECTION_LOST, TERMINATION_BY_REMOTE;
     }
 
     private final static int SESSION_INTERVAL_TOO_SMALL = 422;
@@ -475,22 +475,27 @@ public abstract class ImsServiceSession extends Thread {
         if (sLogger.isActivated()) {
             sLogger.debug("Wait session invitation answer delay=".concat(Long.toString(timeout)));
         }
-
         // Wait until received response or received timeout
         try {
             synchronized (mWaitUserAnswer) {
+                long waitTime = 0;
                 if (timeout > 0) {
-                    mWaitUserAnswer.wait(timeout);
+                    waitTime = timeout;
                 } else {
-                    // Default timeout is ringing period
-                    mWaitUserAnswer.wait(mRingingPeriod);
+                    waitTime = mRingingPeriod;
+                }
+                long startTime = System.currentTimeMillis();
+                mWaitUserAnswer.wait(waitTime);
+                if (System.currentTimeMillis() - startTime <= waitTime) {
+                    return mInvitationStatus;
+                } else {
+                    return InvitationStatus.INVITATION_TIMEOUT;
                 }
             }
         } catch (InterruptedException e) {
             mSessionInterrupted = true;
+            return InvitationStatus.INVITATION_ABORTED_BY_SYSTEM;
         }
-
-        return mInvitationStatus;
     }
 
     /**
@@ -643,8 +648,9 @@ public abstract class ImsServiceSession extends Thread {
         getSessionTimerManager().stop();
 
         // Notify listeners
-        for (ImsSessionListener listener : getListeners()) {
-            listener.handleSessionTerminatedByRemote(mContact);
+        for (int i = 0; i < getListeners().size(); i++) {
+            getListeners().get(i).handleSessionAborted(mContact,
+                    TerminationReason.TERMINATION_BY_REMOTE);
         }
 
         getImsService().getImsModule().getCapabilityService().requestContactCapabilities(mContact);

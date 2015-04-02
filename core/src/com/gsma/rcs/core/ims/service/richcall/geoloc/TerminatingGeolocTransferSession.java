@@ -135,7 +135,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                     }
                     return;
 
-                case INVITATION_NOT_ANSWERED:
+                case INVITATION_TIMEOUT:
                     if (logger.isActivated()) {
                         logger.debug("Session has been rejected on timeout");
                     }
@@ -148,6 +148,13 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
                     for (ImsSessionListener listener : listeners) {
                         listener.handleSessionRejectedByTimeout(contact);
                     }
+                    return;
+
+                case INVITATION_ABORTED_BY_SYSTEM:
+                    if (logger.isActivated()) {
+                        logger.debug("Session has been aborted by system");
+                    }
+                    removeSession();
                     return;
 
                 case INVITATION_CANCELED:
