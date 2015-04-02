@@ -1094,7 +1094,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             mBroadcaster.broadcastStateChanged(mChatId, State.STARTED, ReasonCode.UNSPECIFIED);
         }
         CoreListener listener = mCore.getListener();
-        listener.tryToInviteQueuedGroupChatParticipantInvitations(mChatId, mImService);
+        if (mMessagingLog.getGroupChatParticipantsToBeInvited(mChatId).size() > 0) {
+            listener.tryToInviteQueuedGroupChatParticipantInvitations(mChatId, mImService);
+        }
         listener.tryToDequeueGroupChatMessagesAndGroupFileTransfers(mChatId, mImService);
     }
 
