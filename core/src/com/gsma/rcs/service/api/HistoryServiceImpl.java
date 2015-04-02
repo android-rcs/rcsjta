@@ -16,6 +16,10 @@
 
 package com.gsma.rcs.service.api;
 
+import com.gsma.rcs.ExceptionUtil;
+import com.gsma.rcs.ServerApiBaseException;
+import com.gsma.rcs.ServerApiGenericException;
+import com.gsma.rcs.ServerApiIllegalArgumentException;
 import com.gsma.rcs.provider.history.HistoryMemberBaseIdCreator;
 import com.gsma.rcs.provider.history.HistoryProvider;
 import com.gsma.rcs.provider.messaging.FileTransferData;
@@ -23,6 +27,7 @@ import com.gsma.rcs.provider.sharing.GeolocSharingData;
 import com.gsma.rcs.provider.sharing.ImageSharingData;
 import com.gsma.rcs.provider.sharing.VideoSharingData;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.history.HistoryLog;
 import com.gsma.services.rcs.history.IHistoryService;
@@ -30,6 +35,7 @@ import com.gsma.services.rcs.history.IHistoryService;
 import android.content.ContentProvider;
 import android.content.Context;
 import android.net.Uri;
+import android.os.RemoteException;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -77,10 +83,16 @@ public class HistoryServiceImpl extends IHistoryService.Stub {
      * 
      * @param columnMapping
      */
-    private static final void assertMapTypeOfString(@SuppressWarnings("rawtypes") Map columnMapping) {
+    /* Only raw map types are supported by AIDL. */
+    private static final void assertMapTypeOfString(@SuppressWarnings("rawtypes")
+    Map columnMapping) {
+        if (columnMapping == null) {
+            throw new ServerApiIllegalArgumentException(
+                    "Column mapping of history log field names to internal field names must not be null!");
+        }
         for (Object key : columnMapping.keySet()) {
             if (!((key instanceof String) && (columnMapping.get(key) instanceof String))) {
-                throw new IllegalArgumentException(new StringBuilder(
+                throw new ServerApiIllegalArgumentException(new StringBuilder(
                         "Map not valid when registering provider with key ").append(key)
                         .append("!").toString());
             }
@@ -101,6 +113,7 @@ public class HistoryServiceImpl extends IHistoryService.Stub {
      * @param Uri Database URI
      * @param String Table name
      * @param Map<String, String> Translator of history log field names to internal field names
+     * @throws RemoteException
      */
     /*
      * Unchecked cast must be suppressed since AIDL provides a raw Map type that must be cast.
@@ -110,16 +123,21 @@ public class HistoryServiceImpl extends IHistoryService.Stub {
     public void registerExtraHistoryLogMember(int providerId, Uri providerUri, Uri databaseUri,
             String table,
             /* Only raw map types are supported by AIDL. */
-            @SuppressWarnings("rawtypes") Map columnMapping) {
+            @SuppressWarnings("rawtypes")
+            Map columnMapping) throws RemoteException {
         try {
             assertMapTypeOfString(columnMapping);
             retrieveHistoryLogProvider().registerDatabase(providerId, providerUri, databaseUri,
                     table, columnMapping);
-        } catch (IOException e) {
-            throw new IllegalStateException(new StringBuilder(
-                    "Error registering external provider ").append(providerId)
-                    .append(" with table ").append(table).append(" and database ")
-                    .append(databaseUri).append("!").toString(), e);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -127,22 +145,38 @@ public class HistoryServiceImpl extends IHistoryService.Stub {
      * Unregisters an external history log member.
      * 
      * @param int Id of history log member
+     * @throws RemoteException
      */
     @Override
-    public void unregisterExtraHistoryLogMember(int providerId) {
-        retrieveHistoryLogProvider().unregisterDatabaseByProviderId(providerId);
+    public void unregisterExtraHistoryLogMember(int providerId) throws RemoteException {
+        try {
+            retrieveHistoryLogProvider().unregisterDatabaseByProviderId(providerId);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     @Override
-    public long createUniqueId(int providerId) {
-        if (INTERNAL_MEMBER_IDS.contains(providerId)
-                || providerId > HistoryProvider.MAX_ATTACHED_PROVIDERS) {
-            /* TODO: This exception handling will be changed with CR037. */
-            throw new IllegalStateException(new StringBuilder()
-                    .append("Cannot create ID (not allowed) for internal provider ")
-                    .append(providerId).toString());
-        }
-        return HistoryMemberBaseIdCreator.createUniqueId(mCtx, providerId);
-    }
+    public long createUniqueId(int providerId) throws RemoteException {
+        try {
+            if (INTERNAL_MEMBER_IDS.contains(providerId)
+                    || providerId > HistoryProvider.MAX_ATTACHED_PROVIDERS) {
+                throw new ServerApiIllegalArgumentException(new StringBuilder()
+                        .append("Cannot create ID (not allowed) for internal provider ")
+                        .append(providerId).toString());
+            }
+            return HistoryMemberBaseIdCreator.createUniqueId(mCtx, providerId);
 
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
+    }
 }

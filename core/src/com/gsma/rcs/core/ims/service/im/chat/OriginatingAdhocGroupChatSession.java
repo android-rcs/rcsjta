@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.im.chat;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
+import com.gsma.rcs.ExceptionUtil;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
@@ -37,8 +38,11 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.text.TextUtils;
+
 import java.util.Map;
 
+import javax2.sip.InvalidArgumentException;
 import javax2.sip.header.RequireHeader;
 import javax2.sip.header.SubjectHeader;
 
@@ -56,7 +60,7 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
     /**
      * The logger
      */
-    private static final Logger logger = Logger.getLogger(OriginatingAdhocGroupChatSession.class
+    private static final Logger sLogger = Logger.getLogger(OriginatingAdhocGroupChatSession.class
             .getSimpleName());
 
     /**
@@ -76,7 +80,7 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
         super(parent, null, conferenceId, participantsToInvite, rcsSettings, messagingLog,
                 timestamp);
 
-        if ((subject != null) && (subject.length() > 0)) {
+        if (!TextUtils.isEmpty(subject)) {
             setSubject(subject);
         }
 
@@ -91,13 +95,13 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
      */
     public void run() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Initiate a new ad-hoc group chat session as originating");
+            if (sLogger.isActivated()) {
+                sLogger.info("Initiate a new ad-hoc group chat session as originating");
             }
 
             String localSetup = createSetupOffer();
-            if (logger.isActivated()) {
-                logger.debug("Local setup attribute is " + localSetup);
+            if (sLogger.isActivated()) {
+                sLogger.debug("Local setup attribute is " + localSetup);
             }
 
             int localMsrpPort;
@@ -129,8 +133,8 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
 
             getDialogPath().setLocalContent(multipart);
 
-            if (logger.isActivated()) {
-                logger.info("Send INVITE");
+            if (sLogger.isActivated()) {
+                sLogger.info("Send INVITE");
             }
             SipRequest invite = createInviteRequest(multipart);
 
@@ -139,11 +143,14 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
             getDialogPath().setInvite(invite);
 
             sendInvite(invite);
+        } catch (InvalidArgumentException e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            handleError(new ChatError(ChatError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (SipException e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            handleError(new ChatError(ChatError.UNEXPECTED_EXCEPTION, e.getMessage()));
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Session initiation has failed", e);
-            }
-
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
             handleError(new ChatError(ChatError.UNEXPECTED_EXCEPTION, e.getMessage()));
         }
     }

@@ -1754,11 +1754,7 @@ public class RcsSettings {
      * @return Boolean
      */
     public boolean isGroupChatActivated() {
-        String value = getImConferenceUri();
-        if (!TextUtils.isEmpty(value) && !value.equals(RcsSettingsData.DEFAULT_GROUP_CHAT_URI)) {
-            return true;
-        }
-        return false;
+        return !RcsSettingsData.DEFAULT_GROUP_CHAT_URI.equals(getImConferenceUri());
     }
 
     /**

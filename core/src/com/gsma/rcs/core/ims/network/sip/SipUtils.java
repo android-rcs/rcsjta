@@ -22,6 +22,12 @@
 
 package com.gsma.rcs.core.ims.network.sip;
 
+import com.gsma.rcs.core.TerminalInfo;
+import com.gsma.rcs.core.ims.protocol.sip.SipMessage;
+import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
+import com.gsma.rcs.utils.PhoneUtils;
+
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.ListIterator;
 import java.util.Vector;
@@ -41,11 +47,6 @@ import javax2.sip.header.UserAgentHeader;
 import javax2.sip.message.Message;
 import javax2.sip.message.MessageFactory;
 import javax2.sip.message.Request;
-
-import com.gsma.rcs.core.TerminalInfo;
-import com.gsma.rcs.core.ims.protocol.sip.SipMessage;
-import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
-import com.gsma.rcs.utils.PhoneUtils;
 
 /**
  * SIP utility functions
@@ -186,12 +187,9 @@ public class SipUtils {
      */
     public static String extractUriFromAddress(String addr) {
         String uri = addr;
-        try {
-            int index = addr.indexOf("<");
-            if (index != -1) {
-                uri = addr.substring(index + 1, addr.indexOf(">", index));
-            }
-        } catch (Exception e) {
+        int index = addr.indexOf("<");
+        if (index != -1) {
+            uri = addr.substring(index + 1, addr.indexOf(">", index));
         }
         return uri;
     }
@@ -230,9 +228,9 @@ public class SipUtils {
      * Build User-Agent header
      * 
      * @return header
-     * @throws Exception
+     * @throws ParseException
      */
-    public static Header buildUserAgentHeader() throws Exception {
+    public static Header buildUserAgentHeader() throws ParseException {
         Header userAgentHeader = HEADER_FACTORY.createHeader(UserAgentHeader.NAME,
                 userAgentString());
         return userAgentHeader;
@@ -241,9 +239,10 @@ public class SipUtils {
     /**
      * Build Server header
      * 
-     * @throws Exception
+     * @return header
+     * @throws ParseException
      */
-    public static Header buildServerHeader() throws Exception {
+    public static Header buildServerHeader() throws ParseException {
         if (sServerHeaderValue == null) {
             sServerHeaderValue = new StringBuilder(HEADER_EXT_TO_EXT_SERVER)
                     .append(UA_HEADER_OMA_SIMPLE_IM).append(TerminalInfo.getClientInfo())
@@ -256,9 +255,9 @@ public class SipUtils {
      * Build Allow header
      * 
      * @param msg SIP message
-     * @throws Exception
+     * @throws ParseException
      */
-    public static void buildAllowHeader(Message msg) throws Exception {
+    public static void buildAllowHeader(Message msg) throws ParseException {
         msg.addHeader(HEADER_FACTORY.createAllowHeader(Request.INVITE));
         msg.addHeader(HEADER_FACTORY.createAllowHeader(Request.UPDATE));
         msg.addHeader(HEADER_FACTORY.createAllowHeader(Request.ACK));
@@ -285,9 +284,9 @@ public class SipUtils {
      * 
      * @param info Access info
      * @return Header
-     * @throws Exception
+     * @throws ParseException
      */
-    public static Header buildAccessNetworkInfo(String info) throws Exception {
+    public static Header buildAccessNetworkInfo(String info) throws ParseException {
         Header accessInfo = HEADER_FACTORY
                 .createHeader(SipUtils.HEADER_P_ACCESS_NETWORK_INFO, info);
         return accessInfo;
@@ -457,7 +456,7 @@ public class SipUtils {
      * 
      * @param message SIP message
      * @param tags Table of tags
-     * @throws Exception
+     * @throws ParseException
      */
     public static void setFeatureTags(SipMessage message, String[] tags) throws Exception {
         setFeatureTags(message.getStackMessage(), tags);
@@ -468,9 +467,9 @@ public class SipUtils {
      * 
      * @param message SIP stack message
      * @param tags Table of tags
-     * @throws Exception
+     * @throws ParseException
      */
-    public static void setFeatureTags(Message message, String[] tags) throws Exception {
+    public static void setFeatureTags(Message message, String[] tags) throws ParseException {
         setFeatureTags(message, tags, tags);
     }
 
@@ -480,10 +479,10 @@ public class SipUtils {
      * @param message SIP stack message
      * @param contactTags List of tags for Contact header
      * @param acceptContactTags List of tags for Accept-Contact header
-     * @throws Exception
+     * @throws ParseException
      */
     public static void setFeatureTags(Message message, String[] contactTags,
-            String[] acceptContactTags) throws Exception {
+            String[] acceptContactTags) throws ParseException {
         setContactFeatureTags(message, contactTags);
         setAcceptContactFeatureTags(message, acceptContactTags);
     }
@@ -493,9 +492,10 @@ public class SipUtils {
      * 
      * @param message SIP stack message
      * @param tags List of tags
-     * @throws Exception
+     * @throws ParseException
      */
-    public static void setAcceptContactFeatureTags(Message message, String[] tags) throws Exception {
+    public static void setAcceptContactFeatureTags(Message message, String[] tags)
+            throws ParseException {
         if ((tags == null) || (tags.length == 0)) {
             return;
         }
@@ -517,9 +517,9 @@ public class SipUtils {
      * 
      * @param message SIP stack message
      * @param tags List of tags
-     * @throws Exception
+     * @throws ParseException
      */
-    public static void setContactFeatureTags(Message message, String[] tags) throws Exception {
+    public static void setContactFeatureTags(Message message, String[] tags) throws ParseException {
         if ((tags == null) || (tags.length == 0)) {
             return;
         }
@@ -650,9 +650,10 @@ public class SipUtils {
      * 
      * @param message SIP message
      * @param instanceId SIP instance ID
-     * @throws Exception
+     * @throws ParseException
      */
-    public static void setRemoteInstanceID(Message message, String instanceId) throws Exception {
+    public static void setRemoteInstanceID(Message message, String instanceId)
+            throws ParseException {
         if (instanceId != null) {
             ExtensionHeader acceptHeader = (ExtensionHeader) message
                     .getHeader(SipUtils.HEADER_ACCEPT_CONTACT);

@@ -109,40 +109,34 @@ public class PhoneUtils {
         if (uri == null) {
             return null;
         }
-
-        try {
-            /* Extract URI from address */
-            int index0 = uri.indexOf(URI_START_DELIMITER);
-            if (index0 != -1) {
-                uri = uri.substring(index0 + URI_START_DELIMITER.length(),
-                        uri.indexOf(URI_END_DELIMITER, index0));
-            }
-
-            /* Extract a Tel-URI */
-            int index1 = uri.indexOf(TEL_URI_HEADER);
-            if (index1 != -1) {
-                uri = uri.substring(index1 + TEL_URI_HEADER.length());
-            }
-
-            /* Extract a SIP-URI */
-            index1 = uri.indexOf(SIP_URI_HEADER);
-            if (index1 != -1) {
-                int index2 = uri.indexOf("@", index1);
-                uri = uri.substring(index1 + SIP_URI_HEADER.length(), index2);
-            }
-
-            /* Remove URI parameters */
-            int index2 = uri.indexOf(";");
-            if (index2 != -1) {
-                uri = uri.substring(0, index2);
-            }
-
-            /* Returns the extracted number (username part of the URI) */
-            return uri;
-
-        } catch (Exception e) {
-            return null;
+        /* Extract URI from address */
+        int index0 = uri.indexOf(URI_START_DELIMITER);
+        if (index0 != -1) {
+            uri = uri.substring(index0 + URI_START_DELIMITER.length(),
+                    uri.indexOf(URI_END_DELIMITER, index0));
         }
+
+        /* Extract a Tel-URI */
+        int index1 = uri.indexOf(TEL_URI_HEADER);
+        if (index1 != -1) {
+            uri = uri.substring(index1 + TEL_URI_HEADER.length());
+        }
+
+        /* Extract a SIP-URI */
+        index1 = uri.indexOf(SIP_URI_HEADER);
+        if (index1 != -1) {
+            int index2 = uri.indexOf("@", index1);
+            uri = uri.substring(index1 + SIP_URI_HEADER.length(), index2);
+        }
+
+        /* Remove URI parameters */
+        int index2 = uri.indexOf(";");
+        if (index2 != -1) {
+            uri = uri.substring(0, index2);
+        }
+
+        /* Returns the extracted number (username part of the URI) */
+        return uri;
     }
 
     /**

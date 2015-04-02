@@ -23,15 +23,29 @@
 package com.gsma.rcs.core.ims.network.sip;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
+
+import com.gsma.rcs.core.ims.ImsModule;
+import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.protocol.sip.SipException;
+import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
+import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
+import com.gsma.rcs.core.ims.service.SessionTimerManager;
+import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
+import com.gsma.rcs.utils.IdGenerator;
+import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.contact.ContactId;
+
 import gov2.nist.core.NameValue;
 import gov2.nist.javax2.sip.Utils;
 import gov2.nist.javax2.sip.header.Subject;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.Vector;
 
 import javax2.sip.ClientTransaction;
+import javax2.sip.InvalidArgumentException;
 import javax2.sip.address.Address;
 import javax2.sip.address.URI;
 import javax2.sip.header.AcceptHeader;
@@ -57,17 +71,6 @@ import javax2.sip.header.ViaHeader;
 import javax2.sip.header.WarningHeader;
 import javax2.sip.message.Request;
 import javax2.sip.message.Response;
-
-import com.gsma.rcs.core.ims.ImsModule;
-import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
-import com.gsma.rcs.core.ims.protocol.sip.SipException;
-import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
-import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
-import com.gsma.rcs.core.ims.service.SessionTimerManager;
-import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
-import com.gsma.rcs.utils.IdGenerator;
-import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contact.ContactId;
 
 /**
  * SIP message factory
@@ -516,11 +519,9 @@ public class SipMessageFactory {
 
             // Create the request
             return createInvite(dialog, featureTags, acceptTags, multipart, contentType);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message", e);
-            }
-            throw new SipException("Can't create SIP INVITE message");
+
+        } catch (ParseException e) {
+            throw new SipException("Can't create multipart for a SIP INVITE!", e);
         }
     }
 
@@ -639,11 +640,12 @@ public class SipMessageFactory {
             viaHeader.setRPort();
 
             return new SipRequest(invite);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create SIP message", e);
-            }
-            throw new SipException("Can't create SIP INVITE message");
+
+        } catch (ParseException e) {
+            throw new SipException("Can't create SIP INVITE message!", e);
+
+        } catch (InvalidArgumentException e) {
+            throw new SipException("Can't create SIP INVITE message!", e);
         }
     }
 

@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service;
@@ -30,6 +34,7 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
 import javax2.sip.Dialog;
+import javax2.sip.InvalidArgumentException;
 import javax2.sip.message.Response;
 
 /**
@@ -117,16 +122,15 @@ public class UpdateSessionManager {
             // Set the Proxy-Authorization header
             mSession.getAuthenticationAgent().setProxyAuthorizationHeader(reInvite);
 
+        } catch (InvalidArgumentException e) {
+            mSession.handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
         } catch (SipException e) {
-            // Unexpected error
             mSession.handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
         } catch (CoreException e) {
-            // Unexpected error
             mSession.handleError(new IPCallError(IPCallError.UNEXPECTED_EXCEPTION, e.getMessage()));
         }
 
         return reInvite;
-
     }
 
     /**

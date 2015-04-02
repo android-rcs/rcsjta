@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +15,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.addressbook;
 
-import java.util.Set;
+import com.gsma.rcs.ServerApiServiceNotRegisteredException;
+import com.gsma.rcs.core.Core;
+import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.service.api.ServerApiUtils;
+import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.accounts.Account;
 import android.app.Service;
@@ -30,12 +39,7 @@ import android.content.SyncResult;
 import android.os.Bundle;
 import android.os.IBinder;
 
-import com.gsma.rcs.core.Core;
-import com.gsma.rcs.provider.eab.ContactsManager;
-import com.gsma.rcs.service.api.ServerApiException;
-import com.gsma.rcs.service.api.ServerApiUtils;
-import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.contact.ContactId;
+import java.util.Set;
 
 /**
  * Service to handle account sync. This is invoked with an intent with action
@@ -104,7 +108,7 @@ public class SyncAdapterService extends Service {
             // Test IMS connection
             try {
                 ServerApiUtils.testIms();
-            } catch (ServerApiException e) {
+            } catch (ServerApiServiceNotRegisteredException e) {
                 if (logger.isActivated()) {
                     logger.debug("IMS connection failed");
                 }

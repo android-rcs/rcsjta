@@ -22,6 +22,11 @@
 
 package com.gsma.rcs.service.api;
 
+import com.gsma.rcs.ExceptionUtil;
+import com.gsma.rcs.ServerApiBaseException;
+import com.gsma.rcs.ServerApiGenericException;
+import com.gsma.rcs.ServerApiIllegalArgumentException;
+import com.gsma.rcs.ServerApiPermissionDeniedException;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -436,19 +441,19 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param contacts List of contact IDs
      * @param subject Subject
      * @return instance of IGroupChat
-     * @throws ServerApiException Note: List is used instead of Set because AIDL does only support
-     *             List
+     * @throws RemoteException <p>
+     *             Note: List is used instead of Set because AIDL does only support List
+     *             </p>
      */
     public IGroupChat initiateGroupChat(List<ContactId> contacts, String subject)
-            throws ServerApiException {
+            throws RemoteException {
+        if (contacts == null || contacts.isEmpty()) {
+            throw new ServerApiIllegalArgumentException(
+                    "GroupChat participants list must not be null or empty!");
+        }
         if (!mRcsSettings.isGroupChatActivated()) {
-            if (sLogger.isActivated()) {
-                sLogger.debug("Cannot initiate group chat as group chat feature is not activated by the operator.");
-            }
-            /*
-             * TODO: Throw proper exception in CR037
-             */
-            throw new IllegalArgumentException("Groupchat not activated.");
+            throw new ServerApiPermissionDeniedException(
+                    "The GroupChat feature is not activated on the connected IMS server!");
         }
         // Test IMS connection
         ServerApiUtils.testIms();
@@ -479,11 +484,16 @@ public class ChatServiceImpl extends IChatService.Stub {
                 }
             }.start();
             return groupChat;
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Unexpected error", e);
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
-            throw new ServerApiException(e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 

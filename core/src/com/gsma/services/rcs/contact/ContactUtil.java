@@ -439,7 +439,7 @@ public class ContactUtil {
     /**
      * Formats the given contact to uniquely represent a RCS contact phone number.
      * <p>
-     * May throw a RcsContactFormatException exception if the string contact parameter is not
+     * May throw a IllegalArgumentException exception if the string contact parameter is not
      * enabled to produce a valid ContactId.
      * 
      * @param contact the contact phone number

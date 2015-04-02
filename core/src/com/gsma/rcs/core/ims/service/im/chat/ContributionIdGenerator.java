@@ -24,15 +24,17 @@ package com.gsma.rcs.core.ims.service.im.chat;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import java.util.UUID;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.utils.DeviceUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsServiceException;
+
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Contribution ID generator based on RFC draft-kaplan-dispatch-session-id-03
@@ -40,6 +42,9 @@ import com.gsma.services.rcs.RcsServiceException;
  * @author jexa7410
  */
 public class ContributionIdGenerator {
+
+    private static final String ALOGIRITHM_HMACSHA1 = "HmacSHA1";
+
     /**
      * The logger
      */
@@ -91,8 +96,8 @@ public class ContributionIdGenerator {
     public synchronized static String getContributionId(String callId) {
         try {
             // HMAC-SHA1 operation
-            SecretKeySpec sks = new SecretKeySpec(generateSecretKey(), "HmacSHA1");
-            Mac mac = Mac.getInstance("HmacSHA1");
+            SecretKeySpec sks = new SecretKeySpec(generateSecretKey(), ALOGIRITHM_HMACSHA1);
+            Mac mac = Mac.getInstance(ALOGIRITHM_HMACSHA1);
             mac.init(sks);
             byte[] contributionId = mac.doFinal(callId.getBytes(UTF8));
 
@@ -108,8 +113,12 @@ public class ContributionIdGenerator {
 
             String id = hexString.toString();
             return id;
-        } catch (Exception e) {
-            return null;
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalArgumentException("Not able to generate Contribution Id", e);
+
+        } catch (InvalidKeyException e) {
+            throw new IllegalArgumentException("Not able to generate Contribution Id", e);
         }
     }
 }

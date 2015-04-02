@@ -23,6 +23,7 @@
 package com.gsma.rcs.provider.eab;
 
 import com.gsma.rcs.R;
+import com.gsma.rcs.ServerApiPersistentStorageException;
 import com.gsma.rcs.addressbook.AuthenticationService;
 import com.gsma.rcs.core.ims.service.ContactInfo;
 import com.gsma.rcs.core.ims.service.ContactInfo.BlockingState;
@@ -3159,7 +3160,7 @@ public final class ContactsManager {
      * Get RCS display name for contact
      * 
      * @param contact
-     * @return the display name or IllegalStateException if RCS account is not created
+     * @return the display name or null
      */
     public String getContactDisplayName(ContactId contact) {
         Cursor cursor = null;
@@ -3167,21 +3168,22 @@ public final class ContactsManager {
             Uri uri = Uri.withAppendedPath(RichAddressBookData.CONTENT_URI, contact.toString());
             cursor = mLocalContentResolver.query(uri, PROJECTION_RABP_DISPLAY_NAME, null, null,
                     null);
-            if (cursor.moveToFirst()) {
-                return cursor.getString(cursor
-                        .getColumnIndexOrThrow(RichAddressBookData.KEY_DISPLAY_NAME));
+            if (cursor == null) {
+                throw new ServerApiPersistentStorageException("Unable to query uri ".concat(uri
+                        .toString()));
+            }
 
+            if (!cursor.moveToFirst()) {
+                return null;
             }
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Internal exception", e);
-            }
+            return cursor.getString(cursor
+                    .getColumnIndexOrThrow(RichAddressBookData.KEY_DISPLAY_NAME));
+
         } finally {
             if (cursor != null) {
                 cursor.close();
             }
         }
-        throw new IllegalStateException("No RCS account found");
     }
 
     /**

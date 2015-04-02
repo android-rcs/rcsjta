@@ -34,7 +34,12 @@ import android.text.TextUtils;
  * been blocked for some other reason.
  * </p>
  */
-public class RcsPermissionDeniedException extends RcsServiceException {
+public class RcsPermissionDeniedException extends UnsupportedOperationException {
+
+    /**
+     * Special Delimiter that will be appended while trasmitting server exceptions over AIDL layer.
+     */
+    private static final char DELIMITER_PIPE = '|';
 
     static final long serialVersionUID = 1L;
 
@@ -74,5 +79,34 @@ public class RcsPermissionDeniedException extends RcsServiceException {
         if (isIntendedException(e, RcsPermissionDeniedException.class)) {
             throw new RcsPermissionDeniedException(extractServerException(e), e);
         }
+    }
+
+    /**
+     * Checks if the exception is one of the intended server side exception that has been thrown
+     * over the AIDL layer.
+     * 
+     * @param e Exception
+     * @param clazz Class
+     * @return true if exception getMessage() starts with clazz getName()
+     */
+    private static boolean isIntendedException(Exception e, Class clazz) {
+        final String message = e.getMessage();
+        return (!TextUtils.isEmpty(message) && message.startsWith(clazz.getName()));
+    }
+
+    /**
+     * Extracts server side exception message thrown over the AIDL layer after parsing it based on
+     * {@link DELIMITER_PIPE}
+     * 
+     * @param e Exception
+     * @return Server exception message
+     */
+    private static String extractServerException(Exception e) {
+        final String message = e.getMessage();
+        final int delimiterIndex = message.indexOf(DELIMITER_PIPE);
+        if (delimiterIndex > 0 && delimiterIndex < message.length() - 1) {
+            return message.substring(delimiterIndex + 1);
+        }
+        return message;
     }
 }

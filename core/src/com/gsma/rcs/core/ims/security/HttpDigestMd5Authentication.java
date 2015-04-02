@@ -26,6 +26,8 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.utils.logger.Logger;
 
+import javax2.sip.InvalidArgumentException;
+
 /**
  * HTTP Digest MD5 authentication (see RFC2617)
  * 
@@ -260,25 +262,16 @@ public class HttpDigestMd5Authentication {
      * @param uri Request URI
      * @param nc Nonce counter
      * @param body Entity body
-     * @throws Exception
+     * @throws InvalidArgumentException
      */
     public String calculateResponse(String user, String password, String method, String uri,
-            String nc, String body) throws Exception {
-        if (user == null || realm == null || uri == null || nonce == null) {
-            throw new Exception("Invalid Authorization header" + user + "/" + realm + "/" + uri
-                    + "/" + nonce);
-        }
-
+            String nc, String body) throws InvalidArgumentException {
         String a1 = user + ":" + realm + ":" + password;
         String a2 = method + ":" + uri;
 
         if (qop != null) {
             if (!qop.startsWith("auth")) {
-                throw new Exception("Invalid qop: " + qop);
-            }
-
-            if (nc == null || cnonce == null) {
-                throw new Exception("Invalid Authorization header: " + nc + "/" + cnonce);
+                throw new InvalidArgumentException("Invalid qop: ".concat(qop));
             }
 
             if (qop.equals("auth-int")) {

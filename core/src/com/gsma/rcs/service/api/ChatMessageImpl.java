@@ -16,10 +16,22 @@
 
 package com.gsma.rcs.service.api;
 
+import com.gsma.rcs.ExceptionUtil;
+import com.gsma.rcs.ServerApiBaseException;
+import com.gsma.rcs.ServerApiGenericException;
+import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.chat.IChatMessage;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.os.RemoteException;
+
 public class ChatMessageImpl extends IChatMessage.Stub {
+
+    /**
+     * The logger
+     */
+    private static final Logger sLogger = Logger.getLogger(ChatMessageImpl.class.getSimpleName());
 
     private final ChatMessagePersistedStorageAccessor mPersistentStorage;
 
@@ -32,8 +44,20 @@ public class ChatMessageImpl extends IChatMessage.Stub {
         mPersistentStorage = persistentStorage;
     }
 
-    public ContactId getContact() {
-        return mPersistentStorage.getRemoteContact();
+    public ContactId getContact() throws RemoteException {
+        try {
+            return mPersistentStorage.getRemoteContact();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     public String getId() {

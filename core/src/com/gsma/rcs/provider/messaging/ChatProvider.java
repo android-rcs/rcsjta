@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.provider.messaging;
 
+import com.gsma.rcs.ServerApiPersistentStorageException;
 import com.gsma.rcs.provider.ContentProviderBaseIdCreator;
 import com.gsma.rcs.provider.history.HistoryMemberBaseIdCreator;
 import com.gsma.rcs.utils.DatabaseUtils;
@@ -48,6 +49,8 @@ import java.util.Set;
  * @author Jean-Marc AUFFRET
  */
 public class ChatProvider extends ContentProvider {
+
+    private static final int INVALID_ROW_ID = -1;
 
     private static final String TABLE_GROUP_CHAT = "groupchat";
 
@@ -409,7 +412,11 @@ public class ChatProvider extends ContentProvider {
                 String chatId = initialValues.getAsString(ChatData.KEY_CHAT_ID);
                 initialValues.put(Message.BASECOLUMN_ID, ContentProviderBaseIdCreator
                         .createUniqueId(getContext(), ChatData.CONTENT_URI));
-                db.insert(TABLE_GROUP_CHAT, null, initialValues);
+
+                if (db.insert(TABLE_GROUP_CHAT, null, initialValues) == INVALID_ROW_ID) {
+                    throw new ServerApiPersistentStorageException(new StringBuilder(
+                            "Unable to insert row for URI ").append(uri).toString());
+                }
                 Uri notificationUri = Uri.withAppendedPath(ChatLog.GroupChat.CONTENT_URI, chatId);
                 getContext().getContentResolver().notifyChange(notificationUri, null);
                 return notificationUri;

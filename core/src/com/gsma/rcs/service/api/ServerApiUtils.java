@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +15,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.service.api;
 
+import com.gsma.rcs.ServerApiServiceNotRegisteredException;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.network.ImsNetworkInterface;
 import com.gsma.services.rcs.RcsServiceRegistration;
@@ -41,12 +46,10 @@ public class ServerApiUtils {
 
     /**
      * Test IMS connection
-     * 
-     * @throws ServerApiException
      */
-    public static void testIms() throws ServerApiException {
+    public static void testIms() {
         if (!isImsConnected()) {
-            throw new ServerApiException("Core is not connected to IMS");
+            throw new ServerApiServiceNotRegisteredException("Core is not connected to IMS");
         }
     }
 

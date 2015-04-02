@@ -16,6 +16,8 @@
 
 package com.gsma.services.rcs.history;
 
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsIllegalArgumentException;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceControl;
 import com.gsma.services.rcs.RcsServiceException;
@@ -121,15 +123,15 @@ public class HistoryService extends RcsService {
      */
     public void registerExtraHistoryLogMember(int providerId, Uri providerUri, Uri database,
             String table, Map<String, String> columnMapping) throws RcsServiceException {
-        if (mService != null) {
-            try {
-                mService.registerExtraHistoryLogMember(providerId, providerUri, database, table,
-                        columnMapping);
-            } catch (Exception e) {
-                throw new RcsServiceException(e.getMessage());
-            }
-        } else {
+        if (mService == null) {
             throw new RcsServiceNotAvailableException();
+        }
+        try {
+            mService.registerExtraHistoryLogMember(providerId, providerUri, database, table,
+                    columnMapping);
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -140,14 +142,14 @@ public class HistoryService extends RcsService {
      * @throws RcsServiceException
      */
     public void unregisterExtraHistoryLogMember(int providerId) throws RcsServiceException {
-        if (mService != null) {
-            try {
-                mService.unregisterExtraHistoryLogMember(providerId);
-            } catch (Exception e) {
-                throw new RcsServiceException(e.getMessage());
-            }
-        } else {
+        if (mService == null) {
             throw new RcsServiceNotAvailableException();
+        }
+        try {
+            mService.unregisterExtraHistoryLogMember(providerId);
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -159,14 +161,15 @@ public class HistoryService extends RcsService {
      * @throws RcsServiceException
      */
     public long createUniqueId(int providerId) throws RcsServiceException {
-        if (mService != null) {
-            try {
-                return mService.createUniqueId(providerId);
-            } catch (Exception e) {
-                throw new RcsServiceException(e.getMessage());
-            }
-        } else {
+        if (mService == null) {
             throw new RcsServiceNotAvailableException();
+        }
+        try {
+            return mService.createUniqueId(providerId);
+
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 

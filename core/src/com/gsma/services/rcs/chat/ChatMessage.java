@@ -22,6 +22,8 @@
 
 package com.gsma.services.rcs.chat;
 
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
@@ -70,8 +72,10 @@ public class ChatMessage {
     public ContactId getRemoteContact() throws RcsServiceException {
         try {
             return mChatMessageInf.getContact();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 

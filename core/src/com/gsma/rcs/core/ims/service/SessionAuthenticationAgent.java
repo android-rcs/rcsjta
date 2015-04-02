@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +15,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.core.ims.service;
-
-import javax2.sip.header.ProxyAuthenticateHeader;
-import javax2.sip.header.ProxyAuthorizationHeader;
 
 import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.ImsModule;
@@ -29,6 +30,10 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.security.HttpDigestMd5Authentication;
 import com.gsma.rcs.utils.logger.Logger;
+
+import javax2.sip.InvalidArgumentException;
+import javax2.sip.header.ProxyAuthenticateHeader;
+import javax2.sip.header.ProxyAuthorizationHeader;
 
 /**
  * HTTP Digest MD5 authentication agent for sessions
@@ -132,10 +137,9 @@ public class SessionAuthenticationAgent {
      * Set the authorization header on the INVITE request
      * 
      * @param request SIP request
-     * @throws CoreException
+     * @throws InvalidArgumentException
      */
-    public void setAuthorizationHeader(SipRequest request) throws CoreException {
-        try {
+    public void setAuthorizationHeader(SipRequest request) throws InvalidArgumentException {
             // Re-use the registration authentication (nonce caching)
             if ((registerDigest == null) || (registerDigest.getNextnonce() == null)) {
                 return;
@@ -164,13 +168,6 @@ public class SessionAuthenticationAgent {
             }
 
             // Set header in the SIP message
-            request.addHeader(ProxyAuthorizationHeader.NAME, auth);
-
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create the authorization header", e);
-            }
-            throw new CoreException("Can't create the authorization header");
-        }
+        request.addHeader(ProxyAuthorizationHeader.NAME, auth);
     }
 }

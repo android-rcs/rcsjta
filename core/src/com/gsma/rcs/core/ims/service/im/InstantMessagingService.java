@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.core.ims.service.im;
 
+import com.gsma.rcs.ServerApiMaxAllowedSessionLimitReachedException;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.content.ContentManager;
@@ -514,16 +515,15 @@ public class InstantMessagingService extends ImsService {
         }
     }
 
-    public void assertAvailableChatSession(String errorMessage) throws CoreException {
+    /**
+     * Assert if it is allowed to initiate a new chat session right now or the allowed limit has
+     * been reached.
+     * 
+     * @param errorMessage
+     */
+    public void assertAvailableChatSession(String errorMessage) {
         if (!isChatSessionAvailable()) {
-            if (sLogger.isActivated()) {
-                sLogger.error(errorMessage);
-            }
-            /*
-             * TODO : Proper exception handling will be added here as part of the CR037
-             * implementation
-             */
-            throw new CoreException(errorMessage);
+            throw new ServerApiMaxAllowedSessionLimitReachedException(errorMessage);
         }
     }
 
@@ -994,10 +994,9 @@ public class InstantMessagingService extends ImsService {
      * @param subject Subject
      * @param timestamp Local timestamp
      * @return GroupChatSession
-     * @throws CoreException
      */
     public GroupChatSession initiateAdhocGroupChatSession(Set<ContactId> contacts, String subject,
-            long timestamp) throws CoreException {
+            long timestamp) {
         if (sLogger.isActivated()) {
             sLogger.info("Initiate an ad-hoc group chat session");
         }

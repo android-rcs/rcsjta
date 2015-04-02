@@ -199,11 +199,7 @@ public abstract class ImsServiceSession extends Thread {
         mDialogPath.setAuthenticationAgent(getAuthenticationAgent());
 
         if (mContact != null) {
-            try {
-                mRemoteDisplayName = ContactsManager.getInstance().getContactDisplayName(mContact);
-            } catch (Exception e) {
-                // RCS account does not exist
-            }
+            mRemoteDisplayName = ContactsManager.getInstance().getContactDisplayName(mContact);
         }
     }
 

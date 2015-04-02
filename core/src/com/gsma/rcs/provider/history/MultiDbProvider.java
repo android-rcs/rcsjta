@@ -19,6 +19,8 @@ package com.gsma.rcs.provider.history;
 import static com.gsma.rcs.provider.history.HistoryConstants.INTERNAL_MEMBERS;
 import static com.gsma.rcs.provider.history.HistoryConstants.INTERNAL_MEMBER_IDS;
 
+import com.gsma.rcs.ServerApiIllegalArgumentException;
+
 import android.content.ContentProvider;
 import android.content.Context;
 import android.database.Cursor;
@@ -236,8 +238,7 @@ import java.util.Set;
 
     public void unregisterDatabaseByProviderId(int providerId) {
         if (INTERNAL_MEMBER_IDS.contains(providerId)) {
-            /* TODO: This exception handling will be changed with CR037. */
-            throw new IllegalArgumentException(new StringBuilder(
+            throw new ServerApiIllegalArgumentException(new StringBuilder(
                     "Trying to access history log member with invalid external id:")
                     .append(providerId).append("!").toString());
         }

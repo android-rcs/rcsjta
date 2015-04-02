@@ -22,6 +22,19 @@
 
 package com.gsma.rcs.core.ims.protocol.sip;
 
+import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
+import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext.INotifySipProvisionalResponse;
+import com.gsma.rcs.core.ims.security.cert.KeyStoreManager;
+import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
+import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.utils.IdGenerator;
+import com.gsma.rcs.utils.IpAddressUtils;
+import com.gsma.rcs.utils.NetworkRessourceManager;
+import com.gsma.rcs.utils.logger.Logger;
+
+import android.net.ConnectivityManager;
+
 import gov2.nist.javax2.sip.address.AddressImpl;
 import gov2.nist.javax2.sip.message.SIPMessage;
 
@@ -35,6 +48,7 @@ import java.util.Vector;
 import javax2.sip.ClientTransaction;
 import javax2.sip.DialogTerminatedEvent;
 import javax2.sip.IOExceptionEvent;
+import javax2.sip.InvalidArgumentException;
 import javax2.sip.ListeningPoint;
 import javax2.sip.RequestEvent;
 import javax2.sip.ResponseEvent;
@@ -55,19 +69,6 @@ import javax2.sip.header.RouteHeader;
 import javax2.sip.header.ViaHeader;
 import javax2.sip.message.Request;
 import javax2.sip.message.Response;
-
-import android.net.ConnectivityManager;
-
-import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
-import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext.INotifySipProvisionalResponse;
-import com.gsma.rcs.core.ims.security.cert.KeyStoreManager;
-import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
-import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.IdGenerator;
-import com.gsma.rcs.utils.IpAddressUtils;
-import com.gsma.rcs.utils.NetworkRessourceManager;
-import com.gsma.rcs.utils.logger.Logger;
 
 /**
  * SIP interface which manage the SIP stack. The NIST stack is used statefully (i.e. messages are
@@ -596,16 +597,24 @@ public class SipInterface implements SipListener {
 
     /**
      * Returns the local via path
-     * 
+     *
      * @return List of headers
-     * @throws Exception
+     * @throws SipException
      */
-    public ArrayList<ViaHeader> getViaHeaders() throws Exception {
-        ArrayList<ViaHeader> viaHeaders = new ArrayList<ViaHeader>();
-        ViaHeader via = SipUtils.HEADER_FACTORY.createViaHeader(mLocalIpAddress, mListeningPort,
-                getProxyProtocol(), null);
-        viaHeaders.add(via);
-        return viaHeaders;
+    public ArrayList<ViaHeader> getViaHeaders() throws SipException {
+        try {
+            ArrayList<ViaHeader> viaHeaders = new ArrayList<ViaHeader>();
+            ViaHeader via = SipUtils.HEADER_FACTORY.createViaHeader(mLocalIpAddress,
+                    mListeningPort, getProxyProtocol(), null);
+            viaHeaders.add(via);
+            return viaHeaders;
+
+        } catch (ParseException e) {
+            throw new SipException("Can't create Via headers!", e);
+
+        } catch (InvalidArgumentException e) {
+            throw new SipException("Can't create Via headers!", e);
+        }
     }
 
     /**
@@ -620,30 +629,40 @@ public class SipInterface implements SipListener {
 
     /**
      * Get local contact
-     * 
+     *
      * @return Header
-     * @throws Exception
+     * @throws SipException
      */
-    public ContactHeader getLocalContact() throws Exception {
-        // Set the contact with the terminal IP address, port and transport
-        SipURI contactURI = (SipURI) SipUtils.ADDR_FACTORY.createSipURI(null, mLocalIpAddress);
-        contactURI.setPort(mListeningPort);
-        contactURI.setParameter("transport", mDefaultProtocol);
+    public ContactHeader getLocalContact() throws SipException {
+        try {
+            // Set the contact with the terminal IP address, port and transport
+            SipURI contactURI = (SipURI) SipUtils.ADDR_FACTORY.createSipURI(null, mLocalIpAddress);
+            contactURI.setPort(mListeningPort);
+            contactURI.setParameter("transport", mDefaultProtocol);
 
-        // Create the Contact header
-        Address contactAddress = SipUtils.ADDR_FACTORY.createAddress(contactURI);
-        ContactHeader contactHeader = SipUtils.HEADER_FACTORY.createContactHeader(contactAddress);
+            // Create the Contact header
+            Address contactAddress = SipUtils.ADDR_FACTORY.createAddress(contactURI);
+            ContactHeader contactHeader = SipUtils.HEADER_FACTORY
+                    .createContactHeader(contactAddress);
 
-        return contactHeader;
+            return contactHeader;
+
+        } catch (ParseException e) {
+            throw new SipException("Can't create local contact!", e);
+
+        } catch (InvalidArgumentException e) {
+            throw new SipException("Can't create local contact!", e);
+        }
     }
 
     /**
      * Get contact based on local contact info and multidevice infos (GRUU, sip.instance)
      * 
      * @return Header
-     * @throws Exception
+     * @throws ParseException
+     * @throws SipException
      */
-    public ContactHeader getContact() throws Exception {
+    public ContactHeader getContact() throws ParseException, SipException {
         ContactHeader contactHeader;
         if (mPublicGruu != null) {
             // Create a contact with GRUU
