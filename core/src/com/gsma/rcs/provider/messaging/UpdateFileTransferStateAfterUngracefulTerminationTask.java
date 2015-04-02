@@ -14,10 +14,8 @@
  * the License.
  */
 
-package com.gsma.rcs.service;
+package com.gsma.rcs.provider.messaging;
 
-import com.gsma.rcs.provider.messaging.FileTransferData;
-import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.logger.Logger;
@@ -28,7 +26,7 @@ import com.gsma.services.rcs.filetransfer.FileTransfer.State;
 
 import android.database.Cursor;
 
-/*package private*/class UpdateFileTransferStateTask implements Runnable {
+public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Runnable {
 
     private final MessagingLog mMessagingLog;
 
@@ -36,7 +34,7 @@ import android.database.Cursor;
 
     private final Logger mLogger = Logger.getLogger(getClass().getName());
 
-    /* package private */UpdateFileTransferStateTask(MessagingLog messagingLog,
+    public UpdateFileTransferStateAfterUngracefulTerminationTask(MessagingLog messagingLog,
             FileTransferServiceImpl fileTransferService) {
         mMessagingLog = messagingLog;
         mFileTransferService = fileTransferService;

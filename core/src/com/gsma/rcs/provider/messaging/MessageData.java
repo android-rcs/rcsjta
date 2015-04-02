@@ -37,77 +37,77 @@ public class MessageData {
     /**
      * Unique history ID
      */
-    public static final String KEY_BASECOLUMN_ID = ChatLog.Message.BASECOLUMN_ID;
+    /* package private */ static final String KEY_BASECOLUMN_ID = ChatLog.Message.BASECOLUMN_ID;
 
     /**
      * Id of chat room
      */
-    public static final String KEY_CHAT_ID = ChatLog.Message.CHAT_ID;
+    /* package private */ static final String KEY_CHAT_ID = ChatLog.Message.CHAT_ID;
 
     /**
      * ContactId formatted number of remote contact or null if the message is an outgoing group chat
      * message.
      */
-    public static final String KEY_CONTACT = ChatLog.Message.CONTACT;
+    /* package private */ static final String KEY_CONTACT = ChatLog.Message.CONTACT;
 
     /**
      * Id of the message
      */
-    public static final String KEY_MESSAGE_ID = ChatLog.Message.MESSAGE_ID;
+    /* package private */ static final String KEY_MESSAGE_ID = ChatLog.Message.MESSAGE_ID;
 
     /**
      * Content of the message (as defined by one of the mimetypes in ChatLog.Message.Mimetype)
      */
-    public static final String KEY_CONTENT = ChatLog.Message.CONTENT;
+    /* package private */ static final String KEY_CONTENT = ChatLog.Message.CONTENT;
 
     /**
      * Multipurpose Internet Mail Extensions (MIME) type of message
      */
-    public static final String KEY_MIME_TYPE = ChatLog.Message.MIME_TYPE;
+    /* package private */ static final String KEY_MIME_TYPE = ChatLog.Message.MIME_TYPE;
 
     /**
      * Status direction of message.
      * 
      * @see Direction
      */
-    public static final String KEY_DIRECTION = ChatLog.Message.DIRECTION;
+    /* package private */ static final String KEY_DIRECTION = ChatLog.Message.DIRECTION;
 
     /**
      * @see Status
      */
-    public static final String KEY_STATUS = ChatLog.Message.STATUS;
+    /* package private */ static final String KEY_STATUS = ChatLog.Message.STATUS;
 
     /**
      * Reason code associated with the message status.
      * 
      * @see ReasonCode
      */
-    public static final String KEY_REASON_CODE = ChatLog.Message.REASON_CODE;
+    /* package private */ static final String KEY_REASON_CODE = ChatLog.Message.REASON_CODE;
 
     /**
      * This is set on the receiver side when the message has been displayed.
      * 
      * @see com.gsma.services.rcs.RcsCommon.ReadStatus for the list of status.
      */
-    public static final String KEY_READ_STATUS = ChatLog.Message.READ_STATUS;
+    /* package private */ static final String KEY_READ_STATUS = ChatLog.Message.READ_STATUS;
 
     /**
      * Time when message inserted
      */
-    public static final String KEY_TIMESTAMP = ChatLog.Message.TIMESTAMP;
+    /* package private */ static final String KEY_TIMESTAMP = ChatLog.Message.TIMESTAMP;
 
     /**
      * Time when message sent. If 0 means not sent.
      */
-    public static final String KEY_TIMESTAMP_SENT = ChatLog.Message.TIMESTAMP_SENT;
+    /* package private */ static final String KEY_TIMESTAMP_SENT = ChatLog.Message.TIMESTAMP_SENT;
 
     /**
      * Time when message delivered. If 0 means not delivered
      */
-    public static final String KEY_TIMESTAMP_DELIVERED = ChatLog.Message.TIMESTAMP_DELIVERED;
+    /* package private */ static final String KEY_TIMESTAMP_DELIVERED = ChatLog.Message.TIMESTAMP_DELIVERED;
 
     /**
      * Time when message displayed. If 0 means not displayed.
      */
-    public static final String KEY_TIMESTAMP_DISPLAYED = ChatLog.Message.TIMESTAMP_DISPLAYED;
+    /* package private */ static final String KEY_TIMESTAMP_DISPLAYED = ChatLog.Message.TIMESTAMP_DISPLAYED;
 }

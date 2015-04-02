@@ -14,15 +14,14 @@
  * the License.
  */
 
-package com.gsma.rcs.service;
+package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.eab.ContactsManager;
-import com.gsma.rcs.provider.messaging.FileTransferData;
-import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.DequeueTask;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.contact.ContactId;
@@ -33,11 +32,11 @@ import android.database.Cursor;
 import android.net.Uri;
 
 /* Dequeue all one-to-one and group file transfers */
-/* package private */class FileTransferDequeueTask extends DequeueTask {
+public class FileTransferDequeueTask extends DequeueTask {
 
     private final FileTransferServiceImpl mFileTransferService;
 
-    /* package private */FileTransferDequeueTask(Object lock, InstantMessagingService imService,
+    public FileTransferDequeueTask(Object lock, InstantMessagingService imService,
             MessagingLog messagingLog, FileTransferServiceImpl fileTransferService,
             ContactsManager contactManager, RcsSettings rcsSettings) {
         super(lock, imService, contactManager, messagingLog, rcsSettings);

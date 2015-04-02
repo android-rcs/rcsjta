@@ -16,9 +16,9 @@
 
 package com.gsma.rcs.provider.history;
 
-import android.net.Uri;
-
 import com.gsma.services.rcs.history.HistoryLog;
+
+import android.net.Uri;
 
 public class HistoryLogData {
 
@@ -27,45 +27,45 @@ public class HistoryLogData {
      */
     protected static final Uri CONTENT_URI = Uri.parse("content://com.gsma.rcs.history/history");
 
-    public static final String KEY_BASECOLUMN_ID = HistoryLog.BASECOLUMN_ID;
+    /* package private */static final String KEY_BASECOLUMN_ID = HistoryLog.BASECOLUMN_ID;
 
-    public static final String KEY_PROVIDER_ID = HistoryLog.PROVIDER_ID;
+    /* package private */static final String KEY_PROVIDER_ID = HistoryLog.PROVIDER_ID;
 
-    public static final String KEY_ID = HistoryLog.ID;
+    /* package private */static final String KEY_ID = HistoryLog.ID;
 
-    public static final String KEY_MIME_TYPE = HistoryLog.MIME_TYPE;
+    /* package private */static final String KEY_MIME_TYPE = HistoryLog.MIME_TYPE;
 
-    public static final String KEY_DIRECTION = HistoryLog.DIRECTION;
+    /* package private */static final String KEY_DIRECTION = HistoryLog.DIRECTION;
 
-    public static final String KEY_CONTACT = HistoryLog.CONTACT;
+    /* package private */static final String KEY_CONTACT = HistoryLog.CONTACT;
 
-    public static final String KEY_TIMESTAMP = HistoryLog.TIMESTAMP;
+    /* package private */static final String KEY_TIMESTAMP = HistoryLog.TIMESTAMP;
 
-    public static final String KEY_TIMESTAMP_SENT = HistoryLog.TIMESTAMP_SENT;
+    /* package private */static final String KEY_TIMESTAMP_SENT = HistoryLog.TIMESTAMP_SENT;
 
-    public static final String KEY_TIMESTAMP_DELIVERED = HistoryLog.TIMESTAMP_DELIVERED;
+    /* package private */static final String KEY_TIMESTAMP_DELIVERED = HistoryLog.TIMESTAMP_DELIVERED;
 
-    public static final String KEY_TIMESTAMP_DISPLAYED = HistoryLog.TIMESTAMP_DISPLAYED;
+    /* package private */static final String KEY_TIMESTAMP_DISPLAYED = HistoryLog.TIMESTAMP_DISPLAYED;
 
-    public static final String KEY_STATUS = HistoryLog.STATUS;
+    /* package private */static final String KEY_STATUS = HistoryLog.STATUS;
 
-    public static final String KEY_REASON_CODE = HistoryLog.REASON_CODE;
+    /* package private */static final String KEY_REASON_CODE = HistoryLog.REASON_CODE;
 
-    public static final String KEY_READ_STATUS = HistoryLog.READ_STATUS;
+    /* package private */static final String KEY_READ_STATUS = HistoryLog.READ_STATUS;
 
-    public static final String KEY_CHAT_ID = HistoryLog.CHAT_ID;
+    /* package private */static final String KEY_CHAT_ID = HistoryLog.CHAT_ID;
 
-    public static final String KEY_CONTENT = HistoryLog.CONTENT;
+    /* package private */static final String KEY_CONTENT = HistoryLog.CONTENT;
 
-    public static final String KEY_FILEICON = HistoryLog.FILEICON;
+    /* package private */static final String KEY_FILEICON = HistoryLog.FILEICON;
 
-    public static final String KEY_FILEICON_MIME_TYPE = HistoryLog.FILEICON_MIME_TYPE;
+    /* package private */static final String KEY_FILEICON_MIME_TYPE = HistoryLog.FILEICON_MIME_TYPE;
 
-    public static final String KEY_FILENAME = HistoryLog.FILENAME;
+    /* package private */static final String KEY_FILENAME = HistoryLog.FILENAME;
 
-    public static final String KEY_FILESIZE = HistoryLog.FILESIZE;
+    /* package private */static final String KEY_FILESIZE = HistoryLog.FILESIZE;
 
-    public static final String KEY_TRANSFERRED = HistoryLog.TRANSFERRED;
+    /* package private */static final String KEY_TRANSFERRED = HistoryLog.TRANSFERRED;
 
-    public static final String KEY_DURATION = HistoryLog.DURATION;
+    /* package private */static final String KEY_DURATION = HistoryLog.DURATION;
 }

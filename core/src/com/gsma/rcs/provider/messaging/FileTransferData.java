@@ -55,12 +55,12 @@ public class FileTransferData {
     /**
      * Unique file transfer identifier
      */
-    public static final String KEY_FT_ID = FileTransferLog.FT_ID;
+    /* package private */static final String KEY_FT_ID = FileTransferLog.FT_ID;
 
     /**
      * Id of chat
      */
-    public static final String KEY_CHAT_ID = FileTransferLog.CHAT_ID;
+    /* package private */static final String KEY_CHAT_ID = FileTransferLog.CHAT_ID;
 
     /**
      * Date of the transfer
@@ -86,7 +86,7 @@ public class FileTransferData {
      * ContactId formatted number of remote contact or null if the filetransfer is an outgoing group
      * file transfer.
      */
-    public static final String KEY_CONTACT = FileTransferLog.CONTACT;
+    /* package private */static final String KEY_CONTACT = FileTransferLog.CONTACT;
 
     /**
      * @see FileTransfer.State for possible states.
@@ -113,7 +113,7 @@ public class FileTransferData {
     /**
      * URI of the file
      */
-    public static final String KEY_FILE = FileTransferLog.FILE;
+    /* package private */static final String KEY_FILE = FileTransferLog.FILE;
 
     /**
      * Filename
@@ -135,12 +135,12 @@ public class FileTransferData {
      * 
      * @see Direction
      */
-    public static final String KEY_DIRECTION = FileTransferLog.DIRECTION;
+    /* package private */static final String KEY_DIRECTION = FileTransferLog.DIRECTION;
 
     /**
      * Column name KEY_FILEICON : the URI of the file icon
      */
-    public static final String KEY_FILEICON = FileTransferLog.FILEICON;
+    /* package private */static final String KEY_FILEICON = FileTransferLog.FILEICON;
 
     /**
      * URI of the file icon
@@ -150,12 +150,12 @@ public class FileTransferData {
     /**
      * The upload transaction ID (hidden field from client applications)
      */
-    public static final String KEY_UPLOAD_TID = "upload_tid";
+    /* package private */static final String KEY_UPLOAD_TID = "upload_tid";
 
     /**
      * The download server address (hidden field from client applications)
      */
-    public static final String KEY_DOWNLOAD_URI = "download_uri";
+    /* package private */static final String KEY_DOWNLOAD_URI = "download_uri";
 
     /**
      * The time for when file on the content server is no longer valid to download.

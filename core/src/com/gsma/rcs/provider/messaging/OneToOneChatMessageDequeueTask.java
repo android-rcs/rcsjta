@@ -14,29 +14,28 @@
  * the License.
  */
 
-package com.gsma.rcs.service;
+package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.provider.eab.ContactsManager;
-import com.gsma.rcs.provider.messaging.MessageData;
-import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.DequeueTask;
 import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.OneToOneChatImpl;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.database.Cursor;
 
-/* package private */class OneToOneChatMessageDequeueTask extends DequeueTask {
+public class OneToOneChatMessageDequeueTask extends DequeueTask {
 
     private final ContactId mContact;
 
     private final ChatServiceImpl mChatService;
 
-    /* package private */OneToOneChatMessageDequeueTask(Object lock, ContactId contact,
+    public OneToOneChatMessageDequeueTask(Object lock, ContactId contact,
             InstantMessagingService imService, MessagingLog messagingLog,
             ChatServiceImpl chatService, RcsSettings rcsSettings, ContactsManager contactManager) {
         super(lock, imService, contactManager, messagingLog, rcsSettings);

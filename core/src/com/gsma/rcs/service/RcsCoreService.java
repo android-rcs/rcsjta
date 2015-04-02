@@ -55,9 +55,14 @@ import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.history.GroupChatDequeueTask;
 import com.gsma.rcs.provider.history.HistoryLog;
+import com.gsma.rcs.provider.history.OneToOneChatDequeueTask;
 import com.gsma.rcs.provider.ipcall.IPCallHistory;
+import com.gsma.rcs.provider.messaging.FileTransferDequeueTask;
 import com.gsma.rcs.provider.messaging.MessagingLog;
+import com.gsma.rcs.provider.messaging.OneToOneChatMessageDequeueTask;
+import com.gsma.rcs.provider.messaging.UpdateFileTransferStateAfterUngracefulTerminationTask;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
 import com.gsma.rcs.provider.sharing.UpdateGeolocSharingStateAfterUngracefulTerminationTask;
@@ -945,7 +950,8 @@ public class RcsCoreService extends Service implements CoreListener {
     public void tryToStartImServiceTasks(InstantMessagingService imService) {
         Core core = Core.getInstance();
         /* Update interrupted file transfer status */
-        mImOperationExecutor.execute(new UpdateFileTransferStateTask(mMessagingLog, mFtApi));
+        mImOperationExecutor.execute(new UpdateFileTransferStateAfterUngracefulTerminationTask(
+                mMessagingLog, mFtApi));
         /* Try to auto-rejoin group chats that are still marked as active. */
         mImOperationExecutor.execute(new GroupChatAutoRejoinTask(mMessagingLog, core));
         /* Try to start auto resuming of HTTP file transfers marked as PAUSED_BY_SYSTEM */
