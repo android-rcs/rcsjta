@@ -111,11 +111,6 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatDeliveryInfoLog#
-     * isDeliveredToAllRecipients(java.lang.String)
-     */
     @Override
     public boolean isDeliveredToAllRecipients(String msgId) {
         Cursor cursor = null;
@@ -132,11 +127,6 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatDeliveryInfoLog#
-     * isDisplayedByAllRecipients(java.lang.String)
-     */
     @Override
     public boolean isDisplayedByAllRecipients(String msgId) {
         Cursor cursor = null;

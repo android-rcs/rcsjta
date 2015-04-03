@@ -64,8 +64,8 @@ public class FileTransferLog implements IFileTransferLog {
             .append(ReasonCode.PAUSED_BY_SYSTEM.toInt()).toString();
 
     private static final String SELECTION_BY_EQUAL_CHAT_ID_AND_CONTACT = new StringBuilder(
-            FileTransferData.KEY_FT_ID).append("=? AND ").append(FileTransferData.KEY_CHAT_ID)
-            .append("=").append(FileTransferData.KEY_CONTACT).toString();
+            FileTransferData.KEY_CHAT_ID).append("=").append(FileTransferData.KEY_CONTACT)
+            .toString();
 
     private static final String SELECTION_BY_QUEUED_FILE_TRANSFERS = new StringBuilder(
             FileTransferData.KEY_STATE).append("=").append(State.QUEUED.toInt()).toString();
@@ -350,13 +350,8 @@ public class FileTransferLog implements IFileTransferLog {
             cursor = mLocalContentResolver.query(
                     Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId),
                     SELECTION_FILE_TRANSFER_ID, null, null, null);
-
+            // TODO check if cursor is null CR37
             return cursor.moveToFirst();
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Exception occured while determing if it is file transfer", e);
-            }
-            return false;
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -452,7 +447,7 @@ public class FileTransferLog implements IFileTransferLog {
                 String fileIcon = cursor.getString(fileIconColumnIdx);
                 long timestamp = cursor.getLong(timestampColumnIdx);
                 long timestampSent = cursor.getLong(timestampSentColumnIdx);
-                boolean isGroup = (contact == null) || (!contact.toString().equals(chatId));
+                boolean isGroup = !chatId.equals(phoneNumber);
                 MmContent content = ContentManager.createMmContentFromMime(Uri.parse(file),
                         mimeType, size, fileName);
                 Uri fileIconUri = fileIcon != null ? Uri.parse(fileIcon) : null;
@@ -523,7 +518,7 @@ public class FileTransferLog implements IFileTransferLog {
             String file = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILE));
             String fileIcon = cursor.getString(cursor
                     .getColumnIndexOrThrow(FileTransferData.KEY_FILEICON));
-            boolean isGroup = (contact == null) || !contact.toString().equals(chatId);
+            boolean isGroup = !chatId.equals(phoneNumber);
             MmContent content = ContentManager.createMmContentFromMime(Uri.parse(file), mimeType,
                     size, fileName);
             Uri fileIconUri = fileIcon != null ? Uri.parse(fileIcon) : null;
@@ -548,25 +543,15 @@ public class FileTransferLog implements IFileTransferLog {
         String[] projection = {
             columnName
         };
-        Cursor cursor = null;
-        try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), projection,
-                    null, null, null);
-            if (cursor.moveToFirst()) {
-                return cursor;
-            }
-
-            throw new SQLException(
-                    "No row returned while querying for file transfer data with fileTransferId : "
-                            + fileTransferId);
-
-        } catch (RuntimeException e) {
-            if (cursor != null) {
-                cursor.close();
-            }
-            throw e;
+        Cursor cursor = mLocalContentResolver.query(
+                Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), projection,
+                null, null, null);
+        if (cursor.moveToFirst()) {
+            return cursor;
         }
+        throw new SQLException(
+                "No row returned while querying for file transfer data with fileTransferId : "
+                        + fileTransferId);
     }
 
     private int getDataAsInt(Cursor cursor) {
@@ -639,19 +624,16 @@ public class FileTransferLog implements IFileTransferLog {
 
     @Override
     public boolean isGroupFileTransfer(String fileTransferId) {
-        String[] selArgs = new String[] {
-            fileTransferId
-        };
         Cursor cursor = null;
         try {
-            cursor = mLocalContentResolver.query(FileTransferData.CONTENT_URI,
-                    SELECTION_FILE_TRANSFER_ID, SELECTION_BY_EQUAL_CHAT_ID_AND_CONTACT, selArgs,
-                    null);
+            cursor = mLocalContentResolver.query(
+                    Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId),
+                    SELECTION_FILE_TRANSFER_ID, SELECTION_BY_EQUAL_CHAT_ID_AND_CONTACT, null, null);
+            // TODO check if cursor is null CR037
             /*
              * For a one-to-one file transfer, value of chatID is equal to the value of contact
              */
             return !cursor.moveToFirst();
-
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -661,24 +643,14 @@ public class FileTransferLog implements IFileTransferLog {
 
     @Override
     public Cursor getCacheableFileTransferData(String fileTransferId) throws SQLException {
-        Cursor cursor = null;
-        try {
-            cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), null, null,
-                    null, null);
-            if (cursor.moveToFirst()) {
-                return cursor;
-            }
-
-            throw new SQLException(
-                    "No row returned while querying for fileTransferId : ".concat(fileTransferId));
-
-        } catch (RuntimeException e) {
-            if (cursor != null) {
-                cursor.close();
-            }
-            throw e;
+        Cursor cursor = mLocalContentResolver.query(
+                Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), null, null,
+                null, null);
+        if (cursor.moveToFirst()) {
+            return cursor;
         }
+        throw new SQLException(
+                "No row returned while querying for fileTransferId : ".concat(fileTransferId));
     }
 
     @Override
@@ -717,7 +689,7 @@ public class FileTransferLog implements IFileTransferLog {
                     .getColumnIndexOrThrow(FileTransferData.KEY_FILENAME));
             String fileMimetype = cursor.getString(cursor
                     .getColumnIndexOrThrow(FileTransferData.KEY_MIME_TYPE));
-            boolean isGroup = (phoneNumber == null) || !chatId.equals(phoneNumber);
+            boolean isGroup = !chatId.equals(phoneNumber);
             Uri file = Uri.parse(fileUri);
             MmContent content = ContentManager.createMmContentFromMime(file, fileMimetype,
                     fileSize, fileName);

@@ -91,9 +91,6 @@ public class ChunkReceiver extends Thread {
             interrupt();
         } catch (Exception e) {
         }
-        if (logger.isActivated()) {
-            logger.debug("Receiver is terminated");
-        }
     }
 
     /**
@@ -101,20 +98,16 @@ public class ChunkReceiver extends Thread {
      */
     public void run() {
         try {
-            if (logger.isActivated()) {
-                logger.debug("Receiver is started");
-            }
-
             // Background processing
             while (!terminated) {
-                StringBuffer trace = new StringBuffer();
+                StringBuilder trace = new StringBuilder();
 
                 // Read first line of a new data chunk
-                StringBuffer line = readLine();
+                StringBuilder line = readLine();
 
                 if (line.length() == 0) {
-                    if (logger.isActivated()) {
-                        logger.debug("End of stream");
+                    if (MsrpConnection.MSRP_TRACE_ENABLED) {
+                        System.out.println("<<< End of stream");
                     }
                     return;
                 }
@@ -123,26 +116,18 @@ public class ChunkReceiver extends Thread {
                     trace.append(line);
                     trace.append(MsrpConstants.NEW_LINE);
                 }
-
-                if (logger.isActivated()) {
-                    logger.debug("Read a new chunk");
-                }
-
                 // Check the MSRP tag
                 String[] firstLineTags = line.toString().split(" ");
                 if ((firstLineTags.length < 3)
                         || !firstLineTags[0].equals(MsrpConstants.MSRP_HEADER)) {
-                    if (logger.isActivated()) {
-                        logger.debug("Not a MSRP message");
+                    if (MsrpConnection.MSRP_TRACE_ENABLED) {
+                        System.out.println("<<< Not a MSRP message");
                     }
                     return;
                 }
 
                 // Get the transaction ID from the first line
                 String txId = firstLineTags[1];
-                if (logger.isActivated()) {
-                    logger.debug("Transaction-ID: " + txId);
-                }
                 String end = MsrpConstants.END_MSRP_MSG + txId;
 
                 // Get response code or method name from the first line
@@ -150,14 +135,8 @@ public class ChunkReceiver extends Thread {
                 String method = null;
                 try {
                     responseCode = Integer.parseInt(firstLineTags[2]);
-                    if (logger.isActivated()) {
-                        logger.debug("Response: " + responseCode);
-                    }
                 } catch (NumberFormatException e) {
                     method = firstLineTags[2];
-                    if (logger.isActivated()) {
-                        logger.debug("Method: " + method);
-                    }
                 }
 
                 // Data chunk
@@ -189,10 +168,6 @@ public class ChunkReceiver extends Thread {
                             }
                         }
 
-                        if (logger.isActivated()) {
-                            logger.debug("Read data (" + chunkSize + ")");
-                        }
-
                         if (chunkSize >= 0) {
                             // Use Byte-Range value to read directly the block of data
                             byte[] buffer = readChunkedData(chunkSize, end);
@@ -206,9 +181,6 @@ public class ChunkReceiver extends Thread {
                                 data = new byte[buffer.length - 1];
                                 System.arraycopy(buffer, 0, data, 0, buffer.length - 1);
                                 continuationFlag = (char) buffer[buffer.length - 1];
-                                if (logger.isActivated()) {
-                                    logger.debug("Continuous flag: " + continuationFlag);
-                                }
                             }
 
                             if (MsrpConnection.MSRP_TRACE_ENABLED) {
@@ -217,17 +189,14 @@ public class ChunkReceiver extends Thread {
                             }
                         } else {
                             // Read until terminating header is found
-                            StringBuffer buffer = new StringBuffer();
-                            StringBuffer dataline;
+                            StringBuilder buffer = new StringBuilder();
+                            StringBuilder dataline;
                             boolean endchunk = false;
                             while ((!endchunk) && (buffer.length() < MsrpConstants.CHUNK_MAX_SIZE)) {
                                 dataline = readLine();
                                 if ((dataline.length() - 1 == end.length())
                                         && (dataline.toString().startsWith(end))) {
                                     continuationFlag = dataline.charAt(dataline.length() - 1);
-                                    if (logger.isActivated()) {
-                                        logger.debug("Continuous flag: " + continuationFlag);
-                                    }
                                     endchunk = true;
                                 } else {
                                     if (buffer.length() > 0) {
@@ -246,14 +215,8 @@ public class ChunkReceiver extends Thread {
                                 trace.append(continuationFlag);
                             }
                         }
-                        if (logger.isActivated()) {
-                            logger.debug("Data: " + data.length);
-                        }
                     } else if (line.toString().startsWith(end)) {
                         continuationFlag = line.charAt(line.length() - 1);
-                        if (logger.isActivated()) {
-                            logger.debug("Continuous flag: " + continuationFlag);
-                        }
                     } else {
                         // It's an header
                         int index = line.indexOf(":");
@@ -262,10 +225,6 @@ public class ChunkReceiver extends Thread {
 
                         // Add the header in the list
                         headers.put(headerName, headerValue);
-                        if (logger.isActivated()) {
-                            // Changed by Deutsche Telekom
-                            logger.debug("Header: " + headerName + " - Value: " + headerValue);
-                        }
                     }
                 }
 
@@ -293,10 +252,9 @@ public class ChunkReceiver extends Thread {
                         connection.getSession().receiveMsrpReport(txId, headers);
                     } else {
                         // Unknown request
-                        if (logger.isActivated()) {
-                            logger.debug("Unknown request received: " + method);
+                        if (MsrpConnection.MSRP_TRACE_ENABLED) {
+                            System.out.println("<<< Unknown request received:\n" + trace);
                         }
-
                         // Remove transaction info from list
                         // Changed by Deutsche Telekom
                         connection.getSession().removeMsrpTransactionInfo(txId);
@@ -336,8 +294,8 @@ public class ChunkReceiver extends Thread {
      * @return String
      * @throws IOException
      */
-    private StringBuffer readLine() throws IOException {
-        StringBuffer line = new StringBuffer();
+    private StringBuilder readLine() throws IOException {
+        StringBuilder line = new StringBuilder();
         int previous = -1;
         int current = -1;
         while ((current = stream.read()) != -1) {

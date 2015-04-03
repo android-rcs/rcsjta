@@ -11,7 +11,6 @@ import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.eab.RichAddressBookProvider;
-import com.gsma.rcs.provider.history.HistoryLogData;
 import com.gsma.rcs.provider.history.HistoryProvider;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.FileTransferProvider;
@@ -417,7 +416,7 @@ public class HistoryLogTest extends AndroidTestCase {
     private static Map<String, String> getExternalColumnMapping() {
         Map<String, String> columnMapping = new HashMap<String, String>();
         columnMapping.put(HistoryLog.PROVIDER_ID, String.valueOf(EXTERNAL_PROVIDER_ID));
-        columnMapping.put(HistoryLogData.KEY_BASECOLUMN_ID, BaseColumns._ID);
+        columnMapping.put(HistoryLog.BASECOLUMN_ID, BaseColumns._ID);
         columnMapping.put(HistoryLog.ID, "myid");
         columnMapping.put(HistoryLog.CONTENT, "mycontent");
         columnMapping.put(HistoryLog.TIMESTAMP, "mytimestamp");

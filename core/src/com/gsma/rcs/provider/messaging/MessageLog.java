@@ -251,6 +251,7 @@ public class MessageLog implements IMessageLog {
                             msgId, deliveryStatus, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
                 }
             } catch (Exception e) {
+                // TODO CR037 we should not do such rollback nor catch exception at all?
                 mLocalContentResolver.delete(Uri.withAppendedPath(Message.CONTENT_URI, msgId),
                         null, null);
                 mLocalContentResolver.delete(
@@ -346,6 +347,7 @@ public class MessageLog implements IMessageLog {
         try {
             cursor = mLocalContentResolver.query(Uri.withAppendedPath(Message.CONTENT_URI, msgId),
                     PROJECTION_MESSAGE_ID, null, null, null);
+            // TODO check null cursor CR037
             return cursor.moveToFirst();
         } finally {
             if (cursor != null) {
@@ -358,23 +360,14 @@ public class MessageLog implements IMessageLog {
         String[] projection = new String[] {
             columnName
         };
-        Cursor cursor = null;
-        try {
-            cursor = mLocalContentResolver.query(Uri.withAppendedPath(Message.CONTENT_URI, msgId),
-                    projection, null, null, null);
-            if (cursor.moveToFirst()) {
-                return cursor;
-            }
-
-            throw new SQLException("No row returned while querying for message data with msgId : "
-                    + msgId);
-
-        } catch (RuntimeException e) {
-            if (cursor != null) {
-                cursor.close();
-            }
-            throw e;
+        Cursor cursor = mLocalContentResolver.query(
+                Uri.withAppendedPath(Message.CONTENT_URI, msgId), projection, null, null, null);
+        // TODO check null cursor CR037
+        if (cursor.moveToFirst()) {
+            return cursor;
         }
+        throw new SQLException("No row returned while querying for message data with msgId : "
+                + msgId);
     }
 
     private int getDataAsInt(Cursor cursor) {
@@ -412,72 +405,45 @@ public class MessageLog implements IMessageLog {
 
     @Override
     public boolean isMessageRead(String msgId) {
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Is message read for ").append(msgId).toString());
-        }
-        return (getDataAsInt(getMessageData(MessageData.KEY_READ_STATUS, msgId)) == 1);
+        return (getDataAsInt(getMessageData(MessageData.KEY_READ_STATUS, msgId)) == ReadStatus.READ
+                .toInt());
     }
 
     @Override
     public long getMessageSentTimestamp(String msgId) {
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Get message sent timestamp for ").append(msgId)
-                    .toString());
-        }
         return getDataAsLong(getMessageData(MessageData.KEY_TIMESTAMP_SENT, msgId));
     }
 
     @Override
     public long getMessageTimestamp(String msgId) {
-        if (logger.isActivated()) {
-            logger.debug("Get message timestamp for ".concat(msgId));
-        }
         return getDataAsLong(getMessageData(MessageData.KEY_TIMESTAMP, msgId));
     }
 
     @Override
     public Status getMessageStatus(String msgId) {
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Get message status for ").append(msgId).toString());
-        }
         return Status.valueOf(getDataAsInt(getMessageData(MessageData.KEY_STATUS, msgId)));
     }
 
     @Override
     public ReasonCode getMessageReasonCode(String msgId) {
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Get message reason code for ").append(msgId).toString());
-        }
         return ReasonCode.valueOf(getDataAsInt(getMessageData(MessageData.KEY_REASON_CODE, msgId)));
     }
 
     @Override
     public String getMessageMimeType(String msgId) {
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Get message MIME-type for ").append(msgId).toString());
-        }
         return getDataAsString(getMessageData(MessageData.KEY_MIME_TYPE, msgId));
     }
 
     @Override
     public Cursor getCacheableChatMessageData(String msgId) {
-        Cursor cursor = null;
-        try {
-            cursor = mLocalContentResolver.query(Uri.withAppendedPath(Message.CONTENT_URI, msgId),
-                    null, null, null, null);
-            if (cursor.moveToFirst()) {
-                return cursor;
-            }
-
-            throw new SQLException("No row returned while querying for message data with msgId : "
-                    + msgId);
-
-        } catch (RuntimeException e) {
-            if (cursor != null) {
-                cursor.close();
-            }
-            throw e;
+        Cursor cursor = mLocalContentResolver.query(
+                Uri.withAppendedPath(Message.CONTENT_URI, msgId), null, null, null, null);
+        // TODO check null cursor CR037
+        if (cursor.moveToFirst()) {
+            return cursor;
         }
+        throw new SQLException("No row returned while querying for message data with msgId : "
+                + msgId);
     }
 
     @Override
@@ -485,10 +451,6 @@ public class MessageLog implements IMessageLog {
         return getDataAsString(getMessageData(MessageData.KEY_CONTENT, msgId));
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.orangelabs.rcs.provider.messaging.IMessageLog# getQueuedChatMessages(ContactId)
-     */
     @Override
     public Cursor getQueuedOneToOneChatMessages(ContactId contact) {
         String[] selectionArgs = new String[] {

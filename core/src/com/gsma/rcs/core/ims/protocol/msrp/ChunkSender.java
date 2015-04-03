@@ -91,9 +91,6 @@ public class ChunkSender extends Thread {
             interrupt();
         } catch (Exception e) {
         }
-        if (logger.isActivated()) {
-            logger.debug("Sender is terminated");
-        }
     }
 
     /**
@@ -101,10 +98,6 @@ public class ChunkSender extends Thread {
      */
     public void run() {
         try {
-            if (logger.isActivated()) {
-                logger.debug("Sender is started");
-            }
-
             // Read chunk to be sent
             byte chunk[] = null;
             while ((chunk = (byte[]) buffer.getMessage()) != null) {
