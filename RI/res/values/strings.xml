@@ -173,6 +173,7 @@
     <string name="title_group_chat">Group chat</string>
     <string name="title_chat">Chat with %s</string>
     <string name="title_chat_exit">Are you sure to quit the session?</string>
+    <string name="label_chat_leave_failed">Leave group chat has failed</string>
     <string name="label_chat_aborted">Chat session aborted (%1$s)</string>
     <string name="label_chat_rejected">Chat session rejected (%1$s)</string>
     <string name="menu_insert_smiley">Smiley</string>

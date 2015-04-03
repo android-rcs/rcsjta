@@ -123,27 +123,23 @@ public class GroupChatIntentService extends IntentService {
      * @param invitation
      */
     private void handleNewGroupChatInvitation(String chatId) {
-        try {
-            // Get Chat from provider
-            GroupChatDAO groupChatDAO = new GroupChatDAO(this, chatId);
-            if (LogUtils.isActive) {
-                Log.d(LOGTAG, "Group chat invitation =".concat(groupChatDAO.toString()));
-            }
-
-            // Check if it's a spam
-            if (groupChatDAO.getReasonCode() == GroupChat.ReasonCode.REJECTED_SPAM) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "Do nothing on a spam");
-                }
-                return;
-            }
-
-            forwardGCInvitation2UI(chatId, groupChatDAO);
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "Cannot read group chat from provider", e);
-            }
+        // Get Chat from provider
+        GroupChatDAO groupChatDAO = GroupChatDAO.getGroupChatDao(this, chatId);
+        if (groupChatDAO == null) {
+            return;
         }
+        if (LogUtils.isActive) {
+            Log.d(LOGTAG, "Group chat invitation =".concat(groupChatDAO.toString()));
+        }
+
+        // Check if it's a spam
+        if (groupChatDAO.getReasonCode() == GroupChat.ReasonCode.REJECTED_SPAM) {
+            if (LogUtils.isActive) {
+                Log.e(LOGTAG, "Do nothing on a spam");
+            }
+            return;
+        }
+        forwardGCInvitation2UI(chatId, groupChatDAO);
     }
 
     /**
@@ -152,18 +148,15 @@ public class GroupChatIntentService extends IntentService {
      * @param messageIntent intent with chat message
      */
     private void handleNewGroupChatMessage(String messageId) {
-        try {
-            // Get ChatMessage from provider
-            ChatMessageDAO messageDAO = new ChatMessageDAO(this, messageId);
-            if (LogUtils.isActive) {
-                Log.d(LOGTAG, "Group chat message =".concat(messageDAO.toString()));
-            }
-            forwardGCMessage2UI(messageDAO);
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "Cannot read chat message from provider", e);
-            }
+        // Get ChatMessage from provider
+        ChatMessageDAO messageDAO = ChatMessageDAO.getChatMessageDAO(this, messageId);
+        if (messageDAO == null) {
+            return;
         }
+        if (LogUtils.isActive) {
+            Log.d(LOGTAG, "Group chat message =".concat(messageDAO.toString()));
+        }
+        forwardGCMessage2UI(messageDAO);
     }
 
     /**
@@ -197,19 +190,15 @@ public class GroupChatIntentService extends IntentService {
             String msg;
             if (ChatLog.Message.MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
                 msg = getString(R.string.label_geoloc_msg);
+            } else if (ChatLog.Message.MimeType.TEXT_MESSAGE.equals(mimeType)) {
+                msg = content;
             } else {
-                if (ChatLog.Message.MimeType.TEXT_MESSAGE.equals(mimeType)) {
-                    msg = content;
-                } else {
-                    // If the GC message does not convey user content then
-                    // discards.
-                    if (LogUtils.isActive) {
-                        Log.w(LOGTAG,
-                                new StringBuilder("Discard message of type '").append(mimeType)
-                                        .append("' for chatId ").append(chatId).toString());
-                    }
-                    return;
+                /* If the GC message does not convey user content then discards */
+                if (LogUtils.isActive) {
+                    Log.w(LOGTAG, new StringBuilder("Discard message of type '").append(mimeType)
+                            .append("' for chatId ").append(chatId).toString());
                 }
+                return;
             }
 
             // Create notification

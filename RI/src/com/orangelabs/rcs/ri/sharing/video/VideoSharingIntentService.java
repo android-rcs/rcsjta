@@ -18,7 +18,13 @@
 
 package com.orangelabs.rcs.ri.sharing.video;
 
-import java.util.Calendar;
+import com.gsma.services.rcs.sharing.video.VideoSharing;
+import com.gsma.services.rcs.sharing.video.VideoSharingIntent;
+
+import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LogUtils;
+import com.orangelabs.rcs.ri.utils.RcsDisplayName;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 import android.app.IntentService;
 import android.app.Notification;
@@ -31,11 +37,7 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.gsma.services.rcs.sharing.video.VideoSharingIntent;
-import com.orangelabs.rcs.ri.R;
-import com.orangelabs.rcs.ri.utils.LogUtils;
-import com.orangelabs.rcs.ri.utils.RcsDisplayName;
-import com.orangelabs.rcs.ri.utils.Utils;
+import java.util.Calendar;
 
 /**
  * Video sharing intent service
@@ -101,24 +103,20 @@ public class VideoSharingIntentService extends IntentService {
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "onHandleIntent video sharing with ID ".concat(sharingId));
         }
-        try {
-            // Get Video Sharing from provider
-            VideoSharingDAO vshDao = new VideoSharingDAO(this, sharingId);
-            // Save VideoSharingDAO into intent
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(BUNDLE_VSHDAO_ID, vshDao);
-            intent.putExtras(bundle);
-            if (LogUtils.isActive) {
-                Log.d(LOGTAG, "Video sharing invitation ".concat(vshDao.toString()));
-            }
-            // TODO check VSH state to know if rejected
-            // TODO check validity of direction, etc ...
-            // Display invitation notification
+        // Get Video Sharing from provider
+        VideoSharingDAO vshDao = VideoSharingDAO.getVideoSharingDAO(this, sharingId);
+        if (vshDao == null) {
+            return;
+        }
+        // Save VideoSharingDAO into intent
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(BUNDLE_VSHDAO_ID, vshDao);
+        intent.putExtras(bundle);
+        if (LogUtils.isActive) {
+            Log.d(LOGTAG, "Video sharing invitation ".concat(vshDao.toString()));
+        }
+        if (VideoSharing.State.INVITED == vshDao.getState()) {
             addVideoSharingInvitationNotification(intent, vshDao);
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "Cannot read VSH data from provider", e);
-            }
         }
     }
 

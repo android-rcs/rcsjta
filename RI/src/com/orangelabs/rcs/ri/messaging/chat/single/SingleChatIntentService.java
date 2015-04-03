@@ -112,18 +112,15 @@ public class SingleChatIntentService extends IntentService {
             }
             return;
         }
-        try {
-            // Read message from provider
-            ChatMessageDAO messageDAO = new ChatMessageDAO(this, msgId);
-            if (LogUtils.isActive) {
-                Log.d(LOGTAG, "One to one chat message ".concat(messageDAO.toString()));
-            }
-            forwardSingleChatMessage2UI(this, messageDAO);
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "Cannot read chat message from provider", e);
-            }
+        // Read message from provider
+        ChatMessageDAO msgDAO = ChatMessageDAO.getChatMessageDAO(this, msgId);
+        if (msgDAO == null) {
+            return;
         }
+        if (LogUtils.isActive) {
+            Log.d(LOGTAG, "One to one chat message ".concat(msgDAO.toString()));
+        }
+        forwardSingleChatMessage2UI(this, msgDAO);
     }
 
     /**
@@ -161,15 +158,13 @@ public class SingleChatIntentService extends IntentService {
             String msg;
             if (ChatLog.Message.MimeType.GEOLOC_MESSAGE.equals(mimeType)) {
                 msg = context.getString(R.string.label_geoloc_msg);
+            } else if (ChatLog.Message.MimeType.TEXT_MESSAGE.equals(mimeType)) {
+                msg = content;
             } else {
-                if (ChatLog.Message.MimeType.TEXT_MESSAGE.equals(mimeType)) {
-                    msg = content;
-                } else {
-                    if (LogUtils.isActive) {
-                        Log.e(LOGTAG, "Unknown message type '".concat(mimeType));
-                    }
-                    return;
+                if (LogUtils.isActive) {
+                    Log.e(LOGTAG, "Discard message type '".concat(mimeType));
                 }
+                return;
             }
             // Create notification
             Notification notif = buildNotification(contentIntent, title, msg);

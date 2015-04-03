@@ -32,7 +32,9 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.image.ImageSharingIntent;
+
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
 import com.orangelabs.rcs.ri.utils.RcsDisplayName;
@@ -101,24 +103,20 @@ public class ImageSharingIntentService extends IntentService {
             return;
 
         }
-        try {
-            // Get Image sharing from provider
-            ImageSharingDAO ishDao = new ImageSharingDAO(this, sharingId);
-            // Save ImageSharingDAO into intent
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(BUNDLE_ISHDAO_ID, ishDao);
-            intent.putExtras(bundle);
-            if (LogUtils.isActive) {
-                Log.d(LOGTAG, "ISH invitation ".concat(ishDao.toString()));
-            }
-            // TODO check ISH state to know if rejected
-            // TODO check validity of direction, etc ...
-            // Display invitation notification
+        // Get Image sharing from provider
+        ImageSharingDAO ishDao = ImageSharingDAO.getImageSharingDAO(this, sharingId);
+        if (ishDao == null) {
+            return;
+        }
+        // Save ImageSharingDAO into intent
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(BUNDLE_ISHDAO_ID, ishDao);
+        intent.putExtras(bundle);
+        if (LogUtils.isActive) {
+            Log.d(LOGTAG, "ISH invitation ".concat(ishDao.toString()));
+        }
+        if (ImageSharing.State.INVITED == ishDao.getState()) {
             addImageSharingInvitationNotification(intent, ishDao);
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "Cannot read ISH data from provider", e);
-            }
         }
     }
 

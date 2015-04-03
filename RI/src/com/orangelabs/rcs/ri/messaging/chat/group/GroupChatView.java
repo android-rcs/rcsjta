@@ -63,7 +63,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -144,9 +143,6 @@ public class GroupChatView extends ChatView {
      */
     /* package private */static String chatIdOnForeground;
 
-    /**
-     * The log tag for this class
-     */
     private static final String LOGTAG = LogUtils.getTag(GroupChatView.class.getSimpleName());
 
     /**
@@ -706,10 +702,15 @@ public class GroupChatView extends ChatView {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem menuItem = menu.findItem(R.id.menu_participants);
+        MenuItem menuItemParticipants = menu.findItem(R.id.menu_participants);
+        MenuItem menuItemLeave = menu.findItem(R.id.menu_close_session);
         try {
             if (mGroupChat != null) {
-                menuItem.setEnabled(mGroupChat.isAllowedToInviteParticipants());
+                menuItemParticipants.setEnabled(mGroupChat.isAllowedToInviteParticipants());
+                menuItemLeave.setEnabled(mGroupChat.isAllowedToLeave());
+            } else {
+                menuItemParticipants.setEnabled(false);
+                menuItemLeave.setEnabled(false);
             }
         } catch (RcsServiceException e) {
             e.printStackTrace();
@@ -771,6 +772,15 @@ public class GroupChatView extends ChatView {
                 builder.setPositiveButton(getString(R.string.label_ok),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
+                                if (mGroupChat != null) {
+                                    try {
+                                        mGroupChat.leave();
+                                    } catch (RcsServiceException e) {
+                                        Utils.showMessageAndExit(GroupChatView.this,
+                                                getString(R.string.label_chat_leave_failed),
+                                                mExitOnce, e);
+                                    }
+                                }
                                 // Quit the session
                                 quitSession();
                             }
@@ -791,42 +801,6 @@ public class GroupChatView extends ChatView {
             mProgressDialog.dismiss();
             mProgressDialog = null;
         }
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_BACK:
-                if (mChatId == null) {
-                    // Exit activity
-                    finish();
-                    return true;
-
-                }
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle(getString(R.string.title_chat_exit));
-                builder.setPositiveButton(getString(R.string.label_ok),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                // Quit the session
-                                quitSession();
-                                if (LogUtils.isActive) {
-                                    Log.d(LOGTAG, "Quit the session");
-                                }
-                            }
-                        });
-                builder.setNegativeButton(getString(R.string.label_cancel),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                // Exit activity without aborting the session
-                                finish();
-                            }
-                        });
-                builder.setCancelable(true);
-                builder.show();
-                return true;
-        }
-        return super.onKeyDown(keyCode, event);
     }
 
     /**

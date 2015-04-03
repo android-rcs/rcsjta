@@ -107,58 +107,51 @@ public class FileTransferIntentService extends IntentService {
         if (LogUtils.isActive) {
             Log.d(LOGTAG, "onHandleIntent file transfer with ID ".concat(transferId));
         }
-        try {
-            // Get File Transfer from provider
-            FileTransferDAO ftDao = new FileTransferDAO(this, transferId);
-            try {
-                // Check if a Group CHAT session exists for this file transfer
-                new GroupChatDAO(this, ftDao.getChatId());
-                intent.putExtra(EXTRA_GROUP_FILE, true);
-            } catch (Exception e) {
-                // Purposely left blank
-            }
-
-            // Check if file transfer is already rejected
-            if (FileTransfer.State.REJECTED == ftDao.getState()) {
-                if (LogUtils.isActive) {
-                    Log.e(LOGTAG, "File transfer already rejected. Id=".concat(transferId));
-                }
-                return;
-            }
-
-            // Save FileTransferDAO into intent
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(BUNDLE_FTDAO_ID, ftDao);
-            intent.putExtras(bundle);
-            if (FileTransferIntent.ACTION_NEW_INVITATION.equals(action)) {
-                if (LogUtils.isActive) {
-                    Log.d(LOGTAG, "File Transfer invitation filename=" + ftDao.getFilename()
-                            + " size=" + ftDao.getSize());
-                }
-                // TODO check File Transfer state to know if rejected
-                // TODO check validity of direction, etc ...
-                addFileTransferInvitationNotification(intent, ftDao);
-            } else {
-                if (LogUtils.isActive) {
-                    Log.d(LOGTAG, "onHandleIntent file transfer resume with ID ".concat(transferId));
-                }
-                Intent intentLocal = new Intent(intent);
-                if (Direction.INCOMING == ftDao.getDirection()) {
-                    intentLocal.setClass(this, ReceiveFileTransfer.class);
-                } else {
-                    intentLocal.setClass(this, InitiateFileTransfer.class);
-                }
-                intentLocal.addFlags(Intent.FLAG_FROM_BACKGROUND);
-                intentLocal.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-                intentLocal.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intentLocal.setAction(FileTransferResumeReceiver.ACTION_FT_RESUME);
-                startActivity(intentLocal);
-            }
-        } catch (Exception e) {
-            if (LogUtils.isActive) {
-                Log.e(LOGTAG, "Cannot read FT data from provider", e);
-            }
+        // Get File Transfer from provider
+        FileTransferDAO ftDao = FileTransferDAO.getFileTransferDAO(this, transferId);
+        if (ftDao == null) {
+            return;
         }
+        /* Check if a Group CHAT session exists for this file transfer */
+        intent.putExtra(EXTRA_GROUP_FILE, GroupChatDAO.isGroupChat(this, ftDao.getChatId()));
+
+        // Check if file transfer is already rejected
+        if (FileTransfer.State.REJECTED == ftDao.getState()) {
+            if (LogUtils.isActive) {
+                Log.e(LOGTAG, "File transfer already rejected. Id=".concat(transferId));
+            }
+            return;
+        }
+
+        // Save FileTransferDAO into intent
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(BUNDLE_FTDAO_ID, ftDao);
+        intent.putExtras(bundle);
+        if (FileTransferIntent.ACTION_NEW_INVITATION.equals(action)) {
+            if (LogUtils.isActive) {
+                Log.d(LOGTAG, "File Transfer invitation filename=" + ftDao.getFilename() + " size="
+                        + ftDao.getSize());
+            }
+            // TODO check File Transfer state to know if rejected
+            // TODO check validity of direction, etc ...
+            addFileTransferInvitationNotification(intent, ftDao);
+        } else {
+            if (LogUtils.isActive) {
+                Log.d(LOGTAG, "onHandleIntent file transfer resume with ID ".concat(transferId));
+            }
+            Intent intentLocal = new Intent(intent);
+            if (Direction.INCOMING == ftDao.getDirection()) {
+                intentLocal.setClass(this, ReceiveFileTransfer.class);
+            } else {
+                intentLocal.setClass(this, InitiateFileTransfer.class);
+            }
+            intentLocal.addFlags(Intent.FLAG_FROM_BACKGROUND);
+            intentLocal.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+            intentLocal.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intentLocal.setAction(FileTransferResumeReceiver.ACTION_FT_RESUME);
+            startActivity(intentLocal);
+        }
+
     }
 
     /**

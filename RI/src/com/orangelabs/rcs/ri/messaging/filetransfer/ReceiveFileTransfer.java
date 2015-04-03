@@ -25,7 +25,6 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import com.gsma.services.rcs.filetransfer.FileTransferService;
-import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration;
 import com.gsma.services.rcs.filetransfer.GroupFileTransferListener;
 import com.gsma.services.rcs.filetransfer.OneToOneFileTransferListener;
 
@@ -52,7 +51,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.StatFs;
 import android.provider.MediaStore;
-import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -218,39 +216,26 @@ public class ReceiveFileTransfer extends Activity {
             // Get the file transfer session
             mFileTransfer = ftApi.getFileTransfer(mFtDao.getTransferId());
             if (mFileTransfer == null) {
-                try {
-                    // Fetch state from the provider
-                    mFtDao = new FileTransferDAO(this, mFtDao.getTransferId());
-                    if (FileTransfer.State.TRANSFERRED == mFtDao.getState()) {
-                        displayTransferredFile();
-                        return;
+                if (FileTransfer.State.TRANSFERRED == mFtDao.getState()) {
+                    displayTransferredFile();
+                    return;
 
-                    } else {
-                        String reasonCode = RiApplication.sFileTransferReasonCodes[mFtDao
-                                .getReasonCode().toInt()];
-                        if (LogUtils.isActive) {
-                            Log.e(LOGTAG,
-                                    new StringBuilder("Transfer failed state: ")
-                                            .append(mFtDao.getState()).append(" reason: ")
-                                            .append(reasonCode).toString());
-                        }
-                        // Transfer failed
-                        Utils.showMessageAndExit(this,
-                                getString(R.string.label_transfer_failed, reasonCode), mExitOnce);
-                        return;
-
-                    }
-                } catch (Exception e) {
+                } else {
+                    String reasonCode = RiApplication.sFileTransferReasonCodes[mFtDao
+                            .getReasonCode().toInt()];
                     if (LogUtils.isActive) {
-                        Log.e(LOGTAG, "Failed to retrieve transferred file", e);
+                        Log.e(LOGTAG,
+                                new StringBuilder("Transfer failed state: ")
+                                        .append(mFtDao.getState()).append(" reason: ")
+                                        .append(reasonCode).toString());
                     }
-
-                    // Session not found or expired
-                    Utils.showMessageAndExit(this, getString(R.string.label_session_not_found),
-                            mExitOnce);
+                    // Transfer failed
+                    Utils.showMessageAndExit(this,
+                            getString(R.string.label_transfer_failed, reasonCode), mExitOnce);
                     return;
 
                 }
+
             }
             // Add service event listener
             if (mGgroupFileTransfer) {
@@ -263,28 +248,18 @@ public class ReceiveFileTransfer extends Activity {
             if (mResuming) {
                 return;
             }
-            // TODO To be changed with CR018 which will introduce a new state :
-            // ACCEPTING.
-            // The test is kept in the meantime because it is the only way
-            // to know if FT is auto accepted by the stack (at least in normal
-            // conditions)
+
+            FileTransfer.State state = mFileTransfer.getState();
 
             // Check if not already accepted by the stack
-            if (isFileTransferInvitationAutoAccepted(ftApi.getConfiguration())) {
+            if (FileTransfer.State.INVITED != state) {
                 // File Transfer is auto accepted by the stack. Check capacity
                 isCapacityOk(mFtDao.getSize());
 
-                // Reevaluate the File Transfer state from provider
-                try {
-                    mFtDao = new FileTransferDAO(this, mFtDao.getTransferId());
-                    if (FileTransfer.State.TRANSFERRED == mFtDao.getState()) {
-                        displayTransferredFile();
-                    }
-                } catch (Exception e) {
-                    if (LogUtils.isActive) {
-                        Log.e(LOGTAG, "Failed to read file from DB", e);
-                    }
+                if (FileTransfer.State.TRANSFERRED == state) {
+                    displayTransferredFile();
                 }
+
             } else {
                 // File Transfer must be accepted/rejected by user
                 if (LogUtils.isActive) {
@@ -356,23 +331,6 @@ public class ReceiveFileTransfer extends Activity {
         } catch (Exception e) {
             Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce,
                     e);
-        }
-    }
-
-    /**
-     * Check if file transfer invitation is auto-accepted
-     * 
-     * @param config the file transfer service configuration
-     * @return True if already auto accepted by the stack
-     * @throws RcsServiceException
-     */
-    private boolean isFileTransferInvitationAutoAccepted(FileTransferServiceConfiguration config)
-            throws RcsServiceException {
-        TelephonyManager telephony = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
-        if (telephony.isNetworkRoaming()) {
-            return config.isAutoAcceptInRoamingEnabled();
-        } else {
-            return config.isAutoAcceptEnabled();
         }
     }
 

@@ -18,17 +18,24 @@
 
 package com.orangelabs.rcs.ri.messaging.chat;
 
-import android.content.Context;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.chat.ChatLog;
+import com.gsma.services.rcs.chat.ChatLog.Message;
+import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
+
+import com.orangelabs.rcs.ri.utils.LogUtils;
+
+import android.content.ContentResolver;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.SQLException;
+import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.Log;
 
 /**
  * CHAT Message Data Object
@@ -37,36 +44,46 @@ import com.gsma.services.rcs.contact.ContactUtil;
  */
 public class ChatMessageDAO implements Parcelable {
 
-    private String mMsgId;
+    private final String mMsgId;
 
-    private ContactId mContact;
+    private final ContactId mContact;
 
-    private String mChatId;
+    private final String mChatId;
 
-    private int mStatus;
+    private final Message.Content.Status mStatus;
 
-    private int mReasonCode;
+    private final Message.GroupChatEvent.Status mChatEvent;
 
-    private ReadStatus mReadStatus;
+    private final Message.Content.ReasonCode mReasonCode;
 
-    private Direction mDirection;
+    private final ReadStatus mReadStatus;
 
-    private String mMimeType;
+    private final Direction mDirection;
 
-    private String mContent;
+    private final String mMimeType;
 
-    private long mTimestamp;
+    private final String mContent;
 
-    private long timestampSent;
+    private final long mTimestamp;
 
-    private long mTimestampDelivered;
+    private final long timestampSent;
 
-    private long mTimestampDisplayed;
+    private final long mTimestampDelivered;
 
-    private static final String WHERE_CLAUSE = ChatLog.Message.MESSAGE_ID.concat("=?");
+    private final long mTimestampDisplayed;
 
-    public int getStatus() {
+    private static ContentResolver sContentResolver;
+
+    private static ContactUtil sContactUtil;
+
+    private static final String LOGTAG = LogUtils.getTag(ChatMessageDAO.class.getSimpleName());
+
+    public Message.Content.Status getStatus() {
         return mStatus;
+    }
+
+    public Message.GroupChatEvent.Status getChatEvent() {
+        return mChatEvent;
     }
 
     public String getMsgId() {
@@ -113,7 +130,7 @@ public class ChatMessageDAO implements Parcelable {
         return mContent;
     }
 
-    public int getReasonCode() {
+    public Message.Content.ReasonCode getReasonCode() {
         return mReasonCode;
     }
 
@@ -133,47 +150,52 @@ public class ChatMessageDAO implements Parcelable {
         mChatId = source.readString();
         mMimeType = source.readString();
         mContent = source.readString();
-        mStatus = source.readInt();
+        if (Message.MimeType.GROUPCHAT_EVENT.equals(mMimeType)) {
+            mChatEvent = GroupChatEvent.Status.valueOf(source.readInt());
+            mStatus = null;
+        } else {
+            mStatus = Message.Content.Status.valueOf(source.readInt());
+            mChatEvent = null;
+        }
         mReadStatus = ReadStatus.valueOf(source.readInt());
         mDirection = Direction.valueOf(source.readInt());
         mTimestamp = source.readLong();
         timestampSent = source.readLong();
         mTimestampDelivered = source.readLong();
         mTimestampDisplayed = source.readLong();
-        mReasonCode = source.readInt();
+        mReasonCode = Message.Content.ReasonCode.valueOf(source.readInt());
     }
 
-    /**
-     * Construct the CHAT Message data object from the provider
-     * <p>
-     * Note: to change with CR025 (enums)
-     * 
-     * @param context
-     * @param messageId the unique key field
-     * @throws Exception
-     */
-    public ChatMessageDAO(final Context context, final String messageId) throws Exception {
-        Uri uri = ChatLog.Message.CONTENT_URI;
-        String[] whereArgs = new String[] {
-            messageId
-        };
+    private ChatMessageDAO(ContactUtil contactUtil, ContentResolver resolver, String messageId) {
         Cursor cursor = null;
         try {
-            cursor = context.getContentResolver().query(uri, null, WHERE_CLAUSE, whereArgs, null);
+            cursor = resolver.query(Uri.withAppendedPath(ChatLog.Message.CONTENT_URI, messageId),
+                    null, null, null, null);
             if (!cursor.moveToFirst()) {
-                throw new IllegalArgumentException("messageId no found");
+                throw new SQLException("Failed to find message with ID: ".concat(messageId));
             }
             mMsgId = messageId;
             mChatId = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CHAT_ID));
             String contact = cursor
                     .getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTACT));
             if (contact != null) {
-                ContactUtil contactUtil = ContactUtil.getInstance(context);
                 mContact = contactUtil.formatContact(contact);
+            } else {
+                /* outgoing group chat message */
+                mContact = null;
             }
+
             mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.MIME_TYPE));
             mContent = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CONTENT));
-            mStatus = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.Message.STATUS));
+            int status = cursor.getColumnIndexOrThrow(ChatLog.Message.STATUS);
+            if (Message.MimeType.GROUPCHAT_EVENT.equals(mMimeType)) {
+                mChatEvent = GroupChatEvent.Status.valueOf(status);
+                mStatus = null;
+            } else {
+                mStatus = Message.Content.Status.valueOf(status);
+                mChatEvent = null;
+            }
+
             mReadStatus = ReadStatus.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(ChatLog.Message.READ_STATUS)));
             mDirection = Direction.valueOf(cursor.getInt(cursor
@@ -185,9 +207,8 @@ public class ChatMessageDAO implements Parcelable {
                     .getColumnIndexOrThrow(ChatLog.Message.TIMESTAMP_DELIVERED));
             mTimestampDisplayed = cursor.getLong(cursor
                     .getColumnIndexOrThrow(ChatLog.Message.TIMESTAMP_DISPLAYED));
-            mReasonCode = cursor.getInt(cursor.getColumnIndexOrThrow(ChatLog.Message.REASON_CODE));
-        } catch (Exception e) {
-            throw e;
+            mReasonCode = Message.Content.ReasonCode.valueOf(cursor.getInt(cursor
+                    .getColumnIndexOrThrow(ChatLog.Message.REASON_CODE)));
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -212,14 +233,18 @@ public class ChatMessageDAO implements Parcelable {
         dest.writeString(mChatId);
         dest.writeString(mMimeType);
         dest.writeString(mContent);
-        dest.writeInt(mStatus);
+        if (Message.MimeType.GROUPCHAT_EVENT.equals(mMimeType)) {
+            dest.writeInt(mChatEvent.toInt());
+        } else {
+            dest.writeInt(mStatus.toInt());
+        }
         dest.writeInt(mReadStatus.toInt());
         dest.writeInt(mDirection.toInt());
         dest.writeLong(mTimestamp);
         dest.writeLong(timestampSent);
         dest.writeLong(mTimestampDelivered);
         dest.writeLong(mTimestampDisplayed);
-        dest.writeInt(mReasonCode);
+        dest.writeInt(mReasonCode.toInt());
     };
 
     public static final Parcelable.Creator<ChatMessageDAO> CREATOR = new Parcelable.Creator<ChatMessageDAO>() {
@@ -239,6 +264,30 @@ public class ChatMessageDAO implements Parcelable {
         return "ChatMessageDAO [msgId=" + mMsgId + ", contact=" + mContact + ", chatId=" + mChatId
                 + ", direction=" + mDirection + ", mimeType=" + mMimeType + ", body='" + mContent
                 + "']";
+    }
+
+    /**
+     * Gets instance of chat message from RCS provider
+     * 
+     * @param context
+     * @param msgId
+     * @return instance or null if entry not found
+     */
+    public static ChatMessageDAO getChatMessageDAO(Context context, String msgId) {
+        if (sContentResolver == null) {
+            sContentResolver = context.getContentResolver();
+        }
+        if (sContactUtil == null) {
+            sContactUtil = ContactUtil.getInstance(context);
+        }
+        try {
+            return new ChatMessageDAO(sContactUtil, sContentResolver, msgId);
+        } catch (SQLException e) {
+            if (LogUtils.isActive) {
+                Log.e(LOGTAG, e.getMessage());
+            }
+            return null;
+        }
     }
 
 }

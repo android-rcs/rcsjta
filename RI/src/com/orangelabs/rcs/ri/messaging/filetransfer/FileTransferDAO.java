@@ -18,18 +18,23 @@
 
 package com.orangelabs.rcs.ri.messaging.filetransfer;
 
-import android.content.Context;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
+
+import com.orangelabs.rcs.ri.utils.LogUtils;
+
+import android.content.ContentResolver;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.SQLException;
+import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.Log;
 
 /**
  * File transfer Data Object
@@ -38,46 +43,49 @@ import com.gsma.services.rcs.filetransfer.FileTransferLog;
  */
 public class FileTransferDAO implements Parcelable {
 
-    private String mTransferId;
+    private final String mTransferId;
 
-    private ContactId mContact;
+    private final ContactId mContact;
 
-    private Uri mFile;
+    private final Uri mFile;
 
-    private String mFilename;
+    private final String mFilename;
 
-    private String mChatId;
+    private final String mChatId;
 
-    private String mMimeType;
+    private final String mMimeType;
 
-    private FileTransfer.State mState;
+    private final FileTransfer.State mState;
 
-    private ReadStatus mReadStatus;
+    private final ReadStatus mReadStatus;
 
-    private Direction mDirection;
+    private final Direction mDirection;
 
-    private long mTimestamp;
+    private final long mTimestamp;
 
-    private long mTimestampSent;
+    private final long mTimestampSent;
 
-    private long mTimestampDelivered;
+    private final long mTimestampDelivered;
 
-    private long mTimestampDisplayed;
+    private final long mTimestampDisplayed;
 
-    private long mSizeTransferred;
+    private final long mSizeTransferred;
 
-    private long mSize;
+    private final long mSize;
 
-    private Uri mThumbnail;
+    private final Uri mThumbnail;
 
-    private long mFileExpiration;
+    private final long mFileExpiration;
 
-    private long mFileIconExpiration;
+    private final long mFileIconExpiration;
 
-    private FileTransfer.ReasonCode mReasonCode;
+    private final FileTransfer.ReasonCode mReasonCode;
 
-    private static final String WHERE_CLAUSE = new StringBuilder(FileTransferLog.FT_ID)
-            .append("=?").toString();
+    private static ContentResolver sContentResolver;
+
+    private static ContactUtil sContactUtil;
+
+    private static final String LOGTAG = LogUtils.getTag(FileTransferDAO.class.getSimpleName());
 
     public FileTransfer.State getState() {
         return mState;
@@ -207,33 +215,24 @@ public class FileTransferDAO implements Parcelable {
         mFileIconExpiration = source.readLong();
     }
 
-    /**
-     * Construct the File Transfer data object from the provider
-     * <p>
-     * Note: to change with CR025 (enums)
-     * 
-     * @param context
-     * @param fileTransferId the unique key field
-     * @throws Exception
-     */
-    public FileTransferDAO(final Context context, final String fileTransferId) throws Exception {
-        Uri uri = FileTransferLog.CONTENT_URI;
-        String[] whereArgs = new String[] {
-            fileTransferId
-        };
+    private FileTransferDAO(ContactUtil contactUtil, ContentResolver resolver, String fileTransferId) {
         Cursor cursor = null;
         try {
-            cursor = context.getContentResolver().query(uri, null, WHERE_CLAUSE, whereArgs, null);
+            cursor = resolver.query(
+                    Uri.withAppendedPath(FileTransferLog.CONTENT_URI, fileTransferId), null, null,
+                    null, null);
             if (!cursor.moveToFirst()) {
-                throw new IllegalArgumentException("Filetransfer ID not found");
+                throw new SQLException(
+                        "Failed to find Filetransfer with ID: ".concat(fileTransferId));
             }
             mTransferId = fileTransferId;
             mChatId = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.CHAT_ID));
             String _contact = cursor.getString(cursor
                     .getColumnIndexOrThrow(FileTransferLog.CONTACT));
             if (_contact != null) {
-                ContactUtil contactUtil = ContactUtil.getInstance(context);
-                mContact = contactUtil.formatContact(_contact);
+                mContact = sContactUtil.formatContact(_contact);
+            } else {
+                mContact = null;
             }
             mFile = Uri.parse(cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FILE)));
             mFilename = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FILENAME));
@@ -258,6 +257,8 @@ public class FileTransferDAO implements Parcelable {
                     .getColumnIndexOrThrow(FileTransferLog.FILEICON));
             if (fileicon != null) {
                 mThumbnail = Uri.parse(fileicon);
+            } else {
+                mThumbnail = null;
             }
             mReasonCode = FileTransfer.ReasonCode.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(FileTransferLog.REASON_CODE)));
@@ -265,8 +266,6 @@ public class FileTransferDAO implements Parcelable {
                     .getColumnIndexOrThrow(FileTransferLog.FILE_EXPIRATION));
             mFileIconExpiration = cursor.getLong(cursor
                     .getColumnIndexOrThrow(FileTransferLog.FILEICON_EXPIRATION));
-        } catch (Exception e) {
-            throw e;
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -337,4 +336,28 @@ public class FileTransferDAO implements Parcelable {
         }
     };
 
+    /**
+     * Gets instance of File Transfer from RCS provider
+     * 
+     * @param context
+     * @param fileTransferId
+     * @return instance or null if entry not found
+     */
+    public static FileTransferDAO getFileTransferDAO(final Context context,
+            final String fileTransferId) {
+        if (sContentResolver == null) {
+            sContentResolver = context.getContentResolver();
+        }
+        if (sContactUtil == null) {
+            sContactUtil = ContactUtil.getInstance(context);
+        }
+        try {
+            return new FileTransferDAO(sContactUtil, sContentResolver, fileTransferId);
+        } catch (SQLException e) {
+            if (LogUtils.isActive) {
+                Log.e(LOGTAG, e.getMessage());
+            }
+            return null;
+        }
+    }
 }

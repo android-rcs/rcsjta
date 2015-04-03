@@ -18,15 +18,20 @@
 
 package com.orangelabs.rcs.ri.messaging.chat.group;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.GroupChat;
+
+import com.orangelabs.rcs.ri.utils.LogUtils;
 
 /**
  * Group CHAT Data Object
@@ -35,21 +40,27 @@ import com.gsma.services.rcs.chat.GroupChat;
  */
 public class GroupChatDAO implements Parcelable {
 
-    private String mChatId;
+    private final String mChatId;
 
-    private Direction mDirection;
+    private final Direction mDirection;
 
-    private String mParticipants;
+    private final String mParticipants;
 
-    private GroupChat.State mState;
+    private final GroupChat.State mState;
 
-    private String mSubject;
+    private final String mSubject;
 
-    private long mTimestamp;
+    private final long mTimestamp;
 
-    private GroupChat.ReasonCode mReasonCode;
+    private static ContentResolver sContentResolver;
 
-    private static final String WHERE_CLAUSE = ChatLog.GroupChat.CHAT_ID.concat("=?");
+    private final GroupChat.ReasonCode mReasonCode;
+
+    private static final String LOGTAG = LogUtils.getTag(GroupChatDAO.class.getSimpleName());
+
+    private static final String[] PROJECTION_CHAT_ID = new String[] {
+        ChatLog.GroupChat.CHAT_ID
+    };
 
     public GroupChat.State getState() {
         return mState;
@@ -110,22 +121,18 @@ public class GroupChatDAO implements Parcelable {
      * <p>
      * Note: to change with CR025 (enums)
      * 
-     * @param context
+     * @param resolver
      * @param chatId
-     * @throws Exception
      */
-    public GroupChatDAO(final Context context, final String chatId) throws Exception {
-        Uri uri = ChatLog.GroupChat.CONTENT_URI;
-        String[] whereArgs = new String[] {
-            chatId
-        };
+    private GroupChatDAO(ContentResolver resolver, String chatId) {
         Cursor cursor = null;
         try {
-            cursor = context.getContentResolver().query(uri, null, WHERE_CLAUSE, whereArgs, null);
+            cursor = resolver.query(Uri.withAppendedPath(ChatLog.GroupChat.CONTENT_URI, chatId),
+                    null, null, null, null);
             if (!cursor.moveToFirst()) {
-                throw new IllegalArgumentException("ChatId not found");
+                throw new SQLException("Failed to find group chat with ID: ".concat(chatId));
             }
-            this.mChatId = chatId;
+            mChatId = chatId;
             mSubject = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.GroupChat.SUBJECT));
             mState = GroupChat.State.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(ChatLog.GroupChat.STATE)));
@@ -136,8 +143,6 @@ public class GroupChatDAO implements Parcelable {
                     .getColumnIndexOrThrow(ChatLog.GroupChat.PARTICIPANTS));
             mReasonCode = GroupChat.ReasonCode.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(ChatLog.GroupChat.REASON_CODE)));
-        } catch (Exception e) {
-            throw e;
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -168,4 +173,48 @@ public class GroupChatDAO implements Parcelable {
                 + mState + ", subject=" + mSubject + "]";
     }
 
+    /**
+     * Gets instance of Group Chat from RCS provider
+     * 
+     * @param context
+     * @param chatId
+     * @return instance or null if entry not found
+     */
+    public static GroupChatDAO getGroupChatDao(Context context, String chatId) {
+        if (sContentResolver == null) {
+            sContentResolver = context.getContentResolver();
+        }
+        try {
+            return new GroupChatDAO(sContentResolver, chatId);
+        } catch (SQLException e) {
+            if (LogUtils.isActive) {
+                Log.e(LOGTAG, e.getMessage());
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Checks if group chat exists for chat ID
+     * 
+     * @param context
+     * @param chatId
+     * @return true if group chat exists for chat ID
+     */
+    public static boolean isGroupChat(Context context, String chatId) {
+        if (sContentResolver == null) {
+            sContentResolver = context.getContentResolver();
+        }
+        Cursor cursor = null;
+        try {
+            cursor = sContentResolver.query(
+                    Uri.withAppendedPath(ChatLog.GroupChat.CONTENT_URI, chatId),
+                    PROJECTION_CHAT_ID, null, null, null);
+            return cursor.moveToFirst();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
 }
