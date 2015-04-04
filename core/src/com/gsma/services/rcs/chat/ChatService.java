@@ -57,7 +57,7 @@ import java.util.WeakHashMap;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class ChatService extends RcsService {
+public final class ChatService extends RcsService {
     /**
      * API
      */
@@ -78,8 +78,20 @@ public class ChatService extends RcsService {
 
     /**
      * Connects to the API
+     * 
+     * @throws RcsPermissionDeniedException
      */
-    public void connect() {
+    public void connect() throws RcsPermissionDeniedException {
+        if (!sApiCompatible) {
+            try {
+                sApiCompatible = mRcsServiceControl.isCompatible();
+                if (!sApiCompatible) {
+                    throw new RcsPermissionDeniedException("API is not compatible");
+                }
+            } catch (RcsServiceException e) {
+                throw new RcsPermissionDeniedException("Cannot check API compatibility");
+            }
+        }
         Intent serviceIntent = new Intent(IChatService.class.getName());
         serviceIntent.setPackage(RcsServiceControl.RCS_STACK_PACKAGENAME);
         mCtx.bindService(serviceIntent, apiConnection, 0);

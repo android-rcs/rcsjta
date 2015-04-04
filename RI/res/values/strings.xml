@@ -15,6 +15,7 @@
     <string name="label_command_in_progress">Command in progress...</string>
     <string name="label_session_not_found">Session not found</string>
     <string name="label_api_failed">Call API method has failed</string>
+    <string name="label_api_not_compatible">API is not compatible</string>
     <string name="label_api_unavailable">RCS service not available</string>
     <string name="label_api_disconnected">RCS service disconnected</string>
     <string name="label_api_disabled_">RCS service disabled</string>

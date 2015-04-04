@@ -49,6 +49,8 @@ public abstract class RcsService {
 
     private final Map<RcsServiceRegistrationListener, WeakReference<IRcsServiceRegistrationListener>> mRegistrationListeners = new WeakHashMap<RcsServiceRegistrationListener, WeakReference<IRcsServiceRegistrationListener>>();
 
+    protected static boolean sApiCompatible = false;
+
     /**
      * Information about the current build
      */
@@ -272,8 +274,10 @@ public abstract class RcsService {
 
     /**
      * Connects to the API
+     * 
+     * @throws RcsPermissionDeniedException
      */
-    public abstract void connect();
+    public abstract void connect() throws RcsPermissionDeniedException;
 
     /**
      * Disconnects from the API

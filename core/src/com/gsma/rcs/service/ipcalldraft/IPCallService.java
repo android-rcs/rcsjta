@@ -22,6 +22,7 @@
 
 package com.gsma.rcs.service.ipcalldraft;
 
+import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceControl;
 import com.gsma.services.rcs.RcsServiceException;
@@ -76,8 +77,20 @@ public class IPCallService extends RcsService {
 
     /**
      * Connects to the API
+     * 
+     * @throws RcsPermissionDeniedException
      */
-    public void connect() {
+    public void connect() throws RcsPermissionDeniedException {
+        if (!sApiCompatible) {
+            try {
+                sApiCompatible = mRcsServiceControl.isCompatible();
+                if (!sApiCompatible) {
+                    throw new RcsPermissionDeniedException("API is not compatible");
+                }
+            } catch (RcsServiceException e) {
+                throw new RcsPermissionDeniedException("Cannot check API compatibility");
+            }
+        }
         Intent serviceIntent = new Intent(IIPCallService.class.getName());
         serviceIntent.setPackage(RcsServiceControl.RCS_STACK_PACKAGENAME);
         mCtx.bindService(serviceIntent, apiConnection, 0);
@@ -129,6 +142,8 @@ public class IPCallService extends RcsService {
                 // Do nothing
             }
             mListener.onServiceDisconnected(reasonCode);
+
+            sApiCompatible = false;
         }
     };
 

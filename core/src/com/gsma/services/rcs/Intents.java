@@ -65,6 +65,31 @@ public class Intents {
          */
         public static final String EXTRA_SET_ACTIVATION_MODE = "set_activation_mode";
 
+        /**
+         * Intent to check if RCS stack is compatible with RCS API
+         */
+        public static final String ACTION_GET_COMPATIBLITY = "com.gsma.services.rcs.action.GET_COMPATIBLITY";
+
+        /**
+         * Used as a string extra field in ACTION_GET_COMPATIBLITY intent to convey the codename
+         */
+        public static final String EXTRA_GET_COMPATIBLITY_CODENAME = "get_compatibility_codename";
+
+        /**
+         * Used as an integer extra field in ACTION_GET_COMPATIBLITY intent to convey the version
+         */
+        public static final String EXTRA_GET_COMPATIBLITY_VERSION = "get_compatibility_version";
+
+        /**
+         * Used as an integer extra field in ACTION_GET_COMPATIBLITY intent to convey the increment
+         */
+        public static final String EXTRA_GET_COMPATIBLITY_INCREMENT = "get_compatibility_increment";
+
+        /**
+         * Used as an boolean extra field in ACTION_GET_COMPATIBLITY intent to convey the response
+         */
+        public static final String EXTRA_GET_COMPATIBLITY_RESPONSE = "get_compatibility_response";
+
         private Service() {
         }
     }

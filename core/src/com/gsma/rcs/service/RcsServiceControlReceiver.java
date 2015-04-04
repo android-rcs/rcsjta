@@ -27,12 +27,14 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.EnableRcseSwitch;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Intents;
+import com.gsma.services.rcs.RcsService;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.text.TextUtils;
 
 /**
  * A class to control the service activation.
@@ -47,6 +49,8 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
     private RcsSettings mRcsSettings;
 
     private Context mContext;
+
+    private static final int INVALID_EXTRA = -1;
 
     private boolean getActivationModeChangeable() {
         EnableRcseSwitch enableRcseSwitch = mRcsSettings.getEnableRcseSwitch();
@@ -98,6 +102,22 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
         }
     }
 
+    private boolean isCompatible(String codename, int version, int increment) {
+        if (TextUtils.isEmpty(codename) || version == INVALID_EXTRA || increment == INVALID_EXTRA) {
+            return false;
+        }
+        if (!RcsService.Build.API_CODENAME.equals(codename)) {
+            return false;
+        }
+        if (RcsService.Build.API_VERSION != version) {
+            return false;
+        }
+        if (RcsService.Build.API_INCREMENTAL != increment) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
         LocalContentResolver localContentResolver = new LocalContentResolver(context);
@@ -124,6 +144,20 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
             boolean active = intent
                     .getBooleanExtra(Intents.Service.EXTRA_SET_ACTIVATION_MODE, true);
             setActivationMode(context, active);
+        } else if (Intents.Service.ACTION_GET_COMPATIBLITY.equals(intent.getAction())) {
+            Bundle results = getResultExtras(true);
+            if (results == null) {
+                return;
+            }
+            String codename = intent
+                    .getStringExtra(Intents.Service.EXTRA_GET_COMPATIBLITY_CODENAME);
+            int version = intent.getIntExtra(Intents.Service.EXTRA_GET_COMPATIBLITY_VERSION,
+                    INVALID_EXTRA);
+            int increment = intent.getIntExtra(Intents.Service.EXTRA_GET_COMPATIBLITY_INCREMENT,
+                    INVALID_EXTRA);
+            results.putBoolean(Intents.Service.EXTRA_GET_COMPATIBLITY_RESPONSE,
+                    isCompatible(codename, version, increment));
+            setResultExtras(results);
         }
     }
 

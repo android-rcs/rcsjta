@@ -41,7 +41,6 @@ import java.lang.reflect.Method;
  * A utility class to control the activation of the RCS service.
  */
 public class RcsServiceControl {
-
     /**
      * RCS stack package name
      */
@@ -183,8 +182,12 @@ public class RcsServiceControl {
      * @return the result extra data bundle or null if no response is received due to timeout
      */
     private Bundle queryRcsStackByIntent(String action) {
+        return queryRcsStackByIntent(new Intent(action));
+    }
+
+    private Bundle queryRcsStackByIntent(Intent intent) {
         final SyncBroadcastReceiver broadcastReceiver = new SyncBroadcastReceiver();
-        final Intent broadcastIntent = new Intent(action).setPackage(RCS_STACK_PACKAGENAME);
+        final Intent broadcastIntent = intent.setPackage(RCS_STACK_PACKAGENAME);
 
         // Update flags of the broadcast intent to increase performance
         trySetIntentForActivePackageAndReceiverInForeground(broadcastIntent);
@@ -304,4 +307,25 @@ public class RcsServiceControl {
         mContext.sendBroadcast(broadcastIntent);
     }
 
+    /**
+     * Returns true if the RCS API and core RCS stack are compatible.
+     * 
+     * @return true if the RCS stack and RCS API are compatible.
+     * @throws RcsServiceException
+     */
+    public boolean isCompatible() throws RcsServiceException {
+        Intent intent = new Intent(Intents.Service.ACTION_GET_COMPATIBLITY);
+        intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBLITY_CODENAME,
+                RcsService.Build.API_CODENAME);
+        intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBLITY_VERSION,
+                RcsService.Build.API_VERSION);
+        intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBLITY_INCREMENT,
+                RcsService.Build.API_INCREMENTAL);
+        Bundle resultExtraData = queryRcsStackByIntent(intent);
+        if (resultExtraData == null) {
+            // No response
+            throw new RcsServiceException("Failed to get RCS API compatibility");
+        }
+        return resultExtraData.getBoolean(Intents.Service.EXTRA_GET_COMPATIBLITY_RESPONSE, false);
+    }
 }

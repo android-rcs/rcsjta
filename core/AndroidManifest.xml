@@ -226,6 +226,7 @@
                 <action android:name="com.gsma.services.rcs.action.GET_ACTIVATION_MODE_CHANGEABLE" />
                 <action android:name="com.gsma.services.rcs.action.GET_ACTIVATION_MODE" />
                 <action android:name="com.gsma.services.rcs.action.SET_ACTIVATION_MODE" />
+                <action android:name="com.gsma.services.rcs.action.GET_COMPATIBLITY" />
             </intent-filter>
         </receiver>
 

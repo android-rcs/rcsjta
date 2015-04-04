@@ -24,6 +24,7 @@ package com.gsma.services.rcs.capability;
 
 import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsIllegalArgumentException;
+import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceControl;
@@ -52,7 +53,7 @@ import java.util.Set;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class CapabilityService extends RcsService {
+public final class CapabilityService extends RcsService {
     /**
      * Intent broadcasted to discover extensions
      */
@@ -80,8 +81,20 @@ public class CapabilityService extends RcsService {
 
     /**
      * Connects to the API
+     * 
+     * @throws RcsPermissionDeniedException
      */
-    public void connect() {
+    public void connect() throws RcsPermissionDeniedException {
+        if (!sApiCompatible) {
+            try {
+                sApiCompatible = mRcsServiceControl.isCompatible();
+                if (!sApiCompatible) {
+                    throw new RcsPermissionDeniedException("API is not compatible");
+                }
+            } catch (RcsServiceException e) {
+                throw new RcsPermissionDeniedException("Cannot check API compatibility");
+            }
+        }
         Intent serviceIntent = new Intent(ICapabilityService.class.getName());
         serviceIntent.setPackage(RcsServiceControl.RCS_STACK_PACKAGENAME);
         mCtx.bindService(serviceIntent, apiConnection, 0);

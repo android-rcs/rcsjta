@@ -27,10 +27,14 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.widget.TextView;
 
+import com.gsma.services.rcs.RcsPermissionDeniedException;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceListener;
 import com.gsma.services.rcs.capability.CapabilityService;
+
 import com.orangelabs.rcs.ri.R;
+import com.orangelabs.rcs.ri.utils.LockAccess;
+import com.orangelabs.rcs.ri.utils.Utils;
 
 /**
  * Display and monitor the service status
@@ -42,6 +46,8 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
      * Service API
      */
     private RcsService mApi;
+
+    private LockAccess mExitOnce = new LockAccess();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -63,7 +69,12 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
         mApi = new CapabilityService(getApplicationContext(), this);
 
         // Connect API
-        mApi.connect();
+        try {
+            mApi.connect();
+        } catch (RcsPermissionDeniedException e) {
+            mApi = null;
+            Utils.showMessageAndExit(this, getString(R.string.label_api_not_compatible), mExitOnce);
+        }
     }
 
     @Override
@@ -77,8 +88,10 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
             // Nothing to do
         }
 
-        // Disconnect API
-        mApi.disconnect();
+        if (mApi != null) {
+            // Disconnect API
+            mApi.disconnect();
+        }
     }
 
     /**
@@ -120,7 +133,12 @@ public class ServiceStatus extends Activity implements RcsServiceListener {
         @Override
         public void onReceive(Context context, final Intent intent) {
             // Retry a connection to the service
-            mApi.connect();
+            try {
+                mApi.connect();
+            } catch (RcsPermissionDeniedException e) {
+                mApi = null;
+                Utils.showMessageAndExit(ServiceStatus.this, getString(R.string.label_api_not_compatible), mExitOnce);
+            }
         }
     };
 }
