@@ -47,6 +47,8 @@ import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnUtils;
 import com.gsma.rcs.core.ims.service.im.chat.iscomposing.IsComposingManager;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatMessageSession;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatNotificationSession;
+import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
+import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.DownloadFromInviteFileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
@@ -767,20 +769,37 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             return;
         }
 
-        // Auto reject if file too big
-        long maxSize = mRcsSettings.getMaxFileTransferSize();
-        if (maxSize > 0 && fileTransferInfo.getSize() > maxSize) {
+        /* Auto reject if file too big or size exceeds device storage capacity. */
+        FileSharingError error = FileSharingSession.isFileCapacityAcceptable(
+                fileTransferInfo.getSize(), mRcsSettings);
+        if (error != null) {
             if (sLogger.isActivated()) {
-                sLogger.debug("File is too big, reject the HTTP File transfer");
+                sLogger.debug("File is too big or exceeds storage capacity, "
+                        .concat("reject the HTTP File transfer."));
             }
             MmContent fileIconContent = (fileTransferHttpThumbnail == null) ? null
                     : fileTransferHttpThumbnail.getLocalMmContent(msgId);
-            getImsService()
-                    .getImsModule()
-                    .getCoreListener()
-                    .handleFileTransferInvitationRejected(contact,
-                            fileTransferInfo.getLocalMmContent(), fileIconContent,
-                            ReasonCode.REJECTED_MAX_SIZE, timestamp, timestampSent);
+
+            int errorCode = error.getErrorCode();
+            switch (errorCode) {
+                case FileSharingError.MEDIA_SIZE_TOO_BIG:
+                    getImsService().getImsModule().getCoreListener()
+                            .handleFileTransferInvitationRejected(contact,
+                                    fileTransferInfo.getLocalMmContent(), fileIconContent,
+                                    ReasonCode.REJECTED_MAX_SIZE, timestamp, timestampSent);
+                    break;
+                case FileSharingError.NOT_ENOUGH_STORAGE_SPACE:
+                    getImsService().getImsModule().getCoreListener()
+                            .handleFileTransferInvitationRejected(contact,
+                                    fileTransferInfo.getLocalMmContent(), fileIconContent,
+                                    ReasonCode.REJECTED_LOW_SPACE, timestamp, timestampSent);
+                    break;
+                default:
+                    if (sLogger.isActivated()) {
+                        sLogger.error("Unexpected error while receiving HTTP file transfer."
+                                .concat(Integer.toString(errorCode)));
+                    }
+            }
             return;
         }
 
