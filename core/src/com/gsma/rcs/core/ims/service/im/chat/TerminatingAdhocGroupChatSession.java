@@ -124,11 +124,10 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
     }
 
     private Set<ContactId> getContactToBeInvited(Map<ContactId, ParticipantStatus> participants) {
-        final boolean logActivated = logger.isActivated();
         String chatId = getContributionID();
         Set<ContactId> storedContacts = new HashSet<ContactId>();
-        for (Map.Entry<ContactId, ParticipantStatus> participant : mMessagingLog
-                .getParticipants(chatId).entrySet()) {
+        for (Map.Entry<ContactId, ParticipantStatus> participant : mMessagingLog.getParticipants(
+                chatId).entrySet()) {
             switch (participant.getValue()) {
                 case INVITING:
                 case INVITED:
@@ -141,34 +140,31 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
             }
         }
 
-        Set<ContactId> contactsToBeInvited = new HashSet<ContactId>();
-        if (!storedContacts.isEmpty()) {
-            contactsToBeInvited = storedContacts;
-
-            /*
-             * Only contacts we have stored since before but didn't receive in the group chat
-             * invitation are missing and should be re-invited.
-             */
-            contactsToBeInvited.removeAll(participants.keySet());
-
-            if (!contactsToBeInvited.isEmpty()) {
-                if (logActivated) {
-                    StringBuilder stringBuilder = new StringBuilder(
-                            "Invite to restart with missing contacts: ");
-                    for (ContactId contactToBeInvited : contactsToBeInvited) {
-                        stringBuilder.append(contactToBeInvited.toString()).append(" ");
-                    }
-                    logger.info(stringBuilder.toString());
-                }
-            }
-        } else {
-            if (logActivated) {
+        if (storedContacts.isEmpty()) {
+            if (logger.isActivated()) {
                 logger.info("No initial Group Chat");
             }
+            return storedContacts;
         }
-        return storedContacts;
+        Set<ContactId> contactsToBeInvited = storedContacts;
+        /*
+         * Only contacts we have stored since before but didn't receive in the group chat invitation
+         * are missing and should be re-invited.
+         */
+        contactsToBeInvited.removeAll(participants.keySet());
+        if (!logger.isActivated() || !contactsToBeInvited.isEmpty()) {
+            /* Early exit if log is not activated or set of contacts to be invited is empty */
+            return contactsToBeInvited;
+            
+        }
+        StringBuilder stringBuilder = new StringBuilder("Invite to restart with missing contacts: ");
+        for (ContactId contactToBeInvited : contactsToBeInvited) {
+            stringBuilder.append(contactToBeInvited.toString()).append(" ");
+        }
+        logger.info(stringBuilder.toString());
+        return contactsToBeInvited;
     }
-    
+
     /**
      * Background processing
      */

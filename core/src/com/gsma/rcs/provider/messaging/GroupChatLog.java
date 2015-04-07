@@ -73,7 +73,7 @@ public class GroupChatLog implements IGroupChatLog {
     };
     // @formatter:on
 
-    private static final String[] PROJECTION_CHAT_ID = new String[] {
+    private static final String[] PROJECTION_GC_CHAT_ID = new String[] {
         ChatData.KEY_CHAT_ID
     };
 
@@ -255,7 +255,7 @@ public class GroupChatLog implements IGroupChatLog {
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(ChatData.CONTENT_URI, chatId), PROJECTION_CHAT_ID,
+                    Uri.withAppendedPath(ChatData.CONTENT_URI, chatId), PROJECTION_GC_CHAT_ID,
                     SELECT_CHAT_ID_STATUS_REJECTED, null, null);
             // TODO check null cursor CR037
             return cursor.moveToFirst();
@@ -322,7 +322,7 @@ public class GroupChatLog implements IGroupChatLog {
     public Set<String> getChatIdsOfActiveGroupChatsForAutoRejoin() {
         Cursor cursor = null;
         try {
-            cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, PROJECTION_CHAT_ID,
+            cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, PROJECTION_GC_CHAT_ID,
                     SELECT_ACTIVE_GROUP_CHATS, null, null);
             // TODO check null cursor CR037
             Set<String> activeGroupChats = new HashSet<String>();

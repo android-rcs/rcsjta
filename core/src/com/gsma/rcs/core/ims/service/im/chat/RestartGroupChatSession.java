@@ -119,14 +119,14 @@ public class RestartGroupChatSession extends GroupChatSession {
 
             Set<ContactId> invitees = new HashSet<ContactId>();
             Map<ContactId,ParticipantStatus> participants = getParticipants();
-            for (ContactId participant : participants.keySet()) {
-                switch (participants.get(participant)) {
+            for (Map.Entry<ContactId, ParticipantStatus> participant : participants.entrySet()) {
+                switch (participants.get(participant.getValue())) {
                     case INVITE_QUEUED:
                     case INVITING:
                     case INVITED:
                     case CONNECTED:
                     case DISCONNECTED:
-                        invitees.add(participant);
+                        invitees.add(participant.getKey());
                         break;
 
                     default:
