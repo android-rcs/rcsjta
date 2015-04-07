@@ -25,6 +25,26 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 import static com.gsma.rcs.utils.StringUtils.UTF8_STR;
 
+import com.gsma.rcs.core.CoreException;
+import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.network.sip.SipUtils;
+import com.gsma.rcs.core.ims.protocol.http.HttpAuthenticationAgent;
+import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
+import com.gsma.rcs.platform.AndroidFactory;
+import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.utils.CloseableUtils;
+import com.gsma.rcs.utils.logger.Logger;
+
+import android.net.Uri;
+
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.ParseException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.util.EntityUtils;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -44,26 +64,6 @@ import java.util.Map;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
-
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.ParseException;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.util.EntityUtils;
-
-import android.net.Uri;
-
-import com.gsma.rcs.core.CoreException;
-import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.core.ims.network.sip.SipUtils;
-import com.gsma.rcs.core.ims.protocol.http.HttpAuthenticationAgent;
-import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
-import com.gsma.rcs.platform.AndroidFactory;
-import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.utils.CloseableUtils;
-import com.gsma.rcs.utils.logger.Logger;
 
 /**
  * HTTP upload manager
@@ -346,104 +346,121 @@ public class HttpUploadManager extends HttpTransferManager {
         if (mFileIcon != null) {
             writeThumbnailMultipart(outputStream);
         }
-        // From this point, resuming is possible
+        /* From this point, resuming is possible */
         ((HttpUploadTransferEventListener) getListener()).uploadStarted();
         try {
-            // Add File
+            /* Add File */
             writeFileMultipart(outputStream, file);
             if (!isCancelled()) {
-                // if the upload is cancelled, we don't send the last boundary to get bad request
-                outputStream.writeBytes(twoHyphens + BOUNDARY_TAG + twoHyphens);
+                try {
+                    /*
+                     * if the upload is cancelled, we don't send the last boundary to get bad
+                     * request
+                     */
+                    outputStream.writeBytes(twoHyphens + BOUNDARY_TAG + twoHyphens);
 
-                // Check response status code
-                int responseCode = connection.getResponseCode();
-                if (sLogger.isActivated()) {
-                    sLogger.debug("Second POST response " + responseCode + " "
-                            + connection.getResponseMessage());
-                }
-                byte[] result = null;
-                boolean success = false;
-                boolean retry = false;
-                if (HTTP_TRACE_ENABLED) {
-                    String trace = "<<< Receive HTTP response:";
-                    trace += "\n " + responseCode + " " + connection.getResponseMessage();
-                    System.out.println(trace);
-                }
-                switch (responseCode) {
-                    case HttpStatus.SC_OK:
-                        // 200 OK
-                        success = true;
-                        InputStream inputStream = connection.getInputStream();
-                        result = convertStreamToString(inputStream);
-                        inputStream.close();
-                        if (HTTP_TRACE_ENABLED) {
-                            System.out.println("\n " + new String(result));
-                        }
-                        break;
-                    case HttpStatus.SC_SERVICE_UNAVAILABLE:
-                        // SERVICE UNAVAILABLE : 503
-                        String header = connection.getHeaderField("Retry-After");
-                        int retryAfter = 0;
-                        if (header != null) {
-                            try {
-                                retryAfter = Integer.parseInt(header);
-                            } catch (NumberFormatException e) {
-                                // Nothing to do
-                            }
-                            if (retryAfter >= 0) {
-                                try {
-                                    Thread.sleep(retryAfter * 1000);
-                                    // Retry procedure
-                                    if (mRetryCount < RETRY_MAX) {
-                                        mRetryCount++;
-                                        retry = true;
-                                    }
-                                } catch (InterruptedException e) {
-                                    // Nothing to do
-                                }
-                            }
-                        }
-                        break;
-                    default:
-                        break; // no success, no retry
-                }
-
-                // Close streams
-                outputStream.flush();
-                outputStream.close();
-                connection.disconnect();
-
-                if (success) {
-                    return result;
-                } else if (retry) {
-                    return sendMultipartPost(resp);
-                } else {
-                    if (sLogger.isActivated()) {
-                        sLogger.warn("File Upload aborted, Received " + responseCode
-                                + " from server");
-                    }
-                    return null;
-                }
-            } else {
-                if (isPaused()) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("File transfer paused by user");
-                    }
-                    // Sent data are bufferized. Must wait for response to enable sending to server.
+                    /* Check response status code */
                     int responseCode = connection.getResponseCode();
                     if (sLogger.isActivated()) {
                         sLogger.debug("Second POST response " + responseCode + " "
                                 + connection.getResponseMessage());
+                    }
+                    byte[] result = null;
+                    boolean success = false;
+                    boolean retry = false;
+                    if (HTTP_TRACE_ENABLED) {
+                        String trace = "<<< Receive HTTP response:";
+                        trace += "\n " + responseCode + " " + connection.getResponseMessage();
+                        System.out.println(trace);
+                    }
+                    switch (responseCode) {
+                        case HttpStatus.SC_OK:
+                            success = true;
+                            InputStream inputStream = connection.getInputStream();
+                            result = convertStreamToString(inputStream);
+                            inputStream.close();
+                            if (HTTP_TRACE_ENABLED) {
+                                System.out.println("\n " + new String(result));
+                            }
+                            break;
+                        case HttpStatus.SC_SERVICE_UNAVAILABLE:
+                            String header = connection.getHeaderField("Retry-After");
+                            int retryAfter = 0;
+                            if (header != null) {
+                                try {
+                                    retryAfter = Integer.parseInt(header) * 1000;
+                                } catch (NumberFormatException ignore) {
+                                    /* Nothing to do, ignore the exception */
+                                }
+                                if (retryAfter >= 0) {
+                                    try {
+                                        Thread.sleep(retryAfter);
+                                        /* Retry procedure */
+                                        if (mRetryCount < RETRY_MAX) {
+                                            mRetryCount++;
+                                            retry = true;
+                                        }
+                                    } catch (InterruptedException ignore) {
+                                        /* Nothing to do, ignore the exception */
+                                    }
+                                }
+                            }
+                            break;
+                        default:
+                            break; /* no success, no retry */
+                    }
+
+                    if (success) {
+                        return result;
+                    } else if (retry) {
+                        return sendMultipartPost(resp);
+                    } else {
+                        if (sLogger.isActivated()) {
+                            sLogger.warn("File Upload aborted, Received " + responseCode
+                                    + " from server");
+                        }
+                        return null;
+                    }
+                } catch (IOException e) {
+                    if (sLogger.isActivated()) {
+                        sLogger.warn("File Upload paused due to " + e.getLocalizedMessage()
+                                + " now in state paused.");
+                    }
+                    /*
+                     * When there is a connection problem causing transfer terminated, state should
+                     * be set to paused.
+                     */
+                    pauseTransferBySystem();
+                    return null;
+                }
+            } else {
+                /* Check if user has paused transfer */
+                if (isPaused()) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("File transfer paused by user");
+                    }
+                    try {
+                        /*
+                         * Sent data are bufferized. Must wait for response to enable sending to
+                         * server.
+                         */
+                        int responseCode = connection.getResponseCode();
+                        if (sLogger.isActivated()) {
+                            sLogger.debug("Second POST response " + responseCode + " "
+                                    + connection.getResponseMessage());
+                        }
+                    } catch (IOException e) {
+                        if (sLogger.isActivated()) {
+                            sLogger.warn("File Upload aborted due to " + e.getLocalizedMessage()
+                                    + " now in state pause, waiting for resume...");
+                        }
+                        return null;
                     }
                 } else {
                     if (sLogger.isActivated()) {
                         sLogger.debug("File transfer cancelled by user");
                     }
                 }
-                // Close streams
-                outputStream.flush();
-                outputStream.close();
-                connection.disconnect();
                 return null;
             }
         } catch (SecurityException e) {
@@ -456,15 +473,19 @@ public class HttpUploadManager extends HttpTransferManager {
             }
             getListener().httpTransferNotAllowedToSend();
             return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-
-            if (sLogger.isActivated()) {
-                sLogger.warn("File Upload aborted due to " + e.getLocalizedMessage()
-                        + " now in state pause, waiting for resume...");
+        } finally {
+            /* Close streams */
+            if (outputStream != null) {
+                try {
+                    outputStream.flush();
+                    outputStream.close();
+                } catch (IOException ignore) {
+                    /* Nothing to do, ignore the exception */
+                }
             }
-            pauseTransferBySystem();
-            return null;
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
     }
 
