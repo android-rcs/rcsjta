@@ -40,9 +40,9 @@ public class FileUpload {
     public enum State {
 
         /**
-         * Inactive state
+         * Initiating state
          */
-        INACTIVE(0),
+        INITIATING(0),
 
         /**
          * Upload is started

@@ -18,7 +18,7 @@ package com.gsma.rcs.service.api;
 
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.extension.MultimediaSession;
+import com.gsma.services.rcs.extension.MultimediaSession.ReasonCode;
 import com.gsma.services.rcs.extension.MultimediaSession.State;
 
 /**
@@ -26,28 +26,30 @@ import com.gsma.services.rcs.extension.MultimediaSession.State;
  */
 public class MultimediaSessionStorageAccessor {
 
-    private MultimediaSession.State mState;
+    private State mState;
 
-    private MultimediaSession.ReasonCode mReason;
+    private ReasonCode mReason;
 
     private final ContactId mRemoteContact;
 
     private final Direction mDirection;
 
     private final String mServiceId;
-        
+
     /**
      * Constructor
      * 
      * @param direction
      * @param remoteContact
-     * @param serviceId 
+     * @param serviceId
+     * @param state
      */
-    public MultimediaSessionStorageAccessor(Direction direction, ContactId remoteContact, String serviceId) {
-        mState = State.INITIATING;
+    public MultimediaSessionStorageAccessor(Direction direction, ContactId remoteContact,
+            String serviceId, State state) {
+        mState = state;
         mDirection = direction;
         mRemoteContact = remoteContact;
-        mServiceId  = serviceId;
+        mServiceId = serviceId;
     }
 
     /**
@@ -55,7 +57,7 @@ public class MultimediaSessionStorageAccessor {
      * 
      * @return the state of the multimedia session
      */
-    public MultimediaSession.State getState() {
+    public State getState() {
         return mState;
     }
 
@@ -79,6 +81,7 @@ public class MultimediaSessionStorageAccessor {
 
     /**
      * Gets the service identifier
+     * 
      * @return the service identifier
      */
     public String getServiceId() {
@@ -86,11 +89,12 @@ public class MultimediaSessionStorageAccessor {
     }
 
     /**
-     * Sets the state of the multimedia session
+     * Sets the state and reason code of the multimedia session
      * 
      * @param state the state of the multimedia session
+     * @param reason the reason code for the multimedia session
      */
-    public void setState(MultimediaSession.State state) {
+    public void setStateAndReasonCode(State state, ReasonCode reason) {
         mState = state;
     }
 
@@ -99,16 +103,8 @@ public class MultimediaSessionStorageAccessor {
      * 
      * @return the reason code for the multimedia session
      */
-    public MultimediaSession.ReasonCode getReasonCode() {
+    public ReasonCode getReasonCode() {
         return mReason;
     }
 
-    /**
-     * Sets the reason code for the multimedia session
-     * 
-     * @param reason the reason code for the multimedia session
-     */
-    public void setReasonCode(MultimediaSession.ReasonCode reason) {
-        mReason = reason;
-    }
 }

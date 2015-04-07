@@ -290,7 +290,7 @@ public class InitiateFileUpload extends Activity {
                                         + ") (state=" + state + ") (info=" + fileInfo + ")");
                             }
                         } catch (RcsServiceException e) {
-                            // TODO Auto-generated catch block
+                            // TODO handled later in CR037
                             e.printStackTrace();
                         }
 

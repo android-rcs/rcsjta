@@ -16,35 +16,36 @@
 
 package com.gsma.rcs.service.api;
 
-import com.gsma.services.rcs.upload.FileUpload;
-import com.gsma.services.rcs.upload.FileUploadInfo;
 import com.gsma.services.rcs.upload.FileUpload.State;
+import com.gsma.services.rcs.upload.FileUploadInfo;
 
 import android.net.Uri;
 
 /**
- * FileUploadStorageAccessor helps in retrieving data related to a File upload. 
+ * FileUploadStorageAccessor helps in retrieving data related to a File upload.
  */
 public class FileUploadStorageAccessor {
 
     private final Uri mFile;
 
     private FileUploadInfo mInfo;
-    
-    private FileUpload.State mState;
-    
+
+    private State mState;
+
     /**
      * Constructor
      * 
      * @param file the file URI
+     * @param state State of the file upload
      */
-    public FileUploadStorageAccessor(Uri file) {
+    public FileUploadStorageAccessor(Uri file, State state) {
         mFile = file;
-        mState = State.INACTIVE;
+        mState = state;
     }
 
     /**
      * Gets the file URI
+     * 
      * @return the file URI
      */
     public Uri getFile() {
@@ -53,6 +54,7 @@ public class FileUploadStorageAccessor {
 
     /**
      * Gets the information on the uploaded file
+     * 
      * @return the information on the uploaded file
      */
     public FileUploadInfo getInfo() {
@@ -61,26 +63,29 @@ public class FileUploadStorageAccessor {
 
     /**
      * Sets the information of the uploaded file
+     * 
      * @param info the information of the uploaded file
      */
     public void setInfo(FileUploadInfo info) {
         mInfo = info;
     }
-    
+
     /**
      * Gets the state of the file upload
+     * 
      * @return the state of the file upload
      */
-    public FileUpload.State getState() {
+    public State getState() {
         return mState;
     }
 
     /**
      * Sets the state of the file upload
+     * 
      * @param state the state of the file upload
      */
-    public void setState(FileUpload.State state) {
+    public void setState(State state) {
         mState = state;
     }
-    
+
 }

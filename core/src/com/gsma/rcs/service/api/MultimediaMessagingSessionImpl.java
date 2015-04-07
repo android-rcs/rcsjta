@@ -70,19 +70,20 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
      * @param sipService SipService
      * @param multimediaSessionService MultimediaSessionServiceImpl
      * @param direction
-     * @param contact
+     * @param contact remote contact
      * @param serviceId
+     * @param state State of the multimedia session
      */
     public MultimediaMessagingSessionImpl(String sessionId,
             IMultimediaMessagingSessionEventBroadcaster broadcaster, SipService sipService,
             MultimediaSessionServiceImpl multimediaSessionService, Direction direction,
-            ContactId contact, String serviceId) {
+            ContactId contact, String serviceId, State state) {
         mSessionId = sessionId;
         mBroadcaster = broadcaster;
         mSipService = sipService;
         mMultimediaSessionService = multimediaSessionService;
         mMultimediaSessionStorageAccessor = new MultimediaSessionStorageAccessor(direction,
-                contact, serviceId);
+                contact, serviceId, state);
     }
 
     private void handleSessionRejected(ReasonCode reasonCode, ContactId contact) {
@@ -92,22 +93,17 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
         String sessionId = getSessionId();
         synchronized (mLock) {
             mMultimediaSessionService.removeMultimediaMessaging(sessionId);
-            mMultimediaSessionStorageAccessor.setState(State.REJECTED);
-            mMultimediaSessionStorageAccessor.setReasonCode(reasonCode);
-            mBroadcaster.broadcastStateChanged(contact, sessionId, State.REJECTED, reasonCode);
+            setStateAndReasonThenBroadcast(contact, State.REJECTED, reasonCode);
         }
     }
 
     private void removeSessionAndBroadcast(ContactId contact, State state, ReasonCode reasonCode) {
         mMultimediaSessionService.removeMultimediaMessaging(mSessionId);
-        mMultimediaSessionStorageAccessor.setState(state);
-        mMultimediaSessionStorageAccessor.setReasonCode(reasonCode);
-        mBroadcaster.broadcastStateChanged(contact, mSessionId, state, reasonCode);
+        setStateAndReasonThenBroadcast(contact, state, reasonCode);
     }
 
     private void setStateAndReasonThenBroadcast(ContactId contact, State state, ReasonCode reason) {
-        mMultimediaSessionStorageAccessor.setState(state);
-        mMultimediaSessionStorageAccessor.setReasonCode(reason);
+        mMultimediaSessionStorageAccessor.setStateAndReasonCode(state, reason);
         mBroadcaster.broadcastStateChanged(contact, mSessionId, state, reason);
     }
 

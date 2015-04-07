@@ -127,8 +127,8 @@ public class FileUploadInfo implements Parcelable {
         mFileIconExpiration = FileTransferLog.UNKNOWN_EXPIRATION;
         mFileIconSize = 0L;
         mFileIconMimeType = null;
-    }    
-    
+    }
+
     /**
      * Constructor
      * 

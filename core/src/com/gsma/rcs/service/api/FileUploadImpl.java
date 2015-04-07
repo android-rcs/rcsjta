@@ -30,6 +30,7 @@ import com.gsma.rcs.core.ims.service.upload.FileUploadSessionListener;
 import com.gsma.rcs.service.broadcaster.IFileUploadEventBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.upload.FileUpload;
+import com.gsma.services.rcs.upload.FileUpload.State;
 import com.gsma.services.rcs.upload.FileUploadInfo;
 import com.gsma.services.rcs.upload.IFileUpload;
 
@@ -71,7 +72,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
         mBroadcaster = broadcaster;
         mImService = imService;
         mFileUploadService = fileUploadService;
-        mFileUploadStorageAccessor = new FileUploadStorageAccessor(file);
+        mFileUploadStorageAccessor = new FileUploadStorageAccessor(file, State.INITIATING);
     }
 
     /**
@@ -126,7 +127,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
         }
         synchronized (mLock) {
             if (FileUploadSession.State.PENDING == session.getSessionState()) {
-                return FileUpload.State.INACTIVE.toInt();
+                return FileUpload.State.INITIATING.toInt();
             }
             return FileUpload.State.STARTED.toInt();
         }
@@ -203,7 +204,7 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
         setStateAndBroadcast(uploadId, state);
         mBroadcaster.broadcastUploaded(uploadId, info);
     }
-    
+
     /**
      * Upload terminated with success
      * 
