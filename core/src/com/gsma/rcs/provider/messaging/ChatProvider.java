@@ -22,9 +22,9 @@
 
 package com.gsma.rcs.provider.messaging;
 
-import com.gsma.rcs.ServerApiPersistentStorageException;
 import com.gsma.rcs.provider.ContentProviderBaseIdCreator;
 import com.gsma.rcs.provider.history.HistoryMemberBaseIdCreator;
+import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.DatabaseUtils;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message;

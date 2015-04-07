@@ -14,28 +14,28 @@
  * the License.
  */
 
-package com.gsma.rcs;
+package com.gsma.rcs.service.api;
 
-import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsPermissionDeniedException;
 
 /**
- * Server side implementation of {@link RcsGenericException},
+ * Server side implementation of {@link RcsPermissionDeniedException},
  * <p>
- * This exception will be thrown across AIDL layers and will come as a {@link RcsGenericException}
- * on the client side.
+ * This exception will be thrown across AIDL layers and will come as a
+ * {@link RcsPermissionDeniedException} on the client side.
  * </p>
  * <p>
- * This Generic exception must be thrown when the requested operation failed to fully complete its
- * scope of responsibility and none of the more specified exceptions can be thrown. The client must
- * be able to trust that in case of any failure what so ever and its not possible to throw a more
- * specific exception this exception will be thrown as a kind of default exception to signify that
- * some error occurred that not necessarily need to be more specific than that.
+ * Thrown when a method of the service API is called that not allowed right now. This can be for
+ * multiple reasons like it is not possible to call accept() on a file transfer invitation that has
+ * previously already been rejected, the file trying to be sent is not allowed to be read back due
+ * to security aspects or any other operation that fails because the operation is not allowed or has
+ * been blocked for some other reason.
  * </p>
  * <p>
  * <b> Should never be used on client side.</b>
  * </p>
  */
-public class ServerApiGenericException extends ServerApiBaseException {
+public class ServerApiPermissionDeniedException extends ServerApiBaseException {
 
     static final long serialVersionUID = 1L;
 
@@ -44,19 +44,8 @@ public class ServerApiGenericException extends ServerApiBaseException {
      * 
      * @param message Error message obtained either from a constant string or through e.getMessage()
      */
-    public ServerApiGenericException(String message) {
-        super(RcsGenericException.class, message);
-    }
-
-    /**
-     * Constructs a new Exception with the current stack trace and the specified cause.
-     * 
-     * @param cause the cause (which is saved for later retrieval by the Throwable.getCause()
-     *            method). (A null value is permitted, and indicates that the cause is nonexistent
-     *            or unknown.)
-     */
-    public ServerApiGenericException(Throwable cause) {
-        super(RcsGenericException.class, cause.getMessage(), cause);
+    public ServerApiPermissionDeniedException(String message) {
+        super(RcsPermissionDeniedException.class, message);
     }
 
     /**
@@ -67,8 +56,8 @@ public class ServerApiGenericException extends ServerApiBaseException {
      *            method). (A null value is permitted, and indicates that the cause is nonexistent
      *            or unknown.)
      */
-    public ServerApiGenericException(String message, Throwable cause) {
-        super(RcsGenericException.class, message, cause);
+    public ServerApiPermissionDeniedException(String message, Throwable cause) {
+        super(RcsPermissionDeniedException.class, message, cause);
     }
 
     /**
@@ -79,6 +68,6 @@ public class ServerApiGenericException extends ServerApiBaseException {
      */
     @Override
     public boolean shouldNotBeLogged() {
-        return false;
+        return true;
     }
 }

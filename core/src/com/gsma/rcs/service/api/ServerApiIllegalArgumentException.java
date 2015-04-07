@@ -14,28 +14,26 @@
  * the License.
  */
 
-package com.gsma.rcs;
+package com.gsma.rcs.service.api;
 
-import com.gsma.services.rcs.RcsPermissionDeniedException;
+import com.gsma.services.rcs.RcsIllegalArgumentException;
 
 /**
- * Server side implementation of {@link RcsPermissionDeniedException},
+ * Server side implementation of {@link RcsIllegalArgumentException},
  * <p>
  * This exception will be thrown across AIDL layers and will come as a
- * {@link RcsPermissionDeniedException} on the client side.
+ * {@link RcsIllegalArgumentException} on the client side.
  * </p>
  * <p>
- * Thrown when a method of the service API is called that not allowed right now. This can be for
- * multiple reasons like it is not possible to call accept() on a file transfer invitation that has
- * previously already been rejected, the file trying to be sent is not allowed to be read back due
- * to security aspects or any other operation that fails because the operation is not allowed or has
- * been blocked for some other reason.
+ * Thrown when a method of the service API is called with one or multiple illegal input parameter.
+ * Such as a calling a method and passing null as a parameter in the case that null is not valid for
+ * that parameter.
  * </p>
  * <p>
  * <b> Should never be used on client side.</b>
  * </p>
  */
-public class ServerApiPermissionDeniedException extends ServerApiBaseException {
+public class ServerApiIllegalArgumentException extends ServerApiBaseException {
 
     static final long serialVersionUID = 1L;
 
@@ -44,8 +42,8 @@ public class ServerApiPermissionDeniedException extends ServerApiBaseException {
      * 
      * @param message Error message obtained either from a constant string or through e.getMessage()
      */
-    public ServerApiPermissionDeniedException(String message) {
-        super(RcsPermissionDeniedException.class, message);
+    public ServerApiIllegalArgumentException(String message) {
+        super(RcsIllegalArgumentException.class, message);
     }
 
     /**
@@ -56,8 +54,8 @@ public class ServerApiPermissionDeniedException extends ServerApiBaseException {
      *            method). (A null value is permitted, and indicates that the cause is nonexistent
      *            or unknown.)
      */
-    public ServerApiPermissionDeniedException(String message, Throwable cause) {
-        super(RcsPermissionDeniedException.class, message, cause);
+    public ServerApiIllegalArgumentException(String message, Throwable cause) {
+        super(RcsIllegalArgumentException.class, message, cause);
     }
 
     /**

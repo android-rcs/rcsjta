@@ -19,7 +19,7 @@ package com.gsma.rcs.provider.history;
 import static com.gsma.rcs.provider.history.HistoryConstants.INTERNAL_MEMBERS;
 import static com.gsma.rcs.provider.history.HistoryConstants.INTERNAL_MEMBER_IDS;
 
-import com.gsma.rcs.ServerApiIllegalArgumentException;
+import com.gsma.rcs.service.api.ServerApiIllegalArgumentException;
 
 import android.content.ContentProvider;
 import android.content.Context;

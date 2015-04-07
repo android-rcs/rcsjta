@@ -22,11 +22,6 @@
 
 package com.gsma.rcs.service.api;
 
-import com.gsma.rcs.ExceptionUtil;
-import com.gsma.rcs.ServerApiBaseException;
-import com.gsma.rcs.ServerApiGenericException;
-import com.gsma.rcs.ServerApiIllegalArgumentException;
-import com.gsma.rcs.ServerApiPermissionDeniedException;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;

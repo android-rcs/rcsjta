@@ -16,10 +16,6 @@
 
 package com.gsma.rcs.service.api;
 
-import com.gsma.rcs.ExceptionUtil;
-import com.gsma.rcs.ServerApiBaseException;
-import com.gsma.rcs.ServerApiGenericException;
-import com.gsma.rcs.ServerApiIllegalArgumentException;
 import com.gsma.rcs.provider.history.HistoryMemberBaseIdCreator;
 import com.gsma.rcs.provider.history.HistoryProvider;
 import com.gsma.rcs.provider.messaging.FileTransferData;

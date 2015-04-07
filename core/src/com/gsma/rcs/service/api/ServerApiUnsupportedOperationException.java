@@ -14,27 +14,26 @@
  * the License.
  */
 
-package com.gsma.rcs;
+package com.gsma.rcs.service.api;
 
-import com.gsma.services.rcs.RcsMaxAllowedSessionLimitReachedException;
+import com.gsma.services.rcs.RcsUnsupportedOperationException;
 
 /**
- * Server side implementation of {@link RcsMaxAllowedSessionLimitReachedException},
+ * Server side implementation of {@link RcsUnsupportedOperationException},
  * <p>
  * This exception will be thrown across AIDL layers and will come as a
- * {@link RcsMaxAllowedSessionLimitReachedException} on the client side.
+ * {@link RcsUnsupportedOperationException} on the client side.
  * </p>
  * <p>
- * Thrown if the SERVICE TYPE (message/filetransfer/imageshare/geolocationshare etc) cannot be
- * sent/transfered/resent or a new groupchat invitation cannot be sent right now since the limit of
- * allowed ongoing sessions has already been reached and the client needs to wait for at least one
- * session to be released back to the stack first.
+ * Thrown when a method of the service API is called that is not supported (ie does not make sense
+ * within the scope of the use case) like trying to call pauseTransfer() on a non pausable file
+ * transfer that does not support that etc.
  * </p>
  * <p>
  * <b> Should never be used on client side.</b>
  * </p>
  */
-public class ServerApiMaxAllowedSessionLimitReachedException extends ServerApiBaseException {
+public class ServerApiUnsupportedOperationException extends ServerApiBaseException {
 
     static final long serialVersionUID = 1L;
 
@@ -43,8 +42,8 @@ public class ServerApiMaxAllowedSessionLimitReachedException extends ServerApiBa
      * 
      * @param message Error message obtained either from a constant string or through e.getMessage()
      */
-    public ServerApiMaxAllowedSessionLimitReachedException(String message) {
-        super(RcsMaxAllowedSessionLimitReachedException.class, message);
+    public ServerApiUnsupportedOperationException(String message) {
+        super(RcsUnsupportedOperationException.class, message);
     }
 
     /**
@@ -55,8 +54,8 @@ public class ServerApiMaxAllowedSessionLimitReachedException extends ServerApiBa
      *            method). (A null value is permitted, and indicates that the cause is nonexistent
      *            or unknown.)
      */
-    public ServerApiMaxAllowedSessionLimitReachedException(String message, Throwable cause) {
-        super(RcsMaxAllowedSessionLimitReachedException.class, message, cause);
+    public ServerApiUnsupportedOperationException(String message, Throwable cause) {
+        super(RcsUnsupportedOperationException.class, message, cause);
     }
 
     /**

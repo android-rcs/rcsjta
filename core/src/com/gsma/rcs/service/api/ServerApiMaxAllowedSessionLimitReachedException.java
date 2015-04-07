@@ -14,26 +14,27 @@
  * the License.
  */
 
-package com.gsma.rcs;
+package com.gsma.rcs.service.api;
 
-import com.gsma.services.rcs.RcsServiceNotRegisteredException;
+import com.gsma.services.rcs.RcsMaxAllowedSessionLimitReachedException;
 
 /**
- * Server side implementation of {@link RcsServiceNotRegisteredException},
+ * Server side implementation of {@link RcsMaxAllowedSessionLimitReachedException},
  * <p>
  * This exception will be thrown across AIDL layers and will come as a
- * {@link RcsServiceNotRegisteredException} on the client side.
+ * {@link RcsMaxAllowedSessionLimitReachedException} on the client side.
  * </p>
  * <p>
- * Thrown when a method of the service API using the RCS service platform is called and the terminal
- * which requires that the RcsCoreService is registered and connected to the IMS server is not
- * registered to the RCS service platform (e.g. not yet registered)
+ * Thrown if the SERVICE TYPE (message/filetransfer/imageshare/geolocationshare etc) cannot be
+ * sent/transfered/resent or a new groupchat invitation cannot be sent right now since the limit of
+ * allowed ongoing sessions has already been reached and the client needs to wait for at least one
+ * session to be released back to the stack first.
  * </p>
  * <p>
  * <b> Should never be used on client side.</b>
  * </p>
  */
-public class ServerApiServiceNotRegisteredException extends ServerApiBaseException {
+public class ServerApiMaxAllowedSessionLimitReachedException extends ServerApiBaseException {
 
     static final long serialVersionUID = 1L;
 
@@ -42,8 +43,8 @@ public class ServerApiServiceNotRegisteredException extends ServerApiBaseExcepti
      * 
      * @param message Error message obtained either from a constant string or through e.getMessage()
      */
-    public ServerApiServiceNotRegisteredException(String message) {
-        super(RcsServiceNotRegisteredException.class, message);
+    public ServerApiMaxAllowedSessionLimitReachedException(String message) {
+        super(RcsMaxAllowedSessionLimitReachedException.class, message);
     }
 
     /**
@@ -54,8 +55,8 @@ public class ServerApiServiceNotRegisteredException extends ServerApiBaseExcepti
      *            method). (A null value is permitted, and indicates that the cause is nonexistent
      *            or unknown.)
      */
-    public ServerApiServiceNotRegisteredException(String message, Throwable cause) {
-        super(RcsServiceNotRegisteredException.class, message, cause);
+    public ServerApiMaxAllowedSessionLimitReachedException(String message, Throwable cause) {
+        super(RcsMaxAllowedSessionLimitReachedException.class, message, cause);
     }
 
     /**
@@ -66,6 +67,6 @@ public class ServerApiServiceNotRegisteredException extends ServerApiBaseExcepti
      */
     @Override
     public boolean shouldNotBeLogged() {
-        return false;
+        return true;
     }
 }

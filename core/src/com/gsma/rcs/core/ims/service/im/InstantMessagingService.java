@@ -22,7 +22,6 @@
 
 package com.gsma.rcs.core.ims.service.im;
 
-import com.gsma.rcs.ServerApiMaxAllowedSessionLimitReachedException;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.content.ContentManager;
@@ -71,6 +70,7 @@ import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
+import com.gsma.rcs.service.api.ServerApiMaxAllowedSessionLimitReachedException;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.IdGenerator;

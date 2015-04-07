@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.gsma.rcs;
+package com.gsma.rcs.service.api;
 
 public class ExceptionUtil {
 

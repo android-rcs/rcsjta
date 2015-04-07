@@ -22,9 +22,9 @@
 
 package com.gsma.rcs.addressbook;
 
-import com.gsma.rcs.ServerApiServiceNotRegisteredException;
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.service.api.ServerApiServiceNotRegisteredException;
 import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;

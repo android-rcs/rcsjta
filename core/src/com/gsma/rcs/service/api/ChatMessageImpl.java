@@ -16,9 +16,6 @@
 
 package com.gsma.rcs.service.api;
 
-import com.gsma.rcs.ExceptionUtil;
-import com.gsma.rcs.ServerApiBaseException;
-import com.gsma.rcs.ServerApiGenericException;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.chat.IChatMessage;

@@ -14,26 +14,28 @@
  * the License.
  */
 
-package com.gsma.rcs;
+package com.gsma.rcs.service.api;
 
-import com.gsma.services.rcs.RcsIllegalArgumentException;
+import com.gsma.services.rcs.RcsGenericException;
 
 /**
- * Server side implementation of {@link RcsIllegalArgumentException},
+ * Server side implementation of {@link RcsGenericException},
  * <p>
- * This exception will be thrown across AIDL layers and will come as a
- * {@link RcsIllegalArgumentException} on the client side.
+ * This exception will be thrown across AIDL layers and will come as a {@link RcsGenericException}
+ * on the client side.
  * </p>
  * <p>
- * Thrown when a method of the service API is called with one or multiple illegal input parameter.
- * Such as a calling a method and passing null as a parameter in the case that null is not valid for
- * that parameter.
+ * This Generic exception must be thrown when the requested operation failed to fully complete its
+ * scope of responsibility and none of the more specified exceptions can be thrown. The client must
+ * be able to trust that in case of any failure what so ever and its not possible to throw a more
+ * specific exception this exception will be thrown as a kind of default exception to signify that
+ * some error occurred that not necessarily need to be more specific than that.
  * </p>
  * <p>
  * <b> Should never be used on client side.</b>
  * </p>
  */
-public class ServerApiIllegalArgumentException extends ServerApiBaseException {
+public class ServerApiGenericException extends ServerApiBaseException {
 
     static final long serialVersionUID = 1L;
 
@@ -42,8 +44,19 @@ public class ServerApiIllegalArgumentException extends ServerApiBaseException {
      * 
      * @param message Error message obtained either from a constant string or through e.getMessage()
      */
-    public ServerApiIllegalArgumentException(String message) {
-        super(RcsIllegalArgumentException.class, message);
+    public ServerApiGenericException(String message) {
+        super(RcsGenericException.class, message);
+    }
+
+    /**
+     * Constructs a new Exception with the current stack trace and the specified cause.
+     * 
+     * @param cause the cause (which is saved for later retrieval by the Throwable.getCause()
+     *            method). (A null value is permitted, and indicates that the cause is nonexistent
+     *            or unknown.)
+     */
+    public ServerApiGenericException(Throwable cause) {
+        super(RcsGenericException.class, cause.getMessage(), cause);
     }
 
     /**
@@ -54,8 +67,8 @@ public class ServerApiIllegalArgumentException extends ServerApiBaseException {
      *            method). (A null value is permitted, and indicates that the cause is nonexistent
      *            or unknown.)
      */
-    public ServerApiIllegalArgumentException(String message, Throwable cause) {
-        super(RcsIllegalArgumentException.class, message, cause);
+    public ServerApiGenericException(String message, Throwable cause) {
+        super(RcsGenericException.class, message, cause);
     }
 
     /**
@@ -66,6 +79,6 @@ public class ServerApiIllegalArgumentException extends ServerApiBaseException {
      */
     @Override
     public boolean shouldNotBeLogged() {
-        return true;
+        return false;
     }
 }

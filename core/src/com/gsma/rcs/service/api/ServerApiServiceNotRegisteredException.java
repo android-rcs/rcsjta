@@ -14,28 +14,26 @@
  * the License.
  */
 
-package com.gsma.rcs;
+package com.gsma.rcs.service.api;
 
-import com.gsma.services.rcs.RcsPersistentStorageException;
+import com.gsma.services.rcs.RcsServiceNotRegisteredException;
 
 /**
- * Server side implementation of {@link RcsPersistentStorageException},
+ * Server side implementation of {@link RcsServiceNotRegisteredException},
  * <p>
  * This exception will be thrown across AIDL layers and will come as a
- * {@link RcsPersistentStorageException} on the client side.
+ * {@link RcsServiceNotRegisteredException} on the client side.
  * </p>
  * <p>
- * Thrown when a method of the service API is called to persist data or read back persisted data
- * failed. This can be because the underlying persistent storage database (or possibly further on a
- * CPM cloud) reported an error such as no more entries can be added perhaps because disk is full,
- * or just that a SQL operation failed or even a unsuccessful read operation from persistent
- * storage.
+ * Thrown when a method of the service API using the RCS service platform is called and the terminal
+ * which requires that the RcsCoreService is registered and connected to the IMS server is not
+ * registered to the RCS service platform (e.g. not yet registered)
  * </p>
  * <p>
  * <b> Should never be used on client side.</b>
  * </p>
  */
-public class ServerApiPersistentStorageException extends ServerApiBaseException {
+public class ServerApiServiceNotRegisteredException extends ServerApiBaseException {
 
     static final long serialVersionUID = 1L;
 
@@ -44,8 +42,8 @@ public class ServerApiPersistentStorageException extends ServerApiBaseException 
      * 
      * @param message Error message obtained either from a constant string or through e.getMessage()
      */
-    public ServerApiPersistentStorageException(String message) {
-        super(RcsPersistentStorageException.class, message);
+    public ServerApiServiceNotRegisteredException(String message) {
+        super(RcsServiceNotRegisteredException.class, message);
     }
 
     /**
@@ -56,8 +54,8 @@ public class ServerApiPersistentStorageException extends ServerApiBaseException 
      *            method). (A null value is permitted, and indicates that the cause is nonexistent
      *            or unknown.)
      */
-    public ServerApiPersistentStorageException(String message, Throwable cause) {
-        super(RcsPersistentStorageException.class, message, cause);
+    public ServerApiServiceNotRegisteredException(String message, Throwable cause) {
+        super(RcsServiceNotRegisteredException.class, message, cause);
     }
 
     /**
