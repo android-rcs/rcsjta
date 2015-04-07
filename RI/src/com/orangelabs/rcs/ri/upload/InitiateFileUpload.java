@@ -260,8 +260,7 @@ public class InitiateFileUpload extends Activity {
         @Override
         public void onStateChanged(String uploadId, final FileUpload.State state) {
             // Discard event if not for current uploadId
-            if (InitiateFileUpload.this.mUploadId == null
-                    || !InitiateFileUpload.this.mUploadId.equals(uploadId)) {
+            if (mUploadId == null || !mUploadId.equals(uploadId)) {
                 return;
             }
             mHandler.post(new Runnable() {
@@ -281,6 +280,20 @@ public class InitiateFileUpload extends Activity {
                     } else if (state == FileUpload.State.TRANSFERRED) {
                         // Display sharing status
                         statusView.setText(getString(R.string.label_upload_transferred));
+                        try {
+                            Uri file = mUpload.getFile();
+                            FileUpload.State state = mUpload.getState();
+                            String id = mUpload.getUploadId();
+                            FileUploadInfo fileInfo = mUpload.getUploadInfo();
+                            if (LogUtils.isActive) {
+                                Log.i(LOGTAG, "FileUpload transferred (id=" + id + ") uri=" + file
+                                        + ") (state=" + state + ") (info=" + fileInfo + ")");
+                            }
+                        } catch (RcsServiceException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+
                     }
                 }
             });
@@ -290,7 +303,7 @@ public class InitiateFileUpload extends Activity {
         /**
          * Callback called during the upload progress.
          * 
-         * @param sharingId ID of upload
+         * @param uploadId ID of upload
          * @param currentSize Current transferred size in bytes
          * @param totalSize Total size to transfer in bytes
          */

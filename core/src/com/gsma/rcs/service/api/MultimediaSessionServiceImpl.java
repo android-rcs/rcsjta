@@ -38,6 +38,7 @@ import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.extension.IMultimediaMessagingSession;
@@ -253,16 +254,16 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      */
     public void receiveSipMsrpSessionInvitation(Intent msrpSessionInvite,
             GenericSipMsrpSession session) {
+        ContactId remote = session.getRemoteContact();
         // Add session in the list
         MultimediaMessagingSessionImpl multimediaMessaging = new MultimediaMessagingSessionImpl(
                 session.getSessionID(), mMultimediaMessagingSessionEventBroadcaster, mSipService,
-                this);
+                this, Direction.INCOMING, remote, session.getServiceId());
         session.addListener(multimediaMessaging);
         addMultimediaMessaging(multimediaMessaging);
 
         // Update displayName of remote contact
-        mContactsManager.setContactDisplayName(session.getRemoteContact(),
-                session.getRemoteDisplayName());
+        mContactsManager.setContactDisplayName(remote, session.getRemoteDisplayName());
     }
 
     /**
@@ -272,15 +273,15 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @param session SIP session
      */
     public void receiveSipRtpSessionInvitation(Intent rtpSessionInvite, GenericSipRtpSession session) {
+        ContactId remote = session.getRemoteContact();
         MultimediaStreamingSessionImpl multimediaStreaming = new MultimediaStreamingSessionImpl(
                 session.getSessionID(), mMultimediaStreamingSessionEventBroadcaster, mSipService,
-                this);
+                this, Direction.INCOMING, remote, session.getServiceId());
         session.addListener(multimediaStreaming);
         addMultimediaStreaming(multimediaStreaming);
 
         // Update displayName of remote contact
-        mContactsManager.setContactDisplayName(session.getRemoteContact(),
-                session.getRemoteDisplayName());
+        mContactsManager.setContactDisplayName(remote, session.getRemoteDisplayName());
 
         // Broadcast intent related to the received invitation
         IntentUtils.tryToSetExcludeStoppedPackagesFlag(rtpSessionInvite);
@@ -335,7 +336,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
             // Add session listener
             MultimediaMessagingSessionImpl multiMediaMessaging = new MultimediaMessagingSessionImpl(
                     session.getSessionID(), mMultimediaMessagingSessionEventBroadcaster,
-                    mSipService, this);
+                    mSipService, this, Direction.OUTGOING, contact, serviceId);
             session.addListener(multiMediaMessaging);
             mMultimediaMessagingSessionEventBroadcaster.broadcastStateChanged(contact,
                     session.getSessionID(), MultimediaSession.State.INITIATING,
@@ -369,15 +370,9 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
     public IMultimediaMessagingSession getMessagingSession(String sessionId)
             throws ServerApiException {
         if (logger.isActivated()) {
-            logger.info("Get multimedia messaging " + sessionId);
+            logger.info("Get multimedia messaging ".concat(sessionId));
         }
-
-        IMultimediaMessagingSession multimediaMessaging = mMultimediaMessagingCache.get(sessionId);
-        if (multimediaMessaging != null) {
-            return multimediaMessaging;
-        }
-        return new MultimediaMessagingSessionImpl(sessionId,
-                mMultimediaMessagingSessionEventBroadcaster, mSipService, this);
+        return mMultimediaMessagingCache.get(sessionId);
     }
 
     /**
@@ -444,7 +439,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 
             MultimediaStreamingSessionImpl multimediaStreaming = new MultimediaStreamingSessionImpl(
                     session.getSessionID(), mMultimediaStreamingSessionEventBroadcaster,
-                    mSipService, this);
+                    mSipService, this, Direction.OUTGOING, contact, serviceId);
             session.addListener(multimediaStreaming);
             mMultimediaStreamingSessionEventBroadcaster.broadcastStateChanged(contact,
                     session.getSessionID(), MultimediaSession.State.INITIATING,
@@ -479,15 +474,9 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
     public IMultimediaStreamingSession getStreamingSession(String sessionId)
             throws ServerApiException {
         if (logger.isActivated()) {
-            logger.info("Get multimedia streaming " + sessionId);
+            logger.info("Get multimedia streaming ".concat(sessionId));
         }
-
-        IMultimediaStreamingSession multimediaStreaming = mMultimediaStreamingCache.get(sessionId);
-        if (multimediaStreaming != null) {
-            return multimediaStreaming;
-        }
-        return new MultimediaStreamingSessionImpl(sessionId,
-                mMultimediaStreamingSessionEventBroadcaster, mSipService, this);
+        return mMultimediaStreamingCache.get(sessionId);
     }
 
     /**

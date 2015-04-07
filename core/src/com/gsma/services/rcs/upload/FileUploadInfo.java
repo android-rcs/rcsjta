@@ -141,7 +141,12 @@ public class FileUploadInfo implements Parcelable {
         mFileName = source.readString();
         mSize = source.readLong();
         mMimeType = source.readString();
-        mFileIcon = Uri.parse(source.readString());
+        boolean containsFileIcon = source.readInt() != 0;
+        if (containsFileIcon) {
+            mFileIcon = Uri.parse(source.readString());
+        } else {
+            mFileIcon = null;
+        }
         mFileIconExpiration = source.readLong();
         mFileIconSize = source.readLong();
         mFileIconMimeType = source.readString();
@@ -171,7 +176,12 @@ public class FileUploadInfo implements Parcelable {
         dest.writeString(mFileName);
         dest.writeLong(mSize);
         dest.writeString(mMimeType);
-        dest.writeString(mFileIcon.toString());
+        if (mFileIcon != null) {
+            dest.writeInt(1);
+            dest.writeString(mFileIcon.toString());
+        } else {
+            dest.writeInt(0);
+        }
         dest.writeLong(mFileIconExpiration);
         dest.writeLong(mFileIconSize);
         dest.writeString(mFileIconMimeType);

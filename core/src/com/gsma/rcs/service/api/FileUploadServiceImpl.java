@@ -104,7 +104,7 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      * 
      * @param filUpload File upload
      */
-    protected void addFileUpload(FileUploadImpl filUpload) {
+    private void addFileUpload(FileUploadImpl filUpload) {
         if (logger.isActivated()) {
             logger.debug("Add a file upload in the list (size=" + mFileUploadCache.size() + ")");
         }
@@ -117,7 +117,7 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      * 
      * @param uploadId Upload ID
      */
-    protected void removeFileUpload(String sessionId) {
+    /* package private */void removeFileUpload(String sessionId) {
         if (logger.isActivated()) {
             logger.debug("Remove a file upload from the list (size=" + mFileUploadCache.size()
                     + ")");
@@ -165,7 +165,7 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
             final FileUploadSession session = new FileUploadSession(content, fileicon, mRcsSettings);
 
             FileUploadImpl fileUpload = new FileUploadImpl(session.getUploadID(), mBroadcaster,
-                    mImService, this);
+                    mImService, this, file);
             session.addListener(fileUpload);
 
             session.startSession();
@@ -239,14 +239,9 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      */
     public IFileUpload getFileUpload(String uploadId) throws ServerApiException {
         if (logger.isActivated()) {
-            logger.info("Get file upload " + uploadId);
+            logger.info("Get file upload ".concat(uploadId));
         }
-
-        IFileUpload fileUpload = mFileUploadCache.get(uploadId);
-        if (fileUpload != null) {
-            return fileUpload;
-        }
-        return new FileUploadImpl(uploadId, mBroadcaster, mImService, this);
+        return mFileUploadCache.get(uploadId);
     }
 
     /**

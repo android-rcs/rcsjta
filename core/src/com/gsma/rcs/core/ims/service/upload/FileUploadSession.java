@@ -59,6 +59,24 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
     private final static Logger sLogger = Logger.getLogger(FileUploadSession.class.getSimpleName());
 
     /**
+     * FileUploadSession state
+     */
+    public enum State {
+
+        /**
+         * Session is pending (not yet accepted by a final response to the first POST)
+         */
+        PENDING,
+
+        /**
+         * Session has been established (i.e. response OK to the first POST)
+         */
+        ESTABLISHED;
+    }
+
+    private State mSessionState;
+
+    /**
      * Constructor
      * 
      * @param file Content of file to upload
@@ -67,7 +85,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
      */
     public FileUploadSession(MmContent file, boolean fileIcon, RcsSettings rcsSettings) {
         super();
-
+        mSessionState = State.PENDING;
         mFile = file;
         mFileIcon = fileIcon;
         mUploadId = UUID.randomUUID().toString();
@@ -90,6 +108,15 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
      */
     public String getUploadID() {
         return mUploadId;
+    }
+
+    /**
+     * Gets the session state
+     * 
+     * @return the session state
+     */
+    public State getSessionState() {
+        return mSessionState;
     }
 
     /**
@@ -230,7 +257,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
      * The upload resume is only possible once thumbnail is transferred
      */
     public void uploadStarted() {
-        // Not used
+        mSessionState = State.ESTABLISHED;
     }
 
     /**

@@ -105,7 +105,7 @@ public class FileUpload {
     /**
      * File upload interface
      */
-    private IFileUpload uploadInf;
+    private IFileUpload mUploadInf;
 
     /**
      * Constructor
@@ -113,7 +113,7 @@ public class FileUpload {
      * @param uploadInf Upload interface
      */
     /* package private */FileUpload(IFileUpload uploadInf) {
-        this.uploadInf = uploadInf;
+        mUploadInf = uploadInf;
     }
 
     /**
@@ -124,9 +124,9 @@ public class FileUpload {
      */
     public String getUploadId() throws RcsServiceException {
         try {
-            return uploadInf.getUploadId();
+            return mUploadInf.getUploadId();
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsServiceException(e);
         }
     }
 
@@ -138,9 +138,9 @@ public class FileUpload {
      */
     public Uri getFile() throws RcsServiceException {
         try {
-            return uploadInf.getFile();
+            return mUploadInf.getFile();
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsServiceException(e);
         }
     }
 
@@ -153,9 +153,9 @@ public class FileUpload {
      */
     public FileUploadInfo getUploadInfo() throws RcsServiceException {
         try {
-            return uploadInf.getUploadInfo();
+            return mUploadInf.getUploadInfo();
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsServiceException(e);
         }
     }
 
@@ -168,9 +168,9 @@ public class FileUpload {
      */
     public State getState() throws RcsServiceException {
         try {
-            return State.valueOf(uploadInf.getState());
+            return State.valueOf(mUploadInf.getState());
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsServiceException(e);
         }
     }
 
@@ -181,9 +181,9 @@ public class FileUpload {
      */
     public void abortUpload() throws RcsServiceException {
         try {
-            uploadInf.abortUpload();
+            mUploadInf.abortUpload();
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsServiceException(e);
         }
     }
 }

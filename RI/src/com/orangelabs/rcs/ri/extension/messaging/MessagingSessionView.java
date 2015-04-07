@@ -37,6 +37,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.extension.MultimediaMessagingSession;
@@ -45,6 +46,7 @@ import com.gsma.services.rcs.extension.MultimediaMessagingSessionListener;
 import com.gsma.services.rcs.extension.MultimediaSession;
 import com.gsma.services.rcs.extension.MultimediaSessionService;
 import com.gsma.services.rcs.extension.MultimediaSessionServiceConfiguration;
+
 import com.orangelabs.rcs.ri.ConnectionManager;
 import com.orangelabs.rcs.ri.ConnectionManager.RcsServiceName;
 import com.orangelabs.rcs.ri.R;
@@ -93,17 +95,17 @@ public class MessagingSessionView extends Activity {
     /**
      * UI handler
      */
-    private final Handler handler = new Handler();
+    private final Handler mHandler = new Handler();
 
     /**
      * Session ID
      */
-    private String sessionId;
+    private String mSessionId;
 
     /**
      * Remote contact
      */
-    private ContactId contact;
+    private ContactId mContact;
 
     /**
      * Service ID
@@ -113,12 +115,12 @@ public class MessagingSessionView extends Activity {
     /**
      * Session
      */
-    private MultimediaMessagingSession session;
+    private MultimediaMessagingSession mSession;
 
     /**
      * Progress dialog
      */
-    private Dialog progressDialog;
+    private Dialog mProgressDialog;
 
     /**
      * A locker to exit only once
@@ -149,12 +151,12 @@ public class MessagingSessionView extends Activity {
                         + " state=" + state + " reason=" + reasonCode);
             }
             // Discard event if not for current sessionId
-            if (MessagingSessionView.this.sessionId == null
-                    || !MessagingSessionView.this.sessionId.equals(sessionId)) {
+            if (mSessionId == null
+                    || !mSessionId.equals(sessionId)) {
                 return;
             }
             final String _reasonCode = RiApplication.sMultimediaReasonCodes[reasonCode.toInt()];
-            handler.post(new Runnable() {
+            mHandler.post(new Runnable() {
                 public void run() {
                     switch (state) {
                         case STARTED:
@@ -210,13 +212,13 @@ public class MessagingSessionView extends Activity {
                 Log.d(LOGTAG, "onMessageReceived contact=" + contact + " sessionId=" + sessionId);
             }
             // Discard event if not for current sessionId
-            if (MessagingSessionView.this.sessionId == null
-                    || !MessagingSessionView.this.sessionId.equals(sessionId)) {
+            if (mSessionId == null
+                    || !mSessionId.equals(sessionId)) {
                 return;
             }
             final String data = new String(content);
 
-            handler.post(new Runnable() {
+            mHandler.post(new Runnable() {
                 public void run() {
                     // Display received data
                     TextView txt = (TextView) MessagingSessionView.this
@@ -289,7 +291,7 @@ public class MessagingSessionView extends Activity {
     private void acceptInvitation() {
         try {
             // Accept the invitation
-            session.acceptInvitation();
+            mSession.acceptInvitation();
         } catch (Exception e) {
             Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce,
                     e);
@@ -302,7 +304,7 @@ public class MessagingSessionView extends Activity {
     private void rejectInvitation() {
         try {
             // Reject the invitation
-            session.rejectInvitation();
+            mSession.rejectInvitation();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -328,65 +330,63 @@ public class MessagingSessionView extends Activity {
                 }
 
                 // Get remote contact
-                contact = getIntent().getParcelableExtra(MessagingSessionView.EXTRA_CONTACT);
+                mContact = getIntent().getParcelableExtra(MessagingSessionView.EXTRA_CONTACT);
 
                 // Initiate session
                 startSession();
-            } else {
-                if (mode == MessagingSessionView.MODE_OPEN) {
-                    // Open an existing session
+            } else if (mode == MessagingSessionView.MODE_OPEN) {
+                // Open an existing session
 
-                    // Incoming session
-                    sessionId = getIntent().getStringExtra(MessagingSessionView.EXTRA_SESSION_ID);
+                // Incoming session
+                mSessionId = getIntent().getStringExtra(MessagingSessionView.EXTRA_SESSION_ID);
 
-                    // Get the session
-                    session = sessionApi.getMessagingSession(sessionId);
-                    if (session == null) {
-                        // Session not found or expired
-                        Utils.showMessageAndExit(this,
-                                getString(R.string.label_session_has_expired), mExitOnce);
-                        return;
-                    }
-
-                    // Get remote contact
-                    contact = session.getRemoteContact();
-                } else {
-                    // Incoming session from its Intent
-                    sessionId = getIntent().getStringExtra(
-                            MultimediaMessagingSessionIntent.EXTRA_SESSION_ID);
-
-                    // Get the session
-                    session = sessionApi.getMessagingSession(sessionId);
-                    if (session == null) {
-                        // Session not found or expired
-                        Utils.showMessageAndExit(this,
-                                getString(R.string.label_session_has_expired), mExitOnce);
-                        return;
-                    }
-
-                    // Get remote contact
-                    contact = session.getRemoteContact();
-                    String from = RcsDisplayName.getInstance(this).getDisplayName(contact);
-
-                    // Manual accept
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setTitle(R.string.title_messaging_session);
-                    builder.setMessage(getString(R.string.label_mm_from_id, from, serviceId));
-                    builder.setCancelable(false);
-                    builder.setIcon(R.drawable.ri_notif_mm_session_icon);
-                    builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
-                    builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
-                    builder.show();
+                // Get the session
+                mSession = sessionApi.getMessagingSession(mSessionId);
+                if (mSession == null) {
+                    // Session not found or expired
+                    Utils.showMessageAndExit(this, getString(R.string.label_session_has_expired),
+                            mExitOnce);
+                    return;
                 }
+
+                // Get remote contact
+                mContact = mSession.getRemoteContact();
+            } else {
+                // Incoming session from its Intent
+                mSessionId = getIntent().getStringExtra(
+                        MultimediaMessagingSessionIntent.EXTRA_SESSION_ID);
+
+                // Get the session
+                mSession = sessionApi.getMessagingSession(mSessionId);
+                if (mSession == null) {
+                    // Session not found or expired
+                    Utils.showMessageAndExit(this, getString(R.string.label_session_has_expired),
+                            mExitOnce);
+                    return;
+                }
+
+                // Get remote contact
+                mContact = mSession.getRemoteContact();
+                String from = RcsDisplayName.getInstance(this).getDisplayName(mContact);
+
+                // Manual accept
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.title_messaging_session);
+                builder.setMessage(getString(R.string.label_mm_from_id, from, serviceId));
+                builder.setCancelable(false);
+                builder.setIcon(R.drawable.ri_notif_mm_session_icon);
+                builder.setPositiveButton(getString(R.string.label_accept), acceptBtnListener);
+                builder.setNegativeButton(getString(R.string.label_decline), declineBtnListener);
+                builder.show();
             }
             // Display session info
             TextView featureTagEdit = (TextView) findViewById(R.id.feature_tag);
             featureTagEdit.setText(serviceId);
-            String from = RcsDisplayName.getInstance(this).getDisplayName(contact);
+            String from = RcsDisplayName.getInstance(this).getDisplayName(mContact);
             TextView contactEdit = (TextView) findViewById(R.id.contact);
             contactEdit.setText(from);
             Button sendBtn = (Button) findViewById(R.id.send_btn);
-            if (session != null) {
+            if (mSession != null) {
                 sendBtn.setEnabled(true);
             } else {
                 sendBtn.setEnabled(false);
@@ -404,9 +404,9 @@ public class MessagingSessionView extends Activity {
         // Initiate the chat session in background
         try {
             // Initiate session
-            session = mCnxManager.getMultimediaSessionApi().initiateMessagingSession(serviceId,
-                    contact);
-            sessionId = session.getSessionId();
+            mSession = mCnxManager.getMultimediaSessionApi().initiateMessagingSession(serviceId,
+                    mContact);
+            mSessionId = mSession.getSessionId();
         } catch (Exception e) {
             Utils.showMessageAndExit(this, getString(R.string.label_invitation_failed), mExitOnce,
                     e);
@@ -414,9 +414,9 @@ public class MessagingSessionView extends Activity {
         }
 
         // Display a progress dialog
-        progressDialog = Utils.showProgressDialog(MessagingSessionView.this,
+        mProgressDialog = Utils.showProgressDialog(MessagingSessionView.this,
                 getString(R.string.label_command_in_progress));
-        progressDialog.setOnCancelListener(new OnCancelListener() {
+        mProgressDialog.setOnCancelListener(new OnCancelListener() {
             public void onCancel(DialogInterface dialog) {
                 Toast.makeText(MessagingSessionView.this,
                         getString(R.string.label_session_canceled), Toast.LENGTH_SHORT).show();
@@ -429,9 +429,9 @@ public class MessagingSessionView extends Activity {
      * Hide progress dialog
      */
     public void hideProgressDialog() {
-        if (progressDialog != null && progressDialog.isShowing()) {
-            progressDialog.dismiss();
-            progressDialog = null;
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.dismiss();
+            mProgressDialog = null;
         }
     }
 
@@ -463,13 +463,13 @@ public class MessagingSessionView extends Activity {
      */
     private void quitSession() {
         // Stop session
-        if (session != null) {
+        if (mSession != null) {
             try {
-                session.abortSession();
+                mSession.abortSession();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            session = null;
+            mSession = null;
         }
 
         // Exit activity
@@ -480,7 +480,7 @@ public class MessagingSessionView extends Activity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
-                if (session != null) {
+                if (mSession != null) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setTitle(getString(R.string.label_confirm_close));
                     builder.setPositiveButton(getString(R.string.label_ok),
@@ -536,7 +536,7 @@ public class MessagingSessionView extends Activity {
         public void onClick(View v) {
             try {
                 String data = "data" + i++;
-                session.sendMessage(data.getBytes());
+                mSession.sendMessage(data.getBytes());
             } catch (Exception e) {
                 e.printStackTrace();
             }
