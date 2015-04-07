@@ -20,25 +20,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="com.gsma.services.rcs.RCS_READ_CAPABILITIES" />
-    <uses-permission android:name="com.gsma.services.rcs.RCS_USE_CHATS" />
-    <uses-permission android:name="com.gsma.services.rcs.RCS_READ_CHATS" />
-    <uses-permission android:name="com.gsma.services.rcs.READ_RCS_STATE" />
-    <uses-permission android:name="com.gsma.services.rcs.RCS_RECEIVE_FILETRANSFERS" />
-    <uses-permission android:name="com.gsma.services.rcs.RCS_INITIATE_FILETRANSFERS" />
-    <uses-permission android:name="com.gsma.services.rcs.RCS_READ_FILETRANSFERS" />
-    <uses-permission android:name="com.gsma.services.rcs.RCS_RECEIVE_IMAGESHARES" />
-    <uses-permission android:name="com.gsma.services.rcs.RCS_INITIATE_IMAGESHARES" />
-    <uses-permission android:name="com.gsma.services.rcs.RCS_READ_IMAGESHARES" />
-    <uses-permission android:name="com.gsma.services.rcs.RCS_RECEIVE_VIDEOSHARES" />
-    <uses-permission android:name="com.gsma.services.rcs.RCS_INITIATE_VIDEOSHARES" />
-    <uses-permission android:name="com.gsma.services.rcs.RCS_READ_VIDEOSHARES" />
-    <uses-permission android:name="com.gsma.services.rcs.RCS_RECEIVE_GEOLOCSHARES" />
-    <uses-permission android:name="com.gsma.services.rcs.RCS_INITIATE_GEOLOCSHARES" />
-    <uses-permission android:name="com.gsma.services.rcs.RCS_READ_GEOLOCSHARES" />
-    <uses-permission android:name="com.gsma.services.rcs.RCS_INITIATE_FILEUPLOADS" />
-    <uses-permission android:name="com.gsma.services.rcs.RCS_USE_HISTORY" />
-    <uses-permission android:name="com.gsma.services.rcs.RCS_READ_HISTORY" />
+    <uses-permission android:name="com.gsma.services.permission.RCS" />
 
     <application
         android:name=".RiApplication"

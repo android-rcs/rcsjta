@@ -1,26 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="rcs_core_application_title">RCS service</string>
+    <string name="rcs_core_application_title">RCS services</string>
     <string name="rcs_core_permission">RCS</string>
-    <string name="rcs_core_permission_ext">RCS extensions</string>
-    <string name="rcs_core_permission_read_chat">RCS chat read</string>
-    <string name="rcs_core_permission_read_filetransfer">RCS file transfer read</string>
-    <string name="rcs_core_permission_read_imageshare">RCS imageShare read</string>
-    <string name="rcs_core_permission_read_videoshare">RCS videoShare read</string>
-    <string name="rcs_core_permission_read_capability">RCS capability read</string>
-    <string name="rcs_core_permission_read_ipcall">RCS ipcall read</string>
-    <string name="rcs_core_permission_read_geolocshare">RCS geoloc read</string>
-    <string name="rcs_core_permission_read_history">RCS history log read</string>
-    <string name="rcs_core_permission_desc">RCS</string>
-    <string name="rcs_core_permission_ext_desc">RCS extensions</string>
-    <string name="rcs_core_permission_read_chat_desc">Grants permission to read RCS chat history</string>
-    <string name="rcs_core_permission_read_filetransfer_desc">Grants permission to read RCS file transfer history</string>
-    <string name="rcs_core_permission_read_imageshare_desc">Grants permission to read RCS imageshare history</string>
-    <string name="rcs_core_permission_read_videoshare_desc">Grants permission to read RCS videoshare history</string>
-    <string name="rcs_core_permission_read_capability_desc">Grants permission to read RCS capability information</string>
-    <string name="rcs_core_permission_read_ipcall_desc">Grants permission to read ipcall history</string>
-    <string name="rcs_core_permission_read_geolocshare_desc">Grants permission to read RCS geoloc history</string>
+    <string name="rcs_core_permission_desc">use RCS services</string>
 
     <!-- Strings associated to ContactsContract menus -->
     <string name="rcs_core_my_profile">\u0020My RCS profile</string>
