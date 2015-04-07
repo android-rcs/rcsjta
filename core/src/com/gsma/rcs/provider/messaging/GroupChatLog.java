@@ -36,6 +36,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.net.Uri;
 import android.util.SparseArray;
 
 import java.util.HashMap;
@@ -48,27 +49,34 @@ import java.util.Set;
  */
 public class GroupChatLog implements IGroupChatLog {
 
-    private final static String ORDER_BY_TIMESTAMP_DESC = ChatData.KEY_TIMESTAMP.concat(" DESC");
-
     private final Context mCtx;
 
     private final LocalContentResolver mLocalContentResolver;
 
-    private final static String SELECT_CHAT_ID = ChatData.KEY_CHAT_ID.concat("=?");
-
     private final static String SELECT_CHAT_ID_STATUS_REJECTED = new StringBuilder(
-            ChatData.KEY_CHAT_ID).append("=? AND ").append(ChatData.KEY_STATE).append("=")
-            .append(State.ABORTED.toInt()).append(" AND ").append(ChatData.KEY_REASON_CODE)
-            .append("=").append(ReasonCode.ABORTED_BY_USER.toInt()).append(" AND ")
+            ChatData.KEY_STATE).append("=").append(State.ABORTED.toInt()).append(" AND ")
+            .append(ChatData.KEY_REASON_CODE).append("=")
+            .append(ReasonCode.ABORTED_BY_USER.toInt()).append(" AND ")
             .append(ChatData.KEY_USER_ABORTION).append("=")
             .append(UserAbortion.SERVER_NOT_NOTIFIED.toInt()).toString();
 
     private static final String SELECT_ACTIVE_GROUP_CHATS = new StringBuilder(ChatData.KEY_STATE)
             .append("=").append(State.STARTED.toInt()).toString();
 
-    /**
-     * The logger
-     */
+    // @formatter:off
+    private static final String[] PROJECTION_GC_INFO = new String[] {
+        ChatData.KEY_CHAT_ID, 
+        ChatData.KEY_REJOIN_ID, 
+        ChatData.KEY_PARTICIPANTS,
+        ChatData.KEY_SUBJECT, 
+        ChatData.KEY_TIMESTAMP
+    };
+    // @formatter:on
+
+    private static final String[] PROJECTION_CHAT_ID = new String[] {
+        ChatData.KEY_CHAT_ID
+    };
+
     private static final Logger logger = Logger.getLogger(GroupChatLog.class.getSimpleName());
 
     private static final int FIRST_COLUMN_IDX = 0;
@@ -120,26 +128,23 @@ public class GroupChatLog implements IGroupChatLog {
             builder.append('=');
             builder.append(participant.getValue().toInt());
             if (--size != 0) {
-
                 builder.append(',');
             }
         }
         return builder.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog#addGroupChat(java.lang.String,
-     * java.lang.String, java.util.Set, int, int)
-     */
+    @Override
     public void addGroupChat(String chatId, ContactId contact, String subject,
             Map<ContactId, ParticipantStatus> participants, State state, ReasonCode reasonCode,
             Direction direction, long timestamp) {
+        String encodedParticipants = convert(participants);
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("addGroupChat; chatID=").append(chatId)
                     .append(", subject=").append(subject).append(", state=").append(state)
                     .append(" reasonCode=").append(reasonCode).append(", direction=")
-                    .append(direction).append(", timestamp=").append(timestamp).toString());
+                    .append(direction).append(", timestamp=").append(timestamp)
+                    .append(", participants=").append(encodedParticipants).toString());
         }
         ContentValues values = new ContentValues();
         values.put(ChatData.KEY_CHAT_ID, chatId);
@@ -150,18 +155,13 @@ public class GroupChatLog implements IGroupChatLog {
         values.put(ChatData.KEY_REASON_CODE, reasonCode.toInt());
         values.put(ChatData.KEY_SUBJECT, subject);
 
-        values.put(ChatData.KEY_PARTICIPANTS, convert(participants));
+        values.put(ChatData.KEY_PARTICIPANTS, encodedParticipants);
         values.put(ChatData.KEY_DIRECTION, direction.toInt());
         values.put(ChatData.KEY_TIMESTAMP, timestamp);
         values.put(ChatData.KEY_USER_ABORTION, UserAbortion.SERVER_NOTIFIED.toInt());
         mLocalContentResolver.insert(ChatData.CONTENT_URI, values);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog#acceptGroupChatNextInvitation(java.lang
-     * .String)
-     */
     @Override
     public void acceptGroupChatNextInvitation(String chatId) {
         if (logger.isActivated()) {
@@ -169,14 +169,8 @@ public class GroupChatLog implements IGroupChatLog {
         }
         ContentValues values = new ContentValues();
         values.put(ChatData.KEY_USER_ABORTION, UserAbortion.SERVER_NOTIFIED.toInt());
-        String[] selectionArgs = {
-            chatId
-        };
-        mLocalContentResolver.update(ChatData.CONTENT_URI, values, SELECT_CHAT_ID_STATUS_REJECTED,
-                selectionArgs);
-        if (logger.isActivated()) {
-            logger.debug("acceptGroupChatNextInvitation (chatID=" + chatId + ")");
-        }
+        mLocalContentResolver.update(Uri.withAppendedPath(ChatData.CONTENT_URI, chatId), values,
+                SELECT_CHAT_ID_STATUS_REJECTED, null);
     }
 
     @Override
@@ -188,17 +182,10 @@ public class GroupChatLog implements IGroupChatLog {
         ContentValues values = new ContentValues();
         values.put(ChatData.KEY_STATE, state.toInt());
         values.put(ChatData.KEY_REASON_CODE, reasonCode.toInt());
-        String selectionArgs[] = new String[] {
-            chatId
-        };
-        mLocalContentResolver.update(ChatData.CONTENT_URI, values, SELECT_CHAT_ID, selectionArgs);
+        mLocalContentResolver.update(Uri.withAppendedPath(ChatData.CONTENT_URI, chatId), values,
+                null, null);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog#updateGroupChatParticipant(java.lang.
-     * String, java.util.Set)
-     */
     @Override
     public void updateGroupChatParticipants(String chatId,
             Map<ContactId, ParticipantStatus> participants) {
@@ -209,151 +196,93 @@ public class GroupChatLog implements IGroupChatLog {
         }
         ContentValues values = new ContentValues();
         values.put(ChatData.KEY_PARTICIPANTS, encodedParticipants);
-        mLocalContentResolver.update(ChatData.CONTENT_URI, values, ChatData.KEY_CHAT_ID + " = '"
-                + chatId + "'", null);
+        mLocalContentResolver.update(Uri.withAppendedPath(ChatData.CONTENT_URI, chatId), values,
+                null, null);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog#updateGroupChatRejoinIdOnSessionStart
-     * (java.lang.String, java.lang.String)
-     */
     @Override
     public void setGroupChatRejoinId(String chatId, String rejoinId) {
         if (logger.isActivated()) {
-            logger.debug("Update group chat rejoin ID to " + rejoinId);
+            logger.debug("Update group chat rejoin ID to ".concat(rejoinId));
         }
         ContentValues values = new ContentValues();
         values.put(ChatData.KEY_REJOIN_ID, rejoinId);
         values.put(ChatData.KEY_STATE, State.STARTED.toInt());
-        mLocalContentResolver.update(ChatData.CONTENT_URI, values, ChatData.KEY_CHAT_ID + " = '"
-                + chatId + "'", null);
+        mLocalContentResolver.update(Uri.withAppendedPath(ChatData.CONTENT_URI, chatId), values,
+                null, null);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog#getGroupChatInfo(java.lang.String)
-     */
     @Override
     public GroupChatInfo getGroupChatInfo(String chatId) {
-        if (logger.isActivated()) {
-            logger.debug("Get group chat info for " + chatId);
-        }
-        GroupChatInfo result = null;
         Cursor cursor = null;
-
-        // @formatter:off
-        String[] projection = new String[] {
-                ChatData.KEY_CHAT_ID, ChatData.KEY_REJOIN_ID, ChatData.KEY_PARTICIPANTS,
-                ChatData.KEY_SUBJECT, ChatData.KEY_TIMESTAMP
-        };
-        // @formatter:on
-        String[] selArgs = new String[] {
-            chatId
-        };
         try {
-            cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection, SELECT_CHAT_ID,
-                    selArgs, ORDER_BY_TIMESTAMP_DESC);
-            if (cursor.moveToFirst()) {
-                Map<ContactId, ParticipantStatus> participants = GroupChat.getParticipants(mCtx,
-                        cursor.getString(2));
-                result = new GroupChatInfo(cursor.getString(0), cursor.getString(1), chatId,
-                        participants, cursor.getString(3), cursor.getLong(4));
+            cursor = mLocalContentResolver.query(
+                    Uri.withAppendedPath(ChatData.CONTENT_URI, chatId), PROJECTION_GC_INFO, null,
+                    null, null);
+            // TODO check null cursor CR037
+            if (!cursor.moveToFirst()) {
+                return null;
             }
+            int columnIdxChatId = cursor.getColumnIndexOrThrow(ChatData.KEY_CHAT_ID);
+            int columnIdxRejoinId = cursor.getColumnIndexOrThrow(ChatData.KEY_REJOIN_ID);
+            int columnIdxParticipants = cursor.getColumnIndexOrThrow(ChatData.KEY_PARTICIPANTS);
+            int columnIdxSubject = cursor.getColumnIndexOrThrow(ChatData.KEY_SUBJECT);
+            int columnIdxTimestamp = cursor.getColumnIndexOrThrow(ChatData.KEY_TIMESTAMP);
+            Map<ContactId, ParticipantStatus> participants = GroupChat.getParticipants(mCtx,
+                    cursor.getString(columnIdxParticipants));
+            return new GroupChatInfo(cursor.getString(columnIdxChatId),
+                    cursor.getString(columnIdxRejoinId), chatId, participants,
+                    cursor.getString(columnIdxSubject), cursor.getLong(columnIdxTimestamp));
         } finally {
             if (cursor != null) {
                 cursor.close();
             }
         }
-        return result;
     }
 
-    /**
-     * Get the participants associated with a group chat
-     * 
-     * @param chatId ChatId identifying the group chat
-     * @return participants for the group chat
-     */
+    @Override
     public Map<ContactId, ParticipantStatus> getParticipants(String chatId) {
-        if (logger.isActivated()) {
-            logger.debug("Get group chat participants for ".concat(chatId));
-        }
-        try {
-            return GroupChat.getParticipants(mCtx,
-                    getDataAsString(getGroupChatData(ChatData.KEY_PARTICIPANTS, chatId)));
-        } catch (SQLException exception) {
-            /* No row returned, that's OK we return no participants. */
-            // TODO: will be fixed in CR037
+        Map<ContactId, ParticipantStatus> participants = GroupChat.getParticipants(mCtx,
+                getDataAsString(getGroupChatData(ChatData.KEY_PARTICIPANTS, chatId)));
+        if (participants == null) {
             return new HashMap<ContactId, ParticipantStatus>();
         }
+        return participants;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog#isGroupChatNextInviteRejected(java.lang
-     * .String)
-     */
     @Override
     public boolean isGroupChatNextInviteRejected(String chatId) {
-        String[] projection = {
-            ChatData.KEY_CHAT_ID
-        };
-        String[] selectionArgs = {
-            chatId
-        };
         Cursor cursor = null;
         try {
-            cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection,
-                    SELECT_CHAT_ID_STATUS_REJECTED, selectionArgs, ORDER_BY_TIMESTAMP_DESC);
-            if (cursor.getCount() != 0) {
-                return true;
-            }
+            cursor = mLocalContentResolver.query(
+                    Uri.withAppendedPath(ChatData.CONTENT_URI, chatId), PROJECTION_CHAT_ID,
+                    SELECT_CHAT_ID_STATUS_REJECTED, null, null);
+            // TODO check null cursor CR037
+            return cursor.moveToFirst();
         } finally {
             if (cursor != null) {
                 cursor.close();
             }
         }
-        return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog#getGroupChatData( java.lang.String,
-     * java.lang.String)
-     */
     private Cursor getGroupChatData(String columnName, String chatId) {
-        if (logger.isActivated()) {
-            logger.debug("Get group chat info for ".concat(chatId));
-        }
         String[] projection = new String[] {
             columnName
         };
-        String[] selArgs = new String[] {
-            chatId
-        };
-        Cursor cursor = null;
-        try {
-            cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection, SELECT_CHAT_ID,
-                    selArgs, ORDER_BY_TIMESTAMP_DESC);
-            if (cursor.moveToFirst()) {
-                return cursor;
-            }
-
-            throw new SQLException(
-                    "No row returned while querying for group chat data with chatId : " + chatId);
-
-        } catch (RuntimeException e) {
-            if (cursor != null) {
-                cursor.close();
-            }
-            throw e;
+        Cursor cursor = mLocalContentResolver.query(
+                Uri.withAppendedPath(ChatData.CONTENT_URI, chatId), projection, null, null, null);
+        // TODO check null cursor CR037
+        if (cursor.moveToFirst()) {
+            return cursor;
         }
+        throw new SQLException(
+                "No row returned while querying for group chat data with chatId : ".concat(chatId));
     }
 
     private String getDataAsString(Cursor cursor) {
         try {
             return cursor.getString(FIRST_COLUMN_IDX);
-
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -364,7 +293,6 @@ public class GroupChatLog implements IGroupChatLog {
     private int getDataAsInt(Cursor cursor) {
         try {
             return cursor.getInt(FIRST_COLUMN_IDX);
-
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -372,74 +300,37 @@ public class GroupChatLog implements IGroupChatLog {
         }
     }
 
-    private long getDataAsLong(Cursor cursor) {
-        try {
-            return cursor.getLong(FIRST_COLUMN_IDX);
-
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog#getGroupChatState (java.lang.String)
-     */
     public State getGroupChatState(String chatId) {
-        if (logger.isActivated()) {
-            logger.debug("Get group chat state for ".concat(chatId));
-        }
         return State.valueOf(getDataAsInt(getGroupChatData(ChatData.KEY_STATE, chatId)));
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog#getGroupChatReasonCode (java.lang.String)
-     */
     public ReasonCode getGroupChatReasonCode(String chatId) {
-        if (logger.isActivated()) {
-            logger.debug("Get group chat reason code for ".concat(chatId));
-        }
         return ReasonCode.valueOf(getDataAsInt(getGroupChatData(ChatData.KEY_REASON_CODE, chatId)));
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog#setRejectNextGroupChatNextInvitation
-     * (java.lang.String)
-     */
     public void setRejectNextGroupChatNextInvitation(String chatId) {
         if (logger.isActivated()) {
             logger.debug("setRejectNextGroupChatNextInvitation (chatId=" + chatId + ")");
         }
         ContentValues values = new ContentValues();
         values.put(ChatData.KEY_USER_ABORTION, UserAbortion.SERVER_NOT_NOTIFIED.toInt());
-        mLocalContentResolver.update(ChatData.CONTENT_URI, values, ChatData.KEY_CHAT_ID + " = '"
-                + chatId + "'", null);
+        mLocalContentResolver.update(Uri.withAppendedPath(ChatData.CONTENT_URI, chatId), values,
+                null, null);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog#
-     * retrieveChatIdsOfActiveGroupChatsForAutoRejoin
-     */
+    @Override
     public Set<String> getChatIdsOfActiveGroupChatsForAutoRejoin() {
-        String[] projection = new String[] {
-            ChatData.KEY_CHAT_ID
-        };
         Cursor cursor = null;
         try {
-            cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, projection,
+            cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, PROJECTION_CHAT_ID,
                     SELECT_ACTIVE_GROUP_CHATS, null, null);
+            // TODO check null cursor CR037
             Set<String> activeGroupChats = new HashSet<String>();
             while (cursor.moveToNext()) {
                 String chatId = cursor.getString(FIRST_COLUMN_IDX);
                 activeGroupChats.add(chatId);
             }
             return activeGroupChats;
-
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -447,35 +338,16 @@ public class GroupChatLog implements IGroupChatLog {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.gsma.rcs.provider.messaging.IGroupChatLog#getCacheableGroupChatData (
-     * java.lang.String)
-     */
+    @Override
     public Cursor getCacheableGroupChatData(String chatId) {
-        if (logger.isActivated()) {
-            logger.debug("Get group chat info for ".concat(chatId));
+        Cursor cursor = mLocalContentResolver.query(
+                Uri.withAppendedPath(ChatData.CONTENT_URI, chatId), null, null, null, null);
+        // TODO check null cursor CR03
+        if (cursor.moveToFirst()) {
+            return cursor;
         }
-        String[] selArgs = new String[] {
-            chatId
-        };
-        Cursor cursor = null;
-        try {
-            cursor = mLocalContentResolver.query(ChatData.CONTENT_URI, null, SELECT_CHAT_ID,
-                    selArgs, ORDER_BY_TIMESTAMP_DESC);
-            if (cursor.moveToFirst()) {
-                return cursor;
-            }
-
-            throw new SQLException(
-                    "No row returned while querying for group chat data with chatId : " + chatId);
-
-        } catch (RuntimeException e) {
-            if (cursor != null) {
-                cursor.close();
-            }
-            throw e;
-        }
+        throw new SQLException(
+                "No row returned while querying for group chat data with chatId : ".concat(chatId));
     }
 
     @Override

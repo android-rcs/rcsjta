@@ -233,7 +233,6 @@ public class MessageLog implements IMessageLog {
                 Set<ContactId> recipients = new HashSet<ContactId>();
                 for (Map.Entry<ContactId, ParticipantStatus> participant : mGroupChatLog
                         .getParticipants(chatId).entrySet()) {
-                    // TODO: Verify that these are the proper values to include.
                     switch (participant.getValue()) {
                         case INVITE_QUEUED:
                         case INVITING:

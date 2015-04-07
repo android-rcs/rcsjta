@@ -24,7 +24,6 @@ package com.gsma.rcs.core.ims.service.im.chat;
 
 import static com.gsma.rcs.utils.StringUtils.UTF8;
 
-import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
@@ -41,7 +40,9 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import android.text.TextUtils;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax2.sip.header.RequireHeader;
 import javax2.sip.header.SubjectHeader;
@@ -70,12 +71,11 @@ public class RestartGroupChatSession extends GroupChatSession {
      * @param parent IMS service
      * @param conferenceId Conference ID
      * @param subject Subject associated to the session
-     * @param participants List of invited participants
+     * @param storedParticipants List of invited participants
      * @param contributionId Contribution ID
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
-     * @throws CoreException
      */
     public RestartGroupChatSession(ImsService parent, String conferenceId, String subject,
             String contributionId, Map<ContactId, ParticipantStatus> storedParticipants,
@@ -117,8 +117,24 @@ public class RestartGroupChatSession extends GroupChatSession {
                     .getLocalSocketProtocol(), getAcceptTypes(), getWrappedTypes(), localSetup,
                     getMsrpMgr().getLocalMsrpPath(), SdpUtils.DIRECTION_SENDRECV);
 
-            // FIXME: Which status/statuses should be included? Probably not all.
-            String resourceList = ChatUtils.generateChatResourceList(getParticipants().keySet());
+            Set<ContactId> invitees = new HashSet<ContactId>();
+            Map<ContactId,ParticipantStatus> participants = getParticipants();
+            for (ContactId participant : participants.keySet()) {
+                switch (participants.get(participant)) {
+                    case INVITE_QUEUED:
+                    case INVITING:
+                    case INVITED:
+                    case CONNECTED:
+                    case DISCONNECTED:
+                        invitees.add(participant);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            
+            String resourceList = ChatUtils.generateChatResourceList(invitees);
 
             String multipart = new StringBuilder(Multipart.BOUNDARY_DELIMITER).append(BOUNDARY_TAG)
                     .append(SipUtils.CRLF).append("Content-Type: application/sdp")
