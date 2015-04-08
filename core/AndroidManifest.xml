@@ -29,55 +29,16 @@
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
-    <uses-permission android:name="com.gsma.rcs.permission.RCS" />
+    <uses-permission android:name="com.gsma.services.permission.RCS" />
 
     <permission
-        android:name="com.gsma.rcs.permission.RCS"
+        android:name="com.gsma.services.permission.RCS"
         android:description="@string/rcs_core_permission_desc"
         android:label="@string/rcs_core_permission"
         android:protectionLevel="normal" />
     <permission
-        android:name="com.gsma.rcs.permission.RCS_EXTENSION"
-        android:description="@string/rcs_core_permission_ext_desc"
-        android:label="@string/rcs_core_permission_ext"
-        android:protectionLevel="normal" />
-    <permission
-        android:name="com.gsma.services.rcs.RCS_READ_GEOLOCSHARE"
-        android:description="@string/rcs_core_permission_read_geolocshare_desc"
-        android:label="@string/rcs_core_permission_read_geolocshare"
-        android:protectionLevel="normal" />
-    <permission
-        android:name="com.gsma.services.rcs.RCS_READ_CHATS"
-        android:description="@string/rcs_core_permission_read_chat_desc"
-        android:label="@string/rcs_core_permission_read_chat"
-        android:protectionLevel="normal" />
-    <permission
-        android:name="com.gsma.services.rcs.RCS_READ_FILETRANSFERS"
-        android:description="@string/rcs_core_permission_read_filetransfer_desc"
-        android:label="@string/rcs_core_permission_read_filetransfer"
-        android:protectionLevel="normal" />
-    <permission
-        android:name="com.gsma.services.rcs.RCS_READ_IMAGESHARES"
-        android:description="@string/rcs_core_permission_read_imageshare_desc"
-        android:label="@string/rcs_core_permission_read_imageshare"
-        android:protectionLevel="normal" />
-    <permission
-        android:name="com.gsma.services.rcs.RCS_READ_VIDEOSHARES"
-        android:description="@string/rcs_core_permission_read_videoshare_desc"
-        android:label="@string/rcs_core_permission_read_videoshare"
-        android:protectionLevel="normal" />
-    <permission
-        android:name="com.gsma.services.rcs.RCS_READ_CAPABILITIES"
-        android:description="@string/rcs_core_permission_read_capability_desc"
-        android:label="@string/rcs_core_permission_read_capability"
-        android:protectionLevel="normal" />
-    <permission
-        android:name="com.gsma.rcs.permission.RCS_INTERNAL_ACCESS_ONLY"
+        android:name="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY"
         android:protectionLevel="signature" />
-    <permission android:name="com.gsma.services.rcs.RCS_READ_HISTORY"
-        android:label="@string/rcs_core_permission_read_history"
-        android:description="@string/rcs_core_permission_read_history"
-        android:protectionLevel="normal" />
     <application
         android:icon="@drawable/rcs_icon"
         android:label="@string/rcs_core_application_title" >
@@ -150,43 +111,43 @@
             android:name="com.gsma.rcs.provider.messaging.ChatProvider"
             android:authorities="com.gsma.rcs.chat;com.gsma.services.rcs.provider.chat"
             android:exported="true"
-            android:readPermission="com.gsma.services.rcs.RCS_READ_CHATS"
-            android:writePermission="com.gsma.rcs.permission.RCS_INTERNAL_ACCESS_ONLY" />
+            android:readPermission="com.gsma.services.permission.RCS"
+            android:writePermission="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY" />
         <provider
             android:name="com.gsma.rcs.provider.messaging.GroupDeliveryInfoProvider"
             android:authorities="com.gsma.services.rcs.provider.groupdeliveryinfo"
             android:exported="true"
-            android:readPermission="com.gsma.services.rcs.RCS_READ_CHATS"
-            android:writePermission="com.gsma.rcs.permission.RCS_INTERNAL_ACCESS_ONLY" />
+            android:readPermission="com.gsma.services.permission.RCS"
+            android:writePermission="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY" />
         <provider
             android:name="com.gsma.rcs.provider.messaging.FileTransferProvider"
             android:authorities="com.gsma.rcs.filetransfer;com.gsma.services.rcs.provider.filetransfer"
             android:exported="true"
-            android:readPermission="com.gsma.services.rcs.RCS_READ_FILETRANSFERS"
-            android:writePermission="com.gsma.rcs.permission.RCS_INTERNAL_ACCESS_ONLY" />
+            android:readPermission="com.gsma.services.permission.RCS"
+            android:writePermission="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY" />
         <provider
             android:name="com.gsma.rcs.provider.sharing.ImageSharingProvider"
             android:authorities="com.gsma.services.rcs.provider.imageshare"
             android:exported="true"
-            android:readPermission="com.gsma.services.rcs.RCS_READ_IMAGESHARES"
-            android:writePermission="com.gsma.rcs.permission.RCS_INTERNAL_ACCESS_ONLY" />
+            android:readPermission="com.gsma.services.permission.RCS"
+            android:writePermission="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY" />
         <provider
             android:name="com.gsma.rcs.provider.sharing.VideoSharingProvider"
             android:authorities="com.gsma.services.rcs.provider.videoshare"
             android:exported="true"
-            android:readPermission="com.gsma.services.rcs.RCS_READ_VIDEOSHARES"
-            android:writePermission="com.gsma.rcs.permission.RCS_INTERNAL_ACCESS_ONLY" />
+            android:readPermission="com.gsma.services.permission.RCS"
+            android:writePermission="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY" />
         <provider
             android:name="com.gsma.rcs.provider.eab.RichAddressBookProvider"
             android:authorities="com.gsma.rcs.capability;com.gsma.services.rcs.provider.capability"
             android:exported="true"
-            android:readPermission="com.gsma.services.rcs.RCS_READ_CAPABILITIES"
-            android:writePermission="com.gsma.rcs.permission.RCS_INTERNAL_ACCESS_ONLY" />
+            android:readPermission="com.gsma.services.permission.RCS"
+            android:writePermission="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY" />
         <provider
             android:name=".provider.ipcall.IPCallProvider"
             android:authorities="com.gsma.services.rcs.provider.ipcall"
             android:exported="false"
-            android:writePermission="com.gsma.rcs.permission.RCS_INTERNAL_ACCESS_ONLY" />
+            android:writePermission="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY" />
         <provider
             android:name="com.gsma.rcs.provider.settings.RcsSettingsProvider"
             android:authorities="com.gsma.rcs.setting" />
@@ -194,14 +155,14 @@
             android:name="com.gsma.rcs.provider.sharing.GeolocSharingProvider"
             android:authorities="com.gsma.services.rcs.provider.geolocshare"
             android:exported="true"
-            android:readPermission="com.gsma.services.rcs.RCS_READ_GEOLOCSHARE"
-            android:writePermission="com.gsma.rcs.permission.RCS_INTERNAL_ACCESS_ONLY" />
+            android:readPermission="com.gsma.services.permission.RCS"
+            android:writePermission="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY" />
         <provider
             android:name="com.gsma.rcs.provider.history.HistoryProvider"
             android:authorities="com.gsma.rcs.history;com.gsma.services.rcs.provider.history"
             android:exported="true"
-            android:readPermission="com.gsma.services.rcs.RCS_READ_HISTORY"
-            android:writePermission="com.gsma.rcs.permission.RCS_INTERNAL_ACCESS_ONLY"/>
+            android:readPermission="com.gsma.services.permission.RCS"
+            android:writePermission="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY" />
 
         <!-- Device events receiver -->
 
