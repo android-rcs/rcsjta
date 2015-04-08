@@ -59,7 +59,12 @@ import java.util.Random;
 
 public class HistoryLogTest extends AndroidTestCase {
 
+    private static final String REMOTE_CONTACT_NUMBER = "+46123456789";
+
     private static final String SELECTION_EMPTY = "";
+
+    private static final String SELECTION_NOT_EMPTY = HistoryLog.CONTACT + "='"
+            + REMOTE_CONTACT_NUMBER + "'";
 
     private static final String FILE_TRANSFER_ID = "FtId" + System.currentTimeMillis();
 
@@ -105,8 +110,6 @@ public class HistoryLogTest extends AndroidTestCase {
     private static final String TXT = "Hello";
 
     private static final String DISPLAY_NAME = "display";
-
-    private static final String REMOTE_CONTACT_NUMBER = "+46123456789";
 
     private static final int EXTERNAL_PROVIDER_ID = 10;
 
@@ -463,6 +466,15 @@ public class HistoryLogTest extends AndroidTestCase {
         Uri historyUri = getUriWithAllInternalProviders();
         Cursor cursor = getContext().getContentResolver().query(historyUri, null, SELECTION_EMPTY,
                 null, null);
+        assertEquals(5, cursor.getCount());
+        verifyHistoryLogEntries(cursor);
+    }
+
+    public void testQueryHistoryLogProviderWithSelectionNotEmpty() {
+        addItems();
+        Uri historyUri = getUriWithAllInternalProviders();
+        Cursor cursor = getContext().getContentResolver().query(historyUri, null,
+                SELECTION_NOT_EMPTY, null, null);
         assertEquals(5, cursor.getCount());
         verifyHistoryLogEntries(cursor);
     }

@@ -92,7 +92,7 @@ public class HistoryProvider extends MultiDbProvider {
         String unionQuery = mQueryHelper.generateUnionQuery(historyLogMembers, selectionArgs,
                 selection);
         query.append(" FROM (").append(unionQuery).append(")");
-        if (selectionArgs != null && !TextUtils.isEmpty(selection)) {
+        if (!TextUtils.isEmpty(selection)) {
             query.append(" WHERE ").append(selection);
         }
         if (sort != null) {
