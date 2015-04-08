@@ -22,6 +22,7 @@
 
 package com.gsma.services.rcs.chat;
 
+import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsServiceException;
 
 /**
@@ -54,8 +55,9 @@ public class ChatServiceConfiguration {
     public boolean isChatSf() throws RcsServiceException {
         try {
             return mIConfig.isChatSf();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -72,8 +74,9 @@ public class ChatServiceConfiguration {
     public boolean isChatWarnSF() throws RcsServiceException {
         try {
             return mIConfig.isChatWarnSF();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -86,8 +89,9 @@ public class ChatServiceConfiguration {
     public int getChatTimeout() throws RcsServiceException {
         try {
             return mIConfig.getChatTimeout();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -100,8 +104,9 @@ public class ChatServiceConfiguration {
     public int getIsComposingTimeout() throws RcsServiceException {
         try {
             return mIConfig.getIsComposingTimeout();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -114,8 +119,9 @@ public class ChatServiceConfiguration {
     public int getGroupChatMaxParticipants() throws RcsServiceException {
         try {
             return mIConfig.getGroupChatMaxParticipants();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -128,8 +134,9 @@ public class ChatServiceConfiguration {
     public int getGroupChatMinParticipants() throws RcsServiceException {
         try {
             return mIConfig.getGroupChatMinParticipants();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -144,8 +151,9 @@ public class ChatServiceConfiguration {
     public int getOneToOneChatMessageMaxLength() throws RcsServiceException {
         try {
             return mIConfig.getOneToOneChatMessageMaxLength();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -160,8 +168,9 @@ public class ChatServiceConfiguration {
     public int getGroupChatMessageMaxLength() throws RcsServiceException {
         try {
             return mIConfig.getGroupChatMessageMaxLength();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -176,8 +185,9 @@ public class ChatServiceConfiguration {
     public int getGroupChatSubjectMaxLength() throws RcsServiceException {
         try {
             return mIConfig.getGroupChatSubjectMaxLength();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -190,8 +200,9 @@ public class ChatServiceConfiguration {
     public boolean isGroupChatSupported() throws RcsServiceException {
         try {
             return mIConfig.isGroupChatSupported();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -205,8 +216,9 @@ public class ChatServiceConfiguration {
     public boolean isSmsFallback() throws RcsServiceException {
         try {
             return mIConfig.isSmsFallback();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -221,8 +233,9 @@ public class ChatServiceConfiguration {
     public boolean isRespondToDisplayReportsEnabled() throws RcsServiceException {
         try {
             return mIConfig.isRespondToDisplayReportsEnabled();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -235,8 +248,9 @@ public class ChatServiceConfiguration {
     public int getGeolocLabelMaxLength() throws RcsServiceException {
         try {
             return mIConfig.getGeolocLabelMaxLength();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -249,8 +263,9 @@ public class ChatServiceConfiguration {
     public int getGeolocExpirationTime() throws RcsServiceException {
         try {
             return mIConfig.getGeolocExpirationTime();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -266,7 +281,7 @@ public class ChatServiceConfiguration {
         try {
             mIConfig.setRespondToDisplayReports(enable);
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 }

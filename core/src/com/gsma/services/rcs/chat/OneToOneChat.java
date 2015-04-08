@@ -23,6 +23,9 @@
 package com.gsma.services.rcs.chat;
 
 import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsIllegalArgumentException;
+import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -56,8 +59,9 @@ public class OneToOneChat {
     public ContactId getRemoteContact() throws RcsServiceException {
         try {
             return mOneToOneChatInf.getRemoteContact();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 
@@ -71,8 +75,10 @@ public class OneToOneChat {
     public boolean isAllowedToSendMessage() throws RcsServiceException {
         try {
             return mOneToOneChatInf.isAllowedToSendMessage();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -86,8 +92,11 @@ public class OneToOneChat {
     public ChatMessage sendMessage(String message) throws RcsServiceException {
         try {
             return new ChatMessage(mOneToOneChatInf.sendMessage(message));
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsIllegalArgumentException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -101,8 +110,11 @@ public class OneToOneChat {
     public ChatMessage sendMessage(Geoloc geoloc) throws RcsServiceException {
         try {
             return new ChatMessage(mOneToOneChatInf.sendMessage2(geoloc));
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsIllegalArgumentException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -117,7 +129,7 @@ public class OneToOneChat {
         try {
             mOneToOneChatInf.sendIsComposingEvent(status);
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 
@@ -132,7 +144,7 @@ public class OneToOneChat {
         try {
             mOneToOneChatInf.openChat();
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 
@@ -146,7 +158,9 @@ public class OneToOneChat {
         try {
             mOneToOneChatInf.resendMessage(msgId);
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsIllegalArgumentException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 }

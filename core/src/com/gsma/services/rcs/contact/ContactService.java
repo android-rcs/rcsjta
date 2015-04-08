@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +15,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.services.rcs.contact;
 
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsIllegalArgumentException;
+import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsServiceControl;
 import com.gsma.services.rcs.RcsServiceException;
@@ -48,8 +55,6 @@ public class ContactService extends RcsService {
      * API
      */
     private IContactService mApi;
-
-    private static final String ERROR_CNX = "Contacts service not connected";
 
     /**
      * Constructor
@@ -128,14 +133,16 @@ public class ContactService extends RcsService {
      * @see RcsContact
      */
     public RcsContact getRcsContact(ContactId contact) throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                return mApi.getRcsContact(contact);
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            return mApi.getRcsContact(contact);
+
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -147,20 +154,15 @@ public class ContactService extends RcsService {
      * @see RcsContact
      */
     public Set<RcsContact> getRcsContacts() throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                Set<RcsContact> result = new HashSet<RcsContact>();
-                List<RcsContact> contacts = mApi.getRcsContacts();
-                for (int i = 0; i < contacts.size(); i++) {
-                    RcsContact contact = contacts.get(i);
-                    result.add(contact);
-                }
-                return result;
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            return new HashSet<RcsContact>(mApi.getRcsContacts());
+
+        } catch (Exception e) {
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -172,16 +174,15 @@ public class ContactService extends RcsService {
      * @see RcsContact
      */
     public Set<RcsContact> getRcsContactsOnline() throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                Set<RcsContact> result = new HashSet<RcsContact>();
-                result.addAll(mApi.getRcsContactsOnline());
-                return result;
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            return new HashSet<RcsContact>(mApi.getRcsContactsOnline());
+
+        } catch (Exception e) {
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -194,16 +195,16 @@ public class ContactService extends RcsService {
      * @see RcsContact
      */
     public Set<RcsContact> getRcsContactsSupporting(String serviceId) throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                Set<RcsContact> result = new HashSet<RcsContact>();
-                result.addAll(mApi.getRcsContactsSupporting(serviceId));
-                return result;
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            return new HashSet<RcsContact>(mApi.getRcsContactsSupporting(serviceId));
+
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -215,14 +216,15 @@ public class ContactService extends RcsService {
      * @throws RcsServiceException
      */
     public void blockContact(ContactId contact) throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                mApi.blockContact(contact);
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            mApi.blockContact(contact);
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -233,14 +235,15 @@ public class ContactService extends RcsService {
      * @throws RcsServiceException
      */
     public void unblockContact(ContactId contact) throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                mApi.unblockContact(contact);
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            mApi.unblockContact(contact);
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 }

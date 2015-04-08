@@ -58,8 +58,9 @@ public class ChatMessage {
     public String getId() throws RcsServiceException {
         try {
             return mChatMessageInf.getId();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 
@@ -88,8 +89,10 @@ public class ChatMessage {
     public String getContent() throws RcsServiceException {
         try {
             return mChatMessageInf.getContent();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -102,8 +105,10 @@ public class ChatMessage {
     public String getMimeType() throws RcsServiceException {
         try {
             return mChatMessageInf.getMimeType();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -117,8 +122,10 @@ public class ChatMessage {
     public Direction getDirection() throws RcsServiceException {
         try {
             return Direction.valueOf(mChatMessageInf.getDirection());
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -132,8 +139,10 @@ public class ChatMessage {
     public long getTimestamp() throws RcsServiceException {
         try {
             return mChatMessageInf.getTimestamp();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -147,8 +156,10 @@ public class ChatMessage {
     public long getTimestampSent() throws RcsServiceException {
         try {
             return mChatMessageInf.getTimestampSent();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -162,8 +173,10 @@ public class ChatMessage {
     public long getTimestampDelivered() throws RcsServiceException {
         try {
             return mChatMessageInf.getTimestampDelivered();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -177,8 +190,10 @@ public class ChatMessage {
     public long getTimestampDisplayed() throws RcsServiceException {
         try {
             return mChatMessageInf.getTimestampDisplayed();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -191,8 +206,10 @@ public class ChatMessage {
     public Status getStatus() throws RcsServiceException {
         try {
             return Status.valueOf(mChatMessageInf.getStatus());
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -205,8 +222,10 @@ public class ChatMessage {
     public ReasonCode getReasonCode() throws RcsServiceException {
         try {
             return ReasonCode.valueOf(mChatMessageInf.getReasonCode());
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -219,8 +238,10 @@ public class ChatMessage {
     public String getChatId() throws RcsServiceException {
         try {
             return mChatMessageInf.getChatId();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -233,8 +254,10 @@ public class ChatMessage {
     public boolean isRead() throws RcsServiceException {
         try {
             return mChatMessageInf.isRead();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 }

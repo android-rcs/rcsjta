@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +15,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.services.rcs.capability;
 
-import java.util.Iterator;
-import java.util.Set;
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsIllegalArgumentException;
+import com.gsma.services.rcs.RcsPersistentStorageException;
+import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceControl;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.RcsServiceNotRegisteredException;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -28,13 +41,8 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.IInterface;
 
-import com.gsma.services.rcs.RcsService;
-import com.gsma.services.rcs.RcsServiceControl;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceListener;
-import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.contact.ContactId;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Capability service offers the main entry point to read capabilities of remote contacts, to
@@ -54,8 +62,6 @@ public class CapabilityService extends RcsService {
      * Extension MIME type
      */
     public final static String EXTENSION_MIME_TYPE = "com.gsma.services.rcs";
-
-    private static final String ERROR_CNX = "Capability service not connected";
 
     /**
      * API
@@ -138,14 +144,15 @@ public class CapabilityService extends RcsService {
      * @throws RcsServiceException
      */
     public Capabilities getMyCapabilities() throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                return mApi.getMyCapabilities();
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            return mApi.getMyCapabilities();
+
+        } catch (Exception e) {
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -160,14 +167,16 @@ public class CapabilityService extends RcsService {
      * @throws RcsServiceException
      */
     public Capabilities getContactCapabilities(ContactId contact) throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                return mApi.getContactCapabilities(contact);
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            return mApi.getContactCapabilities(contact);
+
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -186,14 +195,15 @@ public class CapabilityService extends RcsService {
      * @throws RcsServiceException
      */
     public void requestContactCapabilities(ContactId contact) throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                mApi.requestContactCapabilities(contact);
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            mApi.requestContactCapabilities(contact);
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            RcsServiceNotRegisteredException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -230,14 +240,14 @@ public class CapabilityService extends RcsService {
      * @throws RcsServiceException
      */
     public void requestAllContactsCapabilities() throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                mApi.requestAllContactsCapabilities();
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            mApi.requestAllContactsCapabilities();
+        } catch (Exception e) {
+            RcsServiceNotRegisteredException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -248,14 +258,14 @@ public class CapabilityService extends RcsService {
      * @throws RcsServiceException
      */
     public void addCapabilitiesListener(CapabilitiesListener listener) throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                mApi.addCapabilitiesListener(listener);
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            mApi.addCapabilitiesListener(listener);
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -267,14 +277,14 @@ public class CapabilityService extends RcsService {
      */
     public void removeCapabilitiesListener(CapabilitiesListener listener)
             throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                mApi.removeCapabilitiesListener(listener);
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            mApi.removeCapabilitiesListener(listener);
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -287,18 +297,19 @@ public class CapabilityService extends RcsService {
      */
     public void addCapabilitiesListener(Set<ContactId> contacts, CapabilitiesListener listener)
             throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                Iterator<ContactId> list = contacts.iterator();
-                while (list.hasNext()) {
-                    ContactId contact = list.next();
-                    mApi.addCapabilitiesListener2(contact, listener);
-                }
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        if (contacts == null || contacts.isEmpty()) {
+            throw new RcsIllegalArgumentException("contacts must not be null or empty!");
+        }
+        try {
+            for (ContactId contact : contacts) {
+                mApi.addCapabilitiesListener2(contact, listener);
             }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -311,18 +322,19 @@ public class CapabilityService extends RcsService {
      */
     public void removeCapabilitiesListener(Set<ContactId> contacts, CapabilitiesListener listener)
             throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                Iterator<ContactId> list = contacts.iterator();
-                while (list.hasNext()) {
-                    ContactId contact = list.next();
-                    mApi.removeCapabilitiesListener2(contact, listener);
-                }
-            } catch (Exception e) {
-                throw new RcsServiceException(e.getMessage());
-            }
-        } else {
+        if (mApi == null) {
             throw new RcsServiceNotAvailableException();
+        }
+        if (contacts == null || contacts.isEmpty()) {
+            throw new RcsIllegalArgumentException("contacts must not be null or empty!");
+        }
+        try {
+            for (ContactId contact : contacts) {
+                mApi.removeCapabilitiesListener2(contact, listener);
+            }
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 }

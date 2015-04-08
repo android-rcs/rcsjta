@@ -196,6 +196,7 @@ public class ChatService extends RcsService {
             return new OneToOneChat(mApi.getOneToOneChat(contact));
 
         } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
             throw new RcsServiceException(e);
         }
     }
@@ -215,6 +216,7 @@ public class ChatService extends RcsService {
             return new GroupChat(mApi.getGroupChat(chatId));
 
         } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
             throw new RcsServiceException(e);
         }
     }
@@ -253,6 +255,8 @@ public class ChatService extends RcsService {
             return mApi.isAllowedToInitiateGroupChat2(contact);
 
         } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
             throw new RcsServiceException(e);
         }
     }
@@ -305,6 +309,7 @@ public class ChatService extends RcsService {
         try {
             mApi.deleteOneToOneChat(contact);
         } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
             throw new RcsServiceException(e);
         }
     }
@@ -323,6 +328,7 @@ public class ChatService extends RcsService {
         try {
             mApi.deleteGroupChat(chatId);
         } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
             throw new RcsServiceException(e);
         }
     }
@@ -340,6 +346,7 @@ public class ChatService extends RcsService {
         try {
             mApi.deleteMessage(msgId);
         } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
             throw new RcsServiceException(e);
         }
     }
@@ -357,6 +364,7 @@ public class ChatService extends RcsService {
         try {
             mApi.markUndeliveredMessagesAsProcessed(new ArrayList<String>(msgIds));
         } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
             throw new RcsServiceException(e);
         }
     }
@@ -374,6 +382,7 @@ public class ChatService extends RcsService {
         try {
             mApi.markMessageAsRead(msgId);
         } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
             throw new RcsServiceException(e);
         }
     }
@@ -393,6 +402,7 @@ public class ChatService extends RcsService {
             mGroupChatListeners.put(listener, new WeakReference<IGroupChatListener>(rcsListener));
             mApi.addEventListener3(rcsListener);
         } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
             throw new RcsServiceException(e);
         }
     }
@@ -417,6 +427,7 @@ public class ChatService extends RcsService {
                 mApi.removeEventListener3(rcsListener);
             }
         } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
             throw new RcsServiceException(e);
         }
     }
@@ -437,6 +448,7 @@ public class ChatService extends RcsService {
                     rcsListener));
             mApi.addEventListener2(rcsListener);
         } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
             throw new RcsServiceException(e);
         }
     }
@@ -461,6 +473,7 @@ public class ChatService extends RcsService {
                 mApi.removeEventListener2(rcsListener);
             }
         } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
             throw new RcsServiceException(e);
         }
     }
@@ -480,6 +493,7 @@ public class ChatService extends RcsService {
             return new ChatMessage(mApi.getChatMessage(msgId));
 
         } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
             throw new RcsServiceException(e);
         }
     }

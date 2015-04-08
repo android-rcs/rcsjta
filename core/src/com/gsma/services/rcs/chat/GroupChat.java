@@ -23,8 +23,13 @@
 package com.gsma.services.rcs.chat;
 
 import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsIllegalArgumentException;
+import com.gsma.services.rcs.RcsPermissionDeniedException;
+import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsUnsupportedOperationException;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.util.SparseArray;
@@ -304,8 +309,9 @@ public class GroupChat {
     public String getChatId() throws RcsServiceException {
         try {
             return mGroupChatInf.getChatId();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 
@@ -319,8 +325,10 @@ public class GroupChat {
     public Direction getDirection() throws RcsServiceException {
         try {
             return Direction.valueOf(mGroupChatInf.getDirection());
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -334,8 +342,10 @@ public class GroupChat {
     public State getState() throws RcsServiceException {
         try {
             return State.valueOf(mGroupChatInf.getState());
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -349,8 +359,10 @@ public class GroupChat {
     public ReasonCode getReasonCode() throws RcsServiceException {
         try {
             return ReasonCode.valueOf(mGroupChatInf.getReasonCode());
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -363,8 +375,10 @@ public class GroupChat {
     public ContactId getRemoteContact() throws RcsServiceException {
         try {
             return mGroupChatInf.getRemoteContact();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -377,8 +391,10 @@ public class GroupChat {
     public String getSubject() throws RcsServiceException {
         try {
             return mGroupChatInf.getSubject();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -406,7 +422,8 @@ public class GroupChat {
             return participants;
 
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -421,8 +438,10 @@ public class GroupChat {
     public long getTimestamp() throws RcsServiceException {
         try {
             return mGroupChatInf.getTimestamp();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -436,8 +455,10 @@ public class GroupChat {
     public boolean isAllowedToSendMessage() throws RcsServiceException {
         try {
             return mGroupChatInf.isAllowedToSendMessage();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -451,8 +472,12 @@ public class GroupChat {
     public ChatMessage sendMessage(String text) throws RcsServiceException {
         try {
             return new ChatMessage(mGroupChatInf.sendMessage(text));
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsIllegalArgumentException.assertException(e);
+            RcsPermissionDeniedException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -466,8 +491,12 @@ public class GroupChat {
     public ChatMessage sendMessage(Geoloc geoloc) throws RcsServiceException {
         try {
             return new ChatMessage(mGroupChatInf.sendMessage2(geoloc));
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsIllegalArgumentException.assertException(e);
+            RcsPermissionDeniedException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -482,7 +511,7 @@ public class GroupChat {
         try {
             mGroupChatInf.sendIsComposingEvent(status);
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 
@@ -496,8 +525,10 @@ public class GroupChat {
     public boolean isAllowedToInviteParticipants() throws RcsServiceException {
         try {
             return mGroupChatInf.isAllowedToInviteParticipants();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -512,8 +543,11 @@ public class GroupChat {
     public boolean isAllowedToInviteParticipant(ContactId participant) throws RcsServiceException {
         try {
             return mGroupChatInf.isAllowedToInviteParticipant(participant);
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsIllegalArgumentException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -527,7 +561,11 @@ public class GroupChat {
         try {
             mGroupChatInf.inviteParticipants(new ArrayList<ContactId>(participants));
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsIllegalArgumentException.assertException(e);
+            RcsUnsupportedOperationException.assertException(e);
+            RcsPermissionDeniedException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -541,8 +579,9 @@ public class GroupChat {
     public int getMaxParticipants() throws RcsServiceException {
         try {
             return mGroupChatInf.getMaxParticipants();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 
@@ -555,8 +594,10 @@ public class GroupChat {
     public boolean isAllowedToLeave() throws RcsServiceException {
         try {
             return mGroupChatInf.isAllowedToLeave();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -570,7 +611,9 @@ public class GroupChat {
         try {
             mGroupChatInf.leave();
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsUnsupportedOperationException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -585,7 +628,7 @@ public class GroupChat {
         try {
             mGroupChatInf.openChat();
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 }

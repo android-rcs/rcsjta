@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +15,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.rcs.service.api;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 import com.gsma.rcs.core.ims.service.ContactInfo;
 import com.gsma.rcs.core.ims.service.ContactInfo.BlockingState;
@@ -32,12 +32,19 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
-import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
+import com.gsma.services.rcs.RcsServiceRegistration;
 import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.contact.RcsContact;
 import com.gsma.services.rcs.contact.IContactService;
+import com.gsma.services.rcs.contact.RcsContact;
+
+import android.os.RemoteException;
+import android.text.TextUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Contact service API implementation
@@ -153,14 +160,29 @@ public class ContactServiceImpl extends IContactService.Stub {
      * 
      * @param contact Contact ID
      * @return Contact
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public RcsContact getRcsContact(ContactId contact) throws ServerApiException {
+    public RcsContact getRcsContact(ContactId contact) throws RemoteException {
+        if (contact == null) {
+            throw new ServerApiIllegalArgumentException("contact must not be null!");
+        }
         if (logger.isActivated()) {
             logger.info("Get RCS contact " + contact);
         }
-        // Read capabilities in the local database
-        return getRcsContact(mContactsManager.getContactInfo(contact));
+        try {
+            // Read capabilities in the local database
+            return getRcsContact(mContactsManager.getContactInfo(contact));
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
@@ -244,32 +266,56 @@ public class ContactServiceImpl extends IContactService.Stub {
      * Returns the list of rcs contacts
      * 
      * @return List of contacts
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public List<RcsContact> getRcsContacts() throws ServerApiException {
+    public List<RcsContact> getRcsContacts() throws RemoteException {
         if (logger.isActivated()) {
             logger.info("Get rcs contacts");
         }
-        return getRcsContacts(null);
+        try {
+            return getRcsContacts(null);
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
      * Returns the list of online contacts (i.e. registered)
      * 
      * @return List of contacts
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public List<RcsContact> getRcsContactsOnline() throws ServerApiException {
+    public List<RcsContact> getRcsContactsOnline() throws RemoteException {
         if (logger.isActivated()) {
             logger.info("Get registered rcs contacts");
         }
-        return getRcsContacts(new FilterContactInfo() {
+        try {
+            return getRcsContacts(new FilterContactInfo() {
 
-            @Override
-            public boolean inScope(ContactInfo contactInfo) {
-                return RegistrationState.ONLINE.equals(contactInfo.getRegistrationState());
+                @Override
+                public boolean inScope(ContactInfo contactInfo) {
+                    return RegistrationState.ONLINE.equals(contactInfo.getRegistrationState());
+                }
+            });
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
             }
-        });
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
@@ -277,33 +323,46 @@ public class ContactServiceImpl extends IContactService.Stub {
      * 
      * @param serviceId Service ID
      * @return List of contacts
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public List<RcsContact> getRcsContactsSupporting(final String serviceId)
-            throws ServerApiException {
+    public List<RcsContact> getRcsContactsSupporting(final String serviceId) throws RemoteException {
+        if (TextUtils.isEmpty(serviceId)) {
+            throw new ServerApiIllegalArgumentException("serviceId must not be null or empty!");
+        }
         if (logger.isActivated()) {
             logger.info("Get rcs contacts supporting " + serviceId);
         }
+        try {
+            return getRcsContacts(new FilterContactInfo() {
 
-        return getRcsContacts(new FilterContactInfo() {
-
-            @Override
-            public boolean inScope(ContactInfo contactInfo) {
-                com.gsma.rcs.core.ims.service.capability.Capabilities capabilities = contactInfo
-                        .getCapabilities();
-                if (capabilities != null) {
-                    Set<String> supportedExtensions = capabilities.getSupportedExtensions();
-                    if (supportedExtensions != null) {
-                        for (String supportedExtension : supportedExtensions) {
-                            if (supportedExtension.equals(serviceId)) {
-                                return true;
+                @Override
+                public boolean inScope(ContactInfo contactInfo) {
+                    com.gsma.rcs.core.ims.service.capability.Capabilities capabilities = contactInfo
+                            .getCapabilities();
+                    if (capabilities != null) {
+                        Set<String> supportedExtensions = capabilities.getSupportedExtensions();
+                        if (supportedExtensions != null) {
+                            for (String supportedExtension : supportedExtensions) {
+                                if (supportedExtension.equals(serviceId)) {
+                                    return true;
+                                }
                             }
                         }
                     }
+                    return false;
                 }
-                return false;
+            });
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
             }
-        });
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
@@ -334,23 +393,26 @@ public class ContactServiceImpl extends IContactService.Stub {
      * the corresponding spambox.
      * 
      * @param contact Contact ID
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public void blockContact(ContactId contact) throws ServerApiException {
+    public void blockContact(ContactId contact) throws RemoteException {
+        if (contact == null) {
+            throw new ServerApiIllegalArgumentException("contact must not be null!");
+        }
         if (logger.isActivated()) {
             logger.info("Block contact " + contact);
         }
         try {
             mContactsManager.setBlockingState(contact, BlockingState.BLOCKED);
-        } catch (Exception e) {
-            /*
-             * TODO: This is not the correct way to handle this exception, and will be fixed in
-             * CR037
-             */
-            if (logger.isActivated()) {
-                logger.error("Unexpected exception", e);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
             }
-            throw new ServerApiException(e);
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -358,23 +420,26 @@ public class ContactServiceImpl extends IContactService.Stub {
      * Unblock a contact
      * 
      * @param contact Contact ID
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public void unblockContact(ContactId contact) throws ServerApiException {
+    public void unblockContact(ContactId contact) throws RemoteException {
+        if (contact == null) {
+            throw new ServerApiIllegalArgumentException("contact must not be null!");
+        }
+        if (logger.isActivated()) {
+            logger.info("Unblock contact " + contact);
+        }
         try {
-            if (logger.isActivated()) {
-                logger.info("Unblock contact " + contact);
-            }
             mContactsManager.setBlockingState(contact, BlockingState.NOT_BLOCKED);
-        } catch (Exception e) {
-            /*
-             * TODO: This is not the correct way to handle this exception, and will be fixed in
-             * CR037
-             */
-            if (logger.isActivated()) {
-                logger.error("Unexpected exception", e);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
             }
-            throw new ServerApiException(e);
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 }

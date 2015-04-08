@@ -60,6 +60,7 @@ import com.gsma.services.rcs.chat.IOneToOneChatListener;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.os.RemoteException;
+import android.text.TextUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -374,10 +375,25 @@ public class ChatServiceImpl extends IChatService.Stub {
      * 
      * @param contact Contact ID
      * @return IOneToOneChat
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public IOneToOneChat getOneToOneChat(ContactId contact) throws ServerApiException {
-        return getOrCreateOneToOneChat(contact);
+    public IOneToOneChat getOneToOneChat(ContactId contact) throws RemoteException {
+        if (contact == null) {
+            throw new ServerApiIllegalArgumentException("contact must not be null!");
+        }
+        try {
+            return getOrCreateOneToOneChat(contact);
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
@@ -509,37 +525,65 @@ public class ChatServiceImpl extends IChatService.Stub {
      * 
      * @param chatId Chat ID
      * @return IGroupChat
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public IGroupChat getGroupChat(String chatId) throws ServerApiException {
-        return getOrCreateGroupChat(chatId);
+    public IGroupChat getGroupChat(String chatId) throws RemoteException {
+        if (TextUtils.isEmpty(chatId)) {
+            throw new ServerApiIllegalArgumentException("chatId must not be null or empty!");
+        }
+        try {
+            return getOrCreateGroupChat(chatId);
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
      * Returns true if it is possible to initiate a group chat now, else returns false.
      * 
      * @return boolean
+     * @throws RemoteException
      */
-    public boolean isAllowedToInitiateGroupChat() {
-        if (!mRcsSettings.isGroupChatActivated()) {
-            if (sLogger.isActivated()) {
-                sLogger.debug("Cannot initiate group chat as group chat feature is not supported.");
+    public boolean isAllowedToInitiateGroupChat() throws RemoteException {
+        try {
+            if (!mRcsSettings.isGroupChatActivated()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Cannot initiate group chat as group chat feature is not supported.");
+                }
+                return false;
             }
-            return false;
-        }
-        if (!mRcsSettings.getMyCapabilities().isImSessionSupported()) {
-            if (sLogger.isActivated()) {
-                sLogger.debug("Cannot initiate group chat as IM capabilities are not supported for self.");
+            if (!mRcsSettings.getMyCapabilities().isImSessionSupported()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Cannot initiate group chat as IM capabilities are not supported for self.");
+                }
+                return false;
             }
-            return false;
-        }
-        if (!ServerApiUtils.isImsConnected()) {
-            if (sLogger.isActivated()) {
-                sLogger.debug("Cannot initiate group chat as IMS is not connected.");
+            if (!ServerApiUtils.isImsConnected()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Cannot initiate group chat as IMS is not connected.");
+                }
+                return false;
             }
-            return false;
+            return true;
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return true;
     }
 
     /**
@@ -548,52 +592,75 @@ public class ChatServiceImpl extends IChatService.Stub {
      * 
      * @param contact
      * @return true if it's possible to initiate a new group chat
+     * @throws RemoteException
      */
-    public boolean isAllowedToInitiateGroupChat2(ContactId contact) {
-        if (!isAllowedToInitiateGroupChat()) {
-            return false;
+    public boolean isAllowedToInitiateGroupChat2(ContactId contact) throws RemoteException {
+        if (contact == null) {
+            throw new ServerApiIllegalArgumentException("contact must not be null!");
         }
-        Capabilities contactCapabilities = mContactManager.getContactCapabilities(contact);
-        if (contactCapabilities == null) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder(
-                        "Cannot initiate group chat as the capabilities of the participant '")
-                        .append(contact).append("' are not known.").toString());
+        try {
+            if (!isAllowedToInitiateGroupChat()) {
+                return false;
             }
-            return false;
-        }
-        if (!contactCapabilities.isImSessionSupported()) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder("Cannot initiate group chat as the participant '")
-                        .append(contact).append("' does not have IM capabilities.").toString());
+            Capabilities contactCapabilities = mContactManager.getContactCapabilities(contact);
+            if (contactCapabilities == null) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder(
+                            "Cannot initiate group chat as the capabilities of the participant '")
+                            .append(contact).append("' are not known.").toString());
+                }
+                return false;
             }
-            return false;
-        }
-        if (mRcsSettings.isGroupChatInviteIfFullStoreForwardSupported()
-                && !contactCapabilities.isGroupChatStoreForwardSupported()) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder("Cannot initiate group chat as the participant '")
-                        .append(contact)
-                        .append("' does not have store and forward feature supported.").toString());
+            if (!contactCapabilities.isImSessionSupported()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder(
+                            "Cannot initiate group chat as the participant '").append(contact)
+                            .append("' does not have IM capabilities.").toString());
+                }
+                return false;
             }
-            return false;
+            if (mRcsSettings.isGroupChatInviteIfFullStoreForwardSupported()
+                    && !contactCapabilities.isGroupChatStoreForwardSupported()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder(
+                            "Cannot initiate group chat as the participant '").append(contact)
+                            .append("' does not have store and forward feature supported.")
+                            .toString());
+                }
+                return false;
+            }
+            return true;
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return true;
+
     }
 
     /**
      * Deletes all one to one chat from history and abort/reject any associated ongoing session if
      * such exists.
+     * 
+     * @throws RemoteException
      */
-    public void deleteOneToOneChats() {
+    public void deleteOneToOneChats() throws RemoteException {
         throw new UnsupportedOperationException("This method has not been implemented yet!");
     }
 
     /**
      * Deletes all group chat from history and abort/reject any associated ongoing session if such
      * exists.
+     * 
+     * @throws RemoteException
      */
-    public void deleteGroupChats() {
+    public void deleteGroupChats() throws RemoteException {
         throw new UnsupportedOperationException("This method has not been implemented yet!");
     }
 
@@ -602,8 +669,12 @@ public class ChatServiceImpl extends IChatService.Stub {
      * ongoing session if such exists.
      * 
      * @param contact
+     * @throws RemoteException
      */
-    public void deleteOneToOneChat(ContactId contact) {
+    public void deleteOneToOneChat(ContactId contact) throws RemoteException {
+        if (contact == null) {
+            throw new ServerApiIllegalArgumentException("contact must not be null!");
+        }
         throw new UnsupportedOperationException("This method has not been implemented yet!");
     }
 
@@ -612,17 +683,24 @@ public class ChatServiceImpl extends IChatService.Stub {
      * session if such exists.
      * 
      * @param chatId
+     * @throws RemoteException
      */
-    public void deleteGroupChat(String chatId) {
+    public void deleteGroupChat(String chatId) throws RemoteException {
+        if (TextUtils.isEmpty(chatId)) {
+            throw new ServerApiIllegalArgumentException("chatId must not be null or empty!");
+        }
         throw new UnsupportedOperationException("This method has not been implemented yet!");
     }
 
     /**
      * Delete a message from its message id from history.
      * 
-     * @param msgId
+     * @param msgId throws RemoteException
      */
-    public void deleteMessage(String msgId) {
+    public void deleteMessage(String msgId) throws RemoteException {
+        if (TextUtils.isEmpty(msgId)) {
+            throw new ServerApiIllegalArgumentException("msgId must not be null or empty!");
+        }
         throw new UnsupportedOperationException("This method has not been implemented yet!");
     }
 
@@ -630,8 +708,13 @@ public class ChatServiceImpl extends IChatService.Stub {
      * Marks undelivered chat messages to indicate that messages have been processed.
      * 
      * @param msgIds
+     * @throws RemoteException
      */
-    public void markUndeliveredMessagesAsProcessed(List<String> msgIds) {
+    public void markUndeliveredMessagesAsProcessed(List<String> msgIds) throws RemoteException {
+        if (msgIds == null || msgIds.isEmpty()) {
+            throw new ServerApiIllegalArgumentException(
+                    "Undelivered chat messageId's list must not be null or empty!");
+        }
         throw new UnsupportedOperationException("This method has not been implemented yet!");
     }
 
@@ -642,11 +725,25 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @throws RemoteException
      */
     public void addEventListener2(IOneToOneChatListener listener) throws RemoteException {
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Add an OneToOne chat event listener");
         }
-        synchronized (mLock) {
-            mOneToOneChatEventBroadcaster.addOneToOneChatEventListener(listener);
+        try {
+            synchronized (mLock) {
+                mOneToOneChatEventBroadcaster.addOneToOneChatEventListener(listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -657,11 +754,25 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @throws RemoteException
      */
     public void removeEventListener2(IOneToOneChatListener listener) throws RemoteException {
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Remove an OneToOne chat event listener");
         }
-        synchronized (mLock) {
-            mOneToOneChatEventBroadcaster.removeOneToOneChatEventListener(listener);
+        try {
+            synchronized (mLock) {
+                mOneToOneChatEventBroadcaster.removeOneToOneChatEventListener(listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -669,14 +780,28 @@ public class ChatServiceImpl extends IChatService.Stub {
      * Adds a listener on group chat events
      * 
      * @param listener Group chat event listener
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public void addEventListener3(IGroupChatListener listener) throws ServerApiException {
+    public void addEventListener3(IGroupChatListener listener) throws RemoteException {
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Add a Group chat event listener");
         }
-        synchronized (mLock) {
-            mGroupChatEventBroadcaster.addGroupChatEventListener(listener);
+        try {
+            synchronized (mLock) {
+                mGroupChatEventBroadcaster.addGroupChatEventListener(listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -684,14 +809,28 @@ public class ChatServiceImpl extends IChatService.Stub {
      * Removes a listener on group chat events
      * 
      * @param listener Group chat event listener
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public void removeEventListener3(IGroupChatListener listener) throws ServerApiException {
+    public void removeEventListener3(IGroupChatListener listener) throws RemoteException {
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Remove a group chat event listener");
         }
-        synchronized (mLock) {
-            mGroupChatEventBroadcaster.removeGroupChatEventListener(listener);
+        try {
+            synchronized (mLock) {
+                mGroupChatEventBroadcaster.removeGroupChatEventListener(listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -708,17 +847,31 @@ public class ChatServiceImpl extends IChatService.Stub {
      * Mark a received message as read (ie. displayed in the UI)
      * 
      * @param msgId Message ID
-     * @throws ServerApiException
+     * @throws RemoteException
      */
     @Override
-    public void markMessageAsRead(String msgId) throws ServerApiException {
-        mMessagingLog.markMessageAsRead(msgId);
-        if (mRcsSettings.isImReportsActivated() && mRcsSettings.isRespondToDisplayReports()) {
-            if (sLogger.isActivated()) {
-                sLogger.debug("tryToDispatchAllPendingDisplayNotifications for msgID "
-                        .concat(msgId));
+    public void markMessageAsRead(String msgId) throws RemoteException {
+        if (TextUtils.isEmpty(msgId)) {
+            throw new ServerApiIllegalArgumentException("msgId must not be null or empty!");
+        }
+        try {
+            mMessagingLog.markMessageAsRead(msgId);
+            if (mRcsSettings.isImReportsActivated() && mRcsSettings.isRespondToDisplayReports()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("tryToDispatchAllPendingDisplayNotifications for msgID "
+                            .concat(msgId));
+                }
+                mCore.getListener().tryToDispatchAllPendingDisplayNotifications();
             }
-            mCore.getListener().tryToDispatchAllPendingDisplayNotifications();
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -772,11 +925,27 @@ public class ChatServiceImpl extends IChatService.Stub {
      * 
      * @param msgId
      * @return IChatMessage
+     * @throws RemoteException
      */
-    public IChatMessage getChatMessage(String msgId) {
-        ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
-                mMessagingLog, msgId);
-        return new ChatMessageImpl(persistentStorage);
+    public IChatMessage getChatMessage(String msgId) throws RemoteException {
+        if (TextUtils.isEmpty(msgId)) {
+            throw new ServerApiIllegalArgumentException("msgId must not be null or empty!");
+        }
+        try {
+            ChatMessagePersistedStorageAccessor persistentStorage = new ChatMessagePersistedStorageAccessor(
+                    mMessagingLog, msgId);
+            return new ChatMessageImpl(persistentStorage);
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**

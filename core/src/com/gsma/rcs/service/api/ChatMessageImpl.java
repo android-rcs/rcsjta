@@ -57,51 +57,195 @@ public class ChatMessageImpl extends IChatMessage.Stub {
         }
     }
 
-    public String getId() {
-        return mPersistentStorage.getId();
+    public String getId() throws RemoteException {
+        try {
+            return mPersistentStorage.getId();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
-    public String getContent() {
-        return mPersistentStorage.getContent();
+    public String getContent() throws RemoteException {
+        try {
+            return mPersistentStorage.getContent();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
-    public String getMimeType() {
-        return mPersistentStorage.getMimeType();
+    public String getMimeType() throws RemoteException {
+        try {
+            return mPersistentStorage.getMimeType();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
-    public int getDirection() {
-        return mPersistentStorage.getDirection().toInt();
+    public int getDirection() throws RemoteException {
+        try {
+            return mPersistentStorage.getDirection().toInt();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
-    public long getTimestamp() {
-        return mPersistentStorage.getTimestamp();
+    public long getTimestamp() throws RemoteException {
+        try {
+            return mPersistentStorage.getTimestamp();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
-    public long getTimestampSent() {
-        return mPersistentStorage.getTimestampSent();
+    public long getTimestampSent() throws RemoteException {
+        try {
+            return mPersistentStorage.getTimestampSent();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
-    public long getTimestampDelivered() {
-        return mPersistentStorage.getTimestampDelivered();
+    public long getTimestampDelivered() throws RemoteException {
+        try {
+            return mPersistentStorage.getTimestampDelivered();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
-    public long getTimestampDisplayed() {
-        return mPersistentStorage.getTimestampDisplayed();
+    public long getTimestampDisplayed() throws RemoteException {
+        try {
+            return mPersistentStorage.getTimestampDisplayed();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
-    public int getStatus() {
-        return mPersistentStorage.getStatus().toInt();
+    public int getStatus() throws RemoteException {
+        try {
+            return mPersistentStorage.getStatus().toInt();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
-    public int getReasonCode() {
-        return mPersistentStorage.getReasonCode().toInt();
+    public int getReasonCode() throws RemoteException {
+        try {
+            return mPersistentStorage.getReasonCode().toInt();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
-    public String getChatId() {
-        return mPersistentStorage.getChatId();
+    public String getChatId() throws RemoteException {
+        try {
+            return mPersistentStorage.getChatId();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
-    public boolean isRead() {
-        return mPersistentStorage.isRead();
+    public boolean isRead() throws RemoteException {
+        try {
+            return mPersistentStorage.isRead();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 }

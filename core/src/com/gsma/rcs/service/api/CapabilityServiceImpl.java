@@ -22,8 +22,6 @@
 
 package com.gsma.rcs.service.api;
 
-import android.os.Handler;
-
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.service.capability.CapabilityService;
 import com.gsma.rcs.provider.eab.ContactsManager;
@@ -40,6 +38,9 @@ import com.gsma.services.rcs.capability.Capabilities;
 import com.gsma.services.rcs.capability.ICapabilitiesListener;
 import com.gsma.services.rcs.capability.ICapabilityService;
 import com.gsma.services.rcs.contact.ContactId;
+
+import android.os.Handler;
+import android.os.RemoteException;
 
 /**
  * Capability service API implementation
@@ -207,9 +208,22 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * fixed by the MNO and read during the provisioning.
      * 
      * @return Capabilities
+     * @throws RemoteException
      */
-    public Capabilities getMyCapabilities() {
-        return ContactServiceImpl.getCapabilities(mRcsSettings.getMyCapabilities());
+    public Capabilities getMyCapabilities() throws RemoteException {
+        try {
+            return ContactServiceImpl.getCapabilities(mRcsSettings.getMyCapabilities());
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
@@ -220,21 +234,38 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * 
      * @param contact ContactId
      * @return Capabilities
+     * @throws RemoteException
      */
-    public Capabilities getContactCapabilities(ContactId contact) {
+    public Capabilities getContactCapabilities(ContactId contact) throws RemoteException {
+        if (contact == null) {
+            throw new ServerApiIllegalArgumentException("contact must not be null!");
+        }
         if (logger.isActivated()) {
             logger.info("Get capabilities for contact " + contact);
         }
-        com.gsma.rcs.core.ims.service.capability.Capabilities caps = mContactsManager
-                .getContactCapabilities(contact);
-        // TODO update code so not to insert default capabilities in provider
-        if (caps == null
-                || caps.getTimestampOfLastRefresh() == com.gsma.rcs.core.ims.service.capability.Capabilities.INVALID_TIMESTAMP) {
-            // no capabilities are known, returns null as per 1.5.1 specification
-            return null;
+        try {
+            com.gsma.rcs.core.ims.service.capability.Capabilities caps = mContactsManager
+                    .getContactCapabilities(contact);
+            // TODO update code so not to insert default capabilities in provider
+            if (caps == null
+                    || caps.getTimestampOfLastRefresh() == com.gsma.rcs.core.ims.service.capability.Capabilities.INVALID_TIMESTAMP) {
+                // no capabilities are known, returns null as per 1.5.1 specification
+                return null;
+            }
+            // Read capabilities in the local database
+            return ContactServiceImpl.getCapabilities(mContactsManager
+                    .getContactCapabilities(contact));
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        // Read capabilities in the local database
-        return ContactServiceImpl.getCapabilities(mContactsManager.getContactCapabilities(contact));
     }
 
     /**
@@ -249,9 +280,12 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * listener for this event.
      * 
      * @param contact ContactId
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public void requestContactCapabilities(final ContactId contact) throws ServerApiException {
+    public void requestContactCapabilities(final ContactId contact) throws RemoteException {
+        if (contact == null) {
+            throw new ServerApiIllegalArgumentException("contact must not be null!");
+        }
         if (logger.isActivated()) {
             logger.info("Request capabilities for contact " + contact);
         }
@@ -261,11 +295,15 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
         try {
             mOptionsExchangeRequestHandler.post(new CapabilitiesRequester(Core.getInstance()
                     .getCapabilityService(), contact));
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Unexpected error", e);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
             }
-            throw new ServerApiException(e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -309,9 +347,9 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * provisioning). The result of the capability refresh request is provided to all the clients
      * that have registered the listener for this event.
      * 
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public void requestAllContactsCapabilities() throws ServerApiException {
+    public void requestAllContactsCapabilities() throws RemoteException {
         if (logger.isActivated()) {
             logger.info("Request all contacts capabilities");
         }
@@ -321,11 +359,15 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
         try {
             mOptionsExchangeRequestHandler.post(new AllCapabilitiesRequester(mContactsManager, Core
                     .getInstance().getCapabilityService()));
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Unexpected error", e);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
             }
-            throw new ServerApiException(e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -333,13 +375,28 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * Registers a capabilities listener on any contact
      *
      * @param listener Capabilities listener
+     * @throws RemoteException
      */
-    public void addCapabilitiesListener(ICapabilitiesListener listener) {
+    public void addCapabilitiesListener(ICapabilitiesListener listener) throws RemoteException {
         if (logger.isActivated()) {
             logger.info("Add a listener");
         }
-        synchronized (lock) {
-            mCapabilitiesBroadcaster.addCapabilitiesListener(listener);
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
+        }
+        try {
+            synchronized (lock) {
+                mCapabilitiesBroadcaster.addCapabilitiesListener(listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -347,13 +404,28 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      * Unregisters a capabilities listener
      *
      * @param listener Capabilities listener
+     * @throws RemoteException
      */
-    public void removeCapabilitiesListener(ICapabilitiesListener listener) {
+    public void removeCapabilitiesListener(ICapabilitiesListener listener) throws RemoteException {
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
+        }
         if (logger.isActivated()) {
             logger.info("Remove a listener");
         }
-        synchronized (lock) {
-            mCapabilitiesBroadcaster.removeCapabilitiesListener(listener);
+        try {
+            synchronized (lock) {
+                mCapabilitiesBroadcaster.removeCapabilitiesListener(listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -362,13 +434,32 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      *
      * @param contact ContactId
      * @param listener Capabilities listener
+     * @throws RemoteException
      */
-    public void addCapabilitiesListener2(ContactId contact, ICapabilitiesListener listener) {
+    public void addCapabilitiesListener2(ContactId contact, ICapabilitiesListener listener)
+            throws RemoteException {
+        if (contact == null) {
+            throw new ServerApiIllegalArgumentException("contact must not be null!");
+        }
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
+        }
         if (logger.isActivated()) {
             logger.info("Add a listener for contact " + contact);
         }
-        synchronized (lock) {
-            mCapabilitiesBroadcaster.addContactCapabilitiesListener(contact, listener);
+        try {
+            synchronized (lock) {
+                mCapabilitiesBroadcaster.addContactCapabilitiesListener(contact, listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -377,13 +468,32 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
      *
      * @param contact ContactId
      * @param listener Capabilities listener
+     * @throws RemoteException
      */
-    public void removeCapabilitiesListener2(ContactId contact, ICapabilitiesListener listener) {
+    public void removeCapabilitiesListener2(ContactId contact, ICapabilitiesListener listener)
+            throws RemoteException {
+        if (contact == null) {
+            throw new ServerApiIllegalArgumentException("contact must not be null!");
+        }
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
+        }
         if (logger.isActivated()) {
             logger.info("Remove a listener for contact " + contact);
         }
-        synchronized (lock) {
-            mCapabilitiesBroadcaster.removeContactCapabilitiesListener(contact, listener);
+        try {
+            synchronized (lock) {
+                mCapabilitiesBroadcaster.removeContactCapabilitiesListener(contact, listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
