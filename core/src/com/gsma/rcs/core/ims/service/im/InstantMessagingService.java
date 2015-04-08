@@ -70,6 +70,7 @@ import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
+import com.gsma.rcs.provider.settings.RcsSettingsData.ImMsgTech;
 import com.gsma.rcs.service.api.ServerApiMaxAllowedSessionLimitReachedException;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
@@ -908,6 +909,44 @@ public class InstantMessagingService extends ImsService {
      */
     public void receiveOne2OneChatSession(SipRequest invite, long timestamp) {
         boolean logActivated = sLogger.isActivated();
+        /*
+         * Invitation will be rejected if it is OMA SIMPLE IM solution but it doesn't contains first
+         * message. Reference to spec: Rich Communication Suite 5.1 Advanced Communications Services
+         * and Client Specification Version 4.0 Page 187 3.3.4.2 Technical Realization of 1-to-1
+         * Chat features when using OMA SIMPLE IM At the technical level the 1-to-1 Chat service
+         * implemented using OMA SIMPLE IM extends the concepts described in section 3.3.4.1 with
+         * the following concepts: For OMA SIMPLE IM, first message is always included in a
+         * CPIM/IMDN wrapper carried in the SIP INVITE request. So the configuration parameter FIRST
+         * MSG IN INVITE defined in Table 80 is always set to 1.
+         */
+        if (!ChatUtils.isContainingFirstMessage(invite)) {
+            ImMsgTech mode = mRcsSettings.getImMsgTech();
+            switch (mode) {
+                case CPM:
+                    /* Only reject the invitation when FirstMessageInInvite is true. */
+                    if (mRcsSettings.isFirstMessageInInvite()) {
+                        if (logActivated) {
+                            sLogger.error("Currently in Cpm mode, Reject 1-1 chat invition due to it doesn't"
+                                    .concat("carry first message."));
+                        }
+                        sendErrorResponse(invite, Response.DECLINE);
+                        return;
+                    }
+                case SIMPLE_IM:
+                    if (logActivated) {
+                        sLogger.error("Currently in SIMPLE_IM mode, Reject 1-1 chat invition due to it doesn't"
+                                .concat("carry first message."));
+                    }
+                    sendErrorResponse(invite, Response.DECLINE);
+                    return;
+                default:
+                    if (sLogger.isActivated()) {
+                        sLogger.error("Unexpected ImMsgTech code:".concat(String.valueOf(mode)));
+                    }
+                    return;
+            }
+        }
+
         String referredId = ChatUtils.getReferredIdentityAsContactUri(invite);
         ContactId remote = ChatUtils.getReferredIdentityAsContactId(invite);
         if (remote == null) {

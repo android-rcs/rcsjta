@@ -68,7 +68,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
-
 import javax2.sip.header.ContactHeader;
 import javax2.sip.header.ExtensionHeader;
 
@@ -776,6 +775,16 @@ public class ChatUtils {
         } else {
             return getFirstMessageFromSubject(invite, timestamp);
         }
+    }
+
+    public static boolean isContainingFirstMessage(SipRequest invite) {
+        if (invite.getContent() != null) {
+            return true;
+        }
+        if (invite.getSubject().length() > 0) {
+            return true;
+        }
+        return false;
     }
 
     /**

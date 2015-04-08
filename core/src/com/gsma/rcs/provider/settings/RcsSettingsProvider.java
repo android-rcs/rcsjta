@@ -22,7 +22,7 @@
 
 package com.gsma.rcs.provider.settings;
 
-import java.util.ArrayList;
+import com.gsma.rcs.utils.DatabaseUtils;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -34,7 +34,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import com.gsma.rcs.utils.DatabaseUtils;
+import java.util.ArrayList;
 
 /**
  * RCS settings provider
@@ -374,6 +374,9 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_KEY_IMAGE_RESIZE_OPTION);
             addParameter(db, RcsSettingsData.ENABLE_RCS_SWITCH,
                     RcsSettingsData.DEFAULT_ENABLE_RCS_SWITCH);
+            addParameter(db, RcsSettingsData.IM_MSG_TECH, RcsSettingsData.DEFAULT_IM_MSG_TECH);
+            addParameter(db, RcsSettingsData.FIRST_MESSAGE_INVITE,
+                    RcsSettingsData.DEFAULT_FIRST_MESSAGE_INVITE);
         }
 
         @Override

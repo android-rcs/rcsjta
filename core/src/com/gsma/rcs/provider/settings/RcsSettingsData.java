@@ -22,20 +22,21 @@
 
 package com.gsma.rcs.provider.settings;
 
-import javax2.sip.ListeningPoint;
-import android.net.ConnectivityManager;
-import android.net.Uri;
-import android.os.Environment;
-import android.util.SparseArray;
-
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMethod;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
 import com.gsma.services.rcs.filetransfer.FileTransferServiceConfiguration.ImageResizeOption;
 
+import android.net.ConnectivityManager;
+import android.net.Uri;
+import android.os.Environment;
+import android.util.SparseArray;
+
+import javax2.sip.ListeningPoint;
+
 /**
  * RCS settings data constants
- *
+ * 
  * @author jexa7410
  * @author yplo6403
  */
@@ -134,6 +135,47 @@ public class RcsSettingsData {
             throw new IllegalArgumentException(new StringBuilder("No enum const class ")
                     .append(ImSessionStartMode.class.getName()).append(".").append(value)
                     .toString());
+        }
+
+    }
+
+    public static enum ImMsgTech {
+
+        SIMPLE_IM(0),
+
+        CPM(1);
+
+        private final int mValue;
+
+        private static SparseArray<ImMsgTech> mValueToEnum = new SparseArray<ImMsgTech>();
+        static {
+            for (ImMsgTech entry : ImMsgTech.values()) {
+                mValueToEnum.put(entry.toInt(), entry);
+            }
+        }
+
+        private ImMsgTech(int value) {
+            mValue = value;
+        }
+
+        /**
+         * @return value
+         */
+        public final int toInt() {
+            return mValue;
+        }
+
+        /**
+         * @param value
+         * @return ImSessionStartMode
+         */
+        public final static ImMsgTech valueOf(int value) {
+            ImMsgTech entry = mValueToEnum.get(value);
+            if (entry != null) {
+                return entry;
+            }
+            throw new IllegalArgumentException(new StringBuilder("No enum const class ")
+                    .append(ImMsgTech.class.getName()).append(".").append(value).toString());
         }
 
     }
@@ -1245,5 +1287,11 @@ public class RcsSettingsData {
     public static final String ENABLE_RCS_SWITCH = "enableRcseSwitch";
     /* package private */static final int DEFAULT_ENABLE_RCS_SWITCH = EnableRcseSwitch.ALWAYS_SHOW
             .toInt();
+
+    public static final String IM_MSG_TECH = "ImMsgTech";
+    /* package private */static final Integer DEFAULT_IM_MSG_TECH = ImMsgTech.SIMPLE_IM.toInt();
+
+    public static final String FIRST_MESSAGE_INVITE = "FirstMessageInvite";
+    /* package private */static final Boolean DEFAULT_FIRST_MESSAGE_INVITE = true;
 
 }

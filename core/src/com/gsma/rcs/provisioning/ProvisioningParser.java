@@ -47,7 +47,6 @@ import java.io.ByteArrayInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
 import javax2.sip.ListeningPoint;
 
 /**
@@ -879,6 +878,8 @@ public class ProvisioningParser {
         String groupChatSF = null;
         String groupChatOnlySF = null;
         String maxConcurrentSession = null;
+        String imMsgTech = null;
+        String firstMessageInvite = null;
 
         Node childnode = node.getFirstChild();
 
@@ -1112,6 +1113,23 @@ public class ProvisioningParser {
                 if (confFctyUri == null) {
                     if ((confFctyUri = getValueByParamName("conf-fcty-uri", childnode, TYPE_TXT)) != null) {
                         mRcsSettings.setImConferenceUri(formatSipUri(confFctyUri));
+                        continue;
+                    }
+                }
+
+                if (imMsgTech == null) {
+                    if ((imMsgTech = getValueByParamName("imMsgTech", childnode, TYPE_INT)) != null) {
+                        mRcsSettings.writeInteger(RcsSettingsData.IM_MSG_TECH,
+                                Integer.valueOf(imMsgTech));
+                        continue;
+                    }
+                }
+
+                if (firstMessageInvite == null) {
+                    if ((firstMessageInvite = getValueByParamName("firstMsgInvite", childnode,
+                            TYPE_INT)) != null) {
+                        mRcsSettings.writeBoolean(RcsSettingsData.FIRST_MESSAGE_INVITE,
+                                !firstMessageInvite.equals("0"));
                         continue;
                     }
                 }
