@@ -49,8 +49,6 @@ public abstract class RcsService {
 
     private final Map<RcsServiceRegistrationListener, WeakReference<IRcsServiceRegistrationListener>> mRegistrationListeners = new WeakHashMap<RcsServiceRegistrationListener, WeakReference<IRcsServiceRegistrationListener>>();
 
-    protected static boolean sApiCompatible = false;
-
     /**
      * Information about the current build
      */

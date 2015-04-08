@@ -55,7 +55,7 @@ import java.util.WeakHashMap;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class IPCallService extends RcsService {
+public final class IPCallService extends RcsService {
     /**
      * API
      */
@@ -64,6 +64,8 @@ public class IPCallService extends RcsService {
     private final Map<IPCallListener, WeakReference<IIPCallListener>> mIPCallListeners = new WeakHashMap<IPCallListener, WeakReference<IIPCallListener>>();
 
     private static final String ERROR_CNX = "IPCall service not connected";
+
+    private static boolean sApiCompatible = false;
 
     /**
      * Constructor
@@ -80,15 +82,17 @@ public class IPCallService extends RcsService {
      * 
      * @throws RcsPermissionDeniedException
      */
-    public void connect() throws RcsPermissionDeniedException {
+    public final void connect() throws RcsPermissionDeniedException {
         if (!sApiCompatible) {
             try {
-                sApiCompatible = mRcsServiceControl.isCompatible();
+                sApiCompatible = mRcsServiceControl.isCompatible(this);
                 if (!sApiCompatible) {
-                    throw new RcsPermissionDeniedException("API is not compatible");
+                    throw new RcsPermissionDeniedException(
+                            "The TAPI client version of the ip call service is not compatible with the TAPI service implementation version on this device!");
                 }
             } catch (RcsServiceException e) {
-                throw new RcsPermissionDeniedException("Cannot check API compatibility");
+                throw new RcsPermissionDeniedException(
+                        "The compatibility of TAPI client version with the TAPI service implementation version of this device cannot be checked for the ip call service!");
             }
         }
         Intent serviceIntent = new Intent(IIPCallService.class.getName());
@@ -142,8 +146,6 @@ public class IPCallService extends RcsService {
                 // Do nothing
             }
             mListener.onServiceDisconnected(reasonCode);
-
-            sApiCompatible = false;
         }
     };
 

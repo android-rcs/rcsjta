@@ -35,6 +35,12 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Pair;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A class to control the service activation.
@@ -51,6 +57,52 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
     private Context mContext;
 
     private static final int INVALID_EXTRA = -1;
+
+    private enum RcsServiceName {
+        CAPABILITY("CapabilityService"), CONTACT("ContactService"), CHAT("ChatService"), FILE_TRANSFER(
+                "FileTransferService"), FILE_UPLOAD("FileUploadService"), GEOLOC_SHARING(
+                "GeolocSharingService"), HISTORY("HistoryService"), IMAGE_SHARING(
+                "ImageSharingService"), MULTIMEDIA("MultimediaSessionService"), VIDEO_SHARING(
+                "VideoSharingService");
+
+        private String mClassname;
+
+        /* Reverse-lookup map for getting a RcsServiceName from a service classname */
+        private static final Map<String, RcsServiceName> sLookup = new HashMap<String, RcsServiceName>();
+        static {
+            for (RcsServiceName service : RcsServiceName.values())
+                sLookup.put(service.mClassname, service);
+        }
+
+        RcsServiceName(String classname) {
+            mClassname = classname;
+        }
+
+        public static RcsServiceName get(String classname) {
+            return sLookup.get(classname);
+        }
+
+    };
+
+    private static final Set<Pair<Integer, Integer>> sVersionSet001 = new HashSet<Pair<Integer, Integer>>();
+    static {
+        sVersionSet001.add(new Pair<Integer, Integer>(RcsService.Build.API_VERSION,
+                RcsService.Build.API_INCREMENTAL));
+    }
+
+    private static final Map<RcsServiceName, Set<Pair<Integer, Integer>>> sServiceCompatibilityMap = new HashMap<RcsServiceName, Set<Pair<Integer, Integer>>>();
+    static {
+        sServiceCompatibilityMap.put(RcsServiceName.CAPABILITY, sVersionSet001);
+        sServiceCompatibilityMap.put(RcsServiceName.CONTACT, sVersionSet001);
+        sServiceCompatibilityMap.put(RcsServiceName.CHAT, sVersionSet001);
+        sServiceCompatibilityMap.put(RcsServiceName.FILE_TRANSFER, sVersionSet001);
+        sServiceCompatibilityMap.put(RcsServiceName.FILE_UPLOAD, sVersionSet001);
+        sServiceCompatibilityMap.put(RcsServiceName.GEOLOC_SHARING, sVersionSet001);
+        sServiceCompatibilityMap.put(RcsServiceName.HISTORY, sVersionSet001);
+        sServiceCompatibilityMap.put(RcsServiceName.IMAGE_SHARING, sVersionSet001);
+        sServiceCompatibilityMap.put(RcsServiceName.MULTIMEDIA, sVersionSet001);
+        sServiceCompatibilityMap.put(RcsServiceName.VIDEO_SHARING, sVersionSet001);
+    }
 
     private boolean getActivationModeChangeable() {
         EnableRcseSwitch enableRcseSwitch = mRcsSettings.getEnableRcseSwitch();
@@ -102,20 +154,23 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
         }
     }
 
-    private boolean isCompatible(String codename, int version, int increment) {
+    private boolean isCompatible(String servicename, String codename, int version, int increment) {
         if (TextUtils.isEmpty(codename) || version == INVALID_EXTRA || increment == INVALID_EXTRA) {
             return false;
         }
         if (!RcsService.Build.API_CODENAME.equals(codename)) {
             return false;
         }
-        if (RcsService.Build.API_VERSION != version) {
+        RcsServiceName rcsService = RcsServiceName.get(servicename);
+        if (rcsService == null) {
             return false;
         }
-        if (RcsService.Build.API_INCREMENTAL != increment) {
+        Set<Pair<Integer, Integer>> authorizedVersions = sServiceCompatibilityMap.get(rcsService);
+        if (authorizedVersions == null) {
             return false;
         }
-        return true;
+        Pair<Integer, Integer> clientVersion = new Pair<Integer, Integer>(version, increment);
+        return (authorizedVersions.contains(clientVersion));
     }
 
     @Override
@@ -149,14 +204,17 @@ public class RcsServiceControlReceiver extends BroadcastReceiver {
             if (results == null) {
                 return;
             }
+            String servicename = intent
+                    .getStringExtra(Intents.Service.EXTRA_GET_COMPATIBLITY_SERVICE);
             String codename = intent
                     .getStringExtra(Intents.Service.EXTRA_GET_COMPATIBLITY_CODENAME);
             int version = intent.getIntExtra(Intents.Service.EXTRA_GET_COMPATIBLITY_VERSION,
                     INVALID_EXTRA);
             int increment = intent.getIntExtra(Intents.Service.EXTRA_GET_COMPATIBLITY_INCREMENT,
                     INVALID_EXTRA);
+
             results.putBoolean(Intents.Service.EXTRA_GET_COMPATIBLITY_RESPONSE,
-                    isCompatible(codename, version, increment));
+                    isCompatible(servicename, codename, version, increment));
             setResultExtras(results);
         }
     }

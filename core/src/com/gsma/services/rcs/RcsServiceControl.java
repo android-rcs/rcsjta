@@ -41,6 +41,7 @@ import java.lang.reflect.Method;
  * A utility class to control the activation of the RCS service.
  */
 public class RcsServiceControl {
+
     /**
      * RCS stack package name
      */
@@ -308,13 +309,17 @@ public class RcsServiceControl {
     }
 
     /**
-     * Returns true if the RCS API and core RCS stack are compatible.
+     * Returns true if the client RCS API and core RCS stack are compatible for the given service.
      * 
-     * @return true if the RCS stack and RCS API are compatible.
+     * @param service the RCS service
+     * @return true if the client RCS stack and RCS API are compatible for the given service.
      * @throws RcsServiceException
+     * @hide
      */
-    public boolean isCompatible() throws RcsServiceException {
+    public boolean isCompatible(RcsService service) throws RcsServiceException {
+        String serviceName = service.getClass().getSimpleName();
         Intent intent = new Intent(Intents.Service.ACTION_GET_COMPATIBLITY);
+        intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBLITY_SERVICE, serviceName);
         intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBLITY_CODENAME,
                 RcsService.Build.API_CODENAME);
         intent.putExtra(Intents.Service.EXTRA_GET_COMPATIBLITY_VERSION,
@@ -324,7 +329,9 @@ public class RcsServiceControl {
         Bundle resultExtraData = queryRcsStackByIntent(intent);
         if (resultExtraData == null) {
             // No response
-            throw new RcsServiceException("Failed to get RCS API compatibility");
+            throw new RcsServiceException(
+                    "Failed to check client RCS API compatibility for service " + serviceName
+                            + " !");
         }
         return resultExtraData.getBoolean(Intents.Service.EXTRA_GET_COMPATIBLITY_RESPONSE, false);
     }

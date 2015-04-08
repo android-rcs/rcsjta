@@ -56,6 +56,8 @@ public final class ContactService extends RcsService {
      */
     private IContactService mApi;
 
+    private static boolean sApiCompatible = false;
+
     /**
      * Constructor
      * 
@@ -71,15 +73,17 @@ public final class ContactService extends RcsService {
      * 
      * @throws RcsPermissionDeniedException
      */
-    public void connect() throws RcsPermissionDeniedException {
+    public final void connect() throws RcsPermissionDeniedException {
         if (!sApiCompatible) {
             try {
-                sApiCompatible = mRcsServiceControl.isCompatible();
+                sApiCompatible = mRcsServiceControl.isCompatible(this);
                 if (!sApiCompatible) {
-                    throw new RcsPermissionDeniedException("API is not compatible");
+                    throw new RcsPermissionDeniedException(
+                            "The TAPI client version of the contact service is not compatible with the TAPI service implementation version on this device!");
                 }
             } catch (RcsServiceException e) {
-                throw new RcsPermissionDeniedException("Cannot check API compatibility");
+                throw new RcsPermissionDeniedException(
+                        "The compatibility of TAPI client version with the TAPI service implementation version of this device cannot be checked for the contact service!");
             }
         }
         Intent serviceIntent = new Intent(IContactService.class.getName());

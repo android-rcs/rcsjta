@@ -90,6 +90,12 @@ public class Intents {
          */
         public static final String EXTRA_GET_COMPATIBLITY_RESPONSE = "get_compatibility_response";
 
+        /**
+         * Used as an string extra field in ACTION_GET_COMPATIBLITY intent to convey the service
+         * class name
+         */
+        public static final String EXTRA_GET_COMPATIBLITY_SERVICE = "get_compatibility_service";
+
         private Service() {
         }
     }
