@@ -519,7 +519,8 @@ public class RichcallService extends ImsService {
                 sLogger.debug("Contact " + contact
                         + " is blocked: automatically reject the sharing invitation");
             }
-
+            handleImageSharingInvitationRejected(invite, contact,
+                    ImageSharing.ReasonCode.REJECTED_SPAM, timestamp);
             // Send a 603 Decline response
             sendErrorResponse(invite, Response.DECLINE);
             return;
@@ -705,7 +706,8 @@ public class RichcallService extends ImsService {
                 sLogger.debug("Contact " + contact
                         + " is blocked: automatically reject the sharing invitation");
             }
-
+            handleVideoSharingInvitationRejected(invite, contact,
+                    VideoSharing.ReasonCode.REJECTED_SPAM, timestamp);
             // Send a 603 Decline response
             sendErrorResponse(invite, Response.DECLINE);
             return;
@@ -832,7 +834,8 @@ public class RichcallService extends ImsService {
                 sLogger.debug("Contact " + contact
                         + " is blocked: automatically reject the sharing invitation");
             }
-
+            handleGeolocSharingInvitationRejected(invite, contact,
+                    GeolocSharing.ReasonCode.REJECTED_SPAM, timestamp);
             // Send a 603 Decline response
             sendErrorResponse(invite, Response.DECLINE);
             return;
