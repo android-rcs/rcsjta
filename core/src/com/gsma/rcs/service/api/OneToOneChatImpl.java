@@ -698,6 +698,20 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         }
         String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
         synchronized (lock) {
+            if (mContactManager.isBlockedForContact(mContact)) {
+                if (logger.isActivated()) {
+                    logger.debug("Contact "
+                            + mContact
+                            + " is blocked: automatically abort the chat session and store message to spam folder.");
+                }
+                OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
+                if (session != null) {
+                    session.abortSession(TerminationReason.TERMINATION_BY_USER);
+                }
+                mMessagingLog.addOneToOneSpamMessage(msg);
+                mBroadcaster.broadcastMessageReceived(apiMimeType, msgId);
+                return;
+            }
             mMessagingLog.addIncomingOneToOneChatMessage(msg, imdnDisplayedRequested);
             mBroadcaster.broadcastMessageReceived(apiMimeType, msgId);
         }
