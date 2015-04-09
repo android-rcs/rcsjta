@@ -27,6 +27,7 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.rtp.MediaRtpReceiver;
 import com.gsma.rcs.core.ims.protocol.rtp.MediaRtpSender;
+import com.gsma.rcs.core.ims.protocol.rtp.RtpException;
 import com.gsma.rcs.core.ims.protocol.rtp.format.Format;
 import com.gsma.rcs.core.ims.protocol.rtp.format.data.DataFormat;
 import com.gsma.rcs.core.ims.protocol.rtp.stream.RtpStreamListener;
@@ -80,9 +81,9 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
     private MediaRtpSender rtpSender;
 
     /**
-     * Startup flag
+     * Media Session started flag
      */
-    private boolean started = false;
+    private boolean mMediaSessionStarted;
 
     /**
      * The logger
@@ -195,7 +196,7 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
             rtpReceiver.startSession();
             rtpSender.startSession();
 
-            started = true;
+            mMediaSessionStarted = true;
         }
     }
 
@@ -204,7 +205,7 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
      */
     public void closeMediaSession() {
         synchronized (this) {
-            started = false;
+            mMediaSessionStarted = false;
 
             // Stop media
             rtpSender.stopSession();
@@ -217,14 +218,13 @@ public abstract class GenericSipRtpSession extends GenericSipSession implements 
      * 
      * @param content Payload content
      * @return Returns true if sent successfully else returns false
+     * @throws RtpException
      */
-    public boolean sendPlayload(byte[] content) {
-        if (started) {
-            dataSender.addFrame(content, System.currentTimeMillis());
-            return true;
-        } else {
-            return false;
+    public void sendPlayload(byte[] content) throws RtpException {
+        if (!mMediaSessionStarted) {
+            throw new RtpException("unable to send payload!");
         }
+        dataSender.addFrame(content, System.currentTimeMillis());
     }
 
     /**

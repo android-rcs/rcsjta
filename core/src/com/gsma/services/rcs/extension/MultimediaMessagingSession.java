@@ -22,6 +22,10 @@
 
 package com.gsma.services.rcs.extension;
 
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsIllegalArgumentException;
+import com.gsma.services.rcs.RcsPermissionDeniedException;
+import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
@@ -58,8 +62,9 @@ public class MultimediaMessagingSession extends MultimediaSession {
     public String getSessionId() throws RcsServiceException {
         try {
             return sessionIntf.getSessionId();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 
@@ -72,8 +77,9 @@ public class MultimediaMessagingSession extends MultimediaSession {
     public ContactId getRemoteContact() throws RcsServiceException {
         try {
             return sessionIntf.getRemoteContact();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 
@@ -86,8 +92,9 @@ public class MultimediaMessagingSession extends MultimediaSession {
     public String getServiceId() throws RcsServiceException {
         try {
             return sessionIntf.getServiceId();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 
@@ -101,8 +108,9 @@ public class MultimediaMessagingSession extends MultimediaSession {
     public State getState() throws RcsServiceException {
         try {
             return State.valueOf(sessionIntf.getState());
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 
@@ -116,8 +124,9 @@ public class MultimediaMessagingSession extends MultimediaSession {
     public ReasonCode getReasonCode() throws RcsServiceException {
         try {
             return ReasonCode.valueOf(sessionIntf.getReasonCode());
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 
@@ -131,8 +140,9 @@ public class MultimediaMessagingSession extends MultimediaSession {
     public Direction getDirection() throws RcsServiceException {
         try {
             return Direction.valueOf(sessionIntf.getDirection());
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 
@@ -145,7 +155,8 @@ public class MultimediaMessagingSession extends MultimediaSession {
         try {
             sessionIntf.acceptInvitation();
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPermissionDeniedException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -158,7 +169,8 @@ public class MultimediaMessagingSession extends MultimediaSession {
         try {
             sessionIntf.rejectInvitation();
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPermissionDeniedException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -171,7 +183,8 @@ public class MultimediaMessagingSession extends MultimediaSession {
         try {
             sessionIntf.abortSession();
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPermissionDeniedException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -185,7 +198,9 @@ public class MultimediaMessagingSession extends MultimediaSession {
         try {
             sessionIntf.sendMessage(content);
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsIllegalArgumentException.assertException(e);
+            RcsPermissionDeniedException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 }

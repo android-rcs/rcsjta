@@ -26,6 +26,7 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
@@ -189,24 +190,15 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
 
     /**
      * Sends a message in real time
-     * 
+     *
      * @param content Message content
-     * @return Returns true if sent successfully else returns false
+     * @throws MsrpException
      */
-    public boolean sendMessage(byte[] content) {
-        try {
-            ByteArrayInputStream stream = new ByteArrayInputStream(content);
-            String msgId = IdGenerator.getIdentifier().replace('_', '-');
-            mMsrpMgr.sendChunks(stream, msgId, SipService.MIME_TYPE, content.length,
-                    TypeMsrpChunk.Unknown);
-            return true;
-        } catch (Exception e) {
-            // Error
-            if (logger.isActivated()) {
-                logger.error("Problem while sending data chunks", e);
-            }
-            return false;
-        }
+    public void sendMessage(byte[] content) throws MsrpException {
+        ByteArrayInputStream stream = new ByteArrayInputStream(content);
+        String msgId = IdGenerator.getIdentifier().replace('_', '-');
+        mMsrpMgr.sendChunks(stream, msgId, SipService.MIME_TYPE, content.length,
+                TypeMsrpChunk.Unknown);
     }
 
     /**

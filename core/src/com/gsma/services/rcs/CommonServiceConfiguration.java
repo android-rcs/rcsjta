@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.services.rcs;
@@ -230,8 +234,9 @@ public class CommonServiceConfiguration {
     public boolean isConfigValid() throws RcsServiceException {
         try {
             return mIConfig.isConfigValid();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -245,8 +250,9 @@ public class CommonServiceConfiguration {
     public String getMyDisplayName() throws RcsServiceException {
         try {
             return mIConfig.getMyDisplayName();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -260,7 +266,9 @@ public class CommonServiceConfiguration {
         try {
             mIConfig.setMyDisplayName(name);
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            RcsIllegalArgumentException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -273,8 +281,9 @@ public class CommonServiceConfiguration {
     public ContactId getMyContactId() throws RcsServiceException {
         try {
             return mIConfig.getMyContactId();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -286,10 +295,10 @@ public class CommonServiceConfiguration {
      */
     public MessagingMode getMessagingUX() throws RcsServiceException {
         try {
-            int messagingMode = mIConfig.getMessagingUX();
-            return MessagingMode.valueOf(messagingMode);
+            return MessagingMode.valueOf(mIConfig.getMessagingUX());
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -302,10 +311,10 @@ public class CommonServiceConfiguration {
      */
     public MinimumBatteryLevel getMinimumBatteryLevel() throws RcsServiceException {
         try {
-            int minimumBatteryLevel = mIConfig.getMinimumBatteryLevel();
-            return MinimumBatteryLevel.valueOf(minimumBatteryLevel);
+            return MinimumBatteryLevel.valueOf(mIConfig.getMinimumBatteryLevel());
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -320,7 +329,7 @@ public class CommonServiceConfiguration {
         try {
             mIConfig.setMinimumBatteryLevel(level.toInt());
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -332,10 +341,10 @@ public class CommonServiceConfiguration {
      */
     public MessagingMethod getDefaultMessagingMethod() throws RcsServiceException {
         try {
-            int defaultMessagingMethod = mIConfig.getDefaultMessagingMethod();
-            return MessagingMethod.valueOf(defaultMessagingMethod);
+            return MessagingMethod.valueOf(mIConfig.getDefaultMessagingMethod());
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -349,7 +358,7 @@ public class CommonServiceConfiguration {
         try {
             mIConfig.setDefaultMessagingMethod(method.toInt());
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 

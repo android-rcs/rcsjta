@@ -53,6 +53,8 @@ import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
 
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -294,9 +296,22 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * Returns the configuration of the multimedia session service
      * 
      * @return Configuration
+     * @throws RemoteException
      */
-    public IMultimediaSessionServiceConfiguration getConfiguration() {
-        return new IMultimediaSessionServiceConfigurationImpl(mRcsSettings);
+    public IMultimediaSessionServiceConfiguration getConfiguration() throws RemoteException {
+        try {
+            return new IMultimediaSessionServiceConfigurationImpl(mRcsSettings);
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
@@ -309,28 +324,26 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @param serviceId Service ID
      * @param contact Contact ID
      * @return Multimedia messaging session
-     * @throws ServerApiException
+     * @throws RemoteException
      */
     public IMultimediaMessagingSession initiateMessagingSession(String serviceId, ContactId contact)
-            throws ServerApiException {
+            throws RemoteException {
+        if (TextUtils.isEmpty(serviceId)) {
+            throw new ServerApiIllegalArgumentException("serviceId must not be null or empty!");
+        }
+        if (contact == null) {
+            throw new ServerApiIllegalArgumentException("contact must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Initiate a multimedia messaging session with " + contact);
         }
-
-        // Test IMS connection
         ServerApiUtils.testIms();
-
-        // Test security extension
         ServerApiUtils.testApiExtensionPermission(serviceId);
-
         try {
-            // Initiate a new session
             String featureTag = FeatureTags.FEATURE_RCSE + "=\""
                     + FeatureTags.FEATURE_RCSE_EXTENSION + "." + serviceId + "\"";
             final GenericSipMsrpSession session = mSipService.initiateMsrpSession(contact,
                     featureTag);
-
-            // Add session listener
             MultimediaMessagingSessionImpl multiMediaMessaging = new MultimediaMessagingSessionImpl(
                     session.getSessionID(), mMultimediaMessagingSessionEventBroadcaster,
                     mSipService, this, Direction.OUTGOING, contact, serviceId, State.INITIATING);
@@ -339,20 +352,23 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
                     session.getSessionID(), State.INITIATING, ReasonCode.UNSPECIFIED);
 
             addMultimediaMessaging(multiMediaMessaging);
-
-            // Start the session
             new Thread() {
                 public void run() {
                     session.startSession();
                 }
             }.start();
+
             return multiMediaMessaging;
 
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Unexpected error", e);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
-            throw new ServerApiException(e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -361,14 +377,28 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * 
      * @param sessionId
      * @return Multimedia messaging session
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public IMultimediaMessagingSession getMessagingSession(String sessionId)
-            throws ServerApiException {
+    public IMultimediaMessagingSession getMessagingSession(String sessionId) throws RemoteException {
+        if (TextUtils.isEmpty(sessionId)) {
+            throw new ServerApiIllegalArgumentException("sessionId must not be null or empty!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Get multimedia messaging ".concat(sessionId));
         }
-        return mMultimediaMessagingCache.get(sessionId);
+        try {
+            return mMultimediaMessagingCache.get(sessionId);
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
@@ -376,29 +406,34 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * 
      * @param serviceId Service ID
      * @return List of sessions
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public List<IBinder> getMessagingSessions(String serviceId) throws ServerApiException {
-        if (sLogger.isActivated()) {
-            sLogger.info("Get multimedia messaging sessions for service " + serviceId);
+    public List<IBinder> getMessagingSessions(String serviceId) throws RemoteException {
+        if (TextUtils.isEmpty(serviceId)) {
+            throw new ServerApiIllegalArgumentException("serviceId must not be null or empty!");
         }
-
+        if (sLogger.isActivated()) {
+            sLogger.info("Get multimedia messaging sessions for service ".concat(serviceId));
+        }
         try {
             List<IBinder> multimediaMessagingSessions = new ArrayList<IBinder>();
             for (IMultimediaMessagingSession multimediaMessagingSession : mMultimediaMessagingCache
                     .values()) {
-                // Filter on the service ID
                 if (multimediaMessagingSession.getServiceId().contains(serviceId)) {
                     multimediaMessagingSessions.add(multimediaMessagingSession.asBinder());
                 }
             }
             return multimediaMessagingSessions;
 
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Unexpected error", e);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
-            throw new ServerApiException(e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -412,22 +447,22 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @param serviceId Service ID
      * @param contact Contact ID
      * @return Multimedia streaming session
-     * @throws ServerApiException
+     * @throws RemoteException
      */
     public IMultimediaStreamingSession initiateStreamingSession(String serviceId, ContactId contact)
-            throws ServerApiException {
+            throws RemoteException {
+        if (TextUtils.isEmpty(serviceId)) {
+            throw new ServerApiIllegalArgumentException("serviceId must not be null or empty!");
+        }
+        if (contact == null) {
+            throw new ServerApiIllegalArgumentException("contact must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Initiate a multimedia streaming session with " + contact);
         }
-
-        // Test IMS connection
         ServerApiUtils.testIms();
-
-        // Test security extension
         ServerApiUtils.testApiExtensionPermission(serviceId);
-
         try {
-            // Initiate a new session
             String featureTag = FeatureTags.FEATURE_RCSE + "=\""
                     + FeatureTags.FEATURE_RCSE_EXTENSION + "." + serviceId + "\"";
             final GenericSipRtpSession session = mSipService
@@ -441,20 +476,23 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
                     session.getSessionID(), State.INITIATING, ReasonCode.UNSPECIFIED);
 
             addMultimediaStreaming(multimediaStreaming);
-
-            // Start the session
             new Thread() {
                 public void run() {
                     session.startSession();
                 }
             }.start();
+
             return multimediaStreaming;
 
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Unexpected error", e);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
-            throw new ServerApiException(e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
 
     }
@@ -464,14 +502,28 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * 
      * @param sessionId
      * @return Multimedia streaming session or null if not found
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public IMultimediaStreamingSession getStreamingSession(String sessionId)
-            throws ServerApiException {
+    public IMultimediaStreamingSession getStreamingSession(String sessionId) throws RemoteException {
+        if (TextUtils.isEmpty(sessionId)) {
+            throw new ServerApiIllegalArgumentException("sessionId must not be null or empty!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Get multimedia streaming ".concat(sessionId));
         }
-        return mMultimediaStreamingCache.get(sessionId);
+        try {
+            return mMultimediaStreamingCache.get(sessionId);
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
@@ -479,13 +531,15 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * 
      * @param serviceId Service ID
      * @return List of sessions
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public List<IBinder> getStreamingSessions(String serviceId) throws ServerApiException {
+    public List<IBinder> getStreamingSessions(String serviceId) throws RemoteException {
+        if (TextUtils.isEmpty(serviceId)) {
+            throw new ServerApiIllegalArgumentException("serviceId must not be null or empty!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Get multimedia streaming sessions for service " + serviceId);
         }
-
         try {
             List<IBinder> multimediaStreamingSessions = new ArrayList<IBinder>();
             for (IMultimediaStreamingSession multimediaStreamingSession : mMultimediaStreamingCache
@@ -496,11 +550,15 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
             }
             return multimediaStreamingSessions;
 
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Unexpected error", e);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
-            throw new ServerApiException(e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -519,15 +577,30 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * Adds a listener on multimedia messaging session events
      * 
      * @param listener Session event listener
+     * @throws RemoteException
      */
-    public void addEventListener2(IMultimediaMessagingSessionListener listener) {
+    public void addEventListener2(IMultimediaMessagingSessionListener listener)
+            throws RemoteException {
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Add an event listener");
         }
+        try {
+            synchronized (lock) {
+                mMultimediaMessagingSessionEventBroadcaster
+                        .addMultimediaMessagingEventListener(listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
 
-        synchronized (lock) {
-            mMultimediaMessagingSessionEventBroadcaster
-                    .addMultimediaMessagingEventListener(listener);
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -535,14 +608,30 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * Removes a listener on multimedia messaging session events
      * 
      * @param listener Session event listener
+     * @throws RemoteException
      */
-    public void removeEventListener2(IMultimediaMessagingSessionListener listener) {
+    public void removeEventListener2(IMultimediaMessagingSessionListener listener)
+            throws RemoteException {
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Remove an event listener");
         }
-        synchronized (lock) {
-            mMultimediaMessagingSessionEventBroadcaster
-                    .removeMultimediaMessagingEventListener(listener);
+        try {
+            synchronized (lock) {
+                mMultimediaMessagingSessionEventBroadcaster
+                        .removeMultimediaMessagingEventListener(listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -550,14 +639,30 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * Adds a listener on multimedia streaming session events
      * 
      * @param listener Session event listener
+     * @throws RemoteException
      */
-    public void addEventListener3(IMultimediaStreamingSessionListener listener) {
+    public void addEventListener3(IMultimediaStreamingSessionListener listener)
+            throws RemoteException {
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Add an event listener");
         }
-        synchronized (lock) {
-            mMultimediaStreamingSessionEventBroadcaster
-                    .addMultimediaStreamingEventListener(listener);
+        try {
+            synchronized (lock) {
+                mMultimediaStreamingSessionEventBroadcaster
+                        .addMultimediaStreamingEventListener(listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -565,15 +670,30 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * Removes a listener on multimedia streaming session events
      * 
      * @param listener Session event listener
+     * @throws RemoteException
      */
-    public void removeEventListener3(IMultimediaStreamingSessionListener listener) {
+    public void removeEventListener3(IMultimediaStreamingSessionListener listener)
+            throws RemoteException {
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Remove an event listener");
         }
+        try {
+            synchronized (lock) {
+                mMultimediaStreamingSessionEventBroadcaster
+                        .removeMultimediaStreamingEventListener(listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
 
-        synchronized (lock) {
-            mMultimediaStreamingSessionEventBroadcaster
-                    .removeMultimediaStreamingEventListener(listener);
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 

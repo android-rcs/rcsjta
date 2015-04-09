@@ -37,6 +37,7 @@ import com.gsma.services.rcs.extension.MultimediaSession.ReasonCode;
 import com.gsma.services.rcs.extension.MultimediaSession.State;
 
 import android.content.Intent;
+import android.os.RemoteException;
 
 import javax2.sip.message.Response;
 
@@ -120,196 +121,281 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
      * Returns the remote contact ID
      * 
      * @return ContactId
+     * @throws RemoteException
      */
-    public ContactId getRemoteContact() {
-        GenericSipMsrpSession session = mSipService.getGenericSipMsrpSession(mSessionId);
-        if (session == null) {
-            return mMultimediaSessionStorageAccessor.getRemoteContact();
+    public ContactId getRemoteContact() throws RemoteException {
+        try {
+            GenericSipMsrpSession session = mSipService.getGenericSipMsrpSession(mSessionId);
+            if (session == null) {
+                return mMultimediaSessionStorageAccessor.getRemoteContact();
+            }
+            return session.getRemoteContact();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return session.getRemoteContact();
     }
 
     /**
      * Returns the state of the session
      * 
      * @return State
+     * @throws RemoteException
      */
-    public int getState() {
-        GenericSipMsrpSession session = mSipService.getGenericSipMsrpSession(mSessionId);
-        if (session == null) {
-            return mMultimediaSessionStorageAccessor.getState().toInt();
-        }
-        SipDialogPath dialogPath = session.getDialogPath();
-        if (dialogPath != null && dialogPath.isSessionEstablished()) {
-            return State.STARTED.toInt();
-
-        } else if (session.isInitiatedByRemote()) {
-            if (session.isSessionAccepted()) {
-                return State.ACCEPTING.toInt();
+    public int getState() throws RemoteException {
+        try {
+            GenericSipMsrpSession session = mSipService.getGenericSipMsrpSession(mSessionId);
+            if (session == null) {
+                return mMultimediaSessionStorageAccessor.getState().toInt();
             }
-            return State.INVITED.toInt();
+            SipDialogPath dialogPath = session.getDialogPath();
+            if (dialogPath != null && dialogPath.isSessionEstablished()) {
+                return State.STARTED.toInt();
+
+            } else if (session.isInitiatedByRemote()) {
+                if (session.isSessionAccepted()) {
+                    return State.ACCEPTING.toInt();
+                }
+                return State.INVITED.toInt();
+            }
+            return State.INITIATING.toInt();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return State.INITIATING.toInt();
     }
 
     /**
      * Returns the reason code of the state of the multimedia messaging session
      * 
      * @return ReasonCode
+     * @throws RemoteException
      */
-    public int getReasonCode() {
-        GenericSipMsrpSession session = mSipService.getGenericSipMsrpSession(mSessionId);
-        if (session == null) {
-            return mMultimediaSessionStorageAccessor.getReasonCode().toInt();
+    public int getReasonCode() throws RemoteException {
+        try {
+            GenericSipMsrpSession session = mSipService.getGenericSipMsrpSession(mSessionId);
+            if (session == null) {
+                return mMultimediaSessionStorageAccessor.getReasonCode().toInt();
+            }
+            return ReasonCode.UNSPECIFIED.toInt();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return ReasonCode.UNSPECIFIED.toInt();
     }
 
     /**
      * Returns the direction of the session (incoming or outgoing)
      * 
      * @return Direction
+     * @throws RemoteException
      * @see Direction
      */
-    public int getDirection() {
-        GenericSipMsrpSession session = mSipService.getGenericSipMsrpSession(mSessionId);
-        if (session == null) {
-            return mMultimediaSessionStorageAccessor.getDirection().toInt();
+    public int getDirection() throws RemoteException {
+        try {
+            GenericSipMsrpSession session = mSipService.getGenericSipMsrpSession(mSessionId);
+            if (session == null) {
+                return mMultimediaSessionStorageAccessor.getDirection().toInt();
+            }
+            if (session.isInitiatedByRemote()) {
+                return Direction.INCOMING.toInt();
+            }
+            return Direction.OUTGOING.toInt();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        if (session.isInitiatedByRemote()) {
-            return Direction.INCOMING.toInt();
-        }
-        return Direction.OUTGOING.toInt();
     }
 
     /**
      * Returns the service ID
      * 
      * @return Service ID
+     * @throws RemoteException
      */
-    public String getServiceId() {
-        GenericSipMsrpSession session = mSipService.getGenericSipMsrpSession(mSessionId);
-        if (session == null) {
-            return mMultimediaSessionStorageAccessor.getServiceId();
+    public String getServiceId() throws RemoteException {
+        try {
+            GenericSipMsrpSession session = mSipService.getGenericSipMsrpSession(mSessionId);
+            if (session == null) {
+                return mMultimediaSessionStorageAccessor.getServiceId();
+            }
+            return session.getServiceId();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return session.getServiceId();
     }
 
     /**
      * Accepts session invitation
      * 
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public void acceptInvitation() throws ServerApiException {
-        if (mLogger.isActivated()) {
-            mLogger.info("Accept session invitation");
-        }
-        final GenericSipMsrpSession session = mSipService.getGenericSipMsrpSession(mSessionId);
-        if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new ServerApiException("Session with session ID '" + mSessionId
-                    + "' not available.");
-        }
-
-        // Test API permission
-        ServerApiUtils.testApiExtensionPermission(session.getServiceId());
-
-        // Accept invitation
-        new Thread() {
-            public void run() {
-                session.acceptSession();
+    public void acceptInvitation() throws RemoteException {
+        try {
+            if (mLogger.isActivated()) {
+                mLogger.info("Accept session invitation");
             }
-        }.start();
+            final GenericSipMsrpSession session = mSipService.getGenericSipMsrpSession(mSessionId);
+            if (session == null) {
+                throw new ServerApiGenericException(new StringBuilder("Session with session ID '")
+                        .append(mSessionId).append("' not available!").toString());
+            }
+            ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+            new Thread() {
+                public void run() {
+                    session.acceptSession();
+                }
+            }.start();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
      * Rejects session invitation
      * 
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public void rejectInvitation() throws ServerApiException {
-        if (mLogger.isActivated()) {
-            mLogger.info("Reject session invitation");
-        }
-
-        final GenericSipMsrpSession session = mSipService.getGenericSipMsrpSession(mSessionId);
-        if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new ServerApiException("Session with session ID '" + mSessionId
-                    + "' not available.");
-        }
-
-        // Test API permission
-        ServerApiUtils.testApiExtensionPermission(session.getServiceId());
-
-        // Reject invitation
-        new Thread() {
-            public void run() {
-                session.rejectSession(Response.DECLINE);
+    public void rejectInvitation() throws RemoteException {
+        try {
+            if (mLogger.isActivated()) {
+                mLogger.info("Reject session invitation");
             }
-        }.start();
+
+            final GenericSipMsrpSession session = mSipService.getGenericSipMsrpSession(mSessionId);
+            if (session == null) {
+                throw new ServerApiGenericException(new StringBuilder("Session with session ID '")
+                        .append(mSessionId).append("' not available!").toString());
+            }
+            ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+            new Thread() {
+                public void run() {
+                    session.rejectSession(Response.DECLINE);
+                }
+            }.start();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
      * Aborts the session
      * 
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public void abortSession() throws ServerApiException {
-        if (mLogger.isActivated()) {
-            mLogger.info("Cancel session");
-        }
-        final GenericSipMsrpSession session = mSipService.getGenericSipMsrpSession(mSessionId);
-        if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new ServerApiException("Session with session ID '" + mSessionId
-                    + "' not available.");
-        }
-
-        // Test API permission
-        ServerApiUtils.testApiExtensionPermission(session.getServiceId());
-
-        // Abort the session
-        new Thread() {
-            public void run() {
-                session.abortSession(TerminationReason.TERMINATION_BY_USER);
+    public void abortSession() throws RemoteException {
+        try {
+            if (mLogger.isActivated()) {
+                mLogger.info("Cancel session");
             }
-        }.start();
+            final GenericSipMsrpSession session = mSipService.getGenericSipMsrpSession(mSessionId);
+            if (session == null) {
+                throw new ServerApiGenericException(new StringBuilder("Session with session ID '")
+                        .append(mSessionId).append("' not available!").toString());
+            }
+            ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+            new Thread() {
+                public void run() {
+                    session.abortSession(TerminationReason.TERMINATION_BY_USER);
+                }
+            }.start();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
      * Sends a message in real time
      * 
      * @param content Message content
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public void sendMessage(byte[] content) throws ServerApiException {
-        GenericSipMsrpSession session = mSipService.getGenericSipMsrpSession(mSessionId);
-        if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new ServerApiException("Session with session ID '" + mSessionId
-                    + "' not available.");
+    public void sendMessage(byte[] content) throws RemoteException {
+        if (content == null || content.length == 0) {
+            throw new ServerApiIllegalArgumentException("content must not be null or empty!");
         }
+        try {
+            GenericSipMsrpSession session = mSipService.getGenericSipMsrpSession(mSessionId);
+            if (session == null) {
+                throw new ServerApiGenericException(new StringBuilder("Session with session ID '")
+                        .append(mSessionId).append("' not available!").toString());
+            }
+            ServerApiUtils.testApiExtensionPermission(session.getServiceId());
 
-        // Test API permission
-        ServerApiUtils.testApiExtensionPermission(session.getServiceId());
+            /* Do not consider max message size if null */
+            if (session.getMaxMessageSize() != 0 && content.length > session.getMaxMessageSize()) {
+                throw new ServerApiGenericException("Max message length exceeded!");
+            }
+            session.sendMessage(content);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
 
-        /* TODO: This exception handling is not correct. Will be fixed CR037. */
-        // Do not consider max message size if null
-        if (session.getMaxMessageSize() != 0 && content.length > session.getMaxMessageSize()) {
-            throw new ServerApiException("Max message length exceeded!");
-        }
-        /* TODO: This exception handling is not correct. Will be fixed CR037. */
-        if (!session.sendMessage(content)) {
-            throw new ServerApiException("Unable to send message!");
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 

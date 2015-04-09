@@ -2,6 +2,7 @@
  * Software Name : RCS IMS Stack
  *
  * Copyright (C) 2010 France Telecom S.A.
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * NOTE: This file has been modified by Sony Mobile Communications Inc.
+ * Modifications are licensed under the License.
  ******************************************************************************/
 
 package com.gsma.services.rcs;
@@ -42,8 +46,6 @@ public abstract class RcsService {
      * Action to broadcast when RCS service is provisioned.
      */
     public static final String ACTION_SERVICE_PROVISIONING_DATA_CHANGED = "com.gsma.services.rcs.action.SERVICE_PROVISIONNING_DATA_CHANGED";
-
-    private static final String ERROR_CNX = "Service not connected";
 
     protected final RcsServiceControl mRcsServiceControl;
 
@@ -257,7 +259,7 @@ public abstract class RcsService {
                 return m.invoke(mApi);
             }
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -308,8 +310,9 @@ public abstract class RcsService {
         try {
             mVersion = (Integer) callApiMethod("getServiceVersion", null, null);
             return mVersion;
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 
@@ -321,12 +324,13 @@ public abstract class RcsService {
      */
     public boolean isServiceRegistered() throws RcsServiceException {
         if (mApi == null) {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+            throw new RcsServiceNotAvailableException();
         }
         try {
             return (Boolean) callApiMethod("isServiceRegistered", null, null);
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -339,13 +343,14 @@ public abstract class RcsService {
     public RcsServiceRegistration.ReasonCode getServiceRegistrationReasonCode()
             throws RcsServiceException {
         if (mApi == null) {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+            throw new RcsServiceNotAvailableException();
         }
         try {
             int reasonCode = (Integer) callApiMethod("getServiceRegistrationReasonCode", null, null);
             return RcsServiceRegistration.ReasonCode.valueOf(reasonCode);
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -358,7 +363,7 @@ public abstract class RcsService {
     public void addEventListener(RcsServiceRegistrationListener listener)
             throws RcsServiceException {
         if (mApi == null) {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+            throw new RcsServiceNotAvailableException();
         }
         try {
             IRcsServiceRegistrationListener rcsListener = new RcsServiceRegistrationListenerImpl(
@@ -367,7 +372,7 @@ public abstract class RcsService {
                     new WeakReference<IRcsServiceRegistrationListener>(rcsListener));
             callApiMethod("addEventListener", rcsListener, IRcsServiceRegistrationListener.class);
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -380,7 +385,7 @@ public abstract class RcsService {
     public void removeEventListener(RcsServiceRegistrationListener listener)
             throws RcsServiceException {
         if (mApi == null) {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+            throw new RcsServiceNotAvailableException();
         }
         try {
             WeakReference<IRcsServiceRegistrationListener> weakRef = mRegistrationListeners
@@ -394,7 +399,7 @@ public abstract class RcsService {
                         IRcsServiceRegistrationListener.class);
             }
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -406,14 +411,15 @@ public abstract class RcsService {
      */
     public CommonServiceConfiguration getCommonConfiguration() throws RcsServiceException {
         if (mApi == null) {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+            throw new RcsServiceNotAvailableException();
         }
         try {
             ICommonServiceConfiguration configuration = (ICommonServiceConfiguration) callApiMethod(
                     "getCommonConfiguration", null, null);
             return new CommonServiceConfiguration(configuration);
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 }
