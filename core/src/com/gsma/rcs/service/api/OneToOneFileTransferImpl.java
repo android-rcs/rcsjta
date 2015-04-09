@@ -1046,12 +1046,9 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         handleSessionRejected(ReasonCode.REJECTED_BY_USER, contact);
     }
 
-    /*
-     * TODO: Fix reason code mapping between rejected_by_timeout and rejected_by_inactivity.
-     */
     @Override
     public void handleSessionRejectedByTimeout(ContactId contact) {
-        handleSessionRejected(ReasonCode.REJECTED_BY_INACTIVITY, contact);
+        handleSessionRejected(ReasonCode.REJECTED_BY_TIMEOUT, contact);
     }
 
     @Override

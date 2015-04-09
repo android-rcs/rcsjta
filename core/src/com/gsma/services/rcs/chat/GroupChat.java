@@ -233,9 +233,9 @@ public class GroupChat {
         REJECTED_BY_REMOTE(7),
 
         /**
-         * Group chat invitation was rejected by inactivity.
+         * Group chat invitation was rejected by timeout.
          */
-        REJECTED_BY_INACTIVITY(8),
+        REJECTED_BY_TIMEOUT(8),
 
         /**
          * Group chat initiation failed.

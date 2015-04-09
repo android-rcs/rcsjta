@@ -257,7 +257,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             case REJECTED_BY_REMOTE:
             case REJECTED_MAX_CHATS:
             case REJECTED_SPAM:
-            case REJECTED_BY_INACTIVITY:
+            case REJECTED_BY_TIMEOUT:
                 if (logger.isActivated()) {
                     logger.debug(new StringBuilder("Group chat with chatId '").append(mChatId)
                             .append("' is ").append(reasonCode).toString());
@@ -1385,13 +1385,12 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE);
     }
 
-    /* TODO: Fix reasoncode mapping between rejected_by_timeout and rejected_by_inactivity. */
     @Override
     public void handleSessionRejectedByTimeout(ContactId contact) {
         if (logger.isActivated()) {
             logger.info("Session rejected by time out");
         }
-        handleSessionRejected(ReasonCode.REJECTED_BY_INACTIVITY);
+        handleSessionRejected(ReasonCode.REJECTED_BY_TIMEOUT);
     }
 
     @Override

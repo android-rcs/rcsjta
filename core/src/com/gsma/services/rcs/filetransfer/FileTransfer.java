@@ -22,12 +22,12 @@
 
 package com.gsma.services.rcs.filetransfer;
 
-import android.net.Uri;
-import android.util.SparseArray;
-
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
+
+import android.net.Uri;
+import android.util.SparseArray;
 
 /**
  * File transfer
@@ -169,9 +169,9 @@ public class FileTransfer {
         REJECTED_BY_SECONDARY_DEVICE(4),
 
         /**
-         * File transfer has been rejected by inactivity.
+         * File transfer has been rejected by timeout.
          */
-        REJECTED_BY_INACTIVITY(5),
+        REJECTED_BY_TIMEOUT(5),
 
         /**
          * Incoming file transfer was rejected as it was detected as spam.

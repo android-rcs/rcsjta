@@ -481,12 +481,9 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         handleSessionRejected(ReasonCode.REJECTED_BY_USER, contact);
     }
 
-    /*
-     * TODO: Fix reasoncode mapping between rejected_by_inactivity and rejected_by_timout.
-     */
     @Override
     public void handleSessionRejectedByTimeout(ContactId contact) {
-        handleSessionRejected(ReasonCode.REJECTED_BY_INACTIVITY, contact);
+        handleSessionRejected(ReasonCode.REJECTED_BY_TIMEOUT, contact);
     }
 
     @Override

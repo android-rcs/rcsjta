@@ -149,9 +149,9 @@ public class ImageSharing {
         REJECTED_SPAM(5),
 
         /**
-         * Incoming image was rejected by inactivity.
+         * Incoming image was rejected by timeout.
          */
-        REJECTED_BY_INACTIVITY(6),
+        REJECTED_BY_TIMEOUT(6),
 
         /**
          * Incoming image was rejected as is cannot be received due to lack of local storage space.

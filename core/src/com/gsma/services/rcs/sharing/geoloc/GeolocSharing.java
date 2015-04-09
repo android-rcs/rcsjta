@@ -167,9 +167,9 @@ public class GeolocSharing {
         REJECTED_BY_REMOTE(8),
 
         /**
-         * Geolocation share invitation was rejected by inactivity.
+         * Geolocation share invitation was rejected by timeout.
          */
-        REJECTED_BY_INACTIVITY(9),
+        REJECTED_BY_TIMEOUT(9),
 
         /**
          * Geolocation share initiation failed.

@@ -228,7 +228,7 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
                         }
                         return;
 
-                    case INVITATION_NOT_ANSWERED:
+                    case INVITATION_TIMEOUT:
                         if (logActivated) {
                             sLogger.debug("Transfer has been rejected on timeout");
                         }

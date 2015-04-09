@@ -159,9 +159,9 @@ public class VideoSharing {
         REJECTED_BY_REMOTE(8),
 
         /**
-         * Video share been rejected due to inactivity.
+         * Video share been rejected due to timeout.
          */
-        REJECTED_BY_INACTIVITY(9),
+        REJECTED_BY_TIMEOUT(9),
 
         /**
          * Video share initiation failed.

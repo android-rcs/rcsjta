@@ -154,7 +154,7 @@ public abstract class DequeueTask implements Runnable {
             case REJECTED_BY_REMOTE:
             case REJECTED_MAX_CHATS:
             case REJECTED_SPAM:
-            case REJECTED_BY_INACTIVITY:
+            case REJECTED_BY_TIMEOUT:
                 if (mLogger.isActivated()) {
                     mLogger.debug(new StringBuilder(
                             "Cannot dequeue group chat messages and group file transfers right now as it is ")

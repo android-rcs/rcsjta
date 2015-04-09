@@ -684,7 +684,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             case REJECTED_BY_REMOTE:
             case REJECTED_MAX_CHATS:
             case REJECTED_SPAM:
-            case REJECTED_BY_INACTIVITY:
+            case REJECTED_BY_TIMEOUT:
                 if (sLogger.isActivated()) {
                     sLogger.debug(new StringBuilder(
                             "Cannot transfer file to group chat with group chat Id '")

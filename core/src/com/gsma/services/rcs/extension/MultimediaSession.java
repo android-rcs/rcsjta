@@ -148,9 +148,9 @@ public abstract class MultimediaSession {
         REJECTED_BY_REMOTE(6),
 
         /**
-         * Session invitation was rejected by inactivity.
+         * Session invitation was rejected by timeout.
          */
-        REJECTED_BY_INACTIVITY(7),
+        REJECTED_BY_TIMEOUT(7),
 
         /**
          * Initiation failed.
