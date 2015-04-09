@@ -1199,7 +1199,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         if (logger.isActivated()) {
             logger.info(new StringBuilder("IM error ").append(chatErrorCode).toString());
         }
-        setRejoinedAsPartOfSendOperation(false);
         synchronized (lock) {
             mChatService.removeGroupChat(mChatId);
 
@@ -1207,6 +1206,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 if (mGroupChatRejoinedAsPartOfSendOperation) {
                     handleGroupChatRejoinAsPartOfSendOperationFailed();
                 }
+                setRejoinedAsPartOfSendOperation(false);
                 return;
             }
 
@@ -1232,6 +1232,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     break;
             }
         }
+        setRejoinedAsPartOfSendOperation(false);
     }
 
     @Override
