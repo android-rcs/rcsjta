@@ -218,4 +218,10 @@ public class GroupChatPersistedStorageAccessor {
     public void dequeueChatMessage(ChatMessage message) {
         mMessagingLog.dequeueChatMessage(message);
     }
+
+    public void setParticipantsStateAndReasonCode(Map<ContactId, ParticipantStatus> participants,
+            State state, ReasonCode reasonCode) {
+        mMessagingLog.setGroupChatParticipantsStateAndReasonCode(participants, mChatId, state,
+                reasonCode);
+    }
 }

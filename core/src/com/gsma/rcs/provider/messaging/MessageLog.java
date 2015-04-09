@@ -27,11 +27,13 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
+import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
+import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
@@ -45,6 +47,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -69,6 +72,15 @@ public class MessageLog implements IMessageLog {
     private static final String[] PROJECTION_MESSAGE_ID = new String[] {
         MessageData.KEY_MESSAGE_ID
     };
+
+    private static final String[] PROJECTION_GROUP_CHAT_EVENTS = new String[] {
+            MessageData.KEY_STATUS, MessageData.KEY_CONTACT
+    };
+
+    private static final String SELECTION_GROUP_CHAT_EVENTS = new StringBuilder(
+            MessageData.KEY_CHAT_ID).append("=? AND ").append(MessageData.KEY_MIME_TYPE)
+            .append("='").append(ChatLog.Message.MimeType.GROUPCHAT_EVENT).append("' GROUP BY ")
+            .append(MessageData.KEY_CONTACT).toString();
 
     private static final int FIRST_COLUMN_IDX = 0;
 
@@ -266,7 +278,7 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
-    public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent.Status status,
+    public String addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent.Status status,
             long timestamp) {
         if (logger.isActivated()) {
             logger.debug("Add group chat system message: chatID=" + chatId + ", contact=" + contact
@@ -277,7 +289,8 @@ public class MessageLog implements IMessageLog {
         if (contact != null) {
             values.put(MessageData.KEY_CONTACT, contact.toString());
         }
-        values.put(MessageData.KEY_MESSAGE_ID, IdGenerator.generateMessageID());
+        String messageId = IdGenerator.generateMessageID();
+        values.put(MessageData.KEY_MESSAGE_ID, messageId);
         values.put(MessageData.KEY_MIME_TYPE, MimeType.GROUPCHAT_EVENT);
         values.put(MessageData.KEY_STATUS, status.toInt());
         values.put(MessageData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
@@ -288,6 +301,7 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
         values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
         mLocalContentResolver.insert(Message.CONTENT_URI, values);
+        return messageId;
     }
 
     @Override
@@ -495,5 +509,36 @@ public class MessageLog implements IMessageLog {
 
         mLocalContentResolver.update(Uri.withAppendedPath(Message.CONTENT_URI, msgId), values,
                 null, null);
+    }
+
+    @Override
+    public Map<ContactId, GroupChatEvent.Status> getGroupChatEvents(String chatId) {
+        String[] selectionArgs = new String[] {
+            chatId
+        };
+        Cursor cursor = null;
+        try {
+            cursor = mLocalContentResolver.query(Message.CONTENT_URI, PROJECTION_GROUP_CHAT_EVENTS,
+                    SELECTION_GROUP_CHAT_EVENTS, selectionArgs, ORDER_BY_TIMESTAMP_ASC);
+            // TODO check null cursor CR037
+            if (!cursor.moveToFirst()) {
+                return null;
+            }
+            Map<ContactId, GroupChatEvent.Status> groupChatEvents = new HashMap<ContactId, GroupChatEvent.Status>();
+            int columnIdxStatus = cursor.getColumnIndexOrThrow(MessageData.KEY_STATUS);
+            int columnIdxContact = cursor.getColumnIndexOrThrow(MessageData.KEY_CONTACT);
+            do {
+                GroupChatEvent.Status status = GroupChatEvent.Status.valueOf(cursor
+                        .getInt(columnIdxStatus));
+                ContactId contact = ContactUtil.createContactIdFromTrustedData(cursor
+                        .getString(columnIdxContact));
+                groupChatEvents.put(contact, status);
+            } while (cursor.moveToNext());
+            return groupChatEvents;
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
     }
 }

@@ -37,7 +37,7 @@ public interface GroupChatSessionListener extends ChatSessionListener {
      * New conference event
      * 
      * @param contact Contact identifier
-     * @param state ParticipantStatus for the contact
+     * @param status ParticipantStatus for the contact
      * @param timestamp Local timestamp when got notification
      */
     public void handleConferenceEvent(ContactId contact, ParticipantStatus status, long timestamp);

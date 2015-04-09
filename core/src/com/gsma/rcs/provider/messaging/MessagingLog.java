@@ -168,9 +168,9 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent.Status status,
+    public String addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent.Status status,
             long timestamp) {
-        mMessageLog.addGroupChatEvent(chatId, contact, status, timestamp);
+        return mMessageLog.addGroupChatEvent(chatId, contact, status, timestamp);
     }
 
     @Override
@@ -477,5 +477,23 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     @Override
     public void setRemoteSipId(String fileTransferId, String remoteInstanceId) {
         mFileTransferLog.setRemoteSipId(fileTransferId, remoteInstanceId);
+    }
+
+    @Override
+    public boolean isGroupChatPersisted(String chatId) {
+        return mGroupChatLog.isGroupChatPersisted(chatId);
+    }
+
+    @Override
+    public Map<ContactId, GroupChatEvent.Status> getGroupChatEvents(String chatId) {
+        return mMessageLog.getGroupChatEvents(chatId);
+    }
+
+    @Override
+    public void setGroupChatParticipantsStateAndReasonCode(
+            Map<ContactId, ParticipantStatus> participants, String chatId, State state,
+            ReasonCode reasonCode) {
+        mGroupChatLog.setGroupChatParticipantsStateAndReasonCode(participants, chatId, state,
+                reasonCode);
     }
 }

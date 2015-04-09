@@ -174,9 +174,27 @@ public class GroupChatLog implements IGroupChatLog {
     }
 
     @Override
+    public void setGroupChatParticipantsStateAndReasonCode(
+            Map<ContactId, ParticipantStatus> participants, String chatId, State state,
+            ReasonCode reasonCode) {
+        String encodedParticipants = convert(participants);
+        if (logger.isActivated()) {
+            logger.debug("setGCParticipantsStateAndReasonCode (chatId=" + chatId
+                    + ") (participants=" + encodedParticipants + ") (state=" + state
+                    + ") (reasonCode=" + reasonCode + ")");
+        }
+        ContentValues values = new ContentValues();
+        values.put(ChatData.KEY_PARTICIPANTS, encodedParticipants);
+        values.put(ChatData.KEY_STATE, state.toInt());
+        values.put(ChatData.KEY_REASON_CODE, reasonCode.toInt());
+        mLocalContentResolver.update(Uri.withAppendedPath(ChatData.CONTENT_URI, chatId), values,
+                null, null);
+    }
+
+    @Override
     public void setGroupChatStateAndReasonCode(String chatId, State state, ReasonCode reasonCode) {
         if (logger.isActivated()) {
-            logger.debug("updateGroupChatStatus (chatId=" + chatId + ") (state=" + state
+            logger.debug("setGroupChatStateAndReasonCode (chatId=" + chatId + ") (state=" + state
                     + ") (reasonCode=" + reasonCode + ")");
         }
         ContentValues values = new ContentValues();
@@ -361,4 +379,21 @@ public class GroupChatLog implements IGroupChatLog {
         }
         return participantsToBeInvited;
     }
+
+    @Override
+    public boolean isGroupChatPersisted(String chatId) {
+        Cursor cursor = null;
+        try {
+            cursor = mLocalContentResolver.query(
+                    Uri.withAppendedPath(ChatData.CONTENT_URI, chatId), PROJECTION_GC_CHAT_ID,
+                    null, null, null);
+            // TODO check null cursor CR037
+            return cursor.moveToFirst();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
 }

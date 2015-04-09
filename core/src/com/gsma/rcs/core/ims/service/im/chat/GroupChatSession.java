@@ -118,7 +118,7 @@ public abstract class GroupChatSession extends ChatSession {
 
         mParticipants = participants;
 
-        mConferenceSubscriber = new ConferenceEventSubscribeManager(this, rcsSettings);
+        mConferenceSubscriber = new ConferenceEventSubscribeManager(this, rcsSettings, messagingLog);
 
         mImsModule = parent.getImsModule();
 
@@ -198,8 +198,10 @@ public abstract class GroupChatSession extends ChatSession {
      * Apply updates or additions to participants of the group chat.
      * 
      * @param participantUpdates Participant updates
+     * @return participants for which status has changed
      */
-    public void updateParticipants(Map<ContactId, ParticipantStatus> participantUpdates) {
+    public Map<ContactId, ParticipantStatus> updateParticipants(
+            Map<ContactId, ParticipantStatus> participantUpdates) {
         synchronized (mParticipants) {
             Map<ContactId, ParticipantStatus> updatedParticipants = new HashMap<ContactId, ParticipantStatus>();
 
@@ -219,6 +221,7 @@ public abstract class GroupChatSession extends ChatSession {
                             updatedParticipants, mParticipants);
                 }
             }
+            return updatedParticipants;
         }
     }
 

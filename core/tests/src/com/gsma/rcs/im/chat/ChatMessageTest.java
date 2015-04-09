@@ -16,7 +16,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.gsma.service.rcs.database;
+package com.gsma.rcs.im.chat;
 
 import com.gsma.rcs.core.ims.ImsModule;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;

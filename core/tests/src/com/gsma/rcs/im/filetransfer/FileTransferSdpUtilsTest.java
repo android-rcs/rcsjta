@@ -16,7 +16,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.gsma.rcs.ft;
+package com.gsma.rcs.im.filetransfer;
 
 import java.util.Vector;
 

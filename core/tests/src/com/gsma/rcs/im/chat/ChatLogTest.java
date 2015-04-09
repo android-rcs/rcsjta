@@ -19,7 +19,7 @@
  * Modifications are licensed under the License.
  ******************************************************************************/
 
-package com.gsma.service.rcs.chat;
+package com.gsma.rcs.im.chat;
 
 import java.util.AbstractMap;
 import java.util.HashMap;

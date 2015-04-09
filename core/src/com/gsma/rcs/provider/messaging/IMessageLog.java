@@ -31,6 +31,8 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import android.database.Cursor;
 
+import java.util.Map;
+
 /**
  * Interface for the message table
  * 
@@ -81,8 +83,9 @@ public interface IMessageLog {
      * @param contact Contact ID
      * @param status Status
      * @param timestamp Local timestamp when got group chat notification
+     * @return the message ID created for the group chat system event
      */
-    public void addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent.Status status,
+    public String addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent.Status status,
             long timestamp);
 
     /**
@@ -212,4 +215,12 @@ public interface IMessageLog {
      * @return Cursor
      */
     public Cursor getQueuedGroupChatMessages(String chatId);
+
+    /**
+     * Gets group chat events per contacts for chat ID
+     * 
+     * @param chatId
+     * @return group chat events for contacts or null if there is no group chat events
+     */
+    Map<ContactId, GroupChatEvent.Status> getGroupChatEvents(String chatId);
 }

@@ -37,11 +37,14 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatError;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSessionListener;
 import com.gsma.rcs.platform.registry.RegistryFactory;
+import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.PeriodicRefresher;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
+import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent.Status;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -98,9 +101,8 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 
     private final RcsSettings mRcsSettings;
 
-    /**
-     * The logger
-     */
+    private final MessagingLog mMessagingLog;
+
     private final static Logger sLogger = Logger.getLogger(ConferenceEventSubscribeManager.class
             .getSimpleName());
 
@@ -109,12 +111,15 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
      * 
      * @param session Group chat session
      * @param rcsSettings
+     * @param messagingLog
      */
-    public ConferenceEventSubscribeManager(GroupChatSession session, RcsSettings rcsSettings) {
+    public ConferenceEventSubscribeManager(GroupChatSession session, RcsSettings rcsSettings,
+            MessagingLog messagingLog) {
         mSession = session;
         mImsModule = session.getImsService().getImsModule();
         mAuthenticationAgent = new SessionAuthenticationAgent(mImsModule);
         mRcsSettings = rcsSettings;
+        mMessagingLog = messagingLog;
 
         int defaultExpirePeriod = mRcsSettings.getSubscribeExpirePeriod();
         int minExpireValue = RegistryFactory.getFactory().readInteger(REGISTRY_MIN_EXPIRE_PERIOD,
@@ -246,15 +251,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
                     }
 
                     if (!participants.isEmpty()) {
-                        mSession.updateParticipants(participants);
-
-                        for (Map.Entry<ContactId, ParticipantStatus> participant : participants
-                                .entrySet()) {
-                            for (ImsSessionListener listener : mSession.getListeners()) {
-                                ((GroupChatSessionListener) listener).handleConferenceEvent(
-                                        participant.getKey(), participant.getValue(), timestamp);
-                            }
-                        }
+                        updateParticipantStatus(participants, timestamp);
                     }
                 }
             } catch (Exception e) {
@@ -273,6 +270,58 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
             }
             terminatedByServer();
         }
+    }
+
+    private void updateParticipantStatus(Map<ContactId, ParticipantStatus> participants,
+            long timestamp) {
+        Map<ContactId, ParticipantStatus> updatedParticipants = mSession
+                .updateParticipants(participants);
+
+        if (updatedParticipants.isEmpty()) {
+            return;
+        }
+        Map<ContactId, GroupChatEvent.Status> groupChatEventsInDB = mMessagingLog
+                .getGroupChatEvents(mSession.getContributionID());
+
+        for (Map.Entry<ContactId, ParticipantStatus> participant : updatedParticipants.entrySet()) {
+            ContactId contact = participant.getKey();
+            ParticipantStatus status = participant.getValue();
+            if (isGroupChatEventRequired(contact, status, groupChatEventsInDB))
+                for (ImsSessionListener listener : mSession.getListeners()) {
+                    ((GroupChatSessionListener) listener).handleConferenceEvent(contact, status,
+                            timestamp);
+                }
+        }
+    }
+
+    /*
+     * Check if a new group chat event is required. It is required if there was none before for this
+     * contact or if switch from JOINED to DEPARTED (or reverse) is detected.
+     */
+    private boolean isGroupChatEventRequired(ContactId contact, ParticipantStatus status,
+            Map<ContactId, Status> groupChatEvents) {
+        if (groupChatEvents == null) {
+            /* there is no group chat event in provider for the session */
+            return true;
+        }
+        if (!groupChatEvents.containsKey(contact)) {
+            /* there is no group chat event in provider for the contact */
+            return true;
+        }
+        GroupChatEvent.Status statusInDB = groupChatEvents.get(contact);
+
+        if (ParticipantStatus.CONNECTED.equals(status)) {
+            if (GroupChatEvent.Status.JOINED != statusInDB) {
+                /* Contact is not already marked as joined in provider */
+                return true;
+            }
+        } else if (ParticipantStatus.DEPARTED.equals(status)) {
+            if (GroupChatEvent.Status.DEPARTED != statusInDB) {
+                /* Contact is already marked as departed in provider */
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

@@ -47,7 +47,7 @@ public interface IGroupChatLog {
      * @param chatId Chat ID
      * @param contact Contact ID
      * @param subject Subject
-     * @param participants List of participants
+     * @param participants map of participants and associated status
      * @param state State
      * @param reasonCode ReasonCode
      * @param direction Direction
@@ -65,7 +65,7 @@ public interface IGroupChatLog {
     public void acceptGroupChatNextInvitation(String chatId);
 
     /**
-     * Set group chat status and reason code
+     * Set group chat state and reason code
      * 
      * @param chatId Chat ID
      * @param state Group chat state
@@ -74,10 +74,22 @@ public interface IGroupChatLog {
     public void setGroupChatStateAndReasonCode(String chatId, State state, ReasonCode reasonCode);
 
     /**
+     * Set group chat participants, state and reason code
+     * 
+     * @param participants map of participants and associated status
+     * @param chatId Chat ID
+     * @param state Group chat state
+     * @param reasonCode Group chat state reason code
+     */
+    public void setGroupChatParticipantsStateAndReasonCode(
+            Map<ContactId, ParticipantStatus> participants, String chatId, State state,
+            ReasonCode reasonCode);
+
+    /**
      * Update group chat participants
      * 
      * @param chatId Chat ID
-     * @param participants The group chat participants
+     * @param participants map of participants and associated status
      */
     public void updateGroupChatParticipants(String chatId,
             Map<ContactId, ParticipantStatus> participants);
@@ -148,7 +160,7 @@ public interface IGroupChatLog {
     /**
      * Retrieve all active group chats for auto-rejoin
      * 
-     * @return List of chat IDs of those group chats that has to be auto-rejoined
+     * @return Set of chat IDs of those group chats that has to be auto-rejoined
      */
     public Set<String> getChatIdsOfActiveGroupChatsForAutoRejoin();
 
@@ -156,7 +168,15 @@ public interface IGroupChatLog {
      * Get group chat participants to be invited
      * 
      * @param chatId
-     * @return List of participants
+     * @return Set of participants
      */
     public Set<ContactId> getGroupChatParticipantsToBeInvited(String chatId);
+
+    /**
+     * Checks if group chat is persisted
+     * 
+     * @param chatId
+     * @return true if group chat is persisted
+     */
+    boolean isGroupChatPersisted(String chatId);
 }
