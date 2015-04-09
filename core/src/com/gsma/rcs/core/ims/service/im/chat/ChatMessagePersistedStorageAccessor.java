@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.gsma.rcs.service.api;
+package com.gsma.rcs.core.ims.service.im.chat;
 
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.utils.ContactUtil;

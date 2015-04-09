@@ -16,8 +16,8 @@
 
 package com.gsma.rcs.service.api;
 
+import com.gsma.rcs.core.ims.service.im.chat.ChatMessagePersistedStorageAccessor;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.chat.IChatMessage;
 import com.gsma.services.rcs.contact.ContactId;
 
