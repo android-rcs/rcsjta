@@ -39,13 +39,16 @@
     <permission
         android:name="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY"
         android:protectionLevel="signature" />
+
     <application
         android:icon="@drawable/rcs_icon"
         android:label="@string/rcs_core_application_title" >
 
         <!-- RCS service -->
 
-        <service android:name="com.gsma.rcs.service.RcsCoreService" >
+        <service
+            android:name="com.gsma.rcs.service.RcsCoreService"
+            android:permission="com.gsma.services.permission.RCS" >
             <intent-filter>
                 <action android:name="com.gsma.rcs.SERVICE" />
                 <action android:name="com.gsma.services.rcs.contact.IContactService" />
@@ -55,7 +58,7 @@
                 <action android:name="com.gsma.services.rcs.sharing.video.IVideoSharingService" />
                 <action android:name="com.gsma.services.rcs.sharing.image.IImageSharingService" />
                 <action android:name="com.gsma.services.rcs.sharing.geoloc.IGeolocSharingService" />
-                <action android:name="com.gsma.services.rcs.history.IHistoryService"/>
+                <action android:name="com.gsma.services.rcs.history.IHistoryService" />
                 <action android:name="com.gsma.services.rcs.extension.IMultimediaSessionService" />
                 <action android:name="com.gsma.services.rcs.upload.IFileUploadService" />
             </intent-filter>
