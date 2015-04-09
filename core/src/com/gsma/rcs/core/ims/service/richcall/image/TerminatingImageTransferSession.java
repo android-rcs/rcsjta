@@ -512,8 +512,7 @@ public class TerminatingImageTransferSession extends ImageTransferSession implem
         }
 
         try {
-            // Terminate session
-            terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
+            closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
             // Close the media session
             closeMediaSession();
         } catch (Exception e) {

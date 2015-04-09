@@ -296,8 +296,8 @@ public class ImsModule implements SipEventListener {
      * Stop IMS services
      */
     public void stopImsServices(TerminationReason reasonCode) {
-        // Abort all pending sessions
-        abortAllSessions(reasonCode);
+        // Terminate all pending sessions
+        terminateAllSessions(reasonCode);
 
         // Stop each services
         for (ImsService imsService : mServices.values()) {
@@ -436,14 +436,15 @@ public class ImsModule implements SipEventListener {
     }
 
     /**
-     * Abort all sessions
+     * This function is used when all session needs to terminated in both invitation pending and
+     * started state.
      */
-    public void abortAllSessions(TerminationReason reasonCode) {
+    public void terminateAllSessions(TerminationReason reasonCode) {
         if (logger.isActivated()) {
-            logger.debug("Abort all pending sessions");
+            logger.debug("Terminate all sessions");
         }
         for (ImsService service : getImsServices()) {
-            service.abortAllSessions(reasonCode);
+            service.terminateAllSessions(reasonCode);
         }
     }
 

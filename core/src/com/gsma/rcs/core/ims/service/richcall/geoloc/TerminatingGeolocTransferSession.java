@@ -464,8 +464,7 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
         // Close the media session
         closeMediaSession();
 
-        // Terminate session
-        terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
+        closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
 
         ContactId contact = getRemoteContact();
         // Request capabilities to the remote

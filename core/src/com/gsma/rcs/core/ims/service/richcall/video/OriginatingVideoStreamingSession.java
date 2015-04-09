@@ -152,8 +152,7 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
                 sLogger.debug("Proposed codecs are not supported");
             }
 
-            // Terminate session
-            terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
+            closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
 
             // Report error
             handleError(new ContentSharingError(ContentSharingError.UNSUPPORTED_MEDIA_TYPE));

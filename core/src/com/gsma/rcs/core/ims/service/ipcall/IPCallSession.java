@@ -247,8 +247,7 @@ public abstract class IPCallSession extends ImsServiceSession {
                 logger.debug("Proposed audio codecs are not supported");
             }
 
-            // Terminate session
-            terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
+            closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
 
             // Report error
             handleError(new IPCallError(IPCallError.UNSUPPORTED_AUDIO_TYPE));
@@ -265,8 +264,7 @@ public abstract class IPCallSession extends ImsServiceSession {
                     logger.debug("Proposed video codecs are not supported");
                 }
 
-                // Terminate session
-                terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
+                closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
 
                 // Report error
                 handleError(new IPCallError(IPCallError.UNSUPPORTED_VIDEO_TYPE));
@@ -1201,8 +1199,7 @@ public abstract class IPCallSession extends ImsServiceSession {
             // Close the media (audio, video) session
             closeMediaSession();
 
-            // Terminate session
-            terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
+            closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
 
             ContactId contact = getRemoteContact();
 
@@ -1301,8 +1298,7 @@ public abstract class IPCallSession extends ImsServiceSession {
             // Close the audio and video session
             closeMediaSession();
 
-            // Terminate session
-            terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
+            closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
 
             // Remove the current session
             removeSession();

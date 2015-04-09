@@ -348,7 +348,7 @@ public class MultimediaStreamingSessionImpl extends IMultimediaStreamingSession.
             ServerApiUtils.testApiExtensionPermission(session.getServiceId());
             new Thread() {
                 public void run() {
-                    session.abortSession(TerminationReason.TERMINATION_BY_USER);
+                    session.terminateSession(TerminationReason.TERMINATION_BY_USER);
                 }
             }.start();
 

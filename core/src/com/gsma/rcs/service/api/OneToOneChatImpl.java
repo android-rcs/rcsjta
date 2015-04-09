@@ -54,8 +54,6 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
-import java.io.IOException;
-
 /**
  * One-to-One Chat implementation
  * 
@@ -482,7 +480,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
 
     /**
      * Sends a displayed delivery report for a given message ID
-     *
+     * 
      * @param contact Contact ID
      * @param msgId Message ID
      * @param timestamp Timestamp sent in payload for IMDN datetime
@@ -706,7 +704,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                 }
                 OneToOneChatSession session = mImService.getOneToOneChatSession(mContact);
                 if (session != null) {
-                    session.abortSession(TerminationReason.TERMINATION_BY_USER);
+                    session.terminateSession(TerminationReason.TERMINATION_BY_USER);
                 }
                 mMessagingLog.addOneToOneSpamMessage(msg);
                 mBroadcaster.broadcastMessageReceived(apiMimeType, msgId);

@@ -226,7 +226,7 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
 
     /**
      * Returns the timestamp of the call (incoming or outgoing)
-     *
+     * 
      * @return timestamp
      */
     public long getTimestamp() {
@@ -306,10 +306,10 @@ public class IPCallImpl extends IIPCall.Stub implements IPCallStreamingSessionLi
             throw new IllegalStateException("Session with call ID '" + mCallId + "' not available.");
         }
 
-        // Abort the session
+        /* Terminate the session */
         new Thread() {
             public void run() {
-                session.abortSession(TerminationReason.TERMINATION_BY_USER);
+                session.terminateSession(TerminationReason.TERMINATION_BY_USER);
             }
         }.start();
     }

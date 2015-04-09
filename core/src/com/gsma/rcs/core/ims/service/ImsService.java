@@ -236,17 +236,18 @@ public abstract class ImsService {
     public abstract void check();
 
     /**
-     * Aborts all sessions
+     * This function is used when all session needs to terminated in both invitation pending and
+     * started state.
      * 
      * @param reason
      */
-    public void abortAllSessions(TerminationReason reason) {
+    public void terminateAllSessions(TerminationReason reason) {
         synchronized (getImsServiceSessionOperationLock()) {
             for (ImsServiceSession session : mImsServiceSessionCache.values()) {
-                session.abortSession(reason);
+                session.terminateSession(reason);
             }
             for (ImsServiceSession session : mImsServiceSessionWithoutDialogPathCache.values()) {
-                session.abortSession(reason);
+                session.terminateSession(reason);
             }
         }
     }

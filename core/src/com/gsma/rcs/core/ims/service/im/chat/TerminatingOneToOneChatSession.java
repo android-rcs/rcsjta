@@ -433,12 +433,12 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
             }
             if (currentSessionInitiatedByRemote) {
                 if (currentSessionEstablished) {
-                    currentSession.abortSession(TerminationReason.TERMINATION_BY_SYSTEM);
+                    currentSession.terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
                 } else {
                     currentSession.rejectSession();
                 }
             } else {
-                currentSession.abortSession(TerminationReason.TERMINATION_BY_SYSTEM);
+                currentSession.terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
             }
             /*
              * Since the current session was already established and we are now replacing that

@@ -159,36 +159,36 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         return null;
     }
 
-    private void closeSession(TerminationReason reason) {
+    private void closeHttpSession(TerminationReason reason) {
         interruptSession();
 
-        terminateSession(reason);
+        closeSession(reason);
 
         removeSession();
     }
 
     @Override
-    public void abortSession(TerminationReason reason) {
+    public void terminateSession(TerminationReason reason) {
         /* If reason is TERMINATION_BY_SYSTEM and session already started, then it's a pause */
         String fileTransferId = getFileTransferId();
         FileTransfer.State state = mMessagingLog.getFileTransferState(fileTransferId);
         /* If reason is TERMINATION_BY_SYSTEM and session already started, then it's a pause */
         boolean logActivated = sLogger.isActivated();
         if (logActivated) {
-            sLogger.error("abortSession reason=".concat(reason.toString()));
+            sLogger.error("terminateSession reason=".concat(reason.toString()));
         }
 
         if (TerminationReason.TERMINATION_BY_SYSTEM == reason) {
             switch (state) {
                 case INVITED:
-                    closeSession(reason);
+                    closeHttpSession(reason);
                     return;
                 case STARTED:
                     if (!isInitiatedByRemote()
                             && mMessagingLog.getFileTransferUploadTid(fileTransferId) == null) {
                         break;
                     }
-                    closeSession(reason);
+                    closeHttpSession(reason);
                     if (logActivated) {
                         sLogger.info("Pause the session (session terminated, but can be resumed)");
                     }
@@ -200,13 +200,13 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
                     }
                     return;
                 case PAUSED:
-                    closeSession(reason);
+                    closeHttpSession(reason);
                     return;
                 default:
                     break;
             }
         }
-        super.abortSession(reason);
+        super.terminateSession(reason);
     }
 
     /**

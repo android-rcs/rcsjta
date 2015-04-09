@@ -188,8 +188,8 @@ public class CallManager {
                     mMultipartyCall = false;
                     mCallHold = false;
 
-                    // Abort pending richcall sessions
-                    mImsModule.getRichcallService().abortAllSessions();
+                    /* Terminate richcall sessions */
+                    mImsModule.getRichcallService().terminateAllSessions();
 
                     if (sContact == null) {
                         return;
@@ -330,8 +330,8 @@ public class CallManager {
      */
     private void callLegHasChanged() {
         if (mMultipartyCall | mCallHold) {
-            // Abort pending richcall sessions if call hold or multiparty call
-            mImsModule.getRichcallService().abortAllSessions();
+            /* Terminate richcall sessions if call hold or multiparty call */
+            mImsModule.getRichcallService().terminateAllSessions();
         }
 
         // Request new capabilities

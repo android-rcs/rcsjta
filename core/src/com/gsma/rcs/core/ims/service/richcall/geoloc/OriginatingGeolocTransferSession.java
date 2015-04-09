@@ -243,8 +243,7 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
         // Close the media session
         closeMediaSession();
 
-        // Terminate session
-        terminateSession(TerminationReason.TERMINATION_BY_USER);
+        closeSession(TerminationReason.TERMINATION_BY_USER);
 
         // Remove the current session
         removeSession();
@@ -320,8 +319,7 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
         // Close the media session
         closeMediaSession();
 
-        // Terminate session
-        terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
+        closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
 
         ContactId contact = getRemoteContact();
 

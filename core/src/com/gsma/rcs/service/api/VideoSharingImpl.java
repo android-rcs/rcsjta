@@ -283,10 +283,10 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
              */
             throw new IllegalStateException("No session with sharing ID:".concat(mSharingId));
         }
-        // Abort the session
+        /* Terminate the session */
         new Thread() {
             public void run() {
-                session.abortSession(TerminationReason.TERMINATION_BY_USER);
+                session.terminateSession(TerminationReason.TERMINATION_BY_USER);
             }
         }.start();
     }

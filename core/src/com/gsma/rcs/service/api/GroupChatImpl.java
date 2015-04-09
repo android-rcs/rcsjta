@@ -638,10 +638,10 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 logger.info("Cancel session");
             }
 
-            // Abort the session
+            /* Terminate the session */
             new Thread() {
                 public void run() {
-                    session.abortSession(TerminationReason.TERMINATION_BY_USER);
+                    session.terminateSession(TerminationReason.TERMINATION_BY_USER);
                 }
             }.start();
 

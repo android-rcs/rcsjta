@@ -295,8 +295,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
         // Close the media session
         closeMediaSession();
 
-        // Terminate session
-        terminateSession(TerminationReason.TERMINATION_BY_USER);
+        closeSession(TerminationReason.TERMINATION_BY_USER);
 
         // Remove the current session
         removeSession();
@@ -371,8 +370,7 @@ public class OriginatingImageTransferSession extends ImageTransferSession implem
             logger.info("Data transfer error " + error);
         }
 
-        // Terminate session
-        terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
+        closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
 
         // Close the media session
         closeMediaSession();

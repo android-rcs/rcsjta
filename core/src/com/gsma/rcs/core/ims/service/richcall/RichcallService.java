@@ -886,13 +886,14 @@ public class RichcallService extends ImsService {
     }
 
     /**
-     * Abort all pending sessions
+     * This function is used when all session needs to terminated in both invitation pending and
+     * started state.
      */
-    public void abortAllSessions() {
+    public void terminateAllSessions() {
         if (sLogger.isActivated()) {
-            sLogger.debug("Abort all pending sessions");
+            sLogger.debug("Terminate all sessions");
         }
-        abortAllSessions(TerminationReason.TERMINATION_BY_SYSTEM);
+        terminateAllSessions(TerminationReason.TERMINATION_BY_SYSTEM);
     }
 
     /**

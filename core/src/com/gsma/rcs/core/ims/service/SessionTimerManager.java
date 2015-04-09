@@ -274,8 +274,7 @@ public class SessionTimerManager extends PeriodicRefresher {
                     mLogger.debug("Session timer refresh has failed: close the session");
                 }
 
-                // Close the session
-                mSession.abortSession(TerminationReason.TERMINATION_BY_TIMEOUT);
+                mSession.terminateSession(TerminationReason.TERMINATION_BY_TIMEOUT);
 
                 ContactId contact = mSession.getRemoteContact();
                 mSession.getImsService().getImsModule().getCapabilityService()
@@ -303,8 +302,7 @@ public class SessionTimerManager extends PeriodicRefresher {
                     mLogger.debug("Session timer refresh has failed: close the session");
                 }
 
-                // Close the session
-                mSession.abortSession(TerminationReason.TERMINATION_BY_TIMEOUT);
+                mSession.terminateSession(TerminationReason.TERMINATION_BY_TIMEOUT);
 
                 ContactId contact = mSession.getRemoteContact();
                 mSession.getImsService().getImsModule().getCapabilityService()
@@ -323,8 +321,7 @@ public class SessionTimerManager extends PeriodicRefresher {
                 mLogger.error("Session timer refresh has failed", e);
             }
 
-            // Close the session
-            mSession.abortSession(TerminationReason.TERMINATION_BY_SYSTEM);
+            mSession.terminateSession(TerminationReason.TERMINATION_BY_SYSTEM);
         }
     }
 

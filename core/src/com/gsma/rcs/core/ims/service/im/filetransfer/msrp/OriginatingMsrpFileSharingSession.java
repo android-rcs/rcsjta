@@ -307,8 +307,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         // Close the media session
         closeMediaSession();
 
-        // Terminate session
-        terminateSession(TerminationReason.TERMINATION_BY_USER);
+        closeSession(TerminationReason.TERMINATION_BY_USER);
 
         // Remove the current session
         removeSession();

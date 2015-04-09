@@ -540,18 +540,20 @@ public abstract class ImsServiceSession extends Thread {
     }
 
     /**
-     * Abort the session
+     * This function is used when session needs to terminated in both invitation pending and started
+     * state. If an error has occurred and the session needs to closed, please call
+     * closeSession(TerminationReason).
      * 
      * @param reason Termination reason
      */
-    public void abortSession(TerminationReason reason) {
+    public void terminateSession(TerminationReason reason) {
         if (sLogger.isActivated()) {
-            sLogger.info("Abort the session ".concat(reason.toString()));
+            sLogger.info("Terminate the session ".concat(reason.toString()));
         }
 
         interruptSession();
 
-        terminateSession(reason);
+        closeSession(reason);
 
         closeMediaSession();
 
@@ -579,19 +581,21 @@ public abstract class ImsServiceSession extends Thread {
     public void deleteSession() {
         mInvitationStatus = InvitationStatus.INVITATION_DELETED;
         interruptSession();
-        terminateSession(TerminationReason.TERMINATION_BY_USER);
+        closeSession(TerminationReason.TERMINATION_BY_USER);
         closeMediaSession();
         removeSession();
     }
 
     /**
-     * Terminate session
+     * This function is called when an error has occurred in the session and the session needs to be
+     * closed. If you need to actively terminate the session, please call
+     * terminateSession(TerminationReason).
      * 
      * @param reason Reason
      */
-    public void terminateSession(TerminationReason reason) {
+    public void closeSession(TerminationReason reason) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Terminate the session (reason ").append(reason)
+            sLogger.debug(new StringBuilder("Close the session (reason ").append(reason)
                     .append(")").toString());
         }
 
@@ -616,7 +620,7 @@ public abstract class ImsServiceSession extends Thread {
         }
 
         try {
-            // Terminate the session
+            /* Close the session */
             if (mDialogPath.isSigEstablished()) {
                 // Increment the Cseq number of the dialog path
                 getDialogPath().incrementCseq();
@@ -629,11 +633,11 @@ public abstract class ImsServiceSession extends Thread {
             }
 
             if (sLogger.isActivated()) {
-                sLogger.debug("SIP session has been terminated");
+                sLogger.debug("SIP session has been closed");
             }
         } catch (Exception e) {
             if (sLogger.isActivated()) {
-                sLogger.error("Session termination has failed", e);
+                sLogger.error("Session close action has failed", e);
             }
         }
     }

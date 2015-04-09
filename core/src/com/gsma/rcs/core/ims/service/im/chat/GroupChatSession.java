@@ -297,16 +297,15 @@ public abstract class GroupChatSession extends ChatSession {
     }
 
     /**
-     * Terminate session
+     * Close session
      * 
      * @param reason Reason
      */
-    public void terminateSession(TerminationReason reason) {
+    public void closeSession(TerminationReason reason) {
         // Stop conference subscription
         mConferenceSubscriber.terminate();
 
-        // Terminate session
-        super.terminateSession(reason);
+        super.closeSession(reason);
     }
 
     /**
@@ -818,7 +817,7 @@ public abstract class GroupChatSession extends ChatSession {
     }
 
     @Override
-    public void abortSession(TerminationReason reason) {
+    public void terminateSession(TerminationReason reason) {
         /*
          * If there is an ongoing group chat session with same chatId, this session has to be
          * silently aborted so after aborting the session we make sure to not call the rest of this
@@ -826,13 +825,13 @@ public abstract class GroupChatSession extends ChatSession {
          * which is of course not the intention here
          */
         if (!isPendingForRemoval()) {
-            super.abortSession(reason);
+            super.terminateSession(reason);
             return;
         }
 
         interruptSession();
 
-        terminateSession(reason);
+        closeSession(reason);
 
         closeMediaSession();
     }

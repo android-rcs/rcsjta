@@ -341,10 +341,10 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
             // Automatically closed after transfer
             return;
         }
-        // Abort the session
+        /* Terminate the session */
         new Thread() {
             public void run() {
-                session.abortSession(TerminationReason.TERMINATION_BY_USER);
+                session.terminateSession(TerminationReason.TERMINATION_BY_USER);
             }
         }.start();
     }

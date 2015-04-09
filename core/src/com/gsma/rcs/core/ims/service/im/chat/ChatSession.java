@@ -1064,8 +1064,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             sLogger.debug("Chat inactivity event");
         }
 
-        // Abort the session
-        abortSession(TerminationReason.TERMINATION_BY_INACTIVITY);
+        terminateSession(TerminationReason.TERMINATION_BY_INACTIVITY);
     }
 
     /**
