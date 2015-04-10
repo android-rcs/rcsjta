@@ -880,29 +880,27 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     }
 
     @Override
-    public void handleSessionRejectedByUser(ContactId contact) {
+    public void handleSessionRejected(ContactId contact, TerminationReason reason) {
         if (logger.isActivated()) {
-            logger.info("Session rejected by user.");
-        }
-        synchronized (lock) {
-            mChatService.removeOneToOneChat(mContact);
-        }
-    }
-
-    @Override
-    public void handleSessionRejectedByTimeout(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Session rejected by time-out.");
-        }
-        synchronized (lock) {
-            mChatService.removeOneToOneChat(mContact);
-        }
-    }
-
-    @Override
-    public void handleSessionRejectedByRemote(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Session rejected by remote.");
+            switch (reason) {
+                case TERMINATION_BY_USER:
+                    logger.info("Session rejected by user.");
+                    break;
+                case TERMINATION_BY_CONNECTION_LOST:
+                    /* Intentional fall through */
+                case TERMINATION_BY_SYSTEM:
+                    logger.info("Session rejected by system.");
+                    break;
+                case TERMINATION_BY_TIMEOUT:
+                    logger.info("Session rejected by timeout.");
+                    break;
+                case TERMINATION_BY_REMOTE:
+                    logger.info("Session rejected by remote.");
+                    break;
+                default:
+                    throw new IllegalArgumentException(new StringBuilder(
+                            "Unknown reason RejectedReason=").append(reason).append("!").toString());
+            }
         }
         synchronized (lock) {
             mChatService.removeOneToOneChat(mContact);

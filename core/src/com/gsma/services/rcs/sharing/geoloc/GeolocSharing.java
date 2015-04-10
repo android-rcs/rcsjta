@@ -172,14 +172,19 @@ public class GeolocSharing {
         REJECTED_BY_TIMEOUT(9),
 
         /**
+         * Geolocation share invitation was rejected by system.
+         */
+        REJECTED_BY_SYSTEM(10),
+
+        /**
          * Geolocation share initiation failed.
          */
-        FAILED_INITIATION(10),
+        FAILED_INITIATION(11),
 
         /**
          * Sharing of the geolocation has failed.
          */
-        FAILED_SHARING(11);
+        FAILED_SHARING(12);
 
         private final int mValue;
 

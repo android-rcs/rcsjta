@@ -54,15 +54,26 @@ public class UpdateVideoSharingStateAfterUngracefulTerminationTask implements Ru
             cursor = mRichCallHistory.getInterruptedVideoSharings();
             int sharingIdx = cursor.getColumnIndexOrThrow(VideoSharingData.KEY_SHARING_ID);
             int contactIdx = cursor.getColumnIndexOrThrow(VideoSharingData.KEY_CONTACT);
-            int durationIdx = cursor.getColumnIndexOrThrow(VideoSharingData.KEY_DURATION);
+            int stateIdx = cursor.getColumnIndexOrThrow(VideoSharingData.KEY_STATE);
             while (cursor.moveToNext()) {
                 String sharingId = cursor.getString(sharingIdx);
                 String contactNumber = cursor.getString(contactIdx);
                 ContactId contact = ContactUtil.createContactIdFromTrustedData(contactNumber);
-                long duration = cursor.getLong(durationIdx);
-                mVideoService.setVideoSharingStateAndReasonCode(contact, sharingId, State.FAILED,
-                        ReasonCode.FAILED_SHARING, duration);
-
+                State state = State.valueOf(cursor.getInt(stateIdx));
+                switch (state) {
+                    case STARTED:
+                        mVideoService.setVideoSharingStateAndReasonCode(contact, sharingId,
+                                State.FAILED, ReasonCode.FAILED_SHARING);
+                        break;
+                    case INITIATING:
+                        mVideoService.setVideoSharingStateAndReasonCode(contact, sharingId,
+                                State.FAILED, ReasonCode.FAILED_INITIATION);
+                        break;
+                    case INVITED:
+                        mVideoService.setVideoSharingStateAndReasonCode(contact, sharingId,
+                                State.REJECTED, ReasonCode.REJECTED_BY_SYSTEM);
+                        break;
+                }
             }
         } catch (Exception e) {
             /*

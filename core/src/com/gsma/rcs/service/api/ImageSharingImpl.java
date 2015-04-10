@@ -463,18 +463,26 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     }
 
     @Override
-    public void handleSessionRejectedByUser(ContactId contact) {
-        handleSessionRejected(ReasonCode.REJECTED_BY_USER, contact);
-    }
-
-    @Override
-    public void handleSessionRejectedByTimeout(ContactId contact) {
-        handleSessionRejected(ReasonCode.REJECTED_BY_TIMEOUT, contact);
-    }
-
-    @Override
-    public void handleSessionRejectedByRemote(ContactId contact) {
-        handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE, contact);
+    public void handleSessionRejected(ContactId contact, TerminationReason reason) {
+        switch (reason) {
+            case TERMINATION_BY_USER:
+                handleSessionRejected(ReasonCode.REJECTED_BY_USER, contact);
+                break;
+            case TERMINATION_BY_SYSTEM:
+                /* Intentional fall through */
+            case TERMINATION_BY_CONNECTION_LOST:
+                handleSessionRejected(ReasonCode.REJECTED_BY_SYSTEM, contact);
+                break;
+            case TERMINATION_BY_TIMEOUT:
+                handleSessionRejected(ReasonCode.REJECTED_BY_TIMEOUT, contact);
+                break;
+            case TERMINATION_BY_REMOTE:
+                handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE, contact);
+                break;
+            default:
+                throw new IllegalArgumentException(new StringBuilder(
+                        "Unknown reason RejectedReason=").append(reason).append("!").toString());
+        }
     }
 
     @Override

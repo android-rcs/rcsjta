@@ -153,19 +153,24 @@ public abstract class MultimediaSession {
         REJECTED_BY_TIMEOUT(7),
 
         /**
+         * Session invitation was rejected by system.
+         */
+        REJECTED_BY_SYSTEM(8),
+
+        /**
          * Initiation failed.
          */
-        FAILED_INITIATION(8),
+        FAILED_INITIATION(9),
 
         /**
          * Session failed.
          */
-        FAILED_SESSION(9),
+        FAILED_SESSION(10),
 
         /**
          * Media failed.
          */
-        FAILED_MEDIA(10);
+        FAILED_MEDIA(11);
 
         private final int mValue;
 

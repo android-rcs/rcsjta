@@ -240,6 +240,12 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
         mBroadcaster.broadcastStateChanged(contact, sharingId, state, reasonCode);
     }
 
+    public void setVideoSharingStateAndReasonCode(ContactId contact, String sharingId, State state,
+            ReasonCode reasonCode) {
+        mRichCallLog.setVideoSharingStateReasonCode(sharingId, state, reasonCode);
+        mBroadcaster.broadcastStateChanged(contact, sharingId, state, reasonCode);
+    }
+
     /**
      * Get the remote contact Id involved in the current call
      * 

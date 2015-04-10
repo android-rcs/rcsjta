@@ -67,18 +67,18 @@ public class RichCallHistory {
     private static final String SELECTION_BY_INTERRUPTED_GEOLOC_SHARINGS = new StringBuilder(
             GeolocSharingData.KEY_STATE).append(" IN ('")
             .append(GeolocSharing.State.STARTED.toInt()).append("','")
-            .append(GeolocSharing.State.INITIATING.toInt()).append("','")
-            .append(GeolocSharing.State.INVITED.toInt()).append("')").toString();
+            .append(GeolocSharing.State.INVITED.toInt()).append("','")
+            .append(GeolocSharing.State.INITIATING.toInt()).append("')").toString();
 
     private static final String SELECTION_BY_INTERRUPTED_IMAGE_SHARINGS = new StringBuilder(
             ImageSharingData.KEY_STATE).append(" IN ('").append(ImageSharing.State.STARTED.toInt())
-            .append("','").append(ImageSharing.State.INITIATING.toInt()).append("','")
-            .append(ImageSharing.State.INVITED.toInt()).append("')").toString();
+            .append("','").append(ImageSharing.State.INVITED.toInt()).append("','")
+            .append(ImageSharing.State.INITIATING.toInt()).append("')").toString();
 
     private static final String SELECTION_BY_INTERRUPTED_VIDEO_SHARINGS = new StringBuilder(
             VideoSharingData.KEY_STATE).append(" IN ('").append(VideoSharing.State.STARTED.toInt())
-            .append("','").append(VideoSharing.State.INITIATING.toInt()).append("','")
-            .append(VideoSharing.State.INVITED.toInt()).append("')").toString();
+            .append("','").append(VideoSharing.State.INVITED.toInt()).append("','")
+            .append(VideoSharing.State.INITIATING.toInt()).append("')").toString();
 
     private static final String ORDER_BY_TIMESTAMP_ASC = GeolocSharingData.KEY_TIMESTAMP
             .concat(" ASC");
@@ -289,6 +289,28 @@ public class RichCallHistory {
         values.put(VideoSharingData.KEY_STATE, state.toInt());
         values.put(VideoSharingData.KEY_REASON_CODE, reasonCode.toInt());
         values.put(VideoSharingData.KEY_DURATION, duration);
+
+        mLocalContentResolver.update(Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, sharingId),
+                values, null, null);
+    }
+
+    /**
+     * Set the video sharing state, reason code
+     * 
+     * @param sharingId sharing ID of the entry
+     * @param state New state
+     * @param reasonCode Reason Code
+     */
+    public void setVideoSharingStateReasonCode(String sharingId, VideoSharing.State state,
+            VideoSharing.ReasonCode reasonCode) {
+        if (logger.isActivated()) {
+            logger.debug(new StringBuilder("Update video sharing state of sharing ")
+                    .append(sharingId).append(" state=").append(state).append(", reasonCode=")
+                    .append(reasonCode).toString());
+        }
+        ContentValues values = new ContentValues();
+        values.put(VideoSharingData.KEY_STATE, state.toInt());
+        values.put(VideoSharingData.KEY_REASON_CODE, reasonCode.toInt());
 
         mLocalContentResolver.update(Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, sharingId),
                 values, null, null);

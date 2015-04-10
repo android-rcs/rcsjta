@@ -454,7 +454,6 @@ public abstract class ImsServiceSession extends Thread {
             sLogger.debug("Session invitation has been accepted");
         }
         mInvitationStatus = InvitationStatus.INVITATION_ACCEPTED;
-
         // Unblock semaphore
         synchronized (mWaitUserAnswer) {
             mWaitUserAnswer.notifyAll();
@@ -471,7 +470,6 @@ public abstract class ImsServiceSession extends Thread {
         if (InvitationStatus.INVITATION_NOT_ANSWERED != mInvitationStatus) {
             return mInvitationStatus;
         }
-
         if (sLogger.isActivated()) {
             sLogger.debug("Wait session invitation answer delay=".concat(Long.toString(timeout)));
         }
@@ -550,7 +548,7 @@ public abstract class ImsServiceSession extends Thread {
         if (sLogger.isActivated()) {
             sLogger.info("Terminate the session ".concat(reason.toString()));
         }
-
+        boolean wasEstablished = mDialogPath != null && mDialogPath.isSigEstablished();
         interruptSession();
 
         closeSession(reason);
@@ -559,19 +557,15 @@ public abstract class ImsServiceSession extends Thread {
 
         removeSession();
 
-        /* TODO: This will be changed anyway by the implementation of CR018 */
         Collection<ImsSessionListener> listeners = getListeners();
-        /* Handles the case of REJECTED_BY_USER on originating session */
-        if (TerminationReason.TERMINATION_BY_USER == reason && mDialogPath != null
-                && !mDialogPath.isSigEstablished()) {
+        if (wasEstablished) {
             for (ImsSessionListener listener : listeners) {
-                listener.handleSessionRejectedByUser(mContact);
+                listener.handleSessionAborted(mContact, reason);
             }
             return;
         }
-
         for (ImsSessionListener listener : listeners) {
-            listener.handleSessionAborted(mContact, reason);
+            listener.handleSessionRejected(mContact, reason);
         }
     }
 

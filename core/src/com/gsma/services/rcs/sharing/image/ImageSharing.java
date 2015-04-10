@@ -179,19 +179,24 @@ public class ImageSharing {
         REJECTED_BY_REMOTE(11),
 
         /**
+         * Incoming image was rejected by system.
+         */
+        REJECTED_BY_SYSTEM(12),
+
+        /**
          * Image share initiation failed;
          */
-        FAILED_INITIATION(12),
+        FAILED_INITIATION(13),
 
         /**
          * Sharing of the image share has failed.
          */
-        FAILED_SHARING(13),
+        FAILED_SHARING(14),
 
         /**
          * Saving of the image share has failed.
          */
-        FAILED_SAVING(14);
+        FAILED_SAVING(15);
 
         private final int mValue;
 

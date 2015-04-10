@@ -50,22 +50,9 @@ public interface ImsSessionListener {
      * Session is being rejected by user
      * 
      * @param contact Remote contact
+     * @param reason Termination reason
      */
-    public void handleSessionRejectedByUser(ContactId contact);
-
-    /**
-     * Session is being rejected due to time out
-     * 
-     * @param contact Remote contact
-     */
-    public void handleSessionRejectedByTimeout(ContactId contact);
-
-    /**
-     * Session is being rejected by remote
-     * 
-     * @param contact Remote contact
-     */
-    public void handleSessionRejectedByRemote(ContactId contact);
+    public void handleSessionRejected(ContactId contact, TerminationReason reason);
 
     /**
      * Accept has been called and the session is in the process of being started

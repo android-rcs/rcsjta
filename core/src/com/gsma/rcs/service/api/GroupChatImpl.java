@@ -1558,27 +1558,23 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     }
 
     @Override
-    public void handleSessionRejectedByUser(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Session rejected by user");
+    public void handleSessionRejected(ContactId contact, TerminationReason reason) {
+        switch (reason) {
+            case TERMINATION_BY_SYSTEM:
+                /* Intentional fall through */
+            case TERMINATION_BY_CONNECTION_LOST:
+                handleSessionRejected(ReasonCode.REJECTED_BY_SYSTEM);
+                break;
+            case TERMINATION_BY_TIMEOUT:
+                handleSessionRejected(ReasonCode.REJECTED_BY_TIMEOUT);
+                break;
+            case TERMINATION_BY_REMOTE:
+                handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE);
+                break;
+            default:
+                throw new IllegalArgumentException(new StringBuilder(
+                        "Unknown reason RejectedReason=").append(reason).append("!").toString());
         }
-        handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE);
-    }
-
-    @Override
-    public void handleSessionRejectedByTimeout(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Session rejected by time out");
-        }
-        handleSessionRejected(ReasonCode.REJECTED_BY_TIMEOUT);
-    }
-
-    @Override
-    public void handleSessionRejectedByRemote(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Session rejected by time out");
-        }
-        handleSessionRejected(ReasonCode.REJECTED_BY_REMOTE);
     }
 
     @Override

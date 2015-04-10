@@ -297,7 +297,7 @@ public interface IFileTransferLog {
     public String getFileTransferUploadTid(String fileTransferId);
 
     /**
-     * Update file transfer state for interrupted file transfers
+     * Get interrupted file transfers
      * 
      * @return TODO
      */

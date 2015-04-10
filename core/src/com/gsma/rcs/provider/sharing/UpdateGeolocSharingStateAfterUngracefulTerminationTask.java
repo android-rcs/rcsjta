@@ -54,13 +54,26 @@ public class UpdateGeolocSharingStateAfterUngracefulTerminationTask implements R
             cursor = mRichCallHistory.getInterruptedGeolocSharings();
             int sharingIdx = cursor.getColumnIndexOrThrow(GeolocSharingData.KEY_SHARING_ID);
             int contactIdx = cursor.getColumnIndexOrThrow(GeolocSharingData.KEY_CONTACT);
+            int stateIdx = cursor.getColumnIndexOrThrow(GeolocSharingData.KEY_STATE);
             while (cursor.moveToNext()) {
                 String sharingId = cursor.getString(sharingIdx);
                 String contactNumber = cursor.getString(contactIdx);
                 ContactId contact = ContactUtil.createContactIdFromTrustedData(contactNumber);
-                mGeolocService.setGeolocSharingStateAndReasonCode(contact, sharingId, State.FAILED,
-                        ReasonCode.FAILED_SHARING);
-
+                State state = State.valueOf(cursor.getInt(stateIdx));
+                switch (state) {
+                    case STARTED:
+                        mGeolocService.setGeolocSharingStateAndReasonCode(contact, sharingId,
+                                State.FAILED, ReasonCode.FAILED_SHARING);
+                        break;
+                    case INITIATING:
+                        mGeolocService.setGeolocSharingStateAndReasonCode(contact, sharingId,
+                                State.FAILED, ReasonCode.FAILED_INITIATION);
+                        break;
+                    case INVITED:
+                        mGeolocService.setGeolocSharingStateAndReasonCode(contact, sharingId,
+                                State.REJECTED, ReasonCode.REJECTED_BY_SYSTEM);
+                        break;
+                }
             }
         } catch (Exception e) {
             /*

@@ -235,15 +235,7 @@ public class FtHttpResumeManager implements Runnable {
             }
 
             @Override
-            public void handleSessionRejectedByUser(ContactId contact) {
-            }
-
-            @Override
-            public void handleSessionRejectedByTimeout(ContactId contact) {
-            }
-
-            @Override
-            public void handleSessionRejectedByRemote(ContactId contact) {
+            public void handleSessionRejected(ContactId contact, TerminationReason reason) {
             }
 
             @Override

@@ -243,9 +243,14 @@ public class GroupChat {
         REJECTED_BY_TIMEOUT(8),
 
         /**
+         * Group chat invitation was rejected by system.
+         */
+        REJECTED_BY_SYSTEM(9),
+
+        /**
          * Group chat initiation failed.
          */
-        FAILED_INITIATION(9);
+        FAILED_INITIATION(10);
 
         private final int mValue;
 

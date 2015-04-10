@@ -54,13 +54,26 @@ public class UpdateImageSharingStateAfterUngracefulTerminationTask implements Ru
             cursor = mRichCallHistory.getInterruptedImageSharings();
             int sharingIdx = cursor.getColumnIndexOrThrow(ImageSharingData.KEY_SHARING_ID);
             int contactIdx = cursor.getColumnIndexOrThrow(ImageSharingData.KEY_CONTACT);
+            int stateIdx = cursor.getColumnIndexOrThrow(ImageSharingData.KEY_STATE);
             while (cursor.moveToNext()) {
                 String sharingId = cursor.getString(sharingIdx);
                 String contactNumber = cursor.getString(contactIdx);
                 ContactId contact = ContactUtil.createContactIdFromTrustedData(contactNumber);
-                mImageService.setImageSharingStateAndReasonCode(contact, sharingId, State.FAILED,
-                        ReasonCode.FAILED_SHARING);
-
+                State state = State.valueOf(cursor.getInt(stateIdx));
+                switch (state) {
+                    case STARTED:
+                        mImageService.setImageSharingStateAndReasonCode(contact, sharingId,
+                                State.FAILED, ReasonCode.FAILED_SHARING);
+                        break;
+                    case INITIATING:
+                        mImageService.setImageSharingStateAndReasonCode(contact, sharingId,
+                                State.FAILED, ReasonCode.FAILED_INITIATION);
+                        break;
+                    case INVITED:
+                        mImageService.setImageSharingStateAndReasonCode(contact, sharingId,
+                                State.REJECTED, ReasonCode.REJECTED_BY_SYSTEM);
+                        break;
+                }
             }
         } catch (Exception e) {
             /*

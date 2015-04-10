@@ -190,7 +190,8 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                         removeSession();
 
                         for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionRejectedByUser(contact);
+                            listener.handleSessionRejected(contact,
+                                    TerminationReason.TERMINATION_BY_USER);
                         }
                         return;
 
@@ -204,7 +205,8 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                         removeSession();
 
                         for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionRejectedByTimeout(contact);
+                            listener.handleSessionRejected(contact,
+                                    TerminationReason.TERMINATION_BY_TIMEOUT);
                         }
                         return;
 
@@ -223,7 +225,8 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                         removeSession();
 
                         for (ImsSessionListener listener : listeners) {
-                            listener.handleSessionRejectedByRemote(contact);
+                            listener.handleSessionRejected(contact,
+                                    TerminationReason.TERMINATION_BY_REMOTE);
                         }
                         return;
 

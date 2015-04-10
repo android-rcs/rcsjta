@@ -168,14 +168,19 @@ public class IPCall {
         REJECTED_TIME_OUT(9),
 
         /**
+         * IP call has been rejected by system.
+         */
+        REJECTED_BY_SYSTEM(10),
+
+        /**
          * IP call initiation failed.
          */
-        FAILED_INITIATION(10),
+        FAILED_INITIATION(11),
 
         /**
          * IP call failed.
          */
-        FAILED_IPCALL(10);
+        FAILED_IPCALL(12);
 
         private final int mValue;
 
@@ -294,7 +299,7 @@ public class IPCall {
 
     /**
      * Returns the timestamp of the call
-     *
+     * 
      * @return timestamp
      */
     public long getTimestamp() throws RcsServiceException {

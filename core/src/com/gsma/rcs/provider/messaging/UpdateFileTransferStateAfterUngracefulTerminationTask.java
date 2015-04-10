@@ -19,7 +19,6 @@ package com.gsma.rcs.provider.messaging;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
@@ -47,66 +46,98 @@ public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Ru
             int chatIdIdx = cursor.getColumnIndex(FileTransferData.KEY_CHAT_ID);
             int contactIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_CONTACT);
             int fileTransferIdIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_FT_ID);
-            int directionIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_DIRECTION);
             int uploadIdIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_UPLOAD_TID);
             int downloadUriIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_DOWNLOAD_URI);
+            int stateIdx = cursor.getColumnIndexOrThrow(FileTransferData.KEY_STATE);
+            int fileExpirationIdx = cursor
+                    .getColumnIndexOrThrow(FileTransferData.KEY_FILE_EXPIRATION);
             while (cursor.moveToNext()) {
                 String fileTransferId = cursor.getString(fileTransferIdIdx);
                 String contactNumber = cursor.getString(contactIdx);
                 String chatId = cursor.getString(chatIdIdx);
                 ContactId contact = contactNumber != null ? ContactUtil
                         .createContactIdFromTrustedData(contactNumber) : null;
-                Direction direction = Direction.valueOf(cursor.getInt(directionIdx));
+                State state = State.valueOf(cursor.getInt(stateIdx));
                 boolean groupFileTransfer = !chatId.equals(contact);
-                switch (direction) {
-                    case INCOMING:
-                        if (cursor.getString(downloadUriIdx) == null) {
+                if (cursor.getString(downloadUriIdx) == null
+                        && cursor.getString(uploadIdIdx) == null) {
+                    /* Msrp file transfer */
+                    switch (state) {
+                        case INITIATING:
+                            if (groupFileTransfer) {
+                                mFileTransferService.setGroupFileTransferStateAndReasonCode(
+                                        fileTransferId, chatId, State.FAILED,
+                                        ReasonCode.FAILED_INITIATION);
+                                break;
+                            }
+                            mFileTransferService.setOneToOneFileTransferStateAndReasonCode(
+                                    fileTransferId, contact, State.FAILED,
+                                    ReasonCode.FAILED_INITIATION);
+                            break;
+                        case STARTED:
                             if (groupFileTransfer) {
                                 mFileTransferService.setGroupFileTransferStateAndReasonCode(
                                         fileTransferId, chatId, State.FAILED,
                                         ReasonCode.FAILED_DATA_TRANSFER);
-                            } else {
-                                mFileTransferService.setOneToOneFileTransferStateAndReasonCode(
-                                        fileTransferId, contact, State.FAILED,
-                                        ReasonCode.FAILED_DATA_TRANSFER);
+                                break;
                             }
-                        } else {
+                            mFileTransferService.setOneToOneFileTransferStateAndReasonCode(
+                                    fileTransferId, contact, State.FAILED,
+                                    ReasonCode.FAILED_DATA_TRANSFER);
+                            break;
+                        case INVITED:
                             if (groupFileTransfer) {
                                 mFileTransferService.setGroupFileTransferStateAndReasonCode(
-                                        fileTransferId, chatId, State.PAUSED,
-                                        ReasonCode.PAUSED_BY_SYSTEM);
-                            } else {
-                                mFileTransferService.setOneToOneFileTransferStateAndReasonCode(
-                                        fileTransferId, contact, State.PAUSED,
-                                        ReasonCode.PAUSED_BY_SYSTEM);
+                                        fileTransferId, chatId, State.REJECTED,
+                                        ReasonCode.REJECTED_BY_SYSTEM);
+                                break;
                             }
-                        }
-                        break;
-                    case OUTGOING:
-                        if (cursor.getString(uploadIdIdx) == null) {
+                            mFileTransferService.setOneToOneFileTransferStateAndReasonCode(
+                                    fileTransferId, contact, State.REJECTED,
+                                    ReasonCode.REJECTED_BY_SYSTEM);
+                            break;
+                    }
+                } else {
+                    /* Http file transfer */
+                    switch (state) {
+                        case INITIATING:
                             if (groupFileTransfer) {
                                 mFileTransferService.setGroupFileTransferStateAndReasonCode(
                                         fileTransferId, chatId, State.FAILED,
-                                        ReasonCode.FAILED_DATA_TRANSFER);
-                            } else {
-                                mFileTransferService.setOneToOneFileTransferStateAndReasonCode(
-                                        fileTransferId, contact, State.FAILED,
-                                        ReasonCode.FAILED_DATA_TRANSFER);
+                                        ReasonCode.FAILED_INITIATION);
+                                break;
                             }
-                        } else {
+                            mFileTransferService.setOneToOneFileTransferStateAndReasonCode(
+                                    fileTransferId, contact, State.FAILED,
+                                    ReasonCode.FAILED_INITIATION);
+                            break;
+                        case STARTED:
                             if (groupFileTransfer) {
                                 mFileTransferService.setGroupFileTransferStateAndReasonCode(
                                         fileTransferId, chatId, State.PAUSED,
                                         ReasonCode.PAUSED_BY_SYSTEM);
-                            } else {
-                                mFileTransferService.setOneToOneFileTransferStateAndReasonCode(
-                                        fileTransferId, contact, State.PAUSED,
-                                        ReasonCode.PAUSED_BY_SYSTEM);
+                                break;
                             }
-                        }
-                        break;
-                    default:
-                        break;
+                            mFileTransferService.setOneToOneFileTransferStateAndReasonCode(
+                                    fileTransferId, contact, State.PAUSED,
+                                    ReasonCode.PAUSED_BY_SYSTEM);
+                            break;
+                        case INVITED:
+                            if (cursor.getLong(fileExpirationIdx) > System.currentTimeMillis()) {
+                                /* File is not yet expired on the server */
+                                break;
+                            }
+                            if (groupFileTransfer) {
+                                mFileTransferService.setGroupFileTransferStateAndReasonCode(
+                                        fileTransferId, chatId, State.REJECTED,
+                                        ReasonCode.REJECTED_BY_TIMEOUT);
+                                break;
+                            }
+                            mFileTransferService.setOneToOneFileTransferStateAndReasonCode(
+                                    fileTransferId, contact, State.REJECTED,
+                                    ReasonCode.REJECTED_BY_TIMEOUT);
+                            break;
+                    }
                 }
             }
         } catch (Exception e) {

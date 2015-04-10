@@ -79,9 +79,9 @@ public class FileTransferLog implements IFileTransferLog {
             .append(SELECTION_BY_QUEUED_FILE_TRANSFERS).toString();
 
     private static final String SELECTION_BY_INTERRUPTED_FILE_TRANSFERS = new StringBuilder(
-            FileTransferData.KEY_STATE).append("=").append(State.STARTED.toInt()).append(" AND ")
-            .append(FileTransferData.KEY_TRANSFERRED).append("<>")
-            .append(FileTransferData.KEY_FILESIZE).toString();
+            FileTransferData.KEY_STATE).append(" IN ('").append(State.STARTED.toInt())
+            .append("','").append(State.INVITED.toInt()).append("','")
+            .append(State.INITIATING.toInt()).append("')").toString();
 
     private static final String ORDER_BY_TIMESTAMP_ASC = FileTransferData.KEY_TIMESTAMP
             .concat(" ASC");

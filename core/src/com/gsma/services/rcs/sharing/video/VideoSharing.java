@@ -164,14 +164,19 @@ public class VideoSharing {
         REJECTED_BY_TIMEOUT(9),
 
         /**
+         * Video share been rejected due to system.
+         */
+        REJECTED_BY_SYSTEM(10),
+
+        /**
          * Video share initiation failed.
          */
-        FAILED_INITIATION(10),
+        FAILED_INITIATION(11),
 
         /**
          * Sharing of the video share has failed.
          */
-        FAILED_SHARING(11);
+        FAILED_SHARING(12);
 
         private final int mValue;
 
