@@ -816,6 +816,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             ReasonCode reasonCode) {
         mPersistentStorage.setStateAndReasonCode(state, reasonCode);
         mBroadcaster.broadcastStateChanged(contact, mFileTransferId, state, reasonCode);
+
     }
 
     private void handleSessionRejected(ReasonCode reasonCode, ContactId contact) {

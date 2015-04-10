@@ -30,8 +30,10 @@ import com.gsma.rcs.core.ims.service.richcall.image.ImageSharingPersistedStorage
 import com.gsma.rcs.core.ims.service.richcall.image.ImageTransferSession;
 import com.gsma.rcs.platform.file.FileDescription;
 import com.gsma.rcs.platform.file.FileFactory;
+import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.sharing.ImageSharingDeleteTask;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
 import com.gsma.rcs.service.broadcaster.ImageSharingEventBroadcaster;
 import com.gsma.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
@@ -58,6 +60,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Image sharing service implementation
@@ -78,6 +81,10 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
 
     private final ContactsManager mContactsManager;
 
+    private final LocalContentResolver mLocalContentResolver;
+
+    private final ExecutorService mImOperationExecutor;
+
     private final Map<String, IImageSharing> mImageSharingCache = new HashMap<String, IImageSharing>();
 
     /**
@@ -91,6 +98,8 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      */
     private Object lock = new Object();
 
+    private final Object mImsLock;
+
     /**
      * Constructor
      * 
@@ -98,9 +107,15 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * @param richCallLog RichCallHistory
      * @param rcsSettings RcsSettings
      * @param contactsManager ContactsManager
+     * @param core Core
+     * @param localContentResolver LocalContentResolver
+     * @param imOperationExecutor IM ExecutorService
+     * @param imsLock ims lock object
      */
     public ImageSharingServiceImpl(RichcallService richcallService, RichCallHistory richCallLog,
-            RcsSettings rcsSettings, ContactsManager contactsManager) {
+            RcsSettings rcsSettings, ContactsManager contactsManager,
+            LocalContentResolver localContentResolver, ExecutorService imOperationExecutor,
+            Object imsLock) {
         if (logger.isActivated()) {
             logger.info("Image sharing service API is loaded");
         }
@@ -108,6 +123,9 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
         mRichCallLog = richCallLog;
         mRcsSettings = rcsSettings;
         mContactsManager = contactsManager;
+        mLocalContentResolver = localContentResolver;
+        mImOperationExecutor = imOperationExecutor;
+        mImsLock = imsLock;
     }
 
     /**
@@ -141,7 +159,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * 
      * @param sharingId Sharing ID
      */
-    /* package private */void removeImageSharing(String sharingId) {
+    public void removeImageSharing(String sharingId) {
         if (logger.isActivated()) {
             logger.debug("Remove an image sharing from the list (size=" + mImageSharingCache.size()
                     + ")");
@@ -413,7 +431,8 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * such exists.
      */
     public void deleteImageSharings() {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+        mImOperationExecutor.execute(new ImageSharingDeleteTask(this, mRichcallService,
+                mLocalContentResolver, mImsLock));
     }
 
     /**
@@ -423,7 +442,8 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * @param contact
      */
     public void deleteImageSharings2(ContactId contact) {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+        mImOperationExecutor.execute(new ImageSharingDeleteTask(this, mRichcallService,
+                mLocalContentResolver, mImsLock, contact));
     }
 
     /**
@@ -433,7 +453,8 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * @param sharingId
      */
     public void deleteImageSharing(String sharingId) {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+        mImOperationExecutor.execute(new ImageSharingDeleteTask(this, mRichcallService,
+                mLocalContentResolver, mImsLock, sharingId));
     }
 
     /**
@@ -454,5 +475,9 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      */
     public ICommonServiceConfiguration getCommonConfiguration() {
         return new CommonServiceConfigurationImpl(mRcsSettings);
+    }
+
+    public void broadcastDeleted(ContactId contact, List<String> sharingIds) {
+        mBroadcaster.broadcastDeleted(contact, sharingIds);
     }
 }

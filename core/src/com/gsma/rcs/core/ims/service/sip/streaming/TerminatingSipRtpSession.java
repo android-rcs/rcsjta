@@ -145,6 +145,13 @@ public class TerminatingSipRtpSession extends GenericSipRtpSession {
                     }
                     break;
 
+                case INVITATION_DELETED:
+                    if (sLogger.isActivated()) {
+                        sLogger.debug("Session has been deleted");
+                    }
+                    removeSession();
+                    return;
+
                 default:
                     if (sLogger.isActivated()) {
                         sLogger.debug("Unknown invitation answer in run; answer=".concat(String

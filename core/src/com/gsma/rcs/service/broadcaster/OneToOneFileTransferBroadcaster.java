@@ -29,6 +29,8 @@ import com.gsma.services.rcs.filetransfer.IOneToOneFileTransferListener;
 import android.content.Intent;
 import android.os.RemoteCallbackList;
 
+import java.util.List;
+
 /**
  * OneToOneFileTransferBroadcaster maintains the registering and unregistering of
  * IFileTransferListener and also performs broadcast events on these listeners upon the trigger of
@@ -101,5 +103,20 @@ public class OneToOneFileTransferBroadcaster implements IOneToOneFileTransferBro
         IntentUtils.tryToSetReceiverForegroundFlag(resumeFileTransfer);
         resumeFileTransfer.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, filetransferId);
         AndroidFactory.getApplicationContext().sendBroadcast(resumeFileTransfer);
+    }
+
+    public void broadcastFileTransferDeleted(ContactId contact, List<String> filetransferIds) {
+        final int N = mOneToOneFileTransferListeners.beginBroadcast();
+        for (int i = 0; i < N; i++) {
+            try {
+                mOneToOneFileTransferListeners.getBroadcastItem(i).onDeleted(contact,
+                        filetransferIds);
+            } catch (Exception e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener", e);
+                }
+            }
+        }
+        mOneToOneFileTransferListeners.finishBroadcast();
     }
 }

@@ -28,6 +28,8 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.content.Intent;
 import android.os.RemoteCallbackList;
 
+import java.util.List;
+
 /**
  * OneToOneChatEventBroadcaster maintains the registering and unregistering of
  * IOneToOneChatListeners and also performs broadcast events on these listeners upon the trigger of
@@ -90,5 +92,19 @@ public class OneToOneChatEventBroadcaster implements IOneToOneChatEventBroadcast
         newOneToOneMessage.putExtra(OneToOneChatIntent.EXTRA_MIME_TYPE, mimeType);
         newOneToOneMessage.putExtra(OneToOneChatIntent.EXTRA_MESSAGE_ID, msgId);
         AndroidFactory.getApplicationContext().sendBroadcast(newOneToOneMessage);
+    }
+
+    public void broadcastMessagesDeleted(ContactId contact, List<String> msgIds) {
+        final int N = mOneToOneChatListeners.beginBroadcast();
+        for (int i = 0; i < N; i++) {
+            try {
+                mOneToOneChatListeners.getBroadcastItem(i).onMessagesDeleted(contact, msgIds);
+            } catch (Exception e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener.", e);
+                }
+            }
+        }
+        mOneToOneChatListeners.finishBroadcast();
     }
 }

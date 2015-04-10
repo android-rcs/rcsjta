@@ -28,9 +28,11 @@ import com.gsma.rcs.core.ims.service.SessionIdGenerator;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.richcall.video.VideoSharingPersistedStorageAccessor;
 import com.gsma.rcs.core.ims.service.richcall.video.VideoStreamingSession;
+import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
+import com.gsma.rcs.provider.sharing.VideoSharingDeleteTask;
 import com.gsma.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
 import com.gsma.rcs.service.broadcaster.VideoSharingEventBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
@@ -56,6 +58,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Rich call API service
@@ -78,12 +81,18 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
     private final Core mCore;
 
+    private final LocalContentResolver mLocalContentResolver;
+
+    private final ExecutorService mImOperationExecutor;
+
     private final Map<String, IVideoSharing> mVideoSharingCache = new HashMap<String, IVideoSharing>();
 
     /**
      * Lock used for synchronization
      */
     private final Object mLock = new Object();
+
+    private final Object mImsLock;
 
     /**
      * The logger
@@ -99,9 +108,14 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @param rcsSettings RcsSettings
      * @param contactsManager ContactsManager
      * @param core Core
+     * @param localContentResolver LocalContentResolver
+     * @param imOperationExecutor IM ExecutorService
+     * @param imsLock ims lock object
      */
     public VideoSharingServiceImpl(RichcallService richcallService, RichCallHistory richCallLog,
-            RcsSettings rcsSettings, ContactsManager contactsManager, Core core) {
+            RcsSettings rcsSettings, ContactsManager contactsManager, Core core,
+            LocalContentResolver localContentResolver, ExecutorService imOperationExecutor,
+            Object imsLock) {
         if (logger.isActivated()) {
             logger.info("Video sharing API is loaded");
         }
@@ -110,6 +124,9 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
         mRcsSettings = rcsSettings;
         mContactsManager = contactsManager;
         mCore = core;
+        mLocalContentResolver = localContentResolver;
+        mImOperationExecutor = imOperationExecutor;
+        mImsLock = imsLock;
     }
 
     /**
@@ -142,7 +159,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * 
      * @param sharingId Sharing ID
      */
-    /* package private */void removeVideoSharing(String sharingId) {
+    public void removeVideoSharing(String sharingId) {
         if (logger.isActivated()) {
             logger.debug("Remove a video sharing");
         }
@@ -451,7 +468,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * such exists.
      */
     public void deleteVideoSharings() {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+        mImOperationExecutor.execute(new VideoSharingDeleteTask(this, mRichcallService,
+                mLocalContentResolver, mImsLock));
     }
 
     /**
@@ -461,7 +479,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @param contact
      */
     public void deleteVideoSharings2(ContactId contact) {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+        mImOperationExecutor.execute(new VideoSharingDeleteTask(this, mRichcallService,
+                mLocalContentResolver, mImsLock, contact));
     }
 
     /**
@@ -471,6 +490,11 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @param sharingId
      */
     public void deleteVideoSharing(String sharingId) {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+        mImOperationExecutor.execute(new VideoSharingDeleteTask(this, mRichcallService,
+                mLocalContentResolver, mImsLock, sharingId));
+    }
+
+    public void broadcastDeleted(ContactId contact, List<String> sharingIds) {
+        mBroadcaster.broadcastDeleted(contact, sharingIds);
     }
 }

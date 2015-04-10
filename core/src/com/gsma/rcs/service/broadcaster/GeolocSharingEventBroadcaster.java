@@ -22,11 +22,13 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
-import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingListener;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingIntent;
+import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingListener;
 
 import android.content.Intent;
 import android.os.RemoteCallbackList;
+
+import java.util.List;
 
 /**
  * GeolocSharingEventBroadcaster maintains the registering and unregistering of
@@ -87,5 +89,16 @@ public class GeolocSharingEventBroadcaster implements IGeolocSharingEventBroadca
         IntentUtils.tryToSetReceiverForegroundFlag(invitation);
         invitation.putExtra(GeolocSharingIntent.EXTRA_SHARING_ID, sharingId);
         AndroidFactory.getApplicationContext().sendBroadcast(invitation);
+    }
+
+    public void broadcastDeleted(ContactId contact, List<String> sharingIds) {
+        final int N = mGeolocSharingListeners.beginBroadcast();
+        for (int i = 0; i < N; i++) {
+            try {
+                mGeolocSharingListeners.getBroadcastItem(i).onDeleted(contact, sharingIds);
+            } catch (Exception e) {
+            }
+        }
+        mGeolocSharingListeners.finishBroadcast();
     }
 }

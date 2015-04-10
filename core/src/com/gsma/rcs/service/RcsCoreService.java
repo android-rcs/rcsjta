@@ -321,16 +321,19 @@ public class RcsCoreService extends Service implements CoreListener {
             IPCallService ipCallService = core.getIPCallService();
             SipService sipService = core.getSipService();
 
-            mChatApi = new ChatServiceImpl(imService, mMessagingLog, mRcsSettings, mContactManager,
-                    core);
             mFtApi = new FileTransferServiceImpl(imService, mMessagingLog, mRcsSettings,
-                    mContactManager, core);
+                    mContactManager, core, mLocalContentResolver, mImOperationExecutor,
+                    IM_OPERATION_LOCK);
+            mChatApi = new ChatServiceImpl(imService, mMessagingLog, mRcsSettings, mContactManager,
+                    core, mLocalContentResolver, mImOperationExecutor, IM_OPERATION_LOCK, mFtApi);
             mVshApi = new VideoSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings,
-                    mContactManager, core);
+                    mContactManager, core, mLocalContentResolver, mImOperationExecutor,
+                    IM_OPERATION_LOCK);
             mIshApi = new ImageSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings,
-                    mContactManager);
+                    mContactManager, mLocalContentResolver, mImOperationExecutor, IM_OPERATION_LOCK);
             mGshApi = new GeolocSharingServiceImpl(richCallService, mContactManager,
-                    mRichCallHistory, mRcsSettings);
+                    mRichCallHistory, mRcsSettings, mLocalContentResolver, mImOperationExecutor,
+                    IM_OPERATION_LOCK);
             mHistoryApi = new HistoryServiceImpl(getApplicationContext());
             mIpcallApi = new IPCallServiceImpl(ipCallService, IPCallHistory.getInstance(),
                     mContactManager, mRcsSettings);

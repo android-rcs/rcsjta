@@ -32,8 +32,10 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.GeolocSharingPersistedStorageAccessor;
 import com.gsma.rcs.core.ims.service.richcall.geoloc.GeolocTransferSession;
+import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.sharing.GeolocSharingDeleteTask;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
 import com.gsma.rcs.service.broadcaster.GeolocSharingEventBroadcaster;
 import com.gsma.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
@@ -60,6 +62,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Geoloc sharing service implementation
@@ -78,6 +81,10 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
 
     private final RichCallHistory mRichcallLog;
 
+    private final LocalContentResolver mLocalContentResolver;
+
+    private final ExecutorService mImOperationExecutor;
+
     private final Map<String, IGeolocSharing> mGeolocSharingCache = new HashMap<String, IGeolocSharing>();
 
     /**
@@ -91,19 +98,26 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      */
     private final Object lock = new Object();
 
+    private final Object mImsLock;
+
     private final RcsSettings mRcsSettings;
 
     /**
      * Constructor
      * 
      * @param richcallService RichcallService
+     * @param richCallLog RichCallHistory
+     * @param rcsSettings RcsSettings
      * @param contactsManager ContactsManager
-     * @param richCallHistory
-     * @param rcsSettings
+     * @param core Core
+     * @param localContentResolver LocalContentResolver
+     * @param imOperationExecutor IM ExecutorService
+     * @param imsLock ims lock object
      */
     public GeolocSharingServiceImpl(RichcallService richcallService,
             ContactsManager contactsManager, RichCallHistory richCallHistory,
-            RcsSettings rcsSettings) {
+            RcsSettings rcsSettings, LocalContentResolver localContentResolver,
+            ExecutorService imOperationExecutor, Object imsLock) {
         if (logger.isActivated()) {
             logger.info("Geoloc sharing service API is loaded.");
         }
@@ -111,6 +125,9 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
         mContactsManager = contactsManager;
         mRichcallLog = richCallHistory;
         mRcsSettings = rcsSettings;
+        mLocalContentResolver = localContentResolver;
+        mImOperationExecutor = imOperationExecutor;
+        mImsLock = imsLock;
     }
 
     /**
@@ -144,7 +161,7 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * 
      * @param sharingId Sharing ID
      */
-    /* package private */void removeGeolocSharing(String sharingId) {
+    public void removeGeolocSharing(String sharingId) {
         if (logger.isActivated()) {
             logger.debug("Remove a geoloc sharing from the list (size="
                     + mGeolocSharingCache.size() + ")");
@@ -434,7 +451,8 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * such exists.
      */
     public void deleteGeolocSharings() {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+        mImOperationExecutor.execute(new GeolocSharingDeleteTask(this, mRichcallService,
+                mLocalContentResolver, mImsLock));
     }
 
     /**
@@ -444,7 +462,8 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * @param contact
      */
     public void deleteGeolocSharings2(ContactId contact) {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+        mImOperationExecutor.execute(new GeolocSharingDeleteTask(this, mRichcallService,
+                mLocalContentResolver, mImsLock, contact));
     }
 
     /**
@@ -454,6 +473,11 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * @param sharingId
      */
     public void deleteGeolocSharing(String sharingId) {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+        mImOperationExecutor.execute(new GeolocSharingDeleteTask(this, mRichcallService,
+                mLocalContentResolver, mImsLock, sharingId));
+    }
+
+    public void broadcastDeleted(ContactId contact, List<String> sharingIds) {
+        mBroadcaster.broadcastDeleted(contact, sharingIds);
     }
 }

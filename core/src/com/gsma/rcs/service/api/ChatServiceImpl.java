@@ -32,8 +32,14 @@ import com.gsma.rcs.core.ims.service.im.chat.GroupChatPersistedStorageAccessor;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
+import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.messaging.GroupChatDeleteTask;
+import com.gsma.rcs.provider.messaging.GroupChatMessageDeleteTask;
+import com.gsma.rcs.provider.messaging.GroupFileTransferDeleteTask;
 import com.gsma.rcs.provider.messaging.MessagingLog;
+import com.gsma.rcs.provider.messaging.OneToOneChatMessageDeleteTask;
+import com.gsma.rcs.provider.messaging.OneToOneFileTransferDeleteTask;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.broadcaster.GroupChatEventBroadcaster;
 import com.gsma.rcs.service.broadcaster.OneToOneChatEventBroadcaster;
@@ -45,6 +51,7 @@ import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceRegistration;
+import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
@@ -59,6 +66,7 @@ import com.gsma.services.rcs.chat.IOneToOneChat;
 import com.gsma.services.rcs.chat.IOneToOneChatListener;
 import com.gsma.services.rcs.contact.ContactId;
 
+import android.database.Cursor;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
@@ -67,6 +75,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Chat service implementation
@@ -91,6 +100,10 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     private final Core mCore;
 
+    private final LocalContentResolver mLocalContentResolver;
+
+    private final ExecutorService mImOperationExecutor;
+
     private final Map<ContactId, OneToOneChatImpl> mOneToOneChatCache = new HashMap<ContactId, OneToOneChatImpl>();
 
     private final Map<String, GroupChatImpl> mGroupChatCache = new HashMap<String, GroupChatImpl>();
@@ -105,6 +118,10 @@ public class ChatServiceImpl extends IChatService.Stub {
      */
     private final Object mLock = new Object();
 
+    private final Object mImsLock;
+
+    private final FileTransferServiceImpl mFileTransferService;
+
     /**
      * Constructor
      * 
@@ -113,9 +130,15 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param rcsSettings RcsSettings
      * @param contactManager ContactsManager
      * @param core Core
+     * @param localContentResolver LocalContentResolver
+     * @param imOperationExecutor im operation ExecutorService
+     * @param fileTransferService FileTransferServiceImpl
+     * @param imsLock ims operations lock
      */
     public ChatServiceImpl(InstantMessagingService imService, MessagingLog messagingLog,
-            RcsSettings rcsSettings, ContactsManager contactManager, Core core) {
+            RcsSettings rcsSettings, ContactsManager contactManager, Core core,
+            LocalContentResolver localContentResolver, ExecutorService imOperationExecutor,
+            Object imsLock, FileTransferServiceImpl fileTransferService) {
         if (sLogger.isActivated()) {
             sLogger.info("Chat service API is loaded");
         }
@@ -124,6 +147,10 @@ public class ChatServiceImpl extends IChatService.Stub {
         mRcsSettings = rcsSettings;
         mContactManager = contactManager;
         mCore = core;
+        mLocalContentResolver = localContentResolver;
+        mImOperationExecutor = imOperationExecutor;
+        mImsLock = imsLock;
+        mFileTransferService = fileTransferService;
     }
 
     private ReasonCode imdnToFailedReasonCode(ImdnDocument imdn) {
@@ -353,7 +380,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * 
      * @param contact Contact ID
      */
-    /* package private */void removeOneToOneChat(ContactId contact) {
+    public void removeOneToOneChat(ContactId contact) {
         mOneToOneChatCache.remove(contact);
         if (sLogger.isActivated()) {
             sLogger.debug("Remove oneToOne chat from list (size=" + mOneToOneChatCache.size()
@@ -438,7 +465,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * 
      * @param chatId Chat ID
      */
-    /* package private */void removeGroupChat(String chatId) {
+    public void removeGroupChat(String chatId) {
         mGroupChatCache.remove(chatId);
         if (sLogger.isActivated()) {
             sLogger.debug("Remove Group Chat to list (size=" + mGroupChatCache.size()
@@ -647,21 +674,25 @@ public class ChatServiceImpl extends IChatService.Stub {
     /**
      * Deletes all one to one chat from history and abort/reject any associated ongoing session if
      * such exists.
-     * 
-     * @throws RemoteException
      */
-    public void deleteOneToOneChats() throws RemoteException {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+    public void deleteOneToOneChats() {
+        mImOperationExecutor.execute(new OneToOneFileTransferDeleteTask(mFileTransferService,
+                mImService, mLocalContentResolver, mImsLock));
+        mImOperationExecutor.execute(new OneToOneChatMessageDeleteTask(this, mImService,
+                mLocalContentResolver, mImsLock));
     }
 
     /**
      * Deletes all group chat from history and abort/reject any associated ongoing session if such
      * exists.
-     * 
-     * @throws RemoteException
      */
-    public void deleteGroupChats() throws RemoteException {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+    public void deleteGroupChats() {
+        mImOperationExecutor.execute(new GroupFileTransferDeleteTask(mFileTransferService,
+                mImService, mLocalContentResolver, mImsLock));
+        mImOperationExecutor.execute(new GroupChatMessageDeleteTask(this, mImService,
+                mLocalContentResolver, mImsLock));
+        mImOperationExecutor.execute(new GroupChatDeleteTask(this, mImService,
+                mLocalContentResolver, mImsLock));
     }
 
     /**
@@ -669,13 +700,12 @@ public class ChatServiceImpl extends IChatService.Stub {
      * ongoing session if such exists.
      * 
      * @param contact
-     * @throws RemoteException
      */
-    public void deleteOneToOneChat(ContactId contact) throws RemoteException {
-        if (contact == null) {
-            throw new ServerApiIllegalArgumentException("contact must not be null!");
-        }
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+    public void deleteOneToOneChat(ContactId contact) {
+        mImOperationExecutor.execute(new OneToOneFileTransferDeleteTask(mFileTransferService,
+                mImService, mLocalContentResolver, mImsLock, contact));
+        mImOperationExecutor.execute(new OneToOneChatMessageDeleteTask(this, mImService,
+                mLocalContentResolver, mImsLock, contact));
     }
 
     /**
@@ -683,25 +713,47 @@ public class ChatServiceImpl extends IChatService.Stub {
      * session if such exists.
      * 
      * @param chatId
-     * @throws RemoteException
      */
-    public void deleteGroupChat(String chatId) throws RemoteException {
-        if (TextUtils.isEmpty(chatId)) {
-            throw new ServerApiIllegalArgumentException("chatId must not be null or empty!");
-        }
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+    public void deleteGroupChat(String chatId) {
+        mImOperationExecutor.execute(new GroupChatMessageDeleteTask(this, mImService,
+                mLocalContentResolver, mImsLock, chatId));
+        mImOperationExecutor.execute(new GroupFileTransferDeleteTask(mFileTransferService,
+                mImService, mLocalContentResolver, mImsLock, chatId));
+        mImOperationExecutor.execute(new GroupChatDeleteTask(this, mImService,
+                mLocalContentResolver, mImsLock, chatId));
     }
 
     /**
-     * Delete a message from its message id from history.
+     * Delete a message from its message id from history. Will resolve if the message is one to one
+     * or from a group chat.
      * 
-     * @param msgId throws RemoteException
+     * @param msgId
      */
-    public void deleteMessage(String msgId) throws RemoteException {
-        if (TextUtils.isEmpty(msgId)) {
-            throw new ServerApiIllegalArgumentException("msgId must not be null or empty!");
+    public void deleteMessage(String msgId) {
+        Cursor cursor = null;
+        try {
+            cursor = mLocalContentResolver.query(ChatLog.Message.CONTENT_URI.buildUpon()
+                    .appendPath(msgId).build(), new String[] {
+                    ChatLog.Message.CONTACT, ChatLog.Message.CHAT_ID
+            }, null, null, null);
+            if (!cursor.moveToNext()) {
+                return;
+
+            }
+            String contactId = cursor.getString(0);
+            String chatId = cursor.getString(1);
+            if (chatId.equals(contactId)) {
+                mImOperationExecutor.execute(new OneToOneChatMessageDeleteTask(this, mImService,
+                        mLocalContentResolver, mImsLock, msgId));
+            } else {
+                mImOperationExecutor.execute(new GroupChatMessageDeleteTask(this, mImService,
+                        mLocalContentResolver, mImsLock, chatId, msgId));
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
         }
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
     }
 
     /**
@@ -1010,4 +1062,17 @@ public class ChatServiceImpl extends IChatService.Stub {
         mGroupChatEventBroadcaster.broadcastMessageStatusChanged(chatId, mimeType, msgId, status,
                 reasonCode);
     }
+
+    public void broadcastGroupChatMessagesDeleted(String chatId, List<String> msgIds) {
+        mGroupChatEventBroadcaster.broadcastMessagesDeleted(chatId, msgIds);
+    }
+
+    public void broadcastGroupChatsDeleted(List<String> chatIds) {
+        mGroupChatEventBroadcaster.broadcastGroupChatsDeleted(chatIds);
+    }
+
+    public void broadcastOneToOneMessagesDeleted(ContactId contact, List<String> msgIds) {
+        mOneToOneChatEventBroadcaster.broadcastMessagesDeleted(contact, msgIds);
+    }
+
 }

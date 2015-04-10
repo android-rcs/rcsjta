@@ -53,7 +53,7 @@ public abstract class ImsServiceSession extends Thread {
      */
     public enum InvitationStatus {
 
-        INVITATION_NOT_ANSWERED, INVITATION_ACCEPTED, INVITATION_REJECTED, INVITATION_CANCELED, INVITATION_TIMEOUT, INVITATION_REJECTED_BY_SYSTEM;
+        INVITATION_NOT_ANSWERED, INVITATION_ACCEPTED, INVITATION_REJECTED, INVITATION_CANCELED, INVITATION_TIMEOUT, INVITATION_REJECTED_BY_SYSTEM, INVITATION_DELETED;
     }
 
     /**
@@ -490,6 +490,9 @@ public abstract class ImsServiceSession extends Thread {
             }
         } catch (InterruptedException e) {
             mSessionInterrupted = true;
+            if (InvitationStatus.INVITATION_DELETED == mInvitationStatus) {
+                return InvitationStatus.INVITATION_DELETED;
+            }
             return InvitationStatus.INVITATION_REJECTED_BY_SYSTEM;
         }
     }
@@ -564,6 +567,17 @@ public abstract class ImsServiceSession extends Thread {
         for (ImsSessionListener listener : listeners) {
             listener.handleSessionAborted(mContact, reason);
         }
+    }
+
+    /**
+     * Force terminate and remove the session
+     */
+    public void deleteSession() {
+        mInvitationStatus = InvitationStatus.INVITATION_DELETED;
+        interruptSession();
+        terminateSession(TerminationReason.TERMINATION_BY_USER);
+        closeMediaSession();
+        removeSession();
     }
 
     /**

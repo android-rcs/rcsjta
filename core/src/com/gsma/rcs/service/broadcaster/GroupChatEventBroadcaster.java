@@ -33,6 +33,8 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.content.Intent;
 import android.os.RemoteCallbackList;
 
+import java.util.List;
+
 /**
  * GroupChatEventBroadcaster maintains the registering and unregistering of IGroupChatListener and
  * also performs broadcast events on these listeners upon the trigger of corresponding callbacks.
@@ -151,5 +153,33 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
         newGroupChatMessage.putExtra(GroupChatIntent.EXTRA_MIME_TYPE, apiMimeType);
         newGroupChatMessage.putExtra(GroupChatIntent.EXTRA_MESSAGE_ID, msgId);
         AndroidFactory.getApplicationContext().sendBroadcast(newGroupChatMessage);
+    }
+
+    public void broadcastMessagesDeleted(String chatId, List<String> msgIds) {
+        final int N = mGroupChatListeners.beginBroadcast();
+        for (int i = 0; i < N; i++) {
+            try {
+                mGroupChatListeners.getBroadcastItem(i).onMessagesDeleted(chatId, msgIds);
+            } catch (Exception e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener.", e);
+                }
+            }
+        }
+        mGroupChatListeners.finishBroadcast();
+    }
+
+    public void broadcastGroupChatsDeleted(List<String> chatIds) {
+        final int N = mGroupChatListeners.beginBroadcast();
+        for (int i = 0; i < N; i++) {
+            try {
+                mGroupChatListeners.getBroadcastItem(i).onDeleted(chatIds);
+            } catch (Exception e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener.", e);
+                }
+            }
+        }
+        mGroupChatListeners.finishBroadcast();
     }
 }

@@ -35,8 +35,12 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferPersistedStorag
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.platform.file.FileDescription;
 import com.gsma.rcs.platform.file.FileFactory;
+import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.messaging.FileTransferData;
+import com.gsma.rcs.provider.messaging.GroupFileTransferDeleteTask;
 import com.gsma.rcs.provider.messaging.MessagingLog;
+import com.gsma.rcs.provider.messaging.OneToOneFileTransferDeleteTask;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.service.broadcaster.GroupFileTransferBroadcaster;
@@ -65,16 +69,19 @@ import com.gsma.services.rcs.filetransfer.IFileTransferServiceConfiguration;
 import com.gsma.services.rcs.filetransfer.IGroupFileTransferListener;
 import com.gsma.services.rcs.filetransfer.IOneToOneFileTransferListener;
 
+import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 /**
  * File transfer service implementation
@@ -99,6 +106,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     private final Core mCore;
 
+    private final LocalContentResolver mLocalContentResolver;
+
+    private final ExecutorService mImOperationExecutor;
+
     private final Map<String, IFileTransfer> mFileTransferCache = new HashMap<String, IFileTransfer>();
 
     /**
@@ -112,6 +123,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      */
     private final Object mLock = new Object();
 
+    private final Object mImsLock;
+
     /**
      * Constructor
      * 
@@ -120,9 +133,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param rcsSettings RcsSettings
      * @param contactManager ContactsManager
      * @param core Core
+     * @param mimoperationexecutor
+     * @param mLocalContentResolver
      */
     public FileTransferServiceImpl(InstantMessagingService imService, MessagingLog messagingLog,
-            RcsSettings rcsSettings, ContactsManager contactManager, Core core) {
+            RcsSettings rcsSettings, ContactsManager contactManager, Core core,
+            LocalContentResolver localContentResolver, ExecutorService imOperationExecutor,
+            Object imsLock) {
         if (sLogger.isActivated()) {
             sLogger.info("File transfer service API is loaded");
         }
@@ -131,6 +148,29 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         mRcsSettings = rcsSettings;
         mContactManager = contactManager;
         mCore = core;
+        mLocalContentResolver = localContentResolver;
+        mImOperationExecutor = imOperationExecutor;
+        mImsLock = imsLock;
+    }
+
+    public void ensureThumbnailIsDeleted(Uri uri) {
+        Cursor cursor = null;
+        String icon = null;
+        try {
+            cursor = mLocalContentResolver.query(uri, new String[] {
+                FileTransferLog.FILEICON
+            }, null, null, null);
+            if (cursor.moveToNext()) {
+                icon = cursor.getString(0);
+            }
+            if (icon != null) {
+                new File(icon).delete();
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
     }
 
     private ReasonCode imdnToFileTransferFailedReasonCode(ImdnDocument imdn) {
@@ -184,7 +224,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * 
      * @param fileTransferId File transfer ID
      */
-    /* package private */void removeFileTransfer(String fileTransferId) {
+    public void removeFileTransfer(String fileTransferId) {
         if (sLogger.isActivated()) {
             sLogger.debug("Remove a file transfer from the list (size=" + mFileTransferCache.size()
                     + ")");
@@ -1220,7 +1260,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * if such exists.
      */
     public void deleteOneToOneFileTransfers() {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+        mImOperationExecutor.execute(new OneToOneFileTransferDeleteTask(this, mImService,
+                mLocalContentResolver, mImsLock));
     }
 
     /**
@@ -1228,7 +1269,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * if such exists.
      */
     public void deleteGroupFileTransfers() {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+        mImOperationExecutor.execute(new GroupFileTransferDeleteTask(this, mImService,
+                mLocalContentResolver, mImsLock));
     }
 
     /**
@@ -1238,7 +1280,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param contact
      */
     public void deleteOneToOneFileTransfers2(ContactId contact) {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+        mImOperationExecutor.execute(new OneToOneFileTransferDeleteTask(this, mImService,
+                mLocalContentResolver, mImsLock, contact));
     }
 
     /**
@@ -1248,7 +1291,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param chatId
      */
     public void deleteGroupFileTransfers2(String chatId) {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+        mImOperationExecutor.execute(new GroupFileTransferDeleteTask(this, mImService,
+                mLocalContentResolver, mImsLock, chatId));
     }
 
     /**
@@ -1258,7 +1302,33 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param transferId
      */
     public void deleteFileTransfer(String transferId) {
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+        String contactId = null;
+        String chatId = null;
+        Cursor cursor = null;
+        try {
+            cursor = mLocalContentResolver.query(FileTransferData.CONTENT_URI.buildUpon()
+                    .appendPath(transferId).build(), new String[] {
+                    FileTransferLog.CONTACT, FileTransferLog.CHAT_ID
+            }, null, null, null);
+            if (cursor.moveToNext()) {
+                contactId = cursor.getString(0);
+                chatId = cursor.getString(1);
+            } else {
+                return;
+
+            }
+            if (contactId.equals(chatId)) {
+                mImOperationExecutor.execute(new OneToOneFileTransferDeleteTask(this, mImService,
+                        mLocalContentResolver, mImsLock, transferId));
+            } else {
+                mImOperationExecutor.execute(new GroupFileTransferDeleteTask(this, mImService,
+                        mLocalContentResolver, mImsLock, chatId, transferId));
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
     }
 
     /**
@@ -1327,5 +1397,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, state, reasonCode);
         mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId, state,
                 reasonCode);
+    }
+
+    public void broadcastOneToOneFileTransferDeleted(ContactId contact, List<String> transferIds) {
+        mOneToOneFileTransferBroadcaster.broadcastFileTransferDeleted(contact, transferIds);
+    }
+
+    public void broadcastGroupFileTransfersDeleted(String chatId, List<String> transferIds) {
+        mGroupFileTransferBroadcaster.broadcastFileTransfersDeleted(chatId, transferIds);
     }
 }

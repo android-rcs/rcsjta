@@ -30,6 +30,8 @@ import com.gsma.services.rcs.filetransfer.IGroupFileTransferListener;
 import android.content.Intent;
 import android.os.RemoteCallbackList;
 
+import java.util.List;
+
 /**
  * GroupFileTransferBroadcaster maintains the registering and unregistering of
  * IGroupFileTransferListener and also performs broadcast events on these listeners upon the trigger
@@ -120,5 +122,19 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
         IntentUtils.tryToSetReceiverForegroundFlag(resumeFileTransfer);
         resumeFileTransfer.putExtra(FileTransferIntent.EXTRA_TRANSFER_ID, filetransferId);
         AndroidFactory.getApplicationContext().sendBroadcast(resumeFileTransfer);
+    }
+
+    public void broadcastFileTransfersDeleted(String chatId, List<String> transferIds) {
+        final int N = mGroupFileTransferListeners.beginBroadcast();
+        for (int i = 0; i < N; i++) {
+            try {
+                mGroupFileTransferListeners.getBroadcastItem(i).onDeleted(chatId, transferIds);
+            } catch (Exception e) {
+                if (logger.isActivated()) {
+                    logger.error("Can't notify listener per contact", e);
+                }
+            }
+        }
+        mGroupFileTransferListeners.finishBroadcast();
     }
 }

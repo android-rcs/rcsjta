@@ -210,6 +210,13 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
                         }
                         break;
 
+                    case INVITATION_DELETED:
+                        if (logger.isActivated()) {
+                            logger.debug("Session has been deleted");
+                        }
+                        removeSession();
+                        return;
+
                     default:
                         if (logActivated) {
                             logger.debug("Unknown invitation answer in run; answer=".concat(String

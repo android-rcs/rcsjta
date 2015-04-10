@@ -1,0 +1,111 @@
+/*
+ * Copyright (C) 2015 Sony Mobile Communications Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+package com.gsma.rcs.provider.messaging;
+
+import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
+import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
+import com.gsma.rcs.provider.DeleteTask;
+import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.service.api.FileTransferServiceImpl;
+import com.gsma.services.rcs.filetransfer.FileTransferLog;
+
+import java.util.List;
+
+public class GroupFileTransferDeleteTask extends DeleteTask.GroupedByChatId {
+
+    private static final String SELECTION_ALL_GROUP_FILETRANSFERS = new StringBuilder(
+            FileTransferLog.CHAT_ID).append("!=").append(FileTransferLog.CONTACT).toString();
+    private static final String SELECTION_FILETRANSFER_BY_CHATID = new StringBuilder(
+            FileTransferLog.CHAT_ID).append("=?").toString();
+
+    private final FileTransferServiceImpl mFileTransferService;
+
+    private final InstantMessagingService mImService;
+
+    /**
+     * Deletion of all group file transfers.
+     * 
+     * @param fileTransferService the file transfer service impl
+     * @param imService the IM service
+     * @param contentResolver the content resolver
+     * @param imsLock the IMS operation lock
+     */
+    public GroupFileTransferDeleteTask(FileTransferServiceImpl fileTransferService,
+            InstantMessagingService imService, LocalContentResolver contentResolver, Object imsLock) {
+        super(contentResolver, imsLock, FileTransferData.CONTENT_URI, FileTransferLog.FT_ID,
+                FileTransferLog.CHAT_ID, SELECTION_ALL_GROUP_FILETRANSFERS);
+        mFileTransferService = fileTransferService;
+        mImService = imService;
+    }
+
+    /**
+     * Deletion of all file transfers that belong to the specified group chat.
+     * 
+     * @param fileTransferService the file transfer service impl
+     * @param imService the IM service
+     * @param contentResolver the content resolver
+     * @param imsLock the IMS operation lock
+     * @param chatId the chat id
+     */
+    public GroupFileTransferDeleteTask(FileTransferServiceImpl fileTransferService,
+            InstantMessagingService imService, LocalContentResolver contentResolver,
+            Object imsLock, String chatId) {
+        super(contentResolver, imsLock, FileTransferData.CONTENT_URI, FileTransferLog.FT_ID,
+                FileTransferLog.CHAT_ID, SELECTION_FILETRANSFER_BY_CHATID, chatId);
+        mFileTransferService = fileTransferService;
+        mImService = imService;
+    }
+
+    /**
+     * Deletion of a specific file transfer.
+     * 
+     * @param fileTransferService the file transfer service impl
+     * @param imService the IM service
+     * @param contentResolver the content resolver
+     * @param imsLock the IMS operation lock
+     * @param chatId the chat id
+     * @param transferId the transfer id
+     */
+    public GroupFileTransferDeleteTask(FileTransferServiceImpl fileTransferService,
+            InstantMessagingService imService, LocalContentResolver contentResolver,
+            Object imsLock, String chatId, String transferId) {
+        super(contentResolver, imsLock, FileTransferData.CONTENT_URI, FileTransferLog.FT_ID,
+                FileTransferLog.CHAT_ID, null, transferId);
+        mFileTransferService = fileTransferService;
+        mImService = imService;
+    }
+
+    @Override
+    protected void onRowDelete(String chatId, String transferId) {
+        FileSharingSession session = mImService.getFileSharingSession(transferId);
+        if (session == null) {
+            mFileTransferService.ensureThumbnailIsDeleted(getAppendedPathUri(transferId));
+            mFileTransferService.removeFileTransfer(transferId);
+            return;
+
+        }
+        session.deleteSession();
+        mFileTransferService.ensureThumbnailIsDeleted(getAppendedPathUri(transferId));
+        mFileTransferService.removeFileTransfer(transferId);
+    }
+
+    @Override
+    protected void onCompleted(String chatId, List<String> transferIds) {
+        mFileTransferService.broadcastGroupFileTransfersDeleted(chatId, transferIds);
+    }
+
+}
