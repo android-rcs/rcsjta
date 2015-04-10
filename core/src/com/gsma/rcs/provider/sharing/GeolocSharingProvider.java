@@ -17,6 +17,7 @@
 package com.gsma.rcs.provider.sharing;
 
 import com.gsma.rcs.provider.history.HistoryMemberBaseIdCreator;
+import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.DatabaseUtils;
 
 import android.content.ContentProvider;
@@ -30,6 +31,8 @@ import android.net.Uri;
 import android.text.TextUtils;
 
 public class GeolocSharingProvider extends ContentProvider {
+
+    private static final int INVALID_ROW_ID = -1;
 
     private static final String SELECTION_WITH_SHARING_ID_ONLY = GeolocSharingData.KEY_SHARING_ID
             .concat("=?");
@@ -211,7 +214,10 @@ public class GeolocSharingProvider extends ContentProvider {
                 String sharingId = initialValues.getAsString(GeolocSharingData.KEY_SHARING_ID);
                 initialValues.put(GeolocSharingData.KEY_BASECOLUMN_ID, HistoryMemberBaseIdCreator
                         .createUniqueId(getContext(), GeolocSharingData.HISTORYLOG_MEMBER_ID));
-                database.insert(TABLE, null, initialValues);
+                if (database.insert(TABLE, null, initialValues) == INVALID_ROW_ID) {
+                    throw new ServerApiPersistentStorageException(
+                            "Unable to insert row for URI ".concat(uri.toString()));
+                }
                 Uri notificationUri = GeolocSharingData.CONTENT_URI.buildUpon()
                         .appendPath(sharingId).build();
                 getContext().getContentResolver().notifyChange(notificationUri, null);

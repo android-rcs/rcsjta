@@ -22,11 +22,12 @@
 
 package com.gsma.rcs.provider.eab;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
+import com.gsma.rcs.provider.ContentProviderBaseIdCreator;
+import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
+import com.gsma.rcs.utils.DatabaseUtils;
+import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.capability.CapabilitiesLog;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -40,11 +41,11 @@ import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
 
-import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
-import com.gsma.rcs.provider.ContentProviderBaseIdCreator;
-import com.gsma.rcs.utils.DatabaseUtils;
-import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.capability.CapabilitiesLog;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Rich address book provider <br>
@@ -54,6 +55,8 @@ import com.gsma.services.rcs.capability.CapabilitiesLog;
  * It also contains the list of aggregations between native raw contacts and RCS raw contacts
  */
 public class RichAddressBookProvider extends ContentProvider {
+
+    private static final int INVALID_ROW_ID = -1;
 
     private static final String CAPABILITY_TABLE = "capability";
 
@@ -404,7 +407,10 @@ public class RichAddressBookProvider extends ContentProvider {
                 initialValues.put(RichAddressBookData.KEY_BASECOLUMN_ID,
                         ContentProviderBaseIdCreator.createUniqueId(getContext(),
                                 RichAddressBookData.CONTENT_URI));
-                db.insert(CAPABILITY_TABLE, null, initialValues);
+                if (db.insert(CAPABILITY_TABLE, null, initialValues) == INVALID_ROW_ID) {
+                    throw new ServerApiPersistentStorageException(
+                            "Unable to insert row for URI ".concat(uri.toString()));
+                }
                 if (!initialValues.containsKey(RichAddressBookData.KEY_PRESENCE_PHOTO_DATA)) {
                     try {
                         String filename = FILENAME_PREFIX.concat(contact);

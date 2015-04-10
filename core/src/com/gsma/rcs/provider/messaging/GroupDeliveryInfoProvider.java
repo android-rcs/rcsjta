@@ -6,6 +6,7 @@
 package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.provider.ContentProviderBaseIdCreator;
+import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.DatabaseUtils;
 import com.gsma.services.rcs.GroupDeliveryInfo;
 
@@ -23,6 +24,8 @@ import android.text.TextUtils;
  * Group Delivery info provider of chat and file messages
  */
 public class GroupDeliveryInfoProvider extends ContentProvider {
+
+    private static final int INVALID_ROW_ID = -1;
 
     private static final String DATABASE_TABLE = "groupdeliveryinfo";
 
@@ -171,7 +174,10 @@ public class GroupDeliveryInfoProvider extends ContentProvider {
                 initialValues.put(GroupDeliveryInfoData.KEY_BASECOLUMN_ID,
                         ContentProviderBaseIdCreator.createUniqueId(getContext(),
                                 GroupDeliveryInfoData.CONTENT_URI));
-                db.insert(DATABASE_TABLE, null, initialValues);
+                if (db.insert(DATABASE_TABLE, null, initialValues) == INVALID_ROW_ID) {
+                    throw new ServerApiPersistentStorageException(
+                            "Unable to insert row for URI ".concat(uri.toString()));
+                }
                 Uri notificationUri = Uri.withAppendedPath(GroupDeliveryInfo.CONTENT_URI,
                         appendedId);
                 getContext().getContentResolver().notifyChange(notificationUri, null);

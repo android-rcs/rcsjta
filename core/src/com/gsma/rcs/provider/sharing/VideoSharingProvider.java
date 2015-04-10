@@ -23,6 +23,7 @@
 package com.gsma.rcs.provider.sharing;
 
 import com.gsma.rcs.provider.history.HistoryMemberBaseIdCreator;
+import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.DatabaseUtils;
 import com.gsma.services.rcs.sharing.video.VideoSharingLog;
 
@@ -42,6 +43,8 @@ import android.text.TextUtils;
  * @author Jean-Marc AUFFRET
  */
 public class VideoSharingProvider extends ContentProvider {
+
+    private static final int INVALID_ROW_ID = -1;
 
     private static final String SELECTION_WITH_SHARING_ID_ONLY = VideoSharingData.KEY_SHARING_ID
             .concat("=?");
@@ -225,7 +228,10 @@ public class VideoSharingProvider extends ContentProvider {
                 String sharingId = initialValues.getAsString(VideoSharingData.KEY_SHARING_ID);
                 initialValues.put(VideoSharingData.KEY_BASECOLUMN_ID, HistoryMemberBaseIdCreator
                         .createUniqueId(getContext(), VideoSharingData.HISTORYLOG_MEMBER_ID));
-                db.insert(TABLE, null, initialValues);
+                if (db.insert(TABLE, null, initialValues) == INVALID_ROW_ID) {
+                    throw new ServerApiPersistentStorageException(
+                            "Unable to insert row for URI ".concat(uri.toString()));
+                }
                 Uri notificationUri = Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, sharingId);
                 getContext().getContentResolver().notifyChange(notificationUri, null);
                 return notificationUri;

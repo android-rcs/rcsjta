@@ -23,6 +23,7 @@
 package com.gsma.rcs.provider.ipcall;
 
 import com.gsma.rcs.provider.ContentProviderBaseIdCreator;
+import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.service.ipcalldraft.IPCallLog;
 import com.gsma.rcs.utils.DatabaseUtils;
 
@@ -42,6 +43,8 @@ import android.text.TextUtils;
  * @author owom5460
  */
 public class IPCallProvider extends ContentProvider {
+
+    private static final int INVALID_ROW_ID = -1;
 
     private static final String TABLE = "ipcall";
 
@@ -214,7 +217,10 @@ public class IPCallProvider extends ContentProvider {
                 String callId = initialValues.getAsString(IPCallData.KEY_CALL_ID);
                 initialValues.put(IPCallData.KEY_BASECOLUMN_ID, ContentProviderBaseIdCreator
                         .createUniqueId(getContext(), IPCallLog.CONTENT_URI));
-                db.insert(TABLE, null, initialValues);
+                if (db.insert(TABLE, null, initialValues) == INVALID_ROW_ID) {
+                    throw new ServerApiPersistentStorageException(
+                            "Unable to insert row for URI ".concat(uri.toString()));
+                }
                 Uri notificationUri = Uri.withAppendedPath(IPCallLog.CONTENT_URI, callId);
                 getContext().getContentResolver().notifyChange(notificationUri, null);
                 return notificationUri;

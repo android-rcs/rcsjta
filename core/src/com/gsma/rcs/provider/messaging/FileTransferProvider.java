@@ -23,6 +23,7 @@
 package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.provider.history.HistoryMemberBaseIdCreator;
+import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.DatabaseUtils;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
@@ -46,6 +47,8 @@ import java.util.Set;
  * @author Jean-Marc AUFFRET
  */
 public class FileTransferProvider extends ContentProvider {
+
+    private static final int INVALID_ROW_ID = -1;
 
     private static final String SELECTION_WITH_FT_ID_ONLY = FileTransferData.KEY_FT_ID.concat("=?");
 
@@ -326,7 +329,10 @@ public class FileTransferProvider extends ContentProvider {
                 String ftId = initialValues.getAsString(FileTransferData.KEY_FT_ID);
                 initialValues.put(FileTransferLog.BASECOLUMN_ID, HistoryMemberBaseIdCreator
                         .createUniqueId(getContext(), FileTransferData.HISTORYLOG_MEMBER_ID));
-                db.insert(TABLE, null, initialValues);
+                if (db.insert(TABLE, null, initialValues) == INVALID_ROW_ID) {
+                    throw new ServerApiPersistentStorageException(
+                            "Unable to insert row for URI ".concat(uri.toString()));
+                }
                 Uri notificationUri = Uri.withAppendedPath(FileTransferLog.CONTENT_URI, ftId);
                 getContext().getContentResolver().notifyChange(notificationUri, null);
                 return notificationUri;
