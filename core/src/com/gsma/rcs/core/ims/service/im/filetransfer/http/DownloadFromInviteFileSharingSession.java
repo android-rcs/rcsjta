@@ -30,6 +30,7 @@ import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
@@ -69,11 +70,13 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
      * @param messagingLog
      * @param timestamp
      * @param timestampSent
+     * @param contactManager
      */
     public DownloadFromInviteFileSharingSession(ImsService parent, ChatSession chatSession,
             FileTransferHttpInfoDocument fileTransferInfo, String fileTransferId,
             ContactId contact, String displayName, RcsSettings rcsSettings,
-            MessagingLog messagingLog, long timestamp, long timestampSent) {
+            MessagingLog messagingLog, long timestamp, long timestampSent,
+            ContactsManager contactManager) {
 
         // @formatter:off
         super(parent,
@@ -90,7 +93,8 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
                 rcsSettings,
                 messagingLog,
                 timestamp,
-                getRemoteSipId(chatSession));
+                getRemoteSipId(chatSession),
+                contactManager);
         // @formatter:on
 
         mTimestampSent = timestampSent;

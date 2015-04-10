@@ -86,7 +86,7 @@ public class IPCallService extends ImsService {
     /**
      * Contacts manager
      */
-    private final ContactsManager mContactsManager;
+    private final ContactsManager mContactManager;
 
     /**
      * Constructor
@@ -101,7 +101,7 @@ public class IPCallService extends ImsService {
         super(parent, true);
 
         mRcsSettings = rcsSettings;
-        mContactsManager = contactsManager;
+        mContactManager = contactsManager;
     }
 
     private void handleIPCallInvitationRejected(SipRequest invite, ContactId contact,
@@ -236,7 +236,8 @@ public class IPCallService extends ImsService {
 
         // Create a new session
         OriginatingIPCallSession session = new OriginatingIPCallSession(this, contact,
-                audioContent, videoContent, player, renderer, mRcsSettings, timestamp);
+                audioContent, videoContent, player, renderer, mRcsSettings, timestamp,
+                mContactManager);
 
         return session;
     }
@@ -263,7 +264,7 @@ public class IPCallService extends ImsService {
         }
         ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
         // Test if the contact is blocked
-        if (mContactsManager.isBlockedForContact(contact)) {
+        if (mContactManager.isBlockedForContact(contact)) {
             if (logActivated) {
                 sLogger.debug("Contact " + contact
                         + " is blocked: automatically reject the sharing invitation");
@@ -290,7 +291,7 @@ public class IPCallService extends ImsService {
 
         // Create a new session
         IPCallSession session = new TerminatingIPCallSession(this, invite, contact, mRcsSettings,
-                timestamp);
+                timestamp, mContactManager);
 
         getImsModule().getCore().getListener().handleIPCallInvitation(session);
 

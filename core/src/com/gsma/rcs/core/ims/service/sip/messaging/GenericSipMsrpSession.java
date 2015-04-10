@@ -38,6 +38,7 @@ import com.gsma.rcs.core.ims.service.sip.GenericSipSession;
 import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.sip.SipSessionError;
 import com.gsma.rcs.core.ims.service.sip.SipSessionListener;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.NetworkRessourceManager;
@@ -82,10 +83,11 @@ public abstract class GenericSipMsrpSession extends GenericSipSession implements
      * @param featureTag Feature tag
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
+     * @param contactManager
      */
     public GenericSipMsrpSession(ImsService parent, ContactId contact, String featureTag,
-            RcsSettings rcsSettings, long timestamp) {
-        super(parent, contact, featureTag, rcsSettings, timestamp);
+            RcsSettings rcsSettings, long timestamp, ContactsManager contactManager) {
+        super(parent, contact, featureTag, rcsSettings, timestamp, contactManager);
 
         mMaxMsgSize = rcsSettings.getMaxMsrpLengthForExtensions();
 

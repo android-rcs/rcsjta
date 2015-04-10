@@ -424,6 +424,7 @@ public class RichCallHistory {
      * @param state Geoloc sharing state
      * @param reasonCode Reason code of the state
      * @param timestamp Local timestamp for incoming geoloc sharing
+     * @return Uri
      */
     public Uri addIncomingGeolocSharing(ContactId contact, String sharingId, State state,
             ReasonCode reasonCode, long timestamp) {
@@ -447,6 +448,7 @@ public class RichCallHistory {
      * @param state Geoloc sharing state
      * @param reasonCode Reason code of the state
      * @param timestamp Local timestamp for outgoing geoloc sharing
+     * @return Uri
      */
     public Uri addOutgoingGeolocSharing(ContactId contact, String sharingId, Geoloc geoloc,
             State state, ReasonCode reasonCode, long timestamp) {
@@ -509,6 +511,7 @@ public class RichCallHistory {
      * Get the geoloc sharing state
      * 
      * @param sharingId Sharing ID
+     * @return state
      */
     public GeolocSharing.State getGeolocSharingState(String sharingId) {
         if (logger.isActivated()) {
@@ -523,6 +526,7 @@ public class RichCallHistory {
      * Get the geoloc sharing state reason code
      * 
      * @param sharingId Sharing ID
+     * @return reason code
      */
     public GeolocSharing.ReasonCode getGeolocSharingStateReasonCode(String sharingId) {
         if (logger.isActivated()) {

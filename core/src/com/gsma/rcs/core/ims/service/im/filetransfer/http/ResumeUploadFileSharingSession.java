@@ -27,6 +27,7 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -50,14 +51,16 @@ public class ResumeUploadFileSharingSession extends OriginatingHttpFileSharingSe
      * @param resumeUpload the data object in DB
      * @param rcsSettings
      * @param messagingLog
+     * @param contactManager
      */
     public ResumeUploadFileSharingSession(ImsService parent, MmContent content,
-            FtHttpResumeUpload resumeUpload, RcsSettings rcsSettings, MessagingLog messagingLog) {
+            FtHttpResumeUpload resumeUpload, RcsSettings rcsSettings, MessagingLog messagingLog,
+            ContactsManager contactManager) {
         super(resumeUpload.getFileTransferId(), parent, content, resumeUpload.getContact(),
                 resumeUpload.getFileicon() != null ? FileTransferUtils.createMmContent(resumeUpload
                         .getFileicon()) : null, resumeUpload.getTId(), Core.getInstance(),
                 messagingLog, rcsSettings, resumeUpload.getTimestamp(), resumeUpload
-                        .getTimestampSent());
+                        .getTimestampSent(), contactManager);
     }
 
     /**

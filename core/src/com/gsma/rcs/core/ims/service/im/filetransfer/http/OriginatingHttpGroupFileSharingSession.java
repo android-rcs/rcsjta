@@ -35,6 +35,7 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -95,14 +96,17 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      * @param messagingLog
      * @param timestamp Local timestamp for the session
      * @param timestampSent the timestamp sent in payload for the group file sharing
+     * @param contactManager
      */
     public OriginatingHttpGroupFileSharingSession(String fileTransferId, ImsService parent,
             MmContent content, MmContent fileIcon, String conferenceId, String chatSessionId,
             String chatContributionId, String tId, Core core, RcsSettings rcsSettings,
-            MessagingLog messagingLog, long timestamp, long timestampSent) {
+            MessagingLog messagingLog, long timestamp, long timestampSent,
+            ContactsManager contactManager) {
         super(parent, content, null, conferenceId, fileIcon, chatSessionId, chatContributionId,
                 fileTransferId, rcsSettings, messagingLog, timestamp,
-                FileTransferLog.UNKNOWN_EXPIRATION, FileTransferLog.UNKNOWN_EXPIRATION);
+                FileTransferLog.UNKNOWN_EXPIRATION, FileTransferLog.UNKNOWN_EXPIRATION,
+                contactManager);
         mCore = core;
         mTimestampSent = timestampSent;
 

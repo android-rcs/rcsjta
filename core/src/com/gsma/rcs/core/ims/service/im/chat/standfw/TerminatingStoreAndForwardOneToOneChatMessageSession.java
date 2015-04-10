@@ -44,6 +44,7 @@ import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
@@ -76,12 +77,13 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
+     * @param contactManager
      */
     public TerminatingStoreAndForwardOneToOneChatMessageSession(ImsService parent,
             SipRequest invite, ContactId contact, RcsSettings rcsSettings,
-            MessagingLog messagingLog, long timestamp) {
+            MessagingLog messagingLog, long timestamp, ContactsManager contactManager) {
         super(parent, contact, PhoneUtils.formatContactIdToUri(contact), ChatUtils.getFirstMessage(
-                invite, timestamp), rcsSettings, messagingLog, timestamp);
+                invite, timestamp), rcsSettings, messagingLog, timestamp, contactManager);
 
         // Set feature tags
         setFeatureTags(ChatUtils.getSupportedFeatureTagsForChat(rcsSettings));

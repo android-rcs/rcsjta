@@ -92,9 +92,11 @@ public class AuthenticationService extends Service {
      * @param username The username
      * @param enableSync true to enable synchronization
      * @param rcsSettings
+     * @param contactManager
      */
     public static void createRcsAccount(Context context, LocalContentResolver localContentResolver,
-            String username, boolean enableSync, RcsSettings rcsSettings) {
+            String username, boolean enableSync, RcsSettings rcsSettings,
+            ContactsManager contactManager) {
         ContactsManager.createInstance(context, context.getContentResolver(), localContentResolver,
                 rcsSettings);
 
@@ -126,7 +128,7 @@ public class AuthenticationService extends Service {
         context.getContentResolver().insert(Groups.CONTENT_URI, contentValues);
 
         // Create the "Me" item
-        ContactsManager.getInstance().createMyContact();
+        contactManager.createMyContact();
     }
 
     /**

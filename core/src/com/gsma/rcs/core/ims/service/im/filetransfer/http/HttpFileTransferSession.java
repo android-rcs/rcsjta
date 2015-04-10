@@ -31,6 +31,7 @@ import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
@@ -89,12 +90,14 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
      * @param iconExpiration
      * @param messagingLog
      * @param timestamp Local timestamp for the session
+     * @param contactManager
      */
     public HttpFileTransferSession(ImsService parent, MmContent content, ContactId contact,
             String remoteUri, MmContent fileIcon, String chatSessionId, String chatContributionId,
             String fileTransferId, RcsSettings rcsSettings, MessagingLog messagingLog,
-            long timestamp, long fileExpiration, long iconExpiration) {
-        super(parent, content, contact, remoteUri, fileIcon, fileTransferId, rcsSettings, timestamp);
+            long timestamp, long fileExpiration, long iconExpiration, ContactsManager contactManager) {
+        super(parent, content, contact, remoteUri, fileIcon, fileTransferId, rcsSettings,
+                timestamp, contactManager);
 
         mChatSessionId = chatSessionId;
         setContributionID(chatContributionId);

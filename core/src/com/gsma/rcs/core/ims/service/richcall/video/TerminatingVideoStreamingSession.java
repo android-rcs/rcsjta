@@ -39,6 +39,7 @@ import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
@@ -69,11 +70,14 @@ public class TerminatingVideoStreamingSession extends VideoStreamingSession {
      * @param contact Contact Id
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
+     * @param contactManager
      */
     public TerminatingVideoStreamingSession(ImsService parent, SipRequest invite,
-            ContactId contact, RcsSettings rcsSettings, long timestamp) {
+            ContactId contact, RcsSettings rcsSettings, long timestamp,
+            ContactsManager contactManager) {
         super(parent, ContentManager.createLiveVideoContentFromSdp(invite.getContentBytes()),
-                contact, rcsSettings, timestamp);
+                contact, rcsSettings, timestamp, contactManager);
+
         // Create dialog path
         createTerminatingDialogPath(invite);
     }

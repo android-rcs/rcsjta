@@ -164,7 +164,7 @@ public class Core {
         PhoneUtils.initialize(context, mRcsSettings);
 
         // Create the address book manager
-        mAddressBookManager = new AddressBookManager();
+        mAddressBookManager = new AddressBookManager(contactsManager);
 
         // Create the IMS module
         mImsModule = new ImsModule(this, context, mRcsSettings, contactsManager, messagingLog);

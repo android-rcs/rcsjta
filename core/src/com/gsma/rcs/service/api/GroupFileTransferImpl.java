@@ -29,6 +29,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.http.DownloadFromAcceptFile
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.DownloadFromResumeFileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.ResumeUploadFileSharingSession;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
@@ -74,6 +75,8 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
     private final Object mLock = new Object();
 
+    private final ContactsManager mContactManager;
+
     private final static Logger sLogger = Logger.getLogger(GroupFileTransferImpl.class
             .getSimpleName());
 
@@ -88,12 +91,13 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
      * @param rcsSettings RcsSettings
      * @param core Core
      * @param messagingLog
+     * @param contactManager
      */
     public GroupFileTransferImpl(String transferId, IGroupFileTransferBroadcaster broadcaster,
             InstantMessagingService imService,
             FileTransferPersistedStorageAccessor storageAccessor,
             FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings, Core core,
-            MessagingLog messagingLog) {
+            MessagingLog messagingLog, ContactsManager contactManager) {
         mFileTransferId = transferId;
         mBroadcaster = broadcaster;
         mImService = imService;
@@ -102,6 +106,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         mRcsSettings = rcsSettings;
         mCore = core;
         mMessagingLog = messagingLog;
+        mContactManager = contactManager;
     }
 
     /**
@@ -116,14 +121,15 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
      * @param rcsSettings RcsSettings
      * @param core Core
      * @param messagingLog
+     * @param contactManager
      */
     public GroupFileTransferImpl(String transferId, String chatId,
             IGroupFileTransferBroadcaster broadcaster, InstantMessagingService imService,
             FileTransferPersistedStorageAccessor storageAccessor,
             FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings, Core core,
-            MessagingLog messagingLog) {
+            MessagingLog messagingLog, ContactsManager contactManager) {
         this(transferId, broadcaster, imService, storageAccessor, fileTransferService, rcsSettings,
-                core, messagingLog);
+                core, messagingLog, contactManager);
         mChatId = chatId;
     }
 
@@ -379,7 +385,8 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             if (download.getFileExpiration() > System.currentTimeMillis()) {
                 FileSharingSession session = new DownloadFromAcceptFileSharingSession(mImService,
                         ContentManager.createMmContent(resume.getFile(), resume.getSize(),
-                                resume.getFileName()), download, mRcsSettings, mMessagingLog);
+                                resume.getFileName()), download, mRcsSettings, mMessagingLog,
+                        mContactManager);
                 session.addListener(this);
                 session.startSession();
                 return;
@@ -631,12 +638,12 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                 session = new ResumeUploadFileSharingSession(mImService,
                         ContentManager.createMmContent(resume.getFile(), resume.getSize(),
                                 resume.getFileName()), (FtHttpResumeUpload) resume, mRcsSettings,
-                        mMessagingLog);
+                        mMessagingLog, mContactManager);
             } else {
                 session = new DownloadFromResumeFileSharingSession(mImService,
                         ContentManager.createMmContent(resume.getFile(), resume.getSize(),
                                 resume.getFileName()), (FtHttpResumeDownload) resume, mRcsSettings,
-                        mMessagingLog);
+                        mMessagingLog, mContactManager);
             }
             session.addListener(this);
             session.startSession();

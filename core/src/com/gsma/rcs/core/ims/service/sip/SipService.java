@@ -73,10 +73,7 @@ public class SipService extends ImsService {
      */
     private Map<String, GenericSipRtpSession> mGenericSipRtpSessionCache = new HashMap<String, GenericSipRtpSession>();
 
-    /**
-     * Contacts manager
-     */
-    private final ContactsManager mContactsManager;
+    private final ContactsManager mContactManager;
 
     private final RcsSettings mRcsSettings;
 
@@ -84,15 +81,15 @@ public class SipService extends ImsService {
      * Constructor
      * 
      * @param parent IMS module
-     * @param contactsManager ContactsManager
+     * @param contactManager ContactsManager
      * @param rcsSettings
      * @throws CoreException
      */
-    public SipService(ImsModule parent, ContactsManager contactsManager, RcsSettings rcsSettings)
+    public SipService(ImsModule parent, ContactsManager contactManager, RcsSettings rcsSettings)
             throws CoreException {
         super(parent, true);
 
-        mContactsManager = contactsManager;
+        mContactManager = contactManager;
         mRcsSettings = rcsSettings;
     }
 
@@ -139,7 +136,7 @@ public class SipService extends ImsService {
         // Create a new session
         long timestamp = System.currentTimeMillis();
         OriginatingSipMsrpSession session = new OriginatingSipMsrpSession(this, contact,
-                featureTag, mRcsSettings, timestamp);
+                featureTag, mRcsSettings, timestamp, mContactManager);
 
         return session;
     }
@@ -163,7 +160,7 @@ public class SipService extends ImsService {
         }
         // Test if the contact is blocked
         ContactId remote = ContactUtil.createContactIdFromValidatedData(number);
-        if (mContactsManager.isBlockedForContact(remote)) {
+        if (mContactManager.isBlockedForContact(remote)) {
             if (logger.isActivated()) {
                 logger.debug("Contact " + remote
                         + " is blocked: automatically reject the session invitation");
@@ -176,7 +173,7 @@ public class SipService extends ImsService {
 
         // Create a new session
         TerminatingSipMsrpSession session = new TerminatingSipMsrpSession(this, invite, remote,
-                sessionInvite, mRcsSettings, timestamp);
+                sessionInvite, mRcsSettings, timestamp, mContactManager);
 
         getImsModule().getCore().getListener()
                 .handleSipMsrpSessionInvitation(sessionInvite, session);
@@ -199,7 +196,7 @@ public class SipService extends ImsService {
         // Create a new session
         long timestamp = System.currentTimeMillis();
         OriginatingSipRtpSession session = new OriginatingSipRtpSession(this, contact, featureTag,
-                mRcsSettings, timestamp);
+                mRcsSettings, timestamp, mContactManager);
 
         return session;
     }
@@ -223,7 +220,7 @@ public class SipService extends ImsService {
         }
         // Test if the contact is blocked
         ContactId remote = ContactUtil.createContactIdFromValidatedData(number);
-        if (mContactsManager.isBlockedForContact(remote)) {
+        if (mContactManager.isBlockedForContact(remote)) {
             if (logger.isActivated()) {
                 logger.debug("Contact " + remote
                         + " is blocked: automatically reject the session invitation");
@@ -236,7 +233,7 @@ public class SipService extends ImsService {
 
         // Create a new session
         TerminatingSipRtpSession session = new TerminatingSipRtpSession(this, invite, remote,
-                sessionInvite, mRcsSettings, timestamp);
+                sessionInvite, mRcsSettings, timestamp, mContactManager);
 
         getImsModule().getCore().getListener()
                 .handleSipRtpSessionInvitation(sessionInvite, session);

@@ -40,6 +40,7 @@ import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
@@ -80,12 +81,14 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
+     * @param contactManager
      */
     public TerminatingAdhocGroupChatSession(ImsService parent, SipRequest invite,
             ContactId contact, Map<ContactId, ParticipantStatus> participantsFromInvite,
-            String remoteUri, RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp) {
+            String remoteUri, RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
+            ContactsManager contactManager) {
         super(parent, contact, remoteUri, participantsFromInvite, rcsSettings, messagingLog,
-                timestamp);
+                timestamp, contactManager);
 
         mMessagingLog = messagingLog;
 
@@ -155,7 +158,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
         if (!logger.isActivated() || !contactsToBeInvited.isEmpty()) {
             /* Early exit if log is not activated or set of contacts to be invited is empty */
             return contactsToBeInvited;
-            
+
         }
         StringBuilder stringBuilder = new StringBuilder("Invite to restart with missing contacts: ");
         for (ContactId contactToBeInvited : contactsToBeInvited) {

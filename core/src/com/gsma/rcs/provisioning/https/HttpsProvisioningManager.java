@@ -27,6 +27,7 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 import com.gsma.rcs.core.TerminalInfo;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.messaging.MessagingLog;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
 import com.gsma.rcs.provisioning.ProvisioningFailureReasons;
@@ -179,6 +180,8 @@ public class HttpsProvisioningManager {
 
     private final MessagingLog mMessagingLog;
 
+    private final ContactsManager mContactManager;
+
     /**
      * Builds HTTPS request parameters that are related to Terminal, PARAM_RCS_VERSION &
      * PARAM_RCS_PROFILE.
@@ -207,19 +210,23 @@ public class HttpsProvisioningManager {
      * @param user is provisioning service launch after user action ?
      * @param rcsSettings
      * @param messagingLog
+     * @param contactManager
      */
     public HttpsProvisioningManager(Context applicationContext,
             LocalContentResolver localContentResolver, final PendingIntent retryIntent,
-            boolean first, boolean user, RcsSettings rcsSettings, MessagingLog messagingLog) {
+            boolean first, boolean user, RcsSettings rcsSettings, MessagingLog messagingLog,
+            ContactsManager contactManager) {
         mCtx = applicationContext;
         mLocalContentResolver = localContentResolver;
         mRetryIntent = retryIntent;
         mFirst = first;
         mUser = user;
-        mSmsManager = new HttpsProvisioningSMS(this);
         mNetworkCnx = new HttpsProvisioningConnection(this);
         mRcsSettings = rcsSettings;
         mMessagingLog = messagingLog;
+        mContactManager = contactManager;
+        mSmsManager = new HttpsProvisioningSMS(this, localContentResolver, rcsSettings,
+                messagingLog, contactManager);
     }
 
     /**
@@ -456,8 +463,8 @@ public class HttpsProvisioningManager {
                 }
 
                 // Register SMS provisioning receiver
-                mSmsManager.registerSmsProvisioningReceiver(mLocalContentResolver, smsPortForOTP,
-                        primaryUri, client, localContext, mRcsSettings, mMessagingLog);
+                mSmsManager.registerSmsProvisioningReceiver(smsPortForOTP, primaryUri, client,
+                        localContext);
 
                 // Save the MSISDN
                 mRcsSettings.setMsisdn(msisdn);
@@ -905,7 +912,7 @@ public class HttpsProvisioningManager {
                                 }
                                 // Reset config
                                 LauncherUtils.resetRcsConfig(mCtx, mLocalContentResolver,
-                                        mRcsSettings, mMessagingLog);
+                                        mRcsSettings, mMessagingLog, mContactManager);
                                 // Force version to "-1" (resetRcs set version to "0")
                                 mRcsSettings.setProvisioningVersion(version);
                                 // Disable the RCS service
@@ -917,7 +924,7 @@ public class HttpsProvisioningManager {
                                     }
                                     // Reset config
                                     LauncherUtils.resetRcsConfig(mCtx, mLocalContentResolver,
-                                            mRcsSettings, mMessagingLog);
+                                            mRcsSettings, mMessagingLog, mContactManager);
                                 } else {
                                     // Start retry alarm
                                     if (validity > 0) {
@@ -996,7 +1003,7 @@ public class HttpsProvisioningManager {
                 mRcsSettings.setProvisioningVersion(Version.RESETED.toString());
                 // Reset config
                 LauncherUtils.resetRcsConfig(mCtx, mLocalContentResolver, mRcsSettings,
-                        mMessagingLog);
+                        mMessagingLog, mContactManager);
                 // Reason: Provisioning forbidden
                 provisioningFails(ProvisioningFailureReasons.PROVISIONING_FORBIDDEN);
             } else if (HTTP_STATUS_ERROR_NETWORK_AUTHENTICATION_REQUIRED == result.code) {

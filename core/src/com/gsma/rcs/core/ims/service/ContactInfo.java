@@ -29,8 +29,22 @@ import com.gsma.services.rcs.contact.ContactId;
  */
 public class ContactInfo {
 
+    /**
+     * IMS registration state
+     */
     public enum RegistrationState {
-        UNKNOWN(0), ONLINE(1), OFFLINE(2);
+        /**
+         * Unknown registration state
+         */
+        UNKNOWN(0),
+        /**
+         * Registered
+         */
+        ONLINE(1),
+        /**
+         * Not registered
+         */
+        OFFLINE(2);
 
         private int mValue;
 
@@ -48,10 +62,21 @@ public class ContactInfo {
             mValue = value;
         }
 
+        /**
+         * Gets integer value associated to RegistrationState instance
+         * 
+         * @return value
+         */
         public final int toInt() {
             return mValue;
         }
 
+        /**
+         * Returns a RegistrationState instance for the specified integer value.
+         * 
+         * @param value
+         * @return instance of RegistrationState
+         */
         public static RegistrationState valueOf(int value) {
             RegistrationState state = mValueToEnum.get(value);
             if (state != null) {
@@ -61,8 +86,18 @@ public class ContactInfo {
         }
     };
 
+    /**
+     * User blocking state
+     */
     public enum BlockingState {
-        NOT_BLOCKED(0), BLOCKED(1);
+        /**
+         * User is not blocked
+         */
+        NOT_BLOCKED(0),
+        /**
+         * user is blocked
+         */
+        BLOCKED(1);
 
         private int mValue;
 
@@ -80,10 +115,21 @@ public class ContactInfo {
             mValue = value;
         }
 
+        /**
+         * Gets integer value associated to BlockingState instance
+         * 
+         * @return value
+         */
         public final int toInt() {
             return mValue;
         }
 
+        /**
+         * Returns a BlockingState instance for the specified integer value.
+         * 
+         * @param value
+         * @return instance of BlockingState
+         */
         public static BlockingState valueOf(int value) {
             BlockingState state = mValueToEnum.get(value);
             if (state != null) {
@@ -93,6 +139,9 @@ public class ContactInfo {
         }
     };
 
+    /**
+     * RCS status
+     */
     public enum RcsStatus {
         /**
          * The contact is RCS capable but there is no special presence relationship with the user
@@ -149,10 +198,21 @@ public class ContactInfo {
             mValue = value;
         }
 
+        /**
+         * Gets integer value associated to RcsStatus instance
+         * 
+         * @return value
+         */
         public final int toInt() {
             return mValue;
         }
 
+        /**
+         * Returns a RcsStatus instance for the specified integer value.
+         * 
+         * @param value
+         * @return instance of RcsStatus
+         */
         public static RcsStatus valueOf(int value) {
             RcsStatus status = mValueToEnum.get(value);
             if (status != null) {
@@ -216,7 +276,7 @@ public class ContactInfo {
     /**
      * Constructor
      * 
-     * @param contactInfo
+     * @param info
      */
     public ContactInfo(ContactInfo info) {
         mContact = info.getContact();
@@ -305,7 +365,7 @@ public class ContactInfo {
     /**
      * Set the registration state
      * 
-     * @param int registrationState
+     * @param state the registration state
      */
     public void setRegistrationState(RegistrationState state) {
         mRegistrationState = state;

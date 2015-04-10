@@ -35,15 +35,15 @@ import com.gsma.rcs.core.ims.service.presence.Geoloc;
 import com.gsma.rcs.core.ims.service.presence.PresenceInfo;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.eab.ContactsManager;
-import com.gsma.rcs.provider.eab.ContactsManagerException;
+import com.gsma.rcs.provider.eab.ContactManagerException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtilMockContext;
 import com.gsma.rcs.utils.logger.Logger;
 
-public class ContactsManagerTest extends AndroidTestCase {
+public class ContactManagerTest extends AndroidTestCase {
 
-    private static final Logger logger = Logger.getLogger(ContactsManagerTest.class.getName());
-    private ContactsManager cm = null;
+    private static final Logger logger = Logger.getLogger(ContactManagerTest.class.getName());
+    private ContactsManager mContactManager;
     private String mNumber = "+33987654321";
     private ContactUtil contactUtils;
     private ContactId mContact;
@@ -59,23 +59,23 @@ public class ContactsManagerTest extends AndroidTestCase {
         mContentResolver = mContext.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(mContentResolver);
         mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
-        ContactsManager.createInstance(mContext, mContentResolver, mLocalContentResolver,
-                mRcsSettings);
+        mContactManager = ContactsManager.createInstance(mContext, mContentResolver,
+                mLocalContentResolver, mRcsSettings);
 
-        cm = ContactsManager.getInstance();
         contactUtils = ContactUtil.getInstance(new ContactUtilMockContext(mContext));
+
         // info.setContact(contact);
         mContact = contactUtils.formatContact("+33633139785");
     }
 
     protected void tearDown() throws Exception {
-        cm.cleanRCSEntries();
+        mContactManager.cleanRCSEntries();
         super.tearDown();
     }
 
     public void testCreateMyContact() {
         // to end
-        long myraw = cm.createMyContact();
+        long myraw = mContactManager.createMyContact();
         if (logger.isActivated()) {
             logger.debug("my rawId = " + myraw);
             // return -1 cause settings.isSocialPresenceSupported() and accounts
@@ -122,8 +122,8 @@ public class ContactsManagerTest extends AndroidTestCase {
 
         // Set RCS contact info
         try {
-            cm.setContactInfo(info, null);
-        } catch (ContactsManagerException e) {
+            mContactManager.setContactInfo(info, null);
+        } catch (ContactManagerException e) {
             if (logger.isActivated()) {
                 logger.error("Could not save the contact modifications", e);
             }
@@ -133,7 +133,7 @@ public class ContactsManagerTest extends AndroidTestCase {
     public void testGetRcsContactInfo() {
         // Get contact info
         contactoCreate();
-        ContactInfo getInfo = cm.getContactInfo(mContact);
+        ContactInfo getInfo = mContactManager.getContactInfo(mContact);
 
         // Compare getContactInfo informations and initial informations
         if (getInfo == null) {
@@ -228,8 +228,8 @@ public class ContactsManagerTest extends AndroidTestCase {
 
         // Set RCS contact info
         try {
-            cm.setContactInfo(info, null);
-        } catch (ContactsManagerException e) {
+            mContactManager.setContactInfo(info, null);
+        } catch (ContactManagerException e) {
             if (logger.isActivated()) {
                 logger.error("Could not save the contact modifications", e);
             }
@@ -238,7 +238,7 @@ public class ContactsManagerTest extends AndroidTestCase {
 
     public void testSetContactInfo() {
         // create then change a RCSContact into a basic Contact then return it to be a RCSContact
-        Set<ContactId> rcscontacts = cm.getRcsContacts();
+        Set<ContactId> rcscontacts = mContactManager.getRcsContacts();
         if (logger.isActivated()) {
             for (ContactId rcs : rcscontacts) {
                 logger.debug("RCS contact : " + rcs.toString());
@@ -247,7 +247,7 @@ public class ContactsManagerTest extends AndroidTestCase {
         if (rcscontacts.isEmpty())
             contactoCreate();
 
-        ContactInfo oldinfo = cm.getContactInfo(mContact);
+        ContactInfo oldinfo = mContactManager.getContactInfo(mContact);
 
         ContactInfo newInfo = new ContactInfo();
 
@@ -269,7 +269,7 @@ public class ContactsManagerTest extends AndroidTestCase {
         capa.setTimestampOfLastRefresh(timestamp);
 
         // newInfo.setPresenceInfo(null);
-        // if (new)PresenceInfo is null, error on ContactManager line 504 so
+        // if (new)PresenceInfo is null, error on ContactsManager line 504 so
         PresenceInfo prese = new PresenceInfo();
         prese.setFavoriteLink(new FavoriteLink("fav_link_name", "http://fav_link_url"));
         newInfo.setPresenceInfo(prese);
@@ -278,15 +278,15 @@ public class ContactsManagerTest extends AndroidTestCase {
         newInfo.setRegistrationState(RegistrationState.UNKNOWN);
         // Set not RCS contact info and test
         try {
-            cm.setContactInfo(newInfo, oldinfo);
-        } catch (ContactsManagerException e) {
+            mContactManager.setContactInfo(newInfo, oldinfo);
+        } catch (ContactManagerException e) {
             if (logger.isActivated()) {
                 logger.error("Could not save the contact modifications", e);
             }
         }
 
-        rcscontacts = cm.getRcsContacts();
-        Set<ContactId> contacts = cm.getAllContacts();
+        rcscontacts = mContactManager.getRcsContacts();
+        Set<ContactId> contacts = mContactManager.getAllContacts();
         boolean contactChange = (contacts.contains(mContact) && (!(rcscontacts.contains(mContact))));
         assertEquals(contactChange, true);
 
@@ -298,7 +298,7 @@ public class ContactsManagerTest extends AndroidTestCase {
          * av : avails) { logger.debug("available contact : " + av); } } }
          */
 
-        oldinfo = cm.getContactInfo(mContact);
+        oldinfo = mContactManager.getContactInfo(mContact);
         newInfo.setRcsStatus(RcsStatus.ACTIVE);
         timestamp = 1354874212;
         newInfo.setRcsStatusTimestamp(timestamp);
@@ -322,26 +322,26 @@ public class ContactsManagerTest extends AndroidTestCase {
         newInfo.setPresenceInfo(prese);
 
         try {
-            cm.setContactInfo(newInfo, oldinfo);
-        } catch (ContactsManagerException e) {
+            mContactManager.setContactInfo(newInfo, oldinfo);
+        } catch (ContactManagerException e) {
             if (logger.isActivated()) {
                 logger.error("Could not save the contact modifications", e);
             }
         }
-        rcscontacts = cm.getRcsContacts();
+        rcscontacts = mContactManager.getRcsContacts();
         // avails = cm.getRcsContacts();
-        contacts = cm.getAllContacts();
+        contacts = mContactManager.getAllContacts();
         boolean contactToRCS = (rcscontacts.contains(mContact) && contacts.contains(mContact));
         /*
          * if (logger.isActivated()){ if(rcscontacts.isEmpty()) { logger.debug("no RCS contact "); }
          * else { for(String rcs : rcscontacts) { logger.debug("RCS contact : " + rcs); } }
          * for(String av : avails) { logger.debug("available contact : " + av); } }
          */assertEquals(contactToRCS, true);
-        cm.cleanRCSEntries();
+        mContactManager.cleanRCSEntries();
     }
 
     public void testRemoveRcsContact() {
-        cm.cleanRCSEntries();
+        mContactManager.cleanRCSEntries();
     }
 
 }

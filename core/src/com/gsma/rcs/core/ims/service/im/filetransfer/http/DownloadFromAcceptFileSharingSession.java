@@ -26,6 +26,7 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
@@ -48,9 +49,11 @@ public class DownloadFromAcceptFileSharingSession extends TerminatingHttpFileSha
      * @param resume the Data Object to access FT HTTP table in DB
      * @param rcsSettings
      * @param messagingLog
+     * @param contactManager
      */
     public DownloadFromAcceptFileSharingSession(ImsService parent, MmContent content,
-            FtHttpResumeDownload resume, RcsSettings rcsSettings, MessagingLog messagingLog) {
+            FtHttpResumeDownload resume, RcsSettings rcsSettings, MessagingLog messagingLog,
+            ContactsManager contactManager) {
 
         // @formatter:off
         super(parent,
@@ -67,7 +70,8 @@ public class DownloadFromAcceptFileSharingSession extends TerminatingHttpFileSha
                 rcsSettings,
                 messagingLog,
                 resume.getTimestamp(),
-                resume.getRemoteSipInstance());
+                resume.getRemoteSipInstance(),
+                contactManager);
         // @formatter:on
         setSessionAccepted();
     }

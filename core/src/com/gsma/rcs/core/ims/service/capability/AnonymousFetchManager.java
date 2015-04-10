@@ -57,15 +57,20 @@ public class AnonymousFetchManager implements DiscoveryManager {
 
     private final RcsSettings mRcsSettings;
 
+    private final ContactsManager mContactManager;
+
     /**
      * Constructor
      * 
      * @param parent IMS module
      * @param rcsSettings
+     * @param contactManager
      */
-    public AnonymousFetchManager(ImsModule parent, RcsSettings rcsSettings) {
+    public AnonymousFetchManager(ImsModule parent, RcsSettings rcsSettings,
+            ContactsManager contactManager) {
         mImsModule = parent;
         mRcsSettings = rcsSettings;
+        mContactManager = contactManager;
     }
 
     /**
@@ -79,7 +84,7 @@ public class AnonymousFetchManager implements DiscoveryManager {
             logger.debug("Request capabilities in background for " + contact);
         }
         AnonymousFetchRequestTask task = new AnonymousFetchRequestTask(mImsModule, contact,
-                mRcsSettings);
+                mRcsSettings, mContactManager);
         task.start();
         return true;
     }
@@ -151,8 +156,8 @@ public class AnonymousFetchManager implements DiscoveryManager {
             }
 
             // Update capabilities in database
-            ContactsManager.getInstance().setContactCapabilities(contact, capabilities,
-                    RcsStatus.RCS_CAPABLE, RegistrationState.UNKNOWN);
+            mContactManager.setContactCapabilities(contact, capabilities, RcsStatus.RCS_CAPABLE,
+                    RegistrationState.UNKNOWN);
 
             // Notify listener
             mImsModule.getCore().getListener()
@@ -176,8 +181,8 @@ public class AnonymousFetchManager implements DiscoveryManager {
             Capabilities capabilities = new Capabilities();
 
             // Update capabilities in database
-            ContactsManager.getInstance().setContactCapabilities(contact, capabilities,
-                    RcsStatus.NO_INFO, RegistrationState.UNKNOWN);
+            mContactManager.setContactCapabilities(contact, capabilities, RcsStatus.NO_INFO,
+                    RegistrationState.UNKNOWN);
 
             // Notify listener
             mImsModule.getCore().getListener()

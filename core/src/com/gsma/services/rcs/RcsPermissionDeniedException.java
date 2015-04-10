@@ -22,7 +22,6 @@
 
 package com.gsma.services.rcs;
 
-
 /**
  * RCS permission denied exception
  * <p>

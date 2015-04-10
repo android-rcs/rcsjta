@@ -23,7 +23,9 @@
 package com.gsma.rcs.addressbook;
 
 import com.gsma.rcs.core.Core;
+import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.api.ServerApiServiceNotRegisteredException;
 import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -33,6 +35,7 @@ import android.accounts.Account;
 import android.app.Service;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SyncResult;
@@ -57,16 +60,21 @@ public class SyncAdapterService extends Service {
      */
     public static final String ANDROID_CONTENT_SYNCADPTER = "android.content.SyncAdapter";
 
-    /**
-     * The logger
-     */
     private Logger logger = Logger.getLogger(this.getClass().getName());
+
+    private ContactsManager mContactManager;
 
     /**
      * Called when the activity is first created.
      */
     @Override
     public void onCreate() {
+        Context ctx = getApplicationContext();
+        ContentResolver contentResolver = ctx.getContentResolver();
+        LocalContentResolver localContentResolver = new LocalContentResolver(ctx);
+        RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
+        mContactManager = ContactsManager.createInstance(ctx, contentResolver,
+                localContentResolver, rcsSettings);
         mSyncAdapter = new RcsContactsSyncAdapter(this);
     }
 
@@ -117,7 +125,7 @@ public class SyncAdapterService extends Service {
             }
 
             // Update all contacts capabilities
-            Set<ContactId> contacts = ContactsManager.getInstance().getAllContacts();
+            Set<ContactId> contacts = mContactManager.getAllContacts();
             Core.getInstance().getCapabilityService().requestContactCapabilities(contacts);
         }
     }

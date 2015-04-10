@@ -72,6 +72,8 @@ public class OptionsRequestTask implements Runnable {
 
     private final RcsSettings mRcsSettings;
 
+    private final ContactsManager mContactManager;
+
     /**
      * Constructor
      * 
@@ -79,14 +81,16 @@ public class OptionsRequestTask implements Runnable {
      * @param contact Remote contact identifier
      * @param featureTags Feature tags
      * @param rcsSettings
+     * @param contactManager
      */
     public OptionsRequestTask(ImsModule parent, ContactId contact, String[] featureTags,
-            RcsSettings rcsSettings) {
+            RcsSettings rcsSettings, ContactsManager contactManager) {
         mImsModule = parent;
         mContact = contact;
         mFeatureTags = featureTags;
         mAuthenticationAgent = new SessionAuthenticationAgent(mImsModule);
         mRcsSettings = rcsSettings;
+        mContactManager = contactManager;
     }
 
     /**
@@ -190,19 +194,18 @@ public class OptionsRequestTask implements Runnable {
         if (logger.isActivated()) {
             logger.info("User " + mContact + " is not registered");
         }
-        ContactsManager contactManager = ContactsManager.getInstance();
-        ContactInfo info = contactManager.getContactInfo(mContact);
+        ContactInfo info = mContactManager.getContactInfo(mContact);
         if (RcsStatus.NO_INFO.equals(info.getRcsStatus())) {
             // If we do not have already some info on this contact
             // We update the database with empty capabilities
             Capabilities capabilities = new Capabilities();
-            contactManager.setContactCapabilities(mContact, capabilities, RcsStatus.NO_INFO,
+            mContactManager.setContactCapabilities(mContact, capabilities, RcsStatus.NO_INFO,
                     RegistrationState.OFFLINE);
         } else {
             // We have some info on this contact
             // We update the database with its previous infos and set the registration state to
             // offline
-            contactManager.setContactCapabilities(mContact, info.getCapabilities(),
+            mContactManager.setContactCapabilities(mContact, info.getCapabilities(),
                     info.getRcsStatus(), RegistrationState.OFFLINE);
 
             // Notify listener
@@ -224,8 +227,8 @@ public class OptionsRequestTask implements Runnable {
 
         // The contact is not RCS
         Capabilities capabilities = new Capabilities();
-        ContactsManager.getInstance().setContactCapabilities(mContact, capabilities,
-                RcsStatus.NOT_RCS, RegistrationState.UNKNOWN);
+        mContactManager.setContactCapabilities(mContact, capabilities, RcsStatus.NOT_RCS,
+                RegistrationState.UNKNOWN);
 
         // Notify listener
         mImsModule.getCore().getListener().handleCapabilitiesNotification(mContact, capabilities);
@@ -247,8 +250,7 @@ public class OptionsRequestTask implements Runnable {
         Capabilities capabilities = CapabilityUtils.extractCapabilities(resp);
 
         // Update capability time of last refresh
-        ContactsManager contactManager = ContactsManager.getInstance();
-        contactManager.updateCapabilitiesTimeLastRefresh(mContact);
+        mContactManager.updateCapabilitiesTimeLastRefresh(mContact);
 
         // Update the database capabilities
         if (capabilities.isImSessionSupported()) {
@@ -258,15 +260,15 @@ public class OptionsRequestTask implements Runnable {
             // response
             // that included the automata tag defined in [RFC3840]".
             if (capabilities.isSipAutomata()) {
-                contactManager.setContactCapabilities(mContact, capabilities,
+                mContactManager.setContactCapabilities(mContact, capabilities,
                         RcsStatus.RCS_CAPABLE, RegistrationState.OFFLINE);
             } else {
-                contactManager.setContactCapabilities(mContact, capabilities,
+                mContactManager.setContactCapabilities(mContact, capabilities,
                         RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE);
             }
         } else {
             // The contact is not RCS
-            contactManager.setContactCapabilities(mContact, capabilities, RcsStatus.NOT_RCS,
+            mContactManager.setContactCapabilities(mContact, capabilities, RcsStatus.NOT_RCS,
                     RegistrationState.UNKNOWN);
         }
 
@@ -320,6 +322,6 @@ public class OptionsRequestTask implements Runnable {
         }
 
         // We update the database capabilities time of last request
-        ContactsManager.getInstance().updateCapabilitiesTimeLastRequest(mContact);
+        mContactManager.updateCapabilitiesTimeLastRequest(mContact);
     }
 }

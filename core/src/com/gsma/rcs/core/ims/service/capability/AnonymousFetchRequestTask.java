@@ -71,6 +71,8 @@ public class AnonymousFetchRequestTask {
 
     private final RcsSettings mRcsSettings;
 
+    private final ContactsManager mContactManager;
+
     /**
      * The logger
      */
@@ -83,12 +85,15 @@ public class AnonymousFetchRequestTask {
      * @param parent IMS module
      * @param contact Remote contact identifier
      * @param rcsSettings
+     * @param contactManager
      */
-    public AnonymousFetchRequestTask(ImsModule parent, ContactId contact, RcsSettings rcsSettings) {
+    public AnonymousFetchRequestTask(ImsModule parent, ContactId contact, RcsSettings rcsSettings,
+            ContactsManager contactManager) {
         mImsModule = parent;
         mContact = contact;
         mAuthenticationAgent = new SessionAuthenticationAgent(mImsModule);
         mRcsSettings = rcsSettings;
+        mContactManager = contactManager;
     }
 
     /**
@@ -263,7 +268,7 @@ public class AnonymousFetchRequestTask {
         }
 
         // We update the database capabilities time of last request
-        ContactsManager.getInstance().updateCapabilitiesTimeLastRequest(mContact);
+        mContactManager.updateCapabilitiesTimeLastRequest(mContact);
     }
 
     /**
@@ -278,7 +283,7 @@ public class AnonymousFetchRequestTask {
 
         // We update the database with empty capabilities
         Capabilities capabilities = new Capabilities();
-        ContactsManager.getInstance().setContactCapabilities(mContact, capabilities,
-                RcsStatus.NOT_RCS, RegistrationState.UNKNOWN);
+        mContactManager.setContactCapabilities(mContact, capabilities, RcsStatus.NOT_RCS,
+                RegistrationState.UNKNOWN);
     }
 }

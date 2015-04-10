@@ -43,6 +43,7 @@ import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
@@ -79,11 +80,13 @@ public class TerminatingGeolocTransferSession extends GeolocTransferSession impl
      * @param contact Contact Id
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
+     * @param contactManager
      */
     public TerminatingGeolocTransferSession(ImsService parent, SipRequest invite,
-            ContactId contact, RcsSettings rcsSettings, long timestamp) {
+            ContactId contact, RcsSettings rcsSettings, long timestamp,
+            ContactsManager contactManager) {
         super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), contact,
-                rcsSettings, timestamp);
+                rcsSettings, timestamp, contactManager);
 
         // Create dialog path
         createTerminatingDialogPath(invite);

@@ -28,6 +28,7 @@ import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
@@ -66,18 +67,22 @@ public class FtHttpResumeManager implements Runnable {
 
     private final MessagingLog mMessagingLog;
 
+    private final ContactsManager mContactManager;
+
     /**
      * Constructor
      * 
      * @param instantMessagingService IMS service
      * @param rcsSettings
      * @param messagingLog
+     * @param contactManager
      */
     public FtHttpResumeManager(InstantMessagingService instantMessagingService,
-            RcsSettings rcsSettings, MessagingLog messagingLog) {
+            RcsSettings rcsSettings, MessagingLog messagingLog, ContactsManager contactManager) {
         mRcsSettings = rcsSettings;
         mImsService = instantMessagingService;
         mMessagingLog = messagingLog;
+        mContactManager = contactManager;
     }
 
     @Override
@@ -117,7 +122,8 @@ public class FtHttpResumeManager implements Runnable {
 
                 // Creates the Resume Download session object
                 final DownloadFromResumeFileSharingSession resumeDownload = new DownloadFromResumeFileSharingSession(
-                        mImsService, downloadContent, downloadInfo, mRcsSettings, mMessagingLog);
+                        mImsService, downloadContent, downloadInfo, mRcsSettings, mMessagingLog,
+                        mContactManager);
                 resumeDownload.addListener(getFileSharingSessionListener());
                 // Start the download HTTP FT session object
                 new Thread() {
@@ -146,7 +152,8 @@ public class FtHttpResumeManager implements Runnable {
 
                     // Create Resume Upload session
                     final ResumeUploadFileSharingSession resumeUpload = new ResumeUploadFileSharingSession(
-                            mImsService, uploadContent, uploadInfo, mRcsSettings, mMessagingLog);
+                            mImsService, uploadContent, uploadInfo, mRcsSettings, mMessagingLog,
+                            mContactManager);
                     resumeUpload.addListener(getFileSharingSessionListener());
 
                     // Start Resume Upload session

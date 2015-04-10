@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.richcall.video;
 
 import com.gsma.rcs.core.content.LiveVideoContent;
 import com.gsma.rcs.core.ims.service.ImsService;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.IVideoPlayer;
@@ -43,9 +44,11 @@ public class OriginatingLiveVideoStreamingSession extends OriginatingVideoStream
      * @param contact Remote contact Id
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
+     * @param contactManager
      */
     public OriginatingLiveVideoStreamingSession(ImsService parent, IVideoPlayer player,
-            LiveVideoContent content, ContactId contact, RcsSettings rcsSettings, long timestamp) {
-        super(parent, player, content, contact, rcsSettings, timestamp);
+            LiveVideoContent content, ContactId contact, RcsSettings rcsSettings, long timestamp,
+            ContactsManager contactManager) {
+        super(parent, player, content, contact, rcsSettings, timestamp, contactManager);
     }
 }

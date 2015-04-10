@@ -102,7 +102,7 @@ public class InstantMessagingService extends ImsService {
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactsManager mContactsManager;
+    private final ContactsManager mContactManager;
 
     private final MessagingLog mMessagingLog;
 
@@ -163,7 +163,7 @@ public class InstantMessagingService extends ImsService {
     /**
      * Store & Forward manager
      */
-    private final StoreAndForwardManager mStoreAndFwdMgr = new StoreAndForwardManager(this);
+    private final StoreAndForwardManager mStoreAndFwdMgr;
 
     /**
      * The logger
@@ -187,8 +187,10 @@ public class InstantMessagingService extends ImsService {
         super(parent, true);
         mCore = core;
         mRcsSettings = rcsSettings;
-        mContactsManager = contactsManager;
+        mContactManager = contactsManager;
         mMessagingLog = messagingLog;
+        mStoreAndFwdMgr = new StoreAndForwardManager(this, mRcsSettings, mContactManager,
+                mMessagingLog);
     }
 
     private void handleFileTransferInvitationRejected(SipRequest invite, ContactId contact,
@@ -727,7 +729,7 @@ public class InstantMessagingService extends ImsService {
         }
 
         boolean isFToHttpSupportedByRemote = false;
-        Capabilities remoteCapability = mContactsManager.getContactCapabilities(contact);
+        Capabilities remoteCapability = mContactManager.getContactCapabilities(contact);
         if (remoteCapability != null) {
             isFToHttpSupportedByRemote = remoteCapability.isFileTransferHttpSupported();
         }
@@ -737,7 +739,7 @@ public class InstantMessagingService extends ImsService {
             if (FileTransferProtocol.HTTP.equals(mRcsSettings.getFtProtocol())) {
                 return new OriginatingHttpFileSharingSession(fileTransferId, this, content,
                         contact, fileIcon, UUID.randomUUID().toString(), mCore, mMessagingLog,
-                        mRcsSettings, timestamp, timestampSent);
+                        mRcsSettings, timestamp, timestampSent, mContactManager);
             }
         }
 
@@ -749,7 +751,7 @@ public class InstantMessagingService extends ImsService {
          * don't need to pass the timestampSent to OriginatingMsrpFileSharingSession
          */
         return new OriginatingMsrpFileSharingSession(fileTransferId, this, content, contact,
-                fileIcon, mRcsSettings, timestamp);
+                fileIcon, mRcsSettings, timestamp, mContactManager);
     }
 
     /**
@@ -774,7 +776,7 @@ public class InstantMessagingService extends ImsService {
         FileSharingSession session = new OriginatingHttpGroupFileSharingSession(fileTransferId,
                 this, content, fileIcon, ImsModule.IMS_USER_PROFILE.getImConferenceUri(),
                 groupChatSessionId, groupChatId, UUID.randomUUID().toString(), mCore, mRcsSettings,
-                mMessagingLog, timestamp, timestampSent);
+                mMessagingLog, timestamp, timestampSent, mContactManager);
 
         return session;
     }
@@ -809,7 +811,7 @@ public class InstantMessagingService extends ImsService {
          * real proper timestamp from the remote side in this case.
          */
         long timestampSent = timestamp;
-        if (mContactsManager.isBlockedForContact(remote)) {
+        if (mContactManager.isBlockedForContact(remote)) {
             if (logActivated) {
                 sLogger.debug("Contact " + remote
                         + " is blocked: automatically reject the file transfer invitation");
@@ -872,7 +874,7 @@ public class InstantMessagingService extends ImsService {
         }
 
         FileSharingSession session = new TerminatingMsrpFileSharingSession(this, invite, remote,
-                mRcsSettings, timestamp, timestampSent);
+                mRcsSettings, timestamp, timestampSent, mContactManager);
 
         mCore.getListener().handleFileTransferInvitation(session, false, remote,
                 session.getRemoteDisplayName(), FileTransferLog.UNKNOWN_EXPIRATION);
@@ -897,7 +899,7 @@ public class InstantMessagingService extends ImsService {
         assertAvailableChatSession("Max chat sessions achieved");
         long timestamp = firstMsg.getTimestamp();
         OriginatingOneToOneChatSession session = new OriginatingOneToOneChatSession(this, contact,
-                firstMsg, mRcsSettings, mMessagingLog, timestamp);
+                firstMsg, mRcsSettings, mMessagingLog, timestamp, mContactManager);
         return session;
     }
 
@@ -962,7 +964,7 @@ public class InstantMessagingService extends ImsService {
         }
         ChatMessage firstMsg = ChatUtils.getFirstMessage(invite, timestamp);
         // Test if the contact is blocked
-        if (mContactsManager.isBlockedForContact(remote)) {
+        if (mContactManager.isBlockedForContact(remote)) {
             if (logActivated) {
                 sLogger.debug("Contact " + remote
                         + " is blocked: automatically reject the chat invitation");
@@ -1019,7 +1021,7 @@ public class InstantMessagingService extends ImsService {
         }
 
         TerminatingOneToOneChatSession session = new TerminatingOneToOneChatSession(this, invite,
-                remote, mRcsSettings, mMessagingLog, firstMsg.getTimestamp());
+                remote, mRcsSettings, mMessagingLog, firstMsg.getTimestamp(), mContactManager);
 
         mCore.getListener().handleOneOneChatSessionInvitation(session);
 
@@ -1047,7 +1049,7 @@ public class InstantMessagingService extends ImsService {
 
         OriginatingAdhocGroupChatSession session = new OriginatingAdhocGroupChatSession(this,
                 ImsModule.IMS_USER_PROFILE.getImConferenceUri(), subject, participants,
-                mRcsSettings, mMessagingLog, timestamp);
+                mRcsSettings, mMessagingLog, timestamp, mContactManager);
 
         return session;
     }
@@ -1064,7 +1066,7 @@ public class InstantMessagingService extends ImsService {
             sLogger.info("Receive an ad-hoc group chat session invitation");
         }
         ContactId contact = ChatUtils.getReferredIdentityAsContactId(invite);
-        if (contact != null && mContactsManager.isBlockedForContact(contact)) {
+        if (contact != null && mContactManager.isBlockedForContact(contact)) {
             if (logActivated) {
                 sLogger.debug("Contact " + contact
                         + " is blocked: automatically reject the chat invitation");
@@ -1103,7 +1105,7 @@ public class InstantMessagingService extends ImsService {
 
         TerminatingAdhocGroupChatSession session = new TerminatingAdhocGroupChatSession(this,
                 invite, contact, inviteParticipants, remoteUri, mRcsSettings, mMessagingLog,
-                timestamp);
+                timestamp, mContactManager);
 
         /*--
          * 6.3.3.1 Leaving a Group Chat that is idle
@@ -1162,7 +1164,8 @@ public class InstantMessagingService extends ImsService {
             sLogger.debug("Rejoin group chat: " + groupChat.toString());
         }
         long timestamp = groupChat.getTimestamp();
-        return new RejoinGroupChatSession(this, groupChat, mRcsSettings, mMessagingLog, timestamp);
+        return new RejoinGroupChatSession(this, groupChat, mRcsSettings, mMessagingLog, timestamp,
+                mContactManager);
     }
 
     /**
@@ -1202,7 +1205,7 @@ public class InstantMessagingService extends ImsService {
         long timestamp = groupChat.getTimestamp();
         return new RestartGroupChatSession(this, ImsModule.IMS_USER_PROFILE.getImConferenceUri(),
                 groupChat.getSubject(), chatId, storedParticipants, mRcsSettings, mMessagingLog,
-                timestamp);
+                timestamp, mContactManager);
     }
 
     /**
@@ -1332,7 +1335,7 @@ public class InstantMessagingService extends ImsService {
         ChatMessage firstMsg = ChatUtils.getFirstMessage(invite, timestamp);
 
         // Test if the contact is blocked
-        if (mContactsManager.isBlockedForContact(remote)) {
+        if (mContactManager.isBlockedForContact(remote)) {
             if (logActivated) {
                 sLogger.debug("Contact " + remote
                         + " is blocked: automatically reject the S&F invitation");
@@ -1354,8 +1357,8 @@ public class InstantMessagingService extends ImsService {
                     ChatUtils.isImdnDisplayedRequested(invite));
         }
 
-        getStoreAndForwardManager().receiveStoredMessages(invite, remote, mRcsSettings,
-                mMessagingLog, timestamp);
+        getStoreAndForwardManager().receiveStoredMessages(invite, remote, timestamp);
+
     }
 
     /**
@@ -1380,7 +1383,7 @@ public class InstantMessagingService extends ImsService {
             sLogger.debug("Receive S&F push notifications invitation");
         }
         // Test if the contact is blocked
-        if (mContactsManager.isBlockedForContact(remote)) {
+        if (mContactManager.isBlockedForContact(remote)) {
             if (sLogger.isActivated()) {
                 sLogger.debug("Contact " + remote
                         + " is blocked: automatically reject the S&F invitation");
@@ -1391,8 +1394,7 @@ public class InstantMessagingService extends ImsService {
             return;
         }
 
-        getStoreAndForwardManager().receiveStoredNotifications(invite, remote, mRcsSettings,
-                mMessagingLog, timestamp);
+        getStoreAndForwardManager().receiveStoredNotifications(invite, remote, timestamp);
     }
 
     /**
@@ -1422,7 +1424,7 @@ public class InstantMessagingService extends ImsService {
         CpimMessage cpimMessage = ChatUtils.extractCpimMessage(invite);
         long timestampSent = cpimMessage.getTimestampSent();
         // Test if the contact is blocked
-        if (mContactsManager.isBlockedForContact(remote)) {
+        if (mContactManager.isBlockedForContact(remote)) {
             if (logActivated) {
                 sLogger.debug(new StringBuilder("Contact ").append(remote)
                         .append(" is blocked, automatically reject the HTTP File transfer")
@@ -1476,13 +1478,13 @@ public class InstantMessagingService extends ImsService {
 
         // Create and start a chat session
         TerminatingOneToOneChatSession oneToOneChatSession = new TerminatingOneToOneChatSession(
-                this, invite, remote, mRcsSettings, mMessagingLog, timestamp);
+                this, invite, remote, mRcsSettings, mMessagingLog, timestamp, mContactManager);
 
         // Create and start a new HTTP file transfer session
         DownloadFromInviteFileSharingSession fileSharingSession = new DownloadFromInviteFileSharingSession(
                 this, oneToOneChatSession, ftinfo, ChatUtils.getMessageId(invite),
                 oneToOneChatSession.getRemoteContact(), oneToOneChatSession.getRemoteDisplayName(),
-                mRcsSettings, mMessagingLog, timestamp, timestampSent);
+                mRcsSettings, mMessagingLog, timestamp, timestampSent, mContactManager);
         if (fileSharingSession.getFileicon() != null) {
             try {
                 fileSharingSession.downloadFileIcon();
@@ -1532,7 +1534,7 @@ public class InstantMessagingService extends ImsService {
         long timestampSent = cpimMessage.getTimestampSent();
         // Create and start a chat session
         TerminatingStoreAndForwardOneToOneChatMessageSession one2oneChatSession = new TerminatingStoreAndForwardOneToOneChatMessageSession(
-                this, invite, remote, mRcsSettings, mMessagingLog, timestamp);
+                this, invite, remote, mRcsSettings, mMessagingLog, timestamp, mContactManager);
         one2oneChatSession.startSession();
 
         /* Auto reject if file too big */
@@ -1555,7 +1557,7 @@ public class InstantMessagingService extends ImsService {
         DownloadFromInviteFileSharingSession filetransferSession = new DownloadFromInviteFileSharingSession(
                 this, one2oneChatSession, ftinfo, ChatUtils.getMessageId(invite),
                 one2oneChatSession.getRemoteContact(), one2oneChatSession.getRemoteDisplayName(),
-                mRcsSettings, mMessagingLog, timestamp, timestampSent);
+                mRcsSettings, mMessagingLog, timestamp, timestampSent, mContactManager);
         if (filetransferSession.getFileicon() != null) {
             try {
                 filetransferSession.downloadFileIcon();

@@ -1377,15 +1377,16 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     @Override
     public void handleReceiveMessage(ChatMessage msg, boolean imdnDisplayedRequested) {
         String msgId = msg.getMessageId();
+        ContactId remote = msg.getRemoteContact();
         if (logger.isActivated()) {
-            logger.info(new StringBuilder("New IM with messageId '").append(msgId)
-                    .append("' received.").toString());
+            logger.info("New IM with Id '" + msgId + "' received from " + remote);
         }
         synchronized (lock) {
             mPersistentStorage.addGroupChatMessage(msg, Direction.INCOMING,
                     Content.Status.RECEIVED, Content.ReasonCode.UNSPECIFIED);
-            mContactManager.setContactDisplayName(msg.getRemoteContact(), msg.getDisplayName());
-
+            if (remote != null) {
+                mContactManager.setContactDisplayName(remote, msg.getDisplayName());
+            }
             String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
             mBroadcaster.broadcastMessageReceived(apiMimeType, msgId);
         }

@@ -38,6 +38,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.http.DownloadFromAcceptFile
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.DownloadFromResumeFileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.ResumeUploadFileSharingSession;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
@@ -87,6 +88,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
     private static final Logger sLogger = Logger
             .getLogger(OneToOneFileTransferImpl.class.getName());
 
+    private final ContactsManager mContactManager;
+
     /**
      * Constructor
      * 
@@ -98,12 +101,13 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
      * @param rcsSettings RcsSettings
      * @param core Core
      * @param messagingLog
+     * @param contactManager
      */
     public OneToOneFileTransferImpl(String transferId,
             IOneToOneFileTransferBroadcaster broadcaster, InstantMessagingService imService,
             FileTransferPersistedStorageAccessor persistentStorage,
             FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings, Core core,
-            MessagingLog messagingLog) {
+            MessagingLog messagingLog, ContactsManager contactManager) {
         mFileTransferId = transferId;
         mBroadcaster = broadcaster;
         mImService = imService;
@@ -112,6 +116,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         mRcsSettings = rcsSettings;
         mCore = core;
         mMessagingLog = messagingLog;
+        mContactManager = contactManager;
     }
 
     private State getRcsState(FileSharingSession session) {
@@ -376,7 +381,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             if (download.getFileExpiration() > System.currentTimeMillis()) {
                 FileSharingSession session = new DownloadFromAcceptFileSharingSession(mImService,
                         ContentManager.createMmContent(resume.getFile(), resume.getSize(),
-                                resume.getFileName()), download, mRcsSettings, mMessagingLog);
+                                resume.getFileName()), download, mRcsSettings, mMessagingLog,
+                        mContactManager);
                 session.addListener(this);
                 session.startSession();
                 return;
@@ -668,12 +674,12 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                 session = new ResumeUploadFileSharingSession(mImService,
                         ContentManager.createMmContent(resume.getFile(), resume.getSize(),
                                 resume.getFileName()), (FtHttpResumeUpload) resume, mRcsSettings,
-                        mMessagingLog);
+                        mMessagingLog, mContactManager);
             } else {
                 session = new DownloadFromResumeFileSharingSession(mImService,
                         ContentManager.createMmContent(resume.getFile(), resume.getSize(),
                                 resume.getFileName()), (FtHttpResumeDownload) resume, mRcsSettings,
-                        mMessagingLog);
+                        mMessagingLog, mContactManager);
 
             }
             session.addListener(this);

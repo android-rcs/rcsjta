@@ -30,6 +30,7 @@ import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
@@ -85,15 +86,17 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
      * @param messagingLog
      * @param timestamp Local timestamp for the session
      * @param remoteInstanceId
+     * @param contactManager
      */
     public TerminatingHttpFileSharingSession(ImsService parent, MmContent content,
             long fileExpiration, MmContent fileIcon, long iconExpiration, ContactId contact,
             String chatSessionId, String chatContributionId, String fileTransferId,
             boolean isGroup, Uri httpServerAddress, RcsSettings rcsSettings,
-            MessagingLog messagingLog, long timestamp, String remoteInstanceId) {
+            MessagingLog messagingLog, long timestamp, String remoteInstanceId,
+            ContactsManager contactManager) {
         super(parent, content, contact, PhoneUtils.formatContactIdToUri(contact), fileIcon,
                 chatSessionId, chatContributionId, fileTransferId, rcsSettings, messagingLog,
-                timestamp, fileExpiration, iconExpiration);
+                timestamp, fileExpiration, iconExpiration, contactManager);
         mGroupFileTransfer = isGroup;
         mRemoteInstanceId = remoteInstanceId;
         // Instantiate the download manager

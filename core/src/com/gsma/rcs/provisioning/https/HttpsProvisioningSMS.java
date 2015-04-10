@@ -30,6 +30,7 @@ import org.apache.http.protocol.HttpContext;
 
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.messaging.MessagingLog;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.LauncherUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -67,25 +68,34 @@ public class HttpsProvisioningSMS {
     /**
      * Context
      */
-    private Context mContext;
+    private final Context mContext;
+
+    private final RcsSettings mRcsSettings;
+
+    private final LocalContentResolver mLocalContentResolver;
+
+    private final ContactsManager mContactManager;
+
+    private final MessagingLog mMessagingLog;
 
     /**
      * Constructor
      * 
      * @param httpsProvisioningManager
+     * @param localContentResolver
+     * @param rcsSettings
+     * @param messagingLog
+     * @param contactManager
      */
-    public HttpsProvisioningSMS(HttpsProvisioningManager httpsProvisioningManager) {
+    public HttpsProvisioningSMS(HttpsProvisioningManager httpsProvisioningManager,
+            LocalContentResolver localContentResolver, RcsSettings rcsSettings,
+            MessagingLog messagingLog, ContactsManager contactManager) {
         mManager = httpsProvisioningManager;
         mContext = mManager.getContext();
-    }
-
-    /**
-     * Constructor
-     * 
-     * @param context
-     */
-    public HttpsProvisioningSMS(Context context) {
-        mContext = context;
+        mLocalContentResolver = localContentResolver;
+        mRcsSettings = rcsSettings;
+        mMessagingLog = messagingLog;
+        mContactManager = contactManager;
     }
 
     /**
@@ -102,18 +112,13 @@ public class HttpsProvisioningSMS {
     /**
      * Register the SMS provisioning receiver
      * 
-     * @param localContentResolver local content resolver
      * @param smsPort SMS port
      * @param requestUri Request URI
      * @param client Instance of {@link DefaultHttpClient}
      * @param localContext Instance of {@link HttpContext}
-     * @param rcsSettings
-     * @param messagingLog
      */
-    public void registerSmsProvisioningReceiver(final LocalContentResolver localContentResolver,
-            final String smsPort, final String requestUri, final DefaultHttpClient client,
-            final HttpContext localContext, final RcsSettings rcsSettings,
-            final MessagingLog messagingLog) {
+    public void registerSmsProvisioningReceiver(final String smsPort, final String requestUri,
+            final DefaultHttpClient client, final HttpContext localContext) {
         // Unregister previous one
         unregisterSmsProvisioningReceiver();
 
@@ -180,7 +185,7 @@ public class HttpsProvisioningSMS {
                                 .getSystemService(Context.TELEPHONY_SERVICE);
 
                         if (!smsData.contains(tm.getSubscriberId())
-                                && !smsData.contains(rcsSettings.getUserProfileImsPrivateId())) {
+                                && !smsData.contains(mRcsSettings.getUserProfileImsPrivateId())) {
                             if (logActivated) {
                                 sLogger.debug("Binary SMS reconfiguration received but not with my ID");
                             }
@@ -189,11 +194,11 @@ public class HttpsProvisioningSMS {
 
                         new Thread() {
                             public void run() {
-                                rcsSettings.setProvisioningVersion("0");
+                                mRcsSettings.setProvisioningVersion("0");
                                 LauncherUtils.stopRcsService(ctx);
-                                LauncherUtils.resetRcsConfig(ctx, localContentResolver,
-                                        rcsSettings, messagingLog);
-                                LauncherUtils.launchRcsService(ctx, true, false, rcsSettings);
+                                LauncherUtils.resetRcsConfig(ctx, mLocalContentResolver,
+                                        mRcsSettings, mMessagingLog, mContactManager);
+                                LauncherUtils.launchRcsService(ctx, true, false, mRcsSettings);
                             }
                         }.start();
                     } else {

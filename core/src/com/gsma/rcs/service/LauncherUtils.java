@@ -163,9 +163,10 @@ public class LauncherUtils {
      * @param localContentResolver Local content resolver
      * @param rcsSettings
      * @param mMessagingLog
+     * @param contactManager
      */
     public static void resetRcsConfig(Context ctx, LocalContentResolver localContentResolver,
-            RcsSettings rcsSettings, MessagingLog mMessagingLog) {
+            RcsSettings rcsSettings, MessagingLog mMessagingLog, ContactsManager contactManager) {
         if (sLogger.isActivated()) {
             sLogger.debug("Reset RCS config");
         }
@@ -186,12 +187,11 @@ public class LauncherUtils {
         RichCallHistory.createInstance(localContentResolver);
         RichCallHistory.getInstance().deleteAllEntries();
 
-        // Clean the previous account RCS databases : because
-        // they may not be overwritten in the case of a very new account
-        // or if the back-up files of an older one have been destroyed
-        ContactsManager.createInstance(ctx, ctx.getContentResolver(), localContentResolver,
-                rcsSettings);
-        ContactsManager.getInstance().deleteRCSEntries();
+        /*
+         * Clean the previous account RCS databases : because they may not be overwritten in the
+         * case of a very new account or if the back-up files of an older one have been destroyed.
+         */
+        contactManager.deleteRCSEntries();
 
         // Remove the RCS account
         AuthenticationService.removeRcsAccount(ctx, null);

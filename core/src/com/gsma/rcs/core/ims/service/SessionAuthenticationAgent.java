@@ -140,34 +140,32 @@ public class SessionAuthenticationAgent {
      * @throws InvalidArgumentException
      */
     public void setAuthorizationHeader(SipRequest request) throws InvalidArgumentException {
-            // Re-use the registration authentication (nonce caching)
-            if ((registerDigest == null) || (registerDigest.getNextnonce() == null)) {
-                return;
-            }
+        // Re-use the registration authentication (nonce caching)
+        if ((registerDigest == null) || (registerDigest.getNextnonce() == null)) {
+            return;
+        }
 
-            // Update nonce parameters
-            registerDigest.updateNonceParameters();
+        // Update nonce parameters
+        registerDigest.updateNonceParameters();
 
-            // Calculate response
-            String user = ImsModule.IMS_USER_PROFILE.getPrivateID();
-            String password = ImsModule.IMS_USER_PROFILE.getPassword();
-            String response = registerDigest.calculateResponse(user, password, request.getMethod(),
-                    request.getRequestURI(), registerDigest.buildNonceCounter(),
-                    request.getContent());
+        // Calculate response
+        String user = ImsModule.IMS_USER_PROFILE.getPrivateID();
+        String password = ImsModule.IMS_USER_PROFILE.getPassword();
+        String response = registerDigest.calculateResponse(user, password, request.getMethod(),
+                request.getRequestURI(), registerDigest.buildNonceCounter(), request.getContent());
 
-            // Build the Authorization header
-            String auth = "Digest username=\"" + ImsModule.IMS_USER_PROFILE.getPrivateID() + "\""
-                    + ",uri=\"" + request.getRequestURI() + "\"" + ",algorithm=MD5" + ",realm=\""
-                    + registerDigest.getRealm() + "\"" + ",nc="
-                    + registerDigest.buildNonceCounter() + ",nonce=\""
-                    + registerDigest.getNextnonce() + "\"" + ",response=\"" + response + "\""
-                    + ",cnonce=\"" + registerDigest.getCnonce() + "\"";
-            String qop = registerDigest.getQop();
-            if (qop != null) {
-                auth += ",qop=" + qop;
-            }
+        // Build the Authorization header
+        String auth = "Digest username=\"" + ImsModule.IMS_USER_PROFILE.getPrivateID() + "\""
+                + ",uri=\"" + request.getRequestURI() + "\"" + ",algorithm=MD5" + ",realm=\""
+                + registerDigest.getRealm() + "\"" + ",nc=" + registerDigest.buildNonceCounter()
+                + ",nonce=\"" + registerDigest.getNextnonce() + "\"" + ",response=\"" + response
+                + "\"" + ",cnonce=\"" + registerDigest.getCnonce() + "\"";
+        String qop = registerDigest.getQop();
+        if (qop != null) {
+            auth += ",qop=" + qop;
+        }
 
-            // Set header in the SIP message
+        // Set header in the SIP message
         request.addHeader(ProxyAuthorizationHeader.NAME, auth);
     }
 }

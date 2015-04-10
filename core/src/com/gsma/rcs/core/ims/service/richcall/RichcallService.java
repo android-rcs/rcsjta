@@ -112,10 +112,7 @@ public class RichcallService extends ImsService {
      */
     private Map<String, GeolocTransferSession> mGeolocTransferSessionCache = new HashMap<String, GeolocTransferSession>();
 
-    /**
-     * Contacts manager
-     */
-    private final ContactsManager mContactsManager;
+    private final ContactsManager mContactManager;
 
     private final RcsSettings mRcsSettings;
 
@@ -133,7 +130,7 @@ public class RichcallService extends ImsService {
             RcsSettings rcsSettings) throws CoreException {
         super(parent, true);
         mCore = core;
-        mContactsManager = contactsManager;
+        mContactManager = contactsManager;
         mRcsSettings = rcsSettings;
     }
 
@@ -475,7 +472,7 @@ public class RichcallService extends ImsService {
 
         // Create a new session
         OriginatingImageTransferSession session = new OriginatingImageTransferSession(this,
-                content, contact, thumbnail, mRcsSettings, timestamp);
+                content, contact, thumbnail, mRcsSettings, timestamp, mContactManager);
 
         return session;
     }
@@ -514,7 +511,7 @@ public class RichcallService extends ImsService {
         }
 
         // Test if the contact is blocked
-        if (mContactsManager.isBlockedForContact(contact)) {
+        if (mContactManager.isBlockedForContact(contact)) {
             if (logActivated) {
                 sLogger.debug("Contact " + contact
                         + " is blocked: automatically reject the sharing invitation");
@@ -590,7 +587,7 @@ public class RichcallService extends ImsService {
 
         // Create a new session
         ImageTransferSession session = new TerminatingImageTransferSession(this, invite, contact,
-                mRcsSettings, timestamp);
+                mRcsSettings, timestamp, mContactManager);
 
         getImsModule().getCore().getListener().handleContentSharingTransferInvitation(session);
 
@@ -662,7 +659,7 @@ public class RichcallService extends ImsService {
         // Create a new session
         OriginatingVideoStreamingSession session = new OriginatingVideoStreamingSession(this,
                 player, ContentManager.createGenericLiveVideoContent(), contact, mRcsSettings,
-                timestamp);
+                timestamp, mContactManager);
 
         return session;
     }
@@ -701,7 +698,7 @@ public class RichcallService extends ImsService {
         }
 
         // Test if the contact is blocked
-        if (mContactsManager.isBlockedForContact(contact)) {
+        if (mContactManager.isBlockedForContact(contact)) {
             if (logActivated) {
                 sLogger.debug("Contact " + contact
                         + " is blocked: automatically reject the sharing invitation");
@@ -753,7 +750,7 @@ public class RichcallService extends ImsService {
 
         // Create a new session
         VideoStreamingSession session = new TerminatingVideoStreamingSession(this, invite, contact,
-                mRcsSettings, timestamp);
+                mRcsSettings, timestamp, mContactManager);
 
         getImsModule().getCore().getListener().handleContentSharingStreamingInvitation(session);
 
@@ -789,7 +786,7 @@ public class RichcallService extends ImsService {
 
         // Create a new session
         OriginatingGeolocTransferSession session = new OriginatingGeolocTransferSession(this,
-                content, contact, geoloc, mRcsSettings, timestamp);
+                content, contact, geoloc, mRcsSettings, timestamp, mContactManager);
 
         return session;
     }
@@ -829,7 +826,7 @@ public class RichcallService extends ImsService {
         }
 
         // Test if the contact is blocked
-        if (mContactsManager.isBlockedForContact(contact)) {
+        if (mContactManager.isBlockedForContact(contact)) {
             if (logActivated) {
                 sLogger.debug("Contact " + contact
                         + " is blocked: automatically reject the sharing invitation");
@@ -881,7 +878,7 @@ public class RichcallService extends ImsService {
 
         // Create a new session
         GeolocTransferSession session = new TerminatingGeolocTransferSession(this, invite, contact,
-                mRcsSettings, timestamp);
+                mRcsSettings, timestamp, mContactManager);
 
         getImsModule().getCore().getListener().handleContentSharingTransferInvitation(session);
 

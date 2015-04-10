@@ -80,8 +80,7 @@ public class HistoryServiceImpl extends IHistoryService.Stub {
      * @param columnMapping
      */
     /* Only raw map types are supported by AIDL. */
-    private static final void assertMapTypeOfString(@SuppressWarnings("rawtypes")
-    Map columnMapping) {
+    private static final void assertMapTypeOfString(@SuppressWarnings("rawtypes") Map columnMapping) {
         if (columnMapping == null) {
             throw new ServerApiIllegalArgumentException(
                     "Column mapping of history log field names to internal field names must not be null!");
@@ -119,8 +118,7 @@ public class HistoryServiceImpl extends IHistoryService.Stub {
     public void registerExtraHistoryLogMember(int providerId, Uri providerUri, Uri databaseUri,
             String table,
             /* Only raw map types are supported by AIDL. */
-            @SuppressWarnings("rawtypes")
-            Map columnMapping) throws RemoteException {
+            @SuppressWarnings("rawtypes") Map columnMapping) throws RemoteException {
         try {
             assertMapTypeOfString(columnMapping);
             retrieveHistoryLogProvider().registerDatabase(providerId, providerUri, databaseUri,

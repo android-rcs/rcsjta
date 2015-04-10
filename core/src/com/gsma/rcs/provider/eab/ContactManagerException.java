@@ -23,15 +23,15 @@ package com.gsma.rcs.provider.eab;
  * 
  * @author jexa7410
  */
-public class ContactsManagerException extends java.lang.Exception {
+public class ContactManagerException extends java.lang.Exception {
     static final long serialVersionUID = 1L;
 
     /**
-     * Constructor
+     * Constructs a new Exception with the current stack trace and the specified cause.
      * 
-     * @param error Error message
+     * @param e
      */
-    public ContactsManagerException(String error) {
-        super(error);
+    public ContactManagerException(Exception e) {
+        super(e);
     }
 }

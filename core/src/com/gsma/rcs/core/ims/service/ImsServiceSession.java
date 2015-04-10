@@ -147,6 +147,8 @@ public abstract class ImsServiceSession extends Thread {
 
     protected final RcsSettings mRcsSettings;
 
+    protected final ContactsManager mContactManager;
+
     /**
      * Session timestamp
      */
@@ -165,14 +167,16 @@ public abstract class ImsServiceSession extends Thread {
      * @param remoteUri Remote URI
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
+     * @param contactManager
      */
     public ImsServiceSession(ImsService imsService, ContactId contact, String remoteUri,
-            RcsSettings rcsSettings, long timestamp) {
+            RcsSettings rcsSettings, long timestamp, ContactsManager contactManager) {
         mImsService = imsService;
         mContact = contact;
         mRemoteUri = remoteUri;
         mAuthenticationAgent = new SessionAuthenticationAgent(imsService.getImsModule());
         mUpdateMgr = new UpdateSessionManager(this, rcsSettings);
+        mContactManager = contactManager;
         mRcsSettings = rcsSettings;
         mRingingPeriod = mRcsSettings.getRingingPeriod();
         mTimestamp = timestamp;
@@ -199,7 +203,7 @@ public abstract class ImsServiceSession extends Thread {
         mDialogPath.setAuthenticationAgent(getAuthenticationAgent());
 
         if (mContact != null) {
-            mRemoteDisplayName = ContactsManager.getInstance().getContactDisplayName(mContact);
+            mRemoteDisplayName = mContactManager.getContactDisplayName(mContact);
         }
     }
 

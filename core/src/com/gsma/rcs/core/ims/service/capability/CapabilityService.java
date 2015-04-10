@@ -95,10 +95,10 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
         pollingManager = new PollingManager(this, mRcsSettings, mContactsManager);
 
         // Instantiate the options manager
-        optionsManager = new OptionsManager(parent, mRcsSettings);
+        optionsManager = new OptionsManager(parent, mRcsSettings, mContactsManager);
 
         // Instantiate the anonymous fetch manager
-        anonymousFetchManager = new AnonymousFetchManager(parent, mRcsSettings);
+        anonymousFetchManager = new AnonymousFetchManager(parent, mRcsSettings, mContactsManager);
     }
 
     /**

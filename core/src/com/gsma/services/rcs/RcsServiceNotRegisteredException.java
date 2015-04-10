@@ -22,8 +22,6 @@
 
 package com.gsma.services.rcs;
 
-import android.text.TextUtils;
-
 /**
  * Rcs service not registered exception
  * <p>

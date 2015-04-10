@@ -24,6 +24,7 @@ package com.gsma.rcs.provisioning.https;
 
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.messaging.MessagingLog;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provisioning.ProvisioningInfo;
 import com.gsma.rcs.service.LauncherUtils;
@@ -33,6 +34,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -75,6 +77,8 @@ public class HttpsProvisioningService extends Service {
 
     private MessagingLog mMessagingLog;
 
+    private ContactsManager mContactManager;
+
     /**
      * Retry action for provisioning failure
      */
@@ -92,10 +96,13 @@ public class HttpsProvisioningService extends Service {
             sLogger.debug("onCreate");
         }
         mContext = getApplicationContext();
-        mLocalContentResolver = new LocalContentResolver(mContext.getContentResolver());
+        ContentResolver contentResolver = mContext.getContentResolver();
+        mLocalContentResolver = new LocalContentResolver(contentResolver);
         mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
         mMessagingLog = MessagingLog.createInstance(mContext, mLocalContentResolver, mRcsSettings);
         mRetryIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_RETRY), 0);
+        mContactManager = ContactsManager.createInstance(mContext, contentResolver,
+                mLocalContentResolver, mRcsSettings);
     }
 
     @Override
@@ -125,7 +132,7 @@ public class HttpsProvisioningService extends Service {
         registerReceiver(retryReceiver, new IntentFilter(ACTION_RETRY));
 
         mHttpsProvisioningMng = new HttpsProvisioningManager(mContext, mLocalContentResolver,
-                mRetryIntent, first, user, mRcsSettings, mMessagingLog);
+                mRetryIntent, first, user, mRcsSettings, mMessagingLog, mContactManager);
         if (logActivated) {
             sLogger.debug(new StringBuilder("Provisioning (boot=").append(first).append(") (user=")
                     .append(user).append(") (version=").append(version).append(")").toString());

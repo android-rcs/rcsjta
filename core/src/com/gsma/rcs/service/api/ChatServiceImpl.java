@@ -280,13 +280,11 @@ public class ChatServiceImpl extends IChatService.Stub {
      */
     public void receiveOneOneChatInvitation(OneToOneChatSession session) {
         ContactId contact = session.getRemoteContact();
+        String displayName = session.getRemoteDisplayName();
         if (sLogger.isActivated()) {
-            sLogger.info("Receive chat invitation from " + contact + " (display="
-                    + session.getRemoteDisplayName() + ")");
+            sLogger.info("Chat invitation from " + contact + " (display=" + displayName + ")");
         }
-        // Update displayName of remote contact
-        mContactManager.setContactDisplayName(contact, session.getRemoteDisplayName());
-
+        mContactManager.setContactDisplayName(contact, displayName);
         // Add session in the list
         OneToOneChatImpl oneToOneChat = getOrCreateOneToOneChat(contact);
         session.addListener(oneToOneChat);
@@ -429,14 +427,14 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param session Chat session
      */
     public void receiveGroupChatInvitation(GroupChatSession session) {
+        String displayName = session.getRemoteDisplayName();
+        ContactId remote = session.getRemoteContact();
         if (sLogger.isActivated()) {
-            sLogger.info("Receive group chat invitation from " + session.getRemoteContact()
-                    + " (display=" + session.getRemoteDisplayName() + ")");
+            sLogger.info("Group chat invitation from " + remote + " (display=" + displayName + ")");
         }
-
-        // Update displayName of remote contact
-        mContactManager.setContactDisplayName(session.getRemoteContact(),
-                session.getRemoteDisplayName());
+        if (remote != null) {
+            mContactManager.setContactDisplayName(remote, displayName);
+        }
         String chatId = session.getContributionID();
         GroupChatPersistedStorageAccessor storageAccessor = new GroupChatPersistedStorageAccessor(
                 chatId, mMessagingLog, mRcsSettings);

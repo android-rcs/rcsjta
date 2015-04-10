@@ -32,6 +32,7 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.capability.CapabilityUtils;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -65,10 +66,12 @@ public abstract class GenericSipSession extends ImsServiceSession {
      * @param featureTag Feature tag
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
+     * @param contactManager
      */
     public GenericSipSession(ImsService parent, ContactId contact, String featureTag,
-            RcsSettings rcsSettings, long timestamp) {
-        super(parent, contact, PhoneUtils.formatContactIdToUri(contact), rcsSettings, timestamp);
+            RcsSettings rcsSettings, long timestamp, ContactsManager contactManager) {
+        super(parent, contact, PhoneUtils.formatContactIdToUri(contact), rcsSettings, timestamp,
+                contactManager);
 
         // Set the service feature tag
         mFeatureTag = featureTag;

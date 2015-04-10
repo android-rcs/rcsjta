@@ -37,7 +37,7 @@ import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.presence.xdm.XdmManager;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.eab.ContactsManager;
-import com.gsma.rcs.provider.eab.ContactsManagerException;
+import com.gsma.rcs.provider.eab.ContactManagerException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.StartService;
 import com.gsma.rcs.utils.ContactUtil;
@@ -284,7 +284,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                 // Set the presence sharing status to blocked
                 try {
                     mContactsManager.blockContact(contact);
-                } catch (ContactsManagerException e) {
+                } catch (ContactManagerException e) {
                     if (logActivated) {
                         logger.error("Something went wrong when blocking contact " + contact, e);
                     }

@@ -44,6 +44,7 @@ import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimParser;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtil;
@@ -84,12 +85,13 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
+     * @param contactManager
      */
     public TerminatingStoreAndForwardOneToOneChatNotificationSession(ImsService parent,
             SipRequest invite, ContactId contact, RcsSettings rcsSettings,
-            MessagingLog messagingLog, long timestamp) {
+            MessagingLog messagingLog, long timestamp, ContactsManager contactManager) {
         super(parent, contact, PhoneUtils.formatContactIdToUri(contact), null, rcsSettings,
-                messagingLog, timestamp);
+                messagingLog, timestamp, contactManager);
 
         // Create the MSRP manager
         int localMsrpPort = NetworkRessourceManager.generateLocalMsrpPort(rcsSettings);

@@ -100,9 +100,8 @@ public class StartService extends Service {
 
     private MessagingLog mMessagingLog;
 
-    /**
-     * The logger
-     */
+    private ContactsManager mContactManager;
+
     private static final Logger sLogger = Logger.getLogger(StartService.class.getSimpleName());
 
     private static final String INTENT_KEY_BOOT = "boot";
@@ -111,9 +110,13 @@ public class StartService extends Service {
     @Override
     public void onCreate() {
         Context context = getApplicationContext();
+        ContentResolver contentResolver = context.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(context);
         mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
         mMessagingLog = MessagingLog.createInstance(context, mLocalContentResolver, mRcsSettings);
+
+        mContactManager = ContactsManager.createInstance(context, contentResolver,
+                mLocalContentResolver, mRcsSettings);
 
         ConfigurationMode mode = mRcsSettings.getConfigurationMode();
         if (sLogger.isActivated()) {
@@ -302,7 +305,8 @@ public class StartService extends Service {
             }
 
             // Reset RCS account
-            LauncherUtils.resetRcsConfig(ctx, mLocalContentResolver, mRcsSettings, mMessagingLog);
+            LauncherUtils.resetRcsConfig(ctx, mLocalContentResolver, mRcsSettings, mMessagingLog,
+                    mContactManager);
 
             // Restore current account settings
             if (logActivated) {
@@ -343,7 +347,8 @@ public class StartService extends Service {
                     sLogger.debug("Recreate a new RCS account");
                 }
                 AuthenticationService.createRcsAccount(ctx, localContentResolver,
-                        getString(R.string.rcs_core_account_username), true, mRcsSettings);
+                        getString(R.string.rcs_core_account_username), true, mRcsSettings,
+                        mContactManager);
             }
         } else if (hasChangedAccount()) {
             // Account has changed (i.e. new SIM card): delete the current account and create a
@@ -352,10 +357,7 @@ public class StartService extends Service {
                 sLogger.debug(new StringBuilder("Deleting the old RCS account for ").append(
                         mLastUserAccount).toString());
             }
-            ContentResolver contentResolver = ctx.getContentResolver();
-            ContactsManager
-                    .createInstance(ctx, contentResolver, localContentResolver, mRcsSettings);
-            ContactsManager.getInstance().deleteRCSEntries();
+            mContactManager.deleteRCSEntries();
             AuthenticationService.removeRcsAccount(ctx, null);
 
             if (logActivated) {
@@ -363,7 +365,8 @@ public class StartService extends Service {
                         mCurrentUserAccount).toString());
             }
             AuthenticationService.createRcsAccount(ctx, localContentResolver,
-                    getString(R.string.rcs_core_account_username), true, mRcsSettings);
+                    getString(R.string.rcs_core_account_username), true, mRcsSettings,
+                    mContactManager);
         }
 
         // Save the current end user account

@@ -52,7 +52,8 @@ public class LocaleChangedReceiver extends BroadcastReceiver {
         ContentResolver contentResolver = context.getContentResolver();
         LocalContentResolver localContentResolver = new LocalContentResolver(context);
         RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
-        ContactsManager.createInstance(context, contentResolver, localContentResolver, rcsSettings);
-        ContactsManager.getInstance().updateStrings();
+        ContactsManager contactManager = ContactsManager.createInstance(context, contentResolver,
+                localContentResolver, rcsSettings);
+        contactManager.updateStrings();
     }
 }

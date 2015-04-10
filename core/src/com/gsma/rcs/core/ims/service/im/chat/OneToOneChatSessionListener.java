@@ -47,7 +47,6 @@ public interface OneToOneChatSessionListener extends ChatSessionListener {
      * IncomingSessionInitiation error
      * 
      * @param error Error
-     * @param message
      */
     public void handleIncomingSessionInitiationError(ChatError error);
 }

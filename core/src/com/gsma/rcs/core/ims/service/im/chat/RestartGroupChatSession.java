@@ -32,6 +32,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
@@ -71,16 +72,19 @@ public class RestartGroupChatSession extends GroupChatSession {
      * @param parent IMS service
      * @param conferenceId Conference ID
      * @param subject Subject associated to the session
-     * @param storedParticipants List of invited participants
+     * @param storedParticipants map of invited participants
      * @param contributionId Contribution ID
      * @param rcsSettings RCS settings
      * @param messagingLog Messaging log
      * @param timestamp Local timestamp for the session
+     * @param contactManager
      */
     public RestartGroupChatSession(ImsService parent, String conferenceId, String subject,
             String contributionId, Map<ContactId, ParticipantStatus> storedParticipants,
-            RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp) {
-        super(parent, null, conferenceId, storedParticipants, rcsSettings, messagingLog, timestamp);
+            RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
+            ContactsManager contactManager) {
+        super(parent, null, conferenceId, storedParticipants, rcsSettings, messagingLog, timestamp,
+                contactManager);
 
         if (!TextUtils.isEmpty(subject)) {
             setSubject(subject);
@@ -118,7 +122,7 @@ public class RestartGroupChatSession extends GroupChatSession {
                     getMsrpMgr().getLocalMsrpPath(), SdpUtils.DIRECTION_SENDRECV);
 
             Set<ContactId> invitees = new HashSet<ContactId>();
-            Map<ContactId,ParticipantStatus> participants = getParticipants();
+            Map<ContactId, ParticipantStatus> participants = getParticipants();
             for (Map.Entry<ContactId, ParticipantStatus> participant : participants.entrySet()) {
                 switch (participants.get(participant.getValue())) {
                     case INVITE_QUEUED:
@@ -133,7 +137,7 @@ public class RestartGroupChatSession extends GroupChatSession {
                         break;
                 }
             }
-            
+
             String resourceList = ChatUtils.generateChatResourceList(invitees);
 
             String multipart = new StringBuilder(Multipart.BOUNDARY_DELIMITER).append(BOUNDARY_TAG)

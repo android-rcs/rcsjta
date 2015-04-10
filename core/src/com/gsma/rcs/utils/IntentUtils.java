@@ -35,7 +35,7 @@ public class IntentUtils {
 
     private static final String ADD_FLAGS_METHOD_NAME = "addFlags";
 
-    private static final Class[] ADD_FLAGS_PARAM = new Class[] {
+    private static final Class<?>[] ADD_FLAGS_PARAM = new Class[] {
         int.class
     };
 

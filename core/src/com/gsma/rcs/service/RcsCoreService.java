@@ -238,6 +238,9 @@ public class RcsCoreService extends Service implements CoreListener {
         mMessagingLog = MessagingLog.createInstance(mContext, mLocalContentResolver, mRcsSettings);
         RichCallHistory.createInstance(mLocalContentResolver);
         mRichCallHistory = RichCallHistory.getInstance();
+        mContactManager = ContactsManager.createInstance(mContext, mContentResolver,
+                mLocalContentResolver, mRcsSettings);
+
         // Set application context
         AndroidFactory.setApplicationContext(mContext, mRcsSettings);
 
@@ -301,12 +304,9 @@ public class RcsCoreService extends Service implements CoreListener {
             // Instantiate the contactUtils instance (CountryCode is already set)
             com.gsma.services.rcs.contact.ContactUtil.getInstance(this);
 
-            ContactsManager.createInstance(mContext, mContentResolver, mLocalContentResolver,
-                    mRcsSettings);
             IPCallHistory.createInstance(mLocalContentResolver);
 
             HistoryLog.createInstance(mLocalContentResolver);
-            mContactManager = ContactsManager.getInstance();
             mHistoryLog = HistoryLog.getInstance();
 
             // Create the core
@@ -958,8 +958,8 @@ public class RcsCoreService extends Service implements CoreListener {
         /* Try to auto-rejoin group chats that are still marked as active. */
         mImOperationExecutor.execute(new GroupChatAutoRejoinTask(mMessagingLog, core));
         /* Try to start auto resuming of HTTP file transfers marked as PAUSED_BY_SYSTEM */
-        mImOperationExecutor
-                .execute(new FtHttpResumeManager(imService, mRcsSettings, mMessagingLog));
+        mImOperationExecutor.execute(new FtHttpResumeManager(imService, mRcsSettings,
+                mMessagingLog, mContactManager));
         /* Try to dequeue one-to-one chat messages and one-to-one file transfers. */
         mImOperationExecutor.execute(new OneToOneChatDequeueTask(IM_OPERATION_LOCK, imService,
                 mChatApi, mFtApi, mHistoryLog, mMessagingLog, mContactManager, mRcsSettings));

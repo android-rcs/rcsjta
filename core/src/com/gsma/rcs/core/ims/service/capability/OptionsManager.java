@@ -59,6 +59,8 @@ public class OptionsManager implements DiscoveryManager {
 
     private final RcsSettings mRcsSettings;
 
+    private final ContactsManager mContactManager;
+
     /**
      * The logger
      */
@@ -69,10 +71,12 @@ public class OptionsManager implements DiscoveryManager {
      * 
      * @param parent IMS module
      * @param rcsSettings
+     * @param contactManager
      */
-    public OptionsManager(ImsModule parent, RcsSettings rcsSettings) {
+    public OptionsManager(ImsModule parent, RcsSettings rcsSettings, ContactsManager contactManager) {
         mImsModule = parent;
         mRcsSettings = rcsSettings;
+        mContactManager = contactManager;
     }
 
     /**
@@ -107,13 +111,14 @@ public class OptionsManager implements DiscoveryManager {
         }
 
         // Update capability time of last request
-        ContactsManager.getInstance().updateCapabilitiesTimeLastRequest(contact);
+        mContactManager.updateCapabilitiesTimeLastRequest(contact);
 
         // Start request in background
         try {
             boolean richcall = mImsModule.getRichcallService().isCallConnectedWith(contact);
             OptionsRequestTask task = new OptionsRequestTask(mImsModule, contact,
-                    CapabilityUtils.getSupportedFeatureTags(richcall, mRcsSettings), mRcsSettings);
+                    CapabilityUtils.getSupportedFeatureTags(richcall, mRcsSettings), mRcsSettings,
+                    mContactManager);
             mThreadPool.submit(task);
             return true;
         } catch (Exception e) {
@@ -187,12 +192,12 @@ public class OptionsManager implements DiscoveryManager {
         // Update capabilities in database
         if (capabilities.isImSessionSupported()) {
             // RCS-e contact
-            ContactsManager.getInstance().setContactCapabilities(contact, capabilities,
-                    RcsStatus.RCS_CAPABLE, RegistrationState.ONLINE);
+            mContactManager.setContactCapabilities(contact, capabilities, RcsStatus.RCS_CAPABLE,
+                    RegistrationState.ONLINE);
         } else {
             // Not a RCS-e contact
-            ContactsManager.getInstance().setContactCapabilities(contact, capabilities,
-                    RcsStatus.NOT_RCS, RegistrationState.UNKNOWN);
+            mContactManager.setContactCapabilities(contact, capabilities, RcsStatus.NOT_RCS,
+                    RegistrationState.UNKNOWN);
         }
 
         // Notify listener

@@ -26,6 +26,7 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.StorageUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -94,11 +95,12 @@ public abstract class FileSharingSession extends ImsServiceSession {
      * @param filetransferId
      * @param rcsSettings
      * @param timestamp Local timestamp for the session
+     * @param contactManager
      */
     public FileSharingSession(ImsService parent, MmContent content, ContactId contact,
             String remoteUri, MmContent fileIcon, String filetransferId, RcsSettings rcsSettings,
-            long timestamp) {
-        super(parent, contact, remoteUri, rcsSettings, timestamp);
+            long timestamp, ContactsManager contactManager) {
+        super(parent, contact, remoteUri, rcsSettings, timestamp, contactManager);
 
         mContent = content;
         mFileIcon = fileIcon;

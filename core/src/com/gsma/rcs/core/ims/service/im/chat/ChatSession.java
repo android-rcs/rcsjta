@@ -165,10 +165,12 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      * @param messagingLog Messaging log
      * @param firstMsg First message in session
      * @param timestamp Local timestamp for the session
+     * @param contactManager
      */
     public ChatSession(ImsService parent, ContactId contact, String remoteUri,
-            RcsSettings rcsSettings, MessagingLog messagingLog, ChatMessage firstMsg, long timestamp) {
-        super(parent, contact, remoteUri, rcsSettings, timestamp);
+            RcsSettings rcsSettings, MessagingLog messagingLog, ChatMessage firstMsg,
+            long timestamp, ContactsManager contactManager) {
+        super(parent, contact, remoteUri, rcsSettings, timestamp, contactManager);
 
         mMessagingLog = messagingLog;
         mActivityMgr = new ChatActivityManager(this, rcsSettings);
@@ -753,7 +755,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             long timestampSent) {
         FileTransferHttpThumbnail fileTransferHttpThumbnail = fileTransferInfo.getFileThumbnail();
         // Test if the contact is blocked
-        if (ContactsManager.getInstance().isBlockedForContact(contact)) {
+        if (mContactManager.isBlockedForContact(contact)) {
             if (sLogger.isActivated()) {
                 sLogger.debug(new StringBuilder("Contact ").append(contact)
                         .append(" is blocked, reject the HTTP File transfer").toString());
@@ -783,13 +785,17 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
             int errorCode = error.getErrorCode();
             switch (errorCode) {
                 case FileSharingError.MEDIA_SIZE_TOO_BIG:
-                    getImsService().getImsModule().getCoreListener()
+                    getImsService()
+                            .getImsModule()
+                            .getCoreListener()
                             .handleFileTransferInvitationRejected(contact,
                                     fileTransferInfo.getLocalMmContent(), fileIconContent,
                                     ReasonCode.REJECTED_MAX_SIZE, timestamp, timestampSent);
                     break;
                 case FileSharingError.NOT_ENOUGH_STORAGE_SPACE:
-                    getImsService().getImsModule().getCoreListener()
+                    getImsService()
+                            .getImsModule()
+                            .getCoreListener()
                             .handleFileTransferInvitationRejected(contact,
                                     fileTransferInfo.getLocalMmContent(), fileIconContent,
                                     ReasonCode.REJECTED_LOW_SPACE, timestamp, timestampSent);
@@ -822,7 +828,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 
         DownloadFromInviteFileSharingSession fileSession = new DownloadFromInviteFileSharingSession(
                 getImsService(), this, fileTransferInfo, msgId, contact, displayName, mRcsSettings,
-                mMessagingLog, timestamp, timestampSent);
+                mMessagingLog, timestamp, timestampSent, mContactManager);
         if (fileTransferHttpThumbnail != null) {
             try {
                 fileSession.downloadFileIcon();

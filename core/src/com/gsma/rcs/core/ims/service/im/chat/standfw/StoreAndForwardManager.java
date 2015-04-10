@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.im.chat.standfw;
 
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
+import com.gsma.rcs.provider.eab.ContactsManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
@@ -38,14 +39,14 @@ public class StoreAndForwardManager {
      */
     public final static String SERVICE_URI = "rcse-standfw@";
 
-    /**
-     * IMS service
-     */
-    private ImsService imsService;
+    private ImsService mImsService;
 
-    /**
-     * The logger
-     */
+    private final RcsSettings mRcsSettings;
+
+    private final MessagingLog mMessagingLog;
+
+    private final ContactsManager mContactManager;
+
     private final static Logger logger = Logger.getLogger(StoreAndForwardManager.class
             .getSimpleName());
 
@@ -53,9 +54,16 @@ public class StoreAndForwardManager {
      * Constructor
      * 
      * @param imsService IMS service
+     * @param rcsSettings
+     * @param contactManager
+     * @param messagingLog
      */
-    public StoreAndForwardManager(ImsService imsService) {
-        this.imsService = imsService;
+    public StoreAndForwardManager(ImsService imsService, RcsSettings rcsSettings,
+            ContactsManager contactManager, MessagingLog messagingLog) {
+        mImsService = imsService;
+        mRcsSettings = rcsSettings;
+        mContactManager = contactManager;
+        mMessagingLog = messagingLog;
     }
 
     /**
@@ -63,19 +71,17 @@ public class StoreAndForwardManager {
      * 
      * @param invite Received invite
      * @param contact Contact identifier
-     * @param rcsSettings RCS settings
-     * @param messagingLog Messaging log
      * @param timestamp Local timestamp when got SipRequest
      */
-    public void receiveStoredMessages(SipRequest invite, ContactId contact,
-            RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp) {
+    public void receiveStoredMessages(SipRequest invite, ContactId contact, long timestamp) {
         if (logger.isActivated()) {
             logger.debug("Receive stored messages");
         }
         TerminatingStoreAndForwardOneToOneChatMessageSession session = new TerminatingStoreAndForwardOneToOneChatMessageSession(
-                imsService, invite, contact, rcsSettings, messagingLog, timestamp);
+                mImsService, invite, contact, mRcsSettings, mMessagingLog, timestamp,
+                mContactManager);
 
-        imsService.getImsModule().getCore().getListener()
+        mImsService.getImsModule().getCore().getListener()
                 .handleStoreAndForwardMsgSessionInvitation(session);
 
         session.startSession();
@@ -86,19 +92,16 @@ public class StoreAndForwardManager {
      * 
      * @param invite Received invite
      * @param contact Contact identifier
-     * @param rcsSettings RCS settings
-     * @param messagingLog Messaging log
      * @param timestamp Local timestamp when got SipRequest
      */
-    public void receiveStoredNotifications(SipRequest invite, ContactId contact,
-            RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp) {
+    public void receiveStoredNotifications(SipRequest invite, ContactId contact, long timestamp) {
         if (logger.isActivated()) {
             logger.debug("Receive stored notifications");
         }
         TerminatingStoreAndForwardOneToOneChatNotificationSession session = new TerminatingStoreAndForwardOneToOneChatNotificationSession(
-                imsService, invite, contact, rcsSettings, messagingLog, timestamp);
+                mImsService, invite, contact, mRcsSettings, mMessagingLog, timestamp,
+                mContactManager);
 
-        // Start the session
         session.startSession();
     }
 }

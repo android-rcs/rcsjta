@@ -53,22 +53,22 @@ public class AddressBookManager {
     /**
      * Content resolver
      */
-    private ContentResolver contentResolver;
+    private ContentResolver mContentResolver;
 
     /**
      * Cursor used to observe ContactsContract
      */
-    private Cursor contactsContractCursor;
+    private Cursor mContactsContractCursor;
 
     /**
      * Content observer
      */
-    private ContactsContractObserver contactsContractObserver;
+    private ContactsContractObserver mContactsContractObserver;
 
     /**
      * Check handler
      */
-    private CheckHandler checkHandler = new CheckHandler();
+    private CheckHandler mCheckHandler = new CheckHandler();
 
     /**
      * Check message ID
@@ -83,50 +83,56 @@ public class AddressBookManager {
     /**
      * Content observer registered flag
      */
-    private boolean observerIsRegistered = false;
+    private boolean mObserverIsRegistered = false;
 
     /**
      * Background service executor
      */
-    private ExecutorService cleanupExecutor;
+    private ExecutorService mCleanupExecutor;
 
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private Logger mLogger = Logger.getLogger(this.getClass().getName());
+
+    private ContactsManager mContactManager;
 
     /**
      * Constructor
+     * 
+     * @param contactManager
+     * @throws CoreException
      */
-    public AddressBookManager() throws CoreException {
-        if (logger.isActivated()) {
-            logger.info("Address book manager is created");
+    public AddressBookManager(ContactsManager contactManager) throws CoreException {
+        if (mLogger.isActivated()) {
+            mLogger.info("Address book manager is created");
         }
-        this.contentResolver = AndroidFactory.getApplicationContext().getContentResolver();
+        mContentResolver = AndroidFactory.getApplicationContext().getContentResolver();
+        mContactManager = contactManager;
     }
 
     /**
      * Start address book monitoring
      */
     public void startAddressBookMonitoring() {
-        if (logger.isActivated()) {
-            logger.info("Start address book monitoring");
+        if (mLogger.isActivated()) {
+            mLogger.info("Start address book monitoring");
         }
 
         // Instanciate background executor
-        cleanupExecutor = Executors.newSingleThreadExecutor();
+        mCleanupExecutor = Executors.newSingleThreadExecutor();
 
-        if (!observerIsRegistered) {
+        if (!mObserverIsRegistered) {
             // Instanciate content observer
-            contactsContractObserver = new ContactsContractObserver(new Handler());
+            mContactsContractObserver = new ContactsContractObserver(new Handler());
 
             // Query contactContracts phone database
-            contactsContractCursor = contentResolver.query(Phone.CONTENT_URI, null, null, null,
+            mContactsContractCursor = mContentResolver.query(Phone.CONTENT_URI, null, null, null,
                     null);
 
             // Register content observer
-            contactsContractCursor.registerContentObserver(contactsContractObserver);
-            observerIsRegistered = true;
+            mContactsContractCursor.registerContentObserver(mContactsContractObserver);
+            mObserverIsRegistered = true;
         }
     }
 
@@ -134,23 +140,23 @@ public class AddressBookManager {
      * Stop address book monitoring
      */
     public void stopAddressBookMonitoring() {
-        if (logger.isActivated()) {
-            logger.info("Stop address book monitoring");
+        if (mLogger.isActivated()) {
+            mLogger.info("Stop address book monitoring");
         }
 
         // Remove the messages that may still be scheduled
-        checkHandler.removeMessages(CHECK_MESSAGE);
+        mCheckHandler.removeMessages(CHECK_MESSAGE);
 
         // Unregister content observer
-        if (observerIsRegistered) {
-            contactsContractCursor.unregisterContentObserver(contactsContractObserver);
-            observerIsRegistered = false;
+        if (mObserverIsRegistered) {
+            mContactsContractCursor.unregisterContentObserver(mContactsContractObserver);
+            mObserverIsRegistered = false;
             // Close cursor
-            contactsContractCursor.close();
+            mContactsContractCursor.close();
         }
 
         // Shutdown background executor
-        cleanupExecutor.shutdown();
+        mCleanupExecutor.shutdown();
     }
 
     /**
@@ -192,11 +198,11 @@ public class AddressBookManager {
             super.onChange(selfChange);
 
             // Something changed in the address book
-            if (!checkHandler.hasMessages(CHECK_MESSAGE)) {
+            if (!mCheckHandler.hasMessages(CHECK_MESSAGE)) {
                 // If we do not have a check already scheduled, schedule a new one
-                checkHandler.sendEmptyMessageDelayed(CHECK_MESSAGE, MINIMUM_CHECK_PERIOD);
-                if (logger.isActivated()) {
-                    logger.debug("New address book checking scheduled in " + MINIMUM_CHECK_PERIOD
+                mCheckHandler.sendEmptyMessageDelayed(CHECK_MESSAGE, MINIMUM_CHECK_PERIOD);
+                if (mLogger.isActivated()) {
+                    mLogger.debug("New address book checking scheduled in " + MINIMUM_CHECK_PERIOD
                             + " ms");
                 }
             }
@@ -217,8 +223,8 @@ public class AddressBookManager {
 
             if (msg.what == CHECK_MESSAGE) {
                 // Clean RCS entries associated to numbers that have been removed or modified
-                if (logger.isActivated()) {
-                    logger.debug("Minimum check period elapsed, notify the listeners that a change occured in the address book");
+                if (mLogger.isActivated()) {
+                    mLogger.debug("Minimum check period elapsed, notify the listeners that a change occured in the address book");
                 }
 
                 // We may receive multiple CHECK_MESSAGE messages while already processing one. We
@@ -238,16 +244,18 @@ public class AddressBookManager {
                 }
 
                 if (scheduleCleanup) {
-                    cleanupExecutor.execute(new Runnable() {
+                    mCleanupExecutor.execute(new Runnable() {
                         public void run() {
                             isCleanupRunning = true;
 
                             while (true) {
                                 isCleanupNeeded = false;
 
-                                // Clean RCS entries associated to numbers that have been removed or
-                                // modified
-                                ContactsManager.getInstance().cleanRCSEntries();
+                                /*
+                                 * Clean RCS entries associated to numbers that have been removed or
+                                 * modified
+                                 */
+                                mContactManager.cleanRCSEntries();
 
                                 // Notify listeners
                                 for (int i = 0; i < listeners.size(); i++) {
