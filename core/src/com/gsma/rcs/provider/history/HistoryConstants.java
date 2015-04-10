@@ -16,7 +16,7 @@
 
 package com.gsma.rcs.provider.history;
 
-import com.gsma.rcs.provider.eab.RichAddressBookProvider;
+import com.gsma.rcs.provider.contact.ContactProvider;
 import com.gsma.rcs.provider.ipcall.IPCallProvider;
 import com.gsma.rcs.provider.messaging.ChatProvider;
 import com.gsma.rcs.provider.messaging.FileTransferData;
@@ -64,7 +64,7 @@ import java.util.Set;
     private static final Set<String> getProtectedInternalDatabases() {
         Set<String> protectedInternalDatabases = new HashSet<String>();
         protectedInternalDatabases.add(RcsSettingsProvider.DATABASE_NAME);
-        protectedInternalDatabases.add(RichAddressBookProvider.DATABASE_NAME);
+        protectedInternalDatabases.add(ContactProvider.DATABASE_NAME);
         protectedInternalDatabases.add(GroupDeliveryInfoProvider.DATABASE_NAME);
         protectedInternalDatabases.add(IPCallProvider.DATABASE_NAME);
         return protectedInternalDatabases;

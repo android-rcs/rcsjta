@@ -20,7 +20,7 @@ import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.DequeueTask;
 import com.gsma.rcs.service.api.ChatServiceImpl;
@@ -37,7 +37,7 @@ public class OneToOneChatMessageDequeueTask extends DequeueTask {
 
     public OneToOneChatMessageDequeueTask(Object lock, ContactId contact,
             InstantMessagingService imService, MessagingLog messagingLog,
-            ChatServiceImpl chatService, RcsSettings rcsSettings, ContactsManager contactManager) {
+            ChatServiceImpl chatService, RcsSettings rcsSettings, ContactManager contactManager) {
         super(lock, imService, contactManager, messagingLog, rcsSettings);
         mContact = contact;
         mChatService = chatService;

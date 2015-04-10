@@ -29,7 +29,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.http.DownloadFromAcceptFile
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.DownloadFromResumeFileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.ResumeUploadFileSharingSession;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
@@ -75,7 +75,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
 
     private final Object mLock = new Object();
 
-    private final ContactsManager mContactManager;
+    private final ContactManager mContactManager;
 
     private final static Logger sLogger = Logger.getLogger(GroupFileTransferImpl.class
             .getSimpleName());
@@ -97,7 +97,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             InstantMessagingService imService,
             FileTransferPersistedStorageAccessor storageAccessor,
             FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings, Core core,
-            MessagingLog messagingLog, ContactsManager contactManager) {
+            MessagingLog messagingLog, ContactManager contactManager) {
         mFileTransferId = transferId;
         mBroadcaster = broadcaster;
         mImService = imService;
@@ -127,7 +127,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             IGroupFileTransferBroadcaster broadcaster, InstantMessagingService imService,
             FileTransferPersistedStorageAccessor storageAccessor,
             FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings, Core core,
-            MessagingLog messagingLog, ContactsManager contactManager) {
+            MessagingLog messagingLog, ContactManager contactManager) {
         this(transferId, broadcaster, imService, storageAccessor, fileTransferService, rcsSettings,
                 core, messagingLog, contactManager);
         mChatId = chatId;

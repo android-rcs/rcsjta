@@ -28,7 +28,7 @@ import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
@@ -67,7 +67,7 @@ public class FtHttpResumeManager implements Runnable {
 
     private final MessagingLog mMessagingLog;
 
-    private final ContactsManager mContactManager;
+    private final ContactManager mContactManager;
 
     /**
      * Constructor
@@ -78,7 +78,7 @@ public class FtHttpResumeManager implements Runnable {
      * @param contactManager
      */
     public FtHttpResumeManager(InstantMessagingService instantMessagingService,
-            RcsSettings rcsSettings, MessagingLog messagingLog, ContactsManager contactManager) {
+            RcsSettings rcsSettings, MessagingLog messagingLog, ContactManager contactManager) {
         mRcsSettings = rcsSettings;
         mImsService = instantMessagingService;
         mMessagingLog = messagingLog;

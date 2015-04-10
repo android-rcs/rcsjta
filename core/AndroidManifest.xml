@@ -141,7 +141,7 @@
             android:readPermission="com.gsma.services.permission.RCS"
             android:writePermission="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY" />
         <provider
-            android:name="com.gsma.rcs.provider.eab.RichAddressBookProvider"
+            android:name="com.gsma.rcs.provider.contact.ContactProvider"
             android:authorities="com.gsma.rcs.capability;com.gsma.services.rcs.provider.capability"
             android:exported="true"
             android:readPermission="com.gsma.services.permission.RCS"

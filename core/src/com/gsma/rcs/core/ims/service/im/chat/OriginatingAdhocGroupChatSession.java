@@ -31,7 +31,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.api.ExceptionUtil;
@@ -78,7 +78,7 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
      */
     public OriginatingAdhocGroupChatSession(ImsService parent, String conferenceId, String subject,
             Map<ContactId, ParticipantStatus> participantsToInvite, RcsSettings rcsSettings,
-            MessagingLog messagingLog, long timestamp, ContactsManager contactManager) {
+            MessagingLog messagingLog, long timestamp, ContactManager contactManager) {
         super(parent, null, conferenceId, participantsToInvite, rcsSettings, messagingLog,
                 timestamp, contactManager);
 

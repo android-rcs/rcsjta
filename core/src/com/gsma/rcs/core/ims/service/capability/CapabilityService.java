@@ -29,7 +29,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ContactInfo;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.platform.AndroidFactory;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
@@ -54,7 +54,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactsManager mContactsManager;
+    private final ContactManager mContactManager;
 
     private OptionsManager optionsManager;
 
@@ -83,22 +83,22 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * 
      * @param parent IMS module
      * @param rcsSettings RcsSettings
-     * @param contactsManager ContactsManager
+     * @param contactsManager ContactManager
      * @throws CoreException
      */
     public CapabilityService(ImsModule parent, RcsSettings rcsSettings,
-            ContactsManager contactsManager) throws CoreException {
+            ContactManager contactsManager) throws CoreException {
         super(parent, true);
         mRcsSettings = rcsSettings;
-        mContactsManager = contactsManager;
+        mContactManager = contactsManager;
         // Instantiate the polling manager
-        pollingManager = new PollingManager(this, mRcsSettings, mContactsManager);
+        pollingManager = new PollingManager(this, mRcsSettings, mContactManager);
 
         // Instantiate the options manager
-        optionsManager = new OptionsManager(parent, mRcsSettings, mContactsManager);
+        optionsManager = new OptionsManager(parent, mRcsSettings, mContactManager);
 
         // Instantiate the anonymous fetch manager
-        anonymousFetchManager = new AnonymousFetchManager(parent, mRcsSettings, mContactsManager);
+        anonymousFetchManager = new AnonymousFetchManager(parent, mRcsSettings, mContactManager);
     }
 
     /**
@@ -191,7 +191,7 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
         }
 
         // Read capabilities from the database
-        Capabilities capabilities = mContactsManager.getContactCapabilities(contact);
+        Capabilities capabilities = mContactManager.getContactCapabilities(contact);
         if (capabilities == null) {
             if (logActivated) {
                 sLogger.debug("No capability exist for ".concat(contact.toString()));
@@ -313,8 +313,8 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
             if (!alreadyInEabOrInvalidNumbers.contains(contact)) {
                 // If this number is not considered RCS valid or has already an entry with RCS, skip
                 // it
-                if (!mContactsManager.isContactIdAssociatedWithContactInRichAddressBook(contact)
-                        && (!mContactsManager.isOnlySimAssociated(contact) || (Build.VERSION.SDK_INT > 10))) {
+                if (!mContactManager.isContactIdAssociatedWithRcsContactProvider(contact)
+                        && (!mContactManager.isOnlySimAssociated(contact) || (Build.VERSION.SDK_INT > 10))) {
                     // This entry is valid and not already has a RCS raw contact, it can be treated
                     // We exclude the number that comes from SIM only contacts, as those cannot be
                     // aggregated to RCS raw contacts only if OS version if gingerbread or fewer
@@ -335,11 +335,11 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
                 // contact,
                 // then we have to create a new association for it
                 long rawContactId = phonesCursor.getLong(columnIndexRawContactId);
-                if ((!mContactsManager.isSimAccount(rawContactId) || (Build.VERSION.SDK_INT > 10))
-                        && (mContactsManager.getAssociatedRcsRawContact(rawContactId, contact) == -1)) {
-                    ContactInfo currentInfo = mContactsManager.getContactInfo(contact);
+                if ((!mContactManager.isSimAccount(rawContactId) || (Build.VERSION.SDK_INT > 10))
+                        && (mContactManager.getAssociatedRcsRawContact(rawContactId, contact) == -1)) {
+                    ContactInfo currentInfo = mContactManager.getContactInfo(contact);
                     if (currentInfo != null && currentInfo.isRcsContact()) {
-                        mContactsManager.createRcsContact(currentInfo, rawContactId);
+                        mContactManager.createRcsContact(currentInfo, rawContactId);
                     }
                 }
             }
@@ -364,14 +364,14 @@ public class CapabilityService extends ImsService implements AddressBookEventLis
      * @param contact Contact identifier
      */
     public void resetContactCapabilitiesForContentSharing(ContactId contact) {
-        Capabilities capabilities = mContactsManager.getContactCapabilities(contact);
+        Capabilities capabilities = mContactManager.getContactCapabilities(contact);
         if (capabilities != null) {
             // Force a reset of content sharing capabilities
             capabilities.setImageSharingSupport(false);
             capabilities.setVideoSharingSupport(false);
 
             // Update the database capabilities
-            mContactsManager.setContactCapabilities(contact, capabilities);
+            mContactManager.setContactCapabilities(contact, capabilities);
 
             // Notify listener
             getImsModule().getCore().getListener()

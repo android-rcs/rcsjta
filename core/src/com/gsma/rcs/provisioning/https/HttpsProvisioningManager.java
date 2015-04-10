@@ -27,7 +27,7 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 import com.gsma.rcs.core.TerminalInfo;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.messaging.MessagingLog;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.GsmaRelease;
 import com.gsma.rcs.provisioning.ProvisioningFailureReasons;
@@ -180,7 +180,7 @@ public class HttpsProvisioningManager {
 
     private final MessagingLog mMessagingLog;
 
-    private final ContactsManager mContactManager;
+    private final ContactManager mContactManager;
 
     /**
      * Builds HTTPS request parameters that are related to Terminal, PARAM_RCS_VERSION &
@@ -215,7 +215,7 @@ public class HttpsProvisioningManager {
     public HttpsProvisioningManager(Context applicationContext,
             LocalContentResolver localContentResolver, final PendingIntent retryIntent,
             boolean first, boolean user, RcsSettings rcsSettings, MessagingLog messagingLog,
-            ContactsManager contactManager) {
+            ContactManager contactManager) {
         mCtx = applicationContext;
         mLocalContentResolver = localContentResolver;
         mRetryIntent = retryIntent;

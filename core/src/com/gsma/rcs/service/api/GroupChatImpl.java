@@ -39,7 +39,7 @@ import com.gsma.rcs.core.ims.service.im.chat.GroupChatPersistedStorageAccessor;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.GroupChatStateAndReasonCode;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -88,7 +88,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactsManager mContactManager;
+    private final ContactManager mContactManager;
 
     private final MessagingLog mMessagingLog;
 
@@ -114,14 +114,14 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * @param imService InstantMessagingService
      * @param persistentStorage GroupChatPersistedStorageAccessor
      * @param rcsSettings RcsSettings
-     * @param contactManager ContactsManager
+     * @param contactManager ContactManager
      * @param chatService ChatServiceImpl
      * @param messagingLog MessagingLog
      * @param core Core
      */
     public GroupChatImpl(String chatId, IGroupChatEventBroadcaster broadcaster,
             InstantMessagingService imService, GroupChatPersistedStorageAccessor persistentStorage,
-            RcsSettings rcsSettings, ContactsManager contactManager, ChatServiceImpl chatService,
+            RcsSettings rcsSettings, ContactManager contactManager, ChatServiceImpl chatService,
             MessagingLog messagingLog, Core core) {
         mChatId = chatId;
         mBroadcaster = broadcaster;

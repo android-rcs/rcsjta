@@ -28,7 +28,7 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.sip.SipSessionError;
 import com.gsma.rcs.core.ims.service.sip.SipSessionListener;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
@@ -56,7 +56,7 @@ public class OriginatingSipRtpSession extends GenericSipRtpSession {
      * @param contactManager
      */
     public OriginatingSipRtpSession(ImsService parent, ContactId contact, String featureTag,
-            RcsSettings rcsSettings, long timestamp, ContactsManager contactManager) {
+            RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
         super(parent, contact, featureTag, rcsSettings, timestamp, contactManager);
 
         // Create dialog path

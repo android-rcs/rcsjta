@@ -21,7 +21,7 @@ import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -49,7 +49,7 @@ public class GroupChatDequeueTask extends DequeueTask {
     public GroupChatDequeueTask(Object lock, String chatId, InstantMessagingService imService,
             MessagingLog messagingLog, ChatServiceImpl chatService,
             FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings,
-            HistoryLog historyLog, ContactsManager contactManager) {
+            HistoryLog historyLog, ContactManager contactManager) {
         super(lock, imService, contactManager, messagingLog, rcsSettings);
         mChatId = chatId;
         mChatService = chatService;

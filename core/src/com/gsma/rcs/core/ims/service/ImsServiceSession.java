@@ -31,7 +31,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
@@ -147,7 +147,7 @@ public abstract class ImsServiceSession extends Thread {
 
     protected final RcsSettings mRcsSettings;
 
-    protected final ContactsManager mContactManager;
+    protected final ContactManager mContactManager;
 
     /**
      * Session timestamp
@@ -170,7 +170,7 @@ public abstract class ImsServiceSession extends Thread {
      * @param contactManager
      */
     public ImsServiceSession(ImsService imsService, ContactId contact, String remoteUri,
-            RcsSettings rcsSettings, long timestamp, ContactsManager contactManager) {
+            RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
         mImsService = imsService;
         mContact = contact;
         mRemoteUri = remoteUri;

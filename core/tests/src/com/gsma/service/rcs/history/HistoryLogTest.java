@@ -10,7 +10,7 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.eab.RichAddressBookProvider;
+import com.gsma.rcs.provider.contact.ContactProvider;
 import com.gsma.rcs.provider.history.HistoryProvider;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.FileTransferProvider;
@@ -530,8 +530,8 @@ public class HistoryLogTest extends AndroidTestCase {
         }
 
         try {
-            mHistoryService.registerExtraHistoryLogMember(EXTERNAL_PROVIDER_ID, EXTERNAL_URI, Uri
-                    .fromFile(getContext().getDatabasePath(RichAddressBookProvider.DATABASE_NAME)),
+            mHistoryService.registerExtraHistoryLogMember(EXTERNAL_PROVIDER_ID, EXTERNAL_URI,
+                    Uri.fromFile(getContext().getDatabasePath(ContactProvider.DATABASE_NAME)),
                     EXTERNAL_TABLE, columnMapping);
             fail();
         } catch (Exception ignore) {

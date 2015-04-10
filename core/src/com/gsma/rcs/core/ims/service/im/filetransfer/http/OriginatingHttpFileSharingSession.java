@@ -36,7 +36,7 @@ import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -86,7 +86,7 @@ public class OriginatingHttpFileSharingSession extends HttpFileTransferSession i
     public OriginatingHttpFileSharingSession(String fileTransferId, ImsService parent,
             MmContent content, ContactId contact, MmContent fileIcon, String tId, Core core,
             MessagingLog messagingLog, RcsSettings rcsSettings, long timestamp, long timestampSent,
-            ContactsManager contactManager) {
+            ContactManager contactManager) {
         super(parent, content, contact, PhoneUtils.formatContactIdToUri(contact), fileIcon, null,
                 null, fileTransferId, rcsSettings, messagingLog, timestamp,
                 FileTransferLog.UNKNOWN_EXPIRATION, FileTransferLog.UNKNOWN_EXPIRATION,

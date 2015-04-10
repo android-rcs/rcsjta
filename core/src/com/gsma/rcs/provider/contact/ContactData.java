@@ -20,7 +20,7 @@
  * Modifications are licensed under the License.
  ******************************************************************************/
 
-package com.gsma.rcs.provider.eab;
+package com.gsma.rcs.provider.contact;
 
 import com.gsma.services.rcs.capability.CapabilitiesLog;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
@@ -28,11 +28,11 @@ import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import android.net.Uri;
 
 /**
- * Rich address book data constants
+ * RCS Contact address book data constants
  * 
  * @author Jean-Marc AUFFRET
  */
-/* package private */class RichAddressBookData {
+/* package private */public final class ContactData {
     /**
      * Database URI
      */
@@ -257,4 +257,35 @@ import android.net.Uri;
      * BLOCKED value is set
      */
     static final int BLOCKED_VALUE_SET = 1;
+
+    /**
+     * Aggregation data constants
+     */
+    public static final class AggregationData {
+        /**
+         * Database URI
+         */
+        static final Uri CONTENT_URI = Uri
+                .parse("content://com.gsma.services.rcs.provider.capability/aggregation");
+
+        /**
+         * Column name
+         */
+        static final String KEY_ID = "_id";
+
+        /**
+         * Column name
+         */
+        static final String KEY_RCS_NUMBER = "rcs_number";
+
+        /**
+         * Column name
+         */
+        static final String KEY_RAW_CONTACT_ID = "raw_contact_id";
+
+        /**
+         * Column name
+         */
+        static final String KEY_RCS_RAW_CONTACT_ID = "rcs_raw_contact_id";
+    }
 }

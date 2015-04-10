@@ -49,7 +49,7 @@ import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.terms.TermsConditionsService;
 import com.gsma.rcs.core.ims.userprofile.UserProfile;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
@@ -117,7 +117,7 @@ public class ImsModule implements SipEventListener {
      * @throws CoreException
      */
     public ImsModule(Core core, Context context, RcsSettings rcsSettings,
-            ContactsManager contactsManager, MessagingLog messagingLog) throws CoreException {
+            ContactManager contactsManager, MessagingLog messagingLog) throws CoreException {
         mCore = core;
 
         if (logger.isActivated()) {

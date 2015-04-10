@@ -36,7 +36,7 @@ import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
 import com.gsma.rcs.core.ims.service.presence.PresenceError;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -71,7 +71,7 @@ public class AnonymousFetchRequestTask {
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactsManager mContactManager;
+    private final ContactManager mContactManager;
 
     /**
      * The logger
@@ -88,7 +88,7 @@ public class AnonymousFetchRequestTask {
      * @param contactManager
      */
     public AnonymousFetchRequestTask(ImsModule parent, ContactId contact, RcsSettings rcsSettings,
-            ContactsManager contactManager) {
+            ContactManager contactManager) {
         mImsModule = parent;
         mContact = contact;
         mAuthenticationAgent = new SessionAuthenticationAgent(mImsModule);

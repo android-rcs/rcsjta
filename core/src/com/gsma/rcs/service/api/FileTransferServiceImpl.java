@@ -36,7 +36,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.platform.file.FileDescription;
 import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.GroupFileTransferDeleteTask;
 import com.gsma.rcs.provider.messaging.MessagingLog;
@@ -102,7 +102,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactsManager mContactManager;
+    private final ContactManager mContactManager;
 
     private final Core mCore;
 
@@ -131,13 +131,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param imService InstantMessagingService
      * @param messagingLog MessagingLog
      * @param rcsSettings RcsSettings
-     * @param contactManager ContactsManager
+     * @param contactManager ContactManager
      * @param core Core
      * @param mimoperationexecutor
      * @param mLocalContentResolver
      */
     public FileTransferServiceImpl(InstantMessagingService imService, MessagingLog messagingLog,
-            RcsSettings rcsSettings, ContactsManager contactManager, Core core,
+            RcsSettings rcsSettings, ContactManager contactManager, Core core,
             LocalContentResolver localContentResolver, ExecutorService imOperationExecutor,
             Object imsLock) {
         if (sLogger.isActivated()) {

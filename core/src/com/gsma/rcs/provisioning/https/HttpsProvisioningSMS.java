@@ -30,7 +30,7 @@ import org.apache.http.protocol.HttpContext;
 
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.messaging.MessagingLog;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.LauncherUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -74,7 +74,7 @@ public class HttpsProvisioningSMS {
 
     private final LocalContentResolver mLocalContentResolver;
 
-    private final ContactsManager mContactManager;
+    private final ContactManager mContactManager;
 
     private final MessagingLog mMessagingLog;
 
@@ -89,7 +89,7 @@ public class HttpsProvisioningSMS {
      */
     public HttpsProvisioningSMS(HttpsProvisioningManager httpsProvisioningManager,
             LocalContentResolver localContentResolver, RcsSettings rcsSettings,
-            MessagingLog messagingLog, ContactsManager contactManager) {
+            MessagingLog messagingLog, ContactManager contactManager) {
         mManager = httpsProvisioningManager;
         mContext = mManager.getContext();
         mLocalContentResolver = localContentResolver;

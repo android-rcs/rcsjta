@@ -28,7 +28,7 @@ import com.gsma.rcs.core.ims.service.presence.PresenceUtils;
 import com.gsma.rcs.core.ims.service.presence.pidf.PidfDocument;
 import com.gsma.rcs.core.ims.service.presence.pidf.PidfParser;
 import com.gsma.rcs.core.ims.service.presence.pidf.Tuple;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
@@ -57,7 +57,7 @@ public class AnonymousFetchManager implements DiscoveryManager {
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactsManager mContactManager;
+    private final ContactManager mContactManager;
 
     /**
      * Constructor
@@ -67,7 +67,7 @@ public class AnonymousFetchManager implements DiscoveryManager {
      * @param contactManager
      */
     public AnonymousFetchManager(ImsModule parent, RcsSettings rcsSettings,
-            ContactsManager contactManager) {
+            ContactManager contactManager) {
         mImsModule = parent;
         mRcsSettings = rcsSettings;
         mContactManager = contactManager;

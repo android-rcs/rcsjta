@@ -25,7 +25,7 @@ package com.gsma.rcs.service.api;
 import com.gsma.rcs.core.ims.service.ContactInfo;
 import com.gsma.rcs.core.ims.service.ContactInfo.BlockingState;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
@@ -70,20 +70,20 @@ public class ContactServiceImpl extends IContactService.Stub {
     /**
      * Contacts manager
      */
-    private final ContactsManager mContactsManager;
+    private final ContactManager mContactManager;
 
     /**
      * Constructor
      * 
-     * @param contactsManager Contacts manager
+     * @param contactManager Contacts manager
      * @param rcsSettings
      */
-    public ContactServiceImpl(ContactsManager contactsManager, RcsSettings rcsSettings) {
+    public ContactServiceImpl(ContactManager contactManager, RcsSettings rcsSettings) {
         if (logger.isActivated()) {
             logger.info("Contacts service API is loaded");
         }
 
-        mContactsManager = contactsManager;
+        mContactManager = contactManager;
         mRcsSettings = rcsSettings;
     }
 
@@ -171,7 +171,7 @@ public class ContactServiceImpl extends IContactService.Stub {
         }
         try {
             // Read capabilities in the local database
-            return getRcsContact(mContactsManager.getContactInfo(contact));
+            return getRcsContact(mContactManager.getContactInfo(contact));
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -247,9 +247,9 @@ public class ContactServiceImpl extends IContactService.Stub {
     private List<RcsContact> getRcsContacts(FilterContactInfo filterContactInfo) {
         List<RcsContact> rcsContacts = new ArrayList<RcsContact>();
         // Read capabilities in the local database
-        Set<ContactId> contacts = mContactsManager.getRcsContacts();
+        Set<ContactId> contacts = mContactManager.getRcsContacts();
         for (ContactId contact : contacts) {
-            ContactInfo contactInfo = mContactsManager.getContactInfo(contact);
+            ContactInfo contactInfo = mContactManager.getContactInfo(contact);
             if (contactInfo != null) {
                 if (filterContactInfo == null || filterContactInfo.inScope(contactInfo)) {
                     RcsContact contact2add = getRcsContact(contactInfo);
@@ -403,7 +403,7 @@ public class ContactServiceImpl extends IContactService.Stub {
             logger.info("Block contact " + contact);
         }
         try {
-            mContactsManager.setBlockingState(contact, BlockingState.BLOCKED);
+            mContactManager.setBlockingState(contact, BlockingState.BLOCKED);
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
                 logger.error(ExceptionUtil.getFullStackTrace(e));
@@ -430,7 +430,7 @@ public class ContactServiceImpl extends IContactService.Stub {
             logger.info("Unblock contact " + contact);
         }
         try {
-            mContactsManager.setBlockingState(contact, BlockingState.NOT_BLOCKED);
+            mContactManager.setBlockingState(contact, BlockingState.NOT_BLOCKED);
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
                 logger.error(ExceptionUtil.getFullStackTrace(e));

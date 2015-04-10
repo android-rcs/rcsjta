@@ -29,7 +29,7 @@ import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.registry.AndroidRegistryFactory;
 import com.gsma.rcs.provider.BackupRestoreDb;
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ConfigurationMode;
@@ -100,7 +100,7 @@ public class StartService extends Service {
 
     private MessagingLog mMessagingLog;
 
-    private ContactsManager mContactManager;
+    private ContactManager mContactManager;
 
     private static final Logger sLogger = Logger.getLogger(StartService.class.getSimpleName());
 
@@ -115,7 +115,7 @@ public class StartService extends Service {
         mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
         mMessagingLog = MessagingLog.createInstance(context, mLocalContentResolver, mRcsSettings);
 
-        mContactManager = ContactsManager.createInstance(context, contentResolver,
+        mContactManager = ContactManager.createInstance(context, contentResolver,
                 mLocalContentResolver, mRcsSettings);
 
         ConfigurationMode mode = mRcsSettings.getConfigurationMode();

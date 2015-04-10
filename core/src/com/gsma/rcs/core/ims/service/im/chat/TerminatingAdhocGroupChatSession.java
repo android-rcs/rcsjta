@@ -40,7 +40,7 @@ import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
@@ -86,7 +86,7 @@ public class TerminatingAdhocGroupChatSession extends GroupChatSession implement
     public TerminatingAdhocGroupChatSession(ImsService parent, SipRequest invite,
             ContactId contact, Map<ContactId, ParticipantStatus> participantsFromInvite,
             String remoteUri, RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
-            ContactsManager contactManager) {
+            ContactManager contactManager) {
         super(parent, contact, remoteUri, participantsFromInvite, rcsSettings, messagingLog,
                 timestamp, contactManager);
 

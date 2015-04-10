@@ -16,22 +16,22 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.gsma.rcs.provider.eab;
+package com.gsma.rcs.provider.contact;
 
 /**
- * Rich address book exception
+ * ContactManager exception
  * 
  * @author jexa7410
  */
-public class RichAddressBookException extends java.lang.Exception {
+public class ContactManagerException extends java.lang.Exception {
     static final long serialVersionUID = 1L;
 
     /**
-     * Constructor
+     * Constructs a new Exception with the current stack trace and the specified cause.
      * 
-     * @param error Error message
+     * @param e
      */
-    public RichAddressBookException(String error) {
-        super(error);
+    public ContactManagerException(Exception e) {
+        super(e);
     }
 }

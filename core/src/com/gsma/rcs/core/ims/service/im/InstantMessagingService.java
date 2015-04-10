@@ -66,7 +66,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.http.OriginatingHttpGroupFi
 import com.gsma.rcs.core.ims.service.im.filetransfer.msrp.OriginatingMsrpFileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.msrp.TerminatingMsrpFileSharingSession;
 import com.gsma.rcs.core.ims.service.upload.FileUploadSession;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
@@ -102,7 +102,7 @@ public class InstantMessagingService extends ImsService {
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactsManager mContactManager;
+    private final ContactManager mContactManager;
 
     private final MessagingLog mMessagingLog;
 
@@ -178,12 +178,12 @@ public class InstantMessagingService extends ImsService {
      * @param parent IMS module
      * @param core Core
      * @param rcsSettings RcsSettings
-     * @param contactsManager ContactsManager
+     * @param contactsManager ContactManager
      * @param messagingLog MessagingLog
      * @throws CoreException
      */
     public InstantMessagingService(ImsModule parent, Core core, RcsSettings rcsSettings,
-            ContactsManager contactsManager, MessagingLog messagingLog) throws CoreException {
+            ContactManager contactsManager, MessagingLog messagingLog) throws CoreException {
         super(parent, true);
         mCore = core;
         mRcsSettings = rcsSettings;

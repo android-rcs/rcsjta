@@ -31,7 +31,7 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 
 import com.gsma.rcs.core.CoreException;
 import com.gsma.rcs.platform.AndroidFactory;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.utils.logger.Logger;
 
 /**
@@ -95,7 +95,7 @@ public class AddressBookManager {
      */
     private Logger mLogger = Logger.getLogger(this.getClass().getName());
 
-    private ContactsManager mContactManager;
+    private ContactManager mContactManager;
 
     /**
      * Constructor
@@ -103,7 +103,7 @@ public class AddressBookManager {
      * @param contactManager
      * @throws CoreException
      */
-    public AddressBookManager(ContactsManager contactManager) throws CoreException {
+    public AddressBookManager(ContactManager contactManager) throws CoreException {
         if (mLogger.isActivated()) {
             mLogger.info("Address book manager is created");
         }

@@ -36,8 +36,8 @@ import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.presence.xdm.XdmManager;
 import com.gsma.rcs.platform.AndroidFactory;
-import com.gsma.rcs.provider.eab.ContactsManager;
-import com.gsma.rcs.provider.eab.ContactManagerException;
+import com.gsma.rcs.provider.contact.ContactManagerException;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.StartService;
 import com.gsma.rcs.utils.ContactUtil;
@@ -56,7 +56,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactsManager mContactsManager;
+    private final ContactManager mContactManager;
 
     /**
      * Permanent state feature
@@ -98,14 +98,14 @@ public class PresenceService extends ImsService implements AddressBookEventListe
      * 
      * @param parent IMS module
      * @param rcsSettings RcsSettings
-     * @param contactsManager ContactsManager
+     * @param contactsManager ContactManager
      * @throws CoreException
      */
-    public PresenceService(ImsModule parent, RcsSettings rcsSettings,
-            ContactsManager contactsManager) throws CoreException {
+    public PresenceService(ImsModule parent, RcsSettings rcsSettings, ContactManager contactsManager)
+            throws CoreException {
         super(parent, rcsSettings.isSocialPresenceSupported());
         mRcsSettings = rcsSettings;
-        mContactsManager = contactsManager;
+        mContactManager = contactsManager;
         // Set presence service options
         this.permanentState = mRcsSettings.isPermanentStateModeActivated();
 
@@ -136,7 +136,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         getImsModule().getCore().getAddressBookManager().addAddressBookListener(this);
 
         // Restore the last presence info from the contacts database
-        presenceInfo = mContactsManager.getMyPresenceInfo();
+        presenceInfo = mContactManager.getMyPresenceInfo();
         if (logger.isActivated()) {
             logger.debug("Last presence info:\n" + presenceInfo.toString());
         }
@@ -223,7 +223,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         }
 
         // Flush the address book provider
-        mContactsManager.flushContactProvider();
+        mContactManager.flushRcsContactProvider();
 
         ContactId me = null;
         String publicUri = ImsModule.IMS_USER_PROFILE.getPublicUri();
@@ -258,7 +258,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                 }
 
                 // Add the contact to the rich address book provider
-                mContactsManager.modifyRcsContactInProvider(contact, RcsStatus.PENDING_OUT);
+                mContactManager.modifyRcsContactInProvider(contact, RcsStatus.PENDING_OUT);
             }
         }
 
@@ -283,7 +283,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                 }
                 // Set the presence sharing status to blocked
                 try {
-                    mContactsManager.blockContact(contact);
+                    mContactManager.blockContact(contact);
                 } catch (ContactManagerException e) {
                     if (logActivated) {
                         logger.error("Something went wrong when blocking contact " + contact, e);
@@ -291,7 +291,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                 }
 
                 // Add the contact to the rich address book provider
-                mContactsManager.modifyRcsContactInProvider(contact, RcsStatus.BLOCKED);
+                mContactManager.modifyRcsContactInProvider(contact, RcsStatus.BLOCKED);
             }
         }
     }
@@ -890,7 +890,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
         // more, we may have to remove or
         // unblock it
         // Get a list of all RCS numbers
-        Set<ContactId> rcsNumbers = mContactsManager.getRcsContactsWithSocialPresence();
+        Set<ContactId> rcsNumbers = mContactManager.getRcsContactsWithSocialPresence();
         // For each RCS number
         for (ContactId contact : rcsNumbers) {
             if (!PresenceUtils.isNumberInAddressBook(contact)) {
@@ -900,8 +900,8 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                             + " was not found in the address book any more.");
                 }
 
-                if (mContactsManager.isNumberShared(contact)
-                        || mContactsManager.isNumberInvited(contact)) {
+                if (mContactManager.isNumberShared(contact)
+                        || mContactManager.isNumberInvited(contact)) {
                     // Active or Invited
                     if (logger.isActivated()) {
                         logger.debug(contact + " is either active or invited");
@@ -916,7 +916,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                         result = removeRevokedContact(contact);
                         if (result) {
                             // Remove entry from rich address book provider
-                            mContactsManager.modifyRcsContactInProvider(contact,
+                            mContactManager.modifyRcsContactInProvider(contact,
                                     RcsStatus.RCS_CAPABLE);
                         } else {
                             if (logger.isActivated()) {
@@ -924,7 +924,7 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                             }
                         }
                     }
-                } else if (mContactsManager.isNumberBlocked(contact)) {
+                } else if (mContactManager.isNumberBlocked(contact)) {
                     // Blocked
                     if (logger.isActivated()) {
                         logger.debug(contact + " is blocked");
@@ -934,28 +934,28 @@ public class PresenceService extends ImsService implements AddressBookEventListe
                     boolean result = removeBlockedContact(contact);
                     if (result) {
                         // Remove entry from rich address book provider
-                        mContactsManager.modifyRcsContactInProvider(contact, RcsStatus.RCS_CAPABLE);
+                        mContactManager.modifyRcsContactInProvider(contact, RcsStatus.RCS_CAPABLE);
                     } else {
                         if (logger.isActivated()) {
                             logger.error("Something went wrong when removing blocked contact");
                         }
                     }
                 } else {
-                    if (mContactsManager.isNumberWilling(contact)) {
+                    if (mContactManager.isNumberWilling(contact)) {
                         // Willing
                         if (logger.isActivated()) {
                             logger.debug(contact + " is willing");
                             logger.debug("Nothing to do");
                         }
                     } else {
-                        if (mContactsManager.isNumberCancelled(contact)) {
+                        if (mContactManager.isNumberCancelled(contact)) {
                             // Cancelled
                             if (logger.isActivated()) {
                                 logger.debug(contact + " is cancelled");
                                 logger.debug("We remove it from rich address book provider");
                             }
                             // Remove entry from rich address book provider
-                            mContactsManager.modifyRcsContactInProvider(contact,
+                            mContactManager.modifyRcsContactInProvider(contact,
                                     RcsStatus.RCS_CAPABLE);
                         }
                     }

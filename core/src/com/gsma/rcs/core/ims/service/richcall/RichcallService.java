@@ -45,7 +45,7 @@ import com.gsma.rcs.core.ims.service.richcall.image.TerminatingImageTransferSess
 import com.gsma.rcs.core.ims.service.richcall.video.OriginatingVideoStreamingSession;
 import com.gsma.rcs.core.ims.service.richcall.video.TerminatingVideoStreamingSession;
 import com.gsma.rcs.core.ims.service.richcall.video.VideoStreamingSession;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
@@ -112,7 +112,7 @@ public class RichcallService extends ImsService {
      */
     private Map<String, GeolocTransferSession> mGeolocTransferSessionCache = new HashMap<String, GeolocTransferSession>();
 
-    private final ContactsManager mContactManager;
+    private final ContactManager mContactManager;
 
     private final RcsSettings mRcsSettings;
 
@@ -122,11 +122,11 @@ public class RichcallService extends ImsService {
      * Constructor
      * 
      * @param parent IMS module
-     * @param contactsManager ContactsManager
+     * @param contactsManager ContactManager
      * @param rcsSettings
      * @throws CoreException
      */
-    public RichcallService(ImsModule parent, Core core, ContactsManager contactsManager,
+    public RichcallService(ImsModule parent, Core core, ContactManager contactsManager,
             RcsSettings rcsSettings) throws CoreException {
         super(parent, true);
         mCore = core;

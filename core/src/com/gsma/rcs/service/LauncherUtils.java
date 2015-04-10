@@ -33,7 +33,7 @@ import com.gsma.rcs.addressbook.AuthenticationService;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.registry.AndroidRegistryFactory;
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.ipcall.IPCallHistory;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -166,7 +166,7 @@ public class LauncherUtils {
      * @param contactManager
      */
     public static void resetRcsConfig(Context ctx, LocalContentResolver localContentResolver,
-            RcsSettings rcsSettings, MessagingLog mMessagingLog, ContactsManager contactManager) {
+            RcsSettings rcsSettings, MessagingLog mMessagingLog, ContactManager contactManager) {
         if (sLogger.isActivated()) {
             sLogger.debug("Reset RCS config");
         }

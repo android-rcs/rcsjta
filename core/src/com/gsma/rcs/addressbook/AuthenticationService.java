@@ -38,7 +38,7 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.Groups;
 
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -96,8 +96,8 @@ public class AuthenticationService extends Service {
      */
     public static void createRcsAccount(Context context, LocalContentResolver localContentResolver,
             String username, boolean enableSync, RcsSettings rcsSettings,
-            ContactsManager contactManager) {
-        ContactsManager.createInstance(context, context.getContentResolver(), localContentResolver,
+            ContactManager contactManager) {
+        ContactManager.createInstance(context, context.getContentResolver(), localContentResolver,
                 rcsSettings);
 
         // Save the account info into the AccountManager if needed

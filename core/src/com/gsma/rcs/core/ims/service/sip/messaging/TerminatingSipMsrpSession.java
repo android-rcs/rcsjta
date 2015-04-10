@@ -37,7 +37,7 @@ import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.sip.SipSessionError;
 import com.gsma.rcs.core.ims.service.sip.SipSessionListener;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
@@ -75,7 +75,7 @@ public class TerminatingSipMsrpSession extends GenericSipMsrpSession {
      */
     public TerminatingSipMsrpSession(ImsService parent, SipRequest invite, ContactId contact,
             Intent sessionInvite, RcsSettings rcsSettings, long timestamp,
-            ContactsManager contactManager) {
+            ContactManager contactManager) {
         super(parent, contact, invite.getFeatureTags().get(0), rcsSettings, timestamp,
                 contactManager);
 

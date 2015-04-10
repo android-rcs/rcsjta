@@ -29,7 +29,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
@@ -59,7 +59,7 @@ public class OptionsManager implements DiscoveryManager {
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactsManager mContactManager;
+    private final ContactManager mContactManager;
 
     /**
      * The logger
@@ -73,7 +73,7 @@ public class OptionsManager implements DiscoveryManager {
      * @param rcsSettings
      * @param contactManager
      */
-    public OptionsManager(ImsModule parent, RcsSettings rcsSettings, ContactsManager contactManager) {
+    public OptionsManager(ImsModule parent, RcsSettings rcsSettings, ContactManager contactManager) {
         mImsModule = parent;
         mRcsSettings = rcsSettings;
         mContactManager = contactManager;

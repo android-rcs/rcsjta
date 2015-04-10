@@ -38,7 +38,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.http.DownloadFromAcceptFile
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.DownloadFromResumeFileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpFileTransferSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.ResumeUploadFileSharingSession;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
@@ -88,7 +88,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
     private static final Logger sLogger = Logger
             .getLogger(OneToOneFileTransferImpl.class.getName());
 
-    private final ContactsManager mContactManager;
+    private final ContactManager mContactManager;
 
     /**
      * Constructor
@@ -107,7 +107,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             IOneToOneFileTransferBroadcaster broadcaster, InstantMessagingService imService,
             FileTransferPersistedStorageAccessor persistentStorage,
             FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings, Core core,
-            MessagingLog messagingLog, ContactsManager contactManager) {
+            MessagingLog messagingLog, ContactManager contactManager) {
         mFileTransferId = transferId;
         mBroadcaster = broadcaster;
         mImService = imService;

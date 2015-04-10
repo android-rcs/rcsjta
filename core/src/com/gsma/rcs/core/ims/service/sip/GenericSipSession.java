@@ -32,14 +32,13 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.capability.CapabilityUtils;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
 import gov2.nist.javax2.sip.header.ims.PPreferredServiceHeader;
-
 import javax2.sip.header.ExtensionHeader;
 
 /**
@@ -69,7 +68,7 @@ public abstract class GenericSipSession extends ImsServiceSession {
      * @param contactManager
      */
     public GenericSipSession(ImsService parent, ContactId contact, String featureTag,
-            RcsSettings rcsSettings, long timestamp, ContactsManager contactManager) {
+            RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
         super(parent, contact, PhoneUtils.formatContactIdToUri(contact), rcsSettings, timestamp,
                 contactManager);
 

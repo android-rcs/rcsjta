@@ -38,7 +38,7 @@ import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.SessionTimerManager;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.ipcalldraft.AudioCodec;
 import com.gsma.rcs.service.ipcalldraft.VideoCodec;
@@ -73,7 +73,7 @@ public class TerminatingIPCallSession extends IPCallSession {
      * @param contactManager
      */
     public TerminatingIPCallSession(ImsService parent, SipRequest invite, ContactId contact,
-            RcsSettings rcsSettings, long timestamp, ContactsManager contactManager) {
+            RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
         super(parent, contact, ContentManager.createLiveAudioContentFromSdp(invite
                 .getContentBytes()), ContentManager.createLiveVideoContentFromSdp(invite
                 .getContentBytes()), rcsSettings, timestamp, contactManager);

@@ -24,7 +24,7 @@ package com.gsma.rcs.addressbook;
 
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.api.ServerApiServiceNotRegisteredException;
 import com.gsma.rcs.service.api.ServerApiUtils;
@@ -62,7 +62,7 @@ public class SyncAdapterService extends Service {
 
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
-    private ContactsManager mContactManager;
+    private ContactManager mContactManager;
 
     /**
      * Called when the activity is first created.
@@ -73,8 +73,8 @@ public class SyncAdapterService extends Service {
         ContentResolver contentResolver = ctx.getContentResolver();
         LocalContentResolver localContentResolver = new LocalContentResolver(ctx);
         RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
-        mContactManager = ContactsManager.createInstance(ctx, contentResolver,
-                localContentResolver, rcsSettings);
+        mContactManager = ContactManager.createInstance(ctx, contentResolver, localContentResolver,
+                rcsSettings);
         mSyncAdapter = new RcsContactsSyncAdapter(this);
     }
 

@@ -24,7 +24,7 @@ package com.gsma.rcs.core.ims.service.im.chat.standfw;
 
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
@@ -45,7 +45,7 @@ public class StoreAndForwardManager {
 
     private final MessagingLog mMessagingLog;
 
-    private final ContactsManager mContactManager;
+    private final ContactManager mContactManager;
 
     private final static Logger logger = Logger.getLogger(StoreAndForwardManager.class
             .getSimpleName());
@@ -59,7 +59,7 @@ public class StoreAndForwardManager {
      * @param messagingLog
      */
     public StoreAndForwardManager(ImsService imsService, RcsSettings rcsSettings,
-            ContactsManager contactManager, MessagingLog messagingLog) {
+            ContactManager contactManager, MessagingLog messagingLog) {
         mImsService = imsService;
         mRcsSettings = rcsSettings;
         mContactManager = contactManager;

@@ -45,7 +45,7 @@ import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnUtils;
 import com.gsma.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtil;
@@ -111,7 +111,7 @@ public abstract class GroupChatSession extends ChatSession {
      */
     public GroupChatSession(ImsService parent, ContactId contact, String conferenceId,
             Map<ContactId, ParticipantStatus> participants, RcsSettings rcsSettings,
-            MessagingLog messagingLog, long timestamp, ContactsManager contactManager) {
+            MessagingLog messagingLog, long timestamp, ContactManager contactManager) {
         super(parent, contact, conferenceId, rcsSettings, messagingLog, null, timestamp,
                 contactManager);
 

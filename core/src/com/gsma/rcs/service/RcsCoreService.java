@@ -54,7 +54,7 @@ import com.gsma.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.history.GroupChatDequeueTask;
 import com.gsma.rcs.provider.history.HistoryLog;
 import com.gsma.rcs.provider.history.OneToOneChatDequeueTask;
@@ -222,7 +222,7 @@ public class RcsCoreService extends Service implements CoreListener {
 
     private HistoryLog mHistoryLog;
 
-    private ContactsManager mContactManager;
+    private ContactManager mContactManager;
 
     /**
      * The logger
@@ -238,7 +238,7 @@ public class RcsCoreService extends Service implements CoreListener {
         mMessagingLog = MessagingLog.createInstance(mContext, mLocalContentResolver, mRcsSettings);
         RichCallHistory.createInstance(mLocalContentResolver);
         mRichCallHistory = RichCallHistory.getInstance();
-        mContactManager = ContactsManager.createInstance(mContext, mContentResolver,
+        mContactManager = ContactManager.createInstance(mContext, mContentResolver,
                 mLocalContentResolver, mRcsSettings);
 
         // Set application context

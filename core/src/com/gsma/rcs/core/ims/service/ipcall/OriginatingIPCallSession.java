@@ -28,7 +28,7 @@ import com.gsma.rcs.core.ims.network.sip.SipMessageFactory;
 import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.ipcalldraft.IIPCallPlayer;
 import com.gsma.rcs.service.ipcalldraft.IIPCallRenderer;
@@ -64,7 +64,7 @@ public class OriginatingIPCallSession extends IPCallSession {
     public OriginatingIPCallSession(ImsService parent, ContactId contact,
             AudioContent audioContent, VideoContent videoContent, IIPCallPlayer player,
             IIPCallRenderer renderer, RcsSettings rcsSettings, long timestamp,
-            ContactsManager contactManager) {
+            ContactManager contactManager) {
         super(parent, contact, audioContent, videoContent, rcsSettings, timestamp, contactManager);
 
         // Set the player

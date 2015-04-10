@@ -24,7 +24,7 @@ package com.gsma.rcs.service.api;
 
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.ims.service.capability.CapabilityService;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.broadcaster.CapabilitiesBroadcaster;
 import com.gsma.rcs.service.broadcaster.RcsServiceRegistrationEventBroadcaster;
@@ -69,7 +69,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
     /**
      * Contacts manager
      */
-    private final ContactsManager mContactsManager;
+    private final ContactManager mContactManager;
 
     /**
      * This purpose of this handler is to make the request asynchronous with the mechanisms provider
@@ -95,11 +95,11 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
     private class AllCapabilitiesRequester implements Runnable {
 
-        private final ContactsManager mContactManager;
+        private final ContactManager mContactManager;
 
         private final CapabilityService mCapabilityService;
 
-        public AllCapabilitiesRequester(ContactsManager contactManager,
+        public AllCapabilitiesRequester(ContactManager contactManager,
                 CapabilityService capabilityService) {
             mContactManager = contactManager;
             mCapabilityService = capabilityService;
@@ -113,15 +113,15 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
     /**
      * Constructor
      * 
-     * @param contactsManager Contacts manager
+     * @param contactManager Contacts manager
      * @param rcsSettings
      */
-    public CapabilityServiceImpl(ContactsManager contactsManager, RcsSettings rcsSettings) {
+    public CapabilityServiceImpl(ContactManager contactManager, RcsSettings rcsSettings) {
         if (logger.isActivated()) {
             logger.info("Capability service API is loaded");
         }
 
-        mContactsManager = contactsManager;
+        mContactManager = contactManager;
         mOptionsExchangeRequestHandler = new Handler();
         mRcsSettings = rcsSettings;
     }
@@ -244,7 +244,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
             logger.info("Get capabilities for contact " + contact);
         }
         try {
-            com.gsma.rcs.core.ims.service.capability.Capabilities caps = mContactsManager
+            com.gsma.rcs.core.ims.service.capability.Capabilities caps = mContactManager
                     .getContactCapabilities(contact);
             // TODO update code so not to insert default capabilities in provider
             if (caps == null
@@ -253,7 +253,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
                 return null;
             }
             // Read capabilities in the local database
-            return ContactServiceImpl.getCapabilities(mContactsManager
+            return ContactServiceImpl.getCapabilities(mContactManager
                     .getContactCapabilities(contact));
 
         } catch (ServerApiBaseException e) {
@@ -357,7 +357,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
         ServerApiUtils.testIms();
 
         try {
-            mOptionsExchangeRequestHandler.post(new AllCapabilitiesRequester(mContactsManager, Core
+            mOptionsExchangeRequestHandler.post(new AllCapabilitiesRequester(mContactManager, Core
                     .getInstance().getCapabilityService()));
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {

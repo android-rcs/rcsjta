@@ -41,7 +41,7 @@ import com.gsma.rcs.core.ims.service.SessionTimerManager;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
@@ -78,7 +78,7 @@ public class TerminatingOneToOneChatSession extends OneToOneChatSession implemen
      */
     public TerminatingOneToOneChatSession(ImsService parent, SipRequest invite, ContactId contact,
             RcsSettings rcsSettings, MessagingLog messagingLog, long timestamp,
-            ContactsManager contactManager) {
+            ContactManager contactManager) {
         super(parent, contact, PhoneUtils.formatContactIdToUri(contact), ChatUtils.getFirstMessage(
                 invite, timestamp), rcsSettings, messagingLog, timestamp, contactManager);
 

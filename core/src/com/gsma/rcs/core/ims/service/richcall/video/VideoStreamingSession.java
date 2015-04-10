@@ -32,7 +32,7 @@ import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.ContentSharingSession;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
@@ -67,7 +67,7 @@ public abstract class VideoStreamingSession extends ContentSharingSession {
      * @param contactManager
      */
     public VideoStreamingSession(ImsService parent, MmContent content, ContactId contact,
-            RcsSettings rcsSettings, long timestamp, ContactsManager contactManager) {
+            RcsSettings rcsSettings, long timestamp, ContactManager contactManager) {
         super(parent, content, contact, rcsSettings, timestamp, contactManager);
     }
 

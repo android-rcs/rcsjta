@@ -24,7 +24,7 @@ package com.gsma.rcs.addressbook;
 
 import com.gsma.rcs.R;
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.LauncherUtils;
 
@@ -45,7 +45,7 @@ public class SetupRcsAccount extends android.accounts.AccountAuthenticatorActivi
         ContentResolver contentResolver = ctx.getContentResolver();
         LocalContentResolver localContentResolver = new LocalContentResolver(contentResolver);
         RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
-        ContactsManager contactManager = ContactsManager.createInstance(ctx, contentResolver,
+        ContactManager contactManager = ContactManager.createInstance(ctx, contentResolver,
                 localContentResolver, rcsSettings);
 
         AuthenticationService.createRcsAccount(this, localContentResolver,

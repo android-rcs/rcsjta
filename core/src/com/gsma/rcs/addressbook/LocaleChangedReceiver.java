@@ -23,7 +23,7 @@
 package com.gsma.rcs.addressbook;
 
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 
@@ -52,7 +52,7 @@ public class LocaleChangedReceiver extends BroadcastReceiver {
         ContentResolver contentResolver = context.getContentResolver();
         LocalContentResolver localContentResolver = new LocalContentResolver(context);
         RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
-        ContactsManager contactManager = ContactsManager.createInstance(context, contentResolver,
+        ContactManager contactManager = ContactManager.createInstance(context, contentResolver,
                 localContentResolver, rcsSettings);
         contactManager.updateStrings();
     }

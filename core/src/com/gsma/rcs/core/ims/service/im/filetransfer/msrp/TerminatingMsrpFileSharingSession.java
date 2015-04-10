@@ -47,7 +47,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.ImsFileSharingSession;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.NetworkRessourceManager;
@@ -97,7 +97,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
      */
     public TerminatingMsrpFileSharingSession(ImsService parent, SipRequest invite,
             ContactId remote, RcsSettings rcsSettings, long timestamp, long timestampSent,
-            ContactsManager contactManager) {
+            ContactManager contactManager) {
         super(parent, ContentManager.createMmContentFromSdp(invite, rcsSettings), remote,
                 FileTransferUtils.extractFileIcon(invite, rcsSettings), IdGenerator
                         .generateMessageID(), rcsSettings, timestamp, contactManager);

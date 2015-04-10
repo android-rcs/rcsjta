@@ -35,7 +35,7 @@ import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.chat.standfw.TerminatingStoreAndForwardOneToOneChatMessageSession;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
@@ -75,7 +75,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactsManager mContactManager;
+    private final ContactManager mContactManager;
 
     private final Core mCore;
 
@@ -98,12 +98,12 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @param messagingLog MessagingLog
      * @param rcsSettings RcsSettings
      * @param chatService ChatServiceImpl
-     * @param contactManager ContactsManager
+     * @param contactManager ContactManager
      * @param core Core
      */
     public OneToOneChatImpl(ContactId contact, IOneToOneChatEventBroadcaster broadcaster,
             InstantMessagingService imService, MessagingLog messagingLog, RcsSettings rcsSettings,
-            ChatServiceImpl chatService, ContactsManager contactManager, Core core) {
+            ChatServiceImpl chatService, ContactManager contactManager, Core core) {
         mContact = contact;
         mBroadcaster = broadcaster;
         mImService = imService;

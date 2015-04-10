@@ -32,7 +32,7 @@ import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.terms.TermsConditionsService;
 import com.gsma.rcs.platform.AndroidFactory;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.DeviceUtils;
@@ -105,7 +105,7 @@ public class Core {
      * @throws CoreException
      */
     public static Core createCore(CoreListener listener, RcsSettings rcsSettings,
-            ContactsManager contactsManager, MessagingLog messagingLog) throws CoreException {
+            ContactManager contactsManager, MessagingLog messagingLog) throws CoreException {
         if (sInstance != null) {
             return sInstance;
         }
@@ -136,7 +136,7 @@ public class Core {
      * @param contactsManager
      * @throws CoreException
      */
-    private Core(CoreListener listener, RcsSettings rcsSettings, ContactsManager contactsManager,
+    private Core(CoreListener listener, RcsSettings rcsSettings, ContactManager contactsManager,
             MessagingLog messagingLog) throws CoreException {
         boolean logActivated = logger.isActivated();
         if (logActivated) {

@@ -18,7 +18,7 @@
 
 package com.gsma.rcs.core.ims.service.capability;
 
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PeriodicRefresher;
 import com.gsma.rcs.utils.logger.Logger;
@@ -45,7 +45,7 @@ public class PollingManager extends PeriodicRefresher {
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactsManager mContatManager;
+    private final ContactManager mContatManager;
 
     /**
      * The logger
@@ -60,7 +60,7 @@ public class PollingManager extends PeriodicRefresher {
      * @param contactManager
      */
     public PollingManager(CapabilityService parent, RcsSettings rcsSettings,
-            ContactsManager contactManager) {
+            ContactManager contactManager) {
         mImsService = parent;
         mPollingPeriod = rcsSettings.getCapabilityPollingPeriod();
         mRcsSettings = rcsSettings;

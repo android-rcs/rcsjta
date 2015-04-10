@@ -43,7 +43,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.gsma.rcs.core.ims.service.im.filetransfer.ImsFileSharingSession;
 import com.gsma.rcs.platform.AndroidFactory;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.Base64;
 import com.gsma.rcs.utils.IdGenerator;
@@ -96,7 +96,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
      */
     public OriginatingMsrpFileSharingSession(String fileTransferId, ImsService parent,
             MmContent content, ContactId contact, MmContent fileIcon, RcsSettings rcsSettings,
-            long timestamp, ContactsManager contactManager) {
+            long timestamp, ContactManager contactManager) {
         super(parent, content, contact, fileIcon, fileTransferId, rcsSettings, timestamp,
                 contactManager);
 

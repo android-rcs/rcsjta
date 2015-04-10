@@ -34,8 +34,8 @@ import com.gsma.rcs.core.ims.service.presence.FavoriteLink;
 import com.gsma.rcs.core.ims.service.presence.Geoloc;
 import com.gsma.rcs.core.ims.service.presence.PresenceInfo;
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.eab.ContactsManager;
-import com.gsma.rcs.provider.eab.ContactManagerException;
+import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.contact.ContactManagerException;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtilMockContext;
 import com.gsma.rcs.utils.logger.Logger;
@@ -43,7 +43,7 @@ import com.gsma.rcs.utils.logger.Logger;
 public class ContactManagerTest extends AndroidTestCase {
 
     private static final Logger logger = Logger.getLogger(ContactManagerTest.class.getName());
-    private ContactsManager mContactManager;
+    private ContactManager mContactManager;
     private String mNumber = "+33987654321";
     private ContactUtil contactUtils;
     private ContactId mContact;
@@ -59,7 +59,7 @@ public class ContactManagerTest extends AndroidTestCase {
         mContentResolver = mContext.getContentResolver();
         mLocalContentResolver = new LocalContentResolver(mContentResolver);
         mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
-        mContactManager = ContactsManager.createInstance(mContext, mContentResolver,
+        mContactManager = ContactManager.createInstance(mContext, mContentResolver,
                 mLocalContentResolver, mRcsSettings);
 
         contactUtils = ContactUtil.getInstance(new ContactUtilMockContext(mContext));
@@ -269,7 +269,7 @@ public class ContactManagerTest extends AndroidTestCase {
         capa.setTimestampOfLastRefresh(timestamp);
 
         // newInfo.setPresenceInfo(null);
-        // if (new)PresenceInfo is null, error on ContactsManager line 504 so
+        // if (new)PresenceInfo is null, error on ContactManager line 504 so
         PresenceInfo prese = new PresenceInfo();
         prese.setFavoriteLink(new FavoriteLink("fav_link_name", "http://fav_link_url"));
         newInfo.setPresenceInfo(prese);

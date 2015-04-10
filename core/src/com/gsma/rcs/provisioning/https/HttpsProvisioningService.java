@@ -24,7 +24,7 @@ package com.gsma.rcs.provisioning.https;
 
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.messaging.MessagingLog;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provisioning.ProvisioningInfo;
 import com.gsma.rcs.service.LauncherUtils;
@@ -77,7 +77,7 @@ public class HttpsProvisioningService extends Service {
 
     private MessagingLog mMessagingLog;
 
-    private ContactsManager mContactManager;
+    private ContactManager mContactManager;
 
     /**
      * Retry action for provisioning failure
@@ -101,7 +101,7 @@ public class HttpsProvisioningService extends Service {
         mRcsSettings = RcsSettings.createInstance(mLocalContentResolver);
         mMessagingLog = MessagingLog.createInstance(mContext, mLocalContentResolver, mRcsSettings);
         mRetryIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ACTION_RETRY), 0);
-        mContactManager = ContactsManager.createInstance(mContext, contentResolver,
+        mContactManager = ContactManager.createInstance(mContext, contentResolver,
                 mLocalContentResolver, mRcsSettings);
     }
 

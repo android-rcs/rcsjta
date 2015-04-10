@@ -28,7 +28,7 @@ import com.gsma.rcs.core.ims.service.SessionIdGenerator;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallPersistedStorageAccessor;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallService;
 import com.gsma.rcs.core.ims.service.ipcall.IPCallSession;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.ipcall.IPCallHistory;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.broadcaster.IPCallEventBroadcaster;
@@ -74,14 +74,11 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactsManager mContactsManager;
+    private final ContactManager mContactManager;
 
     private final Map<String, IIPCall> mIPCallCache = new HashMap<String, IIPCall>();
 
-    /**
-     * The logger
-     */
-    private static final Logger logger = Logger.getLogger(IPCallServiceImpl.class.getSimpleName());
+    private static final Logger sLogger = Logger.getLogger(IPCallServiceImpl.class.getSimpleName());
 
     /**
      * Lock used for synchronization
@@ -93,18 +90,18 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * 
      * @param ipCallService IPCallService
      * @param ipCallLog IPCallHistory
-     * @param contactsManager ContactsManager
+     * @param contactManager ContactManager
      * @param rcsSettings RcsSettings
      */
     public IPCallServiceImpl(IPCallService ipCallService, IPCallHistory ipCallLog,
-            ContactsManager contactsManager, RcsSettings rcsSettings) {
-        if (logger.isActivated()) {
-            logger.info("IP call service API is loaded");
+            ContactManager contactManager, RcsSettings rcsSettings) {
+        if (sLogger.isActivated()) {
+            sLogger.info("IP call service API is loaded");
         }
         mIPCallService = ipCallService;
         mIPCallLog = ipCallLog;
         mRcsSettings = rcsSettings;
-        mContactsManager = contactsManager;
+        mContactManager = contactManager;
     }
 
     /**
@@ -114,8 +111,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
         // Clear lists of sessions
         mIPCallCache.clear();
 
-        if (logger.isActivated()) {
-            logger.info("IP call service API is closed");
+        if (sLogger.isActivated()) {
+            sLogger.info("IP call service API is closed");
         }
     }
 
@@ -126,8 +123,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      */
 
     protected void addIPCall(IPCallImpl ipCall) {
-        if (logger.isActivated()) {
-            logger.debug("Add an IP Call session in the list (size=" + mIPCallCache.size() + ")");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Add an IP Call session in the list (size=" + mIPCallCache.size() + ")");
         }
 
         mIPCallCache.put(ipCall.getCallId(), ipCall);
@@ -139,8 +136,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * @param sessionId Session ID
      */
     protected void removeIPCall(String sessionId) {
-        if (logger.isActivated()) {
-            logger.debug("Remove an IP Call session from the list (size=" + mIPCallCache.size()
+        if (sLogger.isActivated()) {
+            sLogger.debug("Remove an IP Call session from the list (size=" + mIPCallCache.size()
                     + ")");
         }
 
@@ -171,8 +168,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * @param listener Service registration listener
      */
     public void addEventListener(IRcsServiceRegistrationListener listener) {
-        if (logger.isActivated()) {
-            logger.info("Add a service listener");
+        if (sLogger.isActivated()) {
+            sLogger.info("Add a service listener");
         }
         synchronized (lock) {
             mRcsServiceRegistrationEventBroadcaster.addEventListener(listener);
@@ -185,8 +182,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * @param listener Service registration listener
      */
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
-        if (logger.isActivated()) {
-            logger.info("Remove a service listener");
+        if (sLogger.isActivated()) {
+            sLogger.info("Remove a service listener");
         }
         synchronized (lock) {
             mRcsServiceRegistrationEventBroadcaster.removeEventListener(listener);
@@ -222,12 +219,12 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      */
     public void receiveIPCallInvitation(IPCallSession session) {
         ContactId contact = session.getRemoteContact();
-        if (logger.isActivated()) {
-            logger.info("Receive IP call invitation from " + contact);
+        if (sLogger.isActivated()) {
+            sLogger.info("Receive IP call invitation from " + contact);
         }
 
         // Update displayName of remote contact
-        mContactsManager.setContactDisplayName(contact, session.getRemoteDisplayName());
+        mContactManager.setContactDisplayName(contact, session.getRemoteDisplayName());
 
         String callId = session.getSessionID();
         IPCallPersistedStorageAccessor storageAccessor = new IPCallPersistedStorageAccessor(callId,
@@ -251,8 +248,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      */
     public IIPCall initiateCall(ContactId contact, IIPCallPlayer player, IIPCallRenderer renderer)
             throws ServerApiException {
-        if (logger.isActivated()) {
-            logger.info("Initiate an IP call audio session with " + contact);
+        if (sLogger.isActivated()) {
+            sLogger.info("Initiate an IP call audio session with " + contact);
         }
 
         // Test IMS connection
@@ -314,8 +311,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      */
     public IIPCall initiateVisioCall(ContactId contact, IIPCallPlayer player,
             IIPCallRenderer renderer) throws ServerApiException {
-        if (logger.isActivated()) {
-            logger.info("Initiate an IP call visio session with " + contact);
+        if (sLogger.isActivated()) {
+            sLogger.info("Initiate an IP call visio session with " + contact);
         }
 
         // Test IMS connection
@@ -371,8 +368,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * @throws ServerApiException
      */
     public IIPCall getIPCall(String callId) throws ServerApiException {
-        if (logger.isActivated()) {
-            logger.info("Get IP call " + callId);
+        if (sLogger.isActivated()) {
+            sLogger.info("Get IP call " + callId);
         }
 
         IIPCall ipCall = mIPCallCache.get(callId);
@@ -391,8 +388,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * @throws ServerApiException
      */
     public List<IBinder> getIPCalls() throws ServerApiException {
-        if (logger.isActivated()) {
-            logger.info("Get IP call sessions");
+        if (sLogger.isActivated()) {
+            sLogger.info("Get IP call sessions");
         }
 
         try {
@@ -403,8 +400,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
             return ipCalls;
 
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Unexpected error", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Unexpected error", e);
             }
             throw new ServerApiException(e.getMessage());
         }
@@ -443,8 +440,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * @param listener Listener
      */
     public void addEventListener2(IIPCallListener listener) {
-        if (logger.isActivated()) {
-            logger.info("Add an IP call event listener");
+        if (sLogger.isActivated()) {
+            sLogger.info("Add an IP call event listener");
         }
         synchronized (lock) {
             mBroadcaster.addEventListener(listener);
@@ -457,8 +454,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * @param listener Listener
      */
     public void removeEventListener2(IIPCallListener listener) {
-        if (logger.isActivated()) {
-            logger.info("Remove an IP call event listener");
+        if (sLogger.isActivated()) {
+            sLogger.info("Remove an IP call event listener");
         }
         synchronized (lock) {
             mBroadcaster.removeEventListener(listener);

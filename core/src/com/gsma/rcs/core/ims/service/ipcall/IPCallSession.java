@@ -41,7 +41,7 @@ import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.ImsSessionBasedServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.richcall.video.SdpOrientationExtension;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.ipcalldraft.AudioCodec;
 import com.gsma.rcs.service.ipcalldraft.IIPCallPlayer;
@@ -121,7 +121,7 @@ public abstract class IPCallSession extends ImsServiceSession {
      */
     public IPCallSession(ImsService imsService, ContactId contact, AudioContent audioContent,
             VideoContent videoContent, RcsSettings rcsSettings, long timestamp,
-            ContactsManager contactManager) {
+            ContactManager contactManager) {
         super(imsService, contact, PhoneUtils.formatContactIdToUri(contact), rcsSettings,
                 timestamp, contactManager);
 

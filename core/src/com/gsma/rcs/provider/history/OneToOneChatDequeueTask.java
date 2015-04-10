@@ -22,7 +22,7 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
@@ -49,7 +49,7 @@ public class OneToOneChatDequeueTask extends DequeueTask {
 
     public OneToOneChatDequeueTask(Object lock, InstantMessagingService imService,
             ChatServiceImpl chatService, FileTransferServiceImpl fileTransferService,
-            HistoryLog historyLog, MessagingLog messagingLog, ContactsManager contactManager,
+            HistoryLog historyLog, MessagingLog messagingLog, ContactManager contactManager,
             RcsSettings rcsSettings) {
         super(lock, imService, contactManager, messagingLog, rcsSettings);
         mChatService = chatService;

@@ -19,7 +19,7 @@ package com.gsma.rcs.provider.messaging;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.DequeueTask;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
@@ -38,7 +38,7 @@ public class FileTransferDequeueTask extends DequeueTask {
 
     public FileTransferDequeueTask(Object lock, InstantMessagingService imService,
             MessagingLog messagingLog, FileTransferServiceImpl fileTransferService,
-            ContactsManager contactManager, RcsSettings rcsSettings) {
+            ContactManager contactManager, RcsSettings rcsSettings) {
         super(lock, imService, contactManager, messagingLog, rcsSettings);
         mFileTransferService = fileTransferService;
     }

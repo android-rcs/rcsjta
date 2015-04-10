@@ -20,10 +20,11 @@
  * Modifications are licensed under the License.
  ******************************************************************************/
 
-package com.gsma.rcs.provider.eab;
+package com.gsma.rcs.provider.contact;
 
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.provider.ContentProviderBaseIdCreator;
+import com.gsma.rcs.provider.contact.ContactData.AggregationData;
 import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.DatabaseUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -48,13 +49,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Rich address book provider <br>
+ * RCS Contact provider <br>
  * This provider contains the list of the RCS contacts and their status <br>
  * It is used by the AddressBookManager to keep the synchronization between the native address book
  * and the RCS contacts. <br>
  * It also contains the list of aggregations between native raw contacts and RCS raw contacts
  */
-public class RichAddressBookProvider extends ContentProvider {
+public class ContactProvider extends ContentProvider {
 
     private static final int INVALID_ROW_ID = -1;
 
@@ -67,14 +68,14 @@ public class RichAddressBookProvider extends ContentProvider {
      */
     public static final String DATABASE_NAME = "capability.db";
 
-    private static final String RICH_ADDRESS_BOOK_SELECTION_WITH_CONTACT_ONLY = RichAddressBookData.KEY_CONTACT
+    private static final String RCS_CONTACT_SELECTION_WITH_CONTACT_ONLY = ContactData.KEY_CONTACT
             .concat("=?");
 
     private static final String AGGREGATION_DATA_SELECTION_WITH_ID_ONLY = AggregationData.KEY_ID
             .concat("=?");
 
     private final static String[] PHOTO_DATA_PROJECTION = new String[] {
-        RichAddressBookData.KEY_PRESENCE_PHOTO_DATA
+        ContactData.KEY_PRESENCE_PHOTO_DATA
     };
 
     private static final String FILENAME_PREFIX = "photoData";
@@ -83,11 +84,10 @@ public class RichAddressBookProvider extends ContentProvider {
     static {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
-        sUriMatcher.addURI(RichAddressBookData.CONTENT_URI.getAuthority(),
-                RichAddressBookData.CONTENT_URI.getPath().substring(1),
-                UriType.InternalContacts.INTERNAL_CONTACTS);
-        sUriMatcher.addURI(RichAddressBookData.CONTENT_URI.getAuthority(),
-                RichAddressBookData.CONTENT_URI.getPath().substring(1).concat("/*"),
+        sUriMatcher.addURI(ContactData.CONTENT_URI.getAuthority(), ContactData.CONTENT_URI
+                .getPath().substring(1), UriType.InternalContacts.INTERNAL_CONTACTS);
+        sUriMatcher.addURI(ContactData.CONTENT_URI.getAuthority(), ContactData.CONTENT_URI
+                .getPath().substring(1).concat("/*"),
                 UriType.InternalContacts.INTERNAL_CONTACTS_WITH_ID);
         sUriMatcher.addURI(AggregationData.CONTENT_URI.getAuthority(), AggregationData.CONTENT_URI
                 .getPath().substring(1), UriType.Aggregation.AGGREGATION);
@@ -103,55 +103,41 @@ public class RichAddressBookProvider extends ContentProvider {
      * String to restrict projection for exposed URI to a set of columns
      */
     private static final String[] RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS = new String[] {
-            RichAddressBookData.KEY_BASECOLUMN_ID, RichAddressBookData.KEY_CONTACT,
-            RichAddressBookData.KEY_CAPABILITY_IMAGE_SHARING,
-            RichAddressBookData.KEY_CAPABILITY_VIDEO_SHARING,
-            RichAddressBookData.KEY_CAPABILITY_IM_SESSION,
-            RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER,
-            RichAddressBookData.KEY_CAPABILITY_GEOLOCATION_PUSH,
-            RichAddressBookData.KEY_CAPABILITY_EXTENSIONS, RichAddressBookData.KEY_AUTOMATA,
-            RichAddressBookData.KEY_CAPABILITY_TIME_LAST_REFRESH
+            ContactData.KEY_BASECOLUMN_ID, ContactData.KEY_CONTACT,
+            ContactData.KEY_CAPABILITY_IMAGE_SHARING, ContactData.KEY_CAPABILITY_VIDEO_SHARING,
+            ContactData.KEY_CAPABILITY_IM_SESSION, ContactData.KEY_CAPABILITY_FILE_TRANSFER,
+            ContactData.KEY_CAPABILITY_GEOLOCATION_PUSH, ContactData.KEY_CAPABILITY_EXTENSIONS,
+            ContactData.KEY_AUTOMATA, ContactData.KEY_CAPABILITY_TIME_LAST_REFRESH
     };
 
     /**
      * Columns that are not exposed through external URI
      */
     private static final String[] COLUMNS_HIDDEN_FOR_EXTERNAL_ACCESS = new String[] {
-            RichAddressBookData.KEY_DISPLAY_NAME, RichAddressBookData.KEY_PRESENCE_SHARING_STATUS,
-            RichAddressBookData.KEY_TIMESTAMP, RichAddressBookData.KEY_RCS_STATUS,
-            RichAddressBookData.KEY_REGISTRATION_STATE,
-            RichAddressBookData.KEY_RCS_STATUS_TIMESTAMP,
-            RichAddressBookData.KEY_PRESENCE_FREE_TEXT,
-            RichAddressBookData.KEY_PRESENCE_WEBLINK_NAME,
-            RichAddressBookData.KEY_PRESENCE_WEBLINK_URL,
-            RichAddressBookData.KEY_PRESENCE_PHOTO_EXIST_FLAG,
-            RichAddressBookData.KEY_PRESENCE_PHOTO_ETAG,
-            RichAddressBookData.KEY_PRESENCE_PHOTO_DATA,
-            RichAddressBookData.KEY_PRESENCE_GEOLOC_EXIST_FLAG,
-            RichAddressBookData.KEY_PRESENCE_GEOLOC_LATITUDE,
-            RichAddressBookData.KEY_PRESENCE_GEOLOC_LONGITUDE,
-            RichAddressBookData.KEY_PRESENCE_GEOLOC_ALTITUDE,
-            RichAddressBookData.KEY_PRESENCE_TIMESTAMP,
-            RichAddressBookData.KEY_CAPABILITY_TIME_LAST_RQST,
-            RichAddressBookData.KEY_CAPABILITY_CS_VIDEO,
-            RichAddressBookData.KEY_CAPABILITY_PRESENCE_DISCOVERY,
-            RichAddressBookData.KEY_CAPABILITY_SOCIAL_PRESENCE,
-            RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_HTTP,
-            RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL,
-            RichAddressBookData.KEY_CAPABILITY_GROUP_CHAT_SF,
-            RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_SF,
-            RichAddressBookData.KEY_BLOCKING_TIMESTAMP, RichAddressBookData.KEY_BLOCKED,
-            RichAddressBookData.KEY_CAPABILITY_IP_VOICE_CALL,
-            RichAddressBookData.KEY_CAPABILITY_IP_VIDEO_CALL
+            ContactData.KEY_DISPLAY_NAME, ContactData.KEY_PRESENCE_SHARING_STATUS,
+            ContactData.KEY_TIMESTAMP, ContactData.KEY_RCS_STATUS,
+            ContactData.KEY_REGISTRATION_STATE, ContactData.KEY_RCS_STATUS_TIMESTAMP,
+            ContactData.KEY_PRESENCE_FREE_TEXT, ContactData.KEY_PRESENCE_WEBLINK_NAME,
+            ContactData.KEY_PRESENCE_WEBLINK_URL, ContactData.KEY_PRESENCE_PHOTO_EXIST_FLAG,
+            ContactData.KEY_PRESENCE_PHOTO_ETAG, ContactData.KEY_PRESENCE_PHOTO_DATA,
+            ContactData.KEY_PRESENCE_GEOLOC_EXIST_FLAG, ContactData.KEY_PRESENCE_GEOLOC_LATITUDE,
+            ContactData.KEY_PRESENCE_GEOLOC_LONGITUDE, ContactData.KEY_PRESENCE_GEOLOC_ALTITUDE,
+            ContactData.KEY_PRESENCE_TIMESTAMP, ContactData.KEY_CAPABILITY_TIME_LAST_RQST,
+            ContactData.KEY_CAPABILITY_CS_VIDEO, ContactData.KEY_CAPABILITY_PRESENCE_DISCOVERY,
+            ContactData.KEY_CAPABILITY_SOCIAL_PRESENCE,
+            ContactData.KEY_CAPABILITY_FILE_TRANSFER_HTTP,
+            ContactData.KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL,
+            ContactData.KEY_CAPABILITY_GROUP_CHAT_SF, ContactData.KEY_CAPABILITY_FILE_TRANSFER_SF,
+            ContactData.KEY_BLOCKING_TIMESTAMP, ContactData.KEY_BLOCKED,
+            ContactData.KEY_CAPABILITY_IP_VOICE_CALL, ContactData.KEY_CAPABILITY_IP_VIDEO_CALL
     };
 
     private static final Set<String> COLUMN_SET_HIDDEN_FOR_EXTERNAL_ACCESS = new HashSet<String>(
             Arrays.asList(COLUMNS_HIDDEN_FOR_EXTERNAL_ACCESS));
 
     private static final String RESTRICTED_SELECTION_QUERY_FOR_EXTERNALLY_DEFINED_COLUMNS = new StringBuilder(
-            "(" + RichAddressBookData.KEY_RCS_STATUS).append("!=")
-            .append(RcsStatus.NO_INFO.toInt()).append(") AND (")
-            .append(RichAddressBookData.KEY_RCS_STATUS).append("!=")
+            "(" + ContactData.KEY_RCS_STATUS).append("!=").append(RcsStatus.NO_INFO.toInt())
+            .append(") AND (").append(ContactData.KEY_RCS_STATUS).append("!=")
             .append(RcsStatus.NOT_RCS.toInt()).append(")").toString();
 
     private Logger logger = Logger.getLogger(this.getClass().getName());
@@ -203,54 +189,49 @@ public class RichAddressBookProvider extends ContentProvider {
 
         private void createDb(SQLiteDatabase db) {
             db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(CAPABILITY_TABLE)
-                    .append("(").append(RichAddressBookData.KEY_CONTACT)
-                    .append(" TEXT PRIMARY KEY,").append(RichAddressBookData.KEY_BASECOLUMN_ID)
-                    .append(" INTEGER NOT NULL,").append(RichAddressBookData.KEY_DISPLAY_NAME)
-                    .append(" TEXT,").append(RichAddressBookData.KEY_RCS_STATUS).append(" TEXT,")
-                    .append(RichAddressBookData.KEY_RCS_STATUS_TIMESTAMP).append(" INTEGER,")
-                    .append(RichAddressBookData.KEY_REGISTRATION_STATE).append(" INTEGER,")
-                    .append(RichAddressBookData.KEY_PRESENCE_SHARING_STATUS).append(" TEXT,")
-                    .append(RichAddressBookData.KEY_PRESENCE_FREE_TEXT).append(" TEXT,")
-                    .append(RichAddressBookData.KEY_PRESENCE_WEBLINK_NAME).append(" TEXT,")
-                    .append(RichAddressBookData.KEY_PRESENCE_WEBLINK_URL).append(" TEXT,")
-                    .append(RichAddressBookData.KEY_PRESENCE_PHOTO_EXIST_FLAG).append(" TEXT,")
-                    .append(RichAddressBookData.KEY_PRESENCE_PHOTO_ETAG).append(" TEXT,")
-                    .append(RichAddressBookData.KEY_PRESENCE_PHOTO_DATA).append(" TEXT,")
-                    .append(RichAddressBookData.KEY_PRESENCE_GEOLOC_EXIST_FLAG).append(" TEXT,")
-                    .append(RichAddressBookData.KEY_PRESENCE_GEOLOC_LATITUDE).append(" REAL,")
-                    .append(RichAddressBookData.KEY_PRESENCE_GEOLOC_LONGITUDE).append(" REAL,")
-                    .append(RichAddressBookData.KEY_PRESENCE_GEOLOC_ALTITUDE).append(" REAL,")
-                    .append(RichAddressBookData.KEY_PRESENCE_TIMESTAMP).append(" INTEGER,")
-                    .append(RichAddressBookData.KEY_CAPABILITY_TIME_LAST_RQST).append(" INTEGER,")
-                    .append(RichAddressBookData.KEY_CAPABILITY_CS_VIDEO).append(" INTEGER,")
-                    .append(RichAddressBookData.KEY_CAPABILITY_IMAGE_SHARING).append(" INTEGER,")
-                    .append(RichAddressBookData.KEY_CAPABILITY_VIDEO_SHARING).append(" INTEGER,")
-                    .append(RichAddressBookData.KEY_CAPABILITY_IM_SESSION).append(" INTEGER,")
-                    .append(RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER).append(" INTEGER,")
-                    .append(RichAddressBookData.KEY_CAPABILITY_PRESENCE_DISCOVERY)
-                    .append(" INTEGER,").append(RichAddressBookData.KEY_CAPABILITY_SOCIAL_PRESENCE)
-                    .append(" INTEGER,")
-                    .append(RichAddressBookData.KEY_CAPABILITY_GEOLOCATION_PUSH)
-                    .append(" INTEGER,")
-                    .append(RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_HTTP)
-                    .append(" INTEGER,")
-                    .append(RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL)
-                    .append(" INTEGER,").append(RichAddressBookData.KEY_CAPABILITY_IP_VOICE_CALL)
-                    .append(" INTEGER,").append(RichAddressBookData.KEY_CAPABILITY_IP_VIDEO_CALL)
-                    .append(" INTEGER,")
-                    .append(RichAddressBookData.KEY_CAPABILITY_FILE_TRANSFER_SF)
-                    .append(" INTEGER,").append(RichAddressBookData.KEY_CAPABILITY_GROUP_CHAT_SF)
-                    .append(" INTEGER,").append(RichAddressBookData.KEY_CAPABILITY_EXTENSIONS)
-                    .append(" TEXT,").append(RichAddressBookData.KEY_BLOCKED).append(" INTEGER,")
-                    .append(RichAddressBookData.KEY_BLOCKING_TIMESTAMP).append(" INTEGER,")
-                    .append(RichAddressBookData.KEY_TIMESTAMP).append(" INTEGER,")
-                    .append(RichAddressBookData.KEY_AUTOMATA).append(" TEXT,")
-                    .append(RichAddressBookData.KEY_CAPABILITY_TIME_LAST_REFRESH)
-                    .append(" INTEGER)").toString());
-            db.execSQL(new StringBuilder("CREATE INDEX ")
-                    .append(RichAddressBookData.KEY_BASECOLUMN_ID).append("_idx").append(" ON ")
-                    .append(CAPABILITY_TABLE).append("(")
-                    .append(RichAddressBookData.KEY_BASECOLUMN_ID).append(")").toString());
+                    .append("(").append(ContactData.KEY_CONTACT).append(" TEXT PRIMARY KEY,")
+                    .append(ContactData.KEY_BASECOLUMN_ID).append(" INTEGER NOT NULL,")
+                    .append(ContactData.KEY_DISPLAY_NAME).append(" TEXT,")
+                    .append(ContactData.KEY_RCS_STATUS).append(" TEXT,")
+                    .append(ContactData.KEY_RCS_STATUS_TIMESTAMP).append(" INTEGER,")
+                    .append(ContactData.KEY_REGISTRATION_STATE).append(" INTEGER,")
+                    .append(ContactData.KEY_PRESENCE_SHARING_STATUS).append(" TEXT,")
+                    .append(ContactData.KEY_PRESENCE_FREE_TEXT).append(" TEXT,")
+                    .append(ContactData.KEY_PRESENCE_WEBLINK_NAME).append(" TEXT,")
+                    .append(ContactData.KEY_PRESENCE_WEBLINK_URL).append(" TEXT,")
+                    .append(ContactData.KEY_PRESENCE_PHOTO_EXIST_FLAG).append(" TEXT,")
+                    .append(ContactData.KEY_PRESENCE_PHOTO_ETAG).append(" TEXT,")
+                    .append(ContactData.KEY_PRESENCE_PHOTO_DATA).append(" TEXT,")
+                    .append(ContactData.KEY_PRESENCE_GEOLOC_EXIST_FLAG).append(" TEXT,")
+                    .append(ContactData.KEY_PRESENCE_GEOLOC_LATITUDE).append(" REAL,")
+                    .append(ContactData.KEY_PRESENCE_GEOLOC_LONGITUDE).append(" REAL,")
+                    .append(ContactData.KEY_PRESENCE_GEOLOC_ALTITUDE).append(" REAL,")
+                    .append(ContactData.KEY_PRESENCE_TIMESTAMP).append(" INTEGER,")
+                    .append(ContactData.KEY_CAPABILITY_TIME_LAST_RQST).append(" INTEGER,")
+                    .append(ContactData.KEY_CAPABILITY_CS_VIDEO).append(" INTEGER,")
+                    .append(ContactData.KEY_CAPABILITY_IMAGE_SHARING).append(" INTEGER,")
+                    .append(ContactData.KEY_CAPABILITY_VIDEO_SHARING).append(" INTEGER,")
+                    .append(ContactData.KEY_CAPABILITY_IM_SESSION).append(" INTEGER,")
+                    .append(ContactData.KEY_CAPABILITY_FILE_TRANSFER).append(" INTEGER,")
+                    .append(ContactData.KEY_CAPABILITY_PRESENCE_DISCOVERY).append(" INTEGER,")
+                    .append(ContactData.KEY_CAPABILITY_SOCIAL_PRESENCE).append(" INTEGER,")
+                    .append(ContactData.KEY_CAPABILITY_GEOLOCATION_PUSH).append(" INTEGER,")
+                    .append(ContactData.KEY_CAPABILITY_FILE_TRANSFER_HTTP).append(" INTEGER,")
+                    .append(ContactData.KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL).append(" INTEGER,")
+                    .append(ContactData.KEY_CAPABILITY_IP_VOICE_CALL).append(" INTEGER,")
+                    .append(ContactData.KEY_CAPABILITY_IP_VIDEO_CALL).append(" INTEGER,")
+                    .append(ContactData.KEY_CAPABILITY_FILE_TRANSFER_SF).append(" INTEGER,")
+                    .append(ContactData.KEY_CAPABILITY_GROUP_CHAT_SF).append(" INTEGER,")
+                    .append(ContactData.KEY_CAPABILITY_EXTENSIONS).append(" TEXT,")
+                    .append(ContactData.KEY_BLOCKED).append(" INTEGER,")
+                    .append(ContactData.KEY_BLOCKING_TIMESTAMP).append(" INTEGER,")
+                    .append(ContactData.KEY_TIMESTAMP).append(" INTEGER,")
+                    .append(ContactData.KEY_AUTOMATA).append(" TEXT,")
+                    .append(ContactData.KEY_CAPABILITY_TIME_LAST_REFRESH).append(" INTEGER)")
+                    .toString());
+            db.execSQL(new StringBuilder("CREATE INDEX ").append(ContactData.KEY_BASECOLUMN_ID)
+                    .append("_idx").append(" ON ").append(CAPABILITY_TABLE).append("(")
+                    .append(ContactData.KEY_BASECOLUMN_ID).append(")").toString());
             db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(AGGREGATION_TABLE)
                     .append("(").append(AggregationData.KEY_ID)
                     .append(" INTEGER PRIMARY KEY AUTOINCREMENT,")
@@ -281,9 +262,9 @@ public class RichAddressBookProvider extends ContentProvider {
 
     private String getSelectionWithContact(String selection) {
         if (TextUtils.isEmpty(selection)) {
-            return RICH_ADDRESS_BOOK_SELECTION_WITH_CONTACT_ONLY;
+            return RCS_CONTACT_SELECTION_WITH_CONTACT_ONLY;
         }
-        return new StringBuilder("(").append(RICH_ADDRESS_BOOK_SELECTION_WITH_CONTACT_ONLY)
+        return new StringBuilder("(").append(RCS_CONTACT_SELECTION_WITH_CONTACT_ONLY)
                 .append(") AND (").append(selection).append(")").toString();
     }
 
@@ -350,7 +331,7 @@ public class RichAddressBookProvider extends ContentProvider {
                         .append(uri).append("!").toString());
             }
             String path = cursor.getString(cursor
-                    .getColumnIndexOrThrow(RichAddressBookData.KEY_PRESENCE_PHOTO_DATA));
+                    .getColumnIndexOrThrow(ContactData.KEY_PRESENCE_PHOTO_DATA));
             if (path == null) {
                 throw new FileNotFoundException(new StringBuilder("No photo is defined for URI ")
                         .append(uri).append("!").toString());
@@ -403,15 +384,14 @@ public class RichAddressBookProvider extends ContentProvider {
             case UriType.InternalContacts.INTERNAL_CONTACTS_WITH_ID:
                 Context context = getContext();
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-                String contact = initialValues.getAsString(RichAddressBookData.KEY_CONTACT);
-                initialValues.put(RichAddressBookData.KEY_BASECOLUMN_ID,
-                        ContentProviderBaseIdCreator.createUniqueId(getContext(),
-                                RichAddressBookData.CONTENT_URI));
+                String contact = initialValues.getAsString(ContactData.KEY_CONTACT);
+                initialValues.put(ContactData.KEY_BASECOLUMN_ID, ContentProviderBaseIdCreator
+                        .createUniqueId(getContext(), ContactData.CONTENT_URI));
                 if (db.insert(CAPABILITY_TABLE, null, initialValues) == INVALID_ROW_ID) {
                     throw new ServerApiPersistentStorageException(
                             "Unable to insert row for URI ".concat(uri.toString()));
                 }
-                if (!initialValues.containsKey(RichAddressBookData.KEY_PRESENCE_PHOTO_DATA)) {
+                if (!initialValues.containsKey(ContactData.KEY_PRESENCE_PHOTO_DATA)) {
                     try {
                         String filename = FILENAME_PREFIX.concat(contact);
                         /*
@@ -419,9 +399,9 @@ public class RichAddressBookProvider extends ContentProvider {
                          */
                         context.openFileOutput(filename, Context.MODE_PRIVATE).close();
                         String path = context.getFileStreamPath(filename).getAbsolutePath();
-                        initialValues.put(RichAddressBookData.KEY_PRESENCE_PHOTO_DATA, path);
-                        initialValues.put(RichAddressBookData.KEY_PRESENCE_PHOTO_EXIST_FLAG,
-                                RichAddressBookData.FALSE_VALUE);
+                        initialValues.put(ContactData.KEY_PRESENCE_PHOTO_DATA, path);
+                        initialValues.put(ContactData.KEY_PRESENCE_PHOTO_EXIST_FLAG,
+                                ContactData.FALSE_VALUE);
 
                     } catch (Exception e) {
                         /* TODO: Proper exception handling will be done in CR037 */
@@ -430,8 +410,7 @@ public class RichAddressBookProvider extends ContentProvider {
                         }
                     }
                 }
-                db.update(CAPABILITY_TABLE, initialValues,
-                        RICH_ADDRESS_BOOK_SELECTION_WITH_CONTACT_ONLY,
+                db.update(CAPABILITY_TABLE, initialValues, RCS_CONTACT_SELECTION_WITH_CONTACT_ONLY,
                         getSelectionArgsWithContact(null, contact));
                 Uri notificationUri = Uri.withAppendedPath(CapabilitiesLog.CONTENT_URI, contact);
                 context.getContentResolver().notifyChange(notificationUri, null);

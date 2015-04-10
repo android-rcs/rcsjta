@@ -29,7 +29,7 @@ import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.core.ims.service.richcall.video.VideoSharingPersistedStorageAccessor;
 import com.gsma.rcs.core.ims.service.richcall.video.VideoStreamingSession;
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
 import com.gsma.rcs.provider.sharing.VideoSharingDeleteTask;
@@ -77,7 +77,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactsManager mContactsManager;
+    private final ContactManager mContactManager;
 
     private final Core mCore;
 
@@ -94,10 +94,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
 
     private final Object mImsLock;
 
-    /**
-     * The logger
-     */
-    private static final Logger logger = Logger.getLogger(VideoSharingServiceImpl.class
+    private static final Logger sLogger = Logger.getLogger(VideoSharingServiceImpl.class
             .getSimpleName());
 
     /**
@@ -106,23 +103,23 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @param richcallService RichcallService
      * @param richCallLog RichCallHistory
      * @param rcsSettings RcsSettings
-     * @param contactsManager ContactsManager
+     * @param contactManager ContactManager
      * @param core Core
      * @param localContentResolver LocalContentResolver
      * @param imOperationExecutor IM ExecutorService
      * @param imsLock ims lock object
      */
     public VideoSharingServiceImpl(RichcallService richcallService, RichCallHistory richCallLog,
-            RcsSettings rcsSettings, ContactsManager contactsManager, Core core,
+            RcsSettings rcsSettings, ContactManager contactManager, Core core,
             LocalContentResolver localContentResolver, ExecutorService imOperationExecutor,
             Object imsLock) {
-        if (logger.isActivated()) {
-            logger.info("Video sharing API is loaded");
+        if (sLogger.isActivated()) {
+            sLogger.info("Video sharing API is loaded");
         }
         mRichcallService = richcallService;
         mRichCallLog = richCallLog;
         mRcsSettings = rcsSettings;
-        mContactsManager = contactsManager;
+        mContactManager = contactManager;
         mCore = core;
         mLocalContentResolver = localContentResolver;
         mImOperationExecutor = imOperationExecutor;
@@ -136,8 +133,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
         // Clear list of sessions
         mVideoSharingCache.clear();
 
-        if (logger.isActivated()) {
-            logger.info("Video sharing service API is closed");
+        if (sLogger.isActivated()) {
+            sLogger.info("Video sharing service API is closed");
         }
     }
 
@@ -147,8 +144,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @param videoSharing Video sharing
      */
     private void addVideoSharing(VideoSharingImpl videoSharing) {
-        if (logger.isActivated()) {
-            logger.debug("Add a video sharing");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Add a video sharing");
         }
 
         mVideoSharingCache.put(videoSharing.getSharingId(), videoSharing);
@@ -160,8 +157,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @param sharingId Sharing ID
      */
     public void removeVideoSharing(String sharingId) {
-        if (logger.isActivated()) {
-            logger.debug("Remove a video sharing");
+        if (sLogger.isActivated()) {
+            sLogger.debug("Remove a video sharing");
         }
 
         mVideoSharingCache.remove(sharingId);
@@ -191,8 +188,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @param listener Service registration listener
      */
     public void addEventListener(IRcsServiceRegistrationListener listener) {
-        if (logger.isActivated()) {
-            logger.info("Add a service listener");
+        if (sLogger.isActivated()) {
+            sLogger.info("Add a service listener");
         }
         synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.addEventListener(listener);
@@ -205,8 +202,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @param listener Service registration listener
      */
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
-        if (logger.isActivated()) {
-            logger.info("Remove a service listener");
+        if (sLogger.isActivated()) {
+            sLogger.info("Remove a service listener");
         }
         synchronized (mLock) {
             mRcsServiceRegistrationEventBroadcaster.removeEventListener(listener);
@@ -249,8 +246,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @throws ServerApiException
      */
     public ContactId getRemotePhoneNumber() throws ServerApiException {
-        if (logger.isActivated()) {
-            logger.info("Get remote phone number");
+        if (sLogger.isActivated()) {
+            sLogger.info("Get remote phone number");
         }
 
         // Test core availability
@@ -270,14 +267,14 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      */
     public void receiveVideoSharingInvitation(VideoStreamingSession session) {
         ContactId contact = session.getRemoteContact();
-        if (logger.isActivated()) {
-            logger.info(new StringBuilder("Receive video sharing invitation from ")
+        if (sLogger.isActivated()) {
+            sLogger.info(new StringBuilder("Receive video sharing invitation from ")
                     .append(contact.toString()).append(" displayName=")
                     .append(session.getRemoteDisplayName()).toString());
         }
 
         // Update displayName of remote contact
-        mContactsManager.setContactDisplayName(contact, session.getRemoteDisplayName());
+        mContactManager.setContactDisplayName(contact, session.getRemoteDisplayName());
         String sharingId = session.getSessionID();
         VideoSharingPersistedStorageAccessor storageAccessor = new VideoSharingPersistedStorageAccessor(
                 sharingId, mRichCallLog);
@@ -310,8 +307,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      */
     public IVideoSharing shareVideo(ContactId contact, IVideoPlayer player)
             throws ServerApiException {
-        if (logger.isActivated()) {
-            logger.info("Initiate a live video session with ".concat(contact.toString()));
+        if (sLogger.isActivated()) {
+            sLogger.info("Initiate a live video session with ".concat(contact.toString()));
         }
 
         // Test IMS connection
@@ -362,8 +359,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @throws ServerApiException
      */
     public IVideoSharing getVideoSharing(String sharingId) throws ServerApiException {
-        if (logger.isActivated()) {
-            logger.info("Get video sharing ".concat(sharingId));
+        if (sLogger.isActivated()) {
+            sLogger.info("Get video sharing ".concat(sharingId));
         }
 
         IVideoSharing videoSharing = mVideoSharingCache.get(sharingId);
@@ -383,8 +380,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @throws ServerApiException
      */
     public List<IBinder> getVideoSharings() throws ServerApiException {
-        if (logger.isActivated()) {
-            logger.info("Get video sharing sessions");
+        if (sLogger.isActivated()) {
+            sLogger.info("Get video sharing sessions");
         }
 
         try {
@@ -421,8 +418,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @param listener Listener
      */
     public void addEventListener2(IVideoSharingListener listener) {
-        if (logger.isActivated()) {
-            logger.info("Add a video sharing event listener");
+        if (sLogger.isActivated()) {
+            sLogger.info("Add a video sharing event listener");
         }
         synchronized (mLock) {
             mBroadcaster.addEventListener(listener);
@@ -435,8 +432,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @param listener Listener
      */
     public void removeEventListener2(IVideoSharingListener listener) {
-        if (logger.isActivated()) {
-            logger.info("Remove a video sharing event listener");
+        if (sLogger.isActivated()) {
+            sLogger.info("Remove a video sharing event listener");
         }
         synchronized (mLock) {
             mBroadcaster.removeEventListener(listener);

@@ -33,7 +33,7 @@ import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.GroupChatDeleteTask;
 import com.gsma.rcs.provider.messaging.GroupChatMessageDeleteTask;
 import com.gsma.rcs.provider.messaging.GroupFileTransferDeleteTask;
@@ -96,7 +96,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactsManager mContactManager;
+    private final ContactManager mContactManager;
 
     private final Core mCore;
 
@@ -128,7 +128,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param imService InstantMessagingService
      * @param messagingLog MessagingLog
      * @param rcsSettings RcsSettings
-     * @param contactManager ContactsManager
+     * @param contactManager ContactManager
      * @param core Core
      * @param localContentResolver LocalContentResolver
      * @param imOperationExecutor im operation ExecutorService
@@ -136,7 +136,7 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param imsLock ims operations lock
      */
     public ChatServiceImpl(InstantMessagingService imService, MessagingLog messagingLog,
-            RcsSettings rcsSettings, ContactsManager contactManager, Core core,
+            RcsSettings rcsSettings, ContactManager contactManager, Core core,
             LocalContentResolver localContentResolver, ExecutorService imOperationExecutor,
             Object imsLock, FileTransferServiceImpl fileTransferService) {
         if (sLogger.isActivated()) {

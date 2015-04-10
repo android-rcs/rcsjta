@@ -37,7 +37,7 @@ import com.gsma.rcs.core.ims.service.im.chat.geoloc.GeolocInfoDocument;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.chat.iscomposing.IsComposingInfo;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.IdGenerator;
@@ -72,7 +72,7 @@ public abstract class OneToOneChatSession extends ChatSession {
      */
     public OneToOneChatSession(ImsService parent, ContactId contact, String remoteUri,
             ChatMessage firstMsg, RcsSettings rcsSettings, MessagingLog messagingLog,
-            long timestamp, ContactsManager contactManager) {
+            long timestamp, ContactManager contactManager) {
         super(parent, contact, remoteUri, rcsSettings, messagingLog, firstMsg, timestamp,
                 contactManager);
 

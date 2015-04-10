@@ -25,7 +25,7 @@ package com.gsma.rcs.provisioning;
 import com.gsma.rcs.R;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.messaging.MessagingLog;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.LauncherUtils;
 
@@ -72,7 +72,7 @@ public class TermsAndConditionsRequest extends Activity {
         final RcsSettings rcsSettings = RcsSettings.createInstance(localContentResolver);
         final MessagingLog messaginLog = MessagingLog.createInstance(ctx, localContentResolver,
                 rcsSettings);
-        final ContactsManager contactManager = ContactsManager.createInstance(ctx,
+        final ContactManager contactManager = ContactManager.createInstance(ctx,
                 ctx.getContentResolver(), localContentResolver, rcsSettings);
 
         Intent intent = getIntent();

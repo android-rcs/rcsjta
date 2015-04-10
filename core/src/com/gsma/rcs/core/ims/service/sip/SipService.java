@@ -33,7 +33,7 @@ import com.gsma.rcs.core.ims.service.sip.messaging.TerminatingSipMsrpSession;
 import com.gsma.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 import com.gsma.rcs.core.ims.service.sip.streaming.OriginatingSipRtpSession;
 import com.gsma.rcs.core.ims.service.sip.streaming.TerminatingSipRtpSession;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
@@ -73,7 +73,7 @@ public class SipService extends ImsService {
      */
     private Map<String, GenericSipRtpSession> mGenericSipRtpSessionCache = new HashMap<String, GenericSipRtpSession>();
 
-    private final ContactsManager mContactManager;
+    private final ContactManager mContactManager;
 
     private final RcsSettings mRcsSettings;
 
@@ -81,11 +81,11 @@ public class SipService extends ImsService {
      * Constructor
      * 
      * @param parent IMS module
-     * @param contactManager ContactsManager
+     * @param contactManager ContactManager
      * @param rcsSettings
      * @throws CoreException
      */
-    public SipService(ImsModule parent, ContactsManager contactManager, RcsSettings rcsSettings)
+    public SipService(ImsModule parent, ContactManager contactManager, RcsSettings rcsSettings)
             throws CoreException {
         super(parent, true);
 

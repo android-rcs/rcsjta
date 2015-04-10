@@ -53,7 +53,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.DownloadFromInviteFileSharingSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpThumbnail;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.IdGenerator;
@@ -169,7 +169,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
      */
     public ChatSession(ImsService parent, ContactId contact, String remoteUri,
             RcsSettings rcsSettings, MessagingLog messagingLog, ChatMessage firstMsg,
-            long timestamp, ContactsManager contactManager) {
+            long timestamp, ContactManager contactManager) {
         super(parent, contact, remoteUri, rcsSettings, timestamp, contactManager);
 
         mMessagingLog = messagingLog;

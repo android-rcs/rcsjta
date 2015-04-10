@@ -27,7 +27,7 @@ import com.gsma.rcs.core.ims.service.sip.SipService;
 import com.gsma.rcs.core.ims.service.sip.messaging.GenericSipMsrpSession;
 import com.gsma.rcs.core.ims.service.sip.streaming.GenericSipRtpSession;
 import com.gsma.rcs.platform.AndroidFactory;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.broadcaster.MultimediaMessagingSessionEventBroadcaster;
 import com.gsma.rcs.service.broadcaster.MultimediaStreamingSessionEventBroadcaster;
@@ -76,7 +76,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactsManager mContactsManager;
+    private final ContactManager mContactManager;
 
     private final Map<String, IMultimediaMessagingSession> mMultimediaMessagingCache = new HashMap<String, IMultimediaMessagingSession>();
 
@@ -87,10 +87,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      */
     private final Object lock = new Object();
 
-    /**
-     * The logger
-     */
-    private static final Logger logger = Logger.getLogger(MultimediaSessionServiceImpl.class
+    private static final Logger sLogger = Logger.getLogger(MultimediaSessionServiceImpl.class
             .getSimpleName());
 
     /**
@@ -98,16 +95,16 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * 
      * @param sipService SipService
      * @param rcsSettings RcsSettings
-     * @param contactsManager ContactsManager
+     * @param contactManager ContactManager
      */
     public MultimediaSessionServiceImpl(SipService sipService, RcsSettings rcsSettings,
-            ContactsManager contactsManager) {
-        if (logger.isActivated()) {
-            logger.info("Multimedia session API is loaded");
+            ContactManager contactManager) {
+        if (sLogger.isActivated()) {
+            sLogger.info("Multimedia session API is loaded");
         }
         mSipService = sipService;
         mRcsSettings = rcsSettings;
-        mContactsManager = contactsManager;
+        mContactManager = contactManager;
     }
 
     /**
@@ -117,8 +114,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         // Clear list of sessions
         mMultimediaMessagingCache.clear();
 
-        if (logger.isActivated()) {
-            logger.info("Multimedia session service API is closed");
+        if (sLogger.isActivated()) {
+            sLogger.info("Multimedia session service API is closed");
         }
     }
 
@@ -128,8 +125,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @param multimediaMessaging
      */
     private void addMultimediaMessaging(MultimediaMessagingSessionImpl multimediaMessaging) {
-        if (logger.isActivated()) {
-            logger.debug("Add a MultimediaMessaging in the list (size="
+        if (sLogger.isActivated()) {
+            sLogger.debug("Add a MultimediaMessaging in the list (size="
                     + mMultimediaMessagingCache.size() + ")");
         }
 
@@ -142,8 +139,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @param sessionId Session ID
      */
     /* package private */void removeMultimediaMessaging(String sessionId) {
-        if (logger.isActivated()) {
-            logger.debug("Remove a MultimediaMessaging from the list (size="
+        if (sLogger.isActivated()) {
+            sLogger.debug("Remove a MultimediaMessaging from the list (size="
                     + mMultimediaMessagingCache.size() + ")");
         }
 
@@ -156,8 +153,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @param multimediaStreaming
      */
     private void addMultimediaStreaming(MultimediaStreamingSessionImpl multimediaStreaming) {
-        if (logger.isActivated()) {
-            logger.debug("Add a MultimediaStreaming in the list (size="
+        if (sLogger.isActivated()) {
+            sLogger.debug("Add a MultimediaStreaming in the list (size="
                     + mMultimediaMessagingCache.size() + ")");
         }
 
@@ -170,8 +167,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @param sessionId Session ID
      */
     /* package private */void removeMultimediaStreaming(String sessionId) {
-        if (logger.isActivated()) {
-            logger.debug("Remove a MultimediaStreaming from the list (size="
+        if (sLogger.isActivated()) {
+            sLogger.debug("Remove a MultimediaStreaming from the list (size="
                     + mMultimediaMessagingCache.size() + ")");
         }
 
@@ -202,8 +199,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @param listener Service registration listener
      */
     public void addEventListener(IRcsServiceRegistrationListener listener) {
-        if (logger.isActivated()) {
-            logger.info("Add a service listener");
+        if (sLogger.isActivated()) {
+            sLogger.info("Add a service listener");
         }
         synchronized (lock) {
             mRcsServiceRegistrationEventBroadcaster.addEventListener(listener);
@@ -216,8 +213,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @param listener Service registration listener
      */
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
-        if (logger.isActivated()) {
-            logger.info("Remove a service listener");
+        if (sLogger.isActivated()) {
+            sLogger.info("Remove a service listener");
         }
         synchronized (lock) {
             mRcsServiceRegistrationEventBroadcaster.removeEventListener(listener);
@@ -263,7 +260,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         addMultimediaMessaging(multimediaMessaging);
 
         // Update displayName of remote contact
-        mContactsManager.setContactDisplayName(remote, session.getRemoteDisplayName());
+        mContactManager.setContactDisplayName(remote, session.getRemoteDisplayName());
     }
 
     /**
@@ -281,7 +278,7 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
         addMultimediaStreaming(multimediaStreaming);
 
         // Update displayName of remote contact
-        mContactsManager.setContactDisplayName(remote, session.getRemoteDisplayName());
+        mContactManager.setContactDisplayName(remote, session.getRemoteDisplayName());
 
         // Broadcast intent related to the received invitation
         IntentUtils.tryToSetExcludeStoppedPackagesFlag(rtpSessionInvite);
@@ -316,8 +313,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      */
     public IMultimediaMessagingSession initiateMessagingSession(String serviceId, ContactId contact)
             throws ServerApiException {
-        if (logger.isActivated()) {
-            logger.info("Initiate a multimedia messaging session with " + contact);
+        if (sLogger.isActivated()) {
+            sLogger.info("Initiate a multimedia messaging session with " + contact);
         }
 
         // Test IMS connection
@@ -352,8 +349,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
             return multiMediaMessaging;
 
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Unexpected error", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Unexpected error", e);
             }
             throw new ServerApiException(e.getMessage());
         }
@@ -368,8 +365,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      */
     public IMultimediaMessagingSession getMessagingSession(String sessionId)
             throws ServerApiException {
-        if (logger.isActivated()) {
-            logger.info("Get multimedia messaging ".concat(sessionId));
+        if (sLogger.isActivated()) {
+            sLogger.info("Get multimedia messaging ".concat(sessionId));
         }
         return mMultimediaMessagingCache.get(sessionId);
     }
@@ -382,8 +379,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @throws ServerApiException
      */
     public List<IBinder> getMessagingSessions(String serviceId) throws ServerApiException {
-        if (logger.isActivated()) {
-            logger.info("Get multimedia messaging sessions for service " + serviceId);
+        if (sLogger.isActivated()) {
+            sLogger.info("Get multimedia messaging sessions for service " + serviceId);
         }
 
         try {
@@ -398,8 +395,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
             return multimediaMessagingSessions;
 
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Unexpected error", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Unexpected error", e);
             }
             throw new ServerApiException(e.getMessage());
         }
@@ -419,8 +416,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      */
     public IMultimediaStreamingSession initiateStreamingSession(String serviceId, ContactId contact)
             throws ServerApiException {
-        if (logger.isActivated()) {
-            logger.info("Initiate a multimedia streaming session with " + contact);
+        if (sLogger.isActivated()) {
+            sLogger.info("Initiate a multimedia streaming session with " + contact);
         }
 
         // Test IMS connection
@@ -454,8 +451,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
             return multimediaStreaming;
 
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Unexpected error", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Unexpected error", e);
             }
             throw new ServerApiException(e.getMessage());
         }
@@ -471,8 +468,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      */
     public IMultimediaStreamingSession getStreamingSession(String sessionId)
             throws ServerApiException {
-        if (logger.isActivated()) {
-            logger.info("Get multimedia streaming ".concat(sessionId));
+        if (sLogger.isActivated()) {
+            sLogger.info("Get multimedia streaming ".concat(sessionId));
         }
         return mMultimediaStreamingCache.get(sessionId);
     }
@@ -485,8 +482,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @throws ServerApiException
      */
     public List<IBinder> getStreamingSessions(String serviceId) throws ServerApiException {
-        if (logger.isActivated()) {
-            logger.info("Get multimedia streaming sessions for service " + serviceId);
+        if (sLogger.isActivated()) {
+            sLogger.info("Get multimedia streaming sessions for service " + serviceId);
         }
 
         try {
@@ -500,8 +497,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
             return multimediaStreamingSessions;
 
         } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Unexpected error", e);
+            if (sLogger.isActivated()) {
+                sLogger.error("Unexpected error", e);
             }
             throw new ServerApiException(e.getMessage());
         }
@@ -524,8 +521,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @param listener Session event listener
      */
     public void addEventListener2(IMultimediaMessagingSessionListener listener) {
-        if (logger.isActivated()) {
-            logger.info("Add an event listener");
+        if (sLogger.isActivated()) {
+            sLogger.info("Add an event listener");
         }
 
         synchronized (lock) {
@@ -540,8 +537,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @param listener Session event listener
      */
     public void removeEventListener2(IMultimediaMessagingSessionListener listener) {
-        if (logger.isActivated()) {
-            logger.info("Remove an event listener");
+        if (sLogger.isActivated()) {
+            sLogger.info("Remove an event listener");
         }
         synchronized (lock) {
             mMultimediaMessagingSessionEventBroadcaster
@@ -555,8 +552,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @param listener Session event listener
      */
     public void addEventListener3(IMultimediaStreamingSessionListener listener) {
-        if (logger.isActivated()) {
-            logger.info("Add an event listener");
+        if (sLogger.isActivated()) {
+            sLogger.info("Add an event listener");
         }
         synchronized (lock) {
             mMultimediaStreamingSessionEventBroadcaster
@@ -570,8 +567,8 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
      * @param listener Session event listener
      */
     public void removeEventListener3(IMultimediaStreamingSessionListener listener) {
-        if (logger.isActivated()) {
-            logger.info("Remove an event listener");
+        if (sLogger.isActivated()) {
+            sLogger.info("Remove an event listener");
         }
 
         synchronized (lock) {

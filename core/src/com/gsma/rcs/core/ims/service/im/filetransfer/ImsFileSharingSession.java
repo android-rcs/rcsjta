@@ -33,7 +33,7 @@ import com.gsma.rcs.core.ims.service.ImsServiceSession;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -78,7 +78,7 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
      */
     public ImsFileSharingSession(ImsService parent, MmContent content, ContactId contact,
             MmContent fileIcon, String filetransferId, RcsSettings rcsSettings, long timestamp,
-            ContactsManager contactManager) {
+            ContactManager contactManager) {
         super(parent, content, contact, PhoneUtils.formatContactIdToUri(contact), fileIcon,
                 filetransferId, rcsSettings, timestamp, contactManager);
     }

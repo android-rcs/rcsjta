@@ -28,7 +28,7 @@ import com.gsma.rcs.core.ims.service.ContactInfo;
 import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
@@ -72,7 +72,7 @@ public class OptionsRequestTask implements Runnable {
 
     private final RcsSettings mRcsSettings;
 
-    private final ContactsManager mContactManager;
+    private final ContactManager mContactManager;
 
     /**
      * Constructor
@@ -84,7 +84,7 @@ public class OptionsRequestTask implements Runnable {
      * @param contactManager
      */
     public OptionsRequestTask(ImsModule parent, ContactId contact, String[] featureTags,
-            RcsSettings rcsSettings, ContactsManager contactManager) {
+            RcsSettings rcsSettings, ContactManager contactManager) {
         mImsModule = parent;
         mContact = contact;
         mFeatureTags = featureTags;

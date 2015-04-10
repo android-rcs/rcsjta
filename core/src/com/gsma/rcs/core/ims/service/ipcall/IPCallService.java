@@ -34,7 +34,7 @@ import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceSession.TerminationReason;
-import com.gsma.rcs.provider.eab.ContactsManager;
+import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.ipcalldraft.IIPCallPlayer;
 import com.gsma.rcs.service.ipcalldraft.IIPCallRenderer;
@@ -86,17 +86,17 @@ public class IPCallService extends ImsService {
     /**
      * Contacts manager
      */
-    private final ContactsManager mContactManager;
+    private final ContactManager mContactManager;
 
     /**
      * Constructor
      * 
      * @param parent IMS module
      * @param rcsSettings RcsSettings
-     * @param contactsManager ContactsManager
+     * @param contactsManager ContactManager
      * @throws CoreException
      */
-    public IPCallService(ImsModule parent, RcsSettings rcsSettings, ContactsManager contactsManager)
+    public IPCallService(ImsModule parent, RcsSettings rcsSettings, ContactManager contactsManager)
             throws CoreException {
         super(parent, true);
 
