@@ -93,9 +93,7 @@ public abstract class GroupChatSession extends ChatSession {
      * Max number of participants allowed in the group chat including the current user.
      */
     private int mMaxParticipants;
-    /**
-     * The logger
-     */
+
     private static final Logger sLogger = Logger.getLogger(GroupChatSession.class.getSimpleName());
 
     /**
@@ -195,33 +193,46 @@ public abstract class GroupChatSession extends ChatSession {
     }
 
     /**
-     * Apply updates or additions to participants of the group chat.
+     * Get participants for which status has changed and require update
      * 
-     * @param participantUpdates Participant updates
+     * @param participants Participants
      * @return participants for which status has changed
      */
-    public Map<ContactId, ParticipantStatus> updateParticipants(
-            Map<ContactId, ParticipantStatus> participantUpdates) {
+    public Map<ContactId, ParticipantStatus> getParticipantsToUpdate(
+            Map<ContactId, ParticipantStatus> participants) {
         synchronized (mParticipants) {
-            Map<ContactId, ParticipantStatus> updatedParticipants = new HashMap<ContactId, ParticipantStatus>();
-
-            for (Map.Entry<ContactId, ParticipantStatus> participantUpdate : participantUpdates
+            Map<ContactId, ParticipantStatus> participantsToUpdate = new HashMap<ContactId, ParticipantStatus>();
+            for (Map.Entry<ContactId, ParticipantStatus> participantUpdate : participants
                     .entrySet()) {
                 ContactId contact = participantUpdate.getKey();
                 ParticipantStatus status = participantUpdate.getValue();
-                if (!status.equals(mParticipants.get(contact))) {
-                    mParticipants.put(contact, status);
-                    updatedParticipants.put(contact, status);
+                if (status != mParticipants.get(contact)) {
+                    participantsToUpdate.put(contact, status);
                 }
             }
+            return participantsToUpdate;
+        }
+    }
 
-            if (!updatedParticipants.isEmpty()) {
-                for (ImsSessionListener listener : getListeners()) {
-                    ((GroupChatSessionListener) listener).handleParticipantUpdates(
-                            updatedParticipants, mParticipants);
-                }
+    /**
+     * Apply updates or additions to participants of the group chat.
+     * 
+     * @param participants Participants
+     */
+    public void updateParticipants(Map<ContactId, ParticipantStatus> participants) {
+        synchronized (mParticipants) {
+            Map<ContactId, ParticipantStatus> participantsToUpdate = getParticipantsToUpdate(participants);
+            if (participantsToUpdate.isEmpty()) {
+                return;
             }
-            return updatedParticipants;
+            for (Map.Entry<ContactId, ParticipantStatus> participant : participantsToUpdate
+                    .entrySet()) {
+                mParticipants.put(participant.getKey(), participant.getValue());
+            }
+            for (ImsSessionListener listener : getListeners()) {
+                ((GroupChatSessionListener) listener).handleParticipantUpdates(
+                        participantsToUpdate, mParticipants);
+            }
         }
     }
 

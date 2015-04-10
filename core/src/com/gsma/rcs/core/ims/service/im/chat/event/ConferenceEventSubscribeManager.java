@@ -274,16 +274,16 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
 
     private void updateParticipantStatus(Map<ContactId, ParticipantStatus> participants,
             long timestamp) {
-        Map<ContactId, ParticipantStatus> updatedParticipants = mSession
-                .updateParticipants(participants);
+        Map<ContactId, ParticipantStatus> participantsToUpdate = mSession
+                .getParticipantsToUpdate(participants);
 
-        if (updatedParticipants.isEmpty()) {
+        if (participantsToUpdate.isEmpty()) {
             return;
         }
         Map<ContactId, GroupChatEvent.Status> groupChatEventsInDB = mMessagingLog
                 .getGroupChatEvents(mSession.getContributionID());
 
-        for (Map.Entry<ContactId, ParticipantStatus> participant : updatedParticipants.entrySet()) {
+        for (Map.Entry<ContactId, ParticipantStatus> participant : participantsToUpdate.entrySet()) {
             ContactId contact = participant.getKey();
             ParticipantStatus status = participant.getValue();
             if (isGroupChatEventRequired(contact, status, groupChatEventsInDB))
@@ -292,6 +292,7 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
                             timestamp);
                 }
         }
+        mSession.updateParticipants(participantsToUpdate);
     }
 
     /*
@@ -310,12 +311,12 @@ public class ConferenceEventSubscribeManager extends PeriodicRefresher {
         }
         GroupChatEvent.Status statusInDB = groupChatEvents.get(contact);
 
-        if (ParticipantStatus.CONNECTED.equals(status)) {
+        if (ParticipantStatus.CONNECTED == status) {
             if (GroupChatEvent.Status.JOINED != statusInDB) {
                 /* Contact is not already marked as joined in provider */
                 return true;
             }
-        } else if (ParticipantStatus.DEPARTED.equals(status)) {
+        } else if (ParticipantStatus.DEPARTED == status) {
             if (GroupChatEvent.Status.DEPARTED != statusInDB) {
                 /* Contact is already marked as departed in provider */
                 return true;

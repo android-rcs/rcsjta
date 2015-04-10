@@ -33,7 +33,6 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
-import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
@@ -64,10 +63,8 @@ public class MessageLog implements IMessageLog {
     private GroupDeliveryInfoLog mGroupChatDeliveryInfoLog;
 
     private final RcsSettings mRcsSettings;
-    /**
-     * The logger
-     */
-    private static final Logger logger = Logger.getLogger(MessageLog.class.getSimpleName());
+
+    private static final Logger sLogger = Logger.getLogger(MessageLog.class.getSimpleName());
 
     private static final String[] PROJECTION_MESSAGE_ID = new String[] {
         MessageData.KEY_MESSAGE_ID
@@ -79,7 +76,7 @@ public class MessageLog implements IMessageLog {
 
     private static final String SELECTION_GROUP_CHAT_EVENTS = new StringBuilder(
             MessageData.KEY_CHAT_ID).append("=? AND ").append(MessageData.KEY_MIME_TYPE)
-            .append("='").append(ChatLog.Message.MimeType.GROUPCHAT_EVENT).append("' GROUP BY ")
+            .append("='").append(MimeType.GROUPCHAT_EVENT).append("' GROUP BY ")
             .append(MessageData.KEY_CONTACT).toString();
 
     private static final int FIRST_COLUMN_IDX = 0;
@@ -114,8 +111,8 @@ public class MessageLog implements IMessageLog {
     private void addIncomingOneToOneMessage(ChatMessage msg, Status status, ReasonCode reasonCode) {
         ContactId contact = msg.getRemoteContact();
         String msgId = msg.getMessageId();
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Add incoming chat message: contact=").append(contact)
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Add incoming chat message: contact=").append(contact)
                     .append(", msg=").append(msgId).append(", status=").append(status)
                     .append(", reasonCode=").append(reasonCode).append(".").toString());
         }
@@ -151,8 +148,8 @@ public class MessageLog implements IMessageLog {
     public void addOutgoingOneToOneChatMessage(ChatMessage msg, Status status, ReasonCode reasonCode) {
         ContactId contact = msg.getRemoteContact();
         String msgId = msg.getMessageId();
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Add outgoing chat message: contact=").append(contact)
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Add outgoing chat message: contact=").append(contact)
                     .append(", msg=").append(msgId).append(", status=").append(status)
                     .append(", reasonCode=").append(reasonCode).append(".").toString());
         }
@@ -211,8 +208,8 @@ public class MessageLog implements IMessageLog {
             Status status, ReasonCode reasonCode) {
         String msgId = msg.getMessageId();
         ContactId contact = msg.getRemoteContact();
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Add group chat message; chatId=").append(chatId)
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Add group chat message; chatId=").append(chatId)
                     .append(", msg=").append(msgId).append(", dir=").append(direction)
                     .append(", contact=").append(contact).append(".").toString());
         }
@@ -269,8 +266,8 @@ public class MessageLog implements IMessageLog {
                 mLocalContentResolver.delete(
                         Uri.withAppendedPath(GroupDeliveryInfoData.CONTENT_URI, msgId), null, null);
                 /* TODO: Throw exception */
-                if (logger.isActivated()) {
-                    logger.warn("Group chat message with msgId '" + msgId
+                if (sLogger.isActivated()) {
+                    sLogger.warn("Group chat message with msgId '" + msgId
                             + "' could not be added to database!");
                 }
             }
@@ -280,9 +277,9 @@ public class MessageLog implements IMessageLog {
     @Override
     public String addGroupChatEvent(String chatId, ContactId contact, GroupChatEvent.Status status,
             long timestamp) {
-        if (logger.isActivated()) {
-            logger.debug("Add group chat system message: chatID=" + chatId + ", contact=" + contact
-                    + ", status=" + status);
+        if (sLogger.isActivated()) {
+            sLogger.debug("Add group chat system message: chatID=" + chatId + ", contact="
+                    + contact + ", status=" + status);
         }
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_CHAT_ID, chatId);
@@ -306,8 +303,8 @@ public class MessageLog implements IMessageLog {
 
     @Override
     public void markMessageAsRead(String msgId) {
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Marking chat message as read: msgID=").append(msgId)
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Marking chat message as read: msgID=").append(msgId)
                     .toString());
         }
         ContentValues values = new ContentValues();
@@ -316,16 +313,16 @@ public class MessageLog implements IMessageLog {
         if (mLocalContentResolver.update(Uri.withAppendedPath(Message.CONTENT_URI, msgId), values,
                 null, null) < 1) {
             /* TODO: Throw exception */
-            if (logger.isActivated()) {
-                logger.warn("There was no message with msgId '" + msgId + "' to mark as read.");
+            if (sLogger.isActivated()) {
+                sLogger.warn("There was no message with msgId '" + msgId + "' to mark as read.");
             }
         }
     }
 
     @Override
     public void setChatMessageStatusAndReasonCode(String msgId, Status status, ReasonCode reasonCode) {
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Update chat message: msgID=").append(msgId)
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Update chat message: msgID=").append(msgId)
                     .append(", status=").append(status).append(", reasonCode=").append(reasonCode)
                     .toString());
         }
@@ -339,16 +336,17 @@ public class MessageLog implements IMessageLog {
         if (mLocalContentResolver.update(Uri.withAppendedPath(Message.CONTENT_URI, msgId), values,
                 null, null) < 1) {
             /* TODO: Throw exception */
-            if (logger.isActivated()) {
-                logger.warn("There was no message with msgId '" + msgId + "' to update status for.");
+            if (sLogger.isActivated()) {
+                sLogger.warn("There was no message with msgId '" + msgId
+                        + "' to update status for.");
             }
         }
     }
 
     @Override
     public void markIncomingChatMessageAsReceived(String msgId) {
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder(
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder(
                     "Mark incoming chat message status as received for msgID=").append(msgId)
                     .toString());
         }
@@ -498,8 +496,8 @@ public class MessageLog implements IMessageLog {
 
     @Override
     public void setChatMessageTimestamp(String msgId, long timestamp, long timestampSent) {
-        if (logger.isActivated()) {
-            logger.debug(new StringBuilder("Update chat message: msgID=").append(msgId)
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("Update chat message: msgID=").append(msgId)
                     .append(", timestamp=").append(timestamp).append(", timestampSent=")
                     .append(timestampSent).toString());
         }
@@ -535,6 +533,7 @@ public class MessageLog implements IMessageLog {
                 groupChatEvents.put(contact, status);
             } while (cursor.moveToNext());
             return groupChatEvents;
+
         } finally {
             if (cursor != null) {
                 cursor.close();
