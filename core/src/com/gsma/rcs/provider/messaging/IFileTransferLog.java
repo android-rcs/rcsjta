@@ -161,6 +161,14 @@ public interface IFileTransferLog {
     public boolean isFileTransfer(String fileTransferId);
 
     /**
+     * Returns the icon for a file transfer
+     * 
+     * @param fileTransferId
+     * @return the icon or null if there s none
+     */
+    public String getFileTransferIcon(String fileTransferId);
+
+    /**
      * Set file upload TID
      * 
      * @param fileTransferId File transfer ID

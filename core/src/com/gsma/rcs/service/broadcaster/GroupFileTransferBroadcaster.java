@@ -30,7 +30,9 @@ import com.gsma.services.rcs.filetransfer.IGroupFileTransferListener;
 import android.content.Intent;
 import android.os.RemoteCallbackList;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * GroupFileTransferBroadcaster maintains the registering and unregistering of
@@ -124,11 +126,12 @@ public class GroupFileTransferBroadcaster implements IGroupFileTransferBroadcast
         AndroidFactory.getApplicationContext().sendBroadcast(resumeFileTransfer);
     }
 
-    public void broadcastFileTransfersDeleted(String chatId, List<String> transferIds) {
+    public void broadcastFileTransfersDeleted(String chatId, Set<String> transferIds) {
+        List<String> ids = new ArrayList<String>(transferIds);
         final int N = mGroupFileTransferListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
-                mGroupFileTransferListeners.getBroadcastItem(i).onDeleted(chatId, transferIds);
+                mGroupFileTransferListeners.getBroadcastItem(i).onDeleted(chatId, ids);
             } catch (Exception e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener per contact", e);

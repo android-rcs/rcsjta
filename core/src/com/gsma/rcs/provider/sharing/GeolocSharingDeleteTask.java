@@ -9,7 +9,7 @@ import com.gsma.rcs.service.api.GeolocSharingServiceImpl;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharingLog;
 
-import java.util.List;
+import java.util.Set;
 
 public class GeolocSharingDeleteTask extends DeleteTask.GroupedByContactId {
 
@@ -82,7 +82,7 @@ public class GeolocSharingDeleteTask extends DeleteTask.GroupedByContactId {
     }
 
     @Override
-    protected void onCompleted(ContactId contact, List<String> deletedIds) {
+    protected void onCompleted(ContactId contact, Set<String> deletedIds) {
         mGeolocSharingService.broadcastDeleted(contact, deletedIds);
     }
 

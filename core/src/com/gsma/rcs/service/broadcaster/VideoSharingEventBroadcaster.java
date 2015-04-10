@@ -28,7 +28,9 @@ import com.gsma.services.rcs.sharing.video.VideoSharingIntent;
 import android.content.Intent;
 import android.os.RemoteCallbackList;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * VideoSharingEventBroadcaster maintains the registering and unregistering of IVideoSharingListener
@@ -78,11 +80,12 @@ public class VideoSharingEventBroadcaster implements IVideoSharingEventBroadcast
         AndroidFactory.getApplicationContext().sendBroadcast(newInvitation);
     }
 
-    public void broadcastDeleted(ContactId contact, List<String> sharingIds) {
+    public void broadcastDeleted(ContactId contact, Set<String> sharingIds) {
+        List<String> ids = new ArrayList<String>(sharingIds);
         final int N = mVideoSharingListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
-                mVideoSharingListeners.getBroadcastItem(i).onDeleted(contact, sharingIds);
+                mVideoSharingListeners.getBroadcastItem(i).onDeleted(contact, ids);
             } catch (Exception e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);

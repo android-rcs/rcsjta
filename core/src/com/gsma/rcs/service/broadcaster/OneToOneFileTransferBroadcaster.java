@@ -29,7 +29,9 @@ import com.gsma.services.rcs.filetransfer.IOneToOneFileTransferListener;
 import android.content.Intent;
 import android.os.RemoteCallbackList;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * OneToOneFileTransferBroadcaster maintains the registering and unregistering of
@@ -105,12 +107,12 @@ public class OneToOneFileTransferBroadcaster implements IOneToOneFileTransferBro
         AndroidFactory.getApplicationContext().sendBroadcast(resumeFileTransfer);
     }
 
-    public void broadcastFileTransferDeleted(ContactId contact, List<String> filetransferIds) {
+    public void broadcastFileTransferDeleted(ContactId contact, Set<String> filetransferIds) {
+        List<String> ids = new ArrayList<String>(filetransferIds);
         final int N = mOneToOneFileTransferListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
-                mOneToOneFileTransferListeners.getBroadcastItem(i).onDeleted(contact,
-                        filetransferIds);
+                mOneToOneFileTransferListeners.getBroadcastItem(i).onDeleted(contact, ids);
             } catch (Exception e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener", e);

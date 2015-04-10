@@ -33,6 +33,7 @@ import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
+import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
@@ -533,6 +534,29 @@ public class MessageLog implements IMessageLog {
                 groupChatEvents.put(contact, status);
             } while (cursor.moveToNext());
             return groupChatEvents;
+
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    @Override
+    public boolean isOneToOneChatMessage(String messageId) {
+        Cursor cursor = null;
+        try {
+            cursor = mLocalContentResolver.query(ChatLog.Message.CONTENT_URI.buildUpon()
+                    .appendPath(messageId).build(), new String[] {
+                    ChatLog.Message.CONTACT, ChatLog.Message.CHAT_ID
+            }, null, null, null);
+            if (!cursor.moveToNext()) {
+                return false;
+            }
+            String contactId = cursor.getString(cursor
+                    .getColumnIndexOrThrow(ChatLog.Message.CONTACT));
+            String chatId = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CHAT_ID));
+            return chatId.equals(contactId);
 
         } finally {
             if (cursor != null) {

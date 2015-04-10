@@ -28,7 +28,9 @@ import com.gsma.services.rcs.sharing.image.ImageSharingIntent;
 import android.content.Intent;
 import android.os.RemoteCallbackList;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * ImageSharingEventBroadcaster maintains the registering and unregistering of IImageSharingListener
@@ -94,11 +96,12 @@ public class ImageSharingEventBroadcaster implements IImageSharingEventBroadcast
         AndroidFactory.getApplicationContext().sendBroadcast(invitation);
     }
 
-    public void broadcastDeleted(ContactId contact, List<String> sharingIds) {
+    public void broadcastDeleted(ContactId contact, Set<String> sharingIds) {
+        List<String> ids = new ArrayList<String>(sharingIds);
         final int N = mImageSharingListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
-                mImageSharingListeners.getBroadcastItem(i).onDeleted(contact, sharingIds);
+                mImageSharingListeners.getBroadcastItem(i).onDeleted(contact, ids);
             } catch (Exception e) {
             }
         }

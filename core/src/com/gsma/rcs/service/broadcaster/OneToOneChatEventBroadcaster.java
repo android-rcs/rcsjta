@@ -28,7 +28,9 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.content.Intent;
 import android.os.RemoteCallbackList;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * OneToOneChatEventBroadcaster maintains the registering and unregistering of
@@ -94,11 +96,12 @@ public class OneToOneChatEventBroadcaster implements IOneToOneChatEventBroadcast
         AndroidFactory.getApplicationContext().sendBroadcast(newOneToOneMessage);
     }
 
-    public void broadcastMessagesDeleted(ContactId contact, List<String> msgIds) {
+    public void broadcastMessagesDeleted(ContactId contact, Set<String> msgIds) {
+        List<String> ids = new ArrayList<String>(msgIds);
         final int N = mOneToOneChatListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
-                mOneToOneChatListeners.getBroadcastItem(i).onMessagesDeleted(contact, msgIds);
+                mOneToOneChatListeners.getBroadcastItem(i).onMessagesDeleted(contact, ids);
             } catch (Exception e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener.", e);

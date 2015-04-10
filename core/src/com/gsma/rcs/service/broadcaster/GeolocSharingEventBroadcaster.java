@@ -28,7 +28,9 @@ import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingListener;
 import android.content.Intent;
 import android.os.RemoteCallbackList;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * GeolocSharingEventBroadcaster maintains the registering and unregistering of
@@ -91,11 +93,12 @@ public class GeolocSharingEventBroadcaster implements IGeolocSharingEventBroadca
         AndroidFactory.getApplicationContext().sendBroadcast(invitation);
     }
 
-    public void broadcastDeleted(ContactId contact, List<String> sharingIds) {
+    public void broadcastDeleted(ContactId contact, Set<String> sharingIds) {
+        List<String> ids = new ArrayList<String>(sharingIds);
         final int N = mGeolocSharingListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
-                mGeolocSharingListeners.getBroadcastItem(i).onDeleted(contact, sharingIds);
+                mGeolocSharingListeners.getBroadcastItem(i).onDeleted(contact, ids);
             } catch (Exception e) {
             }
         }

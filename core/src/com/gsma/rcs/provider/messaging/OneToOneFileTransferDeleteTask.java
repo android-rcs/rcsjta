@@ -24,7 +24,7 @@ import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
-import java.util.List;
+import java.util.Set;
 
 public class OneToOneFileTransferDeleteTask extends DeleteTask.GroupedByContactId {
 
@@ -91,7 +91,7 @@ public class OneToOneFileTransferDeleteTask extends DeleteTask.GroupedByContactI
     protected void onRowDelete(ContactId contact, String transferId) {
         FileSharingSession session = mImService.getFileSharingSession(transferId);
         if (session == null) {
-            mFileTransferService.ensureThumbnailIsDeleted(getAppendedPathUri(transferId));
+            mFileTransferService.ensureThumbnailIsDeleted(transferId);
             mFileTransferService.removeFileTransfer(transferId);
             return;
 
@@ -101,7 +101,7 @@ public class OneToOneFileTransferDeleteTask extends DeleteTask.GroupedByContactI
     }
 
     @Override
-    protected void onCompleted(ContactId contact, List<String> transferIds) {
+    protected void onCompleted(ContactId contact, Set<String> transferIds) {
         mFileTransferService.broadcastOneToOneFileTransferDeleted(contact, transferIds);
     }
 }

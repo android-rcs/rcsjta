@@ -23,7 +23,7 @@ import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.services.rcs.chat.ChatLog;
 
-import java.util.List;
+import java.util.Set;
 
 public class GroupChatMessageDeleteTask extends DeleteTask.GroupedByChatId {
 
@@ -77,7 +77,7 @@ public class GroupChatMessageDeleteTask extends DeleteTask.GroupedByChatId {
      * @param imService the IM service
      * @param contentResolver the content resolver
      * @param imsLock the ims operation lock
-     * @param chatId the chat id
+     * @param chatId the chat id (optional, can be null)
      * @param messageId the message id
      */
     public GroupChatMessageDeleteTask(ChatServiceImpl chatService,
@@ -106,7 +106,7 @@ public class GroupChatMessageDeleteTask extends DeleteTask.GroupedByChatId {
     }
 
     @Override
-    protected void onCompleted(String chatId, List<String> msgIds) {
+    protected void onCompleted(String chatId, Set<String> msgIds) {
         mChatService.broadcastGroupChatMessagesDeleted(chatId, msgIds);
     }
 

@@ -51,7 +51,6 @@ import com.gsma.services.rcs.RcsService;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceRegistration;
-import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
@@ -66,7 +65,6 @@ import com.gsma.services.rcs.chat.IOneToOneChat;
 import com.gsma.services.rcs.chat.IOneToOneChatListener;
 import com.gsma.services.rcs.contact.ContactId;
 
-import android.database.Cursor;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
@@ -728,29 +726,12 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param msgId
      */
     public void deleteMessage(String msgId) {
-        Cursor cursor = null;
-        try {
-            cursor = mLocalContentResolver.query(ChatLog.Message.CONTENT_URI.buildUpon()
-                    .appendPath(msgId).build(), new String[] {
-                    ChatLog.Message.CONTACT, ChatLog.Message.CHAT_ID
-            }, null, null, null);
-            if (!cursor.moveToNext()) {
-                return;
-
-            }
-            String contactId = cursor.getString(0);
-            String chatId = cursor.getString(1);
-            if (chatId.equals(contactId)) {
-                mImOperationExecutor.execute(new OneToOneChatMessageDeleteTask(this, mImService,
-                        mLocalContentResolver, mImsLock, msgId));
-            } else {
-                mImOperationExecutor.execute(new GroupChatMessageDeleteTask(this, mImService,
-                        mLocalContentResolver, mImsLock, chatId, msgId));
-            }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+        if (mMessagingLog.isOneToOneChatMessage(msgId)) {
+            mImOperationExecutor.execute(new OneToOneChatMessageDeleteTask(this, mImService,
+                    mLocalContentResolver, mImsLock, msgId));
+        } else {
+            mImOperationExecutor.execute(new GroupChatMessageDeleteTask(this, mImService,
+                    mLocalContentResolver, mImsLock, null, msgId));
         }
     }
 
@@ -1061,15 +1042,15 @@ public class ChatServiceImpl extends IChatService.Stub {
                 reasonCode);
     }
 
-    public void broadcastGroupChatMessagesDeleted(String chatId, List<String> msgIds) {
+    public void broadcastGroupChatMessagesDeleted(String chatId, Set<String> msgIds) {
         mGroupChatEventBroadcaster.broadcastMessagesDeleted(chatId, msgIds);
     }
 
-    public void broadcastGroupChatsDeleted(List<String> chatIds) {
+    public void broadcastGroupChatsDeleted(Set<String> chatIds) {
         mGroupChatEventBroadcaster.broadcastGroupChatsDeleted(chatIds);
     }
 
-    public void broadcastOneToOneMessagesDeleted(ContactId contact, List<String> msgIds) {
+    public void broadcastOneToOneMessagesDeleted(ContactId contact, Set<String> msgIds) {
         mOneToOneChatEventBroadcaster.broadcastMessagesDeleted(contact, msgIds);
     }
 

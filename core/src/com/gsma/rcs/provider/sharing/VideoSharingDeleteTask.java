@@ -9,7 +9,7 @@ import com.gsma.rcs.service.api.VideoSharingServiceImpl;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.VideoSharingLog;
 
-import java.util.List;
+import java.util.Set;
 
 public class VideoSharingDeleteTask extends DeleteTask.GroupedByContactId {
 
@@ -82,7 +82,7 @@ public class VideoSharingDeleteTask extends DeleteTask.GroupedByContactId {
     }
 
     @Override
-    protected void onCompleted(ContactId contact, List<String> deletedIds) {
+    protected void onCompleted(ContactId contact, Set<String> deletedIds) {
         mVideoSharingService.broadcastDeleted(contact, deletedIds);
     }
 }

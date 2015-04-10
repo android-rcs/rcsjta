@@ -223,4 +223,12 @@ public interface IMessageLog {
      * @return group chat events for contacts or null if there is no group chat events
      */
     Map<ContactId, GroupChatEvent.Status> getGroupChatEvents(String chatId);
+
+    /**
+     * Returns true if the chat id and contact are same for this message id.
+     * 
+     * @param messageId the message id
+     * @return true if the message belongs to one to one conversation
+     */
+    public boolean isOneToOneChatMessage(String messageId);
 }

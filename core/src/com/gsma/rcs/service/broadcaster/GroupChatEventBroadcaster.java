@@ -33,7 +33,9 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.content.Intent;
 import android.os.RemoteCallbackList;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * GroupChatEventBroadcaster maintains the registering and unregistering of IGroupChatListener and
@@ -155,11 +157,12 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
         AndroidFactory.getApplicationContext().sendBroadcast(newGroupChatMessage);
     }
 
-    public void broadcastMessagesDeleted(String chatId, List<String> msgIds) {
+    public void broadcastMessagesDeleted(String chatId, Set<String> msgIds) {
+        List<String> msgIds2 = new ArrayList<String>(msgIds);
         final int N = mGroupChatListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
-                mGroupChatListeners.getBroadcastItem(i).onMessagesDeleted(chatId, msgIds);
+                mGroupChatListeners.getBroadcastItem(i).onMessagesDeleted(chatId, msgIds2);
             } catch (Exception e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener.", e);
@@ -169,11 +172,12 @@ public class GroupChatEventBroadcaster implements IGroupChatEventBroadcaster {
         mGroupChatListeners.finishBroadcast();
     }
 
-    public void broadcastGroupChatsDeleted(List<String> chatIds) {
+    public void broadcastGroupChatsDeleted(Set<String> chatIds) {
+        List<String> ids = new ArrayList<String>(chatIds);
         final int N = mGroupChatListeners.beginBroadcast();
         for (int i = 0; i < N; i++) {
             try {
-                mGroupChatListeners.getBroadcastItem(i).onDeleted(chatIds);
+                mGroupChatListeners.getBroadcastItem(i).onDeleted(ids);
             } catch (Exception e) {
                 if (logger.isActivated()) {
                     logger.error("Can't notify listener.", e);

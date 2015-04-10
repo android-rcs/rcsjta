@@ -23,10 +23,10 @@ import com.gsma.services.rcs.contact.ContactId;
 import android.database.Cursor;
 import android.net.Uri;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A common delete task for service objects stored in the database. By having information about the
@@ -131,13 +131,13 @@ public abstract class DeleteTask<T> implements Runnable {
         }
 
         @Override
-        protected void onCompleted(String groupId, List<String> deletedIds) {
+        protected void onCompleted(String groupId, Set<String> deletedIds) {
             onCompleted(deletedIds);
         }
 
         protected abstract void onRowDelete(String itemId);
 
-        protected abstract void onCompleted(List<String> deletedIds);
+        protected abstract void onCompleted(Set<String> deletedIds);
 
         @Override
         protected String getGroupAsKey(String groupIdfromDatabase) {
@@ -150,7 +150,7 @@ public abstract class DeleteTask<T> implements Runnable {
      * This constructor requires the scope of the deletion as a database query selection, and its
      * dependencies.
      * 
-     * @param localContentResolver the local content resolver
+     * @param contentResolver the local content resolver
      * @param lock the lock used during effective deletion
      * @param contentUri the content uri (not path appended)
      * @param columnPrimaryKey the primary key of the item to delete
@@ -198,33 +198,32 @@ public abstract class DeleteTask<T> implements Runnable {
      * 
      * @return the map of the ids grouped by the keys returned by the group column
      */
-    private Map<T, List<String>> getGroupedItemIds() {
+    private Map<T, Set<String>> getGroupedItemIds() {
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(mContentUri, mProjection, mSelection,
                     mSelectionArgs, null);
-            Map<T, List<String>> result = null;
+            Map<T, Set<String>> result = null;
             while (cursor.moveToNext()) {
                 String key = cursor.getString(0);
                 String groupId = null;
                 if (mColumnGroupBy != null) {
                     groupId = cursor.getString(1);
                 }
-                List<String> ids = null;
+                Set<String> ids = null;
                 if (result != null) {
                     ids = result.get(groupId);
                 }
                 if (ids == null) {
-                    ids = new ArrayList<String>();
+                    ids = new HashSet<String>();
                     if (result == null) {
-                        result = new HashMap<T, List<String>>();
+                        result = new HashMap<T, Set<String>>();
                     }
                     result.put(getGroupAsKey(groupId), ids);
                 }
                 ids.add(key);
             }
             return result;
-
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -235,13 +234,12 @@ public abstract class DeleteTask<T> implements Runnable {
     /**
      * Execution can be run several times as incoming items can be deleted.
      * 
-     * @return the list of ids (video sharing, messages, groups..) to delete
+     * @return the result of the execution as map (deleted ids mapped by group column)
      */
-    private Map<T, List<String>> tryDelete() {
-        Map<T, List<String>> items = getGroupedItemIds();
+    private Map<T, Set<String>> tryDelete() {
+        Map<T, Set<String>> items = getGroupedItemIds();
         if (items == null || items.isEmpty()) {
             return null;
-
         }
         synchronized (mLock) {
             for (T groupId : items.keySet()) {
@@ -283,9 +281,9 @@ public abstract class DeleteTask<T> implements Runnable {
      * Called after the delete is completed to report the ids deleted per group chatId or contact.
      * 
      * @param chatOrContactId the key by which the ids are grouped by.
-     * @param deletedIds as a {@link List} as required by the listeners.
+     * @param deletedIds as a {@link Set} as required by the listeners.
      */
-    protected abstract void onCompleted(T groupId, List<String> deletedIds);
+    protected abstract void onCompleted(T groupId, Set<String> deletedIds);
 
     /**
      * Set to true if delete on all the scope range at once. False is default. If not set, the task
@@ -299,11 +297,11 @@ public abstract class DeleteTask<T> implements Runnable {
 
     @Override
     public void run() {
-        Map<T, List<String>> deletedIds = null;
+        Map<T, Set<String>> deletedIds = null;
         try {
             deletedIds = tryDelete();
             if (deletedIds != null && deletedIds.size() > 0 && !mPathAppended) {
-                Map<T, List<String>> deletedIds2 = tryDelete();
+                Map<T, Set<String>> deletedIds2 = tryDelete();
                 if (deletedIds2 != null) {
                     for (T groupId : deletedIds.keySet()) {
                         if (deletedIds.containsKey(groupId)) {
@@ -322,7 +320,6 @@ public abstract class DeleteTask<T> implements Runnable {
         } finally {
             if (deletedIds == null) {
                 return;
-
             }
             for (T groupId : deletedIds.keySet()) {
                 onCompleted(groupId, deletedIds.get(groupId));

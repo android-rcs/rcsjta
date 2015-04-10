@@ -23,7 +23,7 @@ import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
-import java.util.List;
+import java.util.Set;
 
 public class GroupFileTransferDeleteTask extends DeleteTask.GroupedByChatId {
 
@@ -93,18 +93,18 @@ public class GroupFileTransferDeleteTask extends DeleteTask.GroupedByChatId {
     protected void onRowDelete(String chatId, String transferId) {
         FileSharingSession session = mImService.getFileSharingSession(transferId);
         if (session == null) {
-            mFileTransferService.ensureThumbnailIsDeleted(getAppendedPathUri(transferId));
+            mFileTransferService.ensureThumbnailIsDeleted(transferId);
             mFileTransferService.removeFileTransfer(transferId);
             return;
 
         }
         session.deleteSession();
-        mFileTransferService.ensureThumbnailIsDeleted(getAppendedPathUri(transferId));
+        mFileTransferService.ensureThumbnailIsDeleted(transferId);
         mFileTransferService.removeFileTransfer(transferId);
     }
 
     @Override
-    protected void onCompleted(String chatId, List<String> transferIds) {
+    protected void onCompleted(String chatId, Set<String> transferIds) {
         mFileTransferService.broadcastGroupFileTransfersDeleted(chatId, transferIds);
     }
 

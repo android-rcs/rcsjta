@@ -81,6 +81,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -153,23 +154,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         mImsLock = imsLock;
     }
 
-    public void ensureThumbnailIsDeleted(Uri uri) {
-        Cursor cursor = null;
-        String icon = null;
-        try {
-            cursor = mLocalContentResolver.query(uri, new String[] {
-                FileTransferLog.FILEICON
-            }, null, null, null);
-            if (cursor.moveToNext()) {
-                icon = cursor.getString(0);
-            }
-            if (icon != null) {
-                new File(icon).delete();
-            }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+    public void ensureThumbnailIsDeleted(String transferId) {
+        String icon = mMessagingLog.getFileTransferIcon(transferId);
+        if (icon != null) {
+            new File(icon).delete();
         }
     }
 
@@ -1403,11 +1391,11 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 reasonCode);
     }
 
-    public void broadcastOneToOneFileTransferDeleted(ContactId contact, List<String> transferIds) {
+    public void broadcastOneToOneFileTransferDeleted(ContactId contact, Set<String> transferIds) {
         mOneToOneFileTransferBroadcaster.broadcastFileTransferDeleted(contact, transferIds);
     }
 
-    public void broadcastGroupFileTransfersDeleted(String chatId, List<String> transferIds) {
+    public void broadcastGroupFileTransfersDeleted(String chatId, Set<String> transferIds) {
         mGroupFileTransferBroadcaster.broadcastFileTransfersDeleted(chatId, transferIds);
     }
 }

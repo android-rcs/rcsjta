@@ -24,7 +24,7 @@ import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.contact.ContactId;
 
-import java.util.List;
+import java.util.Set;
 
 public class OneToOneChatMessageDeleteTask extends DeleteTask.GroupedByContactId {
 
@@ -106,7 +106,7 @@ public class OneToOneChatMessageDeleteTask extends DeleteTask.GroupedByContactId
     }
 
     @Override
-    protected void onCompleted(ContactId contact, List<String> msgIds) {
+    protected void onCompleted(ContactId contact, Set<String> msgIds) {
         mChatService.broadcastOneToOneMessagesDeleted(contact, msgIds);
     }
 

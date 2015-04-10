@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -491,7 +492,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
                 mLocalContentResolver, mImsLock, sharingId));
     }
 
-    public void broadcastDeleted(ContactId contact, List<String> sharingIds) {
+    public void broadcastDeleted(ContactId contact, Set<String> sharingIds) {
         mBroadcaster.broadcastDeleted(contact, sharingIds);
     }
 }

@@ -359,6 +359,28 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
+    public String getFileTransferIcon(String fileTransferId) {
+        Cursor cursor = null;
+        try {
+            cursor = mLocalContentResolver.query(
+                    Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId),
+                    new String[] {
+                        FileTransferData.KEY_FILEICON
+                    }, null, null, null);
+            if (cursor.moveToNext()) {
+                return cursor
+                        .getString(cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILEICON));
+            }
+            return null;
+
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    @Override
     public void setFileUploadTId(String fileTransferId, String tId) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("setFileUploadTId (tId=").append(tId)

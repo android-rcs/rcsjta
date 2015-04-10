@@ -23,8 +23,11 @@ import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.services.rcs.chat.ChatLog;
 
-import java.util.List;
+import java.util.Set;
 
+/**
+ * Deletion task for group chats.
+ */
 public class GroupChatDeleteTask extends DeleteTask.NotGrouped {
 
     private static final String SELECTION_GROUPDELIVERY_BY_CHATID = new StringBuilder(
@@ -85,7 +88,7 @@ public class GroupChatDeleteTask extends DeleteTask.NotGrouped {
     }
 
     @Override
-    protected void onCompleted(List<String> deletedIds) {
+    protected void onCompleted(Set<String> deletedIds) {
         mChatService.broadcastGroupChatsDeleted(deletedIds);
     }
 

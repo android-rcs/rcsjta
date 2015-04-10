@@ -253,6 +253,11 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
+    public String getFileTransferIcon(String fileTransferId) {
+        return mFileTransferLog.getFileTransferIcon(fileTransferId);
+    }
+
+    @Override
     public boolean isFileTransfer(String fileTransferId) {
         return mFileTransferLog.isFileTransfer(fileTransferId);
     }
@@ -495,5 +500,10 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
             ReasonCode reasonCode) {
         mGroupChatLog.setGroupChatParticipantsStateAndReasonCode(participants, chatId, state,
                 reasonCode);
+    }
+
+    @Override
+    public boolean isOneToOneChatMessage(String messageId) {
+        return mMessageLog.isOneToOneChatMessage(messageId);
     }
 }
