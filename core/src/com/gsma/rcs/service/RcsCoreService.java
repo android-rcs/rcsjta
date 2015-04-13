@@ -125,11 +125,11 @@ import java.util.concurrent.Executors;
  */
 public class RcsCoreService extends Service implements CoreListener {
 
-    private final static Object IM_OPERATION_LOCK = new Object();
+    private final Object mOperationLock = new Object();
 
-    private final static ExecutorService mImOperationExecutor = Executors.newSingleThreadExecutor();
+    private final ExecutorService mImOperationExecutor = Executors.newSingleThreadExecutor();
 
-    private final static ExecutorService mRcOperationExecutor = Executors.newSingleThreadExecutor();
+    private final ExecutorService mRcOperationExecutor = Executors.newSingleThreadExecutor();
 
     /**
      * CPU manager
@@ -323,17 +323,17 @@ public class RcsCoreService extends Service implements CoreListener {
 
             mFtApi = new FileTransferServiceImpl(imService, mMessagingLog, mRcsSettings,
                     mContactManager, core, mLocalContentResolver, mImOperationExecutor,
-                    IM_OPERATION_LOCK);
+                    mOperationLock);
             mChatApi = new ChatServiceImpl(imService, mMessagingLog, mRcsSettings, mContactManager,
-                    core, mLocalContentResolver, mImOperationExecutor, IM_OPERATION_LOCK, mFtApi);
+                    core, mLocalContentResolver, mImOperationExecutor, mOperationLock, mFtApi);
             mVshApi = new VideoSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings,
-                    mContactManager, core, mLocalContentResolver, mImOperationExecutor,
-                    IM_OPERATION_LOCK);
+                    mContactManager, core, mLocalContentResolver, mRcOperationExecutor,
+                    mOperationLock);
             mIshApi = new ImageSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings,
-                    mContactManager, mLocalContentResolver, mImOperationExecutor, IM_OPERATION_LOCK);
+                    mContactManager, mLocalContentResolver, mRcOperationExecutor, mOperationLock);
             mGshApi = new GeolocSharingServiceImpl(richCallService, mContactManager,
-                    mRichCallHistory, mRcsSettings, mLocalContentResolver, mImOperationExecutor,
-                    IM_OPERATION_LOCK);
+                    mRichCallHistory, mRcsSettings, mLocalContentResolver, mRcOperationExecutor,
+                    mOperationLock);
             mHistoryApi = new HistoryServiceImpl(getApplicationContext());
             mIpcallApi = new IPCallServiceImpl(ipCallService, IPCallHistory.getInstance(),
                     mContactManager, mRcsSettings);
@@ -961,7 +961,7 @@ public class RcsCoreService extends Service implements CoreListener {
         mImOperationExecutor.execute(new FtHttpResumeManager(imService, mRcsSettings,
                 mMessagingLog, mContactManager));
         /* Try to dequeue one-to-one chat messages and one-to-one file transfers. */
-        mImOperationExecutor.execute(new OneToOneChatDequeueTask(IM_OPERATION_LOCK, imService,
+        mImOperationExecutor.execute(new OneToOneChatDequeueTask(mOperationLock, imService,
                 mChatApi, mFtApi, mHistoryLog, mMessagingLog, mContactManager, mRcsSettings));
         /*
          * Try to send delayed displayed notifications for read messages if they were not sent
@@ -998,26 +998,26 @@ public class RcsCoreService extends Service implements CoreListener {
     @Override
     public void tryToDequeueGroupChatMessagesAndGroupFileTransfers(String chatId,
             InstantMessagingService imService) {
-        mImOperationExecutor.execute(new GroupChatDequeueTask(IM_OPERATION_LOCK, chatId, imService,
+        mImOperationExecutor.execute(new GroupChatDequeueTask(mOperationLock, chatId, imService,
                 mMessagingLog, mChatApi, mFtApi, mRcsSettings, mHistoryLog, mContactManager));
     }
 
     @Override
     public void tryToDequeueOneToOneChatMessages(ContactId contact,
             InstantMessagingService imService) {
-        mImOperationExecutor.execute(new OneToOneChatMessageDequeueTask(IM_OPERATION_LOCK, contact,
+        mImOperationExecutor.execute(new OneToOneChatMessageDequeueTask(mOperationLock, contact,
                 imService, mMessagingLog, mChatApi, mRcsSettings, mContactManager));
     }
 
     @Override
     public void tryToDequeueFileTransfers(InstantMessagingService imService) {
-        mImOperationExecutor.execute(new FileTransferDequeueTask(IM_OPERATION_LOCK, imService,
+        mImOperationExecutor.execute(new FileTransferDequeueTask(mOperationLock, imService,
                 mMessagingLog, mFtApi, mContactManager, mRcsSettings));
     }
 
     @Override
     public void tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(String chatId) {
         mImOperationExecutor.execute(new GroupChatTerminalExceptionTask(chatId, mChatApi, mFtApi,
-                mMessagingLog, IM_OPERATION_LOCK));
+                mMessagingLog, mOperationLock));
     }
 }
