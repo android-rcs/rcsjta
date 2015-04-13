@@ -22,8 +22,12 @@
 
 package com.gsma.services.rcs.filetransfer;
 
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsPermissionDeniedException;
+import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsUnsupportedOperationException;
 import com.gsma.services.rcs.contact.ContactId;
 
 import android.net.Uri;
@@ -317,8 +321,10 @@ public class FileTransfer {
     public String getChatId() throws RcsServiceException {
         try {
             return mTransferInf.getChatId();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -331,8 +337,9 @@ public class FileTransfer {
     public String getTransferId() throws RcsServiceException {
         try {
             return mTransferInf.getTransferId();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 
@@ -345,8 +352,10 @@ public class FileTransfer {
     public ContactId getRemoteContact() throws RcsServiceException {
         try {
             return mTransferInf.getRemoteContact();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -359,8 +368,10 @@ public class FileTransfer {
     public String getFileName() throws RcsServiceException {
         try {
             return mTransferInf.getFileName();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -373,8 +384,10 @@ public class FileTransfer {
     public long getFileSize() throws RcsServiceException {
         try {
             return mTransferInf.getFileSize();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -387,8 +400,10 @@ public class FileTransfer {
     public String getMimeType() throws RcsServiceException {
         try {
             return mTransferInf.getMimeType();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -401,8 +416,10 @@ public class FileTransfer {
     public Uri getFileIcon() throws RcsServiceException {
         try {
             return mTransferInf.getFileIcon();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -415,8 +432,10 @@ public class FileTransfer {
     public String getFileIconMimeType() throws RcsServiceException {
         try {
             return mTransferInf.getFileIconMimeType();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -429,8 +448,10 @@ public class FileTransfer {
     public Uri getFile() throws RcsServiceException {
         try {
             return mTransferInf.getFile();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -444,8 +465,10 @@ public class FileTransfer {
     public State getState() throws RcsServiceException {
         try {
             return State.valueOf(mTransferInf.getState());
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -460,8 +483,10 @@ public class FileTransfer {
     public ReasonCode getReasonCode() throws RcsServiceException {
         try {
             return ReasonCode.valueOf(mTransferInf.getReasonCode());
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -475,7 +500,9 @@ public class FileTransfer {
     public Direction getDirection() throws RcsServiceException {
         try {
             return Direction.valueOf(mTransferInf.getDirection());
+
         } catch (Exception e) {
+            RcsPersistentStorageException.assertException(e);
             throw new RcsServiceException(e);
         }
     }
@@ -491,8 +518,10 @@ public class FileTransfer {
     public long getTimestamp() throws RcsServiceException {
         try {
             return mTransferInf.getTimestamp();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -507,8 +536,10 @@ public class FileTransfer {
     public long getTimestampSent() throws RcsServiceException {
         try {
             return mTransferInf.getTimestampSent();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -522,8 +553,10 @@ public class FileTransfer {
     public long getTimestampDelivered() throws RcsServiceException {
         try {
             return mTransferInf.getTimestampDelivered();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -537,8 +570,10 @@ public class FileTransfer {
     public long getTimestampDisplayed() throws RcsServiceException {
         try {
             return mTransferInf.getTimestampDisplayed();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -551,7 +586,10 @@ public class FileTransfer {
         try {
             mTransferInf.acceptInvitation();
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            RcsUnsupportedOperationException.assertException(e);
+            RcsPermissionDeniedException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -564,7 +602,10 @@ public class FileTransfer {
         try {
             mTransferInf.rejectInvitation();
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsUnsupportedOperationException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
+            RcsPermissionDeniedException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -577,7 +618,8 @@ public class FileTransfer {
         try {
             mTransferInf.abortTransfer();
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPermissionDeniedException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -592,8 +634,9 @@ public class FileTransfer {
     public boolean isAllowedToPauseTransfer() throws RcsServiceException {
         try {
             return mTransferInf.isAllowedToPauseTransfer();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 
@@ -606,7 +649,9 @@ public class FileTransfer {
         try {
             mTransferInf.pauseTransfer();
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPermissionDeniedException.assertException(e);
+            RcsUnsupportedOperationException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -621,8 +666,10 @@ public class FileTransfer {
     public boolean isAllowedToResumeTransfer() throws RcsServiceException {
         try {
             return mTransferInf.isAllowedToResumeTransfer();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -635,7 +682,9 @@ public class FileTransfer {
         try {
             mTransferInf.resumeTransfer();
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPermissionDeniedException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -648,8 +697,10 @@ public class FileTransfer {
     public boolean isAllowedToResendTransfer() throws RcsServiceException {
         try {
             return mTransferInf.isAllowedToResendTransfer();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -663,7 +714,9 @@ public class FileTransfer {
         try {
             mTransferInf.resendTransfer();
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPermissionDeniedException.assertException(e);
+            RcsUnsupportedOperationException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -676,7 +729,9 @@ public class FileTransfer {
     public boolean isRead() throws RcsServiceException {
         try {
             return mTransferInf.isRead();
+
         } catch (Exception e) {
+            RcsPersistentStorageException.assertException(e);
             throw new RcsServiceException(e);
         }
     }
@@ -690,7 +745,9 @@ public class FileTransfer {
     public long getFileExpiration() throws RcsServiceException {
         try {
             return mTransferInf.getFileExpiration();
+
         } catch (Exception e) {
+            RcsPersistentStorageException.assertException(e);
             throw new RcsServiceException(e);
         }
     }
@@ -704,7 +761,9 @@ public class FileTransfer {
     public long getFileIconExpiration() throws RcsServiceException {
         try {
             return mTransferInf.getFileIconExpiration();
+
         } catch (Exception e) {
+            RcsPersistentStorageException.assertException(e);
             throw new RcsServiceException(e);
         }
     }

@@ -35,6 +35,7 @@ import com.gsma.services.rcs.upload.FileUploadInfo;
 import com.gsma.services.rcs.upload.IFileUpload;
 
 import android.net.Uri;
+import android.os.RemoteException;
 
 /**
  * File upload implementation
@@ -79,81 +80,142 @@ public class FileUploadImpl extends IFileUpload.Stub implements FileUploadSessio
      * Returns the upload ID of the upload
      * 
      * @return Upload ID
+     * @throws RemoteException
      */
-    public String getUploadId() {
-        return mUploadId;
+    public String getUploadId() throws RemoteException {
+        try {
+            return mUploadId;
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
      * Returns info related to upload file
      * 
      * @return Upload info or null if not yet uploaded or in case of error
+     * @throws RemoteException
      * @see FileUploadInfo
      */
-    public FileUploadInfo getUploadInfo() {
-        FileUploadSession session = mImService.getFileUploadSession(mUploadId);
-        FileTransferHttpInfoDocument file;
-        if (session == null) {
-            return mFileUploadStorageAccessor.getInfo();
+    public FileUploadInfo getUploadInfo() throws RemoteException {
+        try {
+            FileUploadSession session = mImService.getFileUploadSession(mUploadId);
+            FileTransferHttpInfoDocument file;
+            if (session == null) {
+                return mFileUploadStorageAccessor.getInfo();
+            }
+            if ((file = session.getFileInfoDocument()) == null) {
+                return null;
+            }
+            return createFileUploadInfo(file);
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        if ((file = session.getFileInfoDocument()) == null) {
-            return null;
-        }
-        return createFileUploadInfo(file);
     }
 
     /**
      * Returns the URI of the file to upload
      * 
      * @return the file URI
+     * @throws RemoteException
      */
-    public Uri getFile() {
-        FileUploadSession session = mImService.getFileUploadSession(mUploadId);
-        if (session == null) {
-            return mFileUploadStorageAccessor.getFile();
+    public Uri getFile() throws RemoteException {
+        try {
+            FileUploadSession session = mImService.getFileUploadSession(mUploadId);
+            if (session == null) {
+                return mFileUploadStorageAccessor.getFile();
+            }
+            return session.getContent().getUri();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return session.getContent().getUri();
     }
 
     /**
      * Returns the state of the file upload
      * 
      * @return State
+     * @throws RemoteException
      */
-    public int getState() {
-        FileUploadSession session = mImService.getFileUploadSession(mUploadId);
-        if (session == null) {
-            return mFileUploadStorageAccessor.getState().toInt();
-        }
-        synchronized (mLock) {
-            if (FileUploadSession.State.PENDING == session.getSessionState()) {
-                return FileUpload.State.INITIATING.toInt();
+    public int getState() throws RemoteException {
+        try {
+            FileUploadSession session = mImService.getFileUploadSession(mUploadId);
+            if (session == null) {
+                return mFileUploadStorageAccessor.getState().toInt();
             }
-            return FileUpload.State.STARTED.toInt();
+            synchronized (mLock) {
+                if (FileUploadSession.State.PENDING == session.getSessionState()) {
+                    return FileUpload.State.INITIATING.toInt();
+                }
+                return FileUpload.State.STARTED.toInt();
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
     /**
      * Aborts the upload
+     * 
+     * @throws RemoteException
      */
-    public void abortUpload() {
-        if (mLogger.isActivated()) {
-            mLogger.info("Cancel session");
-        }
-        final FileUploadSession session = mImService.getFileUploadSession(mUploadId);
-        if (session == null) {
-            /*
-             * TODO: Throw proper exception as part of CR037 implementation
-             */
-            throw new IllegalStateException("Cannot abot session with ID=".concat(mUploadId));
-        }
-
-        // Abort the session
-        new Thread() {
-            public void run() {
-                session.interrupt();
+    public void abortUpload() throws RemoteException {
+        try {
+            if (mLogger.isActivated()) {
+                mLogger.info("Cancel session");
             }
-        }.start();
+            final FileUploadSession session = mImService.getFileUploadSession(mUploadId);
+            if (session == null) {
+                throw new ServerApiGenericException(
+                        "Cannot cancel session with ID= ".concat(mUploadId));
+            }
+            new Thread() {
+                public void run() {
+                    session.interrupt();
+                }
+            }.start();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     private FileUploadInfo createFileUploadInfo(FileTransferHttpInfoDocument file) {

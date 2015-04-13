@@ -22,6 +22,7 @@
 
 package com.gsma.services.rcs.upload;
 
+import com.gsma.services.rcs.RcsGenericException;
 import com.gsma.services.rcs.RcsServiceException;
 
 import android.net.Uri;
@@ -125,8 +126,9 @@ public class FileUpload {
     public String getUploadId() throws RcsServiceException {
         try {
             return mUploadInf.getUploadId();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -139,8 +141,9 @@ public class FileUpload {
     public Uri getFile() throws RcsServiceException {
         try {
             return mUploadInf.getFile();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -154,8 +157,9 @@ public class FileUpload {
     public FileUploadInfo getUploadInfo() throws RcsServiceException {
         try {
             return mUploadInf.getUploadInfo();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -169,8 +173,9 @@ public class FileUpload {
     public State getState() throws RcsServiceException {
         try {
             return State.valueOf(mUploadInf.getState());
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -183,7 +188,7 @@ public class FileUpload {
         try {
             mUploadInf.abortUpload();
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 }

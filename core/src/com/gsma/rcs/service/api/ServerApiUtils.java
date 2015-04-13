@@ -34,12 +34,10 @@ import com.gsma.services.rcs.RcsServiceRegistration;
 public class ServerApiUtils {
     /**
      * Test core
-     * 
-     * @throws ServerApiException
      */
-    public static void testCore() throws ServerApiException {
+    public static void testCore() {
         if (Core.getInstance() == null) {
-            throw new ServerApiException("Core is not instanciated");
+            throw new ServerApiGenericException("Core is not instanciated");
         }
     }
 

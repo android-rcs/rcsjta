@@ -330,9 +330,22 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * Returns the interface to the configuration of the file transfer service
      * 
      * @return IFileTransferServiceConfiguration instance
+     * @throws RemoteException
      */
-    public IFileTransferServiceConfiguration getConfiguration() {
-        return new IFileTransferServiceConfigurationImpl(mRcsSettings);
+    public IFileTransferServiceConfiguration getConfiguration() throws RemoteException {
+        try {
+            return new IFileTransferServiceConfigurationImpl(mRcsSettings);
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
@@ -401,55 +414,43 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param fileTransferId return IFileTransfer OneToOneFileTransferImpl
      * @param timestamp Local timestamp of the file transfer
      * @param timestampSent Timestamp sent in payload of the file transfer
-     * @throws ServerApiException
      */
     private IFileTransfer sendOneToOneFile(ContactId contact, MmContent file, MmContent fileIcon,
-            String fileTransferId, long timestamp, long timestampSent) throws ServerApiException {
-        try {
-            mImService.assertFileSizeNotExceedingMaxLimit(file.getSize(), "File exceeds max size");
+            String fileTransferId, long timestamp, long timestampSent) {
+        mImService.assertFileSizeNotExceedingMaxLimit(file.getSize(), "File exceeds max size");
 
-            FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
-                    fileTransferId, contact, Direction.OUTGOING, contact.toString(), file,
-                    fileIcon, mMessagingLog);
+        FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
+                fileTransferId, contact, Direction.OUTGOING, contact.toString(), file, fileIcon,
+                mMessagingLog);
 
-            if (!mImService.isFileTransferSessionAvailable()
-                    || mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("The max number of file transfer sessions is achieved: queue the file transfer.");
-                }
-                addOutgoingFileTransfer(fileTransferId, contact, file, fileIcon,
-                        FileTransfer.State.QUEUED, timestamp, timestampSent);
-                return new OneToOneFileTransferImpl(fileTransferId,
-                        mOneToOneFileTransferBroadcaster, mImService, storageAccessor, this,
-                        mRcsSettings, mCore, mMessagingLog, mContactManager);
-            }
-            addOutgoingFileTransfer(fileTransferId, contact, file, fileIcon,
-                    FileTransfer.State.INITIATING, timestamp, timestampSent);
-            final FileSharingSession session = mImService.initiateFileTransferSession(
-                    fileTransferId, contact, file, fileIcon, timestamp, timestampSent);
-
-            OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
-                    fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
-                    this, mRcsSettings, mCore, mMessagingLog, mContactManager);
-            session.addListener(oneToOneFileTransfer);
-            addFileTransfer(oneToOneFileTransfer);
-
-            new Thread() {
-                public void run() {
-                    session.startSession();
-                }
-            }.start();
-            return oneToOneFileTransfer;
-
-        } catch (Exception e) {
-            /*
-             * TODO: This is not correct implementation. It will be fixed properly in CR037
-             */
+        if (!mImService.isFileTransferSessionAvailable()
+                || mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
             if (sLogger.isActivated()) {
-                sLogger.error("Unexpected error", e);
+                sLogger.debug("The max number of file transfer sessions is achieved: queue the file transfer.");
             }
-            throw new ServerApiException(e);
+            addOutgoingFileTransfer(fileTransferId, contact, file, fileIcon, State.QUEUED,
+                    timestamp, timestampSent);
+            return new OneToOneFileTransferImpl(fileTransferId, mOneToOneFileTransferBroadcaster,
+                    mImService, storageAccessor, this, mRcsSettings, mCore, mMessagingLog,
+                    mContactManager);
         }
+        addOutgoingFileTransfer(fileTransferId, contact, file, fileIcon, State.INITIATING,
+                timestamp, timestampSent);
+        final FileSharingSession session = mImService.initiateFileTransferSession(fileTransferId,
+                contact, file, fileIcon, timestamp, timestampSent);
+
+        OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
+                fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
+                this, mRcsSettings, mCore, mMessagingLog, mContactManager);
+        session.addListener(oneToOneFileTransfer);
+        addFileTransfer(oneToOneFileTransfer);
+
+        new Thread() {
+            public void run() {
+                session.startSession();
+            }
+        }.start();
+        return oneToOneFileTransfer;
     }
 
     /**
@@ -494,53 +495,45 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         long timestamp = System.currentTimeMillis();
         /* For outgoing file transfer, timestampSent = timestamp */
         long timestampSent = timestamp;
-        try {
-            if (!ServerApiUtils.isImsConnected()) {
-                /*
-                 * If the IMS is NOT connected at this time then re-queue transfer.
-                 */
-                setOneToOneFileTransferStateAndReasonCode(fileTransferId, contact,
-                        FileTransfer.State.QUEUED, FileTransfer.ReasonCode.UNSPECIFIED);
-                return;
-            }
-            if (!mImService.isFileTransferSessionAvailable()
-                    || mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("The max number of file transfer sessions is achieved: re-queue the file transfer with fileTransferId "
-                            .concat(fileTransferId));
-                }
-                setOneToOneFileTransferStateAndReasonCode(fileTransferId, contact,
-                        FileTransfer.State.QUEUED, FileTransfer.ReasonCode.UNSPECIFIED);
-                return;
-            }
-
-            setFileTransferStateAndTimestamps(fileTransferId, contact,
-                    FileTransfer.State.INITIATING, timestamp, timestampSent);
-
-            final FileSharingSession session = mImService.initiateFileTransferSession(
-                    fileTransferId, contact, file, fileIcon, timestamp, timestampSent);
-
-            FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
-                    fileTransferId, contact, Direction.OUTGOING, contact.toString(), file,
-                    fileIcon, mMessagingLog);
-            OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
-                    fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
-                    this, mRcsSettings, mCore, mMessagingLog, mContactManager);
-            session.addListener(oneToOneFileTransfer);
-            addFileTransfer(oneToOneFileTransfer);
-
-            new Thread() {
-                public void run() {
-                    session.startSession();
-                }
-            }.start();
-
-        } catch (Exception e) {
+        if (!ServerApiUtils.isImsConnected()) {
             /*
-             * TODO: This is not correct implementation. It will be fixed properly in CR037
+             * If the IMS is NOT connected at this time then re-queue transfer.
              */
-            throw new IllegalStateException(e);
+            setOneToOneFileTransferStateAndReasonCode(fileTransferId, contact, State.QUEUED,
+                    FileTransfer.ReasonCode.UNSPECIFIED);
+            return;
         }
+        if (!mImService.isFileTransferSessionAvailable()
+                || mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("The max number of file transfer sessions is achieved: re-queue the file transfer with fileTransferId "
+                        .concat(fileTransferId));
+            }
+            setOneToOneFileTransferStateAndReasonCode(fileTransferId, contact, State.QUEUED,
+                    FileTransfer.ReasonCode.UNSPECIFIED);
+            return;
+        }
+
+        setFileTransferStateAndTimestamps(fileTransferId, contact, State.INITIATING, timestamp,
+                timestampSent);
+
+        final FileSharingSession session = mImService.initiateFileTransferSession(fileTransferId,
+                contact, file, fileIcon, timestamp, timestampSent);
+
+        FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
+                fileTransferId, contact, Direction.OUTGOING, contact.toString(), file, fileIcon,
+                mMessagingLog);
+        OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
+                fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
+                this, mRcsSettings, mCore, mMessagingLog, mContactManager);
+        session.addListener(oneToOneFileTransfer);
+        addFileTransfer(oneToOneFileTransfer);
+
+        new Thread() {
+            public void run() {
+                session.startSession();
+            }
+        }.start();
     }
 
     /**
@@ -549,66 +542,82 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * 
      * @param contact
      * @return boolean
+     * @throws RemoteException
      */
-    public boolean isAllowedToTransferFile(ContactId contact) {
-        Capabilities remoteCapabilities = mContactManager.getContactCapabilities(contact);
-        if (remoteCapabilities == null) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder(
-                        "Cannot transfer file as the capabilities of contact ").append(contact)
-                        .append(" are not known.").toString());
-            }
-            return false;
+    public boolean isAllowedToTransferFile(ContactId contact) throws RemoteException {
+        if (contact == null) {
+            throw new ServerApiIllegalArgumentException("contact must not be null!");
         }
-        Capabilities myCapabilities = mRcsSettings.getMyCapabilities();
-        boolean ftMsrpSupportedforSelf = myCapabilities.isFileTransferSupported();
-        boolean ftHttpSupportedforSelf = myCapabilities.isFileTransferHttpSupported();
-        boolean ftMsrpSupportedforRemote = remoteCapabilities.isFileTransferSupported();
-        boolean ftHttpSupportedforRemote = remoteCapabilities.isFileTransferHttpSupported();
-        FileTransferProtocol protocol;
-        if (ftMsrpSupportedforSelf && ftMsrpSupportedforRemote) {
-            if (ftHttpSupportedforSelf && ftHttpSupportedforRemote) {
-                protocol = mRcsSettings.getFtProtocol();
+        try {
+            Capabilities remoteCapabilities = mContactManager.getContactCapabilities(contact);
+            if (remoteCapabilities == null) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder(
+                            "Cannot transfer file as the capabilities of contact ").append(contact)
+                            .append(" are not known.").toString());
+                }
+                return false;
+            }
+            Capabilities myCapabilities = mRcsSettings.getMyCapabilities();
+            boolean ftMsrpSupportedforSelf = myCapabilities.isFileTransferSupported();
+            boolean ftHttpSupportedforSelf = myCapabilities.isFileTransferHttpSupported();
+            boolean ftMsrpSupportedforRemote = remoteCapabilities.isFileTransferSupported();
+            boolean ftHttpSupportedforRemote = remoteCapabilities.isFileTransferHttpSupported();
+            FileTransferProtocol protocol;
+            if (ftMsrpSupportedforSelf && ftMsrpSupportedforRemote) {
+                if (ftHttpSupportedforSelf && ftHttpSupportedforRemote) {
+                    protocol = mRcsSettings.getFtProtocol();
+                } else {
+                    protocol = FileTransferProtocol.MSRP;
+                }
+            } else if (ftHttpSupportedforSelf && ftHttpSupportedforRemote) {
+                protocol = FileTransferProtocol.HTTP;
             } else {
-                protocol = FileTransferProtocol.MSRP;
-            }
-        } else if (ftHttpSupportedforSelf && ftHttpSupportedforRemote) {
-            protocol = FileTransferProtocol.HTTP;
-        } else {
-            if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder(
-                        "Cannot transfer file as there are no available capabilities : FTMsrp(Self)")
-                        .append(ftMsrpSupportedforSelf).append(" FTHttp(Self)")
-                        .append(ftHttpSupportedforSelf).append(" FTMsrp(Remote)")
-                        .append(ftMsrpSupportedforSelf).append(" FTHttp(Remote)")
-                        .append(ftMsrpSupportedforRemote).toString());
-            }
-            return false;
-        }
-        MessagingMode mode = mRcsSettings.getMessagingMode();
-        switch (mode) {
-            case INTEGRATED:
-            case SEAMLESS:
-                if ((FileTransferProtocol.MSRP == protocol && mRcsSettings.isFtAlwaysOn())
-                        || (FileTransferProtocol.HTTP == protocol && mRcsSettings
-                                .isFtHttpCapAlwaysOn())) {
-                    break;
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder(
+                            "Cannot transfer file as there are no available capabilities : FTMsrp(Self)")
+                            .append(ftMsrpSupportedforSelf).append(" FTHttp(Self)")
+                            .append(ftHttpSupportedforSelf).append(" FTMsrp(Remote)")
+                            .append(ftMsrpSupportedforSelf).append(" FTHttp(Remote)")
+                            .append(ftMsrpSupportedforRemote).toString());
                 }
-                if (!mImService.isCapabilitiesValid(remoteCapabilities)) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug(new StringBuilder(
-                                "Cannot transfer file as the cached capabilities of contact ")
-                                .append(contact)
-                                .append(" are not valid anymore for one-to-one communication.")
-                                .toString());
+                return false;
+            }
+            MessagingMode mode = mRcsSettings.getMessagingMode();
+            switch (mode) {
+                case INTEGRATED:
+                case SEAMLESS:
+                    if ((FileTransferProtocol.MSRP == protocol && mRcsSettings.isFtAlwaysOn())
+                            || (FileTransferProtocol.HTTP == protocol && mRcsSettings
+                                    .isFtHttpCapAlwaysOn())) {
+                        break;
                     }
-                    return false;
-                }
-                break;
-            default:
-                break;
+                    if (!mImService.isCapabilitiesValid(remoteCapabilities)) {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug(new StringBuilder(
+                                    "Cannot transfer file as the cached capabilities of contact ")
+                                    .append(contact)
+                                    .append(" are not valid anymore for one-to-one communication.")
+                                    .toString());
+                        }
+                        return false;
+                    }
+                    break;
+                default:
+                    break;
+            }
+            return true;
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return true;
     }
 
     /**
@@ -621,10 +630,16 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param file URI of file to transfer
      * @param attachfileIcon true if the stack must try to attach fileIcon
      * @return FileTransfer
-     * @throws ServerApiException
+     * @throws RemoteException
      */
     public IFileTransfer transferFile(ContactId contact, Uri file, boolean attachfileIcon)
-            throws ServerApiException {
+            throws RemoteException {
+        if (contact == null) {
+            throw new ServerApiIllegalArgumentException("contact must not be null!");
+        }
+        if (file == null) {
+            throw new ServerApiIllegalArgumentException("file must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Transfer file " + file + " to " + contact + " (fileicon="
                     + attachfileIcon + ")");
@@ -650,7 +665,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             }
             /* If the IMS is NOT connected at this time then queue this one to one file. */
             addOutgoingFileTransfer(fileTransferId, contact, content, fileIconContent,
-                    FileTransfer.State.QUEUED, timestamp, timestampSent);
+                    State.QUEUED, timestamp, timestampSent);
             FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
                     fileTransferId, contact, Direction.OUTGOING, contact.toString(), content,
                     fileIconContent, mMessagingLog);
@@ -658,15 +673,15 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                     mImService, storageAccessor, this, mRcsSettings, mCore, mMessagingLog,
                     mContactManager);
 
-        } catch (Exception e) {
-            /*
-             * TODO: This is not the correct way to handle this exception, and will be fixed in
-             * CR037
-             */
-            if (sLogger.isActivated()) {
-                sLogger.error("Unexpected exception", e);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
-            throw new ServerApiException(e);
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -676,56 +691,36 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * 
      * @param chatId
      * @return boolean
+     * @throws RemoteException
      */
-    public boolean isAllowedToTransferFileToGroupChat(String chatId) {
-        if (!mRcsSettings.isGroupChatActivated()) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder(
-                        "Cannot transfer file to group chat with group chat Id '").append(chatId)
-                        .append("' as group chat feature is not supported.").toString());
-            }
-            return false;
+    public boolean isAllowedToTransferFileToGroupChat(String chatId) throws RemoteException {
+        if (TextUtils.isEmpty(chatId)) {
+            throw new ServerApiIllegalArgumentException("chatId must not be null or empty!");
         }
-        if (!mRcsSettings.getMyCapabilities().isFileTransferHttpSupported()) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder(
-                        "Cannot transfer file to group chat with group chat Id '").append(chatId)
-                        .append("' as FT over HTTP capabilities are not supported for self.")
-                        .toString());
-            }
-            return false;
-        }
-        GroupChat.ReasonCode reasonCode;
         try {
-            reasonCode = mMessagingLog.getGroupChatReasonCode(chatId);
-        } catch (SQLException e) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder(
-                        "Cannot transfer file to group chat with group chat Id '").append(chatId)
-                        .append("' as the group chat does not exist in DB.").toString());
-            }
-            return false;
-        }
-        switch (reasonCode) {
-            case ABORTED_BY_USER:
-            case FAILED_INITIATION:
-            case REJECTED_BY_REMOTE:
-            case REJECTED_MAX_CHATS:
-            case REJECTED_SPAM:
-            case REJECTED_BY_TIMEOUT:
+            if (!mRcsSettings.isGroupChatActivated()) {
                 if (sLogger.isActivated()) {
                     sLogger.debug(new StringBuilder(
                             "Cannot transfer file to group chat with group chat Id '")
-                            .append(chatId).append("' as ").append(reasonCode).toString());
+                            .append(chatId).append("' as group chat feature is not supported.")
+                            .toString());
                 }
                 return false;
-            default:
-                break;
-        }
-        GroupChatSession session = mImService.getGroupChatSession(chatId);
-        if (session == null) {
-            GroupChatInfo groupChat = mMessagingLog.getGroupChatInfo(chatId);
-            if (groupChat == null) {
+            }
+            if (!mRcsSettings.getMyCapabilities().isFileTransferHttpSupported()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder(
+                            "Cannot transfer file to group chat with group chat Id '")
+                            .append(chatId)
+                            .append("' as FT over HTTP capabilities are not supported for self.")
+                            .toString());
+                }
+                return false;
+            }
+            GroupChat.ReasonCode reasonCode;
+            try {
+                reasonCode = mMessagingLog.getGroupChatReasonCode(chatId);
+            } catch (SQLException e) {
                 if (sLogger.isActivated()) {
                     sLogger.debug(new StringBuilder(
                             "Cannot transfer file to group chat with group chat Id '")
@@ -734,18 +729,58 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 }
                 return false;
             }
-            if (TextUtils.isEmpty(groupChat.getRejoinId())) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder(
-                            "Cannot transfer file to group chat with group chat Id '")
-                            .append(chatId)
-                            .append("' as there is no ongoing session with corresponding chatId and there exists no rejoinId to rejoin the group chat.")
-                            .toString());
-                }
-                return false;
+            switch (reasonCode) {
+                case ABORTED_BY_USER:
+                case FAILED_INITIATION:
+                case REJECTED_BY_REMOTE:
+                case REJECTED_MAX_CHATS:
+                case REJECTED_SPAM:
+                case REJECTED_BY_TIMEOUT:
+                case REJECTED_BY_SYSTEM:
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(new StringBuilder(
+                                "Cannot transfer file to group chat with group chat Id '")
+                                .append(chatId).append("' as ").append(reasonCode).toString());
+                    }
+                    return false;
+                default:
+                    break;
             }
+            GroupChatSession session = mImService.getGroupChatSession(chatId);
+            if (session == null) {
+                GroupChatInfo groupChat = mMessagingLog.getGroupChatInfo(chatId);
+                if (groupChat == null) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(new StringBuilder(
+                                "Cannot transfer file to group chat with group chat Id '")
+                                .append(chatId).append("' as the group chat does not exist in DB.")
+                                .toString());
+                    }
+                    return false;
+                }
+                if (TextUtils.isEmpty(groupChat.getRejoinId())) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(new StringBuilder(
+                                "Cannot transfer file to group chat with group chat Id '")
+                                .append(chatId)
+                                .append("' as there is no ongoing session with corresponding chatId and there exists no rejoinId to rejoin the group chat.")
+                                .toString());
+                    }
+                    return false;
+                }
+            }
+            return true;
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return true;
     }
 
     /**
@@ -755,98 +790,83 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param fileIcon
      * @param chatId
      * @param fileTransferId
-     * @throws ServerApiException
      */
     private IFileTransfer sendGroupFile(MmContent content, MmContent fileIcon, String chatId,
-            String fileTransferId) throws ServerApiException {
-        try {
-            long fileSize = content.getSize();
-            long timestamp = System.currentTimeMillis();
-            /* For outgoing file transfer, timestampSent = timestamp */
-            long timestampSent = timestamp;
-            mImService.assertFileSizeNotExceedingMaxLimit(fileSize, "File exceeds max size.");
+            String fileTransferId) {
+        long fileSize = content.getSize();
+        long timestamp = System.currentTimeMillis();
+        /* For outgoing file transfer, timestampSent = timestamp */
+        long timestampSent = timestamp;
+        mImService.assertFileSizeNotExceedingMaxLimit(fileSize, "File exceeds max size.");
 
-            FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
-                    fileTransferId, null, Direction.OUTGOING, chatId, content, fileIcon,
-                    mMessagingLog);
+        FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
+                fileTransferId, null, Direction.OUTGOING, chatId, content, fileIcon, mMessagingLog);
 
-            if (!mImService.isFileTransferSessionAvailable()
-                    || mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug("The max number of file transfer sessions is achieved: queue the file transfer.");
-                }
-                addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileIcon,
-                        State.QUEUED, timestamp, timestampSent);
-                return new GroupFileTransferImpl(fileTransferId, chatId,
-                        mGroupFileTransferBroadcaster, mImService, storageAccessor, this,
-                        mRcsSettings, mCore, mMessagingLog, mContactManager);
+        if (!mImService.isFileTransferSessionAvailable()
+                || mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
+            if (sLogger.isActivated()) {
+                sLogger.debug("The max number of file transfer sessions is achieved: queue the file transfer.");
             }
-            final GroupChatSession groupChatSession = mImService.getGroupChatSession(chatId);
-            String chatSessionId = groupChatSession != null ? groupChatSession.getSessionID()
-                    : null;
-            /* If groupChatSession is established send this group file transfer. */
-            if (chatSessionId != null && groupChatSession.isMediaEstablished()) {
-                addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileIcon,
-                        State.INITIATING, timestamp, timestampSent);
-                final FileSharingSession session = mImService.initiateGroupFileTransferSession(
-                        fileTransferId, content, fileIcon, chatId, chatSessionId, timestamp,
-                        timestampSent);
-
-                GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(
-                        session.getFileTransferId(), chatId, mGroupFileTransferBroadcaster,
-                        mImService, storageAccessor, this, mRcsSettings, mCore, mMessagingLog,
-                        mContactManager);
-                session.addListener(groupFileTransfer);
-                addFileTransfer(groupFileTransfer);
-
-                new Thread() {
-                    public void run() {
-                        session.startSession();
-                    }
-                }.start();
-                return groupFileTransfer;
-            }
-            /*
-             * If groupChatSession is NOT established then queue this file transfer and try to
-             * rejoin group chat.
-             */
             addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileIcon, State.QUEUED,
                     timestamp, timestampSent);
-            if (groupChatSession != null) {
-                if (groupChatSession.isInitiatedByRemote()) {
-                    if (sLogger.isActivated()) {
-                        sLogger.debug("Group chat session is pending: auto accept it.");
-                    }
-                    new Thread() {
-                        public void run() {
-                            groupChatSession.acceptSession();
-                        }
-                    }.start();
-                }
-            } else {
-                try {
-                    mCore.getListener().handleRejoinGroupChatAsPartOfSendOperation(chatId);
-
-                } catch (ServerApiException e) {
-                    /*
-                     * failed to rejoin group chat session. Ignoring this exception because we want
-                     * to try again later.
-                     */
-                }
-            }
             return new GroupFileTransferImpl(fileTransferId, chatId, mGroupFileTransferBroadcaster,
                     mImService, storageAccessor, this, mRcsSettings, mCore, mMessagingLog,
                     mContactManager);
-
-        } catch (Exception e) {
-            /*
-             * TODO: Handle Security exception in Exception handling CR037
-             */
-            if (sLogger.isActivated()) {
-                sLogger.error("Unexpected error", e);
-            }
-            throw new ServerApiException(e.getMessage());
         }
+        final GroupChatSession groupChatSession = mImService.getGroupChatSession(chatId);
+        String chatSessionId = groupChatSession != null ? groupChatSession.getSessionID() : null;
+        /* If groupChatSession is established send this group file transfer. */
+        if (chatSessionId != null && groupChatSession.isMediaEstablished()) {
+            addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileIcon,
+                    State.INITIATING, timestamp, timestampSent);
+            final FileSharingSession session = mImService.initiateGroupFileTransferSession(
+                    fileTransferId, content, fileIcon, chatId, chatSessionId, timestamp,
+                    timestampSent);
+
+            GroupFileTransferImpl groupFileTransfer = new GroupFileTransferImpl(
+                    session.getFileTransferId(), chatId, mGroupFileTransferBroadcaster, mImService,
+                    storageAccessor, this, mRcsSettings, mCore, mMessagingLog, mContactManager);
+            session.addListener(groupFileTransfer);
+            addFileTransfer(groupFileTransfer);
+
+            new Thread() {
+                public void run() {
+                    session.startSession();
+                }
+            }.start();
+            return groupFileTransfer;
+        }
+        /*
+         * If groupChatSession is NOT established then queue this file transfer and try to rejoin
+         * group chat.
+         */
+        addOutgoingGroupFileTransfer(fileTransferId, chatId, content, fileIcon, State.QUEUED,
+                timestamp, timestampSent);
+        if (groupChatSession != null) {
+            if (groupChatSession.isInitiatedByRemote()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Group chat session is pending: auto accept it.");
+                }
+                new Thread() {
+                    public void run() {
+                        groupChatSession.acceptSession();
+                    }
+                }.start();
+            }
+        } else {
+            try {
+                mCore.getListener().handleRejoinGroupChatAsPartOfSendOperation(chatId);
+
+            } catch (ServerApiException e) {
+                /*
+                 * failed to rejoin group chat session. Ignoring this exception because we want to
+                 * try again later.
+                 */
+            }
+        }
+        return new GroupFileTransferImpl(fileTransferId, chatId, mGroupFileTransferBroadcaster,
+                mImService, storageAccessor, this, mRcsSettings, mCore, mMessagingLog,
+                mContactManager);
     }
 
     /**
@@ -887,16 +907,19 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param file Uri of file to transfer
      * @param attachfileIcon true if the stack must try to attach fileIcon
      * @return FileTransfer
-     * @throws ServerApiException
+     * @throws RemoteException
      */
     public IFileTransfer transferFileToGroupChat(String chatId, Uri file, boolean attachfileIcon)
-            throws ServerApiException {
+            throws RemoteException {
+        if (TextUtils.isEmpty(chatId)) {
+            throw new ServerApiIllegalArgumentException("chatId must not be null or empty!");
+        }
+        if (file == null) {
+            throw new ServerApiIllegalArgumentException("file must not be null!");
+        }
         if (!isAllowedToTransferFileToGroupChat(chatId)) {
-            /*
-             * TODO: Throw proper exception in CR037
-             */
-            throw new IllegalStateException(
-                    "No sufficient capabilities to transfer file to group chat.");
+            throw new ServerApiPermissionDeniedException(
+                    "No sufficient capabilities to transfer file to group chat!");
         }
         if (sLogger.isActivated()) {
             sLogger.info("sendFile (file=" + file + ") (fileicon=" + attachfileIcon + ")");
@@ -929,14 +952,15 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                     mImService, storageAccessor, this, mRcsSettings, mCore, mMessagingLog,
                     mContactManager);
 
-        } catch (Exception e) {
-            /*
-             * TODO: Handle Security exception in CR037
-             */
-            if (sLogger.isActivated()) {
-                sLogger.error("Unexpected error", e);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
-            throw new ServerApiException(e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -944,9 +968,9 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * Returns the list of file transfers in progress
      * 
      * @return List of file transfer
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public List<IBinder> getFileTransfers() throws ServerApiException {
+    public List<IBinder> getFileTransfers() throws RemoteException {
         if (sLogger.isActivated()) {
             sLogger.info("Get file transfer sessions");
         }
@@ -958,11 +982,15 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             }
             return fileTransfers;
 
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Unexpected error", e);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
-            throw new ServerApiException(e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -971,40 +999,69 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * 
      * @param transferId
      * @return File transfer
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public IFileTransfer getFileTransfer(String transferId) throws ServerApiException {
+    public IFileTransfer getFileTransfer(String transferId) throws RemoteException {
+        if (TextUtils.isEmpty(transferId)) {
+            throw new ServerApiIllegalArgumentException("transferId must not be null or empty!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Get file transfer session ".concat(transferId));
         }
+        try {
+            IFileTransfer fileTransfer = mFileTransferCache.get(transferId);
+            if (fileTransfer != null) {
+                return fileTransfer;
+            }
+            FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
+                    transferId, mMessagingLog);
+            if (mMessagingLog.isGroupFileTransfer(transferId)) {
+                return new GroupFileTransferImpl(transferId, mGroupFileTransferBroadcaster,
+                        mImService, storageAccessor, this, mRcsSettings, mCore, mMessagingLog,
+                        mContactManager);
+            }
+            return new OneToOneFileTransferImpl(transferId, mOneToOneFileTransferBroadcaster,
+                    mImService, storageAccessor, this, mRcsSettings, mCore, mMessagingLog,
+                    mContactManager);
 
-        IFileTransfer fileTransfer = mFileTransferCache.get(transferId);
-        if (fileTransfer != null) {
-            return fileTransfer;
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
-                transferId, mMessagingLog);
-        if (mMessagingLog.isGroupFileTransfer(transferId)) {
-            return new GroupFileTransferImpl(transferId, mGroupFileTransferBroadcaster, mImService,
-                    storageAccessor, this, mRcsSettings, mCore, mMessagingLog, mContactManager);
-        }
-        return new OneToOneFileTransferImpl(transferId, mOneToOneFileTransferBroadcaster,
-                mImService, storageAccessor, this, mRcsSettings, mCore, mMessagingLog,
-                mContactManager);
     }
 
     /**
      * Adds a listener on file transfer events
      * 
      * @param listener OneToOne file transfer listener
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public void addEventListener2(IOneToOneFileTransferListener listener) throws ServerApiException {
+    public void addEventListener2(IOneToOneFileTransferListener listener) throws RemoteException {
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Add a OneToOne file transfer invitation listener");
         }
-        synchronized (mLock) {
-            mOneToOneFileTransferBroadcaster.addOneToOneFileTransferListener(listener);
+        try {
+            synchronized (mLock) {
+                mOneToOneFileTransferBroadcaster.addOneToOneFileTransferListener(listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -1012,15 +1069,28 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * Removes a listener on file transfer events
      * 
      * @param listener OneToOne file transfer listener
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public void removeEventListener2(IOneToOneFileTransferListener listener)
-            throws ServerApiException {
+    public void removeEventListener2(IOneToOneFileTransferListener listener) throws RemoteException {
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Remove a OneToOne file transfer invitation listener");
         }
-        synchronized (mLock) {
-            mOneToOneFileTransferBroadcaster.removeOneToOneFileTransferListener(listener);
+        try {
+            synchronized (mLock) {
+                mOneToOneFileTransferBroadcaster.removeOneToOneFileTransferListener(listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -1028,14 +1098,28 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * Adds a listener on group file transfer events
      * 
      * @param listener Group file transfer listener
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public void addEventListener3(IGroupFileTransferListener listener) throws ServerApiException {
+    public void addEventListener3(IGroupFileTransferListener listener) throws RemoteException {
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Add a group file transfer invitation listener");
         }
-        synchronized (mLock) {
-            mGroupFileTransferBroadcaster.addGroupFileTransferListener(listener);
+        try {
+            synchronized (mLock) {
+                mGroupFileTransferBroadcaster.addGroupFileTransferListener(listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -1043,14 +1127,28 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * Removes a listener on group file transfer events
      * 
      * @param listener Group file transfer listener
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public void removeEventListener3(IGroupFileTransferListener listener) throws ServerApiException {
+    public void removeEventListener3(IGroupFileTransferListener listener) throws RemoteException {
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Remove a group file transfer invitation listener");
         }
-        synchronized (mLock) {
-            mGroupFileTransferBroadcaster.removeGroupFileTransferListener(listener);
+        try {
+            synchronized (mLock) {
+                mGroupFileTransferBroadcaster.removeGroupFileTransferListener(listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -1067,27 +1165,27 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         /* Note: File transfer ID always corresponds to message ID in the imdn pay-load */
         String fileTransferId = imdn.getMsgId();
         if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
-            mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId,
-                    FileTransfer.State.DELIVERED, ReasonCode.UNSPECIFIED);
+            mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, State.DELIVERED,
+                    ReasonCode.UNSPECIFIED);
 
             mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
-                    FileTransfer.State.DELIVERED, ReasonCode.UNSPECIFIED);
+                    State.DELIVERED, ReasonCode.UNSPECIFIED);
         } else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
-            mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId,
-                    FileTransfer.State.DISPLAYED, ReasonCode.UNSPECIFIED);
+            mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, State.DISPLAYED,
+                    ReasonCode.UNSPECIFIED);
 
             mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
-                    FileTransfer.State.DISPLAYED, ReasonCode.UNSPECIFIED);
+                    State.DISPLAYED, ReasonCode.UNSPECIFIED);
         } else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
                 || ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
                 || ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {
             ReasonCode reasonCode = imdnToFileTransferFailedReasonCode(imdn);
 
-            mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId,
-                    FileTransfer.State.FAILED, reasonCode);
+            mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, State.FAILED,
+                    reasonCode);
 
             mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
-                    FileTransfer.State.FAILED, reasonCode);
+                    State.FAILED, reasonCode);
         }
     }
 
@@ -1098,10 +1196,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         mGroupFileTransferBroadcaster.broadcastDeliveryInfoChanged(chatId, contact, fileTransferId,
                 GroupDeliveryInfo.Status.DELIVERED, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
         if (mMessagingLog.isDeliveredToAllRecipients(fileTransferId)) {
-            mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId,
-                    FileTransfer.State.DELIVERED, ReasonCode.UNSPECIFIED);
+            mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, State.DELIVERED,
+                    ReasonCode.UNSPECIFIED);
             mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId,
-                    FileTransfer.State.DELIVERED, ReasonCode.UNSPECIFIED);
+                    State.DELIVERED, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -1112,10 +1210,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         mGroupFileTransferBroadcaster.broadcastDeliveryInfoChanged(chatId, contact, fileTransferId,
                 GroupDeliveryInfo.Status.DISPLAYED, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
         if (mMessagingLog.isDisplayedByAllRecipients(fileTransferId)) {
-            mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId,
-                    FileTransfer.State.DISPLAYED, ReasonCode.UNSPECIFIED);
+            mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, State.DISPLAYED,
+                    ReasonCode.UNSPECIFIED);
             mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId,
-                    FileTransfer.State.DISPLAYED, ReasonCode.UNSPECIFIED);
+                    State.DISPLAYED, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -1241,29 +1339,71 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * the UI).
      * 
      * @param transferId File transfer ID
+     * @throws RemoteException
      */
     @Override
     public void markFileTransferAsRead(String transferId) throws RemoteException {
-        // No notification type corresponds currently to mark as read
-        mMessagingLog.markFileTransferAsRead(transferId);
+        if (TextUtils.isEmpty(transferId)) {
+            throw new ServerApiIllegalArgumentException("transferId must not be null or empty!");
+        }
+        try {
+            /* No notification type corresponds currently to mark as read */
+            mMessagingLog.markFileTransferAsRead(transferId);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
      * Deletes all one to one file transfer history and abort/reject any associated ongoing session
      * if such exists.
+     * 
+     * @throws RemoteException
      */
-    public void deleteOneToOneFileTransfers() {
-        mImOperationExecutor.execute(new OneToOneFileTransferDeleteTask(this, mImService,
-                mLocalContentResolver, mImsLock));
+    public void deleteOneToOneFileTransfers() throws RemoteException {
+        try {
+            mImOperationExecutor.execute(new OneToOneFileTransferDeleteTask(this, mImService,
+                    mLocalContentResolver, mImsLock));
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
+
     }
 
     /**
      * Deletes all group file transfer from history and abort/reject any associated ongoing session
      * if such exists.
+     * 
+     * @throws RemoteException
      */
-    public void deleteGroupFileTransfers() {
-        mImOperationExecutor.execute(new GroupFileTransferDeleteTask(this, mImService,
-                mLocalContentResolver, mImsLock));
+    public void deleteGroupFileTransfers() throws RemoteException {
+        try {
+            mImOperationExecutor.execute(new GroupFileTransferDeleteTask(this, mImService,
+                    mLocalContentResolver, mImsLock));
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
@@ -1271,10 +1411,25 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * history and abort/reject any associated ongoing session if such exists.
      * 
      * @param contact
+     * @throws RemoteException
      */
-    public void deleteOneToOneFileTransfers2(ContactId contact) {
-        mImOperationExecutor.execute(new OneToOneFileTransferDeleteTask(this, mImService,
-                mLocalContentResolver, mImsLock, contact));
+    public void deleteOneToOneFileTransfers2(ContactId contact) throws RemoteException {
+        if (contact == null) {
+            throw new ServerApiIllegalArgumentException("contact must not be null!");
+        }
+        try {
+            mImOperationExecutor.execute(new OneToOneFileTransferDeleteTask(this, mImService,
+                    mLocalContentResolver, mImsLock, contact));
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
@@ -1282,10 +1437,25 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * and abort/reject any associated ongoing session if such exists.
      * 
      * @param chatId
+     * @throws RemoteException
      */
-    public void deleteGroupFileTransfers2(String chatId) {
-        mImOperationExecutor.execute(new GroupFileTransferDeleteTask(this, mImService,
-                mLocalContentResolver, mImsLock, chatId));
+    public void deleteGroupFileTransfers2(String chatId) throws RemoteException {
+        if (TextUtils.isEmpty(chatId)) {
+            throw new ServerApiIllegalArgumentException("chatId must not be null or empty!");
+        }
+        try {
+            mImOperationExecutor.execute(new GroupFileTransferDeleteTask(this, mImService,
+                    mLocalContentResolver, mImsLock, chatId));
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
@@ -1293,23 +1463,30 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * session if such exists.
      * 
      * @param transferId
+     * @throws RemoteException
      */
-    public void deleteFileTransfer(String transferId) {
-        String contactId = null;
-        String chatId = null;
+    public void deleteFileTransfer(String transferId) throws RemoteException {
+        if (TextUtils.isEmpty(transferId)) {
+            throw new ServerApiIllegalArgumentException("transferId must not be null or empty!");
+        }
         Cursor cursor = null;
         try {
-            cursor = mLocalContentResolver.query(FileTransferData.CONTENT_URI.buildUpon()
-                    .appendPath(transferId).build(), new String[] {
+            String contactId = null;
+            String chatId = null;
+            Uri uri = FileTransferData.CONTENT_URI.buildUpon().appendPath(transferId).build();
+            cursor = mLocalContentResolver.query(uri, new String[] {
                     FileTransferLog.CONTACT, FileTransferLog.CHAT_ID
             }, null, null, null);
-            if (cursor.moveToNext()) {
-                contactId = cursor.getString(0);
-                chatId = cursor.getString(1);
-            } else {
-                return;
-
+            if (cursor == null) {
+                throw new ServerApiPersistentStorageException("Unable to query uri ".concat(uri
+                        .toString()));
             }
+            if (!cursor.moveToNext()) {
+                return;
+            }
+            contactId = cursor.getString(0);
+            chatId = cursor.getString(1);
+
             if (contactId.equals(chatId)) {
                 mImOperationExecutor.execute(new OneToOneFileTransferDeleteTask(this, mImService,
                         mLocalContentResolver, mImsLock, transferId));
@@ -1317,6 +1494,16 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 mImOperationExecutor.execute(new GroupFileTransferDeleteTask(this, mImService,
                         mLocalContentResolver, mImsLock, chatId, transferId));
             }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -1328,8 +1515,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * Marks undelivered file transfers to indicate that transfers have been processed.
      * 
      * @param transferIds
+     * @throws RemoteException
      */
-    public void markUndeliveredFileTransfersAsProcessed(List<String> transferIds) {
+    public void markUndeliveredFileTransfersAsProcessed(List<String> transferIds)
+            throws RemoteException {
+        if (transferIds == null || transferIds.isEmpty()) {
+            throw new ServerApiIllegalArgumentException("transferIds must not be null or empty!");
+        }
         throw new UnsupportedOperationException("This method has not been implemented yet!");
     }
 
@@ -1347,7 +1539,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             MmContent fileIcon, ReasonCode reasonCode, long timestamp, long timestampSent) {
         String fileTransferId = IdGenerator.generateMessageID();
         mMessagingLog.addFileTransfer(fileTransferId, contact, Direction.INCOMING, content,
-                fileIcon, FileTransfer.State.REJECTED, reasonCode, timestamp, timestampSent,
+                fileIcon, State.REJECTED, reasonCode, timestamp, timestampSent,
                 FileTransferLog.UNKNOWN_EXPIRATION, FileTransferLog.UNKNOWN_EXPIRATION);
 
         mOneToOneFileTransferBroadcaster.broadcastInvitation(fileTransferId);

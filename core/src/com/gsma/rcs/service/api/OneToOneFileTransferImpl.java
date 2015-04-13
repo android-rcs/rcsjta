@@ -161,329 +161,582 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
      * Returns the chat ID of the file transfer
      * 
      * @return Transfer ID
+     * @throws RemoteException
      */
-    public String getChatId() {
-        // For 1-1 file transfer, chat ID corresponds to the formatted contact number
-        return getRemoteContact().toString();
+    public String getChatId() throws RemoteException {
+        try {
+            /* For 1-1 file transfer, chat ID corresponds to the formatted contact number */
+            return getRemoteContact().toString();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
      * Returns the file transfer ID of the file transfer
      * 
      * @return Transfer ID
+     * @throws RemoteException
      */
-    public String getTransferId() {
-        return mFileTransferId;
+    public String getTransferId() throws RemoteException {
+        try {
+            return mFileTransferId;
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
      * Returns the remote contact identifier
      * 
      * @return ContactId
+     * @throws RemoteException
      */
-    public ContactId getRemoteContact() {
-        FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-        if (session == null) {
-            return mPersistentStorage.getRemoteContact();
+    public ContactId getRemoteContact() throws RemoteException {
+        try {
+            FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+            if (session == null) {
+                return mPersistentStorage.getRemoteContact();
+            }
+            return session.getRemoteContact();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return session.getRemoteContact();
     }
 
     /**
      * Returns the complete filename including the path of the file to be transferred
      * 
      * @return Filename
+     * @throws RemoteException
      */
-    public String getFileName() {
-        FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-        if (session == null) {
-            return mPersistentStorage.getFileName();
+    public String getFileName() throws RemoteException {
+        try {
+            FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+            if (session == null) {
+                return mPersistentStorage.getFileName();
+            }
+            return session.getContent().getName();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return session.getContent().getName();
     }
 
     /**
      * Returns the Uri of the file to be transferred
      * 
      * @return Filename
+     * @throws RemoteException
      */
-    public Uri getFile() {
-        FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-        if (session == null) {
-            return mPersistentStorage.getFile();
+    public Uri getFile() throws RemoteException {
+        try {
+            FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+            if (session == null) {
+                return mPersistentStorage.getFile();
+            }
+            return session.getContent().getUri();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return session.getContent().getUri();
     }
 
     /**
      * Returns the size of the file to be transferred
      * 
      * @return Size in bytes
+     * @throws RemoteException
      */
-    public long getFileSize() {
-        FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-        if (session == null) {
-            return mPersistentStorage.getFileSize();
+    public long getFileSize() throws RemoteException {
+        try {
+            FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+            if (session == null) {
+                return mPersistentStorage.getFileSize();
+            }
+            return session.getContent().getSize();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return session.getContent().getSize();
     }
 
     /**
      * Returns the MIME type of the file to be transferred
      * 
      * @return Type
+     * @throws RemoteException
      */
-    public String getMimeType() {
-        FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-        if (session == null) {
-            return mPersistentStorage.getMimeType();
+    public String getMimeType() throws RemoteException {
+        try {
+            FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+            if (session == null) {
+                return mPersistentStorage.getMimeType();
+            }
+            return session.getContent().getEncoding();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return session.getContent().getEncoding();
     }
 
     /**
      * Returns the Uri of the file icon
      * 
      * @return Uri
+     * @throws RemoteException
      */
-    public Uri getFileIcon() {
-        FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-        if (session == null) {
-            return mPersistentStorage.getFileIcon();
+    public Uri getFileIcon() throws RemoteException {
+        try {
+            FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+            if (session == null) {
+                return mPersistentStorage.getFileIcon();
+            }
+            MmContent fileIcon = session.getContent();
+            return fileIcon != null ? fileIcon.getUri() : null;
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        MmContent fileIcon = session.getContent();
-        return fileIcon != null ? fileIcon.getUri() : null;
     }
 
     /**
      * Returns the Mime type of file icon
      * 
      * @return Mime type
+     * @throws RemoteException
      */
-    public String getFileIconMimeType() {
-        FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-        if (session == null) {
-            return mPersistentStorage.getFileIconMimeType();
+    public String getFileIconMimeType() throws RemoteException {
+        try {
+            FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+            if (session == null) {
+                return mPersistentStorage.getFileIconMimeType();
+            }
+            MmContent fileIconMimeType = session.getContent();
+            return fileIconMimeType != null ? fileIconMimeType.getEncoding() : null;
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        MmContent fileIconMimeType = session.getContent();
-        return fileIconMimeType != null ? fileIconMimeType.getEncoding() : null;
     }
 
     /**
      * Returns the state of the file transfer
      * 
      * @return State
+     * @throws RemoteException
      */
-    public int getState() {
-        FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-        if (session == null) {
-            return mPersistentStorage.getState().toInt();
+    public int getState() throws RemoteException {
+        try {
+            FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+            if (session == null) {
+                return mPersistentStorage.getState().toInt();
+            }
+            return getRcsState(session).toInt();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return getRcsState(session).toInt();
     }
 
     /**
      * Returns the reason code of the state of the file transfer
      * 
      * @return ReasonCode
+     * @throws RemoteException
      */
-    public int getReasonCode() {
-        FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-        if (session == null) {
-            return mPersistentStorage.getReasonCode().toInt();
+    public int getReasonCode() throws RemoteException {
+        try {
+            FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+            if (session == null) {
+                return mPersistentStorage.getReasonCode().toInt();
+            }
+            return getRcsReasonCode(session).toInt();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return getRcsReasonCode(session).toInt();
     }
 
     /**
      * Returns the direction of the transfer (incoming or outgoing)
      * 
      * @return Direction
+     * @throws RemoteException
      * @see Direction
      */
-    public int getDirection() {
-        FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-        if (session == null) {
-            return mPersistentStorage.getDirection().toInt();
+    public int getDirection() throws RemoteException {
+        try {
+            FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+            if (session == null) {
+                return mPersistentStorage.getDirection().toInt();
+            }
+            if (session.isInitiatedByRemote()) {
+                return Direction.INCOMING.toInt();
+            }
+            return Direction.OUTGOING.toInt();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        if (session.isInitiatedByRemote()) {
-            return Direction.INCOMING.toInt();
+    }
+
+    /**
+     * Returns the local timestamp of when the file transfer was initiated and/or queued for
+     * outgoing file transfers or the local timestamp of when the file transfer invitation was
+     * received for incoming file transfers
+     * 
+     * @return long
+     * @throws RemoteException
+     */
+    public long getTimestamp() throws RemoteException {
+        try {
+            return mPersistentStorage.getTimestamp();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return Direction.OUTGOING.toInt();
     }
 
-    public long getTimestamp() {
-        return mPersistentStorage.getTimestamp();
+    /**
+     * Returns the local timestamp of when the file transfer was initiated and /or queued for
+     * outgoing file transfers or the remote timestamp of when the file transfer was initiated for
+     * incoming file transfers
+     * 
+     * @return long
+     * @throws RemoteException
+     */
+    public long getTimestampSent() throws RemoteException {
+        try {
+            return mPersistentStorage.getTimestampSent();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
-    public long getTimestampSent() {
-        return mPersistentStorage.getTimestampSent();
+    /**
+     * Returns the local timestamp of when the file transfer was delivered for outgoing file
+     * transfers or 0 for incoming file transfers or it was not yet displayed
+     * 
+     * @return long
+     * @throws RemoteException
+     */
+    public long getTimestampDelivered() throws RemoteException {
+        try {
+            return mPersistentStorage.getTimestampDelivered();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
-    public long getTimestampDelivered() {
-        return mPersistentStorage.getTimestampDelivered();
-    }
+    /**
+     * Returns the local timestamp of when the file transfer was displayed for outgoing file
+     * transfers or 0 for incoming file transfers or it was not yet displayed
+     * 
+     * @return long
+     * @throws RemoteException
+     */
+    public long getTimestampDisplayed() throws RemoteException {
+        try {
+            return mPersistentStorage.getTimestampDisplayed();
 
-    public long getTimestampDisplayed() {
-        return mPersistentStorage.getTimestampDisplayed();
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
      * Accepts file transfer invitation
+     * 
+     * @throws RemoteException
      */
-    public void acceptInvitation() {
-        if (sLogger.isActivated()) {
-            sLogger.info("Accept session invitation");
-        }
-        final FileSharingSession ongoingSession = mImService.getFileSharingSession(mFileTransferId);
-        if (ongoingSession != null) {
-            if (!ongoingSession.isInitiatedByRemote()) {
-                // TODO Temporarily illegal access exception
-                throw new IllegalStateException(new StringBuilder(
-                        "Cannot accept transfer with fileTransferId '").append(mFileTransferId)
-                        .append("': wrong direction").toString());
-
+    public void acceptInvitation() throws RemoteException {
+        try {
+            if (sLogger.isActivated()) {
+                sLogger.info("Accept session invitation");
             }
-            if (ongoingSession.isSessionAccepted()) {
-                // TODO Temporarily illegal access exception
-                throw new IllegalStateException(new StringBuilder(
-                        "Cannot accept transfer with fileTransferId '").append(mFileTransferId)
-                        .append("': already accepted").toString());
+            final FileSharingSession ongoingSession = mImService
+                    .getFileSharingSession(mFileTransferId);
+            if (ongoingSession != null) {
+                if (!ongoingSession.isInitiatedByRemote()) {
+                    throw new ServerApiUnsupportedOperationException(new StringBuilder(
+                            "Cannot accept transfer with fileTransferId '").append(mFileTransferId)
+                            .append("': wrong direction").toString());
 
-            }
-            /* Accept invitation */
-            new Thread() {
-                public void run() {
-                    ongoingSession.acceptSession();
                 }
-            }.start();
-            return;
+                if (ongoingSession.isSessionAccepted()) {
+                    throw new ServerApiPermissionDeniedException(new StringBuilder(
+                            "Cannot accept transfer with fileTransferId '").append(mFileTransferId)
+                            .append("': already accepted").toString());
 
-        }
-        /* No active session: restore session from provider */
-        FtHttpResume resume = mPersistentStorage.getFileTransferResumeInfo();
-        if (resume != null) {
-            if (!(resume instanceof FtHttpResumeDownload)) {
-                // TODO Temporarily illegal access exception
-                throw new IllegalStateException(new StringBuilder(
-                        "Cannot accept transfer with fileTransferId '").append(mFileTransferId)
-                        .append("': wrong direction").toString());
+                }
+                new Thread() {
+                    public void run() {
+                        ongoingSession.acceptSession();
+                    }
+                }.start();
 
-            }
-            FtHttpResumeDownload download = (FtHttpResumeDownload) resume;
-            if (download.isAccepted()) {
-                // TODO Temporarily illegal access exception
-                throw new IllegalStateException(new StringBuilder(
-                        "Cannot accept transfer with fileTransferId '").append(mFileTransferId)
-                        .append("': already accepted").toString());
-
-            }
-            if (download.getFileExpiration() > System.currentTimeMillis()) {
-                FileSharingSession session = new DownloadFromAcceptFileSharingSession(mImService,
-                        ContentManager.createMmContent(resume.getFile(), resume.getSize(),
-                                resume.getFileName()), download, mRcsSettings, mMessagingLog,
-                        mContactManager);
-                session.addListener(this);
-                session.startSession();
                 return;
 
             }
-            // TODO Temporarily illegal access exception
-            throw new IllegalStateException(new StringBuilder(
-                    "Cannot accept transfer with fileTransferId '").append(mFileTransferId)
-                    .append("': file has expired").toString());
+            /* No active session: restore session from provider */
+            FtHttpResume resume = mPersistentStorage.getFileTransferResumeInfo();
+            if (resume == null) {
+                throw new ServerApiPersistentStorageException(
+                        "Cannot find session sith file transfer ID=".concat(mFileTransferId));
+            }
+            if (!(resume instanceof FtHttpResumeDownload)) {
+                throw new ServerApiUnsupportedOperationException(new StringBuilder(
+                        "Cannot accept transfer with fileTransferId '").append(mFileTransferId)
+                        .append("': wrong direction").toString());
+            }
+            FtHttpResumeDownload download = (FtHttpResumeDownload) resume;
+            if (download.isAccepted()) {
+                throw new ServerApiPermissionDeniedException(new StringBuilder(
+                        "Cannot accept transfer with fileTransferId '").append(mFileTransferId)
+                        .append("': already accepted").toString());
+            }
+            if (download.getFileExpiration() < System.currentTimeMillis()) {
+                throw new ServerApiUnsupportedOperationException(new StringBuilder(
+                        "Cannot accept transfer with fileTransferId '").append(mFileTransferId)
+                        .append("': file has expired").toString());
+            }
+            FileSharingSession session = new DownloadFromAcceptFileSharingSession(mImService,
+                    ContentManager.createMmContent(resume.getFile(), resume.getSize(),
+                            resume.getFileName()), download, mRcsSettings, mMessagingLog,
+                    mContactManager);
+            session.addListener(this);
+            session.startSession();
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        // TODO Temporarily illegal access exception
-        throw new IllegalStateException(
-                "Cannot find session sith file transfer ID=".concat(mFileTransferId));
     }
 
     /**
      * Rejects file transfer invitation
+     * 
+     * @throws RemoteException
      */
-    public void rejectInvitation() {
-        boolean logActivated = sLogger.isActivated();
-        if (logActivated) {
-            sLogger.info("Reject session invitation");
-        }
-        final FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-        if (session == null) {
-            if (Direction.INCOMING != mPersistentStorage.getDirection()) {
-                // TODO Temporarily illegal access exception
-                throw new IllegalStateException(new StringBuilder(
-                        "Cannot reject transfer with fileTransferId '").append(mFileTransferId)
-                        .append("': wrong direction").toString());
-
+    public void rejectInvitation() throws RemoteException {
+        try {
+            if (sLogger.isActivated()) {
+                sLogger.info("Reject session invitation");
             }
-            switch (mPersistentStorage.getState()) {
-                case INVITED:
-                    handleSessionRejected(ReasonCode.REJECTED_BY_USER,
-                            mPersistentStorage.getRemoteContact());
-                    return;
+            final FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+            if (session == null) {
+                if (Direction.INCOMING != mPersistentStorage.getDirection()) {
+                    throw new ServerApiUnsupportedOperationException(new StringBuilder(
+                            "Cannot reject transfer with fileTransferId '").append(mFileTransferId)
+                            .append("': wrong direction").toString());
 
-                case REJECTED:
-                    if (logActivated) {
-                        sLogger.info("Transfer already rejected for ID=".concat(mFileTransferId));
-                    }
-                    return;
+                }
+                switch (mPersistentStorage.getState()) {
+                    case INVITED:
+                        handleSessionRejected(ReasonCode.REJECTED_BY_USER,
+                                mPersistentStorage.getRemoteContact());
+                        return;
 
-                default:
-                    /*
-                     * TODO: Throw correct exception as part of CR037 implementation
-                     */
-                    throw new IllegalStateException(
-                            "Illegal state to reject file transfer with ID="
+                    case REJECTED:
+                        if (sLogger.isActivated()) {
+                            sLogger.info("Transfer already rejected for ID="
                                     .concat(mFileTransferId));
-            }
+                        }
+                        return;
 
+                    default:
+                        throw new ServerApiPermissionDeniedException(
+                                "Illegal state to reject file transfer with ID="
+                                        .concat(mFileTransferId));
+                }
+            }
+            new Thread() {
+                public void run() {
+                    session.rejectSession(Response.DECLINE);
+                }
+            }.start();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-
-        // Reject invitation
-        new Thread() {
-            public void run() {
-                session.rejectSession(Response.DECLINE);
-            }
-        }.start();
     }
 
     /**
      * Aborts the file transfer
+     * 
+     * @throws RemoteException
      */
-    public void abortTransfer() {
-        if (sLogger.isActivated()) {
-            sLogger.info("Cancel session");
-        }
-        final FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-        if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException("Session with file transfer ID '" + mFileTransferId
-                    + "' not available.");
-        }
-        if (session.isFileTransfered()) {
-            // File already transferred and session automatically closed after transfer
-            return;
-        }
-        /* Terminate the session */
-        new Thread() {
-            public void run() {
-                session.terminateSession(TerminationReason.TERMINATION_BY_USER);
+    public void abortTransfer() throws RemoteException {
+        try {
+            if (sLogger.isActivated()) {
+                sLogger.info("Cancel session");
             }
-        }.start();
+            final FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+            if (session == null) {
+                throw new ServerApiPermissionDeniedException(new StringBuilder(
+                        "Session with file transfer ID '").append(mFileTransferId)
+                        .append("' not available!").toString());
+            }
+            if (session.isFileTransfered()) {
+                /* File already transferred and session automatically closed after transfer */
+                throw new ServerApiPermissionDeniedException(
+                        "Cannot abort as file is already transferred!");
+            }
+            new Thread() {
+                public void run() {
+                    session.terminateSession(TerminationReason.TERMINATION_BY_USER);
+                }
+            }.start();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     private boolean isHttpTransfer() {
         FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
         if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException(
-                    "Unable to check if it is HTTP transfer since session with file transfer ID '"
-                            + mFileTransferId + "' not available.");
+            throw new ServerApiGenericException(new StringBuilder(
+                    "Unable to check if it is HTTP transfer since session with file transfer ID '")
+                    .append(mFileTransferId).append("' not available!").toString());
         }
-
         return (session instanceof HttpFileTransferSession);
     }
 
@@ -493,73 +746,88 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
      * storage false will be returned (this is no error)
      * 
      * @return boolean
+     * @throws RemoteException
      */
-    public boolean isAllowedToPauseTransfer() {
-        FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-        if (session == null) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder("Cannot pause transfer with file transfer Id '")
-                        .append(mFileTransferId)
-                        .append("' as there is no ongoing session corresponding to the fileTransferId.")
-                        .toString());
+    public boolean isAllowedToPauseTransfer() throws RemoteException {
+        try {
+            FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+            if (session == null) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder("Cannot pause transfer with file transfer Id '")
+                            .append(mFileTransferId)
+                            .append("' as there is no ongoing session corresponding to the fileTransferId.")
+                            .toString());
+                }
+                return false;
             }
-            return false;
-        }
-        if (!session.isHttpTransfer()) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder("Cannot pause transfer with file transfer Id '")
-                        .append(mFileTransferId).append("' as it is not a HTTP File transfer.")
-                        .toString());
+            if (!session.isHttpTransfer()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder("Cannot pause transfer with file transfer Id '")
+                            .append(mFileTransferId).append("' as it is not a HTTP File transfer.")
+                            .toString());
+                }
+                return false;
             }
-            return false;
-        }
-        State state = getRcsState(session);
-        if (State.STARTED != state) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder("Cannot pause transfer with file transfer Id '")
-                        .append(mFileTransferId).append("' as it is in state ").append(state)
-                        .toString());
+            State state = getRcsState(session);
+            if (State.STARTED != state) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder("Cannot pause transfer with file transfer Id '")
+                            .append(mFileTransferId).append("' as it is in state ").append(state)
+                            .toString());
+                }
+                return false;
             }
-            return false;
+            return true;
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return true;
     }
 
     /**
      * Pauses the file transfer (only for HTTP transfer)
+     * 
+     * @throws RemoteException
      */
-    public void pauseTransfer() {
-        if (sLogger.isActivated()) {
-            sLogger.info("Pause session");
-        }
-        FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-        if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException(
-                    "Unable to pause transfer since session with file transfer ID '"
-                            + mFileTransferId + "' not available.");
-        }
-        if (!isHttpTransfer()) {
+    public void pauseTransfer() throws RemoteException {
+        try {
             if (sLogger.isActivated()) {
-                sLogger.info("Pause available only for HTTP transfer");
+                sLogger.info("Pause session");
             }
-            return;
-        }
-        State state = getRcsState(session);
-        if (State.STARTED != state) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder("Cannot pause transfer with file transfer Id '")
-                        .append(mFileTransferId).append("' as it is in state ").append(state)
-                        .toString());
+            FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+            if (session == null) {
+                throw new ServerApiPermissionDeniedException(new StringBuilder(
+                        "Unable to pause transfer since session with file transfer ID '")
+                        .append(mFileTransferId).append("' not available!").toString());
             }
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException("Session not in STARTED state.");
+            if (!isHttpTransfer()) {
+                throw new ServerApiUnsupportedOperationException(
+                        "Pause available only for HTTP transfer");
+            }
+            State state = getRcsState(session);
+            if (State.STARTED != state) {
+                throw new ServerApiPermissionDeniedException(new StringBuilder(
+                        "Cannot pause transfer with file transfer Id '").append(mFileTransferId)
+                        .append("' as it is in state ").append(state).toString());
+            }
+            ((HttpFileTransferSession) session).pauseFileTransfer();
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        ((HttpFileTransferSession) session).pauseFileTransfer();
     }
 
     /**
@@ -570,12 +838,9 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
     public boolean isSessionPaused() {
         FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
         if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException(
-                    "Unable to check if transfer is paused since session with file transfer ID '"
-                            + mFileTransferId + "' not available.");
+            throw new ServerApiGenericException(new StringBuilder(
+                    "Unable to check if transfer is paused since session with file transfer ID '")
+                    .append(mFileTransferId).append("' not available!").toString());
         }
         if (!isHttpTransfer()) {
             if (sLogger.isActivated()) {
@@ -592,194 +857,247 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
      * storage false will be returned.
      * 
      * @return boolean
+     * @throws RemoteException
      */
-    public boolean isAllowedToResumeTransfer() {
-        ReasonCode reasonCode;
-        FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-        if (session != null) {
-            reasonCode = getRcsReasonCode(session);
-        } else {
-            try {
-                reasonCode = mPersistentStorage.getReasonCode();
-            } catch (SQLException e) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder(
-                            "Cannot resume transfer with file transfer Id '")
-                            .append(mFileTransferId).append("' as it does not exist in DB.")
-                            .toString());
-                }
-                return false;
-            }
-        }
-        if (ReasonCode.PAUSED_BY_USER != reasonCode) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder("Cannot resume transfer with file transfer Id '")
-                        .append(mFileTransferId).append("' as it is ").append(reasonCode)
-                        .toString());
-            }
-            return false;
-        }
-        if (!ServerApiUtils.isImsConnected()) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder("Cannot resume transfer with file transfer Id '")
-                        .append(mFileTransferId)
-                        .append("' as it there is no IMS connection right now.").toString());
-            }
-            return false;
-        }
-        if (session == null) {
-            if (!mImService.isFileTransferSessionAvailable()) {
-                if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder(
-                            "Cannot resume transfer with file transfer Id '")
-                            .append(mFileTransferId)
-                            .append("' as the limit of available file transfer session is reached.")
-                            .toString());
-                }
-                return false;
-            }
-            if (Direction.OUTGOING == mPersistentStorage.getDirection()) {
-                if (mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
+    public boolean isAllowedToResumeTransfer() throws RemoteException {
+        try {
+            ReasonCode reasonCode;
+            FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+            if (session != null) {
+                reasonCode = getRcsReasonCode(session);
+            } else {
+                try {
+                    reasonCode = mPersistentStorage.getReasonCode();
+                } catch (SQLException e) {
                     if (sLogger.isActivated()) {
                         sLogger.debug(new StringBuilder(
                                 "Cannot resume transfer with file transfer Id '")
-                                .append(mFileTransferId)
-                                .append("' as the limit of maximum concurrent outgoing file transfer is reached.")
+                                .append(mFileTransferId).append("' as it does not exist in DB.")
                                 .toString());
                     }
                     return false;
                 }
             }
+            if (ReasonCode.PAUSED_BY_USER != reasonCode) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder(
+                            "Cannot resume transfer with file transfer Id '")
+                            .append(mFileTransferId).append("' as it is ").append(reasonCode)
+                            .toString());
+                }
+                return false;
+            }
+            if (!ServerApiUtils.isImsConnected()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug(new StringBuilder(
+                            "Cannot resume transfer with file transfer Id '")
+                            .append(mFileTransferId)
+                            .append("' as it there is no IMS connection right now.").toString());
+                }
+                return false;
+            }
+            if (session == null) {
+                if (!mImService.isFileTransferSessionAvailable()) {
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(new StringBuilder(
+                                "Cannot resume transfer with file transfer Id '")
+                                .append(mFileTransferId)
+                                .append("' as the limit of available file transfer session is reached.")
+                                .toString());
+                    }
+                    return false;
+                }
+                if (Direction.OUTGOING == mPersistentStorage.getDirection()) {
+                    if (mImService.isMaxConcurrentOutgoingFileTransfersReached()) {
+                        if (sLogger.isActivated()) {
+                            sLogger.debug(new StringBuilder(
+                                    "Cannot resume transfer with file transfer Id '")
+                                    .append(mFileTransferId)
+                                    .append("' as the limit of maximum concurrent outgoing file transfer is reached.")
+                                    .toString());
+                        }
+                        return false;
+                    }
+                }
+            }
+            return true;
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return true;
     }
 
     /**
      * Resume the session (only for HTTP transfer)
+     * 
+     * @throws RemoteException
      */
-    public void resumeTransfer() {
+    public void resumeTransfer() throws RemoteException {
         if (!isAllowedToResumeTransfer()) {
-            throw new IllegalStateException("Not allowed to resume transfer.");
+            throw new ServerApiPermissionDeniedException("Not allowed to resume transfer.");
         }
-        FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-        if (session == null) {
-            FtHttpResume resume = mPersistentStorage.getFileTransferResumeInfo();
-            if (resume == null) {
-                // TODO Temporarily illegal access exception
-                throw new IllegalStateException(new StringBuilder(
-                        "Unable to resume file with fileTransferId ").append(mFileTransferId)
-                        .toString());
+        try {
+            FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+            if (session == null) {
+                FtHttpResume resume = mPersistentStorage.getFileTransferResumeInfo();
+                if (resume == null) {
+                    throw new ServerApiPersistentStorageException(
+                            "Unable to resume file with fileTransferId ".concat(mFileTransferId));
+                }
+                if (Direction.OUTGOING == mPersistentStorage.getDirection()) {
+                    session = new ResumeUploadFileSharingSession(mImService,
+                            ContentManager.createMmContent(resume.getFile(), resume.getSize(),
+                                    resume.getFileName()), (FtHttpResumeUpload) resume,
+                            mRcsSettings, mMessagingLog, mContactManager);
+                } else {
+                    session = new DownloadFromResumeFileSharingSession(mImService,
+                            ContentManager.createMmContent(resume.getFile(), resume.getSize(),
+                                    resume.getFileName()), (FtHttpResumeDownload) resume,
+                            mRcsSettings, mMessagingLog, mContactManager);
+                }
+                session.addListener(this);
+                session.startSession();
+                return;
             }
-            if (Direction.OUTGOING == mPersistentStorage.getDirection()) {
-                session = new ResumeUploadFileSharingSession(mImService,
-                        ContentManager.createMmContent(resume.getFile(), resume.getSize(),
-                                resume.getFileName()), (FtHttpResumeUpload) resume, mRcsSettings,
-                        mMessagingLog, mContactManager);
-            } else {
-                session = new DownloadFromResumeFileSharingSession(mImService,
-                        ContentManager.createMmContent(resume.getFile(), resume.getSize(),
-                                resume.getFileName()), (FtHttpResumeDownload) resume, mRcsSettings,
-                        mMessagingLog, mContactManager);
-
+            if (!(isHttpTransfer() && isSessionPaused())) {
+                throw new ServerApiPermissionDeniedException(
+                        "Resuming can only be used on a paused HTTP transfer");
             }
-            session.addListener(this);
-            session.startSession();
-            return;
-        }
-        boolean fileSharingSessionPaused = isSessionPaused();
-        boolean fileTransferOverHttp = isHttpTransfer();
-        if (sLogger.isActivated()) {
-            sLogger.info("Resuming session paused=" + fileSharingSessionPaused + " http="
-                    + fileTransferOverHttp);
-        }
-
-        if (!(fileTransferOverHttp && fileSharingSessionPaused)) {
-            if (sLogger.isActivated()) {
-                sLogger.info("Resuming can only be used on a paused HTTP transfer");
+            ((HttpFileTransferSession) session).resumeFileTransfer();
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
-            return;
-        }
+            throw e;
 
-        ((HttpFileTransferSession) session).resumeFileTransfer();
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
      * Returns whether you can resend the transfer.
      * 
      * @return boolean
+     * @throws RemoteException
      */
-    public boolean isAllowedToResendTransfer() {
-        FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-        if (session != null) {
-            if (sLogger.isActivated()) {
-                sLogger.debug(new StringBuilder("Cannot resend transfer with fileTransferId ")
-                        .append(mFileTransferId)
-                        .append(" as there is already an ongoing session corresponding to this fileTransferId")
-                        .toString());
-            }
-            return false;
-        }
-        State rcsState = mPersistentStorage.getState();
-        /*
-         * According to Blackbird PDD v3.0, "When a File Transfer is interrupted by sender
-         * interaction (or fails), then ‘resend button’ shall be offered to allow the user to
-         * re-send the file without selecting a new receiver or selecting the file again."
-         */
-        switch (rcsState) {
-            case FAILED:
-                return true;
-            case ABORTED:
-                ReasonCode rcsReasonCode = mPersistentStorage.getReasonCode();
-                switch (rcsReasonCode) {
-                    case ABORTED_BY_SYSTEM:
-                    case ABORTED_BY_USER:
-                        return true;
-                    default:
-                        if (sLogger.isActivated()) {
-                            sLogger.debug(new StringBuilder(
-                                    "Cannot resend transfer with fileTransferId ")
-                                    .append(mFileTransferId).append(" as reasonCode=")
-                                    .append(rcsReasonCode).toString());
-                        }
-                        return false;
-                }
-            default:
+    public boolean isAllowedToResendTransfer() throws RemoteException {
+        try {
+            FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+            if (session != null) {
                 if (sLogger.isActivated()) {
                     sLogger.debug(new StringBuilder("Cannot resend transfer with fileTransferId ")
-                            .append(mFileTransferId).append(" as state=").append(rcsState)
+                            .append(mFileTransferId)
+                            .append(" as there is already an ongoing session corresponding to this fileTransferId")
                             .toString());
                 }
                 return false;
+            }
+            State rcsState = mPersistentStorage.getState();
+            /*
+             * According to Blackbird PDD v3.0, "When a File Transfer is interrupted by sender
+             * interaction (or fails), then ‘resend button’ shall be offered to allow the user to
+             * re-send the file without selecting a new receiver or selecting the file again."
+             */
+            switch (rcsState) {
+                case FAILED:
+                    return true;
+                case ABORTED:
+                    ReasonCode rcsReasonCode = mPersistentStorage.getReasonCode();
+                    switch (rcsReasonCode) {
+                        case ABORTED_BY_SYSTEM:
+                        case ABORTED_BY_USER:
+                            return true;
+                        default:
+                            if (sLogger.isActivated()) {
+                                sLogger.debug(new StringBuilder(
+                                        "Cannot resend transfer with fileTransferId ")
+                                        .append(mFileTransferId).append(" as reasonCode=")
+                                        .append(rcsReasonCode).toString());
+                            }
+                            return false;
+                    }
+                default:
+                    if (sLogger.isActivated()) {
+                        sLogger.debug(new StringBuilder(
+                                "Cannot resend transfer with fileTransferId ")
+                                .append(mFileTransferId).append(" as state=").append(rcsState)
+                                .toString());
+                    }
+                    return false;
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
     /**
      * Resend a file transfer which was previously failed. This only for 1-1 file transfer, an
      * exception is thrown in case of a file transfer to group.
+     * 
+     * @throws RemoteException
      */
-    public void resendTransfer() {
+    public void resendTransfer() throws RemoteException {
         if (!isAllowedToResendTransfer()) {
-            // TODO Temporarily illegal access exception
-            throw new IllegalStateException(new StringBuilder(
+            throw new ServerApiPermissionDeniedException(new StringBuilder(
                     "Unable to resend file with fileTransferId ").append(mFileTransferId)
                     .toString());
         }
-        MmContent file = FileTransferUtils.createMmContent(getFile());
-        Uri fileIcon = getFileIcon();
-        MmContent fileIconContent = fileIcon != null ? FileTransferUtils.createMmContent(fileIcon)
-                : null;
+        try {
+            MmContent file = FileTransferUtils.createMmContent(getFile());
+            Uri fileIcon = getFileIcon();
+            MmContent fileIconContent = fileIcon != null ? FileTransferUtils
+                    .createMmContent(fileIcon) : null;
 
-        mFileTransferService.resendOneToOneFile(getRemoteContact(), file, fileIconContent,
-                mFileTransferId);
+            mFileTransferService.resendOneToOneFile(getRemoteContact(), file, fileIconContent,
+                    mFileTransferId);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
      * Returns true if file transfer has been marked as read
      * 
      * @return boolean
+     * @throws RemoteException
      */
-    public boolean isRead() {
-        return mPersistentStorage.isRead();
+    public boolean isRead() throws RemoteException {
+        try {
+            return mPersistentStorage.isRead();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
@@ -930,7 +1248,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         ReasonCode reasonCode = stateAndReasonCode.getReasonCode();
         synchronized (mLock) {
             mFileTransferService.removeFileTransfer(mFileTransferId);
-            setStateAndReasonCode(getRemoteContact(), state, reasonCode);
+            setStateAndReasonCode(contact, state, reasonCode);
         }
         mCore.getListener().tryToDequeueFileTransfers(mImService);
     }
@@ -1096,19 +1414,43 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
 
     @Override
     public long getFileExpiration() throws RemoteException {
-        FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-        if (session == null) {
-            return mPersistentStorage.getFileExpiration();
+        try {
+            FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+            if (session == null) {
+                return mPersistentStorage.getFileExpiration();
+            }
+            return session.getFileExpiration();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return session.getFileExpiration();
     }
 
     @Override
     public long getFileIconExpiration() throws RemoteException {
-        FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
-        if (session == null) {
-            return mPersistentStorage.getFileIconExpiration();
+        try {
+            FileSharingSession session = mImService.getFileSharingSession(mFileTransferId);
+            if (session == null) {
+                return mPersistentStorage.getFileIconExpiration();
+            }
+            return session.getIconExpiration();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return session.getIconExpiration();
     }
 }

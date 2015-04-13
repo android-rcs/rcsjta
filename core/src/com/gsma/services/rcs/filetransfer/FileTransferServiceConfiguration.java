@@ -22,7 +22,11 @@
 
 package com.gsma.services.rcs.filetransfer;
 
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsPermissionDeniedException;
+import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsUnsupportedOperationException;
 
 import android.util.SparseArray;
 
@@ -117,8 +121,9 @@ public class FileTransferServiceConfiguration {
     public long getWarnSize() throws RcsServiceException {
         try {
             return mIFtServiceConfig.getWarnSize();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -131,8 +136,9 @@ public class FileTransferServiceConfiguration {
     public long getMaxSize() throws RcsServiceException {
         try {
             return mIFtServiceConfig.getMaxSize();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -145,8 +151,9 @@ public class FileTransferServiceConfiguration {
     public boolean isAutoAcceptEnabled() throws RcsServiceException {
         try {
             return mIFtServiceConfig.isAutoAcceptEnabled();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -162,7 +169,9 @@ public class FileTransferServiceConfiguration {
         try {
             mIFtServiceConfig.setAutoAccept(enable);
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            RcsUnsupportedOperationException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -179,8 +188,9 @@ public class FileTransferServiceConfiguration {
     public boolean isAutoAcceptInRoamingEnabled() throws RcsServiceException {
         try {
             return mIFtServiceConfig.isAutoAcceptInRoamingEnabled();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -195,8 +205,12 @@ public class FileTransferServiceConfiguration {
     public void setAutoAcceptInRoaming(boolean enable) throws RcsServiceException {
         try {
             mIFtServiceConfig.setAutoAcceptInRoaming(enable);
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            RcsUnsupportedOperationException.assertException(e);
+            RcsPermissionDeniedException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -210,8 +224,9 @@ public class FileTransferServiceConfiguration {
     public boolean isAutoAcceptModeChangeable() throws RcsServiceException {
         try {
             return mIFtServiceConfig.isAutoAcceptModeChangeable();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -224,8 +239,9 @@ public class FileTransferServiceConfiguration {
     public int getMaxFileTransfers() throws RcsServiceException {
         try {
             return mIFtServiceConfig.getMaxFileTransfers();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -238,10 +254,10 @@ public class FileTransferServiceConfiguration {
      */
     public ImageResizeOption getImageResizeOption() throws RcsServiceException {
         try {
-            int option = mIFtServiceConfig.getImageResizeOption();
-            return ImageResizeOption.valueOf(option);
+            return ImageResizeOption.valueOf(mIFtServiceConfig.getImageResizeOption());
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -255,7 +271,7 @@ public class FileTransferServiceConfiguration {
         try {
             mIFtServiceConfig.setImageResizeOption(option.toInt());
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -268,8 +284,9 @@ public class FileTransferServiceConfiguration {
     public boolean isGroupFileTransferSupported() throws RcsServiceException {
         try {
             return mIFtServiceConfig.isGroupFileTransferSupported();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e);
+            throw new RcsGenericException(e);
         }
     }
 }

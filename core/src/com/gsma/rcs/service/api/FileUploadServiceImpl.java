@@ -22,14 +22,6 @@
 
 package com.gsma.rcs.service.api;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import android.net.Uri;
-import android.os.IBinder;
-
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
@@ -37,7 +29,6 @@ import com.gsma.rcs.core.ims.service.upload.FileUploadSession;
 import com.gsma.rcs.platform.file.FileDescription;
 import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.service.api.ServerApiUtils;
 import com.gsma.rcs.service.broadcaster.FileUploadEventBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
@@ -47,6 +38,16 @@ import com.gsma.services.rcs.upload.IFileUpload;
 import com.gsma.services.rcs.upload.IFileUploadListener;
 import com.gsma.services.rcs.upload.IFileUploadService;
 import com.gsma.services.rcs.upload.IFileUploadServiceConfiguration;
+
+import android.net.Uri;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.text.TextUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * File upload service implementation
@@ -62,9 +63,9 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
     private final Map<String, IFileUpload> mFileUploadCache = new HashMap<String, IFileUpload>();
 
     /**
-     * The logger
+     * The sLogger
      */
-    private static final Logger logger = Logger.getLogger(FileUploadServiceImpl.class
+    private static final Logger sLogger = Logger.getLogger(FileUploadServiceImpl.class
             .getSimpleName());
 
     /**
@@ -81,8 +82,8 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      * @param rcsSettings
      */
     public FileUploadServiceImpl(InstantMessagingService imService, RcsSettings rcsSettings) {
-        if (logger.isActivated()) {
-            logger.info("File upload service API is loaded");
+        if (sLogger.isActivated()) {
+            sLogger.info("File upload service API is loaded");
         }
         mImService = imService;
         mRcsSettings = rcsSettings;
@@ -94,8 +95,8 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
     public void close() {
         mFileUploadCache.clear();
 
-        if (logger.isActivated()) {
-            logger.info("File upload service API is closed");
+        if (sLogger.isActivated()) {
+            sLogger.info("File upload service API is closed");
         }
     }
 
@@ -103,10 +104,11 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      * Add a file upload in the list
      * 
      * @param filUpload File upload
+     * @throws RemoteException
      */
-    private void addFileUpload(FileUploadImpl filUpload) {
-        if (logger.isActivated()) {
-            logger.debug("Add a file upload in the list (size=" + mFileUploadCache.size() + ")");
+    private void addFileUpload(FileUploadImpl filUpload) throws RemoteException {
+        if (sLogger.isActivated()) {
+            sLogger.debug("Add a file upload in the list (size=" + mFileUploadCache.size() + ")");
         }
 
         mFileUploadCache.put(filUpload.getUploadId(), filUpload);
@@ -118,8 +120,8 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      * @param uploadId Upload ID
      */
     /* package private */void removeFileUpload(String sessionId) {
-        if (logger.isActivated()) {
-            logger.debug("Remove a file upload from the list (size=" + mFileUploadCache.size()
+        if (sLogger.isActivated()) {
+            sLogger.debug("Remove a file upload from the list (size=" + mFileUploadCache.size()
                     + ")");
         }
 
@@ -130,9 +132,22 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      * Returns the configuration of the file upload service
      * 
      * @return Configuration
+     * @throws RemoteException
      */
-    public IFileUploadServiceConfiguration getConfiguration() {
-        return new IFileUploadServiceConfigurationImpl(mRcsSettings);
+    public IFileUploadServiceConfiguration getConfiguration() throws RemoteException {
+        try {
+            return new IFileUploadServiceConfigurationImpl(mRcsSettings);
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
@@ -142,16 +157,16 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      * @param file Uri of file to upload
      * @param fileicon File icon option. If true and if it's an image, a file icon is attached.
      * @return File upload
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public IFileUpload uploadFile(Uri file, boolean fileicon) throws ServerApiException {
-        if (logger.isActivated()) {
-            logger.info("Initiate a file upload session (thumbnail option " + fileicon + ")");
+    public IFileUpload uploadFile(Uri file, boolean fileicon) throws RemoteException {
+        if (file == null) {
+            throw new ServerApiIllegalArgumentException("file must not be null!");
         }
-
-        // Test IMS connection
+        if (sLogger.isActivated()) {
+            sLogger.info("Initiate a file upload session (thumbnail option " + fileicon + ")");
+        }
         ServerApiUtils.testCore();
-
         try {
             mImService.assertAvailableFileTransferSession("Max file transfer sessions achieved.");
 
@@ -173,12 +188,15 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
             addFileUpload(fileUpload);
             return fileUpload;
 
-        } catch (Exception e) {
-            // TODO:Handle Security exception in CR037
-            if (logger.isActivated()) {
-                logger.error("Unexpected error", e);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
-            throw new ServerApiException(e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -186,35 +204,46 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      * Can a file be uploaded now
      * 
      * @return Returns true if a file can be uploaded, else returns false
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public boolean canUploadFile() throws ServerApiException {
-        if (!ServerApiUtils.isImsConnected()) {
-            if (logger.isActivated()) {
-                logger.debug("Cannot upload file now as IMS is not connected.");
+    public boolean canUploadFile() throws RemoteException {
+        try {
+            if (!ServerApiUtils.isImsConnected()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Cannot upload file now as IMS is not connected.");
+                }
+                return false;
             }
-            return false;
-        }
-        if (!mImService.isFileTransferSessionAvailable()) {
-            if (logger.isActivated()) {
-                logger.debug("Cannot upload file now as no sessions available.");
+            if (!mImService.isFileTransferSessionAvailable()) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Cannot upload file now as no sessions available.");
+                }
+                return false;
             }
-            return false;
+            return true;
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return true;
     }
 
     /**
      * Returns the list of file uploads in progress
      * 
      * @return List of file uploads
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public List<IBinder> getFileUploads() throws ServerApiException {
-        if (logger.isActivated()) {
-            logger.info("Get file upload sessions");
+    public List<IBinder> getFileUploads() throws RemoteException {
+        if (sLogger.isActivated()) {
+            sLogger.info("Get file upload sessions");
         }
-
         try {
             List<IBinder> fileUploads = new ArrayList<IBinder>(mFileUploadCache.size());
             for (IFileUpload fileUpload : mFileUploadCache.values()) {
@@ -222,11 +251,15 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
             }
             return fileUploads;
 
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Unexpected error", e);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
-            throw new ServerApiException(e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -235,26 +268,56 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      * 
      * @param uploadId
      * @return File upload
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public IFileUpload getFileUpload(String uploadId) throws ServerApiException {
-        if (logger.isActivated()) {
-            logger.info("Get file upload ".concat(uploadId));
+    public IFileUpload getFileUpload(String uploadId) throws RemoteException {
+        if (TextUtils.isEmpty(uploadId)) {
+            throw new ServerApiIllegalArgumentException("uploadId must not be null or empty!");
         }
-        return mFileUploadCache.get(uploadId);
+        if (sLogger.isActivated()) {
+            sLogger.info("Get file upload ".concat(uploadId));
+        }
+        try {
+            return mFileUploadCache.get(uploadId);
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
      * Adds a listener on file upload events
      * 
      * @param listener Listener
+     * @throws RemoteException
      */
-    public void addEventListener(IFileUploadListener listener) {
-        if (logger.isActivated()) {
-            logger.info("Add a file upload event listener");
+    public void addEventListener(IFileUploadListener listener) throws RemoteException {
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
         }
-        synchronized (lock) {
-            mBroadcaster.addEventListener(listener);
+        if (sLogger.isActivated()) {
+            sLogger.info("Add a file upload event listener");
+        }
+        try {
+            synchronized (lock) {
+                mBroadcaster.addEventListener(listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -262,13 +325,28 @@ public class FileUploadServiceImpl extends IFileUploadService.Stub {
      * Removes a listener on file upload events
      * 
      * @param listener Listener
+     * @throws RemoteException
      */
-    public void removeEventListener(IFileUploadListener listener) {
-        if (logger.isActivated()) {
-            logger.info("Remove a file upload event listener");
+    public void removeEventListener(IFileUploadListener listener) throws RemoteException {
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
         }
-        synchronized (lock) {
-            mBroadcaster.removeEventListener(listener);
+        if (sLogger.isActivated()) {
+            sLogger.info("Remove a file upload event listener");
+        }
+        try {
+            synchronized (lock) {
+                mBroadcaster.removeEventListener(listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 

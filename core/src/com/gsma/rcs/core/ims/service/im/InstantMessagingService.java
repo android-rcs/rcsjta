@@ -72,6 +72,7 @@ import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImMsgTech;
 import com.gsma.rcs.service.api.ServerApiMaxAllowedSessionLimitReachedException;
+import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.ContactUtil.PhoneNumber;
 import com.gsma.rcs.utils.IdGenerator;
@@ -650,33 +651,18 @@ public class InstantMessagingService extends ImsService {
 
     public void assertAvailableFileTransferSession(String errorMessage) throws CoreException {
         if (!isFileTransferSessionAvailable()) {
-            if (sLogger.isActivated()) {
-                sLogger.error(errorMessage);
-            }
-            /*
-             * TODO : Proper exception handling will be added here as part of the CR037
-             * implementation
-             */
-            throw new CoreException(errorMessage);
+            throw new ServerApiMaxAllowedSessionLimitReachedException(errorMessage);
         }
     }
 
-    public void assertFileSizeNotExceedingMaxLimit(long size, String errorMessage)
-            throws CoreException {
+    public void assertFileSizeNotExceedingMaxLimit(long size, String errorMessage) {
         /*
          * maxFtSize == 0 means that the checking of allowed number of file transfer size in use is
          * disabled
          */
         long maxFileTransferSize = mRcsSettings.getMaxFileTransferSize();
         if (maxFileTransferSize > 0 && size > maxFileTransferSize) {
-            if (sLogger.isActivated()) {
-                sLogger.error(errorMessage);
-            }
-            /*
-             * TODO : Proper exception handling will be added here as part of the CR037
-             * implementation
-             */
-            throw new CoreException(errorMessage);
+            throw new ServerApiPersistentStorageException(errorMessage);
         }
     }
 
