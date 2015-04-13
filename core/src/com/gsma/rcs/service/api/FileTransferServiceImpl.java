@@ -1093,7 +1093,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     private void handleGroupFileDeliveryStatusDelivered(String chatId, String fileTransferId,
             ContactId contact) {
-        mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, contact,
+        mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(chatId, contact, fileTransferId,
                 GroupDeliveryInfo.Status.DELIVERED, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
         mGroupFileTransferBroadcaster.broadcastDeliveryInfoChanged(chatId, contact, fileTransferId,
                 GroupDeliveryInfo.Status.DELIVERED, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
@@ -1107,7 +1107,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     private void handleGroupFileDeliveryStatusDisplayed(String chatId, String fileTransferId,
             ContactId contact) {
-        mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, contact,
+        mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(chatId, contact, fileTransferId,
                 GroupDeliveryInfo.Status.DISPLAYED, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
         mGroupFileTransferBroadcaster.broadcastDeliveryInfoChanged(chatId, contact, fileTransferId,
                 GroupDeliveryInfo.Status.DISPLAYED, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
@@ -1122,14 +1122,15 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     private void handleGroupFileDeliveryStatusFailed(String chatId, String fileTransferId,
             ContactId contact, ReasonCode reasonCode) {
         if (ReasonCode.FAILED_DELIVERY == reasonCode) {
-            mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, contact,
-                    GroupDeliveryInfo.Status.FAILED, GroupDeliveryInfo.ReasonCode.FAILED_DELIVERY);
+            mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(chatId, contact,
+                    fileTransferId, GroupDeliveryInfo.Status.FAILED,
+                    GroupDeliveryInfo.ReasonCode.FAILED_DELIVERY);
             mGroupFileTransferBroadcaster.broadcastDeliveryInfoChanged(chatId, contact,
                     fileTransferId, GroupDeliveryInfo.Status.FAILED,
                     GroupDeliveryInfo.ReasonCode.FAILED_DELIVERY);
             return;
         }
-        mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(fileTransferId, contact,
+        mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(chatId, contact, fileTransferId,
                 GroupDeliveryInfo.Status.FAILED, GroupDeliveryInfo.ReasonCode.FAILED_DISPLAY);
         mGroupFileTransferBroadcaster.broadcastDeliveryInfoChanged(chatId, contact, fileTransferId,
                 GroupDeliveryInfo.Status.FAILED, GroupDeliveryInfo.ReasonCode.FAILED_DISPLAY);

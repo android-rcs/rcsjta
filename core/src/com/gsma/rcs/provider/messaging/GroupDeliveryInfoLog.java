@@ -23,7 +23,6 @@
 package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.GroupDeliveryInfo.ReasonCode;
 import com.gsma.services.rcs.GroupDeliveryInfo.Status;
 import com.gsma.services.rcs.contact.ContactId;
@@ -54,9 +53,6 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
             GroupDeliveryInfoData.KEY_DELIVERY_STATUS).append("!=")
             .append(Status.DISPLAYED.toInt()).toString();
 
-    private static final Logger logger = Logger.getLogger(GroupDeliveryInfoLog.class
-            .getSimpleName());
-
     private final LocalContentResolver mLocalContentResolver;
 
     /**
@@ -85,13 +81,14 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
     /**
      * Set delivery status for outgoing group chat messages and files
      * 
-     * @param msgId Message ID
+     * @param chatId Group chat ID
      * @param contact The contact ID for which the entry is to be updated
+     * @param msgId Message ID
      * @param status Status
      * @param reasonCode Reason code
      */
-    public void setGroupChatDeliveryInfoStatusAndReasonCode(String msgId, ContactId contact,
-            Status status, ReasonCode reasonCode) {
+    public void setGroupChatDeliveryInfoStatusAndReasonCode(String chatId, ContactId contact,
+            String msgId, Status status, ReasonCode reasonCode) {
         ContentValues values = new ContentValues();
         values.put(GroupDeliveryInfoData.KEY_DELIVERY_STATUS, status.toInt());
         values.put(GroupDeliveryInfoData.KEY_TIMESTAMP_DELIVERED, System.currentTimeMillis());
@@ -99,15 +96,10 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
         String[] selectionArgs = new String[] {
                 msgId, contact.toString()
         };
+
         if (mLocalContentResolver.update(GroupDeliveryInfoData.CONTENT_URI, values,
                 SELECTION_DELIVERY_INFO_BY_MSG_ID_AND_CONTACT, selectionArgs) < 1) {
-            /*
-             * TODO: Skip catching exception, which should be implemented in CR037.
-             */
-            if (logger.isActivated()) {
-                logger.warn("There was not group chat delivery into for msgId '" + msgId
-                        + "' and contact '" + contact + "' to update!");
-            }
+            addGroupChatDeliveryInfoEntry(chatId, contact, msgId, status, reasonCode);
         }
     }
 

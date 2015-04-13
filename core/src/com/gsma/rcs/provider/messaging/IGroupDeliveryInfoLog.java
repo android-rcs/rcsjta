@@ -50,13 +50,14 @@ public interface IGroupDeliveryInfoLog {
     /**
      * Set delivery status for outgoing group chat messages and files
      * 
-     * @param msgID Message ID
+     * @param chatId Group chat ID
      * @param contact The contact ID for which the entry is to be updated
+     * @param msgID Message ID
      * @param status Delivery info status
      * @param reasonCode Delivery info status reason code
      */
-    public void setGroupChatDeliveryInfoStatusAndReasonCode(String msgId, ContactId contact,
-            Status status, ReasonCode reasonCode);
+    public void setGroupChatDeliveryInfoStatusAndReasonCode(String chatId, ContactId contact,
+            String msgId, Status status, ReasonCode reasonCode);
 
     /**
      * Check if all recipients have received message

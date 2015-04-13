@@ -188,7 +188,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     private void handleMessageDeliveryStatusDelivered(ContactId contact, String msgId) {
         String mimeType = mMessagingLog.getMessageMimeType(msgId);
         synchronized (lock) {
-            mPersistentStorage.setDeliveryInfoStatusAndReasonCode(msgId, contact,
+            mPersistentStorage.setDeliveryInfoStatusAndReasonCode(mChatId, contact, msgId,
                     GroupDeliveryInfo.Status.DELIVERED, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
             mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId, contact, mimeType,
                     msgId, GroupDeliveryInfo.Status.DELIVERED,
@@ -205,7 +205,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     private void handleMessageDeliveryStatusDisplayed(ContactId contact, String msgId) {
         String mimeType = mMessagingLog.getMessageMimeType(msgId);
         synchronized (lock) {
-            mPersistentStorage.setDeliveryInfoStatusAndReasonCode(msgId, contact,
+            mPersistentStorage.setDeliveryInfoStatusAndReasonCode(mChatId, contact, msgId,
                     GroupDeliveryInfo.Status.DISPLAYED, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
             mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId, contact, mimeType,
                     msgId, GroupDeliveryInfo.Status.DISPLAYED,
@@ -224,14 +224,14 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         String mimeType = mMessagingLog.getMessageMimeType(msgId);
         synchronized (lock) {
             if (Content.ReasonCode.FAILED_DELIVERY == reasonCode) {
-                mPersistentStorage.setDeliveryInfoStatusAndReasonCode(msgId, contact,
+                mPersistentStorage.setDeliveryInfoStatusAndReasonCode(mChatId, contact, msgId,
                         GroupDeliveryInfo.Status.FAILED,
                         GroupDeliveryInfo.ReasonCode.FAILED_DELIVERY);
                 mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId, contact, mimeType,
                         msgId, GroupDeliveryInfo.Status.FAILED,
                         GroupDeliveryInfo.ReasonCode.FAILED_DELIVERY);
             } else {
-                mPersistentStorage.setDeliveryInfoStatusAndReasonCode(msgId, contact,
+                mPersistentStorage.setDeliveryInfoStatusAndReasonCode(mChatId, contact, msgId,
                         GroupDeliveryInfo.Status.FAILED,
                         GroupDeliveryInfo.ReasonCode.FAILED_DISPLAY);
                 mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId, contact, mimeType,

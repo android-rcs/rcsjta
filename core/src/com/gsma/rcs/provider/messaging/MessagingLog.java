@@ -285,10 +285,10 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public void setGroupChatDeliveryInfoStatusAndReasonCode(String msgId, ContactId contact,
-            GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
-        mGroupChatDeliveryInfoLog.setGroupChatDeliveryInfoStatusAndReasonCode(msgId, contact,
-                status, reasonCode);
+    public void setGroupChatDeliveryInfoStatusAndReasonCode(String chatId, ContactId contact,
+            String msgId, GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
+        mGroupChatDeliveryInfoLog.setGroupChatDeliveryInfoStatusAndReasonCode(chatId, contact,
+                msgId, status, reasonCode);
     }
 
     @Override

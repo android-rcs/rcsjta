@@ -165,9 +165,9 @@ public class GroupChatPersistedStorageAccessor {
         mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode);
     }
 
-    public void setDeliveryInfoStatusAndReasonCode(String msgId, ContactId contact,
+    public void setDeliveryInfoStatusAndReasonCode(String chatId, ContactId contact, String msgId,
             GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
-        mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(msgId, contact, status,
+        mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(chatId, contact, msgId, status,
                 reasonCode);
     }
 
