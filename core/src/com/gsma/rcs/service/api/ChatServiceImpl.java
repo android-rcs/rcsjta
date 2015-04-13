@@ -166,7 +166,7 @@ public class ChatServiceImpl extends IChatService.Stub {
     }
 
     /**
-     * Tries to send a displayed delivery report
+     * Tries to send a displayed delivery report for a one to one chat
      * 
      * @param msgId Message ID
      * @param contact Contact ID
@@ -182,6 +182,46 @@ public class ChatServiceImpl extends IChatService.Stub {
             }
             mImService.getImdnManager().sendMessageDeliveryStatus(contact, msgId,
                     ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp);
+        } catch (Exception ignore) {
+            /*
+             * Purposely ignoring exception since this method only makes an attempt to send report
+             * and in case of failure the report will be sent later as postponed delivery report.
+             */
+        }
+    }
+
+    /**
+     * Tries to send a displayed delivery report for a group chat
+     * 
+     * @param msgId Message ID
+     * @param contact Contact ID
+     * @param timestamp Timestamp sent in payload for IMDN datetime
+     */
+    public void tryToSendGroupChatDisplayedDeliveryReport(final String msgId,
+            final ContactId contact, final long timestamp, String chatId) {
+        try {
+            final GroupChatSession session = mImService.getGroupChatSession(chatId);
+
+            if (session == null || !session.isMediaEstablished()) {
+                if (sLogger.isActivated()) {
+                    sLogger.info("No suitable session found to send the delivery status for "
+                            + msgId + " : use SIP message");
+                }
+                mImService.getImdnManager().sendMessageDeliveryStatus(contact, msgId,
+                        ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp);
+                return;
+            }
+
+            if (sLogger.isActivated()) {
+                sLogger.info("Using the available session to send displayed for " + msgId);
+            }
+
+            new Thread() {
+                public void run() {
+                    session.sendMsrpMessageDeliveryStatus(contact, msgId,
+                            ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp);
+                }
+            }.start();
         } catch (Exception ignore) {
             /*
              * Purposely ignoring exception since this method only makes an attempt to send report

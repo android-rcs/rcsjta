@@ -432,10 +432,8 @@ public abstract class GroupChatSession extends ChatSession {
     @Override
     public void sendMsrpMessageDeliveryStatus(String fromUri, String toUri, String msgId,
             String status, long timestamp) {
-        // Do not perform Message Delivery Status in Albatros for group chat
-        // Only perform delivery status delivered in GC
-        if (mRcsSettings.isAlbatrosRelease()
-                || !status.equalsIgnoreCase(ImdnDocument.DELIVERY_STATUS_DELIVERED)) {
+
+        if (mRcsSettings.isAlbatrosRelease()) {
             return;
         }
         if (sLogger.isActivated()) {
@@ -624,6 +622,11 @@ public abstract class GroupChatSession extends ChatSession {
         mConferenceSubscriber.subscribe();
     }
 
+    private boolean isDisplayReportRequested(String dispositionNotification) {
+        return (dispositionNotification != null && dispositionNotification
+                .contains(ImdnDocument.DISPLAY));
+    }
+
     /*
      * (non-Javadoc)
      * @see com.gsma.rcs.core.ims.service.im.chat.ChatSession#msrpDataReceived(java.lang.String,
@@ -725,10 +728,12 @@ public abstract class GroupChatSession extends ChatSession {
             }
         }
 
-        // Check if the message needs a delivery report
         String dispositionNotification = cpimMsg.getHeader(ImdnUtils.HEADER_IMDN_DISPO_NOTIF);
 
+        boolean displayReportRequested = isDisplayReportRequested(dispositionNotification);
+
         boolean isFToHTTP = FileTransferUtils.isFileTransferHttpType(contentType);
+
         /**
          * Set message's timestamp to the System.currentTimeMillis, not the session's itself
          * timestamp
@@ -756,8 +761,7 @@ public abstract class GroupChatSession extends ChatSession {
             if (ChatUtils.isTextPlainType(contentType)) {
                 ChatMessage msg = new ChatMessage(cpimMsgId, remoteId, cpimMsg.getMessageContent(),
                         MimeType.TEXT_MESSAGE, timestamp, timestampSent, pseudo);
-                boolean imdnDisplayedRequested = false;
-                receive(msg, imdnDisplayedRequested);
+                receive(msg, displayReportRequested);
             } else {
                 if (ChatUtils.isApplicationIsComposingType(contentType)) {
                     // Is composing event
@@ -787,8 +791,7 @@ public abstract class GroupChatSession extends ChatSession {
                             ChatMessage msg = new ChatMessage(cpimMsgId, remoteId,
                                     cpimMsg.getMessageContent(), GeolocInfoDocument.MIME_TYPE,
                                     timestamp, timestampSent, pseudo);
-                            boolean imdnDisplayedRequested = false;
-                            receive(msg, imdnDisplayedRequested);
+                            receive(msg, displayReportRequested);
                         }
                     }
                 }

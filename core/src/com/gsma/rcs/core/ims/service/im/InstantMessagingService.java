@@ -1161,7 +1161,7 @@ public class InstantMessagingService extends ImsService {
      * @return IM session
      * @throws CoreException
      */
-    public ChatSession restartGroupChatSession(String chatId) throws CoreException {
+    public GroupChatSession restartGroupChatSession(String chatId) throws CoreException {
         if (sLogger.isActivated()) {
             sLogger.info("Restart group chat session");
         }

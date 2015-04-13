@@ -65,16 +65,25 @@ public interface IMessageLog {
     public void addOutgoingOneToOneChatMessage(ChatMessage msg, Status status, ReasonCode reasonCode);
 
     /**
-     * Add a group chat message
+     * Add an incoming group chat message
      * 
      * @param chatId Chat ID
      * @param msg Chat message
-     * @param direction Direction
+     * @param imdnDisplayedRequested IMDN display report requested
+     */
+    public void addIncomingGroupChatMessage(String chatId, ChatMessage msg,
+            boolean imdnDisplayedRequested);
+
+    /**
+     * Add an outgoing group chat message
+     * 
+     * @param chatId Chat ID
+     * @param msg Chat message
      * @param status Message status
      * @param reasonCode Status reason code
      */
-    public void addGroupChatMessage(String chatId, ChatMessage msg, Direction direction,
-            Status status, ReasonCode reasonCode);
+    public void addOutgoingGroupChatMessage(String chatId, ChatMessage msg, Status status,
+            ReasonCode reasonCode);
 
     /**
      * Add group chat system message

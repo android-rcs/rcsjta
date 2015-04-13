@@ -201,9 +201,13 @@ public class GroupChatPersistedStorageAccessor {
         mMessagingLog.addGroupChatEvent(mChatId, contact, status, timestamp);
     }
 
-    public void addGroupChatMessage(ChatMessage msg, Direction direction, Status status,
+    public void addIncomingGroupChatMessage(ChatMessage msg, boolean imdnDisplayedRequested) {
+        mMessagingLog.addIncomingGroupChatMessage(mChatId, msg, imdnDisplayedRequested);
+    }
+
+    public void addOutgoingGroupChatMessage(ChatMessage msg, Status status,
             Content.ReasonCode reasonCode) {
-        mMessagingLog.addGroupChatMessage(mChatId, msg, direction, status, reasonCode);
+        mMessagingLog.addOutgoingGroupChatMessage(mChatId, msg, status, reasonCode);
     }
 
     public void setRejectNextGroupChatNextInvitation() {

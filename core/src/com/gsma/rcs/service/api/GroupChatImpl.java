@@ -873,8 +873,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * @param state state of message
      */
     private void addOutgoingGroupChatMessage(ChatMessage msg, Status status) {
-        mPersistentStorage.addGroupChatMessage(msg, Direction.OUTGOING, status,
-                Content.ReasonCode.UNSPECIFIED);
+        mPersistentStorage.addOutgoingGroupChatMessage(msg, status, Content.ReasonCode.UNSPECIFIED);
         String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
         mBroadcaster.broadcastMessageStatusChanged(mChatId, apiMimeType, msg.getMessageId(),
                 status, Content.ReasonCode.UNSPECIFIED);
@@ -1191,7 +1190,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         ServerApiUtils.testIms();
 
         try {
-            final ChatSession session = mImService.restartGroupChatSession(mChatId);
+            final GroupChatSession session = mImService.restartGroupChatSession(mChatId);
             session.addListener(this);
             new Thread() {
                 public void run() {
@@ -1357,8 +1356,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             logger.info("New IM with Id '" + msgId + "' received from " + remote);
         }
         synchronized (lock) {
-            mPersistentStorage.addGroupChatMessage(msg, Direction.INCOMING,
-                    Content.Status.RECEIVED, Content.ReasonCode.UNSPECIFIED);
+            mPersistentStorage.addIncomingGroupChatMessage(msg, imdnDisplayedRequested);
             if (remote != null) {
                 mContactManager.setContactDisplayName(remote, msg.getDisplayName());
             }

@@ -196,6 +196,36 @@ public class MessageLog implements IMessageLog {
     }
 
     /**
+     * Add incoming group chat message
+     * 
+     * @param chatId Chat ID
+     * @param msg Chat message
+     * @param imdnDisplayedRequested Indicates whether IMDN display was requested
+     */
+    @Override
+    public void addIncomingGroupChatMessage(String chatId, ChatMessage msg,
+            boolean imdnDisplayedRequested) {
+        Status chatMessageStatus = imdnDisplayedRequested ? Status.DISPLAY_REPORT_REQUESTED
+                : Status.RECEIVED;
+        addGroupChatMessage(chatId, msg, Direction.INCOMING, chatMessageStatus,
+                ReasonCode.UNSPECIFIED);
+    }
+
+    /**
+     * Add outgoing group chat message
+     * 
+     * @param chatId Chat ID
+     * @param msg Chat message
+     * @param status Status
+     * @param reasonCode Reason code
+     */
+    @Override
+    public void addOutgoingGroupChatMessage(String chatId, ChatMessage msg, Status status,
+            ReasonCode reasonCode) {
+        addGroupChatMessage(chatId, msg, Direction.OUTGOING, status, reasonCode);
+    }
+
+    /**
      * Add group chat message
      * 
      * @param chatId Chat ID
@@ -204,8 +234,7 @@ public class MessageLog implements IMessageLog {
      * @param status Status
      * @param reasonCode Reason code
      */
-    @Override
-    public void addGroupChatMessage(String chatId, ChatMessage msg, Direction direction,
+    private void addGroupChatMessage(String chatId, ChatMessage msg, Direction direction,
             Status status, ReasonCode reasonCode) {
         String msgId = msg.getMessageId();
         ContactId contact = msg.getRemoteContact();

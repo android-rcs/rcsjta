@@ -162,9 +162,15 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public void addGroupChatMessage(String chatId, ChatMessage msg, Direction direction,
-            Status status, Content.ReasonCode reasonCode) {
-        mMessageLog.addGroupChatMessage(chatId, msg, direction, status, reasonCode);
+    public void addIncomingGroupChatMessage(String chatId, ChatMessage msg,
+            boolean imdnDisplayedRequested) {
+        mMessageLog.addIncomingGroupChatMessage(chatId, msg, imdnDisplayedRequested);
+    }
+
+    @Override
+    public void addOutgoingGroupChatMessage(String chatId, ChatMessage msg, Status status,
+            Content.ReasonCode reasonCode) {
+        mMessageLog.addOutgoingGroupChatMessage(chatId, msg, status, reasonCode);
     }
 
     @Override
