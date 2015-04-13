@@ -68,6 +68,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax2.sip.message.Response;
+
 /**
  * Chat session
  * 
@@ -688,7 +690,9 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 
         int errorCode;
 
-        if ((error != null) && (error.contains("413") || error.contains("408"))) {
+        if ((error != null)
+                && (error.contains(String.valueOf(Response.REQUEST_ENTITY_TOO_LARGE)) || error
+                        .contains(String.valueOf(Response.REQUEST_TIMEOUT)))) {
             // session should not be torn down immediately as there may be more errors to come
             // but as errors occurred we shouldn't use it for sending any longer
 

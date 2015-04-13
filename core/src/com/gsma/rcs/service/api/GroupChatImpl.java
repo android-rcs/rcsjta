@@ -40,7 +40,6 @@ import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.provider.contact.ContactManager;
-import com.gsma.rcs.provider.messaging.GroupChatStateAndReasonCode;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
@@ -132,31 +131,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         mContactManager = contactManager;
         mMessagingLog = messagingLog;
         mCore = core;
-    }
-
-    /* TODO: Fix mapping between ChatError and reasonCode. */
-    private GroupChatStateAndReasonCode toStateAndReasonCode(ChatError error) {
-        int chatError = error.getErrorCode();
-        switch (chatError) {
-            case ChatError.SESSION_INITIATION_CANCELLED:
-            case ChatError.SESSION_INITIATION_DECLINED:
-                return new GroupChatStateAndReasonCode(State.REJECTED,
-                        ReasonCode.REJECTED_BY_REMOTE);
-            case ChatError.SESSION_INITIATION_FAILED:
-            case ChatError.SESSION_NOT_FOUND:
-            case ChatError.SESSION_RESTART_FAILED:
-            case ChatError.SUBSCRIBE_CONFERENCE_FAILED:
-            case ChatError.UNEXPECTED_EXCEPTION:
-                return new GroupChatStateAndReasonCode(State.FAILED, ReasonCode.FAILED_INITIATION);
-            case ChatError.MEDIA_SESSION_BROKEN:
-            case ChatError.MEDIA_SESSION_FAILED:
-                return new GroupChatStateAndReasonCode(State.ABORTED,
-                        ReasonCode.ABORTED_BY_INACTIVITY);
-            default:
-                throw new IllegalArgumentException(new StringBuilder(
-                        "Unknown reason in GroupChatImpl.toStateAndReasonCode; chatError=")
-                        .append(chatError).append("!").toString());
-        }
     }
 
     private Content.ReasonCode imdnToMessageFailedReasonCode(ImdnDocument imdn) {
@@ -1414,35 +1388,42 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         }
         synchronized (lock) {
             mChatService.removeGroupChat(mChatId);
-
-            if (ChatError.SESSION_NOT_FOUND == chatErrorCode) {
-                if (mGroupChatRejoinedAsPartOfSendOperation) {
-                    handleGroupChatRejoinAsPartOfSendOperationFailed();
-                }
-                setRejoinedAsPartOfSendOperation(false);
-                return;
-            }
-
-            GroupChatStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
-            State state = stateAndReasonCode.getState();
-            ReasonCode reasonCode = stateAndReasonCode.getReasonCode();
-            if (ChatError.MEDIA_SESSION_FAILED == chatErrorCode) {
+            int chatError = error.getErrorCode();
+            switch (chatError) {
+                case ChatError.SESSION_INITIATION_CANCELLED:
+                    /* Intentional fall through */
+                case ChatError.SESSION_INITIATION_DECLINED:
+                    setStateAndReasonCodeAndBroadcast(State.REJECTED, ReasonCode.REJECTED_BY_REMOTE);
+                    mCore.getListener()
+                            .tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(mChatId);
+                    break;
+                case ChatError.SESSION_NOT_FOUND:
+                    if (mGroupChatRejoinedAsPartOfSendOperation) {
+                        handleGroupChatRejoinAsPartOfSendOperationFailed();
+                    }
+                    break;
+                case ChatError.SESSION_INITIATION_FAILED:
+                    /* Intentional fall through */
+                case ChatError.SESSION_RESTART_FAILED:
+                    /* Intentional fall through */
+                case ChatError.SUBSCRIBE_CONFERENCE_FAILED:
+                    /* Intentional fall through */
+                case ChatError.UNEXPECTED_EXCEPTION:
+                    setStateAndReasonCodeAndBroadcast(State.FAILED, ReasonCode.FAILED_INITIATION);
+                    mCore.getListener()
+                            .tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(mChatId);
+                    break;
                 /*
                  * This error is caused because of a network drop so the group chat is not set to
                  * ABORTED state in this case as it will be auto-rejoined when network connection is
                  * regained
                  */
-            } else {
-                setStateAndReasonCodeAndBroadcast(state, reasonCode);
-            }
-            switch (reasonCode) {
-                case FAILED_INITIATION:
-                case REJECTED_BY_REMOTE:
-                    mCore.getListener()
-                            .tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(mChatId);
+                case ChatError.MEDIA_SESSION_FAILED:
+                case ChatError.MEDIA_SESSION_BROKEN:
                     break;
                 default:
-                    break;
+                    throw new IllegalArgumentException(new StringBuilder(
+                            "Unknown reason; chatError=").append(chatError).append("!").toString());
             }
         }
         setRejoinedAsPartOfSendOperation(false);
