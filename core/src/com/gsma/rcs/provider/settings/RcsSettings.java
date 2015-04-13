@@ -2166,4 +2166,13 @@ public class RcsSettings {
     public long getMsgCapValidityPeriod() {
         return readLong(RcsSettingsData.MSG_CAP_VALIDITY_PERIOD);
     }
+
+    /**
+     * Get request group chat display reports option
+     * 
+     * @return True if group chat display reports are to be requested
+     */
+    public boolean isRequestGroupChatDisplayReportsEnabled() {
+        return readBoolean(RcsSettingsData.REQUEST_GROUP_CHAT_DISPLAY_REPORTS);
+    }
 }

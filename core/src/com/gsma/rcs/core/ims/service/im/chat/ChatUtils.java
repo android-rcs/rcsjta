@@ -513,7 +513,7 @@ public class ChatUtils {
      * @param timestampSent Timestamp sent in payload for CPIM DateTime
      * @return String
      */
-    public static String buildCpimMessageWithDeliveredImdn(String from, String to,
+    public static String buildCpimMessageWithoutDisplayedImdn(String from, String to,
             String messageId, String content, String contentType, long timestampSent) {
         return new StringBuilder(CpimMessage.HEADER_FROM).append(": ")
                 .append(formatCpimSipUri(from)).append(CRLF).append(CpimMessage.HEADER_TO)

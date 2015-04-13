@@ -370,9 +370,13 @@ public abstract class GroupChatSession extends ChatSession {
         String mimeType = msg.getMimeType();
         boolean useImdn = getImdnManager().isImdnActivated() && !mRcsSettings.isAlbatrosRelease();
         if (useImdn) {
-            networkContent = ChatUtils.buildCpimMessageWithDeliveredImdn(from, to, msgId,
-                    msg.getContent(), mimeType, msg.getTimestampSent());
-
+            if (mRcsSettings.isRequestGroupChatDisplayReportsEnabled()) {
+                networkContent = ChatUtils.buildCpimMessageWithImdn(from, to, msgId,
+                        msg.getContent(), mimeType, msg.getTimestampSent());
+            } else {
+                networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from, to, msgId,
+                        msg.getContent(), mimeType, msg.getTimestampSent());
+            }
         } else {
             networkContent = ChatUtils.buildCpimMessage(from, to, msg.getContent(), mimeType,
                     msg.getTimestampSent());
