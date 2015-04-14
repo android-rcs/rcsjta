@@ -164,7 +164,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 
     /**
      * Registers a listener on service registration events
-     *
+     * 
      * @param listener Service registration listener
      */
     public void addEventListener(IRcsServiceRegistrationListener listener) {
@@ -178,7 +178,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 
     /**
      * Unregisters a listener on service registration events
-     *
+     * 
      * @param listener Service registration listener
      */
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
@@ -202,7 +202,7 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
 
     /**
      * Notifies unregistration event
-     *
+     * 
      * @param reasonCode for unregistration
      */
     public void notifyUnRegistration(RcsServiceRegistration.ReasonCode reasonCode) {
@@ -425,9 +425,8 @@ public class IPCallServiceImpl extends IIPCallService.Stub {
      * @param reasonCode Reason code
      * @param timestamp Local timestamp when got invitation
      */
-    public void addAndBroadcastIPCallInvitationRejected(ContactId contact,
-            AudioContent audioContent, VideoContent videoContent, ReasonCode reasonCode,
-            long timestamp) {
+    public void addIPCallInvitationRejected(ContactId contact, AudioContent audioContent,
+            VideoContent videoContent, ReasonCode reasonCode, long timestamp) {
         String sessionId = SessionIdGenerator.getNewId();
         mIPCallLog.addCall(sessionId, contact, Direction.INCOMING, audioContent, videoContent,
                 IPCall.State.REJECTED, reasonCode, timestamp);

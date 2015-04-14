@@ -284,8 +284,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
         }
     }
 
-    private void setStateAndReasonCodeAndBroadcast(ContactId contact, State state,
-            ReasonCode reasonCode) {
+    private void setStateAndReasonCode(ContactId contact, State state, ReasonCode reasonCode) {
         mPersistentStorage.setStateAndReasonCode(state, reasonCode);
         mBroadcaster.broadcastStateChanged(contact, mSharingId, state, reasonCode);
     }
@@ -296,7 +295,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
         }
         synchronized (lock) {
             mGeolocSharingService.removeGeolocSharing(mSharingId);
-            setStateAndReasonCodeAndBroadcast(contact, State.REJECTED, reasonCode);
+            setStateAndReasonCode(contact, State.REJECTED, reasonCode);
         }
     }
 
@@ -308,7 +307,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
             logger.info("Session started.");
         }
         synchronized (lock) {
-            setStateAndReasonCodeAndBroadcast(contact, State.STARTED, ReasonCode.UNSPECIFIED);
+            setStateAndReasonCode(contact, State.STARTED, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -328,16 +327,13 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
             switch (reason) {
                 case TERMINATION_BY_TIMEOUT:
                 case TERMINATION_BY_SYSTEM:
-                    setStateAndReasonCodeAndBroadcast(contact, State.ABORTED,
-                            ReasonCode.ABORTED_BY_SYSTEM);
+                    setStateAndReasonCode(contact, State.ABORTED, ReasonCode.ABORTED_BY_SYSTEM);
                     break;
                 case TERMINATION_BY_CONNECTION_LOST:
-                    setStateAndReasonCodeAndBroadcast(contact, State.FAILED,
-                            ReasonCode.FAILED_SHARING);
+                    setStateAndReasonCode(contact, State.FAILED, ReasonCode.FAILED_SHARING);
                     break;
                 case TERMINATION_BY_USER:
-                    setStateAndReasonCodeAndBroadcast(contact, State.ABORTED,
-                            ReasonCode.ABORTED_BY_USER);
+                    setStateAndReasonCode(contact, State.ABORTED, ReasonCode.ABORTED_BY_USER);
                     break;
                 case TERMINATION_BY_REMOTE:
                     /*
@@ -346,8 +342,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
                      * check if it is storing and broadcasting right state and reasoncode.
                      */
                     if (State.TRANSFERRED != mPersistentStorage.getState()) {
-                        setStateAndReasonCodeAndBroadcast(contact, State.ABORTED,
-                                ReasonCode.ABORTED_BY_REMOTE);
+                        setStateAndReasonCode(contact, State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
                     }
                     break;
                 default:
@@ -374,7 +369,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
         ReasonCode reasonCode = stateAndReasonCode.getReasonCode();
         synchronized (lock) {
             mGeolocSharingService.removeGeolocSharing(mSharingId);
-            setStateAndReasonCodeAndBroadcast(contact, state, reasonCode);
+            setStateAndReasonCode(contact, state, reasonCode);
         }
     }
 
@@ -407,7 +402,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
             logger.info("Accepting sharing.");
         }
         synchronized (lock) {
-            setStateAndReasonCodeAndBroadcast(contact, State.ACCEPTING, ReasonCode.UNSPECIFIED);
+            setStateAndReasonCode(contact, State.ACCEPTING, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -438,7 +433,7 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
     @Override
     public void handle180Ringing(ContactId contact) {
         synchronized (lock) {
-            setStateAndReasonCodeAndBroadcast(contact, State.RINGING, ReasonCode.UNSPECIFIED);
+            setStateAndReasonCode(contact, State.RINGING, ReasonCode.UNSPECIFIED);
         }
     }
 }

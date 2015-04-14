@@ -405,8 +405,8 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @param reasonCode Reason code
      * @param timestamp Local timestamp when got invitation
      */
-    public void addAndBroadcastVideoSharingInvitationRejected(ContactId contact,
-            VideoContent content, ReasonCode reasonCode, long timestamp) {
+    public void addVideoSharingInvitationRejected(ContactId contact, VideoContent content,
+            ReasonCode reasonCode, long timestamp) {
         String sessionId = SessionIdGenerator.getNewId();
         mRichCallLog.addVideoSharing(sessionId, contact, Direction.INCOMING, content,
                 VideoSharing.State.REJECTED, reasonCode, timestamp);

@@ -387,7 +387,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * @param reasonCode Reason code
      * @param timestamp Local timestamp when got invitation
      */
-    public void addAndBroadcastImageSharingInvitationRejected(ContactId contact, MmContent content,
+    public void addImageSharingInvitationRejected(ContactId contact, MmContent content,
             ReasonCode reasonCode, long timestamp) {
         String sessionId = SessionIdGenerator.getNewId();
         mRichCallLog.addImageSharing(sessionId, contact, Direction.INCOMING, content,

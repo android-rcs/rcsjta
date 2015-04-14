@@ -818,8 +818,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
     }
 
-    private void setStateAndReasonCodeAndBroadcast(ContactId contact, State state,
-            ReasonCode reasonCode) {
+    private void setStateAndReasonCode(ContactId contact, State state, ReasonCode reasonCode) {
         mPersistentStorage.setStateAndReasonCode(state, reasonCode);
         mBroadcaster.broadcastStateChanged(contact, mFileTransferId, state, reasonCode);
 
@@ -831,7 +830,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
         synchronized (mLock) {
             mFileTransferService.removeFileTransfer(mFileTransferId);
-            setStateAndReasonCodeAndBroadcast(contact, State.REJECTED, reasonCode);
+            setStateAndReasonCode(contact, State.REJECTED, reasonCode);
         }
         mCore.getListener().tryToDequeueFileTransfers(mImService);
     }
@@ -846,7 +845,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             sLogger.info("Session started");
         }
         synchronized (mLock) {
-            setStateAndReasonCodeAndBroadcast(contact, State.STARTED, ReasonCode.UNSPECIFIED);
+            setStateAndReasonCode(contact, State.STARTED, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -866,16 +865,13 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             switch (reason) {
                 case TERMINATION_BY_TIMEOUT:
                 case TERMINATION_BY_SYSTEM:
-                    setStateAndReasonCodeAndBroadcast(contact, State.ABORTED,
-                            ReasonCode.ABORTED_BY_SYSTEM);
+                    setStateAndReasonCode(contact, State.ABORTED, ReasonCode.ABORTED_BY_SYSTEM);
                     break;
                 case TERMINATION_BY_CONNECTION_LOST:
-                    setStateAndReasonCodeAndBroadcast(contact, State.FAILED,
-                            ReasonCode.FAILED_DATA_TRANSFER);
+                    setStateAndReasonCode(contact, State.FAILED, ReasonCode.FAILED_DATA_TRANSFER);
                     break;
                 case TERMINATION_BY_USER:
-                    setStateAndReasonCodeAndBroadcast(contact, State.ABORTED,
-                            ReasonCode.ABORTED_BY_USER);
+                    setStateAndReasonCode(contact, State.ABORTED, ReasonCode.ABORTED_BY_USER);
                     break;
                 case TERMINATION_BY_REMOTE:
                     /*
@@ -883,8 +879,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                      * session is closed. Then this check of state can be removed.
                      */
                     if (State.TRANSFERRED != mPersistentStorage.getState()) {
-                        setStateAndReasonCodeAndBroadcast(contact, State.ABORTED,
-                                ReasonCode.ABORTED_BY_REMOTE);
+                        setStateAndReasonCode(contact, State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
                     }
                     break;
                 default:
@@ -913,8 +908,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
              * is closed. Then this check of state can be removed.
              */
             if (State.TRANSFERRED != mPersistentStorage.getState()) {
-                setStateAndReasonCodeAndBroadcast(contact, State.ABORTED,
-                        ReasonCode.ABORTED_BY_REMOTE);
+                setStateAndReasonCode(contact, State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
             }
         }
         mCore.getListener().tryToDequeueFileTransfers(mImService);
@@ -936,7 +930,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         ReasonCode reasonCode = stateAndReasonCode.getReasonCode();
         synchronized (mLock) {
             mFileTransferService.removeFileTransfer(mFileTransferId);
-            setStateAndReasonCodeAndBroadcast(getRemoteContact(), state, reasonCode);
+            setStateAndReasonCode(getRemoteContact(), state, reasonCode);
         }
         mCore.getListener().tryToDequeueFileTransfers(mImService);
     }
@@ -963,8 +957,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
     public void handleTransferNotAllowedToSend(ContactId contact) {
         synchronized (mLock) {
             mFileTransferService.removeFileTransfer(mFileTransferId);
-            setStateAndReasonCodeAndBroadcast(contact, State.FAILED,
-                    ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
+            setStateAndReasonCode(contact, State.FAILED, ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
         }
         mCore.getListener().tryToDequeueFileTransfers(mImService);
     }
@@ -1005,7 +998,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             sLogger.info("Transfer paused by user");
         }
         synchronized (mLock) {
-            setStateAndReasonCodeAndBroadcast(contact, State.PAUSED, ReasonCode.PAUSED_BY_USER);
+            setStateAndReasonCode(contact, State.PAUSED, ReasonCode.PAUSED_BY_USER);
         }
     }
 
@@ -1020,7 +1013,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         }
         synchronized (mLock) {
             mFileTransferService.removeFileTransfer(mFileTransferId);
-            setStateAndReasonCodeAndBroadcast(contact, State.PAUSED, ReasonCode.PAUSED_BY_SYSTEM);
+            setStateAndReasonCode(contact, State.PAUSED, ReasonCode.PAUSED_BY_SYSTEM);
         }
     }
 
@@ -1034,7 +1027,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             sLogger.info("Transfer resumed");
         }
         synchronized (mLock) {
-            setStateAndReasonCodeAndBroadcast(contact, State.STARTED, ReasonCode.UNSPECIFIED);
+            setStateAndReasonCode(contact, State.STARTED, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -1044,7 +1037,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             sLogger.info("Accepting transfer");
         }
         synchronized (mLock) {
-            setStateAndReasonCodeAndBroadcast(contact, State.ACCEPTING, ReasonCode.UNSPECIFIED);
+            setStateAndReasonCode(contact, State.ACCEPTING, ReasonCode.UNSPECIFIED);
         }
     }
 

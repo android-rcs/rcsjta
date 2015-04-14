@@ -137,8 +137,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         return System.currentTimeMillis() - getTimestamp();
     }
 
-    private void setStateAndReasonCodeAndDurationAndBroadcast(ContactId contact,
-            long currentDuration, State state, ReasonCode reasonCode) {
+    private void setStateAndReasonCodeAndDuration(ContactId contact, long currentDuration,
+            State state, ReasonCode reasonCode) {
         mPersistentStorage.setStateReasonCodeAndDuration(state, reasonCode, currentDuration);
         mBroadcaster.broadcastStateChanged(contact, mSharingId, state, reasonCode);
     }
@@ -390,8 +390,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         }
         long currentDuration = getCurrentDuration();
         synchronized (mLock) {
-            setStateAndReasonCodeAndDurationAndBroadcast(contact, currentDuration,
-                    VideoSharing.State.STARTED, ReasonCode.UNSPECIFIED);
+            setStateAndReasonCodeAndDuration(contact, currentDuration, VideoSharing.State.STARTED,
+                    ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -411,19 +411,19 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
             switch (reason) {
                 case TERMINATION_BY_SYSTEM:
                 case TERMINATION_BY_TIMEOUT:
-                    setStateAndReasonCodeAndDurationAndBroadcast(contact, currentDuration,
-                            State.ABORTED, ReasonCode.ABORTED_BY_SYSTEM);
+                    setStateAndReasonCodeAndDuration(contact, currentDuration, State.ABORTED,
+                            ReasonCode.ABORTED_BY_SYSTEM);
                     break;
                 case TERMINATION_BY_CONNECTION_LOST:
-                    setStateAndReasonCodeAndDurationAndBroadcast(contact, currentDuration,
-                            State.FAILED, ReasonCode.FAILED_SHARING);
+                    setStateAndReasonCodeAndDuration(contact, currentDuration, State.FAILED,
+                            ReasonCode.FAILED_SHARING);
                     break;
                 case TERMINATION_BY_USER:
-                    setStateAndReasonCodeAndDurationAndBroadcast(contact, currentDuration,
-                            State.ABORTED, ReasonCode.ABORTED_BY_USER);
+                    setStateAndReasonCodeAndDuration(contact, currentDuration, State.ABORTED,
+                            ReasonCode.ABORTED_BY_USER);
                     break;
                 case TERMINATION_BY_REMOTE:
-                    setStateAndReasonCodeAndDurationAndBroadcast(contact, currentDuration,
+                    setStateAndReasonCodeAndDuration(contact, currentDuration,
                             VideoSharing.State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
                     break;
                 default:
@@ -449,8 +449,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         long currentDuration = getCurrentDuration();
         synchronized (mLock) {
             mVideoSharingService.removeVideoSharing(mSharingId);
-            setStateAndReasonCodeAndDurationAndBroadcast(contact, currentDuration, state,
-                    reasonCode);
+            setStateAndReasonCodeAndDuration(contact, currentDuration, state, reasonCode);
         }
     }
 
@@ -461,7 +460,7 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
         }
         long currentDuration = getCurrentDuration();
         synchronized (mLock) {
-            setStateAndReasonCodeAndDurationAndBroadcast(contact, currentDuration,
+            setStateAndReasonCodeAndDuration(contact, currentDuration,
                     VideoSharing.State.ACCEPTING, ReasonCode.UNSPECIFIED);
         }
     }
@@ -508,8 +507,8 @@ public class VideoSharingImpl extends IVideoSharing.Stub implements VideoStreami
     public void handle180Ringing(ContactId contact) {
         long currentDuration = getCurrentDuration();
         synchronized (mLock) {
-            setStateAndReasonCodeAndDurationAndBroadcast(contact, currentDuration,
-                    VideoSharing.State.RINGING, ReasonCode.UNSPECIFIED);
+            setStateAndReasonCodeAndDuration(contact, currentDuration, VideoSharing.State.RINGING,
+                    ReasonCode.UNSPECIFIED);
         }
     }
 }

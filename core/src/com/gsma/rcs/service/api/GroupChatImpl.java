@@ -146,7 +146,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 .toString());
     }
 
-    private void setStateAndReasonCodeAndBroadcast(State state, ReasonCode reasonCode) {
+    private void setStateAndReasonCode(State state, ReasonCode reasonCode) {
         mPersistentStorage.setStateAndReasonCode(state, reasonCode);
         mBroadcaster.broadcastStateChanged(mChatId, state, reasonCode);
     }
@@ -155,7 +155,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         setRejoinedAsPartOfSendOperation(false);
         synchronized (lock) {
             mChatService.removeGroupChat(mChatId);
-            setStateAndReasonCodeAndBroadcast(State.REJECTED, reasonCode);
+            setStateAndReasonCode(State.REJECTED, reasonCode);
         }
     }
 
@@ -1329,15 +1329,15 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                      */
                     break;
                 case TERMINATION_BY_USER:
-                    setStateAndReasonCodeAndBroadcast(State.ABORTED, ReasonCode.ABORTED_BY_USER);
+                    setStateAndReasonCode(State.ABORTED, ReasonCode.ABORTED_BY_USER);
                     break;
                 case TERMINATION_BY_TIMEOUT:
                 case TERMINATION_BY_INACTIVITY:
-                    setStateAndReasonCodeAndBroadcast(State.ABORTED,
+                    setStateAndReasonCode(State.ABORTED,
                             ReasonCode.ABORTED_BY_INACTIVITY);
                     break;
                 case TERMINATION_BY_REMOTE:
-                    setStateAndReasonCodeAndBroadcast(State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
+                    setStateAndReasonCode(State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
                     break;
                 default:
                     throw new IllegalArgumentException(
@@ -1393,7 +1393,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 case ChatError.SESSION_INITIATION_CANCELLED:
                     /* Intentional fall through */
                 case ChatError.SESSION_INITIATION_DECLINED:
-                    setStateAndReasonCodeAndBroadcast(State.REJECTED, ReasonCode.REJECTED_BY_REMOTE);
+                    setStateAndReasonCode(State.REJECTED, ReasonCode.REJECTED_BY_REMOTE);
                     mCore.getListener()
                             .tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(mChatId);
                     break;
@@ -1409,7 +1409,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                 case ChatError.SUBSCRIBE_CONFERENCE_FAILED:
                     /* Intentional fall through */
                 case ChatError.UNEXPECTED_EXCEPTION:
-                    setStateAndReasonCodeAndBroadcast(State.FAILED, ReasonCode.FAILED_INITIATION);
+                    setStateAndReasonCode(State.FAILED, ReasonCode.FAILED_INITIATION);
                     mCore.getListener()
                             .tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(mChatId);
                     break;
@@ -1553,7 +1553,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             logger.info("Accepting group chat session");
         }
         synchronized (lock) {
-            setStateAndReasonCodeAndBroadcast(State.ACCEPTING, ReasonCode.UNSPECIFIED);
+            setStateAndReasonCode(State.ACCEPTING, ReasonCode.UNSPECIFIED);
         }
     }
 

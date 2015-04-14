@@ -420,8 +420,8 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
      * @param reasonCode Reason code
      * @param timestamp Local timestamp when got invitation
      */
-    public void addAndBroadcastGeolocSharingInvitationRejected(ContactId contact,
-            GeolocContent content, ReasonCode reasonCode, long timestamp) {
+    public void addGeolocSharingInvitationRejected(ContactId contact, GeolocContent content,
+            ReasonCode reasonCode, long timestamp) {
         String sharingId = SessionIdGenerator.getNewId();
         mRichcallLog.addIncomingGeolocSharing(contact, sharingId, GeolocSharing.State.REJECTED,
                 reasonCode, timestamp);

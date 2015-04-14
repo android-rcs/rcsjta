@@ -94,16 +94,16 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
         String sessionId = getSessionId();
         synchronized (mLock) {
             mMultimediaSessionService.removeMultimediaMessaging(sessionId);
-            setStateAndReasonThenBroadcast(contact, State.REJECTED, reasonCode);
+            setStateAndReason(contact, State.REJECTED, reasonCode);
         }
     }
 
-    private void removeSessionAndBroadcast(ContactId contact, State state, ReasonCode reasonCode) {
+    private void removeSession(ContactId contact, State state, ReasonCode reasonCode) {
         mMultimediaSessionService.removeMultimediaMessaging(mSessionId);
-        setStateAndReasonThenBroadcast(contact, state, reasonCode);
+        setStateAndReason(contact, state, reasonCode);
     }
 
-    private void setStateAndReasonThenBroadcast(ContactId contact, State state, ReasonCode reason) {
+    private void setStateAndReason(ContactId contact, State state, ReasonCode reason) {
         mMultimediaSessionStorageAccessor.setStateAndReasonCode(state, reason);
         mBroadcaster.broadcastStateChanged(contact, mSessionId, state, reason);
     }
@@ -409,7 +409,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
             mLogger.info("Session started");
         }
         synchronized (mLock) {
-            setStateAndReasonThenBroadcast(contact, State.STARTED, ReasonCode.UNSPECIFIED);
+            setStateAndReason(contact, State.STARTED, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -427,16 +427,16 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
             switch (reason) {
                 case TERMINATION_BY_SYSTEM:
                 case TERMINATION_BY_TIMEOUT:
-                    removeSessionAndBroadcast(contact, State.ABORTED, ReasonCode.ABORTED_BY_SYSTEM);
+                    removeSession(contact, State.ABORTED, ReasonCode.ABORTED_BY_SYSTEM);
                     break;
                 case TERMINATION_BY_USER:
-                    removeSessionAndBroadcast(contact, State.ABORTED, ReasonCode.ABORTED_BY_USER);
+                    removeSession(contact, State.ABORTED, ReasonCode.ABORTED_BY_USER);
                     break;
                 case TERMINATION_BY_CONNECTION_LOST:
-                    removeSessionAndBroadcast(contact, State.FAILED, ReasonCode.FAILED_SESSION);
+                    removeSession(contact, State.FAILED, ReasonCode.FAILED_SESSION);
                     break;
                 case TERMINATION_BY_REMOTE:
-                    removeSessionAndBroadcast(contact, State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
+                    removeSession(contact, State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown TerminationReason=".concat(String
@@ -460,19 +460,17 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
 
             switch (error.getErrorCode()) {
                 case SipSessionError.SESSION_INITIATION_DECLINED:
-                    setStateAndReasonThenBroadcast(contact, State.REJECTED,
-                            ReasonCode.REJECTED_BY_REMOTE);
+                    setStateAndReason(contact, State.REJECTED, ReasonCode.REJECTED_BY_REMOTE);
                     break;
                 case SipSessionError.MEDIA_FAILED:
-                    setStateAndReasonThenBroadcast(contact, State.FAILED, ReasonCode.FAILED_MEDIA);
+                    setStateAndReason(contact, State.FAILED, ReasonCode.FAILED_MEDIA);
                     break;
                 case SipSessionError.SESSION_INITIATION_CANCELLED:
                 case SipSessionError.SESSION_INITIATION_FAILED:
-                    setStateAndReasonThenBroadcast(contact, State.FAILED,
-                            ReasonCode.FAILED_INITIATION);
+                    setStateAndReason(contact, State.FAILED, ReasonCode.FAILED_INITIATION);
                     break;
                 default:
-                    setStateAndReasonThenBroadcast(contact, State.FAILED, ReasonCode.FAILED_SESSION);
+                    setStateAndReason(contact, State.FAILED, ReasonCode.FAILED_SESSION);
             }
         }
     }
@@ -495,7 +493,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
             mLogger.info("Accepting session");
         }
         synchronized (mLock) {
-            setStateAndReasonThenBroadcast(contact, State.ACCEPTING, ReasonCode.UNSPECIFIED);
+            setStateAndReason(contact, State.ACCEPTING, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -525,7 +523,7 @@ public class MultimediaMessagingSessionImpl extends IMultimediaMessagingSession.
     @Override
     public void handle180Ringing(ContactId contact) {
         synchronized (mLock) {
-            setStateAndReasonThenBroadcast(contact, State.RINGING, ReasonCode.UNSPECIFIED);
+            setStateAndReason(contact, State.RINGING, ReasonCode.UNSPECIFIED);
         }
     }
 

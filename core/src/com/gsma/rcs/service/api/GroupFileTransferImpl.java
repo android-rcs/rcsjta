@@ -707,7 +707,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             sLogger.info("Session started");
         }
         synchronized (mLock) {
-            setStateAndReasonCodeAndBroadcast(State.STARTED, ReasonCode.UNSPECIFIED);
+            setStateAndReasonCode(State.STARTED, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -753,12 +753,12 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         synchronized (mLock) {
             mFileTransferService.removeFileTransfer(mFileTransferId);
 
-            setStateAndReasonCodeAndBroadcast(State.REJECTED, reasonCode);
+            setStateAndReasonCode(State.REJECTED, reasonCode);
         }
         mCore.getListener().tryToDequeueFileTransfers(mImService);
     }
 
-    private void setStateAndReasonCodeAndBroadcast(State state, ReasonCode reasonCode) {
+    private void setStateAndReasonCode(State state, ReasonCode reasonCode) {
         mPersistentStorage.setStateAndReasonCode(state, reasonCode);
         mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId, state, reasonCode);
     }
@@ -779,13 +779,13 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             switch (reason) {
                 case TERMINATION_BY_TIMEOUT:
                 case TERMINATION_BY_SYSTEM:
-                    setStateAndReasonCodeAndBroadcast(State.ABORTED, ReasonCode.ABORTED_BY_SYSTEM);
+                    setStateAndReasonCode(State.ABORTED, ReasonCode.ABORTED_BY_SYSTEM);
                     break;
                 case TERMINATION_BY_CONNECTION_LOST:
-                    setStateAndReasonCodeAndBroadcast(State.FAILED, ReasonCode.FAILED_DATA_TRANSFER);
+                    setStateAndReasonCode(State.FAILED, ReasonCode.FAILED_DATA_TRANSFER);
                     break;
                 case TERMINATION_BY_USER:
-                    setStateAndReasonCodeAndBroadcast(State.ABORTED, ReasonCode.ABORTED_BY_USER);
+                    setStateAndReasonCode(State.ABORTED, ReasonCode.ABORTED_BY_USER);
                     break;
                 case TERMINATION_BY_REMOTE:
                     /*
@@ -794,8 +794,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
                      * check if it is storing and broadcasting right state and reasoncode.
                      */
                     if (State.TRANSFERRED != mPersistentStorage.getState()) {
-                        setStateAndReasonCodeAndBroadcast(State.ABORTED,
-                                ReasonCode.ABORTED_BY_REMOTE);
+                        setStateAndReasonCode(State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
                     }
                     break;
                 default:
@@ -825,7 +824,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
              * storing and broadcasting right state and reasoncode.
              */
             if (State.TRANSFERRED != mPersistentStorage.getState()) {
-                setStateAndReasonCodeAndBroadcast(State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
+                setStateAndReasonCode(State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
             }
         }
         mCore.getListener().tryToDequeueFileTransfers(mImService);
@@ -846,7 +845,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         ReasonCode reasonCode = stateAndReasonCode.getReasonCode();
         synchronized (mLock) {
             mFileTransferService.removeFileTransfer(mFileTransferId);
-            setStateAndReasonCodeAndBroadcast(state, reasonCode);
+            setStateAndReasonCode(state, reasonCode);
         }
         mCore.getListener().tryToDequeueFileTransfers(mImService);
     }
@@ -872,7 +871,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
     @Override
     public void handleTransferNotAllowedToSend(ContactId contact) {
         synchronized (mLock) {
-            setStateAndReasonCodeAndBroadcast(State.FAILED, ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
+            setStateAndReasonCode(State.FAILED, ReasonCode.FAILED_NOT_ALLOWED_TO_SEND);
         }
         mCore.getListener().tryToDequeueFileTransfers(mImService);
     }
@@ -927,7 +926,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
         }
         synchronized (mLock) {
             mFileTransferService.removeFileTransfer(mFileTransferId);
-            setStateAndReasonCodeAndBroadcast(State.PAUSED, ReasonCode.PAUSED_BY_SYSTEM);
+            setStateAndReasonCode(State.PAUSED, ReasonCode.PAUSED_BY_SYSTEM);
         }
     }
 
@@ -941,7 +940,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             sLogger.info("Transfer resumed");
         }
         synchronized (mLock) {
-            setStateAndReasonCodeAndBroadcast(State.STARTED, ReasonCode.UNSPECIFIED);
+            setStateAndReasonCode(State.STARTED, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -951,7 +950,7 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             sLogger.info("Accepting transfer");
         }
         synchronized (mLock) {
-            setStateAndReasonCodeAndBroadcast(State.ACCEPTING, ReasonCode.UNSPECIFIED);
+            setStateAndReasonCode(State.ACCEPTING, ReasonCode.UNSPECIFIED);
         }
     }
 

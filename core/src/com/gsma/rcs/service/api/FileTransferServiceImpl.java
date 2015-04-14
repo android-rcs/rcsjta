@@ -1343,7 +1343,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param timestamp Local timestamp when got invitation
      * @param timestampSent Timestamp sent in payload for the file transfer
      */
-    public void addAndBroadcastFileTransferInvitationRejected(ContactId contact, MmContent content,
+    public void addFileTransferInvitationRejected(ContactId contact, MmContent content,
             MmContent fileIcon, ReasonCode reasonCode, long timestamp, long timestampSent) {
         String fileTransferId = IdGenerator.generateMessageID();
         mMessagingLog.addFileTransfer(fileTransferId, contact, Direction.INCOMING, content,

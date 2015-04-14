@@ -126,8 +126,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
         }
     }
 
-    private void setStateAndReasonCodeAndBroadcast(ContactId contact, State state,
-            ReasonCode reasonCode) {
+    private void setStateAndReasonCode(ContactId contact, State state, ReasonCode reasonCode) {
         mPersistentStorage.setStateAndReasonCode(state, reasonCode);
         mBroadcaster.broadcastStateChanged(contact, mSharingId, state, reasonCode);
     }
@@ -138,7 +137,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
         }
         synchronized (lock) {
             mImageSharingService.removeImageSharing(mSharingId);
-            setStateAndReasonCodeAndBroadcast(contact, ImageSharing.State.REJECTED, reasonCode);
+            setStateAndReasonCode(contact, ImageSharing.State.REJECTED, reasonCode);
         }
     }
 
@@ -359,8 +358,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
             logger.info("Session started");
         }
         synchronized (lock) {
-            setStateAndReasonCodeAndBroadcast(contact, ImageSharing.State.STARTED,
-                    ReasonCode.UNSPECIFIED);
+            setStateAndReasonCode(contact, ImageSharing.State.STARTED, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -379,16 +377,13 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
             switch (reason) {
                 case TERMINATION_BY_SYSTEM:
                 case TERMINATION_BY_TIMEOUT:
-                    setStateAndReasonCodeAndBroadcast(contact, State.ABORTED,
-                            ReasonCode.ABORTED_BY_SYSTEM);
+                    setStateAndReasonCode(contact, State.ABORTED, ReasonCode.ABORTED_BY_SYSTEM);
                     break;
                 case TERMINATION_BY_CONNECTION_LOST:
-                    setStateAndReasonCodeAndBroadcast(contact, State.FAILED,
-                            ReasonCode.FAILED_SHARING);
+                    setStateAndReasonCode(contact, State.FAILED, ReasonCode.FAILED_SHARING);
                     break;
                 case TERMINATION_BY_USER:
-                    setStateAndReasonCodeAndBroadcast(contact, State.ABORTED,
-                            ReasonCode.ABORTED_BY_USER);
+                    setStateAndReasonCode(contact, State.ABORTED, ReasonCode.ABORTED_BY_USER);
                     break;
                 case TERMINATION_BY_REMOTE:
                     /*
@@ -396,7 +391,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
                      * session is closed. Then this check of state can be removed.
                      */
                     if (State.TRANSFERRED != mPersistentStorage.getState()) {
-                        setStateAndReasonCodeAndBroadcast(contact, ImageSharing.State.ABORTED,
+                        setStateAndReasonCode(contact, ImageSharing.State.ABORTED,
                                 ReasonCode.ABORTED_BY_REMOTE);
                     }
                     break;
@@ -423,7 +418,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
         ReasonCode reasonCode = stateAndReasonCode.getReasonCode();
         synchronized (lock) {
             mImageSharingService.removeImageSharing(mSharingId);
-            setStateAndReasonCodeAndBroadcast(contact, state, reasonCode);
+            setStateAndReasonCode(contact, state, reasonCode);
         }
     }
 
@@ -453,8 +448,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
         }
         synchronized (lock) {
             mImageSharingService.removeImageSharing(mSharingId);
-            setStateAndReasonCodeAndBroadcast(contact, ImageSharing.State.TRANSFERRED,
-                    ReasonCode.UNSPECIFIED);
+            setStateAndReasonCode(contact, ImageSharing.State.TRANSFERRED, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -464,8 +458,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
             logger.info("Accepting sharing");
         }
         synchronized (lock) {
-            setStateAndReasonCodeAndBroadcast(contact, ImageSharing.State.ACCEPTING,
-                    ReasonCode.UNSPECIFIED);
+            setStateAndReasonCode(contact, ImageSharing.State.ACCEPTING, ReasonCode.UNSPECIFIED);
         }
     }
 
@@ -500,8 +493,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     @Override
     public void handle180Ringing(ContactId contact) {
         synchronized (lock) {
-            setStateAndReasonCodeAndBroadcast(contact, ImageSharing.State.RINGING,
-                    ReasonCode.UNSPECIFIED);
+            setStateAndReasonCode(contact, ImageSharing.State.RINGING, ReasonCode.UNSPECIFIED);
         }
     }
 }

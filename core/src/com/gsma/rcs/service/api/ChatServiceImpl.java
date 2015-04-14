@@ -927,9 +927,9 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param reasonCode Reason code
      * @param timestamp Local timestamp when got invitation
      */
-    public void addAndBroadcastGroupChatInvitationRejected(String chatId, ContactId contact,
-            String subject, Map<ContactId, ParticipantStatus> participants,
-            GroupChat.ReasonCode reasonCode, long timestamp) {
+    public void addGroupChatInvitationRejected(String chatId, ContactId contact, String subject,
+            Map<ContactId, ParticipantStatus> participants, GroupChat.ReasonCode reasonCode,
+            long timestamp) {
 
         mMessagingLog.addGroupChat(chatId, contact, subject, participants,
                 GroupChat.State.REJECTED, reasonCode, Direction.INCOMING, timestamp);
