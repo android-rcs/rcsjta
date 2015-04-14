@@ -40,6 +40,8 @@ import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharing;
 
+import android.os.RemoteException;
+
 import javax2.sip.message.Response;
 
 /**
@@ -91,169 +93,301 @@ public class GeolocSharingImpl extends IGeolocSharing.Stub implements GeolocTran
      * Returns the sharing ID of the geoloc sharing
      * 
      * @return Sharing ID
+     * @throws RemoteException
      */
-    public String getSharingId() {
-        return mSharingId;
+    public String getSharingId() throws RemoteException {
+        try {
+            return mSharingId;
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
      * Gets the geolocation
      * 
      * @return Geolocation
+     * @throws RemoteException
      */
-    public Geoloc getGeoloc() {
-        GeolocTransferSession session = mRichcallService.getGeolocTransferSession(mSharingId);
-        if (session == null) {
-            return mPersistentStorage.getGeoloc();
-        }
+    public Geoloc getGeoloc() throws RemoteException {
+        try {
+            GeolocTransferSession session = mRichcallService.getGeolocTransferSession(mSharingId);
+            if (session == null) {
+                return mPersistentStorage.getGeoloc();
+            }
 
-        return session.getGeoloc();
+            return session.getGeoloc();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
      * Returns the remote contact identifier
      * 
      * @return ContactId
+     * @throws RemoteException
      */
-    public ContactId getRemoteContact() {
-        GeolocTransferSession session = mRichcallService.getGeolocTransferSession(mSharingId);
-        if (session == null) {
-            return mPersistentStorage.getRemoteContact();
+    public ContactId getRemoteContact() throws RemoteException {
+        try {
+            GeolocTransferSession session = mRichcallService.getGeolocTransferSession(mSharingId);
+            if (session == null) {
+                return mPersistentStorage.getRemoteContact();
+            }
+            return session.getRemoteContact();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return session.getRemoteContact();
     }
 
     /**
      * Returns the state of the geoloc sharing
      * 
      * @return State
+     * @throws RemoteException
      */
-    public int getState() {
-        GeolocTransferSession session = mRichcallService.getGeolocTransferSession(mSharingId);
-        if (session == null) {
-            return mPersistentStorage.getState().toInt();
-        }
-        SipDialogPath dialogPath = session.getDialogPath();
-        if (dialogPath != null && dialogPath.isSessionEstablished()) {
-            return State.STARTED.toInt();
-        } else if (session.isInitiatedByRemote()) {
-            if (session.isSessionAccepted()) {
-                return State.ACCEPTING.toInt();
+    public int getState() throws RemoteException {
+        try {
+            GeolocTransferSession session = mRichcallService.getGeolocTransferSession(mSharingId);
+            if (session == null) {
+                return mPersistentStorage.getState().toInt();
             }
-            return State.INVITED.toInt();
+            SipDialogPath dialogPath = session.getDialogPath();
+            if (dialogPath != null && dialogPath.isSessionEstablished()) {
+                return State.STARTED.toInt();
+
+            } else if (session.isInitiatedByRemote()) {
+                if (session.isSessionAccepted()) {
+                    return State.ACCEPTING.toInt();
+                }
+                return State.INVITED.toInt();
+            }
+            return State.INITIATING.toInt();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return State.INITIATING.toInt();
     }
 
     /**
      * Returns the reason code of the state of the geoloc sharing
      * 
      * @return ReasonCode
+     * @throws RemoteException
      */
-    public int getReasonCode() {
-        GeolocTransferSession session = mRichcallService.getGeolocTransferSession(mSharingId);
-        if (session == null) {
-            return mPersistentStorage.getReasonCode().toInt();
+    public int getReasonCode() throws RemoteException {
+        try {
+            GeolocTransferSession session = mRichcallService.getGeolocTransferSession(mSharingId);
+            if (session == null) {
+                return mPersistentStorage.getReasonCode().toInt();
+            }
+            return ReasonCode.UNSPECIFIED.toInt();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return ReasonCode.UNSPECIFIED.toInt();
     }
 
     /**
      * Returns the direction of the sharing (incoming or outgoing)
      * 
      * @return Direction
+     * @throws RemoteException
      * @see Direction
      */
-    public int getDirection() {
-        GeolocTransferSession session = mRichcallService.getGeolocTransferSession(mSharingId);
-        if (session == null) {
-            return mPersistentStorage.getDirection().toInt();
+    public int getDirection() throws RemoteException {
+        try {
+            GeolocTransferSession session = mRichcallService.getGeolocTransferSession(mSharingId);
+            if (session == null) {
+                return mPersistentStorage.getDirection().toInt();
+            }
+            if (session.isInitiatedByRemote()) {
+                return Direction.INCOMING.toInt();
+            }
+            return Direction.OUTGOING.toInt();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        if (session.isInitiatedByRemote()) {
-            return Direction.INCOMING.toInt();
-        }
-        return Direction.OUTGOING.toInt();
     }
 
-    public long getTimestamp() {
-        GeolocTransferSession session = mRichcallService.getGeolocTransferSession(mSharingId);
-        if (session == null) {
-            return mPersistentStorage.getTimestamp();
+    /**
+     * Returns the local timestamp of when the geoloc sharing was initiated for outgoing geoloc
+     * sharing or the local timestamp of when the geoloc sharing invitation was received for
+     * incoming geoloc sharings.
+     * 
+     * @return long
+     * @throws RemoteException
+     */
+    public long getTimestamp() throws RemoteException {
+        try {
+            GeolocTransferSession session = mRichcallService.getGeolocTransferSession(mSharingId);
+            if (session == null) {
+                return mPersistentStorage.getTimestamp();
+            }
+            return session.getTimestamp();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return session.getTimestamp();
     }
 
     /**
      * Accepts geoloc sharing invitation
+     * 
+     * @throws RemoteException
      */
-    public void acceptInvitation() {
-        if (logger.isActivated()) {
-            logger.info("Accept session invitation");
-        }
-        final GeolocTransferSession session = mRichcallService.getGeolocTransferSession(mSharingId);
-        if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException("Session with sharing ID '" + mSharingId
-                    + "' not available.");
-        }
-        // Accept invitation
-        new Thread() {
-            public void run() {
-                session.acceptSession();
+    public void acceptInvitation() throws RemoteException {
+        try {
+            if (logger.isActivated()) {
+                logger.info("Accept session invitation");
             }
-        }.start();
+            final GeolocTransferSession session = mRichcallService
+                    .getGeolocTransferSession(mSharingId);
+            if (session == null) {
+                throw new ServerApiGenericException(new StringBuilder("Session with sharing ID '")
+                        .append(mSharingId).append("' not available!").toString());
+            }
+            new Thread() {
+                public void run() {
+                    session.acceptSession();
+                }
+            }.start();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
      * Rejects geoloc sharing invitation
+     * 
+     * @throws RemoteException
      */
-    public void rejectInvitation() {
-        if (logger.isActivated()) {
-            logger.info("Reject session invitation");
-        }
-        final GeolocTransferSession session = mRichcallService.getGeolocTransferSession(mSharingId);
-        if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException("Session with sharing ID '" + mSharingId
-                    + "' not available.");
-        }
-        // Reject invitation
-        new Thread() {
-            public void run() {
-                session.rejectSession(Response.DECLINE);
+    public void rejectInvitation() throws RemoteException {
+        try {
+            if (logger.isActivated()) {
+                logger.info("Reject session invitation");
             }
-        }.start();
+            final GeolocTransferSession session = mRichcallService
+                    .getGeolocTransferSession(mSharingId);
+            if (session == null) {
+                throw new ServerApiGenericException(new StringBuilder("Session with sharing ID '")
+                        .append(mSharingId).append("' not available!").toString());
+            }
+            new Thread() {
+                public void run() {
+                    session.rejectSession(Response.DECLINE);
+                }
+            }.start();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
      * Aborts the sharing
+     * 
+     * @throws RemoteException
      */
-    public void abortSharing() {
-        if (logger.isActivated()) {
-            logger.info("Cancel session");
-        }
-        final GeolocTransferSession session = mRichcallService.getGeolocTransferSession(mSharingId);
-        if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException("Session with sharing ID '" + mSharingId
-                    + "' not available.");
-        }
-        if (session.isGeolocTransfered()) {
-            // Automatically closed after transfer
-            return;
-        }
-        /* Terminate the session */
-        new Thread() {
-            public void run() {
-                session.terminateSession(TerminationReason.TERMINATION_BY_USER);
+    public void abortSharing() throws RemoteException {
+        try {
+            if (logger.isActivated()) {
+                logger.info("Cancel session");
             }
-        }.start();
+            final GeolocTransferSession session = mRichcallService
+                    .getGeolocTransferSession(mSharingId);
+            if (session == null) {
+                throw new ServerApiGenericException(new StringBuilder("Session with sharing ID '")
+                        .append(mSharingId).append("' not available!").toString());
+            }
+            if (session.isGeolocTransfered()) {
+                throw new ServerApiPermissionDeniedException(
+                        "Cannot abort as geoloc is already transferred!");
+            }
+            new Thread() {
+                public void run() {
+                    session.terminateSession(TerminationReason.TERMINATION_BY_USER);
+                }
+            }.start();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                logger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            logger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/

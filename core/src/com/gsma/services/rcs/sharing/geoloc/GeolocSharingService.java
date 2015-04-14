@@ -22,12 +22,19 @@
 
 package com.gsma.services.rcs.sharing.geoloc;
 
-import java.lang.ref.WeakReference;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
+import com.gsma.services.rcs.Geoloc;
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsIllegalArgumentException;
+import com.gsma.services.rcs.RcsPermissionDeniedException;
+import com.gsma.services.rcs.RcsPersistentStorageException;
+import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceControl;
+import com.gsma.services.rcs.RcsServiceException;
+import com.gsma.services.rcs.RcsServiceListener;
+import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
+import com.gsma.services.rcs.RcsServiceNotAvailableException;
+import com.gsma.services.rcs.RcsServiceNotRegisteredException;
+import com.gsma.services.rcs.contact.ContactId;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -36,17 +43,12 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.IInterface;
 
-import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.RcsPermissionDeniedException;
-import com.gsma.services.rcs.RcsService;
-import com.gsma.services.rcs.RcsServiceControl;
-import com.gsma.services.rcs.RcsServiceException;
-import com.gsma.services.rcs.RcsServiceListener;
-import com.gsma.services.rcs.RcsServiceListener.ReasonCode;
-import com.gsma.services.rcs.RcsServiceNotAvailableException;
-import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.sharing.geoloc.IGeolocSharing;
-import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingService;
+import java.lang.ref.WeakReference;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  * This class offers the main entry point to share geolocation info during a CS call. Several
@@ -62,8 +64,6 @@ public final class GeolocSharingService extends RcsService {
     private IGeolocSharingService mApi;
 
     private final Map<GeolocSharingListener, WeakReference<IGeolocSharingListener>> mGeolocSharingListeners = new WeakHashMap<GeolocSharingListener, WeakReference<IGeolocSharingListener>>();
-
-    private static final String ERROR_CNX = "GeolocSharing service not connected";
 
     private static boolean sApiCompatible = false;
 
@@ -162,19 +162,22 @@ public final class GeolocSharingService extends RcsService {
      * @see Geoloc
      */
     public GeolocSharing shareGeoloc(ContactId contact, Geoloc geoloc) throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                IGeolocSharing sharingIntf = mApi.shareGeoloc(contact, geoloc);
-                if (sharingIntf != null) {
-                    return new GeolocSharing(sharingIntf);
-                } else {
-                    return null;
-                }
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            IGeolocSharing sharingIntf = mApi.shareGeoloc(contact, geoloc);
+            if (sharingIntf != null) {
+                return new GeolocSharing(sharingIntf);
+
+            } else {
+                return null;
             }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            RcsServiceNotRegisteredException.assertException(e);
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -185,21 +188,20 @@ public final class GeolocSharingService extends RcsService {
      * @throws RcsServiceException
      */
     public Set<GeolocSharing> getGeolocSharings() throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                Set<GeolocSharing> result = new HashSet<GeolocSharing>();
-                List<IBinder> ishList = mApi.getGeolocSharings();
-                for (IBinder binder : ishList) {
-                    GeolocSharing sharing = new GeolocSharing(
-                            IGeolocSharing.Stub.asInterface(binder));
-                    result.add(sharing);
-                }
-                return result;
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            Set<GeolocSharing> result = new HashSet<GeolocSharing>();
+            List<IBinder> ishList = mApi.getGeolocSharings();
+            for (IBinder binder : ishList) {
+                GeolocSharing sharing = new GeolocSharing(IGeolocSharing.Stub.asInterface(binder));
+                result.add(sharing);
             }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+            return result;
+
+        } catch (Exception e) {
+            throw new RcsGenericException(e);
         }
     }
 
@@ -211,14 +213,15 @@ public final class GeolocSharingService extends RcsService {
      * @throws RcsServiceException
      */
     public GeolocSharing getGeolocSharing(String sharingId) throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                return new GeolocSharing(mApi.getGeolocSharing(sharingId));
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            return new GeolocSharing(mApi.getGeolocSharing(sharingId));
+
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -229,14 +232,13 @@ public final class GeolocSharingService extends RcsService {
      * @throws RcsServiceException
      */
     public void deleteGeolocSharings() throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                mApi.deleteGeolocSharings();
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            mApi.deleteGeolocSharings();
+        } catch (Exception e) {
+            throw new RcsGenericException(e);
         }
     }
 
@@ -248,14 +250,14 @@ public final class GeolocSharingService extends RcsService {
      * @throws RcsServiceException
      */
     public void deleteGeolocSharings(ContactId contact) throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                mApi.deleteGeolocSharings2(contact);
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            mApi.deleteGeolocSharings2(contact);
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -267,14 +269,14 @@ public final class GeolocSharingService extends RcsService {
      * @throws RcsServiceException
      */
     public void deleteGeolocSharing(String sharingId) throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                mApi.deleteGeolocSharing(sharingId);
-            } catch (Exception e) {
-                throw new RcsServiceException(e.getMessage());
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            mApi.deleteGeolocSharing(sharingId);
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -285,17 +287,17 @@ public final class GeolocSharingService extends RcsService {
      * @throws RcsServiceException
      */
     public void addEventListener(GeolocSharingListener listener) throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                IGeolocSharingListener rcsListener = new GeolocSharingListenerImpl(listener);
-                mGeolocSharingListeners.put(listener, new WeakReference<IGeolocSharingListener>(
-                        rcsListener));
-                mApi.addEventListener2(rcsListener);
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
-            }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            IGeolocSharingListener rcsListener = new GeolocSharingListenerImpl(listener);
+            mGeolocSharingListeners.put(listener, new WeakReference<IGeolocSharingListener>(
+                    rcsListener));
+            mApi.addEventListener2(rcsListener);
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -306,22 +308,22 @@ public final class GeolocSharingService extends RcsService {
      * @throws RcsServiceException
      */
     public void removeEventListener(GeolocSharingListener listener) throws RcsServiceException {
-        if (mApi != null) {
-            try {
-                WeakReference<IGeolocSharingListener> weakRef = mGeolocSharingListeners
-                        .remove(listener);
-                if (weakRef == null) {
-                    return;
-                }
-                IGeolocSharingListener rcsListener = weakRef.get();
-                if (rcsListener != null) {
-                    mApi.removeEventListener2(rcsListener);
-                }
-            } catch (Exception e) {
-                throw new RcsServiceException(e);
+        if (mApi == null) {
+            throw new RcsServiceNotAvailableException();
+        }
+        try {
+            WeakReference<IGeolocSharingListener> weakRef = mGeolocSharingListeners
+                    .remove(listener);
+            if (weakRef == null) {
+                return;
             }
-        } else {
-            throw new RcsServiceNotAvailableException(ERROR_CNX);
+            IGeolocSharingListener rcsListener = weakRef.get();
+            if (rcsListener != null) {
+                mApi.removeEventListener2(rcsListener);
+            }
+        } catch (Exception e) {
+            RcsIllegalArgumentException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 }

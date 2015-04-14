@@ -22,6 +22,9 @@
 
 package com.gsma.services.rcs.sharing.video;
 
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsIllegalArgumentException;
+import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
@@ -239,8 +242,9 @@ public class VideoSharing {
     public String getSharingId() throws RcsServiceException {
         try {
             return mSharingInf.getSharingId();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 
@@ -253,8 +257,10 @@ public class VideoSharing {
     public ContactId getRemoteContact() throws RcsServiceException {
         try {
             return mSharingInf.getRemoteContact();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -268,8 +274,10 @@ public class VideoSharing {
     public State getState() throws RcsServiceException {
         try {
             return State.valueOf(mSharingInf.getState());
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -283,8 +291,10 @@ public class VideoSharing {
     public ReasonCode getReasonCode() throws RcsServiceException {
         try {
             return ReasonCode.valueOf(mSharingInf.getReasonCode());
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -298,8 +308,10 @@ public class VideoSharing {
     public Direction getDirection() throws RcsServiceException {
         try {
             return Direction.valueOf(mSharingInf.getDirection());
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -313,7 +325,8 @@ public class VideoSharing {
         try {
             mSharingInf.acceptInvitation(player);
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsIllegalArgumentException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -326,7 +339,7 @@ public class VideoSharing {
         try {
             mSharingInf.rejectInvitation();
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 
@@ -339,7 +352,7 @@ public class VideoSharing {
         try {
             mSharingInf.abortSharing();
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 
@@ -352,8 +365,10 @@ public class VideoSharing {
     public String getVideoEncoding() throws RcsServiceException {
         try {
             return mSharingInf.getVideoEncoding();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -368,8 +383,10 @@ public class VideoSharing {
     public long getTimestamp() throws RcsServiceException {
         try {
             return mSharingInf.getTimestamp();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -382,8 +399,10 @@ public class VideoSharing {
     public long getDuration() throws RcsServiceException {
         try {
             return mSharingInf.getDuration();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -397,8 +416,10 @@ public class VideoSharing {
     public VideoDescriptor getVideoDescriptor() throws RcsServiceException {
         try {
             return mSharingInf.getVideoDescriptor();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 }

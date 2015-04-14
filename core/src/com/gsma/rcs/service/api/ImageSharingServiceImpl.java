@@ -55,6 +55,8 @@ import com.gsma.services.rcs.sharing.image.ImageSharing.State;
 
 import android.net.Uri;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -141,14 +143,15 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * Add an image sharing in the list
      * 
      * @param imageSharing Image sharing
+     * @param sharingId String
      */
-    private void addImageSharing(ImageSharingImpl imageSharing) {
+    private void addImageSharing(ImageSharingImpl imageSharing, String sharingId) {
         if (sLogger.isActivated()) {
-            sLogger.debug("Add an image sharing in the list (size=" + mImageSharingCache.size()
-                    + ")");
+            sLogger.debug(new StringBuilder("Add an image sharing in the list (size=")
+                    .append(mImageSharingCache.size()).append(")").toString());
         }
 
-        mImageSharingCache.put(imageSharing.getSharingId(), imageSharing);
+        mImageSharingCache.put(sharingId, imageSharing);
     }
 
     /**
@@ -259,7 +262,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
                 sharingId, mRichCallLog);
         ImageSharingImpl imageSharing = new ImageSharingImpl(sharingId, mRichcallService,
                 mBroadcaster, storageAccessor, this);
-        addImageSharing(imageSharing);
+        addImageSharing(imageSharing, sharingId);
         session.addListener(imageSharing);
     }
 
@@ -267,9 +270,22 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * Returns the configuration of image sharing service
      * 
      * @return Configuration
+     * @throws RemoteException
      */
-    public IImageSharingServiceConfiguration getConfiguration() {
-        return new IImageSharingServiceConfigurationImpl(mRcsSettings);
+    public IImageSharingServiceConfiguration getConfiguration() throws RemoteException {
+        try {
+            return new IImageSharingServiceConfigurationImpl(mRcsSettings);
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
@@ -282,16 +298,19 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * @param contact Contact ID
      * @param file Uri of file to share
      * @return Image sharing
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public IImageSharing shareImage(ContactId contact, Uri file) throws ServerApiException {
-        if (sLogger.isActivated()) {
-            sLogger.info("Initiate an image sharing session with " + contact);
+    public IImageSharing shareImage(ContactId contact, Uri file) throws RemoteException {
+        if (contact == null) {
+            throw new ServerApiIllegalArgumentException("contact must not be null!");
         }
-
-        // Test IMS connection
+        if (file == null) {
+            throw new ServerApiIllegalArgumentException("file must not be null!");
+        }
+        if (sLogger.isActivated()) {
+            sLogger.info("Initiate an image sharing session with ".concat(contact.toString()));
+        }
         ServerApiUtils.testIms();
-
         try {
             FileDescription desc = FileFactory.getFactory().getFileDescription(file);
             MmContent content = ContentManager
@@ -313,7 +332,7 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
             ImageSharingImpl imageSharing = new ImageSharingImpl(sharingId, mRichcallService,
                     mBroadcaster, storageAccessor, this);
 
-            addImageSharing(imageSharing);
+            addImageSharing(imageSharing, sharingId);
             session.addListener(imageSharing);
 
             new Thread() {
@@ -321,14 +340,18 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
                     session.startSession();
                 }
             }.start();
+
             return imageSharing;
 
-        } catch (Exception e) {
-            // TODO:Handle Security exception in CR026
-            if (sLogger.isActivated()) {
-                sLogger.error("Unexpected error", e);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
-            throw new ServerApiException(e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -336,13 +359,12 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * Returns the list of image sharings in progress
      * 
      * @return List of image sharings
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public List<IBinder> getImageSharings() throws ServerApiException {
+    public List<IBinder> getImageSharings() throws RemoteException {
         if (sLogger.isActivated()) {
             sLogger.info("Get image sharing sessions");
         }
-
         try {
             List<IBinder> imageSharings = new ArrayList<IBinder>(mImageSharingCache.size());
             for (IImageSharing imageSharing : mImageSharingCache.values()) {
@@ -350,11 +372,15 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
             }
             return imageSharings;
 
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Unexpected error", e);
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
             }
-            throw new ServerApiException(e.getMessage());
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -363,20 +389,35 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * 
      * @param sharingId
      * @return Image sharing
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public IImageSharing getImageSharing(String sharingId) throws ServerApiException {
+    public IImageSharing getImageSharing(String sharingId) throws RemoteException {
+        if (TextUtils.isEmpty(sharingId)) {
+            throw new ServerApiIllegalArgumentException("sharingId must not be null or empty!");
+        }
         if (sLogger.isActivated()) {
-            sLogger.info("Get image sharing session " + sharingId);
+            sLogger.info("Get image sharing session ".concat(sharingId));
         }
-        IImageSharing imageSharing = mImageSharingCache.get(sharingId);
-        if (imageSharing != null) {
-            return imageSharing;
+        try {
+            IImageSharing imageSharing = mImageSharingCache.get(sharingId);
+            if (imageSharing != null) {
+                return imageSharing;
+            }
+            ImageSharingPersistedStorageAccessor storageAccessor = new ImageSharingPersistedStorageAccessor(
+                    sharingId, mRichCallLog);
+            return new ImageSharingImpl(sharingId, mRichcallService, mBroadcaster, storageAccessor,
+                    this);
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        ImageSharingPersistedStorageAccessor storageAccessor = new ImageSharingPersistedStorageAccessor(
-                sharingId, mRichCallLog);
-        return new ImageSharingImpl(sharingId, mRichcallService, mBroadcaster, storageAccessor,
-                this);
     }
 
     /**
@@ -399,13 +440,28 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * Adds a listener on image sharing events
      * 
      * @param listener Listener
+     * @throws RemoteException
      */
-    public void addEventListener2(IImageSharingListener listener) {
+    public void addEventListener2(IImageSharingListener listener) throws RemoteException {
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Add an Image sharing event listener");
         }
-        synchronized (lock) {
-            mBroadcaster.addEventListener(listener);
+        try {
+            synchronized (lock) {
+                mBroadcaster.addEventListener(listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -413,23 +469,51 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * Removes a listener on image sharing events
      * 
      * @param listener Listener
+     * @throws RemoteException
      */
-    public void removeEventListener2(IImageSharingListener listener) {
+    public void removeEventListener2(IImageSharingListener listener) throws RemoteException {
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Remove an Image sharing event listener");
         }
-        synchronized (lock) {
-            mBroadcaster.removeEventListener(listener);
+        try {
+            synchronized (lock) {
+                mBroadcaster.removeEventListener(listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
     /**
      * Deletes all image sharing from history and abort/reject any associated ongoing session if
      * such exists.
+     * 
+     * @throws RemoteException
      */
-    public void deleteImageSharings() {
-        mImOperationExecutor.execute(new ImageSharingDeleteTask(this, mRichcallService,
-                mLocalContentResolver, mImsLock));
+    public void deleteImageSharings() throws RemoteException {
+        try {
+            mImOperationExecutor.execute(new ImageSharingDeleteTask(this, mRichcallService,
+                    mLocalContentResolver, mImsLock));
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
@@ -437,10 +521,25 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * ongoing session if such exists
      * 
      * @param contact
+     * @throws RemoteException
      */
-    public void deleteImageSharings2(ContactId contact) {
-        mImOperationExecutor.execute(new ImageSharingDeleteTask(this, mRichcallService,
-                mLocalContentResolver, mImsLock, contact));
+    public void deleteImageSharings2(ContactId contact) throws RemoteException {
+        if (contact == null) {
+            throw new ServerApiIllegalArgumentException("contact must not be null!");
+        }
+        try {
+            mImOperationExecutor.execute(new ImageSharingDeleteTask(this, mRichcallService,
+                    mLocalContentResolver, mImsLock, contact));
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
@@ -448,10 +547,25 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
      * ongoing session if such exists.
      * 
      * @param sharingId
+     * @throws RemoteException
      */
-    public void deleteImageSharing(String sharingId) {
-        mImOperationExecutor.execute(new ImageSharingDeleteTask(this, mRichcallService,
-                mLocalContentResolver, mImsLock, sharingId));
+    public void deleteImageSharing(String sharingId) throws RemoteException {
+        if (TextUtils.isEmpty(sharingId)) {
+            throw new ServerApiIllegalArgumentException("sharingId must not be null or empty!");
+        }
+        try {
+            mImOperationExecutor.execute(new ImageSharingDeleteTask(this, mRichcallService,
+                    mLocalContentResolver, mImsLock, sharingId));
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**

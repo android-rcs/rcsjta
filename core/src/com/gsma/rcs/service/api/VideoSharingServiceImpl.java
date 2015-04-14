@@ -53,6 +53,8 @@ import com.gsma.services.rcs.sharing.video.VideoSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.video.VideoSharing.State;
 
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -143,13 +145,15 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * Add a video sharing in the list
      * 
      * @param videoSharing Video sharing
+     * @param sharingId String
      */
-    private void addVideoSharing(VideoSharingImpl videoSharing) {
+    private void addVideoSharing(VideoSharingImpl videoSharing, String sharingId) {
         if (sLogger.isActivated()) {
-            sLogger.debug("Add a video sharing");
+            sLogger.debug(new StringBuilder("Add an video sharing in the list (size=")
+                    .append(mVideoSharingCache.size()).append(")").toString());
         }
 
-        mVideoSharingCache.put(videoSharing.getSharingId(), videoSharing);
+        mVideoSharingCache.put(sharingId, videoSharing);
     }
 
     /**
@@ -287,7 +291,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
                 sharingId, mRichCallLog);
         VideoSharingImpl videoSharing = new VideoSharingImpl(sharingId, mRichcallService,
                 mBroadcaster, storageAccessor, this);
-        addVideoSharing(videoSharing);
+        addVideoSharing(videoSharing, sharingId);
         session.addListener(videoSharing);
     }
 
@@ -295,9 +299,22 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * Returns the configuration of video sharing service
      * 
      * @return Configuration
+     * @throws RemoteException
      */
-    public IVideoSharingServiceConfiguration getConfiguration() {
-        return new IVideoSharingServiceConfigurationImpl(mRcsSettings);
+    public IVideoSharingServiceConfiguration getConfiguration() throws RemoteException {
+        try {
+            return new IVideoSharingServiceConfigurationImpl(mRcsSettings);
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
@@ -310,22 +327,19 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * @param contact Contact ID
      * @param player Video player
      * @return Video sharing
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public IVideoSharing shareVideo(ContactId contact, IVideoPlayer player)
-            throws ServerApiException {
+    public IVideoSharing shareVideo(ContactId contact, IVideoPlayer player) throws RemoteException {
+        if (contact == null) {
+            throw new ServerApiIllegalArgumentException("contact must not be null!");
+        }
+        if (player == null) {
+            throw new ServerApiIllegalArgumentException("player must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Initiate a live video session with ".concat(contact.toString()));
         }
-
-        // Test IMS connection
         ServerApiUtils.testIms();
-
-        // Test if at least the audio media is configured
-        if (player == null) {
-            throw new ServerApiException("Missing video player");
-        }
-
         try {
             long timestamp = System.currentTimeMillis();
             final VideoStreamingSession session = mRichcallService.initiateLiveVideoSharingSession(
@@ -343,7 +357,7 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
                     content.getHeight(), content.getWidth(), timestamp);
             VideoSharingImpl videoSharing = new VideoSharingImpl(sharingId, mRichcallService,
                     mBroadcaster, storageAccessor, this);
-            addVideoSharing(videoSharing);
+            addVideoSharing(videoSharing, sharingId);
             session.addListener(videoSharing);
 
             new Thread() {
@@ -351,10 +365,18 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
                     session.startSession();
                 }
             }.start();
+
             return videoSharing;
 
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
         } catch (Exception e) {
-            throw new ServerApiException(e);
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -363,34 +385,47 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * 
      * @param sharingId
      * @return Video sharing
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public IVideoSharing getVideoSharing(String sharingId) throws ServerApiException {
+    public IVideoSharing getVideoSharing(String sharingId) throws RemoteException {
+        if (TextUtils.isEmpty(sharingId)) {
+            throw new ServerApiIllegalArgumentException("sharingId must not be null or empty!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Get video sharing ".concat(sharingId));
         }
+        try {
+            IVideoSharing videoSharing = mVideoSharingCache.get(sharingId);
+            if (videoSharing != null) {
+                return videoSharing;
+            }
+            VideoSharingPersistedStorageAccessor storageAccessor = new VideoSharingPersistedStorageAccessor(
+                    sharingId, mRichCallLog);
+            return new VideoSharingImpl(sharingId, mRichcallService, mBroadcaster, storageAccessor,
+                    this);
 
-        IVideoSharing videoSharing = mVideoSharingCache.get(sharingId);
-        if (videoSharing != null) {
-            return videoSharing;
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        VideoSharingPersistedStorageAccessor storageAccessor = new VideoSharingPersistedStorageAccessor(
-                sharingId, mRichCallLog);
-        return new VideoSharingImpl(sharingId, mRichcallService, mBroadcaster, storageAccessor,
-                this);
     }
 
     /**
      * Returns the list of video sharings in progress
      * 
      * @return List of video sharings
-     * @throws ServerApiException
+     * @throws RemoteException
      */
-    public List<IBinder> getVideoSharings() throws ServerApiException {
+    public List<IBinder> getVideoSharings() throws RemoteException {
         if (sLogger.isActivated()) {
             sLogger.info("Get video sharing sessions");
         }
-
         try {
             List<IBinder> videoSharings = new ArrayList<IBinder>(mVideoSharingCache.size());
             for (IVideoSharing videoSharing : mVideoSharingCache.values()) {
@@ -398,8 +433,15 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
             }
             return videoSharings;
 
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
         } catch (Exception e) {
-            throw new ServerApiException(e);
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -423,13 +465,28 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * Adds a listener on video sharing events
      * 
      * @param listener Listener
+     * @throws RemoteException
      */
-    public void addEventListener2(IVideoSharingListener listener) {
+    public void addEventListener2(IVideoSharingListener listener) throws RemoteException {
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Add a video sharing event listener");
         }
-        synchronized (mLock) {
-            mBroadcaster.addEventListener(listener);
+        try {
+            synchronized (mLock) {
+                mBroadcaster.addEventListener(listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -437,13 +494,28 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * Removes a listener from video sharing events
      * 
      * @param listener Listener
+     * @throws RemoteException
      */
-    public void removeEventListener2(IVideoSharingListener listener) {
+    public void removeEventListener2(IVideoSharingListener listener) throws RemoteException {
+        if (listener == null) {
+            throw new ServerApiIllegalArgumentException("listener must not be null!");
+        }
         if (sLogger.isActivated()) {
             sLogger.info("Remove a video sharing event listener");
         }
-        synchronized (mLock) {
-            mBroadcaster.removeEventListener(listener);
+        try {
+            synchronized (mLock) {
+                mBroadcaster.removeEventListener(listener);
+            }
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
     }
 
@@ -470,10 +542,23 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
     /**
      * Deletes all video sharing from history and abort/reject any associated ongoing session if
      * such exists.
+     * 
+     * @throws RemoteException
      */
-    public void deleteVideoSharings() {
-        mImOperationExecutor.execute(new VideoSharingDeleteTask(this, mRichcallService,
-                mLocalContentResolver, mImsLock));
+    public void deleteVideoSharings() throws RemoteException {
+        try {
+            mImOperationExecutor.execute(new VideoSharingDeleteTask(this, mRichcallService,
+                    mLocalContentResolver, mImsLock));
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
@@ -481,10 +566,25 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * associated ongoing session if such exists.
      * 
      * @param contact
+     * @throws RemoteException
      */
-    public void deleteVideoSharings2(ContactId contact) {
-        mImOperationExecutor.execute(new VideoSharingDeleteTask(this, mRichcallService,
-                mLocalContentResolver, mImsLock, contact));
+    public void deleteVideoSharings2(ContactId contact) throws RemoteException {
+        if (contact == null) {
+            throw new ServerApiIllegalArgumentException("contact must not be null!");
+        }
+        try {
+            mImOperationExecutor.execute(new VideoSharingDeleteTask(this, mRichcallService,
+                    mLocalContentResolver, mImsLock, contact));
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
@@ -492,10 +592,25 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
      * ongoing session if such exists.
      * 
      * @param sharingId
+     * @throws RemoteException
      */
-    public void deleteVideoSharing(String sharingId) {
-        mImOperationExecutor.execute(new VideoSharingDeleteTask(this, mRichcallService,
-                mLocalContentResolver, mImsLock, sharingId));
+    public void deleteVideoSharing(String sharingId) throws RemoteException {
+        if (TextUtils.isEmpty(sharingId)) {
+            throw new ServerApiIllegalArgumentException("sharingId must not be null or empty!");
+        }
+        try {
+            mImOperationExecutor.execute(new VideoSharingDeleteTask(this, mRichcallService,
+                    mLocalContentResolver, mImsLock, sharingId));
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     public void broadcastDeleted(ContactId contact, Set<String> sharingIds) {

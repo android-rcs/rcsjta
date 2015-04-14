@@ -41,6 +41,7 @@ import com.gsma.services.rcs.sharing.image.ImageSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.image.ImageSharing.State;
 
 import android.net.Uri;
+import android.os.RemoteException;
 
 import javax2.sip.message.Response;
 
@@ -69,7 +70,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     /**
      * The logger
      */
-    private final Logger logger = Logger.getLogger(getClass().getName());
+    private final Logger mLogger = Logger.getLogger(getClass().getName());
 
     /**
      * Constructor
@@ -132,8 +133,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
     }
 
     private void handleSessionRejected(ReasonCode reasonCode, ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Session rejected; reasonCode=" + reasonCode + ".");
+        if (mLogger.isActivated()) {
+            mLogger.info("Session rejected; reasonCode=" + reasonCode + ".");
         }
         synchronized (lock) {
             mImageSharingService.removeImageSharing(mSharingId);
@@ -145,207 +146,378 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      * Returns the sharing ID of the image sharing
      * 
      * @return Sharing ID
+     * @throws RemoteException
      */
-    public String getSharingId() {
-        return mSharingId;
+    public String getSharingId() throws RemoteException {
+        try {
+            return mSharingId;
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
      * Returns the remote contact identifier
      * 
      * @return ContactId
+     * @throws RemoteException
      */
-    public ContactId getRemoteContact() {
-        ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
-        if (session == null) {
-            return mPersistentStorage.getRemoteContact();
+    public ContactId getRemoteContact() throws RemoteException {
+        try {
+            ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
+            if (session == null) {
+                return mPersistentStorage.getRemoteContact();
+            }
+            return session.getRemoteContact();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return session.getRemoteContact();
     }
 
     /**
      * Returns the complete filename including the path of the file to be transferred
      * 
      * @return Filename
+     * @throws RemoteException
      */
-    public String getFileName() {
-        ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
-        if (session == null) {
-            return mPersistentStorage.getFileName();
+    public String getFileName() throws RemoteException {
+        try {
+            ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
+            if (session == null) {
+                return mPersistentStorage.getFileName();
+            }
+            return session.getContent().getName();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return session.getContent().getName();
     }
 
     /**
      * Returns the Uri of the file to be transferred
      * 
      * @return Filename
+     * @throws RemoteException
      */
-    public Uri getFile() {
-        ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
-        if (session == null) {
-            return mPersistentStorage.getFile();
+    public Uri getFile() throws RemoteException {
+        try {
+            ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
+            if (session == null) {
+                return mPersistentStorage.getFile();
+            }
+            return session.getContent().getUri();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return session.getContent().getUri();
     }
 
     /**
      * Returns the size of the file to be transferred
      * 
      * @return Size in bytes
+     * @throws RemoteException
      */
-    public long getFileSize() {
-        ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
-        if (session == null) {
-            return mPersistentStorage.getFileSize();
+    public long getFileSize() throws RemoteException {
+        try {
+            ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
+            if (session == null) {
+                return mPersistentStorage.getFileSize();
+            }
+            return session.getContent().getSize();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return session.getContent().getSize();
     }
 
     /**
      * Returns the MIME type of the file to be transferred
      * 
      * @return Type
+     * @throws RemoteException
      */
-    public String getMimeType() {
-        ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
-        if (session == null) {
-            return mPersistentStorage.getMimeType();
+    public String getMimeType() throws RemoteException {
+        try {
+            ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
+            if (session == null) {
+                return mPersistentStorage.getMimeType();
+            }
+            return session.getContent().getEncoding();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return session.getContent().getEncoding();
     }
 
     /**
      * Returns the state of the image sharing
      * 
      * @return State
+     * @throws RemoteException
      */
-    public int getState() {
-        ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
-        if (session == null) {
-            return mPersistentStorage.getState().toInt();
-        }
-        SipDialogPath dialogPath = session.getDialogPath();
-        if (dialogPath != null && dialogPath.isSessionEstablished()) {
-            return ImageSharing.State.STARTED.toInt();
-        } else if (session.isInitiatedByRemote()) {
-            if (session.isSessionAccepted()) {
-                return ImageSharing.State.ACCEPTING.toInt();
+    public int getState() throws RemoteException {
+        try {
+            ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
+            if (session == null) {
+                return mPersistentStorage.getState().toInt();
             }
-            return ImageSharing.State.INVITED.toInt();
+            SipDialogPath dialogPath = session.getDialogPath();
+            if (dialogPath != null && dialogPath.isSessionEstablished()) {
+                return ImageSharing.State.STARTED.toInt();
+
+            } else if (session.isInitiatedByRemote()) {
+                if (session.isSessionAccepted()) {
+                    return ImageSharing.State.ACCEPTING.toInt();
+                }
+                return ImageSharing.State.INVITED.toInt();
+            }
+            return ImageSharing.State.INITIATING.toInt();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return ImageSharing.State.INITIATING.toInt();
     }
 
     /**
      * Returns the reason code of the state of the image sharing
      * 
      * @return ReasonCode
+     * @throws RemoteException
      */
-    public int getReasonCode() {
-        ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
-        if (session == null) {
-            return mPersistentStorage.getReasonCode().toInt();
+    public int getReasonCode() throws RemoteException {
+        try {
+            ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
+            if (session == null) {
+                return mPersistentStorage.getReasonCode().toInt();
+            }
+            return ReasonCode.UNSPECIFIED.toInt();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return ReasonCode.UNSPECIFIED.toInt();
     }
 
     /**
      * Returns the direction of the sharing (incoming or outgoing)
      * 
      * @return Direction
+     * @throws RemoteException
      * @see Direction
      */
-    public int getDirection() {
-        ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
-        if (session == null) {
-            return mPersistentStorage.getDirection().toInt();
+    public int getDirection() throws RemoteException {
+        try {
+            ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
+            if (session == null) {
+                return mPersistentStorage.getDirection().toInt();
+            }
+            if (session.isInitiatedByRemote()) {
+                return Direction.INCOMING.toInt();
+            }
+            return Direction.OUTGOING.toInt();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        if (session.isInitiatedByRemote()) {
-            return Direction.INCOMING.toInt();
-        }
-        return Direction.OUTGOING.toInt();
     }
 
-    public long getTimestamp() {
-        ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
-        if (session == null) {
-            return mPersistentStorage.getTimestamp();
+    /**
+     * Returns the local timestamp of when the image sharing was initiated for outgoing image
+     * sharing or the local timestamp of when the image sharing invitation was received for incoming
+     * image sharings.
+     * 
+     * @return long
+     * @throws RemoteException
+     */
+    public long getTimestamp() throws RemoteException {
+        try {
+            ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
+            if (session == null) {
+                return mPersistentStorage.getTimestamp();
+            }
+            return session.getTimestamp();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
         }
-        return session.getTimestamp();
     }
 
     /**
      * Accepts image sharing invitation
+     * 
+     * @throws RemoteException
      */
-    public void acceptInvitation() {
-        if (logger.isActivated()) {
-            logger.info("Accept session invitation");
-        }
-        final ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
-        if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException("Session with sharing ID '" + mSharingId
-                    + "' not available.");
-        }
-        // Accept invitation
-        new Thread() {
-            public void run() {
-                session.acceptSession();
+    public void acceptInvitation() throws RemoteException {
+        try {
+            if (mLogger.isActivated()) {
+                mLogger.info("Accept session invitation");
             }
-        }.start();
+            final ImageTransferSession session = mRichcallService
+                    .getImageTransferSession(mSharingId);
+            if (session == null) {
+                throw new ServerApiGenericException(new StringBuilder("Session with sharing ID '")
+                        .append(mSharingId).append("' not available!").toString());
+            }
+            new Thread() {
+                public void run() {
+                    session.acceptSession();
+                }
+            }.start();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
      * Rejects image sharing invitation
+     * 
+     * @throws RemoteException
      */
-    public void rejectInvitation() {
-        if (logger.isActivated()) {
-            logger.info("Reject session invitation");
-        }
-        final ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
-        if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException("Session with sharing ID '" + mSharingId
-                    + "' not available.");
-        }
-        // Reject invitation
-        new Thread() {
-            public void run() {
-                session.rejectSession(Response.DECLINE);
+    public void rejectInvitation() throws RemoteException {
+        try {
+            if (mLogger.isActivated()) {
+                mLogger.info("Reject session invitation");
             }
-        }.start();
+            final ImageTransferSession session = mRichcallService
+                    .getImageTransferSession(mSharingId);
+            if (session == null) {
+                throw new ServerApiGenericException(new StringBuilder("Session with sharing ID '")
+                        .append(mSharingId).append("' not available!").toString());
+            }
+            new Thread() {
+                public void run() {
+                    session.rejectSession(Response.DECLINE);
+                }
+            }.start();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /**
      * Aborts the sharing
+     * 
+     * @throws RemoteException
      */
-    public void abortSharing() {
-        if (logger.isActivated()) {
-            logger.info("Cancel session");
-        }
-        final ImageTransferSession session = mRichcallService.getImageTransferSession(mSharingId);
-        if (session == null) {
-            /*
-             * TODO: Throw correct exception as part of CR037 implementation
-             */
-            throw new IllegalStateException("Session with sharing ID '" + mSharingId
-                    + "' not available.");
-        }
-        if (session.isImageTransfered()) {
-            // Automatically closed after transfer
-            return;
-        }
-        /* Terminate the session */
-        new Thread() {
-            public void run() {
-                session.terminateSession(TerminationReason.TERMINATION_BY_USER);
+    public void abortSharing() throws RemoteException {
+        try {
+            if (mLogger.isActivated()) {
+                mLogger.info("Cancel session");
             }
-        }.start();
+            final ImageTransferSession session = mRichcallService
+                    .getImageTransferSession(mSharingId);
+            if (session == null) {
+                throw new ServerApiGenericException(new StringBuilder("Session with sharing ID '")
+                        .append(mSharingId).append("' not available!").toString());
+            }
+            if (session.isImageTransfered()) {
+                throw new ServerApiPermissionDeniedException(
+                        "Cannot abort as image is already transferred!");
+            }
+            new Thread() {
+                public void run() {
+                    session.terminateSession(TerminationReason.TERMINATION_BY_USER);
+                }
+            }.start();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
     }
 
     /*------------------------------- SESSION EVENTS ----------------------------------*/
@@ -354,8 +526,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      * Session is started
      */
     public void handleSessionStarted(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Session started");
+        if (mLogger.isActivated()) {
+            mLogger.info("Session started");
         }
         synchronized (lock) {
             setStateAndReasonCode(contact, ImageSharing.State.STARTED, ReasonCode.UNSPECIFIED);
@@ -368,8 +540,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      * @param reason Termination reason
      */
     public void handleSessionAborted(ContactId contact, TerminationReason reason) {
-        if (logger.isActivated()) {
-            logger.info(new StringBuilder("Session aborted (terminationReason ").append(reason)
+        if (mLogger.isActivated()) {
+            mLogger.info(new StringBuilder("Session aborted (terminationReason ").append(reason)
                     .append(")").toString());
         }
         synchronized (lock) {
@@ -410,8 +582,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      * @param error Error
      */
     public void handleSharingError(ContactId contact, ContentSharingError error) {
-        if (logger.isActivated()) {
-            logger.info("Sharing error " + error.getErrorCode());
+        if (mLogger.isActivated()) {
+            mLogger.info("Sharing error " + error.getErrorCode());
         }
         ImageSharingStateAndReasonCode stateAndReasonCode = toStateAndReasonCode(error);
         State state = stateAndReasonCode.getState();
@@ -432,7 +604,7 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
         synchronized (lock) {
             mPersistentStorage.setProgress(currentSize);
 
-            mBroadcaster.broadcastProgressUpdate(contact, getSharingId(), currentSize, totalSize);
+            mBroadcaster.broadcastProgressUpdate(contact, mSharingId, currentSize, totalSize);
         }
     }
 
@@ -443,8 +615,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
      * @param file File URI associated to the received content
      */
     public void handleContentTransfered(ContactId contact, Uri file) {
-        if (logger.isActivated()) {
-            logger.info("Image transferred");
+        if (mLogger.isActivated()) {
+            mLogger.info("Image transferred");
         }
         synchronized (lock) {
             mImageSharingService.removeImageSharing(mSharingId);
@@ -454,8 +626,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
     @Override
     public void handleSessionAccepted(ContactId contact) {
-        if (logger.isActivated()) {
-            logger.info("Accepting sharing");
+        if (mLogger.isActivated()) {
+            mLogger.info("Accepting sharing");
         }
         synchronized (lock) {
             setStateAndReasonCode(contact, ImageSharing.State.ACCEPTING, ReasonCode.UNSPECIFIED);
@@ -487,8 +659,8 @@ public class ImageSharingImpl extends IImageSharing.Stub implements ImageTransfe
 
     @Override
     public void handleSessionInvited(ContactId contact, MmContent content, long timestamp) {
-        if (logger.isActivated()) {
-            logger.info("Invited to image sharing session");
+        if (mLogger.isActivated()) {
+            mLogger.info("Invited to image sharing session");
         }
         synchronized (lock) {
             mPersistentStorage.addImageSharing(contact, Direction.INCOMING, content,

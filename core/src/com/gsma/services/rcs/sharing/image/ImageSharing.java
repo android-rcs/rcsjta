@@ -22,6 +22,9 @@
 
 package com.gsma.services.rcs.sharing.image;
 
+import com.gsma.services.rcs.RcsGenericException;
+import com.gsma.services.rcs.RcsPermissionDeniedException;
+import com.gsma.services.rcs.RcsPersistentStorageException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.contact.ContactId;
@@ -249,8 +252,9 @@ public class ImageSharing {
     public String getSharingId() throws RcsServiceException {
         try {
             return mSharingInf.getSharingId();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 
@@ -263,8 +267,10 @@ public class ImageSharing {
     public ContactId getRemoteContact() throws RcsServiceException {
         try {
             return mSharingInf.getRemoteContact();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -277,8 +283,10 @@ public class ImageSharing {
     public Uri getFile() throws RcsServiceException {
         try {
             return mSharingInf.getFile();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -291,8 +299,10 @@ public class ImageSharing {
     public String getFileName() throws RcsServiceException {
         try {
             return mSharingInf.getFileName();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -305,8 +315,10 @@ public class ImageSharing {
     public long getFileSize() throws RcsServiceException {
         try {
             return mSharingInf.getFileSize();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -319,8 +331,10 @@ public class ImageSharing {
     public String getMimeType() throws RcsServiceException {
         try {
             return mSharingInf.getMimeType();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -335,8 +349,10 @@ public class ImageSharing {
     public long getTimestamp() throws RcsServiceException {
         try {
             return mSharingInf.getTimestamp();
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -350,8 +366,10 @@ public class ImageSharing {
     public State getState() throws RcsServiceException {
         try {
             return State.valueOf(mSharingInf.getState());
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -365,8 +383,10 @@ public class ImageSharing {
     public ReasonCode getReasonCode() throws RcsServiceException {
         try {
             return ReasonCode.valueOf(mSharingInf.getReasonCode());
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -380,8 +400,10 @@ public class ImageSharing {
     public Direction getDirection() throws RcsServiceException {
         try {
             return Direction.valueOf(mSharingInf.getDirection());
+
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 
@@ -394,7 +416,7 @@ public class ImageSharing {
         try {
             mSharingInf.acceptInvitation();
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 
@@ -407,7 +429,7 @@ public class ImageSharing {
         try {
             mSharingInf.rejectInvitation();
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            throw new RcsGenericException(e);
         }
     }
 
@@ -420,7 +442,8 @@ public class ImageSharing {
         try {
             mSharingInf.abortSharing();
         } catch (Exception e) {
-            throw new RcsServiceException(e.getMessage());
+            RcsPermissionDeniedException.assertException(e);
+            throw new RcsGenericException(e);
         }
     }
 }
