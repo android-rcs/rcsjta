@@ -234,6 +234,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
             case REJECTED_MAX_CHATS:
             case REJECTED_SPAM:
             case REJECTED_BY_TIMEOUT:
+            case REJECTED_BY_SYSTEM:
                 if (logger.isActivated()) {
                     logger.debug(new StringBuilder("Group chat with chatId '").append(mChatId)
                             .append("' is ").append(reasonCode).toString());

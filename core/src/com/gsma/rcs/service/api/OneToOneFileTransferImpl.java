@@ -1002,6 +1002,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
                 return false;
             }
             State rcsState = mPersistentStorage.getState();
+            ReasonCode rcsReasonCode = mPersistentStorage.getReasonCode();
             /*
              * According to Blackbird PDD v3.0, "When a File Transfer is interrupted by sender
              * interaction (or fails), then ‘resend button’ shall be offered to allow the user to
@@ -1010,8 +1011,20 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             switch (rcsState) {
                 case FAILED:
                     return true;
+                case REJECTED:
+                    switch (rcsReasonCode) {
+                        case REJECTED_BY_SYSTEM:
+                            return true;
+                        default:
+                            if (sLogger.isActivated()) {
+                                sLogger.debug(new StringBuilder(
+                                        "Cannot resend transfer with fileTransferId ")
+                                        .append(mFileTransferId).append(" as reasonCode=")
+                                        .append(rcsReasonCode).toString());
+                            }
+                            return false;
+                    }
                 case ABORTED:
-                    ReasonCode rcsReasonCode = mPersistentStorage.getReasonCode();
                     switch (rcsReasonCode) {
                         case ABORTED_BY_SYSTEM:
                         case ABORTED_BY_USER:
