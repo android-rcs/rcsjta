@@ -777,28 +777,6 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
 
     /*
      * (non-Javadoc)
-     * @see com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener# handleMessageSending(
-     * com.gsma.rcs.core.ims.service.im.chat.ChatMessage)
-     */
-    @Override
-    public void handleMessageSending(ChatMessage msg) {
-        String msgId = msg.getMessageId();
-        String networkMimeType = msg.getMimeType();
-        if (logger.isActivated()) {
-            logger.info(new StringBuilder("Message is being sent; msgId=").append(msgId)
-                    .append("; mimeType").append(networkMimeType).append(".").toString());
-        }
-        String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(networkMimeType);
-        synchronized (lock) {
-            mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.SENDING,
-                    ReasonCode.UNSPECIFIED);
-            mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId,
-                    Status.SENDING, ReasonCode.UNSPECIFIED);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
      * @see com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener# handleMessageSent(
      * com.gsma.rcs.core.ims.service.im.chat.ChatMessage)
      */

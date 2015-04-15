@@ -57,13 +57,6 @@ public interface ChatSessionListener extends ImsSessionListener {
     public void handleIsComposingEvent(ContactId contact, boolean status);
 
     /**
-     * Notifying sending of a message
-     * 
-     * @param msg Chat message
-     */
-    public void handleMessageSending(ChatMessage msg);
-
-    /**
      * Notifying that a message has been sent
      * 
      * @param msgId Message ID

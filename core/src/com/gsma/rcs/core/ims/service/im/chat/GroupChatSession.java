@@ -57,7 +57,6 @@ import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -380,11 +379,6 @@ public abstract class GroupChatSession extends ChatSession {
         } else {
             networkContent = ChatUtils.buildCpimMessage(from, to, msg.getContent(), mimeType,
                     msg.getTimestampSent());
-        }
-
-        Collection<ImsSessionListener> listeners = getListeners();
-        for (ImsSessionListener listener : listeners) {
-            ((ChatSessionListener) listener).handleMessageSending(msg);
         }
 
         boolean sendOperationSucceeded = false;

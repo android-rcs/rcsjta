@@ -44,7 +44,6 @@ import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contact.ContactId;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -154,11 +153,6 @@ public abstract class OneToOneChatSession extends ChatSession {
         } else {
             networkContent = ChatUtils.buildCpimMessage(from, to, msg.getContent(), mimeType,
                     msg.getTimestampSent());
-        }
-
-        Collection<ImsSessionListener> listeners = getListeners();
-        for (ImsSessionListener listener : listeners) {
-            ((ChatSessionListener) listener).handleMessageSending(msg);
         }
 
         boolean sendOperationSucceeded = false;

@@ -1333,8 +1333,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     break;
                 case TERMINATION_BY_TIMEOUT:
                 case TERMINATION_BY_INACTIVITY:
-                    setStateAndReasonCode(State.ABORTED,
-                            ReasonCode.ABORTED_BY_INACTIVITY);
+                    setStateAndReasonCode(State.ABORTED, ReasonCode.ABORTED_BY_INACTIVITY);
                     break;
                 case TERMINATION_BY_REMOTE:
                     setStateAndReasonCode(State.ABORTED, ReasonCode.ABORTED_BY_REMOTE);
@@ -1437,25 +1436,6 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         synchronized (lock) {
             // Notify event listeners
             mBroadcaster.broadcastComposingEvent(mChatId, contact, status);
-        }
-    }
-
-    @Override
-    public void handleMessageSending(ChatMessage msg) {
-        String msgId = msg.getMessageId();
-        String networkMimeType = msg.getMimeType();
-        if (logger.isActivated()) {
-            logger.info(new StringBuilder("Message is being sent; msgId=").append(msgId)
-                    .append("networkMimeType=").append(networkMimeType).append(".").append(".")
-                    .toString());
-        }
-        String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(networkMimeType);
-        synchronized (lock) {
-            mPersistentStorage.setMessageStatusAndReasonCode(msgId, Status.SENDING,
-                    Content.ReasonCode.UNSPECIFIED);
-
-            mBroadcaster.broadcastMessageStatusChanged(mChatId, apiMimeType, msgId, Status.SENDING,
-                    Content.ReasonCode.UNSPECIFIED);
         }
     }
 
