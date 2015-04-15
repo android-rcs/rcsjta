@@ -23,6 +23,7 @@
 package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.GroupDeliveryInfo.ReasonCode;
 import com.gsma.services.rcs.GroupDeliveryInfo.Status;
 import com.gsma.services.rcs.contact.ContactId;
@@ -66,15 +67,15 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
 
     @Override
     public Uri addGroupChatDeliveryInfoEntry(String chatId, ContactId contact, String msgId,
-            Status status, ReasonCode reasonCode) {
+            Status status, ReasonCode reasonCode, long timestampDelivered, long timestampDisplayed) {
         ContentValues values = new ContentValues();
         values.put(GroupDeliveryInfoData.KEY_CHAT_ID, chatId);
         values.put(GroupDeliveryInfoData.KEY_ID, msgId);
         values.put(GroupDeliveryInfoData.KEY_CONTACT, contact.toString());
         values.put(GroupDeliveryInfoData.KEY_DELIVERY_STATUS, status.toInt());
         values.put(GroupDeliveryInfoData.KEY_REASON_CODE, reasonCode.toInt());
-        values.put(GroupDeliveryInfoData.KEY_TIMESTAMP_DELIVERED, 0);
-        values.put(GroupDeliveryInfoData.KEY_TIMESTAMP_DISPLAYED, 0);
+        values.put(GroupDeliveryInfoData.KEY_TIMESTAMP_DELIVERED, timestampDelivered);
+        values.put(GroupDeliveryInfoData.KEY_TIMESTAMP_DISPLAYED, timestampDisplayed);
         return mLocalContentResolver.insert(GroupDeliveryInfoData.CONTENT_URI, values);
     }
 
@@ -86,21 +87,19 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
      * @param msgId Message ID
      * @param status Status
      * @param reasonCode Reason code
+     * @return true if an entry was updated, otherwise false
      */
-    public void setGroupChatDeliveryInfoStatusAndReasonCode(String chatId, ContactId contact,
+    public boolean setGroupChatDeliveryInfoStatusAndReasonCode(String chatId, ContactId contact,
             String msgId, Status status, ReasonCode reasonCode) {
         ContentValues values = new ContentValues();
         values.put(GroupDeliveryInfoData.KEY_DELIVERY_STATUS, status.toInt());
-        values.put(GroupDeliveryInfoData.KEY_TIMESTAMP_DELIVERED, System.currentTimeMillis());
         values.put(GroupDeliveryInfoData.KEY_REASON_CODE, reasonCode.toInt());
         String[] selectionArgs = new String[] {
                 msgId, contact.toString()
         };
 
-        if (mLocalContentResolver.update(GroupDeliveryInfoData.CONTENT_URI, values,
-                SELECTION_DELIVERY_INFO_BY_MSG_ID_AND_CONTACT, selectionArgs) < 1) {
-            addGroupChatDeliveryInfoEntry(chatId, contact, msgId, status, reasonCode);
-        }
+        return (mLocalContentResolver.update(GroupDeliveryInfoData.CONTENT_URI, values,
+                SELECTION_DELIVERY_INFO_BY_MSG_ID_AND_CONTACT, selectionArgs) >= 1);
     }
 
     @Override
@@ -133,6 +132,71 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
             if (cursor != null) {
                 cursor.close();
             }
+        }
+    }
+
+    /**
+     * Set outgoing group chat message or file to delivered
+     * 
+     * @param chatId Group chat ID
+     * @param contact The contact ID for which the entry is to be updated
+     * @param msgId Message ID
+     * @param timestampDelivered Time for delivery
+     */
+    public void setGroupChatDeliveryInfoDelivered(String chatId, ContactId contact, String msgId,
+            long timestampDelivered) {
+        GroupDeliveryInfo.Status status = GroupDeliveryInfo.Status.DELIVERED;
+        GroupDeliveryInfo.ReasonCode reason = GroupDeliveryInfo.ReasonCode.UNSPECIFIED;
+
+        ContentValues values = new ContentValues();
+        values.put(GroupDeliveryInfoData.KEY_DELIVERY_STATUS, status.toInt());
+        values.put(GroupDeliveryInfoData.KEY_TIMESTAMP_DELIVERED, timestampDelivered);
+        values.put(GroupDeliveryInfoData.KEY_REASON_CODE, reason.toInt());
+        String[] selectionArgs = new String[] {
+                msgId, contact.toString()
+        };
+
+        if (mLocalContentResolver.update(GroupDeliveryInfoData.CONTENT_URI, values,
+                SELECTION_DELIVERY_INFO_BY_MSG_ID_AND_CONTACT, selectionArgs) < 1) {
+            /*
+             * No entry updated means that there was no matching row. Adding row and setting
+             * displayed timestamp to 0.
+             */
+            addGroupChatDeliveryInfoEntry(chatId, contact, msgId, status, reason,
+                    timestampDelivered, 0);
+        }
+    }
+
+    /**
+     * Set outgoing group chat message or file to displayed
+     * 
+     * @param chatId Group chat ID
+     * @param contact The contact ID for which the entry is to be updated
+     * @param msgId Message ID
+     * @param timestampDisplayed Time for display
+     */
+    public void setGroupChatDeliveryInfoDisplayed(String chatId, ContactId contact, String msgId,
+            long timestampDisplayed) {
+        ContentValues values = new ContentValues();
+        GroupDeliveryInfo.Status status = GroupDeliveryInfo.Status.DISPLAYED;
+        GroupDeliveryInfo.ReasonCode reason = GroupDeliveryInfo.ReasonCode.UNSPECIFIED;
+
+        values.put(GroupDeliveryInfoData.KEY_DELIVERY_STATUS, status.toInt());
+        values.put(GroupDeliveryInfoData.KEY_TIMESTAMP_DISPLAYED, timestampDisplayed);
+        values.put(GroupDeliveryInfoData.KEY_REASON_CODE, reason.toInt());
+        String[] selectionArgs = new String[] {
+                msgId, contact.toString()
+        };
+
+        if (mLocalContentResolver.update(GroupDeliveryInfoData.CONTENT_URI, values,
+                SELECTION_DELIVERY_INFO_BY_MSG_ID_AND_CONTACT, selectionArgs) < 1) {
+            /*
+             * No entry updated means that there was no matching row. Adding row and setting
+             * delivered timestamp to same as displayed timestamp. This is the most reasonable value
+             * we can set at this point.
+             */
+            addGroupChatDeliveryInfoEntry(chatId, contact, msgId, status, reason,
+                    timestampDisplayed, timestampDisplayed);
         }
     }
 }

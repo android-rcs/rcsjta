@@ -234,11 +234,20 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
+    public void setFileTransferDelivered(String fileTransferId, long timestampDelivered) {
+        mFileTransferLog.setFileTransferDelivered(fileTransferId, timestampDelivered);
+    }
+
+    @Override
+    public void setFileTransferDisplayed(String fileTransferId, long timestampDisplayed) {
+        mFileTransferLog.setFileTransferDisplayed(fileTransferId, timestampDisplayed);
+    }
+
+    @Override
     public void setFileTransferStateAndTimestamps(String fileTransferId, FileTransfer.State state,
             FileTransfer.ReasonCode reasonCode, long timestamp, long timestampSent) {
         mFileTransferLog.setFileTransferStateAndTimestamps(fileTransferId, state, reasonCode,
                 timestamp, timestampSent);
-
     }
 
     @Override
@@ -285,16 +294,17 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 
     @Override
     public Uri addGroupChatDeliveryInfoEntry(String chatId, ContactId contact, String msgId,
-            GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
+            GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode,
+            long timestampDelivered, long timestampDisplayed) {
         return mGroupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId, contact, msgId,
-                status, reasonCode);
+                status, reasonCode, timestampDelivered, timestampDisplayed);
     }
 
     @Override
-    public void setGroupChatDeliveryInfoStatusAndReasonCode(String chatId, ContactId contact,
+    public boolean setGroupChatDeliveryInfoStatusAndReasonCode(String chatId, ContactId contact,
             String msgId, GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
-        mGroupChatDeliveryInfoLog.setGroupChatDeliveryInfoStatusAndReasonCode(chatId, contact,
-                msgId, status, reasonCode);
+        return mGroupChatDeliveryInfoLog.setGroupChatDeliveryInfoStatusAndReasonCode(chatId,
+                contact, msgId, status, reasonCode);
     }
 
     @Override
@@ -511,5 +521,29 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     @Override
     public boolean isOneToOneChatMessage(String messageId) {
         return mMessageLog.isOneToOneChatMessage(messageId);
+    }
+
+    @Override
+    public void setGroupChatDeliveryInfoDelivered(String chatId, ContactId contact,
+            String fileTransferId, long timestampDelivered) {
+        mGroupChatDeliveryInfoLog.setGroupChatDeliveryInfoDelivered(chatId, contact,
+                fileTransferId, timestampDelivered);
+    }
+
+    @Override
+    public void setGroupChatDeliveryInfoDisplayed(String chatId, ContactId contact,
+            String fileTransferId, long timestampDisplayed) {
+        mGroupChatDeliveryInfoLog.setGroupChatDeliveryInfoDisplayed(chatId, contact,
+                fileTransferId, timestampDisplayed);
+    }
+
+    @Override
+    public void setChatMessageStatusDelivered(String msgId, long timestampDelivered) {
+        mMessageLog.setChatMessageStatusDelivered(msgId, timestampDelivered);
+    }
+
+    @Override
+    public void setChatMessageStatusDisplayed(String msgId, long timestampDisplayed) {
+        mMessageLog.setChatMessageStatusDisplayed(msgId, timestampDisplayed);
     }
 }

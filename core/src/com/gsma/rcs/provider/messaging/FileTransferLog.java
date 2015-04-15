@@ -213,9 +213,10 @@ public class FileTransferLog implements IFileTransferLog {
             }
 
             for (ContactId contact : recipients) {
+                /* Add entry with delivered and displayed timestamps set to 0. */
                 mGroupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId, contact,
                         fileTransferId, GroupDeliveryInfo.Status.NOT_DELIVERED,
-                        GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
+                        GroupDeliveryInfo.ReasonCode.UNSPECIFIED, 0, 0);
             }
         } catch (Exception e) {
             if (logger.isActivated()) {
@@ -809,6 +810,41 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_REASON_CODE, reasonCode.toInt());
         values.put(FileTransferData.KEY_TIMESTAMP, timestamp);
         values.put(FileTransferData.KEY_TIMESTAMP_SENT, timestampSent);
+        mLocalContentResolver.update(
+                Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
+                null);
+    }
+
+    public void setFileTransferDelivered(String fileTransferId, long timestampDelivered) {
+        if (logger.isActivated()) {
+            logger.debug(new StringBuilder("setFileTransferDelivered fileTransferId=")
+                    .append(fileTransferId).append(", timestampDelivered=")
+                    .append(timestampDelivered).toString());
+        }
+
+        ContentValues values = new ContentValues();
+        values.put(FileTransferData.KEY_STATE, FileTransfer.State.DELIVERED.toInt());
+        values.put(FileTransferData.KEY_REASON_CODE, FileTransfer.ReasonCode.UNSPECIFIED.toInt());
+        values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, timestampDelivered);
+
+        mLocalContentResolver.update(
+                Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
+                null);
+    }
+
+    public void setFileTransferDisplayed(String fileTransferId, long timestampDisplayed) {
+        if (logger.isActivated()) {
+            logger.debug(new StringBuilder("setFileTransferDisplayed fileTransferId=")
+                    .append(fileTransferId).append(", timestampDisplayed=")
+                    .append(timestampDisplayed).toString());
+        }
+
+        ContentValues values = new ContentValues();
+
+        values.put(FileTransferData.KEY_STATE, FileTransfer.State.DISPLAYED.toInt());
+        values.put(FileTransferData.KEY_REASON_CODE, FileTransfer.ReasonCode.UNSPECIFIED.toInt());
+        values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, timestampDisplayed);
+
         mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
                 null);

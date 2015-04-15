@@ -240,4 +240,20 @@ public interface IMessageLog {
      * @return true if the message belongs to one to one conversation
      */
     public boolean isOneToOneChatMessage(String messageId);
+
+    /**
+     * Set chat message delivered
+     * 
+     * @param msgId Message ID
+     * @param timestampDelivered Delivered time
+     */
+    void setChatMessageStatusDelivered(String msgId, long timestampDelivered);
+
+    /**
+     * Set chat message displayed
+     * 
+     * @param msgId Message ID
+     * @param timestampDisplayed Displayed time
+     */
+    void setChatMessageStatusDisplayed(String msgId, long timestampDisplayed);
 }

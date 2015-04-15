@@ -165,10 +165,18 @@ public class GroupChatPersistedStorageAccessor {
         mMessagingLog.setChatMessageStatusAndReasonCode(msgId, status, reasonCode);
     }
 
-    public void setDeliveryInfoStatusAndReasonCode(String chatId, ContactId contact, String msgId,
-            GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
-        mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(chatId, contact, msgId, status,
-                reasonCode);
+    public void setMessageStatusDelivered(String msgId, long timestampDelivered) {
+        mMessagingLog.setChatMessageStatusDelivered(msgId, timestampDelivered);
+    }
+
+    public void setMessageStatusDisplayed(String msgId, long timestampDisplayed) {
+        mMessagingLog.setChatMessageStatusDisplayed(msgId, timestampDisplayed);
+    }
+
+    public boolean setGroupDeliveryInfoStatusAndReasonCode(String chatId, ContactId contact,
+            String msgId, GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
+        return mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(chatId, contact, msgId,
+                status, reasonCode);
     }
 
     public boolean isDeliveredToAllRecipients(String msgId) {
@@ -227,5 +235,15 @@ public class GroupChatPersistedStorageAccessor {
             State state, ReasonCode reasonCode) {
         mMessagingLog.setGroupChatParticipantsStateAndReasonCode(participants, mChatId, state,
                 reasonCode);
+    }
+
+    public void setGroupChatDeliveryInfoDelivered(String chatId, ContactId contact, String msgId,
+            long timestampDelivered) {
+        mMessagingLog.setGroupChatDeliveryInfoDelivered(chatId, contact, msgId, timestampDelivered);
+    }
+
+    public void setDeliveryInfoDisplayed(String chatId, ContactId contact, String msgId,
+            long timestampDisplayed) {
+        mMessagingLog.setGroupChatDeliveryInfoDisplayed(chatId, contact, msgId, timestampDisplayed);
     }
 }

@@ -310,4 +310,20 @@ public interface IFileTransferLog {
      * @param remoteInstanceId
      */
     public void setRemoteSipId(String fileTransferId, String remoteInstanceId);
+
+    /**
+     * Set file transfer delivered
+     * 
+     * @param fileTransferId File transfer ID
+     * @param timestampDelivered Time delivered
+     */
+    void setFileTransferDelivered(String fileTransferId, long timestampDelivered);
+
+    /**
+     * Set file transfer displayed
+     * 
+     * @param fileTransferId File transfer ID
+     * @param timestampDisplayed Time displayed
+     */
+    void setFileTransferDisplayed(String fileTransferId, long timestampDisplayed);
 }

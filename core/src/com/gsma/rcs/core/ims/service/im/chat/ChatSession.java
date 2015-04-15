@@ -673,7 +673,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
         } else if ((msgId != null) && TypeMsrpChunk.TextMessage.equals(typeMsrpChunk)) {
             for (int i = 0; i < getListeners().size(); i++) {
                 ImdnDocument imdn = new ImdnDocument(msgId, ImdnDocument.DELIVERY_NOTIFICATION,
-                        ImdnDocument.DELIVERY_STATUS_FAILED);
+                        ImdnDocument.DELIVERY_STATUS_FAILED, ImdnDocument.IMDN_DATETIME_NOT_SET);
                 ContactId contact = null;
                 ((ChatSessionListener) getListeners().get(i)).handleMessageDeliveryStatus(contact,
                         imdn);

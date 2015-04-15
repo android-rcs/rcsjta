@@ -286,8 +286,9 @@ public class MessageLog implements IMessageLog {
                 }
 
                 for (ContactId recipient : recipients) {
+                    /* Add entry with delivered and displayed timestamps set to 0. */
                     mGroupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId, recipient,
-                            msgId, deliveryStatus, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
+                            msgId, deliveryStatus, GroupDeliveryInfo.ReasonCode.UNSPECIFIED, 0, 0);
                 }
             } catch (Exception e) {
                 // TODO CR037 we should not do such rollback nor catch exception at all?
@@ -334,7 +335,7 @@ public class MessageLog implements IMessageLog {
     @Override
     public void markMessageAsRead(String msgId) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Marking chat message as read: msgID=").append(msgId)
+            sLogger.debug(new StringBuilder("Marking chat message as read: msgId=").append(msgId)
                     .toString());
         }
         ContentValues values = new ContentValues();
@@ -352,7 +353,7 @@ public class MessageLog implements IMessageLog {
     @Override
     public void setChatMessageStatusAndReasonCode(String msgId, Status status, ReasonCode reasonCode) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Update chat message: msgID=").append(msgId)
+            sLogger.debug(new StringBuilder("Update chat message: msgId=").append(msgId)
                     .append(", status=").append(status).append(", reasonCode=").append(reasonCode)
                     .toString());
         }
@@ -377,7 +378,7 @@ public class MessageLog implements IMessageLog {
     public void markIncomingChatMessageAsReceived(String msgId) {
         if (sLogger.isActivated()) {
             sLogger.debug(new StringBuilder(
-                    "Mark incoming chat message status as received for msgID=").append(msgId)
+                    "Mark incoming chat message status as received for msgId=").append(msgId)
                     .toString());
         }
         setChatMessageStatusAndReasonCode(msgId, Status.RECEIVED, ReasonCode.UNSPECIFIED);
@@ -527,7 +528,7 @@ public class MessageLog implements IMessageLog {
     @Override
     public void setChatMessageTimestamp(String msgId, long timestamp, long timestampSent) {
         if (sLogger.isActivated()) {
-            sLogger.debug(new StringBuilder("Update chat message: msgID=").append(msgId)
+            sLogger.debug(new StringBuilder("Set chat message timestamp msgId=").append(msgId)
                     .append(", timestamp=").append(timestamp).append(", timestampSent=")
                     .append(timestampSent).toString());
         }
@@ -591,6 +592,40 @@ public class MessageLog implements IMessageLog {
             if (cursor != null) {
                 cursor.close();
             }
+        }
+    }
+
+    @Override
+    public void setChatMessageStatusDelivered(String msgId, long timestampDelivered) {
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("setChatMessageStatusDelivered msgId=").append(msgId)
+                    .append(", timestampDelivered=").append(timestampDelivered).toString());
+        }
+        ContentValues values = new ContentValues();
+        values.put(MessageData.KEY_STATUS, Status.DELIVERED.toInt());
+        values.put(MessageData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
+        values.put(MessageData.KEY_TIMESTAMP_DELIVERED, timestampDelivered);
+
+        if (mLocalContentResolver.update(Uri.withAppendedPath(Message.CONTENT_URI, msgId), values,
+                null, null) < 1) {
+            sLogger.warn("There was no message with msgId '" + msgId + "' to set to delivered.");
+        }
+    }
+
+    @Override
+    public void setChatMessageStatusDisplayed(String msgId, long timestampDisplayed) {
+        if (sLogger.isActivated()) {
+            sLogger.debug(new StringBuilder("setChatMessageStatusDisplayed msgId=").append(msgId)
+                    .append(", timestampDisplayed=").append(timestampDisplayed).toString());
+        }
+        ContentValues values = new ContentValues();
+        values.put(MessageData.KEY_STATUS, Status.DISPLAYED.toInt());
+        values.put(MessageData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
+        values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, timestampDisplayed);
+
+        if (mLocalContentResolver.update(Uri.withAppendedPath(Message.CONTENT_URI, msgId), values,
+                null, null) < 1) {
+            sLogger.warn("There was no message with msgId '" + msgId + "' to set to displayed.");
         }
     }
 }

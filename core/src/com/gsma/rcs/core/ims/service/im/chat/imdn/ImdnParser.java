@@ -22,8 +22,8 @@
 
 package com.gsma.rcs.core.ims.service.im.chat.imdn;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
+import com.gsma.rcs.utils.DateUtils;
+import com.gsma.rcs.utils.logger.Logger;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -31,7 +31,8 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.gsma.rcs.utils.logger.Logger;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 /**
  * IMDN parser (RFC5438)
@@ -50,6 +51,8 @@ public class ImdnParser extends DefaultHandler {
     private String mStatus;
 
     private String mMsgId;
+
+    private long mDateTime;
 
     /**
      * The logger
@@ -98,22 +101,18 @@ public class ImdnParser extends DefaultHandler {
     public void endElement(String namespaceURL, String localName, String qname) {
         if (ImdnDocument.MESSAGE_ID_TAG.equals(localName)) {
             mMsgId = accumulator.toString();
-
+        } else if (ImdnDocument.IMDN_DATETIME.equals(localName)) {
+            mDateTime = DateUtils.decodeDate(accumulator.toString());
         } else if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(localName)) {
             mStatus = ImdnDocument.DELIVERY_STATUS_DELIVERED;
-
         } else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(localName)) {
             mStatus = ImdnDocument.DELIVERY_STATUS_DISPLAYED;
-
         } else if (ImdnDocument.DELIVERY_STATUS_FAILED.equals(localName)) {
             mStatus = ImdnDocument.DELIVERY_STATUS_FAILED;
-
         } else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(localName)) {
             mStatus = ImdnDocument.DELIVERY_STATUS_ERROR;
-
         } else if (ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(localName)) {
             mStatus = ImdnDocument.DELIVERY_STATUS_FORBIDDEN;
-
         } else if (ImdnDocument.IMDN_TAG.equals(localName)) {
             if (logger.isActivated()) {
                 logger.debug("IMDN document is complete");
@@ -152,6 +151,6 @@ public class ImdnParser extends DefaultHandler {
             return null;
         }
 
-        return new ImdnDocument(mMsgId, mNotificationType, mStatus);
+        return new ImdnDocument(mMsgId, mNotificationType, mStatus, mDateTime);
     }
 }

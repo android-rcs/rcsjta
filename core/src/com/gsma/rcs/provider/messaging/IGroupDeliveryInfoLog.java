@@ -43,9 +43,11 @@ public interface IGroupDeliveryInfoLog {
      * @param msgId Message ID of a chat message
      * @param status Delivery info status
      * @param reasonCode Delivery info status reason code
+     * @param timestampDisplayed Timestamp for display
+     * @param timestampDelivered Timestamp for delivery
      */
     public Uri addGroupChatDeliveryInfoEntry(String chatId, ContactId contact, String msgId,
-            Status status, ReasonCode reasonCode);
+            Status status, ReasonCode reasonCode, long timestampDisplayed, long timestampDelivered);
 
     /**
      * Set delivery status for outgoing group chat messages and files
@@ -55,8 +57,9 @@ public interface IGroupDeliveryInfoLog {
      * @param msgID Message ID
      * @param status Delivery info status
      * @param reasonCode Delivery info status reason code
+     * @return True if an entry was updated, otherwise false
      */
-    public void setGroupChatDeliveryInfoStatusAndReasonCode(String chatId, ContactId contact,
+    public boolean setGroupChatDeliveryInfoStatusAndReasonCode(String chatId, ContactId contact,
             String msgId, Status status, ReasonCode reasonCode);
 
     /**
@@ -74,4 +77,26 @@ public interface IGroupDeliveryInfoLog {
      * @return true If it is last contact to display message
      */
     public boolean isDisplayedByAllRecipients(String msgId);
+
+    /**
+     * Set delivery info status to delivered for outgoing group chat message or file
+     * 
+     * @param chatId Group chat ID
+     * @param contact The contact ID for which the entry is to be updated
+     * @param msgID Message ID
+     * @param timestampDelivered Timestamp for message delivery
+     */
+    void setGroupChatDeliveryInfoDelivered(String chatId, ContactId contact, String msgId,
+            long timestampDelivered);
+
+    /**
+     * Set delivery info status to displayed for outgoing group chat message or file
+     * 
+     * @param chatId Group chat ID
+     * @param contact The contact ID for which the entry is to be updated
+     * @param msgID Message ID
+     * @param timestampDisplayed Timestamp for message display
+     */
+    void setGroupChatDeliveryInfoDisplayed(String chatId, ContactId contact, String msgId,
+            long timestampDisplayed);
 }

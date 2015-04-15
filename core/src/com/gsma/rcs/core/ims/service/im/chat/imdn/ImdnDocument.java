@@ -57,7 +57,11 @@ public class ImdnDocument {
 
     public static final String MESSAGE_ID_TAG = "message-id";
 
+    public static final String IMDN_DATETIME = "datetime";
+
     public static final String IMDN_NAMESPACE = "imdn <urn:ietf:params:imdn>";
+
+    public static final int IMDN_DATETIME_NOT_SET = 0;
 
     /**
      * Disposition notification header positive delivery value
@@ -80,10 +84,13 @@ public class ImdnDocument {
 
     private final String mNotificationType;
 
-    public ImdnDocument(String msgId, String notificationType, String status) {
+    private final long mDateTime;
+
+    public ImdnDocument(String msgId, String notificationType, String status, long dateTime) {
         mMsgId = msgId;
         mNotificationType = notificationType;
         mStatus = status;
+        mDateTime = dateTime;
     }
 
     /**
@@ -111,5 +118,14 @@ public class ImdnDocument {
      */
     public String getNotificationType() {
         return mNotificationType;
+    }
+
+    /**
+     * Get DateTime
+     * 
+     * @return DateTime
+     */
+    public long getDateTime() {
+        return mDateTime;
     }
 }

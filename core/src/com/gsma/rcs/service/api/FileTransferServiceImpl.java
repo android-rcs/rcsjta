@@ -367,24 +367,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     }
 
     /**
-     * Update new file transfer state, reason code, timestamp and timestamtSent
-     * 
-     * @param fileTransferId File transfer ID
-     * @param contact ContactId
-     * @param state New state of the file transfer
-     * @param timestamp New local timestamp for the file transfer
-     * @param timestampSent New timestamp sent in payload for the file transfer
-     */
-
-    private void setFileTransferStateAndTimestamps(String fileTransferId, ContactId contact,
-            State state, long timestamp, long timestampSent) {
-        mMessagingLog.setFileTransferStateAndTimestamps(fileTransferId, state,
-                ReasonCode.UNSPECIFIED, timestamp, timestampSent);
-        mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId, state,
-                ReasonCode.UNSPECIFIED);
-    }
-
-    /**
      * Add outgoing group file transfer to DB
      * 
      * @param fileTransferId File transfer ID
@@ -512,8 +494,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             return;
         }
 
-        setFileTransferStateAndTimestamps(fileTransferId, contact, State.INITIATING, timestamp,
-                timestampSent);
+        mMessagingLog.setFileTransferStateAndTimestamps(fileTransferId, State.INITIATING,
+                ReasonCode.UNSPECIFIED, timestamp, timestampSent);
+        mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
+                State.INITIATING, ReasonCode.UNSPECIFIED);
 
         final FileSharingSession session = mImService.initiateFileTransferSession(fileTransferId,
                 contact, file, fileIcon, timestamp, timestampSent);
@@ -1130,17 +1114,17 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      */
     public void handleFileDeliveryStatus(ImdnDocument imdn, ContactId contact) {
         String status = imdn.getStatus();
+        long timestamp = imdn.getDateTime();
+
         /* Note: File transfer ID always corresponds to message ID in the imdn pay-load */
         String fileTransferId = imdn.getMsgId();
         if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
-            mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, State.DELIVERED,
-                    ReasonCode.UNSPECIFIED);
+            mMessagingLog.setFileTransferDelivered(fileTransferId, timestamp);
 
             mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
                     State.DELIVERED, ReasonCode.UNSPECIFIED);
         } else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
-            mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, State.DISPLAYED,
-                    ReasonCode.UNSPECIFIED);
+            mMessagingLog.setFileTransferDisplayed(fileTransferId, timestamp);
 
             mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
                     State.DISPLAYED, ReasonCode.UNSPECIFIED);
@@ -1158,28 +1142,26 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     }
 
     private void handleGroupFileDeliveryStatusDelivered(String chatId, String fileTransferId,
-            ContactId contact) {
-        mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(chatId, contact, fileTransferId,
-                GroupDeliveryInfo.Status.DELIVERED, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
+            ContactId contact, long timestampDelivered) {
+        mMessagingLog.setGroupChatDeliveryInfoDelivered(chatId, contact, fileTransferId,
+                timestampDelivered);
         mGroupFileTransferBroadcaster.broadcastDeliveryInfoChanged(chatId, contact, fileTransferId,
                 GroupDeliveryInfo.Status.DELIVERED, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
         if (mMessagingLog.isDeliveredToAllRecipients(fileTransferId)) {
-            mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, State.DELIVERED,
-                    ReasonCode.UNSPECIFIED);
+            mMessagingLog.setFileTransferDelivered(fileTransferId, timestampDelivered);
             mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId,
                     State.DELIVERED, ReasonCode.UNSPECIFIED);
         }
     }
 
     private void handleGroupFileDeliveryStatusDisplayed(String chatId, String fileTransferId,
-            ContactId contact) {
-        mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(chatId, contact, fileTransferId,
-                GroupDeliveryInfo.Status.DISPLAYED, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
+            ContactId contact, long timestampDisplayed) {
+        mMessagingLog.setGroupChatDeliveryInfoDisplayed(chatId, contact, fileTransferId,
+                timestampDisplayed);
         mGroupFileTransferBroadcaster.broadcastDeliveryInfoChanged(chatId, contact, fileTransferId,
                 GroupDeliveryInfo.Status.DISPLAYED, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
         if (mMessagingLog.isDisplayedByAllRecipients(fileTransferId)) {
-            mMessagingLog.setFileTransferStateAndReasonCode(fileTransferId, State.DISPLAYED,
-                    ReasonCode.UNSPECIFIED);
+            mMessagingLog.setFileTransferDisplayed(fileTransferId, timestampDisplayed);
             mGroupFileTransferBroadcaster.broadcastStateChanged(chatId, fileTransferId,
                     State.DISPLAYED, ReasonCode.UNSPECIFIED);
         }
@@ -1188,16 +1170,27 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     private void handleGroupFileDeliveryStatusFailed(String chatId, String fileTransferId,
             ContactId contact, ReasonCode reasonCode) {
         if (ReasonCode.FAILED_DELIVERY == reasonCode) {
-            mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(chatId, contact,
+            if (!mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(chatId, contact,
                     fileTransferId, GroupDeliveryInfo.Status.FAILED,
-                    GroupDeliveryInfo.ReasonCode.FAILED_DELIVERY);
+                    GroupDeliveryInfo.ReasonCode.FAILED_DELIVERY)) {
+                /* Add entry with delivered and displayed timestamps set to 0. */
+                mMessagingLog.addGroupChatDeliveryInfoEntry(chatId, contact, fileTransferId,
+                        GroupDeliveryInfo.Status.FAILED,
+                        GroupDeliveryInfo.ReasonCode.FAILED_DELIVERY, 0, 0);
+            }
             mGroupFileTransferBroadcaster.broadcastDeliveryInfoChanged(chatId, contact,
                     fileTransferId, GroupDeliveryInfo.Status.FAILED,
                     GroupDeliveryInfo.ReasonCode.FAILED_DELIVERY);
             return;
         }
-        mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(chatId, contact, fileTransferId,
-                GroupDeliveryInfo.Status.FAILED, GroupDeliveryInfo.ReasonCode.FAILED_DISPLAY);
+        if (!mMessagingLog.setGroupChatDeliveryInfoStatusAndReasonCode(chatId, contact,
+                fileTransferId, GroupDeliveryInfo.Status.FAILED,
+                GroupDeliveryInfo.ReasonCode.FAILED_DISPLAY)) {
+            /* Add entry with delivered and displayed timestamps set to 0. */
+            mMessagingLog.addGroupChatDeliveryInfoEntry(chatId, contact, fileTransferId,
+                    GroupDeliveryInfo.Status.FAILED, GroupDeliveryInfo.ReasonCode.FAILED_DISPLAY,
+                    0, 0);
+        }
         mGroupFileTransferBroadcaster.broadcastDeliveryInfoChanged(chatId, contact, fileTransferId,
                 GroupDeliveryInfo.Status.FAILED, GroupDeliveryInfo.ReasonCode.FAILED_DISPLAY);
     }
@@ -1212,6 +1205,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     public void handleGroupFileDeliveryStatus(String chatId, ImdnDocument imdn, ContactId contact) {
         String status = imdn.getStatus();
         String msgId = imdn.getMsgId();
+        long timestamp = imdn.getDateTime();
+
         if (sLogger.isActivated()) {
             sLogger.info(new StringBuilder("Handling group file delivery status; contact=")
                     .append(contact).append(", msgId=").append(msgId).append(", status=")
@@ -1219,9 +1214,9 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                     .append(imdn.getNotificationType()).toString());
         }
         if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
-            handleGroupFileDeliveryStatusDelivered(chatId, msgId, contact);
+            handleGroupFileDeliveryStatusDelivered(chatId, msgId, contact, timestamp);
         } else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
-            handleGroupFileDeliveryStatusDisplayed(chatId, msgId, contact);
+            handleGroupFileDeliveryStatusDisplayed(chatId, msgId, contact, timestamp);
         } else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
                 || ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
                 || ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {

@@ -821,9 +821,12 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
     public void handleMessageDeliveryStatus(ContactId contact, ImdnDocument imdn) {
         String msgId = imdn.getMsgId();
         String status = imdn.getStatus();
+        long timestamp = imdn.getDateTime();
+
         if (logger.isActivated()) {
             logger.info(new StringBuilder("New message delivery status for message ").append(msgId)
-                    .append(", status ").append(status).append(".").toString());
+                    .append(", status ").append(status).append(", timestamp ").append(timestamp)
+                    .append(".").toString());
         }
         String mimeType = mMessagingLog.getMessageMimeType(msgId);
         if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
@@ -839,8 +842,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
 
         } else if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
             synchronized (lock) {
-                mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.DELIVERED,
-                        ReasonCode.UNSPECIFIED);
+                mMessagingLog.setChatMessageStatusDelivered(msgId, timestamp);
 
                 mBroadcaster.broadcastMessageStatusChanged(contact, mimeType, msgId,
                         Status.DELIVERED, ReasonCode.UNSPECIFIED);
@@ -848,8 +850,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
 
         } else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
             synchronized (lock) {
-                mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.DISPLAYED,
-                        ReasonCode.UNSPECIFIED);
+                mMessagingLog.setChatMessageStatusDisplayed(msgId, timestamp);
 
                 mBroadcaster.broadcastMessageStatusChanged(contact, mimeType, msgId,
                         Status.DISPLAYED, ReasonCode.UNSPECIFIED);

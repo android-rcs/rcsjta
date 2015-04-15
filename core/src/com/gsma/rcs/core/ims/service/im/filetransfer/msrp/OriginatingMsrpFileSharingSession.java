@@ -301,6 +301,8 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
             logger.info("Data transfered");
         }
 
+        long timestamp = System.currentTimeMillis();
+
         // File has been transfered
         fileTransfered();
 
@@ -320,10 +322,11 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         }
         InstantMessagingService imService = ((InstantMessagingService) getImsService());
         String fileTransferId = getFileTransferId();
+
         imService.receiveFileDeliveryStatus(contact, new ImdnDocument(fileTransferId,
-                ImdnDocument.POSITIVE_DELIVERY, ImdnDocument.DELIVERY_STATUS_DELIVERED));
+                ImdnDocument.POSITIVE_DELIVERY, ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp));
         imService.receiveFileDeliveryStatus(contact, new ImdnDocument(fileTransferId,
-                ImdnDocument.DISPLAY, ImdnDocument.DELIVERY_STATUS_DISPLAYED));
+                ImdnDocument.DISPLAY, ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp));
     }
 
     /**

@@ -159,34 +159,34 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         }
     }
 
-    private void handleMessageDeliveryStatusDelivered(ContactId contact, String msgId) {
+    private void handleMessageDeliveryStatusDelivered(ContactId contact, String msgId,
+            long timestampDelivered) {
         String mimeType = mMessagingLog.getMessageMimeType(msgId);
         synchronized (lock) {
-            mPersistentStorage.setDeliveryInfoStatusAndReasonCode(mChatId, contact, msgId,
-                    GroupDeliveryInfo.Status.DELIVERED, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
+            mPersistentStorage.setGroupChatDeliveryInfoDelivered(mChatId, contact, msgId,
+                    timestampDelivered);
             mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId, contact, mimeType,
                     msgId, GroupDeliveryInfo.Status.DELIVERED,
                     GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
             if (mPersistentStorage.isDeliveredToAllRecipients(msgId)) {
-                mPersistentStorage.setMessageStatusAndReasonCode(msgId, Status.DELIVERED,
-                        Content.ReasonCode.UNSPECIFIED);
+                mPersistentStorage.setMessageStatusDelivered(msgId, timestampDelivered);
                 mBroadcaster.broadcastMessageStatusChanged(mChatId, mimeType, msgId,
                         Status.DELIVERED, Content.ReasonCode.UNSPECIFIED);
             }
         }
     }
 
-    private void handleMessageDeliveryStatusDisplayed(ContactId contact, String msgId) {
+    private void handleMessageDeliveryStatusDisplayed(ContactId contact, String msgId,
+            long timestampDisplayed) {
         String mimeType = mMessagingLog.getMessageMimeType(msgId);
         synchronized (lock) {
-            mPersistentStorage.setDeliveryInfoStatusAndReasonCode(mChatId, contact, msgId,
-                    GroupDeliveryInfo.Status.DISPLAYED, GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
+            mPersistentStorage
+                    .setDeliveryInfoDisplayed(mChatId, contact, msgId, timestampDisplayed);
             mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId, contact, mimeType,
                     msgId, GroupDeliveryInfo.Status.DISPLAYED,
                     GroupDeliveryInfo.ReasonCode.UNSPECIFIED);
             if (mPersistentStorage.isDisplayedByAllRecipients(msgId)) {
-                mPersistentStorage.setMessageStatusAndReasonCode(msgId, Status.DISPLAYED,
-                        Content.ReasonCode.UNSPECIFIED);
+                mPersistentStorage.setMessageStatusDisplayed(msgId, timestampDisplayed);
                 mBroadcaster.broadcastMessageStatusChanged(mChatId, mimeType, msgId,
                         Status.DISPLAYED, Content.ReasonCode.UNSPECIFIED);
             }
@@ -198,16 +198,26 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
         String mimeType = mMessagingLog.getMessageMimeType(msgId);
         synchronized (lock) {
             if (Content.ReasonCode.FAILED_DELIVERY == reasonCode) {
-                mPersistentStorage.setDeliveryInfoStatusAndReasonCode(mChatId, contact, msgId,
-                        GroupDeliveryInfo.Status.FAILED,
-                        GroupDeliveryInfo.ReasonCode.FAILED_DELIVERY);
+                if (!mPersistentStorage.setGroupDeliveryInfoStatusAndReasonCode(mChatId, contact,
+                        msgId, GroupDeliveryInfo.Status.FAILED,
+                        GroupDeliveryInfo.ReasonCode.FAILED_DELIVERY)) {
+                    /* Add entry with delivered and displayed timestamps set to 0. */
+                    mMessagingLog.addGroupChatDeliveryInfoEntry(mChatId, contact, msgId,
+                            GroupDeliveryInfo.Status.FAILED,
+                            GroupDeliveryInfo.ReasonCode.FAILED_DELIVERY, 0, 0);
+                }
                 mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId, contact, mimeType,
                         msgId, GroupDeliveryInfo.Status.FAILED,
                         GroupDeliveryInfo.ReasonCode.FAILED_DELIVERY);
             } else {
-                mPersistentStorage.setDeliveryInfoStatusAndReasonCode(mChatId, contact, msgId,
-                        GroupDeliveryInfo.Status.FAILED,
-                        GroupDeliveryInfo.ReasonCode.FAILED_DISPLAY);
+                if (!mPersistentStorage.setGroupDeliveryInfoStatusAndReasonCode(mChatId, contact,
+                        msgId, GroupDeliveryInfo.Status.FAILED,
+                        GroupDeliveryInfo.ReasonCode.FAILED_DISPLAY)) {
+                    /* Add entry with delivered and displayed timestamps set to 0. */
+                    mMessagingLog.addGroupChatDeliveryInfoEntry(mChatId, contact, msgId,
+                            GroupDeliveryInfo.Status.FAILED,
+                            GroupDeliveryInfo.ReasonCode.FAILED_DISPLAY, 0, 0);
+                }
                 mBroadcaster.broadcastMessageGroupDeliveryInfoChanged(mChatId, contact, mimeType,
                         msgId, GroupDeliveryInfo.Status.FAILED,
                         GroupDeliveryInfo.ReasonCode.FAILED_DISPLAY);
@@ -1491,6 +1501,8 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     public void handleMessageDeliveryStatus(ContactId contact, ImdnDocument imdn) {
         String status = imdn.getStatus();
         String msgId = imdn.getMsgId();
+        long timestamp = imdn.getDateTime();
+
         if (logger.isActivated()) {
             logger.info(new StringBuilder("Handling message delivery status; contact=")
                     .append(contact).append(", msgId=").append(msgId).append(", status=")
@@ -1498,9 +1510,9 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                     .append(imdn.getNotificationType()).toString());
         }
         if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
-            handleMessageDeliveryStatusDelivered(contact, msgId);
+            handleMessageDeliveryStatusDelivered(contact, msgId, timestamp);
         } else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
-            handleMessageDeliveryStatusDisplayed(contact, msgId);
+            handleMessageDeliveryStatusDisplayed(contact, msgId, timestamp);
         } else if (ImdnDocument.DELIVERY_STATUS_ERROR.equals(status)
                 || ImdnDocument.DELIVERY_STATUS_FAILED.equals(status)
                 || ImdnDocument.DELIVERY_STATUS_FORBIDDEN.equals(status)) {

@@ -360,6 +360,8 @@ public class ChatServiceImpl extends IChatService.Stub {
         String status = imdn.getStatus();
         String msgId = imdn.getMsgId();
         String notificationType = imdn.getNotificationType();
+        long timestamp = imdn.getDateTime();
+
         if (sLogger.isActivated()) {
             sLogger.info("Receive message delivery status for message " + msgId + ", status "
                     + status + "notificationType=" + notificationType);
@@ -379,8 +381,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
         } else if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
             synchronized (mLock) {
-                mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.DELIVERED,
-                        ReasonCode.UNSPECIFIED);
+                mMessagingLog.setChatMessageStatusDelivered(msgId, timestamp);
 
                 mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, mimeType,
                         msgId, Status.DELIVERED, ReasonCode.UNSPECIFIED);
@@ -388,8 +389,7 @@ public class ChatServiceImpl extends IChatService.Stub {
 
         } else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
             synchronized (mLock) {
-                mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.DISPLAYED,
-                        ReasonCode.UNSPECIFIED);
+                mMessagingLog.setChatMessageStatusDisplayed(msgId, timestamp);
 
                 mOneToOneChatEventBroadcaster.broadcastMessageStatusChanged(contact, mimeType,
                         msgId, Status.DISPLAYED, ReasonCode.UNSPECIFIED);
