@@ -22,7 +22,6 @@
 
 package com.gsma.rcs.provider.messaging;
 
-import com.gsma.rcs.provider.ContentProviderBaseIdCreator;
 import com.gsma.rcs.provider.history.HistoryMemberBaseIdCreator;
 import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.DatabaseUtils;
@@ -52,8 +51,6 @@ public class ChatProvider extends ContentProvider {
 
     private static final int INVALID_ROW_ID = -1;
 
-    private static final String TABLE_GROUP_CHAT = "groupchat";
-
     private static final String SELECTION_WITH_CHAT_ID_ONLY = ChatData.KEY_CHAT_ID.concat("=?");
 
     private static final String SELECTION_WITH_MSG_ID_ONLY = MessageData.KEY_MESSAGE_ID
@@ -78,9 +75,14 @@ public class ChatProvider extends ContentProvider {
     }
 
     /**
-     * Table name
+     * Messages table name
      */
     public static final String TABLE_MESSAGE = "message";
+
+    /**
+     * Group chats table name
+     */
+    public static final String TABLE_GROUP_CHAT = "groupchat";
 
     /**
      * Database name
@@ -410,8 +412,8 @@ public class ChatProvider extends ContentProvider {
             case UriType.InternalChat.CHAT_WITH_ID:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 String chatId = initialValues.getAsString(ChatData.KEY_CHAT_ID);
-                initialValues.put(Message.BASECOLUMN_ID, ContentProviderBaseIdCreator
-                        .createUniqueId(getContext(), ChatData.CONTENT_URI));
+                initialValues.put(ChatLog.GroupChat.BASECOLUMN_ID, HistoryMemberBaseIdCreator
+                        .createUniqueId(getContext(), ChatLog.GroupChat.HISTORYLOG_MEMBER_ID));
 
                 if (db.insert(TABLE_GROUP_CHAT, null, initialValues) == INVALID_ROW_ID) {
                     throw new ServerApiPersistentStorageException(new StringBuilder(

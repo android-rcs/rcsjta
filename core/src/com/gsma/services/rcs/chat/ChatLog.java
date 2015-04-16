@@ -55,6 +55,11 @@ public class ChatLog {
                 .parse("content://com.gsma.services.rcs.provider.chat/groupchat");
 
         /**
+         * History log member id
+         */
+        public static final int HISTORYLOG_MEMBER_ID = 0;
+
+        /**
          * The name of the column containing the unique id across provider tables.
          * <P>
          * Type: INTEGER

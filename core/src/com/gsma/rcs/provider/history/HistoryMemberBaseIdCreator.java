@@ -18,6 +18,7 @@ package com.gsma.rcs.provider.history;
 
 import com.gsma.services.rcs.history.HistoryLog;
 
+import android.content.ContentProviderClient;
 import android.content.Context;
 import android.util.SparseArray;
 
@@ -44,30 +45,34 @@ public class HistoryMemberBaseIdCreator {
      */
     public static long createUniqueId(Context ctx, int memberId) {
         AtomicLong nextId = sNextIds.get(memberId);
-
         if (nextId != null) {
             return nextId.incrementAndGet();
         }
-
         synchronized (sNextIds) {
             nextId = sNextIds.get(memberId);
-
             if (nextId != null) {
                 return nextId.incrementAndGet();
             }
-
             String historyLogAuthority = HistoryLog.CONTENT_URI.getAuthority();
-            HistoryProvider provider = (HistoryProvider) ctx.getContentResolver()
-                    .acquireContentProviderClient(historyLogAuthority).getLocalContentProvider();
-            long maxId = provider.getMaxId(memberId);
-            if (maxId == 0) {
-                maxId = (memberId - 1) * RANGE_SIZE;
-            }
-            nextId = new AtomicLong(maxId);
-            sNextIds.put(memberId, nextId);
-            nextId.set(maxId);
-            return nextId.incrementAndGet();
+            ContentProviderClient contentProviderClient = ctx.getContentResolver()
+                    .acquireContentProviderClient(historyLogAuthority);
+            try {
+                HistoryProvider provider = (HistoryProvider) contentProviderClient
+                        .getLocalContentProvider();
+                long maxId = provider.getMaxId(memberId);
+                if (maxId == 0) {
+                    maxId = (memberId - 1) * RANGE_SIZE;
+                }
+                nextId = new AtomicLong(maxId);
+                sNextIds.put(memberId, nextId);
+                nextId.set(maxId);
+                return nextId.incrementAndGet();
 
+            } finally {
+                if (contentProviderClient != null) {
+                    contentProviderClient.release();
+                }
+            }
         }
     }
 

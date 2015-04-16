@@ -72,6 +72,7 @@ import java.util.Set;
 
     private static final Set<Integer> getInternalMemberIds() {
         Set<Integer> internalMemberIds = new HashSet<Integer>();
+        internalMemberIds.add(ChatLog.GroupChat.HISTORYLOG_MEMBER_ID);
         internalMemberIds.add(ChatLog.Message.HISTORYLOG_MEMBER_ID);
         internalMemberIds.add(FileTransferData.HISTORYLOG_MEMBER_ID);
         internalMemberIds.add(ImageSharingData.HISTORYLOG_MEMBER_ID);
@@ -82,6 +83,9 @@ import java.util.Set;
 
     private static final Set<HistoryMemberDatabase> getInternalMembers() {
         Set<HistoryMemberDatabase> internalMembers = new HashSet<HistoryMemberDatabase>();
+        internalMembers.add(new HistoryMemberDatabase(ChatLog.GroupChat.HISTORYLOG_MEMBER_ID,
+                ChatLog.GroupChat.CONTENT_URI, ChatProvider.DATABASE_NAME, null,
+                ChatProvider.TABLE_GROUP_CHAT, getGroupChatProviderColumnMapping()));
         internalMembers.add(new HistoryMemberDatabase(ChatLog.Message.HISTORYLOG_MEMBER_ID,
                 ChatLog.Message.CONTENT_URI, ChatProvider.DATABASE_NAME, null,
                 ChatProvider.TABLE_MESSAGE, getChatMessageProviderColumnMapping()));
@@ -98,6 +102,21 @@ import java.util.Set;
                 GeolocSharingLog.CONTENT_URI, GeolocSharingProvider.DATABASE_NAME, null,
                 GeolocSharingProvider.TABLE, getGeolocSharingProviderColumnMapping()));
         return internalMembers;
+    }
+
+    private static final Map<String, String> getGroupChatProviderColumnMapping() {
+        Map<String, String> columnMapping = new HashMap<String, String>();
+        columnMapping.put(HistoryLogData.KEY_PROVIDER_ID,
+                String.valueOf(ChatLog.GroupChat.HISTORYLOG_MEMBER_ID));
+        columnMapping.put(HistoryLogData.KEY_BASECOLUMN_ID, ChatLog.GroupChat.BASECOLUMN_ID);
+        columnMapping.put(HistoryLogData.KEY_DIRECTION, ChatLog.GroupChat.DIRECTION);
+        columnMapping.put(HistoryLogData.KEY_CONTACT, ChatLog.GroupChat.CONTACT);
+        columnMapping.put(HistoryLogData.KEY_TIMESTAMP, ChatLog.GroupChat.TIMESTAMP);
+        columnMapping.put(HistoryLogData.KEY_STATUS, ChatLog.GroupChat.STATE);
+        columnMapping.put(HistoryLogData.KEY_REASON_CODE, ChatLog.GroupChat.REASON_CODE);
+        columnMapping.put(HistoryLogData.KEY_CHAT_ID, ChatLog.GroupChat.CHAT_ID);
+        columnMapping.put(HistoryLogData.KEY_CONTENT, ChatLog.GroupChat.SUBJECT);
+        return columnMapping;
     }
 
     private static final Map<String, String> getChatMessageProviderColumnMapping() {
