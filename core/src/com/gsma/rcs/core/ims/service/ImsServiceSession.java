@@ -548,7 +548,7 @@ public abstract class ImsServiceSession extends Thread {
         if (sLogger.isActivated()) {
             sLogger.info("Terminate the session ".concat(reason.toString()));
         }
-        boolean wasEstablished = mDialogPath != null && mDialogPath.isSigEstablished();
+        boolean wasEstablished = mDialogPath != null && isSessionAccepted();
         interruptSession();
 
         closeSession(reason);

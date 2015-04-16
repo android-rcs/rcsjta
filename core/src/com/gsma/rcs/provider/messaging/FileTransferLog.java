@@ -81,7 +81,8 @@ public class FileTransferLog implements IFileTransferLog {
     private static final String SELECTION_BY_INTERRUPTED_FILE_TRANSFERS = new StringBuilder(
             FileTransferData.KEY_STATE).append(" IN ('").append(State.STARTED.toInt())
             .append("','").append(State.INVITED.toInt()).append("','")
-            .append(State.INITIATING.toInt()).append("')").toString();
+            .append(State.ACCEPTING.toInt()).append("','").append(State.INITIATING.toInt())
+            .append("')").toString();
 
     private static final String ORDER_BY_TIMESTAMP_ASC = FileTransferData.KEY_TIMESTAMP
             .concat(" ASC");

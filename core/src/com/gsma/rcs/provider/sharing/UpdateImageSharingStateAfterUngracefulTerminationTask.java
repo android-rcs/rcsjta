@@ -65,6 +65,10 @@ public class UpdateImageSharingStateAfterUngracefulTerminationTask implements Ru
                         mImageService.setImageSharingStateAndReasonCode(contact, sharingId,
                                 State.FAILED, ReasonCode.FAILED_SHARING);
                         break;
+                    case ACCEPTING:
+                        mImageService.setImageSharingStateAndReasonCode(contact, sharingId,
+                                State.ABORTED, ReasonCode.ABORTED_BY_SYSTEM);
+                        break;
                     case INITIATING:
                         mImageService.setImageSharingStateAndReasonCode(contact, sharingId,
                                 State.FAILED, ReasonCode.FAILED_INITIATION);

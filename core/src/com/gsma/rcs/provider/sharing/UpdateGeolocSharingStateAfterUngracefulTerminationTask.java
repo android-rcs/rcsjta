@@ -65,6 +65,10 @@ public class UpdateGeolocSharingStateAfterUngracefulTerminationTask implements R
                         mGeolocService.setGeolocSharingStateAndReasonCode(contact, sharingId,
                                 State.FAILED, ReasonCode.FAILED_SHARING);
                         break;
+                    case ACCEPTING:
+                        mGeolocService.setGeolocSharingStateAndReasonCode(contact, sharingId,
+                                State.ABORTED, ReasonCode.ABORTED_BY_SYSTEM);
+                        break;
                     case INITIATING:
                         mGeolocService.setGeolocSharingStateAndReasonCode(contact, sharingId,
                                 State.FAILED, ReasonCode.FAILED_INITIATION);

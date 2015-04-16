@@ -74,6 +74,17 @@ public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Ru
                                     fileTransferId, contact, State.FAILED,
                                     ReasonCode.FAILED_INITIATION);
                             break;
+                        case ACCEPTING:
+                            if (groupFileTransfer) {
+                                mFileTransferService.setGroupFileTransferStateAndReasonCode(
+                                        fileTransferId, chatId, State.ABORTED,
+                                        ReasonCode.ABORTED_BY_SYSTEM);
+                                break;
+                            }
+                            mFileTransferService.setOneToOneFileTransferStateAndReasonCode(
+                                    fileTransferId, contact, State.ABORTED,
+                                    ReasonCode.ABORTED_BY_SYSTEM);
+                            break;
                         case STARTED:
                             if (groupFileTransfer) {
                                 mFileTransferService.setGroupFileTransferStateAndReasonCode(
@@ -110,6 +121,17 @@ public class UpdateFileTransferStateAfterUngracefulTerminationTask implements Ru
                             mFileTransferService.setOneToOneFileTransferStateAndReasonCode(
                                     fileTransferId, contact, State.FAILED,
                                     ReasonCode.FAILED_INITIATION);
+                            break;
+                        case ACCEPTING:
+                            if (groupFileTransfer) {
+                                mFileTransferService.setGroupFileTransferStateAndReasonCode(
+                                        fileTransferId, chatId, State.ABORTED,
+                                        ReasonCode.ABORTED_BY_SYSTEM);
+                                break;
+                            }
+                            mFileTransferService.setOneToOneFileTransferStateAndReasonCode(
+                                    fileTransferId, contact, State.ABORTED,
+                                    ReasonCode.ABORTED_BY_SYSTEM);
                             break;
                         case STARTED:
                             if (groupFileTransfer) {

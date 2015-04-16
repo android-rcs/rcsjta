@@ -65,6 +65,10 @@ public class UpdateVideoSharingStateAfterUngracefulTerminationTask implements Ru
                         mVideoService.setVideoSharingStateAndReasonCode(contact, sharingId,
                                 State.FAILED, ReasonCode.FAILED_SHARING);
                         break;
+                    case ACCEPTING:
+                        mVideoService.setVideoSharingStateAndReasonCode(contact, sharingId,
+                                State.ABORTED, ReasonCode.ABORTED_BY_SYSTEM);
+                        break;
                     case INITIATING:
                         mVideoService.setVideoSharingStateAndReasonCode(contact, sharingId,
                                 State.FAILED, ReasonCode.FAILED_INITIATION);
