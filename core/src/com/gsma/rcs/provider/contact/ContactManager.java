@@ -920,13 +920,13 @@ public final class ContactManager {
      * @return Contact info
      */
     public ContactInfo getContactInfo(ContactId contact) {
-        boolean isLogActivated = sLogger.isActivated();
-        if (isLogActivated) {
+        boolean logActivated = sLogger.isActivated();
+        if (logActivated) {
             sLogger.debug("getContactInfo for : ".concat(contact.toString()));
         }
         ContactInfo contactInfo = mContactInfoCache.get(contact);
         if (contactInfo == null) {
-            if (isLogActivated) {
+            if (logActivated) {
                 sLogger.debug("  --> ContactInfo not found in cache");
             }
             contactInfo = getContactInfoFromProvider(contact);
@@ -1023,7 +1023,7 @@ public final class ContactManager {
      * Flush the RCS contact provider
      */
     public void flushRcsContactProvider() {
-        if(sLogger.isActivated()){
+        if (sLogger.isActivated()) {
             sLogger.debug("clear ContactInfo cache");
         }
         mContactInfoCache.clear();
@@ -2733,7 +2733,7 @@ public final class ContactManager {
      */
     private void cleanEntriesInRcsContactProvider() {
         // Empty the cache
-        if(sLogger.isActivated()){
+        if (sLogger.isActivated()) {
             sLogger.debug("clear ContactInfo cache");
         }
         mContactInfoCache.clear();
@@ -2771,7 +2771,7 @@ public final class ContactManager {
         // Delete Aggregation data
         mLocalContentResolver.delete(AggregationData.CONTENT_URI, null, null);
         // Empty the cache
-        if(sLogger.isActivated()){
+        if (sLogger.isActivated()) {
             sLogger.debug("clear ContactInfo cache");
         }
         mContactInfoCache.clear();
