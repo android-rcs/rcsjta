@@ -46,10 +46,8 @@ import android.os.IBinder;
 import android.os.IInterface;
 
 import java.lang.ref.WeakReference;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.WeakHashMap;
 
 /**
@@ -218,30 +216,6 @@ public final class ImageSharingService extends RcsService {
             RcsIllegalArgumentException.assertException(e);
             RcsServiceNotRegisteredException.assertException(e);
             RcsPersistentStorageException.assertException(e);
-            throw new RcsGenericException(e);
-        }
-    }
-
-    /**
-     * Returns the list of image sharings in progress
-     * 
-     * @return List of image sharings
-     * @throws RcsServiceException
-     */
-    public Set<ImageSharing> getImageSharings() throws RcsServiceException {
-        if (mApi == null) {
-            throw new RcsServiceNotAvailableException();
-        }
-        try {
-            Set<ImageSharing> result = new HashSet<ImageSharing>();
-            List<IBinder> ishList = mApi.getImageSharings();
-            for (IBinder binder : ishList) {
-                ImageSharing sharing = new ImageSharing(IImageSharing.Stub.asInterface(binder));
-                result.add(sharing);
-            }
-            return result;
-
-        } catch (Exception e) {
             throw new RcsGenericException(e);
         }
     }

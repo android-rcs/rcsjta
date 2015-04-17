@@ -24,9 +24,7 @@ interface IImageSharingService {
 	void removeEventListener(IRcsServiceRegistrationListener listener);
 
 	IImageSharingServiceConfiguration getConfiguration();
-    
-	List<IBinder> getImageSharings();
-	
+
 	IImageSharing getImageSharing(in String sharingId);
 
 	IImageSharing shareImage(in ContactId contact, in Uri file);

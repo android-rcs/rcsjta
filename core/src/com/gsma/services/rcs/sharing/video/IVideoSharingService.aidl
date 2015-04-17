@@ -24,8 +24,6 @@ interface IVideoSharingService {
 
 	IVideoSharingServiceConfiguration getConfiguration();
 
-	List<IBinder> getVideoSharings();
-	
 	IVideoSharing getVideoSharing(in String sharingId);
 
 	IVideoSharing shareVideo(in ContactId contact, in IVideoPlayer player);

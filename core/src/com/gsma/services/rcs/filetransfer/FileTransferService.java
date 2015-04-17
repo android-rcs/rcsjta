@@ -46,7 +46,6 @@ import android.os.IInterface;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -320,30 +319,6 @@ public final class FileTransferService extends RcsService {
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             RcsPersistentStorageException.assertException(e);
-            throw new RcsGenericException(e);
-        }
-    }
-
-    /**
-     * Returns the list of file transfers in progress
-     * 
-     * @return List of file transfers
-     * @throws RcsServiceException
-     */
-    public Set<FileTransfer> getFileTransfers() throws RcsServiceException {
-        if (mApi == null) {
-            throw new RcsServiceNotAvailableException();
-        }
-        try {
-            Set<FileTransfer> result = new HashSet<FileTransfer>();
-            List<IBinder> ftList = mApi.getFileTransfers();
-            for (IBinder binder : ftList) {
-                FileTransfer ft = new FileTransfer(IFileTransfer.Stub.asInterface(binder));
-                result.add(ft);
-            }
-            return result;
-
-        } catch (Exception e) {
             throw new RcsGenericException(e);
         }
     }

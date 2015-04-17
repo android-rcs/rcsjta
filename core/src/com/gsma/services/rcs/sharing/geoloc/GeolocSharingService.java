@@ -44,10 +44,7 @@ import android.os.IBinder;
 import android.os.IInterface;
 
 import java.lang.ref.WeakReference;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.WeakHashMap;
 
 /**
@@ -177,30 +174,6 @@ public final class GeolocSharingService extends RcsService {
             RcsIllegalArgumentException.assertException(e);
             RcsServiceNotRegisteredException.assertException(e);
             RcsPersistentStorageException.assertException(e);
-            throw new RcsGenericException(e);
-        }
-    }
-
-    /**
-     * Returns the list of geoloc sharings in progress
-     * 
-     * @return List of geoloc sharings
-     * @throws RcsServiceException
-     */
-    public Set<GeolocSharing> getGeolocSharings() throws RcsServiceException {
-        if (mApi == null) {
-            throw new RcsServiceNotAvailableException();
-        }
-        try {
-            Set<GeolocSharing> result = new HashSet<GeolocSharing>();
-            List<IBinder> ishList = mApi.getGeolocSharings();
-            for (IBinder binder : ishList) {
-                GeolocSharing sharing = new GeolocSharing(IGeolocSharing.Stub.asInterface(binder));
-                result.add(sharing);
-            }
-            return result;
-
-        } catch (Exception e) {
             throw new RcsGenericException(e);
         }
     }

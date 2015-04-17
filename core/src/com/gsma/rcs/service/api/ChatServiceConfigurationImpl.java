@@ -206,23 +206,6 @@ public class ChatServiceConfigurationImpl extends IChatServiceConfiguration.Stub
     }
 
     @Override
-    public boolean isChatSf() throws RemoteException {
-        try {
-            return mRcsSettings.isStoreForwardWarningActivated();
-
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
-
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
-    }
-
-    @Override
     public boolean isChatWarnSF() throws RemoteException {
         try {
             return mRcsSettings.isStoreForwardWarningActivated();

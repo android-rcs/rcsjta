@@ -22,9 +22,7 @@ interface IChatServiceConfiguration {
 	int getIsComposingTimeout();
 	
 	int getOneToOneChatMessageMaxLength();
-	
-	boolean isChatSf();
-	 
+
 	boolean isChatWarnSF();
 	
 	boolean isGroupChatSupported();

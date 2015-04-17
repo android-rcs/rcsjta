@@ -43,10 +43,7 @@ import android.os.IBinder;
 import android.os.IInterface;
 
 import java.lang.ref.WeakReference;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.WeakHashMap;
 
 /**
@@ -195,30 +192,6 @@ public final class VideoSharingService extends RcsService {
             RcsIllegalArgumentException.assertException(e);
             RcsServiceNotRegisteredException.assertException(e);
             RcsPersistentStorageException.assertException(e);
-            throw new RcsGenericException(e);
-        }
-    }
-
-    /**
-     * Returns the list of video sharings in progress
-     * 
-     * @return List of video sharings
-     * @throws RcsServiceException
-     */
-    public Set<VideoSharing> getVideoSharings() throws RcsServiceException {
-        if (mApi == null) {
-            throw new RcsServiceNotAvailableException();
-        }
-        try {
-            Set<VideoSharing> result = new HashSet<VideoSharing>();
-            List<IBinder> vshList = mApi.getVideoSharings();
-            for (IBinder binder : vshList) {
-                VideoSharing sharing = new VideoSharing(IVideoSharing.Stub.asInterface(binder));
-                result.add(sharing);
-            }
-            return result;
-
-        } catch (Exception e) {
             throw new RcsGenericException(e);
         }
     }

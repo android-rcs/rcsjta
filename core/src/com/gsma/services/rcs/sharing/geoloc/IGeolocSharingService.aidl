@@ -21,8 +21,6 @@ interface IGeolocSharingService {
 
 	void removeEventListener(IRcsServiceRegistrationListener listener);
 
-	List<IBinder> getGeolocSharings();
-	
 	IGeolocSharing getGeolocSharing(in String sharingId);
 
 	IGeolocSharing shareGeoloc(in ContactId contact, in Geoloc geoloc);

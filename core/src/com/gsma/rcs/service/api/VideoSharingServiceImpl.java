@@ -52,13 +52,10 @@ import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.video.VideoSharing.State;
 
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -403,35 +400,6 @@ public class VideoSharingServiceImpl extends IVideoSharingService.Stub {
                     sharingId, mRichCallLog);
             return new VideoSharingImpl(sharingId, mRichcallService, mBroadcaster, storageAccessor,
                     this);
-
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
-
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
-    }
-
-    /**
-     * Returns the list of video sharings in progress
-     * 
-     * @return List of video sharings
-     * @throws RemoteException
-     */
-    public List<IBinder> getVideoSharings() throws RemoteException {
-        if (sLogger.isActivated()) {
-            sLogger.info("Get video sharing sessions");
-        }
-        try {
-            List<IBinder> videoSharings = new ArrayList<IBinder>(mVideoSharingCache.size());
-            for (IVideoSharing videoSharing : mVideoSharingCache.values()) {
-                videoSharings.add(videoSharing.asBinder());
-            }
-            return videoSharings;
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {

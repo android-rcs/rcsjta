@@ -72,12 +72,10 @@ import com.gsma.services.rcs.filetransfer.IOneToOneFileTransferListener;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -951,36 +949,6 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             return new GroupFileTransferImpl(fileTransferId, chatId, mGroupFileTransferBroadcaster,
                     mImService, storageAccessor, this, mRcsSettings, mCore, mMessagingLog,
                     mContactManager);
-
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
-
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
-    }
-
-    /**
-     * Returns the list of file transfers in progress
-     * 
-     * @return List of file transfer
-     * @throws RemoteException
-     */
-    public List<IBinder> getFileTransfers() throws RemoteException {
-        if (sLogger.isActivated()) {
-            sLogger.info("Get file transfer sessions");
-        }
-
-        try {
-            List<IBinder> fileTransfers = new ArrayList<IBinder>(mFileTransferCache.size());
-            for (IFileTransfer fileTransfer : mFileTransferCache.values()) {
-                fileTransfers.add(fileTransfer.asBinder());
-            }
-            return fileTransfers;
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {

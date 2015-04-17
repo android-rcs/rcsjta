@@ -56,13 +56,10 @@ import com.gsma.services.rcs.sharing.geoloc.IGeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingListener;
 import com.gsma.services.rcs.sharing.geoloc.IGeolocSharingService;
 
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -318,35 +315,6 @@ public class GeolocSharingServiceImpl extends IGeolocSharingService.Stub {
             addGeolocSharing(geolocSharing, sharingId);
             session.addListener(geolocSharing);
             return geolocSharing;
-
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
-
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
-    }
-
-    /**
-     * Returns the list of geoloc sharings in progress
-     * 
-     * @return List of geoloc sharings
-     * @throws RemoteException
-     */
-    public List<IBinder> getGeolocSharings() throws RemoteException {
-        if (sLogger.isActivated()) {
-            sLogger.info("Get geoloc sharing sessions");
-        }
-        try {
-            List<IBinder> geolocSharings = new ArrayList<IBinder>(mGeolocSharingCache.size());
-            for (IGeolocSharing geolocSharing : mGeolocSharingCache.values()) {
-                geolocSharings.add(geolocSharing.asBinder());
-            }
-            return geolocSharings;
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {

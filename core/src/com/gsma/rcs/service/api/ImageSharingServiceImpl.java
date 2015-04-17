@@ -54,13 +54,10 @@ import com.gsma.services.rcs.sharing.image.ImageSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.image.ImageSharing.State;
 
 import android.net.Uri;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -342,35 +339,6 @@ public class ImageSharingServiceImpl extends IImageSharingService.Stub {
             }.start();
 
             return imageSharing;
-
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
-
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-        }
-    }
-
-    /**
-     * Returns the list of image sharings in progress
-     * 
-     * @return List of image sharings
-     * @throws RemoteException
-     */
-    public List<IBinder> getImageSharings() throws RemoteException {
-        if (sLogger.isActivated()) {
-            sLogger.info("Get image sharing sessions");
-        }
-        try {
-            List<IBinder> imageSharings = new ArrayList<IBinder>(mImageSharingCache.size());
-            for (IImageSharing imageSharing : mImageSharingCache.values()) {
-                imageSharings.add(imageSharing.asBinder());
-            }
-            return imageSharings;
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {

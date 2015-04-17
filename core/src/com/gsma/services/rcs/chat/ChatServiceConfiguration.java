@@ -46,22 +46,6 @@ public class ChatServiceConfiguration {
     }
 
     /**
-     * Is the Store and Forward capability is supported.
-     * 
-     * @return True if Store and Forward capability is supported, False if no Store & Forward
-     *         capability
-     * @throws RcsServiceException
-     */
-    public boolean isChatSf() throws RcsServiceException {
-        try {
-            return mIConfig.isChatSf();
-
-        } catch (Exception e) {
-            throw new RcsGenericException(e);
-        }
-    }
-
-    /**
      * Does the UX should alert the user that messages are handled differently when the Store and
      * Forward functionality is involved. It returns True if user should be informed when sending
      * message to offline user.

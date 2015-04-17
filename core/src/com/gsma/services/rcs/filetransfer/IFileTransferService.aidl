@@ -26,8 +26,6 @@ interface IFileTransferService {
 
 	IFileTransferServiceConfiguration getConfiguration();
 
-	List<IBinder> getFileTransfers();
-	
 	IFileTransfer getFileTransfer(in String transferId);
 
 	IFileTransfer transferFile(in ContactId contact, in Uri file, in boolean attachFileicon);
