@@ -27,15 +27,19 @@ import static com.gsma.rcs.utils.StringUtils.UTF8;
 import com.gsma.rcs.core.ims.network.sip.Multipart;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
+import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.im.chat.cpim.CpimMessage;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ExceptionUtil;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
+
+import javax2.sip.InvalidArgumentException;
 
 /**
  * Originating one-to-one chat session
@@ -51,7 +55,7 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
     /**
      * The logger
      */
-    private Logger logger = Logger.getLogger(this.getClass().getName());
+    private final Logger mLogger = Logger.getLogger(getClass().getName());
 
     /**
      * Constructor
@@ -81,14 +85,14 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
      */
     public void run() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Initiate a new 1-1 chat session as originating");
+            if (mLogger.isActivated()) {
+                mLogger.info("Initiate a new 1-1 chat session as originating");
             }
 
             // Set setup mode
             String localSetup = createSetupOffer();
-            if (logger.isActivated()) {
-                logger.debug("Local setup attribute is " + localSetup);
+            if (mLogger.isActivated()) {
+                mLogger.debug("Local setup attribute is " + localSetup);
             }
 
             // Set local port
@@ -157,14 +161,19 @@ public class OriginatingOneToOneChatSession extends OneToOneChatSession {
 
             // Send INVITE request
             sendInvite(invite);
-
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Session initiation has failed", e);
-            }
-
-            // Unexpected error
-            handleError(new ChatError(ChatError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (InvalidArgumentException e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
+        } catch (SipException e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
+        } catch (RuntimeException e) {
+            /*
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
         }
     }
 

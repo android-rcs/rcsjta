@@ -55,6 +55,17 @@ public class ChatError extends ImsSessionBasedServiceError {
     public final static int MEDIA_SESSION_BROKEN = CHAT_ERROR_CODES + 5;
 
     /**
+     * Sending response to an accepted chat session failed (e.g. Failed sending empty packet or
+     * 200OK/ACK responses)
+     */
+    public final static int SEND_RESPONSE_FAILED = CHAT_ERROR_CODES + 6;
+
+    /**
+     * Group chat rejoin has failed
+     */
+    public final static int SESSION_REJOIN_FAILED = CHAT_ERROR_CODES + 7;
+
+    /**
      * Constructor
      * 
      * @param error Error code
@@ -77,8 +88,23 @@ public class ChatError extends ImsSessionBasedServiceError {
      * 
      * @param code Error code
      * @param msg Detail message
+     * @deprecated <p>
+     *             Should use ChatError(int code, Throwable cause)
+     *             </p>
      */
     public ChatError(int code, String msg) {
         super(code, msg);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param code Error code
+     * @param cause the cause (which is saved for later retrieval by the Throwable.getCause()
+     *            method). (A null value is permitted, and indicates that the cause is nonexistent
+     *            or unknown.)
+     */
+    public ChatError(int code, Throwable cause) {
+        super(code, cause);
     }
 }

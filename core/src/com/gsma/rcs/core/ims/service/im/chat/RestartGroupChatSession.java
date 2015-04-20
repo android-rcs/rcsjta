@@ -35,6 +35,7 @@ import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ExceptionUtil;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
@@ -45,6 +46,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax2.sip.InvalidArgumentException;
 import javax2.sip.header.RequireHeader;
 import javax2.sip.header.SubjectHeader;
 import javax2.sip.header.WarningHeader;
@@ -63,8 +65,7 @@ public class RestartGroupChatSession extends GroupChatSession {
     /**
      * The logger
      */
-    private static final Logger logger = Logger.getLogger(RestartGroupChatSession.class
-            .getSimpleName());
+    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
 
     /**
      * Constructor
@@ -100,13 +101,13 @@ public class RestartGroupChatSession extends GroupChatSession {
      */
     public void run() {
         try {
-            if (logger.isActivated()) {
-                logger.info("Restart a group chat session");
+            if (mLogger.isActivated()) {
+                mLogger.info("Restart a group chat session");
             }
 
             String localSetup = createSetupOffer();
-            if (logger.isActivated()) {
-                logger.debug("Local setup attribute is " + localSetup);
+            if (mLogger.isActivated()) {
+                mLogger.debug("Local setup attribute is " + localSetup);
             }
 
             int localMsrpPort;
@@ -155,8 +156,8 @@ public class RestartGroupChatSession extends GroupChatSession {
 
             getDialogPath().setLocalContent(multipart);
 
-            if (logger.isActivated()) {
-                logger.info("Send INVITE");
+            if (mLogger.isActivated()) {
+                mLogger.info("Send INVITE");
             }
             SipRequest invite = createInviteRequest(multipart);
 
@@ -165,12 +166,19 @@ public class RestartGroupChatSession extends GroupChatSession {
             getDialogPath().setInvite(invite);
 
             sendInvite(invite);
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Session initiation has failed", e);
-            }
-
-            handleError(new ChatError(ChatError.UNEXPECTED_EXCEPTION, e.getMessage()));
+        } catch (InvalidArgumentException e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            handleError(new ChatError(ChatError.SESSION_RESTART_FAILED, e));
+        } catch (SipException e) {
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            handleError(new ChatError(ChatError.SESSION_RESTART_FAILED, e));
+        } catch (RuntimeException e) {
+            /*
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            handleError(new ChatError(ChatError.SESSION_RESTART_FAILED, e));
         }
     }
 

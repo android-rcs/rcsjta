@@ -116,24 +116,6 @@ public abstract class OneToOneChatSession extends ChatSession {
     }
 
     /**
-     * Handle IncomingSessionInitiation error
-     * 
-     * @param error Error
-     */
-    public void handleIncomingSessionInitiationError(ImsServiceError error) {
-        if (isSessionInterrupted()) {
-            return;
-        }
-        closeMediaSession();
-        removeSession();
-        for (ImsSessionListener listener : getListeners()) {
-            ((OneToOneChatSessionListener) listener)
-                    .handleIncomingSessionInitiationError(new ChatError(error));
-        }
-
-    }
-
-    /**
      * Send a text message
      * 
      * @param msg Chat message

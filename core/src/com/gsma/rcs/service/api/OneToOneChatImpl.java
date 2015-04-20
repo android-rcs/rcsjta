@@ -717,23 +717,6 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
 
     /*
      * (non-Javadoc)
-     * @see com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener#
-     * handleOneToOneIncomingSessionInitiationError
-     * (com.gsma.rcs.core.ims.service.im.chat.ChatError)
-     */
-    @Override
-    public void handleIncomingSessionInitiationError(ChatError error) {
-        int errorCode = error.getErrorCode();
-        if (logger.isActivated()) {
-            logger.info("IncomingSessionInitiation error " + errorCode);
-        }
-        synchronized (lock) {
-            mChatService.removeOneToOneChat(mContact);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
      * @see com.gsma.rcs.core.ims.service.im.chat.ChatSessionListener#handleImError
      * (com.gsma.rcs.core.ims.service.im.chat.ChatError)
      */
@@ -757,6 +740,13 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                         mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId,
                                 Status.FAILED, ReasonCode.FAILED_SEND);
                     }
+                    break;
+                /*
+                 * For cases where send response failed due to no ACK/200 OK response, we should not
+                 * change Chat state.
+                 */
+                /* Intentional fall through */
+                case ChatError.SEND_RESPONSE_FAILED:
                     break;
                 default:
                     break;

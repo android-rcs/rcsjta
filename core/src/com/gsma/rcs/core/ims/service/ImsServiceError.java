@@ -49,7 +49,7 @@ public class ImsServiceError extends Error {
     /**
      * Error code
      */
-    private int code;
+    private int mErrorCode;
 
     /**
      * Constructor
@@ -59,7 +59,7 @@ public class ImsServiceError extends Error {
     public ImsServiceError(int code) {
         super();
 
-        this.code = code;
+        mErrorCode = code;
     }
 
     /**
@@ -67,11 +67,28 @@ public class ImsServiceError extends Error {
      * 
      * @param code Error code
      * @param msg Detail message
+     * @deprecated <p>
+     *             Should use ImsServiceError(int code, Throwable cause)
+     *             </p>
      */
     public ImsServiceError(int code, String msg) {
         super(msg);
 
-        this.code = code;
+        mErrorCode = code;
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param code Error code
+     * @param cause the cause (which is saved for later retrieval by the Throwable.getCause()
+     *            method). (A null value is permitted, and indicates that the cause is nonexistent
+     *            or unknown.)
+     */
+    public ImsServiceError(int code, Throwable cause) {
+        super(cause);
+
+        mErrorCode = code;
     }
 
     /**
@@ -80,6 +97,6 @@ public class ImsServiceError extends Error {
      * @return Error code
      */
     public int getErrorCode() {
-        return code;
+        return mErrorCode;
     }
 }

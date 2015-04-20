@@ -22,15 +22,18 @@
 
 package com.gsma.rcs.core.ims.service.upload;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import com.gsma.rcs.core.Core;
 import com.gsma.rcs.core.content.MmContent;
+import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.FileTransferHttpInfoDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpUploadManager;
 import com.gsma.rcs.core.ims.service.im.filetransfer.http.HttpUploadTransferEventListener;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ExceptionUtil;
 import com.gsma.rcs.utils.logger.Logger;
 
 /**
@@ -39,8 +42,6 @@ import com.gsma.rcs.utils.logger.Logger;
  * @author Jean-Marc AUFFRET
  */
 public class FileUploadSession extends Thread implements HttpUploadTransferEventListener {
-
-    private final static int UPLOAD_ERROR_UNSPECIFIED = -1;
 
     private String mUploadId;
 
@@ -56,7 +57,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
 
     private final RcsSettings mRcsSettings;
 
-    private final static Logger sLogger = Logger.getLogger(FileUploadSession.class.getSimpleName());
+    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
 
     /**
      * FileUploadSession state
@@ -142,47 +143,37 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
      */
     public void run() {
         try {
-            if (sLogger.isActivated()) {
-                sLogger.info("Initiate a new HTTP upload ".concat(mUploadId));
+            if (mLogger.isActivated()) {
+                mLogger.info("Initiate a new HTTP upload ".concat(mUploadId));
             }
-
-            // Create fileIcon content is requested
+            /* Create fileIcon content is requested */
             MmContent fileIconContent = null;
             if (mFileIcon) {
-                // Create the file icon
-                try {
-                    fileIconContent = FileTransferUtils.createFileicon(mFile.getUri(), mUploadId,
-                            mRcsSettings);
-                } catch (SecurityException e) {
-                    /*
-                     * TODO: This is not the proper way to handle the exception thrown. Will be
-                     * taken care of in CR037
-                     */
-                    if (sLogger.isActivated()) {
-                        sLogger.error(
-                                "File icon creation has failed due to that the file is not accessible!",
-                                e);
-                    }
-                    removeSession();
-                    mListener.handleUploadNotAllowedToSend();
-                    return;
-                }
+                fileIconContent = FileTransferUtils.createFileicon(mFile.getUri(), mUploadId,
+                        mRcsSettings);
             }
-
-            // Instantiate the upload manager
             mUploadManager = new HttpUploadManager(mFile, fileIconContent, this, mUploadId,
                     mRcsSettings);
-
-            // Upload the file to the HTTP server
             byte[] result = mUploadManager.uploadFile();
             storeResult(result);
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("File transfer has failed", e);
-            }
+        } catch (SecurityException e) {
+            mLogger.error(
+                    "File icon creation has failed as the file is not accessible for HTTP uploadId "
+                            .concat(mUploadId),
+                    e);
             removeSession();
-            // Unexpected error
-            mListener.handleUploadError(UPLOAD_ERROR_UNSPECIFIED);
+            mListener.handleUploadNotAllowedToSend();
+        } catch (IOException e) {
+            removeSession();
+            mListener.handleUploadError(FileSharingError.MEDIA_UPLOAD_FAILED);
+        } catch (RuntimeException e) {
+            /*
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            removeSession();
+            mListener.handleUploadError(FileSharingError.MEDIA_UPLOAD_FAILED);
         }
     }
 
@@ -220,20 +211,20 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
         }
         if (mFileInfoDoc != null) {
             // File uploaded with success
-            if (sLogger.isActivated()) {
-                sLogger.debug("Upload done with success: ".concat(mFileInfoDoc.getUri().toString()));
+            if (mLogger.isActivated()) {
+                mLogger.debug("Upload done with success: ".concat(mFileInfoDoc.getUri().toString()));
             }
 
             removeSession();
             mListener.handleUploadTerminated(mFileInfoDoc);
         } else {
             // Upload error
-            if (sLogger.isActivated()) {
-                sLogger.debug("Upload has failed");
+            if (mLogger.isActivated()) {
+                mLogger.debug("Upload has failed");
             }
             removeSession();
             // Notify listener
-            mListener.handleUploadError(UPLOAD_ERROR_UNSPECIFIED);
+            mListener.handleUploadError(FileSharingError.MEDIA_UPLOAD_FAILED);
         }
     }
 
@@ -285,7 +276,7 @@ public class FileUploadSession extends Thread implements HttpUploadTransferEvent
          * for file upload
          */
         removeSession();
-        mListener.handleUploadError(UPLOAD_ERROR_UNSPECIFIED);
+        mListener.handleUploadError(FileSharingError.MEDIA_TRANSFER_FAILED);
     }
 
     /**

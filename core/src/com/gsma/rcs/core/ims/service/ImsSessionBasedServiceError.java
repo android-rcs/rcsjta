@@ -89,8 +89,23 @@ public class ImsSessionBasedServiceError extends ImsServiceError {
      * 
      * @param code Error code
      * @param msg Detail message
+     * @deprecated <p>
+     *             Should use ImsSessionBasedServiceError(int code, Throwable cause)
+     *             </p>
      */
     public ImsSessionBasedServiceError(int code, String msg) {
         super(code, msg);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param code Error code
+     * @param cause the cause (which is saved for later retrieval by the Throwable.getCause()
+     *            method). (A null value is permitted, and indicates that the cause is nonexistent
+     *            or unknown.)
+     */
+    public ImsSessionBasedServiceError(int code, Throwable cause) {
+        super(code, cause);
     }
 }

@@ -52,6 +52,7 @@ import org.xml.sax.InputSource;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -85,8 +86,10 @@ public class FileTransferUtils {
      * @param fileIconId the identifier of the file icon
      * @param rcsSettings
      * @return the content of the file icon
+     * @throws IOException
      */
-    public static MmContent createFileicon(Uri file, String fileIconId, RcsSettings rcsSettings) {
+    public static MmContent createFileicon(Uri file, String fileIconId, RcsSettings rcsSettings)
+            throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         InputStream in = null;
         try {
@@ -140,11 +143,6 @@ public class FileTransferUtils {
                 logger.debug("Generate Icon " + fileIconName + " for image " + file);
             }
             return fileIcon;
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error(e.getMessage(), e);
-            }
-            return null;
         } finally {
             CloseableUtils.close(in);
         }

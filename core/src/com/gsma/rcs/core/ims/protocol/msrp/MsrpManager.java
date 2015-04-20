@@ -267,35 +267,24 @@ public class MsrpManager {
     public MsrpSession createMsrpClientSession(String remoteHost, int remotePort,
             String remoteMsrpPath, MsrpEventListener listener, String fingerprint)
             throws MsrpException {
-        try {
-            if (logger.isActivated()) {
-                logger.info("Create MSRP client end point at " + remoteHost + ":" + remotePort);
-            }
-
-            // Create a new MSRP session
-            mMsrpSession = new MsrpSession(mRcsSettings);
-            mMsrpSession.setFrom(getLocalMsrpPath());
-            mMsrpSession.setTo(remoteMsrpPath);
-
-            // Create a MSRP client connection
-            // Changed by Deutsche Telekom
-            MsrpConnection connection = new MsrpClientConnection(mMsrpSession, remoteHost,
-                    remotePort, mSecured, fingerprint);
-
-            // Associate the connection to the session
-            mMsrpSession.setConnection(connection);
-
-            // Add event listener
-            mMsrpSession.addMsrpEventListener(listener);
-
-            // Return the created session
-            return mMsrpSession;
-        } catch (Exception e) {
-            if (logger.isActivated()) {
-                logger.error("Can't create the MSRP client session", e);
-            }
-            throw new MsrpException("Create MSRP client session has failed");
+        if (logger.isActivated()) {
+            logger.info(new StringBuilder("Create MSRP client end point at ").append(remoteHost)
+                    .append(":").append(remotePort).toString());
         }
+
+        /* Create a new MSRP session */
+        mMsrpSession = new MsrpSession(mRcsSettings);
+        mMsrpSession.setFrom(getLocalMsrpPath());
+        mMsrpSession.setTo(remoteMsrpPath);
+
+        /* Create a MSRP client connection */
+        /* Changed by Deutsche Telekom */
+        MsrpConnection connection = new MsrpClientConnection(mMsrpSession, remoteHost, remotePort,
+                mSecured, fingerprint);
+        mMsrpSession.setConnection(connection);
+        mMsrpSession.addMsrpEventListener(listener);
+
+        return mMsrpSession;
     }
 
     /**

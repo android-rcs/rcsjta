@@ -61,8 +61,7 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
     /**
      * The logger
      */
-    private static final Logger sLogger = Logger.getLogger(OriginatingAdhocGroupChatSession.class
-            .getSimpleName());
+    private final Logger mLogger = Logger.getLogger(getClass().getSimpleName());
 
     /**
      * Constructor
@@ -97,13 +96,13 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
      */
     public void run() {
         try {
-            if (sLogger.isActivated()) {
-                sLogger.info("Initiate a new ad-hoc group chat session as originating");
+            if (mLogger.isActivated()) {
+                mLogger.info("Initiate a new ad-hoc group chat session as originating");
             }
 
             String localSetup = createSetupOffer();
-            if (sLogger.isActivated()) {
-                sLogger.debug("Local setup attribute is " + localSetup);
+            if (mLogger.isActivated()) {
+                mLogger.debug("Local setup attribute is ".concat(localSetup));
             }
 
             int localMsrpPort;
@@ -135,8 +134,8 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
 
             getDialogPath().setLocalContent(multipart);
 
-            if (sLogger.isActivated()) {
-                sLogger.info("Send INVITE");
+            if (mLogger.isActivated()) {
+                mLogger.info("Send INVITE");
             }
             SipRequest invite = createInviteRequest(multipart);
 
@@ -146,14 +145,18 @@ public class OriginatingAdhocGroupChatSession extends GroupChatSession {
 
             sendInvite(invite);
         } catch (InvalidArgumentException e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            handleError(new ChatError(ChatError.UNEXPECTED_EXCEPTION, e.getMessage()));
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
         } catch (SipException e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            handleError(new ChatError(ChatError.UNEXPECTED_EXCEPTION, e.getMessage()));
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            handleError(new ChatError(ChatError.UNEXPECTED_EXCEPTION, e.getMessage()));
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
+        } catch (RuntimeException e) {
+            /*
+             * Intentionally catch runtime exceptions as else it will abruptly end the thread and
+             * eventually bring the whole system down, which is not intended.
+             */
+            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            handleError(new ChatError(ChatError.SESSION_INITIATION_FAILED, e));
         }
     }
 

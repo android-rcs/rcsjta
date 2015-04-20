@@ -29,6 +29,7 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.network.sip.FeatureTags;
 import com.gsma.rcs.core.ims.network.sip.SipUtils;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpEventListener;
+import com.gsma.rcs.core.ims.protocol.msrp.MsrpException;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpManager;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
@@ -733,15 +734,11 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
 
     /**
      * Send an empty data chunk
+     * 
+     * @throws MsrpException
      */
-    public void sendEmptyDataChunk() {
-        try {
-            mMsrpMgr.sendEmptyChunk();
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Problem while sending empty data chunk", e);
-            }
-        }
+    public void sendEmptyDataChunk() throws MsrpException {
+        mMsrpMgr.sendEmptyChunk();
     }
 
     /**

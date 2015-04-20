@@ -1422,6 +1422,15 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
                             .tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(mChatId);
                     break;
                 /*
+                 * For cases where rejoin has failed or send response failed due to no ACK/200 OK
+                 * response, we should not change Chat state.
+                 */
+                /* Intentional fall through */
+                case ChatError.SESSION_REJOIN_FAILED:
+                    /* Intentional fall through */
+                case ChatError.SEND_RESPONSE_FAILED:
+                    break;
+                /*
                  * This error is caused because of a network drop so the group chat is not set to
                  * ABORTED state in this case as it will be auto-rejoined when network connection is
                  * regained
