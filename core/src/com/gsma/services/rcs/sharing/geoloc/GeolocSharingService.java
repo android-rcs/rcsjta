@@ -89,7 +89,8 @@ public final class GeolocSharingService extends RcsService {
                 }
             } catch (RcsServiceException e) {
                 throw new RcsPermissionDeniedException(
-                        "The compatibility of TAPI client version with the TAPI service implementation version of this device cannot be checked for the geoloc sharing service!");
+                        "The compatibility of TAPI client version with the TAPI service implementation version of this device cannot be checked for the geoloc sharing service!",
+                        e);
             }
         }
         Intent serviceIntent = new Intent(IGeolocSharingService.class.getName());

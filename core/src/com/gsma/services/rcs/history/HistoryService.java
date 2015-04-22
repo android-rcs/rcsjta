@@ -71,7 +71,8 @@ public final class HistoryService extends RcsService {
                 }
             } catch (RcsServiceException e) {
                 throw new RcsPermissionDeniedException(
-                        "The compatibility of TAPI client version with the TAPI service implementation version of this device cannot be checked for the history service!");
+                        "The compatibility of TAPI client version with the TAPI service implementation version of this device cannot be checked for the history service!",
+                        e);
             }
         }
         Intent serviceIntent = new Intent(IHistoryService.class.getName());

@@ -92,7 +92,8 @@ public final class FileUploadService extends RcsService {
                 }
             } catch (RcsServiceException e) {
                 throw new RcsPermissionDeniedException(
-                        "The compatibility of TAPI client version with the TAPI service implementation version of this device cannot be checked for the file upload service!");
+                        "The compatibility of TAPI client version with the TAPI service implementation version of this device cannot be checked for the file upload service!",
+                        e);
             }
         }
         Intent serviceIntent = new Intent(IFileUploadService.class.getName());

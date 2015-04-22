@@ -93,7 +93,8 @@ public final class ImageSharingService extends RcsService {
                 }
             } catch (RcsServiceException e) {
                 throw new RcsPermissionDeniedException(
-                        "The compatibility of TAPI client version with the TAPI service implementation version of this device cannot be checked for the image sharing service!");
+                        "The compatibility of TAPI client version with the TAPI service implementation version of this device cannot be checked for the image sharing service!",
+                        e);
             }
         }
         Intent serviceIntent = new Intent(IImageSharingService.class.getName());

@@ -83,7 +83,8 @@ public final class ContactService extends RcsService {
                 }
             } catch (RcsServiceException e) {
                 throw new RcsPermissionDeniedException(
-                        "The compatibility of TAPI client version with the TAPI service implementation version of this device cannot be checked for the contact service!");
+                        "The compatibility of TAPI client version with the TAPI service implementation version of this device cannot be checked for the contact service!",
+                        e);
             }
         }
         Intent serviceIntent = new Intent(IContactService.class.getName());

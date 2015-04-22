@@ -92,7 +92,8 @@ public final class MultimediaSessionService extends RcsService {
                 }
             } catch (RcsServiceException e) {
                 throw new RcsPermissionDeniedException(
-                        "The compatibility of TAPI client version with the TAPI service implementation version of this device cannot be checked for the multimedia service!");
+                        "The compatibility of TAPI client version with the TAPI service implementation version of this device cannot be checked for the multimedia service!",
+                        e);
             }
         }
         Intent serviceIntent = new Intent(IMultimediaSessionService.class.getName());

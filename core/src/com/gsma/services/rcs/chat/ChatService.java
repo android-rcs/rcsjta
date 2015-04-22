@@ -93,7 +93,8 @@ public final class ChatService extends RcsService {
                 }
             } catch (RcsServiceException e) {
                 throw new RcsPermissionDeniedException(
-                        "The compatibility of TAPI client version with the TAPI service implementation version of this device cannot be checked for the chat service!");
+                        "The compatibility of TAPI client version with the TAPI service implementation version of this device cannot be checked for the chat service!",
+                        e);
             }
         }
         Intent serviceIntent = new Intent(IChatService.class.getName());

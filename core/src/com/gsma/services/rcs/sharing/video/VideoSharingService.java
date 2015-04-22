@@ -88,7 +88,8 @@ public final class VideoSharingService extends RcsService {
                 }
             } catch (RcsServiceException e) {
                 throw new RcsPermissionDeniedException(
-                        "The compatibility of TAPI client version with the TAPI service implementation version of this device cannot be checked for the video sharing service!");
+                        "The compatibility of TAPI client version with the TAPI service implementation version of this device cannot be checked for the video sharing service!",
+                        e);
             }
         }
         Intent serviceIntent = new Intent(IVideoSharingService.class.getName());
