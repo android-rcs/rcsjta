@@ -30,6 +30,7 @@ import com.gsma.rcs.core.ims.protocol.sdp.MediaDescription;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpParser;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipDialogPath;
+import com.gsma.rcs.core.ims.protocol.sip.SipException;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
@@ -38,12 +39,17 @@ import com.gsma.rcs.core.ims.service.richcall.ContentSharingError;
 import com.gsma.rcs.core.ims.service.richcall.RichcallService;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.service.api.ExceptionUtil;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.IVideoPlayer;
 import com.gsma.services.rcs.sharing.video.VideoCodec;
 
+import android.os.RemoteException;
+
 import java.util.Vector;
+
+import javax2.sip.InvalidArgumentException;
 
 /**
  * Originating video content sharing session (streaming)
@@ -115,23 +121,27 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
 
             // Send INVITE request
             sendInvite(invite);
-        } catch (Exception e) {
-            if (sLogger.isActivated()) {
-                sLogger.error("Session initiation has failed", e);
-            }
-
-            // Unexpected error
-            handleError(new ContentSharingError(ContentSharingError.UNEXPECTED_EXCEPTION,
-                    e.getMessage()));
+        } catch (SipException e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (InvalidArgumentException e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (RemoteException e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
+        } catch (RuntimeException e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            handleError(new ContentSharingError(ContentSharingError.SESSION_INITIATION_FAILED, e));
         }
     }
 
     /**
      * Prepare media session
      * 
-     * @throws Exception
+     * @throws RemoteException
      */
-    public void prepareMediaSession() throws Exception {
+    public void prepareMediaSession() throws SipException {
         // Parse the remote SDP part
         SdpParser parser = new SdpParser(getDialogPath().getRemoteContent().getBytes(UTF8));
         MediaDescription mediaVideo = parser.getMediaDescription("video");
@@ -143,32 +153,35 @@ public class OriginatingVideoStreamingSession extends VideoStreamingSession {
         Vector<VideoCodec> proposedCodecs = VideoCodecManager.extractVideoCodecsFromSdp(medias);
 
         IVideoPlayer player = getPlayer();
+        try {
+            // Codec negotiation
+            VideoCodec selectedVideoCodec = VideoCodecManager.negociateVideoCodec(
+                    player.getSupportedCodecs(), proposedCodecs);
 
-        // Codec negotiation
-        VideoCodec selectedVideoCodec = VideoCodecManager.negociateVideoCodec(
-                player.getSupportedCodecs(), proposedCodecs);
-        if (selectedVideoCodec == null) {
-            if (sLogger.isActivated()) {
-                sLogger.debug("Proposed codecs are not supported");
+            if (selectedVideoCodec == null) {
+                if (sLogger.isActivated()) {
+                    sLogger.debug("Proposed codecs are not supported");
+                }
+
+                closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
+
+                // Report error
+                handleError(new ContentSharingError(ContentSharingError.UNSUPPORTED_MEDIA_TYPE));
+                return;
             }
+            getContent().setEncoding("video/" + selectedVideoCodec.getEncoding());
 
-            closeSession(TerminationReason.TERMINATION_BY_SYSTEM);
-
-            // Report error
-            handleError(new ContentSharingError(ContentSharingError.UNSUPPORTED_MEDIA_TYPE));
-            return;
+            // Set the video player orientation
+            SdpOrientationExtension extensionHeader = SdpOrientationExtension.create(mediaVideo);
+            if (extensionHeader != null) {
+                // Update the orientation ID
+                setOrientation(extensionHeader.getExtensionId());
+            }
+            // Set the video player remote info
+            player.setRemoteInfo(selectedVideoCodec, remoteHost, remotePort, getOrientation());
+        } catch (RemoteException e) {
+            throw new SipException("Error when preparing the media session", e);
         }
-        getContent().setEncoding("video/" + selectedVideoCodec.getEncoding());
-
-        // Set the video player orientation
-        SdpOrientationExtension extensionHeader = SdpOrientationExtension.create(mediaVideo);
-        if (extensionHeader != null) {
-            // Update the orientation ID
-            setOrientation(extensionHeader.getExtensionId());
-        }
-
-        // Set the video player remote info
-        player.setRemoteInfo(selectedVideoCodec, remoteHost, remotePort, getOrientation());
     }
 
     /**

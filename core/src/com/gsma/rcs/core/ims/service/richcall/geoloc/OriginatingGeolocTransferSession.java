@@ -159,8 +159,7 @@ public class OriginatingGeolocTransferSession extends GeolocTransferSession impl
             }
 
             // Unexpected error
-            handleError(new ContentSharingError(ContentSharingError.UNEXPECTED_EXCEPTION,
-                    e.getMessage()));
+            handleError(new ContentSharingError(ContentSharingError.UNEXPECTED_EXCEPTION, e));
         }
 
         if (logger.isActivated()) {
