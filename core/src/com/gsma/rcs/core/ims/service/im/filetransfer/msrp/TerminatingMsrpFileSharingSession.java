@@ -48,12 +48,12 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.core.ims.service.im.filetransfer.ImsFileSharingSession;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -163,7 +163,8 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
 
                     ((FileSharingSessionListener) listener).handleSessionAutoAccepted(contact,
                             file, fileIcon, timestamp, mTimestampSent,
-                            FileTransferLog.UNKNOWN_EXPIRATION, FileTransferLog.UNKNOWN_EXPIRATION);
+                            FileTransferData.UNKNOWN_EXPIRATION,
+                            FileTransferData.UNKNOWN_EXPIRATION);
                 }
 
             } else {
@@ -174,7 +175,8 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
                 for (ImsSessionListener listener : listeners) {
                     ((FileSharingSessionListener) listener).handleSessionInvited(contact, file,
                             fileIcon, timestamp, mTimestampSent,
-                            FileTransferLog.UNKNOWN_EXPIRATION, FileTransferLog.UNKNOWN_EXPIRATION);
+                            FileTransferData.UNKNOWN_EXPIRATION,
+                            FileTransferData.UNKNOWN_EXPIRATION);
                 }
 
                 send180Ringing(getDialogPath().getInvite(), getDialogPath().getLocalTag());
@@ -472,7 +474,7 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
             // Notify listeners
             for (ImsSessionListener listener : listeners) {
                 ((FileSharingSessionListener) listener).handleFileTransfered(file, contact,
-                        FileTransferLog.UNKNOWN_EXPIRATION, FileTransferLog.UNKNOWN_EXPIRATION);
+                        FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION);
             }
         } catch (Exception e) {
             // Delete the temp file

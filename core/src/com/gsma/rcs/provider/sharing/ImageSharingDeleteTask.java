@@ -7,7 +7,6 @@ import com.gsma.rcs.provider.DeleteTask;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.service.api.ImageSharingServiceImpl;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.sharing.image.ImageSharingLog;
 
 import java.util.Set;
 
@@ -27,8 +26,8 @@ public class ImageSharingDeleteTask extends DeleteTask.GroupedByContactId {
      */
     public ImageSharingDeleteTask(ImageSharingServiceImpl imageSharingService,
             RichcallService richcallService, LocalContentResolver contentResolver, Object imsLock) {
-        super(contentResolver, imsLock, ImageSharingLog.CONTENT_URI, ImageSharingLog.SHARING_ID,
-                ImageSharingLog.CONTACT, null);
+        super(contentResolver, imsLock, ImageSharingData.CONTENT_URI,
+                ImageSharingData.KEY_SHARING_ID, ImageSharingData.KEY_CONTACT, null);
         mImageSharingService = imageSharingService;
         mRichcallService = richcallService;
     }
@@ -45,8 +44,8 @@ public class ImageSharingDeleteTask extends DeleteTask.GroupedByContactId {
     public ImageSharingDeleteTask(ImageSharingServiceImpl imageSharingService,
             RichcallService richcallService, LocalContentResolver contentResolver, Object imsLock,
             String sharingId) {
-        super(contentResolver, imsLock, ImageSharingLog.CONTENT_URI, ImageSharingLog.SHARING_ID,
-                ImageSharingLog.CONTACT, null, sharingId);
+        super(contentResolver, imsLock, ImageSharingData.CONTENT_URI,
+                ImageSharingData.KEY_SHARING_ID, ImageSharingData.KEY_CONTACT, null, sharingId);
         mImageSharingService = imageSharingService;
         mRichcallService = richcallService;
     }
@@ -63,8 +62,8 @@ public class ImageSharingDeleteTask extends DeleteTask.GroupedByContactId {
     public ImageSharingDeleteTask(ImageSharingServiceImpl imageSharingService,
             RichcallService richcallService, LocalContentResolver contentResolver, Object imsLock,
             ContactId contact) {
-        super(contentResolver, imsLock, ImageSharingLog.CONTENT_URI, ImageSharingLog.SHARING_ID,
-                ImageSharingLog.CONTACT, contact);
+        super(contentResolver, imsLock, ImageSharingData.CONTENT_URI,
+                ImageSharingData.KEY_SHARING_ID, ImageSharingData.KEY_CONTACT, contact);
         mImageSharingService = imageSharingService;
         mRichcallService = richcallService;
     }

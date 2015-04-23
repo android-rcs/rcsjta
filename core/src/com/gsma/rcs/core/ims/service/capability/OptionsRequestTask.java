@@ -25,9 +25,9 @@ import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.protocol.sip.SipTransactionContext;
 import com.gsma.rcs.core.ims.service.ContactInfo;
-import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
 import com.gsma.rcs.core.ims.service.ContactInfo.RcsStatus;
 import com.gsma.rcs.core.ims.service.ContactInfo.RegistrationState;
+import com.gsma.rcs.core.ims.service.SessionAuthenticationAgent;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
@@ -249,8 +249,8 @@ public class OptionsRequestTask implements Runnable {
         SipResponse resp = ctx.getSipResponse();
         Capabilities capabilities = CapabilityUtils.extractCapabilities(resp);
 
-        // Update capability time of last refresh
-        mContactManager.updateCapabilitiesTimeLastRefresh(mContact);
+        // Update capability time of last response
+        mContactManager.updateCapabilitiesTimeLastResponse(mContact);
 
         // Update the database capabilities
         if (capabilities.isImSessionSupported()) {

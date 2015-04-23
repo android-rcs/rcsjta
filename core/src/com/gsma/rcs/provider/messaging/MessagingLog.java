@@ -29,9 +29,7 @@ import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsService.Direction;
-import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
@@ -41,6 +39,7 @@ import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -74,7 +73,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 
     /**
      * Create instance
-     * 
+     *
      * @param context Context
      * @param localContentResolver Local content resolver
      * @param rcsSettings
@@ -95,7 +94,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 
     /**
      * Constructor
-     * 
+     *
      * @param context Application context
      * @param localContentResolver Local content provider
      * @param rcsSettings
@@ -286,15 +285,16 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
      * Delete all entries in Chat, Message and FileTransfer Logs
      */
     public void deleteAllEntries() {
-        mLocalContentResolver.delete(ChatData.CONTENT_URI, null, null);
-        mLocalContentResolver.delete(ChatLog.Message.CONTENT_URI, null, null);
+        mLocalContentResolver.delete(GroupChatData.CONTENT_URI, null, null);
+        mLocalContentResolver.delete(MessageData.CONTENT_URI, null, null);
         mLocalContentResolver.delete(FileTransferData.CONTENT_URI, null, null);
         mLocalContentResolver.delete(GroupDeliveryInfoData.CONTENT_URI, null, null);
     }
 
     @Override
     public Uri addGroupChatDeliveryInfoEntry(String chatId, ContactId contact, String msgId,
-            GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode,
+            GroupDeliveryInfo.Status status,
+            GroupDeliveryInfo.ReasonCode reasonCode,
             long timestampDelivered, long timestampDisplayed) {
         return mGroupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId, contact, msgId,
                 status, reasonCode, timestampDelivered, timestampDisplayed);
@@ -302,7 +302,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 
     @Override
     public boolean setGroupChatDeliveryInfoStatusAndReasonCode(String chatId, ContactId contact,
-            String msgId, GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
+            String msgId, GroupDeliveryInfo.Status status,
+            GroupDeliveryInfo.ReasonCode reasonCode) {
         return mGroupChatDeliveryInfoLog.setGroupChatDeliveryInfoStatusAndReasonCode(chatId,
                 contact, msgId, status, reasonCode);
     }
@@ -345,6 +346,11 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     @Override
     public GroupChat.ReasonCode getGroupChatReasonCode(String chatId) {
         return mGroupChatLog.getGroupChatReasonCode(chatId);
+    }
+
+    @Override
+    public String getFileTransferChatId(String fileTransferId) {
+        return mFileTransferLog.getFileTransferChatId(fileTransferId);
     }
 
     @Override

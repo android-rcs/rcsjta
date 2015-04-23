@@ -24,53 +24,61 @@ package com.gsma.rcs.provider.ipcall;
 
 import com.gsma.rcs.service.ipcalldraft.IPCallLog;
 
+import android.net.Uri;
+
 /**
  * IP call history provider data
  * 
  * @author owom5460
  */
-public class IPCallData {
+/* package private */class IPCallData {
+
+    /**
+     * Content provider URI
+     */
+    /* package private */static final Uri CONTENT_URI = Uri
+            .parse("content://com.gsma.rcs.ipcall/ipcall");
 
     /**
      * Column name
      */
-    static final String KEY_BASECOLUMN_ID = IPCallLog.BASECOLUMN_ID;
+    /* package private */static final String KEY_BASECOLUMN_ID = IPCallLog.BASECOLUMN_ID;
 
     /**
      * Column name
      */
-    static final String KEY_CONTACT = IPCallLog.CONTACT;
+    /* package private */static final String KEY_CONTACT = IPCallLog.CONTACT;
 
     /**
      * Column name
      */
-    static final String KEY_DIRECTION = IPCallLog.DIRECTION;
+    /* package private */static final String KEY_DIRECTION = IPCallLog.DIRECTION;
 
     /**
      * Column name
      */
-    static final String KEY_TIMESTAMP = IPCallLog.TIMESTAMP;
+    /* package private */static final String KEY_TIMESTAMP = IPCallLog.TIMESTAMP;
 
     /**
      * Column name
      */
-    static final String KEY_STATE = IPCallLog.STATE;
+    /* package private */static final String KEY_STATE = IPCallLog.STATE;
 
     /**
      * Column name
      */
-    static final String KEY_REASON_CODE = IPCallLog.REASON_CODE;
+    /* package private */static final String KEY_REASON_CODE = IPCallLog.REASON_CODE;
 
     /**
      * Column name
      */
-    static final String KEY_CALL_ID = IPCallLog.CALL_ID;
+    /* package private */static final String KEY_CALL_ID = IPCallLog.CALL_ID;
 
-    static final String KEY_VIDEO_ENCODING = IPCallLog.VIDEO_ENCODING;
+    /* package private */static final String KEY_VIDEO_ENCODING = IPCallLog.VIDEO_ENCODING;
 
-    static final String KEY_AUDIO_ENCODING = IPCallLog.AUDIO_ENCODING;
+    /* package private */static final String KEY_AUDIO_ENCODING = IPCallLog.AUDIO_ENCODING;
 
-    static final String KEY_WIDTH = IPCallLog.WIDTH;
+    /* package private */static final String KEY_WIDTH = IPCallLog.WIDTH;
 
-    static final String KEY_HEIGHT = IPCallLog.HEIGHT;
+    /* package private */static final String KEY_HEIGHT = IPCallLog.HEIGHT;
 }

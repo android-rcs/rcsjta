@@ -31,13 +31,13 @@ import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
-import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferPersistedStorageAccessor;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.platform.file.FileDescription;
 import com.gsma.rcs.platform.file.FileFactory;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.FileTransferData;
+import com.gsma.rcs.provider.messaging.FileTransferPersistedStorageAccessor;
 import com.gsma.rcs.provider.messaging.GroupFileTransferDeleteTask;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.messaging.OneToOneFileTransferDeleteTask;
@@ -50,7 +50,6 @@ import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.MimeManager;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
-import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
@@ -62,14 +61,13 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
-import com.gsma.services.rcs.filetransfer.FileTransferLog;
 import com.gsma.services.rcs.filetransfer.IFileTransfer;
 import com.gsma.services.rcs.filetransfer.IFileTransferService;
 import com.gsma.services.rcs.filetransfer.IFileTransferServiceConfiguration;
 import com.gsma.services.rcs.filetransfer.IGroupFileTransferListener;
 import com.gsma.services.rcs.filetransfer.IOneToOneFileTransferListener;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
-import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
 import android.os.RemoteException;
@@ -84,7 +82,7 @@ import java.util.concurrent.ExecutorService;
 
 /**
  * File transfer service implementation
- * 
+ *
  * @author Jean-Marc AUFFRET
  */
 public class FileTransferServiceImpl extends IFileTransferService.Stub {
@@ -126,7 +124,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Constructor
-     * 
+     *
      * @param imService InstantMessagingService
      * @param messagingLog MessagingLog
      * @param rcsSettings RcsSettings
@@ -187,7 +185,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Add a file transfer in the list
-     * 
+     *
      * @param fileTransfer File transfer
      */
     public void addFileTransfer(IFileTransfer fileTransfer) {
@@ -207,7 +205,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Remove a file transfer from the list
-     * 
+     *
      * @param fileTransferId File transfer ID
      */
     public void removeFileTransfer(String fileTransferId) {
@@ -221,7 +219,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Returns true if the service is registered to the platform, else returns false
-     * 
+     *
      * @return Returns true if registered else returns false
      */
     public boolean isServiceRegistered() {
@@ -230,7 +228,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Return the reason code for IMS service registration
-     * 
+     *
      * @return the reason code for IMS service registration
      */
     public int getServiceRegistrationReasonCode() {
@@ -239,7 +237,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Registers a listener on service registration events
-     * 
+     *
      * @param listener Service registration listener
      */
     public void addEventListener(IRcsServiceRegistrationListener listener) {
@@ -253,7 +251,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Unregisters a listener on service registration events
-     * 
+     *
      * @param listener Service registration listener
      */
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
@@ -277,7 +275,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Notifies unregistration event
-     * 
+     *
      * @param reasonCode for unregistration
      */
     public void notifyUnRegistration(RcsServiceRegistration.ReasonCode reasonCode) {
@@ -289,7 +287,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Receive a new file transfer invitation
-     * 
+     *
      * @param session File transfer session
      * @param isGroup is group file transfer
      * @param contact Contact ID
@@ -326,7 +324,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Returns the interface to the configuration of the file transfer service
-     * 
+     *
      * @return IFileTransferServiceConfiguration instance
      * @throws RemoteException
      */
@@ -348,7 +346,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Add outgoing file transfer to DB
-     * 
+     *
      * @param fileTransferId File transfer ID
      * @param contact ContactId
      * @param content Content of file
@@ -361,14 +359,14 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             MmContent content, MmContent fileicon, State state, long timestamp, long timestampSent) {
         mMessagingLog.addFileTransfer(fileTransferId, contact, Direction.OUTGOING, content,
                 fileicon, state, ReasonCode.UNSPECIFIED, timestamp, timestampSent,
-                FileTransferLog.UNKNOWN_EXPIRATION, FileTransferLog.UNKNOWN_EXPIRATION);
+                FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION);
         mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId, state,
                 ReasonCode.UNSPECIFIED);
     }
 
     /**
      * Add outgoing group file transfer to DB
-     * 
+     *
      * @param fileTransferId File transfer ID
      * @param chatId Chat ID of group chat
      * @param content Content of file
@@ -387,7 +385,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * 1-1 file send operation initiated
-     * 
+     *
      * @param contact
      * @param file
      * @param fileIcon
@@ -435,7 +433,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Dequeue one-to-one file transfer
-     * 
+     *
      * @param fileTransferId
      * @param contact
      * @param file
@@ -463,7 +461,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * 1-1 file re-send operation initiated
-     * 
+     *
      * @param contact
      * @param file
      * @param fileIcon
@@ -521,7 +519,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     /**
      * Returns true if it is possible to initiate file transfer to the contact specified by the
      * contact parameter, else returns false.
-     * 
+     *
      * @param contact
      * @return boolean
      * @throws RemoteException
@@ -607,7 +605,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * transferred (for a local or a remote file). The parameter contact supports the following
      * formats: MSISDN in national or international format, SIP address, SIP-URI or Tel-URI. If the
      * format of the contact is not supported an exception is thrown.
-     * 
+     *
      * @param contact Contact
      * @param file URI of file to transfer
      * @param attachfileIcon true if the stack must try to attach fileIcon
@@ -670,7 +668,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     /**
      * Returns true if it is possible to initiate file transfer to the group chat specified by the
      * chatId parameter, else returns false.
-     * 
+     *
      * @param chatId
      * @return boolean
      * @throws RemoteException
@@ -767,7 +765,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Group file send operation initiated
-     * 
+     *
      * @param content
      * @param fileIcon
      * @param chatId
@@ -853,7 +851,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Dequeue group file transfer
-     * 
+     *
      * @param fileTransferId
      * @param content
      * @param fileIcon
@@ -884,7 +882,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     /**
      * Transfers a file to participants. The parameter file contains the URI of the file to be
      * transferred (for a local or a remote file).
-     * 
+     *
      * @param chatId ChatId of group chat
      * @param file Uri of file to transfer
      * @param attachfileIcon true if the stack must try to attach fileIcon
@@ -948,7 +946,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Returns a current file transfer from its unique ID
-     * 
+     *
      * @param transferId
      * @return File transfer
      * @throws RemoteException
@@ -990,7 +988,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Adds a listener on file transfer events
-     * 
+     *
      * @param listener OneToOne file transfer listener
      * @throws RemoteException
      */
@@ -1019,7 +1017,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Removes a listener on file transfer events
-     * 
+     *
      * @param listener OneToOne file transfer listener
      * @throws RemoteException
      */
@@ -1048,7 +1046,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Adds a listener on group file transfer events
-     * 
+     *
      * @param listener Group file transfer listener
      * @throws RemoteException
      */
@@ -1077,7 +1075,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Removes a listener on group file transfer events
-     * 
+     *
      * @param listener Group file transfer listener
      * @throws RemoteException
      */
@@ -1108,7 +1106,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * File Transfer delivery status. In FToHTTP, Delivered status is done just after download
      * information are received by the terminating, and Displayed status is done when the file is
      * downloaded. In FToMSRP, the two status are directly done just after MSRP transfer complete.
-     * 
+     *
      * @param imdn Imdn document
      * @param contact contact who received file
      */
@@ -1197,7 +1195,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Handles group file transfer delivery status.
-     * 
+     *
      * @param chatId Chat ID
      * @param imdn Imdn Document
      * @param contact Contact ID
@@ -1227,7 +1225,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Returns service version
-     * 
+     *
      * @return Version
      * @see VERSION_CODES
      * @throws ServerApiException
@@ -1238,7 +1236,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Resume an outgoing HTTP file transfer
-     * 
+     *
      * @param session File transfer session
      * @param isGroup is group file transfer
      */
@@ -1268,7 +1266,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Resume an incoming HTTP file transfer
-     * 
+     *
      * @param session File transfer session
      * @param isGroup is group file transfer
      * @param chatSessionId corresponding chatSessionId
@@ -1300,7 +1298,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     /**
      * Mark a received file transfer as read (i.e. the invitation or the file has been displayed in
      * the UI).
-     * 
+     *
      * @param transferId File transfer ID
      * @throws RemoteException
      */
@@ -1327,7 +1325,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     /**
      * Deletes all one to one file transfer history and abort/reject any associated ongoing session
      * if such exists.
-     * 
+     *
      * @throws RemoteException
      */
     public void deleteOneToOneFileTransfers() throws RemoteException {
@@ -1350,7 +1348,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     /**
      * Deletes all group file transfer from history and abort/reject any associated ongoing session
      * if such exists.
-     * 
+     *
      * @throws RemoteException
      */
     public void deleteGroupFileTransfers() throws RemoteException {
@@ -1372,7 +1370,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     /**
      * Deletes file transfer corresponding to a given one to one chat specified by contact from
      * history and abort/reject any associated ongoing session if such exists.
-     * 
+     *
      * @param contact
      * @throws RemoteException
      */
@@ -1398,7 +1396,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     /**
      * Deletes file transfer corresponding to a given group chat specified by chat id from history
      * and abort/reject any associated ongoing session if such exists.
-     * 
+     *
      * @param chatId
      * @throws RemoteException
      */
@@ -1432,51 +1430,19 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         if (TextUtils.isEmpty(transferId)) {
             throw new ServerApiIllegalArgumentException("transferId must not be null or empty!");
         }
-        Cursor cursor = null;
-        try {
-            String contactId = null;
-            String chatId = null;
-            Uri uri = FileTransferData.CONTENT_URI.buildUpon().appendPath(transferId).build();
-            cursor = mLocalContentResolver.query(uri, new String[] {
-                    FileTransferLog.CONTACT, FileTransferLog.CHAT_ID
-            }, null, null, null);
-            if (cursor == null) {
-                throw new ServerApiPersistentStorageException("Unable to query uri ".concat(uri
-                        .toString()));
-            }
-            if (!cursor.moveToNext()) {
-                return;
-            }
-            contactId = cursor.getString(0);
-            chatId = cursor.getString(1);
-
-            if (contactId.equals(chatId)) {
-                mImOperationExecutor.execute(new OneToOneFileTransferDeleteTask(this, mImService,
-                        mLocalContentResolver, mImsLock, transferId));
-            } else {
-                mImOperationExecutor.execute(new GroupFileTransferDeleteTask(this, mImService,
-                        mLocalContentResolver, mImsLock, chatId, transferId));
-            }
-        } catch (ServerApiBaseException e) {
-            if (!e.shouldNotBeLogged()) {
-                sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            }
-            throw e;
-
-        } catch (Exception e) {
-            sLogger.error(ExceptionUtil.getFullStackTrace(e));
-            throw new ServerApiGenericException(e);
-
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
+        if (mMessagingLog.isGroupFileTransfer(transferId)) {
+            mImOperationExecutor.execute(new GroupFileTransferDeleteTask(this, mImService,
+                    mLocalContentResolver, mImsLock, mMessagingLog
+                            .getFileTransferChatId(transferId), transferId));
+        } else {
+            mImOperationExecutor.execute(new OneToOneFileTransferDeleteTask(this, mImService,
+                    mLocalContentResolver, mImsLock, transferId));
         }
     }
 
     /**
      * Marks undelivered file transfers to indicate that transfers have been processed.
-     * 
+     *
      * @param transferIds
      * @throws RemoteException
      */
@@ -1490,7 +1456,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Add and broadcast file transfer invitation rejections
-     * 
+     *
      * @param contact Contact
      * @param content File content
      * @param fileIcon File content
@@ -1503,14 +1469,14 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         String fileTransferId = IdGenerator.generateMessageID();
         mMessagingLog.addFileTransfer(fileTransferId, contact, Direction.INCOMING, content,
                 fileIcon, State.REJECTED, reasonCode, timestamp, timestampSent,
-                FileTransferLog.UNKNOWN_EXPIRATION, FileTransferLog.UNKNOWN_EXPIRATION);
+                FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION);
 
         mOneToOneFileTransferBroadcaster.broadcastInvitation(fileTransferId);
     }
 
     /**
      * Returns the common service configuration
-     * 
+     *
      * @return the common service configuration
      */
     public ICommonServiceConfiguration getCommonConfiguration() {
@@ -1519,7 +1485,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Set one-one file transfer state and reason code
-     * 
+     *
      * @param fileTransferId
      * @param contact
      * @param state
@@ -1534,7 +1500,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     /**
      * Set group file transfer state and reason code
-     * 
+     *
      * @param fileTransferId
      * @param chatId
      * @param state

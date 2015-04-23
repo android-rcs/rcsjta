@@ -106,7 +106,7 @@ public class ContactManagerTest extends AndroidTestCase {
         capa.setSipAutomata(true);
         capa.addSupportedExtension("MyRcsExtensionTag1");
         capa.addSupportedExtension("MyRcsExtensionTag2");
-        capa.setTimestampOfLastRefresh(timestamp);
+        capa.setTimestampOfLastResponse(timestamp);
         info.setCapabilities(capa);
 
         PresenceInfo pres = new PresenceInfo();
@@ -152,7 +152,7 @@ public class ContactManagerTest extends AndroidTestCase {
             assertEquals(true, getCapa.isSocialPresenceSupported());
             assertEquals(true, getCapa.isVideoSharingSupported());
             assertEquals(true, getCapa.isSipAutomata());
-            assertEquals(timestamp, getCapa.getTimestampOfLastRefresh());
+            assertEquals(timestamp, getCapa.getTimestampOfLastResponse());
             assertEquals(timestamp, getCapa.getTimestampOfLastRequest());
             // Timestamp not tested because it is automatically updated with the current time
             Set<String> getExtraCapa = getCapa.getSupportedExtensions();
@@ -212,7 +212,7 @@ public class ContactManagerTest extends AndroidTestCase {
         capa.addSupportedExtension("MyRcsExtensionTag1");
         capa.addSupportedExtension("MyRcsExtensionTag2");
         capa.setSipAutomata(true);
-        capa.setTimestampOfLastRefresh(timestamp);
+        capa.setTimestampOfLastResponse(timestamp);
         info.setCapabilities(capa);
 
         PresenceInfo pres = new PresenceInfo();
@@ -266,7 +266,7 @@ public class ContactManagerTest extends AndroidTestCase {
 
         newInfo.setContact(mContact);
 
-        capa.setTimestampOfLastRefresh(timestamp);
+        capa.setTimestampOfLastResponse(timestamp);
 
         // newInfo.setPresenceInfo(null);
         // if (new)PresenceInfo is null, error on ContactManager line 504 so
@@ -310,7 +310,7 @@ public class ContactManagerTest extends AndroidTestCase {
         capa.setTimestampOfLastRequest(timestamp);
         capa.addSupportedExtension("MyRcsExtensionTag3");
         capa.addSupportedExtension("MyRcsExtensionTag4");
-        capa.setTimestampOfLastRefresh(timestamp);
+        capa.setTimestampOfLastResponse(timestamp);
 
         prese.setFavoriteLink(new FavoriteLink("favo_link_name", "http://favo_link_url"));
         prese.setFreetext("free_text");

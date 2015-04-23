@@ -119,10 +119,10 @@ public class CapabilitiesLog {
     public static final String AUTOMATA = "automata";
 
     /**
-     * The name of the column containing the time of the last capability refresh.
+     * The name of the column containing the time of the last capability update from network.
      * <P>
      * Type: LONG
      * </P>
      */
-    public static final String TIMESTAMP = "capability_time_last_refresh";
+    public static final String TIMESTAMP = "timestamp";
 }

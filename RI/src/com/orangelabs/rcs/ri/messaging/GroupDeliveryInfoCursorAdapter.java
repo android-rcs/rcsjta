@@ -4,7 +4,8 @@
 
 package com.orangelabs.rcs.ri.messaging;
 
-import com.gsma.services.rcs.GroupDeliveryInfo;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfoLog;
 
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;
@@ -129,11 +130,11 @@ public class GroupDeliveryInfoCursorAdapter extends CursorAdapter {
          * @param cursor
          */
         ViewHolder(View base, Cursor cursor) {
-            columnContact = cursor.getColumnIndexOrThrow(GroupDeliveryInfo.CONTACT);
-            columnDeliver = cursor.getColumnIndexOrThrow(GroupDeliveryInfo.TIMESTAMP_DELIVERED);
-            columnDisplay = cursor.getColumnIndexOrThrow(GroupDeliveryInfo.TIMESTAMP_DISPLAYED);
-            columnStatus = cursor.getColumnIndexOrThrow(GroupDeliveryInfo.STATUS);
-            columnReason = cursor.getColumnIndexOrThrow(GroupDeliveryInfo.REASON_CODE);
+            columnContact = cursor.getColumnIndexOrThrow(GroupDeliveryInfoLog.CONTACT);
+            columnDeliver = cursor.getColumnIndexOrThrow(GroupDeliveryInfoLog.TIMESTAMP_DELIVERED);
+            columnDisplay = cursor.getColumnIndexOrThrow(GroupDeliveryInfoLog.TIMESTAMP_DISPLAYED);
+            columnStatus = cursor.getColumnIndexOrThrow(GroupDeliveryInfoLog.STATUS);
+            columnReason = cursor.getColumnIndexOrThrow(GroupDeliveryInfoLog.REASON_CODE);
             statusText = (TextView) base.findViewById(R.id.status);
             contactText = (TextView) base.findViewById(R.id.contact);
             deliverText = (TextView) base.findViewById(R.id.deliver);

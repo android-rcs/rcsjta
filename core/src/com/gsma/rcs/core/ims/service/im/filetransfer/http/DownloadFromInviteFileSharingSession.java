@@ -31,11 +31,11 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 import android.net.Uri;
 
@@ -118,7 +118,7 @@ public class DownloadFromInviteFileSharingSession extends TerminatingHttpFileSha
         if (thumbnailInfo != null) {
             return thumbnailInfo.getExpiration();
         }
-        return FileTransferLog.UNKNOWN_EXPIRATION;
+        return FileTransferData.UNKNOWN_EXPIRATION;
     }
 
     /**

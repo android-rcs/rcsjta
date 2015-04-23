@@ -23,7 +23,6 @@
 package com.gsma.rcs.provider.contact;
 
 import com.gsma.services.rcs.capability.CapabilitiesLog;
-import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 import android.net.Uri;
 
@@ -32,260 +31,263 @@ import android.net.Uri;
  * 
  * @author Jean-Marc AUFFRET
  */
-/* package private */public final class ContactData {
+/* package private */final class ContactData {
     /**
      * Database URI
      */
-    static final Uri CONTENT_URI = Uri.parse("content://com.gsma.rcs.capability/capability");
+    /* package private */static final Uri CONTENT_URI = Uri
+            .parse("content://com.gsma.rcs.capability/capability");
 
     /**
      * Unique base column id
      */
-    static final String KEY_BASECOLUMN_ID = FileTransferLog.BASECOLUMN_ID;
+    /* package private */static final String KEY_BASECOLUMN_ID = CapabilitiesLog.BASECOLUMN_ID;
 
     /**
      * ContactId formatted number of contact associated to the capabilities.
      */
-    static final String KEY_CONTACT = CapabilitiesLog.CONTACT;
+    /* package private */static final String KEY_CONTACT = CapabilitiesLog.CONTACT;
 
     /**
      * Column Name
      */
-    static final String KEY_DISPLAY_NAME = "display_name";
+    /* package private */static final String KEY_DISPLAY_NAME = "display_name";
 
     /**
      * Column name
      */
-    static final String KEY_PRESENCE_SHARING_STATUS = "presence_sharing_status";
+    /* package private */static final String KEY_PRESENCE_SHARING_STATUS = "presence_sharing_status";
 
     /**
      * Column name
      */
-    static final String KEY_TIMESTAMP = "timestamp";
+    /* package private */static final String KEY_TIMESTAMP_CONTACT_UPDATED = "timestamp_contact_updated";
 
     /**
      * Column name
      */
-    static final String KEY_RCS_STATUS = "rcs_status";
+    /* package private */static final String KEY_RCS_STATUS = "rcs_status";
 
     /**
      * Column name
      */
-    static final String KEY_REGISTRATION_STATE = "registration_state";
+    /* package private */static final String KEY_REGISTRATION_STATE = "registration_state";
 
     /**
      * Column name
      */
-    static final String KEY_RCS_STATUS_TIMESTAMP = "rcs_status_timestamp";
+    /* package private */static final String KEY_RCS_STATUS_TIMESTAMP = "rcs_status_timestamp";
 
     /**
      * Column name
      */
-    static final String KEY_PRESENCE_FREE_TEXT = "presence_free_text";
+    /* package private */static final String KEY_PRESENCE_FREE_TEXT = "presence_free_text";
 
     /**
      * Column name
      */
-    static final String KEY_PRESENCE_WEBLINK_NAME = "presence_weblink_name";
+    /* package private */static final String KEY_PRESENCE_WEBLINK_NAME = "presence_weblink_name";
 
     /**
      * Column name
      */
-    static final String KEY_PRESENCE_WEBLINK_URL = "presence_weblink_url";
+    /* package private */static final String KEY_PRESENCE_WEBLINK_URL = "presence_weblink_url";
 
     /**
      * Column name
      */
-    static final String KEY_PRESENCE_PHOTO_EXIST_FLAG = "presence_photo_exist_flag";
+    /* package private */static final String KEY_PRESENCE_PHOTO_EXIST_FLAG = "presence_photo_exist_flag";
 
     /**
      * Column name
      */
-    static final String KEY_PRESENCE_PHOTO_ETAG = "presence_photo_etag";
+    /* package private */static final String KEY_PRESENCE_PHOTO_ETAG = "presence_photo_etag";
 
     /**
      * Column name
      */
-    static final String KEY_PRESENCE_PHOTO_DATA = "presence_photo_data";
+    /* package private */static final String KEY_PRESENCE_PHOTO_DATA = "presence_photo_data";
 
     /**
      * Column name
      */
-    static final String KEY_PRESENCE_GEOLOC_EXIST_FLAG = "presence_geoloc_exist_flag";
+    /* package private */static final String KEY_PRESENCE_GEOLOC_EXIST_FLAG = "presence_geoloc_exist_flag";
 
     /**
      * Column name
      */
-    static final String KEY_PRESENCE_GEOLOC_LATITUDE = "presence_geoloc_latitude";
+    /* package private */static final String KEY_PRESENCE_GEOLOC_LATITUDE = "presence_geoloc_latitude";
 
     /**
      * Column name
      */
-    static final String KEY_PRESENCE_GEOLOC_LONGITUDE = "presence_geoloc_longitude";
+    /* package private */static final String KEY_PRESENCE_GEOLOC_LONGITUDE = "presence_geoloc_longitude";
 
     /**
      * Column name
      */
-    static final String KEY_PRESENCE_GEOLOC_ALTITUDE = "presence_geoloc_altitude";
+    /* package private */static final String KEY_PRESENCE_GEOLOC_ALTITUDE = "presence_geoloc_altitude";
 
     /**
      * Column name
      */
-    static final String KEY_PRESENCE_TIMESTAMP = "presence_timestamp";
+    /* package private */static final String KEY_PRESENCE_TIMESTAMP = "presence_timestamp";
 
     /**
      * Column name
      */
-    static final String KEY_CAPABILITY_TIME_LAST_RQST = "capability_time_last_rqst";
+    /* package private */static final String KEY_CAPABILITY_TIMESTAMP_LAST_REQUEST = "capability_time_last_rqst";
 
     /**
      * Column name
      */
-    static final String KEY_CAPABILITY_CS_VIDEO = "capability_cs_video";
+    /* package private */static final String KEY_CAPABILITY_CS_VIDEO = "capability_cs_video";
 
     /**
      * Image sharing capability. Values: 1 (true), 0 (false)
      */
-    static final String KEY_CAPABILITY_IMAGE_SHARING = CapabilitiesLog.CAPABILITY_IMAGE_SHARE;
+    /* package private */static final String KEY_CAPABILITY_IMAGE_SHARE = CapabilitiesLog.CAPABILITY_IMAGE_SHARE;
 
     /**
      * Video sharing capability. Values: 1 (true), 0 (false)
      */
-    static final String KEY_CAPABILITY_VIDEO_SHARING = CapabilitiesLog.CAPABILITY_VIDEO_SHARE;
+    /* package private */static final String KEY_CAPABILITY_VIDEO_SHARE = CapabilitiesLog.CAPABILITY_VIDEO_SHARE;
 
     /**
      * IM/Chat capability. Values: 1 (true), 0 (false)
      */
-    static final String KEY_CAPABILITY_IM_SESSION = CapabilitiesLog.CAPABILITY_IM_SESSION;
+    /* package private */static final String KEY_CAPABILITY_IM_SESSION = CapabilitiesLog.CAPABILITY_IM_SESSION;
 
     /**
      * File transfer capability. Values: 1 (true), 0 (false)
      */
-    static final String KEY_CAPABILITY_FILE_TRANSFER = CapabilitiesLog.CAPABILITY_FILE_TRANSFER;
+    /* package private */static final String KEY_CAPABILITY_FILE_TRANSFER = CapabilitiesLog.CAPABILITY_FILE_TRANSFER;
 
     /**
      * Column name
      */
-    static final String KEY_CAPABILITY_PRESENCE_DISCOVERY = "capability_presence_discovery";
+    /* package private */static final String KEY_CAPABILITY_PRESENCE_DISCOVERY = "capability_presence_discovery";
 
     /**
      * Column name
      */
-    static final String KEY_CAPABILITY_SOCIAL_PRESENCE = "capability_social_presence";
+    /* package private */static final String KEY_CAPABILITY_SOCIAL_PRESENCE = "capability_social_presence";
 
     /**
      * Geolocation push capability. Values: 1 (true), 0 (false)
      */
-    static final String KEY_CAPABILITY_GEOLOCATION_PUSH = CapabilitiesLog.CAPABILITY_GEOLOC_PUSH;
+    /* package private */static final String KEY_CAPABILITY_GEOLOC_PUSH = CapabilitiesLog.CAPABILITY_GEOLOC_PUSH;
 
     /**
      * Column name
      */
-    static final String KEY_CAPABILITY_FILE_TRANSFER_HTTP = "capability_file_transfer_http";
+    /* package private */static final String KEY_CAPABILITY_FILE_TRANSFER_HTTP = "capability_file_transfer_http";
 
     /**
      * Column name
      */
-    static final String KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL = "capability_file_transfer_thumbnail";
+    /* package private */static final String KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL = "capability_file_transfer_thumbnail";
 
     /**
      * Supported RCS extensions. List of features tags semicolon separated (e.g. <TAG1>;<TAG2>;
      * ;TAGn)
      */
-    static final String KEY_CAPABILITY_EXTENSIONS = CapabilitiesLog.CAPABILITY_EXTENSIONS;
+    /* package private */static final String KEY_CAPABILITY_EXTENSIONS = CapabilitiesLog.CAPABILITY_EXTENSIONS;
 
     /**
      * Column name
      */
     // TODO: Refer to Ipcall api here in future releases
-    // static final String KEY_CAPABILITY_IP_VOICE_CALL = CapabilitiesLog.CAPABILITY_IP_VOICE_CALL;
-    static final String KEY_CAPABILITY_IP_VOICE_CALL = "capability_ip_voice_call";
+    // /* package private */static final String KEY_CAPABILITY_IP_VOICE_CALL =
+    // CapabilitiesLog.CAPABILITY_IP_VOICE_CALL;
+    /* package private */static final String KEY_CAPABILITY_IP_VOICE_CALL = "capability_ip_voice_call";
 
     /**
      * Column name
      */
     // TODO: Refer to Ipcall api here in future releases
-    // static final String KEY_CAPABILITY_IP_VIDEO_CALL = CapabilitiesLog.CAPABILITY_IP_VIDEO_CALL;
-    static final String KEY_CAPABILITY_IP_VIDEO_CALL = "capability_ip_video_call";
+    // /* package private */static final String KEY_CAPABILITY_IP_VIDEO_CALL =
+    // CapabilitiesLog.CAPABILITY_IP_VIDEO_CALL;
+    /* package private */static final String KEY_CAPABILITY_IP_VIDEO_CALL = "capability_ip_video_call";
 
     /**
      * Column name
      */
-    static final String KEY_CAPABILITY_GROUP_CHAT_SF = "capability_group_chat_sf";
+    /* package private */static final String KEY_CAPABILITY_GROUP_CHAT_SF = "capability_group_chat_sf";
 
     /**
      * Column name
      */
-    static final String KEY_CAPABILITY_FILE_TRANSFER_SF = "capability_file_transfer_sf";
+    /* package private */static final String KEY_CAPABILITY_FILE_TRANSFER_SF = "capability_file_transfer_sf";
 
     /**
      * Is an automata. Values: 1 (true), 0 (false).
      */
-    static final String KEY_AUTOMATA = CapabilitiesLog.AUTOMATA;
+    /* package private */static final String KEY_AUTOMATA = CapabilitiesLog.AUTOMATA;
 
     /**
-     * Timestamp of the last capability refresh
+     * Timestamp of the last capability response
      */
-    static final String KEY_CAPABILITY_TIME_LAST_REFRESH = CapabilitiesLog.TIMESTAMP;
+    /* package private */static final String KEY_CAPABILITY_TIMESTAMP_LAST_RESPONSE = CapabilitiesLog.TIMESTAMP;
 
     /**
      * TRUE value
      */
-    public static final String TRUE_VALUE = Boolean.toString(true);
+    /* package private */static final String TRUE_VALUE = Boolean.toString(true);
 
     /**
      * FALSE value
      */
-    public static final String FALSE_VALUE = Boolean.toString(false);
+    /* package private */static final String FALSE_VALUE = Boolean.toString(false);
 
     /**
      * Column name
      */
-    static final String KEY_BLOCKING_TIMESTAMP = "blocking_timestamp";
+    /* package private */static final String KEY_BLOCKING_TIMESTAMP = "blocking_timestamp";
 
     /**
      * Column name
      */
-    static final String KEY_BLOCKED = "blocked";
+    /* package private */static final String KEY_BLOCKED = "blocked";
 
     /**
      * BLOCKED value is not set
      */
-    static final int BLOCKED_VALUE_NOT_SET = 0;
+    /* package private */static final int BLOCKED_VALUE_NOT_SET = 0;
 
     /**
      * BLOCKED value is set
      */
-    static final int BLOCKED_VALUE_SET = 1;
+    /* package private */static final int BLOCKED_VALUE_SET = 1;
 
     /**
      * Aggregation data constants
      */
-    public static final class AggregationData {
+    /* package private */static final class AggregationData {
         /**
          * Database URI
          */
-        static final Uri CONTENT_URI = Uri
-                .parse("content://com.gsma.services.rcs.provider.capability/aggregation");
+        /* package private */static final Uri CONTENT_URI = Uri
+                .parse("content://com.gsma.rcs.capability/aggregation");
 
         /**
          * Column name
          */
-        static final String KEY_ID = "_id";
+        /* package private */static final String KEY_ID = "_id";
 
         /**
          * Column name
          */
-        static final String KEY_RCS_NUMBER = "rcs_number";
+        /* package private */static final String KEY_RCS_NUMBER = "rcs_number";
 
         /**
          * Column name
          */
-        static final String KEY_RAW_CONTACT_ID = "raw_contact_id";
+        /* package private */static final String KEY_RAW_CONTACT_ID = "raw_contact_id";
 
         /**
          * Column name
          */
-        static final String KEY_RCS_RAW_CONTACT_ID = "rcs_raw_contact_id";
+        /* package private */static final String KEY_RCS_RAW_CONTACT_ID = "rcs_raw_contact_id";
     }
 }

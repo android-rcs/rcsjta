@@ -25,12 +25,20 @@ package com.gsma.rcs.provider.sharing;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
 import com.gsma.services.rcs.sharing.image.ImageSharingLog;
 
+import android.net.Uri;
+
 /**
  * Image sharing data constants
  * 
  * @author Jean-Marc AUFFRET
  */
 public class ImageSharingData {
+
+    /**
+     * Content provider URI
+     */
+    /* package private */public static final Uri CONTENT_URI = Uri
+            .parse("content://com.gsma.rcs.imageshare/imageshare");
 
     /**
      * History log member id

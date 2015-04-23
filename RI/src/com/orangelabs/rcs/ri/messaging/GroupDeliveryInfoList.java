@@ -18,7 +18,8 @@
 
 package com.orangelabs.rcs.ri.messaging;
 
-import com.gsma.services.rcs.GroupDeliveryInfo;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfoLog;
 
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.utils.LogUtils;
@@ -57,16 +58,16 @@ public class GroupDeliveryInfoList extends FragmentActivity implements
 
     // @formatter:off
     private static final String[] PROJECTION = new String[] {
-        GroupDeliveryInfo.BASECOLUMN_ID,
-        GroupDeliveryInfo.CONTACT,
-        GroupDeliveryInfo.TIMESTAMP_DELIVERED,
-        GroupDeliveryInfo.TIMESTAMP_DISPLAYED,
-        GroupDeliveryInfo.STATUS,
-        GroupDeliveryInfo.REASON_CODE
+        GroupDeliveryInfoLog.BASECOLUMN_ID,
+        GroupDeliveryInfoLog.CONTACT,
+        GroupDeliveryInfoLog.TIMESTAMP_DELIVERED,
+        GroupDeliveryInfoLog.TIMESTAMP_DISPLAYED,
+        GroupDeliveryInfoLog.STATUS,
+        GroupDeliveryInfoLog.REASON_CODE
     };
     // @formatter:on
 
-    private static final String WHERE_CLAUSE = new StringBuilder(GroupDeliveryInfo.ID).append("=?")
+    private static final String WHERE_CLAUSE = new StringBuilder(GroupDeliveryInfoLog.ID).append("=?")
             .toString();
 
     /**
@@ -118,7 +119,7 @@ public class GroupDeliveryInfoList extends FragmentActivity implements
             Log.d(LOGTAG, "onCreateLoader " + id);
         }
         // Create a new CursorLoader with the following query parameters.
-        CursorLoader loader = new CursorLoader(this, GroupDeliveryInfo.CONTENT_URI, PROJECTION,
+        CursorLoader loader = new CursorLoader(this, GroupDeliveryInfoLog.CONTENT_URI, PROJECTION,
                 WHERE_CLAUSE, new String[] {
                     mMessageId
                 }, null);

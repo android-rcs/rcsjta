@@ -37,11 +37,11 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingError;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
+import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 /**
  * Originating file transfer HTTP session
@@ -105,7 +105,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
             ContactManager contactManager) {
         super(parent, content, null, conferenceId, fileIcon, chatSessionId, chatContributionId,
                 fileTransferId, rcsSettings, messagingLog, timestamp,
-                FileTransferLog.UNKNOWN_EXPIRATION, FileTransferLog.UNKNOWN_EXPIRATION,
+                FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION,
                 contactManager);
         mCore = core;
         mTimestampSent = timestampSent;
@@ -199,7 +199,7 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
         if (thumbnail != null) {
             setIconExpiration(thumbnail.getExpiration());
         } else {
-            setIconExpiration(FileTransferLog.UNKNOWN_EXPIRATION);
+            setIconExpiration(FileTransferData.UNKNOWN_EXPIRATION);
         }
 
         mChatSession = mCore.getImService().getGroupChatSession(getContributionID());

@@ -14,18 +14,16 @@
  * the License.
  */
 
-package com.gsma.rcs.core.ims.service.im.filetransfer;
+package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.provider.fthttp.FtHttpResume;
-import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
-import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 import android.database.Cursor;
 import android.net.Uri;
@@ -65,9 +63,9 @@ public class FileTransferPersistedStorageAccessor {
 
     private long mTimestampDisplayed;
 
-    private long mFileExpiration = FileTransferLog.UNKNOWN_EXPIRATION;
+    private long mFileExpiration = FileTransferData.UNKNOWN_EXPIRATION;
 
-    private long mFileIconExpiration = FileTransferLog.UNKNOWN_EXPIRATION;
+    private long mFileIconExpiration = FileTransferData.UNKNOWN_EXPIRATION;
 
     /**
      * Constructor
@@ -112,43 +110,46 @@ public class FileTransferPersistedStorageAccessor {
         try {
             cursor = mMessagingLog.getCacheableFileTransferData(mFileTransferId);
             String contact = cursor
-                    .getString(cursor.getColumnIndexOrThrow(FileTransferLog.CONTACT));
+                    .getString(cursor.getColumnIndexOrThrow(FileTransferData.KEY_CONTACT));
             if (contact != null) {
                 mContact = ContactUtil.createContactIdFromTrustedData(contact);
             }
             mDirection = Direction.valueOf(cursor.getInt(cursor
-                    .getColumnIndexOrThrow(FileTransferLog.DIRECTION)));
-            mChatId = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.CHAT_ID));
-            mFileName = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FILENAME));
-            mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.MIME_TYPE));
-            mFile = Uri.parse(cursor.getString(cursor.getColumnIndexOrThrow(FileTransferLog.FILE)));
+                    .getColumnIndexOrThrow(FileTransferData.KEY_DIRECTION)));
+            mChatId = cursor.getString(cursor.getColumnIndexOrThrow(FileTransferData.KEY_CHAT_ID));
+            mFileName = cursor.getString(cursor
+                    .getColumnIndexOrThrow(FileTransferData.KEY_FILENAME));
+            mMimeType = cursor.getString(cursor
+                    .getColumnIndexOrThrow(FileTransferData.KEY_MIME_TYPE));
+            mFile = Uri.parse(cursor.getString(cursor
+                    .getColumnIndexOrThrow(FileTransferData.KEY_FILE)));
             String fileIcon = cursor.getString(cursor
-                    .getColumnIndexOrThrow(FileTransferLog.FILEICON));
+                    .getColumnIndexOrThrow(FileTransferData.KEY_FILEICON));
             if (fileIcon != null) {
                 mFileIcon = Uri.parse(fileIcon);
             }
             if (!mRead) {
                 mRead = ReadStatus.READ.toInt() == cursor.getInt(cursor
-                        .getColumnIndexOrThrow(FileTransferLog.READ_STATUS));
+                        .getColumnIndexOrThrow(FileTransferData.KEY_READ_STATUS));
             }
-            mFileSize = cursor.getLong(cursor.getColumnIndexOrThrow(FileTransferLog.FILESIZE));
+            mFileSize = cursor.getLong(cursor.getColumnIndexOrThrow(FileTransferData.KEY_FILESIZE));
             mFileIconMimeType = cursor.getString(cursor
-                    .getColumnIndexOrThrow(FileTransferLog.FILEICON_MIME_TYPE));
+                    .getColumnIndexOrThrow(FileTransferData.KEY_FILEICON_MIME_TYPE));
             if (mTimestampDelivered <= 0) {
                 mTimestampDelivered = cursor.getLong(cursor
-                        .getColumnIndexOrThrow(FileTransferLog.TIMESTAMP_DELIVERED));
+                        .getColumnIndexOrThrow(FileTransferData.KEY_TIMESTAMP_DELIVERED));
             }
             if (mTimestampDisplayed <= 0) {
                 mTimestampDisplayed = cursor.getLong(cursor
-                        .getColumnIndexOrThrow(FileTransferLog.TIMESTAMP_DISPLAYED));
+                        .getColumnIndexOrThrow(FileTransferData.KEY_TIMESTAMP_DISPLAYED));
             }
-            if (mFileExpiration == FileTransferLog.UNKNOWN_EXPIRATION) {
+            if (mFileExpiration == FileTransferData.UNKNOWN_EXPIRATION) {
                 mFileExpiration = cursor.getLong(cursor
-                        .getColumnIndexOrThrow(FileTransferLog.FILE_EXPIRATION));
+                        .getColumnIndexOrThrow(FileTransferData.KEY_FILE_EXPIRATION));
             }
-            if (mFileIconExpiration == FileTransferLog.UNKNOWN_EXPIRATION) {
+            if (mFileIconExpiration == FileTransferData.UNKNOWN_EXPIRATION) {
                 mFileIconExpiration = cursor.getLong(cursor
-                        .getColumnIndexOrThrow(FileTransferLog.FILEICON_EXPIRATION));
+                        .getColumnIndexOrThrow(FileTransferData.KEY_FILEICON_EXPIRATION));
             }
         } finally {
             if (cursor != null) {
@@ -350,7 +351,7 @@ public class FileTransferPersistedStorageAccessor {
     public long getFileExpiration() {
         /* No need to read from provider unless outgoing and expiration is unknown. */
         if (Direction.OUTGOING == mDirection
-                && FileTransferLog.UNKNOWN_EXPIRATION == mFileExpiration) {
+                && FileTransferData.UNKNOWN_EXPIRATION == mFileExpiration) {
             cacheData();
         }
         return mFileExpiration;
@@ -364,7 +365,7 @@ public class FileTransferPersistedStorageAccessor {
     public long getFileIconExpiration() {
         /* No need to read from provider unless outgoing and expiration is unknown. */
         if (Direction.OUTGOING == mDirection
-                && FileTransferLog.UNKNOWN_EXPIRATION == mFileIconExpiration) {
+                && FileTransferData.UNKNOWN_EXPIRATION == mFileIconExpiration) {
             cacheData();
         }
         return mFileIconExpiration;

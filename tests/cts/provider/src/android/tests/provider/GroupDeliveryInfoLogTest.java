@@ -18,7 +18,7 @@
 
 package android.tests.provider;
 
-import com.gsma.services.rcs.GroupDeliveryInfo;
+import com.gsma.services.rcs.GroupDeliveryInfoLog;
 
 import android.content.ContentProviderClient;
 import android.content.ContentValues;
@@ -33,20 +33,16 @@ public class GroupDeliveryInfoLogTest extends InstrumentationTestCase {
 
     private ContentProviderClient mProvider;
     private static final String[] GROUPDELIVERYINFO_LOG_PROJECTION = new String[] {
-        GroupDeliveryInfo.ID,
-        GroupDeliveryInfo.CONTACT,
-        GroupDeliveryInfo.CHAT_ID,
-        GroupDeliveryInfo.REASON_CODE,
-        GroupDeliveryInfo.STATUS,
-        GroupDeliveryInfo.TIMESTAMP_DELIVERED,
-        GroupDeliveryInfo.TIMESTAMP_DISPLAYED
+            GroupDeliveryInfoLog.ID, GroupDeliveryInfoLog.CONTACT, GroupDeliveryInfoLog.CHAT_ID,
+            GroupDeliveryInfoLog.REASON_CODE, GroupDeliveryInfoLog.STATUS,
+            GroupDeliveryInfoLog.TIMESTAMP_DELIVERED, GroupDeliveryInfoLog.TIMESTAMP_DISPLAYED
     };
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         mProvider = getInstrumentation().getTargetContext().getContentResolver()
-                .acquireContentProviderClient(GroupDeliveryInfo.CONTENT_URI);
+                .acquireContentProviderClient(GroupDeliveryInfoLog.CONTENT_URI);
         assertNotNull(mProvider);
     }
 
@@ -58,13 +54,12 @@ public class GroupDeliveryInfoLogTest extends InstrumentationTestCase {
         // Check that provider handles columns names and query operation
         Cursor cursor = null;
         try {
-            String where = GroupDeliveryInfo.CONTACT.concat("=?");
+            String where = GroupDeliveryInfoLog.CONTACT.concat("=?");
             String[] whereArgs = new String[] {
-                    "+33123456789"
+                "+33123456789"
             };
-            cursor = mProvider.query(GroupDeliveryInfo.CONTENT_URI,
-                    GROUPDELIVERYINFO_LOG_PROJECTION, where,
-                    whereArgs, null);
+            cursor = mProvider.query(GroupDeliveryInfoLog.CONTENT_URI,
+                    GROUPDELIVERYINFO_LOG_PROJECTION, where, whereArgs, null);
             assertNotNull(cursor);
         } catch (Exception e) {
             fail("query of GroupDeliveryInfoLog failed " + e.getMessage());
@@ -77,7 +72,7 @@ public class GroupDeliveryInfoLogTest extends InstrumentationTestCase {
 
     public void testGroupDeliveryInfoLogQueryById() {
         // Check that provider handles columns names and query operation by ID
-        Uri uri = Uri.withAppendedPath(GroupDeliveryInfo.CONTENT_URI, "123456789");
+        Uri uri = Uri.withAppendedPath(GroupDeliveryInfoLog.CONTENT_URI, "123456789");
         Cursor cursor = null;
         try {
             assertNotNull(mProvider);
@@ -96,7 +91,7 @@ public class GroupDeliveryInfoLogTest extends InstrumentationTestCase {
         // Check that provider handles columns names and query operation where clause is null
         Cursor cursor = null;
         try {
-            cursor = mProvider.query(GroupDeliveryInfo.CONTENT_URI, null, null, null, null);
+            cursor = mProvider.query(GroupDeliveryInfoLog.CONTENT_URI, null, null, null, null);
             assertNotNull(cursor);
             if (cursor.moveToFirst()) {
                 Utils.checkProjection(GROUPDELIVERYINFO_LOG_PROJECTION, cursor.getColumnNames());
@@ -113,15 +108,16 @@ public class GroupDeliveryInfoLogTest extends InstrumentationTestCase {
     public void testGroupDeliveryInfoLogInsert() {
         // Check that provider does not support insert operation
         ContentValues values = new ContentValues();
-        values.put(GroupDeliveryInfo.ID, "delivinfo_id");
-        values.put(GroupDeliveryInfo.CHAT_ID, "chat_id");
-        values.put(GroupDeliveryInfo.CONTACT, "+3360102030405");
-        values.put(GroupDeliveryInfo.REASON_CODE, GroupDeliveryInfo.ReasonCode.UNSPECIFIED.toInt());
-        values.put(GroupDeliveryInfo.STATUS, GroupDeliveryInfo.Status.DELIVERED.toInt());
-        values.put(GroupDeliveryInfo.TIMESTAMP_DELIVERED, 0);
-        values.put(GroupDeliveryInfo.TIMESTAMP_DISPLAYED, 0);
+        values.put(GroupDeliveryInfoLog.ID, "delivinfo_id");
+        values.put(GroupDeliveryInfoLog.CHAT_ID, "chat_id");
+        values.put(GroupDeliveryInfoLog.CONTACT, "+3360102030405");
+        values.put(GroupDeliveryInfoLog.REASON_CODE,
+                GroupDeliveryInfoLog.ReasonCode.UNSPECIFIED.toInt());
+        values.put(GroupDeliveryInfoLog.STATUS, GroupDeliveryInfoLog.Status.DELIVERED.toInt());
+        values.put(GroupDeliveryInfoLog.TIMESTAMP_DELIVERED, 0);
+        values.put(GroupDeliveryInfoLog.TIMESTAMP_DISPLAYED, 0);
         try {
-            mProvider.insert(GroupDeliveryInfo.CONTENT_URI, values);
+            mProvider.insert(GroupDeliveryInfoLog.CONTENT_URI, values);
             fail("GroupDeliveryInfoLog is read only");
         } catch (Exception ex) {
             assertTrue("insert into GroupDeliveryInfoLog should be forbidden",
@@ -133,7 +129,7 @@ public class GroupDeliveryInfoLogTest extends InstrumentationTestCase {
     public void testGroupDeliveryInfoLogDelete() {
         // Check that provider supports delete operation
         try {
-            mProvider.delete(GroupDeliveryInfo.CONTENT_URI, null, null);
+            mProvider.delete(GroupDeliveryInfoLog.CONTENT_URI, null, null);
             fail("GroupDeliveryInfoLog is read only");
         } catch (Exception e) {
             assertTrue("delete of GroupDeliveryInfoLog should be forbidden",
@@ -143,14 +139,14 @@ public class GroupDeliveryInfoLogTest extends InstrumentationTestCase {
 
     public void GroupDeliveryInfoLogUpdate() {
         ContentValues values = new ContentValues();
-        values.put(GroupDeliveryInfo.TIMESTAMP_DELIVERED, 0);
+        values.put(GroupDeliveryInfoLog.TIMESTAMP_DELIVERED, 0);
         // Check that provider does not support update operation
         try {
-            String where = GroupDeliveryInfo.ID.concat("=?");
+            String where = GroupDeliveryInfoLog.ID.concat("=?");
             String[] whereArgs = new String[] {
-                    "123456789"
+                "123456789"
             };
-            mProvider.update(GroupDeliveryInfo.CONTENT_URI, values, where, whereArgs);
+            mProvider.update(GroupDeliveryInfoLog.CONTENT_URI, values, where, whereArgs);
             fail("ChatLog is read only");
         } catch (Exception ex) {
             assertTrue("Updating a GroupDeliveryInfoLog should be forbidden",

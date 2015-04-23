@@ -70,7 +70,7 @@ public class Capabilities implements Parcelable {
     private boolean mAutomata = false;
 
     /**
-     * The timestamp of the last capability refresh
+     * The timestamp of the last capability response
      */
     private long mTimestamp;
 
@@ -84,7 +84,7 @@ public class Capabilities implements Parcelable {
      * @param geolocPush Geolocation push support
      * @param extensions Set of supported extensions
      * @param automata Automata flag
-     * @param timestamp timestamp of last capability refresh
+     * @param timestamp timestamp of last capability response
      * @hide
      */
     public Capabilities(boolean imageSharing, boolean videoSharing, boolean imSession,
@@ -249,9 +249,9 @@ public class Capabilities implements Parcelable {
     }
 
     /**
-     * Timestamp of the last capability refresh (in milliseconds)
+     * Timestamp of the last capability response (in milliseconds)
      * 
-     * @return the timestamp of the last capability refresh
+     * @return the timestamp of the last capability response
      */
     public long getTimestamp() {
         return mTimestamp;

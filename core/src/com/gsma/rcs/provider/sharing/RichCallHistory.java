@@ -33,11 +33,8 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharingLog;
 import com.gsma.services.rcs.sharing.image.ImageSharing;
-import com.gsma.services.rcs.sharing.image.ImageSharingLog;
 import com.gsma.services.rcs.sharing.video.VideoSharing;
-import com.gsma.services.rcs.sharing.video.VideoSharingLog;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -100,7 +97,7 @@ public class RichCallHistory {
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId), projection, null,
+                    Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId), projection, null,
                     null, null);
             if (cursor.moveToFirst()) {
                 return cursor;
@@ -131,7 +128,7 @@ public class RichCallHistory {
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, sharingId), projection, null,
+                    Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId), projection, null,
                     null, null);
             if (cursor.moveToFirst()) {
                 return cursor;
@@ -270,7 +267,7 @@ public class RichCallHistory {
         values.put(VideoSharingData.KEY_VIDEO_ENCODING, content.getEncoding());
         values.put(VideoSharingData.KEY_WIDTH, content.getWidth());
         values.put(VideoSharingData.KEY_HEIGHT, content.getHeight());
-        return mLocalContentResolver.insert(VideoSharingLog.CONTENT_URI, values);
+        return mLocalContentResolver.insert(VideoSharingData.CONTENT_URI, values);
     }
 
     /**
@@ -293,7 +290,7 @@ public class RichCallHistory {
         values.put(VideoSharingData.KEY_REASON_CODE, reasonCode.toInt());
         values.put(VideoSharingData.KEY_DURATION, duration);
 
-        mLocalContentResolver.update(Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, sharingId),
+        mLocalContentResolver.update(Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId),
                 values, null, null);
     }
 
@@ -315,7 +312,7 @@ public class RichCallHistory {
         values.put(VideoSharingData.KEY_STATE, state.toInt());
         values.put(VideoSharingData.KEY_REASON_CODE, reasonCode.toInt());
 
-        mLocalContentResolver.update(Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, sharingId),
+        mLocalContentResolver.update(Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId),
                 values, null, null);
     }
 
@@ -332,7 +329,7 @@ public class RichCallHistory {
         }
         ContentValues values = new ContentValues();
         values.put(VideoSharingData.KEY_DURATION, duration);
-        mLocalContentResolver.update(Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, sharingId),
+        mLocalContentResolver.update(Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId),
                 values, null, null);
     }
 
@@ -370,7 +367,7 @@ public class RichCallHistory {
         values.put(ImageSharingData.KEY_STATE, state.toInt());
         values.put(ImageSharingData.KEY_REASON_CODE, reasonCode.toInt());
         values.put(ImageSharingData.KEY_TIMESTAMP, timestamp);
-        return mLocalContentResolver.insert(ImageSharingLog.CONTENT_URI, values);
+        return mLocalContentResolver.insert(ImageSharingData.CONTENT_URI, values);
     }
 
     /**
@@ -395,7 +392,7 @@ public class RichCallHistory {
                 values.put(ImageSharingData.KEY_TRANSFERRED, total);
             }
         }
-        mLocalContentResolver.update(Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId),
+        mLocalContentResolver.update(Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId),
                 values, null, null);
     }
 
@@ -412,7 +409,7 @@ public class RichCallHistory {
                 ImageSharingData.KEY_FILESIZE
             };
             c = mLocalContentResolver.query(
-                    Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId), projection, null,
+                    Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId), projection, null,
                     null, null);
             if (c.moveToFirst()) {
                 return c.getLong(0);
@@ -435,7 +432,7 @@ public class RichCallHistory {
     public void setImageSharingProgress(String sharingId, long currentSize) {
         ContentValues values = new ContentValues();
         values.put(ImageSharingData.KEY_TRANSFERRED, currentSize);
-        mLocalContentResolver.update(Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId),
+        mLocalContentResolver.update(Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId),
                 values, null, null);
     }
 
@@ -568,12 +565,12 @@ public class RichCallHistory {
     }
 
     public Cursor getInterruptedImageSharings() {
-        return mLocalContentResolver.query(ImageSharingLog.CONTENT_URI, null,
+        return mLocalContentResolver.query(ImageSharingData.CONTENT_URI, null,
                 SELECTION_BY_INTERRUPTED_IMAGE_SHARINGS, null, ORDER_BY_TIMESTAMP_ASC);
     }
 
     public Cursor getInterruptedVideoSharings() {
-        return mLocalContentResolver.query(VideoSharingLog.CONTENT_URI, null,
+        return mLocalContentResolver.query(VideoSharingData.CONTENT_URI, null,
                 SELECTION_BY_INTERRUPTED_VIDEO_SHARINGS, null, ORDER_BY_TIMESTAMP_ASC);
     }
 
@@ -587,7 +584,7 @@ public class RichCallHistory {
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(GeolocSharingLog.CONTENT_URI, sharingId), null, null,
+                    Uri.withAppendedPath(GeolocSharingData.CONTENT_URI, sharingId), null, null,
                     null, null);
             if (cursor.moveToFirst()) {
                 return cursor;
@@ -608,8 +605,8 @@ public class RichCallHistory {
      * Delete all entries in Rich Call history
      */
     public void deleteAllEntries() {
-        mLocalContentResolver.delete(ImageSharingLog.CONTENT_URI, null, null);
-        mLocalContentResolver.delete(VideoSharingLog.CONTENT_URI, null, null);
+        mLocalContentResolver.delete(ImageSharingData.CONTENT_URI, null, null);
+        mLocalContentResolver.delete(VideoSharingData.CONTENT_URI, null, null);
         mLocalContentResolver.delete(GeolocSharingData.CONTENT_URI, null, null);
     }
 
@@ -679,7 +676,7 @@ public class RichCallHistory {
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId), null, null, null,
+                    Uri.withAppendedPath(ImageSharingData.CONTENT_URI, sharingId), null, null, null,
                     null);
             if (cursor.moveToFirst()) {
                 return cursor;
@@ -706,7 +703,7 @@ public class RichCallHistory {
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, sharingId), null, null, null,
+                    Uri.withAppendedPath(VideoSharingData.CONTENT_URI, sharingId), null, null, null,
                     null);
             if (cursor.moveToFirst()) {
                 return cursor;

@@ -23,10 +23,10 @@
 package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.provider.LocalContentResolver;
-import com.gsma.services.rcs.GroupDeliveryInfo;
-import com.gsma.services.rcs.GroupDeliveryInfo.ReasonCode;
-import com.gsma.services.rcs.GroupDeliveryInfo.Status;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo.ReasonCode;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo.Status;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -42,23 +42,22 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
             .append(GroupDeliveryInfoData.KEY_CONTACT).append("=?").toString();
 
     private static final String SELECTION_CONTACTS_NOT_RECEIVED_MESSAGE = new StringBuilder(
-            GroupDeliveryInfoData.KEY_DELIVERY_STATUS).append("=")
-            .append(Status.NOT_DELIVERED.toInt()).append(" OR (")
-            .append(GroupDeliveryInfoData.KEY_DELIVERY_STATUS).append("=")
+            GroupDeliveryInfoData.KEY_STATUS).append("=").append(Status.NOT_DELIVERED.toInt())
+            .append(" OR (").append(GroupDeliveryInfoData.KEY_STATUS).append("=")
             .append(Status.FAILED.toInt()).append(" AND ")
             .append(GroupDeliveryInfoData.KEY_REASON_CODE).append(" IN (")
             .append(ReasonCode.FAILED_DELIVERY.toInt()).append(",")
             .append(ReasonCode.FAILED_DISPLAY.toInt()).append("))").toString();
 
     private static final String SELECTION_DELIVERY_INFO_NOT_DISPLAYED = new StringBuilder(
-            GroupDeliveryInfoData.KEY_DELIVERY_STATUS).append("!=")
-            .append(Status.DISPLAYED.toInt()).toString();
+            GroupDeliveryInfoData.KEY_STATUS).append("<>").append(Status.DISPLAYED.toInt())
+            .toString();
 
     private final LocalContentResolver mLocalContentResolver;
 
     /**
      * Constructor
-     * 
+     *
      * @param localContentResolver Local content resolver
      */
     /* package private */GroupDeliveryInfoLog(LocalContentResolver localContentResolver) {
@@ -72,7 +71,7 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
         values.put(GroupDeliveryInfoData.KEY_CHAT_ID, chatId);
         values.put(GroupDeliveryInfoData.KEY_ID, msgId);
         values.put(GroupDeliveryInfoData.KEY_CONTACT, contact.toString());
-        values.put(GroupDeliveryInfoData.KEY_DELIVERY_STATUS, status.toInt());
+        values.put(GroupDeliveryInfoData.KEY_STATUS, status.toInt());
         values.put(GroupDeliveryInfoData.KEY_REASON_CODE, reasonCode.toInt());
         values.put(GroupDeliveryInfoData.KEY_TIMESTAMP_DELIVERED, timestampDelivered);
         values.put(GroupDeliveryInfoData.KEY_TIMESTAMP_DISPLAYED, timestampDisplayed);
@@ -81,7 +80,7 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
 
     /**
      * Set delivery status for outgoing group chat messages and files
-     * 
+     *
      * @param chatId Group chat ID
      * @param contact The contact ID for which the entry is to be updated
      * @param msgId Message ID
@@ -92,7 +91,7 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
     public boolean setGroupChatDeliveryInfoStatusAndReasonCode(String chatId, ContactId contact,
             String msgId, Status status, ReasonCode reasonCode) {
         ContentValues values = new ContentValues();
-        values.put(GroupDeliveryInfoData.KEY_DELIVERY_STATUS, status.toInt());
+        values.put(GroupDeliveryInfoData.KEY_STATUS, status.toInt());
         values.put(GroupDeliveryInfoData.KEY_REASON_CODE, reasonCode.toInt());
         String[] selectionArgs = new String[] {
                 msgId, contact.toString()
@@ -137,7 +136,7 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
 
     /**
      * Set outgoing group chat message or file to delivered
-     * 
+     *
      * @param chatId Group chat ID
      * @param contact The contact ID for which the entry is to be updated
      * @param msgId Message ID
@@ -149,7 +148,7 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
         GroupDeliveryInfo.ReasonCode reason = GroupDeliveryInfo.ReasonCode.UNSPECIFIED;
 
         ContentValues values = new ContentValues();
-        values.put(GroupDeliveryInfoData.KEY_DELIVERY_STATUS, status.toInt());
+        values.put(GroupDeliveryInfoData.KEY_STATUS, status.toInt());
         values.put(GroupDeliveryInfoData.KEY_TIMESTAMP_DELIVERED, timestampDelivered);
         values.put(GroupDeliveryInfoData.KEY_REASON_CODE, reason.toInt());
         String[] selectionArgs = new String[] {
@@ -169,7 +168,7 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
 
     /**
      * Set outgoing group chat message or file to displayed
-     * 
+     *
      * @param chatId Group chat ID
      * @param contact The contact ID for which the entry is to be updated
      * @param msgId Message ID
@@ -181,7 +180,7 @@ public class GroupDeliveryInfoLog implements IGroupDeliveryInfoLog {
         GroupDeliveryInfo.Status status = GroupDeliveryInfo.Status.DISPLAYED;
         GroupDeliveryInfo.ReasonCode reason = GroupDeliveryInfo.ReasonCode.UNSPECIFIED;
 
-        values.put(GroupDeliveryInfoData.KEY_DELIVERY_STATUS, status.toInt());
+        values.put(GroupDeliveryInfoData.KEY_STATUS, status.toInt());
         values.put(GroupDeliveryInfoData.KEY_TIMESTAMP_DISPLAYED, timestampDisplayed);
         values.put(GroupDeliveryInfoData.KEY_REASON_CODE, reason.toInt());
         String[] selectionArgs = new String[] {

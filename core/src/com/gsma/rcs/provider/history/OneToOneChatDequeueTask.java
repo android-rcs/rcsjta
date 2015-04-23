@@ -24,6 +24,7 @@ import com.gsma.rcs.core.ims.service.im.chat.OneToOneChatSession;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.FileTransferData;
+import com.gsma.rcs.provider.messaging.MessageData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.service.DequeueTask;
@@ -31,7 +32,6 @@ import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.rcs.service.api.OneToOneChatImpl;
 import com.gsma.rcs.utils.ContactUtil;
-import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
@@ -79,7 +79,7 @@ public class OneToOneChatDequeueTask extends DequeueTask {
                     ContactId contact = ContactUtil.createContactIdFromTrustedData(phoneNumber);
                     try {
                         switch (providerId) {
-                            case Message.HISTORYLOG_MEMBER_ID:
+                            case MessageData.HISTORYLOG_MEMBER_ID:
                                 String msgId = cursor.getString(idIdx);
                                 String content = cursor.getString(contentIdx);
                                 String mimeType = cursor.getString(mimeTypeIdx);

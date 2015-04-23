@@ -7,7 +7,6 @@ import com.gsma.rcs.provider.DeleteTask;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.service.api.VideoSharingServiceImpl;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.sharing.video.VideoSharingLog;
 
 import java.util.Set;
 
@@ -27,8 +26,8 @@ public class VideoSharingDeleteTask extends DeleteTask.GroupedByContactId {
      */
     public VideoSharingDeleteTask(VideoSharingServiceImpl videoSharingService,
             RichcallService richcallService, LocalContentResolver contentResolver, Object imsLock) {
-        super(contentResolver, imsLock, VideoSharingLog.CONTENT_URI, VideoSharingLog.SHARING_ID,
-                VideoSharingLog.CONTACT, null);
+        super(contentResolver, imsLock, VideoSharingData.CONTENT_URI,
+                VideoSharingData.KEY_SHARING_ID, VideoSharingData.KEY_CONTACT, null);
         mVideoSharingService = videoSharingService;
         mRichcallService = richcallService;
     }
@@ -45,8 +44,8 @@ public class VideoSharingDeleteTask extends DeleteTask.GroupedByContactId {
     public VideoSharingDeleteTask(VideoSharingServiceImpl videoSharingService,
             RichcallService richcallService, LocalContentResolver contentResolver, Object imsLock,
             String sharingId) {
-        super(contentResolver, imsLock, VideoSharingLog.CONTENT_URI, VideoSharingLog.SHARING_ID,
-                VideoSharingLog.CONTACT, null, sharingId);
+        super(contentResolver, imsLock, VideoSharingData.CONTENT_URI,
+                VideoSharingData.KEY_SHARING_ID, VideoSharingData.KEY_CONTACT, null, sharingId);
         mVideoSharingService = videoSharingService;
         mRichcallService = richcallService;
     }
@@ -63,8 +62,8 @@ public class VideoSharingDeleteTask extends DeleteTask.GroupedByContactId {
     public VideoSharingDeleteTask(VideoSharingServiceImpl videoSharingService,
             RichcallService richcallService, LocalContentResolver contentResolver, Object imsLock,
             ContactId contact) {
-        super(contentResolver, imsLock, VideoSharingLog.CONTENT_URI, VideoSharingLog.SHARING_ID,
-                VideoSharingLog.CONTACT, contact);
+        super(contentResolver, imsLock, VideoSharingData.CONTENT_URI,
+                VideoSharingData.KEY_SHARING_ID, VideoSharingData.KEY_CONTACT, contact);
         mVideoSharingService = videoSharingService;
         mRichcallService = richcallService;
     }

@@ -14,18 +14,15 @@
  * the License.
  */
 
-package com.gsma.rcs.service;
+package com.gsma.rcs.provider.messaging;
 
-import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.service.api.ChatServiceImpl;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
-import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 import android.database.Cursor;
 
@@ -64,8 +61,8 @@ public class GroupChatTerminalExceptionTask implements Runnable {
         try {
             synchronized (mLock) {
                 messageCursor = mMessagingLog.getQueuedGroupChatMessages(mChatId);
-                int msgIdIdx = messageCursor.getColumnIndexOrThrow(Message.MESSAGE_ID);
-                int mimeTypeIdx = messageCursor.getColumnIndexOrThrow(Message.MIME_TYPE);
+                int msgIdIdx = messageCursor.getColumnIndexOrThrow(MessageData.KEY_MESSAGE_ID);
+                int mimeTypeIdx = messageCursor.getColumnIndexOrThrow(MessageData.KEY_MIME_TYPE);
                 while (messageCursor.moveToNext()) {
                     String msgId = messageCursor.getString(msgIdIdx);
                     String mimeType = messageCursor.getString(mimeTypeIdx);
@@ -73,7 +70,8 @@ public class GroupChatTerminalExceptionTask implements Runnable {
                             Status.FAILED, Content.ReasonCode.FAILED_SEND);
                 }
                 fileCursor = mMessagingLog.getQueuedGroupFileTransfers(mChatId);
-                int fileTransferIdIdx = fileCursor.getColumnIndexOrThrow(FileTransferLog.FT_ID);
+                int fileTransferIdIdx = fileCursor
+                        .getColumnIndexOrThrow(FileTransferData.KEY_FT_ID);
                 while (fileCursor.moveToNext()) {
                     String fileTransferId = fileCursor.getString(fileTransferIdIdx);
                     mFileTransferService.setGroupFileTransferStateAndReasonCode(fileTransferId,

@@ -16,8 +16,8 @@
 
 package com.gsma.services.rcs.filetransfer;
 
-import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
 import android.os.RemoteException;
 import android.util.Log;
@@ -27,7 +27,7 @@ import java.util.List;
 
 /**
  * Group file transfer event listener implementation
- * 
+ *
  * @hide
  */
 public class GroupFileTransferListenerImpl extends IGroupFileTransferListener.Stub {

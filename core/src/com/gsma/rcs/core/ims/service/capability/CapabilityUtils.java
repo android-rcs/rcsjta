@@ -296,7 +296,7 @@ public class CapabilityUtils {
             }
         }
         long timestamp = System.currentTimeMillis();
-        capabilities.setTimestampOfLastRefresh(timestamp);
+        capabilities.setTimestampOfLastResponse(timestamp);
         capabilities.setTimestampOfLastRequest(timestamp);
         return capabilities;
     }

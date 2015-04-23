@@ -25,12 +25,20 @@ package com.gsma.rcs.provider.sharing;
 import com.gsma.services.rcs.sharing.video.VideoSharing;
 import com.gsma.services.rcs.sharing.video.VideoSharingLog;
 
+import android.net.Uri;
+
 /**
  * Video sharing data constants
  * 
  * @author Jean-Marc AUFFRET
  */
 public class VideoSharingData {
+
+    /**
+     * Content provider URI
+     */
+    /* package private */public static final Uri CONTENT_URI = Uri
+            .parse("content://com.gsma.rcs.videoshare/videoshare");
 
     /**
      * History log member id

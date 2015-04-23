@@ -31,72 +31,77 @@ import android.net.Uri;
  * 
  * @author Jean-Marc AUFFRET
  */
-public class ChatData {
+public class GroupChatData {
     /**
      * Database URIs
      */
-    protected static final Uri CONTENT_URI = Uri.parse("content://com.gsma.rcs.chat/groupchat");
+    public static final Uri CONTENT_URI = Uri.parse("content://com.gsma.rcs.chat/groupchat");
+
+    /**
+     * History log member id
+     */
+    public static final int HISTORYLOG_MEMBER_ID = ChatLog.GroupChat.HISTORYLOG_MEMBER_ID;
 
     /**
      * Base column unique id
      */
-    static final String KEY_BASECOLUMN_ID = ChatLog.GroupChat.BASECOLUMN_ID;
+    /* package private */static final String KEY_BASECOLUMN_ID = ChatLog.GroupChat.BASECOLUMN_ID;
 
     /**
      * Id for chat room
      */
-    static final String KEY_CHAT_ID = ChatLog.GroupChat.CHAT_ID;
-
-    /**
-     * Column name
-     */
-    static final String KEY_REJOIN_ID = "rejoin_id";
+    /* package private */static final String KEY_CHAT_ID = ChatLog.GroupChat.CHAT_ID;
 
     /**
      * State of chat room.
      * 
      * @see State
      */
-    static final String KEY_STATE = ChatLog.GroupChat.STATE;
+    /* package private */static final String KEY_STATE = ChatLog.GroupChat.STATE;
 
     /**
      * Reason code associated with the group chat state.
      * 
      * @see ReasonCode
      */
-    static final String KEY_REASON_CODE = ChatLog.GroupChat.REASON_CODE;
+    /* package private */static final String KEY_REASON_CODE = ChatLog.GroupChat.REASON_CODE;
 
     /**
      * Subject of the group chat room
      */
-    static final String KEY_SUBJECT = ChatLog.GroupChat.SUBJECT;
+    /* package private */static final String KEY_SUBJECT = ChatLog.GroupChat.SUBJECT;
 
     /**
      * List of participants and associated status stored as a String parseable with the
      * ChatLog.GroupChat.getParticipantInfos() method.
      */
-    static final String KEY_PARTICIPANTS = ChatLog.GroupChat.PARTICIPANTS;
+    /* package private */static final String KEY_PARTICIPANTS = ChatLog.GroupChat.PARTICIPANTS;
 
     /**
      * Status direction of group chat
      * 
      * @see Direction
      */
-    static final String KEY_DIRECTION = ChatLog.GroupChat.DIRECTION;
+    /* package private */static final String KEY_DIRECTION = ChatLog.GroupChat.DIRECTION;
 
     /**
      * Timestamp of the invitation
      */
-    static final String KEY_TIMESTAMP = ChatLog.GroupChat.TIMESTAMP;
-
-    /**
-     * Column name : Departed by user
-     */
-    public static final String KEY_USER_ABORTION = "user_abortion";
+    /* package private */static final String KEY_TIMESTAMP = ChatLog.GroupChat.TIMESTAMP;
 
     /**
      * ContactId formatted number of the inviter of the group chat or null if this is a group chat
      * initiated by the local user (ie outgoing group chat).
      */
-    public static final String KEY_CONTACT = ChatLog.GroupChat.CONTACT;
+    /* package private */static final String KEY_CONTACT = ChatLog.GroupChat.CONTACT;
+
+    /**
+     * Column name
+     */
+    /* package private */static final String KEY_REJOIN_ID = "rejoin_id";
+
+    /**
+     * Column name : Departed by user
+     */
+    /* package private */static final String KEY_USER_ABORTION = "user_abortion";
 }

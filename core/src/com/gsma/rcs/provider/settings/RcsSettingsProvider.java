@@ -86,9 +86,9 @@ public class RcsSettingsProvider extends ContentProvider {
          * @param value Value
          */
         private void addParameter(SQLiteDatabase db, String key, String value) {
-            db.execSQL(new StringBuilder("INSERT INTO ").append(TABLE).append("(")
-                    .append(RcsSettingsData.KEY_KEY).append(",").append(RcsSettingsData.KEY_VALUE)
-                    .append(") VALUES ('").append(key).append("','").append(value).append("');")
+            db.execSQL(new StringBuilder("INSERT INTO ").append(TABLE).append('(')
+                    .append(RcsSettingsData.KEY_KEY).append(',').append(RcsSettingsData.KEY_VALUE)
+                    .append(") VALUES ('").append(key).append("','").append(value).append("')")
                     .toString());
         }
 
@@ -110,7 +110,7 @@ public class RcsSettingsProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append("(")
+            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append('(')
                     .append(RcsSettingsData.KEY_KEY).append(" TEXT NOT NULL PRIMARY KEY,")
                     .append(RcsSettingsData.KEY_VALUE).append(" TEXT NOT NULL)").toString());
 
@@ -431,7 +431,7 @@ public class RcsSettingsProvider extends ContentProvider {
             return SELECTION_WITH_KEY_ONLY;
         }
         return new StringBuilder("(").append(SELECTION_WITH_KEY_ONLY).append(") AND (")
-                .append(selection).append(")").toString();
+                .append(selection).append(')').toString();
     }
 
     private String[] getSelectionArgsWithKey(String[] selectionArgs, String key) {
@@ -469,20 +469,18 @@ public class RcsSettingsProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
             String sort) {
         Cursor cursor = null;
-        Uri notificationUri = RcsSettingsData.CONTENT_URI;
         try {
             switch (sUriMatcher.match(uri)) {
                 case UriType.SETTINGS_WITH_KEY:
                     String key = uri.getLastPathSegment();
                     selection = getSelectionWithKey(selection);
                     selectionArgs = getSelectionArgsWithKey(selectionArgs, key);
-                    notificationUri = Uri.withAppendedPath(notificationUri, key);
                     /* Intentional fall through */
                 case UriType.SETTINGS:
                     SQLiteDatabase database = mOpenHelper.getReadableDatabase();
                     cursor = database.query(TABLE, projection, selection, selectionArgs, null,
                             null, sort);
-                    cursor.setNotificationUri(getContext().getContentResolver(), notificationUri);
+                    cursor.setNotificationUri(getContext().getContentResolver(), uri);
                     return cursor;
 
                 default:
@@ -499,19 +497,17 @@ public class RcsSettingsProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        Uri notificationUri = RcsSettingsData.CONTENT_URI;
         switch (sUriMatcher.match(uri)) {
             case UriType.SETTINGS_WITH_KEY:
                 String key = uri.getLastPathSegment();
                 selection = getSelectionWithKey(selection);
                 selectionArgs = getSelectionArgsWithKey(selectionArgs, key);
-                notificationUri = Uri.withAppendedPath(notificationUri, key);
                 /* Intentional fall through */
             case UriType.SETTINGS:
                 SQLiteDatabase database = mOpenHelper.getWritableDatabase();
                 int count = database.update(TABLE, values, selection, selectionArgs);
                 if (count > 0) {
-                    getContext().getContentResolver().notifyChange(notificationUri, null);
+                    getContext().getContentResolver().notifyChange(uri, null);
                 }
                 return count;
 

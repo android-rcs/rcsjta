@@ -14,9 +14,8 @@
  * the License.
  */
 
-package com.gsma.rcs.core.ims.service.richcall.geoloc;
+package com.gsma.rcs.provider.sharing;
 
-import com.gsma.rcs.provider.sharing.RichCallHistory;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.Geoloc;
 import com.gsma.services.rcs.RcsService.Direction;
@@ -24,7 +23,6 @@ import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.geoloc.GeolocSharing.State;
-import com.gsma.services.rcs.sharing.geoloc.GeolocSharingLog;
 
 import android.database.Cursor;
 
@@ -67,18 +65,19 @@ public class GeolocSharingPersistedStorageAccessor {
         try {
             cursor = mRichCallLog.getCacheableGeolocSharingData(mSharingId);
             String contact = cursor.getString(cursor
-                    .getColumnIndexOrThrow(GeolocSharingLog.CONTACT));
+                    .getColumnIndexOrThrow(GeolocSharingData.KEY_CONTACT));
             if (contact != null) {
                 mContact = ContactUtil.createContactIdFromTrustedData(contact);
             }
             mDirection = Direction.valueOf(cursor.getInt(cursor
-                    .getColumnIndexOrThrow(GeolocSharingLog.DIRECTION)));
+                    .getColumnIndexOrThrow(GeolocSharingData.KEY_DIRECTION)));
             String geoloc = cursor
-                    .getString(cursor.getColumnIndexOrThrow(GeolocSharingLog.CONTENT));
+                    .getString(cursor.getColumnIndexOrThrow(GeolocSharingData.KEY_CONTENT));
             if (geoloc != null) {
                 mGeoloc = new Geoloc(geoloc);
             }
-            mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(GeolocSharingLog.TIMESTAMP));
+            mTimestamp = cursor.getLong(cursor
+                    .getColumnIndexOrThrow(GeolocSharingData.KEY_TIMESTAMP));
         } finally {
             if (cursor != null) {
                 cursor.close();

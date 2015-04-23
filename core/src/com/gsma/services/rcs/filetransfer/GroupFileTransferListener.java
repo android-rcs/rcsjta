@@ -16,8 +16,8 @@
 
 package com.gsma.services.rcs.filetransfer;
 
-import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
 import java.util.Set;
 
@@ -28,7 +28,7 @@ public abstract class GroupFileTransferListener {
 
     /**
      * Callback called when the group file transfer status/reasonCode is changed.
-     * 
+     *
      * @param chatId Id of chat
      * @param transferId Id of file transfer
      * @param state State of file transfer after change
@@ -40,7 +40,7 @@ public abstract class GroupFileTransferListener {
     /**
      * Callback called when a group file transfer state/reasonCode is changed for a single recipient
      * only.
-     * 
+     *
      * @param chatId Id of chat
      * @param contact Contact ID
      * @param transferId Id of file transfer
@@ -52,7 +52,7 @@ public abstract class GroupFileTransferListener {
 
     /**
      * Callback called during the transfer progress of group file transfer
-     * 
+     *
      * @param chatId Id of chat
      * @param transferId Id of file transfer
      * @param currentSize Current transferred size in bytes
@@ -65,7 +65,7 @@ public abstract class GroupFileTransferListener {
      * Callback called when a delete operation completed that resulted in that one or several group
      * file transfers was deleted specified by the transferIds parameter corresponding to a specific
      * group chat.
-     * 
+     *
      * @param chatId id of the chat
      * @param transferIds ids of those deleted file transfers
      */

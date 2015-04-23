@@ -52,10 +52,16 @@ public class VideoSharingProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher;
     static {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+        sUriMatcher.addURI(VideoSharingData.CONTENT_URI.getAuthority(),
+                VideoSharingData.CONTENT_URI.getPath().substring(1),
+                UriType.InternalVideoSharing.VIDEO_SHARING);
+        sUriMatcher.addURI(VideoSharingData.CONTENT_URI.getAuthority(),
+                VideoSharingData.CONTENT_URI.getPath().substring(1).concat("/*"),
+                UriType.InternalVideoSharing.VIDEO_SHARING_WITH_ID);
         sUriMatcher.addURI(VideoSharingLog.CONTENT_URI.getAuthority(), VideoSharingLog.CONTENT_URI
-                .getPath().substring(1), UriType.VIDEO_SHARING);
+                .getPath().substring(1), UriType.VideoSharing.VIDEO_SHARING);
         sUriMatcher.addURI(VideoSharingLog.CONTENT_URI.getAuthority(), VideoSharingLog.CONTENT_URI
-                .getPath().substring(1).concat("/*"), UriType.VIDEO_SHARING_WITH_ID);
+                .getPath().substring(1).concat("/*"), UriType.VideoSharing.VIDEO_SHARING_WITH_ID);
     }
 
     /**
@@ -70,9 +76,17 @@ public class VideoSharingProvider extends ContentProvider {
 
     private static final class UriType {
 
-        private static final int VIDEO_SHARING = 1;
+        private static final class VideoSharing {
+            private static final int VIDEO_SHARING = 1;
 
-        private static final int VIDEO_SHARING_WITH_ID = 2;
+            private static final int VIDEO_SHARING_WITH_ID = 2;
+        }
+
+        private static final class InternalVideoSharing {
+            private static final int VIDEO_SHARING = 3;
+
+            private static final int VIDEO_SHARING_WITH_ID = 4;
+        }
     }
 
     private static final class CursorType {
@@ -94,7 +108,7 @@ public class VideoSharingProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append("(")
+            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append('(')
                     .append(VideoSharingData.KEY_BASECOLUMN_ID).append(" INTEGER NOT NULL,")
                     .append(VideoSharingData.KEY_SHARING_ID).append(" TEXT NOT NULL PRIMARY KEY,")
                     .append(VideoSharingData.KEY_CONTACT).append(" TEXT NOT NULL,")
@@ -108,14 +122,14 @@ public class VideoSharingProvider extends ContentProvider {
                     .append(VideoSharingData.KEY_HEIGHT).append(" INTEGER NOT NULL)").toString());
             db.execSQL(new StringBuilder("CREATE INDEX ")
                     .append(VideoSharingData.KEY_BASECOLUMN_ID).append("_idx").append(" ON ")
-                    .append(TABLE).append("(").append(VideoSharingData.KEY_BASECOLUMN_ID)
-                    .append(")").toString());
+                    .append(TABLE).append('(').append(VideoSharingData.KEY_BASECOLUMN_ID)
+                    .append(')').toString());
             db.execSQL(new StringBuilder("CREATE INDEX ").append(VideoSharingData.KEY_CONTACT)
-                    .append("_idx").append(" ON ").append(TABLE).append("(")
-                    .append(VideoSharingData.KEY_CONTACT).append(")").toString());
+                    .append("_idx").append(" ON ").append(TABLE).append('(')
+                    .append(VideoSharingData.KEY_CONTACT).append(')').toString());
             db.execSQL(new StringBuilder("CREATE INDEX ").append(VideoSharingData.KEY_TIMESTAMP)
-                    .append("_idx").append(" ON ").append(TABLE).append("(")
-                    .append(VideoSharingData.KEY_TIMESTAMP).append(")").toString());
+                    .append("_idx").append(" ON ").append(TABLE).append('(')
+                    .append(VideoSharingData.KEY_TIMESTAMP).append(')').toString());
         }
 
         @Override
@@ -132,7 +146,7 @@ public class VideoSharingProvider extends ContentProvider {
             return SELECTION_WITH_SHARING_ID_ONLY;
         }
         return new StringBuilder("(").append(SELECTION_WITH_SHARING_ID_ONLY).append(") AND (")
-                .append(selection).append(")").toString();
+                .append(selection).append(')').toString();
     }
 
     private String[] getSelectionArgsWithSharingId(String[] selectionArgs, String sharingId) {
@@ -154,10 +168,14 @@ public class VideoSharingProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
         switch (sUriMatcher.match(uri)) {
-            case UriType.VIDEO_SHARING:
+            case UriType.InternalVideoSharing.VIDEO_SHARING:
+                /* Intentional fall through */
+            case UriType.VideoSharing.VIDEO_SHARING:
                 return CursorType.TYPE_DIRECTORY;
 
-            case UriType.VIDEO_SHARING_WITH_ID:
+            case UriType.InternalVideoSharing.VIDEO_SHARING_WITH_ID:
+                /* Intentional fall through */
+            case UriType.VideoSharing.VIDEO_SHARING_WITH_ID:
                 return CursorType.TYPE_ITEM;
 
             default:
@@ -172,13 +190,32 @@ public class VideoSharingProvider extends ContentProvider {
         Cursor cursor = null;
         try {
             switch (sUriMatcher.match(uri)) {
-                case UriType.VIDEO_SHARING_WITH_ID:
+                case UriType.InternalVideoSharing.VIDEO_SHARING_WITH_ID:
                     String sharingId = uri.getLastPathSegment();
                     selection = getSelectionWithSharingId(selection);
                     selectionArgs = getSelectionArgsWithSharingId(selectionArgs, sharingId);
-                    /* Intentional fall through */
-                case UriType.VIDEO_SHARING:
                     SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+                    cursor = db
+                            .query(TABLE, projection, selection, selectionArgs, null, null, sort);
+                    cursor.setNotificationUri(getContext().getContentResolver(),
+                            Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, sharingId));
+                    return cursor;
+
+                case UriType.InternalVideoSharing.VIDEO_SHARING:
+                    db = mOpenHelper.getReadableDatabase();
+                    cursor = db
+                            .query(TABLE, projection, selection, selectionArgs, null, null, sort);
+                    cursor.setNotificationUri(getContext().getContentResolver(),
+                            VideoSharingLog.CONTENT_URI);
+                    return cursor;
+
+                case UriType.VideoSharing.VIDEO_SHARING_WITH_ID:
+                    sharingId = uri.getLastPathSegment();
+                    selection = getSelectionWithSharingId(selection);
+                    selectionArgs = getSelectionArgsWithSharingId(selectionArgs, sharingId);
+                    /* Intentional fall through */
+                case UriType.VideoSharing.VIDEO_SHARING:
+                    db = mOpenHelper.getReadableDatabase();
                     cursor = db
                             .query(TABLE, projection, selection, selectionArgs, null, null, sort);
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
@@ -198,19 +235,27 @@ public class VideoSharingProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        Uri notificationUri = VideoSharingLog.CONTENT_URI;
         switch (sUriMatcher.match(uri)) {
-            case UriType.VIDEO_SHARING_WITH_ID:
+            case UriType.InternalVideoSharing.VIDEO_SHARING_WITH_ID:
                 String sharingId = uri.getLastPathSegment();
                 selection = getSelectionWithSharingId(selection);
                 selectionArgs = getSelectionArgsWithSharingId(selectionArgs, sharingId);
+                notificationUri = Uri.withAppendedPath(notificationUri, sharingId);
                 /* Intentional fall through */
-            case UriType.VIDEO_SHARING:
+            case UriType.InternalVideoSharing.VIDEO_SHARING:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.update(TABLE, values, selection, selectionArgs);
                 if (count > 0) {
-                    getContext().getContentResolver().notifyChange(uri, null);
+                    getContext().getContentResolver().notifyChange(notificationUri, null);
                 }
                 return count;
+
+            case UriType.VideoSharing.VIDEO_SHARING_WITH_ID:
+                /* Intentional fall through */
+            case UriType.VideoSharing.VIDEO_SHARING:
+                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
+                        .append(uri).append(") supports read only access!").toString());
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
@@ -221,20 +266,27 @@ public class VideoSharingProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues initialValues) {
         switch (sUriMatcher.match(uri)) {
-            case UriType.VIDEO_SHARING:
+            case UriType.InternalVideoSharing.VIDEO_SHARING:
                 /* Intentional fall through */
-            case UriType.VIDEO_SHARING_WITH_ID:
+            case UriType.InternalVideoSharing.VIDEO_SHARING_WITH_ID:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 String sharingId = initialValues.getAsString(VideoSharingData.KEY_SHARING_ID);
                 initialValues.put(VideoSharingData.KEY_BASECOLUMN_ID, HistoryMemberBaseIdCreator
                         .createUniqueId(getContext(), VideoSharingData.HISTORYLOG_MEMBER_ID));
                 if (db.insert(TABLE, null, initialValues) == INVALID_ROW_ID) {
-                    throw new ServerApiPersistentStorageException(
-                            "Unable to insert row for URI ".concat(uri.toString()));
+                    throw new ServerApiPersistentStorageException(new StringBuilder(
+                            "Unable to insert row for URI ").append(uri.toString()).append('!')
+                            .toString());
                 }
                 Uri notificationUri = Uri.withAppendedPath(VideoSharingLog.CONTENT_URI, sharingId);
                 getContext().getContentResolver().notifyChange(notificationUri, null);
                 return notificationUri;
+
+            case UriType.VideoSharing.VIDEO_SHARING_WITH_ID:
+                /* Intentional fall through */
+            case UriType.VideoSharing.VIDEO_SHARING:
+                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
+                        .append(uri).append(") supports read only access!").toString());
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
@@ -244,20 +296,27 @@ public class VideoSharingProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
+        Uri notificationUri = VideoSharingLog.CONTENT_URI;
         switch (sUriMatcher.match(uri)) {
-            case UriType.VIDEO_SHARING_WITH_ID:
+            case UriType.InternalVideoSharing.VIDEO_SHARING_WITH_ID:
                 String sharingId = uri.getLastPathSegment();
                 selection = getSelectionWithSharingId(selection);
                 selectionArgs = getSelectionArgsWithSharingId(selectionArgs, sharingId);
+                notificationUri = Uri.withAppendedPath(notificationUri, sharingId);
                 /* Intentional fall through */
-            case UriType.VIDEO_SHARING:
+            case UriType.InternalVideoSharing.VIDEO_SHARING:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.delete(TABLE, selection, selectionArgs);
                 if (count > 0) {
-                    getContext().getContentResolver().notifyChange(uri, null);
+                    getContext().getContentResolver().notifyChange(notificationUri, null);
                 }
                 return count;
 
+            case UriType.VideoSharing.VIDEO_SHARING_WITH_ID:
+                /* Intentional fall through */
+            case UriType.VideoSharing.VIDEO_SHARING:
+                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
+                        .append(uri).append(") supports read only access!").toString());
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
                         .append(uri).append("!").toString());

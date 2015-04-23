@@ -16,16 +16,15 @@
 
 package com.gsma.rcs.service.api;
 
+import com.gsma.rcs.provider.history.HistoryLogData;
 import com.gsma.rcs.provider.history.HistoryMemberBaseIdCreator;
 import com.gsma.rcs.provider.history.HistoryProvider;
 import com.gsma.rcs.provider.messaging.FileTransferData;
+import com.gsma.rcs.provider.messaging.MessageData;
 import com.gsma.rcs.provider.sharing.GeolocSharingData;
 import com.gsma.rcs.provider.sharing.ImageSharingData;
 import com.gsma.rcs.provider.sharing.VideoSharingData;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.RcsGenericException;
-import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.history.HistoryLog;
 import com.gsma.services.rcs.history.IHistoryService;
 
 import android.content.ContentProvider;
@@ -45,7 +44,7 @@ import java.util.Set;
 public class HistoryServiceImpl extends IHistoryService.Stub {
 
     private static final Set<Integer> INTERNAL_MEMBER_IDS = new HashSet<Integer>(Arrays.asList(
-            ChatLog.Message.HISTORYLOG_MEMBER_ID, FileTransferData.HISTORYLOG_MEMBER_ID,
+            MessageData.HISTORYLOG_MEMBER_ID, FileTransferData.HISTORYLOG_MEMBER_ID,
             ImageSharingData.HISTORYLOG_MEMBER_ID, VideoSharingData.HISTORYLOG_MEMBER_ID,
             GeolocSharingData.HISTORYLOG_MEMBER_ID));
 
@@ -67,7 +66,7 @@ public class HistoryServiceImpl extends IHistoryService.Stub {
         if (mHistoryProvider != null) {
             return mHistoryProvider;
         }
-        String historyLogAuthority = HistoryLog.CONTENT_URI.getAuthority();
+        String historyLogAuthority = HistoryLogData.CONTENT_URI.getAuthority();
         ContentProvider provider = mCtx.getContentResolver()
                 .acquireContentProviderClient(historyLogAuthority).getLocalContentProvider();
         mHistoryProvider = (HistoryProvider) provider;
@@ -80,7 +79,8 @@ public class HistoryServiceImpl extends IHistoryService.Stub {
      * @param columnMapping
      */
     /* Only raw map types are supported by AIDL. */
-    private static final void assertMapTypeOfString(@SuppressWarnings("rawtypes") Map columnMapping) {
+    private static final void assertMapTypeOfString(@SuppressWarnings("rawtypes")
+    Map columnMapping) {
         if (columnMapping == null) {
             throw new ServerApiIllegalArgumentException(
                     "Column mapping of history log field names to internal field names must not be null!");
@@ -118,7 +118,8 @@ public class HistoryServiceImpl extends IHistoryService.Stub {
     public void registerExtraHistoryLogMember(int providerId, Uri providerUri, Uri databaseUri,
             String table,
             /* Only raw map types are supported by AIDL. */
-            @SuppressWarnings("rawtypes") Map columnMapping) throws RemoteException {
+            @SuppressWarnings("rawtypes")
+            Map columnMapping) throws RemoteException {
         try {
             assertMapTypeOfString(columnMapping);
             retrieveHistoryLogProvider().registerDatabase(providerId, providerUri, databaseUri,

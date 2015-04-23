@@ -30,7 +30,6 @@ import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
@@ -38,6 +37,7 @@ import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -643,6 +643,11 @@ public class FileTransferLog implements IFileTransferLog {
         }
         return getDataAsLong(getFileTransferData(FileTransferData.KEY_TIMESTAMP_SENT,
                 fileTransferId));
+    }
+
+    @Override
+    public String getFileTransferChatId(String fileTransferId) {
+        return getDataAsString(getFileTransferData(FileTransferData.KEY_CHAT_ID, fileTransferId));
     }
 
     @Override

@@ -27,12 +27,24 @@ import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 
+import android.net.Uri;
+
 /**
  * Message data constants
  * 
  * @author Jean-Marc AUFFRET
  */
 public class MessageData {
+    /**
+     * Database URIs
+     */
+    public static final Uri CONTENT_URI = Uri
+            .parse("content://com.gsma.rcs.chat/chatmessage");
+
+    /**
+     * History log member id
+     */
+    public static final int HISTORYLOG_MEMBER_ID = ChatLog.Message.HISTORYLOG_MEMBER_ID;
 
     /**
      * Unique history ID

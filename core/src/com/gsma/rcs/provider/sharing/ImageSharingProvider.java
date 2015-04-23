@@ -52,10 +52,16 @@ public class ImageSharingProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher;
     static {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+        sUriMatcher.addURI(ImageSharingData.CONTENT_URI.getAuthority(),
+                ImageSharingData.CONTENT_URI.getPath().substring(1),
+                UriType.InternalImageSharing.IMAGE_SHARING);
+        sUriMatcher.addURI(ImageSharingData.CONTENT_URI.getAuthority(),
+                ImageSharingData.CONTENT_URI.getPath().substring(1).concat("/*"),
+                UriType.InternalImageSharing.IMAGE_SHARING_WITH_ID);
         sUriMatcher.addURI(ImageSharingLog.CONTENT_URI.getAuthority(), ImageSharingLog.CONTENT_URI
-                .getPath().substring(1), UriType.IMAGE_SHARING);
+                .getPath().substring(1), UriType.ImageSharing.IMAGE_SHARING);
         sUriMatcher.addURI(ImageSharingLog.CONTENT_URI.getAuthority(), ImageSharingLog.CONTENT_URI
-                .getPath().substring(1).concat("/*"), UriType.IMAGE_SHARING_WITH_ID);
+                .getPath().substring(1).concat("/*"), UriType.ImageSharing.IMAGE_SHARING_WITH_ID);
     }
 
     /**
@@ -70,9 +76,17 @@ public class ImageSharingProvider extends ContentProvider {
 
     private static final class UriType {
 
-        private static final int IMAGE_SHARING = 1;
+        private static final class ImageSharing {
+            private static final int IMAGE_SHARING = 1;
 
-        private static final int IMAGE_SHARING_WITH_ID = 2;
+            private static final int IMAGE_SHARING_WITH_ID = 2;
+        }
+
+        private static final class InternalImageSharing {
+            private static final int IMAGE_SHARING = 3;
+
+            private static final int IMAGE_SHARING_WITH_ID = 4;
+        }
     }
 
     private static final class CursorType {
@@ -91,7 +105,7 @@ public class ImageSharingProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append("(")
+            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append('(')
                     .append(ImageSharingData.KEY_BASECOLUMN_ID).append(" INTEGER NOT NULL,")
                     .append(ImageSharingData.KEY_SHARING_ID).append(" TEXT NOT NULL PRIMARY KEY,")
                     .append(ImageSharingData.KEY_CONTACT).append(" TEXT NOT NULL,")
@@ -106,14 +120,14 @@ public class ImageSharingProvider extends ContentProvider {
                     .append(ImageSharingData.KEY_FILESIZE).append(" INTEGER NOT NULL)").toString());
             db.execSQL(new StringBuilder("CREATE INDEX ")
                     .append(ImageSharingData.KEY_BASECOLUMN_ID).append("_idx").append(" ON ")
-                    .append(TABLE).append("(").append(ImageSharingData.KEY_BASECOLUMN_ID)
-                    .append(")").toString());
+                    .append(TABLE).append('(').append(ImageSharingData.KEY_BASECOLUMN_ID)
+                    .append(')').toString());
             db.execSQL(new StringBuilder("CREATE INDEX ").append(ImageSharingData.KEY_CONTACT)
-                    .append("_idx").append(" ON ").append(TABLE).append("(")
-                    .append(ImageSharingData.KEY_CONTACT).append(")").toString());
+                    .append("_idx").append(" ON ").append(TABLE).append('(')
+                    .append(ImageSharingData.KEY_CONTACT).append(')').toString());
             db.execSQL(new StringBuilder("CREATE INDEX ").append(ImageSharingData.KEY_TIMESTAMP)
-                    .append("_idx").append(" ON ").append(TABLE).append("(")
-                    .append(ImageSharingData.KEY_TIMESTAMP).append(")").toString());
+                    .append("_idx").append(" ON ").append(TABLE).append('(')
+                    .append(ImageSharingData.KEY_TIMESTAMP).append(')').toString());
         }
 
         @Override
@@ -130,7 +144,7 @@ public class ImageSharingProvider extends ContentProvider {
             return SELECTION_WITH_SHARING_ID_ONLY;
         }
         return new StringBuilder("(").append(SELECTION_WITH_SHARING_ID_ONLY).append(") AND (")
-                .append(selection).append(")").toString();
+                .append(selection).append(')').toString();
     }
 
     private String[] getSelectionArgsWithSharingId(String[] selectionArgs, String sharingId) {
@@ -152,10 +166,14 @@ public class ImageSharingProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
         switch (sUriMatcher.match(uri)) {
-            case UriType.IMAGE_SHARING:
+            case UriType.InternalImageSharing.IMAGE_SHARING:
+                /* Intentional fall through */
+            case UriType.ImageSharing.IMAGE_SHARING:
                 return CursorType.TYPE_DIRECTORY;
 
-            case UriType.IMAGE_SHARING_WITH_ID:
+            case UriType.InternalImageSharing.IMAGE_SHARING_WITH_ID:
+                /* Intentional fall through */
+            case UriType.ImageSharing.IMAGE_SHARING_WITH_ID:
                 return CursorType.TYPE_ITEM;
 
             default:
@@ -170,13 +188,32 @@ public class ImageSharingProvider extends ContentProvider {
         Cursor cursor = null;
         try {
             switch (sUriMatcher.match(uri)) {
-                case UriType.IMAGE_SHARING_WITH_ID:
+                case UriType.InternalImageSharing.IMAGE_SHARING_WITH_ID:
                     String sharingId = uri.getLastPathSegment();
                     selection = getSelectionWithSharingId(selection);
                     selectionArgs = getSelectionArgsWithSharingId(selectionArgs, sharingId);
-                    /* Intentional fall through */
-                case UriType.IMAGE_SHARING:
                     SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+                    cursor = db
+                            .query(TABLE, projection, selection, selectionArgs, null, null, sort);
+                    cursor.setNotificationUri(getContext().getContentResolver(),
+                            Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId));
+                    return cursor;
+
+                case UriType.InternalImageSharing.IMAGE_SHARING:
+                    db = mOpenHelper.getReadableDatabase();
+                    cursor = db
+                            .query(TABLE, projection, selection, selectionArgs, null, null, sort);
+                    cursor.setNotificationUri(getContext().getContentResolver(),
+                            ImageSharingLog.CONTENT_URI);
+                    return cursor;
+
+                case UriType.ImageSharing.IMAGE_SHARING_WITH_ID:
+                    sharingId = uri.getLastPathSegment();
+                    selection = getSelectionWithSharingId(selection);
+                    selectionArgs = getSelectionArgsWithSharingId(selectionArgs, sharingId);
+                    /* Intentional fall through */
+                case UriType.ImageSharing.IMAGE_SHARING:
+                    db = mOpenHelper.getReadableDatabase();
                     cursor = db
                             .query(TABLE, projection, selection, selectionArgs, null, null, sort);
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
@@ -196,19 +233,27 @@ public class ImageSharingProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        Uri notificationUri = ImageSharingLog.CONTENT_URI;
         switch (sUriMatcher.match(uri)) {
-            case UriType.IMAGE_SHARING_WITH_ID:
+            case UriType.InternalImageSharing.IMAGE_SHARING_WITH_ID:
                 String sharingId = uri.getLastPathSegment();
                 selection = getSelectionWithSharingId(selection);
                 selectionArgs = getSelectionArgsWithSharingId(selectionArgs, sharingId);
+                notificationUri = Uri.withAppendedPath(notificationUri, sharingId);
                 /* Intentional fall through */
-            case UriType.IMAGE_SHARING:
+            case UriType.InternalImageSharing.IMAGE_SHARING:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.update(TABLE, values, selection, selectionArgs);
                 if (count > 0) {
-                    getContext().getContentResolver().notifyChange(uri, null);
+                    getContext().getContentResolver().notifyChange(notificationUri, null);
                 }
                 return count;
+
+            case UriType.ImageSharing.IMAGE_SHARING_WITH_ID:
+                /* Intentional fall through */
+            case UriType.ImageSharing.IMAGE_SHARING:
+                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
+                        .append(uri).append(") supports read only access!").toString());
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
@@ -219,20 +264,27 @@ public class ImageSharingProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues initialValues) {
         switch (sUriMatcher.match(uri)) {
-            case UriType.IMAGE_SHARING:
+            case UriType.InternalImageSharing.IMAGE_SHARING:
                 /* Intentional fall through */
-            case UriType.IMAGE_SHARING_WITH_ID:
+            case UriType.InternalImageSharing.IMAGE_SHARING_WITH_ID:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 String sharingId = initialValues.getAsString(ImageSharingData.KEY_SHARING_ID);
                 initialValues.put(ImageSharingData.KEY_BASECOLUMN_ID, HistoryMemberBaseIdCreator
                         .createUniqueId(getContext(), ImageSharingData.HISTORYLOG_MEMBER_ID));
                 if (db.insert(TABLE, null, initialValues) == INVALID_ROW_ID) {
-                    throw new ServerApiPersistentStorageException(
-                            "Unable to insert row for URI ".concat(uri.toString()));
+                    throw new ServerApiPersistentStorageException(new StringBuilder(
+                            "Unable to insert row for URI ").append(uri.toString()).append('!')
+                            .toString());
                 }
                 Uri notificationUri = Uri.withAppendedPath(ImageSharingLog.CONTENT_URI, sharingId);
                 getContext().getContentResolver().notifyChange(notificationUri, null);
                 return notificationUri;
+
+            case UriType.ImageSharing.IMAGE_SHARING_WITH_ID:
+                /* Intentional fall through */
+            case UriType.ImageSharing.IMAGE_SHARING:
+                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
+                        .append(uri).append(") supports read only access!").toString());
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
@@ -242,19 +294,27 @@ public class ImageSharingProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
+        Uri notificationUri = ImageSharingLog.CONTENT_URI;
         switch (sUriMatcher.match(uri)) {
-            case UriType.IMAGE_SHARING_WITH_ID:
+            case UriType.InternalImageSharing.IMAGE_SHARING_WITH_ID:
                 String sharingId = uri.getLastPathSegment();
                 selection = getSelectionWithSharingId(selection);
                 selectionArgs = getSelectionArgsWithSharingId(selectionArgs, sharingId);
+                notificationUri = Uri.withAppendedPath(notificationUri, sharingId);
                 /* Intentional fall through */
-            case UriType.IMAGE_SHARING:
+            case UriType.InternalImageSharing.IMAGE_SHARING:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.delete(TABLE, selection, selectionArgs);
                 if (count > 0) {
-                    getContext().getContentResolver().notifyChange(uri, null);
+                    getContext().getContentResolver().notifyChange(notificationUri, null);
                 }
                 return count;
+
+            case UriType.ImageSharing.IMAGE_SHARING_WITH_ID:
+                /* Intentional fall through */
+            case UriType.ImageSharing.IMAGE_SHARING:
+                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
+                        .append(uri).append(") supports read only access!").toString());
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")

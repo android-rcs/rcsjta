@@ -16,8 +16,6 @@
 
 package com.gsma.rcs.provider.history;
 
-import com.gsma.services.rcs.history.HistoryLog;
-
 import android.content.ContentProviderClient;
 import android.content.Context;
 import android.util.SparseArray;
@@ -53,7 +51,7 @@ public class HistoryMemberBaseIdCreator {
             if (nextId != null) {
                 return nextId.incrementAndGet();
             }
-            String historyLogAuthority = HistoryLog.CONTENT_URI.getAuthority();
+            String historyLogAuthority = HistoryLogData.CONTENT_URI.getAuthority();
             ContentProviderClient contentProviderClient = ctx.getContentResolver()
                     .acquireContentProviderClient(historyLogAuthority);
             try {

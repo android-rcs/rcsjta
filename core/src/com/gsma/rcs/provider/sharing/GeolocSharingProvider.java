@@ -19,6 +19,7 @@ package com.gsma.rcs.provider.sharing;
 import com.gsma.rcs.provider.history.HistoryMemberBaseIdCreator;
 import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.DatabaseUtils;
+import com.gsma.services.rcs.sharing.geoloc.GeolocSharingLog;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -39,9 +40,17 @@ public class GeolocSharingProvider extends ContentProvider {
 
     private static final class UriType {
 
-        private static final int BASE = 1;
+        private static final class GeolocSharing {
+            private static final int BASE = 1;
 
-        private static final int WITH_SHARING_ID = 2;
+            private static final int WITH_SHARING_ID = 2;
+        }
+
+        private static final class InternalGeolocSharing {
+            private static final int BASE = 3;
+
+            private static final int WITH_SHARING_ID = 4;
+        }
     }
 
     private static final class CursorType {
@@ -55,10 +64,16 @@ public class GeolocSharingProvider extends ContentProvider {
     static {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         sUriMatcher.addURI(GeolocSharingData.CONTENT_URI.getAuthority(),
-                GeolocSharingData.CONTENT_URI.getPath().substring(1), UriType.BASE);
+                GeolocSharingData.CONTENT_URI.getPath().substring(1),
+                UriType.InternalGeolocSharing.BASE);
         sUriMatcher.addURI(GeolocSharingData.CONTENT_URI.getAuthority(),
                 GeolocSharingData.CONTENT_URI.getPath().substring(1).concat("/*"),
-                UriType.WITH_SHARING_ID);
+                UriType.InternalGeolocSharing.WITH_SHARING_ID);
+        sUriMatcher.addURI(GeolocSharingLog.CONTENT_URI.getAuthority(),
+                GeolocSharingLog.CONTENT_URI.getPath().substring(1), UriType.GeolocSharing.BASE);
+        sUriMatcher.addURI(GeolocSharingLog.CONTENT_URI.getAuthority(),
+                GeolocSharingLog.CONTENT_URI.getPath().substring(1).concat("/*"),
+                UriType.GeolocSharing.WITH_SHARING_ID);
     }
 
     /**
@@ -79,10 +94,9 @@ public class GeolocSharingProvider extends ContentProvider {
         }
 
         @Override
-        public void onCreate(SQLiteDatabase database) {
-            database.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE)
-                    .append(" (").append(GeolocSharingData.KEY_SHARING_ID)
-                    .append(" TEXT NOT NULL PRIMARY KEY,")
+        public void onCreate(SQLiteDatabase db) {
+            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append(" (")
+                    .append(GeolocSharingData.KEY_SHARING_ID).append(" TEXT NOT NULL PRIMARY KEY,")
                     .append(GeolocSharingData.KEY_BASECOLUMN_ID).append(" INTEGER NOT NULL,")
                     .append(GeolocSharingData.KEY_CONTACT).append(" TEXT NOT NULL,")
                     .append(GeolocSharingData.KEY_CONTENT).append(" TEXT,")
@@ -90,23 +104,24 @@ public class GeolocSharingProvider extends ContentProvider {
                     .append(GeolocSharingData.KEY_DIRECTION).append(" INTEGER NOT NULL,")
                     .append(GeolocSharingData.KEY_STATE).append(" INTEGER NOT NULL,")
                     .append(GeolocSharingData.KEY_REASON_CODE).append(" INTEGER NOT NULL,")
-                    .append(GeolocSharingData.KEY_TIMESTAMP).append(" INTEGER NOT NULL);")
+                    .append(GeolocSharingData.KEY_TIMESTAMP).append(" INTEGER NOT NULL)")
                     .toString());
-            database.execSQL(new StringBuilder("CREATE INDEX ")
+            db.execSQL(new StringBuilder("CREATE INDEX ")
                     .append(GeolocSharingData.KEY_BASECOLUMN_ID).append("_idx ON ").append(TABLE)
-                    .append("(").append(GeolocSharingData.KEY_BASECOLUMN_ID).append(")").toString());
-            database.execSQL(new StringBuilder("CREATE INDEX ")
-                    .append(GeolocSharingData.KEY_CONTACT).append("_idx ON ").append(TABLE)
-                    .append("(").append(GeolocSharingData.KEY_CONTACT).append(")").toString());
-            database.execSQL(new StringBuilder("CREATE INDEX ")
-                    .append(GeolocSharingData.KEY_TIMESTAMP).append("_idx ON ").append(TABLE)
-                    .append("(").append(GeolocSharingData.KEY_TIMESTAMP).append(")").toString());
+                    .append('(').append(GeolocSharingData.KEY_BASECOLUMN_ID).append(')')
+                    .toString());
+            db.execSQL(new StringBuilder("CREATE INDEX ").append(GeolocSharingData.KEY_CONTACT)
+                    .append("_idx ON ").append(TABLE).append('(')
+                    .append(GeolocSharingData.KEY_CONTACT).append(')').toString());
+            db.execSQL(new StringBuilder("CREATE INDEX ").append(GeolocSharingData.KEY_TIMESTAMP)
+                    .append("_idx ON ").append(TABLE).append('(')
+                    .append(GeolocSharingData.KEY_TIMESTAMP).append(')').toString());
         }
 
         @Override
-        public void onUpgrade(SQLiteDatabase database, int oldVersion, int currentVersion) {
-            database.execSQL("DROP TABLE IF EXISTS " + TABLE);
-            onCreate(database);
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int currentVersion) {
+            db.execSQL("DROP TABLE IF EXISTS ".concat(TABLE));
+            onCreate(db);
         }
     }
 
@@ -117,7 +132,7 @@ public class GeolocSharingProvider extends ContentProvider {
             return SELECTION_WITH_SHARING_ID_ONLY;
         }
         return new StringBuilder("(").append(SELECTION_WITH_SHARING_ID_ONLY).append(") AND (")
-                .append(selection).append(")").toString();
+                .append(selection).append(')').toString();
     }
 
     private String[] getSelectionArgsWithSharingId(String[] selectionArgs, String sharingId) {
@@ -139,10 +154,14 @@ public class GeolocSharingProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
         switch (sUriMatcher.match(uri)) {
-            case UriType.BASE:
+            case UriType.InternalGeolocSharing.BASE:
+                /* Intentional fall through */
+            case UriType.GeolocSharing.BASE:
                 return CursorType.TYPE_DIRECTORY;
 
-            case UriType.WITH_SHARING_ID:
+            case UriType.InternalGeolocSharing.WITH_SHARING_ID:
+                /* Intentional fall through */
+            case UriType.GeolocSharing.WITH_SHARING_ID:
                 return CursorType.TYPE_ITEM;
 
             default:
@@ -157,16 +176,34 @@ public class GeolocSharingProvider extends ContentProvider {
         Cursor cursor = null;
         try {
             switch (sUriMatcher.match(uri)) {
-                case UriType.WITH_SHARING_ID:
+                case UriType.InternalGeolocSharing.WITH_SHARING_ID:
                     String sharingId = uri.getLastPathSegment();
                     selection = getSelectionWithSharingId(selection);
                     selectionArgs = getSelectionArgsWithSharingId(selectionArgs, sharingId);
-                    /* Intentional fall through */
-                case UriType.BASE:
-                    SQLiteDatabase database = mOpenHelper.getReadableDatabase();
-                    cursor = database.query(TABLE, projection, selection, selectionArgs, null,
-                            null, sort);
+                    SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+                    cursor = db
+                            .query(TABLE, projection, selection, selectionArgs, null, null, sort);
+                    cursor.setNotificationUri(getContext().getContentResolver(),
+                            Uri.withAppendedPath(GeolocSharingLog.CONTENT_URI, sharingId));
+                    return cursor;
 
+                case UriType.InternalGeolocSharing.BASE:
+                    db = mOpenHelper.getReadableDatabase();
+                    cursor = db
+                            .query(TABLE, projection, selection, selectionArgs, null, null, sort);
+                    cursor.setNotificationUri(getContext().getContentResolver(),
+                            GeolocSharingLog.CONTENT_URI);
+                    return cursor;
+
+                case UriType.GeolocSharing.WITH_SHARING_ID:
+                    sharingId = uri.getLastPathSegment();
+                    selection = getSelectionWithSharingId(selection);
+                    selectionArgs = getSelectionArgsWithSharingId(selectionArgs, sharingId);
+                    /* Intentional fall through */
+                case UriType.GeolocSharing.BASE:
+                    db = mOpenHelper.getReadableDatabase();
+                    cursor = db
+                            .query(TABLE, projection, selection, selectionArgs, null, null, sort);
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
                     return cursor;
 
@@ -184,19 +221,27 @@ public class GeolocSharingProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        Uri notificationUri = GeolocSharingLog.CONTENT_URI;
         switch (sUriMatcher.match(uri)) {
-            case UriType.WITH_SHARING_ID:
+            case UriType.InternalGeolocSharing.WITH_SHARING_ID:
                 String sharingId = uri.getLastPathSegment();
                 selection = getSelectionWithSharingId(selection);
                 selectionArgs = getSelectionArgsWithSharingId(selectionArgs, sharingId);
+                notificationUri = Uri.withAppendedPath(notificationUri, sharingId);
                 /* Intentional fall through */
-            case UriType.BASE:
-                SQLiteDatabase database = mOpenHelper.getWritableDatabase();
-                int count = database.update(TABLE, values, selection, selectionArgs);
+            case UriType.InternalGeolocSharing.BASE:
+                SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+                int count = db.update(TABLE, values, selection, selectionArgs);
                 if (count > 0) {
-                    getContext().getContentResolver().notifyChange(uri, null);
+                    getContext().getContentResolver().notifyChange(notificationUri, null);
                 }
                 return count;
+
+            case UriType.GeolocSharing.WITH_SHARING_ID:
+                /* Intentional fall through */
+            case UriType.GeolocSharing.BASE:
+                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
+                        .append(uri).append(") supports read only access!").toString());
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
@@ -207,21 +252,28 @@ public class GeolocSharingProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues initialValues) {
         switch (sUriMatcher.match(uri)) {
-            case UriType.WITH_SHARING_ID:
+            case UriType.InternalGeolocSharing.WITH_SHARING_ID:
                 /* Intentional fall through */
-            case UriType.BASE:
-                SQLiteDatabase database = mOpenHelper.getWritableDatabase();
+            case UriType.InternalGeolocSharing.BASE:
+                SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 String sharingId = initialValues.getAsString(GeolocSharingData.KEY_SHARING_ID);
                 initialValues.put(GeolocSharingData.KEY_BASECOLUMN_ID, HistoryMemberBaseIdCreator
                         .createUniqueId(getContext(), GeolocSharingData.HISTORYLOG_MEMBER_ID));
-                if (database.insert(TABLE, null, initialValues) == INVALID_ROW_ID) {
-                    throw new ServerApiPersistentStorageException(
-                            "Unable to insert row for URI ".concat(uri.toString()));
+                if (db.insert(TABLE, null, initialValues) == INVALID_ROW_ID) {
+                    throw new ServerApiPersistentStorageException(new StringBuilder(
+                            "Unable to insert row for URI ").append(uri.toString()).append('!')
+                            .toString());
                 }
-                Uri notificationUri = GeolocSharingData.CONTENT_URI.buildUpon()
+                Uri notificationUri = GeolocSharingLog.CONTENT_URI.buildUpon()
                         .appendPath(sharingId).build();
                 getContext().getContentResolver().notifyChange(notificationUri, null);
                 return notificationUri;
+
+            case UriType.GeolocSharing.WITH_SHARING_ID:
+                /* Intentional fall through */
+            case UriType.GeolocSharing.BASE:
+                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
+                        .append(uri).append(") supports read only access!").toString());
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
@@ -231,19 +283,27 @@ public class GeolocSharingProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
+        Uri notificationUri = GeolocSharingLog.CONTENT_URI;
         switch (sUriMatcher.match(uri)) {
-            case UriType.WITH_SHARING_ID:
+            case UriType.InternalGeolocSharing.WITH_SHARING_ID:
                 String sharingId = uri.getLastPathSegment();
                 selection = getSelectionWithSharingId(selection);
                 selectionArgs = getSelectionArgsWithSharingId(selectionArgs, sharingId);
+                notificationUri = Uri.withAppendedPath(notificationUri, sharingId);
                 /* Intentional fall through */
-            case UriType.BASE:
-                SQLiteDatabase database = mOpenHelper.getWritableDatabase();
-                int count = database.delete(TABLE, selection, selectionArgs);
+            case UriType.InternalGeolocSharing.BASE:
+                SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+                int count = db.delete(TABLE, selection, selectionArgs);
                 if (count > 0) {
-                    getContext().getContentResolver().notifyChange(uri, null);
+                    getContext().getContentResolver().notifyChange(notificationUri, null);
                 }
                 return count;
+
+            case UriType.GeolocSharing.WITH_SHARING_ID:
+                /* Intentional fall through */
+            case UriType.GeolocSharing.BASE:
+                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
+                        .append(uri).append(") supports read only access!").toString());
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")

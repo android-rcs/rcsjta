@@ -47,7 +47,7 @@ public class GroupChatDeleteTask extends DeleteTask.NotGrouped {
      */
     public GroupChatDeleteTask(ChatServiceImpl chatService, InstantMessagingService imService,
             LocalContentResolver contentResolver, Object imsLock) {
-        super(contentResolver, imsLock, ChatData.CONTENT_URI, ChatLog.GroupChat.CHAT_ID, null);
+        super(contentResolver, imsLock, GroupChatData.CONTENT_URI, ChatLog.GroupChat.CHAT_ID, null);
         mChatService = chatService;
         mImService = imService;
     }
@@ -63,7 +63,7 @@ public class GroupChatDeleteTask extends DeleteTask.NotGrouped {
      */
     public GroupChatDeleteTask(ChatServiceImpl chatService, InstantMessagingService imService,
             LocalContentResolver contentResolver, Object imsLock, String chatId) {
-        super(contentResolver, imsLock, ChatData.CONTENT_URI, ChatLog.GroupChat.CHAT_ID, null,
+        super(contentResolver, imsLock, GroupChatData.CONTENT_URI, ChatLog.GroupChat.CHAT_ID, null,
                 chatId);
         mChatService = chatService;
         mImService = imService;

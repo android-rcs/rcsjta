@@ -18,8 +18,6 @@
 
 package com.gsma.rcs.core.ims.service.capability;
 
-import com.gsma.rcs.provider.settings.RcsSettings;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -122,9 +120,9 @@ public class Capabilities {
     private long mTimestampOfLastRequest = INVALID_TIMESTAMP;
 
     /**
-     * Last timestamp capabilities was refreshed
+     * Timestamp of when this capabilities was received from network.
      */
-    private long mTimestampOfLastRefresh = INVALID_TIMESTAMP;
+    private long mTimestampOfLastResponse = INVALID_TIMESTAMP;
 
     /**
      * Constructor
@@ -458,25 +456,25 @@ public class Capabilities {
                 + ", File_transfer=" + mFileTransfer + ", Chat=" + mImSession + ", FT_http="
                 + mFileTransferHttp + ", Geolocation_push=" + mGeolocationPush + ", Automata="
                 + mSipAutomata + ", TimestampLastRequest=" + mTimestampOfLastRequest
-                + ", TimestampLastRefresh=" + mTimestampOfLastRefresh;
+                + ", TimestampLastResponse=" + mTimestampOfLastResponse;
     }
 
     /**
-     * Get timestamp of last refresh
+     * Get timestamp of last response
      * 
-     * @return timestampOfLastRefresh (in milliseconds)
+     * @return timestampOfLastResponse (in milliseconds)
      */
-    public long getTimestampOfLastRefresh() {
-        return mTimestampOfLastRefresh;
+    public long getTimestampOfLastResponse() {
+        return mTimestampOfLastResponse;
     }
 
     /**
-     * Set timestamp of last refresh
+     * Set timestamp of last response
      * 
-     * @param timestampOfLastRefresh (in milliseconds)
+     * @param timestampOfLastResponse (in milliseconds)
      */
-    public void setTimestampOfLastRefresh(long timestampOfLastRefresh) {
-        mTimestampOfLastRefresh = timestampOfLastRefresh;
+    public void setTimestampOfLastResponse(long timestampOfLastResponse) {
+        mTimestampOfLastResponse = timestampOfLastResponse;
     }
 
 }

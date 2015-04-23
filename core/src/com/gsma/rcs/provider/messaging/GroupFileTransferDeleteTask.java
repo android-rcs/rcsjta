@@ -21,16 +21,16 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSession;
 import com.gsma.rcs.provider.DeleteTask;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
-import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 import java.util.Set;
 
 public class GroupFileTransferDeleteTask extends DeleteTask.GroupedByChatId {
 
     private static final String SELECTION_ALL_GROUP_FILETRANSFERS = new StringBuilder(
-            FileTransferLog.CHAT_ID).append("!=").append(FileTransferLog.CONTACT).toString();
+            FileTransferData.KEY_CHAT_ID).append("<>").append(FileTransferData.KEY_CONTACT)
+            .toString();
     private static final String SELECTION_FILETRANSFER_BY_CHATID = new StringBuilder(
-            FileTransferLog.CHAT_ID).append("=?").toString();
+            FileTransferData.KEY_CHAT_ID).append("=?").toString();
 
     private final FileTransferServiceImpl mFileTransferService;
 
@@ -46,8 +46,8 @@ public class GroupFileTransferDeleteTask extends DeleteTask.GroupedByChatId {
      */
     public GroupFileTransferDeleteTask(FileTransferServiceImpl fileTransferService,
             InstantMessagingService imService, LocalContentResolver contentResolver, Object imsLock) {
-        super(contentResolver, imsLock, FileTransferData.CONTENT_URI, FileTransferLog.FT_ID,
-                FileTransferLog.CHAT_ID, SELECTION_ALL_GROUP_FILETRANSFERS);
+        super(contentResolver, imsLock, FileTransferData.CONTENT_URI, FileTransferData.KEY_FT_ID,
+                FileTransferData.KEY_CHAT_ID, SELECTION_ALL_GROUP_FILETRANSFERS);
         mFileTransferService = fileTransferService;
         mImService = imService;
     }
@@ -64,8 +64,8 @@ public class GroupFileTransferDeleteTask extends DeleteTask.GroupedByChatId {
     public GroupFileTransferDeleteTask(FileTransferServiceImpl fileTransferService,
             InstantMessagingService imService, LocalContentResolver contentResolver,
             Object imsLock, String chatId) {
-        super(contentResolver, imsLock, FileTransferData.CONTENT_URI, FileTransferLog.FT_ID,
-                FileTransferLog.CHAT_ID, SELECTION_FILETRANSFER_BY_CHATID, chatId);
+        super(contentResolver, imsLock, FileTransferData.CONTENT_URI, FileTransferData.KEY_FT_ID,
+                FileTransferData.KEY_CHAT_ID, SELECTION_FILETRANSFER_BY_CHATID, chatId);
         mFileTransferService = fileTransferService;
         mImService = imService;
     }
@@ -83,8 +83,8 @@ public class GroupFileTransferDeleteTask extends DeleteTask.GroupedByChatId {
     public GroupFileTransferDeleteTask(FileTransferServiceImpl fileTransferService,
             InstantMessagingService imService, LocalContentResolver contentResolver,
             Object imsLock, String chatId, String transferId) {
-        super(contentResolver, imsLock, FileTransferData.CONTENT_URI, FileTransferLog.FT_ID,
-                FileTransferLog.CHAT_ID, null, transferId);
+        super(contentResolver, imsLock, FileTransferData.CONTENT_URI, FileTransferData.KEY_FT_ID,
+                FileTransferData.KEY_CHAT_ID, null, transferId);
         mFileTransferService = fileTransferService;
         mImService = imService;
     }

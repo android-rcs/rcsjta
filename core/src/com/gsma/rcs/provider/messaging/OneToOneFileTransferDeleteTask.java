@@ -22,14 +22,14 @@ import com.gsma.rcs.provider.DeleteTask;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.service.api.FileTransferServiceImpl;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 import java.util.Set;
 
 public class OneToOneFileTransferDeleteTask extends DeleteTask.GroupedByContactId {
 
     private static final String SELECTION_ALL_ONETOONE_FILETRANSFERS = new StringBuilder(
-            FileTransferLog.CHAT_ID).append("=").append(FileTransferLog.CONTACT).toString();
+            FileTransferData.KEY_CHAT_ID).append("=").append(FileTransferData.KEY_CONTACT)
+            .toString();
 
     private final FileTransferServiceImpl mFileTransferService;
 
@@ -45,8 +45,8 @@ public class OneToOneFileTransferDeleteTask extends DeleteTask.GroupedByContactI
      */
     public OneToOneFileTransferDeleteTask(FileTransferServiceImpl fileTransferService,
             InstantMessagingService imService, LocalContentResolver contentResolver, Object imsLock) {
-        super(contentResolver, imsLock, FileTransferData.CONTENT_URI, FileTransferLog.FT_ID,
-                FileTransferLog.CONTACT, SELECTION_ALL_ONETOONE_FILETRANSFERS);
+        super(contentResolver, imsLock, FileTransferData.CONTENT_URI, FileTransferData.KEY_FT_ID,
+                FileTransferData.KEY_CONTACT, SELECTION_ALL_ONETOONE_FILETRANSFERS);
         mFileTransferService = fileTransferService;
         mImService = imService;
     }
@@ -63,8 +63,8 @@ public class OneToOneFileTransferDeleteTask extends DeleteTask.GroupedByContactI
     public OneToOneFileTransferDeleteTask(FileTransferServiceImpl fileTransferService,
             InstantMessagingService imService, LocalContentResolver contentResolver,
             Object imsLock, String transferId) {
-        super(contentResolver, imsLock, FileTransferData.CONTENT_URI, FileTransferLog.FT_ID,
-                FileTransferLog.CONTACT, null, transferId);
+        super(contentResolver, imsLock, FileTransferData.CONTENT_URI, FileTransferData.KEY_FT_ID,
+                FileTransferData.KEY_CONTACT, null, transferId);
         mFileTransferService = fileTransferService;
         mImService = imService;
     }
@@ -81,8 +81,8 @@ public class OneToOneFileTransferDeleteTask extends DeleteTask.GroupedByContactI
     public OneToOneFileTransferDeleteTask(FileTransferServiceImpl fileTransferService,
             InstantMessagingService imService, LocalContentResolver contentResolver,
             Object imsLock, ContactId contact) {
-        super(contentResolver, imsLock, FileTransferData.CONTENT_URI, FileTransferLog.FT_ID,
-                FileTransferLog.CONTACT, contact);
+        super(contentResolver, imsLock, FileTransferData.CONTENT_URI, FileTransferData.KEY_FT_ID,
+                FileTransferData.KEY_CONTACT, contact);
         mFileTransferService = fileTransferService;
         mImService = imService;
     }

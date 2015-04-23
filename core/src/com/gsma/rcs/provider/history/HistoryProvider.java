@@ -81,7 +81,7 @@ public class HistoryProvider extends MultiDbProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
             String sort) {
-        List<String> historyLogMembers = uri.getQueryParameters(HistoryLog.PROVIDER_ID);
+        List<String> historyLogMembers = uri.getQueryParameters(HistoryLogData.KEY_PROVIDER_ID);
         ensureDatabasesAttached(historyLogMembers);
         StringBuilder query = new StringBuilder("SELECT ");
         if (projection == null) {
@@ -91,7 +91,7 @@ public class HistoryProvider extends MultiDbProvider {
         }
         String unionQuery = mQueryHelper.generateUnionQuery(historyLogMembers, selectionArgs,
                 selection);
-        query.append(" FROM (").append(unionQuery).append(")");
+        query.append(" FROM (").append(unionQuery).append(')');
         if (!TextUtils.isEmpty(selection)) {
             query.append(" WHERE ").append(selection);
         }

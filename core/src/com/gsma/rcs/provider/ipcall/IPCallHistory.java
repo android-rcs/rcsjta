@@ -27,7 +27,6 @@ import com.gsma.rcs.core.content.VideoContent;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.service.ipcalldraft.IPCall.ReasonCode;
 import com.gsma.rcs.service.ipcalldraft.IPCall.State;
-import com.gsma.rcs.service.ipcalldraft.IPCallLog;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
@@ -71,7 +70,7 @@ public class IPCallHistory {
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(IPCallLog.CONTENT_URI, callId), projection, null, null,
+                    Uri.withAppendedPath(IPCallData.CONTENT_URI, callId), projection, null, null,
                     null);
             if (cursor.moveToFirst()) {
                 return cursor;
@@ -165,7 +164,7 @@ public class IPCallHistory {
         if (audiocontent != null) {
             values.put(IPCallData.KEY_AUDIO_ENCODING, audiocontent.getEncoding());
         }
-        return mLocalContentResolver.insert(IPCallLog.CONTENT_URI, values);
+        return mLocalContentResolver.insert(IPCallData.CONTENT_URI, values);
     }
 
     /**
@@ -185,7 +184,7 @@ public class IPCallHistory {
         ContentValues values = new ContentValues();
         values.put(IPCallData.KEY_STATE, state.toInt());
         values.put(IPCallData.KEY_REASON_CODE, reasonCode.toInt());
-        mLocalContentResolver.update(Uri.withAppendedPath(IPCallLog.CONTENT_URI, callId), values,
+        mLocalContentResolver.update(Uri.withAppendedPath(IPCallData.CONTENT_URI, callId), values,
                 null, null);
     }
 
@@ -193,7 +192,7 @@ public class IPCallHistory {
      * Delete all entries in IP call history
      */
     public void deleteAllEntries() {
-        mLocalContentResolver.delete(IPCallLog.CONTENT_URI, null, null);
+        mLocalContentResolver.delete(IPCallData.CONTENT_URI, null, null);
     }
 
     /**
@@ -232,7 +231,7 @@ public class IPCallHistory {
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(
-                    Uri.withAppendedPath(IPCallLog.CONTENT_URI, callId), null, null, null, null);
+                    Uri.withAppendedPath(IPCallData.CONTENT_URI, callId), null, null, null, null);
             if (cursor.moveToFirst()) {
                 return cursor;
             }

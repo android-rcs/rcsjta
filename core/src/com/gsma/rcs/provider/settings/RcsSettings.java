@@ -708,7 +708,7 @@ public class RcsSettings {
         capabilities.setGroupChatStoreForwardSupport(isGroupChatStoreForwardSupported());
         capabilities.setSipAutomata(isSipAutomata());
         capabilities.setTimestampOfLastRequest(Capabilities.INVALID_TIMESTAMP);
-        capabilities.setTimestampOfLastRefresh(System.currentTimeMillis());
+        capabilities.setTimestampOfLastResponse(Capabilities.INVALID_TIMESTAMP);
         // Add extensions
         capabilities.setSupportedExtensions(getSupportedRcsExtensions());
         return capabilities;

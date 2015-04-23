@@ -21,16 +21,15 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.provider.DeleteTask;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.service.api.ChatServiceImpl;
-import com.gsma.services.rcs.chat.ChatLog;
 
 import java.util.Set;
 
 public class GroupChatMessageDeleteTask extends DeleteTask.GroupedByChatId {
 
     private static final String SELECTION_GROUP_CHATMESSAGES = new StringBuilder(
-            ChatLog.Message.CHAT_ID).append("!=").append(ChatLog.Message.CONTACT).toString();
+            MessageData.KEY_CHAT_ID).append("<>").append(MessageData.KEY_CONTACT).toString();
     private static final String SELECTION_CHATMESSAGES_BY_CHATID = new StringBuilder(
-            ChatLog.Message.CHAT_ID).append("=?").toString();
+            MessageData.KEY_CHAT_ID).append("=?").toString();
 
     private final ChatServiceImpl mChatService;
 
@@ -46,8 +45,8 @@ public class GroupChatMessageDeleteTask extends DeleteTask.GroupedByChatId {
      */
     public GroupChatMessageDeleteTask(ChatServiceImpl chatService,
             InstantMessagingService imService, LocalContentResolver contentResolver, Object imsLock) {
-        super(contentResolver, imsLock, ChatData.CONTENT_URI, ChatLog.Message.MESSAGE_ID,
-                ChatLog.Message.CHAT_ID, SELECTION_GROUP_CHATMESSAGES);
+        super(contentResolver, imsLock, MessageData.CONTENT_URI, MessageData.KEY_MESSAGE_ID,
+                MessageData.KEY_CHAT_ID, SELECTION_GROUP_CHATMESSAGES);
         mChatService = chatService;
         mImService = imService;
     }
@@ -64,8 +63,8 @@ public class GroupChatMessageDeleteTask extends DeleteTask.GroupedByChatId {
     public GroupChatMessageDeleteTask(ChatServiceImpl chatService,
             InstantMessagingService imService, LocalContentResolver contentResolver,
             Object imsLock, String chatId) {
-        super(contentResolver, imsLock, ChatLog.Message.CONTENT_URI, ChatLog.Message.MESSAGE_ID,
-                ChatData.KEY_CHAT_ID, SELECTION_CHATMESSAGES_BY_CHATID, chatId);
+        super(contentResolver, imsLock, MessageData.CONTENT_URI, MessageData.KEY_MESSAGE_ID,
+                GroupChatData.KEY_CHAT_ID, SELECTION_CHATMESSAGES_BY_CHATID, chatId);
         mChatService = chatService;
         mImService = imService;
     }
@@ -83,8 +82,8 @@ public class GroupChatMessageDeleteTask extends DeleteTask.GroupedByChatId {
     public GroupChatMessageDeleteTask(ChatServiceImpl chatService,
             InstantMessagingService imService, LocalContentResolver contentResolver,
             Object imsLock, String chatId, String messageId) {
-        super(contentResolver, imsLock, ChatData.CONTENT_URI, MessageData.KEY_MESSAGE_ID,
-                ChatData.KEY_CHAT_ID, null, messageId);
+        super(contentResolver, imsLock, GroupChatData.CONTENT_URI, MessageData.KEY_MESSAGE_ID,
+                GroupChatData.KEY_CHAT_ID, null, messageId);
         mChatService = chatService;
         mImService = imService;
     }

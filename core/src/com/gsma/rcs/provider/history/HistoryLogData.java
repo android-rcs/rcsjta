@@ -25,7 +25,7 @@ public class HistoryLogData {
     /**
      * Database URI
      */
-    protected static final Uri CONTENT_URI = Uri.parse("content://com.gsma.rcs.history/history");
+    public static final Uri CONTENT_URI = Uri.parse("content://com.gsma.rcs.history/history");
 
     /* package private */static final String KEY_BASECOLUMN_ID = HistoryLog.BASECOLUMN_ID;
 

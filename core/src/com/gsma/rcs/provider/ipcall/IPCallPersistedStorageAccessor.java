@@ -14,14 +14,12 @@
  * the License.
  */
 
-package com.gsma.rcs.core.ims.service.ipcall;
+package com.gsma.rcs.provider.ipcall;
 
 import com.gsma.rcs.core.content.AudioContent;
 import com.gsma.rcs.core.content.VideoContent;
-import com.gsma.rcs.provider.ipcall.IPCallHistory;
 import com.gsma.rcs.service.ipcalldraft.IPCall.ReasonCode;
 import com.gsma.rcs.service.ipcalldraft.IPCall.State;
-import com.gsma.rcs.service.ipcalldraft.IPCallLog;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
@@ -64,13 +62,13 @@ public class IPCallPersistedStorageAccessor {
         Cursor cursor = null;
         try {
             cursor = mIPCallLog.getCacheableIPCallData(mCallId);
-            String contact = cursor.getString(cursor.getColumnIndexOrThrow(IPCallLog.CONTACT));
+            String contact = cursor.getString(cursor.getColumnIndexOrThrow(IPCallData.KEY_CONTACT));
             if (contact != null) {
                 mContact = ContactUtil.createContactIdFromTrustedData(contact);
             }
             mDirection = Direction.valueOf(cursor.getInt(cursor
-                    .getColumnIndexOrThrow(IPCallLog.DIRECTION)));
-            mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(IPCallLog.TIMESTAMP));
+                    .getColumnIndexOrThrow(IPCallData.KEY_DIRECTION)));
+            mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(IPCallData.KEY_TIMESTAMP));
         } finally {
             if (cursor != null) {
                 cursor.close();

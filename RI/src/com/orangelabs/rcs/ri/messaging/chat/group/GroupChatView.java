@@ -19,7 +19,6 @@
 package com.orangelabs.rcs.ri.messaging.chat.group;
 
 import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsServiceNotAvailableException;
@@ -35,6 +34,7 @@ import com.gsma.services.rcs.chat.GroupChatListener;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.contact.ContactUtil;
 import com.gsma.services.rcs.contact.RcsContact;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
 import com.orangelabs.rcs.ri.R;
 import com.orangelabs.rcs.ri.RiApplication;

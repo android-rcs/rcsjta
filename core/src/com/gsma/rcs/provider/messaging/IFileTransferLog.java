@@ -200,6 +200,14 @@ public interface IFileTransferLog {
     public FtHttpResumeUpload retrieveFtHttpResumeUpload(String tId);
 
     /**
+     * Get the chat id for a file transfer with specific id
+     * 
+     * @param fileTransferId specific id
+     * @return chat id
+     */
+    public String getFileTransferChatId(String fileTransferId);
+
+    /**
      * Get file transfer state from its unique ID
      * 
      * @param fileTransferId Unique ID of file transfer

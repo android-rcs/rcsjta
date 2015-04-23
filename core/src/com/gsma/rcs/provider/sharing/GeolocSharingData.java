@@ -25,7 +25,8 @@ import android.net.Uri;
  */
 public class GeolocSharingData {
 
-    public static final Uri CONTENT_URI = GeolocSharingLog.CONTENT_URI;
+    public static final Uri CONTENT_URI = Uri
+            .parse("content://com.gsma.rcs.geolocshare/geolocshare");
 
     public static final int HISTORYLOG_MEMBER_ID = GeolocSharingLog.HISTORYLOG_MEMBER_ID;
 

@@ -155,7 +155,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
     /**
      * Registers a listener on service registration events
-     *
+     * 
      * @param listener Service registration listener
      */
     public void addEventListener(IRcsServiceRegistrationListener listener) {
@@ -169,7 +169,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
     /**
      * Unregisters a listener on service registration events
-     *
+     * 
      * @param listener Service registration listener
      */
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
@@ -193,7 +193,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
     /**
      * Notifies unregistration event
-     *
+     * 
      * @param reasonCode for unregistration
      */
     public void notifyUnRegistration(RcsServiceRegistration.ReasonCode reasonCode) {
@@ -248,7 +248,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
                     .getContactCapabilities(contact);
             // TODO update code so not to insert default capabilities in provider
             if (caps == null
-                    || caps.getTimestampOfLastRefresh() == com.gsma.rcs.core.ims.service.capability.Capabilities.INVALID_TIMESTAMP) {
+                    || caps.getTimestampOfLastResponse() == com.gsma.rcs.core.ims.service.capability.Capabilities.INVALID_TIMESTAMP) {
                 // no capabilities are known, returns null as per 1.5.1 specification
                 return null;
             }
@@ -330,7 +330,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
     /**
      * Notify listeners
-     *
+     * 
      * @param contact ContactId
      * @param capabilities Capabilities
      */
@@ -373,7 +373,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
     /**
      * Registers a capabilities listener on any contact
-     *
+     * 
      * @param listener Capabilities listener
      * @throws RemoteException
      */
@@ -402,7 +402,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
     /**
      * Unregisters a capabilities listener
-     *
+     * 
      * @param listener Capabilities listener
      * @throws RemoteException
      */
@@ -431,7 +431,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
     /**
      * Registers a listener for receiving capabilities of a given contact
-     *
+     * 
      * @param contact ContactId
      * @param listener Capabilities listener
      * @throws RemoteException
@@ -465,7 +465,7 @@ public class CapabilityServiceImpl extends ICapabilityService.Stub {
 
     /**
      * Unregisters a listener of capabilities for a given contact
-     *
+     * 
      * @param contact ContactId
      * @param listener Capabilities listener
      * @throws RemoteException

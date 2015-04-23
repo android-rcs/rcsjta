@@ -19,6 +19,7 @@
 package com.gsma.rcs.im.chat;
 
 import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.provider.messaging.MessageData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtilMockContext;
@@ -74,7 +75,7 @@ public class MessageLogTest extends AndroidTestCase {
         String messageId = mMessagingLog.addGroupChatEvent(mChatId, mContact1,
                 GroupChatEvent.Status.DEPARTED, mTimestamp);
         // Read entry
-        Uri uri = Uri.withAppendedPath(Message.CONTENT_URI, messageId);
+        Uri uri = Uri.withAppendedPath(MessageData.CONTENT_URI, messageId);
         Cursor cursor = mContentResolver.query(uri, null, null, null, null);
         // Check entry
         assertEquals(cursor.getCount(), 1);
@@ -118,10 +119,10 @@ public class MessageLogTest extends AndroidTestCase {
         assertEquals(GroupChatEvent.Status.DEPARTED, groupChatEvents.get(mContact1));
         assertEquals(GroupChatEvent.Status.JOINED, groupChatEvents.get(mContact2));
 
-        Uri uri = Uri.withAppendedPath(Message.CONTENT_URI, id1);
+        Uri uri = Uri.withAppendedPath(MessageData.CONTENT_URI, id1);
         mLocalContentResolver.delete(uri, null, null);
         assertEquals(false, mMessagingLog.isMessagePersisted(id1));
-        uri = Uri.withAppendedPath(Message.CONTENT_URI, id2);
+        uri = Uri.withAppendedPath(MessageData.CONTENT_URI, id2);
         mLocalContentResolver.delete(uri, null, null);
         assertEquals(false, mMessagingLog.isMessagePersisted(id2));
     }

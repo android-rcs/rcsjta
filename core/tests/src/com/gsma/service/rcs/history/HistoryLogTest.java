@@ -14,6 +14,7 @@ import com.gsma.rcs.provider.contact.ContactProvider;
 import com.gsma.rcs.provider.history.HistoryProvider;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.FileTransferProvider;
+import com.gsma.rcs.provider.messaging.MessageData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsProvider;
@@ -258,17 +259,12 @@ public class HistoryLogTest extends AndroidTestCase {
         mContactUtil = ContactUtil.getInstance(new ContactUtilMockContext(
                 new ContactUtilMockContext(getContext())));
 
-        sLocalContentResolver.delete(
-                Uri.parse("content://com.gsma.services.rcs.provider.chat/chatmessage"), null, null);
-        sLocalContentResolver.delete(
-                Uri.parse("content://com.gsma.services.rcs.provider.imageshare/imageshare"), null,
-                null);
-        sLocalContentResolver.delete(
-                Uri.parse("content://com.gsma.services.rcs.provider.videoshare/videoshare"), null,
-                null);
-        sLocalContentResolver.delete(
-                Uri.parse("content://com.gsma.services.rcs.provider.geolocshare/geolocshare"),
+        sLocalContentResolver.delete(MessageData.CONTENT_URI, null, null);
+        sLocalContentResolver.delete(Uri.parse("content://com.gsma.rcs.imageshare/imageshare"),
                 null, null);
+        sLocalContentResolver.delete(Uri.parse("content://com.gsma.rcs.videoshare/videoshare"),
+                null, null);
+        sLocalContentResolver.delete(GeolocSharingData.CONTENT_URI, null, null);
 
         try {
             SQLiteDatabase dbft = getContext().openOrCreateDatabase(

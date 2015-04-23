@@ -67,6 +67,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.msrp.OriginatingMsrpFileSha
 import com.gsma.rcs.core.ims.service.im.filetransfer.msrp.TerminatingMsrpFileSharingSession;
 import com.gsma.rcs.core.ims.service.upload.FileUploadSession;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
@@ -82,7 +83,6 @@ import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.chat.GroupChat.ReasonCode;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
-import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -863,7 +863,7 @@ public class InstantMessagingService extends ImsService {
                 mRcsSettings, timestamp, timestampSent, mContactManager);
 
         mCore.getListener().handleFileTransferInvitation(session, false, remote,
-                session.getRemoteDisplayName(), FileTransferLog.UNKNOWN_EXPIRATION);
+                session.getRemoteDisplayName(), FileTransferData.UNKNOWN_EXPIRATION);
 
         session.startSession();
     }
@@ -1590,7 +1590,7 @@ public class InstantMessagingService extends ImsService {
      */
     public boolean isCapabilitiesValid(Capabilities capabilities) {
         long msgCapValidityPeriod = mRcsSettings.getMsgCapValidityPeriod();
-        if (System.currentTimeMillis() > capabilities.getTimestampOfLastRefresh()
+        if (System.currentTimeMillis() > capabilities.getTimestampOfLastResponse()
                 + msgCapValidityPeriod) {
             return false;
         }

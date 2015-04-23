@@ -23,6 +23,7 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.userprofile.UserProfile;
 import com.gsma.rcs.provider.LocalContentResolver;
+import com.gsma.rcs.provider.messaging.MessageData;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.ContactUtilMockContext;
@@ -114,7 +115,7 @@ public class ChatMessageTest extends AndroidTestCase {
         assertEquals(msgId, id);
         assertEquals(mTimestamp, readTimestamp);
         assertEquals(mTimestampSent, readTimestampSent);
-        mLocalContentResolver.delete(Uri.withAppendedPath(Message.CONTENT_URI, msgId), null, null);
+        mLocalContentResolver.delete(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), null, null);
         assertFalse(mMessagingLog.isMessagePersisted(msgId));
     }
 
@@ -156,7 +157,7 @@ public class ChatMessageTest extends AndroidTestCase {
         assertEquals(msgId, id);
         assertEquals(mTimestamp, readTimestamp);
         assertEquals(mTimestampSent, readTimestampSent);
-        mLocalContentResolver.delete(Uri.withAppendedPath(Message.CONTENT_URI, msgId), null, null);
+        mLocalContentResolver.delete(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), null, null);
         assertFalse(mMessagingLog.isMessagePersisted(msgId));
     }
 }

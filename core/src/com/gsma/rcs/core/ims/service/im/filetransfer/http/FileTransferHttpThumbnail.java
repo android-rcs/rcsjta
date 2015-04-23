@@ -25,8 +25,8 @@ package com.gsma.rcs.core.ims.service.im.filetransfer.http;
 import com.gsma.rcs.core.content.ContentManager;
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
+import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 import android.net.Uri;
 
@@ -43,7 +43,7 @@ public class FileTransferHttpThumbnail {
 
     private Uri mUri;
 
-    private long mExpiration = FileTransferLog.UNKNOWN_EXPIRATION;
+    private long mExpiration = FileTransferData.UNKNOWN_EXPIRATION;
 
     private final RcsSettings mRcsSettings;
 

@@ -22,9 +22,9 @@
 
 package com.gsma.rcs.provider.messaging;
 
-import com.gsma.services.rcs.GroupDeliveryInfo.ReasonCode;
-import com.gsma.services.rcs.GroupDeliveryInfo.Status;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo.ReasonCode;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo.Status;
 
 import android.net.Uri;
 

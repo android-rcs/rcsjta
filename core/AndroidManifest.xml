@@ -118,7 +118,7 @@
             android:writePermission="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY" />
         <provider
             android:name="com.gsma.rcs.provider.messaging.GroupDeliveryInfoProvider"
-            android:authorities="com.gsma.services.rcs.provider.groupdeliveryinfo"
+            android:authorities="com.gsma.rcs.groupdeliveryinfo;com.gsma.services.rcs.provider.groupdeliveryinfo"
             android:exported="true"
             android:readPermission="com.gsma.services.permission.RCS"
             android:writePermission="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY" />
@@ -130,13 +130,13 @@
             android:writePermission="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY" />
         <provider
             android:name="com.gsma.rcs.provider.sharing.ImageSharingProvider"
-            android:authorities="com.gsma.services.rcs.provider.imageshare"
+            android:authorities="com.gsma.rcs.imageshare;com.gsma.services.rcs.provider.imageshare"
             android:exported="true"
             android:readPermission="com.gsma.services.permission.RCS"
             android:writePermission="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY" />
         <provider
             android:name="com.gsma.rcs.provider.sharing.VideoSharingProvider"
-            android:authorities="com.gsma.services.rcs.provider.videoshare"
+            android:authorities="com.gsma.rcs.videoshare;com.gsma.services.rcs.provider.videoshare"
             android:exported="true"
             android:readPermission="com.gsma.services.permission.RCS"
             android:writePermission="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY" />
@@ -148,15 +148,18 @@
             android:writePermission="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY" />
         <provider
             android:name=".provider.ipcall.IPCallProvider"
-            android:authorities="com.gsma.services.rcs.provider.ipcall"
+            android:authorities="com.gsma.rcs.ipcall;com.gsma.services.rcs.provider.ipcall"
             android:exported="false"
+            android:readPermission="com.gsma.services.permission.RCS"
             android:writePermission="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY" />
         <provider
             android:name="com.gsma.rcs.provider.settings.RcsSettingsProvider"
-            android:authorities="com.gsma.rcs.setting" />
+            android:authorities="com.gsma.rcs.setting"
+            android:exported="false"
+            android:permission="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY" />
         <provider
             android:name="com.gsma.rcs.provider.sharing.GeolocSharingProvider"
-            android:authorities="com.gsma.services.rcs.provider.geolocshare"
+            android:authorities="com.gsma.rcs.geolocshare;com.gsma.services.rcs.provider.geolocshare"
             android:exported="true"
             android:readPermission="com.gsma.services.permission.RCS"
             android:writePermission="com.gsma.services.permission.RCS_INTERNAL_ACCESS_ONLY" />

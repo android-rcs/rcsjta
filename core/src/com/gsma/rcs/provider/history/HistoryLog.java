@@ -18,7 +18,7 @@ package com.gsma.rcs.provider.history;
 
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.provider.messaging.FileTransferData;
-import com.gsma.services.rcs.chat.ChatLog.Message;
+import com.gsma.rcs.provider.messaging.MessageData;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
@@ -34,8 +34,7 @@ public class HistoryLog {
     private final LocalContentResolver mLocalContentResolver;
 
     private static final Uri CHATMESSAGE_AND_FILETRANSFER_CONTENT_URI = new HistoryUriBuilder(
-            com.gsma.services.rcs.history.HistoryLog.CONTENT_URI)
-            .appendProvider(Message.HISTORYLOG_MEMBER_ID)
+            HistoryLogData.CONTENT_URI).appendProvider(MessageData.HISTORYLOG_MEMBER_ID)
             .appendProvider(FileTransferData.HISTORYLOG_MEMBER_ID).build();
 
     private static final String SELECTION_QUEUED_CHATMESSAGES_AND_FILETRANSFERS = new StringBuilder(
@@ -43,19 +42,19 @@ public class HistoryLog {
             .append(" AND ").append(HistoryLogData.KEY_MIME_TYPE).append("<>'")
             .append(MimeType.GROUPCHAT_EVENT).append("' AND ")
             .append(HistoryLogData.KEY_PROVIDER_ID).append("=")
-            .append(Message.HISTORYLOG_MEMBER_ID).append(") OR (")
+            .append(MessageData.HISTORYLOG_MEMBER_ID).append(") OR (")
             .append(HistoryLogData.KEY_STATUS).append("=")
             .append(FileTransfer.State.QUEUED.toInt()).append(" AND ")
             .append(HistoryLogData.KEY_PROVIDER_ID).append("=")
-            .append(FileTransferData.HISTORYLOG_MEMBER_ID).append(")").toString();
+            .append(FileTransferData.HISTORYLOG_MEMBER_ID).append(')').toString();
 
     private static final String SELECTION_QUEUED_GROUPCHATMESSAGES_AND_GROUPFILETRANSFERS = new StringBuilder(
             HistoryLogData.KEY_CHAT_ID).append("=? AND (")
-            .append(SELECTION_QUEUED_CHATMESSAGES_AND_FILETRANSFERS).append(")").toString();
+            .append(SELECTION_QUEUED_CHATMESSAGES_AND_FILETRANSFERS).append(')').toString();
 
     private static final String SELECTION_QUEUED_ONETOONECHATMESSAGES_AND_ONETOONE_FILETRANSFERS = new StringBuilder(
             HistoryLogData.KEY_CHAT_ID).append("=").append(HistoryLogData.KEY_CONTACT)
-            .append(" AND (").append(SELECTION_QUEUED_CHATMESSAGES_AND_FILETRANSFERS).append(")")
+            .append(" AND (").append(SELECTION_QUEUED_CHATMESSAGES_AND_FILETRANSFERS).append(')')
             .toString();
 
     private static final String ORDER_BY_TIMESTAMP_ASC = HistoryLogData.KEY_TIMESTAMP

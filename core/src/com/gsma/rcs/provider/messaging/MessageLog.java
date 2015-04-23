@@ -30,7 +30,6 @@ import com.gsma.rcs.service.api.ServerApiPersistentStorageException;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
-import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
 import com.gsma.services.rcs.chat.ChatLog;
@@ -41,6 +40,7 @@ import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
 import com.gsma.services.rcs.chat.ChatLog.Message.MimeType;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -135,7 +135,7 @@ public class MessageLog implements IMessageLog {
 
         values.put(MessageData.KEY_STATUS, status.toInt());
         values.put(MessageData.KEY_REASON_CODE, reasonCode.toInt());
-        mLocalContentResolver.insert(Message.CONTENT_URI, values);
+        mLocalContentResolver.insert(MessageData.CONTENT_URI, values);
     }
 
     /**
@@ -171,7 +171,7 @@ public class MessageLog implements IMessageLog {
 
         values.put(MessageData.KEY_STATUS, status.toInt());
         values.put(MessageData.KEY_REASON_CODE, reasonCode.toInt());
-        mLocalContentResolver.insert(Message.CONTENT_URI, values);
+        mLocalContentResolver.insert(MessageData.CONTENT_URI, values);
     }
 
     @Override
@@ -181,7 +181,7 @@ public class MessageLog implements IMessageLog {
 
     /**
      * Add incoming one-to-one chat message
-     * 
+     *
      * @param msg Chat message
      * @param imdnDisplayedRequested Indicates whether IMDN display was requested
      */
@@ -197,7 +197,7 @@ public class MessageLog implements IMessageLog {
 
     /**
      * Add incoming group chat message
-     * 
+     *
      * @param chatId Chat ID
      * @param msg Chat message
      * @param imdnDisplayedRequested Indicates whether IMDN display was requested
@@ -261,7 +261,7 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_TIMESTAMP_SENT, msg.getTimestampSent());
         values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
         values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
-        mLocalContentResolver.insert(Message.CONTENT_URI, values);
+        mLocalContentResolver.insert(MessageData.CONTENT_URI, values);
 
         if (direction == Direction.OUTGOING) {
             try {
@@ -292,7 +292,7 @@ public class MessageLog implements IMessageLog {
                 }
             } catch (Exception e) {
                 // TODO CR037 we should not do such rollback nor catch exception at all?
-                mLocalContentResolver.delete(Uri.withAppendedPath(Message.CONTENT_URI, msgId),
+                mLocalContentResolver.delete(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
                         null, null);
                 mLocalContentResolver.delete(
                         Uri.withAppendedPath(GroupDeliveryInfoData.CONTENT_URI, msgId), null, null);
@@ -328,7 +328,7 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_TIMESTAMP_SENT, timestamp);
         values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
         values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
-        mLocalContentResolver.insert(Message.CONTENT_URI, values);
+        mLocalContentResolver.insert(MessageData.CONTENT_URI, values);
         return messageId;
     }
 
@@ -341,8 +341,8 @@ public class MessageLog implements IMessageLog {
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_READ_STATUS, ReadStatus.READ.toInt());
 
-        if (mLocalContentResolver.update(Uri.withAppendedPath(Message.CONTENT_URI, msgId), values,
-                null, null) < 1) {
+        if (mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
+                values, null, null) < 1) {
             /* TODO: Throw exception */
             if (sLogger.isActivated()) {
                 sLogger.warn("There was no message with msgId '" + msgId + "' to mark as read.");
@@ -364,8 +364,8 @@ public class MessageLog implements IMessageLog {
             values.put(MessageData.KEY_TIMESTAMP_DELIVERED, System.currentTimeMillis());
         }
 
-        if (mLocalContentResolver.update(Uri.withAppendedPath(Message.CONTENT_URI, msgId), values,
-                null, null) < 1) {
+        if (mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
+                values, null, null) < 1) {
             /* TODO: Throw exception */
             if (sLogger.isActivated()) {
                 sLogger.warn("There was no message with msgId '" + msgId
@@ -388,8 +388,9 @@ public class MessageLog implements IMessageLog {
     public boolean isMessagePersisted(String msgId) {
         Cursor cursor = null;
         try {
-            cursor = mLocalContentResolver.query(Uri.withAppendedPath(Message.CONTENT_URI, msgId),
-                    PROJECTION_MESSAGE_ID, null, null, null);
+            cursor = mLocalContentResolver.query(
+                    Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), PROJECTION_MESSAGE_ID,
+                    null, null, null);
             // TODO check null cursor CR037
             return cursor.moveToFirst();
         } finally {
@@ -404,7 +405,7 @@ public class MessageLog implements IMessageLog {
             columnName
         };
         Cursor cursor = mLocalContentResolver.query(
-                Uri.withAppendedPath(Message.CONTENT_URI, msgId), projection, null, null, null);
+                Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), projection, null, null, null);
         // TODO check null cursor CR037
         if (cursor.moveToFirst()) {
             return cursor;
@@ -480,7 +481,7 @@ public class MessageLog implements IMessageLog {
     @Override
     public Cursor getCacheableChatMessageData(String msgId) {
         Cursor cursor = mLocalContentResolver.query(
-                Uri.withAppendedPath(Message.CONTENT_URI, msgId), null, null, null, null);
+                Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), null, null, null, null);
         if (cursor.moveToFirst()) {
             return cursor;
         }
@@ -499,7 +500,7 @@ public class MessageLog implements IMessageLog {
         String[] selectionArgs = new String[] {
             contact.toString()
         };
-        return mLocalContentResolver.query(Message.CONTENT_URI, null,
+        return mLocalContentResolver.query(MessageData.CONTENT_URI, null,
                 SELECTION_QUEUED_ONETOONE_CHAT_MESSAGES, selectionArgs, ORDER_BY_TIMESTAMP_ASC);
     }
 
@@ -512,8 +513,8 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_TIMESTAMP, message.getTimestamp());
         values.put(MessageData.KEY_TIMESTAMP_SENT, message.getTimestampSent());
         mLocalContentResolver.update(
-                Uri.withAppendedPath(Message.CONTENT_URI, message.getMessageId()), values, null,
-                null);
+                Uri.withAppendedPath(MessageData.CONTENT_URI, message.getMessageId()), values,
+                null, null);
     }
 
     @Override
@@ -521,7 +522,7 @@ public class MessageLog implements IMessageLog {
         String[] selectionArgs = new String[] {
             chatId
         };
-        return mLocalContentResolver.query(Message.CONTENT_URI, null,
+        return mLocalContentResolver.query(MessageData.CONTENT_URI, null,
                 SELECTION_QUEUED_GROUP_CHAT_MESSAGES, selectionArgs, ORDER_BY_TIMESTAMP_ASC);
     }
 
@@ -536,7 +537,7 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_TIMESTAMP, timestamp);
         values.put(MessageData.KEY_TIMESTAMP_SENT, timestampSent);
 
-        mLocalContentResolver.update(Uri.withAppendedPath(Message.CONTENT_URI, msgId), values,
+        mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), values,
                 null, null);
     }
 
@@ -606,8 +607,8 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
         values.put(MessageData.KEY_TIMESTAMP_DELIVERED, timestampDelivered);
 
-        if (mLocalContentResolver.update(Uri.withAppendedPath(Message.CONTENT_URI, msgId), values,
-                null, null) < 1) {
+        if (mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
+                values, null, null) < 1) {
             sLogger.warn("There was no message with msgId '" + msgId + "' to set to delivered.");
         }
     }
@@ -623,8 +624,8 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
         values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, timestampDisplayed);
 
-        if (mLocalContentResolver.update(Uri.withAppendedPath(Message.CONTENT_URI, msgId), values,
-                null, null) < 1) {
+        if (mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
+                values, null, null) < 1) {
             sLogger.warn("There was no message with msgId '" + msgId + "' to set to displayed.");
         }
     }

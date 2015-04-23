@@ -35,17 +35,17 @@ import static com.gsma.rcs.provider.contact.ContactData.KEY_CAPABILITY_FILE_TRAN
 import static com.gsma.rcs.provider.contact.ContactData.KEY_CAPABILITY_FILE_TRANSFER_HTTP;
 import static com.gsma.rcs.provider.contact.ContactData.KEY_CAPABILITY_FILE_TRANSFER_SF;
 import static com.gsma.rcs.provider.contact.ContactData.KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL;
-import static com.gsma.rcs.provider.contact.ContactData.KEY_CAPABILITY_GEOLOCATION_PUSH;
+import static com.gsma.rcs.provider.contact.ContactData.KEY_CAPABILITY_GEOLOC_PUSH;
 import static com.gsma.rcs.provider.contact.ContactData.KEY_CAPABILITY_GROUP_CHAT_SF;
-import static com.gsma.rcs.provider.contact.ContactData.KEY_CAPABILITY_IMAGE_SHARING;
+import static com.gsma.rcs.provider.contact.ContactData.KEY_CAPABILITY_IMAGE_SHARE;
 import static com.gsma.rcs.provider.contact.ContactData.KEY_CAPABILITY_IM_SESSION;
 import static com.gsma.rcs.provider.contact.ContactData.KEY_CAPABILITY_IP_VIDEO_CALL;
 import static com.gsma.rcs.provider.contact.ContactData.KEY_CAPABILITY_IP_VOICE_CALL;
 import static com.gsma.rcs.provider.contact.ContactData.KEY_CAPABILITY_PRESENCE_DISCOVERY;
 import static com.gsma.rcs.provider.contact.ContactData.KEY_CAPABILITY_SOCIAL_PRESENCE;
-import static com.gsma.rcs.provider.contact.ContactData.KEY_CAPABILITY_TIME_LAST_REFRESH;
-import static com.gsma.rcs.provider.contact.ContactData.KEY_CAPABILITY_TIME_LAST_RQST;
-import static com.gsma.rcs.provider.contact.ContactData.KEY_CAPABILITY_VIDEO_SHARING;
+import static com.gsma.rcs.provider.contact.ContactData.KEY_CAPABILITY_TIMESTAMP_LAST_REQUEST;
+import static com.gsma.rcs.provider.contact.ContactData.KEY_CAPABILITY_TIMESTAMP_LAST_RESPONSE;
+import static com.gsma.rcs.provider.contact.ContactData.KEY_CAPABILITY_VIDEO_SHARE;
 import static com.gsma.rcs.provider.contact.ContactData.KEY_CONTACT;
 import static com.gsma.rcs.provider.contact.ContactData.KEY_DISPLAY_NAME;
 import static com.gsma.rcs.provider.contact.ContactData.KEY_PRESENCE_FREE_TEXT;
@@ -62,7 +62,7 @@ import static com.gsma.rcs.provider.contact.ContactData.KEY_PRESENCE_WEBLINK_URL
 import static com.gsma.rcs.provider.contact.ContactData.KEY_RCS_STATUS;
 import static com.gsma.rcs.provider.contact.ContactData.KEY_RCS_STATUS_TIMESTAMP;
 import static com.gsma.rcs.provider.contact.ContactData.KEY_REGISTRATION_STATE;
-import static com.gsma.rcs.provider.contact.ContactData.KEY_TIMESTAMP;
+import static com.gsma.rcs.provider.contact.ContactData.KEY_TIMESTAMP_CONTACT_UPDATED;
 import static com.gsma.rcs.provider.contact.ContactData.TRUE_VALUE;
 
 import com.gsma.rcs.R;
@@ -127,7 +127,7 @@ import java.util.Set;
 /**
  * Contains utility methods for interfacing with the Android SDK ContactProvider and the RCS contact
  * provider.
- *
+ * 
  * @author Jean-Marc AUFFRET
  * @author Deutsche Telekom AG
  * @author yplo6403
@@ -140,16 +140,16 @@ public final class ContactManager {
 
     // @formatter:off
         private enum MimeType {
-            NUMBER, 
-            RCS_STATUS, 
-            REGISTRATION_STATE, 
-            CAPABILITY_IMAGE_SHARING, 
-            CAPABILITY_VIDEO_SHARING, 
+            NUMBER,
+            RCS_STATUS,
+            REGISTRATION_STATE,
+            CAPABILITY_IMAGE_SHARING,
+            CAPABILITY_VIDEO_SHARING,
             CAPABILITY_IM_SESSION,
-            CAPABILITY_FILE_TRANSFER, 
-            CAPABILITY_GEOLOCATION_PUSH, 
-            CAPABILITY_EXTENSIONS, 
-            CAPABILITY_IP_VOICE_CALL, 
+            CAPABILITY_FILE_TRANSFER,
+            CAPABILITY_GEOLOCATION_PUSH,
+            CAPABILITY_EXTENSIONS,
+            CAPABILITY_IP_VOICE_CALL,
             CAPABILITY_IP_VIDEO_CALL
         };
    // @formatter:on
@@ -242,7 +242,7 @@ public final class ContactManager {
 
     private final static String NOT_SIM_ACCOUNT_SELECTION = new StringBuilder("(")
             .append(RawContacts.ACCOUNT_TYPE).append(" IS NULL OR ")
-            .append(RawContacts.ACCOUNT_TYPE).append("!='").append(SIM_ACCOUNT_NAME)
+            .append(RawContacts.ACCOUNT_TYPE).append("<>'").append(SIM_ACCOUNT_NAME)
             .append("') AND ").append(RawContacts._ID).append("=?").toString();
 
     private final static String SIM_ACCOUNT_SELECTION = new StringBuilder(RawContacts.ACCOUNT_TYPE)
@@ -266,14 +266,14 @@ public final class ContactManager {
     };
 
     private static final String WHERE_RCS_STATUS_RCS = new StringBuilder(KEY_RCS_STATUS)
-            .append("!='").append(RcsStatus.NO_INFO.toInt()).append("' AND ")
-            .append(KEY_RCS_STATUS).append("!='").append(RcsStatus.NOT_RCS.toInt()).append("'")
+            .append("<>'").append(RcsStatus.NO_INFO.toInt()).append("' AND ")
+            .append(KEY_RCS_STATUS).append("<>'").append(RcsStatus.NOT_RCS.toInt()).append("'")
             .toString();
 
     private static final String WHERE_RCS_STATUS_WITH_SOCIAL_PRESENCE = new StringBuilder(
-            KEY_RCS_STATUS).append("!='").append(RcsStatus.NO_INFO.toInt()).append("' AND ")
-            .append(KEY_RCS_STATUS).append("!='").append(RcsStatus.NOT_RCS.toInt())
-            .append("' AND ").append(KEY_RCS_STATUS).append("!='")
+            KEY_RCS_STATUS).append("<>'").append(RcsStatus.NO_INFO.toInt()).append("' AND ")
+            .append(KEY_RCS_STATUS).append("<>'").append(RcsStatus.NOT_RCS.toInt())
+            .append("' AND ").append(KEY_RCS_STATUS).append("<>'")
             .append(RcsStatus.RCS_CAPABLE.toInt()).append("'").toString();
 
     private static final String WHERE_RCS_RAW_CONTACT_ID_AND_RCS_NUMBER = new StringBuilder(
@@ -362,16 +362,16 @@ public final class ContactManager {
 
     private static final String SEL_RAW_CONTACT_MIME_TYPES = new StringBuilder(Data.RAW_CONTACT_ID)
             .append("=? AND ").append(Data.MIMETYPE).append(" IN (")
-            .append(MIMETYPE_REGISTRATION_STATE).append(",").append(MIMETYPE_BLOCKING_STATE)
-            .append(",").append(MIMETYPE_NUMBER).append(",")
-            .append(MIMETYPE_CAPABILITY_IMAGE_SHARING).append(",")
-            .append(MIMETYPE_CAPABILITY_VIDEO_SHARING).append(",")
-            .append(MIMETYPE_CAPABILITY_IP_VOICE_CALL).append(",")
-            .append(MIMETYPE_CAPABILITY_IP_VIDEO_CALL).append(",")
-            .append(MIMETYPE_CAPABILITY_IM_SESSION).append(",")
-            .append(MIMETYPE_CAPABILITY_FILE_TRANSFER).append(",")
-            .append(MIMETYPE_CAPABILITY_GEOLOCATION_PUSH).append(",")
-            .append(MIMETYPE_CAPABILITY_EXTENSIONS).append(")").toString();
+            .append(MIMETYPE_REGISTRATION_STATE).append(',').append(MIMETYPE_BLOCKING_STATE)
+            .append(',').append(MIMETYPE_NUMBER).append(',')
+            .append(MIMETYPE_CAPABILITY_IMAGE_SHARING).append(',')
+            .append(MIMETYPE_CAPABILITY_VIDEO_SHARING).append(',')
+            .append(MIMETYPE_CAPABILITY_IP_VOICE_CALL).append(',')
+            .append(MIMETYPE_CAPABILITY_IP_VIDEO_CALL).append(',')
+            .append(MIMETYPE_CAPABILITY_IM_SESSION).append(',')
+            .append(MIMETYPE_CAPABILITY_FILE_TRANSFER).append(',')
+            .append(MIMETYPE_CAPABILITY_GEOLOCATION_PUSH).append(',')
+            .append(MIMETYPE_CAPABILITY_EXTENSIONS).append(')').toString();
 
     /**
      * Current instance
@@ -481,7 +481,7 @@ public final class ContactManager {
         values.put(KEY_CAPABILITY_FILE_TRANSFER, support);
 
         support = newCapabilities.isImageSharingSupported() && isRegistered;
-        values.put(KEY_CAPABILITY_IMAGE_SHARING, support);
+        values.put(KEY_CAPABILITY_IMAGE_SHARE, support);
 
         support = (newCapabilities.isImSessionSupported() && isRegistered)
                 || (mRcsSettings.isImAlwaysOn() && newInfo.isRcsContact());
@@ -494,10 +494,10 @@ public final class ContactManager {
         values.put(KEY_CAPABILITY_SOCIAL_PRESENCE, support);
 
         support = newCapabilities.isVideoSharingSupported() && isRegistered;
-        values.put(KEY_CAPABILITY_VIDEO_SHARING, support);
+        values.put(KEY_CAPABILITY_VIDEO_SHARE, support);
 
         support = newCapabilities.isGeolocationPushSupported() && isRegistered;
-        values.put(KEY_CAPABILITY_GEOLOCATION_PUSH, support);
+        values.put(KEY_CAPABILITY_GEOLOC_PUSH, support);
 
         boolean fileTransferHttpSupported = newCapabilities.isFileTransferHttpSupported();
         support = ((fileTransferHttpSupported && isRegistered) || (mRcsSettings
@@ -528,8 +528,10 @@ public final class ContactManager {
                 ServiceExtensionManager.getExtensions(newCapabilities.getSupportedExtensions()));
 
         // Save capabilities timestamp
-        values.put(KEY_CAPABILITY_TIME_LAST_RQST, newCapabilities.getTimestampOfLastRequest());
-        values.put(KEY_CAPABILITY_TIME_LAST_REFRESH, newCapabilities.getTimestampOfLastRefresh());
+        values.put(KEY_CAPABILITY_TIMESTAMP_LAST_REQUEST,
+                newCapabilities.getTimestampOfLastRequest());
+        values.put(KEY_CAPABILITY_TIMESTAMP_LAST_RESPONSE,
+                newCapabilities.getTimestampOfLastResponse());
 
         PhotoIcon photoIcon = null;
 
@@ -573,18 +575,22 @@ public final class ContactManager {
                 }
                 values.put(KEY_PRESENCE_PHOTO_ETAG, photoIcon.getEtag());
             }
+        } else {
+            values.put(KEY_PRESENCE_TIMESTAMP, INVALID_TIME);
         }
 
         // Save blocking state
         if (BlockingState.BLOCKED == newInfo.getBlockingState()) {
             // Block the contact
             values.put(KEY_BLOCKED, BLOCKED_VALUE_SET);
-            values.put(KEY_BLOCKING_TIMESTAMP, System.currentTimeMillis());
+            values.put(KEY_BLOCKING_TIMESTAMP, newInfo.getBlockingTimestamp());
         } else {
             // Unblock the contact
             values.put(KEY_BLOCKED, BLOCKED_VALUE_NOT_SET);
             values.put(KEY_BLOCKING_TIMESTAMP, INVALID_TIME);
         }
+
+        values.put(KEY_TIMESTAMP_CONTACT_UPDATED, System.currentTimeMillis());
 
         // Save registration state
         values.put(KEY_REGISTRATION_STATE, newInfo.getRegistrationState().toInt());
@@ -827,6 +833,10 @@ public final class ContactManager {
                 int blockingState = cursor.getInt(cursor.getColumnIndexOrThrow(KEY_BLOCKED));
                 infos.setBlockingState(BlockingState.valueOf(blockingState));
 
+                long blockingTimestamp = cursor.getLong(cursor
+                        .getColumnIndexOrThrow(KEY_BLOCKING_TIMESTAMP));
+                infos.setBlockingTimestamp(blockingTimestamp);
+
                 // Get Presence info
                 presenceInfo.setPresenceStatus(cursor.getString(cursor
                         .getColumnIndexOrThrow(KEY_PRESENCE_SHARING_STATUS)));
@@ -866,7 +876,7 @@ public final class ContactManager {
                 capabilities.setFileTransferSupport(isCapabilitySupported(cursor,
                         KEY_CAPABILITY_FILE_TRANSFER));
                 capabilities.setImageSharingSupport(isCapabilitySupported(cursor,
-                        KEY_CAPABILITY_IMAGE_SHARING));
+                        KEY_CAPABILITY_IMAGE_SHARE));
                 capabilities.setImSessionSupport(isCapabilitySupported(cursor,
                         KEY_CAPABILITY_IM_SESSION));
                 capabilities.setPresenceDiscoverySupport(isCapabilitySupported(cursor,
@@ -874,9 +884,9 @@ public final class ContactManager {
                 capabilities.setSocialPresenceSupport(isCapabilitySupported(cursor,
                         KEY_CAPABILITY_SOCIAL_PRESENCE));
                 capabilities.setGeolocationPushSupport(isCapabilitySupported(cursor,
-                        KEY_CAPABILITY_GEOLOCATION_PUSH));
+                        KEY_CAPABILITY_GEOLOC_PUSH));
                 capabilities.setVideoSharingSupport(isCapabilitySupported(cursor,
-                        KEY_CAPABILITY_VIDEO_SHARING));
+                        KEY_CAPABILITY_VIDEO_SHARE));
                 capabilities.setFileTransferThumbnailSupport(isCapabilitySupported(cursor,
                         KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL));
                 capabilities.setFileTransferHttpSupport(isCapabilitySupported(cursor,
@@ -897,10 +907,10 @@ public final class ContactManager {
 
                 // Set time of last request
                 capabilities.setTimestampOfLastRequest(cursor.getLong(cursor
-                        .getColumnIndexOrThrow(KEY_CAPABILITY_TIME_LAST_RQST)));
+                        .getColumnIndexOrThrow(KEY_CAPABILITY_TIMESTAMP_LAST_REQUEST)));
                 // Set time of last refresh
-                capabilities.setTimestampOfLastRefresh(cursor.getLong(cursor
-                        .getColumnIndexOrThrow(KEY_CAPABILITY_TIME_LAST_REFRESH)));
+                capabilities.setTimestampOfLastResponse(cursor.getLong(cursor
+                        .getColumnIndexOrThrow(KEY_CAPABILITY_TIMESTAMP_LAST_RESPONSE)));
             }
             infos.setPresenceInfo(presenceInfo);
             infos.setCapabilities(capabilities);
@@ -1037,17 +1047,41 @@ public final class ContactManager {
      * @param rcsStatus
      */
     public void modifyRcsContactInProvider(ContactId contact, RcsStatus rcsStatus) {
+        long currentTime = System.currentTimeMillis();
         ContentValues values = new ContentValues();
         values.put(KEY_PRESENCE_SHARING_STATUS, rcsStatus.toInt());
-        values.put(KEY_TIMESTAMP, System.currentTimeMillis());
-        if (!isContactIdAssociatedWithRcsContactProvider(contact)) {
-            values.put(KEY_CONTACT, contact.toString());
-            // Contact not present in provider, insert
-            mLocalContentResolver.insert(CONTENT_URI, values);
-        } else {
-            // Contact already present, update
+        values.put(KEY_TIMESTAMP_CONTACT_UPDATED, currentTime);
+        if (isContactIdAssociatedWithRcsContactProvider(contact)) {
+            /* Contact already present, update. */
             Uri uri = Uri.withAppendedPath(CONTENT_URI, contact.toString());
             mLocalContentResolver.update(uri, values, null, null);
+        } else {
+            /* Contact not present in provider, insert. */
+            values.put(KEY_CONTACT, contact.toString());
+            values.put(KEY_RCS_STATUS, rcsStatus.toInt());
+            values.put(KEY_RCS_STATUS_TIMESTAMP, currentTime);
+            values.put(KEY_REGISTRATION_STATE, RegistrationState.UNKNOWN.toInt());
+            values.put(KEY_PRESENCE_TIMESTAMP, -1);
+            values.put(KEY_CAPABILITY_TIMESTAMP_LAST_REQUEST, Capabilities.INVALID_TIMESTAMP);
+            values.put(KEY_CAPABILITY_CS_VIDEO, 0);
+            values.put(KEY_CAPABILITY_IMAGE_SHARE, 0);
+            values.put(KEY_CAPABILITY_VIDEO_SHARE, 0);
+            values.put(KEY_CAPABILITY_IM_SESSION, 0);
+            values.put(KEY_CAPABILITY_FILE_TRANSFER, 0);
+            values.put(KEY_CAPABILITY_PRESENCE_DISCOVERY, 0);
+            values.put(KEY_CAPABILITY_SOCIAL_PRESENCE, 0);
+            values.put(KEY_CAPABILITY_GEOLOC_PUSH, 0);
+            values.put(KEY_CAPABILITY_FILE_TRANSFER_HTTP, 0);
+            values.put(KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL, 0);
+            values.put(KEY_CAPABILITY_IP_VOICE_CALL, 0);
+            values.put(KEY_CAPABILITY_IP_VIDEO_CALL, 0);
+            values.put(KEY_CAPABILITY_FILE_TRANSFER_SF, 0);
+            values.put(KEY_CAPABILITY_GROUP_CHAT_SF, 0);
+            values.put(KEY_BLOCKED, BLOCKED_VALUE_NOT_SET);
+            values.put(KEY_BLOCKING_TIMESTAMP, INVALID_TIME);
+            values.put(KEY_AUTOMATA, 0);
+            values.put(KEY_CAPABILITY_TIMESTAMP_LAST_RESPONSE, Capabilities.INVALID_TIMESTAMP);
+            mLocalContentResolver.insert(CONTENT_URI, values);
         }
         getContactInfo(contact).setRcsStatus(rcsStatus);
     }
@@ -1085,7 +1119,7 @@ public final class ContactManager {
 
     /**
      * Get the RCS contacts in the contact contract provider
-     *
+     * 
      * @return set containing all RCS contacts
      */
     public Set<ContactId> getRcsContacts() {
@@ -1115,7 +1149,7 @@ public final class ContactManager {
 
     /**
      * Get all the contacts in the RCS contact provider
-     *
+     * 
      * @return set containing all contacts that have been at least queried once for capabilities
      */
     public Set<ContactId> getAllContacts() {
@@ -1788,7 +1822,7 @@ public final class ContactManager {
 
         supported = caps.isImageSharingSupported() && isRegistered;
         caps.setImageSharingSupport(supported);
-        values.put(KEY_CAPABILITY_IMAGE_SHARING, supported);
+        values.put(KEY_CAPABILITY_IMAGE_SHARE, supported);
 
         supported = (caps.isImSessionSupported() && isRegistered)
                 || (mRcsSettings.isImAlwaysOn() && isRcsContact);
@@ -1805,11 +1839,11 @@ public final class ContactManager {
 
         supported = caps.isVideoSharingSupported() && isRegistered;
         caps.setVideoSharingSupport(supported);
-        values.put(KEY_CAPABILITY_VIDEO_SHARING, supported);
+        values.put(KEY_CAPABILITY_VIDEO_SHARE, supported);
 
         supported = caps.isGeolocationPushSupported() && isRegistered;
         caps.setGeolocationPushSupport(supported);
-        values.put(KEY_CAPABILITY_GEOLOCATION_PUSH, supported);
+        values.put(KEY_CAPABILITY_GEOLOC_PUSH, supported);
 
         supported = caps.isFileTransferHttpSupported() && isRegistered;
         caps.setFileTransferHttpSupport(supported);
@@ -1845,8 +1879,8 @@ public final class ContactManager {
         values.put(KEY_CAPABILITY_EXTENSIONS, extensions);
 
         // Save capabilities timestamp
-        values.put(KEY_CAPABILITY_TIME_LAST_RQST, caps.getTimestampOfLastRequest());
-        values.put(KEY_CAPABILITY_TIME_LAST_REFRESH, caps.getTimestampOfLastRefresh());
+        values.put(KEY_CAPABILITY_TIMESTAMP_LAST_REQUEST, caps.getTimestampOfLastRequest());
+        values.put(KEY_CAPABILITY_TIMESTAMP_LAST_RESPONSE, caps.getTimestampOfLastResponse());
 
         Uri uri = Uri.withAppendedPath(CONTENT_URI, contact.toString());
         mLocalContentResolver.update(uri, values, null, null);
@@ -1904,7 +1938,7 @@ public final class ContactManager {
         // Update the cache
         capabilities.setTimestampOfLastRequest(now);
         ContentValues values = new ContentValues();
-        values.put(KEY_CAPABILITY_TIME_LAST_RQST, now);
+        values.put(KEY_CAPABILITY_TIMESTAMP_LAST_REQUEST, now);
         Uri uri = Uri.withAppendedPath(CONTENT_URI, contactNumber);
         mLocalContentResolver.update(uri, values, null, null);
     }
@@ -2257,7 +2291,7 @@ public final class ContactManager {
 
     /**
      * Utility to check if a phone number is associated to an entry in the RCS contact provider
-     *
+     * 
      * @param contact The contact ID
      * @return true if contact has an entry in the RCS contact provider, else false
      */
@@ -2829,10 +2863,11 @@ public final class ContactManager {
      * 
      * @param contact
      */
-    public void updateCapabilitiesTimeLastRefresh(ContactId contact) {
+    public void updateCapabilitiesTimeLastResponse(ContactId contact) {
         String contactNumber = contact.toString();
         if (sLogger.isActivated()) {
-            sLogger.debug("Update the time of last capabilities refresh for ".concat(contactNumber));
+            sLogger.debug("Update the time of last capabilities response for "
+                    .concat(contactNumber));
         }
         Capabilities capabilities = getContactCapabilities(contact);
         if (capabilities == null) {
@@ -2840,9 +2875,9 @@ public final class ContactManager {
         }
         long now = System.currentTimeMillis();
         /* Update the cache */
-        capabilities.setTimestampOfLastRefresh(now);
+        capabilities.setTimestampOfLastResponse(now);
         ContentValues values = new ContentValues();
-        values.put(KEY_CAPABILITY_TIME_LAST_REFRESH, now);
+        values.put(KEY_CAPABILITY_TIMESTAMP_LAST_RESPONSE, now);
         Uri uri = Uri.withAppendedPath(CONTENT_URI, contactNumber);
         mLocalContentResolver.update(uri, values, null, null);
     }
@@ -2861,6 +2896,7 @@ public final class ContactManager {
         ContactInfo newInfo = new ContactInfo(oldInfo);
         // Update the state
         newInfo.setBlockingState(state);
+        newInfo.setBlockingTimestamp(System.currentTimeMillis());
         // Save the modifications
         setContactInfo(newInfo, oldInfo);
     }

@@ -98,7 +98,7 @@ public class ContactServiceImpl extends IContactService.Stub {
 
     /**
      * Returns true if the service is registered to the platform, else returns false
-     *
+     * 
      * @return Returns true if registered else returns false
      */
     public boolean isServiceRegistered() {
@@ -107,7 +107,7 @@ public class ContactServiceImpl extends IContactService.Stub {
 
     /**
      * Registers a listener on service registration events
-     *
+     * 
      * @param listener Service registration listener
      */
     public void addEventListener(IRcsServiceRegistrationListener listener) {
@@ -121,7 +121,7 @@ public class ContactServiceImpl extends IContactService.Stub {
 
     /**
      * Unregisters a listener on service registration events
-     *
+     * 
      * @param listener Service registration listener
      */
     public void removeEventListener(IRcsServiceRegistrationListener listener) {
@@ -145,7 +145,7 @@ public class ContactServiceImpl extends IContactService.Stub {
 
     /**
      * Notifies unregistration event
-     *
+     * 
      * @param reasonCode for unregistration
      */
     public void notifyUnRegistration(RcsServiceRegistration.ReasonCode reasonCode) {
@@ -202,7 +202,7 @@ public class ContactServiceImpl extends IContactService.Stub {
                 capabilities.isFileTransferSupported()
                         || capabilities.isFileTransferHttpSupported(),
                 capabilities.isGeolocationPushSupported(), capabilities.getSupportedExtensions(),
-                capabilities.isSipAutomata(), capabilities.getTimestampOfLastRefresh());
+                capabilities.isSipAutomata(), capabilities.getTimestampOfLastResponse());
     }
 
     /**

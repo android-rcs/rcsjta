@@ -16,10 +16,10 @@
 
 package com.gsma.rcs.service.broadcaster;
 
-import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
 import com.gsma.services.rcs.filetransfer.FileTransfer.State;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
 /**
  * Interface to perform broadcast events on GroupFileTransferListeners

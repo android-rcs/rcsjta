@@ -31,7 +31,6 @@ import com.gsma.rcs.core.ims.service.capability.Capabilities;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatError;
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
-import com.gsma.rcs.core.ims.service.im.chat.ChatMessagePersistedStorageAccessor;
 import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatInfo;
@@ -40,13 +39,13 @@ import com.gsma.rcs.core.ims.service.im.chat.GroupChatSession;
 import com.gsma.rcs.core.ims.service.im.chat.GroupChatSessionListener;
 import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnDocument;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.messaging.ChatMessagePersistedStorageAccessor;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.settings.RcsSettingsData.ImSessionStartMode;
 import com.gsma.rcs.service.broadcaster.IGroupChatEventBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.Geoloc;
-import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
@@ -58,6 +57,7 @@ import com.gsma.services.rcs.chat.GroupChat.State;
 import com.gsma.services.rcs.chat.IChatMessage;
 import com.gsma.services.rcs.chat.IGroupChat;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
 import android.database.SQLException;
 import android.os.RemoteException;
@@ -71,7 +71,7 @@ import java.util.Set;
 
 /**
  * Group chat implementation
- * 
+ *
  * @author Jean-Marc AUFFRET
  */
 public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionListener {
@@ -107,7 +107,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     /**
      * Constructor
-     * 
+     *
      * @param chatId Chat Id
      * @param broadcaster IGroupChatEventBroadcaster
      * @param imService InstantMessagingService
@@ -369,7 +369,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     /**
      * Get chat ID
-     * 
+     *
      * @return Chat ID
      */
     public String getChatId() {
@@ -378,7 +378,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     /**
      * Get remote contact identifier
-     * 
+     *
      * @return ContactId
      * @throws RemoteException
      */
@@ -405,7 +405,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     /**
      * Returns the direction of the group chat (incoming or outgoing)
-     * 
+     *
      * @return Direction
      * @throws RemoteException
      */
@@ -435,7 +435,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     /**
      * Returns the state of the group chat
-     * 
+     *
      * @return State
      * @throws RemoteException
      */
@@ -471,7 +471,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     /**
      * Returns the reason code of the state of the group chat
-     * 
+     *
      * @return ReasonCode
      * @throws RemoteException
      */
@@ -499,7 +499,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
      * Returns the local timestamp of when the group chat invitation was initiated for outgoing
      * group chats or the local timestamp of when the group chat invitation was received for
      * incoming group chat invitations.
-     * 
+     *
      * @return Timestamp
      * @throws RemoteException
      */
@@ -525,7 +525,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     /**
      * Is Store & Forward
-     * 
+     *
      * @return Boolean
      */
     public boolean isStoreAndForward() {
@@ -542,7 +542,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     /**
      * Get subject associated to the session
-     * 
+     *
      * @return String
      * @throws RemoteException
      */
@@ -569,7 +569,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     /**
      * Returns true if it is possible to leave this group chat.
-     * 
+     *
      * @return boolean
      * @throws RemoteException
      */
@@ -599,7 +599,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     /**
      * Quits a group chat conversation. The conversation will continue between other participants if
      * there are enough participants.
-     * 
+     *
      * @throws RemoteException
      */
     public void leave() throws RemoteException {
@@ -645,7 +645,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     /**
      * Returns the participants. A participant is identified by its MSISDN in national or
      * international format, SIP address, SIP-URI or Tel-URI.
-     * 
+     *
      * @return Participants
      * @throws RemoteException
      */
@@ -682,7 +682,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     /**
      * Returns the max number of participants for a group chat from the group chat info subscription
      * (this value overrides the provisioning parameter)
-     * 
+     *
      * @return Number
      * @throws RemoteException
      */
@@ -709,7 +709,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     /**
      * Returns true if it is possible to invite additional participants to the group chat right now,
      * else returns false.
-     * 
+     *
      * @return boolean
      * @throws RemoteException
      */
@@ -745,7 +745,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     /**
      * Returns true if it is possible to invite the specified participants to the group chat right
      * now, else returns false.
-     * 
+     *
      * @param participant ContactId
      * @return boolean
      * @throws RemoteException
@@ -777,7 +777,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     /**
      * Invite additional participants to this group chat.
-     * 
+     *
      * @param participants Set of participants
      * @throws RemoteException
      */
@@ -849,7 +849,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     /**
      * Invite additional participants to this group chat
-     * 
+     *
      * @param session
      * @param participants
      */
@@ -878,7 +878,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     /**
      * Add group chat message to Db
-     * 
+     *
      * @param msg InstantMessage
      * @param state state of message
      */
@@ -891,7 +891,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     /**
      * Actual send operation of message performed
-     * 
+     *
      * @param msg Chat message
      */
     private void sendChatMessage(final ChatMessage msg) {
@@ -942,7 +942,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     /**
      * Dequeue group chat message
-     * 
+     *
      * @param message Chat message
      * @throws ServerApiException
      */
@@ -965,7 +965,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     /**
      * Returns true if it is possible to send messages in the group chat right now, else returns
      * false.
-     * 
+     *
      * @return boolean
      * @throws RemoteException
      */
@@ -1019,7 +1019,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     /**
      * Sends a text message to the group
-     * 
+     *
      * @param text Message
      * @return Chat message
      * @throws RemoteException
@@ -1064,7 +1064,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     /**
      * Sends a geoloc message
-     * 
+     *
      * @param geoloc Geoloc
      * @return ChatMessage
      * @throws RemoteException
@@ -1110,7 +1110,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     /**
      * Sends an is-composing event. The status is set to true when typing a message, else it is set
      * to false.
-     * 
+     *
      * @see ImSessionStartMode
      * @param status Is-composing status
      * @throws RemoteException
@@ -1159,7 +1159,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     /**
      * Rejoins an existing group chat from its unique chat ID
-     * 
+     *
      * @return Group chat
      * @throws ServerApiException
      */
@@ -1188,7 +1188,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     /**
      * Restarts a previous group chat from its unique chat ID
-     * 
+     *
      * @return Group chat
      * @throws ServerApiException
      */
@@ -1218,7 +1218,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
     /**
      * open the chat conversation. Note: if its an incoming pending chat session and the parameter
      * IM SESSION START is 0 then the session is accepted now.
-     * 
+     *
      * @see ImSessionStartMode
      * @throws RemoteException
      */
@@ -1523,7 +1523,7 @@ public class GroupChatImpl extends IGroupChat.Stub implements GroupChatSessionLi
 
     /**
      * Request to add participant has failed
-     * 
+     *
      * @param contact Contact ID
      * @param reason Error reason
      */

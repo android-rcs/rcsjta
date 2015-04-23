@@ -14,16 +14,14 @@
  * the License.
  */
 
-package com.gsma.rcs.core.ims.service.richcall.image;
+package com.gsma.rcs.provider.sharing;
 
 import com.gsma.rcs.core.content.MmContent;
-import com.gsma.rcs.provider.sharing.RichCallHistory;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.image.ImageSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.image.ImageSharing.State;
-import com.gsma.services.rcs.sharing.image.ImageSharingLog;
 
 import android.database.Cursor;
 import android.net.Uri;
@@ -76,18 +74,22 @@ public class ImageSharingPersistedStorageAccessor {
         Cursor cursor = null;
         try {
             cursor = mRichCallLog.getCacheableImageTransferData(mSharingId);
-            String contact = cursor
-                    .getString(cursor.getColumnIndexOrThrow(ImageSharingLog.CONTACT));
+            String contact = cursor.getString(cursor
+                    .getColumnIndexOrThrow(ImageSharingData.KEY_CONTACT));
             if (contact != null) {
                 mContact = ContactUtil.createContactIdFromTrustedData(contact);
             }
             mDirection = Direction.valueOf(cursor.getInt(cursor
-                    .getColumnIndexOrThrow(ImageSharingLog.DIRECTION)));
-            mFileName = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILENAME));
-            mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.MIME_TYPE));
-            mFileSize = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.FILESIZE));
-            mFile = Uri.parse(cursor.getString(cursor.getColumnIndexOrThrow(ImageSharingLog.FILE)));
-            mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingLog.TIMESTAMP));
+                    .getColumnIndexOrThrow(ImageSharingData.KEY_DIRECTION)));
+            mFileName = cursor.getString(cursor
+                    .getColumnIndexOrThrow(ImageSharingData.KEY_FILENAME));
+            mMimeType = cursor.getString(cursor
+                    .getColumnIndexOrThrow(ImageSharingData.KEY_MIME_TYPE));
+            mFileSize = cursor.getLong(cursor.getColumnIndexOrThrow(ImageSharingData.KEY_FILESIZE));
+            mFile = Uri.parse(cursor.getString(cursor
+                    .getColumnIndexOrThrow(ImageSharingData.KEY_FILE)));
+            mTimestamp = cursor.getLong(cursor
+                    .getColumnIndexOrThrow(ImageSharingData.KEY_TIMESTAMP));
         } finally {
             if (cursor != null) {
                 cursor.close();

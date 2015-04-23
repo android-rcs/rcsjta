@@ -16,11 +16,11 @@
 
 package com.gsma.services.rcs.chat;
 
-import com.gsma.services.rcs.GroupDeliveryInfo;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.GroupChat.ParticipantStatus;
 import com.gsma.services.rcs.contact.ContactId;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfo;
 
 import android.os.RemoteException;
 import android.util.Log;
@@ -30,7 +30,7 @@ import java.util.List;
 
 /**
  * Group chat event listener implementation
- * 
+ *
  * @hide
  */
 public class GroupChatListenerImpl extends IGroupChatListener.Stub {

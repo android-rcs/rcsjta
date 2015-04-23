@@ -94,15 +94,16 @@ public class FileTransferProvider extends ContentProvider {
      * Strings to restrict projection for exposed URI to a set of columns
      */
     private static final String[] RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS = new String[] {
-            FileTransferData.KEY_BASECOLUMN_ID, FileTransferLog.FT_ID, FileTransferLog.CHAT_ID,
-            FileTransferLog.CONTACT, FileTransferLog.FILE, FileTransferLog.FILENAME,
-            FileTransferLog.MIME_TYPE, FileTransferLog.FILEICON,
-            FileTransferLog.FILEICON_MIME_TYPE, FileTransferLog.DIRECTION,
-            FileTransferLog.FILESIZE, FileTransferLog.TRANSFERRED, FileTransferLog.TIMESTAMP,
-            FileTransferLog.TIMESTAMP_SENT, FileTransferLog.TIMESTAMP_DELIVERED,
-            FileTransferLog.TIMESTAMP_DISPLAYED, FileTransferLog.STATE,
-            FileTransferLog.REASON_CODE, FileTransferLog.READ_STATUS,
-            FileTransferLog.FILE_EXPIRATION, FileTransferLog.FILEICON_EXPIRATION
+            FileTransferData.KEY_BASECOLUMN_ID, FileTransferData.KEY_FT_ID,
+            FileTransferData.KEY_CHAT_ID, FileTransferData.KEY_CONTACT, FileTransferData.KEY_FILE,
+            FileTransferData.KEY_FILENAME, FileTransferData.KEY_MIME_TYPE,
+            FileTransferData.KEY_FILEICON, FileTransferData.KEY_FILEICON_MIME_TYPE,
+            FileTransferData.KEY_DIRECTION, FileTransferData.KEY_FILESIZE,
+            FileTransferData.KEY_TRANSFERRED, FileTransferData.KEY_TIMESTAMP,
+            FileTransferData.KEY_TIMESTAMP_SENT, FileTransferData.KEY_TIMESTAMP_DELIVERED,
+            FileTransferData.KEY_TIMESTAMP_DISPLAYED, FileTransferData.KEY_STATE,
+            FileTransferData.KEY_REASON_CODE, FileTransferData.KEY_READ_STATUS,
+            FileTransferData.KEY_FILE_EXPIRATION, FileTransferData.KEY_FILEICON_EXPIRATION
     };
 
     /**
@@ -135,7 +136,7 @@ public class FileTransferProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append("(")
+            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append('(')
                     .append(FileTransferData.KEY_FT_ID).append(" TEXT NOT NULL PRIMARY KEY,")
                     .append(FileTransferData.KEY_BASECOLUMN_ID).append(" INTEGER NOT NULL,")
                     .append(FileTransferData.KEY_CONTACT).append(" TEXT,")
@@ -162,18 +163,18 @@ public class FileTransferProvider extends ContentProvider {
                     .append(FileTransferData.KEY_REMOTE_SIP_ID).append(" TEXT)").toString());
             db.execSQL(new StringBuilder("CREATE INDEX ")
                     .append(FileTransferData.KEY_BASECOLUMN_ID).append("_idx").append(" ON ")
-                    .append(TABLE).append("(").append(FileTransferData.KEY_BASECOLUMN_ID)
-                    .append(")").toString());
+                    .append(TABLE).append('(').append(FileTransferData.KEY_BASECOLUMN_ID)
+                    .append(')').toString());
             db.execSQL(new StringBuilder("CREATE INDEX ").append(FileTransferData.KEY_CHAT_ID)
-                    .append("_idx").append(" ON ").append(TABLE).append("(")
-                    .append(FileTransferData.KEY_CHAT_ID).append(")").toString());
+                    .append("_idx").append(" ON ").append(TABLE).append('(')
+                    .append(FileTransferData.KEY_CHAT_ID).append(')').toString());
             db.execSQL(new StringBuilder("CREATE INDEX ").append(FileTransferData.KEY_TIMESTAMP)
-                    .append("_idx").append(" ON ").append(TABLE).append("(")
-                    .append(FileTransferData.KEY_TIMESTAMP).append(")").toString());
+                    .append("_idx").append(" ON ").append(TABLE).append('(')
+                    .append(FileTransferData.KEY_TIMESTAMP).append(')').toString());
             db.execSQL(new StringBuilder("CREATE INDEX ")
                     .append(FileTransferData.KEY_TIMESTAMP_SENT).append("_idx").append(" ON ")
-                    .append(TABLE).append("(").append(FileTransferData.KEY_TIMESTAMP_SENT)
-                    .append(")").toString());
+                    .append(TABLE).append('(').append(FileTransferData.KEY_TIMESTAMP_SENT)
+                    .append(')').toString());
         }
 
         @Override
@@ -190,7 +191,7 @@ public class FileTransferProvider extends ContentProvider {
             return SELECTION_WITH_FT_ID_ONLY;
         }
         return new StringBuilder("(").append(SELECTION_WITH_FT_ID_ONLY).append(") AND (")
-                .append(selection).append(")").toString();
+                .append(selection).append(')').toString();
     }
 
     private String[] getSelectionArgsWithFtId(String[] selectionArgs, String ftId) {
@@ -247,20 +248,25 @@ public class FileTransferProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
             String sort) {
         Cursor cursor = null;
-        Uri notificationUri = FileTransferLog.CONTENT_URI;
         try {
             switch (sUriMatcher.match(uri)) {
                 case UriType.InternalFileTransfer.FILE_TRANSFER_WITH_ID:
                     String ftId = uri.getLastPathSegment();
                     selection = getSelectionWithFtId(selection);
                     selectionArgs = getSelectionArgsWithFtId(selectionArgs, ftId);
-                    notificationUri = Uri.withAppendedPath(notificationUri, ftId);
-                    /* Intentional fall through */
-                case UriType.InternalFileTransfer.FILE_TRANSFER:
                     SQLiteDatabase db = mOpenHelper.getReadableDatabase();
                     cursor = db
                             .query(TABLE, projection, selection, selectionArgs, null, null, sort);
-                    cursor.setNotificationUri(getContext().getContentResolver(), notificationUri);
+                    cursor.setNotificationUri(getContext().getContentResolver(),
+                            Uri.withAppendedPath(FileTransferLog.CONTENT_URI, ftId));
+                    return cursor;
+
+                case UriType.InternalFileTransfer.FILE_TRANSFER:
+                    db = mOpenHelper.getReadableDatabase();
+                    cursor = db
+                            .query(TABLE, projection, selection, selectionArgs, null, null, sort);
+                    cursor.setNotificationUri(getContext().getContentResolver(),
+                            FileTransferLog.CONTENT_URI);
                     return cursor;
 
                 case UriType.FileTransfer.FILE_TRANSFER_WITH_ID:
@@ -311,7 +317,7 @@ public class FileTransferProvider extends ContentProvider {
                 /* Intentional fall through */
             case UriType.FileTransfer.FILE_TRANSFER:
                 throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
-                        .append(uri).append(") supports read only access.").toString());
+                        .append(uri).append(") supports read only access!").toString());
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
@@ -327,11 +333,12 @@ public class FileTransferProvider extends ContentProvider {
             case UriType.InternalFileTransfer.FILE_TRANSFER_WITH_ID:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 String ftId = initialValues.getAsString(FileTransferData.KEY_FT_ID);
-                initialValues.put(FileTransferLog.BASECOLUMN_ID, HistoryMemberBaseIdCreator
+                initialValues.put(FileTransferData.KEY_BASECOLUMN_ID, HistoryMemberBaseIdCreator
                         .createUniqueId(getContext(), FileTransferData.HISTORYLOG_MEMBER_ID));
                 if (db.insert(TABLE, null, initialValues) == INVALID_ROW_ID) {
-                    throw new ServerApiPersistentStorageException(
-                            "Unable to insert row for URI ".concat(uri.toString()));
+                    throw new ServerApiPersistentStorageException(new StringBuilder(
+                            "Unable to insert row for URI ").append(uri.toString()).append('!')
+                            .toString());
                 }
                 Uri notificationUri = Uri.withAppendedPath(FileTransferLog.CONTENT_URI, ftId);
                 getContext().getContentResolver().notifyChange(notificationUri, null);
@@ -341,7 +348,7 @@ public class FileTransferProvider extends ContentProvider {
                 /* Intentional fall through */
             case UriType.FileTransfer.FILE_TRANSFER:
                 throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
-                        .append(uri).append(") supports read only access.").toString());
+                        .append(uri).append(") supports read only access!").toString());
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
@@ -371,7 +378,7 @@ public class FileTransferProvider extends ContentProvider {
                 /* Intentional fall through */
             case UriType.FileTransfer.FILE_TRANSFER:
                 throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
-                        .append(uri).append(") supports read only access.").toString());
+                        .append(uri).append(") supports read only access!").toString());
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")

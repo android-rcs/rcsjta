@@ -14,9 +14,8 @@
  * the License.
  */
 
-package com.gsma.rcs.core.ims.service.im.chat;
+package com.gsma.rcs.provider.messaging;
 
-import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
@@ -92,27 +91,27 @@ public class ChatMessagePersistedStorageAccessor {
         Cursor cursor = null;
         try {
             cursor = mMessagingLog.getCacheableChatMessageData(mId);
-            String contact = cursor.getString(cursor.getColumnIndexOrThrow(Message.CONTACT));
+            String contact = cursor.getString(cursor.getColumnIndexOrThrow(MessageData.KEY_CONTACT));
             if (contact != null) {
                 /* Do not check validity for trusted data */
                 mRemoteContact = ContactUtil.createContactIdFromTrustedData(contact);
             }
             mDirection = Direction.valueOf(cursor.getInt(cursor
                     .getColumnIndexOrThrow(Message.DIRECTION)));
-            mContent = cursor.getString(cursor.getColumnIndexOrThrow(Message.CONTENT));
-            mChatId = cursor.getString(cursor.getColumnIndexOrThrow(Message.CHAT_ID));
-            mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(Message.MIME_TYPE));
+            mContent = cursor.getString(cursor.getColumnIndexOrThrow(MessageData.KEY_CONTENT));
+            mChatId = cursor.getString(cursor.getColumnIndexOrThrow(MessageData.KEY_CHAT_ID));
+            mMimeType = cursor.getString(cursor.getColumnIndexOrThrow(MessageData.KEY_MIME_TYPE));
             if (!mRead) {
                 mRead = ReadStatus.READ.toInt() == cursor.getInt(cursor
-                        .getColumnIndexOrThrow(Message.READ_STATUS));
+                        .getColumnIndexOrThrow(MessageData.KEY_READ_STATUS));
             }
             if (mTimestampDelivered <= 0) {
                 mTimestampDelivered = cursor.getLong(cursor
-                        .getColumnIndexOrThrow(Message.TIMESTAMP_DELIVERED));
+                        .getColumnIndexOrThrow(MessageData.KEY_TIMESTAMP_DELIVERED));
             }
             if (mTimestampDisplayed <= 0) {
                 mTimestampDisplayed = cursor.getLong(cursor
-                        .getColumnIndexOrThrow(Message.TIMESTAMP_DISPLAYED));
+                        .getColumnIndexOrThrow(MessageData.KEY_TIMESTAMP_DISPLAYED));
             }
         } finally {
             if (cursor != null) {

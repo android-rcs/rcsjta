@@ -16,30 +16,31 @@
 
 package com.gsma.rcs.provider.messaging;
 
-import com.gsma.services.rcs.GroupDeliveryInfo;
+import com.gsma.services.rcs.groupdelivery.GroupDeliveryInfoLog;
 
 import android.net.Uri;
 
 /**
  * Delivery info data constants
  */
-public class GroupDeliveryInfoData {
+/* package private */class GroupDeliveryInfoData {
 
-    public static final Uri CONTENT_URI = GroupDeliveryInfo.CONTENT_URI;
+    /* package private */static final Uri CONTENT_URI = Uri
+            .parse("content://com.gsma.rcs.groupdeliveryinfo/groupdeliveryinfo");
 
-    public static final String KEY_DELIVERY_STATUS = GroupDeliveryInfo.STATUS;
+    /* package private */static final String KEY_STATUS = GroupDeliveryInfoLog.STATUS;
 
-    public static final String KEY_BASECOLUMN_ID = GroupDeliveryInfo.BASECOLUMN_ID;
+    /* package private */static final String KEY_BASECOLUMN_ID = GroupDeliveryInfoLog.BASECOLUMN_ID;
 
-    public static final String KEY_REASON_CODE = GroupDeliveryInfo.REASON_CODE;
+    /* package private */static final String KEY_REASON_CODE = GroupDeliveryInfoLog.REASON_CODE;
 
-    public static final String KEY_ID = GroupDeliveryInfo.ID;
+    /* package private */static final String KEY_ID = GroupDeliveryInfoLog.ID;
 
-    public static final String KEY_CHAT_ID = GroupDeliveryInfo.CHAT_ID;
+    /* package private */static final String KEY_CHAT_ID = GroupDeliveryInfoLog.CHAT_ID;
 
-    public static final String KEY_CONTACT = GroupDeliveryInfo.CONTACT;
+    /* package private */static final String KEY_CONTACT = GroupDeliveryInfoLog.CONTACT;
 
-    public static final String KEY_TIMESTAMP_DELIVERED = GroupDeliveryInfo.TIMESTAMP_DELIVERED;
+    /* package private */static final String KEY_TIMESTAMP_DELIVERED = GroupDeliveryInfoLog.TIMESTAMP_DELIVERED;
 
-    public static final String KEY_TIMESTAMP_DISPLAYED = GroupDeliveryInfo.TIMESTAMP_DISPLAYED;
+    /* package private */static final String KEY_TIMESTAMP_DISPLAYED = GroupDeliveryInfoLog.TIMESTAMP_DISPLAYED;
 }

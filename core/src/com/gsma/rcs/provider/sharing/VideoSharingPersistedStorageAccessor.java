@@ -14,17 +14,15 @@
  * the License.
  */
 
-package com.gsma.rcs.core.ims.service.richcall.video;
+package com.gsma.rcs.provider.sharing;
 
 import com.gsma.rcs.core.content.VideoContent;
-import com.gsma.rcs.provider.sharing.RichCallHistory;
 import com.gsma.rcs.utils.ContactUtil;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.sharing.video.VideoDescriptor;
 import com.gsma.services.rcs.sharing.video.VideoSharing.ReasonCode;
 import com.gsma.services.rcs.sharing.video.VideoSharing.State;
-import com.gsma.services.rcs.sharing.video.VideoSharingLog;
 
 import android.database.Cursor;
 import android.net.Uri;
@@ -89,19 +87,20 @@ public class VideoSharingPersistedStorageAccessor {
         Cursor cursor = null;
         try {
             cursor = mRichCallLog.getCacheableVideoSharingData(mSharingId);
-            String contact = cursor
-                    .getString(cursor.getColumnIndexOrThrow(VideoSharingLog.CONTACT));
+            String contact = cursor.getString(cursor
+                    .getColumnIndexOrThrow(VideoSharingData.KEY_CONTACT));
             if (contact != null) {
                 mContact = ContactUtil.createContactIdFromTrustedData(contact);
             }
             mDirection = Direction.valueOf(cursor.getInt(cursor
-                    .getColumnIndexOrThrow(VideoSharingLog.DIRECTION)));
+                    .getColumnIndexOrThrow(VideoSharingData.KEY_DIRECTION)));
             mVideoEncoding = cursor.getString(cursor
-                    .getColumnIndexOrThrow(VideoSharingLog.VIDEO_ENCODING));
-            int width = cursor.getInt(cursor.getColumnIndexOrThrow(VideoSharingLog.WIDTH));
-            int height = cursor.getInt(cursor.getColumnIndexOrThrow(VideoSharingLog.HEIGHT));
+                    .getColumnIndexOrThrow(VideoSharingData.KEY_VIDEO_ENCODING));
+            int width = cursor.getInt(cursor.getColumnIndexOrThrow(VideoSharingData.KEY_WIDTH));
+            int height = cursor.getInt(cursor.getColumnIndexOrThrow(VideoSharingData.KEY_HEIGHT));
             mVideoDescriptor = new VideoDescriptor(width, height);
-            mTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(VideoSharingLog.TIMESTAMP));
+            mTimestamp = cursor.getLong(cursor
+                    .getColumnIndexOrThrow(VideoSharingData.KEY_TIMESTAMP));
         } finally {
             if (cursor != null) {
                 cursor.close();

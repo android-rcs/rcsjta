@@ -104,10 +104,10 @@ public class ContactProvider extends ContentProvider {
      */
     private static final String[] RESTRICTED_PROJECTION_FOR_EXTERNALLY_DEFINED_COLUMNS = new String[] {
             ContactData.KEY_BASECOLUMN_ID, ContactData.KEY_CONTACT,
-            ContactData.KEY_CAPABILITY_IMAGE_SHARING, ContactData.KEY_CAPABILITY_VIDEO_SHARING,
+            ContactData.KEY_CAPABILITY_IMAGE_SHARE, ContactData.KEY_CAPABILITY_VIDEO_SHARE,
             ContactData.KEY_CAPABILITY_IM_SESSION, ContactData.KEY_CAPABILITY_FILE_TRANSFER,
-            ContactData.KEY_CAPABILITY_GEOLOCATION_PUSH, ContactData.KEY_CAPABILITY_EXTENSIONS,
-            ContactData.KEY_AUTOMATA, ContactData.KEY_CAPABILITY_TIME_LAST_REFRESH
+            ContactData.KEY_CAPABILITY_GEOLOC_PUSH, ContactData.KEY_CAPABILITY_EXTENSIONS,
+            ContactData.KEY_AUTOMATA, ContactData.KEY_CAPABILITY_TIMESTAMP_LAST_RESPONSE
     };
 
     /**
@@ -115,14 +115,14 @@ public class ContactProvider extends ContentProvider {
      */
     private static final String[] COLUMNS_HIDDEN_FOR_EXTERNAL_ACCESS = new String[] {
             ContactData.KEY_DISPLAY_NAME, ContactData.KEY_PRESENCE_SHARING_STATUS,
-            ContactData.KEY_TIMESTAMP, ContactData.KEY_RCS_STATUS,
+            ContactData.KEY_TIMESTAMP_CONTACT_UPDATED, ContactData.KEY_RCS_STATUS,
             ContactData.KEY_REGISTRATION_STATE, ContactData.KEY_RCS_STATUS_TIMESTAMP,
             ContactData.KEY_PRESENCE_FREE_TEXT, ContactData.KEY_PRESENCE_WEBLINK_NAME,
             ContactData.KEY_PRESENCE_WEBLINK_URL, ContactData.KEY_PRESENCE_PHOTO_EXIST_FLAG,
             ContactData.KEY_PRESENCE_PHOTO_ETAG, ContactData.KEY_PRESENCE_PHOTO_DATA,
             ContactData.KEY_PRESENCE_GEOLOC_EXIST_FLAG, ContactData.KEY_PRESENCE_GEOLOC_LATITUDE,
             ContactData.KEY_PRESENCE_GEOLOC_LONGITUDE, ContactData.KEY_PRESENCE_GEOLOC_ALTITUDE,
-            ContactData.KEY_PRESENCE_TIMESTAMP, ContactData.KEY_CAPABILITY_TIME_LAST_RQST,
+            ContactData.KEY_PRESENCE_TIMESTAMP, ContactData.KEY_CAPABILITY_TIMESTAMP_LAST_REQUEST,
             ContactData.KEY_CAPABILITY_CS_VIDEO, ContactData.KEY_CAPABILITY_PRESENCE_DISCOVERY,
             ContactData.KEY_CAPABILITY_SOCIAL_PRESENCE,
             ContactData.KEY_CAPABILITY_FILE_TRANSFER_HTTP,
@@ -136,9 +136,9 @@ public class ContactProvider extends ContentProvider {
             Arrays.asList(COLUMNS_HIDDEN_FOR_EXTERNAL_ACCESS));
 
     private static final String RESTRICTED_SELECTION_QUERY_FOR_EXTERNALLY_DEFINED_COLUMNS = new StringBuilder(
-            "(" + ContactData.KEY_RCS_STATUS).append("!=").append(RcsStatus.NO_INFO.toInt())
-            .append(") AND (").append(ContactData.KEY_RCS_STATUS).append("!=")
-            .append(RcsStatus.NOT_RCS.toInt()).append(")").toString();
+            "(").append(ContactData.KEY_RCS_STATUS).append("<>").append(RcsStatus.NO_INFO.toInt())
+            .append(") AND (").append(ContactData.KEY_RCS_STATUS).append("<>")
+            .append(RcsStatus.NOT_RCS.toInt()).append(')').toString();
 
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
@@ -185,18 +185,18 @@ public class ContactProvider extends ContentProvider {
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
 
-        private static final int DATABASE_VERSION = 27;
+        private static final int DATABASE_VERSION = 28;
 
         private void createDb(SQLiteDatabase db) {
             db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(CAPABILITY_TABLE)
-                    .append("(").append(ContactData.KEY_CONTACT).append(" TEXT PRIMARY KEY,")
-                    .append(ContactData.KEY_BASECOLUMN_ID).append(" INTEGER NOT NULL,")
-                    .append(ContactData.KEY_DISPLAY_NAME).append(" TEXT,")
-                    .append(ContactData.KEY_RCS_STATUS).append(" TEXT,")
-                    .append(ContactData.KEY_RCS_STATUS_TIMESTAMP).append(" INTEGER,")
-                    .append(ContactData.KEY_REGISTRATION_STATE).append(" INTEGER,")
-                    .append(ContactData.KEY_PRESENCE_SHARING_STATUS).append(" TEXT,")
-                    .append(ContactData.KEY_PRESENCE_FREE_TEXT).append(" TEXT,")
+                    .append('(').append(ContactData.KEY_CONTACT)
+                    .append(" TEXT NOT NULL PRIMARY KEY,").append(ContactData.KEY_BASECOLUMN_ID)
+                    .append(" INTEGER NOT NULL,").append(ContactData.KEY_DISPLAY_NAME)
+                    .append(" TEXT,").append(ContactData.KEY_RCS_STATUS)
+                    .append(" INTEGER NOT NULL,").append(ContactData.KEY_RCS_STATUS_TIMESTAMP)
+                    .append(" INTEGER NOT NULL,").append(ContactData.KEY_REGISTRATION_STATE)
+                    .append(" INTEGER NOT NULL,").append(ContactData.KEY_PRESENCE_SHARING_STATUS)
+                    .append(" TEXT,").append(ContactData.KEY_PRESENCE_FREE_TEXT).append(" TEXT,")
                     .append(ContactData.KEY_PRESENCE_WEBLINK_NAME).append(" TEXT,")
                     .append(ContactData.KEY_PRESENCE_WEBLINK_URL).append(" TEXT,")
                     .append(ContactData.KEY_PRESENCE_PHOTO_EXIST_FLAG).append(" TEXT,")
@@ -206,34 +206,39 @@ public class ContactProvider extends ContentProvider {
                     .append(ContactData.KEY_PRESENCE_GEOLOC_LATITUDE).append(" REAL,")
                     .append(ContactData.KEY_PRESENCE_GEOLOC_LONGITUDE).append(" REAL,")
                     .append(ContactData.KEY_PRESENCE_GEOLOC_ALTITUDE).append(" REAL,")
-                    .append(ContactData.KEY_PRESENCE_TIMESTAMP).append(" INTEGER,")
-                    .append(ContactData.KEY_CAPABILITY_TIME_LAST_RQST).append(" INTEGER,")
-                    .append(ContactData.KEY_CAPABILITY_CS_VIDEO).append(" INTEGER,")
-                    .append(ContactData.KEY_CAPABILITY_IMAGE_SHARING).append(" INTEGER,")
-                    .append(ContactData.KEY_CAPABILITY_VIDEO_SHARING).append(" INTEGER,")
-                    .append(ContactData.KEY_CAPABILITY_IM_SESSION).append(" INTEGER,")
-                    .append(ContactData.KEY_CAPABILITY_FILE_TRANSFER).append(" INTEGER,")
-                    .append(ContactData.KEY_CAPABILITY_PRESENCE_DISCOVERY).append(" INTEGER,")
-                    .append(ContactData.KEY_CAPABILITY_SOCIAL_PRESENCE).append(" INTEGER,")
-                    .append(ContactData.KEY_CAPABILITY_GEOLOCATION_PUSH).append(" INTEGER,")
-                    .append(ContactData.KEY_CAPABILITY_FILE_TRANSFER_HTTP).append(" INTEGER,")
-                    .append(ContactData.KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL).append(" INTEGER,")
-                    .append(ContactData.KEY_CAPABILITY_IP_VOICE_CALL).append(" INTEGER,")
-                    .append(ContactData.KEY_CAPABILITY_IP_VIDEO_CALL).append(" INTEGER,")
-                    .append(ContactData.KEY_CAPABILITY_FILE_TRANSFER_SF).append(" INTEGER,")
-                    .append(ContactData.KEY_CAPABILITY_GROUP_CHAT_SF).append(" INTEGER,")
-                    .append(ContactData.KEY_CAPABILITY_EXTENSIONS).append(" TEXT,")
-                    .append(ContactData.KEY_BLOCKED).append(" INTEGER,")
-                    .append(ContactData.KEY_BLOCKING_TIMESTAMP).append(" INTEGER,")
-                    .append(ContactData.KEY_TIMESTAMP).append(" INTEGER,")
-                    .append(ContactData.KEY_AUTOMATA).append(" TEXT,")
-                    .append(ContactData.KEY_CAPABILITY_TIME_LAST_REFRESH).append(" INTEGER)")
-                    .toString());
+                    .append(ContactData.KEY_PRESENCE_TIMESTAMP).append(" INTEGER NOT NULL,")
+                    .append(ContactData.KEY_CAPABILITY_TIMESTAMP_LAST_REQUEST)
+                    .append(" INTEGER NOT NULL,").append(ContactData.KEY_CAPABILITY_CS_VIDEO)
+                    .append(" INTEGER NOT NULL,").append(ContactData.KEY_CAPABILITY_IMAGE_SHARE)
+                    .append(" INTEGER NOT NULL,").append(ContactData.KEY_CAPABILITY_VIDEO_SHARE)
+                    .append(" INTEGER NOT NULL,").append(ContactData.KEY_CAPABILITY_IM_SESSION)
+                    .append(" INTEGER NOT NULL,").append(ContactData.KEY_CAPABILITY_FILE_TRANSFER)
+                    .append(" INTEGER NOT NULL,")
+                    .append(ContactData.KEY_CAPABILITY_PRESENCE_DISCOVERY)
+                    .append(" INTEGER NOT NULL,")
+                    .append(ContactData.KEY_CAPABILITY_SOCIAL_PRESENCE)
+                    .append(" INTEGER NOT NULL,").append(ContactData.KEY_CAPABILITY_GEOLOC_PUSH)
+                    .append(" INTEGER NOT NULL,")
+                    .append(ContactData.KEY_CAPABILITY_FILE_TRANSFER_HTTP)
+                    .append(" INTEGER NOT NULL,")
+                    .append(ContactData.KEY_CAPABILITY_FILE_TRANSFER_THUMBNAIL)
+                    .append(" INTEGER NOT NULL,").append(ContactData.KEY_CAPABILITY_IP_VOICE_CALL)
+                    .append(" INTEGER NOT NULL,").append(ContactData.KEY_CAPABILITY_IP_VIDEO_CALL)
+                    .append(" INTEGER NOT NULL,")
+                    .append(ContactData.KEY_CAPABILITY_FILE_TRANSFER_SF)
+                    .append(" INTEGER NOT NULL,").append(ContactData.KEY_CAPABILITY_GROUP_CHAT_SF)
+                    .append(" INTEGER NOT NULL,").append(ContactData.KEY_CAPABILITY_EXTENSIONS)
+                    .append(" TEXT,").append(ContactData.KEY_BLOCKED).append(" INTEGER NOT NULL,")
+                    .append(ContactData.KEY_BLOCKING_TIMESTAMP).append(" INTEGER NOT NULL,")
+                    .append(ContactData.KEY_TIMESTAMP_CONTACT_UPDATED).append(" INTEGER NOT NULL,")
+                    .append(ContactData.KEY_AUTOMATA).append(" INTEGER NOT NULL,")
+                    .append(ContactData.KEY_CAPABILITY_TIMESTAMP_LAST_RESPONSE)
+                    .append(" INTEGER NOT NULL)").toString());
             db.execSQL(new StringBuilder("CREATE INDEX ").append(ContactData.KEY_BASECOLUMN_ID)
-                    .append("_idx").append(" ON ").append(CAPABILITY_TABLE).append("(")
-                    .append(ContactData.KEY_BASECOLUMN_ID).append(")").toString());
+                    .append("_idx").append(" ON ").append(CAPABILITY_TABLE).append('(')
+                    .append(ContactData.KEY_BASECOLUMN_ID).append(')').toString());
             db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(AGGREGATION_TABLE)
-                    .append("(").append(AggregationData.KEY_ID)
+                    .append('(').append(AggregationData.KEY_ID)
                     .append(" INTEGER PRIMARY KEY AUTOINCREMENT,")
                     .append(AggregationData.KEY_RCS_NUMBER).append(" TEXT NOT NULL,")
                     .append(AggregationData.KEY_RAW_CONTACT_ID).append(" INTEGER NOT NULL,")
@@ -265,7 +270,7 @@ public class ContactProvider extends ContentProvider {
             return RCS_CONTACT_SELECTION_WITH_CONTACT_ONLY;
         }
         return new StringBuilder("(").append(RCS_CONTACT_SELECTION_WITH_CONTACT_ONLY)
-                .append(") AND (").append(selection).append(")").toString();
+                .append(") AND (").append(selection).append(')').toString();
     }
 
     private String[] getSelectionArgsWithContact(String[] selectionArgs, String contact) {
@@ -283,7 +288,7 @@ public class ContactProvider extends ContentProvider {
             return AGGREGATION_DATA_SELECTION_WITH_ID_ONLY;
         }
         return new StringBuilder("(").append(AGGREGATION_DATA_SELECTION_WITH_ID_ONLY)
-                .append(") AND (").append(selection).append(")").toString();
+                .append(") AND (").append(selection).append(')').toString();
     }
 
     private String[] getSelectionArgsWithAggregationId(String[] selectionArgs,
@@ -303,7 +308,7 @@ public class ContactProvider extends ContentProvider {
         }
         return new StringBuilder("(")
                 .append(RESTRICTED_SELECTION_QUERY_FOR_EXTERNALLY_DEFINED_COLUMNS)
-                .append(") AND (").append(selection).append(")").toString();
+                .append(") AND (").append(selection).append(')').toString();
     }
 
     private String[] restrictProjectionToExternallyDefinedColumns(String[] projection)
@@ -388,8 +393,9 @@ public class ContactProvider extends ContentProvider {
                 initialValues.put(ContactData.KEY_BASECOLUMN_ID, ContentProviderBaseIdCreator
                         .createUniqueId(getContext(), ContactData.CONTENT_URI));
                 if (db.insert(CAPABILITY_TABLE, null, initialValues) == INVALID_ROW_ID) {
-                    throw new ServerApiPersistentStorageException(
-                            "Unable to insert row for URI ".concat(uri.toString()));
+                    throw new ServerApiPersistentStorageException(new StringBuilder(
+                            "Unable to insert row for URI ").append(uri.toString()).append('!')
+                            .toString());
                 }
                 if (!initialValues.containsKey(ContactData.KEY_PRESENCE_PHOTO_DATA)) {
                     try {
@@ -420,7 +426,7 @@ public class ContactProvider extends ContentProvider {
                 /* Intentional fall through */
             case UriType.Contacts.CONTACTS:
                 throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
-                        .append(uri).append(") supports read only access.").toString());
+                        .append(uri).append(") supports read only access!").toString());
 
             case UriType.Aggregation.AGGREGATION:
                 /* Intentional fall through */
@@ -441,34 +447,32 @@ public class ContactProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
             String sort) {
         Cursor cursor = null;
-        Uri notificationUri = CapabilitiesLog.CONTENT_URI;
         try {
             switch (sUriMatcher.match(uri)) {
                 case UriType.InternalContacts.INTERNAL_CONTACTS_WITH_ID:
                     String contact = uri.getLastPathSegment();
                     selection = getSelectionWithContact(selection);
                     selectionArgs = getSelectionArgsWithContact(selectionArgs, contact);
-                    notificationUri = Uri.withAppendedPath(notificationUri, contact);
-                    /* Intentional fall through */
-                case UriType.InternalContacts.INTERNAL_CONTACTS:
                     SQLiteDatabase db = mOpenHelper.getReadableDatabase();
                     cursor = db.query(CAPABILITY_TABLE, projection, selection, selectionArgs, null,
                             null, sort);
-                    cursor.setNotificationUri(getContext().getContentResolver(), notificationUri);
+                    cursor.setNotificationUri(getContext().getContentResolver(),
+                            Uri.withAppendedPath(CapabilitiesLog.CONTENT_URI, contact));
+                    return cursor;
+
+                case UriType.InternalContacts.INTERNAL_CONTACTS:
+                    db = mOpenHelper.getReadableDatabase();
+                    cursor = db.query(CAPABILITY_TABLE, projection, selection, selectionArgs, null,
+                            null, sort);
+                    cursor.setNotificationUri(getContext().getContentResolver(),
+                            CapabilitiesLog.CONTENT_URI);
                     return cursor;
 
                 case UriType.Contacts.CONTACTS_WITH_ID:
-                    /* Limited access with exposed URI */
                     contact = uri.getLastPathSegment();
                     selection = getSelectionWithContact(selection);
                     selectionArgs = getSelectionArgsWithContact(selectionArgs, contact);
-                    db = mOpenHelper.getReadableDatabase();
-                    cursor = db.query(CAPABILITY_TABLE,
-                            restrictProjectionToExternallyDefinedColumns(projection), selection,
-                            selectionArgs, null, null, sort);
-                    cursor.setNotificationUri(getContext().getContentResolver(), uri);
-                    return cursor;
-
+                    /* Intentional fall through */
                 case UriType.Contacts.CONTACTS:
                     /* Limited access with exposed URI */
                     db = mOpenHelper.getReadableDatabase();
@@ -506,19 +510,25 @@ public class ContactProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        Uri notificationUri = CapabilitiesLog.CONTENT_URI;
         switch (sUriMatcher.match(uri)) {
             case UriType.InternalContacts.INTERNAL_CONTACTS_WITH_ID:
                 String contact = uri.getLastPathSegment();
                 selection = getSelectionWithContact(selection);
                 selectionArgs = getSelectionArgsWithContact(selectionArgs, contact);
-                notificationUri = Uri.withAppendedPath(notificationUri, contact);
-                /* Intentional fall through */
-            case UriType.InternalContacts.INTERNAL_CONTACTS:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.update(CAPABILITY_TABLE, values, selection, selectionArgs);
                 if (count > 0) {
-                    getContext().getContentResolver().notifyChange(notificationUri, null);
+                    getContext().getContentResolver().notifyChange(
+                            Uri.withAppendedPath(CapabilitiesLog.CONTENT_URI, contact), null);
+                }
+                return count;
+
+            case UriType.InternalContacts.INTERNAL_CONTACTS:
+                db = mOpenHelper.getWritableDatabase();
+                count = db.update(CAPABILITY_TABLE, values, selection, selectionArgs);
+                if (count > 0) {
+                    getContext().getContentResolver().notifyChange(CapabilitiesLog.CONTENT_URI,
+                            null);
                 }
                 return count;
 
@@ -526,7 +536,7 @@ public class ContactProvider extends ContentProvider {
                 /* Intentional fall through */
             case UriType.Contacts.CONTACTS:
                 throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
-                        .append(uri).append(") supports read only access.").toString());
+                        .append(uri).append(") supports read only access!").toString());
 
             case UriType.Aggregation.AGGREGATION_WITH_ID:
                 String aggregationDataid = uri.getLastPathSegment();
@@ -549,19 +559,25 @@ public class ContactProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        Uri notificationUri = CapabilitiesLog.CONTENT_URI;
         switch (sUriMatcher.match(uri)) {
             case UriType.InternalContacts.INTERNAL_CONTACTS_WITH_ID:
                 String contact = uri.getLastPathSegment();
                 selection = getSelectionWithContact(selection);
                 selectionArgs = getSelectionArgsWithContact(selectionArgs, contact);
-                notificationUri = Uri.withAppendedPath(notificationUri, contact);
-                /* Intentional fall through */
-            case UriType.InternalContacts.INTERNAL_CONTACTS:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.delete(CAPABILITY_TABLE, selection, selectionArgs);
                 if (count > 0) {
-                    getContext().getContentResolver().notifyChange(notificationUri, null);
+                    getContext().getContentResolver().notifyChange(
+                            Uri.withAppendedPath(CapabilitiesLog.CONTENT_URI, contact), null);
+                }
+                return count;
+
+            case UriType.InternalContacts.INTERNAL_CONTACTS:
+                db = mOpenHelper.getWritableDatabase();
+                count = db.delete(CAPABILITY_TABLE, selection, selectionArgs);
+                if (count > 0) {
+                    getContext().getContentResolver().notifyChange(CapabilitiesLog.CONTENT_URI,
+                            null);
                 }
                 return count;
 
@@ -569,7 +585,7 @@ public class ContactProvider extends ContentProvider {
                 /* Intentional fall through */
             case UriType.Contacts.CONTACTS:
                 throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
-                        .append(uri).append(") supports read only access.").toString());
+                        .append(uri).append(") supports read only access!").toString());
 
             case UriType.Aggregation.AGGREGATION_WITH_ID:
                 String aggregationDataId = uri.getLastPathSegment();

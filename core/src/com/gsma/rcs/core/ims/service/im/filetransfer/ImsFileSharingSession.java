@@ -34,11 +34,11 @@ import com.gsma.rcs.core.ims.service.ImsSessionListener;
 import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
 import com.gsma.rcs.core.ims.service.im.chat.ChatUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
+import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
-import com.gsma.services.rcs.filetransfer.FileTransferLog;
 
 import android.net.Uri;
 
@@ -220,12 +220,12 @@ public abstract class ImsFileSharingSession extends FileSharingSession {
 
     @Override
     public long getFileExpiration() {
-        return FileTransferLog.UNKNOWN_EXPIRATION;
+        return FileTransferData.UNKNOWN_EXPIRATION;
     }
 
     @Override
     public long getIconExpiration() {
-        return FileTransferLog.UNKNOWN_EXPIRATION;
+        return FileTransferData.UNKNOWN_EXPIRATION;
     }
 
 }

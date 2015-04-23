@@ -21,7 +21,6 @@ import com.gsma.rcs.core.ims.service.im.chat.ChatSession;
 import com.gsma.rcs.provider.DeleteTask;
 import com.gsma.rcs.provider.LocalContentResolver;
 import com.gsma.rcs.service.api.ChatServiceImpl;
-import com.gsma.services.rcs.chat.ChatLog;
 import com.gsma.services.rcs.contact.ContactId;
 
 import java.util.Set;
@@ -29,7 +28,7 @@ import java.util.Set;
 public class OneToOneChatMessageDeleteTask extends DeleteTask.GroupedByContactId {
 
     private static final String SELECTION_ONETOONE_CHATMESSAGES = new StringBuilder(
-            ChatLog.Message.CHAT_ID).append("=").append(ChatLog.Message.CONTACT).toString();
+            MessageData.KEY_CHAT_ID).append("=").append(MessageData.KEY_CONTACT).toString();
 
     private final ChatServiceImpl mChatService;
 
@@ -45,8 +44,8 @@ public class OneToOneChatMessageDeleteTask extends DeleteTask.GroupedByContactId
      */
     public OneToOneChatMessageDeleteTask(ChatServiceImpl chatService,
             InstantMessagingService imService, LocalContentResolver contentResolver, Object imsLock) {
-        super(contentResolver, imsLock, ChatLog.Message.CONTENT_URI, ChatLog.Message.MESSAGE_ID,
-                ChatLog.Message.CONTACT, SELECTION_ONETOONE_CHATMESSAGES);
+        super(contentResolver, imsLock, MessageData.CONTENT_URI, MessageData.KEY_MESSAGE_ID,
+                MessageData.KEY_CONTACT, SELECTION_ONETOONE_CHATMESSAGES);
         mChatService = chatService;
         mImService = imService;
         setAllAtOnce(true);
@@ -64,8 +63,8 @@ public class OneToOneChatMessageDeleteTask extends DeleteTask.GroupedByContactId
     public OneToOneChatMessageDeleteTask(ChatServiceImpl chatService,
             InstantMessagingService imService, LocalContentResolver contentResolver,
             Object imsLock, String messageId) {
-        super(contentResolver, imsLock, ChatLog.Message.CONTENT_URI, ChatLog.Message.MESSAGE_ID,
-                ChatLog.Message.CONTACT, null, messageId);
+        super(contentResolver, imsLock, MessageData.CONTENT_URI, MessageData.KEY_MESSAGE_ID,
+                MessageData.KEY_CONTACT, null, messageId);
         mChatService = chatService;
         mImService = imService;
     }
@@ -82,8 +81,8 @@ public class OneToOneChatMessageDeleteTask extends DeleteTask.GroupedByContactId
     public OneToOneChatMessageDeleteTask(ChatServiceImpl chatService,
             InstantMessagingService imService, LocalContentResolver contentResolver,
             Object imsLock, ContactId contact) {
-        super(contentResolver, imsLock, ChatLog.Message.CONTENT_URI, ChatLog.Message.MESSAGE_ID,
-                ChatLog.Message.CONTACT, contact);
+        super(contentResolver, imsLock, MessageData.CONTENT_URI, MessageData.KEY_MESSAGE_ID,
+                MessageData.KEY_CONTACT, contact);
         mChatService = chatService;
         mImService = imService;
         setAllAtOnce(true);

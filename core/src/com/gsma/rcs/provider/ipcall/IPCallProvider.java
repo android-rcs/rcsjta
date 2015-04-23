@@ -55,17 +55,29 @@ public class IPCallProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher;
     static {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+        sUriMatcher.addURI(IPCallData.CONTENT_URI.getAuthority(), IPCallData.CONTENT_URI.getPath()
+                .substring(1), UriType.InternalIPCall.IPCALL);
+        sUriMatcher.addURI(IPCallData.CONTENT_URI.getAuthority(), IPCallData.CONTENT_URI.getPath()
+                .substring(1).concat("/*"), UriType.InternalIPCall.IPCALL_WITH_CALLID);
         sUriMatcher.addURI(IPCallLog.CONTENT_URI.getAuthority(), IPCallLog.CONTENT_URI.getPath()
-                .substring(1), UriType.IPCALL);
+                .substring(1), UriType.IPCall.IPCALL);
         sUriMatcher.addURI(IPCallLog.CONTENT_URI.getAuthority(), IPCallLog.CONTENT_URI.getPath()
-                .substring(1).concat("/*"), UriType.IPCALL_WITH_CALLID);
+                .substring(1).concat("/*"), UriType.IPCall.IPCALL_WITH_CALLID);
     }
 
     private static final class UriType {
 
-        private static final int IPCALL = 1;
+        private static final class IPCall {
+            private static final int IPCALL = 1;
 
-        private static final int IPCALL_WITH_CALLID = 2;
+            private static final int IPCALL_WITH_CALLID = 2;
+        }
+
+        private static final class InternalIPCall {
+            private static final int IPCALL = 3;
+
+            private static final int IPCALL_WITH_CALLID = 4;
+        }
     }
 
     private static final class CursorType {
@@ -84,7 +96,7 @@ public class IPCallProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append("(")
+            db.execSQL(new StringBuilder("CREATE TABLE IF NOT EXISTS ").append(TABLE).append('(')
                     .append(IPCallData.KEY_CALL_ID).append(" TEXT NOT NULL PRIMARY KEY,")
                     .append(IPCallData.KEY_BASECOLUMN_ID).append(" INTEGER NOT NULL,")
                     .append(IPCallData.KEY_CONTACT).append(" TEXT NOT NULL,")
@@ -97,14 +109,14 @@ public class IPCallProvider extends ContentProvider {
                     .append(IPCallData.KEY_WIDTH).append(" INTEGER NOT NULL,")
                     .append(IPCallData.KEY_HEIGHT).append(" INTEGER NOT NULL)").toString());
             db.execSQL(new StringBuilder("CREATE INDEX ").append(IPCallData.KEY_CONTACT)
-                    .append("_idx").append(" ON ").append(TABLE).append("(")
-                    .append(IPCallData.KEY_CONTACT).append(")").toString());
+                    .append("_idx").append(" ON ").append(TABLE).append('(')
+                    .append(IPCallData.KEY_CONTACT).append(')').toString());
             db.execSQL(new StringBuilder("CREATE INDEX ").append(IPCallData.KEY_BASECOLUMN_ID)
-                    .append("_idx").append(" ON ").append(TABLE).append("(")
-                    .append(IPCallData.KEY_BASECOLUMN_ID).append(")").toString());
+                    .append("_idx").append(" ON ").append(TABLE).append('(')
+                    .append(IPCallData.KEY_BASECOLUMN_ID).append(')').toString());
             db.execSQL(new StringBuilder("CREATE INDEX ").append(IPCallData.KEY_TIMESTAMP)
-                    .append("_idx").append(" ON ").append(TABLE).append("(")
-                    .append(IPCallData.KEY_TIMESTAMP).append(")").toString());
+                    .append("_idx").append(" ON ").append(TABLE).append('(')
+                    .append(IPCallData.KEY_TIMESTAMP).append(')').toString());
         }
 
         @Override
@@ -121,7 +133,7 @@ public class IPCallProvider extends ContentProvider {
             return SELECTION_WITH_CALLID_ONLY;
         }
         return new StringBuilder("(").append(SELECTION_WITH_CALLID_ONLY).append(") AND (")
-                .append(selection).append(")").toString();
+                .append(selection).append(')').toString();
     }
 
     private String[] getSelectionArgsWithCallId(String[] selectionArgs, String callId) {
@@ -143,10 +155,14 @@ public class IPCallProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
         switch (sUriMatcher.match(uri)) {
-            case UriType.IPCALL:
+            case UriType.InternalIPCall.IPCALL:
+                /* Intentional fall through */
+            case UriType.IPCall.IPCALL:
                 return CursorType.TYPE_DIRECTORY;
 
-            case UriType.IPCALL_WITH_CALLID:
+            case UriType.InternalIPCall.IPCALL_WITH_CALLID:
+                /* Intentional fall through */
+            case UriType.IPCall.IPCALL_WITH_CALLID:
                 return CursorType.TYPE_ITEM;
 
             default:
@@ -161,13 +177,32 @@ public class IPCallProvider extends ContentProvider {
         Cursor cursor = null;
         try {
             switch (sUriMatcher.match(uri)) {
-                case UriType.IPCALL_WITH_CALLID:
+                case UriType.InternalIPCall.IPCALL_WITH_CALLID:
                     String callId = uri.getLastPathSegment();
                     selection = getSelectionWithCallId(selection);
                     selectionArgs = getSelectionArgsWithCallId(selectionArgs, callId);
-                    /* Intentional fall through */
-                case UriType.IPCALL:
                     SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+                    cursor = db
+                            .query(TABLE, projection, selection, selectionArgs, null, null, sort);
+                    cursor.setNotificationUri(getContext().getContentResolver(),
+                            Uri.withAppendedPath(IPCallLog.CONTENT_URI, callId));
+                    return cursor;
+
+                case UriType.InternalIPCall.IPCALL:
+                    db = mOpenHelper.getReadableDatabase();
+                    cursor = db
+                            .query(TABLE, projection, selection, selectionArgs, null, null, sort);
+                    cursor.setNotificationUri(getContext().getContentResolver(),
+                            IPCallLog.CONTENT_URI);
+                    return cursor;
+
+                case UriType.IPCall.IPCALL_WITH_CALLID:
+                    callId = uri.getLastPathSegment();
+                    selection = getSelectionWithCallId(selection);
+                    selectionArgs = getSelectionArgsWithCallId(selectionArgs, callId);
+                    /* Intentional fall through */
+                case UriType.IPCall.IPCALL:
+                    db = mOpenHelper.getReadableDatabase();
                     cursor = db
                             .query(TABLE, projection, selection, selectionArgs, null, null, sort);
                     cursor.setNotificationUri(getContext().getContentResolver(), uri);
@@ -187,19 +222,27 @@ public class IPCallProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        Uri notificationUri = IPCallLog.CONTENT_URI;
         switch (sUriMatcher.match(uri)) {
-            case UriType.IPCALL_WITH_CALLID:
+            case UriType.InternalIPCall.IPCALL_WITH_CALLID:
                 String callId = uri.getLastPathSegment();
                 selection = getSelectionWithCallId(selection);
                 selectionArgs = getSelectionArgsWithCallId(selectionArgs, callId);
+                notificationUri = Uri.withAppendedPath(notificationUri, callId);
                 /* Intentional fall through */
-            case UriType.IPCALL:
+            case UriType.InternalIPCall.IPCALL:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.update(TABLE, values, selection, selectionArgs);
                 if (count > 0) {
-                    getContext().getContentResolver().notifyChange(uri, null);
+                    getContext().getContentResolver().notifyChange(notificationUri, null);
                 }
                 return count;
+
+            case UriType.IPCall.IPCALL_WITH_CALLID:
+                /* Intentional fall through */
+            case UriType.IPCall.IPCALL:
+                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
+                        .append(uri).append(") supports read only access!").toString());
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
@@ -210,20 +253,27 @@ public class IPCallProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues initialValues) {
         switch (sUriMatcher.match(uri)) {
-            case UriType.IPCALL:
+            case UriType.InternalIPCall.IPCALL:
                 /* Intentional fall through */
-            case UriType.IPCALL_WITH_CALLID:
+            case UriType.InternalIPCall.IPCALL_WITH_CALLID:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 String callId = initialValues.getAsString(IPCallData.KEY_CALL_ID);
                 initialValues.put(IPCallData.KEY_BASECOLUMN_ID, ContentProviderBaseIdCreator
-                        .createUniqueId(getContext(), IPCallLog.CONTENT_URI));
+                        .createUniqueId(getContext(), IPCallData.CONTENT_URI));
                 if (db.insert(TABLE, null, initialValues) == INVALID_ROW_ID) {
-                    throw new ServerApiPersistentStorageException(
-                            "Unable to insert row for URI ".concat(uri.toString()));
+                    throw new ServerApiPersistentStorageException(new StringBuilder(
+                            "Unable to insert row for URI ").append(uri.toString()).append('!')
+                            .toString());
                 }
                 Uri notificationUri = Uri.withAppendedPath(IPCallLog.CONTENT_URI, callId);
                 getContext().getContentResolver().notifyChange(notificationUri, null);
                 return notificationUri;
+
+            case UriType.IPCall.IPCALL:
+                /* Intentional fall through */
+            case UriType.IPCall.IPCALL_WITH_CALLID:
+                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
+                        .append(uri).append(") supports read only access!").toString());
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
@@ -233,19 +283,27 @@ public class IPCallProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
+        Uri notificationUri = IPCallLog.CONTENT_URI;
         switch (sUriMatcher.match(uri)) {
-            case UriType.IPCALL_WITH_CALLID:
+            case UriType.InternalIPCall.IPCALL_WITH_CALLID:
                 String callId = uri.getLastPathSegment();
                 selection = getSelectionWithCallId(selection);
                 selectionArgs = getSelectionArgsWithCallId(selectionArgs, callId);
+                notificationUri = Uri.withAppendedPath(notificationUri, callId);
                 /* Intentional fall through */
-            case UriType.IPCALL:
+            case UriType.InternalIPCall.IPCALL:
                 SQLiteDatabase db = mOpenHelper.getWritableDatabase();
                 int count = db.delete(TABLE, selection, selectionArgs);
                 if (count > 0) {
-                    getContext().getContentResolver().notifyChange(uri, null);
+                    getContext().getContentResolver().notifyChange(notificationUri, null);
                 }
                 return count;
+
+            case UriType.IPCall.IPCALL_WITH_CALLID:
+                /* Intentional fall through */
+            case UriType.IPCall.IPCALL:
+                throw new UnsupportedOperationException(new StringBuilder("This provider (URI=")
+                        .append(uri).append(") supports read only access!").toString());
 
             default:
                 throw new IllegalArgumentException(new StringBuilder("Unsupported URI ")
