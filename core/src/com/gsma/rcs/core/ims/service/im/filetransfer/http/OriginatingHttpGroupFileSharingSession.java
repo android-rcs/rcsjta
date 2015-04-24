@@ -155,18 +155,27 @@ public class OriginatingHttpGroupFileSharingSession extends HttpFileTransferSess
      * Send the file transfer information
      */
     private void sendFileTransferInfo() {
-        String mime = CpimMessage.MIME_TYPE;
         String from = ImsModule.IMS_USER_PROFILE.getPublicAddress();
-        String to = ChatUtils.ANOMYNOUS_URI;
-        // Note: FileTransferId is always generated to equal the associated msgId of a FileTransfer
-        // invitation message.
-        String msgId = getFileTransferId();
+        String networkContent;
 
-        String content = ChatUtils.buildCpimMessageWithImdn(from, to, msgId, mFileInfo,
-                FileTransferHttpInfoDocument.MIME_TYPE, mTimestampSent);
+        if (getImdnManager().isImdnActivated() && !mRcsSettings.isAlbatrosRelease()) {
+            String msgId = getFileTransferId();
 
-        mChatSession.sendDataChunks(IdGenerator.generateMessageID(), content, mime,
-                TypeMsrpChunk.FileSharing);
+            if (mRcsSettings.isRequestGroupChatDisplayReportsEnabled()) {
+                networkContent = ChatUtils.buildCpimMessageWithImdn(from, ChatUtils.ANOMYNOUS_URI,
+                        msgId, mFileInfo, CpimMessage.MIME_TYPE, mTimestampSent);
+            } else {
+                networkContent = ChatUtils.buildCpimMessageWithoutDisplayedImdn(from,
+                        ChatUtils.ANOMYNOUS_URI, msgId, mFileInfo, CpimMessage.MIME_TYPE,
+                        mTimestampSent);
+            }
+        } else {
+            networkContent = ChatUtils.buildCpimMessage(from, ChatUtils.ANOMYNOUS_URI, mFileInfo,
+                    CpimMessage.MIME_TYPE, mTimestampSent);
+        }
+
+        mChatSession.sendDataChunks(IdGenerator.generateMessageID(), networkContent,
+                CpimMessage.MIME_TYPE, TypeMsrpChunk.FileSharing);
     }
 
     /**

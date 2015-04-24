@@ -139,9 +139,8 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                 // File transfered
                 handleFileTransfered();
 
-                // Send delivery report "displayed"
-                // According to BB PDD section 6.1.4 there should be no display for GC messages.
-                if (!mGroupFileTransfer) {
+                // TODO: Should also consider a "send display reports for groups"-setting
+                if (getImdnManager().isImdnActivated() && !mRcsSettings.isAlbatrosRelease()) {
                     sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
                             System.currentTimeMillis());
                 }
@@ -219,7 +218,7 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
             chatSession.sendMsrpMessageDeliveryStatus(contact, msgId, status, timestamp);
         } else {
             // Send message delivery status via a SIP MESSAGE
-            imService.getImdnManager().sendMessageDeliveryStatusImmediately(contact, msgId, status,
+            getImdnManager().sendMessageDeliveryStatusImmediately(contact, msgId, status,
                     mRemoteInstanceId, timestamp);
         }
     }
@@ -246,9 +245,11 @@ public abstract class TerminatingHttpFileSharingSession extends HttpFileTransfer
                     // File transfered
                     handleFileTransfered();
 
-                    // Send delivery report "displayed"
-                    sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
-                            System.currentTimeMillis());
+                    // TODO: Should also consider a "send display reports for groups"-setting
+                    if (getImdnManager().isImdnActivated() && !mRcsSettings.isAlbatrosRelease()) {
+                        sendDeliveryReport(ImdnDocument.DELIVERY_STATUS_DISPLAYED,
+                                System.currentTimeMillis());
+                    }
                 } else {
                     // Don't call handleError in case of Pause or Cancel
                     if (mDownloadManager.isCancelled() || mDownloadManager.isPaused()) {

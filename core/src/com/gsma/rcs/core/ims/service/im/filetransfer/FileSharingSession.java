@@ -26,6 +26,8 @@ import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceSession;
+import com.gsma.rcs.core.ims.service.im.InstantMessagingService;
+import com.gsma.rcs.core.ims.service.im.chat.imdn.ImdnManager;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.utils.StorageUtils;
@@ -243,6 +245,15 @@ public abstract class FileSharingSession extends ImsServiceSession {
             }
         }
         return null;
+    }
+
+    /**
+     * Returns the IMDN manager
+     * 
+     * @return IMDN manager
+     */
+    protected ImdnManager getImdnManager() {
+        return ((InstantMessagingService) getImsService()).getImdnManager();
     }
 
     @Override
