@@ -128,7 +128,7 @@ public class FileTransferProvider extends ContentProvider {
     public static final String DATABASE_NAME = "filetransfer.db";
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 15;
+        private static final int DATABASE_VERSION = 16;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -152,6 +152,8 @@ public class FileTransferProvider extends ContentProvider {
                     .append(FileTransferData.KEY_TIMESTAMP_SENT).append(" INTEGER NOT NULL,")
                     .append(FileTransferData.KEY_TIMESTAMP_DELIVERED).append(" INTEGER NOT NULL,")
                     .append(FileTransferData.KEY_TIMESTAMP_DISPLAYED).append(" INTEGER NOT NULL,")
+                    .append(FileTransferData.KEY_DELIVERY_EXPIRATION).append(" INTEGER NOT NULL,")
+                    .append(FileTransferData.KEY_EXPIRED_DELIVERY).append(" INTEGER NOT NULL,")
                     .append(FileTransferData.KEY_TRANSFERRED).append(" INTEGER NOT NULL,")
                     .append(FileTransferData.KEY_FILESIZE).append(" INTEGER NOT NULL,")
                     .append(FileTransferData.KEY_FILEICON).append(" TEXT,")

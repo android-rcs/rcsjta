@@ -50,6 +50,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.ImsFileSharingSession;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.NetworkRessourceManager;
 import com.gsma.rcs.utils.logger.Logger;
@@ -474,7 +475,8 @@ public class TerminatingMsrpFileSharingSession extends ImsFileSharingSession imp
             // Notify listeners
             for (ImsSessionListener listener : listeners) {
                 ((FileSharingSessionListener) listener).handleFileTransfered(file, contact,
-                        FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION);
+                        FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION,
+                        FileTransferProtocol.MSRP);
             }
         } catch (Exception e) {
             // Delete the temp file

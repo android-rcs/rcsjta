@@ -45,8 +45,10 @@ import com.gsma.rcs.provider.messaging.FileTransferPersistedStorageAccessor;
 import com.gsma.rcs.provider.messaging.FileTransferStateAndReasonCode;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.service.broadcaster.IOneToOneFileTransferBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer.ReasonCode;
@@ -83,6 +85,8 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
 
     private final MessagingLog mMessagingLog;
 
+    private final OneToOneUndeliveredImManager mUndeliveredManager;
+
     private final Object mLock = new Object();
 
     private static final Logger sLogger = Logger
@@ -102,12 +106,14 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
      * @param core Core
      * @param messagingLog
      * @param contactManager
+     * @param undeliveredManager
      */
     public OneToOneFileTransferImpl(String transferId,
             IOneToOneFileTransferBroadcaster broadcaster, InstantMessagingService imService,
             FileTransferPersistedStorageAccessor persistentStorage,
             FileTransferServiceImpl fileTransferService, RcsSettings rcsSettings, Core core,
-            MessagingLog messagingLog, ContactManager contactManager) {
+            MessagingLog messagingLog, ContactManager contactManager,
+            OneToOneUndeliveredImManager undeliveredManager) {
         mFileTransferId = transferId;
         mBroadcaster = broadcaster;
         mImService = imService;
@@ -117,6 +123,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
         mCore = core;
         mMessagingLog = messagingLog;
         mContactManager = contactManager;
+        mUndeliveredManager = undeliveredManager;
     }
 
     private State getRcsState(FileSharingSession session) {
@@ -1301,17 +1308,27 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
      * @param fileExpiration the time when file on the content server is no longer valid to download
      * @param fileIconExpiration the time when icon file on the content server is no longer valid to
      *            download
+     * @param ftProtocol
      */
     public void handleFileTransfered(MmContent content, ContactId contact, long fileExpiration,
-            long fileIconExpiration) {
+            long fileIconExpiration, FileTransferProtocol ftProtocol) {
         if (sLogger.isActivated()) {
             sLogger.info("Content transferred");
         }
 
         synchronized (mLock) {
             mFileTransferService.removeFileTransfer(mFileTransferId);
-
-            mPersistentStorage.setTransferred(content, fileExpiration, fileIconExpiration);
+            long deliveryExpiration = 0;
+            if (FileTransferProtocol.HTTP == ftProtocol && !mRcsSettings.isFtHttpCapAlwaysOn()) {
+                long timeout = mRcsSettings.getMsgDeliveryTimeoutPeriod();
+                if (timeout > 0) {
+                    deliveryExpiration = System.currentTimeMillis() + timeout;
+                    mUndeliveredManager.scheduleOneToOneFileTransferDeliveryTimeoutAlarm(contact,
+                            mFileTransferId, deliveryExpiration);
+                }
+            }
+            mPersistentStorage.setTransferred(content, fileExpiration, fileIconExpiration,
+                    deliveryExpiration);
 
             mBroadcaster.broadcastStateChanged(contact, mFileTransferId, State.TRANSFERRED,
                     ReasonCode.UNSPECIFIED);
@@ -1455,6 +1472,22 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             }
             return session.getIconExpiration();
 
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
+    }
+
+    @Override
+    public boolean isExpiredDelivery() throws RemoteException {
+        try {
+            return mPersistentStorage.isExpiredDelivery();
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
                 sLogger.error(ExceptionUtil.getFullStackTrace(e));

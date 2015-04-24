@@ -409,14 +409,6 @@ public interface CoreListener {
     public void tryToStartImServiceTasks(InstantMessagingService imService);
 
     /**
-     * Try to start ImService tasks once the IMS connection is re-established and the ImsServices
-     * are restarted
-     * 
-     * @param rcService
-     */
-    public void tryToStartRichcallServiceTasks(RichcallService rcService);
-
-    /**
      * Try to invite queued group chat participants
      * 
      * @param chatId
@@ -462,4 +454,18 @@ public interface CoreListener {
      * @param chatId
      */
     public void tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(String chatId);
+
+    /**
+     * Handle one-one chat messgae delivery expiration
+     * 
+     * @param intent
+     */
+    public void handleOneToOneChatMessageDeliveryExpiration(Intent intent);
+
+    /**
+     * Handle one-one file transfer delivery expiration
+     * 
+     * @param intent
+     */
+    public void handleOneToOneFileTransferDeliveryExpiration(Intent intent);
 }

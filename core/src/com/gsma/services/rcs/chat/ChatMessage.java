@@ -260,4 +260,23 @@ public class ChatMessage {
             throw new RcsGenericException(e);
         }
     }
+
+    /**
+     * Returns true if delivery for this chat message has expired or false otherwise. Note: false
+     * means either that delivery for this chat message has not yet expired, delivery has been
+     * successful, delivery expiration has been cleared (see clearMessageDeliveryExpiration) or that
+     * this particular chat message is not eligible for delivery expiration in the first place.
+     * 
+     * @return boolean
+     * @throws RcsServiceException
+     */
+    public boolean isExpiredDelivery() throws RcsServiceException {
+        try {
+            return mChatMessageInf.isExpiredDelivery();
+
+        } catch (Exception e) {
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsGenericException(e);
+        }
+    }
 }

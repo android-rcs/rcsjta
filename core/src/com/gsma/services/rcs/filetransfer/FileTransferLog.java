@@ -151,6 +151,14 @@ public class FileTransferLog {
     public static final String TIMESTAMP_DISPLAYED = "timestamp_displayed";
 
     /**
+     * If delivery has expired for this file. Values: 1 (true), 0 (false)
+     * <P>
+     * Type: INTEGER
+     * </P>
+     */
+    public static final String EXPIRED_DELIVERY = "expired_delivery";
+
+    /**
      * The name of the column containing the state of the transfer.
      * <P>
      * Type: INTEGER

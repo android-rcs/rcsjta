@@ -163,7 +163,7 @@ public class ChatProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 16;
+        private static final int DATABASE_VERSION = 17;
 
         public DatabaseHelper(Context ctx) {
             super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
@@ -205,7 +205,9 @@ public class ChatProvider extends ContentProvider {
                     .append(MessageData.KEY_TIMESTAMP).append(" INTEGER NOT NULL,")
                     .append(MessageData.KEY_TIMESTAMP_SENT).append(" INTEGER NOT NULL,")
                     .append(MessageData.KEY_TIMESTAMP_DELIVERED).append(" INTEGER NOT NULL,")
-                    .append(MessageData.KEY_TIMESTAMP_DISPLAYED).append(" INTEGER NOT NULL)")
+                    .append(MessageData.KEY_TIMESTAMP_DISPLAYED).append(" INTEGER NOT NULL,")
+                    .append(MessageData.KEY_DELIVERY_EXPIRATION).append(" INTEGER NOT NULL,")
+                    .append(MessageData.KEY_EXPIRED_DELIVERY).append(" INTEGER NOT NULL)")
                     .toString());
             db.execSQL(new StringBuilder("CREATE INDEX ").append(TABLE_MESSAGE).append('_')
                     .append(MessageData.KEY_BASECOLUMN_ID).append("_idx").append(" ON ")

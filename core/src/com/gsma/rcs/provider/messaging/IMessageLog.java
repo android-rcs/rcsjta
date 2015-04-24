@@ -23,7 +23,6 @@
 package com.gsma.rcs.provider.messaging;
 
 import com.gsma.rcs.core.ims.service.im.chat.ChatMessage;
-import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
@@ -31,6 +30,7 @@ import com.gsma.services.rcs.contact.ContactId;
 
 import android.database.Cursor;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -61,8 +61,10 @@ public interface IMessageLog {
      * @param msg Chat message
      * @param status Message status
      * @param reasonCode Status reason code
+     * @param deliveryExpiration TODO
      */
-    public void addOutgoingOneToOneChatMessage(ChatMessage msg, Status status, ReasonCode reasonCode);
+    public void addOutgoingOneToOneChatMessage(ChatMessage msg, Status status,
+            ReasonCode reasonCode, long deliveryExpiration);
 
     /**
      * Add an incoming group chat message
@@ -256,4 +258,36 @@ public interface IMessageLog {
      * @param timestampDisplayed Displayed time
      */
     void setChatMessageStatusDisplayed(String msgId, long timestampDisplayed);
+
+    /**
+     * Marks undelivered chat messages to indicate that messages have been processed.
+     * 
+     * @param msgIds
+     */
+    public void clearMessageDeliveryExpiration(List<String> msgIds);
+
+    /**
+     * Set message delivery expired for specified message id.
+     * 
+     * @param msgId
+     */
+    public void setChatMessageDeliveryExpired(String msgId);
+
+    /**
+     * Get one-one chat messages with unexpired delivery
+     * 
+     * @return Cursor
+     */
+    public Cursor getOneToOneChatMessagesWithUnexpiredDelivery();
+
+    /**
+     * Returns true if delivery for this chat message has expired or false otherwise. Note: false
+     * means either that delivery for this chat message has not yet expired, delivery has been
+     * successful, delivery expiration has been cleared (see clearMessageDeliveryExpiration) or that
+     * this particular chat message is not eligible for delivery expiration in the first place.
+     * 
+     * @param msgId
+     * @return boolean
+     */
+    public boolean isChatMessageExpiredDelivery(String msgId);
 }

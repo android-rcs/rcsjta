@@ -793,6 +793,7 @@ public class ProvisioningParser {
      */
     private void parseMessaging(Node node) {
         String ftHTTPCapAlwaysOn = null;
+        String deliveryTimeout = null;
         if (node == null) {
             return;
         }
@@ -805,6 +806,16 @@ public class ProvisioningParser {
                             TYPE_INT)) != null) {
                         mRcsSettings.writeBoolean(RcsSettingsData.FT_HTTP_CAP_ALWAYS_ON,
                                 !ftHTTPCapAlwaysOn.equals("0"));
+                        continue;
+                    }
+                }
+                if (deliveryTimeout == null) {
+                    if ((deliveryTimeout = getValueByParamName("deliveryTimeout", childnode,
+                            TYPE_INT)) != null) {
+                        long timeout = Long.parseLong(deliveryTimeout)
+                                * SECONDS_TO_MILILSECONDS_CONVERSION_RATE;
+                        mRcsSettings.writeLong(RcsSettingsData.MSG_DELIVERY_TIMEOUT, timeout);
+                        continue;
                     }
                 }
             } while ((childnode = childnode.getNextSibling()) != null);

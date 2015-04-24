@@ -53,6 +53,7 @@ import com.gsma.services.rcs.CommonServiceConfiguration.MessagingMode;
 import com.gsma.services.rcs.ICommonServiceConfiguration;
 import com.gsma.services.rcs.IRcsServiceRegistrationListener;
 import com.gsma.services.rcs.RcsService;
+import com.gsma.services.rcs.RcsServiceException;
 import com.gsma.services.rcs.RcsService.Build.VERSION_CODES;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsServiceRegistration;
@@ -107,6 +108,8 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
 
     private final ExecutorService mImOperationExecutor;
 
+    private final OneToOneUndeliveredImManager mOneToOneUndeliveredImManager;
+
     private final Map<String, IFileTransfer> mFileTransferCache = new HashMap<String, IFileTransfer>();
 
     /**
@@ -132,11 +135,12 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param core Core
      * @param mimoperationexecutor
      * @param mLocalContentResolver
+     * @param oneToOneUndeliveredImManager
      */
     public FileTransferServiceImpl(InstantMessagingService imService, MessagingLog messagingLog,
             RcsSettings rcsSettings, ContactManager contactManager, Core core,
             LocalContentResolver localContentResolver, ExecutorService imOperationExecutor,
-            Object imsLock) {
+            Object imsLock, OneToOneUndeliveredImManager oneToOneUndeliveredImManager) {
         if (sLogger.isActivated()) {
             sLogger.info("File transfer service API is loaded");
         }
@@ -148,6 +152,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         mLocalContentResolver = localContentResolver;
         mImOperationExecutor = imOperationExecutor;
         mImsLock = imsLock;
+        mOneToOneUndeliveredImManager = oneToOneUndeliveredImManager;
     }
 
     public void ensureThumbnailIsDeleted(String transferId) {
@@ -316,7 +321,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         } else {
             OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
                     fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
-                    this, mRcsSettings, mCore, mMessagingLog, mContactManager);
+                    this, mRcsSettings, mCore, mMessagingLog, mContactManager, mOneToOneUndeliveredImManager);
             session.addListener(oneToOneFileTransfer);
             addFileTransfer(oneToOneFileTransfer);
         }
@@ -383,6 +388,37 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 ReasonCode.UNSPECIFIED);
     }
 
+    private FileTransferProtocol getFileTransferProtocolForOneToOneFileTransfer(ContactId contact) {
+        Capabilities myCapabilities = mRcsSettings.getMyCapabilities();
+        Capabilities remoteCapabilities = mContactManager.getContactCapabilities(contact);
+        if (remoteCapabilities == null) {
+            return null;
+        }
+        boolean ftMsrpSupportedforSelf = myCapabilities.isFileTransferSupported();
+        boolean ftHttpSupportedforSelf = myCapabilities.isFileTransferHttpSupported();
+        boolean ftMsrpSupportedforRemote = remoteCapabilities.isFileTransferSupported();
+        boolean ftHttpSupportedforRemote = remoteCapabilities.isFileTransferHttpSupported();
+        if (ftMsrpSupportedforSelf && ftMsrpSupportedforRemote) {
+            if (ftHttpSupportedforSelf && ftHttpSupportedforRemote) {
+                return mRcsSettings.getFtProtocol();
+            } else {
+                return FileTransferProtocol.MSRP;
+            }
+        } else if (ftHttpSupportedforSelf && ftHttpSupportedforRemote) {
+            return FileTransferProtocol.HTTP;
+        } else {
+            if (sLogger.isActivated()) {
+                sLogger.debug(new StringBuilder(
+                        "There are are no available capabilities : FTMsrp(Self)")
+                        .append(ftMsrpSupportedforSelf).append(" FTHttp(Self)")
+                        .append(ftHttpSupportedforSelf).append(" FTMsrp(Remote)")
+                        .append(ftMsrpSupportedforSelf).append(" FTHttp(Remote)")
+                        .append(ftMsrpSupportedforRemote).toString());
+            }
+            return null;
+        }
+    }
+
     /**
      * 1-1 file send operation initiated
      *
@@ -410,16 +446,25 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                     timestamp, timestampSent);
             return new OneToOneFileTransferImpl(fileTransferId, mOneToOneFileTransferBroadcaster,
                     mImService, storageAccessor, this, mRcsSettings, mCore, mMessagingLog,
-                    mContactManager);
+                    mContactManager, mOneToOneUndeliveredImManager);
         }
+        FileTransferProtocol ftProtocol = getFileTransferProtocolForOneToOneFileTransfer(contact);
+        if (ftProtocol == null) {
+            /* Throw proper exception as part of CR037 */
+            throw new ServerApiGenericException(
+                    new StringBuilder(
+                            "No valid file transfer protocol could be determined for sending file with fileTransferId '")
+                            .append(fileTransferId).append("'!").toString());
+        }
+
         addOutgoingFileTransfer(fileTransferId, contact, file, fileIcon, State.INITIATING,
                 timestamp, timestampSent);
         final FileSharingSession session = mImService.initiateFileTransferSession(fileTransferId,
-                contact, file, fileIcon, timestamp, timestampSent);
+                contact, file, fileIcon, timestamp, timestampSent, ftProtocol);
 
         OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
                 fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
-                this, mRcsSettings, mCore, mMessagingLog, mContactManager);
+                this, mRcsSettings, mCore, mMessagingLog, mContactManager, mOneToOneUndeliveredImManager);
         session.addListener(oneToOneFileTransfer);
         addFileTransfer(oneToOneFileTransfer);
 
@@ -444,16 +489,24 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         long timestamp = System.currentTimeMillis();
         /* For outgoing file transfer, timestampSent = timestamp */
         long timestampSent = timestamp;
+        FileTransferProtocol ftProtocol = getFileTransferProtocolForOneToOneFileTransfer(contact);
+        if (ftProtocol == null) {
+            /* Throw proper exception as part of CR037 */
+            throw new ServerApiGenericException(
+                    new StringBuilder(
+                            "No valid file transfer protocol could be determined for dequeueing file with fileTransferId '")
+                            .append(fileTransferId).append("'!").toString());
+        }
         mMessagingLog.dequeueFileTransfer(fileTransferId, timestamp, timestampSent);
         mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
                 State.INITIATING, ReasonCode.UNSPECIFIED);
         final FileSharingSession session = mImService.initiateFileTransferSession(fileTransferId,
-                contact, file, fileIcon, timestamp, timestampSent);
+                contact, file, fileIcon, timestamp, timestampSent, ftProtocol);
 
         OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
                 fileTransferId, mOneToOneFileTransferBroadcaster, mImService,
                 new FileTransferPersistedStorageAccessor(fileTransferId, mMessagingLog), this,
-                mRcsSettings, mCore, mMessagingLog, mContactManager);
+                mRcsSettings, mCore, mMessagingLog, mContactManager, mOneToOneUndeliveredImManager);
         session.addListener(oneToOneFileTransfer);
         addFileTransfer(oneToOneFileTransfer);
         session.startSession();
@@ -496,16 +549,25 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 ReasonCode.UNSPECIFIED, timestamp, timestampSent);
         mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
                 State.INITIATING, ReasonCode.UNSPECIFIED);
+        FileTransferProtocol ftProtocol = getFileTransferProtocolForOneToOneFileTransfer(contact);
+        if (ftProtocol == null) {
+            /* Throw proper exception as part of CR037 */
+            throw new ServerApiGenericException(
+                    new StringBuilder(
+                            "No valid file transfer protocol could be determined for resending file with fileTransferId '")
+                            .append(fileTransferId).append("'!").toString());
+        }
 
         final FileSharingSession session = mImService.initiateFileTransferSession(fileTransferId,
-                contact, file, fileIcon, timestamp, timestampSent);
+                contact, file, fileIcon, timestamp, timestampSent, ftProtocol);
 
         FileTransferPersistedStorageAccessor storageAccessor = new FileTransferPersistedStorageAccessor(
                 fileTransferId, contact, Direction.OUTGOING, contact.toString(), file, fileIcon,
                 mMessagingLog);
         OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
                 fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
-                this, mRcsSettings, mCore, mMessagingLog, mContactManager);
+                this, mRcsSettings, mCore, mMessagingLog, mContactManager,
+                mOneToOneUndeliveredImManager);
         session.addListener(oneToOneFileTransfer);
         addFileTransfer(oneToOneFileTransfer);
 
@@ -538,28 +600,10 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                 }
                 return false;
             }
-            Capabilities myCapabilities = mRcsSettings.getMyCapabilities();
-            boolean ftMsrpSupportedforSelf = myCapabilities.isFileTransferSupported();
-            boolean ftHttpSupportedforSelf = myCapabilities.isFileTransferHttpSupported();
-            boolean ftMsrpSupportedforRemote = remoteCapabilities.isFileTransferSupported();
-            boolean ftHttpSupportedforRemote = remoteCapabilities.isFileTransferHttpSupported();
-            FileTransferProtocol protocol;
-            if (ftMsrpSupportedforSelf && ftMsrpSupportedforRemote) {
-                if (ftHttpSupportedforSelf && ftHttpSupportedforRemote) {
-                    protocol = mRcsSettings.getFtProtocol();
-                } else {
-                    protocol = FileTransferProtocol.MSRP;
-                }
-            } else if (ftHttpSupportedforSelf && ftHttpSupportedforRemote) {
-                protocol = FileTransferProtocol.HTTP;
-            } else {
+            FileTransferProtocol protocol = getFileTransferProtocolForOneToOneFileTransfer(contact);
+            if (protocol == null) {
                 if (sLogger.isActivated()) {
-                    sLogger.debug(new StringBuilder(
-                            "Cannot transfer file as there are no available capabilities : FTMsrp(Self)")
-                            .append(ftMsrpSupportedforSelf).append(" FTHttp(Self)")
-                            .append(ftHttpSupportedforSelf).append(" FTMsrp(Remote)")
-                            .append(ftMsrpSupportedforSelf).append(" FTHttp(Remote)")
-                            .append(ftMsrpSupportedforRemote).toString());
+                    sLogger.debug("Cannot transfer file as no valid file transfer protocol could be determined.");
                 }
                 return false;
             }
@@ -651,7 +695,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
                     fileIconContent, mMessagingLog);
             return new OneToOneFileTransferImpl(fileTransferId, mOneToOneFileTransferBroadcaster,
                     mImService, storageAccessor, this, mRcsSettings, mCore, mMessagingLog,
-                    mContactManager);
+                    mContactManager, mOneToOneUndeliveredImManager);
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -972,7 +1016,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
             }
             return new OneToOneFileTransferImpl(transferId, mOneToOneFileTransferBroadcaster,
                     mImService, storageAccessor, this, mRcsSettings, mCore, mMessagingLog,
-                    mContactManager);
+                    mContactManager, mOneToOneUndeliveredImManager);
 
         } catch (ServerApiBaseException e) {
             if (!e.shouldNotBeLogged()) {
@@ -1117,11 +1161,13 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         /* Note: File transfer ID always corresponds to message ID in the imdn pay-load */
         String fileTransferId = imdn.getMsgId();
         if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
+            mOneToOneUndeliveredImManager.cancelDeliveryTimeoutAlarm(fileTransferId);
             mMessagingLog.setFileTransferDelivered(fileTransferId, timestamp);
 
             mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
                     State.DELIVERED, ReasonCode.UNSPECIFIED);
         } else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
+            mOneToOneUndeliveredImManager.cancelDeliveryTimeoutAlarm(fileTransferId);
             mMessagingLog.setFileTransferDisplayed(fileTransferId, timestamp);
 
             mOneToOneFileTransferBroadcaster.broadcastStateChanged(contact, fileTransferId,
@@ -1258,7 +1304,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         } else {
             OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
                     fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
-                    this, mRcsSettings, mCore, mMessagingLog, mContactManager);
+                    this, mRcsSettings, mCore, mMessagingLog, mContactManager, mOneToOneUndeliveredImManager);
             session.addListener(oneToOneFileTransfer);
             addFileTransfer(oneToOneFileTransfer);
         }
@@ -1289,7 +1335,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
         } else {
             OneToOneFileTransferImpl oneToOneFileTransfer = new OneToOneFileTransferImpl(
                     fileTransferId, mOneToOneFileTransferBroadcaster, mImService, storageAccessor,
-                    this, mRcsSettings, mCore, mMessagingLog, mContactManager);
+                    this, mRcsSettings, mCore, mMessagingLog, mContactManager, mOneToOneUndeliveredImManager);
             session.addListener(oneToOneFileTransfer);
             addFileTransfer(oneToOneFileTransfer);
         }
@@ -1441,17 +1487,22 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
     }
 
     /**
-     * Marks undelivered file transfers to indicate that transfers have been processed.
-     *
+     * Disables and clears any delivery expiration for a set of file transfers regardless if the
+     * delivery of them has expired already or not.
+     * 
      * @param transferIds
      * @throws RemoteException
      */
-    public void markUndeliveredFileTransfersAsProcessed(List<String> transferIds)
+    public void clearFileTransferDeliveryExpiration(List<String> transferIds)
             throws RemoteException {
         if (transferIds == null || transferIds.isEmpty()) {
-            throw new ServerApiIllegalArgumentException("transferIds must not be null or empty!");
+            throw new ServerApiIllegalArgumentException(
+                    "transferId list must not be null or empty!");
         }
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+        for (String transferId : transferIds) {
+            mOneToOneUndeliveredImManager.cancelDeliveryTimeoutAlarm(transferId);
+        }
+        mMessagingLog.clearFileTransferDeliveryExpiration(transferIds);
     }
 
     /**

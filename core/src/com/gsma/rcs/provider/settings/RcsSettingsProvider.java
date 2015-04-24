@@ -76,7 +76,7 @@ public class RcsSettingsProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final int DATABASE_VERSION = 110;
+        private static final int DATABASE_VERSION = 111;
 
         /**
          * Add a parameter in the db
@@ -296,6 +296,8 @@ public class RcsSettingsProvider extends ContentProvider {
                     RcsSettingsData.DEFAULT_FT_CAPABILITY_ALWAYS_ON);
             addParameter(db, RcsSettingsData.FT_HTTP_CAP_ALWAYS_ON,
                     RcsSettingsData.DEFAULT_FT_HTTP_CAP_ALWAYS_ON);
+            addParameter(db, RcsSettingsData.MSG_DELIVERY_TIMEOUT,
+                    RcsSettingsData.DEFAULT_MSG_DELIVERY_TIMEOUT);
             addParameter(db, RcsSettingsData.MSG_CAP_VALIDITY_PERIOD,
                     RcsSettingsData.DEFAULT_MSG_CAP_VALIDITY_PERIOD);
             addParameter(db, RcsSettingsData.IM_USE_REPORTS, RcsSettingsData.DEFAULT_IM_USE_REPORTS);

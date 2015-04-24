@@ -24,6 +24,7 @@ package com.gsma.rcs.core.ims.service.im.filetransfer;
 
 import com.gsma.rcs.core.content.MmContent;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
+import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.services.rcs.contact.ContactId;
 
 /**
@@ -66,9 +67,10 @@ public interface FileSharingSessionListener extends ImsSessionListener {
      * @param fileExpiration the time when file on the content server is no longer valid to download
      * @param fileIconExpiration the time when file icon on the content server is no longer valid to
      *            download
+     * @param ftProtocol FileTransferProtocol
      */
     public void handleFileTransfered(MmContent content, ContactId contact, long fileExpiration,
-            long fileIconExpiration);
+            long fileIconExpiration, FileTransferProtocol ftProtocol);
 
     /**
      * File transfer has been paused by user

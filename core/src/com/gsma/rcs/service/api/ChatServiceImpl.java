@@ -102,6 +102,8 @@ public class ChatServiceImpl extends IChatService.Stub {
 
     private final ExecutorService mImOperationExecutor;
 
+    private final OneToOneUndeliveredImManager mOneToOneUndeliveredImManager;
+
     private final Map<ContactId, OneToOneChatImpl> mOneToOneChatCache = new HashMap<ContactId, OneToOneChatImpl>();
 
     private final Map<String, GroupChatImpl> mGroupChatCache = new HashMap<String, GroupChatImpl>();
@@ -132,11 +134,13 @@ public class ChatServiceImpl extends IChatService.Stub {
      * @param imOperationExecutor im operation ExecutorService
      * @param fileTransferService FileTransferServiceImpl
      * @param imsLock ims operations lock
+     * @param oneToOneUndeliveredImManager OneToOneUndeliveredImManager
      */
     public ChatServiceImpl(InstantMessagingService imService, MessagingLog messagingLog,
             RcsSettings rcsSettings, ContactManager contactManager, Core core,
             LocalContentResolver localContentResolver, ExecutorService imOperationExecutor,
-            Object imsLock, FileTransferServiceImpl fileTransferService) {
+            Object imsLock, FileTransferServiceImpl fileTransferService,
+            OneToOneUndeliveredImManager oneToOneUndeliveredImManager) {
         if (sLogger.isActivated()) {
             sLogger.info("Chat service API is loaded");
         }
@@ -149,6 +153,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         mImOperationExecutor = imOperationExecutor;
         mImsLock = imsLock;
         mFileTransferService = fileTransferService;
+        mOneToOneUndeliveredImManager = oneToOneUndeliveredImManager;
     }
 
     private ReasonCode imdnToFailedReasonCode(ImdnDocument imdn) {
@@ -380,6 +385,7 @@ public class ChatServiceImpl extends IChatService.Stub {
             }
 
         } else if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
+            mOneToOneUndeliveredImManager.cancelDeliveryTimeoutAlarm(msgId);
             synchronized (mLock) {
                 mMessagingLog.setChatMessageStatusDelivered(msgId, timestamp);
 
@@ -388,6 +394,7 @@ public class ChatServiceImpl extends IChatService.Stub {
             }
 
         } else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
+            mOneToOneUndeliveredImManager.cancelDeliveryTimeoutAlarm(msgId);
             synchronized (mLock) {
                 mMessagingLog.setChatMessageStatusDisplayed(msgId, timestamp);
 
@@ -430,7 +437,7 @@ public class ChatServiceImpl extends IChatService.Stub {
             return oneToOneChat;
         }
         return new OneToOneChatImpl(contact, mOneToOneChatEventBroadcaster, mImService,
-                mMessagingLog, mRcsSettings, this, mContactManager, mCore);
+                mMessagingLog, mRcsSettings, this, mContactManager, mCore, mOneToOneUndeliveredImManager);
     }
 
     /**
@@ -776,17 +783,21 @@ public class ChatServiceImpl extends IChatService.Stub {
     }
 
     /**
-     * Marks undelivered chat messages to indicate that messages have been processed.
+     * Disables and clears any delivery expiration for a set of chat messages regardless if the
+     * delivery of them has expired already or not.
      * 
      * @param msgIds
      * @throws RemoteException
      */
-    public void markUndeliveredMessagesAsProcessed(List<String> msgIds) throws RemoteException {
+    public void clearMessageDeliveryExpiration(List<String> msgIds) throws RemoteException {
         if (msgIds == null || msgIds.isEmpty()) {
             throw new ServerApiIllegalArgumentException(
-                    "Undelivered chat messageId's list must not be null or empty!");
+                    "Undelivered chat messageId list must not be null and empty!");
         }
-        throw new UnsupportedOperationException("This method has not been implemented yet!");
+        for (String msgId : msgIds) {
+            mOneToOneUndeliveredImManager.cancelDeliveryTimeoutAlarm(msgId);
+        }
+        mMessagingLog.clearMessageDeliveryExpiration(msgIds);
     }
 
     /**
@@ -986,7 +997,7 @@ public class ChatServiceImpl extends IChatService.Stub {
         ContactId contact = session.getRemoteContact();
         OneToOneChatImpl oneToOneChat = new OneToOneChatImpl(contact,
                 mOneToOneChatEventBroadcaster, mImService, mMessagingLog, mRcsSettings, this,
-                mContactManager, mCore);
+                mContactManager, mCore, mOneToOneUndeliveredImManager);
         session.addListener(oneToOneChat);
         addOneToOneChat(contact, oneToOneChat);
     }

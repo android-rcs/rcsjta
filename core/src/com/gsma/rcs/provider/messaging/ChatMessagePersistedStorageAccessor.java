@@ -208,4 +208,8 @@ public class ChatMessagePersistedStorageAccessor {
         }
         return mRead;
     }
+
+    public boolean isExpiredDelivery() {
+        return mMessagingLog.isChatMessageExpiredDelivery(mId);
+    }
 }

@@ -58,7 +58,7 @@ interface IFileTransferService {
 
 	void deleteFileTransfer(in String transferId);
 
-	void markUndeliveredFileTransfersAsProcessed(in List<String> transferIds);
+	void clearFileTransferDeliveryExpiration(in List<String> transferIds);
 	
 	ICommonServiceConfiguration getCommonConfiguration();
 }

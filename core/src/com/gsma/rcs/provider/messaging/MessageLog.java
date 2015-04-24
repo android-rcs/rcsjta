@@ -49,6 +49,7 @@ import android.net.Uri;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -90,6 +91,14 @@ public class MessageLog implements IMessageLog {
             MessageData.KEY_CHAT_ID).append("=? AND ").append(MessageData.KEY_STATUS).append("=")
             .append(Status.QUEUED.toInt()).toString();
 
+    private static final String SELECTION_BY_MULTIPLE_MSG_IDS = new StringBuilder(
+            MessageData.KEY_MESSAGE_ID).append(" IN(").append("=?)").toString();
+
+    private static final String SELECTION_ONETOONE_CHAT_MESSAGES_WITH_UNEXPIRED_DELIVERY = new StringBuilder(
+            MessageData.KEY_DELIVERY_EXPIRATION).append(">? AND ").append(MessageData.KEY_STATUS)
+            .append(" NOT IN(").append(Status.DELIVERED.toInt()).append(",")
+            .append(Status.DISPLAYED.toInt()).append(")").toString();
+    
     private static final String ORDER_BY_TIMESTAMP_ASC = MessageData.KEY_TIMESTAMP.concat(" ASC");
 
     /**
@@ -132,6 +141,8 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_TIMESTAMP_SENT, msg.getTimestampSent());
         values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
         values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
+        values.put(MessageData.KEY_DELIVERY_EXPIRATION, 0);
+        values.put(MessageData.KEY_EXPIRED_DELIVERY, 0);
 
         values.put(MessageData.KEY_STATUS, status.toInt());
         values.put(MessageData.KEY_REASON_CODE, reasonCode.toInt());
@@ -144,9 +155,11 @@ public class MessageLog implements IMessageLog {
      * @param msg Chat message
      * @param status Status
      * @param reasonCode Reason code
+     * @param deliveryExpiration
      */
     @Override
-    public void addOutgoingOneToOneChatMessage(ChatMessage msg, Status status, ReasonCode reasonCode) {
+    public void addOutgoingOneToOneChatMessage(ChatMessage msg, Status status,
+            ReasonCode reasonCode, long deliveryExpiration) {
         ContactId contact = msg.getRemoteContact();
         String msgId = msg.getMessageId();
         if (sLogger.isActivated()) {
@@ -168,7 +181,8 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_TIMESTAMP_SENT, msg.getTimestampSent());
         values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
         values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
-
+        values.put(MessageData.KEY_DELIVERY_EXPIRATION, deliveryExpiration);
+        values.put(MessageData.KEY_EXPIRED_DELIVERY, 0);
         values.put(MessageData.KEY_STATUS, status.toInt());
         values.put(MessageData.KEY_REASON_CODE, reasonCode.toInt());
         mLocalContentResolver.insert(MessageData.CONTENT_URI, values);
@@ -261,6 +275,8 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_TIMESTAMP_SENT, msg.getTimestampSent());
         values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
         values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
+        values.put(MessageData.KEY_DELIVERY_EXPIRATION, 0);
+        values.put(MessageData.KEY_EXPIRED_DELIVERY, 0);
         mLocalContentResolver.insert(MessageData.CONTENT_URI, values);
 
         if (direction == Direction.OUTGOING) {
@@ -328,6 +344,8 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_TIMESTAMP_SENT, timestamp);
         values.put(MessageData.KEY_TIMESTAMP_DELIVERED, 0);
         values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, 0);
+        values.put(MessageData.KEY_DELIVERY_EXPIRATION, 0);
+        values.put(MessageData.KEY_EXPIRED_DELIVERY, 0);
         mLocalContentResolver.insert(MessageData.CONTENT_URI, values);
         return messageId;
     }
@@ -606,6 +624,7 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_STATUS, Status.DELIVERED.toInt());
         values.put(MessageData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
         values.put(MessageData.KEY_TIMESTAMP_DELIVERED, timestampDelivered);
+        values.put(MessageData.KEY_EXPIRED_DELIVERY, 0);
 
         if (mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
                 values, null, null) < 1) {
@@ -623,10 +642,45 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_STATUS, Status.DISPLAYED.toInt());
         values.put(MessageData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
         values.put(MessageData.KEY_TIMESTAMP_DISPLAYED, timestampDisplayed);
+        values.put(MessageData.KEY_EXPIRED_DELIVERY, 0);
 
         if (mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
                 values, null, null) < 1) {
             sLogger.warn("There was no message with msgId '" + msgId + "' to set to displayed.");
         }
+    }
+
+    @Override
+    public void clearMessageDeliveryExpiration(List<String> msgIds) {
+        ContentValues values = new ContentValues();
+        String[] selectionArgs = new String[msgIds.size()];
+        selectionArgs = msgIds.toArray(selectionArgs);
+        values.put(MessageData.KEY_DELIVERY_EXPIRATION, 0);
+        values.put(MessageData.KEY_EXPIRED_DELIVERY, 0);
+        mLocalContentResolver.update(MessageData.CONTENT_URI, values, SELECTION_BY_MULTIPLE_MSG_IDS,
+                selectionArgs);
+    }
+
+    @Override
+    public void setChatMessageDeliveryExpired(String msgId) {
+        ContentValues values = new ContentValues();
+        values.put(MessageData.KEY_EXPIRED_DELIVERY, 1);
+        mLocalContentResolver.update(Uri.withAppendedPath(Message.CONTENT_URI, msgId), values,
+                null, null);
+    }
+
+    @Override
+    public Cursor getOneToOneChatMessagesWithUnexpiredDelivery() {
+        String[] selectionArgs = new String[] {
+            String.valueOf(System.currentTimeMillis())
+        };
+        return mLocalContentResolver.query(MessageData.CONTENT_URI, null,
+                SELECTION_ONETOONE_CHAT_MESSAGES_WITH_UNEXPIRED_DELIVERY, selectionArgs,
+                ORDER_BY_TIMESTAMP_ASC);
+    }
+
+    @Override
+    public boolean isChatMessageExpiredDelivery(String msgId) {
+        return getDataAsInt(getMessageData(MessageData.KEY_EXPIRED_DELIVERY, msgId)) == 1;
     }
 }

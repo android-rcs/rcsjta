@@ -84,6 +84,14 @@ public class FileTransferLog implements IFileTransferLog {
             .append(State.ACCEPTING.toInt()).append("','").append(State.INITIATING.toInt())
             .append("')").toString();
 
+    private static final String SELECTION_BY_MULTIPLE_FT_IDS = new StringBuilder(
+            FileTransferData.KEY_FT_ID).append(" IN(").append("=?)").toString();
+
+    private static final String SELECTION_ONETOONE_FILE_TRANSFERS_WITH_UNEXPIRED_DELIVERY = new StringBuilder(
+            FileTransferData.KEY_DELIVERY_EXPIRATION).append(">? AND ")
+            .append(FileTransferData.KEY_STATE).append(" NOT IN(").append(State.DELIVERED.toInt())
+            .append(",").append(State.DISPLAYED.toInt()).append(")").toString();
+
     private static final String ORDER_BY_TIMESTAMP_ASC = FileTransferData.KEY_TIMESTAMP
             .concat(" ASC");
 
@@ -154,6 +162,8 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_TIMESTAMP_SENT, timestampSent);
         values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, 0);
         values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, 0);
+        values.put(FileTransferData.KEY_DELIVERY_EXPIRATION, 0);
+        values.put(FileTransferData.KEY_EXPIRED_DELIVERY, 0);
         values.put(FileTransferData.KEY_FILE_EXPIRATION, fileExpiration);
         mLocalContentResolver.insert(FileTransferData.CONTENT_URI, values);
     }
@@ -182,6 +192,8 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_TIMESTAMP_SENT, timestampSent);
         values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, 0);
         values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, 0);
+        values.put(FileTransferData.KEY_DELIVERY_EXPIRATION, 0);
+        values.put(FileTransferData.KEY_EXPIRED_DELIVERY, 0);
         values.put(FileTransferData.KEY_STATE, state.toInt());
         values.put(FileTransferData.KEY_REASON_CODE, reasonCode.toInt());
         if (thumbnail != null) {
@@ -264,6 +276,8 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_TIMESTAMP_SENT, timestampSent);
         values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, 0);
         values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, 0);
+        values.put(FileTransferData.KEY_DELIVERY_EXPIRATION, 0);
+        values.put(FileTransferData.KEY_EXPIRED_DELIVERY, 0);
         if (fileIcon != null) {
             values.put(FileTransferData.KEY_FILEICON, fileIcon.getUri().toString());
             values.put(FileTransferData.KEY_FILEICON_MIME_TYPE, fileIcon.getEncoding());
@@ -290,8 +304,10 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_REASON_CODE, reasonCode.toInt());
         if (state == State.DELIVERED) {
             values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, System.currentTimeMillis());
+            values.put(FileTransferData.KEY_EXPIRED_DELIVERY, 0);
         } else if (state == State.DISPLAYED) {
             values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, System.currentTimeMillis());
+            values.put(FileTransferData.KEY_EXPIRED_DELIVERY, 0);
         }
         mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
@@ -328,7 +344,7 @@ public class FileTransferLog implements IFileTransferLog {
 
     @Override
     public void setFileTransferred(String fileTransferId, MmContent content, long fileExpiration,
-            long fileIconExpiration) {
+            long fileIconExpiration, long deliveryExpiration) {
         if (logger.isActivated()) {
             logger.debug(new StringBuilder("setFileTransferred (Id=").append(fileTransferId)
                     .append(") (uri=").append(content.getUri()).append(")").toString());
@@ -339,6 +355,7 @@ public class FileTransferLog implements IFileTransferLog {
         values.put(FileTransferData.KEY_TRANSFERRED, content.getSize());
         values.put(FileTransferData.KEY_FILE_EXPIRATION, fileExpiration);
         values.put(FileTransferData.KEY_FILEICON_EXPIRATION, fileIconExpiration);
+        values.put(FileTransferData.KEY_DELIVERY_EXPIRATION, deliveryExpiration);
         mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
                 null);
@@ -853,5 +870,40 @@ public class FileTransferLog implements IFileTransferLog {
         mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
                 null);
+    }
+
+    @Override
+    public void clearFileTransferDeliveryExpiration(List<String> fileTransferIds) {
+        ContentValues values = new ContentValues();
+        values.put(FileTransferData.KEY_EXPIRED_DELIVERY, 0);
+        String[] selectionArgs = new String[fileTransferIds.size()];
+        selectionArgs = fileTransferIds.toArray(selectionArgs);
+        mLocalContentResolver.update(FileTransferData.CONTENT_URI, values,
+                SELECTION_BY_MULTIPLE_FT_IDS, selectionArgs);
+    }
+
+    @Override
+    public void setFileTransferDeliveryExpired(String fileTransferId) {
+        ContentValues values = new ContentValues();
+        values.put(FileTransferData.KEY_EXPIRED_DELIVERY, 1);
+        mLocalContentResolver.update(
+                Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
+                null);
+    }
+
+    @Override
+    public Cursor getOneToOneFileTransfersWithUnexpiredDelivery() {
+        String[] selectionArgs = new String[] {
+            String.valueOf(System.currentTimeMillis())
+        };
+        return mLocalContentResolver.query(FileTransferData.CONTENT_URI, null,
+                SELECTION_ONETOONE_FILE_TRANSFERS_WITH_UNEXPIRED_DELIVERY, selectionArgs,
+                ORDER_BY_TIMESTAMP_ASC);
+    }
+
+    @Override
+    public boolean isFileTransferExpiredDelivery(String fileTransferId) {
+        return getDataAsInt(getFileTransferData(FileTransferData.KEY_EXPIRED_DELIVERY,
+                fileTransferId)) == 1;
     }
 }

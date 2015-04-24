@@ -62,5 +62,5 @@ interface IChatService {
 
 	void deleteMessage(in String msgId);
 
-	void markUndeliveredMessagesAsProcessed(in List<String> msgIds);
+	void clearMessageDeliveryExpiration(in List<String> msgIds);
 }

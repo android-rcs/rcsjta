@@ -113,6 +113,15 @@ public class HistoryLog {
     public static final String TIMESTAMP_DISPLAYED = "timestamp_displayed";
 
     /**
+     * The name of the column denoting if delivery has expired for this file. Values: 1 (true), 0
+     * (false)
+     * <P>
+     * Type: INTEGER
+     * </P>
+     */
+    public static final String EXPIRED_DELIVERY = "expired_delivery";
+
+    /**
      * The name of the column containing the status (or state).
      * <P>
      * Type: INTEGER

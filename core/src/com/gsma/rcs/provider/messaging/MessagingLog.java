@@ -156,8 +156,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 
     @Override
     public void addOutgoingOneToOneChatMessage(ChatMessage msg, Status status,
-            Content.ReasonCode reasonCode) {
-        mMessageLog.addOutgoingOneToOneChatMessage(msg, status, reasonCode);
+            Content.ReasonCode reasonCode, long deliveryExpiration) {
+        mMessageLog.addOutgoingOneToOneChatMessage(msg, status, reasonCode, deliveryExpiration);
     }
 
     @Override
@@ -261,9 +261,9 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 
     @Override
     public void setFileTransferred(String fileTransferId, MmContent content, long fileExpiration,
-            long fileIconExpiration) {
+            long fileIconExpiration, long deliveryExpiration) {
         mFileTransferLog.setFileTransferred(fileTransferId, content, fileExpiration,
-                fileIconExpiration);
+                fileIconExpiration, deliveryExpiration);
     }
 
     @Override
@@ -551,5 +551,45 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     @Override
     public void setChatMessageStatusDisplayed(String msgId, long timestampDisplayed) {
         mMessageLog.setChatMessageStatusDisplayed(msgId, timestampDisplayed);
+    }
+
+    @Override
+    public void clearMessageDeliveryExpiration(List<String> msgIds) {
+        mMessageLog.clearMessageDeliveryExpiration(msgIds);
+    }
+
+    @Override
+    public void clearFileTransferDeliveryExpiration(List<String> fileTransferIds) {
+        mFileTransferLog.clearFileTransferDeliveryExpiration(fileTransferIds);
+    }
+
+    @Override
+    public void setFileTransferDeliveryExpired(String fileTransferId) {
+        mFileTransferLog.setFileTransferDeliveryExpired(fileTransferId);
+    }
+
+    @Override
+    public void setChatMessageDeliveryExpired(String msgId) {
+        mMessageLog.setChatMessageDeliveryExpired(msgId);
+    }
+
+    @Override
+    public Cursor getOneToOneChatMessagesWithUnexpiredDelivery() {
+        return mMessageLog.getOneToOneChatMessagesWithUnexpiredDelivery();
+    }
+
+    @Override
+    public Cursor getOneToOneFileTransfersWithUnexpiredDelivery() {
+        return mFileTransferLog.getOneToOneFileTransfersWithUnexpiredDelivery();
+    }
+
+    @Override
+    public boolean isChatMessageExpiredDelivery(String msgId) {
+        return mMessageLog.isChatMessageExpiredDelivery(msgId);
+    }
+
+    @Override
+    public boolean isFileTransferExpiredDelivery(String fileTransferId) {
+        return mFileTransferLog.isFileTransferExpiredDelivery(fileTransferId);
     }
 }

@@ -369,17 +369,18 @@ public final class ChatService extends RcsService {
     }
 
     /**
-     * Marks undelivered chat messages to indicate that messages have been processed.
+     * Disables and clears any delivery expiration for a set of chat messages regardless if the
+     * delivery of them has expired already or not.
      * 
      * @param msgIds
      * @throws RcsServiceException
      */
-    public void markUndeliveredMessagesAsProcessed(Set<String> msgIds) throws RcsServiceException {
+    public void clearMessageDeliveryExpiration(Set<String> msgIds) throws RcsServiceException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
         try {
-            mApi.markUndeliveredMessagesAsProcessed(new ArrayList<String>(msgIds));
+            mApi.clearMessageDeliveryExpiration(new ArrayList<String>(msgIds));
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             throw new RcsServiceException(e);

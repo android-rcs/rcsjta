@@ -767,4 +767,23 @@ public class FileTransfer {
             throw new RcsServiceException(e);
         }
     }
+
+    /**
+     * Returns true if delivery for this file has expired or false otherwise. Note: false means
+     * either that delivery for this file has not yet expired, delivery has been successful,
+     * delivery expiration has been cleared (see clearFileTransferDeliveryExpiration) or that this
+     * particular file is not eligible for delivery expiration in the first place.
+     * 
+     * @return boolean
+     * @throws RcsServiceException
+     */
+    public boolean isExpiredDelivery() throws RcsServiceException {
+        try {
+            return mTransferInf.isExpiredDelivery();
+
+        } catch (Exception e) {
+            RcsPersistentStorageException.assertException(e);
+            throw new RcsServiceException(e);
+        }
+    }
 }

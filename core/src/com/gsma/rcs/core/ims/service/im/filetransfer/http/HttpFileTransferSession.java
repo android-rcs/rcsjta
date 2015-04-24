@@ -34,6 +34,7 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileSharingSessionListener;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 import com.gsma.services.rcs.filetransfer.FileTransfer;
@@ -278,7 +279,7 @@ public abstract class HttpFileTransferSession extends FileSharingSession {
         long fileIconExpiration = getIconExpiration();
         for (ImsSessionListener listener : getListeners()) {
             ((FileSharingSessionListener) listener).handleFileTransfered(content, contact,
-                    fileExpiration, fileIconExpiration);
+                    fileExpiration, fileIconExpiration, FileTransferProtocol.HTTP);
         }
     }
 

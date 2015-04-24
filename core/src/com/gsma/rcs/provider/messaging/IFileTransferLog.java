@@ -148,9 +148,10 @@ public interface IFileTransferLog {
      * @param fileExpiration the time when file on the content server is no longer valid to download
      * @param fileIconExpiration the time when file icon on the content server is no longer valid to
      *            download
+     * @param deliveryExpiration TODO
      */
     public void setFileTransferred(String fileTransferId, MmContent content, long fileExpiration,
-            long fileIconExpiration);
+            long fileIconExpiration, long deliveryExpiration);
 
     /**
      * Tells if the MessageID corresponds to that of a file transfer
@@ -307,7 +308,7 @@ public interface IFileTransferLog {
     /**
      * Get interrupted file transfers
      * 
-     * @return TODO
+     * @return
      */
     public Cursor getInterruptedFileTransfers();
 
@@ -334,4 +335,36 @@ public interface IFileTransferLog {
      * @param timestampDisplayed Time displayed
      */
     void setFileTransferDisplayed(String fileTransferId, long timestampDisplayed);
+
+    /**
+     * Marks undelivered file transfers to indicate that transfers have been processed.
+     * 
+     * @param fileTransferIds
+     */
+    public void clearFileTransferDeliveryExpiration(List<String> fileTransferIds);
+
+    /**
+     * Set file transfer delivery expired for specified file transfer id.
+     * 
+     * @param fileTransferId
+     */
+    public void setFileTransferDeliveryExpired(String fileTransferId);
+
+    /**
+     * Get one-one file transfers with unexpired delivery
+     * 
+     * @return Cursor
+     */
+    public Cursor getOneToOneFileTransfersWithUnexpiredDelivery();
+
+    /**
+     * Returns true if delivery for this file has expired or false otherwise. Note: false means
+     * either that delivery for this file has not yet expired, delivery has been successful,
+     * delivery expiration has been cleared (see clearFileTransferDeliveryExpiration) or that this
+     * particular file is not eligible for delivery expiration in the first place.
+     * 
+     * @param fileTransferId
+     * @return boolean
+     */
+    public boolean isFileTransferExpiredDelivery(String fileTransferId);
 }

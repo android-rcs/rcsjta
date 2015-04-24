@@ -705,39 +705,32 @@ public class InstantMessagingService extends ImsService {
      * @param fileIcon Content of fileicon
      * @param timestamp the local timestamp when initiating the file transfer
      * @param timestampSent the timestamp sent in payload for the file transfer
+     * @param ftProtocol FileTransferProtocol
      * @return File transfer session
      */
     public FileSharingSession initiateFileTransferSession(String fileTransferId, ContactId contact,
-            MmContent content, MmContent fileIcon, long timestamp, long timestampSent) {
+            MmContent content, MmContent fileIcon, long timestamp, long timestampSent,
+            FileTransferProtocol ftProtocol) {
         if (sLogger.isActivated()) {
             sLogger.info("Initiate a file transfer session with contact " + contact + ", file "
                     + content.toString());
         }
-
-        boolean isFToHttpSupportedByRemote = false;
-        Capabilities remoteCapability = mContactManager.getContactCapabilities(contact);
-        if (remoteCapability != null) {
-            isFToHttpSupportedByRemote = remoteCapability.isFileTransferHttpSupported();
-        }
-
-        Capabilities myCapability = mRcsSettings.getMyCapabilities();
-        if (isFToHttpSupportedByRemote && myCapability.isFileTransferHttpSupported()) {
-            if (FileTransferProtocol.HTTP.equals(mRcsSettings.getFtProtocol())) {
+        switch (ftProtocol) {
+            case HTTP:
                 return new OriginatingHttpFileSharingSession(fileTransferId, this, content,
                         contact, fileIcon, UUID.randomUUID().toString(), mCore, mMessagingLog,
                         mRcsSettings, timestamp, timestampSent, mContactManager);
-            }
+            case MSRP:
+                /*
+                 * Since in MSRP communication we do not have a timestampSent to be sent in payload,
+                 * then we don't need to pass the timestampSent to OriginatingMsrpFileSharingSession
+                 */
+                return new OriginatingMsrpFileSharingSession(fileTransferId, this, content,
+                        contact, fileIcon, mRcsSettings, timestamp, mContactManager);
+            default:
+                throw new IllegalArgumentException("Unknown FileTransferProtocol ".concat(ftProtocol
+                        .toString()));
         }
-
-        if (remoteCapability != null && remoteCapability.isFileTransferThumbnailSupported()) {
-            fileIcon = null;
-        }
-        /*
-         * Since in MSRP communication we do not have a timestampSent to be sent in payload, then we
-         * don't need to pass the timestampSent to OriginatingMsrpFileSharingSession
-         */
-        return new OriginatingMsrpFileSharingSession(fileTransferId, this, content, contact,
-                fileIcon, mRcsSettings, timestamp, mContactManager);
     }
 
     /**

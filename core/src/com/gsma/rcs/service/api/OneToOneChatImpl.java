@@ -77,6 +77,8 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
 
     private final Core mCore;
 
+    private final OneToOneUndeliveredImManager mUndeliveredImManager;
+
     /**
      * Lock used for synchronization
      */
@@ -98,10 +100,12 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @param chatService ChatServiceImpl
      * @param contactManager ContactManager
      * @param core Core
+     * @param undeliveredImManager OneToOneUndeliveredImManager
      */
     public OneToOneChatImpl(ContactId contact, IOneToOneChatEventBroadcaster broadcaster,
             InstantMessagingService imService, MessagingLog messagingLog, RcsSettings rcsSettings,
-            ChatServiceImpl chatService, ContactManager contactManager, Core core) {
+            ChatServiceImpl chatService, ContactManager contactManager, Core core,
+            OneToOneUndeliveredImManager undeliveredImManager) {
         mContact = contact;
         mBroadcaster = broadcaster;
         mImService = imService;
@@ -110,6 +114,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         mRcsSettings = rcsSettings;
         mContactManager = contactManager;
         mCore = core;
+        mUndeliveredImManager = undeliveredImManager;
     }
 
     private ReasonCode imdnToFailedReasonCode(ImdnDocument imdn) {
@@ -325,6 +330,17 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         }
     }
 
+    private long getDeliveryExpirationTime(long timestampSent) {
+        if (mRcsSettings.isImAlwaysOn()) {
+            return 0;
+        }
+        final long timeout = mRcsSettings.getMsgDeliveryTimeoutPeriod();
+        if (timeout == 0L) {
+            return 0;
+        }
+        return timestampSent + timeout;
+    }
+
     /**
      * Add chat message to Db
      * 
@@ -332,10 +348,18 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
      * @param state state of message
      */
     private void addOutgoingChatMessage(ChatMessage msg, Status status) {
-        mMessagingLog.addOutgoingOneToOneChatMessage(msg, status, ReasonCode.UNSPECIFIED);
+        String msgId = msg.getMessageId();
+        long timestampSent = msg.getTimestampSent();
+        long deliveryExpiration = getDeliveryExpirationTime(timestampSent);
+        mMessagingLog.addOutgoingOneToOneChatMessage(msg, status, ReasonCode.UNSPECIFIED,
+                deliveryExpiration);
         String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
-        mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msg.getMessageId(),
-                status, ReasonCode.UNSPECIFIED);
+        mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId, status,
+                ReasonCode.UNSPECIFIED);
+        if (deliveryExpiration != 0) {
+            mUndeliveredImManager.scheduleOneToOneChatMessageDeliveryTimeoutAlarm(mContact, msgId,
+                    deliveryExpiration);
+        }
     }
 
     /**
@@ -739,6 +763,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
                                 ReasonCode.FAILED_SEND);
                         mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId,
                                 Status.FAILED, ReasonCode.FAILED_SEND);
+                        mUndeliveredImManager.cancelDeliveryTimeoutAlarm(msgId);
                     }
                     break;
                 /*
@@ -780,7 +805,6 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         synchronized (lock) {
             mMessagingLog.setChatMessageStatusAndReasonCode(msgId, Status.SENT,
                     ReasonCode.UNSPECIFIED);
-
             mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId, Status.SENT,
                     ReasonCode.UNSPECIFIED);
         }
@@ -831,6 +855,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             }
 
         } else if (ImdnDocument.DELIVERY_STATUS_DELIVERED.equals(status)) {
+            mUndeliveredImManager.cancelDeliveryTimeoutAlarm(msgId);
             synchronized (lock) {
                 mMessagingLog.setChatMessageStatusDelivered(msgId, timestamp);
 
@@ -839,6 +864,7 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
             }
 
         } else if (ImdnDocument.DELIVERY_STATUS_DISPLAYED.equals(status)) {
+            mUndeliveredImManager.cancelDeliveryTimeoutAlarm(msgId);
             synchronized (lock) {
                 mMessagingLog.setChatMessageStatusDisplayed(msgId, timestamp);
 

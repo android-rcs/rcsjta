@@ -83,6 +83,11 @@ public class FileTransferData {
     /* package private */static final String KEY_TIMESTAMP_DISPLAYED = FileTransferLog.TIMESTAMP_DISPLAYED;
 
     /**
+     * If delivery has expired for this file. Values: 1 (true), 0 (false)
+     */
+    /* package private */static final String KEY_EXPIRED_DELIVERY = FileTransferLog.EXPIRED_DELIVERY;
+
+    /**
      * ContactId formatted number of remote contact or null if the filetransfer is an outgoing group
      * file transfer.
      */
@@ -179,4 +184,9 @@ public class FileTransferData {
      */
     /* package private */static final String KEY_REMOTE_SIP_ID = "remote_sip_id";
 
+    /**
+     * Time when file delivery time out will expire or 0 if this file is not eligible for delivery
+     * expiration.
+     */
+    /* package private */static final String KEY_DELIVERY_EXPIRATION = "delivery_expiration";
 }

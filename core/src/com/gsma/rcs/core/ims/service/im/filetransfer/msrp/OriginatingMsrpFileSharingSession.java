@@ -33,6 +33,7 @@ import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession;
 import com.gsma.rcs.core.ims.protocol.msrp.MsrpSession.TypeMsrpChunk;
 import com.gsma.rcs.core.ims.protocol.sdp.SdpUtils;
 import com.gsma.rcs.core.ims.protocol.sip.SipRequest;
+import com.gsma.rcs.core.ims.protocol.sip.SipResponse;
 import com.gsma.rcs.core.ims.service.ImsService;
 import com.gsma.rcs.core.ims.service.ImsServiceError;
 import com.gsma.rcs.core.ims.service.ImsSessionListener;
@@ -46,6 +47,7 @@ import com.gsma.rcs.platform.AndroidFactory;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.FileTransferData;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.utils.Base64;
 import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.NetworkRessourceManager;
@@ -318,15 +320,13 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         MmContent content = getContent();
         for (ImsSessionListener listener : getListeners()) {
             ((FileSharingSessionListener) listener).handleFileTransfered(content, contact,
-                    FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION);
+                    FileTransferData.UNKNOWN_EXPIRATION, FileTransferData.UNKNOWN_EXPIRATION,
+                    FileTransferProtocol.MSRP);
         }
-        InstantMessagingService imService = ((InstantMessagingService) getImsService());
-        String fileTransferId = getFileTransferId();
 
-        imService.receiveFileDeliveryStatus(contact, new ImdnDocument(fileTransferId,
-                ImdnDocument.POSITIVE_DELIVERY, ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp));
-        imService.receiveFileDeliveryStatus(contact, new ImdnDocument(fileTransferId,
-                ImdnDocument.DISPLAY, ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp));
+        ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(contact,
+                new ImdnDocument(getFileTransferId(), ImdnDocument.DISPLAY,
+                        ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp));
     }
 
     /**
@@ -394,4 +394,16 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
         return false;
     }
 
+    /**
+     * Handle 200 0K response
+     * 
+     * @param resp 200 OK response
+     */
+    public void handle200OK(SipResponse resp) {
+        super.handle200OK(resp);
+        long timestamp = System.currentTimeMillis();
+        ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(getRemoteContact(),
+                new ImdnDocument(getFileTransferId(), ImdnDocument.POSITIVE_DELIVERY,
+                        ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp));
+    }
 }

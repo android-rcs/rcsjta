@@ -36,6 +36,7 @@ import com.gsma.rcs.provider.messaging.FileTransferPersistedStorageAccessor;
 import com.gsma.rcs.provider.messaging.FileTransferStateAndReasonCode;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.service.broadcaster.IGroupFileTransferBroadcaster;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
@@ -1189,15 +1190,18 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
      *            download.
      * @param fileIconExpiration the time when the file icon on the content server is no longer
      *            valid to download.
+     * @param ftProtocol
      */
     public void handleFileTransfered(MmContent content, ContactId contact, long fileExpiration,
-            long fileIconExpiration) {
+            long fileIconExpiration, FileTransferProtocol ftProtocol) {
         if (sLogger.isActivated()) {
             sLogger.info("Content transferred");
         }
         synchronized (mLock) {
             mFileTransferService.removeFileTransfer(mFileTransferId);
-            mPersistentStorage.setTransferred(content, fileExpiration, fileIconExpiration);
+            long deliveryExpiration = 0;
+            mPersistentStorage.setTransferred(content, fileExpiration, fileIconExpiration,
+                    deliveryExpiration);
             mBroadcaster.broadcastStateChanged(mChatId, mFileTransferId, State.TRANSFERRED,
                     ReasonCode.UNSPECIFIED);
         }
@@ -1351,5 +1355,11 @@ public class GroupFileTransferImpl extends IFileTransfer.Stub implements FileSha
             sLogger.error(ExceptionUtil.getFullStackTrace(e));
             throw new ServerApiGenericException(e);
         }
+    }
+
+    @Override
+    public boolean isExpiredDelivery() throws RemoteException {
+        /* Delivery expiration is not applicable for group file transfers. */
+        return false;
     }
 }

@@ -315,9 +315,10 @@ public class FileTransferPersistedStorageAccessor {
         mMessagingLog.setFileTransferProgress(mFileTransferId, currentSize);
     }
 
-    public void setTransferred(MmContent content, long fileExpiration, long fileIconExpiration) {
+    public void setTransferred(MmContent content, long fileExpiration, long fileIconExpiration,
+            long deliveryExpiration) {
         mMessagingLog.setFileTransferred(mFileTransferId, content, fileExpiration,
-                fileIconExpiration);
+                fileIconExpiration, deliveryExpiration);
     }
 
     public void addFileTransfer(ContactId contact, Direction direction, MmContent content,
@@ -369,5 +370,17 @@ public class FileTransferPersistedStorageAccessor {
             cacheData();
         }
         return mFileIconExpiration;
+    }
+
+    /**
+     * Returns true if delivery for this file has expired or false otherwise. Note: false means
+     * either that delivery for this file has not yet expired, delivery has been successful,
+     * delivery expiration has been cleared (see clearFileTransferDeliveryExpiration) or that this
+     * particular file is not eligible for delivery expiration in the first place.
+     * 
+     * @return deliveryExpiration
+     */
+    public boolean isExpiredDelivery() {
+        return mMessagingLog.isFileTransferExpiredDelivery(mFileTransferId);
     }
 }

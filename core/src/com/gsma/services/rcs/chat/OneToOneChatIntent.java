@@ -48,4 +48,21 @@ public class OneToOneChatIntent {
      * Message ID of received message
      */
     public final static String EXTRA_MESSAGE_ID = "messageId";
+
+    /**
+     * Broadcast action: message delivery timeout.
+     * <p>
+     * Intent includes the following extras:
+     * <ul>
+     * <li> {@link #EXTRA_CONTACT} containing the contact ID of remote contact.
+     * <li> {@link #EXTRA_MESSAGE_ID} containing the message ID of the chat message that triggered
+     * the timeout.
+     * </ul>
+     */
+    public final static String ACTION_NEW_ONE_TO_ONE_MESSAGE_DELIVERY_EXPIRED = "com.gsma.services.rcs.chat.action.MESSAGE_DELIVERY_EXPIRED";
+
+    /**
+     * ContactId of remote contact
+     */
+    public final static String EXTRA_CONTACT = "contact";
 }

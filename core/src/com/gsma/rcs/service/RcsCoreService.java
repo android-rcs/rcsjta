@@ -64,6 +64,7 @@ import com.gsma.rcs.provider.messaging.FileTransferDequeueTask;
 import com.gsma.rcs.provider.messaging.GroupChatTerminalExceptionTask;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.messaging.OneToOneChatMessageDequeueTask;
+import com.gsma.rcs.provider.messaging.RecreateDeliveryExpirationAlarms;
 import com.gsma.rcs.provider.messaging.UpdateFileTransferStateAfterUngracefulTerminationTask;
 import com.gsma.rcs.provider.settings.RcsSettings;
 import com.gsma.rcs.provider.sharing.RichCallHistory;
@@ -80,6 +81,7 @@ import com.gsma.rcs.service.api.HistoryServiceImpl;
 import com.gsma.rcs.service.api.IPCallServiceImpl;
 import com.gsma.rcs.service.api.ImageSharingServiceImpl;
 import com.gsma.rcs.service.api.MultimediaSessionServiceImpl;
+import com.gsma.rcs.service.api.OneToOneUndeliveredImManager;
 import com.gsma.rcs.service.api.ServerApiException;
 import com.gsma.rcs.service.api.VideoSharingServiceImpl;
 import com.gsma.rcs.service.ipcalldraft.IIPCallService;
@@ -132,6 +134,8 @@ public class RcsCoreService extends Service implements CoreListener {
     private final ExecutorService mImOperationExecutor = Executors.newSingleThreadExecutor();
 
     private final ExecutorService mRcOperationExecutor = Executors.newSingleThreadExecutor();
+
+    private OneToOneUndeliveredImManager mOneToOneUndeliveredImManager;
 
     /**
      * CPU manager
@@ -317,6 +321,7 @@ public class RcsCoreService extends Service implements CoreListener {
             // Instantiate API
             mContactApi = new ContactServiceImpl(mContactManager, mRcsSettings);
             mCapabilityApi = new CapabilityServiceImpl(mContactManager, mRcsSettings);
+            mOneToOneUndeliveredImManager = new OneToOneUndeliveredImManager(mContext, mMessagingLog);
             core = Core.getInstance();
             InstantMessagingService imService = core.getImService();
             RichcallService richCallService = core.getRichcallService();
@@ -325,9 +330,10 @@ public class RcsCoreService extends Service implements CoreListener {
 
             mFtApi = new FileTransferServiceImpl(imService, mMessagingLog, mRcsSettings,
                     mContactManager, core, mLocalContentResolver, mImOperationExecutor,
-                    mOperationLock);
+                    mOperationLock, mOneToOneUndeliveredImManager);
             mChatApi = new ChatServiceImpl(imService, mMessagingLog, mRcsSettings, mContactManager,
-                    core, mLocalContentResolver, mImOperationExecutor, mOperationLock, mFtApi);
+                    core, mLocalContentResolver, mImOperationExecutor, mOperationLock, mFtApi,
+                    mOneToOneUndeliveredImManager);
             mVshApi = new VideoSharingServiceImpl(richCallService, mRichCallHistory, mRcsSettings,
                     mContactManager, core, mLocalContentResolver, mRcOperationExecutor,
                     mOperationLock);
@@ -447,6 +453,10 @@ public class RcsCoreService extends Service implements CoreListener {
             mHistoryApi.close();
             mHistoryApi = null;
         }
+        if (mOneToOneUndeliveredImManager != null) {
+            mOneToOneUndeliveredImManager.cleanup();
+        }
+
         // Terminate the core in background
         Core.terminateCore();
 
@@ -592,6 +602,21 @@ public class RcsCoreService extends Service implements CoreListener {
         if (sLogger.isActivated()) {
             sLogger.debug("Handle event core started");
         }
+        /* Update interrupted file transfer status */
+        mImOperationExecutor.execute(new UpdateFileTransferStateAfterUngracefulTerminationTask(
+                mMessagingLog, mFtApi));
+        mRcOperationExecutor.execute(new UpdateGeolocSharingStateAfterUngracefulTerminationTask(
+                mRichCallHistory, mGshApi));
+        mRcOperationExecutor.execute(new UpdateImageSharingStateAfterUngracefulTerminationTask(
+                mRichCallHistory, mIshApi));
+        mRcOperationExecutor.execute(new UpdateVideoSharingStateAfterUngracefulTerminationTask(
+                mRichCallHistory, mVshApi));
+        /*
+         * Recreate delivery expiration alarm for one-one chat messages and one-one file transfers
+         * after boot
+         */
+        mImOperationExecutor.execute(new RecreateDeliveryExpirationAlarms(mMessagingLog,
+                mOneToOneUndeliveredImManager, mOperationLock));
         // Send service up intent
         Intent serviceUp = new Intent(RcsService.ACTION_SERVICE_UP);
         IntentUtils.tryToSetReceiverForegroundFlag(serviceUp);
@@ -951,9 +976,6 @@ public class RcsCoreService extends Service implements CoreListener {
     @Override
     public void tryToStartImServiceTasks(InstantMessagingService imService) {
         Core core = Core.getInstance();
-        /* Update interrupted file transfer status */
-        mImOperationExecutor.execute(new UpdateFileTransferStateAfterUngracefulTerminationTask(
-                mMessagingLog, mFtApi));
         /* Try to auto-rejoin group chats that are still marked as active. */
         mImOperationExecutor.execute(new GroupChatAutoRejoinTask(mMessagingLog, core));
         /* Try to start auto resuming of HTTP file transfers marked as PAUSED_BY_SYSTEM */
@@ -969,16 +991,6 @@ public class RcsCoreService extends Service implements CoreListener {
          */
         mImOperationExecutor.execute(new DelayedDisplayNotificationDispatcher(
                 mLocalContentResolver, mChatApi));
-    }
-
-    @Override
-    public void tryToStartRichcallServiceTasks(RichcallService rcService) {
-        mRcOperationExecutor.execute(new UpdateGeolocSharingStateAfterUngracefulTerminationTask(
-                mRichCallHistory, mGshApi));
-        mRcOperationExecutor.execute(new UpdateImageSharingStateAfterUngracefulTerminationTask(
-                mRichCallHistory, mIshApi));
-        mRcOperationExecutor.execute(new UpdateVideoSharingStateAfterUngracefulTerminationTask(
-                mRichCallHistory, mVshApi));
     }
 
     @Override
@@ -1018,5 +1030,15 @@ public class RcsCoreService extends Service implements CoreListener {
     public void tryToMarkQueuedGroupChatMessagesAndGroupFileTransfersAsFailed(String chatId) {
         mImOperationExecutor.execute(new GroupChatTerminalExceptionTask(chatId, mChatApi, mFtApi,
                 mMessagingLog, mOperationLock));
+    }
+
+    @Override
+    public void handleOneToOneChatMessageDeliveryExpiration(Intent intent) {
+        mOneToOneUndeliveredImManager.handleChatMessageDeliveryExpiration(intent);
+    }
+
+    @Override
+    public void handleOneToOneFileTransferDeliveryExpiration(Intent intent) {
+        mOneToOneUndeliveredImManager.handleFileTransferDeliveryExpiration(intent);
     }
 }

@@ -49,12 +49,12 @@ import java.util.Set;
             HistoryLogData.KEY_ID, HistoryLogData.KEY_MIME_TYPE, HistoryLogData.KEY_DIRECTION,
             HistoryLogData.KEY_CONTACT, HistoryLogData.KEY_TIMESTAMP,
             HistoryLogData.KEY_TIMESTAMP_SENT, HistoryLogData.KEY_TIMESTAMP_DELIVERED,
-            HistoryLogData.KEY_TIMESTAMP_DISPLAYED, HistoryLogData.KEY_STATUS,
-            HistoryLogData.KEY_REASON_CODE, HistoryLogData.KEY_READ_STATUS,
-            HistoryLogData.KEY_CHAT_ID, HistoryLogData.KEY_CONTENT, HistoryLogData.KEY_FILEICON,
-            HistoryLogData.KEY_FILEICON_MIME_TYPE, HistoryLogData.KEY_FILENAME,
-            HistoryLogData.KEY_FILESIZE, HistoryLogData.KEY_TRANSFERRED,
-            HistoryLogData.KEY_DURATION
+            HistoryLogData.KEY_TIMESTAMP_DISPLAYED, HistoryLogData.KEY_EXPIRED_DELIVERY,
+            HistoryLogData.KEY_STATUS, HistoryLogData.KEY_REASON_CODE,
+            HistoryLogData.KEY_READ_STATUS, HistoryLogData.KEY_CHAT_ID, HistoryLogData.KEY_CONTENT,
+            HistoryLogData.KEY_FILEICON, HistoryLogData.KEY_FILEICON_MIME_TYPE,
+            HistoryLogData.KEY_FILENAME, HistoryLogData.KEY_FILESIZE,
+            HistoryLogData.KEY_TRANSFERRED, HistoryLogData.KEY_DURATION
     };
 
     /* package private */static final Set<String> PROTECTED_INTERNAL_DATABASES = getProtectedInternalDatabases();
@@ -136,6 +136,8 @@ import java.util.Set;
                 ChatLog.Message.TIMESTAMP_DELIVERED);
         columnMapping.put(HistoryLogData.KEY_TIMESTAMP_DISPLAYED,
                 ChatLog.Message.TIMESTAMP_DISPLAYED);
+        columnMapping.put(HistoryLogData.KEY_EXPIRED_DELIVERY,
+                ChatLog.Message.EXPIRED_DELIVERY);
         columnMapping.put(HistoryLogData.KEY_STATUS, ChatLog.Message.STATUS);
         columnMapping.put(HistoryLogData.KEY_REASON_CODE, ChatLog.Message.REASON_CODE);
         columnMapping.put(HistoryLogData.KEY_READ_STATUS, ChatLog.Message.READ_STATUS);
@@ -159,6 +161,8 @@ import java.util.Set;
                 FileTransferLog.TIMESTAMP_DELIVERED);
         columnMapping.put(HistoryLogData.KEY_TIMESTAMP_DISPLAYED,
                 FileTransferLog.TIMESTAMP_DISPLAYED);
+        columnMapping.put(HistoryLogData.KEY_EXPIRED_DELIVERY,
+                FileTransferLog.EXPIRED_DELIVERY);
         columnMapping.put(HistoryLogData.KEY_STATUS, FileTransferLog.STATE);
         columnMapping.put(HistoryLogData.KEY_REASON_CODE, FileTransferLog.REASON_CODE);
         columnMapping.put(HistoryLogData.KEY_READ_STATUS, FileTransferLog.READ_STATUS);

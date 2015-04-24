@@ -47,6 +47,8 @@ public class HistoryLogData {
 
     /* package private */static final String KEY_TIMESTAMP_DISPLAYED = HistoryLog.TIMESTAMP_DISPLAYED;
 
+    /* package private */static final String KEY_EXPIRED_DELIVERY = HistoryLog.EXPIRED_DELIVERY;
+
     /* package private */static final String KEY_STATUS = HistoryLog.STATUS;
 
     /* package private */static final String KEY_REASON_CODE = HistoryLog.REASON_CODE;

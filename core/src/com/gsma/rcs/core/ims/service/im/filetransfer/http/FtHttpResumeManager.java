@@ -34,6 +34,7 @@ import com.gsma.rcs.provider.fthttp.FtHttpResumeDownload;
 import com.gsma.rcs.provider.fthttp.FtHttpResumeUpload;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
+import com.gsma.rcs.provider.settings.RcsSettingsData.FileTransferProtocol;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
 
@@ -212,7 +213,7 @@ public class FtHttpResumeManager implements Runnable {
 
             @Override
             public void handleFileTransfered(MmContent content, ContactId contact,
-                    long fileExpiration, long fileIconExpiration) {
+                    long fileExpiration, long fileIconExpiration, FileTransferProtocol ftProtocol) {
                 if (fired.compareAndSet(false, true)) {
                     processNext();
                 }

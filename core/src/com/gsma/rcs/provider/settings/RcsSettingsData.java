@@ -1045,6 +1045,17 @@ public class RcsSettingsData {
 
     /* package private */static final Boolean DEFAULT_FT_HTTP_CAP_ALWAYS_ON = false;
 
+    public static final String MSG_DELIVERY_TIMEOUT = "msgDeliveryTimeout";
+
+    /*
+     * According to joyn Blackbird Product Definition Document Delivery Timeout - "This parameter
+     * controls the timeout for the reception of Optional delivery reports for joyn messages after
+     * which a capability Parameter check is done to verify whether the contact is offline. When set
+     * to 0 the timeout shall not be used as a trigger for the capability exchange. A default value
+     * of 300 seconds is used in case the parameter is not provided."
+     */
+    /* package private */static final Long DEFAULT_MSG_DELIVERY_TIMEOUT = 300000L;
+
     /**
      * Contacts validity period in one-one messaging
      */

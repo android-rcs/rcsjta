@@ -248,4 +248,20 @@ public class ChatMessageImpl extends IChatMessage.Stub {
             throw new ServerApiGenericException(e);
         }
     }
+
+    public boolean isExpiredDelivery() throws RemoteException {
+        try {
+            return mPersistentStorage.isExpiredDelivery();
+
+        } catch (ServerApiBaseException e) {
+            if (!e.shouldNotBeLogged()) {
+                sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            }
+            throw e;
+
+        } catch (Exception e) {
+            sLogger.error(ExceptionUtil.getFullStackTrace(e));
+            throw new ServerApiGenericException(e);
+        }
+    }
 }

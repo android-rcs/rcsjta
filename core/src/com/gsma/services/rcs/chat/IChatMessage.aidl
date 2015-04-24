@@ -29,4 +29,6 @@ interface IChatMessage {
 	String getChatId();
 
 	boolean isRead();
+
+	boolean isExpiredDelivery();
 }

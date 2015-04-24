@@ -2175,4 +2175,13 @@ public class RcsSettings {
     public boolean isRequestGroupChatDisplayReportsEnabled() {
         return readBoolean(RcsSettingsData.REQUEST_GROUP_CHAT_DISPLAY_REPORTS);
     }
+
+    /**
+     * Get message delivery timeout in one-one messaging
+     * 
+     * @return Period in milliseconds
+     */
+    public long getMsgDeliveryTimeoutPeriod() {
+        return readLong(RcsSettingsData.MSG_DELIVERY_TIMEOUT);
+    }
 }

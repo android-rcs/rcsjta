@@ -122,4 +122,15 @@ public class MessageData {
      * Time when message displayed. If 0 means not displayed.
      */
     /* package private */static final String KEY_TIMESTAMP_DISPLAYED = ChatLog.Message.TIMESTAMP_DISPLAYED;
+
+    /**
+     * If delivery has expired for this message. Values: 1 (true), 0 (false)
+     */
+    /* package private */static final String KEY_EXPIRED_DELIVERY = ChatLog.Message.EXPIRED_DELIVERY;
+
+    /**
+     * Time when message delivery time-out will expire or 0 if this message is not eligible for
+     * delivery expiration.
+     */
+    /* package private */static final String KEY_DELIVERY_EXPIRATION = "delivery_expiration";
 }

@@ -166,8 +166,6 @@ public class RichcallService extends ImsService {
             return;
         }
         setServiceStarted(true);
-
-        mCore.getListener().tryToStartRichcallServiceTasks(this);
     }
 
     /**

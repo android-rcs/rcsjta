@@ -539,19 +539,19 @@ public final class FileTransferService extends RcsService {
     }
 
     /**
-     * Marks undelivered file transfers to indicate the specified file transfers have been
-     * processed.
+     * Disables and clears any delivery expiration for a set of file transfers regardless if the
+     * delivery of them has expired already or not.
      * 
      * @param transferIds
      * @throws RcsServiceException
      */
-    public void markUndeliveredFileTransfersAsProcessed(Set<String> transferIds)
+    public void clearFileTransferDeliveryExpiration(Set<String> transferIds)
             throws RcsServiceException {
         if (mApi == null) {
             throw new RcsServiceNotAvailableException();
         }
         try {
-            mApi.markUndeliveredFileTransfersAsProcessed(new ArrayList<String>(transferIds));
+            mApi.clearFileTransferDeliveryExpiration(new ArrayList<String>(transferIds));
         } catch (Exception e) {
             RcsIllegalArgumentException.assertException(e);
             throw new RcsGenericException(e);
