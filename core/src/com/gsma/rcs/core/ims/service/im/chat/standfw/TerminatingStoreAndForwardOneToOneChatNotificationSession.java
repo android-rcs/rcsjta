@@ -407,13 +407,13 @@ public class TerminatingStoreAndForwardOneToOneChatNotificationSession extends O
             boolean isFileTransfer = mMessagingLog.isFileTransfer(imdn.getMsgId());
             if (isFileTransfer) {
                 ((InstantMessagingService) getImsService())
-                        .receiveFileDeliveryStatus(contact, imdn);
+                        .receiveOneToOneFileDeliveryStatus(contact, imdn);
 
             } else {
                 // Notify the message delivery outside of the chat
                 // session
                 getImsService().getImsModule().getCore().getListener()
-                        .handleMessageDeliveryStatus(contact, imdn);
+                        .handleOneToOneMessageDeliveryStatus(contact, imdn);
 
             }
         } catch (Exception e) {

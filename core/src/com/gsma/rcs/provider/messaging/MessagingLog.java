@@ -73,7 +73,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 
     /**
      * Create instance
-     *
+     * 
      * @param context Context
      * @param localContentResolver Local content resolver
      * @param rcsSettings
@@ -94,7 +94,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 
     /**
      * Constructor
-     *
+     * 
      * @param context Application context
      * @param localContentResolver Local content provider
      * @param rcsSettings
@@ -293,8 +293,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 
     @Override
     public Uri addGroupChatDeliveryInfoEntry(String chatId, ContactId contact, String msgId,
-            GroupDeliveryInfo.Status status,
-            GroupDeliveryInfo.ReasonCode reasonCode,
+            GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode,
             long timestampDelivered, long timestampDisplayed) {
         return mGroupChatDeliveryInfoLog.addGroupChatDeliveryInfoEntry(chatId, contact, msgId,
                 status, reasonCode, timestampDelivered, timestampDisplayed);
@@ -302,8 +301,7 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
 
     @Override
     public boolean setGroupChatDeliveryInfoStatusAndReasonCode(String chatId, ContactId contact,
-            String msgId, GroupDeliveryInfo.Status status,
-            GroupDeliveryInfo.ReasonCode reasonCode) {
+            String msgId, GroupDeliveryInfo.Status status, GroupDeliveryInfo.ReasonCode reasonCode) {
         return mGroupChatDeliveryInfoLog.setGroupChatDeliveryInfoStatusAndReasonCode(chatId,
                 contact, msgId, status, reasonCode);
     }
@@ -525,8 +523,8 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public boolean isOneToOneChatMessage(String messageId) {
-        return mMessageLog.isOneToOneChatMessage(messageId);
+    public boolean isOneToOneChatMessage(String msgId) {
+        return mMessageLog.isOneToOneChatMessage(msgId);
     }
 
     @Override
@@ -591,5 +589,10 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     @Override
     public boolean isFileTransferExpiredDelivery(String fileTransferId) {
         return mFileTransferLog.isFileTransferExpiredDelivery(fileTransferId);
+    }
+
+    @Override
+    public String getMessageChatId(String msgId) {
+        return mMessageLog.getMessageChatId(msgId);
     }
 }

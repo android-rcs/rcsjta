@@ -1005,7 +1005,7 @@ public abstract class ChatSession extends ImsServiceSession implements MsrpEvent
                     ((InstantMessagingService) getImsService()).receiveGroupFileDeliveryStatus(
                             mContributionId, contact, imdn);
                 } else {
-                    ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(contact,
+                    ((InstantMessagingService) getImsService()).receiveOneToOneFileDeliveryStatus(contact,
                             imdn);
                 }
             } else {

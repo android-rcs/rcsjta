@@ -331,8 +331,8 @@ public class MessageLog implements IMessageLog {
         if (contact != null) {
             values.put(MessageData.KEY_CONTACT, contact.toString());
         }
-        String messageId = IdGenerator.generateMessageID();
-        values.put(MessageData.KEY_MESSAGE_ID, messageId);
+        String msgId = IdGenerator.generateMessageID();
+        values.put(MessageData.KEY_MESSAGE_ID, msgId);
         values.put(MessageData.KEY_MIME_TYPE, MimeType.GROUPCHAT_EVENT);
         values.put(MessageData.KEY_STATUS, status.toInt());
         values.put(MessageData.KEY_REASON_CODE, ReasonCode.UNSPECIFIED.toInt());
@@ -345,7 +345,7 @@ public class MessageLog implements IMessageLog {
         values.put(MessageData.KEY_DELIVERY_EXPIRATION, 0);
         values.put(MessageData.KEY_EXPIRED_DELIVERY, 0);
         mLocalContentResolver.insert(MessageData.CONTENT_URI, values);
-        return messageId;
+        return msgId;
     }
 
     @Override
@@ -495,6 +495,29 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
+    // TODO: This function should be replaced to use getDataAsString(getMessageData))
+    // as soon as that method handles exceptions correctly (i.e. doesn't throw exception
+    // when no row is found).
+    public String getMessageChatId(String msgId) {
+        Cursor cursor = null;
+        try {
+            cursor = mLocalContentResolver.query(
+                    Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), new String[] {
+                        MessageData.KEY_CHAT_ID
+                    }, null, null, null);
+            if (cursor.moveToNext()) {
+                return cursor.getString(cursor.getColumnIndexOrThrow(MessageData.KEY_CHAT_ID));
+            }
+            return null;
+
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    @Override
     public Cursor getCacheableChatMessageData(String msgId) {
         Cursor cursor = mLocalContentResolver.query(
                 Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), null, null, null, null);
@@ -591,11 +614,11 @@ public class MessageLog implements IMessageLog {
     }
 
     @Override
-    public boolean isOneToOneChatMessage(String messageId) {
+    public boolean isOneToOneChatMessage(String msgId) {
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(
-                    MessageData.CONTENT_URI.buildUpon().appendPath(messageId).build(),
+                    MessageData.CONTENT_URI.buildUpon().appendPath(msgId).build(),
                     new String[] {
                             MessageData.KEY_CONTACT, MessageData.KEY_CHAT_ID
                     }, null, null, null);

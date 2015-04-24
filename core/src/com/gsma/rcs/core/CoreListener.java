@@ -217,12 +217,21 @@ public interface CoreListener {
             TerminatingStoreAndForwardOneToOneChatMessageSession session);
 
     /**
-     * New message delivery status
+     * New one to one message delivery status
      * 
      * @param contact Contact identifier
      * @param imdn Imdn document
      */
-    public void handleMessageDeliveryStatus(ContactId contact, ImdnDocument imdn);
+    public void handleOneToOneMessageDeliveryStatus(ContactId contact, ImdnDocument imdn);
+
+    /**
+     * New group message delivery status
+     * 
+     * @param chatId Chat ID
+     * @param contact Contact identifier
+     * @param imdn Imdn document
+     */
+    public void handleGroupMessageDeliveryStatus(String chatId, ContactId contact, ImdnDocument imdn);
 
     /**
      * New file delivery status
@@ -230,7 +239,7 @@ public interface CoreListener {
      * @param contact who notified status
      * @param imdn Imdn document
      */
-    public void handleFileDeliveryStatus(ContactId contact, ImdnDocument imdn);
+    public void handleOneToOneFileDeliveryStatus(ContactId contact, ImdnDocument imdn);
 
     /**
      * New group file delivery status

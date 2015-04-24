@@ -816,7 +816,7 @@ public class RcsCoreService extends Service implements CoreListener {
     }
 
     @Override
-    public void handleMessageDeliveryStatus(ContactId contact, ImdnDocument imdn) {
+    public void handleOneToOneMessageDeliveryStatus(ContactId contact, ImdnDocument imdn) {
         if (sLogger.isActivated()) {
             sLogger.debug("Handle message delivery status");
         }
@@ -825,14 +825,19 @@ public class RcsCoreService extends Service implements CoreListener {
     }
 
     @Override
-    public void handleFileDeliveryStatus(ContactId contact, ImdnDocument imdn) {
+    public void handleGroupMessageDeliveryStatus(String chatId, ContactId contact, ImdnDocument imdn) {
+        mChatApi.getOrCreateGroupChat(chatId).handleMessageDeliveryStatus(contact, imdn);
+    }
+
+    @Override
+    public void handleOneToOneFileDeliveryStatus(ContactId contact, ImdnDocument imdn) {
         if (sLogger.isActivated()) {
             sLogger.debug("Handle file delivery status: fileTransferId=" + imdn.getMsgId()
                     + " notification_type=" + imdn.getNotificationType() + " status="
                     + imdn.getStatus() + " contact=" + contact);
         }
 
-        mFtApi.handleFileDeliveryStatus(imdn, contact);
+        mFtApi.handleOneToOneFileDeliveryStatus(imdn, contact);
     }
 
     @Override

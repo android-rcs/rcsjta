@@ -324,7 +324,7 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
                     FileTransferProtocol.MSRP);
         }
 
-        ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(contact,
+        ((InstantMessagingService) getImsService()).receiveOneToOneFileDeliveryStatus(contact,
                 new ImdnDocument(getFileTransferId(), ImdnDocument.DISPLAY,
                         ImdnDocument.DELIVERY_STATUS_DISPLAYED, timestamp));
     }
@@ -402,8 +402,9 @@ public class OriginatingMsrpFileSharingSession extends ImsFileSharingSession imp
     public void handle200OK(SipResponse resp) {
         super.handle200OK(resp);
         long timestamp = System.currentTimeMillis();
-        ((InstantMessagingService) getImsService()).receiveFileDeliveryStatus(getRemoteContact(),
-                new ImdnDocument(getFileTransferId(), ImdnDocument.POSITIVE_DELIVERY,
-                        ImdnDocument.DELIVERY_STATUS_DELIVERED, timestamp));
+        ((InstantMessagingService) getImsService()).receiveOneToOneFileDeliveryStatus(
+                getRemoteContact(), new ImdnDocument(getFileTransferId(),
+                        ImdnDocument.POSITIVE_DELIVERY, ImdnDocument.DELIVERY_STATUS_DELIVERED,
+                        timestamp));
     }
 }

@@ -1154,7 +1154,7 @@ public class FileTransferServiceImpl extends IFileTransferService.Stub {
      * @param imdn Imdn document
      * @param contact contact who received file
      */
-    public void handleFileDeliveryStatus(ImdnDocument imdn, ContactId contact) {
+    public void handleOneToOneFileDeliveryStatus(ImdnDocument imdn, ContactId contact) {
         String status = imdn.getStatus();
         long timestamp = imdn.getDateTime();
 

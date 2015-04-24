@@ -290,4 +290,12 @@ public interface IMessageLog {
      * @return boolean
      */
     public boolean isChatMessageExpiredDelivery(String msgId);
+
+    /**
+     * Get chat id for chat message
+     * 
+     * @param msgId Message ID
+     * @return ChatId
+     */
+    String getMessageChatId(String msgId);
 }

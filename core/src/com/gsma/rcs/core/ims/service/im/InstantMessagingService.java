@@ -223,9 +223,7 @@ public class InstantMessagingService extends ImsService {
             getImsModule().getSipManager().sendSipResponse(resp);
         } catch (SipException e) {
             /* Better exception handling after CR037 */
-            if (sLogger.isActivated()) {
-                sLogger.error("Can't send 403 Forbidden response", e);
-            }
+            sLogger.error("Can't send 403 Forbidden response", e);
         }
     }
 
@@ -728,8 +726,8 @@ public class InstantMessagingService extends ImsService {
                 return new OriginatingMsrpFileSharingSession(fileTransferId, this, content,
                         contact, fileIcon, mRcsSettings, timestamp, mContactManager);
             default:
-                throw new IllegalArgumentException("Unknown FileTransferProtocol ".concat(ftProtocol
-                        .toString()));
+                throw new IllegalArgumentException(
+                        "Unknown FileTransferProtocol ".concat(ftProtocol.toString()));
         }
     }
 
@@ -1206,66 +1204,58 @@ public class InstantMessagingService extends ImsService {
      * @param message Received message
      */
     public void receiveMessageDeliveryStatus(SipRequest message) {
-        boolean logActivated = sLogger.isActivated();
-        // Send a 200 OK response
         try {
-            if (logActivated) {
-                sLogger.info("Send 200 OK");
-            }
+            /*
+             * Begin by sending 200 OK, a failure before doing that may cause the sender to re-send
+             * the report and if reception fails again we are stuck in a loop.
+             */
             SipResponse response = SipMessageFactory.createResponse(message,
-                    IdGenerator.getIdentifier(), 200);
+                    IdGenerator.getIdentifier(), Response.OK);
+
             getImsModule().getSipManager().sendSipResponse(response);
-        } catch (Exception e) {
-            if (logActivated) {
-                sLogger.error("Can't send 200 OK response", e);
-            }
-            return;
-        }
 
-        // Parse received message
-        ImdnDocument imdn;
-        try {
-            imdn = ChatUtils.parseCpimDeliveryReport(message.getContent());
-            if (imdn == null) {
-                return;
-            }
-
+            ImdnDocument imdn = ChatUtils.parseCpimDeliveryReport(message.getContent());
             String assertedId = SipUtils.getAssertedIdentity(message);
             PhoneNumber number = ContactUtil.getValidPhoneNumberFromUri(assertedId);
+
             if (number == null) {
-                if (logActivated) {
-                    sLogger.error("receiveMessageDeliveryStatus failed: invalid remote ID '"
-                            + assertedId + "'");
+                sLogger.error("Invalid remote ID " + assertedId);
+                return;
+            }
+
+            ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
+            String msgId = imdn.getMsgId();
+
+            String chatId = mMessagingLog.getMessageChatId(msgId);
+            if (chatId != null) {
+                if (chatId.equals(contact.toString())) {
+                    mCore.getListener().handleOneToOneMessageDeliveryStatus(contact, imdn);
+                } else {
+                    mCore.getListener().handleGroupMessageDeliveryStatus(chatId, contact, imdn);
                 }
                 return;
             }
-            ContactId contact = ContactUtil.createContactIdFromValidatedData(number);
 
-            String msgId = imdn.getMsgId();
-            // Note: FileTransferId is always generated to equal the
-            // associated msgId of a FileTransfer invitation message.
-            String fileTransferId = msgId;
-
-            // Check if message delivery of a file transfer
-            boolean isFileTransfer = mMessagingLog.isFileTransfer(fileTransferId);
-            if (isFileTransfer) {
-                // Notify the file delivery outside of the chat session
-                receiveFileDeliveryStatus(contact, imdn);
-            } else {
-                // Get session associated to the contact
-                OneToOneChatSession session = getOneToOneChatSession(contact);
-                if (session != null) {
-                    // Notify the message delivery from the chat session
-                    session.handleMessageDeliveryStatus(contact, imdn);
+            /* Message not found, check if the id refers to a file transfer. */
+            chatId = mMessagingLog.getFileTransferChatId(msgId);
+            if (chatId != null) {
+                if (chatId.equals(contact.toString())) {
+                    receiveOneToOneFileDeliveryStatus(contact, imdn);
                 } else {
-                    // Notify the message delivery outside of the chat session
-                    mCore.getListener().handleMessageDeliveryStatus(contact, imdn);
+                    receiveGroupFileDeliveryStatus(chatId, contact, imdn);
                 }
+                return;
             }
+            sLogger.error("SIP imdn delivery report received referencing a message that was "
+                    + " not found in our database. Message id " + msgId);
+
+        } catch (SipException e) {
+            sLogger.error("Failed to send 200 OK response", e);
+
         } catch (Exception e) {
-            if (logActivated) {
-                sLogger.warn("Cannot parse message delivery status");
-            }
+            // TODO: This will be changed when ChatUtils.parseCpimDeliveryReport
+            // is changed to throw a less generic exception.
+            sLogger.warn("Failed to parse imdn delivery report.");
         }
     }
 
@@ -1275,9 +1265,9 @@ public class InstantMessagingService extends ImsService {
      * @param contact Contact identifier
      * @param imdn Imdn document
      */
-    public void receiveFileDeliveryStatus(ContactId contact, ImdnDocument imdn) {
+    public void receiveOneToOneFileDeliveryStatus(ContactId contact, ImdnDocument imdn) {
         // Notify the file delivery outside of the chat session
-        mCore.getListener().handleFileDeliveryStatus(contact, imdn);
+        mCore.getListener().handleOneToOneFileDeliveryStatus(contact, imdn);
     }
 
     /**
@@ -1468,9 +1458,7 @@ public class InstantMessagingService extends ImsService {
             try {
                 fileSharingSession.downloadFileIcon();
             } catch (CoreException e) {
-                if (logActivated) {
-                    sLogger.error("Failed to initiate download file transfer", e);
-                }
+                sLogger.error("Failed to download file icon", e);
                 sendErrorResponse(invite, Response.DECLINE);
                 handleFileTransferInvitationRejected(invite, remote,
                         FileTransfer.ReasonCode.REJECTED_MEDIA_FAILED, timestamp, timestampSent);
@@ -1541,9 +1529,7 @@ public class InstantMessagingService extends ImsService {
             try {
                 filetransferSession.downloadFileIcon();
             } catch (CoreException e) {
-                if (logActivated) {
-                    sLogger.error("Failed to download file icon", e);
-                }
+                sLogger.error("Failed to download file icon", e);
                 one2oneChatSession.sendErrorResponse(invite, one2oneChatSession.getDialogPath()
                         .getLocalTag(), Response.DECLINE);
 
