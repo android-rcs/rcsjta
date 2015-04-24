@@ -32,8 +32,6 @@ import com.gsma.rcs.utils.IdGenerator;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.RcsService.Direction;
 import com.gsma.services.rcs.RcsService.ReadStatus;
-import com.gsma.services.rcs.chat.ChatLog;
-import com.gsma.services.rcs.chat.ChatLog.Message;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.ReasonCode;
 import com.gsma.services.rcs.chat.ChatLog.Message.Content.Status;
 import com.gsma.services.rcs.chat.ChatLog.Message.GroupChatEvent;
@@ -98,7 +96,7 @@ public class MessageLog implements IMessageLog {
             MessageData.KEY_DELIVERY_EXPIRATION).append(">? AND ").append(MessageData.KEY_STATUS)
             .append(" NOT IN(").append(Status.DELIVERED.toInt()).append(",")
             .append(Status.DISPLAYED.toInt()).append(")").toString();
-    
+
     private static final String ORDER_BY_TIMESTAMP_ASC = MessageData.KEY_TIMESTAMP.concat(" ASC");
 
     /**
@@ -195,7 +193,7 @@ public class MessageLog implements IMessageLog {
 
     /**
      * Add incoming one-to-one chat message
-     *
+     * 
      * @param msg Chat message
      * @param imdnDisplayedRequested Indicates whether IMDN display was requested
      */
@@ -211,7 +209,7 @@ public class MessageLog implements IMessageLog {
 
     /**
      * Add incoming group chat message
-     *
+     * 
      * @param chatId Chat ID
      * @param msg Chat message
      * @param imdnDisplayedRequested Indicates whether IMDN display was requested
@@ -566,8 +564,9 @@ public class MessageLog implements IMessageLog {
         };
         Cursor cursor = null;
         try {
-            cursor = mLocalContentResolver.query(Message.CONTENT_URI, PROJECTION_GROUP_CHAT_EVENTS,
-                    SELECTION_GROUP_CHAT_EVENTS, selectionArgs, ORDER_BY_TIMESTAMP_ASC);
+            cursor = mLocalContentResolver.query(MessageData.CONTENT_URI,
+                    PROJECTION_GROUP_CHAT_EVENTS, SELECTION_GROUP_CHAT_EVENTS, selectionArgs,
+                    ORDER_BY_TIMESTAMP_ASC);
             // TODO check null cursor CR037
             if (!cursor.moveToFirst()) {
                 return null;
@@ -595,16 +594,17 @@ public class MessageLog implements IMessageLog {
     public boolean isOneToOneChatMessage(String messageId) {
         Cursor cursor = null;
         try {
-            cursor = mLocalContentResolver.query(ChatLog.Message.CONTENT_URI.buildUpon()
-                    .appendPath(messageId).build(), new String[] {
-                    ChatLog.Message.CONTACT, ChatLog.Message.CHAT_ID
-            }, null, null, null);
+            cursor = mLocalContentResolver.query(
+                    MessageData.CONTENT_URI.buildUpon().appendPath(messageId).build(),
+                    new String[] {
+                            MessageData.KEY_CONTACT, MessageData.KEY_CHAT_ID
+                    }, null, null, null);
             if (!cursor.moveToNext()) {
                 return false;
             }
             String contactId = cursor.getString(cursor
-                    .getColumnIndexOrThrow(ChatLog.Message.CONTACT));
-            String chatId = cursor.getString(cursor.getColumnIndexOrThrow(ChatLog.Message.CHAT_ID));
+                    .getColumnIndexOrThrow(MessageData.KEY_CONTACT));
+            String chatId = cursor.getString(cursor.getColumnIndexOrThrow(MessageData.KEY_CHAT_ID));
             return chatId.equals(contactId);
 
         } finally {
@@ -657,15 +657,15 @@ public class MessageLog implements IMessageLog {
         selectionArgs = msgIds.toArray(selectionArgs);
         values.put(MessageData.KEY_DELIVERY_EXPIRATION, 0);
         values.put(MessageData.KEY_EXPIRED_DELIVERY, 0);
-        mLocalContentResolver.update(MessageData.CONTENT_URI, values, SELECTION_BY_MULTIPLE_MSG_IDS,
-                selectionArgs);
+        mLocalContentResolver.update(MessageData.CONTENT_URI, values,
+                SELECTION_BY_MULTIPLE_MSG_IDS, selectionArgs);
     }
 
     @Override
     public void setChatMessageDeliveryExpired(String msgId) {
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_EXPIRED_DELIVERY, 1);
-        mLocalContentResolver.update(Uri.withAppendedPath(Message.CONTENT_URI, msgId), values,
+        mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId), values,
                 null, null);
     }
 
