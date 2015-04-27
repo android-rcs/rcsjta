@@ -95,15 +95,15 @@ public class AnonymousFetchManager implements DiscoveryManager {
      * @param notify Received notify
      */
     public void receiveNotification(SipRequest notify) {
-        boolean isLogActivated = logger.isActivated();
-        if (isLogActivated) {
+        boolean logActivated = logger.isActivated();
+        if (logActivated) {
             logger.debug("Anonymous fetch notification received");
         }
 
         // Parse XML part
         byte[] content = notify.getContentBytes();
         if (content != null) {
-            if (isLogActivated) {
+            if (logActivated) {
                 logger.debug("Anonymous fetch notification with PIDF document");
             }
             InputSource pidfInput = new InputSource(new ByteArrayInputStream(content));
@@ -111,7 +111,7 @@ public class AnonymousFetchManager implements DiscoveryManager {
             try {
                 pidfParser = new PidfParser(pidfInput);
             } catch (Exception e) {
-                if (isLogActivated) {
+                if (logActivated) {
                     logger.error("Can't parse XML notification", e);
                 }
                 return;
@@ -129,7 +129,7 @@ public class AnonymousFetchManager implements DiscoveryManager {
             String entity = presence.getEntity();
             PhoneNumber validPhoneNumber = ContactUtil.getValidPhoneNumberFromUri(entity);
             if (validPhoneNumber == null) {
-                if (isLogActivated) {
+                if (logActivated) {
                     logger.error(new StringBuilder("Discard XML notification: bad entity '")
                             .append(entity).append("'").toString());
                 }
@@ -163,13 +163,13 @@ public class AnonymousFetchManager implements DiscoveryManager {
             mImsModule.getCore().getListener()
                     .handleCapabilitiesNotification(contact, capabilities);
         } else {
-            if (isLogActivated) {
+            if (logActivated) {
                 logger.debug("Anonymous fetch notification is empty");
             }
             String sipAssertedId = SipUtils.getAssertedIdentity(notify);
             PhoneNumber validPhoneNumber = ContactUtil.getValidPhoneNumberFromUri(sipAssertedId);
             if (validPhoneNumber == null) {
-                if (isLogActivated) {
+                if (logActivated) {
                     logger.error(new StringBuilder("Cannot process notification: invalid SIP id '")
                             .append(sipAssertedId).append("'").toString());
                 }
