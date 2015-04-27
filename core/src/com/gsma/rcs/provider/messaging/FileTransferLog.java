@@ -290,6 +290,15 @@ public class FileTransferLog implements IFileTransferLog {
         mLocalContentResolver.insert(FileTransferData.CONTENT_URI, values);
     }
 
+    /**
+     * Set file transfer state and reason code. Note that this method should not be used for
+     * State.DELIVERED and State.DISPLAYED. These states require timestamps and should be set
+     * through setFileTransferDelivered and setFileTransferDisplayed respectively.
+     * 
+     * @param fileTransferId File transfer ID
+     * @param state File transfer state (see restriction above)
+     * @param reasonCode File transfer state reason code
+     */
     @Override
     public void setFileTransferStateAndReasonCode(String fileTransferId, State state,
             ReasonCode reasonCode) {
@@ -299,14 +308,18 @@ public class FileTransferLog implements IFileTransferLog {
                     .append(", reasonCode=").append(reasonCode).toString());
         }
 
+        switch (state) {
+            case DELIVERED:
+            case DISPLAYED:
+                throw new IllegalArgumentException(new StringBuilder("State that requires ")
+                        .append("timestamp passed, use specific method taking timestamp")
+                        .append(" to set state ").append(state.toString()).toString());
+            default:
+        }
+
         ContentValues values = new ContentValues();
         values.put(FileTransferData.KEY_STATE, state.toInt());
         values.put(FileTransferData.KEY_REASON_CODE, reasonCode.toInt());
-        if (state == State.DELIVERED) {
-            values.put(FileTransferData.KEY_TIMESTAMP_DELIVERED, System.currentTimeMillis());
-        } else if (state == State.DISPLAYED) {
-            values.put(FileTransferData.KEY_TIMESTAMP_DISPLAYED, System.currentTimeMillis());
-        }
         mLocalContentResolver.update(
                 Uri.withAppendedPath(FileTransferData.CONTENT_URI, fileTransferId), values, null,
                 null);

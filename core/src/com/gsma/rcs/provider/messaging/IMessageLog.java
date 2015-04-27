@@ -107,10 +107,12 @@ public interface IMessageLog {
     public void markMessageAsRead(String msgId);
 
     /**
-     * Set chat message status and reason code
+     * Set chat message status and reason code. Note that this method should not be used for
+     * Status.DELIVERED and Status.DISPLAYED. These states require timestamps and should be set
+     * through setChatMessageStatusDelivered and setChatMessageStatusDisplayed respectively.
      * 
      * @param msgId Message ID
-     * @param status Message status
+     * @param status Message status (See restriction above)
      * @param reasonCode Message status reason code
      */
     public void setChatMessageStatusAndReasonCode(String msgId, Status status, ReasonCode reasonCode);
@@ -275,8 +277,8 @@ public interface IMessageLog {
 
     /**
      * Get one-one chat messages with unexpired delivery
-     * @param currentTime
      * 
+     * @param currentTime
      * @return Cursor
      */
     public Cursor getOneToOneChatMessagesWithUnexpiredDelivery(long currentTime);

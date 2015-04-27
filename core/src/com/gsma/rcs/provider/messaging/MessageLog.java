@@ -366,6 +366,15 @@ public class MessageLog implements IMessageLog {
         }
     }
 
+    /**
+     * Set chat message status and reason code. Note that this method should not be used for
+     * Status.DELIVERED and Status.DISPLAYED. These states require timestamps and should be set
+     * through setChatMessageStatusDelivered and setChatMessageStatusDisplayed respectively.
+     * 
+     * @param msgId Message ID
+     * @param status Message status (See restriction above)
+     * @param reasonCode Message status reason code
+     */
     @Override
     public void setChatMessageStatusAndReasonCode(String msgId, Status status, ReasonCode reasonCode) {
         if (sLogger.isActivated()) {
@@ -373,12 +382,19 @@ public class MessageLog implements IMessageLog {
                     .append(", status=").append(status).append(", reasonCode=").append(reasonCode)
                     .toString());
         }
+
+        switch (status) {
+            case DELIVERED:
+            case DISPLAYED:
+                throw new IllegalArgumentException(new StringBuilder("Status that requires ")
+                        .append("timestamp passed, use specific method taking timestamp")
+                        .append(" to set status ").append(status.toString()).toString());
+            default:
+        }
+
         ContentValues values = new ContentValues();
         values.put(MessageData.KEY_STATUS, status.toInt());
         values.put(MessageData.KEY_REASON_CODE, reasonCode.toInt());
-        if (Status.DELIVERED == status) {
-            values.put(MessageData.KEY_TIMESTAMP_DELIVERED, System.currentTimeMillis());
-        }
 
         if (mLocalContentResolver.update(Uri.withAppendedPath(MessageData.CONTENT_URI, msgId),
                 values, null, null) < 1) {
@@ -629,8 +645,7 @@ public class MessageLog implements IMessageLog {
         Cursor cursor = null;
         try {
             cursor = mLocalContentResolver.query(
-                    MessageData.CONTENT_URI.buildUpon().appendPath(msgId).build(),
-                    new String[] {
+                    MessageData.CONTENT_URI.buildUpon().appendPath(msgId).build(), new String[] {
                             MessageData.KEY_CONTACT, MessageData.KEY_CHAT_ID
                     }, null, null, null);
             if (!cursor.moveToNext()) {

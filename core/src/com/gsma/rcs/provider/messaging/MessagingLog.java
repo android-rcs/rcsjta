@@ -183,6 +183,15 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
         mMessageLog.markMessageAsRead(msgId);
     }
 
+    /**
+     * Set chat message status and reason code. Note that this method should not be used for
+     * Status.DELIVERED and Status.DISPLAYED. These states require timestamps and should be set
+     * through setChatMessageStatusDelivered and setChatMessageStatusDisplayed respectively.
+     * 
+     * @param msgId Message ID
+     * @param status Message status (See restriction above)
+     * @param reasonCode Message status reason code
+     */
     @Override
     public void setChatMessageStatusAndReasonCode(String msgId, Status status,
             Content.ReasonCode reasonCode) {
@@ -226,6 +235,15 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
                 fileIconExpiration);
     }
 
+    /**
+     * Set file transfer state and reason code. Note that this method should not be used for
+     * State.DELIVERED and State.DISPLAYED. These states require timestamps and should be set
+     * through setFileTransferDelivered and setFileTransferDisplayed respectively.
+     * 
+     * @param fileTransferId File transfer ID
+     * @param state File transfer state (see restriction above)
+     * @param reasonCode File transfer state reason code
+     */
     @Override
     public void setFileTransferStateAndReasonCode(String fileTransferId, FileTransfer.State state,
             FileTransfer.ReasonCode reasonCode) {
