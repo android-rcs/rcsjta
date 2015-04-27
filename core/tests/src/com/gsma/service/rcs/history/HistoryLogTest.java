@@ -310,13 +310,13 @@ public class HistoryLogTest extends AndroidTestCase {
             ChatMessage msg = new ChatMessage(MESSAGE_ID, getRemoteContact(), TXT,
                     MimeType.TEXT_MESSAGE, mTimestamp++, mTimestampSent++, DISPLAY_NAME);
             mMessagingLog.addOutgoingOneToOneChatMessage(msg, Message.Content.Status.SENT,
-                    Message.Content.ReasonCode.UNSPECIFIED);
+                    Message.Content.ReasonCode.UNSPECIFIED, 0);
         }
         for (String id : ids) {
             ChatMessage msg = new ChatMessage(id, getRemoteContact(), TXT, MimeType.TEXT_MESSAGE,
                     mTimestamp++, mTimestampSent++, DISPLAY_NAME);
             mMessagingLog.addOutgoingOneToOneChatMessage(msg, Message.Content.Status.SENT,
-                    Message.Content.ReasonCode.UNSPECIFIED);
+                    Message.Content.ReasonCode.UNSPECIFIED, 0);
         }
     }
 

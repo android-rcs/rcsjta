@@ -87,7 +87,7 @@ public class ChatMessageTest extends AndroidTestCase {
 
         // Add entry
         mMessagingLog.addOutgoingOneToOneChatMessage(msg, Message.Content.Status.SENT,
-                Message.Content.ReasonCode.UNSPECIFIED);
+                Message.Content.ReasonCode.UNSPECIFIED, 0);
 
         String where = new StringBuilder(Message.MESSAGE_ID).append("=?").toString();
         String[] whereArgs = new String[] {
@@ -126,7 +126,7 @@ public class ChatMessageTest extends AndroidTestCase {
         String msgId = chatMsg.getMessageId();
         // Add entry
         mMessagingLog.addOutgoingOneToOneChatMessage(chatMsg, Message.Content.Status.SENT,
-                Message.Content.ReasonCode.UNSPECIFIED);
+                Message.Content.ReasonCode.UNSPECIFIED, 0);
 
         // Read entry
         Uri uri = Uri.withAppendedPath(Message.CONTENT_URI, msgId);
