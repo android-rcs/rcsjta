@@ -49,7 +49,6 @@ import com.gsma.rcs.core.ims.service.im.filetransfer.FileTransferUtils;
 import com.gsma.rcs.provider.contact.ContactManager;
 import com.gsma.rcs.provider.messaging.MessagingLog;
 import com.gsma.rcs.provider.settings.RcsSettings;
-import com.gsma.rcs.service.api.ExceptionUtil;
 import com.gsma.rcs.utils.PhoneUtils;
 import com.gsma.rcs.utils.logger.Logger;
 import com.gsma.services.rcs.contact.ContactId;
@@ -351,7 +350,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
         } catch (MsrpException e) {
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
         } catch (SipException e) {
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            mLogger.error("Unable to send 200OK response!", e);
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
         } catch (IOException e) {
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
@@ -360,7 +359,7 @@ public class TerminatingStoreAndForwardOneToOneChatMessageSession extends OneToO
              * Intentionally catch runtime exceptions as else it will abruptly end the thread and
              * eventually bring the whole system down, which is not intended.
              */
-            mLogger.error(ExceptionUtil.getFullStackTrace(e));
+            mLogger.error("Failed initiating a store & forward session for messages!", e);
             handleError(new ChatError(ChatError.SEND_RESPONSE_FAILED, e));
         }
     }

@@ -19,6 +19,7 @@
 package com.gsma.rcs.utils.logger;
 
 import com.gsma.rcs.platform.logger.AndroidAppender;
+import com.gsma.rcs.service.api.ExceptionUtil;
 
 /**
  * Logger
@@ -150,7 +151,7 @@ public class Logger {
      */
     public void error(String trace, Throwable e) {
         printTrace(trace, ERROR_LEVEL);
-        e.printStackTrace();
+        printTrace(ExceptionUtil.getFullStackTrace(e), ERROR_LEVEL);
     }
 
     /**
@@ -170,7 +171,8 @@ public class Logger {
      */
     public void fatal(String trace, Throwable e) {
         printTrace(trace, FATAL_LEVEL);
-        e.printStackTrace();
+        printTrace(ExceptionUtil.getFullStackTrace(e), FATAL_LEVEL);
+
     }
 
     /**
