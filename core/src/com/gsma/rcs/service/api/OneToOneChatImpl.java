@@ -353,9 +353,6 @@ public class OneToOneChatImpl extends IOneToOneChat.Stub implements OneToOneChat
         long deliveryExpiration = getDeliveryExpirationTime(timestampSent);
         mMessagingLog.addOutgoingOneToOneChatMessage(msg, status, ReasonCode.UNSPECIFIED,
                 deliveryExpiration);
-        String apiMimeType = ChatUtils.networkMimeTypeToApiMimeType(msg.getMimeType());
-        mBroadcaster.broadcastMessageStatusChanged(mContact, apiMimeType, msgId, status,
-                ReasonCode.UNSPECIFIED);
         if (deliveryExpiration != 0) {
             mUndeliveredImManager.scheduleOneToOneChatMessageDeliveryTimeoutAlarm(mContact, msgId,
                     deliveryExpiration);

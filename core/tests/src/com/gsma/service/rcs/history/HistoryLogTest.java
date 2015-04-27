@@ -299,7 +299,7 @@ public class HistoryLogTest extends AndroidTestCase {
     }
 
     private void addOutgoingFileTransferSharing() {
-        mMessagingLog.addFileTransfer(FILE_TRANSFER_ID, getRemoteContact(), Direction.INCOMING,
+        mMessagingLog.addOneToOneFileTransfer(FILE_TRANSFER_ID, getRemoteContact(), Direction.INCOMING,
                 CONTENT, THUMBNAIL, FileTransfer.State.INVITED,
                 FileTransfer.ReasonCode.UNSPECIFIED, mTimestamp++, mTimestampSent++,
                 FileTransferLog.UNKNOWN_EXPIRATION, FileTransferLog.UNKNOWN_EXPIRATION);

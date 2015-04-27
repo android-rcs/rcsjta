@@ -321,12 +321,12 @@ public class FileTransferPersistedStorageAccessor {
                 fileIconExpiration, deliveryExpiration);
     }
 
-    public void addFileTransfer(ContactId contact, Direction direction, MmContent content,
+    public void addOneToOneFileTransfer(ContactId contact, Direction direction, MmContent content,
             MmContent fileIcon, State status, ReasonCode reasonCode, long timestamp,
             long timestampSent, long fileExpiration, long fileIconExpiration) {
         mContact = contact;
         mDirection = direction;
-        mMessagingLog.addFileTransfer(mFileTransferId, contact, direction, content, fileIcon,
+        mMessagingLog.addOneToOneFileTransfer(mFileTransferId, contact, direction, content, fileIcon,
                 status, reasonCode, timestamp, timestampSent, fileExpiration, fileIconExpiration);
     }
 

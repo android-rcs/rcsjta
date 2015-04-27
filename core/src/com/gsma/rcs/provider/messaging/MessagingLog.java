@@ -209,11 +209,11 @@ public class MessagingLog implements IGroupChatLog, IMessageLog, IFileTransferLo
     }
 
     @Override
-    public void addFileTransfer(String fileTransferId, ContactId contact, Direction direction,
+    public void addOneToOneFileTransfer(String fileTransferId, ContactId contact, Direction direction,
             MmContent content, MmContent fileIcon, FileTransfer.State state,
             FileTransfer.ReasonCode reasonCode, long timestamp, long timestampSent,
             long fileExpiration, long fileIconExpiration) {
-        mFileTransferLog.addFileTransfer(fileTransferId, contact, direction, content, fileIcon,
+        mFileTransferLog.addOneToOneFileTransfer(fileTransferId, contact, direction, content, fileIcon,
                 state, reasonCode, timestamp, timestampSent, fileExpiration, fileIconExpiration);
     }
 

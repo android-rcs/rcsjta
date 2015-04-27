@@ -47,7 +47,6 @@ import com.gsma.services.rcs.extension.IMultimediaSessionService;
 import com.gsma.services.rcs.extension.IMultimediaSessionServiceConfiguration;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSession;
 import com.gsma.services.rcs.extension.IMultimediaStreamingSessionListener;
-import com.gsma.services.rcs.extension.MultimediaSession.ReasonCode;
 import com.gsma.services.rcs.extension.MultimediaSession.State;
 import com.gsma.services.rcs.extension.MultimediaStreamingSessionIntent;
 
@@ -348,8 +347,6 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
                     session.getSessionID(), mMultimediaMessagingSessionEventBroadcaster,
                     mSipService, this, Direction.OUTGOING, contact, serviceId, State.INITIATING);
             session.addListener(multiMediaMessaging);
-            mMultimediaMessagingSessionEventBroadcaster.broadcastStateChanged(contact,
-                    session.getSessionID(), State.INITIATING, ReasonCode.UNSPECIFIED);
 
             addMultimediaMessaging(multiMediaMessaging);
             new Thread() {
@@ -472,8 +469,6 @@ public class MultimediaSessionServiceImpl extends IMultimediaSessionService.Stub
                     session.getSessionID(), mMultimediaStreamingSessionEventBroadcaster,
                     mSipService, this, Direction.OUTGOING, contact, serviceId, State.INITIATING);
             session.addListener(multimediaStreaming);
-            mMultimediaStreamingSessionEventBroadcaster.broadcastStateChanged(contact,
-                    session.getSessionID(), State.INITIATING, ReasonCode.UNSPECIFIED);
 
             addMultimediaStreaming(multimediaStreaming);
             new Thread() {

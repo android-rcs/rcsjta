@@ -1419,7 +1419,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             sLogger.info("Invited to one-to-one file transfer session");
         }
         synchronized (mLock) {
-            mPersistentStorage.addFileTransfer(contact, Direction.INCOMING, file, fileIcon,
+            mPersistentStorage.addOneToOneFileTransfer(contact, Direction.INCOMING, file, fileIcon,
                     State.INVITED, ReasonCode.UNSPECIFIED, timestamp, timestampSent,
                     fileExpiration, fileIconExpiration);
         }
@@ -1434,7 +1434,7 @@ public class OneToOneFileTransferImpl extends IFileTransfer.Stub implements
             sLogger.info("Session auto accepted");
         }
         synchronized (mLock) {
-            mPersistentStorage.addFileTransfer(contact, Direction.INCOMING, file, fileIcon,
+            mPersistentStorage.addOneToOneFileTransfer(contact, Direction.INCOMING, file, fileIcon,
                     State.ACCEPTING, ReasonCode.UNSPECIFIED, timestamp, timestampSent,
                     fileExpiration, fileIconExpiration);
         }

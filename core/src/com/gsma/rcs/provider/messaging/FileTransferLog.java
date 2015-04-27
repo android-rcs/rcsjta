@@ -124,7 +124,7 @@ public class FileTransferLog implements IFileTransferLog {
     }
 
     @Override
-    public void addFileTransfer(String fileTransferId, ContactId contact, Direction direction,
+    public void addOneToOneFileTransfer(String fileTransferId, ContactId contact, Direction direction,
             MmContent content, MmContent fileIcon, State state, ReasonCode reasonCode,
             long timestamp, long timestampSent, long fileExpiration, long fileIconExpiration) {
         if (logger.isActivated()) {

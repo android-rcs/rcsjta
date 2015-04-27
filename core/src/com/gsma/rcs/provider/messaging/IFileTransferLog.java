@@ -43,7 +43,7 @@ import java.util.List;
 public interface IFileTransferLog {
 
     /**
-     * Add outgoing file transfer
+     * Add outgoing one to one file transfer
      * 
      * @param fileTransferId File Transfer ID
      * @param contact Contact ID
@@ -61,9 +61,10 @@ public interface IFileTransferLog {
      * @param fileIconExpiration the time when file icon on the content server is no longer valid to
      *            download.
      */
-    public void addFileTransfer(String fileTransferId, ContactId contact, Direction direction,
-            MmContent content, MmContent fileIcon, State state, ReasonCode reasonCode,
-            long timestamp, long timestampSent, long fileExpiration, long fileIconExpiration);
+    public void addOneToOneFileTransfer(String fileTransferId, ContactId contact,
+            Direction direction, MmContent content, MmContent fileIcon, State state,
+            ReasonCode reasonCode, long timestamp, long timestampSent, long fileExpiration,
+            long fileIconExpiration);
 
     /**
      * Add an outgoing File Transfer supported by Group Chat
@@ -354,8 +355,8 @@ public interface IFileTransferLog {
 
     /**
      * Get one-one file transfers with unexpired delivery
-     * @param currentTime
      * 
+     * @param currentTime
      * @return Cursor
      */
     public Cursor getOneToOneFileTransfersWithUnexpiredDelivery(long currentTime);
